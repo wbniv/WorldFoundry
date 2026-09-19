@@ -169,48 +169,54 @@
  },
  {
   "leg": 28,
-  "kind": "HOLD",
-  "target": 0.5,
-  "room": "640-master-bed"
+  "kind": "X",
+  "target": -7.0,
+  "room": null
  },
  {
   "leg": 29,
+  "kind": "HOLD",
+  "target": 5.0,
+  "room": "640-master-bed"
+ },
+ {
+  "leg": 30,
   "kind": "X",
   "target": -4.3,
   "room": null
  },
  {
-  "leg": 30,
+  "leg": 31,
   "kind": "Y",
   "target": -1.0,
   "room": null
  },
  {
-  "leg": 31,
+  "leg": 32,
   "kind": "HOLD",
   "target": 0.5,
   "room": "640-closet"
  },
  {
-  "leg": 32,
+  "leg": 33,
   "kind": "Y",
   "target": -5.0,
   "room": null
  },
  {
-  "leg": 33,
+  "leg": 34,
   "kind": "X",
   "target": -0.75,
   "room": null
  },
  {
-  "leg": 34,
+  "leg": 35,
   "kind": "Y",
   "target": -1.0,
   "room": null
  },
  {
-  "leg": 35,
+  "leg": 36,
   "kind": "HOLD",
   "target": 0.5,
   "room": "640-bath"

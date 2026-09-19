@@ -1,5 +1,5 @@
 {
- "_comment": "Guided tour of every 639-owned (blue) room. Straight axis-aligned legs between waypoints; a waypoint with a `room` label is a hold there. Each leg is a servo (push toward the coordinate from either side, advance when within tol_m and slower than stop_speed) compiled into the player's Forth by blender_create_condo.py (CONDO_TOUR=…). Pace: ground speed ≈ accel/(30·decel). docs/plans/2026-09-19-condo-639-tour-video.md A waypoint's `hold` overrides hold_seconds: the two patio stops hold 3 s each so the balcony camera's 5 s tilt-up from the patio to the skyline plays out.",
+ "_comment": "Guided tour of every 639-owned (blue) room. Straight axis-aligned legs between waypoints; a waypoint with a `room` label is a hold there. Each leg is a servo (push toward the coordinate from either side, advance when within tol_m and slower than stop_speed) compiled into the player's Forth by blender_create_condo.py (CONDO_TOUR=…). Pace: ground speed ≈ accel/(30·decel). docs/plans/2026-09-19-condo-639-tour-video.md A waypoint's `hold` overrides hold_seconds: the two patio stops hold 3 s each and the master-bedroom window stop 5 s so the balcony and window cameras' 5 s pans play out.",
  "spawn": [
   4.66,
   -14.5,
@@ -136,8 +136,15 @@
    "at": [
     -1.5,
     -5.0
+   ]
+  },
+  {
+   "at": [
+    -7.0,
+    -5.0
    ],
-   "room": "640-master-bed"
+   "room": "640-master-bed",
+   "hold": 5.0
   },
   {
    "at": [

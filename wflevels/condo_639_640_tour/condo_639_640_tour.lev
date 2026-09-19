@@ -147,7 +147,7 @@
 		{ 'STR' { 'NAME' "Poof" } { 'STR' "" } }
 		{ 'I32' { 'NAME' "Is Needle Gun Target" } { 'DATA' 0l } { 'STR' "False" } }  //False|True
 		{ 'I32' { 'NAME' "Write To Mailbox On Death" } { 'DATA' 0l } { 'STR' "0" } }
-		{ 'STR' { 'NAME' "Script" } { 'STR' "\\ wf\n98 read-mailbox dup 0 <> if INDEXOF_CAMSHOT write-mailbox 0 98 write-mailbox else drop then\n99 read-mailbox dup 0 <> if INDEXOF_CAMSHOT write-mailbox 0 99 write-mailbox 97 read-mailbox 0 = if INDEXOF_TIME read-mailbox 97 write-mailbox then else drop 0 97 write-mailbox then\n" } }
+		{ 'STR' { 'NAME' "Script" } { 'STR' "\\ wf\n98 read-mailbox dup 0 <> if INDEXOF_CAMSHOT write-mailbox 0 98 write-mailbox else drop then\n99 read-mailbox dup 0 <> if INDEXOF_CAMSHOT write-mailbox 0 99 write-mailbox 97 read-mailbox 0 = if INDEXOF_TIME read-mailbox 97 write-mailbox then else drop 0 97 write-mailbox then\n95 read-mailbox dup 0 <> if INDEXOF_CAMSHOT write-mailbox 0 95 write-mailbox 96 read-mailbox 0 = if INDEXOF_TIME read-mailbox 96 write-mailbox then else drop 0 96 write-mailbox then\n" } }
 		{ 'I32' { 'NAME' "Script Controls Input" } { 'DATA' 0l } { 'STR' "False" } }  //False|True
 		{ 'FILE' { 'NAME' "Mesh Name" } { 'STR' "" } }
 		{ 'I32' { 'NAME' "Model Type" } { 'STR' "None" } }
@@ -911,7 +911,7 @@
 		{ 'STR' { 'NAME' "Poof" } { 'STR' "" } }
 		{ 'I32' { 'NAME' "Is Needle Gun Target" } { 'DATA' 0l } { 'STR' "False" } }  //False|True
 		{ 'I32' { 'NAME' "Write To Mailbox On Death" } { 'DATA' 0l } { 'STR' "0" } }
-		{ 'STR' { 'NAME' "Script" } { 'STR' "\\ wf\n500 read-mailbox\ndup 0 = if INDEXOF_Y_POS read-mailbox -12.0 - dup 0.12 > if drop 4096 INDEXOF_INPUT write-mailbox else dup -0.12 < if drop 2048 INDEXOF_INPUT write-mailbox else drop 0 INDEXOF_INPUT write-mailbox INDEXOF_YSPEED read-mailbox abs 0.4 < if drop 1 dup 500 write-mailbox then then then then\ndup 1 = if 0 INDEXOF_INPUT write-mailbox 501 read-mailbox 0 = if INDEXOF_TIME read-mailbox 0.5 + 501 write-mailbox then INDEXOF_TIME read-mailbox 501 read-mailbox >= if 0 501 write-mailbox drop 2 dup 500 write-mailbox then then\ndup 2 = if INDEXOF_Y_POS read-mailbox -13.9 - dup 0.12 > if drop 4096 INDEXOF_INPUT write-mailbox else dup -0.12 < if drop 2048 INDEXOF_INPUT write-mailbox else drop 0 INDEXOF_INPUT write-mailbox INDEXOF_YSPEED read-mailbox abs 0.4 < if drop 3 dup 500 write-mailbox then then then then\ndup 3 = if INDEXOF_X_POS read-mailbox 2.6 - dup 0.12 > if drop 16384 INDEXOF_INPUT write-mailbox else dup -0.12 < if drop 8192 INDEXOF_INPUT write-mailbox else drop 0 INDEXOF_INPUT write-mailbox INDEXOF_XSPEED read-mailbox abs 0.4 < if drop 4 dup 500 write-mailbox then then then then\ndup 4 = if INDEXOF_X_POS read-mailbox 1.0 - dup 0.12 > if drop 16384 INDEXOF_INPUT write-mailbox else dup -0.12 < if drop 8192 INDEXOF_INPUT write-mailbox else drop 0 INDEXOF_INPUT write-mailbox INDEXOF_XSPEED read-mailbox abs 0.4 < if drop 5 dup 500 write-mailbox then then then then\ndup 5 = if 0 INDEXOF_INPUT write-mailbox 501 read-mailbox 0 = if INDEXOF_TIME read-mailbox 0.5 + 501 write-mailbox then INDEXOF_TIME read-mailbox 501 read-mailbox >= if 0 501 write-mailbox drop 6 dup 500 write-mailbox then then\ndup 6 = if INDEXOF_X_POS read-mailbox 2.6 - dup 0.12 > if drop 16384 INDEXOF_INPUT write-mailbox else dup -0.12 < if drop 8192 INDEXOF_INPUT write-mailbox else drop 0 INDEXOF_INPUT write-mailbox INDEXOF_XSPEED read-mailbox abs 0.4 < if drop 7 dup 500 write-mailbox then then then then\ndup 7 = if INDEXOF_X_POS read-mailbox 4.35 - dup 0.12 > if drop 16384 INDEXOF_INPUT write-mailbox else dup -0.12 < if drop 8192 INDEXOF_INPUT write-mailbox else drop 0 INDEXOF_INPUT write-mailbox INDEXOF_XSPEED read-mailbox abs 0.4 < if drop 8 dup 500 write-mailbox then then then then\ndup 8 = if INDEXOF_Y_POS read-mailbox -5.0 - dup 0.12 > if drop 4096 INDEXOF_INPUT write-mailbox else dup -0.12 < if drop 2048 INDEXOF_INPUT write-mailbox else drop 0 INDEXOF_INPUT write-mailbox INDEXOF_YSPEED read-mailbox abs 0.4 < if drop 9 dup 500 write-mailbox then then then then\ndup 9 = if 0 INDEXOF_INPUT write-mailbox 501 read-mailbox 0 = if INDEXOF_TIME read-mailbox 0.5 + 501 write-mailbox then INDEXOF_TIME read-mailbox 501 read-mailbox >= if 0 501 write-mailbox drop 10 dup 500 write-mailbox then then\ndup 10 = if INDEXOF_Y_POS read-mailbox -9.5 - dup 0.12 > if drop 4096 INDEXOF_INPUT write-mailbox else dup -0.12 < if drop 2048 INDEXOF_INPUT write-mailbox else drop 0 INDEXOF_INPUT write-mailbox INDEXOF_YSPEED read-mailbox abs 0.4 < if drop 11 dup 500 write-mailbox then then then then\ndup 11 = if INDEXOF_X_POS read-mailbox 3.25 - dup 0.12 > if drop 16384 INDEXOF_INPUT write-mailbox else dup -0.12 < if drop 8192 INDEXOF_INPUT write-mailbox else drop 0 INDEXOF_INPUT write-mailbox INDEXOF_XSPEED read-mailbox abs 0.4 < if drop 12 dup 500 write-mailbox then then then then\ndup 12 = if INDEXOF_Y_POS read-mailbox -5.0 - dup 0.12 > if drop 4096 INDEXOF_INPUT write-mailbox else dup -0.12 < if drop 2048 INDEXOF_INPUT write-mailbox else drop 0 INDEXOF_INPUT write-mailbox INDEXOF_YSPEED read-mailbox abs 0.4 < if drop 13 dup 500 write-mailbox then then then then\ndup 13 = if 0 INDEXOF_INPUT write-mailbox 501 read-mailbox 0 = if INDEXOF_TIME read-mailbox 0.5 + 501 write-mailbox then INDEXOF_TIME read-mailbox 501 read-mailbox >= if 0 501 write-mailbox drop 14 dup 500 write-mailbox then then\ndup 14 = if INDEXOF_X_POS read-mailbox 0.7 - dup 0.12 > if drop 16384 INDEXOF_INPUT write-mailbox else dup -0.12 < if drop 8192 INDEXOF_INPUT write-mailbox else drop 0 INDEXOF_INPUT write-mailbox INDEXOF_XSPEED read-mailbox abs 0.4 < if drop 15 dup 500 write-mailbox then then then then\ndup 15 = if INDEXOF_Y_POS read-mailbox -1.0 - dup 0.12 > if drop 4096 INDEXOF_INPUT write-mailbox else dup -0.12 < if drop 2048 INDEXOF_INPUT write-mailbox else drop 0 INDEXOF_INPUT write-mailbox INDEXOF_YSPEED read-mailbox abs 0.4 < if drop 16 dup 500 write-mailbox then then then then\ndup 16 = if 0 INDEXOF_INPUT write-mailbox 501 read-mailbox 0 = if INDEXOF_TIME read-mailbox 0.5 + 501 write-mailbox then INDEXOF_TIME read-mailbox 501 read-mailbox >= if 0 501 write-mailbox drop 17 dup 500 write-mailbox then then\ndup 17 = if INDEXOF_Y_POS read-mailbox -5.0 - dup 0.12 > if drop 4096 INDEXOF_INPUT write-mailbox else dup -0.12 < if drop 2048 INDEXOF_INPUT write-mailbox else drop 0 INDEXOF_INPUT write-mailbox INDEXOF_YSPEED read-mailbox abs 0.4 < if drop 18 dup 500 write-mailbox then then then then\ndup 18 = if INDEXOF_X_POS read-mailbox 3.25 - dup 0.12 > if drop 16384 INDEXOF_INPUT write-mailbox else dup -0.12 < if drop 8192 INDEXOF_INPUT write-mailbox else drop 0 INDEXOF_INPUT write-mailbox INDEXOF_XSPEED read-mailbox abs 0.4 < if drop 19 dup 500 write-mailbox then then then then\ndup 19 = if INDEXOF_Y_POS read-mailbox -1.0 - dup 0.12 > if drop 4096 INDEXOF_INPUT write-mailbox else dup -0.12 < if drop 2048 INDEXOF_INPUT write-mailbox else drop 0 INDEXOF_INPUT write-mailbox INDEXOF_YSPEED read-mailbox abs 0.4 < if drop 20 dup 500 write-mailbox then then then then\ndup 20 = if 0 INDEXOF_INPUT write-mailbox 501 read-mailbox 0 = if INDEXOF_TIME read-mailbox 3.0 + 501 write-mailbox then INDEXOF_TIME read-mailbox 501 read-mailbox >= if 0 501 write-mailbox drop 21 dup 500 write-mailbox then then\ndup 21 = if INDEXOF_X_POS read-mailbox 6.6 - dup 0.12 > if drop 16384 INDEXOF_INPUT write-mailbox else dup -0.12 < if drop 8192 INDEXOF_INPUT write-mailbox else drop 0 INDEXOF_INPUT write-mailbox INDEXOF_XSPEED read-mailbox abs 0.4 < if drop 22 dup 500 write-mailbox then then then then\ndup 22 = if 0 INDEXOF_INPUT write-mailbox 501 read-mailbox 0 = if INDEXOF_TIME read-mailbox 3.0 + 501 write-mailbox then INDEXOF_TIME read-mailbox 501 read-mailbox >= if 0 501 write-mailbox drop 23 dup 500 write-mailbox then then\ndup 23 = if INDEXOF_X_POS read-mailbox 3.25 - dup 0.12 > if drop 16384 INDEXOF_INPUT write-mailbox else dup -0.12 < if drop 8192 INDEXOF_INPUT write-mailbox else drop 0 INDEXOF_INPUT write-mailbox INDEXOF_XSPEED read-mailbox abs 0.4 < if drop 24 dup 500 write-mailbox then then then then\ndup 24 = if INDEXOF_Y_POS read-mailbox -9.1 - dup 0.12 > if drop 4096 INDEXOF_INPUT write-mailbox else dup -0.12 < if drop 2048 INDEXOF_INPUT write-mailbox else drop 0 INDEXOF_INPUT write-mailbox INDEXOF_YSPEED read-mailbox abs 0.4 < if drop 25 dup 500 write-mailbox then then then then\ndup 25 = if INDEXOF_X_POS read-mailbox -1.5 - dup 0.12 > if drop 16384 INDEXOF_INPUT write-mailbox else dup -0.12 < if drop 8192 INDEXOF_INPUT write-mailbox else drop 0 INDEXOF_INPUT write-mailbox INDEXOF_XSPEED read-mailbox abs 0.4 < if drop 26 dup 500 write-mailbox then then then then\ndup 26 = if 0 INDEXOF_INPUT write-mailbox 501 read-mailbox 0 = if INDEXOF_TIME read-mailbox 0.5 + 501 write-mailbox then INDEXOF_TIME read-mailbox 501 read-mailbox >= if 0 501 write-mailbox drop 27 dup 500 write-mailbox then then\ndup 27 = if INDEXOF_Y_POS read-mailbox -5.0 - dup 0.12 > if drop 4096 INDEXOF_INPUT write-mailbox else dup -0.12 < if drop 2048 INDEXOF_INPUT write-mailbox else drop 0 INDEXOF_INPUT write-mailbox INDEXOF_YSPEED read-mailbox abs 0.4 < if drop 28 dup 500 write-mailbox then then then then\ndup 28 = if 0 INDEXOF_INPUT write-mailbox 501 read-mailbox 0 = if INDEXOF_TIME read-mailbox 0.5 + 501 write-mailbox then INDEXOF_TIME read-mailbox 501 read-mailbox >= if 0 501 write-mailbox drop 29 dup 500 write-mailbox then then\ndup 29 = if INDEXOF_X_POS read-mailbox -4.3 - dup 0.12 > if drop 16384 INDEXOF_INPUT write-mailbox else dup -0.12 < if drop 8192 INDEXOF_INPUT write-mailbox else drop 0 INDEXOF_INPUT write-mailbox INDEXOF_XSPEED read-mailbox abs 0.4 < if drop 30 dup 500 write-mailbox then then then then\ndup 30 = if INDEXOF_Y_POS read-mailbox -1.0 - dup 0.12 > if drop 4096 INDEXOF_INPUT write-mailbox else dup -0.12 < if drop 2048 INDEXOF_INPUT write-mailbox else drop 0 INDEXOF_INPUT write-mailbox INDEXOF_YSPEED read-mailbox abs 0.4 < if drop 31 dup 500 write-mailbox then then then then\ndup 31 = if 0 INDEXOF_INPUT write-mailbox 501 read-mailbox 0 = if INDEXOF_TIME read-mailbox 0.5 + 501 write-mailbox then INDEXOF_TIME read-mailbox 501 read-mailbox >= if 0 501 write-mailbox drop 32 dup 500 write-mailbox then then\ndup 32 = if INDEXOF_Y_POS read-mailbox -5.0 - dup 0.12 > if drop 4096 INDEXOF_INPUT write-mailbox else dup -0.12 < if drop 2048 INDEXOF_INPUT write-mailbox else drop 0 INDEXOF_INPUT write-mailbox INDEXOF_YSPEED read-mailbox abs 0.4 < if drop 33 dup 500 write-mailbox then then then then\ndup 33 = if INDEXOF_X_POS read-mailbox -0.75 - dup 0.12 > if drop 16384 INDEXOF_INPUT write-mailbox else dup -0.12 < if drop 8192 INDEXOF_INPUT write-mailbox else drop 0 INDEXOF_INPUT write-mailbox INDEXOF_XSPEED read-mailbox abs 0.4 < if drop 34 dup 500 write-mailbox then then then then\ndup 34 = if INDEXOF_Y_POS read-mailbox -1.0 - dup 0.12 > if drop 4096 INDEXOF_INPUT write-mailbox else dup -0.12 < if drop 2048 INDEXOF_INPUT write-mailbox else drop 0 INDEXOF_INPUT write-mailbox INDEXOF_YSPEED read-mailbox abs 0.4 < if drop 35 dup 500 write-mailbox then then then then\ndup 35 = if 0 INDEXOF_INPUT write-mailbox 501 read-mailbox 0 = if INDEXOF_TIME read-mailbox 0.5 + 501 write-mailbox then INDEXOF_TIME read-mailbox 501 read-mailbox >= if 0 501 write-mailbox drop 36 dup 500 write-mailbox then then\ndup 36 = if 0 INDEXOF_INPUT write-mailbox 1 502 write-mailbox then\ndrop\n" } }
+		{ 'STR' { 'NAME' "Script" } { 'STR' "\\ wf\n500 read-mailbox\ndup 0 = if INDEXOF_Y_POS read-mailbox -12.0 - dup 0.12 > if drop 4096 INDEXOF_INPUT write-mailbox else dup -0.12 < if drop 2048 INDEXOF_INPUT write-mailbox else drop 0 INDEXOF_INPUT write-mailbox INDEXOF_YSPEED read-mailbox abs 0.4 < if drop 1 dup 500 write-mailbox then then then then\ndup 1 = if 0 INDEXOF_INPUT write-mailbox 501 read-mailbox 0 = if INDEXOF_TIME read-mailbox 0.5 + 501 write-mailbox then INDEXOF_TIME read-mailbox 501 read-mailbox >= if 0 501 write-mailbox drop 2 dup 500 write-mailbox then then\ndup 2 = if INDEXOF_Y_POS read-mailbox -13.9 - dup 0.12 > if drop 4096 INDEXOF_INPUT write-mailbox else dup -0.12 < if drop 2048 INDEXOF_INPUT write-mailbox else drop 0 INDEXOF_INPUT write-mailbox INDEXOF_YSPEED read-mailbox abs 0.4 < if drop 3 dup 500 write-mailbox then then then then\ndup 3 = if INDEXOF_X_POS read-mailbox 2.6 - dup 0.12 > if drop 16384 INDEXOF_INPUT write-mailbox else dup -0.12 < if drop 8192 INDEXOF_INPUT write-mailbox else drop 0 INDEXOF_INPUT write-mailbox INDEXOF_XSPEED read-mailbox abs 0.4 < if drop 4 dup 500 write-mailbox then then then then\ndup 4 = if INDEXOF_X_POS read-mailbox 1.0 - dup 0.12 > if drop 16384 INDEXOF_INPUT write-mailbox else dup -0.12 < if drop 8192 INDEXOF_INPUT write-mailbox else drop 0 INDEXOF_INPUT write-mailbox INDEXOF_XSPEED read-mailbox abs 0.4 < if drop 5 dup 500 write-mailbox then then then then\ndup 5 = if 0 INDEXOF_INPUT write-mailbox 501 read-mailbox 0 = if INDEXOF_TIME read-mailbox 0.5 + 501 write-mailbox then INDEXOF_TIME read-mailbox 501 read-mailbox >= if 0 501 write-mailbox drop 6 dup 500 write-mailbox then then\ndup 6 = if INDEXOF_X_POS read-mailbox 2.6 - dup 0.12 > if drop 16384 INDEXOF_INPUT write-mailbox else dup -0.12 < if drop 8192 INDEXOF_INPUT write-mailbox else drop 0 INDEXOF_INPUT write-mailbox INDEXOF_XSPEED read-mailbox abs 0.4 < if drop 7 dup 500 write-mailbox then then then then\ndup 7 = if INDEXOF_X_POS read-mailbox 4.35 - dup 0.12 > if drop 16384 INDEXOF_INPUT write-mailbox else dup -0.12 < if drop 8192 INDEXOF_INPUT write-mailbox else drop 0 INDEXOF_INPUT write-mailbox INDEXOF_XSPEED read-mailbox abs 0.4 < if drop 8 dup 500 write-mailbox then then then then\ndup 8 = if INDEXOF_Y_POS read-mailbox -5.0 - dup 0.12 > if drop 4096 INDEXOF_INPUT write-mailbox else dup -0.12 < if drop 2048 INDEXOF_INPUT write-mailbox else drop 0 INDEXOF_INPUT write-mailbox INDEXOF_YSPEED read-mailbox abs 0.4 < if drop 9 dup 500 write-mailbox then then then then\ndup 9 = if 0 INDEXOF_INPUT write-mailbox 501 read-mailbox 0 = if INDEXOF_TIME read-mailbox 0.5 + 501 write-mailbox then INDEXOF_TIME read-mailbox 501 read-mailbox >= if 0 501 write-mailbox drop 10 dup 500 write-mailbox then then\ndup 10 = if INDEXOF_Y_POS read-mailbox -9.5 - dup 0.12 > if drop 4096 INDEXOF_INPUT write-mailbox else dup -0.12 < if drop 2048 INDEXOF_INPUT write-mailbox else drop 0 INDEXOF_INPUT write-mailbox INDEXOF_YSPEED read-mailbox abs 0.4 < if drop 11 dup 500 write-mailbox then then then then\ndup 11 = if INDEXOF_X_POS read-mailbox 3.25 - dup 0.12 > if drop 16384 INDEXOF_INPUT write-mailbox else dup -0.12 < if drop 8192 INDEXOF_INPUT write-mailbox else drop 0 INDEXOF_INPUT write-mailbox INDEXOF_XSPEED read-mailbox abs 0.4 < if drop 12 dup 500 write-mailbox then then then then\ndup 12 = if INDEXOF_Y_POS read-mailbox -5.0 - dup 0.12 > if drop 4096 INDEXOF_INPUT write-mailbox else dup -0.12 < if drop 2048 INDEXOF_INPUT write-mailbox else drop 0 INDEXOF_INPUT write-mailbox INDEXOF_YSPEED read-mailbox abs 0.4 < if drop 13 dup 500 write-mailbox then then then then\ndup 13 = if 0 INDEXOF_INPUT write-mailbox 501 read-mailbox 0 = if INDEXOF_TIME read-mailbox 0.5 + 501 write-mailbox then INDEXOF_TIME read-mailbox 501 read-mailbox >= if 0 501 write-mailbox drop 14 dup 500 write-mailbox then then\ndup 14 = if INDEXOF_X_POS read-mailbox 0.7 - dup 0.12 > if drop 16384 INDEXOF_INPUT write-mailbox else dup -0.12 < if drop 8192 INDEXOF_INPUT write-mailbox else drop 0 INDEXOF_INPUT write-mailbox INDEXOF_XSPEED read-mailbox abs 0.4 < if drop 15 dup 500 write-mailbox then then then then\ndup 15 = if INDEXOF_Y_POS read-mailbox -1.0 - dup 0.12 > if drop 4096 INDEXOF_INPUT write-mailbox else dup -0.12 < if drop 2048 INDEXOF_INPUT write-mailbox else drop 0 INDEXOF_INPUT write-mailbox INDEXOF_YSPEED read-mailbox abs 0.4 < if drop 16 dup 500 write-mailbox then then then then\ndup 16 = if 0 INDEXOF_INPUT write-mailbox 501 read-mailbox 0 = if INDEXOF_TIME read-mailbox 0.5 + 501 write-mailbox then INDEXOF_TIME read-mailbox 501 read-mailbox >= if 0 501 write-mailbox drop 17 dup 500 write-mailbox then then\ndup 17 = if INDEXOF_Y_POS read-mailbox -5.0 - dup 0.12 > if drop 4096 INDEXOF_INPUT write-mailbox else dup -0.12 < if drop 2048 INDEXOF_INPUT write-mailbox else drop 0 INDEXOF_INPUT write-mailbox INDEXOF_YSPEED read-mailbox abs 0.4 < if drop 18 dup 500 write-mailbox then then then then\ndup 18 = if INDEXOF_X_POS read-mailbox 3.25 - dup 0.12 > if drop 16384 INDEXOF_INPUT write-mailbox else dup -0.12 < if drop 8192 INDEXOF_INPUT write-mailbox else drop 0 INDEXOF_INPUT write-mailbox INDEXOF_XSPEED read-mailbox abs 0.4 < if drop 19 dup 500 write-mailbox then then then then\ndup 19 = if INDEXOF_Y_POS read-mailbox -1.0 - dup 0.12 > if drop 4096 INDEXOF_INPUT write-mailbox else dup -0.12 < if drop 2048 INDEXOF_INPUT write-mailbox else drop 0 INDEXOF_INPUT write-mailbox INDEXOF_YSPEED read-mailbox abs 0.4 < if drop 20 dup 500 write-mailbox then then then then\ndup 20 = if 0 INDEXOF_INPUT write-mailbox 501 read-mailbox 0 = if INDEXOF_TIME read-mailbox 3.0 + 501 write-mailbox then INDEXOF_TIME read-mailbox 501 read-mailbox >= if 0 501 write-mailbox drop 21 dup 500 write-mailbox then then\ndup 21 = if INDEXOF_X_POS read-mailbox 6.6 - dup 0.12 > if drop 16384 INDEXOF_INPUT write-mailbox else dup -0.12 < if drop 8192 INDEXOF_INPUT write-mailbox else drop 0 INDEXOF_INPUT write-mailbox INDEXOF_XSPEED read-mailbox abs 0.4 < if drop 22 dup 500 write-mailbox then then then then\ndup 22 = if 0 INDEXOF_INPUT write-mailbox 501 read-mailbox 0 = if INDEXOF_TIME read-mailbox 3.0 + 501 write-mailbox then INDEXOF_TIME read-mailbox 501 read-mailbox >= if 0 501 write-mailbox drop 23 dup 500 write-mailbox then then\ndup 23 = if INDEXOF_X_POS read-mailbox 3.25 - dup 0.12 > if drop 16384 INDEXOF_INPUT write-mailbox else dup -0.12 < if drop 8192 INDEXOF_INPUT write-mailbox else drop 0 INDEXOF_INPUT write-mailbox INDEXOF_XSPEED read-mailbox abs 0.4 < if drop 24 dup 500 write-mailbox then then then then\ndup 24 = if INDEXOF_Y_POS read-mailbox -9.1 - dup 0.12 > if drop 4096 INDEXOF_INPUT write-mailbox else dup -0.12 < if drop 2048 INDEXOF_INPUT write-mailbox else drop 0 INDEXOF_INPUT write-mailbox INDEXOF_YSPEED read-mailbox abs 0.4 < if drop 25 dup 500 write-mailbox then then then then\ndup 25 = if INDEXOF_X_POS read-mailbox -1.5 - dup 0.12 > if drop 16384 INDEXOF_INPUT write-mailbox else dup -0.12 < if drop 8192 INDEXOF_INPUT write-mailbox else drop 0 INDEXOF_INPUT write-mailbox INDEXOF_XSPEED read-mailbox abs 0.4 < if drop 26 dup 500 write-mailbox then then then then\ndup 26 = if 0 INDEXOF_INPUT write-mailbox 501 read-mailbox 0 = if INDEXOF_TIME read-mailbox 0.5 + 501 write-mailbox then INDEXOF_TIME read-mailbox 501 read-mailbox >= if 0 501 write-mailbox drop 27 dup 500 write-mailbox then then\ndup 27 = if INDEXOF_Y_POS read-mailbox -5.0 - dup 0.12 > if drop 4096 INDEXOF_INPUT write-mailbox else dup -0.12 < if drop 2048 INDEXOF_INPUT write-mailbox else drop 0 INDEXOF_INPUT write-mailbox INDEXOF_YSPEED read-mailbox abs 0.4 < if drop 28 dup 500 write-mailbox then then then then\ndup 28 = if INDEXOF_X_POS read-mailbox -7.0 - dup 0.12 > if drop 16384 INDEXOF_INPUT write-mailbox else dup -0.12 < if drop 8192 INDEXOF_INPUT write-mailbox else drop 0 INDEXOF_INPUT write-mailbox INDEXOF_XSPEED read-mailbox abs 0.4 < if drop 29 dup 500 write-mailbox then then then then\ndup 29 = if 0 INDEXOF_INPUT write-mailbox 501 read-mailbox 0 = if INDEXOF_TIME read-mailbox 5.0 + 501 write-mailbox then INDEXOF_TIME read-mailbox 501 read-mailbox >= if 0 501 write-mailbox drop 30 dup 500 write-mailbox then then\ndup 30 = if INDEXOF_X_POS read-mailbox -4.3 - dup 0.12 > if drop 16384 INDEXOF_INPUT write-mailbox else dup -0.12 < if drop 8192 INDEXOF_INPUT write-mailbox else drop 0 INDEXOF_INPUT write-mailbox INDEXOF_XSPEED read-mailbox abs 0.4 < if drop 31 dup 500 write-mailbox then then then then\ndup 31 = if INDEXOF_Y_POS read-mailbox -1.0 - dup 0.12 > if drop 4096 INDEXOF_INPUT write-mailbox else dup -0.12 < if drop 2048 INDEXOF_INPUT write-mailbox else drop 0 INDEXOF_INPUT write-mailbox INDEXOF_YSPEED read-mailbox abs 0.4 < if drop 32 dup 500 write-mailbox then then then then\ndup 32 = if 0 INDEXOF_INPUT write-mailbox 501 read-mailbox 0 = if INDEXOF_TIME read-mailbox 0.5 + 501 write-mailbox then INDEXOF_TIME read-mailbox 501 read-mailbox >= if 0 501 write-mailbox drop 33 dup 500 write-mailbox then then\ndup 33 = if INDEXOF_Y_POS read-mailbox -5.0 - dup 0.12 > if drop 4096 INDEXOF_INPUT write-mailbox else dup -0.12 < if drop 2048 INDEXOF_INPUT write-mailbox else drop 0 INDEXOF_INPUT write-mailbox INDEXOF_YSPEED read-mailbox abs 0.4 < if drop 34 dup 500 write-mailbox then then then then\ndup 34 = if INDEXOF_X_POS read-mailbox -0.75 - dup 0.12 > if drop 16384 INDEXOF_INPUT write-mailbox else dup -0.12 < if drop 8192 INDEXOF_INPUT write-mailbox else drop 0 INDEXOF_INPUT write-mailbox INDEXOF_XSPEED read-mailbox abs 0.4 < if drop 35 dup 500 write-mailbox then then then then\ndup 35 = if INDEXOF_Y_POS read-mailbox -1.0 - dup 0.12 > if drop 4096 INDEXOF_INPUT write-mailbox else dup -0.12 < if drop 2048 INDEXOF_INPUT write-mailbox else drop 0 INDEXOF_INPUT write-mailbox INDEXOF_YSPEED read-mailbox abs 0.4 < if drop 36 dup 500 write-mailbox then then then then\ndup 36 = if 0 INDEXOF_INPUT write-mailbox 501 read-mailbox 0 = if INDEXOF_TIME read-mailbox 0.5 + 501 write-mailbox then INDEXOF_TIME read-mailbox 501 read-mailbox >= if 0 501 write-mailbox drop 37 dup 500 write-mailbox then then\ndup 37 = if 0 INDEXOF_INPUT write-mailbox 1 502 write-mailbox then\ndrop\n" } }
 		{ 'I32' { 'NAME' "Script Controls Input" } { 'DATA' 1l } { 'STR' "True" } }  //False|True
 		{ 'FILE' { 'NAME' "Mesh Name" } { 'STR' "" } }
 		{ 'I32' { 'NAME' "Model Type" } { 'STR' "Mesh" } }
@@ -2601,6 +2601,231 @@
 		{ 'I32' { 'NAME' "Template Object" } { 'DATA' 0l } { 'STR' "False" } }  //False|True
 		{ 'I32' { 'NAME' "MailBox" } { 'DATA' 99l } { 'STR' "99" } }
 		{ 'STR' { 'NAME' "Object" } { 'STR' "cs_balcony" } }
+		{ 'I32' { 'NAME' "Activated By" } { 'DATA' 1l } { 'STR' "Actor" } }  //All|Actor|Class|List
+		{ 'STR' { 'NAME' "Activated By Actor" } { 'STR' "Player" } }
+		{ 'STR' { 'NAME' "Activated By Class" } { 'STR' "" } }
+		{ 'FX32' { 'NAME' "slopeA" } { 'DATA' 0.0000000000000000(1.15.16) } { 'STR' "0.000000" } }
+		{ 'FX32' { 'NAME' "slopeB" } { 'DATA' 0.0000000000000000(1.15.16) } { 'STR' "0.000000" } }
+		{ 'FX32' { 'NAME' "slopeC" } { 'DATA' 0.0000000000000000(1.15.16) } { 'STR' "0.000000" } }
+		{ 'FX32' { 'NAME' "slopeD" } { 'DATA' 0.0000000000000000(1.15.16) } { 'STR' "0.000000" } }
+	}
+	{ 'OBJ' 
+		{ 'NAME' "MasterLook" }
+		{ 'VEC3' { 'NAME' "Position" } { 'DATA' -9.5000000000000000(1.15.16) -6.0000000000000000(1.15.16) 15.4499998092651367(1.15.16)  //x,y,z
+		} }
+		{ 'EULR' { 'NAME' "Orientation" } { 'DATA' 0.0000000000000000(1.15.16) -0.0000000000000000(1.15.16) 0.0000000000000000(1.15.16)  //a,b,c
+		} }
+		{ 'STR' { 'NAME' "Class Name" } { 'DATA' "platform" } }
+		{ 'I32' { 'NAME' "Mobility" } { 'STR' "Anchored" } }
+		{ 'FX32' { 'NAME' "Mass" } { 'DATA' 0.0000000000000000(1.15.16) } { 'STR' "0.0" } }
+		{ 'STR' { 'NAME' "Script" } { 'STR' "\\ wf\n96 read-mailbox dup 0 <> if INDEXOF_TIME read-mailbox swap - dup 5.0 > if drop 5.0 then 5.0 / dup 12.0 * -6.0 + INDEXOF_Y_POS write-mailbox 3.0 * 15.45 + INDEXOF_Z_POS write-mailbox else drop -6.0 INDEXOF_Y_POS write-mailbox 15.45 INDEXOF_Z_POS write-mailbox then\n" } }
+		{ 'I32' { 'NAME' "Model Type" } { 'STR' "None" } }
+	}
+	{ 'OBJ' 
+		{ 'NAME' "cs_master" }
+		{ 'VEC3' { 'NAME' "Position" } { 'DATA' -1.7999999523162842(1.15.16) 0.0000000000000000(1.15.16) 17.4500007629394531(1.15.16)  //x,y,z
+		} }
+		{ 'EULR' { 'NAME' "Orientation" } { 'DATA' 0.0000000000000000(1.15.16) -0.0000000000000000(1.15.16) 0.0000000000000000(1.15.16)  //a,b,c
+		} }
+		{ 'BOX3' { 'NAME' "Global Bounding Box" } { 'DATA' -0.5000000000000000(1.15.16) -0.5000000000000000(1.15.16) 0.0000000000000000(1.15.16) 0.5000000000000000(1.15.16) 0.5000000000000000(1.15.16) 1.0000000000000000(1.15.16)  //min(x,y,z)-max(x,y,z)
+		} }
+		{ 'STR' { 'NAME' "Class Name" } { 'DATA' "camshot" } }
+		{ 'I32' { 'NAME' "MovementClass" } { 'DATA' 16l } { 'STR' "16" } }
+		{ 'I32' { 'NAME' "Mobility" } { 'STR' "Anchored" } }
+		{ 'FX32' { 'NAME' "Mass" } { 'DATA' 75.0000000000000000(1.15.16) } { 'STR' "75.0" } }
+		{ 'I32' { 'NAME' "Moves Between Rooms" } { 'DATA' 0l } { 'STR' "False" } }  //False|True
+		{ 'I32' { 'NAME' "Movement Mailbox" } { 'DATA' 1l } { 'STR' "1" } }
+		{ 'FX32' { 'NAME' "Step Size" } { 'DATA' 0.5499877929687500(1.15.16) } { 'STR' "0.54998779296875" } }
+		{ 'FX32' { 'NAME' "Vertical Elasticity" } { 'DATA' 0.5000000000000000(1.15.16) } { 'STR' "0.5" } }
+		{ 'FX32' { 'NAME' "Horizontal Elasticity" } { 'DATA' 0.5000000000000000(1.15.16) } { 'STR' "0.5" } }
+		{ 'FX32' { 'NAME' "Surface Friction" } { 'DATA' 0.9499969482421875(1.15.16) } { 'STR' "0.9499969482421875" } }
+		{ 'I32' { 'NAME' "At End Of Path" } { 'STR' "Ping-Pong" } }
+		{ 'STR' { 'NAME' "Object To Follow" } { 'STR' "" } }
+		{ 'STR' { 'NAME' "Follow Offset" } { 'STR' "" } }
+		{ 'FX32' { 'NAME' "Running Acceleration" } { 'DATA' 1.0000000000000000(1.15.16) } { 'STR' "1.0" } }
+		{ 'FX32' { 'NAME' "Running Deceleration" } { 'DATA' 0.8999938964843750(1.15.16) } { 'STR' "0.899993896484375" } }
+		{ 'FX32' { 'NAME' "Max Ground Speed" } { 'DATA' 10.0000000000000000(1.15.16) } { 'STR' "10.0" } }
+		{ 'FX32' { 'NAME' "Turn Rate" } { 'DATA' 5.0000000000000000(1.15.16) } { 'STR' "5.0" } }
+		{ 'FX32' { 'NAME' "Crawling Acceleration" } { 'DATA' 0.5000000000000000(1.15.16) } { 'STR' "0.5" } }
+		{ 'FX32' { 'NAME' "Jumping Acceleration" } { 'DATA' 18.0000000000000000(1.15.16) } { 'STR' "18.0" } }
+		{ 'FX32' { 'NAME' "Jumping Momentum Transfer" } { 'DATA' 0.5000000000000000(1.15.16) } { 'STR' "0.5" } }
+		{ 'FX32' { 'NAME' "Air Acceleration" } { 'DATA' 1.0000000000000000(1.15.16) } { 'STR' "1.0" } }
+		{ 'FX32' { 'NAME' "Horiz Air Drag" } { 'DATA' 0.2500000000000000(1.15.16) } { 'STR' "0.25" } }
+		{ 'FX32' { 'NAME' "Vert Air Drag" } { 'DATA' 0.2500000000000000(1.15.16) } { 'STR' "0.25" } }
+		{ 'FX32' { 'NAME' "Max Air Speed" } { 'DATA' 10.0000000000000000(1.15.16) } { 'STR' "10.0" } }
+		{ 'FX32' { 'NAME' "Falling Acceleration" } { 'DATA' 9.8099975585937500(1.15.16) } { 'STR' "9.80999755859375" } }
+		{ 'FX32' { 'NAME' "Fall Anim Threshold" } { 'DATA' 2.0000000000000000(1.15.16) } { 'STR' "2.0" } }
+		{ 'FX32' { 'NAME' "Stun Threshold" } { 'DATA' 2.5000000000000000(1.15.16) } { 'STR' "2.5" } }
+		{ 'FX32' { 'NAME' "Stun Duration" } { 'DATA' 1.0000000000000000(1.15.16) } { 'STR' "1.0" } }
+		{ 'STR' { 'NAME' "Tool A" } { 'STR' "" } }
+		{ 'STR' { 'NAME' "Tool B" } { 'STR' "" } }
+		{ 'STR' { 'NAME' "Tool C" } { 'STR' "" } }
+		{ 'STR' { 'NAME' "Tool D" } { 'STR' "" } }
+		{ 'STR' { 'NAME' "Tool E" } { 'STR' "" } }
+		{ 'STR' { 'NAME' "Tool F" } { 'STR' "" } }
+		{ 'FX32' { 'NAME' "hp" } { 'DATA' 32767.0000000000000000(1.15.16) } { 'STR' "32767.0" } }
+		{ 'I32' { 'NAME' "Number Of Local Mailboxes" } { 'DATA' 0l } { 'STR' "0" } }
+		{ 'STR' { 'NAME' "Poof" } { 'STR' "" } }
+		{ 'I32' { 'NAME' "Is Needle Gun Target" } { 'DATA' 0l } { 'STR' "False" } }  //False|True
+		{ 'I32' { 'NAME' "Write To Mailbox On Death" } { 'DATA' 0l } { 'STR' "0" } }
+		{ 'I32' { 'NAME' "Script Controls Input" } { 'DATA' 0l } { 'STR' "False" } }  //False|True
+		{ 'FILE' { 'NAME' "Mesh Name" } { 'STR' "" } }
+		{ 'I32' { 'NAME' "Model Type" } { 'STR' "None" } }
+		{ 'I32' { 'NAME' "Animation Mailbox" } { 'DATA' 1l } { 'STR' "1" } }
+		{ 'I32' { 'NAME' "Visibility Mailbox" } { 'DATA' 1l } { 'STR' "1" } }
+		{ 'I32' { 'NAME' "Matte Type" } { 'DATA' 1l } { 'STR' "Color" } }  //None|Color|Image
+		{ 'I32' { 'NAME' "Background Color" } { 'DATA' 0l } { 'STR' "0" } }
+		{ 'I32' { 'NAME' "Debug Background Color" } { 'DATA' 7829367l } { 'STR' "7829367" } }
+		{ 'FX32' { 'NAME' "Distance" } { 'DATA' 8000.0000000000000000(1.15.16) } { 'STR' "8000.0" } }
+		{ 'FILE' { 'NAME' "Tiles" } { 'STR' "" } }
+		{ 'FILE' { 'NAME' "Map" } { 'STR' "" } }
+		{ 'FX32' { 'NAME' "X Rotation Scale" } { 'DATA' 1.0000000000000000(1.15.16) } { 'STR' "1.0" } }
+		{ 'FX32' { 'NAME' "Y Rotation Scale" } { 'DATA' 1.0000000000000000(1.15.16) } { 'STR' "1.0" } }
+		{ 'I32' { 'NAME' "generationType" } { 'STR' "Pulse" } }
+		{ 'FX32' { 'NAME' "period" } { 'DATA' 0.1499938964843750(1.15.16) } { 'STR' "0.149993896484375" } }
+		{ 'FX32' { 'NAME' "timeDelay" } { 'DATA' 0.0000000000000000(1.15.16) } { 'STR' "0.0" } }
+		{ 'FX32' { 'NAME' "yArc" } { 'DATA' 1.0000000000000000(1.15.16) } { 'STR' "1.0" } }
+		{ 'FX32' { 'NAME' "zArc" } { 'DATA' 1.0000000000000000(1.15.16) } { 'STR' "1.0" } }
+		{ 'FX32' { 'NAME' "initialSphereRadius" } { 'DATA' 0.0999908447265625(1.15.16) } { 'STR' "0.0999908447265625" } }
+		{ 'FX32' { 'NAME' "sphereExpansionRate" } { 'DATA' 0.0999908447265625(1.15.16) } { 'STR' "0.0999908447265625" } }
+		{ 'I32' { 'NAME' "nParticles" } { 'DATA' 1l } { 'STR' "1" } }
+		{ 'FX32' { 'NAME' "initialVelocity" } { 'DATA' 0.2999877929687500(1.15.16) } { 'STR' "0.29998779296875" } }
+		{ 'FX32' { 'NAME' "initialAngleA" } { 'DATA' 0.0000000000000000(1.15.16) } { 'STR' "0.0" } }
+		{ 'FX32' { 'NAME' "initialAngleB" } { 'DATA' 0.0000000000000000(1.15.16) } { 'STR' "0.0" } }
+		{ 'FX32' { 'NAME' "initialAngleC" } { 'DATA' 0.0000000000000000(1.15.16) } { 'STR' "0.0" } }
+		{ 'FX32' { 'NAME' "deltaAngleA" } { 'DATA' 0.0000000000000000(1.15.16) } { 'STR' "0.0" } }
+		{ 'FX32' { 'NAME' "deltaAngleB" } { 'DATA' 0.0000000000000000(1.15.16) } { 'STR' "0.0" } }
+		{ 'FX32' { 'NAME' "deltaAngleC" } { 'DATA' 0.0000000000000000(1.15.16) } { 'STR' "0.0" } }
+		{ 'FX32' { 'NAME' "lifeTime" } { 'DATA' 2.0000000000000000(1.15.16) } { 'STR' "2.0" } }
+		{ 'FX32' { 'NAME' "initialAlpha" } { 'DATA' 1.0000000000000000(1.15.16) } { 'STR' "1.0" } }
+		{ 'FX32' { 'NAME' "alphaDecrement" } { 'DATA' 0.0499877929687500(1.15.16) } { 'STR' "0.04998779296875" } }
+		{ 'I32' { 'NAME' "Type" } { 'STR' "None" } }
+		{ 'FX32' { 'NAME' "magnitude" } { 'DATA' 0.2999877929687500(1.15.16) } { 'STR' "0.29998779296875" } }
+		{ 'FX32' { 'NAME' "vectorX" } { 'DATA' 0.0000000000000000(1.15.16) } { 'STR' "0.0" } }
+		{ 'FX32' { 'NAME' "vectorY" } { 'DATA' 0.0000000000000000(1.15.16) } { 'STR' "0.0" } }
+		{ 'FX32' { 'NAME' "vectorZ" } { 'DATA' 0.0000000000000000(1.15.16) } { 'STR' "0.0" } }
+		{ 'I32' { 'NAME' "forceType" } { 'STR' "None" } }
+		{ 'FX32' { 'NAME' "magnitude2" } { 'DATA' 0.2999877929687500(1.15.16) } { 'STR' "0.29998779296875" } }
+		{ 'FX32' { 'NAME' "vectorX2" } { 'DATA' 0.0000000000000000(1.15.16) } { 'STR' "0.0" } }
+		{ 'FX32' { 'NAME' "vectorY2" } { 'DATA' 0.0000000000000000(1.15.16) } { 'STR' "0.0" } }
+		{ 'FX32' { 'NAME' "vectorZ2" } { 'DATA' 0.0000000000000000(1.15.16) } { 'STR' "0.0" } }
+		{ 'STR' { 'NAME' "Shadow Object Template" } { 'STR' "" } }
+		{ 'I32' { 'NAME' "Check Below Only Once" } { 'DATA' 1l } { 'STR' "True" } }  //False|True
+		{ 'I32' { 'NAME' "Template Object" } { 'DATA' 0l } { 'STR' "False" } }  //False|True
+		{ 'I32' { 'NAME' "Camera" } { 'DATA' 0l } { 'STR' "0" } }
+		{ 'STR' { 'NAME' "Target" } { 'STR' "MasterLook" } }
+		{ 'STR' { 'NAME' "Follow" } { 'STR' "CamTarget" } }
+		{ 'FX32' { 'NAME' "Climb Rate" } { 'DATA' 5.0000000000000000(1.15.16) } { 'STR' "5.0" } }
+		{ 'FX32' { 'NAME' "Elasticity" } { 'DATA' 10.0000000000000000(1.15.16) } { 'STR' "10.0" } }
+		{ 'I32' { 'NAME' "Track Object Mailbox" } { 'DATA' 0l } { 'STR' "0" } }
+		{ 'STR' { 'NAME' "Track Object" } { 'STR' "Player" } }
+		{ 'I32' { 'NAME' "Rotation" } { 'DATA' 0l } { 'STR' "Fixed" } }  //Fixed|Track
+		{ 'I32' { 'NAME' "Position X" } { 'DATA' 1l } { 'STR' "Relative" } }  //Absolute|Relative
+		{ 'I32' { 'NAME' "Position Y" } { 'DATA' 1l } { 'STR' "Relative" } }  //Absolute|Relative
+		{ 'I32' { 'NAME' "Position Z" } { 'DATA' 1l } { 'STR' "Relative" } }  //Absolute|Relative
+		{ 'FX32' { 'NAME' "FOV" } { 'DATA' 60.0000000000000000(1.15.16) } { 'STR' "60.0" } }
+		{ 'FX32' { 'NAME' "Roll" } { 'DATA' 0.0000000000000000(1.15.16) } { 'STR' "0.0" } }
+		{ 'FX32' { 'NAME' "Pan Time In Seconds" } { 'DATA' 0.7000000000000000(1.15.16) } { 'STR' "0.7" } }
+		{ 'FX32' { 'NAME' "Hither" } { 'DATA' 0.1000000000000000(1.15.16) } { 'STR' "0.1" } }
+		{ 'FX32' { 'NAME' "Yon" } { 'DATA' 200.0000000000000000(1.15.16) } { 'STR' "200.0" } }
+		{ 'FX32' { 'NAME' "slopeA" } { 'DATA' 0.0000000000000000(1.15.16) } { 'STR' "0.000000" } }
+		{ 'FX32' { 'NAME' "slopeB" } { 'DATA' 0.0000000000000000(1.15.16) } { 'STR' "0.000000" } }
+		{ 'FX32' { 'NAME' "slopeC" } { 'DATA' 0.0000000000000000(1.15.16) } { 'STR' "0.000000" } }
+		{ 'FX32' { 'NAME' "slopeD" } { 'DATA' 0.0000000000000000(1.15.16) } { 'STR' "0.000000" } }
+	}
+	{ 'OBJ' 
+		{ 'NAME' "zone-master" }
+		{ 'VEC3' { 'NAME' "Position" } { 'DATA' -7.1500000953674316(1.15.16) -4.3750000000000000(1.15.16) 17.1000003814697266(1.15.16)  //x,y,z
+		} }
+		{ 'EULR' { 'NAME' "Orientation" } { 'DATA' 0.0000000000000000(1.15.16) -0.0000000000000000(1.15.16) 0.0000000000000000(1.15.16)  //a,b,c
+		} }
+		{ 'BOX3' { 'NAME' "Global Bounding Box" } { 'DATA' -0.8499999046325684(1.15.16) -2.4749999046325684(1.15.16) -1.8500000238418579(1.15.16) 0.8499999046325684(1.15.16) 2.4749999046325684(1.15.16) 1.8500000238418579(1.15.16)  //min(x,y,z)-max(x,y,z)
+		} }
+		{ 'STR' { 'NAME' "Class Name" } { 'DATA' "actboxor" } }
+		{ 'I32' { 'NAME' "MovementClass" } { 'DATA' 17l } { 'STR' "17" } }
+		{ 'I32' { 'NAME' "Mobility" } { 'STR' "Anchored" } }
+		{ 'FX32' { 'NAME' "Mass" } { 'DATA' 75.0000000000000000(1.15.16) } { 'STR' "75.0" } }
+		{ 'I32' { 'NAME' "Moves Between Rooms" } { 'DATA' 0l } { 'STR' "False" } }  //False|True
+		{ 'I32' { 'NAME' "Movement Mailbox" } { 'DATA' 1l } { 'STR' "1" } }
+		{ 'FX32' { 'NAME' "Step Size" } { 'DATA' 0.5499877929687500(1.15.16) } { 'STR' "0.54998779296875" } }
+		{ 'FX32' { 'NAME' "Vertical Elasticity" } { 'DATA' 0.5000000000000000(1.15.16) } { 'STR' "0.5" } }
+		{ 'FX32' { 'NAME' "Horizontal Elasticity" } { 'DATA' 0.5000000000000000(1.15.16) } { 'STR' "0.5" } }
+		{ 'FX32' { 'NAME' "Surface Friction" } { 'DATA' 0.9499969482421875(1.15.16) } { 'STR' "0.9499969482421875" } }
+		{ 'I32' { 'NAME' "At End Of Path" } { 'STR' "Ping-Pong" } }
+		{ 'STR' { 'NAME' "Object To Follow" } { 'STR' "" } }
+		{ 'STR' { 'NAME' "Follow Offset" } { 'STR' "" } }
+		{ 'FX32' { 'NAME' "Running Acceleration" } { 'DATA' 1.0000000000000000(1.15.16) } { 'STR' "1.0" } }
+		{ 'FX32' { 'NAME' "Running Deceleration" } { 'DATA' 0.8999938964843750(1.15.16) } { 'STR' "0.899993896484375" } }
+		{ 'FX32' { 'NAME' "Max Ground Speed" } { 'DATA' 10.0000000000000000(1.15.16) } { 'STR' "10.0" } }
+		{ 'FX32' { 'NAME' "Turn Rate" } { 'DATA' 5.0000000000000000(1.15.16) } { 'STR' "5.0" } }
+		{ 'FX32' { 'NAME' "Crawling Acceleration" } { 'DATA' 0.5000000000000000(1.15.16) } { 'STR' "0.5" } }
+		{ 'FX32' { 'NAME' "Jumping Acceleration" } { 'DATA' 18.0000000000000000(1.15.16) } { 'STR' "18.0" } }
+		{ 'FX32' { 'NAME' "Jumping Momentum Transfer" } { 'DATA' 0.5000000000000000(1.15.16) } { 'STR' "0.5" } }
+		{ 'FX32' { 'NAME' "Air Acceleration" } { 'DATA' 1.0000000000000000(1.15.16) } { 'STR' "1.0" } }
+		{ 'FX32' { 'NAME' "Horiz Air Drag" } { 'DATA' 0.2500000000000000(1.15.16) } { 'STR' "0.25" } }
+		{ 'FX32' { 'NAME' "Vert Air Drag" } { 'DATA' 0.2500000000000000(1.15.16) } { 'STR' "0.25" } }
+		{ 'FX32' { 'NAME' "Max Air Speed" } { 'DATA' 10.0000000000000000(1.15.16) } { 'STR' "10.0" } }
+		{ 'FX32' { 'NAME' "Falling Acceleration" } { 'DATA' 9.8099975585937500(1.15.16) } { 'STR' "9.80999755859375" } }
+		{ 'FX32' { 'NAME' "Fall Anim Threshold" } { 'DATA' 2.0000000000000000(1.15.16) } { 'STR' "2.0" } }
+		{ 'FX32' { 'NAME' "Stun Threshold" } { 'DATA' 2.5000000000000000(1.15.16) } { 'STR' "2.5" } }
+		{ 'FX32' { 'NAME' "Stun Duration" } { 'DATA' 1.0000000000000000(1.15.16) } { 'STR' "1.0" } }
+		{ 'STR' { 'NAME' "Tool A" } { 'STR' "" } }
+		{ 'STR' { 'NAME' "Tool B" } { 'STR' "" } }
+		{ 'STR' { 'NAME' "Tool C" } { 'STR' "" } }
+		{ 'STR' { 'NAME' "Tool D" } { 'STR' "" } }
+		{ 'STR' { 'NAME' "Tool E" } { 'STR' "" } }
+		{ 'STR' { 'NAME' "Tool F" } { 'STR' "" } }
+		{ 'FX32' { 'NAME' "hp" } { 'DATA' 32767.0000000000000000(1.15.16) } { 'STR' "32767.0" } }
+		{ 'I32' { 'NAME' "Number Of Local Mailboxes" } { 'DATA' 0l } { 'STR' "0" } }
+		{ 'STR' { 'NAME' "Poof" } { 'STR' "" } }
+		{ 'I32' { 'NAME' "Is Needle Gun Target" } { 'DATA' 0l } { 'STR' "False" } }  //False|True
+		{ 'I32' { 'NAME' "Write To Mailbox On Death" } { 'DATA' 0l } { 'STR' "0" } }
+		{ 'I32' { 'NAME' "Script Controls Input" } { 'DATA' 0l } { 'STR' "False" } }  //False|True
+		{ 'FILE' { 'NAME' "Mesh Name" } { 'STR' "" } }
+		{ 'I32' { 'NAME' "Model Type" } { 'STR' "None" } }
+		{ 'I32' { 'NAME' "Animation Mailbox" } { 'DATA' 1l } { 'STR' "1" } }
+		{ 'I32' { 'NAME' "Visibility Mailbox" } { 'DATA' 1l } { 'STR' "1" } }
+		{ 'I32' { 'NAME' "Matte Type" } { 'DATA' 1l } { 'STR' "Color" } }  //None|Color|Image
+		{ 'I32' { 'NAME' "Background Color" } { 'DATA' 0l } { 'STR' "0" } }
+		{ 'I32' { 'NAME' "Debug Background Color" } { 'DATA' 7829367l } { 'STR' "7829367" } }
+		{ 'FX32' { 'NAME' "Distance" } { 'DATA' 8000.0000000000000000(1.15.16) } { 'STR' "8000.0" } }
+		{ 'FILE' { 'NAME' "Tiles" } { 'STR' "" } }
+		{ 'FILE' { 'NAME' "Map" } { 'STR' "" } }
+		{ 'FX32' { 'NAME' "X Rotation Scale" } { 'DATA' 1.0000000000000000(1.15.16) } { 'STR' "1.0" } }
+		{ 'FX32' { 'NAME' "Y Rotation Scale" } { 'DATA' 1.0000000000000000(1.15.16) } { 'STR' "1.0" } }
+		{ 'I32' { 'NAME' "generationType" } { 'STR' "Pulse" } }
+		{ 'FX32' { 'NAME' "period" } { 'DATA' 0.1499938964843750(1.15.16) } { 'STR' "0.149993896484375" } }
+		{ 'FX32' { 'NAME' "timeDelay" } { 'DATA' 0.0000000000000000(1.15.16) } { 'STR' "0.0" } }
+		{ 'FX32' { 'NAME' "yArc" } { 'DATA' 1.0000000000000000(1.15.16) } { 'STR' "1.0" } }
+		{ 'FX32' { 'NAME' "zArc" } { 'DATA' 1.0000000000000000(1.15.16) } { 'STR' "1.0" } }
+		{ 'FX32' { 'NAME' "initialSphereRadius" } { 'DATA' 0.0999908447265625(1.15.16) } { 'STR' "0.0999908447265625" } }
+		{ 'FX32' { 'NAME' "sphereExpansionRate" } { 'DATA' 0.0999908447265625(1.15.16) } { 'STR' "0.0999908447265625" } }
+		{ 'I32' { 'NAME' "nParticles" } { 'DATA' 1l } { 'STR' "1" } }
+		{ 'FX32' { 'NAME' "initialVelocity" } { 'DATA' 0.2999877929687500(1.15.16) } { 'STR' "0.29998779296875" } }
+		{ 'FX32' { 'NAME' "initialAngleA" } { 'DATA' 0.0000000000000000(1.15.16) } { 'STR' "0.0" } }
+		{ 'FX32' { 'NAME' "initialAngleB" } { 'DATA' 0.0000000000000000(1.15.16) } { 'STR' "0.0" } }
+		{ 'FX32' { 'NAME' "initialAngleC" } { 'DATA' 0.0000000000000000(1.15.16) } { 'STR' "0.0" } }
+		{ 'FX32' { 'NAME' "deltaAngleA" } { 'DATA' 0.0000000000000000(1.15.16) } { 'STR' "0.0" } }
+		{ 'FX32' { 'NAME' "deltaAngleB" } { 'DATA' 0.0000000000000000(1.15.16) } { 'STR' "0.0" } }
+		{ 'FX32' { 'NAME' "deltaAngleC" } { 'DATA' 0.0000000000000000(1.15.16) } { 'STR' "0.0" } }
+		{ 'FX32' { 'NAME' "lifeTime" } { 'DATA' 2.0000000000000000(1.15.16) } { 'STR' "2.0" } }
+		{ 'FX32' { 'NAME' "initialAlpha" } { 'DATA' 1.0000000000000000(1.15.16) } { 'STR' "1.0" } }
+		{ 'FX32' { 'NAME' "alphaDecrement" } { 'DATA' 0.0499877929687500(1.15.16) } { 'STR' "0.04998779296875" } }
+		{ 'I32' { 'NAME' "Type" } { 'STR' "None" } }
+		{ 'FX32' { 'NAME' "magnitude" } { 'DATA' 0.2999877929687500(1.15.16) } { 'STR' "0.29998779296875" } }
+		{ 'FX32' { 'NAME' "vectorX" } { 'DATA' 0.0000000000000000(1.15.16) } { 'STR' "0.0" } }
+		{ 'FX32' { 'NAME' "vectorY" } { 'DATA' 0.0000000000000000(1.15.16) } { 'STR' "0.0" } }
+		{ 'FX32' { 'NAME' "vectorZ" } { 'DATA' 0.0000000000000000(1.15.16) } { 'STR' "0.0" } }
+		{ 'I32' { 'NAME' "forceType" } { 'STR' "None" } }
+		{ 'FX32' { 'NAME' "magnitude2" } { 'DATA' 0.2999877929687500(1.15.16) } { 'STR' "0.29998779296875" } }
+		{ 'FX32' { 'NAME' "vectorX2" } { 'DATA' 0.0000000000000000(1.15.16) } { 'STR' "0.0" } }
+		{ 'FX32' { 'NAME' "vectorY2" } { 'DATA' 0.0000000000000000(1.15.16) } { 'STR' "0.0" } }
+		{ 'FX32' { 'NAME' "vectorZ2" } { 'DATA' 0.0000000000000000(1.15.16) } { 'STR' "0.0" } }
+		{ 'STR' { 'NAME' "Shadow Object Template" } { 'STR' "" } }
+		{ 'I32' { 'NAME' "Check Below Only Once" } { 'DATA' 1l } { 'STR' "True" } }  //False|True
+		{ 'I32' { 'NAME' "Template Object" } { 'DATA' 0l } { 'STR' "False" } }  //False|True
+		{ 'I32' { 'NAME' "MailBox" } { 'DATA' 95l } { 'STR' "95" } }
+		{ 'STR' { 'NAME' "Object" } { 'STR' "cs_master" } }
 		{ 'I32' { 'NAME' "Activated By" } { 'DATA' 1l } { 'STR' "Actor" } }  //All|Actor|Class|List
 		{ 'STR' { 'NAME' "Activated By Actor" } { 'STR' "Player" } }
 		{ 'STR' { 'NAME' "Activated By Class" } { 'STR' "" } }

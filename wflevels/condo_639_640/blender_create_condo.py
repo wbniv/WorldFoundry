@@ -698,41 +698,6 @@ def add_locator(name, location, bbox_min=None, bbox_max=None):
     return o
 
 
-# The look target is a scripted platform (the moon's launch_tracker pattern): while the
-# player is on the patio it slides from LOOK0 to LOOK1 over BALCONY_SWEEP_S, timed from
-# mailbox 97 (set by the Director on entry, zeroed on exit), so every visit tilts up from
-# the balcony to the skyline. Writes world Y/Z through its own INDEXOF_Y_POS / Z_POS.
-balcony_look = bpy.data.objects.new('BalconyLook', bpy.data.meshes.new('BalconyLook'))
-scene.collection.objects.link(balcony_look)
-attach_schema(balcony_look, 'platform')
-balcony_look.location = BALCONY_LOOK0
-balcony_look['wf_Mobility']   = 'Anchored'
-balcony_look['wf_Model Type'] = 'None'
-balcony_look['wf_Mass']       = 0.0
-_lx0, _lz0 = BALCONY_LOOK0[0], BALCONY_LOOK0[2] + UNIT_Z
-_lx1, _lz1 = BALCONY_LOOK1[0], BALCONY_LOOK1[2] + UNIT_Z
-balcony_look['wf_Script'] = (
-    "\\ wf\n"
-    f"{MB_BALCONY_T0} read-mailbox dup 0 <> if INDEXOF_TIME read-mailbox swap - "      # ( elapsed )
-    f"dup {BALCONY_SWEEP_S} > if drop {BALCONY_SWEEP_S} then {BALCONY_SWEEP_S} / "     # ( t 0..1 )
-    f"dup {_lx1 - _lx0} * {_lx0} + INDEXOF_X_POS write-mailbox "
-    f"{_lz1 - _lz0} * {_lz0} + INDEXOF_Z_POS write-mailbox "
-    f"else drop {_lx0} INDEXOF_X_POS write-mailbox {_lz0} INDEXOF_Z_POS write-mailbox then\n"
-)
-cs_balcony = camshot.copy()
-cs_balcony.data = None
-cs_balcony.name = 'cs_balcony'
-cs_balcony.location = BALCONY_CAM
-for k in ('wf_Position X', 'wf_Position Y', 'wf_Position Z'):
-    cs_balcony[k] = 'Relative'
-cs_balcony['wf_Rotation'] = 'Fixed'
-cs_balcony['wf_Target']   = 'BalconyLook'
-cs_balcony['wf_Follow']   = 'CamTarget'
-cs_balcony['wf_Track Object'] = 'Player'
-cs_balcony['wf_Pan Time In Seconds'] = 0.7
-scene.collection.objects.link(cs_balcony)
-
-
 def add_zone(name, mn, mx, mailbox, shot_name):
     z = add_locator(name, (mn + mx) / 2.0, mn, mx)
     attach_schema(z, 'actboxor')
@@ -747,15 +712,78 @@ def add_zone(name, mn, mx, mailbox, shot_name):
     return z
 
 
+def add_pov_camera(tag, cam_offset, look0, look1, zone_min, zone_max, zone_mb, t0_mb, sweep_s=BALCONY_SWEEP_S):
+    """A first-person camshot `cs_<tag>` switched on by the ActBoxOR `zone-<tag>` (mailbox
+    `zone_mb`), looking at `<Tag>Look` — a scripted platform (the moon's launch_tracker
+    pattern) that slides from look0 to look1 over `sweep_s` seconds timed from mailbox
+    `t0_mb` (the Director writes the level time on entry, zeroes it on exit), so every
+    visit pans the skybox the same way. Offsets are Relative to the player / relative to
+    CamTarget at the origin (movecam.cc: position = (camshot − Follow) + Player,
+    direction = Target − camshot); the look target animates whichever of X/Y differs
+    between look0 and look1, plus Z, through its own INDEXOF_*_POS mailboxes."""
+    name = tag.capitalize() + 'Look'
+    look = bpy.data.objects.new(name, bpy.data.meshes.new(name))
+    scene.collection.objects.link(look)
+    attach_schema(look, 'platform')
+    look.location = look0
+    look['wf_Mobility']   = 'Anchored'
+    look['wf_Model Type'] = 'None'
+    look['wf_Mass']       = 0.0
+    axis = 'X' if abs(look1[0] - look0[0]) > abs(look1[1] - look0[1]) else 'Y'
+    a0, a1 = (look0[0], look1[0]) if axis == 'X' else (look0[1], look1[1])
+    z0, z1 = look0[2] + UNIT_Z, look1[2] + UNIT_Z
+    look['wf_Script'] = (
+        "\\ wf\n"
+        f"{t0_mb} read-mailbox dup 0 <> if INDEXOF_TIME read-mailbox swap - "      # ( elapsed )
+        f"dup {sweep_s} > if drop {sweep_s} then {sweep_s} / "                     # ( t 0..1 )
+        f"dup {a1 - a0} * {a0} + INDEXOF_{axis}_POS write-mailbox "
+        f"{z1 - z0} * {z0} + INDEXOF_Z_POS write-mailbox "
+        f"else drop {a0} INDEXOF_{axis}_POS write-mailbox {z0} INDEXOF_Z_POS write-mailbox then\n"
+    )
+    cs = camshot.copy()
+    cs.data = None
+    cs.name = 'cs_' + tag
+    cs.location = cam_offset
+    for k in ('wf_Position X', 'wf_Position Y', 'wf_Position Z'):
+        cs[k] = 'Relative'
+    cs['wf_Rotation'] = 'Fixed'
+    cs['wf_Target']   = name
+    cs['wf_Follow']   = 'CamTarget'
+    cs['wf_Track Object'] = 'Player'
+    cs['wf_Pan Time In Seconds'] = 0.7
+    scene.collection.objects.link(cs)
+    zone = add_zone('zone-' + tag, Vector(zone_min), Vector(zone_max), zone_mb, cs.name)
+    print(f"[condo] {tag} POV camera: zone x {zone_min[0]:.2f}…{zone_max[0]:.2f} y {zone_min[1]:.2f}…{zone_max[1]:.2f}, "
+          f"cs_{tag} at {cam_offset}, look {look0} → {look1} over {sweep_s} s")
+    return cs, look, zone
+
+
 pad = 0.1
-zone_balcony = add_zone('zone-balcony', bal_min - Vector((pad, pad, 0.5)), bal_max + Vector((pad, pad, 0.5)),
-                        MB_ZONE_BALCONY, 'cs_balcony')
+cs_balcony, balcony_look, zone_balcony = add_pov_camera(
+    'balcony', BALCONY_CAM, BALCONY_LOOK0, BALCONY_LOOK1,
+    bal_min - Vector((pad, pad, 0.5)), bal_max + Vector((pad, pad, 0.5)), MB_ZONE_BALCONY, MB_BALCONY_T0)
+
+# Master-bedroom window (plan: docs/plans/2026-09-19-condo-master-window-pov.md). 640's
+# master bedroom has its curved glass along the unit's −X (compass south) wall; the zone is
+# the strip within MASTER_STRIP_W of it. The camera sits 1.8 m further in −X — past the glass
+# and past unit-640's actor bbox (min x −7.95), so the physics camera has nothing to hit.
+MB_ZONE_MASTER, MB_MASTER_T0 = 95, 96
+MASTER_ROOM   = '640-master-bed'
+MASTER_STRIP_W = 1.6
+MASTER_CAM    = (-1.8, 0.0, 1.7)
+MASTER_LOOK0  = (-9.5, -6.0, -0.3)      # south-east, 2° down — Soi 34 and Sathu Pradit Road
+MASTER_LOOK1  = (-9.5, 6.0, 2.7)        # south-west, 14° up — the river loop and the sky
+_mb = next(((mn, mx) for name, mn, mx in room_outlines if name == MASTER_ROOM), None)
+assert _mb is not None, f"{MASTER_ROOM} outline missing"
+cs_master, master_look, zone_master = add_pov_camera(
+    'master', MASTER_CAM, MASTER_LOOK0, MASTER_LOOK1,
+    (_mb[0].x - pad, _mb[0].y - pad, -0.5), (_mb[0].x + MASTER_STRIP_W, _mb[1].y + pad, WALL_H + 0.5),
+    MB_ZONE_MASTER, MB_MASTER_T0)
+
 cx0, cy0, cx1, cy1 = CORRIDOR
 zone_interior = add_zone('zone-interior', Vector((min(cx0, -8.2), cy0 - 0.5, -0.5)),
                          Vector((max(cx1, 8.2), bal_min.y - pad, WALL_H + 0.5)),
                          MB_ZONE_INTERIOR, 'cs_dollhouse')
-print(f"[condo] balcony camera: zone y {bal_min.y - pad:.2f}…{bal_max.y + pad:.2f}, cs_balcony at {BALCONY_CAM}, "
-      f"look {BALCONY_LOOK0} → {BALCONY_LOOK1} over {BALCONY_SWEEP_S} s")
 
 # ── 8. Lights, matte, director, levelobj ─────────────────────────────────────
 light = find_by_class('light')
@@ -795,13 +823,20 @@ director['wf_Model Type'] = 'None'
 # mailbox to INDEXOF_CAMSHOT and zero it, patio last so it wins on a boundary tick.
 # Mailbox 97 holds the level time the patio zone was entered (for BalconyLook's sweep) and
 # is zeroed the first tick the zone stops writing.
-director['wf_Script'] = (
-    "\\ wf\n"
-    f"{MB_ZONE_INTERIOR} read-mailbox dup 0 <> if INDEXOF_CAMSHOT write-mailbox 0 {MB_ZONE_INTERIOR} write-mailbox else drop then\n"
-    f"{MB_ZONE_BALCONY} read-mailbox dup 0 <> if INDEXOF_CAMSHOT write-mailbox 0 {MB_ZONE_BALCONY} write-mailbox "
-    f"{MB_BALCONY_T0} read-mailbox 0 = if INDEXOF_TIME read-mailbox {MB_BALCONY_T0} write-mailbox then "
-    f"else drop 0 {MB_BALCONY_T0} write-mailbox then\n"
-)
+def _zone_forward(zone_mb, t0_mb=None):
+    s = f"{zone_mb} read-mailbox dup 0 <> if INDEXOF_CAMSHOT write-mailbox 0 {zone_mb} write-mailbox "
+    if t0_mb:
+        s += f"{t0_mb} read-mailbox 0 = if INDEXOF_TIME read-mailbox {t0_mb} write-mailbox then else drop 0 {t0_mb} write-mailbox then\n"
+    else:
+        s += "else drop then\n"
+    return s
+
+
+# Interior first, the window zones after it, so a window shot wins while its strip is
+# occupied (the strips lie inside the interior zone).
+director['wf_Script'] = ("\\ wf\n" + _zone_forward(MB_ZONE_INTERIOR)
+                         + _zone_forward(MB_ZONE_BALCONY, MB_BALCONY_T0)
+                         + _zone_forward(MB_ZONE_MASTER, MB_MASTER_T0))
 
 levelobj = find_by_class('levelobj')
 assert levelobj is not None
