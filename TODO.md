@@ -73,6 +73,7 @@
 
 ### Level / Gameplay
 
+- [ ] **20 s room-tour video of 205/639** — bridge-driven waypoint walk recorded with `-record_video`, room captions from the level's own `target` bboxes burnt in via ffmpeg, `task video-condo-639`. Blocked on one decision: add the missing bath-N door to the source model (a) or ship 6 rooms (b). [plan](docs/plans/2026-09-19-condo-639-tour-video.md)
 - [ ] **FSN browser design references — desktop filesystem visualizers.** Study for layout/encoding ideas: **KDirStat/QDirStat** ([QDirStat](https://github.com/shundhammer/qdirstat)) treemaps; **Filelight** ([source](https://invent.kde.org/utilities/filelight)) radial sunbursts.
 - [ ] **Filesystem-viz family — remaining views.** Platform shipped (flat numeric table from C + per-view Forth Director); done views: filelight, fsn `filesys`, treemap, planetarium dome. **Open:** **Tiered monument** (#2) sunburst variant; **unified runtime view-switcher** (one level, mode mailbox cycles tree↔sunburst↔treemap↔tiered↔dome); **procedural single-mesh** upgrade (exact sectors via one runtime `RenderObject3D`). [plan](docs/plans/2026-06-13-filesystem-viz-on-a-flat-table-forth-policy-core-f.md)
 - [ ] **Marble-madness: script-based input remapping** — `Script Controls Input = True`; script reads raw joystick (1008), remaps, writes `EMAILBOX_INPUT` (3024). Current impl handles LEFT/RIGHT strafe in `movement.cc` (TurnRate==0 branch); the script approach is a viable future refactor. See `player.cc:192` for the passthrough pattern.
@@ -263,4 +264,8 @@ _Auto-added from plan "Out of scope"/"Deferred" sections at commit time. Triage 
 - [ ] **(triage)** Translucent glass — needs a `MATL` flag + renderer path; engine work, tracked separately if wanted. — _from [2026-09-19-condo-639-640-level.md](docs/plans/2026-09-19-condo-639-640-level.md)_  <!-- fp:3b12ba3a015cecab -->
 - [ ] **(triage)** Fixing `install.sh`'s dependency on `~/.config/blender/<latest>` for a non‑default Blender install. — _from [2026-09-19-condo-639-640-level.md](docs/plans/2026-09-19-condo-639-640-level.md)_  <!-- fp:3802151cd56bf127 -->
 - [ ] **(triage)** Re‑pointing the other level scripts' `~/.config/blender/4.0/…` fallback path (they still say 4.0). — _from [2026-09-19-condo-639-640-level.md](docs/plans/2026-09-19-condo-639-640-level.md)_  <!-- fp:07fa5f82060143b5 -->
+- [ ] **(triage)** A 640 tour (same script, different waypoints; do it once 639's cut is approved). — _from [2026-09-19-condo-639-tour-video.md](docs/plans/2026-09-19-condo-639-tour-video.md)_  <!-- fp:edb49dd7f743f1d0 -->
+- [ ] **(triage)** Camera moves other than the doll‑house follow (a fly‑through would need a second CamShot + ActBoxOR switching). — _from [2026-09-19-condo-639-tour-video.md](docs/plans/2026-09-19-condo-639-tour-video.md)_  <!-- fp:bd09abdc74022e55 -->
+- [ ] **(triage)** Higher than 640 × 480: the Linux HAL has no `-width/-height` switch yet (TODO item exists); upscale with ffmpeg if needed. — _from [2026-09-19-condo-639-tour-video.md](docs/plans/2026-09-19-condo-639-tour-video.md)_  <!-- fp:3d7a6f1c41894cb0 -->
+- [verify] **2026-09-19-condo-639-tour-video** — Verification section present but no PASS recorded — run + record the steps. _from [2026-09-19-condo-639-tour-video.md](docs/plans/2026-09-19-condo-639-tour-video.md)_  <!-- fp:8366216da3905027 -->
 <!-- END auto-captured-deferrals -->
