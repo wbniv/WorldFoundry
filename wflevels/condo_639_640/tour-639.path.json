@@ -1,0 +1,176 @@
+{
+ "_comment": "Guided tour of every 639-owned (blue) room. Straight axis-aligned legs between waypoints; a waypoint with a `room` label is a hold there. Each leg is a servo (push toward the coordinate from either side, advance when within tol_m and slower than stop_speed) compiled into the player's Forth by blender_create_condo.py (CONDO_TOUR=\u2026). Pace: ground speed \u2248 accel/(30\u00b7decel). docs/plans/2026-09-19-condo-639-tour-video.md",
+ "spawn": [
+  4.66,
+  -16.0,
+  0.3
+ ],
+ "accel": 260,
+ "hold_seconds": 0.5,
+ "waypoints": [
+  {
+   "at": [
+    4.66,
+    -12.0
+   ],
+   "room": "639-kitchen"
+  },
+  {
+   "at": [
+    4.66,
+    -13.9
+   ]
+  },
+  {
+   "at": [
+    2.6,
+    -13.9
+   ]
+  },
+  {
+   "at": [
+    1.0,
+    -13.9
+   ],
+   "room": "639-bath-S"
+  },
+  {
+   "at": [
+    2.6,
+    -13.9
+   ]
+  },
+  {
+   "at": [
+    4.35,
+    -13.9
+   ]
+  },
+  {
+   "at": [
+    4.35,
+    -5.0
+   ],
+   "room": "639-project-rm"
+  },
+  {
+   "at": [
+    4.35,
+    -9.5
+   ]
+  },
+  {
+   "at": [
+    3.25,
+    -9.5
+   ]
+  },
+  {
+   "at": [
+    3.25,
+    -5.0
+   ],
+   "room": "639-guest-bed"
+  },
+  {
+   "at": [
+    0.7,
+    -5.0
+   ]
+  },
+  {
+   "at": [
+    0.7,
+    -1.0
+   ],
+   "room": "639-bath-N"
+  },
+  {
+   "at": [
+    0.7,
+    -5.0
+   ]
+  },
+  {
+   "at": [
+    3.25,
+    -5.0
+   ]
+  },
+  {
+   "at": [
+    3.25,
+    -1.0
+   ],
+   "room": "639-patio-recessed"
+  },
+  {
+   "at": [
+    6.6,
+    -1.0
+   ],
+   "room": "639-patio"
+  },
+  {
+   "at": [
+    3.25,
+    -1.0
+   ]
+  },
+  {
+   "at": [
+    3.25,
+    -9.1
+   ]
+  },
+  {
+   "at": [
+    -1.5,
+    -9.1
+   ],
+   "room": "640-room-2.9x3.3"
+  },
+  {
+   "at": [
+    -1.5,
+    -5.0
+   ],
+   "room": "640-master-bed"
+  },
+  {
+   "at": [
+    -4.3,
+    -5.0
+   ]
+  },
+  {
+   "at": [
+    -4.3,
+    -1.0
+   ],
+   "room": "640-closet"
+  },
+  {
+   "at": [
+    -4.3,
+    -5.0
+   ]
+  },
+  {
+   "at": [
+    -0.75,
+    -5.0
+   ]
+  },
+  {
+   "at": [
+    -0.75,
+    -1.0
+   ],
+   "room": "640-bath"
+  }
+ ],
+ "decel": 3.0,
+ "tol_m": 0.12,
+ "stop_speed": 0.4
+}

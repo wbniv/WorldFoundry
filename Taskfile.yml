@@ -773,6 +773,40 @@ tasks:
     generates:
       - wflevels/condo_639_640-standalone.iff
 
+  tour-condo-639:
+    desc: "Build the self-walking tour level wflevels/condo_639_640_tour from tour-639.path.json (player's Forth walks every 639-owned room)"
+    deps: [tools-build]
+    vars:
+      CONDO_BLEND: '{{.CONDO_BLEND | default (printf "%s/docs/aircon/units-639-640.blend" (env "HOME"))}}'
+    cmds:
+      - |
+        set -euo pipefail
+        CONDO_TOUR=wflevels/condo_639_640/tour-639.path.json CONDO_LEVEL=condo_639_640_tour \
+          blender --background --python-exit-code 1 \
+          --python wflevels/condo_639_640/blender_create_condo.py -- "{{.CONDO_BLEND}}" \
+          2>&1 | grep -E '^\[condo\]|^Info: Exported|Error|Traceback' || true
+        test -s wflevels/condo_639_640_tour/condo_639_640_tour.lev
+      - bash wftools/wf_blender/build_level_binary.sh condo_639_640_tour
+    sources:
+      - wflevels/condo_639_640/blender_create_condo.py
+      - wflevels/condo_639_640/tour-639.path.json
+      - wflevels/condo_639_640/condo_639_640-standalone.iff.txt
+      - '{{.CONDO_BLEND}}'
+    generates:
+      - wflevels/condo_639_640_tour-standalone.iff
+
+  video-condo-639:
+    desc: "Record the 639 room tour → wflevels/condo_639_640/tour-639.mp4 (+ .srt captions). TOUR_SECONDS=N target length (default 30; 0 = real time)."
+    deps: [ensure-build, tour-condo-639]
+    cmds:
+      - python3 tests/record_condo_639_tour.py --seconds "${TOUR_SECONDS:-30}"
+    sources:
+      - wflevels/condo_639_640_tour-standalone.iff
+      - tests/record_condo_639_tour.py
+    generates:
+      - wflevels/condo_639_640/tour-639.mp4
+      - wflevels/condo_639_640/tour-639.srt
+
   run-condo:
     desc: "Run wf_game on wflevels/condo_639_640-standalone.iff (condo 205/639+640 doll-house walkthrough). WF_RECORD=1 records video. WF_FULLSCREEN=1 for fullscreen."
     deps: [ensure-build]

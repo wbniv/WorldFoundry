@@ -32,8 +32,11 @@ SCRIPT_DIR = os.path.dirname(os.path.abspath(__file__))
 REPO       = os.path.normpath(os.path.join(SCRIPT_DIR, '..', '..'))
 SNOWGOONS  = os.path.join(REPO, 'wflevels', 'snowgoons-blender', 'snowgoons-blender.lev')
 OAD_DIR    = os.path.join(REPO, 'wftools', 'wf_oad', 'tests', 'fixtures')
-OUT_LEV    = os.path.join(SCRIPT_DIR, 'condo_639_640.lev')
-OUT_BLEND  = os.path.join(SCRIPT_DIR, 'condo_639_640.blend')   # the assembled WF scene, for inspection in Blender
+LEVEL_NAME = os.environ.get('CONDO_LEVEL', 'condo_639_640')   # e.g. condo_639_640_tour for the tour build
+OUT_DIR    = os.path.join(REPO, 'wflevels', LEVEL_NAME)
+OUT_LEV    = os.path.join(OUT_DIR, LEVEL_NAME + '.lev')
+OUT_BLEND  = os.path.join(OUT_DIR, LEVEL_NAME + '.blend')      # the assembled WF scene, for inspection in Blender
+TOUR_PATH  = os.environ.get('CONDO_TOUR', '')                  # path .json → player walks it (see tour_forth below)
 
 _argv = sys.argv[sys.argv.index('--') + 1:] if '--' in sys.argv else []
 SRC_BLEND = os.path.abspath(os.path.expanduser(
@@ -56,6 +59,14 @@ GROUND_T      = 0.30
 PLAYER_H      = 1.70
 PLAYER_SPAWN  = tuple(float(v) for v in os.environ['CONDO_SPAWN'].split(',')) if os.environ.get('CONDO_SPAWN') \
                 else (4.66, -17.0, 0.30)     # on the ground outside 639's front door (CONDO_SPAWN=x,y,z overrides)
+TOUR = None
+if TOUR_PATH:
+    import json
+    with open(TOUR_PATH) as _f:
+        TOUR = json.load(_f)
+    PLAYER_SPAWN = tuple(TOUR.get('spawn', PLAYER_SPAWN))
+    os.environ.setdefault('CONDO_ACCEL', str(TOUR.get('accel', 105)))
+    os.environ.setdefault('CONDO_DECEL', str(TOUR.get('decel', 0.85)))
 CAM_OFFSET    = (0.0, -3.5, 9.0)             # doll-house view: 69° elevation from the south
 LOOK_OFFSET   = (0.0, 0.0, 0.9)              # aim at the player's chest, not the feet
 ROOM_CENTRE   = (0.0, -8.0, 6.0)
@@ -454,7 +465,7 @@ player['wf_Visibility Mailbox']    = 1
 # `Max Ground Speed` never binds at these values. 40 = indoor walking pace.
 # CONDO_ACCEL / CONDO_SPEED override for tour recordings (4 m/s ≈ accel 105).
 player['wf_Running Acceleration']  = float(os.environ.get('CONDO_ACCEL', 40.0))
-player['wf_Running Deceleration']  = 0.85
+player['wf_Running Deceleration']  = float(os.environ.get('CONDO_DECEL', 0.85))   # 0.85 = long glide; tour uses more
 player['wf_Max Ground Speed']      = float(os.environ.get('CONDO_SPEED', 4.0))
 player['wf_Jumping Acceleration']  = 5.0          # a small hop, not a platformer jump
 player['wf_Falling Acceleration']  = 9.81
@@ -463,10 +474,77 @@ player['wf_Max Air Speed']         = 4.0
 player['wf_Horiz Air Drag']        = 1.5
 player['wf_Turn Rate']             = 0.0          # LEFT/RIGHT strafe (doom-stick), no rotation
 player['wf_Script Controls Input'] = 'True'
-player['wf_Script'] = (
-    "\\ wf\n"
-    "INDEXOF_HARDWARE_JOYSTICK1_RAW read-mailbox INDEXOF_INPUT write-mailbox\n"
-)
+
+JOY_UP, JOY_DOWN, JOY_RIGHT, JOY_LEFT = 1 << 11, 1 << 12, 1 << 13, 1 << 14   # hal/sjoystic.h EJ_BUTTONB_*
+MB_LEG, MB_HOLD_UNTIL, MB_DONE = 500, 501, 502   # global user mailboxes (2–999, shared)
+
+
+def tour_forth(tour):
+    """Compile the waypoint list into a per-tick zForth state machine.
+
+    Global mailbox 500 holds the current leg. A move leg is a *servo*: it pushes
+    the player toward the waypoint coordinate from either side (joystick bits by
+    sign of the error) and advances only when the error is within `tol_m` AND the
+    player's speed along that axis (X/YSPEED mailboxes) is below `stop_speed` —
+    so momentum can never carry him past a doorway into a jamb (which "complete
+    once past the target" did, run-dependently). A labelled waypoint adds a hold
+    leg (bits 0) timed on INDEXOF_TIME via mailbox 501. The last leg sets mailbox
+    502 = 1 so a recorder knows the tour is over. Position-based → replays the
+    same at any frame rate.
+    """
+    hold = float(tour.get('hold_seconds', 0.5))
+    tol = float(tour.get('tol_m', 0.12))
+    stop_speed = float(tour.get('stop_speed', 0.4))
+    legs = []                                   # (bits, axis, target, label)  bits = "+" direction bits
+    px, py = tour['spawn'][0], tour['spawn'][1]
+    for wp in tour['waypoints']:
+        x, y = wp['at']
+        dx, dy = x - px, y - py
+        assert (abs(dx) < 1e-6) != (abs(dy) < 1e-6), f"leg to {wp['at']} must be axis-aligned (from {px, py})"
+        legs.append(('X', x, None) if abs(dx) > 1e-6 else ('Y', y, None))
+        if wp.get('room'):
+            legs.append(('HOLD', hold, wp['room']))
+        px, py = x, y
+    lines = ["\\ wf", f"{MB_LEG} read-mailbox"]          # ( leg )
+    for k, (kind, val, label) in enumerate(legs):
+        nxt = k + 1
+        if kind in ('X', 'Y'):
+            pos_mb, spd_mb = (f'INDEXOF_{kind}_POS', f'INDEXOF_{kind}SPEED')
+            plus, minus = (JOY_RIGHT, JOY_LEFT) if kind == 'X' else (JOY_UP, JOY_DOWN)
+            # ( leg ) → err = pos − target; err > tol → push minus; err < −tol → push plus;
+            # else stop, and advance once |speed| < stop_speed.
+            lines.append(
+                f"dup {k} = if {pos_mb} read-mailbox {val} - "
+                f"dup {tol} > if drop {minus} INDEXOF_INPUT write-mailbox else "
+                f"dup {-tol} < if drop {plus} INDEXOF_INPUT write-mailbox else "
+                f"drop 0 INDEXOF_INPUT write-mailbox "
+                f"{spd_mb} read-mailbox abs {stop_speed} < if drop {nxt} dup {MB_LEG} write-mailbox then "
+                f"then then then")
+        else:   # hold `val` seconds at the labelled room
+            lines.append(
+                f"dup {k} = if 0 INDEXOF_INPUT write-mailbox "
+                f"{MB_HOLD_UNTIL} read-mailbox 0 = if INDEXOF_TIME read-mailbox {val} + {MB_HOLD_UNTIL} write-mailbox then "
+                f"INDEXOF_TIME read-mailbox {MB_HOLD_UNTIL} read-mailbox >= if "
+                f"0 {MB_HOLD_UNTIL} write-mailbox drop {nxt} dup {MB_LEG} write-mailbox then then")
+    lines.append(f"dup {len(legs)} = if 0 INDEXOF_INPUT write-mailbox 1 {MB_DONE} write-mailbox then")
+    lines.append("drop")
+    return "\n".join(lines) + "\n", legs
+
+
+if TOUR:
+    _script, _legs = tour_forth(TOUR)
+    player['wf_Script'] = _script
+    player['wf_Falling Acceleration'] = 9.81
+    print(f"[condo] tour: {len(_legs)} legs, {sum(1 for l in _legs if l[2])} room holds, "
+          f"{len(_script)} bytes of Forth")
+    os.makedirs(OUT_DIR, exist_ok=True)
+    with open(os.path.join(OUT_DIR, LEVEL_NAME + '.legs.json'), 'w') as _f:
+        json.dump([{'leg': i, 'kind': kind, 'target': val, 'room': lab} for i, (kind, val, lab) in enumerate(_legs)], _f, indent=1)
+else:
+    player['wf_Script'] = (
+        "\\ wf\n"
+        "INDEXOF_HARDWARE_JOYSTICK1_RAW read-mailbox INDEXOF_INPUT write-mailbox\n"
+    )
 
 # ── 7. Camera rig: relative doll-house shot ──────────────────────────────────
 # BungeeCam: position = (camshot − Follow) + TrackObject; look-at = (Target − Follow)
@@ -590,6 +668,11 @@ assert not outside, f"actors outside room bbox {lo}..{hi}: {outside}"
 
 # ── 10. Export ───────────────────────────────────────────────────────────────
 wf_objects = [o for o in scene.objects if o.get('wf_schema_path')]
+os.makedirs(OUT_DIR, exist_ok=True)
+_wrapper = os.path.join(OUT_DIR, LEVEL_NAME + '-standalone.iff.txt')
+if LEVEL_NAME != 'condo_639_640' and not os.path.exists(_wrapper):
+    with open(os.path.join(SCRIPT_DIR, 'condo_639_640-standalone.iff.txt')) as _src, open(_wrapper, 'w') as _dst:
+        _dst.write(_src.read().replace('condo_639_640', LEVEL_NAME))
 bpy.ops.wm.save_as_mainfile(filepath=OUT_BLEND)
 print(f"[condo] saved assembled scene → {OUT_BLEND}")
 print(f"[condo] exporting {len(wf_objects)} actors → {OUT_LEV}")

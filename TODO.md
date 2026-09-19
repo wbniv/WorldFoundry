@@ -73,7 +73,6 @@
 
 ### Level / Gameplay
 
-- [ ] **20 s room-tour video of every blue (639-owned) room** — 639's seven rooms + 640's master suite and room-2.9x3.3; bridge-driven waypoint walk recorded with `-record_video`, room captions from the level's own `target` bboxes burnt in via ffmpeg, `task video-condo-639`. Decision taken: bath-N doorway added to the source model (11 blue rooms). [plan](docs/plans/2026-09-19-condo-639-tour-video.md)
 - [ ] **FSN browser design references — desktop filesystem visualizers.** Study for layout/encoding ideas: **KDirStat/QDirStat** ([QDirStat](https://github.com/shundhammer/qdirstat)) treemaps; **Filelight** ([source](https://invent.kde.org/utilities/filelight)) radial sunbursts.
 - [ ] **Filesystem-viz family — remaining views.** Platform shipped (flat numeric table from C + per-view Forth Director); done views: filelight, fsn `filesys`, treemap, planetarium dome. **Open:** **Tiered monument** (#2) sunburst variant; **unified runtime view-switcher** (one level, mode mailbox cycles tree↔sunburst↔treemap↔tiered↔dome); **procedural single-mesh** upgrade (exact sectors via one runtime `RenderObject3D`). [plan](docs/plans/2026-06-13-filesystem-viz-on-a-flat-table-forth-policy-core-f.md)
 - [ ] **Marble-madness: script-based input remapping** — `Script Controls Input = True`; script reads raw joystick (1008), remaps, writes `EMAILBOX_INPUT` (3024). Current impl handles LEFT/RIGHT strafe in `movement.cc` (TurnRate==0 branch); the script approach is a viable future refactor. See `player.cc:192` for the passthrough pattern.
@@ -138,6 +137,7 @@
 
 ## Done
 
+- ✅ 2026-09-19 — [condo-tour] 30 s captioned tour of all 11 blue rooms (Forth waypoint servo, `task video-condo-639`); bath-N door + 640 outlines added at source. See [plan](docs/plans/2026-09-19-condo-639-tour-video.md).
 - ✅ 2026-09-19 — [condo-level] Condo 205/639+640 doll-house walkthrough from the aircon .blend; `task condo-level`/`run-condo`; exporter merge-revert fixed. See [plan](docs/plans/2026-09-19-condo-639-640-level.md).
 - [x] 2026-06-14 — [apt-task] `task` migrated to live cloudsmith `ubuntu/questing`; apt owns `/usr/bin/task` 3.51.1 (foundry winner + cloudsmith auto-update), shadowing manual binary removed. [plan](docs/plans/2026-06-13-fix-task-apt-source.md)
 - [x] 2026-06-13 — [dome] Planetarium dome view — Filelight sunburst on a hemisphere; reuses `fl-scan` verbatim; first `WF_CULL=1` consumer. [plan](docs/plans/2026-06-13-planetarium-dome-view.md)

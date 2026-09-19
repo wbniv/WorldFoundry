@@ -1,9 +1,15 @@
 | Date | Change |
 |------|--------|
+| [2026-09-19](https://github.com/wbniv/WorldFoundry/commit/caba2591) | docs(plan): tour video — author the path once, replay frame-exact |
 | [2026-09-19](https://github.com/wbniv/WorldFoundry/commit/de9d0b05) | feat(condo): bath-N door + 640 master/closet locators, walking pace, HOME-safe task sources |
 | [2026-09-19](https://github.com/wbniv/WorldFoundry/commit/88c389c7) | docs(plan): 20 s room-tour video of 205/639 (bridge-driven walk + burnt-in captions) |
 
 <!--history-meta v1
+caba2591	author	Will Norris
+caba2591	added	30
+caba2591	deleted	15
+caba2591	files	1
+caba2591	body	Co-Authored-By: Claude Opus 5 <noreply@anthropic.com>\nClaude-Session: https://claude.ai/code/session_017TmcNaoJVBysfboB3VeC7N
 de9d0b05	author	Will Norris
 de9d0b05	added	46
 de9d0b05	deleted	35
