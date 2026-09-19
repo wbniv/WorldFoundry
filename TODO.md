@@ -137,6 +137,7 @@
 
 ## Done
 
+- ✅ 2026-09-19 — [condo-level] Condo 205/639+640 doll-house walkthrough from the aircon .blend; `task condo-level`/`run-condo`; exporter merge-revert fixed. See [plan](docs/plans/2026-09-19-condo-639-640-level.md).
 - [x] 2026-06-14 — [apt-task] `task` migrated to live cloudsmith `ubuntu/questing`; apt owns `/usr/bin/task` 3.51.1 (foundry winner + cloudsmith auto-update), shadowing manual binary removed. [plan](docs/plans/2026-06-13-fix-task-apt-source.md)
 - [x] 2026-06-13 — [dome] Planetarium dome view — Filelight sunburst on a hemisphere; reuses `fl-scan` verbatim; first `WF_CULL=1` consumer. [plan](docs/plans/2026-06-13-planetarium-dome-view.md)
 - [x] 2026-06-13 — [read-actor-mb] `read-actor-mailbox` cross-actor read (zForth syscall 24 + WASM parity); regression guard `wfmut_smoke` RA1. [plan](docs/plans/2026-06-13-add-read-actor-mailbox-to-the-scripting-engines.md)
@@ -256,4 +257,10 @@ _Auto-added from plan "Out of scope"/"Deferred" sections at commit time. Triage 
 - [ ] **(triage)** Arbitrary-velocity / concurrent-burst consumers — this primitive enables them; wiring a — _from [2026-06-13-spawn-template-forth-primitive.md](docs/plans/2026-06-13-spawn-template-forth-primitive.md)_  <!-- fp:539de80d8b7cf2f5 -->
 - [verify] **2026-06-13-spawn-template-forth-primitive** — Verification section present but no PASS recorded — run + record the steps. _from [2026-06-13-spawn-template-forth-primitive.md](docs/plans/2026-06-13-spawn-template-forth-primitive.md)_  <!-- fp:b99e9fc4fd8d8b4e -->
 - [verify] **2026-06-13-web-av-finish-deferred-items** — Verification section present but no PASS recorded — run + record the steps. _from [2026-06-13-web-av-finish-deferred-items.md](docs/plans/2026-06-13-web-av-finish-deferred-items.md)_  <!-- fp:53a7a69bb75405c0 -->
+- [ ] **(triage)** **Package `wf_blender` as a `.deb` for `apt.foundrylinux.org`** (`wf-blender`: add‑on `.py` files + abi3 `wf_core.so`, installed under `/usr/share/wf-blender/` like `blender-asset-finder`), so a fresh machine gets the exporter with `apt install` instead of `maturin` + `install.sh`. — _from [2026-09-19-condo-639-640-level.md](docs/plans/2026-09-19-condo-639-640-level.md)_  <!-- fp:c73b169c67d2a460 -->
+- [ ] **(triage)** Room presence triggers (`actbox` per room writing a `CONDO_ROOM` mailbox + a `Meter` readout) — first useful upgrade once the walkthrough exists. — _from [2026-09-19-condo-639-640-level.md](docs/plans/2026-09-19-condo-639-640-level.md)_  <!-- fp:c6e4534169f27105 -->
+- [ ] **(triage)** Drop‑ceiling toggle (a `Visibility Mailbox` on a re‑enabled `unit-640-drop-ceiling` statplat). — _from [2026-09-19-condo-639-640-level.md](docs/plans/2026-09-19-condo-639-640-level.md)_  <!-- fp:c7390007c4808d35 -->
+- [ ] **(triage)** Translucent glass — needs a `MATL` flag + renderer path; engine work, tracked separately if wanted. — _from [2026-09-19-condo-639-640-level.md](docs/plans/2026-09-19-condo-639-640-level.md)_  <!-- fp:3b12ba3a015cecab -->
+- [ ] **(triage)** Fixing `install.sh`'s dependency on `~/.config/blender/<latest>` for a non‑default Blender install. — _from [2026-09-19-condo-639-640-level.md](docs/plans/2026-09-19-condo-639-640-level.md)_  <!-- fp:3802151cd56bf127 -->
+- [ ] **(triage)** Re‑pointing the other level scripts' `~/.config/blender/4.0/…` fallback path (they still say 4.0). — _from [2026-09-19-condo-639-640-level.md](docs/plans/2026-09-19-condo-639-640-level.md)_  <!-- fp:07fa5f82060143b5 -->
 <!-- END auto-captured-deferrals -->

@@ -1,0 +1,21 @@
+// condo_639_640-standalone.iff.txt — L4-wrapped form of condo_639_640 for wf_game -L.
+//
+// Build:  task condo-level        (Blender export + build-level)
+//         task build-level -- condo_639_640   (binary stages only)
+// Run:    task run-condo
+//
+// Walkthrough of condo units 205/639 + 205/640 with the planned air-con
+// installation: 60 flat-colour statplat meshes (shells, partitions, glass,
+// AC gear, service-run tubes), 11 room-locator targets, 1.7 m player.
+// Plan: docs/plans/2026-09-19-condo-639-640-level.md
+{ 'L4'
+    { 'ALGN' .align( 2048 ) }
+    { 'RAM'
+        'OBJD' 1500000l                 // 83 actors + margin
+        'PERM' 500000l                  // player figure only
+        'ROOM' 3000000l                 // ~60 small meshes; largest tube ≈ 12 KB on disk
+        'FLAG' 1l 1l                    // doomstick, bungeecam
+    }
+    { 'ALGN' .align( 2048 ) }
+    [ "../condo_639_640.iff" ]
+}

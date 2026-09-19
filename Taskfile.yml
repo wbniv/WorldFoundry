@@ -663,8 +663,27 @@ tasks:
         LD_LIBRARY_PATH=engine/libs DISPLAY=:0 engine/wf_game -Lwflevels/snowgoons.iff $FSFLAG $RECFLAG 2>&1 | tee "$LOG"
         [ -n "$RECOUT" ] && [ -f output.mp4 ] && mv output.mp4 "$RECOUT" && echo "Saved → $RECOUT"
 
+  tools-build:
+    desc: "Build the Rust level tools (iffcomp-rs, levcomp-rs, textile-rs) in release mode; build_level_binary.sh needs all three"
+    cmds:
+      - cargo build --release --manifest-path wftools/iffcomp-rs/Cargo.toml
+      - cargo build --release --manifest-path wftools/levcomp-rs/Cargo.toml
+      - cargo build --release --manifest-path wftools/textile-rs/Cargo.toml
+    sources:
+      - wftools/iffcomp-rs/src/**/*.rs
+      - wftools/levcomp-rs/src/**/*.rs
+      - wftools/textile-rs/src/**/*.rs
+      - wftools/wf_iff/src/**/*.rs
+      - wftools/wf_oad/src/**/*.rs
+      - wftools/*/Cargo.toml
+    generates:
+      - wftools/iffcomp-rs/target/release/iffcomp
+      - wftools/levcomp-rs/target/release/levcomp
+      - wftools/textile-rs/target/release/textile
+
   build-level:
     desc: "Build a level's inner + standalone .iff (usage: task build-level -- qbert_practice)"
+    deps: [tools-build]
     cmds:
       - |
         set -- {{.CLI_ARGS}}
@@ -729,6 +748,44 @@ tasks:
         fi
         [ "${WF_FULLSCREEN:-}" = "1" ] && FSFLAG="-fullscreen"
         LD_LIBRARY_PATH=engine/libs DISPLAY=:0 engine/wf_game -Lwflevels/smb_w1_1-standalone.iff $FSFLAG $RECFLAG 2>&1 | tee "$LOG"
+        [ -n "$RECOUT" ] && [ -f output.mp4 ] && mv output.mp4 "$RECOUT" && echo "Saved → $RECOUT"
+
+  condo-level:
+    desc: "Condo 205/639+640 walkthrough: convert ~/docs/aircon/units-639-640.blend (CONDO_BLEND= to override) → wflevels/condo_639_640 → standalone .iff. Needs the wf_blender add-on installed."
+    deps: [tools-build]
+    vars:
+      CONDO_BLEND: '{{.CONDO_BLEND | default "$HOME/docs/aircon/units-639-640.blend"}}'
+    cmds:
+      - |
+        set -euo pipefail
+        blender --background --python-expr "import addon_utils; raise SystemExit(0 if addon_utils.enable('wf_blender', default_set=False, persistent=False) else 1)" >/dev/null 2>&1 \
+          || { echo "wf_blender add-on not installed — 'sudo apt install wf-blender' once it is on apt.foundrylinux.org; until then 'task blender-install'" >&2; exit 1; }
+        blender --background --python-exit-code 1 \
+          --python wflevels/condo_639_640/blender_create_condo.py -- "{{.CONDO_BLEND}}" \
+          2>&1 | grep -E '^\[condo\]|^Info: Exported|Error|Traceback' || true
+        test -s wflevels/condo_639_640/condo_639_640.lev
+      - bash wftools/wf_blender/build_level_binary.sh condo_639_640
+    sources:
+      - wflevels/condo_639_640/blender_create_condo.py
+      - wflevels/condo_639_640/condo_639_640-standalone.iff.txt
+      - '{{.CONDO_BLEND}}'
+    generates:
+      - wflevels/condo_639_640-standalone.iff
+
+  run-condo:
+    desc: "Run wf_game on wflevels/condo_639_640-standalone.iff (condo 205/639+640 doll-house walkthrough). WF_RECORD=1 records video. WF_FULLSCREEN=1 for fullscreen."
+    deps: [ensure-build]
+    cmds:
+      - |
+        LOG=/tmp/wfgame_condo.log
+        echo "Logging to $LOG"
+        RECFLAG=""; RECOUT=""; FSFLAG=""
+        if [ -n "${WF_RECORD:-}" ]; then
+          RECOUT="${WF_RECORD}"; [ "$RECOUT" = "1" ] && RECOUT="$(date +%Y%m%d_%H%M%S)_condo.mp4"
+          RECFLAG="-record_video"; echo "Recording → $RECOUT"
+        fi
+        [ "${WF_FULLSCREEN:-}" = "1" ] && FSFLAG="-fullscreen"
+        LD_LIBRARY_PATH=engine/libs DISPLAY=:0 engine/wf_game -Lwflevels/condo_639_640-standalone.iff $FSFLAG $RECFLAG 2>&1 | tee "$LOG"
         [ -n "$RECOUT" ] && [ -f output.mp4 ] && mv output.mp4 "$RECOUT" && echo "Saved → $RECOUT"
 
   run-moon:

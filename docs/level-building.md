@@ -280,13 +280,21 @@ for obj in bpy.data.objects:
         obj.display_type = 'WIRE'
 ```
 
+**The `room` bbox mesh is hidden by default.** It is a bounding-box visualisation the
+size of the whole level, so even as a wireframe it clutters every view and, in solid
+display, occludes everything. Authoring scripts hide it in the saved `.blend`
+(`room.display_type = 'WIRE'; room.hide_render = True; room.hide_set(True)`); the
+exporter walks `scene.objects` regardless of visibility, so the hidden room still
+exports. Un-hide it in the outliner (eye icon) only when you need to see or resize the
+bounds. Pattern: [`wflevels/condo_639_640/blender_create_condo.py`](../wflevels/condo_639_640/blender_create_condo.py) § 9.
+
 #### Standard infrastructure object table
 
 | Class | Typical `wf_Model Type` | Renders in-engine? | Wireframe in Blender? |
 |-------|-------------------------|--------------------|-----------------------|
 | `statplat`, `player`, `enemy`, `missile` (with mesh) | `Mesh` | yes | ✗ |
 | `matte` | `None` (background painted via `Matte Type`/`Background Color`) | yes (backdrop) | ✗ |
-| `room` | *(no OAD on the bbox visualisation mesh)* | no | ✓ |
+| `room` | *(no OAD on the bbox visualisation mesh)* | no | ✓ **and hidden** (`hide_set(True)`, `hide_render=True`) |
 | `actboxor`, `actbox` | `None` | no | ✓ |
 | `camshot` | `None` (override default `Box`) | no | ✓ |
 | `camera` | `None` (override default `Box`) | no | ✓ |

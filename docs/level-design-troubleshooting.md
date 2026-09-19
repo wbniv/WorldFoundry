@@ -952,6 +952,77 @@ object also collides with nothing).
 
 ---
 
+## Mesh asset names are capped at 31 bytes — `assets.cc:254` `stringIter->BytesLeft() < 32`
+
+**Symptom:** the level builds cleanly but `wf_game -L` asserts immediately while reading the
+asset map:
+
+```
+|stringIter->BytesLeft() < 32                                                 |
+|in file ".../wfsource/source/asset/assets.cc" on line 254
+```
+
+**Cause:** `AssetManager::ReadAssetMap` copies every `ASMP` name into a fixed 32-byte
+`_assetStringMap[]._name`, so a mesh file name (the `Mesh Name` / exported `.iff` basename)
+longer than 31 bytes aborts. The wf_blender exporter names the mesh after the Blender object
+(`obj.name.lower() + '.iff'`), so any object named like
+`640-midea-24k-master-outdoor-A-closet-wall` (43 chars) trips it.
+
+**Fix:** keep the actor `NAME` (which has no such limit) and set a short mesh file name via
+`obj['wf_original_mesh_name'] = '<slug>.iff'` (≤ 30 chars). `wflevels/condo_639_640/blender_create_condo.py`
+`sanitize()` cuts long slugs to 21 chars + a 4-hex CRC of the full name so they stay unique.
+
+---
+
+## `Probably have a polygon which is too small` — sub-threshold triangles abort the level
+
+**Symptom:** `wf_game -L` prints the Jolt vertex dump for one mesh, then
+
+```
+AssertMsg:Probably have a polygon which is too small, length = 1.777941361e-05
+|length.Abs() > Scalar(0,4)                        math/vector3.hpi:243
+```
+
+**Cause:** face normals are computed at load as `(v2−v0)×(v1−v0)` and normalised in 1.15.16
+fixed point; `Vector3::Normalize` asserts the cross-product length is > `Scalar(0,4)` ≈ 6.1e-5.
+That is **twice the triangle's area**, so any triangle under ~3e-5 m² aborts. Bevelled Blender
+curves (pipes, service runs) produce exactly those at sharp polyline corners; boolean cut-outs
+can too.
+
+**Fix:** clean every exported mesh in the authoring script — triangulate, drop faces with
+`face.calc_area() < 8e-5`, remove the orphaned verts (bmesh; see `clean_mesh()` in
+`blender_create_condo.py`). The log's last `jolt: mesh v… local=(…)` lines tell you which mesh.
+
+---
+
+## Named "room" locators — use `target`, never a mesh-less `statplat`
+
+**Symptom:** you want invisible, named actors marking areas (rooms of a building, zones) that
+the player can walk through, and a `statplat` with `Model Type='None'` blocks the player with an
+invisible box.
+
+**Cause:** `StatPlat`'s constructor creates a Jolt **box** body from its BOX3 as a placeholder
+(`actor.cc`), and `BindAssets` only swaps it for a trimesh when `Model Type == Mesh` — with
+`None` the solid box stays for the life of the level.
+
+**Fix:** copy the scaffold's `target` actor: `Mobility=Anchored`, `MovementClass 3`,
+`Model Type='None'`, no Jolt body at all. Give it the area's bbox with
+`obj['wf_original_bbox'] = (-hx,-hy,-hz, hx,hy,hz)` + `obj['wf_had_authored_bbox'] = True`
+so the BOX3 is still emitted for a mesh-less object. Its centre must sit inside the WF room
+bbox like any other actor. (`ActBox` is the upgrade when the area should also *fire* something.)
+
+---
+
+## Headless Blender exits 0 after a Python exception — pass `--python-exit-code 1`
+
+`blender --background --python script.py` returns **0** even when the script raised, so a
+`set -e` pipeline (or a Taskfile task) happily proceeds to `build_level_binary.sh` with a stale
+`.lev`. Always run authoring scripts as
+`blender --background --python-exit-code 1 --python script.py`, and have the task
+`test -s <level>.lev` afterwards.
+
+---
+
 ## Multiple face colors in one mesh — per-face materialIndex
 
 A single mesh IFF supports multiple materials.  The `MATL` chunk stores an **array** of `_MaterialOnDisk` structs (one per material), and each face record has a `materialIndex` field (int16) that selects which material applies to that face:

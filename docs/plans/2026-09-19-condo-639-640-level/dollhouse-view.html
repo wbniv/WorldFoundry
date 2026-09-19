@@ -1,0 +1,174 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="color-scheme" content="light">
+<title>Mockup — Condo 639/640 doll-house walkthrough</title>
+<style>
+  :root { --bg:#ffffff; --fg:#1f2328; --muted:#656d76; --line:#d1d9e0; --panel:#f6f8fa; --accent:#0969da; }
+  * { box-sizing:border-box; }
+  body { margin:0; width:1440px; height:900px; overflow:hidden; background:var(--bg); color:var(--fg);
+         font:15px/1.5 ui-sans-serif, system-ui, -apple-system, "Segoe UI", sans-serif; }
+  header { display:flex; align-items:center; gap:12px; padding:14px 24px; border-bottom:1px solid var(--line); background:var(--panel); }
+  header h1 { margin:0; font-size:16px; font-weight:600; }
+  header .tag { margin-left:auto; font:600 11px ui-monospace, SFMono-Regular, Menlo, monospace; letter-spacing:.04em; color:var(--muted); border:1px solid var(--line); border-radius:10px; padding:2px 8px; }
+  main { display:grid; grid-template-columns:300px 1fr; height:calc(900px - 57px); }
+  nav { border-right:1px solid var(--line); padding:16px; background:var(--panel); font-size:13px; }
+  nav h2 { font-size:12px; text-transform:uppercase; letter-spacing:.06em; color:var(--muted); margin:14px 0 6px; }
+  nav button { display:block; width:100%; text-align:left; padding:8px 10px; margin:2px 0; border:1px solid transparent; border-radius:6px; background:none; color:var(--fg); font:inherit; cursor:pointer; }
+  nav button[aria-pressed="true"] { background:var(--accent); color:#fff; }
+  nav table { border-collapse:collapse; width:100%; }
+  nav td { padding:2px 4px; vertical-align:top; }
+  nav .sw { display:inline-block; width:14px; height:14px; border-radius:3px; vertical-align:-2px; margin-right:6px; border:1px solid #0003; }
+  kbd { font:600 11px ui-monospace, monospace; border:1px solid var(--line); border-bottom-width:2px; border-radius:4px; padding:0 5px; background:var(--bg); }
+  section { position:relative; overflow:hidden; background:#e9edf1; }
+  svg text.room { font:600 11px ui-monospace, monospace; fill:#333; }
+  svg text.room .cls { font-weight:400; fill:#777; font-size:10px; }
+  svg text.axis { font:11px ui-monospace, monospace; fill:#555; }
+  .hud { position:absolute; left:18px; top:14px; background:#0009; color:#fff; font:12px ui-monospace, monospace; padding:8px 10px; border-radius:6px; white-space:pre; }
+  .empty { position:absolute; inset:0; display:none; align-items:center; justify-content:center; background:#111; color:#ddd; font:13px ui-monospace, monospace; white-space:pre; padding:40px; }
+</style>
+</head>
+<body>
+<header><h1>Condo 205/639 + 205/640 — doll-house walkthrough (plan view of what the CamShot frames)</h1><span class="tag">MOCKUP — NOT SHIPPED</span></header>
+<main>
+<nav>
+  <h2>State</h2>
+  <button data-state="spawn" aria-pressed="true">① Spawn — outside 639's front door</button>
+  <button data-state="occluded">② Occluded feet — wall &lt; 1 m south of player</button>
+  <button data-state="connector">③ Crossing the party-wall connector</button>
+  <button data-state="empty">④ levcomp warning — actor outside room bbox</button>
+  <h2>Controls (doom-stick, Turn Rate 0)</h2>
+  <table>
+    <tr><td><kbd>▲</kbd></td><td>walk +Y (toward the back / balconies)</td></tr>
+    <tr><td><kbd>▼</kbd></td><td>walk −Y (toward the front doors)</td></tr>
+    <tr><td><kbd>◀</kbd> <kbd>▶</kbd></td><td>strafe screen-left / screen-right (−X / +X)</td></tr>
+    <tr><td><kbd>Space</kbd></td><td>small hop (jump)</td></tr>
+  </table>
+  <h2>Camera</h2>
+  <div>CamShot <code>cs_dollhouse</code>: player + (0, −3.5, 9), all axes <b>Relative</b>, Rotation <b>Track</b>, Target = Player, FOV 60°. Elevation ≈ 69°. Dashed footprint = ground area in frame.</div>
+  <h2>Legend</h2>
+  <table>
+    <tr><td><span class="sw" style="background:#3f8cd9"></span>unit-639 (blue)</td></tr>
+    <tr><td><span class="sw" style="background:#f2a633"></span>unit-640 (ochre) · master suite painted 639-blue on purpose</td></tr>
+    <tr><td><span class="sw" style="background:#d81b1b"></span>route-power</td></tr>
+    <tr><td><span class="sw" style="background:#b8733a"></span>route-lineset</td></tr>
+    <tr><td><span class="sw" style="background:#7fb8e8"></span>route-drain</td></tr>
+    <tr><td><span class="sw" style="background:#f4f4f4"></span>indoor head · <span class="sw" style="background:#6d6d6d"></span>condenser</td></tr>
+    <tr><td><span class="sw" style="border:1.5px dashed #666;background:none"></span>room outline → named <code>target</code> (no geometry)</td></tr>
+  </table>
+</nav>
+<section>
+<svg width="1140" height="843" viewBox="0 0 1140 843" xmlns="http://www.w3.org/2000/svg">
+<g transform="translate(58.947 -3.684) scale(0.894737)">
+<polygon points="577.1,60.0 662.6,60.0 780.4,60.0 780.4,77.1 810.8,77.1 810.8,60.0 864.0,60.0 864.0,136.0 864.0,316.5 864.0,326.0 858.3,326.0 858.3,364.0 864.0,364.0 864.0,373.5 864.0,510.3 864.0,519.8 858.3,519.8 858.3,557.8 864.0,557.8 864.0,567.3 864.0,643.3 767.3,643.3 706.5,643.3 560.0,643.3 560.0,567.3 565.7,567.3 565.7,519.8 560.0,519.8 560.0,510.3 560.0,373.5 565.7,373.5 565.7,326.0 560.0,326.0 560.0,316.5 560.0,77.1 577.1,77.1" fill="#3f8cd9" fill-opacity=".22" stroke="#3f8cd9" stroke-width="5"/>
+<polygon points="411.8,60.0 560.0,60.0 560.0,643.3 443.1,643.3 382.4,643.3 362.4,643.3 362.4,533.1 259.8,533.1 259.8,335.5 260.1,317.5 261.1,299.5 262.7,281.8 265.0,264.2 267.9,246.9 271.4,230.1 275.5,213.6 280.2,197.8 285.4,182.4 291.2,167.8 297.5,153.9 304.3,140.7 311.6,128.4 319.3,116.9 327.4,106.4 335.8,96.9 344.6,88.4 353.6,81.0 362.9,74.6 372.5,69.4 382.1,65.3 392.0,62.4 401.9,60.6" fill="#f2a633" fill-opacity=".22" stroke="#f2a633" stroke-width="5"/>
+<rect x="259.8" y="60.0" width="300.2" height="256.5" fill="#3f8cd9" fill-opacity=".18"/>
+<line x1="560.0" y1="136.0" x2="856.4" y2="136.0" stroke="#2f6fb0" stroke-width="4" stroke-linecap="square"><title>639-front-strip-S-wall</title></line>
+<line x1="662.6" y1="60.0" x2="662.6" y2="136.0" stroke="#2f6fb0" stroke-width="4" stroke-linecap="square"><title>639-bath-N-E-wall</title></line>
+<line x1="704.4" y1="136.0" x2="704.4" y2="364.0" stroke="#2f6fb0" stroke-width="4" stroke-linecap="square"><title>639-guest-project-wall</title></line>
+<line x1="560.0" y1="364.0" x2="856.4" y2="364.0" stroke="#2f6fb0" stroke-width="4" stroke-linecap="square"><title>639-kitchen-N-wall</title></line>
+<line x1="560.0" y1="567.3" x2="636.0" y2="567.3" stroke="#2f6fb0" stroke-width="4" stroke-linecap="square"><title>639-bath-S-N-wall</title></line>
+<line x1="636.0" y1="567.3" x2="636.0" y2="643.3" stroke="#2f6fb0" stroke-width="4" stroke-linecap="square"><title>639-bath-S-E-wall</title></line>
+<line x1="259.8" y1="316.5" x2="449.8" y2="316.5" stroke="#c27d16" stroke-width="4" stroke-linecap="square"><title>640-master-bed-S-wall-W</title></line>
+<line x1="449.8" y1="316.5" x2="466.9" y2="316.5" stroke="#c27d16" stroke-width="4" stroke-linecap="square"><title>640-master-bed-S-wall-W2</title></line>
+<line x1="533.4" y1="316.5" x2="560.0" y2="316.5" stroke="#c27d16" stroke-width="4" stroke-linecap="square"><title>640-master-bed-S-wall-E</title></line>
+<line x1="466.9" y1="316.5" x2="533.4" y2="316.5" stroke="#c27d16" stroke-width="4" stroke-linecap="square"><title>640-master-bed-S-door-header</title></line>
+<line x1="307.0" y1="136.0" x2="560.0" y2="136.0" stroke="#c27d16" stroke-width="4" stroke-linecap="square"><title>640-bath-closet-S-wall</title></line>
+<line x1="417.5" y1="60.0" x2="417.5" y2="136.0" stroke="#c27d16" stroke-width="4" stroke-linecap="square"><title>640-bath-closet-divider</title></line>
+<line x1="449.8" y1="316.5" x2="449.8" y2="441.9" stroke="#c27d16" stroke-width="4" stroke-linecap="square"><title>640-room-S-of-master-W-wall</title></line>
+<line x1="449.8" y1="441.9" x2="560.0" y2="441.9" stroke="#c27d16" stroke-width="4" stroke-linecap="square"><title>640-room-S-of-master-S-wall</title></line>
+<line x1="449.8" y1="441.9" x2="449.8" y2="567.3" stroke="#c27d16" stroke-width="4" stroke-linecap="square"><title>640-nong-ice-W-wall</title></line>
+<line x1="449.8" y1="567.3" x2="560.0" y2="567.3" stroke="#c27d16" stroke-width="4" stroke-linecap="square"><title>640-nong-ice-S-wall</title></line>
+<line x1="484.0" y1="567.3" x2="484.0" y2="643.3" stroke="#c27d16" stroke-width="4" stroke-linecap="square"><title>640-bath-S-W-wall</title></line>
+<rect x="550.5" y="386.8" width="19.0" height="36.1" fill="#fff" stroke="#888" stroke-dasharray="3 2"/>
+<rect x="706.7" y="639.3" width="60.8" height="8" fill="#fff" stroke="#888" stroke-dasharray="3 2"/>
+<rect x="382.4" y="639.3" width="60.8" height="8" fill="#fff" stroke="#888" stroke-dasharray="3 2"/>
+<rect x="563.0" y="63.0" width="96.6" height="70.0" fill="none" stroke="#666" stroke-dasharray="6 4" stroke-width="1.2"/>
+<text x="611.3" y="98.0" class="room" text-anchor="middle">639-bath-N<tspan x="611.3" dy="14" class="cls">target</tspan></text>
+<rect x="665.6" y="63.0" width="96.6" height="70.0" fill="none" stroke="#666" stroke-dasharray="6 4" stroke-width="1.2"/>
+<text x="713.9" y="98.0" class="room" text-anchor="middle">639-patio-recessed<tspan x="713.9" dy="14" class="cls">target</tspan></text>
+<rect x="768.2" y="63.0" width="85.2" height="70.0" fill="none" stroke="#666" stroke-dasharray="6 4" stroke-width="1.2"/>
+<text x="810.8" y="98.0" class="room" text-anchor="middle">639-patio<tspan x="810.8" dy="14" class="cls">target</tspan></text>
+<rect x="563.0" y="139.0" width="138.4" height="222.0" fill="none" stroke="#666" stroke-dasharray="6 4" stroke-width="1.2"/>
+<text x="632.2" y="250.0" class="room" text-anchor="middle">639-guest-bed<tspan x="632.2" dy="14" class="cls">target</tspan></text>
+<rect x="707.4" y="139.0" width="146.0" height="222.0" fill="none" stroke="#666" stroke-dasharray="6 4" stroke-width="1.2"/>
+<text x="780.4" y="250.0" class="room" text-anchor="middle">639-project-rm<tspan x="780.4" dy="14" class="cls">target</tspan></text>
+<rect x="563.0" y="367.0" width="290.4" height="273.3" fill="none" stroke="#666" stroke-dasharray="6 4" stroke-width="1.2"/>
+<text x="708.2" y="503.7" class="room" text-anchor="middle">639-kitchen<tspan x="708.2" dy="14" class="cls">target</tspan></text>
+<rect x="563.0" y="570.3" width="70.0" height="70.0" fill="none" stroke="#666" stroke-dasharray="6 4" stroke-width="1.2"/>
+<text x="598.0" y="605.3" class="room" text-anchor="middle">639-bath-S<tspan x="598.0" dy="14" class="cls">target</tspan></text>
+<rect x="420.5" y="63.0" width="136.5" height="70.0" fill="none" stroke="#666" stroke-dasharray="6 4" stroke-width="1.2"/>
+<text x="488.8" y="98.0" class="room" text-anchor="middle">640-bath<tspan x="488.8" dy="14" class="cls">target</tspan></text>
+<rect x="452.8" y="319.5" width="104.2" height="119.4" fill="none" stroke="#666" stroke-dasharray="6 4" stroke-width="1.2"/>
+<text x="504.9" y="379.2" class="room" text-anchor="middle">640-room-2.9x3.3<tspan x="504.9" dy="14" class="cls">target</tspan></text>
+<rect x="452.8" y="444.9" width="104.2" height="119.4" fill="none" stroke="#666" stroke-dasharray="6 4" stroke-width="1.2"/>
+<text x="504.9" y="504.6" class="room" text-anchor="middle">640-nong-ice-bed<tspan x="504.9" dy="14" class="cls">target</tspan></text>
+<rect x="487.0" y="570.3" width="70.0" height="70.0" fill="none" stroke="#666" stroke-dasharray="6 4" stroke-width="1.2"/>
+<text x="522.0" y="605.3" class="room" text-anchor="middle">640-bath-S<tspan x="522.0" dy="14" class="cls">target</tspan></text>
+<polyline points="848.6,634.8 848.6,634.8 643.1,634.8 643.1,561.1 583.8,561.1 583.8,141.9 631.2,141.9 631.2,140.8" fill="none" stroke="#d81b1b" stroke-width="3" stroke-linejoin="round"><title>639-daikin-power</title></polyline>
+<polyline points="631.2,140.8 631.2,131.2 657.4,131.2 657.4,64.8 657.4,55.2 657.4,55.2 669.2,55.2 669.2,64.8 678.8,74.2" fill="none" stroke="#7fb8e8" stroke-width="3" stroke-linejoin="round"><title>639-daikin-drain</title></polyline>
+<polyline points="631.2,140.8 631.2,131.2 658.6,131.2 658.6,64.8 658.6,55.2 658.6,55.2 679.9,55.2 679.9,46.9" fill="none" stroke="#b8733a" stroke-width="3" stroke-linejoin="round"><title>639-daikin-lineset</title></polyline>
+<polyline points="468.6,634.8 468.6,634.8 446.0,634.8 446.0,504.1 446.0,504.1" fill="none" stroke="#d81b1b" stroke-width="3" stroke-linejoin="round"><title>640-xiaomi-power</title></polyline>
+<polyline points="446.0,504.1 454.3,504.1 454.3,562.3 512.5,562.3 512.5,573.0 512.5,577.8" fill="none" stroke="#7fb8e8" stroke-width="3" stroke-linejoin="round"><title>640-xiaomi-drain</title></polyline>
+<polyline points="446.0,504.1 446.0,504.1 264.3,528.8 264.3,528.8 247.7,528.8 244.1,516.0" fill="none" stroke="#b8733a" stroke-width="3" stroke-linejoin="round"><title>640-xiaomi-lineset</title></polyline>
+<rect x="-17.1" y="-4.2" width="34.2" height="8.4" fill="#f4f4f4" stroke="#222" stroke-width="1.2" transform="translate(631.2 143.6) rotate(0)"><title>639-daikin-18k-guest-indoor</title></rect>
+<rect x="-17.1" y="-4.2" width="34.2" height="8.4" fill="#f4f4f4" stroke="#222" stroke-width="1.2" transform="translate(443.6 504.6) rotate(-90)"><title>640-xiaomi-18k-nongice-indoor</title></rect>
+<rect x="-15.2" y="-5.7" width="30.4" height="11.4" fill="#6d6d6d" stroke="#222" stroke-width="1.2" transform="translate(679.9 46.9) rotate(0)"><title>639-daikin-18k-guest-outdoor</title></rect>
+<rect x="-15.2" y="-5.7" width="30.4" height="11.4" fill="#6d6d6d" stroke="#222" stroke-width="1.2" transform="translate(244.1 516.0) rotate(-90)"><title>640-xiaomi-18k-nongice-outdoor</title></rect>
+<rect x="436.0" y="139.4" width="34.2" height="8.4" fill="#f4f4f4" stroke="#222" stroke-width="1.2"><title>640-midea-24k-master-indoor-A-closet-wall</title></rect>
+<rect x="-15" y="-6" width="30" height="12" fill="#6d6d6d" stroke="#222" transform="translate(314.9 106.9) rotate(-127)"><title>640-midea-24k-master-outdoor-A-closet-wall</title></rect>
+<text x="199.0" y="14.4" class="axis">y=0 · BACK (balconies, curved bay)</text>
+<text x="199.0" y="679.4" class="axis">y=−15.35 · FRONT (entrances, consumer units)</text>
+<text x="560.0" y="702.2" class="axis" text-anchor="middle">party wall x=0 · 640 ◀ | ▶ 639</text>
+</g>
+<g id="cam"></g>
+<g id="player"></g>
+</svg>
+<div class="hud" id="hud"></div>
+<div class="empty" id="empty">levcomp-rs: WARNING: actor "640-xiaomi-18k-nongice-outdoor" world-center (-8.31,-12.00,0.58)
+falls outside every room bbox — it will not render in-game.
+Expand the room actor in Blender to contain this actor.
+
+→ room_condo rel-bbox must be ≥ ±15 in X (condensers sit at x≈−8.5, outside the shell).
+   The script asserts every actor centre against the room bbox before export,
+   so this state is a build failure, not a runtime surprise.</div>
+</section>
+</main>
+<script>
+(function(){
+  var SC=34.0, OX=560, OY=50;
+  function X(x){return OX+x*SC} function Y(y){return OY-y*SC}
+  var states={
+    spawn:    {p:[4.66,-17.0], hud:'Player  x=4.66  y=-17.00  z=0.00  facing +Y\nCamera  x=4.66  y=-20.50  z=9.00  (Relative)\nRoom    outside · ground slab',occl:false},
+    occluded: {p:[1.5,-7.5],  hud:'Player  x=1.50  y=-7.50  z=0.00\nCamera  x=1.50  y=-11.00  z=9.00\nRoom    639-guest-bed\n639-kitchen-N-wall-jamb0 is 0.5 m south → sight line at wall = z 1.29 < 2.7 → feet hidden',occl:true},
+    connector:{p:[0.0,-9.1],  hud:'Player  x=0.00  y=-9.10  z=0.00\nCamera  x=0.00  y=-12.60  z=9.00\nRoom    party-wall connector (x −0.25…0.25, y −9.55…−8.60, h 2.1)',occl:false},
+    empty:    {p:null}
+  };
+  function show(name){
+    document.querySelectorAll('nav button').forEach(function(b){b.setAttribute('aria-pressed', b.dataset.state===name)});
+    var st=states[name]; var empty=document.getElementById('empty');
+    if(!st.p){ empty.style.display='flex'; return; } empty.style.display='none';
+    var px=st.p[0], py=st.p[1];
+    // ground footprint of a 60° FOV camera at (px, py-3.5, 9) looking at the player: approx trapezoid
+    var camy=py-3.5, d=Math.hypot(3.5,9); var half=Math.tan(Math.PI/6);
+    var near=py-2.2, far=py+4.6, wn=half*(d-2.4), wf=half*(d+6.0);
+    var fp='M'+X(px-wn)+' '+Y(near)+' L'+X(px+wn)+' '+Y(near)+' L'+X(px+wf)+' '+Y(far)+' L'+X(px-wf)+' '+Y(far)+' Z';
+    document.getElementById('cam').innerHTML=
+      '<path d="'+fp+'" fill="#000" fill-opacity=".06" stroke="#222" stroke-dasharray="8 5" stroke-width="1.5"/>'+
+      '<g transform="translate('+X(px)+' '+Y(camy)+')"><rect x="-11" y="-7" width="22" height="14" rx="3" fill="#222"/><polygon points="11,-4 19,-9 19,9 11,4" fill="#222"/>'+
+      '<text x="0" y="24" text-anchor="middle" style="font:600 11px ui-monospace,monospace;fill:#222">cs_dollhouse z=9</text></g>';
+    var occ = st.occl ? '<line x1="'+X(px)+'" y1="'+Y(camy)+'" x2="'+X(px)+'" y2="'+Y(py)+'" stroke="#d81b1b" stroke-width="2"/>'+
+      '<text x="'+(X(px)+10)+'" y="'+(Y(py)+22)+'" style="font:600 11px ui-monospace,monospace;fill:#d81b1b">feet occluded by wall at y=−8</text>' : '';
+    document.getElementById('player').innerHTML= occ+
+      '<circle cx="'+X(px)+'" cy="'+Y(py)+'" r="8" fill="#fff" stroke="#111" stroke-width="2"/>'+
+      '<polygon points="'+X(px)+','+(Y(py)-14)+' '+(X(px)-5)+','+(Y(py)-6)+' '+(X(px)+5)+','+(Y(py)-6)+'" fill="#111"/>'+
+      '<text x="'+(X(px)+12)+'" y="'+(Y(py)+4)+'" style="font:600 12px ui-monospace,monospace;fill:#111">Player</text>';
+    document.getElementById('hud').textContent=st.hud;
+  }
+  document.querySelectorAll('nav button').forEach(function(b){b.addEventListener('click',function(){show(b.dataset.state)})});
+  show('spawn');
+})();
+</script>
+</body>
+</html>

@@ -81,3 +81,8 @@ engine/vendor/emsdk-6.0.0/.emscripten*
 # Web build output
 build-web/
 wfsource/source/game/output.mp4
+
+# Task (go-task) checksum fingerprints
+.task/
+# Blender autosave backups
+*.blend1
