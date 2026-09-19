@@ -750,9 +750,26 @@ tasks:
         LD_LIBRARY_PATH=engine/libs DISPLAY=:0 engine/wf_game -Lwflevels/smb_w1_1-standalone.iff $FSFLAG $RECFLAG 2>&1 | tee "$LOG"
         [ -n "$RECOUT" ] && [ -f output.mp4 ] && mv output.mp4 "$RECOUT" && echo "Saved → $RECOUT"
 
+  condo-osm-fetch:
+    desc: "Refresh wflevels/condo_639_640/site-osm.json from Overpass (network; the committed copy makes builds offline + byte-stable)"
+    cmds:
+      - python3 wflevels/condo_639_640/make_site_textures.py fetch
+
+  condo-textures:
+    desc: "Render the condo site skybox textures (condo_sky.tga, condo_ground.tga) from site-osm.json — offline, byte-stable"
+    cmds:
+      - python3 wflevels/condo_639_640/make_site_textures.py render
+    sources:
+      - wflevels/condo_639_640/make_site_textures.py
+      - wflevels/condo_639_640/site_constants.py
+      - wflevels/condo_639_640/site-osm.json
+    generates:
+      - wflevels/condo_639_640/condo_sky.tga
+      - wflevels/condo_639_640/condo_ground.tga
+
   condo-level:
     desc: "Condo 205/639+640 walkthrough: convert ~/docs/aircon/units-639-640.blend (CONDO_BLEND= to override) → wflevels/condo_639_640 → standalone .iff. Needs the wf_blender add-on installed."
-    deps: [tools-build]
+    deps: [tools-build, condo-textures]
     vars:
       # Task does not expand $HOME inside `sources:` globs — use the template env lookup.
       CONDO_BLEND: '{{.CONDO_BLEND | default (printf "%s/docs/aircon/units-639-640.blend" (env "HOME"))}}'
@@ -763,11 +780,17 @@ tasks:
           || { echo "wf_blender add-on not installed — 'sudo apt install worldfoundry-blender-editor-exporter' (apt.worldfoundry.org) or 'task blender-install'" >&2; exit 1; }
         blender --background --python-exit-code 1 \
           --python wflevels/condo_639_640/blender_create_condo.py -- "{{.CONDO_BLEND}}" \
-          2>&1 | grep -E '^\[condo\]|^Info: Exported|Error|Traceback' || true
+          2>&1 | { grep -E '^\[condo\]|^Info: Exported|Error|Traceback|Assert' || true; }
+        # pipefail above: a failing Blender step fails the task (a bare `|| true` used to mask it
+        # and let the previous .lev through to build-level).
         test -s wflevels/condo_639_640/condo_639_640.lev
       - bash wftools/wf_blender/build_level_binary.sh condo_639_640
     sources:
       - wflevels/condo_639_640/blender_create_condo.py
+      - wflevels/condo_639_640/site_constants.py
+      - wflevels/condo_639_640/condo_sky.tga
+      - wflevels/condo_639_640/condo_ground.tga
+      - wflevels/condo_639_640/textile.flags
       - wflevels/condo_639_640/condo_639_640-standalone.iff.txt
       - '{{.CONDO_BLEND}}'
     generates:
@@ -775,7 +798,7 @@ tasks:
 
   tour-condo-639:
     desc: "Build the self-walking tour level wflevels/condo_639_640_tour from tour-639.path.json (player's Forth walks every 639-owned room)"
-    deps: [tools-build]
+    deps: [tools-build, condo-textures]
     vars:
       CONDO_BLEND: '{{.CONDO_BLEND | default (printf "%s/docs/aircon/units-639-640.blend" (env "HOME"))}}'
     cmds:
@@ -784,11 +807,15 @@ tasks:
         CONDO_TOUR=wflevels/condo_639_640/tour-639.path.json CONDO_LEVEL=condo_639_640_tour \
           blender --background --python-exit-code 1 \
           --python wflevels/condo_639_640/blender_create_condo.py -- "{{.CONDO_BLEND}}" \
-          2>&1 | grep -E '^\[condo\]|^Info: Exported|Error|Traceback' || true
+          2>&1 | { grep -E '^\[condo\]|^Info: Exported|Error|Traceback|Assert' || true; }
         test -s wflevels/condo_639_640_tour/condo_639_640_tour.lev
       - bash wftools/wf_blender/build_level_binary.sh condo_639_640_tour
     sources:
       - wflevels/condo_639_640/blender_create_condo.py
+      - wflevels/condo_639_640/site_constants.py
+      - wflevels/condo_639_640/condo_sky.tga
+      - wflevels/condo_639_640/condo_ground.tga
+      - wflevels/condo_639_640/textile.flags
       - wflevels/condo_639_640/tour-639.path.json
       - wflevels/condo_639_640/condo_639_640-standalone.iff.txt
       - '{{.CONDO_BLEND}}'
@@ -796,10 +823,10 @@ tasks:
       - wflevels/condo_639_640_tour-standalone.iff
 
   video-condo-639:
-    desc: "Record the 639 room tour → wflevels/condo_639_640/tour-639.mp4 (+ .srt captions). TOUR_SECONDS=N target length (default 30; 0 = real time); TOUR_SIZE=WxH (default 640x480)."
+    desc: "Record the 639 room tour → wflevels/condo_639_640/tour-639.mp4 (+ .srt captions). TOUR_SECONDS=N target length (default 35 — 30 + the 5 s balcony pan; 0 = real time); TOUR_SIZE=WxH (default 640x480)."
     deps: [ensure-build, tour-condo-639]
     cmds:
-      - python3 tests/record_condo_639_tour.py --seconds "${TOUR_SECONDS:-30}" --size "${TOUR_SIZE:-640x480}"
+      - python3 tests/record_condo_639_tour.py --seconds "${TOUR_SECONDS:-35}" --size "${TOUR_SIZE:-640x480}"
     sources:
       - wflevels/condo_639_640_tour-standalone.iff
       - tests/record_condo_639_tour.py
@@ -820,7 +847,14 @@ tasks:
           RECFLAG="-record_video"; echo "Recording → $RECOUT"
         fi
         [ "${WF_FULLSCREEN:-}" = "1" ] && FSFLAG="-fullscreen"
-        LD_LIBRARY_PATH=engine/libs DISPLAY=:0 engine/wf_game -Lwflevels/condo_639_640-standalone.iff $FSFLAG $RECFLAG 2>&1 | tee "$LOG"
+        # Site sky/ground textures (wflevels/condo_639_640/textile.flags): a 1024² PERM atlas needs
+        # the perm page, the total VRAM box, AND the transient slot widened — material.cc's
+        # CalcVRAMuv bounds every texture's u by VRAMTransientWidth even for PERM textures.
+        LD_LIBRARY_PATH=engine/libs DISPLAY=:0 engine/wf_game \
+          --vram-width=4096 --vram-height=2048 \
+          --vram-slot-width=1024 --vram-slot-height=1024 \
+          --vram-perm-width=1024 --vram-perm-height=1024 \
+          -Lwflevels/condo_639_640-standalone.iff $FSFLAG $RECFLAG 2>&1 | tee "$LOG"
         [ -n "$RECOUT" ] && [ -f output.mp4 ] && mv output.mp4 "$RECOUT" && echo "Saved → $RECOUT"
 
   run-moon:

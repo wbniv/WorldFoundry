@@ -12,7 +12,7 @@
     { 'ALGN' .align( 2048 ) }
     { 'RAM'
         'OBJD' 1500000l                 // 83 actors + margin
-        'PERM' 500000l                  // player figure only
+        'PERM' 1500000l                 // player figure + sky/ground meshes + the 1024² PERM atlas
         'ROOM' 3000000l                 // ~60 small meshes; largest tube ≈ 12 KB on disk
         'FLAG' 1l 1l                    // doomstick, bungeecam
     }

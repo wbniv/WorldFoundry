@@ -68,7 +68,11 @@ for stale in ("output.mp4",):
     (WORK / stale).unlink(missing_ok=True)
 log_fp = open(LOG, "w")
 proc = subprocess.Popen([str(WF), f"-L{IFF}", f"-width={VW}", f"-height={VH}", "-record_video", "--debug-port", str(PORT),
-                         "--debug-bind", "127.0.0.1", "--debug-print-actors"],
+                         "--debug-bind", "127.0.0.1", "--debug-print-actors",
+                         # 1024² PERM atlas for the site sky/ground textures (wflevels/condo_639_640/textile.flags);
+                         # same VRAM flag set as Taskfile run-condo
+                         "--vram-width=4096", "--vram-height=2048", "--vram-slot-width=1024", "--vram-slot-height=1024",
+                         "--vram-perm-width=1024", "--vram-perm-height=1024"],
                         cwd=str(WORK), env=env, stdout=log_fp, stderr=subprocess.STDOUT)
 t_launch = time.time()
 time.sleep(2.0)
@@ -101,12 +105,12 @@ try:
                 bx = bbox.get(room)
                 inside = bool(bx and bx[0] <= x <= bx[2] and bx[1] <= y <= bx[3]) if (bx and x is not None) else False
                 entries.append((room, float(t or 0.0), inside))
-                print(f"HOLD {room:20s} t={float(t or 0):6.2f}s pos=({x:.2f},{y:.2f}) inside={inside}")
+                print(f"HOLD {room:20s} t={float(t or 0):6.2f}s wall={time.time() - t_launch:6.2f}s pos=({x:.2f},{y:.2f}) inside={inside}")
                 if not inside:
                     failures.append(f"{room}: player at ({x:.2f},{y:.2f}) outside bbox {bx}")
         if mv(MB_DONE) == 1.0:
             t_done = mv(MB_TIME)
-            print(f"TOUR_DONE t={t_done:.2f}s")
+            print(f"TOUR_DONE t={t_done:.2f}s wall={time.time() - t_launch:.2f}s")
             time.sleep(1.5)                 # linger on the last room
             break
         time.sleep(0.03)

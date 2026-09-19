@@ -54,11 +54,17 @@ WALL_H        = 2.7
 GLASS_T       = 0.10    # source panes are 0.02 m — sub-decimetre slabs have gone
                         # invisible before (troubleshooting § "too thin in
                         # camera-depth axis"); 0.10 fills the wall opening exactly.
-GROUND        = (-14.0, -22.0, 14.0, 6.0)   # x0, y0, x1, y1 of the site slab
-GROUND_T      = 0.30
+# Real-world placement (pin, compass ↔ axes, 6th-floor elevation, texture sizes) is shared
+# with make_site_textures.py so the sky/ground textures and the geometry can't disagree.
+sys.path.insert(0, SCRIPT_DIR)
+from site_constants import UNIT_Z, SLAB_T, GROUND_HALF, SKY_R           # noqa: E402
+CORRIDOR      = (-9.0, -17.4, 9.0, -15.4)   # x0, y0, x1, y1: open-air corridor outside both front doors
+PARAPET_H     = 1.1                          # railing on its outer edge — a 16 m drop otherwise
+PARAPET_T     = 0.15
 PLAYER_H      = 1.70
 PLAYER_SPAWN  = tuple(float(v) for v in os.environ['CONDO_SPAWN'].split(',')) if os.environ.get('CONDO_SPAWN') \
-                else (4.66, -17.0, 0.30)     # on the ground outside 639's front door (CONDO_SPAWN=x,y,z overrides)
+                else (4.66, -14.5, 0.30)     # just inside 639's front door — the unit is on the 6th floor, so
+                                             # the level starts in the condo, not on the street (CONDO_SPAWN=x,y,z overrides)
 TOUR = None
 if TOUR_PATH:
     import json
@@ -67,10 +73,13 @@ if TOUR_PATH:
     PLAYER_SPAWN = tuple(TOUR.get('spawn', PLAYER_SPAWN))
     os.environ.setdefault('CONDO_ACCEL', str(TOUR.get('accel', 105)))
     os.environ.setdefault('CONDO_DECEL', str(TOUR.get('decel', 0.85)))
-CAM_OFFSET    = (0.0, -3.5, 9.0)             # doll-house view: 69° elevation from the south
-LOOK_OFFSET   = (0.0, 0.0, 0.9)              # aim at the player's chest, not the feet
-ROOM_CENTRE   = (0.0, -8.0, 6.0)
-ROOM_HALF     = (15.0, 16.0, 10.0)
+CAM_OFFSET    = tuple(float(v) for v in os.environ['CONDO_CAM'].split(',')) if os.environ.get('CONDO_CAM') \
+                else (0.0, -3.5, 9.0)        # doll-house view: 69° elevation from the east (CONDO_CAM=x,y,z
+                                             # overrides, e.g. 0,-1.5,1.2 for a low shot that sees the sky dome)
+LOOK_OFFSET   = tuple(float(v) for v in os.environ['CONDO_LOOK'].split(',')) if os.environ.get('CONDO_LOOK') \
+                else (0.0, 0.0, 0.9)         # aim at the player's chest, not the feet (CONDO_LOOK=x,y,z overrides)
+ROOM_CENTRE   = (0.0, -8.0, 12.0)            # z −4…28: ground quad and dome centres, the lifted units, the camera
+ROOM_HALF     = (15.0, 18.0, 16.0)           # y −26…10: the corridor and the balcony camera's look target
 NUM_MAILBOXES = 100
 SUN_ALT_DEG   = 50.0
 SUN_AZ_DEG    = 30.0
@@ -329,60 +338,22 @@ for name, mn, mx in room_outlines:
     scene.collection.objects.link(t)
 stats['room'] = len(room_outlines)
 
-# ── 5. Site ground slab (so a front door never leads out of the room bbox) ───
-# The ground has a hole exactly under each shell (outline taken from the shell's own
-# slab-bottom faces), so it meets the unit floors edge-to-edge at z=0 and never overlaps them — coplanar overlap z-fights, and a
-# lowered slab is a ledge Jolt's CharacterVirtual (no stair-step) treats as a wall.
-# Built as a slab minus one closed PRISM per shell outline (EXACT boolean). Using the
-# shells themselves as operands fails silently (they aren't closed solids — the solver
-# merges their slab faces into the ground), and bmesh triangle_fill /
-# mathutils.geometry.tessellate_polygon both mis-triangulate the concave loops.
-def slab_outline(shell_obj, z_bottom=-0.15, tol=1e-3):
-    """World-space boundary loops of the shell's slab-bottom faces, lifted to z=0."""
-    me, mw = shell_obj.data, shell_obj.matrix_world
-    wco = [mw @ v.co for v in me.vertices]
-    slab = [pg for pg in me.polygons if all(abs(wco[i].z - z_bottom) < tol for i in pg.vertices)]
-    assert slab, f"{shell_obj.name}: no slab-bottom faces at z={z_bottom}"
-    count = {}
-    for pg in slab:
-        for e in pg.edge_keys:
-            count[e] = count.get(e, 0) + 1
-    edges = [e for e, c in count.items() if c == 1]
-    return [((wco[a].x, wco[a].y, 0.0), (wco[b].x, wco[b].y, 0.0)) for a, b in edges]
-
-
-def order_loop(edges):
-    """Edge list (each vert degree 2) → one ordered closed polyline of (x, y, z)."""
-    nxt = {}
-    for a, b in edges:
-        nxt.setdefault(a, []).append(b)
-        nxt.setdefault(b, []).append(a)
-    assert all(len(v) == 2 for v in nxt.values()), "slab outline is not a simple loop"
-    start = edges[0][0]
-    loop, prev, cur = [start], None, start
-    while True:
-        cand = [n for n in nxt[cur] if n != prev] or nxt[cur]
-        prev, cur = cur, cand[0]
-        if cur == start:
-            break
-        loop.append(cur)
-    assert len(loop) == len(edges), f"outline loop {len(loop)} ≠ {len(edges)} edges (multiple loops?)"
-    return loop
-
-
+# ── 5. Site: corridor outside the doors, the ground map far below, the sky dome ──
+# The units are on the 6th floor (UNIT_Z = 15.75 m), so "outside the front door" is the
+# building's open-air corridor, not the ground: a slab strip with a parapet. The ground is a
+# textured quad at world z = 0 (condo_ground.tga, OSM flat map, ±GROUND_HALF m) and the sky
+# an inverted sphere with an equirectangular panorama (condo_sky.tga) — both generated by
+# make_site_textures.py from site-osm.json, both routed to the PERM atlas like the moon's
+# skydome (Moves Between Rooms). Everything else is authored at z = 0 and lifted in § 9b.
 import bmesh as _bmesh
 
 
-def prism_mesh(name, loop, z0, z1):
-    """Closed manifold prism over an ordered (x, y) loop — a clean boolean operand."""
+def box_mesh(name, x0, y0, z0, x1, y1, z1):
+    """Closed box with outward normals (exterior geometry — see level-building.md § winding)."""
     bm = _bmesh.new()
-    bot = [bm.verts.new((v[0], v[1], z0)) for v in loop]
-    top = [bm.verts.new((v[0], v[1], z1)) for v in loop]
-    bm.faces.new(bot)
-    bm.faces.new(top)
-    n = len(loop)
-    for i in range(n):
-        bm.faces.new((bot[i], bot[(i + 1) % n], top[(i + 1) % n], top[i]))
+    _bmesh.ops.create_cube(bm, size=1.0)
+    for v in bm.verts:
+        v.co = ((x0 + x1) / 2 + v.co.x * (x1 - x0), (y0 + y1) / 2 + v.co.y * (y1 - y0), (z0 + z1) / 2 + v.co.z * (z1 - z0))
     _bmesh.ops.recalc_face_normals(bm, faces=bm.faces)
     me = bpy.data.meshes.new(name)
     bm.to_mesh(me)
@@ -390,55 +361,117 @@ def prism_mesh(name, loop, z0, z1):
     return me
 
 
-gx0, gy0, gx1, gy1 = GROUND
-_box = _bmesh.new()
-_bmesh.ops.create_cube(_box, size=1.0)
-_gbase = bpy.data.meshes.new('site-ground-base')
-_box.to_mesh(_gbase)
-_box.free()
-ground = bpy.data.objects.new('site-ground', _gbase)
-scene.collection.objects.link(ground)
-ground.scale = (gx1 - gx0, gy1 - gy0, GROUND_T)
-ground.location = ((gx0 + gx1) / 2.0, (gy0 + gy1) / 2.0, -GROUND_T / 2.0)
-cutters, n_outline = [], 0
-for shell_name in ('unit-639', 'unit-640'):
-    shell = bpy.data.objects.get(shell_name)
-    assert shell is not None, f"missing shell {shell_name}"
-    edges = slab_outline(shell)
-    n_outline += len(edges)
-    cutter = bpy.data.objects.new('cut-' + shell_name, prism_mesh('cut-' + shell_name, order_loop(edges), -1.0, 1.0))
-    scene.collection.objects.link(cutter)
-    cutters.append(cutter)
-    mod = ground.modifiers.new('cut-' + shell_name, 'BOOLEAN')
-    mod.operation = 'DIFFERENCE'
-    mod.object = cutter
-    mod.solver = 'EXACT'
-bpy.context.view_layer.update()
-_dg = bpy.context.evaluated_depsgraph_get()
-_gev = ground.evaluated_get(_dg)
-gmesh_cut = bpy.data.meshes.new_from_object(_gev, depsgraph=_dg)
-gmesh_cut.transform(_gev.matrix_world)           # bake scale/location: verts in world space
-ground.modifiers.clear()
-ground.data = gmesh_cut
-ground.scale = (1.0, 1.0, 1.0)
-ground.location = (0.0, 0.0, 0.0)
-bpy.data.meshes.remove(_gbase)
-for c in cutters:
-    cm = c.data
-    bpy.data.objects.remove(c, do_unlink=True)
-    bpy.data.meshes.remove(cm)
-gmesh = gmesh_cut
-gmesh.name = 'site-ground'
-gmesh.update()
-gmesh.materials.append(make_flat_material('site-ground', (0.55, 0.58, 0.52)))
-for poly in gmesh.polygons:
-    poly.material_index = 0
-clean_mesh(gmesh)
-zs = [v.co.z for v in gmesh.vertices]
-assert -GROUND_T - 1e-3 < min(zs) and max(zs) < 1e-3, f"site-ground z-range {min(zs)}..{max(zs)} — boolean cut went wrong"
-as_statplat(ground)
-print(f"[condo] site-ground: {n_outline} outline edges cut out, "
-      f"{len(gmesh.vertices)} verts, {len(gmesh.polygons)} tris")
+def add_flat_actor(name, mesh, rgb):
+    mesh.materials.append(make_flat_material(name, rgb))
+    obj = bpy.data.objects.new(name, mesh)
+    scene.collection.objects.link(obj)
+    clean_mesh(mesh, recalc=False)
+    as_statplat(obj)
+    return obj
+
+
+def make_textured_material(name, tga):
+    """White BSDF base + image texture: the WF fragment shader samples the texture only
+    when the vertex colour is white (`step(0.99, min(rgb))`, backend_modern.cc kFS)."""
+    mat = bpy.data.materials.new(name)
+    mat.use_nodes = True
+    bsdf = next(n for n in mat.node_tree.nodes if n.type == 'BSDF_PRINCIPLED')
+    tex = mat.node_tree.nodes.new('ShaderNodeTexImage')
+    tex.image = bpy.data.images.load(os.path.join(SCRIPT_DIR, tga))
+    mat.node_tree.links.new(tex.outputs['Color'], bsdf.inputs['Base Color'])
+    bsdf.inputs['Base Color'].default_value = (1.0, 1.0, 1.0, 1.0)
+    mat.diffuse_color = (1.0, 1.0, 1.0, 1.0)
+    return mat
+
+
+for tga in ('condo_ground.tga', 'condo_sky.tga'):
+    if not os.path.isfile(os.path.join(SCRIPT_DIR, tga)):
+        raise SystemExit(f"[condo] missing {tga} — run `task condo-textures` (make_site_textures.py render)")
+
+cx0, cy0, cx1, cy1 = CORRIDOR
+corridor = add_flat_actor('corridor', box_mesh('corridor', cx0, cy0, -SLAB_T, cx1, cy1, 0.0), (0.62, 0.62, 0.60))
+parapet = add_flat_actor('corridor-parapet',
+                         box_mesh('corridor-parapet', cx0, cy0 - PARAPET_T, 0.0, cx1, cy0, PARAPET_H), (0.70, 0.70, 0.68))
+
+# WF texture V runs top-down: gfx/material.cc CalcVRAMuv maps v = 0 to the texture's first
+# (top) row and the exporter passes Blender's uv.y through unflipped — the opposite of
+# Blender/GL, where v = 0 is the bottom row. So "image top" is v = 0 here.
+# Ground map: one quad, UV so image top (north = +X) is v = 0 and image right (east = −Y) is u = 1.
+_gm = bpy.data.meshes.new('site-map')
+_g = GROUND_HALF
+# Winding pinned to +Z in Blender's convention (CCW seen from above), the same way the corridor
+# box comes out of create_cube + recalc, which WF_CULL=1 keeps; recalc on a lone open quad is a
+# coin toss and the first attempt vanished under culling.
+_gm.from_pydata([(-_g, -_g, 0.0), (_g, -_g, 0.0), (_g, _g, 0.0), (-_g, _g, 0.0)], [], [(0, 3, 2, 1)])
+_uv = _gm.uv_layers.new(name='UVMap')
+for li, loop in enumerate(_gm.loops):
+    x, y, _z = _gm.vertices[loop.vertex_index].co
+    _uv.data[li].uv = (0.5 - y / (2 * _g), 0.5 - x / (2 * _g))
+_gm.update()
+_gm.materials.append(make_textured_material('site-map', 'condo_ground.tga'))
+site_map = bpy.data.objects.new('site-map', _gm)
+scene.collection.objects.link(site_map)
+clean_mesh(_gm, recalc=False)                     # triangulate only — keep the pinned winding
+as_statplat(site_map)
+site_map['wf_Moves Between Rooms'] = 'True'
+
+
+def build_skydome(radius, segs=48, rings=24):
+    """Lat/long sphere with explicit UVs: column j at compass θ = 360·j/segs, level position
+    (R cosθ cosφ, −R sinθ cosφ, R sinφ) since +X is north and +Y west; u = θ/360, v = (90−φ)/180
+    (WF v = 0 is the top row = zenith, see the site-map note above).
+    One extra seam column (segs+1 vertex columns) so no face straddles u = 1 → 0. Faces are
+    wound inward (the player is inside)."""
+    verts, uvs = [], []
+    for i in range(rings + 1):
+        phi = math.radians(-90.0 + 180.0 * i / rings)
+        for j in range(segs + 1):
+            th = math.radians(360.0 * j / segs)
+            verts.append((radius * math.cos(th) * math.cos(phi), -radius * math.sin(th) * math.cos(phi), radius * math.sin(phi)))
+            uvs.append((j / segs, 1.0 - i / rings))
+    faces = []
+    cols = segs + 1
+    for i in range(rings):
+        for j in range(segs):
+            a, b, c, d = i * cols + j, i * cols + j + 1, (i + 1) * cols + j + 1, (i + 1) * cols + j
+            if i == 0:
+                faces.append((a, d, c))          # pole triangles (a == b position-wise)
+            elif i == rings - 1:
+                faces.append((a, d, b))
+            else:
+                faces.append((a, d, c, b))
+    me = bpy.data.meshes.new('skydome')
+    me.from_pydata(verts, [], faces)
+    uv = me.uv_layers.new(name='UVMap')
+    for li, loop in enumerate(me.loops):
+        uv.data[li].uv = uvs[loop.vertex_index]
+    me.update()
+    bm = _bmesh.new()
+    bm.from_mesh(me)
+    _bmesh.ops.recalc_face_normals(bm, faces=bm.faces)   # outward first …
+    _bmesh.ops.reverse_faces(bm, faces=bm.faces)          # … then flip: inner surface visible
+    bm.to_mesh(me)
+    bm.free()
+    me.update()
+    return me
+
+
+_sky = build_skydome(SKY_R)
+_sky.materials.append(make_textured_material('skydome', 'condo_sky.tga'))
+skydome = bpy.data.objects.new('skydome', _sky)
+scene.collection.objects.link(skydome)
+skydome.location = (0.0, -8.0, UNIT_Z)          # world-space: the viewpoint the panorama was painted from
+clean_mesh(_sky, recalc=False)
+as_statplat(skydome)
+skydome['wf_Moves Between Rooms'] = 'True'
+# Mass 0 ⇒ Actor::CanCollide() is false (actor.cc:1079: collisionTable[kind] && Mass > 0).
+# Camera obstacle avoidance is a *bbox* overlap pass, and the dome's bbox is the whole
+# level — with a mass the camera "hit" it every tick and climbed (BungeeCameraHandler
+# ClimbRate) until every shot was 12 m higher than authored.
+skydome['wf_Mass'] = 0.0
+NOT_LIFTED = {site_map.name, skydome.name, 'room_condo', 'Matte'}   # world-space: ground, sky, room bounds, backdrop
+print(f"[condo] site: corridor {cx1 - cx0:.0f}×{cy1 - cy0:.0f} m + parapet, site-map ±{_g:.0f} m, "
+      f"skydome R={SKY_R:.0f} m {len(_sky.vertices)} verts {len(_sky.polygons)} tris; units → z={UNIT_Z}")
 
 # ── 6. Player: 1.7 m figure, feet at local z=0, +X front marker ──────────────
 def build_figure():
@@ -538,7 +571,7 @@ def tour_forth(tour):
         assert (abs(dx) < 1e-6) != (abs(dy) < 1e-6), f"leg to {wp['at']} must be axis-aligned (from {px, py})"
         legs.append(('X', x, None) if abs(dx) > 1e-6 else ('Y', y, None))
         if wp.get('room'):
-            legs.append(('HOLD', hold, wp['room']))
+            legs.append(('HOLD', float(wp.get('hold', hold)), wp['room']))   # per-waypoint `hold` overrides hold_seconds
         px, py = x, y
     lines = ["\\ wf", f"{MB_LEG} read-mailbox"]          # ( leg )
     for k, (kind, val, label) in enumerate(legs):
@@ -620,6 +653,110 @@ camera['wf_FoggingColor']            = 0x000000    # indoor: no snowgoons Earth 
 camera['wf_FoggingStartDistance']    = 999.0
 camera['wf_FoggingCompleteDistance'] = 1000.0
 
+# ── 7b. Balcony camera: step onto 639's patio and the shot cuts to Bangkok ──────
+# Two ActBoxOR zones write their camshot's object index to a mailbox every tick the
+# player overlaps them (game/actboxor.cc — it never clears); the Director forwards the
+# mailbox to INDEXOF_CAMSHOT and zeroes it. In bungee-cam mode the handler re-reads
+# INDEXOF_CAMSHOT each tick and never clears it (movecam.cc BungeeCameraHandler), so
+# the last written shot sticks: interior zone → cs_dollhouse, patio zone → cs_balcony.
+# The zones are adjacent, not overlapping; the Director reads the patio's mailbox last
+# so it wins on a boundary tick.
+#
+# cs_balcony is the player's POV: Relative offset (0, 1.5, 1.7) — 1.5 m ahead of the player
+# at eye height, which on the patio puts the camera just past the pony wall in free air.
+# That matters because the camera is a physics body that climbs whenever its bbox overlaps a
+# collidable actor (BungeeCameraHandler ClimbRate): inside the patio it would hit the player
+# or the walls and sail upward. movecam.cc SetCameraParametersFromShot: position =
+# (camshot − Follow) + Player, direction = Target − camshot, both in world space.
+MB_ZONE_INTERIOR, MB_ZONE_BALCONY, MB_BALCONY_T0 = 98, 99, 97   # 97: level time the player stepped onto the patio (0 = not there)
+BALCONY_ROOMS = ('639-patio', '639-patio-recessed')
+_bal = [(mn, mx) for name, mn, mx in room_outlines if name in BALCONY_ROOMS]
+assert len(_bal) == len(BALCONY_ROOMS), f"balcony outlines missing: {[n for n, _, _ in room_outlines]}"
+bal_min = Vector((min(mn.x for mn, _ in _bal), min(mn.y for mn, _ in _bal), 0.0))
+bal_max = Vector((max(mx.x for _, mx in _bal), max(mx.y for _, mx in _bal), WALL_H))
+BALCONY_CAM     = (0.0, 1.5, 1.7)       # POV: offset from the player — eye height, past the pony wall
+BALCONY_LOOK0   = (-6.0, 9.5, -0.3)     # sweep start (world, relative to CamTarget): south-west, 14° down — the street
+BALCONY_LOOK1   = (6.0, 9.5, 2.7)       # sweep end: north-west, 7° up — the towers and the sky
+BALCONY_SWEEP_S = 5.0                   # the pan takes this long, then holds (tour patio holds add the same 5 s)
+
+
+def add_locator(name, location, bbox_min=None, bbox_max=None):
+    """target-class locator (no mesh, no Jolt body); an authored bbox makes it a zone."""
+    o = target_proto.copy()
+    o.data = None
+    o.name = name
+    o.location = location
+    o.rotation_euler = (0.0, 0.0, 0.0)
+    o.scale = (1.0, 1.0, 1.0)
+    o['wf_Model Type'] = 'None'
+    o['wf_original_mesh_name'] = ''
+    if bbox_min is not None:
+        half = (bbox_max - bbox_min) / 2.0
+        o['wf_original_bbox'] = (-half.x, -half.y, -half.z, half.x, half.y, half.z)
+        o['wf_had_authored_bbox'] = True
+    scene.collection.objects.link(o)
+    return o
+
+
+# The look target is a scripted platform (the moon's launch_tracker pattern): while the
+# player is on the patio it slides from LOOK0 to LOOK1 over BALCONY_SWEEP_S, timed from
+# mailbox 97 (set by the Director on entry, zeroed on exit), so every visit tilts up from
+# the balcony to the skyline. Writes world Y/Z through its own INDEXOF_Y_POS / Z_POS.
+balcony_look = bpy.data.objects.new('BalconyLook', bpy.data.meshes.new('BalconyLook'))
+scene.collection.objects.link(balcony_look)
+attach_schema(balcony_look, 'platform')
+balcony_look.location = BALCONY_LOOK0
+balcony_look['wf_Mobility']   = 'Anchored'
+balcony_look['wf_Model Type'] = 'None'
+balcony_look['wf_Mass']       = 0.0
+_lx0, _lz0 = BALCONY_LOOK0[0], BALCONY_LOOK0[2] + UNIT_Z
+_lx1, _lz1 = BALCONY_LOOK1[0], BALCONY_LOOK1[2] + UNIT_Z
+balcony_look['wf_Script'] = (
+    "\\ wf\n"
+    f"{MB_BALCONY_T0} read-mailbox dup 0 <> if INDEXOF_TIME read-mailbox swap - "      # ( elapsed )
+    f"dup {BALCONY_SWEEP_S} > if drop {BALCONY_SWEEP_S} then {BALCONY_SWEEP_S} / "     # ( t 0..1 )
+    f"dup {_lx1 - _lx0} * {_lx0} + INDEXOF_X_POS write-mailbox "
+    f"{_lz1 - _lz0} * {_lz0} + INDEXOF_Z_POS write-mailbox "
+    f"else drop {_lx0} INDEXOF_X_POS write-mailbox {_lz0} INDEXOF_Z_POS write-mailbox then\n"
+)
+cs_balcony = camshot.copy()
+cs_balcony.data = None
+cs_balcony.name = 'cs_balcony'
+cs_balcony.location = BALCONY_CAM
+for k in ('wf_Position X', 'wf_Position Y', 'wf_Position Z'):
+    cs_balcony[k] = 'Relative'
+cs_balcony['wf_Rotation'] = 'Fixed'
+cs_balcony['wf_Target']   = 'BalconyLook'
+cs_balcony['wf_Follow']   = 'CamTarget'
+cs_balcony['wf_Track Object'] = 'Player'
+cs_balcony['wf_Pan Time In Seconds'] = 0.7
+scene.collection.objects.link(cs_balcony)
+
+
+def add_zone(name, mn, mx, mailbox, shot_name):
+    z = add_locator(name, (mn + mx) / 2.0, mn, mx)
+    attach_schema(z, 'actboxor')
+    z['wf_MovementClass']      = 17               # Actor::ActBoxOR_KIND (actboxor.cc:67 asserts it; the
+                                                  # target prototype carries 3 and the exporter copies it)
+    z['wf_Mobility']           = 'Anchored'
+    z['wf_MailBox']            = mailbox
+    z['wf_Object']             = shot_name
+    z['wf_Activated By']       = 'Actor'
+    z['wf_Activated By Actor'] = 'Player'
+    z['wf_Activated By Class'] = ''
+    return z
+
+
+pad = 0.1
+zone_balcony = add_zone('zone-balcony', bal_min - Vector((pad, pad, 0.5)), bal_max + Vector((pad, pad, 0.5)),
+                        MB_ZONE_BALCONY, 'cs_balcony')
+cx0, cy0, cx1, cy1 = CORRIDOR
+zone_interior = add_zone('zone-interior', Vector((min(cx0, -8.2), cy0 - 0.5, -0.5)),
+                         Vector((max(cx1, 8.2), bal_min.y - pad, WALL_H + 0.5)),
+                         MB_ZONE_INTERIOR, 'cs_dollhouse')
+print(f"[condo] balcony camera: zone y {bal_min.y - pad:.2f}…{bal_max.y + pad:.2f}, cs_balcony at {BALCONY_CAM}, "
+      f"look {BALCONY_LOOK0} → {BALCONY_LOOK1} over {BALCONY_SWEEP_S} s")
+
 # ── 8. Lights, matte, director, levelobj ─────────────────────────────────────
 light = find_by_class('light')
 assert light is not None
@@ -651,9 +788,20 @@ matte['wf_Visibility Mailbox'] = 1
 matte['wf_Model Type']         = 'None'
 
 director = find_by_class('director')
-if director:
-    director.name = 'Director'
-    director['wf_Model Type'] = 'None'
+assert director is not None, "snowgoons scaffold has no director (needed for the camera zones)"
+director.name = 'Director'
+director['wf_Model Type'] = 'None'
+# Camera-zone multiplexer (replaces snowgoons' 100/99/98 version): forward each zone's
+# mailbox to INDEXOF_CAMSHOT and zero it, patio last so it wins on a boundary tick.
+# Mailbox 97 holds the level time the patio zone was entered (for BalconyLook's sweep) and
+# is zeroed the first tick the zone stops writing.
+director['wf_Script'] = (
+    "\\ wf\n"
+    f"{MB_ZONE_INTERIOR} read-mailbox dup 0 <> if INDEXOF_CAMSHOT write-mailbox 0 {MB_ZONE_INTERIOR} write-mailbox else drop then\n"
+    f"{MB_ZONE_BALCONY} read-mailbox dup 0 <> if INDEXOF_CAMSHOT write-mailbox 0 {MB_ZONE_BALCONY} write-mailbox "
+    f"{MB_BALCONY_T0} read-mailbox 0 = if INDEXOF_TIME read-mailbox {MB_BALCONY_T0} write-mailbox then "
+    f"else drop 0 {MB_BALCONY_T0} write-mailbox then\n"
+)
 
 levelobj = find_by_class('levelobj')
 assert levelobj is not None
@@ -691,6 +839,15 @@ for o in scene.objects:
                                                     'matte', 'levelobj', 'director'):
         o.display_type = 'WIRE'
 
+# ── 9b. Lift to the 6th floor ────────────────────────────────────────────────
+# Everything above was authored with the unit floor at z = 0 (slab_outline, darken_floors
+# and the tour's spawn all assume it); the ground map and the dome are world-space already.
+# The camera rig (cs_dollhouse, CamTarget, LookAt) is relative — position = (camshot − Follow)
+# + TrackObject — so lifting all three by the same amount changes nothing.
+for o in scene.objects:
+    if o.get('wf_schema_path') and o.name not in NOT_LIFTED:
+        o.location.z += UNIT_Z
+
 # Every actor centre must be strictly inside the room bbox or levcomp drops it
 # from the render list (troubleshooting § "falls outside every room bbox").
 bpy.context.view_layer.update()          # matrix_world is stale until the depsgraph runs
@@ -705,9 +862,15 @@ assert not outside, f"actors outside room bbox {lo}..{hi}: {outside}"
 wf_objects = [o for o in scene.objects if o.get('wf_schema_path')]
 os.makedirs(OUT_DIR, exist_ok=True)
 _wrapper = os.path.join(OUT_DIR, LEVEL_NAME + '-standalone.iff.txt')
-if LEVEL_NAME != 'condo_639_640' and not os.path.exists(_wrapper):
-    with open(os.path.join(SCRIPT_DIR, 'condo_639_640-standalone.iff.txt')) as _src, open(_wrapper, 'w') as _dst:
-        _dst.write(_src.read().replace('condo_639_640', LEVEL_NAME))
+if LEVEL_NAME != 'condo_639_640':
+    if not os.path.exists(_wrapper):
+        with open(os.path.join(SCRIPT_DIR, 'condo_639_640-standalone.iff.txt')) as _src, open(_wrapper, 'w') as _dst:
+            _dst.write(_src.read().replace('condo_639_640', LEVEL_NAME))
+    # textile-rs reads textures and textile.flags from the level dir, so a derived build
+    # (the tour) gets fresh copies of the site textures every run.
+    import shutil
+    for _f in ('condo_ground.tga', 'condo_sky.tga', 'textile.flags'):
+        shutil.copyfile(os.path.join(SCRIPT_DIR, _f), os.path.join(OUT_DIR, _f))
 bpy.ops.wm.save_as_mainfile(filepath=OUT_BLEND)
 print(f"[condo] saved assembled scene → {OUT_BLEND}")
 print(f"[condo] exporting {len(wf_objects)} actors → {OUT_LEV}")

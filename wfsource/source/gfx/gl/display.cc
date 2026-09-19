@@ -934,11 +934,17 @@ CaptureFrame(int xSize, int ySize, int liveW, int liveH)
 {
     if (!gCapturePipe)
     {
-        char cmd[256];
+        // Frames are stamped with the wall clock as ffmpeg reads them (the pipe is
+        // effectively synchronous: one 900 KB frame vs a 64 KB pipe buffer) and
+        // resampled to a constant 30 fps, so video time == wall time == the level
+        // clock whatever the render rate. With a plain "-framerate 30" a scene that
+        // renders at 23 fps played 1.3x too fast and anything timed off the level
+        // clock (the condo tour's captions) drifted seconds behind.
+        char cmd[320];
         snprintf(cmd, sizeof(cmd),
             "ffmpeg -y -f rawvideo -pixel_format bgr24 "
-            "-video_size %dx%d -framerate 30 "
-            "-i pipe:0 -vf vflip -c:v libx264 -pix_fmt yuv420p "
+            "-video_size %dx%d -use_wallclock_as_timestamps 1 "
+            "-i pipe:0 -vf vflip -fps_mode cfr -r 30 -c:v libx264 -pix_fmt yuv420p "
             "-movflags frag_keyframe+empty_moov output.mp4",
             xSize, ySize);
         gCapturePipe = popen(cmd, "w");
