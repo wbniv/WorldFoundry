@@ -756,6 +756,26 @@ triangles in disk/cylinder generators (`disk_geo`). After authoring, run with `W
 eyeball it: a face that **disappears** from the intended view is wound backwards (toggle `WF_CULL`
 off and on — if the surface reappears with culling off, it's a winding bug, not a missing mesh).
 
+**Blender-built meshes come out inside-out.** Blender's normal is `(v1−v0)×(v2−v0)` — the
+opposite hand of the engine's `(v2−v0)×(v1−v0)` — and the exporter keeps the vertex order, so
+`recalc_face_normals` / "Recalculate Outside" produces **WF-inward** faces. Symptoms: with
+`WF_CULL=1` the walls of a prop vanish while its top stays (you are seeing the far inner faces);
+with culling off, one-sided lighting lights the far side, so the prop reads as one flat tone
+with no wall/roof separation — easily mistaken for a depth-sort problem. Fix in the level script:
+exterior geometry `recalc_face_normals` **then `reverse_faces`**; a dome the player stands in
+is `recalc_face_normals` alone. Do the recalc **per closed shell before merging** — welding
+shared vertices between adjacent shells (OSM shophouse rows) makes the merged mesh non-manifold
+and the recalc flips walls at random. Do not use "a box survives culling" as the test: a box
+keeps its inner faces either way. Seen 2026-09-19 building the condo neighbourhood
+([plan](plans/2026-09-19-condo-site-surroundings.md)).
+
+**Coplanar faces flicker — and the ground is the usual place.** Two faces in the same plane
+sharing an edge (a prop's bottom face on the ground quad, a podium's face on a parapet's plane,
+a slab bottom on a podium top) alternate per pixel along the shared edge as the camera moves
+("z-buffer issues at the bottom of the buildings"). The 24-bit depth buffer is not the problem;
+the geometry is. Omit faces that can never be seen (a prism standing on the ground needs no
+bottom), and inset anything that would otherwise share a plane by a few centimetres.
+
 **Escape hatch — two-sided surfaces.** A genuinely double-sided surface (the matte/HUD
 background, a thin billboard/flag) should set the material's `DOUBLE_SIDED` flag
 (`gfx/material.hp`), which exempts it from culling. The matte path passes this automatically;

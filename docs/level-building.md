@@ -388,6 +388,22 @@ surfaces (matte, billboards) set the material `DOUBLE_SIDED` flag. **Note:** cul
 because most shipped level meshes are *not* yet wound consistently; turning it on globally is a
 separate effort. Full rules + the `WF_CULL` toggle: [level-design-troubleshooting.md → Mesh face normals & backface culling](level-design-troubleshooting.md#mesh-face-normals--backface-culling).
 
+**Blender builds the opposite hand (2026-09-19).** WF's face normal is `(v2−v0)×(v1−v0)`;
+Blender's (and every right-handed convention's) is `(v1−v0)×(v2−v0)`. The exporter passes the
+vertex order through unchanged, so a mesh that is **outward in Blender is inward in WF**:
+`bmesh.ops.recalc_face_normals` (or "Recalculate Outside") on a prop, a box or a terrain gives
+faces the engine culls from outside and lights from the wrong side — with culling off that shows
+as a flat, unshaded mass (walls and roofs one tone), with `WF_CULL=1` the walls vanish and the
+roofs stay. So in a level script: **exterior geometry = `recalc_face_normals` then
+`reverse_faces`**; interior geometry (a dome the player stands inside) = `recalc_face_normals`
+alone. A lone open quad has no "outside" for the recalc to find — pin its winding and check it
+under `WF_CULL=1` (a quad wound `(0, 3, 2, 1)` from its CCW-from-above corners is WF +Z). Verify
+the hand empirically, not by whether a *box* survives culling: a box always keeps its far
+(inner) faces, which look identical in flat colour. Worked example: `site-buildings` /
+`box_mesh` in `wflevels/condo_639_640/blender_create_condo.py`; findings in
+[the condo surroundings plan](plans/2026-09-19-condo-site-surroundings.md). Making the exporter
+flip the hand instead is an open TODO — it would re-light every shipped level at once.
+
 ---
 
 ## Engine systems you wire from a level
