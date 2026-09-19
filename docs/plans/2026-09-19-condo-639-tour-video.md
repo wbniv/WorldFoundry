@@ -37,17 +37,30 @@ just no name), so `ROOMS["640"]` gained `master-bed` (x −7.9…0, y −6.75…
 
 One bridge‑driven script that records, one Taskfile entry, captions burnt in afterwards.
 
-1. **`tests/record_condo_639_tour.py`** — launches `wf_game -L… -record_video --debug-port …`
-   (recording starts at frame 0), waits for the player idx, then walks a fixed **waypoint list**
-   with `inject_input(joystick1_raw, bits, −1)` per leg, releasing when the watched `X/Y_POS` is
-   within 0.15 m of the waypoint (same primitives as `walk_condo.py`). Each room gets a ~1 s hold
-   so the caption is readable. On the last waypoint it sends a 0 input, waits 1 s, `SIGTERM`s the
-   engine (the recorder finalises the mp4 on exit — the moon/SMB recordings use the same path),
-   and renames `output.mp4`.
-2. **Room detection = the level's own `target` bboxes.** The script parses `condo_639_640.lev`
-   (`lev_name_to_pos` + the `BOX3`) for every `target` whose name starts `639-`, and each tick
-   records `(t, room)` for the player position → an `.srt` with one cue per room entry
-   (`00:03.4 → 00:06.1  639-kitchen`). No engine change, no ActBox.
+1. **Author the path once, replay it exactly.** Two phases, one script
+   (`tests/record_condo_639_tour.py`):
+   - **`--author`** (run once, or when geometry/pace changes): launches the tour build with the
+     bridge, walks the waypoint list below with `inject_input(joystick1_raw, bits, −1)` per leg,
+     polling `X/Y_POS` until the waypoint is within 0.15 m, and records how many *engine frames* each
+     leg took (the bridge reports the frame counter; fall back to 60 × wall‑seconds). Output:
+     `wflevels/condo_639_640/tour-639.path.json` — an ordered list of `{bits, frames, label}` legs
+     plus the spawn and the accel it was authored at — **committed**, so nobody re‑walks the floor.
+   - **`--record`** (the default; what `task video-condo-639` runs): launches the tour build with
+     `-record_video` and the bridge, then queues the legs back‑to‑back as
+     `inject_input(bits, duration_frames=N)`. Frame counts are consumed by the engine itself, so the
+     replay is deterministic regardless of wall‑clock jitter and every take produces the same frames.
+     No position polling during the take; a post‑take sanity check reads the final `X/Y_POS` and
+     fails loudly (exit 1, no mp4 renamed) if it is > 0.5 m from the path's last waypoint — the
+     signal that the path is stale and `--author` must run again.
+   - Holds are legs with `bits=0`; the room label on each leg feeds the captions directly (no
+     runtime room detection needed, but the bbox check in 2 stays as a cross‑check).
+   On the last leg it sends `0`, waits 1 s, `SIGTERM`s the engine (the recorder finalises the mp4
+   on exit — the moon/SMB recordings use the same path), and renames `output.mp4`.
+2. **Captions from the path + a bbox cross‑check.** Cue times come straight from the path file
+   (cumulative frames ÷ 30 fps per labelled leg) → an `.srt` with one cue per room
+   (`00:03.4 → 00:06.1  639-kitchen`). During `--author` the script also parses the level's own
+   `target` bboxes from `condo_639_640.lev` and asserts the player really is inside the named room
+   at each hold — so a label can't lie. No engine change, no ActBox.
 3. **Pace and post‑process.** The 11‑room route below is ≈76 m; at the interactive level's 1.6 m/s
    that is ≈48 s. Ground speed is OAD data (the terminal velocity of `Running Acceleration` vs `Running
    Deceleration`; calibrated 2026‑09‑19: accel 40 ≈ 1.55 m/s, ≈ accel/26), not a mailbox, so the
@@ -67,9 +80,10 @@ One bridge‑driven script that records, one Taskfile entry, captions burnt in a
    `(−4.3,−5.0)` → `(−4.3,−1.0)` 640‑closet ⏸ → `(−4.3,−5.0)` → `(−0.75,−5.0)` → `(−0.75,−1.0)`
    640‑bath ⏸ (end).
    Straight legs only (doom‑stick strafes are axis‑aligned), each leg one joystick bit.
-5. **`task video-condo-639`** — deps `condo-level`; runs the script, then ffmpeg; writes
-   `wflevels/condo_639_640/tour-639.mp4` (+ `tour-639.srt`). Idempotent via `sources:`
-   (the standalone `.iff`, the script) / `generates:`.
+5. **Tasks.** `task tour-path-condo-639` (author: rebuilds the tour level, walks it, writes the
+   path file) and `task video-condo-639` (deps `condo-level`; replays the path with recording, then
+   ffmpeg; writes `wflevels/condo_639_640/tour-639.mp4` + `tour-639.srt`). Both idempotent via
+   `sources:` (the tour standalone `.iff`, the script, the path file) / `generates:`.
 6. **Verification artefacts**: the mp4, the srt, and three frames grabbed at kitchen / bath‑S /
    patio into `docs/plans/screenshots/`.
 
@@ -100,7 +114,8 @@ states to see the *bath‑N unreachable* variant (option b, rejected) and the ti
 ## Verification
 
 1. **Tour build exists.** `CONDO_ACCEL=105 CONDO_SPAWN=4.66,-16,0.3` export + build succeeds; `grep "Running Acceleration"` in the tour `.lev` shows `105`.
-2. **Script visits every room.** `python3 tests/record_condo_639_tour.py` exits 0 and prints one `ENTER <room> t=…` line for each of the 11 blue rooms, in route order.
+2. **Path authored and every room visited.** `python3 tests/record_condo_639_tour.py --author` exits 0, writes `tour-639.path.json`, and prints one `HOLD <room> frames=…` line for each of the 11 blue rooms, in route order, each with the bbox cross‑check `inside=True`.
+2b. **Replay is exact.** Two consecutive `--record` runs end within 0.05 m of each other (final `X/Y_POS` printed by the sanity check) and the two `.srt` files are byte‑identical.
 3. **Video length and content.** `ffprobe tour-639.mp4` → duration 19–21 s, 640 × 480, 30 fps; the `.srt` has one cue per room.
 4. **Captions readable.** Frames at 3 s / 9 s / 18 s saved to `docs/plans/screenshots/2026-09-19-tour-{kitchen,bath-s,patio}.png` show the room name legibly.
 5. **Re‑run is a no‑op.** `task video-condo-639` twice → second run "up to date".
