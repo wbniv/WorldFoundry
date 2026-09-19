@@ -55,8 +55,8 @@ A named camera placement in the world. Defines where the camera sits, what it lo
 | Elasticity | Fixed32 | 10 | Bungee-Cam mode only |
 | Track Object Mailbox | Int32 | 0 | Mailbox to read track-object index from |
 | Track Object | Object ref | Player01 | Direct track object (mutually exclusive with mailbox) |
-| Rotation | Toggle | Fixed | `Fixed` = camera faces a fixed look-at; `Track` = mirrors Follow object's rotation |
-| Position X/Y/Z | Toggle ×3 | Relative | `Absolute` = camera placed at CamShot world position; `Relative` = offset from Follow object |
+| Rotation | Toggle | Fixed | `Track` = rotate the position offset, direction and up by the **Track Object's** heading (C only); `Fixed` = don't. `Fixed` does **not** park the camera — position and aim still follow the formulas below (corrected 2026-09-19) |
+| Position X/Y/Z | Toggle ×3 | Relative | per axis: `Relative` = (camshot − Follow) + Track Object; `Absolute` = the CamShot's own coordinate |
 | FOV | Fixed32 | 50° | Field of view (1–180). **Stored but not applied — see Limitations.** |
 | Roll | Fixed32 | 0 | **Disabled** (Euler/Matrix34 bug, `#pragma message` since ~2003) |
 | Pan Time In Seconds | Fixed32 | 1.0 s | Transition time when switching **to** this shot |
@@ -71,9 +71,11 @@ camera.position.Y = (PositionY == Relative) ? (camshot.Y - follow.Y) : camshot.Y
 camera.position.Z = (PositionZ == Relative) ? (camshot.Z - follow.Z) : camshot.Z
 ```
 
-After rotation is applied (if `Rotation == Track`), the track object's position is added back per-axis according to the same `PositionX/Y/Z` flags.
+After rotation is applied (if `Rotation == Track`), the track object's position is added back per-axis according to the same `PositionX/Y/Z` flags — so with `Relative` the camera is `TrackObject + (camshot − Follow)`: author the camshot **relative to `Follow`** (put `Follow` at the origin and the camshot's position *is* the offset).
 
-**Look-at calculation:** `direction = Target.position - CamShot.position`. Up vector is always world `+Z` (roll is disabled).
+**Look-at calculation:** `direction = Target.position - CamShot.position` in world space — `Follow` and `Track Object` play no part in the aim. Up vector is always world `+Z` (roll is disabled). Verified against the condo doll-house (`Relative`/`Fixed`, follows and aims correctly) and the moon vista (`Absolute`/`Fixed`, `Follow = Target` at the look point) on 2026-09-19; the earlier reading of this table ("`Fixed` ignores `Track Object`") was wrong.
+
+**The camera is a physics body (bungee mode).** `BungeeCameraHandler::predictPosition` springs the `Camera` actor toward the desired pose (`Elasticity`), and whenever the camera's bbox overlaps any actor with `Mass > 0` (`Actor::CanCollide`, `actor.cc:1079` — a bbox test, not a mesh contact) it stops seeking Z and adds `Climb Rate` upward until |Δz| ≥ the camera-to-target range (`movecam.cc:966-985`). Consequences: a first-person shot placed inside a room climbs 10–30 m (the shell's bbox is the room); a sky dome must have `Mass 0` or its world-sized bbox is a permanent collision; POV cameras belong in free air outside every actor bbox. `hitTop` is never set (the collision cast is stubbed), so the camera never stops climbing on a ceiling either.
 
 ---
 
@@ -85,10 +87,12 @@ An invisible volume placed in the level that, when the player overlaps it, write
 
 | Field | Type | Default | Notes |
 |---|---|---|---|
-| MailBox | Int32 | 100 | Mailbox to write to (typically `EMAILBOX_CAMSHOT`) |
+| MailBox | Int32 | 100 | Mailbox to write to — a user mailbox that a Director forwards to `EMAILBOX_CAMSHOT` (the snowgoons/condo pattern), or `EMAILBOX_CAMSHOT` itself |
 | Object (Camshot Object) | Object ref | — | The CamShot actor index written to the mailbox |
+| Activated By / Activated By Actor | enum / Object ref | Actor / Player | who trips it; the condo zones use `Actor` + `Player` |
+| (movement block) MovementClass | Int32 | — | must be **17** (`Actor::ActBoxOR_KIND`, asserted in `actboxor.cc:67`); a zone cloned from a `target` prototype carries 3 and asserts on load |
 
-The camera system reads `EMAILBOX_CAMSHOT` every tick. The mailbox is **cleared to zero by `NormalCameraHandler::update()`** after it has been consumed — so the write from ActBoxOR is one-shot and edge-triggered, not persistent.
+`ActBoxOR::update()` writes `Object`'s index to `MailBox` **every tick the activating actor overlaps its bbox, and never writes anything on exit** — the mailbox keeps the last value. What consumes it depends on the mode: `NormalCameraHandler::update()` clears `EMAILBOX_CAMSHOT` after every tick (so the ActBoxOR re-writing each frame is what keeps a shot alive, and leaving all zones asserts "found no ActBoxOR"); `BungeeCameraHandler` **never clears it** (`movecam.cc:947`, the "do not clear" note) — the last written index stays active and a new write cuts immediately. With user mailboxes and a Director multiplexer, zero each mailbox after forwarding it and forward the higher-priority zone last; that is what makes "step out of the zone → previous shot" work in bungee mode (`wflevels/condo_639_640/blender_create_condo.py` § 7b).
 
 ---
 
@@ -196,7 +200,7 @@ Place additional CamShot actors and corresponding ActBoxOR zones (smaller, non-o
 
 ### Bungee-Cam
 
-Enable the `gBungeeCam` global (currently a compile-time/runtime flag; no in-level switch). The camera follows the track object with elastic lag controlled by **Climb Rate** and **Elasticity** on the CamShot.
+`gBungeeCam` is set per level from the standalone wrapper's `'FLAG' <doomstick> <bungeecam>` (`level.cc:434`, `plmc->bungeeCamFlag`) — the condo and moon wrappers set it. The camera follows the track object with elastic lag (**Elasticity**) and climbs on bbox contact (**Climb Rate**, see "The camera is a physics body" above). In bungee mode there is no pan on a shot change — the spring supplies the motion — and `EMAILBOX_CAMSHOT` is never cleared.
 
 ### Getting a narrow-FOV / pseudo-isometric look
 

@@ -1149,7 +1149,8 @@ if camshot:
     camshot['wf_Track Object'] = 'Player'
     camshot['wf_Target']       = 'CamTarget'
     camshot['wf_Follow']       = 'CamTarget'
-    camshot['wf_Yon']          = 2500.0  # skydome R=2000 m; default 100 m clips it
+    camshot['wf_Yon']          = 2500.0  # not applied: the renderer projects with a fixed 60°/1 m/1000 m
+                                          # (display.cc SetProjection; CamShot FOV/Hither/Yon never reach it)
     camshot['wf_Moves Between Rooms'] = 'True'
     # cs_chase: active TIME 31–51 (HUD T_MINUS 20–40; lander off-screen, wide overview).
     camshot['wf_Script'] = (

@@ -778,27 +778,93 @@ initializer list, and move the `_overrideLevelNum` check to BEFORE the asserts.
 
 - **DelayCameraHandler**: waits up to 5 frames for `EMAILBOX_CAMSHOT > 0` then transitions.
   Assertion at `movecam.cc:885` fires if nobody writes a valid CamShot index within 5 frames.
-- **BungeeCameraHandler**: main follow camera. Each frame reads `EMAILBOX_CAMSHOT` (mailbox 1921)
-  to get the active CamShot object's index. Originally cleared the mailbox after reading
-  (relied on ActBoxOR to re-write each frame).
-- **NormalCameraHandler**: validates that the stored shot index is a real CamShot object.
+- **BungeeCameraHandler** (levels with the wrapper's bungeecam flag): reads `EMAILBOX_CAMSHOT`
+  every frame and never clears it — the last index written stays active; springs the physics
+  camera toward the shot pose and climbs on bbox contact (see below).
+- **NormalCameraHandler** (flag off): validates the shot index, hands shot changes to
+  `PanCameraHandler`, and **clears the mailbox after every tick** — an ActBoxOR must re-write it
+  each frame or the handler asserts "found no ActBoxOR".
 
-#### CamShot tracking toggles — `Rotation` and `Position X/Y/Z`
+#### CamShot — what `Rotation`, `Position X/Y/Z`, `Follow` and `Target` actually do (verified 2026-09-19)
 
-For a camera that **follows the player**, the CamShot needs both its `Track Object`
-set (e.g. `Player`) **and** the right mode toggles:
+`SetCameraParametersFromShot` ([`movecam.cc:255-388`](../wfsource/source/game/movecam.cc)) computes
+the desired camera pose from the active CamShot every tick. In world space:
 
-| Field | Value to follow the player | Effect if wrong (0) |
-|-------|----------------------------|---------------------|
-| `Rotation` (`Fixed`\|`Track`) | **`Track` (1)** | `Fixed` → camera orientation static, ignores `Track Object` |
-| `Position X/Y/Z` (`Absolute`\|`Relative`) | **`Relative` (1)** | `Absolute` → camera parked at the CamShot's world position |
+```
+position (per axis)  = PositionX/Y/Z == Relative ? (camshot − Follow) + TrackObject : camshot
+direction            = Target − camshot                      (never involves Follow or TrackObject)
+up                   = +Z                                    (Roll is dead code)
+Rotation == Track    → position offset, direction and up are all rotated by TrackObject's
+                       heading (C only) before TrackObject is added
+```
 
-With `Fixed`/`Absolute` the BungeeCam ignores the player even though `Track Object`
-is set, parking at a static wide pose. On a mostly-white level (e.g. a snow level)
-that static view can read as "untextured/flat gray" when the textures are actually
-fine — see [troubleshooting](level-design-troubleshooting.md). These toggles are
-`TYPEENTRYBOOLEANTOGGLE` enums; a `.lev` where their `DATA` and `STR` disagree is
-corrupt and now hard-fails on Blender import.
+So **`Fixed` does not park the camera** — it only means "don't turn with the tracked object's
+heading". The two rigs in use:
+
+| Rig | Toggles | Objects | Effect |
+|---|---|---|---|
+| Doll-house follow (condo `cs_dollhouse`) | `Relative` ×3, `Fixed` | `Follow = CamTarget` at the origin, `Target = LookAt` at (0, 0, 0.9), `Track Object = Player` | camera = player + camshot offset; aim = `LookAt − camshot` — a fixed world-axis offset that follows the player without spinning with the doom-stick heading |
+| Vista / parked (moon `cs_chase`, `cs_earth`) | `Absolute` ×3, `Fixed` | `Follow = Target = CamTarget` at the look point | camera at the camshot's own point, aimed at the look point; `Track Object` is irrelevant |
+| Third person that turns with the player | `Relative` ×3, `Track` | as doll-house | the offset swings behind the player as they turn |
+
+Rules that fall out of the formulas:
+
+- Author `camshot` and `Target` **relative to `Follow`** when `Relative` — with `Follow` at the
+  origin the camshot's position *is* the offset and `Target` is the aim offset. If you lift a
+  level (the condo moves everything up 15.75 m) lift camshot, `Follow` and `Target` together;
+  their differences are what matter.
+- `Target` and `Follow` are `ObjRef`s the exporter resolves **by object name** — rename the
+  object *and* the property, and check the exported `.lev` (`{ 'STR' { 'NAME' "Target" } … }`):
+  an unresolvable name makes levcomp write 0 and the engine asserts `shotData->Target`
+  ([`movecam.cc:310`](../wfsource/source/game/movecam.cc)) on load.
+- `FOV`, `Hither`, `Yon` are stored and even interpolated during pans but **never reach the
+  renderer** — `CameraHandler::SetCamera` still carries the 2003 `#pragma message "write field
+  of view, hither and yon code"` and `display.cc` projects with a fixed 60° / 1.0 m / 1000 m.
+  Don't tune them expecting a change.
+
+**The camera is a physics body, and it climbs.** In bungee mode (below) the `Camera` actor is
+sprung toward the desired position (`Elasticity`), and every tick its bbox overlaps any actor
+with `Mass > 0` (`Actor::CanCollide`, [`actor.cc:1079`](../wfsource/source/game/actor.cc)) it
+stops seeking Z and adds `Climb Rate` upward until |Δz| exceeds the camera-to-target range
+([`movecam.cc:966-985`](../wfsource/source/game/movecam.cc)). The test is a **bbox** overlap,
+not a mesh contact, so: a first-person camera placed inside a room sails up 10–30 m (the unit
+shell's bbox is the whole room); a world-sized actor such as a sky dome must have `Mass 0` or
+every camera "collides" with it forever; put POV cameras in free air *outside* every bbox
+(the condo's balcony/window shots sit 1.5–1.8 m past the glass). If a shot is higher and steeper
+than authored, this is why.
+
+**Bungee vs normal mode** is a per-level flag: the standalone wrapper's `'FLAG' <doomstick>
+<bungeecam>` ([`level.cc:434`](../wfsource/source/game/level.cc) → `gBungeeCam`). Normal mode
+pans between shots (`PanCameraHandler`, `Pan Time In Seconds`) and **clears `INDEXOF_CAMSHOT`
+after every tick**, so something must re-write it every tick — an `ActBoxOR` under the player —
+or `NormalCameraHandler` asserts "found no ActBoxOR". Bungee mode **never clears it**: the
+handler re-reads the mailbox each tick, the last index written wins, and a change cuts
+immediately (the spring supplies the motion; no pan).
+
+**Switching shots** = writing a CamShot's object index to `INDEXOF_CAMSHOT` (1021):
+
+- At load the engine writes the **first CamShot in the level** ([`level.cc:205`](../wfsource/source/game/level.cc)),
+  so no ActBoxOR is needed for a single-shot level in bungee mode.
+- `ActBoxOR` (`wf_MovementClass` **17** — `actboxor.cc:67` asserts it and a `target` prototype
+  carries 3; `Activated By = Actor`, `Activated By Actor = Player`, `MailBox`, `Object = <camshot
+  name>`, an authored bbox) writes `Object`'s index to its mailbox **every tick the player
+  overlaps it and never clears it**. Route through a Director script that forwards and zeroes:
+  ```forth
+  \ wf
+  98 read-mailbox dup 0 <> if INDEXOF_CAMSHOT write-mailbox 0 98 write-mailbox else drop then
+  99 read-mailbox dup 0 <> if INDEXOF_CAMSHOT write-mailbox 0 99 write-mailbox else drop then
+  ```
+  Zones may overlap; the mailbox forwarded **last** wins the tick. Zeroing after forwarding is
+  what makes "leave the zone → previous shot" work in bungee mode.
+- A Director or any actor script can write `INDEXOF_CAMSHOT` directly for cutscenes.
+
+Pre-position the `Camera` actor at the opening shot's pose, or the spring flies it there from
+wherever the scaffold left it (the condo starts it at `spawn + CAM_OFFSET`). These toggles are
+`TYPEENTRYBOOLEANTOGGLE` enums; a `.lev` where their `DATA` and `STR` disagree is corrupt and
+hard-fails on Blender import. Worked examples: `wflevels/condo_639_640/blender_create_condo.py`
+§ 7–7b (doll-house + two zone-switched POV shots with scripted look targets) and
+`wflevels/moon_site01/blender_create_moon.py` § 7 (vista + cutscene shots). Deeper dive:
+[camera-system investigation](investigations/2026-04-29-camera-system.md).
 
 #### Fog OAS fields — match your environment, don't inherit snowgoons'
 
