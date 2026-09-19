@@ -760,7 +760,7 @@ tasks:
       - |
         set -euo pipefail
         blender --background --python-expr "import addon_utils; raise SystemExit(0 if addon_utils.enable('wf_blender', default_set=False, persistent=False) else 1)" >/dev/null 2>&1 \
-          || { echo "wf_blender add-on not installed — 'sudo apt install wf-blender' once it is on apt.foundrylinux.org; until then 'task blender-install'" >&2; exit 1; }
+          || { echo "wf_blender add-on not installed — 'sudo apt install worldfoundry-blender-editor-exporter' (apt.worldfoundry.org) or 'task blender-install'" >&2; exit 1; }
         blender --background --python-exit-code 1 \
           --python wflevels/condo_639_640/blender_create_condo.py -- "{{.CONDO_BLEND}}" \
           2>&1 | grep -E '^\[condo\]|^Info: Exported|Error|Traceback' || true

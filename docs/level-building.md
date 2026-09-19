@@ -154,6 +154,17 @@ the first-time setup.
   manually in a terminal.
 - The Blender addon listens on `localhost:9876` by default.
 
+### Installing the add‑on and the level tools
+
+The packaged route is [apt.worldfoundry.org](https://apt.worldfoundry.org/) (`stable/main`):
+`worldfoundry-blender-editor-exporter` (the `wf_blender` add‑on + `wf_core`), the CLI tools
+`iffcomp`/`levcomp`/`textile`/`cdpack`, and the `worldfoundry-cli` / `worldfoundry-development`
+umbrellas. (It is *not* on `apt.foundrylinux.org`, which hosts `task` and `blender-asset-finder`.)
+From a checkout, `task blender-install` symlinks this tree's add‑on into
+`~/.config/blender/<latest>/scripts/addons/wf_blender/` and `task tools-build` produces the release
+binaries `build_level_binary.sh` expects under `wftools/*/target/release/`. Check the package
+version against the repo when a level relies on a recent exporter feature — the apt build lags.
+
 ### Headless Blender export fallback
 
 `bpy.ops.wf.export_level` is only registered when MCP is connected (the `debug_bridge`
