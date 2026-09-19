@@ -96,14 +96,14 @@ def _blender_version(bin_path: Path) -> str:
     return out.stdout.splitlines()[0].split()[-1] if out.stdout else "unknown"
 
 
-def test_blender_addon_export_qbert_practice(tmp_path: Path, wf_core_so: Path) -> None:
-    """End-to-end: load fixture .blend, run wf_blender's level export, compare
-    output to the committed golden .lev. Byte-identical match required.
+_EXPORT_CACHE: dict = {}
 
-    Regen the golden when an EXPECTED export-format change lands:
-        BLENDER_BIN=/tmp/blender-4.0.2/blender \\
-        bash tests/blender_runner/regen-golden.sh
-    """
+
+def _export_fixture(tmp_path: Path, wf_core_so: Path) -> tuple[Path, str]:
+    """Run the headless export of the qbert fixture once per session; both tests below
+    read the same output directory (the .lev plus the per-mesh .iff files beside it)."""
+    if 'out' in _EXPORT_CACHE:
+        return _EXPORT_CACHE['out']
     if not FIXTURE_BLEND.is_file():
         pytest.fail(f"fixture missing: {FIXTURE_BLEND}")
     if not RUNNER.is_file():
@@ -170,6 +170,20 @@ def test_blender_addon_export_qbert_practice(tmp_path: Path, wf_core_so: Path) -
 
     if not out_lev.is_file():
         pytest.fail(f"runner exited cleanly but {out_lev} was not produced")
+    _EXPORT_CACHE['out'] = (out_lev, bl_ver)
+    return out_lev, bl_ver
+
+
+def test_blender_addon_export_qbert_practice(tmp_path: Path, wf_core_so: Path) -> None:
+    """End-to-end: load fixture .blend, run wf_blender's level export, compare
+    output to the committed golden .lev. Byte-identical match required.
+
+    Regen the golden when an EXPECTED export-format change lands (or when the Blender
+    version's float noise moves the slope/bbox digits — check the diff is only that):
+        BLENDER_BIN=$(which blender) python3 -m pytest tests/test_blender_addon_export.py
+        cp <printed out.lev> tests/fixtures/qbert_practice-golden.lev
+    """
+    out_lev, bl_ver = _export_fixture(tmp_path, wf_core_so)
 
     if not GOLDEN_LEV.is_file():
         # On first run there's no golden yet. Print the produced output and
@@ -219,3 +233,66 @@ def test_blender_addon_export_qbert_practice(tmp_path: Path, wf_core_so: Path) -
             f"Export output length differs from golden: "
             f"actual={len(actual)}, expected={len(expected)}"
         )
+
+
+# ── Face hand ─────────────────────────────────────────────────────────────────
+# The engine computes a face normal as (v2−v0)×(v1−v0) (gfx/face.hpi), Blender as
+# (v1−v0)×(v2−v0). export_level.py reverses each face's loop order so a mesh that is outward
+# in Blender is outward in WF. This pins that: every face of an exported closed box must have
+# its WF normal pointing away from the box centroid. Comment the reversal out and it fails.
+_VRTX_SIZE, _FACE_SIZE = 24, 8
+
+
+def _iff_chunks(data: bytes) -> dict:
+    """Flat {tag: payload} over a binary IFF blob (first occurrence of each tag)."""
+    chunks, i = {}, 0
+    while i + 8 <= len(data):
+        tag = data[i:i + 4]
+        if not tag.isalpha() and tag not in (b'FORM',):
+            i += 1
+            continue
+        size = int.from_bytes(data[i + 4:i + 8], 'little')
+        if 0 < size <= len(data) - i - 8:
+            key = tag.decode('ascii', 'replace')
+            if key not in chunks:
+                chunks[key] = data[i + 8:i + 8 + size]
+            if key in ('MODL', 'FORM'):
+                i += 8                      # descend
+                continue
+            i += 8 + size
+        else:
+            i += 1
+    return chunks
+
+
+def _wf_faces(iff_path: Path):
+    """→ (verts[(x, y, z)], faces[(a, b, c)]) in WF's on-disk order."""
+    import struct
+    chunks = _iff_chunks(iff_path.read_bytes())
+    vrtx, face = chunks.get('VRTX', b''), chunks.get('FACE', b'')
+    verts = []
+    for i in range(len(vrtx) // _VRTX_SIZE):
+        _u, _v, _c, x, y, z = struct.unpack_from('<iiIiii', vrtx, i * _VRTX_SIZE)
+        verts.append((x / 65536.0, y / 65536.0, z / 65536.0))
+    faces = [struct.unpack_from('<hhh', face, i * _FACE_SIZE) for i in range(len(face) // _FACE_SIZE)]
+    return verts, faces
+
+
+def test_exported_faces_are_wf_outward(tmp_path: Path, wf_core_so: Path) -> None:
+    out_lev, _ = _export_fixture(tmp_path, wf_core_so)
+    boxes = []
+    for iff in sorted(out_lev.parent.glob('*.iff')):
+        verts, faces = _wf_faces(iff)
+        if len(verts) == 8 and len(faces) == 12:      # a closed box
+            boxes.append((iff.name, verts, faces))
+    assert boxes, f"no 8-vertex/12-face box mesh among {[p.name for p in out_lev.parent.glob('*.iff')]}"
+    for name, verts, faces in boxes:
+        cx = sum(v[0] for v in verts) / 8; cy = sum(v[1] for v in verts) / 8; cz = sum(v[2] for v in verts) / 8
+        for a, b, c in faces:
+            v0, v1, v2 = verts[a], verts[b], verts[c]
+            e1 = (v2[0] - v0[0], v2[1] - v0[1], v2[2] - v0[2])       # WF: (v2−v0) × (v1−v0)
+            e2 = (v1[0] - v0[0], v1[1] - v0[1], v1[2] - v0[2])
+            n = (e1[1] * e2[2] - e1[2] * e2[1], e1[2] * e2[0] - e1[0] * e2[2], e1[0] * e2[1] - e1[1] * e2[0])
+            fc = ((v0[0] + v1[0] + v2[0]) / 3 - cx, (v0[1] + v1[1] + v2[1]) / 3 - cy, (v0[2] + v1[2] + v2[2]) / 3 - cz)
+            dot = n[0] * fc[0] + n[1] * fc[1] + n[2] * fc[2]
+            assert dot > 0, f"{name}: face ({a},{b},{c}) has its WF normal pointing INTO the box (dot {dot:.4g}) — the exporter's hand reversal is missing"

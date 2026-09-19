@@ -747,27 +747,23 @@ to be **seen from**:
 - **Interior-viewed** geometry (room boxes seen from inside, a dome/skybox the player stands
   within) → normals point **inward, toward the viewer**.
 
-**Common gotcha — the inside-out box.** The hand-written box face list
-`[(0,3,2,1),(4,5,6,7),(0,1,5,4),(1,2,6,5),(2,3,7,6),(3,0,4,7)]` (as in `add_solid_box` /
-`make_box_mesh`) produces **inward** normals under `(v2-v0)×(v1-v0)` — its "top" face `(4,5,6,7)`
-normal is `-Z` (down). For an exterior box, **reverse every face tuple** so normals point out:
-`[(1,2,3,0),(7,6,5,4),(4,5,1,0),(5,6,2,1),(6,7,3,2),(7,4,0,3)]`. Likewise reverse fan/wall
-triangles in disk/cylinder generators (`disk_geo`). After authoring, run with `WF_CULL=1` and
-eyeball it: a face that **disappears** from the intended view is wound backwards (toggle `WF_CULL`
-off and on — if the surface reappears with culling off, it's a winding bug, not a missing mesh).
+**Whose hand? Blender's.** The engine's `(v2−v0)×(v1−v0)` is the opposite hand of Blender's
+`(v1−v0)×(v2−v0)`; since 2026-09-19 `export_level.py` reverses every face's loop order on export
+and back on import, so what is outward in the viewport is outward in the engine and
+import → export is byte-identical. Consequences: the hand-written box list
+`[(0,3,2,1),(4,5,6,7),(0,1,5,4),(1,2,6,5),(2,3,7,6),(3,0,4,7)]` (`add_solid_box` / `make_box_mesh`)
+is an **exterior** box — do **not** reverse its tuples; `recalc_face_normals` is right for props;
+only an interior (dome) gets `reverse_faces`. A level script that compensated for the engine's
+hand before the flip is now inside-out and must drop the compensation. Only hand-written `.iff`
+text still needs the engine's hand. Guard: `tests/test_blender_addon_export.py::test_exported_faces_are_wf_outward`.
 
-**Blender-built meshes come out inside-out.** Blender's normal is `(v1−v0)×(v2−v0)` — the
-opposite hand of the engine's `(v2−v0)×(v1−v0)` — and the exporter keeps the vertex order, so
-`recalc_face_normals` / "Recalculate Outside" produces **WF-inward** faces. Symptoms: with
-`WF_CULL=1` the walls of a prop vanish while its top stays (you are seeing the far inner faces);
-with culling off, one-sided lighting lights the far side, so the prop reads as one flat tone
-with no wall/roof separation — easily mistaken for a depth-sort problem. Fix in the level script:
-exterior geometry `recalc_face_normals` **then `reverse_faces`**; a dome the player stands in
-is `recalc_face_normals` alone. Do the recalc **per closed shell before merging** — welding
-shared vertices between adjacent shells (OSM shophouse rows) makes the merged mesh non-manifold
-and the recalc flips walls at random. Do not use "a box survives culling" as the test: a box
-keeps its inner faces either way. Seen 2026-09-19 building the condo neighbourhood
-([plan](plans/2026-09-19-condo-site-surroundings.md)).
+**Diagnosing.** With `WF_CULL=1`, a face that **disappears** from the intended view is wound
+backwards (toggle `WF_CULL` off and on — if the surface reappears with culling off, it's a
+winding bug, not a missing mesh). With culling off, a wrong-way prop is not invisible but **lit
+from the far side**: walls and roofs come out one flat tone, easily mistaken for a depth-sort
+fault. Do the recalc **per closed shell before merging** shells that share vertices (welded
+shophouse rows turned into one non-manifold blob and the recalc flipped walls at random). Do not
+use "a box survives culling" as the test: a box keeps its inner faces either way.
 
 **Coplanar faces flicker — and the ground is the usual place.** Two faces in the same plane
 sharing an edge (a prop's bottom face on the ground quad, a podium's face on a parapet's plane,

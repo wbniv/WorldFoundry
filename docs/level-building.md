@@ -375,34 +375,33 @@ and the FSN `filesys` towers (2026-06-12, runtime template + scale). It is one
 rule, not a physics quirk. See also the scale-mailbox note in
 [level-design-troubleshooting.md](level-design-troubleshooting.md#b-runtime-xyz_scale-mailboxes-30403042--visual-only).
 
-### Mesh face winding — normals must face the viewer (backface culling, 2026-06-13)
+### Mesh face winding — author for Blender; the exporter adapts (2026-09-19)
 
 **The renderer has an opt-in software backface cull** (`WF_CULL=1`, off by default — see the note
-below on why it isn't global yet). **When it's on**, author every face's winding so its normal
-points toward where the surface is **seen from** — **outward/up** for exterior geometry (props,
-floors, treemap cells, terrain), **inward** for interior geometry the player stands inside (rooms,
-a dome/skybox). A wrong-way face **vanishes** under culling, not just shades dark. The hand-written
-box list `[(0,3,2,1),(4,5,6,7),…]` is **inside-out** (inward normals) — reverse every tuple for an
-exterior box: `[(1,2,3,0),(7,6,5,4),(4,5,1,0),(5,6,2,1),(6,7,3,2),(7,4,0,3)]`. Genuinely two-sided
-surfaces (matte, billboards) set the material `DOUBLE_SIDED` flag. **Note:** culling is opt-in
-because most shipped level meshes are *not* yet wound consistently; turning it on globally is a
-separate effort. Full rules + the `WF_CULL` toggle: [level-design-troubleshooting.md → Mesh face normals & backface culling](level-design-troubleshooting.md#mesh-face-normals--backface-culling).
+below on why it isn't global yet). **When it's on**, a face is kept only if its normal points toward
+where it is seen from — **outward/up** for exterior geometry (props, floors, treemap cells,
+terrain), **inward** for interior geometry the player stands inside (rooms, a dome/skybox). A
+wrong-way face **vanishes** under culling, and with culling off it is **lit from the wrong side**
+(one-sided lighting), which reads as a flat, unshaded mass.
 
-**Blender builds the opposite hand (2026-09-19).** WF's face normal is `(v2−v0)×(v1−v0)`;
-Blender's (and every right-handed convention's) is `(v1−v0)×(v2−v0)`. The exporter passes the
-vertex order through unchanged, so a mesh that is **outward in Blender is inward in WF**:
-`bmesh.ops.recalc_face_normals` (or "Recalculate Outside") on a prop, a box or a terrain gives
-faces the engine culls from outside and lights from the wrong side — with culling off that shows
-as a flat, unshaded mass (walls and roofs one tone), with `WF_CULL=1` the walls vanish and the
-roofs stay. So in a level script: **exterior geometry = `recalc_face_normals` then
-`reverse_faces`**; interior geometry (a dome the player stands inside) = `recalc_face_normals`
-alone. A lone open quad has no "outside" for the recalc to find — pin its winding and check it
-under `WF_CULL=1` (a quad wound `(0, 3, 2, 1)` from its CCW-from-above corners is WF +Z). Verify
-the hand empirically, not by whether a *box* survives culling: a box always keeps its far
-(inner) faces, which look identical in flat colour. Worked example: `site-buildings` /
-`box_mesh` in `wflevels/condo_639_640/blender_create_condo.py`; findings in
-[the condo surroundings plan](plans/2026-09-19-condo-site-surroundings.md). Making the exporter
-flip the hand instead is an open TODO — it would re-light every shipped level at once.
+**The rule is Blender's rule.** The engine computes a face normal as `(v2−v0)×(v1−v0)`
+(`gfx/face.hpi:34`, "reversed for our handedness"), the opposite hand of Blender's
+`(v1−v0)×(v2−v0)`; since 2026-09-19 `export_level.py` reverses each face's loop order on export
+(and back on import) so the two agree. So: if `recalc_face_normals` / "Recalculate Outside" looks
+right in the Blender viewport, it is right in the engine; the standard hand-written box list
+`[(0,3,2,1),(4,5,6,7),(0,1,5,4),(1,2,6,5),(2,3,7,6),(3,0,4,7)]` is an **exterior** box; a dome the
+player stands inside is the one thing that gets `bmesh.ops.reverse_faces`. **Never compensate for
+the engine's hand in a level script** — the pre-2026-09-19 advice to "reverse every tuple" or
+"recalc then reverse" is retired (a script that still does it is now inside-out). Recalc **per
+closed shell before merging** shells that share vertices, or the recalc flips faces at random.
+A lone open quad has no "outside" for the recalc to find: wind it counter-clockwise as seen from
+its visible side. Verify with `WF_CULL=1`, not by whether a box survives (a box keeps its inner
+faces either way). Genuinely two-sided surfaces (matte, billboards) set the material
+`DOUBLE_SIDED` flag. **Note:** culling is opt-in because levels authored before the exporter flip
+may still carry hand-compensated windings; turning it on globally is a separate effort. Full
+rules + the `WF_CULL` toggle: [level-design-troubleshooting.md → Mesh face normals & backface culling](level-design-troubleshooting.md#mesh-face-normals--backface-culling).
+Hand-written `.iff` text (no exporter) still needs the engine's hand. Plan:
+[2026-09-19-exporter-face-hand](plans/2026-09-19-exporter-face-hand.md).
 
 ---
 

@@ -167,7 +167,9 @@ Generated into `wflevels/condo_639_640/site-catalog.md`; this copy is from the s
   roofs stayed, and with culling off the one‑sided lighting lit the wrong side, which made
   walls and roofs one flat tone. Exterior geometry is now `recalc_face_normals` +
   `reverse_faces`; the dome is Blender‑outward. (The earlier "the corridor box survives culling"
-  inference was its inner faces — corrected in the skybox plan.)
+  inference was its inner faces — corrected in the skybox plan.) **Superseded the same day:**
+  [the exporter now adapts the hand](2026-09-19-exporter-face-hand.md), and these compensations
+  were removed again.
 - **A global `remove_doubles` across prisms breaks the recalc**: adjacent shophouses share OSM
   nodes, welding them made rows non‑manifold and the recalc flipped walls at random. Normals
   are computed per prism before merging.

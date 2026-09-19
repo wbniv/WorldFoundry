@@ -4,6 +4,13 @@ World Foundry level import / export operators.
   WF_OT_import_level  — read a .lev text IFF → populate Blender scene
   WF_OT_export_level  — write Blender scene → .lev text IFF
 
+Face hand: the engine computes a face normal as (v2−v0)×(v1−v0) (gfx/face.hpi, "reversed
+for our handedness"); Blender uses (v1−v0)×(v2−v0). This module is the adapter: the exporter
+writes each face's loop order REVERSED and the importer reverses it back, so a mesh that is
+outward in Blender is outward in WF (lit from the camera side, kept by WF_CULL=1) and
+import → export is byte-identical. Author for Blender; never compensate in a level script.
+See docs/plans/2026-09-19-exporter-face-hand.md.
+
 .lev format (text IFF):
 
   { 'LVL'
@@ -370,7 +377,7 @@ def _load_mesh_iff(filepath: str):
     for i in range(n_faces):
         base = i * _FACE_SIZE
         v1, v2, v3, mat_idx = struct.unpack_from('<hhhh', face_data, base)
-        faces.append((v1, v2, v3))
+        faces.append((v3, v2, v1))          # WF hand → Blender hand (see module docstring)
         face_mat_idxs.append(mat_idx)
 
     _MATL_SIZE = 264  # sizeof(_MaterialOnDisk) = 4+4+256
@@ -468,7 +475,7 @@ def _write_mesh_iff(blobj, filepath: str) -> bool:
                 split_map[key] = len(split_verts)
                 split_verts.append((bm.verts[orig_vi].co.copy(), u, v))
             tri.append(split_map[key])
-        face_triples.append((tri[0], tri[1], tri[2], face.material_index))
+        face_triples.append((tri[2], tri[1], tri[0], face.material_index))   # Blender hand → WF hand
 
     # ── Canonicalize vertex + face order (deterministic export) ──────────────
     # split_verts/face_triples above are built in `bm.faces` encounter order,

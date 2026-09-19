@@ -350,14 +350,13 @@ import bmesh as _bmesh
 
 
 def box_mesh(name, x0, y0, z0, x1, y1, z1):
-    """Closed box wound WF-outward: Blender-outward then reversed, since WF's face normal is
-    (v2−v0)×(v1−v0), the opposite hand of Blender's (level-building.md § winding)."""
+    """Closed box, outward in Blender's hand — the exporter adapts to the engine's
+    (level-building.md § winding)."""
     bm = _bmesh.new()
     _bmesh.ops.create_cube(bm, size=1.0)
     for v in bm.verts:
         v.co = ((x0 + x1) / 2 + v.co.x * (x1 - x0), (y0 + y1) / 2 + v.co.y * (y1 - y0), (z0 + z1) / 2 + v.co.z * (z1 - z0))
     _bmesh.ops.recalc_face_normals(bm, faces=bm.faces)
-    _bmesh.ops.reverse_faces(bm, faces=bm.faces)
     me = bpy.data.meshes.new(name)
     bm.to_mesh(me)
     bm.free()
@@ -402,10 +401,9 @@ parapet = add_flat_actor('corridor-parapet',
 # Ground map: one quad, UV so image top (north = +X) is v = 0 and image right (east = −Y) is u = 1.
 _gm = bpy.data.meshes.new('site-map')
 _g = GROUND_HALF
-# Winding pinned to +Z in Blender's convention (CCW seen from above), the same way the corridor
-# box comes out of create_cube + recalc, which WF_CULL=1 keeps; recalc on a lone open quad is a
-# coin toss and the first attempt vanished under culling.
-_gm.from_pydata([(-_g, -_g, 0.0), (_g, -_g, 0.0), (_g, _g, 0.0), (-_g, _g, 0.0)], [], [(0, 3, 2, 1)])
+# Winding pinned to +Z in Blender's hand (counter-clockwise seen from above); a recalc on a
+# lone open quad is a coin toss. The exporter adapts the hand to the engine's.
+_gm.from_pydata([(-_g, -_g, 0.0), (_g, -_g, 0.0), (_g, _g, 0.0), (-_g, _g, 0.0)], [], [(0, 1, 2, 3)])
 _uv = _gm.uv_layers.new(name='UVMap')
 for li, loop in enumerate(_gm.loops):
     x, y, _z = _gm.vertices[loop.vertex_index].co
@@ -422,7 +420,8 @@ site_map['wf_Moves Between Rooms'] = 'True'
 def build_skydome(radius, segs=48, rings=24):
     """Lat/long sphere with explicit UVs: column j at compass θ = 360·j/segs, level position
     (R cosθ cosφ, −R sinθ cosφ, R sinφ) since +X is north and +Y west; u = θ/360, v = (90−φ)/180
-    (WF v = 0 is the top row = zenith, see the site-map note above).
+    (WF v = 0 is the top row = zenith, see the site-map note above). Faces are wound inward in
+    Blender's hand (the player is inside); the exporter adapts the hand.
     One extra seam column (segs+1 vertex columns) so no face straddles u = 1 → 0. Faces are
     wound inward (the player is inside)."""
     verts, uvs = [], []
@@ -451,7 +450,8 @@ def build_skydome(radius, segs=48, rings=24):
     me.update()
     bm = _bmesh.new()
     bm.from_mesh(me)
-    _bmesh.ops.recalc_face_normals(bm, faces=bm.faces)   # Blender-outward == WF-inward: the inner surface faces the player
+    _bmesh.ops.recalc_face_normals(bm, faces=bm.faces)   # outward first …
+    _bmesh.ops.reverse_faces(bm, faces=bm.faces)          # … then inward: the player stands inside
     bm.to_mesh(me)
     bm.free()
     me.update()
@@ -504,13 +504,10 @@ def prism(bm, loop, z0, z1, mat_wall, mat_roof):
             f = bm.faces.new((bot[i], bot[(i + 1) % n], top[(i + 1) % n], top[i]))
             f.material_index = mat_wall
             faces.append(f)
-        # Per prism, while it is still a closed manifold of its own (a global recalc after
-        # welding shared shophouse vertices turned rows into one non-manifold blob and
-        # flipped walls at random): Blender-outward, then reversed, because WF computes
-        # the face normal as (v2−v0)×(v1−v0) — the opposite hand — so Blender-outward is
-        # WF-inward: culled from outside under WF_CULL=1 and lit from the wrong side.
+        # Outward, per prism, while it is still a closed manifold of its own (a global recalc
+        # after welding shared shophouse vertices turned rows into one non-manifold blob and
+        # flipped walls at random). Blender's hand; the exporter adapts to the engine's.
         _bmesh.ops.recalc_face_normals(bm, faces=faces)
-        _bmesh.ops.reverse_faces(bm, faces=faces)
         _bmesh.ops.delete(bm, geom=[fb], context='FACES_ONLY')
         return n + 1
     except ValueError:            # self-touching outline → duplicate face; leave what was built
