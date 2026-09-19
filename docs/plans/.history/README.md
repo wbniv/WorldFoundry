@@ -1,5 +1,6 @@
 | Date | Change |
 |------|--------|
+| [2026-09-19](https://github.com/wbniv/WorldFoundry/commit/ead4d8f2) | docs: index the condo tour and darker-floors plans |
 | [2026-09-19](https://github.com/wbniv/WorldFoundry/commit/6209eba1) | docs: index the condo level plan |
 | [2026-08-05](https://github.com/wbniv/WorldFoundry/commit/a1f2cb8d) | docs: index wf_game runner build plan |
 | [2026-07-07](https://github.com/wbniv/WorldFoundry/commit/781333b7) | docs(plans): index the glTF and VTT-wedge plans |
@@ -8,6 +9,11 @@
 | [2026-06-26](https://github.com/wbniv/WorldFoundry/commit/16d72fa6) | docs: add plan index (docs/plans/README.md) |
 
 <!--history-meta v1
+ead4d8f2	author	Will Norris
+ead4d8f2	added	7
+ead4d8f2	deleted	3
+ead4d8f2	files	1
+ead4d8f2	body	Co-Authored-By: Claude Opus 5 <noreply@anthropic.com>\nClaude-Session: https://claude.ai/code/session_017TmcNaoJVBysfboB3VeC7N
 6209eba1	author	Will Norris
 6209eba1	added	6
 6209eba1	deleted	4
