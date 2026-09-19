@@ -96,13 +96,31 @@ try:
     zs.append(p[2])
     check("partition wall solid", -8.6 < p[1] < -7.9, f"y={p[1]:.2f} vs wall face -8.05 (capsule r≈0.2)")
 
-    # 3. strafe -X into the party wall (x≈±0.05) — blocked, x stays > 0
-    p = hold(JOY_LEFT, lambda p: p[0] < 0.0, 8)
+    # 2b. through the guest-bedroom door (x 2.85..3.65 at y=-8) and the new bath-N door
+    #     (x 0.30..1.10 at y=-2, added to the source model 2026-09-19), then back to the kitchen
+    p = hold(JOY_RIGHT, lambda p: p[0] > 3.2, 8)
+    p = hold(JOY_UP, lambda p: p[1] > -5.0, 8)
+    zs.append(p[2])
+    check("guest-bed door passable", p[1] > -7.9, f"y={p[1]:.2f} x={p[0]:.2f}")
+    p = hold(JOY_LEFT, lambda p: p[0] < 0.75, 8)
+    p = hold(JOY_UP, lambda p: p[1] > -1.2, 8)
+    zs.append(p[2])
+    check("bath-N door passable", p[1] > -1.9, f"y={p[1]:.2f} x={p[0]:.2f} (door y=-2.0)")
+    p = hold(JOY_DOWN, lambda p: p[1] < -5.0, 8)
+    p = hold(JOY_RIGHT, lambda p: p[0] > 3.2, 8)
+    p = hold(JOY_DOWN, lambda p: p[1] < -9.1, 8)
+    p = hold(JOY_LEFT, lambda p: p[0] < 1.0, 8)
+    zs.append(p[2])
+    check("back in kitchen", -9.6 < p[1] < -8.4 and p[0] < 1.2, f"pos={p}")
+
+    # 3. south of the connector (y < -9.55): strafe -X into the party wall — blocked, x stays > 0
+    p = hold(JOY_DOWN, lambda p: p[1] < -10.8, 8)
+    p = hold(JOY_LEFT, lambda p: p[0] < 0.0, 6)
     zs.append(p[2])
     check("party wall solid", 0.0 < p[0] < 0.6, f"x={p[0]:.2f} vs wall face +0.05")
 
-    # 4. walk -Y to the connector doorway (y -9.55..-8.60), strafe -X into 640
-    p = hold(JOY_DOWN, lambda p: p[1] < -9.0, 8)
+    # 4. up into the connector doorway (y -9.55..-8.60), strafe -X into 640
+    p = hold(JOY_UP, lambda p: p[1] > -9.3, 8)
     zs.append(p[2])
     p = hold(JOY_LEFT, lambda p: p[0] < -0.8, 12)
     zs.append(p[2])

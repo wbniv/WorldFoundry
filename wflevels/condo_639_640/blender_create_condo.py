@@ -448,9 +448,14 @@ player['wf_Mobility']              = 'Physics'
 player['wf_Mass']                  = 70.0
 player['wf_Model Type']            = 'Mesh'
 player['wf_Visibility Mailbox']    = 1
-player['wf_Running Acceleration']  = 8.0
+# Calibrated on the bridge (motion profile of a straight walk): ground speed is
+# the terminal velocity of `Running Acceleration` against `Running Deceleration`
+# 0.85 — accel 8 → 0.31 m/s, 40 → 1.55 m/s, 80 → 3.0 m/s (≈ accel/26) — and
+# `Max Ground Speed` never binds at these values. 40 = indoor walking pace.
+# CONDO_ACCEL / CONDO_SPEED override for tour recordings (4 m/s ≈ accel 105).
+player['wf_Running Acceleration']  = float(os.environ.get('CONDO_ACCEL', 40.0))
 player['wf_Running Deceleration']  = 0.85
-player['wf_Max Ground Speed']      = 1.6          # indoor walking pace, m/s
+player['wf_Max Ground Speed']      = float(os.environ.get('CONDO_SPEED', 4.0))
 player['wf_Jumping Acceleration']  = 5.0          # a small hop, not a platformer jump
 player['wf_Falling Acceleration']  = 9.81
 player['wf_Air Acceleration']      = 0.0

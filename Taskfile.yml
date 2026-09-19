@@ -754,7 +754,8 @@ tasks:
     desc: "Condo 205/639+640 walkthrough: convert ~/docs/aircon/units-639-640.blend (CONDO_BLEND= to override) → wflevels/condo_639_640 → standalone .iff. Needs the wf_blender add-on installed."
     deps: [tools-build]
     vars:
-      CONDO_BLEND: '{{.CONDO_BLEND | default "$HOME/docs/aircon/units-639-640.blend"}}'
+      # Task does not expand $HOME inside `sources:` globs — use the template env lookup.
+      CONDO_BLEND: '{{.CONDO_BLEND | default (printf "%s/docs/aircon/units-639-640.blend" (env "HOME"))}}'
     cmds:
       - |
         set -euo pipefail
