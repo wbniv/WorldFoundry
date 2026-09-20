@@ -1,7 +1,7 @@
 # Plan: macOS port — renderer-agnostic runtime bring-up (headless)
 
 **Date:** 2026-05-26
-**Status:** Implemented (authored from Linux); awaiting first Codemagic macOS build.
+**Status:** Implemented (authored from Linux); the first Codemagic macOS build **ran on 2026‑05‑27** and produced three real fix commits — `ab1a0f3a` (missing `Display::MeasureDelta()`, a link error), `a7ee03ba` (`NSBundleAccessor` falls back to `fopen` for absolute paths, a runtime behaviour), `d0dcece2` (delta `timeval` before `ConvertTimeToScalar`, a `Scalar` overflow). The gfx half continues in [2026-09-20-macos-metal-renderer.md](2026-09-20-macos-metal-renderer.md).
 **Companion:** [docs/investigations/2026-05-26-macos-port-estimate.md](../investigations/2026-05-26-macos-port-estimate.md)
 
 ## Context
@@ -55,4 +55,6 @@ The smoke test still works: `-L` calls `ConstructDiskFile(gLevelOverridePath)` d
 
 ## Deferred (TODO)
 
-The real Metal renderer + window (the gfx half, Metal-direct, shared with iOS); re-enabling Jolt + the full scripting roster on macOS once the headless bring-up is green.
+The real Metal renderer + window (the gfx half, Metal-direct, shared with iOS) — now planned in [2026-09-20-macos-metal-renderer.md](2026-09-20-macos-metal-renderer.md).
+
+~~re-enabling Jolt + the full scripting roster on macOS once the headless bring-up is green~~ — **done.** Jolt is the macOS default (`CMakeLists.txt` `WF_PHYSICS_ENGINE=jolt`; the macOS option gate does not override it, and the `-DWF_PHYSICS_ENGINE=legacy` first-build workaround is gone from `codemagic.yaml`'s configure step). The full scripting roster (Lua/Fennel/QuickJS/Wren/zForth + the debug bridge) came back on in `04061deb` (2026‑05‑27); only WAMR remains forced off on macOS.

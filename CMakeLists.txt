@@ -205,9 +205,16 @@ if(ANDROID)
         menu particle audio/linux  # miniaudio impl is portable; dir name is legacy
     )
 elseif(IOS)
-    # Phase 2B2: most of the engine. gfx/gl (X11/GLX) and gfx/glpipeline
-    # (GL-only backend) stay out; iOS renders through hal/ios/metal_view.mm
-    # + (Phase 2B3) a Metal RendererBackend.
+    # Phase 2B2: most of the engine. gfx/gl (X11/GLX) stays out. gfx/glpipeline
+    # also stays out today, but NOT because it is GL-only: since the
+    # RendererBackend seam landed, the eight rend{f,g}{c,t}{l,p}.cc geometry
+    # files there are backend-agnostic (they include only gfx/renderer_backend.hp
+    # and end in RendererBackendGet().DrawTriangle()). backend_modern.cc is the
+    # only genuinely GL-bound file in the directory. Compiling the eight and
+    # skipping backend_modern.cc is Phase 1 of
+    # docs/plans/2026-09-20-macos-metal-renderer.md; until then iOS renders
+    # through hal/ios/metal_view.mm + a Metal RendererBackend and uses the
+    # engine/stubs/renderpoly3d_stubs.cc link stubs.
     # savegame/linux is reused — it's POSIX file I/O, works on Darwin too.
     set(WF_DIRS
         pigsys streams cpplib math memory iff mailbox
@@ -219,8 +226,12 @@ elseif(IOS)
         menu particle audio/linux
     )
 elseif(APPLE)
-    # macOS desktop — mirrors iOS: gfx/gl (X11/GLX) + gfx/glpipeline (GL backend)
-    # excluded; rendering is a no-op. hal/macos provides the entry shell, the
+    # macOS desktop — mirrors iOS: gfx/gl (X11/GLX) excluded, and gfx/glpipeline
+    # excluded too for now. As on the iOS arm above, that exclusion is a
+    # not-yet-done, not a GL dependency: only backend_modern.cc in that directory
+    # is GL-bound. Rendering is a true no-op (engine/stubs/renderer_stub.cc)
+    # until Phase 1 of docs/plans/2026-09-20-macos-metal-renderer.md.
+    # hal/macos provides the entry shell, the
     # headless Display, and GL/window stubs. The portable Linux HAL files
     # (platform_init/audio/input/lifecycle/asset_accessor_posix) are reused
     # explicitly in the macOS stub-sources block below. savegame/linux +

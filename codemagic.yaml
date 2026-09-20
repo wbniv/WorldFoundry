@@ -361,8 +361,10 @@ workflows:
         # CMake build dir — .o files + libwfengine.a + libzforth.a survive
         # between runs so only changed TUs recompile on fix-iterate cycles.
         - build-macos
-        # Jolt extraction — not used today (legacy physics) but cached now so
-        # the first Jolt-enabled build skips the tar -xzf step.
+        # Jolt extraction — Jolt IS the physics engine on macOS (CMakeLists.txt
+        # defaults WF_PHYSICS_ENGINE=jolt and the macOS gate does not override
+        # it; the old -DWF_PHYSICS_ENGINE=legacy is gone from the configure step
+        # below). Caching the extraction keeps the tar -xzf step off every run.
         - engine/vendor/jolt-physics-5.5.0
 
     environment:
