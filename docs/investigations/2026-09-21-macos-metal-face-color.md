@@ -82,6 +82,38 @@ Two independent portability assumptions fail:
 
 Both libc generators already start with the equivalent of seed 1. Explicitly calling `srand(1)` does not make their algorithms identical, and it does not specify which constructor argument receives which draw. The argument order above describes the tested builds, not a portable guarantee of either compiler.
 
+### Argument position is fixed; execution order is not
+
+The first argument always supplies red, the second green, and the third blue:
+
+```cpp
+Color tempColor(rand() % 230 + 26,   // red
+                rand() % 230 + 26,   // green
+                rand() % 230 + 26);  // blue
+```
+
+C++ does not require these expressions to execute left to right. Every `rand()` advances shared generator state, so whichever argument executes first receives the first draw. The compiler does not swap the constructor parameters; it chooses the order in which their values are computed.
+
+To isolate this effect from the different libc algorithms, suppose both platforms produce the same next three channel values: `129, 72, 193`.
+
+| Evaluation order | First draw goes to | Second draw goes to | Third draw goes to | Resulting RGB |
+|---|---|---|---|---|
+| Left to right | Red = 129 | Green = 72 | Blue = 193 | `(129,72,193)` |
+| Right to left | Blue = 129 | Green = 72 | Red = 193 | `(193,72,129)` |
+
+In C++17, parameter initializations are *indeterminately sequenced*: one completes before another, but their relative order is unspecified. This expression therefore has unspecified ordering, not undefined behavior. Left-to-right and right-to-left are the orders observed in these builds; portable code must not assume either, or assume those are the only permitted orders.
+
+The fix sequences the state-changing operations in separate statements:
+
+```cpp
+const auto blue  = uint8_t(Next() % 230 + 26);
+const auto green = uint8_t(Next() % 230 + 26);
+const auto red   = uint8_t(Next() % 230 + 26);
+return {red, green, blue};
+```
+
+Each statement completes before the next. Blue-first deliberately preserves the Linux reference assignment. The final material constructor receives already-computed channel values, so its argument evaluation order no longer affects the color. This solves channel assignment; specifying `Next()`'s portable algorithm separately solves the different random sequences.
+
 [rendfcl.cc](../../wfsource/source/gfx/glpipeline/rendfcl.cc) divides the material channels by 256 before submission. With the matching shading inputs, those colors produce the observed pink and teal pixels. The problematic expression was already present in repository root commit `a2784f6e` (2010-05-01); the new Metal renderer exposed a longstanding shared-code portability defect.
 
 ## Fix and regression protection
