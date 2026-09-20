@@ -760,7 +760,7 @@
 		{ 'NAME' "Light01" }
 		{ 'VEC3' { 'NAME' "Position" } { 'DATA' 188.2500000000000000(1.15.16) -22.0000000000000000(1.15.16) 13.5000000000000000(1.15.16)  //x,y,z
 		} }
-		{ 'EULR' { 'NAME' "Orientation" } { 'DATA' 1.0471975803375244(1.15.16) -0.0000000000000000(1.15.16) 0.0000000000000000(1.15.16)  //a,b,c
+		{ 'EULR' { 'NAME' "Orientation" } { 'DATA' 0.0000000000000000(1.15.16) 0.9948376736367679(1.15.16) 0.9773843811168246(1.15.16)  //a,b,c
 		} }
 		{ 'BOX3' { 'NAME' "Global Bounding Box" } { 'DATA' -0.2500000000000000(1.15.16) -0.2500000000000000(1.15.16) -0.2500000000000000(1.15.16) 0.0000000000000000(1.15.16) 0.0000000000000000(1.15.16) 0.0000000000000000(1.15.16)  //min(x,y,z)-max(x,y,z)
 		} }
@@ -847,16 +847,16 @@
 		{ 'STR' { 'NAME' "Shadow Object Template" } { 'STR' "" } }
 		{ 'I32' { 'NAME' "Check Below Only Once" } { 'DATA' 1l } { 'STR' "True" } }  //False|True
 		{ 'I32' { 'NAME' "Template Object" } { 'DATA' 0l } { 'STR' "False" } }  //False|True
-		{ 'FX32' { 'NAME' "lightRed" } { 'DATA' 1.0000000000000000(1.15.16) } { 'STR' "1.0" } }
-		{ 'FX32' { 'NAME' "lightGreen" } { 'DATA' 1.0000000000000000(1.15.16) } { 'STR' "1.0" } }
-		{ 'FX32' { 'NAME' "lightBlue" } { 'DATA' 1.0000000000000000(1.15.16) } { 'STR' "1.0" } }
+		{ 'FX32' { 'NAME' "lightRed" } { 'DATA' 0.6500000000000000(1.15.16) } { 'STR' "0.650000" } }
+		{ 'FX32' { 'NAME' "lightGreen" } { 'DATA' 0.6500000000000000(1.15.16) } { 'STR' "0.650000" } }
+		{ 'FX32' { 'NAME' "lightBlue" } { 'DATA' 0.6500000000000000(1.15.16) } { 'STR' "0.650000" } }
 		{ 'FX32' { 'NAME' "lightX" } { 'DATA' 0.0000000000000000(1.15.16) } { 'STR' "0.0" } }
 		{ 'FX32' { 'NAME' "lightY" } { 'DATA' 0.0000000000000000(1.15.16) } { 'STR' "0.0" } }
 		{ 'FX32' { 'NAME' "lightZ" } { 'DATA' 0.0000000000000000(1.15.16) } { 'STR' "0.0" } }
 		{ 'I32' { 'NAME' "lightType" } { 'DATA' 0l } { 'STR' "Directional" } }  //Directional|Ambient
-		{ 'FX32' { 'NAME' "lightRed" } { 'DATA' 1.0000000000000000(1.15.16) } { 'STR' "1.000000" } }
-		{ 'FX32' { 'NAME' "lightGreen" } { 'DATA' 1.0000000000000000(1.15.16) } { 'STR' "1.000000" } }
-		{ 'FX32' { 'NAME' "lightBlue" } { 'DATA' 1.0000000000000000(1.15.16) } { 'STR' "1.000000" } }
+		{ 'FX32' { 'NAME' "lightRed" } { 'DATA' 0.6500000000000000(1.15.16) } { 'STR' "0.650000" } }
+		{ 'FX32' { 'NAME' "lightGreen" } { 'DATA' 0.6500000000000000(1.15.16) } { 'STR' "0.650000" } }
+		{ 'FX32' { 'NAME' "lightBlue" } { 'DATA' 0.6500000000000000(1.15.16) } { 'STR' "0.650000" } }
 		{ 'I32' { 'NAME' "lightType" } { 'DATA' 0l } { 'STR' "Directional" } }  //Directional|Ambient
 		{ 'FX32' { 'NAME' "slopeA" } { 'DATA' 0.0000000000000000(1.15.16) } { 'STR' "0.000000" } }
 		{ 'FX32' { 'NAME' "slopeB" } { 'DATA' 0.0000000000000000(1.15.16) } { 'STR' "0.000000" } }
@@ -3873,7 +3873,7 @@
 		{ 'NAME' "Light_coin" }
 		{ 'VEC3' { 'NAME' "Position" } { 'DATA' 12.0000000000000000(1.15.16) -22.0000000000000000(1.15.16) -42.0000000000000000(1.15.16)  //x,y,z
 		} }
-		{ 'EULR' { 'NAME' "Orientation" } { 'DATA' 1.0471975803375244(1.15.16) -0.0000000000000000(1.15.16) 0.0000000000000000(1.15.16)  //a,b,c
+		{ 'EULR' { 'NAME' "Orientation" } { 'DATA' 0.0000000000000000(1.15.16) 0.9948376736367679(1.15.16) 0.9773843811168246(1.15.16)  //a,b,c
 		} }
 		{ 'BOX3' { 'NAME' "Global Bounding Box" } { 'DATA' -0.2500000000000000(1.15.16) -0.2500000000000000(1.15.16) -0.2500000000000000(1.15.16) 0.0000000000000000(1.15.16) 0.0000000000000000(1.15.16) 0.0000000000000000(1.15.16)  //min(x,y,z)-max(x,y,z)
 		} }
@@ -3960,16 +3960,16 @@
 		{ 'STR' { 'NAME' "Shadow Object Template" } { 'STR' "" } }
 		{ 'I32' { 'NAME' "Check Below Only Once" } { 'DATA' 1l } { 'STR' "True" } }  //False|True
 		{ 'I32' { 'NAME' "Template Object" } { 'DATA' 0l } { 'STR' "False" } }  //False|True
-		{ 'FX32' { 'NAME' "lightRed" } { 'DATA' 1.0000000000000000(1.15.16) } { 'STR' "1.0" } }
-		{ 'FX32' { 'NAME' "lightGreen" } { 'DATA' 1.0000000000000000(1.15.16) } { 'STR' "1.0" } }
-		{ 'FX32' { 'NAME' "lightBlue" } { 'DATA' 1.0000000000000000(1.15.16) } { 'STR' "1.0" } }
+		{ 'FX32' { 'NAME' "lightRed" } { 'DATA' 0.6500000000000000(1.15.16) } { 'STR' "0.650000" } }
+		{ 'FX32' { 'NAME' "lightGreen" } { 'DATA' 0.6500000000000000(1.15.16) } { 'STR' "0.650000" } }
+		{ 'FX32' { 'NAME' "lightBlue" } { 'DATA' 0.6500000000000000(1.15.16) } { 'STR' "0.650000" } }
 		{ 'FX32' { 'NAME' "lightX" } { 'DATA' 0.0000000000000000(1.15.16) } { 'STR' "0.0" } }
 		{ 'FX32' { 'NAME' "lightY" } { 'DATA' 0.0000000000000000(1.15.16) } { 'STR' "0.0" } }
 		{ 'FX32' { 'NAME' "lightZ" } { 'DATA' 0.0000000000000000(1.15.16) } { 'STR' "0.0" } }
 		{ 'I32' { 'NAME' "lightType" } { 'DATA' 0l } { 'STR' "Directional" } }  //Directional|Ambient
-		{ 'FX32' { 'NAME' "lightRed" } { 'DATA' 1.0000000000000000(1.15.16) } { 'STR' "1.000000" } }
-		{ 'FX32' { 'NAME' "lightGreen" } { 'DATA' 1.0000000000000000(1.15.16) } { 'STR' "1.000000" } }
-		{ 'FX32' { 'NAME' "lightBlue" } { 'DATA' 1.0000000000000000(1.15.16) } { 'STR' "1.000000" } }
+		{ 'FX32' { 'NAME' "lightRed" } { 'DATA' 0.6500000000000000(1.15.16) } { 'STR' "0.650000" } }
+		{ 'FX32' { 'NAME' "lightGreen" } { 'DATA' 0.6500000000000000(1.15.16) } { 'STR' "0.650000" } }
+		{ 'FX32' { 'NAME' "lightBlue" } { 'DATA' 0.6500000000000000(1.15.16) } { 'STR' "0.650000" } }
 		{ 'I32' { 'NAME' "lightType" } { 'DATA' 0l } { 'STR' "Directional" } }  //Directional|Ambient
 		{ 'FX32' { 'NAME' "slopeA" } { 'DATA' 0.0000000000000000(1.15.16) } { 'STR' "0.000000" } }
 		{ 'FX32' { 'NAME' "slopeB" } { 'DATA' 0.0000000000000000(1.15.16) } { 'STR' "0.000000" } }
@@ -4116,16 +4116,16 @@
 		{ 'STR' { 'NAME' "Shadow Object Template" } { 'STR' "" } }
 		{ 'I32' { 'NAME' "Check Below Only Once" } { 'DATA' 1l } { 'STR' "True" } }  //False|True
 		{ 'I32' { 'NAME' "Template Object" } { 'DATA' 0l } { 'STR' "False" } }  //False|True
-		{ 'FX32' { 'NAME' "lightRed" } { 'DATA' 1.0000000000000000(1.15.16) } { 'STR' "1.0" } }
-		{ 'FX32' { 'NAME' "lightGreen" } { 'DATA' 1.0000000000000000(1.15.16) } { 'STR' "1.0" } }
-		{ 'FX32' { 'NAME' "lightBlue" } { 'DATA' 1.0000000000000000(1.15.16) } { 'STR' "1.0" } }
+		{ 'FX32' { 'NAME' "lightRed" } { 'DATA' 0.4200000000000000(1.15.16) } { 'STR' "0.420000" } }
+		{ 'FX32' { 'NAME' "lightGreen" } { 'DATA' 0.4200000000000000(1.15.16) } { 'STR' "0.420000" } }
+		{ 'FX32' { 'NAME' "lightBlue" } { 'DATA' 0.4200000000000000(1.15.16) } { 'STR' "0.420000" } }
 		{ 'FX32' { 'NAME' "lightX" } { 'DATA' 0.0000000000000000(1.15.16) } { 'STR' "0.0" } }
 		{ 'FX32' { 'NAME' "lightY" } { 'DATA' 0.0000000000000000(1.15.16) } { 'STR' "0.0" } }
 		{ 'FX32' { 'NAME' "lightZ" } { 'DATA' 0.0000000000000000(1.15.16) } { 'STR' "0.0" } }
 		{ 'I32' { 'NAME' "lightType" } { 'DATA' 1l } { 'STR' "Ambient" } }  //Directional|Ambient
-		{ 'FX32' { 'NAME' "lightRed" } { 'DATA' 1.0000000000000000(1.15.16) } { 'STR' "1.000000" } }
-		{ 'FX32' { 'NAME' "lightGreen" } { 'DATA' 1.0000000000000000(1.15.16) } { 'STR' "1.000000" } }
-		{ 'FX32' { 'NAME' "lightBlue" } { 'DATA' 1.0000000000000000(1.15.16) } { 'STR' "1.000000" } }
+		{ 'FX32' { 'NAME' "lightRed" } { 'DATA' 0.4200000000000000(1.15.16) } { 'STR' "0.420000" } }
+		{ 'FX32' { 'NAME' "lightGreen" } { 'DATA' 0.4200000000000000(1.15.16) } { 'STR' "0.420000" } }
+		{ 'FX32' { 'NAME' "lightBlue" } { 'DATA' 0.4200000000000000(1.15.16) } { 'STR' "0.420000" } }
 		{ 'I32' { 'NAME' "lightType" } { 'DATA' 1l } { 'STR' "Ambient" } }  //Directional|Ambient
 		{ 'FX32' { 'NAME' "slopeA" } { 'DATA' 0.0000000000000000(1.15.16) } { 'STR' "0.000000" } }
 		{ 'FX32' { 'NAME' "slopeB" } { 'DATA' 0.0000000000000000(1.15.16) } { 'STR' "0.000000" } }
@@ -4223,16 +4223,16 @@
 		{ 'STR' { 'NAME' "Shadow Object Template" } { 'STR' "" } }
 		{ 'I32' { 'NAME' "Check Below Only Once" } { 'DATA' 1l } { 'STR' "True" } }  //False|True
 		{ 'I32' { 'NAME' "Template Object" } { 'DATA' 0l } { 'STR' "False" } }  //False|True
-		{ 'FX32' { 'NAME' "lightRed" } { 'DATA' 1.0000000000000000(1.15.16) } { 'STR' "1.0" } }
-		{ 'FX32' { 'NAME' "lightGreen" } { 'DATA' 1.0000000000000000(1.15.16) } { 'STR' "1.0" } }
-		{ 'FX32' { 'NAME' "lightBlue" } { 'DATA' 1.0000000000000000(1.15.16) } { 'STR' "1.0" } }
+		{ 'FX32' { 'NAME' "lightRed" } { 'DATA' 0.4200000000000000(1.15.16) } { 'STR' "0.420000" } }
+		{ 'FX32' { 'NAME' "lightGreen" } { 'DATA' 0.4200000000000000(1.15.16) } { 'STR' "0.420000" } }
+		{ 'FX32' { 'NAME' "lightBlue" } { 'DATA' 0.4200000000000000(1.15.16) } { 'STR' "0.420000" } }
 		{ 'FX32' { 'NAME' "lightX" } { 'DATA' 0.0000000000000000(1.15.16) } { 'STR' "0.0" } }
 		{ 'FX32' { 'NAME' "lightY" } { 'DATA' 0.0000000000000000(1.15.16) } { 'STR' "0.0" } }
 		{ 'FX32' { 'NAME' "lightZ" } { 'DATA' 0.0000000000000000(1.15.16) } { 'STR' "0.0" } }
 		{ 'I32' { 'NAME' "lightType" } { 'DATA' 1l } { 'STR' "Ambient" } }  //Directional|Ambient
-		{ 'FX32' { 'NAME' "lightRed" } { 'DATA' 1.0000000000000000(1.15.16) } { 'STR' "1.000000" } }
-		{ 'FX32' { 'NAME' "lightGreen" } { 'DATA' 1.0000000000000000(1.15.16) } { 'STR' "1.000000" } }
-		{ 'FX32' { 'NAME' "lightBlue" } { 'DATA' 1.0000000000000000(1.15.16) } { 'STR' "1.000000" } }
+		{ 'FX32' { 'NAME' "lightRed" } { 'DATA' 0.4200000000000000(1.15.16) } { 'STR' "0.420000" } }
+		{ 'FX32' { 'NAME' "lightGreen" } { 'DATA' 0.4200000000000000(1.15.16) } { 'STR' "0.420000" } }
+		{ 'FX32' { 'NAME' "lightBlue" } { 'DATA' 0.4200000000000000(1.15.16) } { 'STR' "0.420000" } }
 		{ 'I32' { 'NAME' "lightType" } { 'DATA' 1l } { 'STR' "Ambient" } }  //Directional|Ambient
 		{ 'FX32' { 'NAME' "slopeA" } { 'DATA' 0.0000000000000000(1.15.16) } { 'STR' "0.000000" } }
 		{ 'FX32' { 'NAME' "slopeB" } { 'DATA' 0.0000000000000000(1.15.16) } { 'STR' "0.000000" } }

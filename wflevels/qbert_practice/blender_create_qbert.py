@@ -351,31 +351,42 @@ if camera:
 light = find_by_class('light')
 if light:
     light.location = (0, -5, 16)
-    # mm_practice uses (π/2, 0, 0) but that one-direction tilt only lights
-    # one of our 45°-rotated cube's two visible side faces; the other renders
-    # near-black. Add a 45° Z-rotation so the source vector points midway
-    # between the two visible-face normals, giving both sides equal
-    # (~0.707) directional contribution → both lit + shadow side colours
-    # render at consistent half-brightness instead of one being fully dark.
-    light.rotation_euler = (math.pi / 2, 0, math.pi / 4)
+    # Key light, aimed for the classic isometric three-tone cube: blue top
+    # bright, the two visible side faces at different mid values.  Unlike the
+    # SMB levels, qbert's cube mesh is wound OUTWARD (its top face carries a +Z
+    # normal), so this one takes a *positive* altitude.  Verified by capture: at
+    # the mirrored aim the whole pyramid went to pure black.
+    SUN_ALT_DEG = 52.0
+    SUN_AZ_DEG  = 235.0
+    SUN_KEY     = 0.60
+    SUN_AMBIENT = 0.50   # was a fullbright 1.0 crutch until 2026-09-20
+
+    # `Light::Set` reads the direction off the actor's local +X axis and the
+    # shader uses it unnegated (`dot(N, u_light_dir)`), so it is the vector
+    # pointing *toward* the light; Rz(C)·Ry(B)·(1,0,0) = (cos B·cos C,
+    # cos B·sin C, -sin B), hence B = -alt.  The old (π/2, 0, π/4) recipe put
+    # the altitude in the one euler that cannot move +X at all.
+    # See docs/level-building.md § "Lighting" and
+    # docs/plans/2026-09-20-relight-swept-levels.md.
+    light.rotation_euler = (0.0, -math.radians(SUN_ALT_DEG), math.radians(SUN_AZ_DEG))
     light.name = 'Light01'
     light['wf_lightType'] = 'Directional'
-    light['wf_lightRed']   = 1.0
-    light['wf_lightGreen'] = 1.0
-    light['wf_lightBlue']  = 1.0
+    light['wf_lightRed']   = SUN_KEY
+    light['wf_lightGreen'] = SUN_KEY
+    light['wf_lightBlue']  = SUN_KEY
 
     # Ambient — mandatory, not decoration.  `u_ambient` defaults to
     # `Color::black` (game/level.cc), so a face that no Directional light faces
-    # renders pure black.  This level's Directional points along world +X
-    # (rotation_euler's first angle is the X euler, and rotating +X about X is a
-    # no-op on the +X axis `Light::Set` reads the direction from), so nothing the
-    # side-view camera sees is lit by it at all — without this the level is
-    # black.  White, to match the flat look this level has always shipped with.
-    # See docs/plans/2026-09-20-engine-multi-directional-light-fix.md.
+    # renders pure black.  Held a little above the documented 0.4 here because
+    # the pyramid is the only thing on screen and its cubes are already
+    # colour-coded per face.
     ambient = light.copy()
     scene.collection.objects.link(ambient)
     ambient.name = 'AmbientLight'
     ambient['wf_lightType'] = 'Ambient'
+    ambient['wf_lightRed']   = SUN_AMBIENT
+    ambient['wf_lightGreen'] = SUN_AMBIENT
+    ambient['wf_lightBlue']  = SUN_AMBIENT
 
 def _srgb_to_linear(c):
     # sRGB component (0..1) -> linear-light component (0..1).

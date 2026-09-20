@@ -18,6 +18,7 @@ Run:
 Then:
   bash wftools/wf_blender/build_level_binary.sh pilot_demo
 """
+import math
 import os
 import addon_utils
 import bpy
@@ -93,17 +94,37 @@ print("[pilot_demo] classes after strip:", sorted({get_class(o) for o in bpy.dat
 # The dedup above keeps exactly one object per class, so whichever `light` it
 # kept is snowgoons' Directional — and `u_ambient` defaults to `Color::black`
 # (game/level.cc), so a face no Directional light faces renders pure black.
-# snowgoons' Directional points along world +X (rotation_euler's first angle is
-# the X euler, and rotating +X about X is a no-op on the +X axis `Light::Set`
-# reads the direction from), so nothing the camera sees is lit by it: without an
-# Ambient the level is black.  White, matching the flat look it shipped with.
-# See docs/plans/2026-09-20-engine-multi-directional-light-fix.md.
+# As imported it still carries snowgoons' old `(pi/2 - alt, 0, az)` aim, which
+# puts the altitude in the one euler that cannot move the local +X axis
+# `Light::Set` reads the direction from — i.e. an exactly horizontal beam that
+# lights nothing this camera sees.  Re-aim it and give the level a real ~0.4
+# ambient instead of the fullbright 1.0 crutch it carried until 2026-09-20.
+#
+# The vector reaches the shader unnegated (`dot(N, u_light_dir)`), so it points
+# *toward* the light: Rz(C)·Ry(B)·(1,0,0) = (cos B·cos C, cos B·sin C, -sin B),
+# hence B = -alt.  snowgoons' scaffold geometry is wound inward, so this level
+# takes the same negative-altitude aim its parent does.
+# See docs/level-building.md § "Lighting" and
+# docs/plans/2026-09-20-relight-swept-levels.md.
+SUN_ALT_DEG = -52.0
+SUN_AZ_DEG  = 55.0
+SUN_KEY     = 0.65
+SUN_AMBIENT = 0.40
+
 _light = find_by_class('light')
 assert _light is not None, "no light object imported from snowgoons"
+_light.rotation_euler = (0.0, -math.radians(SUN_ALT_DEG), math.radians(SUN_AZ_DEG))
+_light['wf_lightType']  = 'Directional'
+_light['wf_lightRed']   = SUN_KEY
+_light['wf_lightGreen'] = SUN_KEY
+_light['wf_lightBlue']  = SUN_KEY
 _ambient = _light.copy()
 scene.collection.objects.link(_ambient)
 _ambient.name = 'AmbientLight'
 _ambient['wf_lightType'] = 'Ambient'
+_ambient['wf_lightRed']   = SUN_AMBIENT
+_ambient['wf_lightGreen'] = SUN_AMBIENT
+_ambient['wf_lightBlue']  = SUN_AMBIENT
 
 # 4. Retarget the player's Script to PILOT.
 player = find_by_class('player')

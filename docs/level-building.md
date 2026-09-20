@@ -429,15 +429,31 @@ If you author only Directional lights, any face whose normal isn't facing one of
 #
 #     Rz(C)·Ry(B)·(1,0,0) = (cos B·cos C, cos B·sin C, -sin B)
 #
-# B = altitude tips the beam down by that many degrees; C = azimuth is the
-# bearing the light travels toward. The older `(pi/2 - alt, 0, az)` recipe put
-# altitude in A and produced an exactly horizontal beam; it only looked lit from
-# above because of a since-fixed engine bug that leaked the light's *position*
-# into its direction. See docs/plans/2026-09-20-engine-multi-directional-light-fix.md.
+# That vector reaches the shader UNNEGATED (`RenderCamera::SetDirectionalLight`,
+# gfx/camera.hpi:68 → `lit += color * max(0, dot(N, u_light_dir))`,
+# glpipeline/backend_modern.cc:86), so it is the vector pointing *toward* the
+# light — a face is lit when its normal aligns with it. Therefore
+#
+#     B = -radians(alt)   puts the light `alt` degrees ABOVE the horizon
+#     C =  radians(az)    is its bearing
+#
+# ⚠ …for geometry wound outward. Much of the shipped content is wound INWARD —
+# the faces you see carry -Z / +Y normals (docs/level-design-troubleshooting.md,
+# "Mesh face normals & backface culling") — and those levels need the mirrored
+# aim (negative `alt`, azimuth + 180°) for the same visual result. Always verify
+# with a capture: aim the wrong way and every visible face drops to exactly the
+# ambient term. Measured per level in
+# docs/plans/2026-09-20-relight-swept-levels.md (qbert + marble-madness are
+# outward-wound; SMB, snowgoons, pilot_demo and the condo are inward-wound).
+#
+# The older `(pi/2 - alt, 0, az)` recipe put altitude in A and produced an
+# exactly horizontal beam; it only looked lit from above because of a
+# since-fixed engine bug that leaked the light's *position* into its direction.
+# See docs/plans/2026-09-20-engine-multi-directional-light-fix.md.
 light = find_by_class('light')           # or create from scratch
 light.name = 'Sun'
 light.rotation_euler = (0.0,
-                        math.radians(SUN_ALT_DEG),
+                        -math.radians(SUN_ALT_DEG),
                         math.radians(SUN_AZ_DEG))
 light['wf_lightType']  = 'Directional'
 light['wf_lightRed']   = 1.0

@@ -225,28 +225,56 @@ if camera:
     camera['wf_FoggingColor']            = 0x5C94FC
     camera['wf_Model Type'] = 'None'
 
+# ── Lighting ─────────────────────────────────────────────────────────────────
+# Key light + ambient fill.  SUN_ALT_DEG is NEGATIVE on purpose: see
+# wf_light_aim() and docs/level-building.md § "Lighting".
+SUN_ALT_DEG = -57.0
+SUN_AZ_DEG  = 56.0
+SUN_KEY     = 0.65    # Directional grey
+SUN_AMBIENT = 0.42    # Ambient grey (was a fullbright 1.0 crutch until 2026-09-20)
+
+
+def wf_light_aim(alt_deg, az_deg):
+    """Blender `rotation_euler` that aims a WF Directional Light.
+
+    `Light::Set` (game/light.hpi) reads the direction off the actor's local +X
+    axis and hands it to the shader **unnegated** (gfx/camera.hpi:68 →
+    glpipeline/backend_modern.cc:86, `dot(N, u_light_dir)`), so it is the vector
+    pointing *toward* the light: a face is lit when its normal aligns with it.
+
+        Rz(C)·Ry(B)·(1,0,0) = (cos B·cos C, cos B·sin C, -sin B)
+
+    so B = -alt puts the light `alt` degrees above the horizon, and C = az is its
+    bearing.  SMB's block/ground meshes are wound **inward** (the faces the side
+    camera sees carry -Z / +Y normals), so the aim that reads as "sun from above"
+    here is a *negative* altitude — verified by capture, not by theory.
+    See docs/plans/2026-09-20-relight-swept-levels.md.
+    """
+    return (0.0, -math.radians(alt_deg), math.radians(az_deg))
+
+
 light = find_by_class('light')
 if light:
     light.location       = (SCENE_MID_X, CAM_Y + 8, MARIO_Z + 12)
-    light.rotation_euler = (math.pi / 3, 0, 0)   # sun ~60° above horizon
+    light.rotation_euler = wf_light_aim(SUN_ALT_DEG, SUN_AZ_DEG)
     light.name = 'Light01'
     light['wf_lightType']  = 'Directional'
-    light['wf_lightRed']   = 1.0
-    light['wf_lightGreen'] = 1.0
-    light['wf_lightBlue']  = 1.0
+    light['wf_lightRed']   = SUN_KEY
+    light['wf_lightGreen'] = SUN_KEY
+    light['wf_lightBlue']  = SUN_KEY
 
     # Ambient — mandatory, not decoration.  `u_ambient` defaults to
     # `Color::black` (game/level.cc), so a face that no Directional light faces
-    # renders pure black.  This level's Directional points along world +X
-    # (rotation_euler's first angle is the X euler, and rotating +X about X is a
-    # no-op on the +X axis `Light::Set` reads the direction from), so nothing the
-    # side-view camera sees is lit by it at all — without this the level is
-    # black.  White, to match the flat look this level has always shipped with.
-    # See docs/plans/2026-09-20-engine-multi-directional-light-fix.md.
+    # renders pure black.  ~0.4 grey is the documented fill point; the key above
+    # carries the modelling instead of a fullbright ambient.
+    # See docs/plans/2026-09-20-relight-swept-levels.md.
     ambient = light.copy()
     scene.collection.objects.link(ambient)
     ambient.name = 'AmbientLight'
     ambient['wf_lightType'] = 'Ambient'
+    ambient['wf_lightRed']   = SUN_AMBIENT
+    ambient['wf_lightGreen'] = SUN_AMBIENT
+    ambient['wf_lightBlue']  = SUN_AMBIENT
 
 # ── Helpers ───────────────────────────────────────────────────────────────────
 # ── 5. Ground platform ────────────────────────────────────────────────────────
@@ -893,7 +921,7 @@ if light:
     scene.collection.objects.link(coin_light)
     coin_light.name = 'Light_coin'
     coin_light.location = (CR_MID, -22.0, CR_FLOOR_TOP + 6.0)
-    coin_light.rotation_euler = (math.pi / 3, 0, 0)
+    coin_light.rotation_euler = wf_light_aim(SUN_ALT_DEG, SUN_AZ_DEG)
 
     # …and its Ambient, for the same reason as the surface one above: the
     # ambient slot is reset per room, so the coin room needs its own.
@@ -901,6 +929,9 @@ if light:
     scene.collection.objects.link(coin_ambient)
     coin_ambient.name = 'AmbientLight_coin'
     coin_ambient['wf_lightType'] = 'Ambient'
+    coin_ambient['wf_lightRed']   = SUN_AMBIENT
+    coin_ambient['wf_lightGreen'] = SUN_AMBIENT
+    coin_ambient['wf_lightBlue']  = SUN_AMBIENT
 
 # Exit pipe + walk-into warp back to the surface (Mario collects coins L→R then exits).
 EXIT_PIPE_X0, EXIT_PIPE_X1 = 13*T, 15*T
