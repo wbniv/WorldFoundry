@@ -3066,16 +3066,16 @@
 		{ 'STR' { 'NAME' "Shadow Object Template" } { 'STR' "" } }
 		{ 'I32' { 'NAME' "Check Below Only Once" } { 'DATA' 1l } { 'STR' "True" } }  //False|True
 		{ 'I32' { 'NAME' "Template Object" } { 'DATA' 0l } { 'STR' "False" } }  //False|True
-		{ 'FX32' { 'NAME' "lightRed" } { 'DATA' 0.4500000000000000(1.15.16) } { 'STR' "0.45" } }
-		{ 'FX32' { 'NAME' "lightGreen" } { 'DATA' 0.4500000000000000(1.15.16) } { 'STR' "0.45" } }
-		{ 'FX32' { 'NAME' "lightBlue" } { 'DATA' 0.5000000000000000(1.15.16) } { 'STR' "0.5" } }
+		{ 'FX32' { 'NAME' "lightRed" } { 'DATA' 0.3800000000000000(1.15.16) } { 'STR' "0.38" } }
+		{ 'FX32' { 'NAME' "lightGreen" } { 'DATA' 0.3800000000000000(1.15.16) } { 'STR' "0.38" } }
+		{ 'FX32' { 'NAME' "lightBlue" } { 'DATA' 0.4222222222222222(1.15.16) } { 'STR' "0.4222222222222222" } }
 		{ 'FX32' { 'NAME' "lightX" } { 'DATA' 0.0000000000000000(1.15.16) } { 'STR' "0.0" } }
 		{ 'FX32' { 'NAME' "lightY" } { 'DATA' 0.0000000000000000(1.15.16) } { 'STR' "0.0" } }
 		{ 'FX32' { 'NAME' "lightZ" } { 'DATA' 0.0000000000000000(1.15.16) } { 'STR' "0.0" } }
 		{ 'I32' { 'NAME' "lightType" } { 'DATA' 1l } { 'STR' "Ambient" } }  //Directional|Ambient
-		{ 'FX32' { 'NAME' "lightRed" } { 'DATA' 0.4500000000000000(1.15.16) } { 'STR' "0.450000" } }
-		{ 'FX32' { 'NAME' "lightGreen" } { 'DATA' 0.4500000000000000(1.15.16) } { 'STR' "0.450000" } }
-		{ 'FX32' { 'NAME' "lightBlue" } { 'DATA' 0.5000000000000000(1.15.16) } { 'STR' "0.500000" } }
+		{ 'FX32' { 'NAME' "lightRed" } { 'DATA' 0.3800000000000000(1.15.16) } { 'STR' "0.380000" } }
+		{ 'FX32' { 'NAME' "lightGreen" } { 'DATA' 0.3800000000000000(1.15.16) } { 'STR' "0.380000" } }
+		{ 'FX32' { 'NAME' "lightBlue" } { 'DATA' 0.4222222222222222(1.15.16) } { 'STR' "0.422222" } }
 		{ 'I32' { 'NAME' "lightType" } { 'DATA' 1l } { 'STR' "Ambient" } }  //Directional|Ambient
 		{ 'FX32' { 'NAME' "slopeA" } { 'DATA' 0.0000000000000000(1.15.16) } { 'STR' "0.000000" } }
 		{ 'FX32' { 'NAME' "slopeB" } { 'DATA' 0.0000000000000000(1.15.16) } { 'STR' "0.000000" } }
@@ -3096,10 +3096,10 @@
 		{ 'I32' { 'NAME' "Mobility" } { 'STR' "Anchored" } }
 		{ 'I32' { 'NAME' "Model Type" } { 'STR' "Mesh" } }
 		{ 'I32' { 'NAME' "Visibility Mailbox" } { 'DATA' 1l } { 'STR' "1" } }
-		{ 'FX32' { 'NAME' "slopeA" } { 'DATA' 0.0015037593984962(1.15.16) } { 'STR' "0.001504" } }
-		{ 'FX32' { 'NAME' "slopeB" } { 'DATA' 0.0090225563909774(1.15.16) } { 'STR' "0.009023" } }
-		{ 'FX32' { 'NAME' "slopeC" } { 'DATA' 0.0150375939849624(1.15.16) } { 'STR' "0.015038" } }
-		{ 'FX32' { 'NAME' "slopeD" } { 'DATA' 0.2368421052631579(1.15.16) } { 'STR' "0.236842" } }
+		{ 'FX32' { 'NAME' "slopeA" } { 'DATA' 0.0000000000468222(1.15.16) } { 'STR' "0.000000" } }
+		{ 'FX32' { 'NAME' "slopeB" } { 'DATA' 0.0086410053011288(1.15.16) } { 'STR' "0.008641" } }
+		{ 'FX32' { 'NAME' "slopeC" } { 'DATA' 0.0078554595443833(1.15.16) } { 'STR' "0.007855" } }
+		{ 'FX32' { 'NAME' "slopeD" } { 'DATA' 0.1237234878240377(1.15.16) } { 'STR' "0.123723" } }
 	}
 	{ 'OBJ' 
 		{ 'NAME' "639-front-strip-S-wall-jamb0" }
@@ -3552,10 +3552,10 @@
 		{ 'I32' { 'NAME' "Mobility" } { 'STR' "Anchored" } }
 		{ 'I32' { 'NAME' "Model Type" } { 'STR' "Mesh" } }
 		{ 'I32' { 'NAME' "Visibility Mailbox" } { 'DATA' 1l } { 'STR' "1" } }
-		{ 'FX32' { 'NAME' "slopeA" } { 'DATA' -0.0419907247916914(1.15.16) } { 'STR' "-0.041991" } }
-		{ 'FX32' { 'NAME' "slopeB" } { 'DATA' 0.0219756319647123(1.15.16) } { 'STR' "0.021976" } }
-		{ 'FX32' { 'NAME' "slopeC" } { 'DATA' 0.0119474313022700(1.15.16) } { 'STR' "0.011947" } }
-		{ 'FX32' { 'NAME' "slopeD" } { 'DATA' 0.1881720430107527(1.15.16) } { 'STR' "0.188172" } }
+		{ 'FX32' { 'NAME' "slopeA" } { 'DATA' -0.0254014498899080(1.15.16) } { 'STR' "-0.025401" } }
+		{ 'FX32' { 'NAME' "slopeB" } { 'DATA' 0.0122231785331587(1.15.16) } { 'STR' "0.012223" } }
+		{ 'FX32' { 'NAME' "slopeC" } { 'DATA' 0.0070274088413070(1.15.16) } { 'STR' "0.007027" } }
+		{ 'FX32' { 'NAME' "slopeD" } { 'DATA' 0.1106816892505846(1.15.16) } { 'STR' "0.110682" } }
 	}
 	{ 'OBJ' 
 		{ 'NAME' "640-master-bed-S-wall-W" }

@@ -24,6 +24,7 @@ import re
 import sys
 
 import addon_utils
+import bmesh
 import bpy
 from mathutils import Matrix, Vector
 
@@ -84,6 +85,13 @@ ROOM_HALF     = (170.0, 170.0, 16.0)         # levcomp places an actor by its me
 NUM_MAILBOXES = 100
 SUN_ALT_DEG   = 50.0
 SUN_AZ_DEG    = 30.0
+# Fill light: the engine's idle 2nd directional slot, aimed roughly opposite the
+# sun so walls the sun misses still get a directional term (CONDO_FILL_AZ_DEG /
+# CONDO_FILL_INTENSITY override). CONDO_AMBIENT sets the flat ambient level.
+FILL_AZ_DEG    = float(os.environ.get('CONDO_FILL_AZ_DEG', 195.0))
+FILL_ALT_DEG   = 35.0
+FILL_INTENSITY = float(os.environ.get('CONDO_FILL_INTENSITY', 0.0))   # 0 = off; see § 8
+AMBIENT        = float(os.environ.get('CONDO_AMBIENT', 0.38))
 
 # ── 1. Clean scene, enable add-on, import the snowgoons scaffold ─────────────
 bpy.ops.wm.read_factory_settings(use_empty=True)
@@ -318,6 +326,122 @@ for shell_name in ('unit-639', 'unit-640'):
     shell = bpy.data.objects.get(shell_name)
     if shell:
         print(f"[condo] {shell_name}: {darken_floors(shell, FLOOR_SHADE)} floor faces at shade {FLOOR_SHADE}")
+
+# ── 3c. Seams: fake the contact AO the engine cannot compute ────────────────
+# The renderer is pure per-vertex `ambient + Σ directional·max(0,N·L)` with no
+# shadows and no AO (gfx/glpipeline/backend_modern.cc), so two walls meeting at
+# 90° and a wall meeting the ceiling are shaded identically — the corner is
+# invisible. Same per-face-material-tint trick as darken_floors(), but the face
+# selector is "close to a seam" instead of "floor top":
+#   (a) a thin z-band of every wall at the floor (z≈0) and ceiling (z≈WALL_H);
+#   (b) a thin strip either side of a *concave* wall/wall corner edge.
+# Walls are authored as single full-height quads (z 0→2.7), so there is nothing
+# to select until the mesh is cut: bisect first, then tint the offcuts.
+SEAM_SHADE = float(os.environ.get('CONDO_SEAM_SHADE', 0.75))
+SEAM_BAND  = 0.12       # metres of darkened strip either side of a seam
+_VERT_N    = 0.30       # |normal.z| below this counts as a wall face
+_PERP_N    = 0.35       # |dot(nA,nB)| below this counts as a ~90° corner
+
+
+def darken_seams(obj, shade, band=SEAM_BAND):
+    """Retint a `band`-wide strip of each wall along the floor line, the ceiling
+    line and every concave wall/wall corner. Returns (floor, ceiling, corner)
+    face counts. Geometry is only subdivided, never moved, so the Jolt trimesh
+    surface — and therefore collision — is unchanged."""
+    me = obj.data
+    if not me.materials or shade >= 0.999:
+        return (0, 0, 0)
+
+    bm = bmesh.new()
+    bm.from_mesh(me)
+
+    def is_wall(f):
+        return abs(f.normal.z) < _VERT_N
+
+    # (a) horizontal cuts at the top of the floor band and the bottom of the
+    # ceiling band — one bisect each, across the whole shell.
+    for z in (band, WALL_H - band):
+        bmesh.ops.bisect_plane(
+            bm, geom=list(bm.verts) + list(bm.edges) + list(bm.faces),
+            plane_co=(0.0, 0.0, z), plane_no=(0.0, 0.0, 1.0),
+            clear_inner=False, clear_outer=False)
+    bm.normal_update()
+
+    # (b) concave wall/wall corners: a vertical edge with exactly two wall faces
+    # whose normals are ~perpendicular, and whose neighbour sits *in front of*
+    # this face's normal (dot(nA, cB - cA) > 0 ⇒ interior corner, not an outside
+    # one). Cut each of the two faces parallel to the shared edge, `band` away.
+    corner_lines = []
+    for e in list(bm.edges):
+        if len(e.link_faces) != 2:
+            continue
+        ev = e.verts[1].co - e.verts[0].co
+        if ev.length < 1e-6 or abs(ev.normalized().z) < 0.9:
+            continue                                  # not a vertical edge
+        fa, fb = e.link_faces
+        if not (is_wall(fa) and is_wall(fb)):
+            continue
+        if abs(fa.normal.dot(fb.normal)) > _PERP_N:
+            continue                                  # not a ~90° meeting
+        if fa.normal.dot(fb.calc_center_median() - fa.calc_center_median()) <= 0:
+            continue                                  # convex (outside) corner
+        p = e.verts[0].co.copy()
+        corner_lines.append((p.x, p.y))
+        for f in (fa, fb):
+            # in-plane horizontal direction, pointing from the edge into the face
+            d = f.normal.cross(Vector((0.0, 0.0, 1.0)))
+            if d.length < 1e-6:
+                continue
+            d.normalize()
+            if d.dot(f.calc_center_median() - p) < 0:
+                d = -d
+            bmesh.ops.bisect_plane(
+                bm, geom=list(f.verts) + list(f.edges) + [f],
+                plane_co=p + d * band, plane_no=d,
+                clear_inner=False, clear_outer=False)
+    bm.normal_update()
+
+    bm.to_mesh(me)
+    bm.free()
+    me.update()
+
+    # Tint pass on the now-subdivided mesh. One darkened material per source
+    # material (same dedup as darken_floors), never one per polygon.
+    seam_mats = {}
+    counts = {'floor': 0, 'ceil': 0, 'corner': 0}
+    for pg in me.polygons:
+        if abs(pg.normal.z) >= _VERT_N:
+            continue
+        c = pg.center
+        if c.z <= 1e-4 or c.z >= WALL_H - 1e-4:
+            continue                                  # skirt / cap, not a wall
+        if c.z < band:
+            kind = 'floor'
+        elif c.z > WALL_H - band:
+            kind = 'ceil'
+        elif any(abs(c.x - lx) < band and abs(c.y - ly) < band for lx, ly in corner_lines):
+            kind = 'corner'
+        else:
+            continue
+        src_i = pg.material_index
+        if src_i not in seam_mats:
+            src = me.materials[src_i]
+            r, g, b, _a = src.diffuse_color
+            dark = make_flat_material(f'seam-{src.name}-{shade:.2f}',
+                                      (r * shade, g * shade, b * shade))
+            me.materials.append(dark)
+            seam_mats[src_i] = len(me.materials) - 1
+        pg.material_index = seam_mats[src_i]
+        counts[kind] += 1
+    return (counts['floor'], counts['ceil'], counts['corner'])
+
+
+for shell_name in ('unit-639', 'unit-640'):
+    shell = bpy.data.objects.get(shell_name)
+    if shell:
+        nf, nc, nk = darken_seams(shell, SEAM_SHADE)
+        print(f"[condo] {shell_name}: {nf} floor-seam, {nc} ceiling-seam, {nk} corner-seam "
+              f"faces at shade {SEAM_SHADE} (band {SEAM_BAND} m)")
 
 # ── 4. Room outlines → named `target` locators (bbox = room, no Jolt body) ───
 target_proto = find_by_class('target')
@@ -877,9 +1001,49 @@ scene.collection.objects.link(ambient)
 ambient.name = 'AmbientLight'
 ambient.location = (0.0, -8.0, 8.0)
 ambient['wf_lightType']  = 'Ambient'
-ambient['wf_lightRed']   = 0.45
-ambient['wf_lightGreen'] = 0.45
-ambient['wf_lightBlue']  = 0.50
+# 0.45 → 0.38 (still inside the 0.3–0.5 fill band documented in
+# docs/level-building.md § "Lighting"): the flat ambient term carries less of the
+# image so the two directional terms — and the gradient between differently
+# angled walls — read more strongly. Same slightly-cool grey ratio as before.
+ambient['wf_lightRed']   = AMBIENT
+ambient['wf_lightGreen'] = AMBIENT
+ambient['wf_lightBlue']  = AMBIENT * (0.50 / 0.45)
+
+# Second directional slot — DISABLED by default (CONDO_FILL_INTENSITY=0).
+#
+# The plan assumed this was pure authoring: the render camera does offer 3
+# directional slots (RB_MAX_LIGHTS, gfx/camera.hpi) and
+# RenderCamera::SetDirectionalLight range-checks against MAX_LIGHTS. But the
+# actor→light path in front of it does not deliver them. Adding a third `light`
+# actor makes wf_game die on `assert(ambientLightIndex < 1)`
+# (game/level.cc:1200), and it still dies when *all three* actors are authored
+# `lightType = Directional` (DATA 0l) in condo_639_640.lev — verified by hand-
+# patching the .lev and rebuilding. So the 2nd and 3rd Light actors are read as
+# AMBIENT_LIGHT at runtime regardless of what is authored: Light::Type() reads
+# getOad()->lightType (game/light.hpi:63) and is not picking up the per-actor
+# OAD blob. That is an engine/levcomp defect, not a level-script one, and
+# fixing it is outside this plan's scope.
+#
+# The code below is kept, wired and documented so the fill light is one env var
+# away once that defect is fixed: CONDO_FILL_INTENSITY=0.35 re-enables it.
+if FILL_INTENSITY > 0.0:
+    fill = light.copy()
+    fill.data = light.data.copy() if light.data else None
+    scene.collection.objects.link(fill)
+    fill.name = 'FillLight'
+    fill.location = (0.0, -8.0, 8.0)
+    fill.rotation_euler = (math.pi / 2 - math.radians(FILL_ALT_DEG), 0.0, math.radians(FILL_AZ_DEG))
+    fill['wf_lightType']  = 'Directional'
+    fill['wf_lightRed']   = FILL_INTENSITY * 0.85
+    fill['wf_lightGreen'] = FILL_INTENSITY * 0.92
+    fill['wf_lightBlue']  = FILL_INTENSITY * 1.00
+    fill['wf_Model Type'] = 'None'
+    print(f"[condo] lights: Sun az {SUN_AZ_DEG}° alt {SUN_ALT_DEG}°, FillLight az {FILL_AZ_DEG}° "
+          f"alt {FILL_ALT_DEG}° intensity {FILL_INTENSITY}, Ambient {AMBIENT:.2f}")
+else:
+    print(f"[condo] lights: Sun az {SUN_AZ_DEG}° alt {SUN_ALT_DEG}°, Ambient {AMBIENT:.2f}; "
+          f"FillLight disabled (2nd Light actor reads as AMBIENT at runtime — "
+          f"level.cc:1200 assert; set CONDO_FILL_INTENSITY>0 once fixed)")
 
 matte = find_by_class('matte')
 assert matte is not None
