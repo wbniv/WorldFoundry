@@ -1,10 +1,16 @@
 | Date | Change |
 |------|--------|
+| [2026-09-20](https://github.com/wbniv/WorldFoundry/commit/00623f5d) | docs(plans): Phase 1 result — 1563 triangles/frame, §2.1 confirmed |
 | [2026-09-20](https://github.com/wbniv/WorldFoundry/commit/41510bae) | refactor(memory): measure the array cookie instead of switching on it |
 | [2026-09-20](https://github.com/wbniv/WorldFoundry/commit/ce9bf2d9) | docs(plans): record Phase 0 verification for the macOS Metal renderer |
 | [2026-09-20](https://github.com/wbniv/WorldFoundry/commit/72f650bd) | docs(plans): scope the macOS Metal renderer port |
 
 <!--history-meta v1
+00623f5d	author	Will Norris
+00623f5d	added	61
+00623f5d	deleted	0
+00623f5d	files	1
+00623f5d	body	The gate cleared on the first run. macos-smoke.log reports one distinct value\nacross every rendered frame — 29 EndFrame calls, all DrawTriangle=1563, 45327\ntotal, zero asserts. Non-zero and exactly stable, so the eight\nrend{f,g}{c,t}{l,p}.cc files really are backend-agnostic and the plan's largest\nuncertainty is retired: "write eight Metal RenderPoly3D implementations" was\nnever work, it was a CMake change.\n\nVerification step 7 filled in with raw output per ~/CLAUDE.md's format, plus two\ndetails recorded rather than glossed:\n\n- 29 EndFrame calls for 30 StepFrames. The render block is gated on\n  camera()->ValidView() (game.cc:584), so one step drew nothing — most likely\n  the first, before the camera handler produces a valid view. Explicitly marked\n  NOT PROVEN from this log, because the counter numbers EndFrame calls rather\n  than StepFrame calls and so cannot say which step was skipped. Harmless for\n  this gate; it matters for Phase 2, which compares Metal's count against this\n  reference, so the note says to count StepFrames before leaning on the number.\n- --memory-test still passes on this build and still measures a 16-byte cookie,\n  so pulling eight new TUs into the macOS build didn't disturb the Phase 0 fix.\n\nTODO's macOS Metal item stays Open with Phases 0+1 struck and the real remaining\nwork named (Phase 2 encoder+depth, Phase 3 textures incl. the open §D4 design\ncall, Phase 4 window); a Done line records the Phase 1 milestone itself.\n\nCo-Authored-By: Claude Opus 5 (1M context) <noreply@anthropic.com>\nClaude-Session: https://claude.ai/code/session_015ksFy3ZSSz2XMdto3jVA9v
 41510bae	author	Will Norris
 41510bae	added	17
 41510bae	deleted	5

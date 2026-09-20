@@ -114,6 +114,8 @@ This cannot be papered over — it is the difference between flat-shaded geometr
 
 Neither is clean. (a) is the right long-term shape and the wrong thing to do while the renderer is unproven; (b) is a hazard shaped exactly like a use-after-free. My lean is **(b) behind an explicit destroy-notification callback for Phase 3, converting to (a) in a follow-up once Metal is drawing** — but this is close enough that it is written up as an open decision, not a settled one.
 
+**Decided (Will, 2026-09-20): (a).** Widen the `RendererBackend` seam now rather than staging through the sidecar — accept the cross-platform `pixelmap.*` change and its regression surface on Linux/Android/Web. By Phase 3, Phases 0-1 will have already exercised the Linux/macOS shared path enough that this is a reasonable time to take that risk; the sidecar's use-after-free hazard is a worse trade than a well-tested refactor of already-passing platforms.
+
 ### D5 — Windowing: GLFW, with a stated escape hatch
 
 GLFW is already in-tree at `third_party/glfw` and already linked by the editor (`CMakeLists.txt:1244`, `:1303`) — but configured **X11-only** (`GLFW_BUILD_WAYLAND OFF`, and the surrounding block at `:1210-1244` is explicitly the editor's X11/GLX host). Using it for `wf_game` on macOS means enabling its Cocoa backend and linking it into the *game* target for the first time.
@@ -251,7 +253,7 @@ That leaves a budget that is *decent* for a gate and *terrible* for a shader loo
 
 **O2 — Is a macOS renderer the goal, or is the editor?** The investigation's §8 makes a sharp point: *"the playable game is a near-free byproduct of building the editor"*, and the editor's viewport embed needs the same offscreen `MTLTexture` target as Phase 2. If macOS `wf_edit` is the real destination, Phase 2's offscreen target should be designed as the editor's handshake surface from the start (replacing the GLX-typed `gfx/host_gl_context.h`) rather than retrofitted. That is a scope question about *why* this work is happening, and it is not mine to answer.
 
-**O3 — Texture ownership: widen the seam, or sidecar?** D4(a) vs D4(b). (a) is the correct shape and puts working Linux/Android/Web texture code at risk while the Metal path is still unproven; (b) is contained but is a pointer-keyed cache over objects that do not announce their own destruction (`gfx/pixelmap.cc:106`). I lean (b)-then-(a) and flag that I am genuinely unsure.
+**O3 — Texture ownership: widen the seam, or sidecar? RESOLVED (Will, 2026-09-20): (a), widen the seam.** See D4.
 
 **O4 — GLFW-for-`wf_game`, or a bespoke `NSWindow` host?** D5 recommends GLFW for editor/runtime parity, which means enabling GLFW's Cocoa backend and linking GLFW into `wf_game` for the first time on any platform (today only `wf_edit` links it, `CMakeLists.txt:1303`). A ~150-line AppKit host avoids that coupling at the price of forking input. This is an ergonomics-vs-sharing trade of the exact kind the brief says not to guess at.
 
