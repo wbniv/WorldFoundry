@@ -36,6 +36,11 @@
 
 #import <Metal/Metal.h>
 #import <simd/simd.h>
+// CAMetalLayer / CAMetalDrawable for the Phase 4 windowed path. Metal.h does
+// NOT pull these in — they are QuartzCore types — which is what broke build
+// 6ab051f8b90e9b17b45ad5b1. Present on both Apple targets, and QuartzCore is
+// already linked on each.
+#import <QuartzCore/CAMetalLayer.h>
 
 #include <gfx/renderer_backend.hp>
 #include <gfx/pixelmap.hp>
@@ -805,8 +810,6 @@ OffscreenTarget sOffscreen;
 // Shares the depth attachment and the encoder handoff with the offscreen path;
 // only the colour attachment and the present differ.
 id<CAMetalDrawable>  sDrawable        = nil;
-id<MTLTexture>       sLastPresented   = nil;   // for --capture-frame readback
-bool                 sUsingLayer      = false;
 unsigned long        sPresentedCount  = 0;
 
 #endif  // WF_TARGET_MACOS
@@ -900,9 +903,9 @@ void EndFrame()
 bool ReadbackRGBA8(unsigned char* dst, int width, int height)
 {
     if (!dst || !sOffscreen.haveFrame) return false;
-    // Follow whichever target the frame actually went to, so --capture-frame
-    // works identically windowed and headless.
-    id<MTLTexture> src = sUsingLayer ? sLastPresented : sOffscreen.color;
+    // One source for both modes: the windowed path blits its drawable into
+    // sOffscreen.color before presenting (see EndFrameToLayer).
+    id<MTLTexture> src = sOffscreen.color;
     if (!src) return false;
     if ((NSUInteger)width  != [src width] ||
         (NSUInteger)height != [src height]) return false;
@@ -976,7 +979,6 @@ bool BeginFrameToLayer(void* caMetalLayer, int width, int height)
     vp.znear   = 0.0; vp.zfar = 1.0;
     [sOffscreen.enc setViewport:vp];
 
-    sUsingLayer = true;
     sMetalBackend.SetCurrentEncoder(sOffscreen.enc);
     return true;
 }
@@ -988,9 +990,26 @@ void EndFrameToLayer()
     [sOffscreen.enc endEncoding];
     sMetalBackend.ClearCurrentEncoder();
 
-    // Keep the drawable's texture readable for --capture-frame. The layer is
-    // created with framebufferOnly = NO precisely so this is allowed.
-    sLastPresented = sDrawable.texture;
+    // Copy the drawable into the offscreen colour texture so --capture-frame
+    // can read it. NOT a direct getBytes on the drawable: a CAMetalLayer
+    // drawable's storage mode is the layer's business and may be private, in
+    // which case a CPU read is invalid. sOffscreen.color is Managed, is already
+    // the drawable's size (EnsureTextures ran in BeginFrameToLayer), and the
+    // synchronize below makes it CPU-visible — so one readback path serves both
+    // windowed and headless modes.
+    if (sOffscreen.color)
+    {
+        id<MTLBlitCommandEncoder> copy = [sOffscreen.cmd blitCommandEncoder];
+        [copy copyFromTexture:sDrawable.texture
+                  sourceSlice:0 sourceLevel:0
+                 sourceOrigin:MTLOriginMake(0, 0, 0)
+                   sourceSize:MTLSizeMake(sOffscreen.width, sOffscreen.height, 1)
+                    toTexture:sOffscreen.color
+             destinationSlice:0 destinationLevel:0
+            destinationOrigin:MTLOriginMake(0, 0, 0)];
+        [copy synchronizeResource:sOffscreen.color];
+        [copy endEncoding];
+    }
 
     [sOffscreen.cmd presentDrawable:sDrawable];
     [sOffscreen.cmd commit];

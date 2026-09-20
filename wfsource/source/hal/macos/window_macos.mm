@@ -199,8 +199,12 @@ bool Create(int width, int height, bool fullscreen, const char* title)
     g_layer.device          = MTLCreateSystemDefaultDevice();
     g_layer.pixelFormat     = MTLPixelFormatBGRA8Unorm;
     g_layer.framebufferOnly = NO;   // NO so --capture-frame can read it back
-    [view setWantsLayer:YES];
+    // setLayer: BEFORE setWantsLayer: — that order makes the view LAYER-HOSTING
+    // (it adopts our CAMetalLayer). The reverse order makes it layer-BACKED:
+    // AppKit creates its own layer first and ours becomes a sublayer, which
+    // renders but resizes and scales on AppKit's terms, not ours.
     [view setLayer:g_layer];
+    [view setWantsLayer:YES];
 
     SyncDrawableSize();
 
