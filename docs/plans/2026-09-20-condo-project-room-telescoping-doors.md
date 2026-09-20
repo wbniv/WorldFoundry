@@ -160,6 +160,42 @@ telescope to exactly one panel width).
 
 </details>
 
+## Real sliding motion — next iteration (2026‑09‑20)
+
+A follow-up (`docs/plans/2026-09-20-jolt-kinematic-position-sync.md`) set out to fix
+Jolt collision-sync for scripted position writes, on the assumption (from the original
+research pass, now known wrong) that a moving rigid actor's collision stays stale behind
+its mesh. Implementation found the opposite: `PhysicalAttributes::Update()`
+(`wfsource/source/physics/jolt/physical.hpi:22-28`) already pushes an actor's `_position`
+into its Jolt body **unconditionally, every physics frame**, for any actor with a
+`JoltBodyID` — not just character-controlled ones. **Scripted position-mailbox writes on
+a solid rigid actor already move its collision correctly, today, with no engine change.**
+(The one real limitation: it's a teleport, not a swept move, so a *fast* mover could in
+principle pass through a character without pushing it aside — irrelevant at door speeds.
+See that plan's Status section for the full finding.)
+
+This removes Blocker 1's premise for the *visibility-swap* design specifically — it does
+not need a collision-toggle mailbox to exist. A different, better design sidesteps it
+entirely: instead of two static mesh **states** toggled by `Visibility Mailbox` (both
+`Mass 0`, collision never real), author the three panels as **three individual actors
+that are always solid** (`Mass` > 0, like any ordinary wall) and let the two movable ones
+physically slide between their closed bay and the gather bay via a per-tick Forth script
+writing their local `X_POS` mailbox — the `fsn_flydown()` lerp-over-time pattern
+(`engine/stubs/scripting_zforth.cc:189-201`), triggered off the same `zone-project-doors`
+proximity mailboxes (91/92) already built. When "closed," each panel is solid and
+occupies its bay, genuinely blocking the doorway — no visual cue standing in for
+physics. When "open," the panels have physically relocated into the gather bay
+(`x 6.47→7.80`, on their existing 3 parallel Y-tracks, `DOOR_TRACK_D` apart — no
+Z-fighting) and aren't blocking anything, because they simply aren't there anymore,
+which is how a real telescoping door works. The fixed panel never scripts — it's just a
+normal solid actor at rest in the gather bay from the start.
+
+Not yet implemented. Tracked as the next iteration on this plan rather than a separate
+plan, since it changes this same feature's mechanism, not its geometry or wall
+identification. Superseded design (the `Visibility Mailbox` two-state swap, `Mass 0`
+both states) stays shipped and live (`CONDO_DOORS=1`) until this lands — it is a strict
+improvement, not a prerequisite fix, so there's no reason to ship broken in between.
+
 ## Out of scope
 
 - ~~Resolving what's beyond the north wall when open (balcony? patio? open air 6 stories
