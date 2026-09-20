@@ -24,13 +24,15 @@ helpers (`add_zone`, the `platform` look‑target pattern, the Director multiple
 2. **`cs_master`** — POV, `Relative` offset **(−1.8, 0, 1.7)**: eye height, 1.8 m in −X.
    From anywhere in the strip that is x ≤ −8.1 — past the glass and past unit‑640's actor bbox
    (min x −7.95), in free air, so the physics camera never "collides" and climbs. `Fixed`,
-   `Follow = CamTarget`, `Track Object = Player`, `Target = MasterLook`, pan time 0.7 s.
+   `Follow = CamTarget`, `Track Object = Player`, `Target = MasterLook`. The current shot uses
+   a 52° FOV and a 1.0 s blend.
 3. **`MasterLook`** — scripted `platform` (moon `launch_tracker` pattern), mailbox **96** =
    level time the strip was entered (Director sets/zeroes it like 97 for the balcony). Pans
-   over `BALCONY_SWEEP_S` = 5 s from **(−9.5, −6.0, −0.3)** — south‑east, 2° down at Soi 34
-   and Sathu Pradit Road — to **(−9.5, 6.0, 2.7)** — south‑west, 14° up at the river loop and
-   the sky — crossing KCC mid‑pan. Offsets are relative to the camshot's authored point,
-   i.e. world (−1.8 − 9.5, ±6, 17.45 + dz); animates Y and Z via `INDEXOF_Y_POS` / `Z_POS`.
+   over `BALCONY_SWEEP_S` = 5 s with smoothstep easing from **(−18, −11, 0.6)** — a distant,
+   slightly lowered view over Soi 34 — to **(−18, 2, 2.0)** — slightly above the river-loop
+   horizon — crossing KCC and the bridge skyline mid‑pan. The original x = −9.5 start target
+   was only about 1.2 m from the camera at the tour stop and therefore aimed ~59° down into
+   a nearby roof; the distant targets correct that geometry rather than masking it with timing.
 4. **Director** — forwards 98 (interior), 99 (balcony), 95 (master) in that order, zeroing
    each; maintains 97 and 96.
 5. **Tour** — waypoint 19 `(−1.5, −5.0)` loses its `room` (a corner now); new waypoint
@@ -109,3 +111,26 @@ HOLD 639-patio            t= 20.78s wall= 21.82s pos=(6.63,-1.10) inside=True
 ```
 
 **PASS** (same recording, POV visible at both patio cues).
+
+## Pan-quality revision (2026‑09‑20)
+
+Both exterior shots now use a 52° FOV, one-second doll-house/POV blend, and smoothstep
+target motion. The master targets moved from the near-field `(-9.5,-6,-0.3) →
+(-9.5,6,2.7)` path to the distant near-horizon path documented above. The patio targets
+likewise changed to `(-6,15,0.6) → (8,15,2.0)`, and its trigger begins at y = −1.55 so
+the camera does not cut while the player is crossing the glass-door plane. The tour holds
+five seconds at the main patio viewpoint and one second at the recessed stop, keeping the
+overall six-second patio dwell while making the sweep stationary.
+
+```
+HOLD 639-patio            t=13.60s wall=103.87s inside=True
+HOLD 639-patio-recessed   t=19.60s wall=149.39s inside=True
+HOLD 640-master-bed       t=33.40s wall=249.44s inside=True
+TOUR_DONE t=46.20s wall=347.61s
+RESULT: PASS  …/tour-639.mp4 (40.400000s, 640x480; raw 342.0s; 11 rooms)
+```
+
+**PASS.** Frame samples across both cues keep the horizon in the middle third. The patio
+pan no longer begins during the door crossing, and the master pan no longer dives into a
+roof; it sweeps across the low-rise site, KCC, and the bridge silhouettes before returning
+indoors. The exact 11-room order and open-door completion checks also passed.

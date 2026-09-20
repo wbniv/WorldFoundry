@@ -2422,14 +2422,14 @@
 	}
 	{ 'OBJ' 
 		{ 'NAME' "BalconyLook" }
-		{ 'VEC3' { 'NAME' "Position" } { 'DATA' -6.0000000000000000(1.15.16) 9.5000000000000000(1.15.16) 15.4499998092651367(1.15.16)  //x,y,z
+		{ 'VEC3' { 'NAME' "Position" } { 'DATA' -6.0000000000000000(1.15.16) 15.0000000000000000(1.15.16) 16.3500003814697266(1.15.16)  //x,y,z
 		} }
 		{ 'EULR' { 'NAME' "Orientation" } { 'DATA' 0.0000000000000000(1.15.16) -0.0000000000000000(1.15.16) 0.0000000000000000(1.15.16)  //a,b,c
 		} }
 		{ 'STR' { 'NAME' "Class Name" } { 'DATA' "platform" } }
 		{ 'I32' { 'NAME' "Mobility" } { 'STR' "Anchored" } }
 		{ 'FX32' { 'NAME' "Mass" } { 'DATA' 0.0000000000000000(1.15.16) } { 'STR' "0.0" } }
-		{ 'STR' { 'NAME' "Script" } { 'STR' "\\ wf\n97 read-mailbox dup 0 <> if INDEXOF_TIME read-mailbox swap - dup 5.0 > if drop 5.0 then 5.0 / dup 12.0 * -6.0 + INDEXOF_X_POS write-mailbox 3.0 * 15.45 + INDEXOF_Z_POS write-mailbox else drop -6.0 INDEXOF_X_POS write-mailbox 15.45 INDEXOF_Z_POS write-mailbox then\n" } }
+		{ 'STR' { 'NAME' "Script" } { 'STR' "\\ wf\n97 read-mailbox dup 0 <> if INDEXOF_TIME read-mailbox swap - dup 5.0 > if drop 5.0 then 5.0 / dup dup * swap 2 * 3 swap - * dup 14.0 * -6.0 + INDEXOF_X_POS write-mailbox 1.3999999999999986 * 16.35 + INDEXOF_Z_POS write-mailbox else drop -6.0 INDEXOF_X_POS write-mailbox 16.35 INDEXOF_Z_POS write-mailbox then\n" } }
 		{ 'I32' { 'NAME' "Model Type" } { 'STR' "None" } }
 	}
 	{ 'OBJ' 
@@ -2534,9 +2534,9 @@
 		{ 'I32' { 'NAME' "Position X" } { 'DATA' 1l } { 'STR' "Relative" } }  //Absolute|Relative
 		{ 'I32' { 'NAME' "Position Y" } { 'DATA' 1l } { 'STR' "Relative" } }  //Absolute|Relative
 		{ 'I32' { 'NAME' "Position Z" } { 'DATA' 1l } { 'STR' "Relative" } }  //Absolute|Relative
-		{ 'FX32' { 'NAME' "FOV" } { 'DATA' 60.0000000000000000(1.15.16) } { 'STR' "60.0" } }
+		{ 'FX32' { 'NAME' "FOV" } { 'DATA' 52.0000000000000000(1.15.16) } { 'STR' "52.0" } }
 		{ 'FX32' { 'NAME' "Roll" } { 'DATA' 0.0000000000000000(1.15.16) } { 'STR' "0.0" } }
-		{ 'FX32' { 'NAME' "Pan Time In Seconds" } { 'DATA' 0.7000000000000000(1.15.16) } { 'STR' "0.7" } }
+		{ 'FX32' { 'NAME' "Pan Time In Seconds" } { 'DATA' 1.0000000000000000(1.15.16) } { 'STR' "1.0" } }
 		{ 'FX32' { 'NAME' "Hither" } { 'DATA' 0.1000000000000000(1.15.16) } { 'STR' "0.1" } }
 		{ 'FX32' { 'NAME' "Yon" } { 'DATA' 200.0000000000000000(1.15.16) } { 'STR' "200.0" } }
 		{ 'FX32' { 'NAME' "slopeA" } { 'DATA' 0.0000000000000000(1.15.16) } { 'STR' "0.000000" } }
@@ -2546,11 +2546,11 @@
 	}
 	{ 'OBJ' 
 		{ 'NAME' "zone-balcony" }
-		{ 'VEC3' { 'NAME' "Position" } { 'DATA' 5.2500000000000000(1.15.16) -0.9999999403953552(1.15.16) 17.1000003814697266(1.15.16)  //x,y,z
+		{ 'VEC3' { 'NAME' "Position" } { 'DATA' 5.2500000000000000(1.15.16) -0.7249999642372131(1.15.16) 17.1000003814697266(1.15.16)  //x,y,z
 		} }
 		{ 'EULR' { 'NAME' "Orientation" } { 'DATA' 0.0000000000000000(1.15.16) -0.0000000000000000(1.15.16) 0.0000000000000000(1.15.16)  //a,b,c
 		} }
-		{ 'BOX3' { 'NAME' "Global Bounding Box" } { 'DATA' -2.6500000953674316(1.15.16) -1.0999999046325684(1.15.16) -1.8500000238418579(1.15.16) 2.6500000953674316(1.15.16) 1.0999999046325684(1.15.16) 1.8500000238418579(1.15.16)  //min(x,y,z)-max(x,y,z)
+		{ 'BOX3' { 'NAME' "Global Bounding Box" } { 'DATA' -2.6500000953674316(1.15.16) -0.8249999880790710(1.15.16) -1.8500000238418579(1.15.16) 2.6500000953674316(1.15.16) 0.8249999880790710(1.15.16) 1.8500000238418579(1.15.16)  //min(x,y,z)-max(x,y,z)
 		} }
 		{ 'STR' { 'NAME' "Class Name" } { 'DATA' "actboxor" } }
 		{ 'I32' { 'NAME' "MovementClass" } { 'DATA' 17l } { 'STR' "17" } }
@@ -2647,14 +2647,14 @@
 	}
 	{ 'OBJ' 
 		{ 'NAME' "MasterLook" }
-		{ 'VEC3' { 'NAME' "Position" } { 'DATA' -9.5000000000000000(1.15.16) -6.0000000000000000(1.15.16) 15.4499998092651367(1.15.16)  //x,y,z
+		{ 'VEC3' { 'NAME' "Position" } { 'DATA' -18.0000000000000000(1.15.16) -11.0000000000000000(1.15.16) 16.3500003814697266(1.15.16)  //x,y,z
 		} }
 		{ 'EULR' { 'NAME' "Orientation" } { 'DATA' 0.0000000000000000(1.15.16) -0.0000000000000000(1.15.16) 0.0000000000000000(1.15.16)  //a,b,c
 		} }
 		{ 'STR' { 'NAME' "Class Name" } { 'DATA' "platform" } }
 		{ 'I32' { 'NAME' "Mobility" } { 'STR' "Anchored" } }
 		{ 'FX32' { 'NAME' "Mass" } { 'DATA' 0.0000000000000000(1.15.16) } { 'STR' "0.0" } }
-		{ 'STR' { 'NAME' "Script" } { 'STR' "\\ wf\n96 read-mailbox dup 0 <> if INDEXOF_TIME read-mailbox swap - dup 5.0 > if drop 5.0 then 5.0 / dup 12.0 * -6.0 + INDEXOF_Y_POS write-mailbox 3.0 * 15.45 + INDEXOF_Z_POS write-mailbox else drop -6.0 INDEXOF_Y_POS write-mailbox 15.45 INDEXOF_Z_POS write-mailbox then\n" } }
+		{ 'STR' { 'NAME' "Script" } { 'STR' "\\ wf\n96 read-mailbox dup 0 <> if INDEXOF_TIME read-mailbox swap - dup 5.0 > if drop 5.0 then 5.0 / dup dup * swap 2 * 3 swap - * dup 13.0 * -11.0 + INDEXOF_Y_POS write-mailbox 1.3999999999999986 * 16.35 + INDEXOF_Z_POS write-mailbox else drop -11.0 INDEXOF_Y_POS write-mailbox 16.35 INDEXOF_Z_POS write-mailbox then\n" } }
 		{ 'I32' { 'NAME' "Model Type" } { 'STR' "None" } }
 	}
 	{ 'OBJ' 
@@ -2759,9 +2759,9 @@
 		{ 'I32' { 'NAME' "Position X" } { 'DATA' 1l } { 'STR' "Relative" } }  //Absolute|Relative
 		{ 'I32' { 'NAME' "Position Y" } { 'DATA' 1l } { 'STR' "Relative" } }  //Absolute|Relative
 		{ 'I32' { 'NAME' "Position Z" } { 'DATA' 1l } { 'STR' "Relative" } }  //Absolute|Relative
-		{ 'FX32' { 'NAME' "FOV" } { 'DATA' 60.0000000000000000(1.15.16) } { 'STR' "60.0" } }
+		{ 'FX32' { 'NAME' "FOV" } { 'DATA' 52.0000000000000000(1.15.16) } { 'STR' "52.0" } }
 		{ 'FX32' { 'NAME' "Roll" } { 'DATA' 0.0000000000000000(1.15.16) } { 'STR' "0.0" } }
-		{ 'FX32' { 'NAME' "Pan Time In Seconds" } { 'DATA' 0.7000000000000000(1.15.16) } { 'STR' "0.7" } }
+		{ 'FX32' { 'NAME' "Pan Time In Seconds" } { 'DATA' 1.0000000000000000(1.15.16) } { 'STR' "1.0" } }
 		{ 'FX32' { 'NAME' "Hither" } { 'DATA' 0.1000000000000000(1.15.16) } { 'STR' "0.1" } }
 		{ 'FX32' { 'NAME' "Yon" } { 'DATA' 200.0000000000000000(1.15.16) } { 'STR' "200.0" } }
 		{ 'FX32' { 'NAME' "slopeA" } { 'DATA' 0.0000000000000000(1.15.16) } { 'STR' "0.000000" } }

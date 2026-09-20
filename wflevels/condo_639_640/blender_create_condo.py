@@ -916,9 +916,14 @@ assert len(_bal) == len(BALCONY_ROOMS), f"balcony outlines missing: {[n for n, _
 bal_min = Vector((min(mn.x for mn, _ in _bal), min(mn.y for mn, _ in _bal), 0.0))
 bal_max = Vector((max(mx.x for _, mx in _bal), max(mx.y for _, mx in _bal), WALL_H))
 BALCONY_CAM     = (0.0, 1.5, 1.7)       # POV: offset from the player — eye height, past the pony wall
-BALCONY_LOOK0   = (-6.0, 9.5, -0.3)     # sweep start (world, relative to CamTarget): south-west, 14° down — the street
-BALCONY_LOOK1   = (6.0, 9.5, 2.7)       # sweep end: north-west, 7° up — the towers and the sky
+# Keep both targets well beyond the nearby site blocks and close to the horizon.
+# The old −0.3 → +2.7 m rise began on rooftops and ended mostly on sky; this
+# gentler arc holds Bangkok in the middle third of the frame throughout.
+BALCONY_LOOK0   = (-6.0, 15.0, 0.6)
+BALCONY_LOOK1   = (8.0, 15.0, 2.0)
 BALCONY_SWEEP_S = 5.0                   # the pan takes this long, then holds (tour patio holds add the same 5 s)
+POV_FOV_DEG     = 52.0                  # tighter than the 60° doll-house shot: skyline, not foreground floor
+POV_BLEND_S     = 1.0                   # soften doll-house ↔ POV transitions without consuming the whole hold
 
 
 def add_locator(name, location, bbox_min=None, bbox_max=None):
@@ -953,7 +958,8 @@ def add_zone(name, mn, mx, mailbox, shot_name):
     return z
 
 
-def add_pov_camera(tag, cam_offset, look0, look1, zone_min, zone_max, zone_mb, t0_mb, sweep_s=BALCONY_SWEEP_S):
+def add_pov_camera(tag, cam_offset, look0, look1, zone_min, zone_max, zone_mb, t0_mb,
+                   sweep_s=BALCONY_SWEEP_S, fov=POV_FOV_DEG, blend_s=POV_BLEND_S):
     """A first-person camshot `cs_<tag>` switched on by the ActBoxOR `zone-<tag>` (mailbox
     `zone_mb`), looking at `<Tag>Look` — a scripted platform (the moon's launch_tracker
     pattern) that slides from look0 to look1 over `sweep_s` seconds timed from mailbox
@@ -976,7 +982,8 @@ def add_pov_camera(tag, cam_offset, look0, look1, zone_min, zone_max, zone_mb, t
     look['wf_Script'] = (
         "\\ wf\n"
         f"{t0_mb} read-mailbox dup 0 <> if INDEXOF_TIME read-mailbox swap - "      # ( elapsed )
-        f"dup {sweep_s} > if drop {sweep_s} then {sweep_s} / "                     # ( t 0..1 )
+        f"dup {sweep_s} > if drop {sweep_s} then {sweep_s} / "                     # ( linear t 0..1 )
+        f"dup dup * swap 2 * 3 swap - * "                                          # smoothstep: t²(3−2t)
         f"dup {a1 - a0} * {a0} + INDEXOF_{axis}_POS write-mailbox "
         f"{z1 - z0} * {z0} + INDEXOF_Z_POS write-mailbox "
         f"else drop {a0} INDEXOF_{axis}_POS write-mailbox {z0} INDEXOF_Z_POS write-mailbox then\n"
@@ -991,18 +998,26 @@ def add_pov_camera(tag, cam_offset, look0, look1, zone_min, zone_max, zone_mb, t
     cs['wf_Target']   = name
     cs['wf_Follow']   = 'CamTarget'
     cs['wf_Track Object'] = 'Player'
-    cs['wf_Pan Time In Seconds'] = 0.7
+    cs['wf_FOV'] = fov
+    cs['wf_Pan Time In Seconds'] = blend_s
     scene.collection.objects.link(cs)
     zone = add_zone('zone-' + tag, Vector(zone_min), Vector(zone_max), zone_mb, cs.name)
     print(f"[condo] {tag} POV camera: zone x {zone_min[0]:.2f}…{zone_max[0]:.2f} y {zone_min[1]:.2f}…{zone_max[1]:.2f}, "
-          f"cs_{tag} at {cam_offset}, look {look0} → {look1} over {sweep_s} s")
+          f"cs_{tag} at {cam_offset}, FOV {fov:.0f}°, look {look0} → {look1} "
+          f"over {sweep_s} s smoothstep, blend {blend_s:.1f} s")
     return cs, look, zone
 
 
 pad = 0.1
+# Do not cut to the exterior shot while the player is still squeezing through
+# the glass-door plane. Both tour patio holds sit at y = −1.0, comfortably past
+# this inset trigger edge.
+BALCONY_ZONE_ENTRY_Y = -1.55
+bal_zone_min = Vector((bal_min.x - pad, max(bal_min.y - pad, BALCONY_ZONE_ENTRY_Y), bal_min.z - 0.5))
+bal_zone_max = bal_max + Vector((pad, pad, 0.5))
 cs_balcony, balcony_look, zone_balcony = add_pov_camera(
     'balcony', BALCONY_CAM, BALCONY_LOOK0, BALCONY_LOOK1,
-    bal_min - Vector((pad, pad, 0.5)), bal_max + Vector((pad, pad, 0.5)), MB_ZONE_BALCONY, MB_BALCONY_T0)
+    bal_zone_min, bal_zone_max, MB_ZONE_BALCONY, MB_BALCONY_T0)
 
 # Master-bedroom window (plan: docs/plans/2026-09-19-condo-master-window-pov.md). 640's
 # master bedroom has its curved glass along the unit's −X (compass south) wall; the zone is
@@ -1012,8 +1027,12 @@ MB_ZONE_MASTER, MB_MASTER_T0 = 95, 96
 MASTER_ROOM   = '640-master-bed'
 MASTER_STRIP_W = 1.6
 MASTER_CAM    = (-1.8, 0.0, 1.7)
-MASTER_LOOK0  = (-9.5, -6.0, -0.3)      # south-east, 2° down — Soi 34 and Sathu Pradit Road
-MASTER_LOOK1  = (-9.5, 6.0, 2.7)        # south-west, 14° up — the river loop and the sky
+# The former x = −9.5 targets sat only ~0.7 m beyond the camera at the tour
+# stop, making the first frame point ~59° down into a roof. Put the sweep on a
+# distant south-facing horizon instead: a mild downward start over Soi 34,
+# through KCC, to a slightly raised view toward the river loop.
+MASTER_LOOK0  = (-18.0, -11.0, 0.6)
+MASTER_LOOK1  = (-18.0, 2.0, 2.0)
 _mb = next(((mn, mx) for name, mn, mx in room_outlines if name == MASTER_ROOM), None)
 assert _mb is not None, f"{MASTER_ROOM} outline missing"
 cs_master, master_look, zone_master = add_pov_camera(

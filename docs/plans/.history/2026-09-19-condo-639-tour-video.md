@@ -1,5 +1,6 @@
 | Date | Change |
 |------|--------|
+| [2026-09-20](https://github.com/wbniv/WorldFoundry/commit/91a5fab2) | feat(condo): add button door and patio tour |
 | [2026-09-19](https://github.com/wbniv/WorldFoundry/commit/466adf4b) | fix(main): window switches survive the game's argv parser (-height= was taken for -h) |
 | [2026-09-19](https://github.com/wbniv/WorldFoundry/commit/e59fcf28) | feat(condo): 30 s captioned room tour of all 11 blue rooms — tour-639.mp4 |
 | [2026-09-19](https://github.com/wbniv/WorldFoundry/commit/caba2591) | docs(plan): tour video — author the path once, replay frame-exact |
@@ -7,6 +8,10 @@
 | [2026-09-19](https://github.com/wbniv/WorldFoundry/commit/88c389c7) | docs(plan): 20 s room-tour video of 205/639 (bridge-driven walk + burnt-in captions) |
 
 <!--history-meta v1
+91a5fab2	author	Will Norris
+91a5fab2	added	50
+91a5fab2	deleted	17
+91a5fab2	files	1
 466adf4b	author	Will Norris
 466adf4b	added	1
 466adf4b	deleted	1

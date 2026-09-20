@@ -233,3 +233,9 @@ exported target bbox, and confirms door closedness is zero at completion. The fi
 MP4 is 640×480 at 30 fps with 11 wall-time-aligned cues; sampled frames at 8/10/12/14 s
 show the project-room approach, switch/door traversal, and patio arrival, while frames
 at 14.5/18/20.5/22 s show patio → recessed patio → guest-bedroom progression.
+
+The 2026‑09‑20 camera-quality pass keeps the total patio dwell at six seconds but changes
+the holds from 3+3 to 5+1 seconds. This lets the eased five-second balcony sweep play at the
+main patio stop instead of translating during half the pan. The regenerated 40.4 s video
+also carries the corrected distant-horizon master-window sweep; both exterior cues were
+visually checked from four evenly spaced frames.

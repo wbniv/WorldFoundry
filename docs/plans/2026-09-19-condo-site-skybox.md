@@ -295,6 +295,20 @@ Perm = player.iff,site_map.iff,skydome.iff
 
 **PASS**
 
+### Balcony pan quality revision (2026‑09‑20)
+
+The shipped balcony view now uses a narrower 52° FOV, a one-second entry/exit blend, and
+smoothstep easing over five seconds. Its targets moved from `(-6,9.5,-0.3) → (6,9.5,2.7)`
+to the more distant, flatter `(-6,15,0.6) → (8,15,2.0)` arc so nearby site blocks remain
+foreground context instead of filling the frame. `zone-balcony` is inset to y = −1.55,
+past the new project-room glass-door plane, and the tour dwell changed from 3+3 seconds to
+5+1 seconds across the main/recessed patio stops. The total dwell is unchanged, but the
+camera performs nearly all of its pan while the player is stationary.
+
+The 2026‑09‑20 recording completed all 39 legs and 11 room holds; the `639-patio` cue spans
+10.974–16.298 s in the 40.4 s cut. Sampled frames show a stable horizon in the middle third
+from the left skyline through the right skyline, without the former ground-heavy start.
+
 3. Elevation: from the saved `.blend`, `unit-639` bbox z = **15.60…18.45**, `Player` z ≈
    16.05, `corridor` top at 15.75, `site-map` at 0, `skydome` centre z 15.75; the "actors
    outside room bbox" assertion passes.

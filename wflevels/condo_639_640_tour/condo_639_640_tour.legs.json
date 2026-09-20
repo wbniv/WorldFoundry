@@ -98,7 +98,7 @@
  {
   "leg": 16,
   "kind": "HOLD",
-  "target": 3.0,
+  "target": 5.0,
   "room": "639-patio"
  },
  {
@@ -110,7 +110,7 @@
  {
   "leg": 18,
   "kind": "HOLD",
-  "target": 3.0,
+  "target": 1.0,
   "room": "639-patio-recessed"
  },
  {
