@@ -8,6 +8,26 @@ includes:
 
 tasks:
 
+  setup:
+    desc: "One-time: bootstrap the AWS wf-terraform profile, Codemagic API token + app id, and PagerDuty routing key. Idempotent, plan-then-confirm on every mutation. See docs/SETUP.md."
+    cmds:
+      - bash scripts/setup.sh {{.CLI_ARGS}}
+
+  setup-check:
+    desc: "Report which setup credentials are already configured. Never prompts, never mutates."
+    cmds:
+      - bash scripts/setup.sh --check
+
+  creds-dump:
+    desc: "Bundle this machine's AWS wf-terraform profile + any live setup session-caches into a tarball, for migrating to a new machine. See scripts/creds-dump.sh -h."
+    cmds:
+      - bash scripts/creds-dump.sh {{.CLI_ARGS}}
+
+  creds-commit:
+    desc: "Same as creds-dump, but GPG-encrypted to secrets/creds-bundle.tar.gpg — safe to commit to git. See scripts/creds-commit.sh -h."
+    cmds:
+      - bash scripts/creds-commit.sh {{.CLI_ARGS}}
+
   vendor-unpack:
     desc: "Unpack vendored source archives and init editor submodules (idempotent)"
     cmds:

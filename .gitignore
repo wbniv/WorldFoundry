@@ -86,3 +86,6 @@ wfsource/source/game/output.mp4
 .task/
 # Blender autosave backups
 *.blend1
+
+# One-time credential setup (scripts/setup.sh) run logs + session caches
+.setup-logs/
