@@ -370,6 +370,17 @@ Steps a future implementation pass runs, in order. Per `~/CLAUDE.md` **Plan veri
 
     **PASS** (via `task build`). The `WF_POSIX` / `WF_HAS_X11` introduction and the `platform_init.cc` guard change do not regress Linux — `WF_HAS_X11` is 1 on desktop Linux, so the X11 `-fullscreen` screen-size query still compiles and links exactly as before. The step's command should be corrected to `task build` in a future edit of this plan.
 
+    **2026-09-21 single-face fix regression (isolated worktree):**
+
+    ```
+    $ task build
+    === Linking ===
+    Built: /tmp/wf-metal-face/engine/wf_game
+    EXIT=0
+    ```
+
+    **PASS.** Canonical build remains green after the shared material-color fix.
+
 2. `cmake -S . -B /tmp/wf-cfgcheck -DCMAKE_BUILD_TYPE=Debug` — CMake branches parse. Exit 0.
 
     ```
@@ -384,6 +395,20 @@ Steps a future implementation pass runs, in order. Per `~/CLAUDE.md` **Plan veri
 
     **PASS.**
 
+    **2026-09-21 single-face fix preflight:**
+
+    ```
+    $ cmake -S . -B /tmp/wf-face-cfgcheck -DCMAKE_BUILD_TYPE=Debug
+    -- Looking for mremap
+    -- Looking for mremap - found
+    -- Configuring done (1.0s)
+    -- Generating done (0.1s)
+    -- Build files have been written to: /tmp/wf-face-cfgcheck
+    EXIT=0
+    ```
+
+    **PASS.** Separate build directory used for the isolated worktree.
+
 3. `python3 -c 'import yaml,sys; yaml.safe_load(open("codemagic.yaml"))'` — workflow YAML valid. Exit 0.
 
     ```
@@ -392,6 +417,16 @@ Steps a future implementation pass runs, in order. Per `~/CLAUDE.md` **Plan veri
     ```
 
     **PASS.** The new `.github/workflows/codemagic-budget.yml` parses too (checked in the same call).
+
+    **2026-09-21 single-face fix preflight:**
+
+    ```
+    $ python3 -c 'import yaml; yaml.safe_load(open("codemagic.yaml")); print("YAML PASS")'
+    YAML PASS
+    EXIT=0
+    ```
+
+    **PASS.** Includes the portable-color unit test and frame comparison gate.
 
 4. `./build/wf_game --frame-step-smoke=30 --cycles=1 -L wflevels/snowgoons-blender/snowgoons-standalone.iff; echo $?` — Linux reference run still exits 0.
 
@@ -415,6 +450,21 @@ Steps a future implementation pass runs, in order. Per `~/CLAUDE.md` **Plan veri
     ```
 
     **PASS** (with the corrected path). The `delta too large` lines are the pre-existing wall-clock-vs-frame-step warning from the headless driver, not a regression.
+
+    **2026-09-21 single-face fix regression:**
+
+    ```
+    $ cd /tmp/wf-metal-face/wfsource/source/game
+    $ /tmp/wf-metal-face/engine/wf_game --frame-step-smoke=30 --cycles=1 -rate20 -record_video --capture-frame=20=/tmp/wf-face-linux-fixed.png -L/tmp/wf-metal-face/wflevels/snowgoons-blender/snowgoons-standalone.iff
+    linux: capture frame 20 -> /tmp/wf-face-linux-fixed.png (640x480) written, non-black pixels 62109/307200
+    EXIT=0
+    $ /tmp/wf-metal-face/engine/wf_game --memory-test
+    memory pool-array test: 0 failure(s)
+    EXIT=0
+    ```
+
+    **PASS.** Corrected binary/cwd/level paths as above; `-record_video` is
+    required for the Linux PNG capture path. Full image comparison is under step 10.
 
 **Codemagic `macos-desktop-debug` (manual trigger — one run per phase):**
 
@@ -710,7 +760,74 @@ Steps a future implementation pass runs, in order. Per `~/CLAUDE.md` **Plan veri
 
     **PASS — Linux regression.** Capture from the fixed binary is byte-identical
     to the reference. CMake configuration and workflow YAML validation also pass.
-    Final macOS verification: pending the fixed run.
+    **PASS — fixed macOS run**, build `6ab054b015af74ee5cb1493b`, fix commit
+    `8bb1a162`: all 12 workflow steps succeeded, including both new regression
+    gates. The comparison gate was also run against the diagnostic capture and
+    correctly FAILED on the original 455 pixels (maximum channel delta 148).
+
+    ```
+    $ python3 tests/compare_renderer_frames.py tests/fixtures/renderer/snowgoons-linux-frame20.png macos-frame20.png --tolerance 3
+    640x480: exact=306705/307200 (99.838867%)
+    max channel delta histogram: {0: 306705, 1: 494, 3: 1}
+    coverage IoU=62109/62111 (99.996780%)
+    pixels exceeding tolerance 3: 0
+    PASS
+    Former mismatch pixels: 455 now exact: 455
+    Pixels outside former mismatch changed by fix: 0
+    memory pool-array test: 0 failure(s)
+    macos: capture frame 20 -> /Users/builder/clone/macos-frame20.png (640x480) written, non-black pixels 62111/307200
+    ```
+
+    **PASS — face is now exactly correct.** The remaining 495 pixels are the
+    same small interpolation/filter/raster rounding differences that existed
+    before the fix: 494 at delta 1, one at delta 3, concentrated on textured
+    detail (see the cyan difference map). No remaining solid-color discrepancy.
+    Two pixels differ between zero and one intensity, so *exact* coverage IoU
+    is 99.996780%, not literally 100%; the earlier report rounded it to 100.0%.
+    No pixel outside the corrected face changed between the two Mac captures.
+
+    **Screenshots — actual captures, not mockups.** The full PNGs are retained:
+    [Linux reference](2026-09-20-macos-metal-renderer/linux-frame20.png),
+    [Metal before](2026-09-20-macos-metal-renderer/metal-before-frame20.png),
+    [Metal fixed](2026-09-20-macos-metal-renderer/metal-fixed-frame20.png).
+    Click either panel for its self-contained HTML; screenshots are 1440×900.
+    The comparison includes enlarged identical-region crops, and the difference
+    map amplifies channel deltas (orange >3, cyan 1–3, black identical).
+
+    [![Linux reference, Metal before and Metal after, with enlarged face crops](2026-09-20-macos-metal-renderer/face-comparison.png)](2026-09-20-macos-metal-renderer/face-comparison.html)
+
+    [![Before and after pixel-difference maps](2026-09-20-macos-metal-renderer/face-difference.png)](2026-09-20-macos-metal-renderer/face-difference.html)
+
+    Screenshot regeneration: open either HTML at 1440×900 or use headless
+    Chrome with `--window-size=1440,900 --force-device-scale-factor=1
+    --virtual-time-budget=3000 --screenshot=<same-basename.png> file://<absolute-html>`.
+    Each HTML embeds its actual source PNGs and derives the panels directly.
+    The Linux golden PNG's SHA-256 (also unchanged after the fix) is
+    `1ed40f46ac8fd983a379ea05ccb5de09639a9f656d866c461026dcfaf9dc4584`.
+
+    **Mac time for this investigation: two runs, 237.453 seconds = 3.95755
+    Mac-minutes**, calculated from each build's `startedAt` / `finishedAt`:
+
+    ```
+    diagnostic 6ab052b08915493520db2424 105.368 seconds
+    fixed 6ab054b015af74ee5cb1493b 132.085 seconds
+    Own total: 237.453 seconds; 3.95755 Mac-minutes
+    ```
+
+    Required pre-run budget checks reported 29/400 then 36/400 minutes. Other
+    concurrent builds on `2026-new-level` also consume account minutes, so the
+    account delta is not this branch's cost. Final account check:
+
+    ```
+    app=6aafa6886ab3f21cf431a6cb mac_seconds=2464
+    month=2026-09 used=42 pct=10%  (budget=400 min)
+    threshold 50%: not reached
+    threshold 80%: not reached
+    threshold 95%: not reached
+    ```
+
+    **PASS — budget.** Both runs were checked before triggering; far below 400.
+
 
 11. *(Phase 4)* Interactive `.app` launches, renders, accepts keyboard/gamepad input, and closes cleanly (`HALWindowCloseRequested` path, `game/game.cc:296`).
 12. *(Phase 4)* `-width=800 -height=600` and `-fullscreen` produce correctly sized windows — closes `TODO.md:7`.
