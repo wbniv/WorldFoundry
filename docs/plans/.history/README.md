@@ -1,5 +1,6 @@
 | Date | Change |
 |------|--------|
+| [2026-09-20](https://github.com/wbniv/WorldFoundry/commit/84b41c6b) | docs(plans): index the condo wall shading definition plan |
 | [2026-09-19](https://github.com/wbniv/WorldFoundry/commit/1ba2bae5) | docs: index the exporter face-hand plan |
 | [2026-09-19](https://github.com/wbniv/WorldFoundry/commit/fdf945eb) | docs: index the condo surroundings plan |
 | [2026-09-19](https://github.com/wbniv/WorldFoundry/commit/bf9b0aa7) | docs: index the condo master-window POV plan |
@@ -14,6 +15,11 @@
 | [2026-06-26](https://github.com/wbniv/WorldFoundry/commit/16d72fa6) | docs: add plan index (docs/plans/README.md) |
 
 <!--history-meta v1
+84b41c6b	author	Will Norris
+84b41c6b	added	1
+84b41c6b	deleted	0
+84b41c6b	files	1
+84b41c6b	body	Co-Authored-By: Claude Sonnet 5 <noreply@anthropic.com>\nClaude-Session: https://claude.ai/code/session_011WmfFdmKRi46BtcEyu8pkT
 1ba2bae5	author	Will Norris
 1ba2bae5	added	4
 1ba2bae5	deleted	2
