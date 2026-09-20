@@ -434,6 +434,7 @@ workflows:
           # array cookie is 16 bytes here vs 8 on x86_64). Fails loudly and
           # early rather than as a cookie assert 30 frames in.
           "$WF_GAME" --memory-test 2>&1 | tee "$CM_BUILD_DIR/macos-smoke.log"
+          python3 -c 'import ctypes; c=ctypes.CDLL(None); c.srand(1); print("RB libc rand seed=1:", [c.rand() for _ in range(3)])' | tee -a "$CM_BUILD_DIR/macos-smoke.log"
           # --capture-frame=N counts frames that reached the BACKEND, not engine
           # steps: Phase 1 measured 29 rendered frames for 30 steps (the render
           # block is gated on camera()->ValidView()). So capture at 20, safely
@@ -444,7 +445,7 @@ workflows:
           # not reproducible even on the same machine, let alone comparable with
           # a Linux capture — which is what plan steps 9 and 10 need. Verified
           # locally: two -rate20 runs produce byte-identical PNGs.
-          "$WF_GAME" --frame-step-smoke=30 --cycles=1 -L"$LEVEL" -rate20 \
+          WF_TRACE_RENDER=1 "$WF_GAME" --frame-step-smoke=30 --cycles=1 -L"$LEVEL" -rate20 \
             --capture-frame=20="$CM_BUILD_DIR/macos-frame20.png" \
             2>&1 | tee -a "$CM_BUILD_DIR/macos-smoke.log"
 

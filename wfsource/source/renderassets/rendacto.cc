@@ -245,6 +245,7 @@ MakeRandMaterialList(Memory& memory, int count)
 	assert(ValidPtr(materialList));
    //Color tempColor(rand()%128 + 128,rand()%128 + 128,rand()%128 + 128);
    Color tempColor(rand()%230 + 26,rand()%230 + 26,rand()%230 + 26);
+   if (getenv("WF_TRACE_RENDER")) fprintf(stderr, "RB box material rgb=%u,%u,%u\n", tempColor.Red(), tempColor.Green(), tempColor.Blue());
 	for(int index=0;index < count; index++)
 	{
 		materialList[index] = Material(tempColor,Material::FLAT_SHADED|Material::SOLID_COLOR,emptyTexture,NULL);

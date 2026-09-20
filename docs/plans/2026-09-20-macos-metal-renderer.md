@@ -623,6 +623,15 @@ Steps a future implementation pass runs, in order. Per `~/CLAUDE.md` **Plan veri
     `backend_modern.cc`'s). Left as a follow-up rather than churned on — 0.15 % of one frame, fully
     characterised, and cheap to re-open with a per-object dump.
 
+    **Single-face follow-up — 2026-09-21 (in progress).** Work isolated on
+    `fix/macos-metal-face-color`. Compare frame-20 per-flush texture selection,
+    vertex colors, UVs and model-view matrices before changing shader behavior.
+    Also trace procedural box material creation: `MakeRandMaterialList` uses
+    platform libc `rand()` in three constructor arguments with unspecified evaluation order. Localized
+    mismatch: `(313,389)`–`(330,422)`, 455 pixels. The matching Linux baseline is
+    `det1.png` / `linux-seam20.png` / `lx20.png` in the prior scratchpad;
+    `linux-frame20.png` there is an older unmatched capture.
+
 11. *(Phase 4)* Interactive `.app` launches, renders, accepts keyboard/gamepad input, and closes cleanly (`HALWindowCloseRequested` path, `game/game.cc:296`).
 12. *(Phase 4)* `-width=800 -height=600` and `-fullscreen` produce correctly sized windows — closes `TODO.md:7`.
 13. *(Phase 5)* `-DWF_WASM_ENGINE=wamr` configures and links on arm64 Darwin; smoke run exits 0.
