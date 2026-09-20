@@ -4,6 +4,13 @@
 > glass doors”. The north (x ≈ 7.80) wall was the wrong wall — see the Context update
 > below. The door wall is the room's y = −2.00 face, onto the patios.
 
+> **Current state (fourth iteration, 2026‑09‑20): shipped.** The glass panels no
+> longer react merely because the player approaches. A visible wall switch beside
+> the door toggles them only when the player stands within reach and presses
+> **B** (keyboard **2**). The panels retain their continuous two-second motion and
+> real collision; the gathered one-third stack and every part of the fully extended
+> plane are impassable. A second press while moving reverses them smoothly.
+
 ## Context
 
 The condo level's patio wall of `639-project-rm` is currently modeled as a solid
@@ -67,10 +74,18 @@ User direction on the two open questions this raises:
    rather than the narrow recessed nook by the guest bedroom.
 2. **Interactivity: real, not just static geometry.** The 2 movable panels should
    actually be operable at runtime (player can open/close them), not just corrected to
-   look right in a screenshot. *Partly delivered — the state swap is real and
-   proximity-driven, but it is visual only; see Collision under Approach.*
+   look right in a screenshot. ~~The first two implementations made proximity itself
+   the command.~~ **User correction, 2026‑09‑20:** proximity should only establish
+   that the switch is reachable; opening/closing requires an explicit button press.
+   The shipped interaction is now the visible wall switch + B/keyboard-2 described
+   under **Button-operated control** below.
 
 ## Approach
+
+> The alternatives in this section record the first implementation pass. The
+> visibility swap was subsequently replaced by solid sliding actors, and its
+> proximity command was subsequently replaced by the explicit wall-button design.
+> The current mechanism is specified in the two dated iteration sections below.
 
 Confirmed by research: the engine has **no dedicated door/mover/elevator actor**.
 `Platform` (`wfsource/source/game/platform.hp/.cc`) exists as an OAD/collision-table
@@ -212,7 +227,71 @@ the **Director** drives them by actor index with `write-actor-mailbox`
 and Coily-snake fan-out already do. Same lerp, same `t/SECS` fraction, same trigger, same
 result; only the script's owner differs. Everything else in the design above — solid
 panels, real collision, physical relocation into the gather bay, `zone-project-doors`
-mailboxes 91/92 reused — is as written.
+mailboxes 91/92 reused — was as written for the second iteration. The third iteration
+below changes the trigger and slide-state mailboxes, not the solid-panel mechanism.
+
+## Button-operated control — third iteration (2026‑09‑20)
+
+**User-directed change:** walking near the glass wall must not operate it. The player
+must press a visible button beside the door to open or close it.
+
+The sliding-panel actors and their real collision remain unchanged. This iteration
+replaces only the command source and makes the motion state robust to reversal:
+
+- Add one visible `639-project-door-button` mesh on the project-room side of the
+  perpendicular x = 7.80 jamb, centred at `(7.75, −2.45, 1.15)`. It is a dark wall
+  plate with a raised orange cap, overall bbox x 7.70…7.80, y −2.58…−2.32,
+  z 0.98…1.32. It carries `Mass 0`: it is an interaction affordance, not a tiny
+  collision snag on the wall.
+- Replace the full-door proximity strip with `zone-project-door-button`, a small
+  project-room-side reach volume (x 6.80…7.90, y −3.10…−2.05, z 0…2.10). Its
+  `ActBoxOR` writes mailbox 92 while the Player overlaps it. Mailbox 92 is a gate,
+  not a command: entering or leaving the volume never moves the panels.
+- While mailbox 92 is active, a fresh B press from
+  `INDEXOF_HARDWARE_JOYSTICK1_RAW_JUSTPRESSED` toggles mailbox 93 (`0 = open`,
+  `1 = closed`). B is `JOYSTICK_BUTTON_B` / raw bit `0x2`, keyboard key `2` in the
+  Linux GL input map. A/Space remains the player's existing hop and therefore is not
+  overloaded as the interaction key. Mailbox 91 latches a press until the bit clears,
+  guaranteeing one toggle even if an input pulse spans multiple Director ticks.
+- Mailbox 94 stores continuous **closedness** in the range 0…1. Each Director tick
+  adds or subtracts `INDEXOF_DELTA_TIME / 2.0` according to target mailbox 93 and
+  clamps the result. Panel 0 gets `closedness × −2.6667 m`; panel 1 gets
+  `closedness × −1.3333 m`; fixed panel 2 is never written. Both target and
+  closedness initialise to zero, preserving the user-selected open default.
+- Storing current closedness instead of only a target deadline fixes a latent defect
+  in the prior proximity implementation: changing direction during a slide could
+  restart from the opposite endpoint. A second button press now changes only the
+  target, so the next tick continues from the exact current position in the opposite
+  direction with no jump.
+
+The resulting Director clause is intentionally level-local and uses only existing
+engine primitives; no new actor class, input binding, or engine code is required.
+`CONDO_DOORS=0` still omits the panels, switch and interaction zone together and leaves
+the original wall intact.
+
+**Shipped and verified** — see the final Result section below.
+
+## Collision guarantee — fourth iteration (2026‑09‑20)
+
+**User-directed invariant:** the player must not cross any visible glass. With the
+door open/contracted, the gathered x 6.47…7.80 third is solid while the other two
+thirds remain a real doorway. With the door fully extended, the entire x 3.80…7.80
+plane is solid, including both joints between panel actors.
+
+The three leaves were already collision-bearing StatPlats and passed an initial live
+probe. This iteration makes that property explicit and regression-tested:
+
+- Every `639-project-door-panel-{0,1,2}` now authors `Mass 75` directly instead of
+  relying on the StatPlat schema's current default. A future schema/default change
+  therefore cannot silently make the glass passable.
+- The engine regression drives the real Player toward the patio through the centre
+  of the gathered stack, the centre of every extended third, and the two panel seams.
+  Every attempt must stop on the room side of the y = −2.00 door plane.
+- The visible mesh and collision mesh remain the same object. The two movable bodies
+  still follow their panels continuously, so collision stays aligned with the glass
+  throughout a slide; no invisible full-width blocker is left behind when open.
+
+**Shipped and verified** — see the final Result section below.
 
 ## Out of scope
 
@@ -454,6 +533,11 @@ the Director's default (**open**) unless the walker enters the door strip.
 
 ### Result (2026‑09‑20, real sliding motion): PASS — shipped live
 
+> **Historical second-iteration result.** These checks document the former
+> proximity-operated trigger. The solid sliding-panel mechanism remains current, but
+> the button-operated result at the end of this plan supersedes the trigger behavior,
+> mailbox names, and actor count recorded here.
+
 The doors now provide **real physical collision when closed**, which the first iteration
 could not. Verification steps and raw output below.
 
@@ -667,16 +751,121 @@ $ CONDO_DOORS=0 CONDO_LEVEL=condo_639_640_nodoors blender --background --python 
 **PASS.** 100 actors (the level without the doors feature at all), untrimmed jamb2, no
 panels, no zone — the escape hatch survives the rewrite.
 
+### Result (2026‑09‑20, button-operated control): PASS — shipped live
 
+The third iteration preserves the three solid sliding panels and replaces automatic
+proximity operation with an explicit, visible wall switch. Verification covers the
+level build, the actual engine input/physics path, reversal during motion, and the tour
+variant.
 
-1. **Step as originally written.**
+1. **Rebuild the main level and confirm the button, reach zone, and actor indices.**
 
 ```
-$ the exact command
-raw output, unedited
+$ task condo-level --force
+[condo] 639-project-rm: 639-front-strip-S-wall-jamb2 trimmed x 3.65…7.80 → 3.65…3.80; x 3.80…7.80 becomes telescoping doors
+[condo] 639-project-rm telescoping doors: 3 solid panels (1.33 m each, statplat default Mass); panel 2 fixed at x 6.47…7.80, panels 0…1 slide -2.67 m, -1.33 m to close the x 3.80…7.80 frontage over 2.0 s; z 0.00…2.70 at y -2.00, tracks 0.11 m apart; wall button at (7.80, -2.45, 1.15), B/keyboard-2 toggles while in mailbox zone 92; mailboxes target 93, closedness 94
+[condo] 639-project-rm telescoping doors: movable panels are runtime actors 37…38 (export positions 36…38 + bias 1); verify with `wf_game --debug-print-actors`
+[condo] exporting 105 actors → /home/will/WorldFoundry-wbniv/wflevels/condo_639_640/condo_639_640.lev
+✓ built /home/will/WorldFoundry-wbniv/wflevels/condo_639_640.iff (2379776 bytes)
+✓ built /home/will/WorldFoundry-wbniv/wflevels/condo_639_640-standalone.iff (2383872 bytes)
 ```
 
-**PASS** — one line on what the output proves.
+**PASS.** The actor-count increase to 105 is the new `639-project-door-button`; its compiled bbox is
+x 7.70…7.80, y −2.58…−2.32, z 0.98…1.32. `zone-project-door-button` exports with
+the intended x 6.80…7.90, y −3.10…−2.05 reach volume. The movable panels remain
+runtime actors 37/38, so their collision-bearing implementation is unchanged.
 
-An item stays `[verify T<n>]` in TODO.md until every step here has recorded output.
--->
+2. **Exercise the behavior through the real game executable and debug bridge.**
+
+```
+$ python3 tests/verify_condo_door_button.py
+actors: player=8 panel0=37 button=40
+PASS  default open: target=0.0 closedness=0.0 panel0.x=-0.0
+PASS  far press ignored: target=0.0
+PASS  near press toggles closed: target=1.0
+PASS  continuous close: closedness=0.1
+PASS  settles closed: closedness=1.0 panel0.x=-2.6667
+PASS  second press opens: closedness=1e-06
+PASS  mid-slide reversal has no snap: before=0.25 after=0.25 final=0.0
+RESULT: PASS
+```
+
+**PASS.** Merely approaching does nothing. B/keyboard-2 is ignored away from the
+switch, toggles the target while within reach, closes and reopens continuously, and
+reverses a partial slide without jumping to an endpoint.
+
+3. **Rebuild the tour variant.**
+
+```
+$ task tour-condo-639 --force
+[condo] tour: 37 legs, 11 room holds, 10078 bytes of Forth
+[condo] 639-project-rm telescoping doors: 3 solid panels (1.33 m each, statplat default Mass); panel 2 fixed at x 6.47…7.80, panels 0…1 slide -2.67 m, -1.33 m to close the x 3.80…7.80 frontage over 2.0 s; z 0.00…2.70 at y -2.00, tracks 0.11 m apart; wall button at (7.80, -2.45, 1.15), B/keyboard-2 toggles while in mailbox zone 92; mailboxes target 93, closedness 94
+[condo] exporting 105 actors → /home/will/WorldFoundry-wbniv/wflevels/condo_639_640_tour/condo_639_640_tour.lev
+✓ built /home/will/WorldFoundry-wbniv/wflevels/condo_639_640_tour.iff (2390016 bytes)
+✓ built /home/will/WorldFoundry-wbniv/wflevels/condo_639_640_tour-standalone.iff (2394112 bytes)
+```
+
+**PASS.** The tour gets the same switch, reach zone, mailboxes, and actor count as the
+main level. This statement described the original tour; the current tour result below
+supersedes its open-default route.
+
+### Result (2026‑09‑20, collision guarantee): PASS — shipped live
+
+1. **Rebuild both variants with explicit panel collision.**
+
+```
+$ task condo-level --force
+[condo] 639-project-rm telescoping doors: 3 solid panels (1.33 m each, explicit Mass 75); panel 2 fixed at x 6.47…7.80, panels 0…1 slide -2.67 m, -1.33 m to close the x 3.80…7.80 frontage over 2.0 s; z 0.00…2.70 at y -2.00, tracks 0.11 m apart; wall button at (7.80, -2.45, 1.15), B/keyboard-2 toggles while in mailbox zone 92; mailboxes press-latch 91, target 93, closedness 94
+[condo] exporting 105 actors → /home/will/WorldFoundry-wbniv/wflevels/condo_639_640/condo_639_640.lev
+✓ built /home/will/WorldFoundry-wbniv/wflevels/condo_639_640.iff (2379776 bytes)
+✓ built /home/will/WorldFoundry-wbniv/wflevels/condo_639_640-standalone.iff (2383872 bytes)
+
+$ task tour-condo-639 --force
+[condo] 639-project-rm telescoping doors: 3 solid panels (1.33 m each, explicit Mass 75); panel 2 fixed at x 6.47…7.80, panels 0…1 slide -2.67 m, -1.33 m to close the x 3.80…7.80 frontage over 2.0 s; z 0.00…2.70 at y -2.00, tracks 0.11 m apart; wall button at (7.80, -2.45, 1.15), B/keyboard-2 toggles while in mailbox zone 92; mailboxes press-latch 91, target 93, closedness 94
+[condo] exporting 105 actors → /home/will/WorldFoundry-wbniv/wflevels/condo_639_640_tour/condo_639_640_tour.lev
+✓ built /home/will/WorldFoundry-wbniv/wflevels/condo_639_640_tour.iff (2390016 bytes)
+✓ built /home/will/WorldFoundry-wbniv/wflevels/condo_639_640_tour-standalone.iff (2394112 bytes)
+```
+
+**PASS.** All three panel records in both exported levels contain an explicit
+`Mass 75.0`; the main and tour binaries build with the same 105-actor layout.
+
+2. **Walk into every collision-critical part of the real in-engine door.**
+
+```
+$ python3 tests/verify_condo_door_button.py
+actors: player=8 panel0=37 button=40
+PASS  default open: target=0.0 closedness=0.0 panel0.x=-0.0
+PASS  far press ignored: target=0.0
+PASS  near press toggles closed: target=1.0
+PASS  continuous close: closedness=0.1
+PASS  settles closed: closedness=1.0 panel0.x=-2.6667
+PASS  second press opens: closedness=1e-06
+PASS  mid-slide reversal has no snap: before=0.25 after=0.25 final=0.0
+PASS  gathered one-third blocks passage: final y=-2.379985 vs door plane -2.00
+PASS  collision test door closed: closedness=1.0
+PASS  closed left third blocks passage: x=4.45 final y=-2.379985 vs door plane -2.00
+PASS  closed left/middle seam third blocks passage: x=5.13 final y=-2.269985 vs door plane -2.00
+PASS  closed middle third blocks passage: x=5.8 final y=-2.269985 vs door plane -2.00
+PASS  closed middle/right seam third blocks passage: x=6.47 final y=-2.159984 vs door plane -2.00
+PASS  closed right/fixed third blocks passage: x=7.1 final y=-2.159984 vs door plane -2.00
+RESULT: PASS
+```
+
+**PASS.** No sampled approach crossed y = −2.00. The gathered third blocks when
+open, and all three thirds plus both actor-to-actor seams block when fully extended.
+
+### Result (2026‑09‑20, guided door-to-patio route): PASS — recorded
+
+The tour variant now starts the glass doors closed, visits `639-project-rm`, stops by
+the visible switch, runs a `DOOR_OPEN` action through the door target mailbox, waits
+until closedness is zero, crosses the cleared middle bay to `639-patio`, visits
+`639-patio-recessed`, and then enters `639-guest-bed`. The remaining blue-room route
+continues afterward.
+
+`python3 tests/record_condo_639_tour.py --verify-only --timeout 300` completed all
+39 legs and 11 in-bounds room holds in the requested order, with `TOUR_DONE` at
+46.2 s of level time. `task video-condo-639` recorded the same route to a 40.4 s,
+640×480, 30 fps MP4. The recorder verifies exact room order and final door-open state;
+sampled frames confirm the project-room, door crossing, both patio stops, and guest
+bedroom captions align with the picture.

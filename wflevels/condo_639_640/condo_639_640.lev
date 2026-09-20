@@ -147,7 +147,7 @@
 		{ 'STR' { 'NAME' "Poof" } { 'STR' "" } }
 		{ 'I32' { 'NAME' "Is Needle Gun Target" } { 'DATA' 0l } { 'STR' "False" } }  //False|True
 		{ 'I32' { 'NAME' "Write To Mailbox On Death" } { 'DATA' 0l } { 'STR' "0" } }
-		{ 'STR' { 'NAME' "Script" } { 'STR' "\\ wf\n98 read-mailbox dup 0 <> if INDEXOF_CAMSHOT write-mailbox 0 98 write-mailbox else drop then\n99 read-mailbox dup 0 <> if INDEXOF_CAMSHOT write-mailbox 0 99 write-mailbox 97 read-mailbox 0 = if INDEXOF_TIME read-mailbox 97 write-mailbox then else drop 0 97 write-mailbox then\n95 read-mailbox dup 0 <> if INDEXOF_CAMSHOT write-mailbox 0 95 write-mailbox 96 read-mailbox 0 = if INDEXOF_TIME read-mailbox 96 write-mailbox then else drop 0 96 write-mailbox then\n92 read-mailbox 0 <> if 1 91 write-mailbox 0 92 write-mailbox 0 else 91 read-mailbox 0 = if 0 else 1 then then dup 93 read-mailbox <> if dup 93 write-mailbox INDEXOF_TIME read-mailbox 2.0 + 94 write-mailbox then 1 94 read-mailbox INDEXOF_TIME read-mailbox - 2.0 / - dup 1 > if drop 1 then dup 0 < if drop 0 then swap 0 = if 1 swap - then dup -2.6667 * INDEXOF_X_POS 37 write-actor-mailbox dup -1.3333 * INDEXOF_X_POS 38 write-actor-mailbox drop\n" } }
+		{ 'STR' { 'NAME' "Script" } { 'STR' "\\ wf\n98 read-mailbox dup 0 <> if INDEXOF_CAMSHOT write-mailbox 0 98 write-mailbox else drop then\n99 read-mailbox dup 0 <> if INDEXOF_CAMSHOT write-mailbox 0 99 write-mailbox 97 read-mailbox 0 = if INDEXOF_TIME read-mailbox 97 write-mailbox then else drop 0 97 write-mailbox then\n95 read-mailbox dup 0 <> if INDEXOF_CAMSHOT write-mailbox 0 95 write-mailbox 96 read-mailbox 0 = if INDEXOF_TIME read-mailbox 96 write-mailbox then else drop 0 96 write-mailbox then\nINDEXOF_HARDWARE_JOYSTICK1_RAW_JUSTPRESSED read-mailbox JOYSTICK_BUTTON_B & 0 <> if 92 read-mailbox 0 <> if 91 read-mailbox 0 = if 1 93 read-mailbox - 93 write-mailbox 1 91 write-mailbox then then else 0 91 write-mailbox then 0 92 write-mailbox 94 read-mailbox INDEXOF_DELTA_TIME read-mailbox 2.0 / 93 read-mailbox 0 <> if + else - then dup 1 > if drop 1 then dup 0 < if drop 0 then dup 94 write-mailbox dup -2.6667 * INDEXOF_X_POS 37 write-actor-mailbox dup -1.3333 * INDEXOF_X_POS 38 write-actor-mailbox drop\n" } }
 		{ 'I32' { 'NAME' "Script Controls Input" } { 'DATA' 0l } { 'STR' "False" } }  //False|True
 		{ 'FILE' { 'NAME' "Mesh Name" } { 'STR' "" } }
 		{ 'I32' { 'NAME' "Model Type" } { 'STR' "None" } }
@@ -2983,6 +2983,7 @@
 		{ 'FILE' { 'NAME' "Mesh Name" } { 'STR' "639_project_door_panel_0.iff" } }
 		{ 'I32'  { 'NAME' "Model Type" } { 'DATA' 1l } { 'STR' "Mesh" } }
 		{ 'I32' { 'NAME' "Mobility" } { 'STR' "Anchored" } }
+		{ 'FX32' { 'NAME' "Mass" } { 'DATA' 75.0000000000000000(1.15.16) } { 'STR' "75.0" } }
 		{ 'I32' { 'NAME' "Model Type" } { 'STR' "Mesh" } }
 		{ 'I32' { 'NAME' "Visibility Mailbox" } { 'DATA' 1l } { 'STR' "1" } }
 		{ 'FX32' { 'NAME' "slopeA" } { 'DATA' 0.0000000000000000(1.15.16) } { 'STR' "0.000000" } }
@@ -3002,6 +3003,7 @@
 		{ 'FILE' { 'NAME' "Mesh Name" } { 'STR' "639_project_door_panel_1.iff" } }
 		{ 'I32'  { 'NAME' "Model Type" } { 'DATA' 1l } { 'STR' "Mesh" } }
 		{ 'I32' { 'NAME' "Mobility" } { 'STR' "Anchored" } }
+		{ 'FX32' { 'NAME' "Mass" } { 'DATA' 75.0000000000000000(1.15.16) } { 'STR' "75.0" } }
 		{ 'I32' { 'NAME' "Model Type" } { 'STR' "Mesh" } }
 		{ 'I32' { 'NAME' "Visibility Mailbox" } { 'DATA' 1l } { 'STR' "1" } }
 		{ 'FX32' { 'NAME' "slopeA" } { 'DATA' 0.0000000000000000(1.15.16) } { 'STR' "0.000000" } }
@@ -3021,6 +3023,27 @@
 		{ 'FILE' { 'NAME' "Mesh Name" } { 'STR' "639_project_door_panel_2.iff" } }
 		{ 'I32'  { 'NAME' "Model Type" } { 'DATA' 1l } { 'STR' "Mesh" } }
 		{ 'I32' { 'NAME' "Mobility" } { 'STR' "Anchored" } }
+		{ 'FX32' { 'NAME' "Mass" } { 'DATA' 75.0000000000000000(1.15.16) } { 'STR' "75.0" } }
+		{ 'I32' { 'NAME' "Model Type" } { 'STR' "Mesh" } }
+		{ 'I32' { 'NAME' "Visibility Mailbox" } { 'DATA' 1l } { 'STR' "1" } }
+		{ 'FX32' { 'NAME' "slopeA" } { 'DATA' 0.0000000000000000(1.15.16) } { 'STR' "0.000000" } }
+		{ 'FX32' { 'NAME' "slopeB" } { 'DATA' 0.0000000000000000(1.15.16) } { 'STR' "0.000000" } }
+		{ 'FX32' { 'NAME' "slopeC" } { 'DATA' 0.0000000000000000(1.15.16) } { 'STR' "0.000000" } }
+		{ 'FX32' { 'NAME' "slopeD" } { 'DATA' 0.0000000000000000(1.15.16) } { 'STR' "0.000000" } }
+	}
+	{ 'OBJ'
+		{ 'NAME' "639-project-door-button" }
+		{ 'VEC3' { 'NAME' "Position" } { 'DATA' 0.0000000000000000(1.15.16) 0.0000000000000000(1.15.16) 15.7500000000000000(1.15.16)  //x,y,z
+		} }
+		{ 'EULR' { 'NAME' "Orientation" } { 'DATA' 0.0000000000000000(1.15.16) -0.0000000000000000(1.15.16) 0.0000000000000000(1.15.16)  //a,b,c
+		} }
+		{ 'BOX3' { 'NAME' "Global Bounding Box" } { 'DATA' 7.7000002861022949(1.15.16) -2.5799999237060547(1.15.16) 0.9800000190734863(1.15.16) 7.8000001907348633(1.15.16) -2.3199999332427979(1.15.16) 1.3200000524520874(1.15.16)  //min(x,y,z)-max(x,y,z)
+		} }
+		{ 'STR' { 'NAME' "Class Name" } { 'DATA' "statplat" } }
+		{ 'FILE' { 'NAME' "Mesh Name" } { 'STR' "639_project_door_button.iff" } }
+		{ 'I32'  { 'NAME' "Model Type" } { 'DATA' 1l } { 'STR' "Mesh" } }
+		{ 'I32' { 'NAME' "Mobility" } { 'STR' "Anchored" } }
+		{ 'FX32' { 'NAME' "Mass" } { 'DATA' 0.0000000000000000(1.15.16) } { 'STR' "0.0" } }
 		{ 'I32' { 'NAME' "Model Type" } { 'STR' "Mesh" } }
 		{ 'I32' { 'NAME' "Visibility Mailbox" } { 'DATA' 1l } { 'STR' "1" } }
 		{ 'FX32' { 'NAME' "slopeA" } { 'DATA' 0.0000000000000000(1.15.16) } { 'STR' "0.000000" } }
@@ -3029,12 +3052,12 @@
 		{ 'FX32' { 'NAME' "slopeD" } { 'DATA' 0.0000000000000000(1.15.16) } { 'STR' "0.000000" } }
 	}
 	{ 'OBJ' 
-		{ 'NAME' "zone-project-doors" }
-		{ 'VEC3' { 'NAME' "Position" } { 'DATA' 5.8000001907348633(1.15.16) -2.0000000000000000(1.15.16) 17.1000003814697266(1.15.16)  //x,y,z
+		{ 'NAME' "zone-project-door-button" }
+		{ 'VEC3' { 'NAME' "Position" } { 'DATA' 7.3500003814697266(1.15.16) -2.5749998092651367(1.15.16) 16.7999992370605469(1.15.16)  //x,y,z
 		} }
 		{ 'EULR' { 'NAME' "Orientation" } { 'DATA' 0.0000000000000000(1.15.16) -0.0000000000000000(1.15.16) 0.0000000000000000(1.15.16)  //a,b,c
 		} }
-		{ 'BOX3' { 'NAME' "Global Bounding Box" } { 'DATA' -2.0999999046325684(1.15.16) -1.5999999046325684(1.15.16) -1.8500000238418579(1.15.16) 2.0999999046325684(1.15.16) 1.5999999046325684(1.15.16) 1.8500000238418579(1.15.16)  //min(x,y,z)-max(x,y,z)
+		{ 'BOX3' { 'NAME' "Global Bounding Box" } { 'DATA' -0.5499999523162842(1.15.16) -0.5249999761581421(1.15.16) -1.0499999523162842(1.15.16) 0.5499999523162842(1.15.16) 0.5249999761581421(1.15.16) 1.0499999523162842(1.15.16)  //min(x,y,z)-max(x,y,z)
 		} }
 		{ 'STR' { 'NAME' "Class Name" } { 'DATA' "actboxor" } }
 		{ 'I32' { 'NAME' "MovementClass" } { 'DATA' 17l } { 'STR' "17" } }
@@ -3120,7 +3143,7 @@
 		{ 'I32' { 'NAME' "Check Below Only Once" } { 'DATA' 1l } { 'STR' "True" } }  //False|True
 		{ 'I32' { 'NAME' "Template Object" } { 'DATA' 0l } { 'STR' "False" } }  //False|True
 		{ 'I32' { 'NAME' "MailBox" } { 'DATA' 92l } { 'STR' "92" } }
-		{ 'STR' { 'NAME' "Object" } { 'STR' "639-project-door-panel-0" } }
+		{ 'STR' { 'NAME' "Object" } { 'STR' "639-project-door-button" } }
 		{ 'I32' { 'NAME' "Activated By" } { 'DATA' 1l } { 'STR' "Actor" } }  //All|Actor|Class|List
 		{ 'STR' { 'NAME' "Activated By Actor" } { 'STR' "Player" } }
 		{ 'STR' { 'NAME' "Activated By Class" } { 'STR' "" } }

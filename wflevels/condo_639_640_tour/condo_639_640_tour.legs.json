@@ -61,162 +61,174 @@
  },
  {
   "leg": 10,
-  "kind": "Y",
-  "target": -9.5,
+  "kind": "X",
+  "target": 7.25,
   "room": null
  },
  {
   "leg": 11,
-  "kind": "X",
-  "target": 3.25,
+  "kind": "Y",
+  "target": -2.55,
   "room": null
  },
  {
   "leg": 12,
-  "kind": "Y",
-  "target": -5.0,
+  "kind": "DOOR_OPEN",
+  "target": 0.0,
   "room": null
  },
  {
   "leg": 13,
-  "kind": "HOLD",
-  "target": 0.5,
-  "room": "639-guest-bed"
+  "kind": "X",
+  "target": 5.8,
+  "room": null
  },
  {
   "leg": 14,
-  "kind": "X",
-  "target": 0.7,
+  "kind": "Y",
+  "target": -1.0,
   "room": null
  },
  {
   "leg": 15,
-  "kind": "Y",
-  "target": -1.0,
-  "room": null
- },
- {
-  "leg": 16,
-  "kind": "HOLD",
-  "target": 0.5,
-  "room": "639-bath-N"
- },
- {
-  "leg": 17,
-  "kind": "Y",
-  "target": -5.0,
-  "room": null
- },
- {
-  "leg": 18,
-  "kind": "X",
-  "target": 3.25,
-  "room": null
- },
- {
-  "leg": 19,
-  "kind": "Y",
-  "target": -1.0,
-  "room": null
- },
- {
-  "leg": 20,
-  "kind": "HOLD",
-  "target": 3.0,
-  "room": "639-patio-recessed"
- },
- {
-  "leg": 21,
   "kind": "X",
   "target": 6.6,
   "room": null
  },
  {
-  "leg": 22,
+  "leg": 16,
   "kind": "HOLD",
   "target": 3.0,
   "room": "639-patio"
  },
  {
-  "leg": 23,
+  "leg": 17,
   "kind": "X",
   "target": 3.25,
   "room": null
  },
  {
+  "leg": 18,
+  "kind": "HOLD",
+  "target": 3.0,
+  "room": "639-patio-recessed"
+ },
+ {
+  "leg": 19,
+  "kind": "Y",
+  "target": -5.0,
+  "room": null
+ },
+ {
+  "leg": 20,
+  "kind": "HOLD",
+  "target": 0.5,
+  "room": "639-guest-bed"
+ },
+ {
+  "leg": 21,
+  "kind": "X",
+  "target": 0.7,
+  "room": null
+ },
+ {
+  "leg": 22,
+  "kind": "Y",
+  "target": -1.0,
+  "room": null
+ },
+ {
+  "leg": 23,
+  "kind": "HOLD",
+  "target": 0.5,
+  "room": "639-bath-N"
+ },
+ {
   "leg": 24,
   "kind": "Y",
-  "target": -9.1,
+  "target": -5.0,
   "room": null
  },
  {
   "leg": 25,
   "kind": "X",
-  "target": -1.5,
+  "target": 3.25,
   "room": null
  },
  {
   "leg": 26,
+  "kind": "Y",
+  "target": -9.1,
+  "room": null
+ },
+ {
+  "leg": 27,
+  "kind": "X",
+  "target": -1.5,
+  "room": null
+ },
+ {
+  "leg": 28,
   "kind": "HOLD",
   "target": 0.5,
   "room": "640-room-2.9x3.3"
  },
  {
-  "leg": 27,
+  "leg": 29,
   "kind": "Y",
   "target": -5.0,
   "room": null
  },
  {
-  "leg": 28,
+  "leg": 30,
   "kind": "X",
   "target": -7.0,
   "room": null
  },
  {
-  "leg": 29,
+  "leg": 31,
   "kind": "HOLD",
   "target": 5.0,
   "room": "640-master-bed"
  },
  {
-  "leg": 30,
+  "leg": 32,
   "kind": "X",
   "target": -4.3,
   "room": null
  },
  {
-  "leg": 31,
+  "leg": 33,
   "kind": "Y",
   "target": -1.0,
   "room": null
  },
  {
-  "leg": 32,
+  "leg": 34,
   "kind": "HOLD",
   "target": 0.5,
   "room": "640-closet"
  },
  {
-  "leg": 33,
+  "leg": 35,
   "kind": "Y",
   "target": -5.0,
   "room": null
  },
  {
-  "leg": 34,
+  "leg": 36,
   "kind": "X",
   "target": -0.75,
   "room": null
  },
  {
-  "leg": 35,
+  "leg": 37,
   "kind": "Y",
   "target": -1.0,
   "room": null
  },
  {
-  "leg": 36,
+  "leg": 38,
   "kind": "HOLD",
   "target": 0.5,
   "room": "640-bath"

@@ -768,6 +768,11 @@ player['wf_Script Controls Input'] = 'True'
 
 JOY_UP, JOY_DOWN, JOY_RIGHT, JOY_LEFT = 1 << 11, 1 << 12, 1 << 13, 1 << 14   # hal/sjoystic.h EJ_BUTTONB_*
 MB_LEG, MB_HOLD_UNTIL, MB_DONE = 500, 501, 502   # global user mailboxes (2–999, shared)
+MB_DOOR_TOUR_INIT   = 90                    # tour-only: initialise the door closed once
+MB_DOOR_PRESS_LATCH = 91                    # one toggle per physical button press
+MB_DOOR_BUTTON_ZONE = 92                    # ActBoxOR reach gate for the wall switch
+MB_DOOR_TARGET      = 93                    # 0 = open, 1 = closed
+MB_DOOR_CLOSEDNESS  = 94                    # continuous 0..1 slide position
 
 
 def tour_forth(tour):
@@ -780,8 +785,10 @@ def tour_forth(tour):
     so momentum can never carry him past a doorway into a jamb (which "complete
     once past the target" did, run-dependently). A labelled waypoint adds a hold
     leg (bits 0) timed on INDEXOF_TIME via mailbox 501. The last leg sets mailbox
-    502 = 1 so a recorder knows the tour is over. Position-based → replays the
-    same at any frame rate.
+    502 = 1 so a recorder knows the tour is over. A waypoint may also carry
+    `"action": "open-project-door"`; that emits a stationary action leg which
+    commands the same target mailbox as the wall button and waits until the
+    panels are fully open. Position-based → replays the same at any frame rate.
     """
     hold = float(tour.get('hold_seconds', 0.5))
     tol = float(tour.get('tol_m', 0.12))
@@ -793,6 +800,10 @@ def tour_forth(tour):
         dx, dy = x - px, y - py
         assert (abs(dx) < 1e-6) != (abs(dy) < 1e-6), f"leg to {wp['at']} must be axis-aligned (from {px, py})"
         legs.append(('X', x, None) if abs(dx) > 1e-6 else ('Y', y, None))
+        action = wp.get('action')
+        if action:
+            assert action == 'open-project-door', f"unknown tour action: {action}"
+            legs.append(('DOOR_OPEN', 0.0, None))
         if wp.get('room'):
             legs.append(('HOLD', float(wp.get('hold', hold)), wp['room']))   # per-waypoint `hold` overrides hold_seconds
         px, py = x, y
@@ -811,12 +822,19 @@ def tour_forth(tour):
                 f"drop 0 INDEXOF_INPUT write-mailbox "
                 f"{spd_mb} read-mailbox abs {stop_speed} < if drop {nxt} dup {MB_LEG} write-mailbox then "
                 f"then then then")
-        else:   # hold `val` seconds at the labelled room
+        elif kind == 'HOLD':   # hold `val` seconds at the labelled room
             lines.append(
                 f"dup {k} = if 0 INDEXOF_INPUT write-mailbox "
                 f"{MB_HOLD_UNTIL} read-mailbox 0 = if INDEXOF_TIME read-mailbox {val} + {MB_HOLD_UNTIL} write-mailbox then "
                 f"INDEXOF_TIME read-mailbox {MB_HOLD_UNTIL} read-mailbox >= if "
                 f"0 {MB_HOLD_UNTIL} write-mailbox drop {nxt} dup {MB_LEG} write-mailbox then then")
+        else:   # open-project-door: stop, command open, wait for the two-second slide
+            assert kind == 'DOOR_OPEN'
+            lines.append(
+                f"dup {k} = if 0 INDEXOF_INPUT write-mailbox "
+                f"0 {MB_DOOR_TARGET} write-mailbox "
+                f"{MB_DOOR_CLOSEDNESS} read-mailbox 0.001 <= if "
+                f"drop {nxt} dup {MB_LEG} write-mailbox then then")
     lines.append(f"dup {len(legs)} = if 0 INDEXOF_INPUT write-mailbox 1 {MB_DONE} write-mailbox then")
     lines.append("drop")
     return "\n".join(lines) + "\n", legs
@@ -1033,15 +1051,17 @@ zone_interior = add_zone('zone-interior', Vector((min(cx0, -8.2), cy0 - 0.5, -0.
 # x 3.65…3.80 slice that fronts the guest bedroom, and put the doors across the
 # project room's own x 3.80…7.80 frontage.
 #
-# MECHANISM (2026-09-20, 2nd iteration — real sliding motion, real collision).
+# MECHANISM (2026-09-20, 3rd iteration — wall-button control).
 # Three individual statplat panel actors, all solid at the ordinary wall Mass
-# (the `statplat` schema default of 75, movebloc.inc:15 — `as_statplat()` leaves
-# `Mass` unset exactly as every other wall in this file does). One is fixed in
+# (75, movebloc.inc:15), explicitly authored so a schema/default change cannot
+# silently turn the glass into a pass-through surface. One is fixed in
 # the gather bay; the other two physically slide along X between the gather bay
-# and their closed bays, driven by a per-tick lerp in the Director's Forth that
-# writes their `INDEXOF_X_POS` mailbox — the `fsn_flydown()` t/SECS pattern
-# (engine/stubs/scripting_zforth.cc:189-201), triggered off the same
-# `zone-project-doors` ActBoxOR proximity mailboxes as before.
+# and their closed bays. A visible switch on the project-room side of the
+# x=7.80 jamb has a small ActBoxOR interaction-range volume. Pressing B
+# (keyboard 2) while inside that volume toggles the target; merely approaching
+# or leaving does nothing. The Director integrates a continuous 0..1
+# closedness mailbox toward that target and writes the panels'
+# `INDEXOF_X_POS` mailboxes. A second press in flight reverses smoothly.
 #
 # COLLISION IS NOW REAL, and that is the point of this iteration. Superseded:
 # the `Visibility Mailbox` two-state swap with `Mass 0` on both states, which
@@ -1070,17 +1090,13 @@ zone_interior = add_zone('zone-interior', Vector((min(cx0, -8.2), cy0 - 0.5, -0.
 #
 # ON by default since the wall correction: CONDO_DOORS=0 builds the plain wall back.
 CONDO_DOORS = os.environ.get('CONDO_DOORS', '1') not in ('', '0', 'false', 'False')
-MB_DOOR_ZONE, MB_DOOR_VISITED = 92, 91     # 90–94 are free: the other local zone
-MB_DOOR_CLOSING, MB_DOOR_T1   = 93, 94     # mailboxes in this level are 95–99
-#   91 visited-latch   92 ActBoxOR zone
-#   93 target state: 0 = open (the load-time default, mailboxes are 0), 1 = closed
-#   94 level time at which the in-flight slide finishes (0 at load ⇒ already settled)
 DOOR_ROOM    = '639-project-rm'
 DOOR_WALL    = '639-front-strip-S-wall-jamb2'
 DOOR_PANELS  = 3
 DOOR_TRACK_D = 0.11          # centre-to-centre spacing of the three tracks, in Y
-DOOR_ZONE_D  = 1.6           # how far either side of the wall the proximity strip reaches
 DOOR_SLIDE_S = 2.0           # seconds for a full open or close — reads as a real door
+DOOR_COLLISION_MASS = 75.0    # explicit ordinary-wall collision for every glass leaf
+DOOR_BUTTON_Y = -2.45         # wall switch on the project-room side of the x=7.80 jamb
 # The Director addresses the movable panels by runtime actor index, which is NOT
 # something to count by hand out of the .lev (docs/level-design-troubleshooting.md
 # § "Runtime actor indices do NOT match the .lev OBJECT ordering"). It is taken
@@ -1125,9 +1141,9 @@ if CONDO_DOORS:
     def _door_panel(name, track, x0, x1):
         """One solid glass panel actor, baked in world space on its own Y track.
 
-        Mass is deliberately left unset: `as_statplat()` gives it the statplat
-        schema default (75, movebloc.inc:15), which is what every ordinary wall
-        in this level carries, so the panel collides like a wall.
+        Mass is explicitly 75 (the ordinary-wall/statplat default in
+        movebloc.inc:15), so both the gathered stack and the fully extended
+        plane are guaranteed collision surfaces even if that default changes.
         """
         bm = _bmesh.new()
         yc = DOOR_Y + (track - (DOOR_PANELS - 1) / 2.0) * DOOR_TRACK_D
@@ -1144,6 +1160,7 @@ if CONDO_DOORS:
         scene.collection.objects.link(obj)
         clean_mesh(me, recalc=False)
         as_statplat(obj)
+        obj['wf_Mass'] = DOOR_COLLISION_MASS
         return obj
 
     # The gather bay is the last one (x 6.47…7.80). Which end they gather at is the
@@ -1168,50 +1185,96 @@ if CONDO_DOORS:
         door_shift.append((DOOR_X0 + _i * DOOR_W) - DOOR_GATHER_X0)   # 0 for the fixed panel
     assert abs(door_shift[DOOR_PANELS - 1]) < 1e-6, "the last bay must be the gather bay"
 
-    # Proximity zone: the strip within DOOR_ZONE_D either side of the wall, so the doors
-    # open whether the player approaches from the room or back from the patio. It writes
-    # its own mailbox only (no camshot forwarding), so it cannot disturb zone-interior /
-    # zone-balcony / zone-master, which overlap it.
-    zone_doors = add_zone('zone-project-doors',
-                          Vector((DOOR_X0 - pad, DOOR_Y - DOOR_ZONE_D, -0.5)),
-                          Vector((DOOR_X1 + pad, DOOR_Y + DOOR_ZONE_D, WALL_H + 0.5)),
-                          MB_DOOR_ZONE, door_panels[0].name)
+    # A visible wall switch, mounted on the project-room side of the x=7.80 jamb.
+    # It is intentionally Mass 0: the cap protrudes enough to read from the doll-house
+    # camera, but should not snag the player's collision capsule. The nearby ActBoxOR
+    # is only an interaction-range gate; entering/leaving it never moves the doors.
+    _button_plate_mat = make_flat_material('door-button-plate', (0.16, 0.18, 0.20))
+    _button_cap_mat = make_flat_material('door-button-cap', (0.95, 0.32, 0.08))
+    _button_bm = _bmesh.new()
+
+    def _button_box(center, size, material_index):
+        _verts = _bmesh.ops.create_cube(_button_bm, size=1.0)['verts']
+        _vset = set(_verts)
+        for _v in _verts:
+            _v.co = (center[0] + _v.co.x * size[0],
+                     center[1] + _v.co.y * size[1],
+                     center[2] + _v.co.z * size[2])
+        for _face in _button_bm.faces:
+            if all(_v in _vset for _v in _face.verts):
+                _face.material_index = material_index
+
+    # x=7.80 is the perpendicular wall: both pieces protrude toward the room (−X).
+    _button_box((DOOR_X1 - 0.02, DOOR_BUTTON_Y, 1.15), (0.04, 0.26, 0.34), 0)
+    _button_box((DOOR_X1 - 0.07, DOOR_BUTTON_Y, 1.15), (0.06, 0.14, 0.14), 1)
+    _bmesh.ops.recalc_face_normals(_button_bm, faces=_button_bm.faces)
+    _button_me = bpy.data.meshes.new('639-project-door-button')
+    _button_bm.to_mesh(_button_me)
+    _button_bm.free()
+    _button_me.materials.append(_button_plate_mat)
+    _button_me.materials.append(_button_cap_mat)
+    door_button = bpy.data.objects.new('639-project-door-button', _button_me)
+    scene.collection.objects.link(door_button)
+    clean_mesh(_button_me, recalc=False)
+    as_statplat(door_button)
+    door_button['wf_Mass'] = 0.0
+
+    zone_door_button = add_zone(
+        'zone-project-door-button',
+        Vector((DOOR_X1 - 1.00, DOOR_Y - 1.10, 0.0)),
+        Vector((DOOR_X1 + 0.10, DOOR_Y - 0.05, 2.10)),
+        MB_DOOR_BUTTON_ZONE, door_button.name)
 
     # Director clause, per tick:
-    #   1. want := 0 (open) while the player is in the strip, or until the strip has
-    #      ever been entered; 1 (closed) once they have visited and left. Mailboxes
-    #      are 0 at load, so the level opens with the doors **open**, gathered at
-    #      x 7.80 (plan § Context, user direction 1).
-    #   2. On a change of `want`, latch it in mb 93 and stamp mb 94 with the level
-    #      time the slide will finish (now + DOOR_SLIDE_S).
-    #   3. f := 1 − (deadline − now)/DOOR_SLIDE_S, clamped 0…1 — the fraction of the
-    #      current slide already travelled. At load mb 94 = 0 < now, so f = 1 and the
-    #      panels are already settled at their target; no start-of-level animation.
-    #   4. c := "closedness" = f when closing, 1 − f when opening; each movable
-    #      panel's X offset is c × its closed-minus-open shift.
+    #   1. ActBoxOR mailbox 92 says only whether the player is within reach of the
+    #      physical switch. While in reach, a fresh B press toggles target mailbox 93.
+    #      Mailbox 91 latches that press until the just-pressed bit clears, preventing
+    #      a long/synthetic input pulse from toggling on consecutive Director ticks.
+    #      B / keyboard 2 is deliberately separate from A / Space, the player's jump.
+    #   2. Mailbox 94 is the current closedness. Integrating DELTA_TIME / 2 s toward
+    #      the target gives constant-speed motion and lets a second press reverse a
+    #      moving door without the deadline-based implementation's position snap.
+    #   3. Each movable panel's X offset is closedness × its closed-minus-open shift.
+    # Mailboxes initialise to zero, so the interactive level loads open. The tour
+    # variant initialises once to closed, allowing its switch stop to visibly open it.
     def _door_forth_fn(idx0):
+        _tour_init = (
+            f"{MB_DOOR_TOUR_INIT} read-mailbox 0 = if "
+            f"1 {MB_DOOR_TARGET} write-mailbox 1 {MB_DOOR_CLOSEDNESS} write-mailbox "
+            f"1 {MB_DOOR_TOUR_INIT} write-mailbox then "
+            if TOUR else ""
+        )
         return (
-            f"{MB_DOOR_ZONE} read-mailbox 0 <> if "
-            f"1 {MB_DOOR_VISITED} write-mailbox 0 {MB_DOOR_ZONE} write-mailbox 0 "
-            f"else {MB_DOOR_VISITED} read-mailbox 0 = if 0 else 1 then then "
-            f"dup {MB_DOOR_CLOSING} read-mailbox <> if "
-            f"dup {MB_DOOR_CLOSING} write-mailbox "
-            f"INDEXOF_TIME read-mailbox {DOOR_SLIDE_S} + {MB_DOOR_T1} write-mailbox then "
-            f"1 {MB_DOOR_T1} read-mailbox INDEXOF_TIME read-mailbox - {DOOR_SLIDE_S} / - "
+            _tour_init
+            +
+            f"INDEXOF_HARDWARE_JOYSTICK1_RAW_JUSTPRESSED read-mailbox "
+            f"JOYSTICK_BUTTON_B & 0 <> if "
+            f"{MB_DOOR_BUTTON_ZONE} read-mailbox 0 <> if "
+            f"{MB_DOOR_PRESS_LATCH} read-mailbox 0 = if "
+            f"1 {MB_DOOR_TARGET} read-mailbox - {MB_DOOR_TARGET} write-mailbox "
+            f"1 {MB_DOOR_PRESS_LATCH} write-mailbox then then "
+            f"else 0 {MB_DOOR_PRESS_LATCH} write-mailbox then "
+            f"0 {MB_DOOR_BUTTON_ZONE} write-mailbox "
+            f"{MB_DOOR_CLOSEDNESS} read-mailbox "
+            f"INDEXOF_DELTA_TIME read-mailbox {DOOR_SLIDE_S} / "
+            f"{MB_DOOR_TARGET} read-mailbox 0 <> if + else - then "
             f"dup 1 > if drop 1 then dup 0 < if drop 0 then "
-            f"swap 0 = if 1 swap - then "
+            f"dup {MB_DOOR_CLOSEDNESS} write-mailbox "
             + "".join(f"dup {door_shift[_i]:.4f} * INDEXOF_X_POS "
                       f"{idx0 + _i} write-actor-mailbox "
                       for _i in range(DOOR_PANELS - 1))
             + "drop\n")
     print(f"[condo] {DOOR_ROOM} telescoping doors: {DOOR_PANELS} solid panels "
-          f"({DOOR_W:.2f} m each, statplat default Mass); panel {DOOR_PANELS - 1} fixed at "
+          f"({DOOR_W:.2f} m each, explicit Mass {DOOR_COLLISION_MASS:.0f}); "
+          f"panel {DOOR_PANELS - 1} fixed at "
           f"x {DOOR_GATHER_X0:.2f}…{DOOR_X1:.2f}, panels 0…{DOOR_PANELS - 2} slide "
           f"{', '.join(f'{s:+.2f} m' for s in door_shift[:-1])} to close the "
           f"x {DOOR_X0:.2f}…{DOOR_X1:.2f} frontage over {DOOR_SLIDE_S:.1f} s; "
           f"z 0.00…{WALL_H:.2f} at y {DOOR_Y:.2f}, tracks {DOOR_TRACK_D:.2f} m apart; "
-          f"mailboxes zone {MB_DOOR_ZONE} visited {MB_DOOR_VISITED} closing {MB_DOOR_CLOSING} "
-          f"deadline {MB_DOOR_T1}")
+          f"wall button at ({DOOR_X1:.2f}, {DOOR_BUTTON_Y:.2f}, 1.15), "
+          f"B/keyboard-2 toggles while in mailbox zone {MB_DOOR_BUTTON_ZONE}; "
+          f"mailboxes press-latch {MB_DOOR_PRESS_LATCH}, target {MB_DOOR_TARGET}, "
+          f"closedness {MB_DOOR_CLOSEDNESS}")
 else:
     print(f"[condo] {DOOR_ROOM} telescoping doors: OFF (CONDO_DOORS=0 set; the plain "
           f"{DOOR_WALL} stays — see docs/plans/2026-09-20-condo-project-room-telescoping-doors.md)")

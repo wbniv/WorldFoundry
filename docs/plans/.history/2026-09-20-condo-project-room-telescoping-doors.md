@@ -1,10 +1,16 @@
 | Date | Change |
 |------|--------|
+| [2026-09-20](https://github.com/wbniv/WorldFoundry/commit/24c81892) | feat(condo): project-room doors really slide, and really block when closed |
 | [2026-09-20](https://github.com/wbniv/WorldFoundry/commit/8a172a0e) | docs(plans): real sliding doors are achievable with no engine change |
 | [2026-09-20](https://github.com/wbniv/WorldFoundry/commit/fbcbba8a) | feat(condo): 639-project-rm's patio wall is telescoping glass doors |
 | [2026-09-20](https://github.com/wbniv/WorldFoundry/commit/2b1c8c86) | docs(plans): 639-project-rm north wall is telescoping doors (design plan) |
 
 <!--history-meta v1
+24c81892	author	Will Norris
+24c81892	added	246
+24c81892	deleted	10
+24c81892	files	1
+24c81892	body	Second iteration of docs/plans/2026-09-20-condo-project-room-telescoping-doors.md.\nReplaces the two `Mass 0` mesh states swapped by a `Visibility Mailbox` — which\ncould only ever be a visual cue — with three individual glass panels that are\nalways solid (statplat default Mass 75, same as every other wall here) and\nphysically slide between their closed bays and the x 6.47…7.80 gather bay over\n2 s, on their own Y tracks so the gathered stack doesn't Z-fight.\n\nThe premise the first iteration rejected this on turned out to be false:\n`PhysicalAttributes::Update()` (physics/jolt/physical.hpi:22-28) already pushes\nan actor's position into its Jolt body every physics frame, for every actor on\nthe update list. A scripted position write therefore moves the collision with\nthe mesh, so no collision-toggle mailbox and no engine change were needed.\n\nOne mechanism correction against the plan, forced by the engine: a StatPlat\ncannot carry the per-tick script the plan called for (actor.cc:752-754 asserts\n"No scripts allowed on StatPlat's" / "No local mailboxes allowed on StatPlat's"),\nand the actor kinds that can script get no Jolt body at all, so they would not\ncollide. The Director drives the two movable panels by actor index with\n`write-actor-mailbox` instead — same t/SECS lerp, same zone-project-doors\ntrigger (mailboxes 91/92), 93/94 reused for target state + slide deadline.\n\nMeasured, not assumed: with the doors closed the player walks up to y=-2.38 and\nstops dead against the glass; with them open he crosses to y=-0.32 out on\n639-patio. Full verification, including a four-frame slide series and a whole\ntour walk-through, recorded in the plan.\n\nCo-Authored-By: Claude Opus 5 (1M context) <noreply@anthropic.com>\nClaude-Session: https://claude.ai/code/session_011WmfFdmKRi46BtcEyu8pkT
 8a172a0e	author	Will Norris
 8a172a0e	added	36
 8a172a0e	deleted	0

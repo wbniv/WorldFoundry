@@ -1,11 +1,17 @@
 | Date | Change |
 |------|--------|
+| [2026-09-19](https://github.com/wbniv/WorldFoundry/commit/466adf4b) | fix(main): window switches survive the game's argv parser (-height= was taken for -h) |
 | [2026-09-19](https://github.com/wbniv/WorldFoundry/commit/e59fcf28) | feat(condo): 30 s captioned room tour of all 11 blue rooms — tour-639.mp4 |
 | [2026-09-19](https://github.com/wbniv/WorldFoundry/commit/caba2591) | docs(plan): tour video — author the path once, replay frame-exact |
 | [2026-09-19](https://github.com/wbniv/WorldFoundry/commit/de9d0b05) | feat(condo): bath-N door + 640 master/closet locators, walking pace, HOME-safe task sources |
 | [2026-09-19](https://github.com/wbniv/WorldFoundry/commit/88c389c7) | docs(plan): 20 s room-tour video of 205/639 (bridge-driven walk + burnt-in captions) |
 
 <!--history-meta v1
+466adf4b	author	Will Norris
+466adf4b	added	1
+466adf4b	deleted	1
+466adf4b	files	1
+466adf4b	body	ParseCommandLine matched switches by first letter, so -height=960 hit the\n'h' help branch and exited with usage, -width= fell through to the\n"unrecognized" debug print and -fullscreen toggled the DESIGNER_CHEATS 'f'\nframe-rate flag. The HAL (ParseWindowSwitches) had already consumed them\ncorrectly since 2026-06-04. Recognise -width/-height/-xpos/-ypos/-window/\n-fullscreen explicitly as platform-handled no-ops, make -h/-help and -f\nexact matches, list them in usage(); document in command-line-switches.md.\n\nTour recorder gains --size WxH / TOUR_SIZE (default stays 640x480; the\ncommitted tour-639.mp4 is unchanged). Known limitation recorded: the\ncapture pipe assumes 30 rendered fps, so HD takes play fast — TODO added.\n\nCo-Authored-By: Claude Opus 5 <noreply@anthropic.com>\nClaude-Session: https://claude.ai/code/session_017TmcNaoJVBysfboB3VeC7N
 e59fcf28	author	Will Norris
 e59fcf28	added	121
 e59fcf28	deleted	40

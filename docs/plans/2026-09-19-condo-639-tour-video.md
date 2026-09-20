@@ -1,4 +1,4 @@
-# 20‑second guided tour video of every blue (205/639‑owned) room
+# Guided tour video of every blue (205/639‑owned) room
 
 ## Context
 
@@ -45,7 +45,8 @@ One bridge‑driven script that records, one Taskfile entry, captions burnt in a
    move leg is a **servo**: it pushes toward the waypoint coordinate from either side (joystick bits
    by the sign of the error) and advances only when the error is within `tol_m` (0.12) *and* the
    player's `X/YSPEED` is below `stop_speed` (0.4), so momentum can never carry him past a doorway
-   into a jamb — the first cut used "complete once past the target" and stalled on the closet door in
+   into a jamb — the current collision-tolerant threshold is `tol_m` 0.22 — the first cut used
+   "complete once past the target" and stalled on the closet door in
    one run out of four; a labelled waypoint adds a hold leg (bits 0) timed on `INDEXOF_TIME`
    via mailbox 501; the last leg raises mailbox 502 (`TOUR_DONE`). Why this and not bridge‑driven
    input: the bridge's `inject_input` holds one override per slot (no queue) and the game loop
@@ -53,38 +54,42 @@ One bridge‑driven script that records, one Taskfile entry, captions burnt in a
    the outside isn't available; a **position‑based** walk is deterministic in outcome at any frame
    rate, needs no authoring pass, and can't drift into a jamb. The tour build is a separate level
    (`wflevels/condo_639_640_tour/`, wrapper generated from the main one) so the interactive
-   level's script stays the raw joystick passthrough.
+   level's script stays the raw joystick passthrough. An `open-project-door` waypoint compiles to a
+   stationary `DOOR_OPEN` leg: the tour stops at the visible switch, writes the same door target
+   mailbox used by the button, and waits for closedness zero before crossing the doorway.
 2. **Captions from the leg counter.** `tests/record_condo_639_tour.py` launches the tour build with
-   `-record_video` and the bridge, watches mailbox 500 (leg) and `INDEXOF_TIME` on the player, and
-   turns each entry into a labelled hold leg into an `.srt` cue (`00:03.4 → 00:06.1  639-kitchen`)
-   using the level clock (the recording starts on the same loop, so cue ≈ video time; verified by a
-   frame grab). When 502 flips to 1 it sends no input, waits 1 s, `SIGTERM`s the engine (the
+   `-record_video` and the bridge, watches mailbox 500 (leg), records each hold's capture wall time,
+   and turns each entry into a labelled `.srt` cue. Wall time is aligned to the raw MP4 duration
+   before the `setpts` speed-up; this keeps captions aligned even when software rendering makes the
+   game clock run much slower than the recorder. When 502 flips to 1 it sends no input, waits 1.5 s, `SIGTERM`s the engine (the
    recorder finalises the mp4 on exit) and renames `output.mp4`. The `target` bboxes in the `.lev`
    cross‑check that the player really is inside each labelled room at its hold (exit 1 otherwise).
-3. **Pace and post‑process (30 s, agreed 2026‑09‑19).** The 11‑room route below is ≈76 m; at the
+3. **Pace and post‑process (40 s current cut).** The 11‑room route below is ≈76 m; at the
    interactive level's 1.5 m/s that is ≈50 s. Ground speed is OAD data (the terminal velocity of `Running Acceleration` vs `Running
    Deceleration`; calibrated 2026‑09‑19: accel 40 ≈ 1.55 m/s, ≈ accel/26), not a mailbox, so the
    tour build takes `accel`/`decel` from the path file (260 / 3.0 ≈ 2.9 m/s — a brisk walk; the high
    deceleration kills the glide in a few ticks so the servo settles; the camera follows, walls
    still block) and spawns at the front door `(4.66, −16.0)`,
    exported as `condo_639_640_tour` (never the interactive default). 76 m / 2.9 m/s + 11 × 0.5 s holds ≈
-   30.5 s of level time (≈33 s raw with load + a 1.5 s linger); ffmpeg burns the `.srt` in
+   46 s of level time after the door action plus longer patio/master-window holds; software capture
+   may take several minutes of raw wall time. ffmpeg burns the `.srt` in
    (`subtitles=…:force_style='FontSize=22,Outline=2'`, libass is built in), prepends a 12‑frame
-   title card ("205/639 room tour") and applies `setpts` (≈1.1×) to land at 30 s.
-   `TOUR_SECONDS=0` keeps real time; `20` would need ≈1.65× (or `accel` ≈400).
+   title card ("205/639 room tour") and applies `setpts` to land at 40 s.
+   `TOUR_SECONDS=0` keeps raw capture time.
 4. **Route** (waypoints in metres, all inside doorways with ≥ 0.2 m clearance):
-   `(4.66,−16.0)` start → `(4.66,−12.0)` kitchen ⏸ → `(2.6,−13.9)` → `(1.0,−13.9)` bath‑S ⏸ →
-   `(2.6,−13.9)` → `(4.35,−9.5)` → `(4.35,−5.0)` project‑rm ⏸ → `(4.35,−9.5)` → `(3.25,−9.5)` →
-   `(3.25,−5.0)` guest‑bed ⏸ → `(0.7,−5.0)` → `(0.7,−1.0)` bath‑N ⏸ → `(0.7,−5.0)` → `(3.25,−5.0)` →
-   `(3.25,−1.0)` patio‑recessed ⏸ → `(6.6,−1.0)` patio ⏸ → `(3.25,−1.0)` → `(3.25,−9.1)` →
-   `(0.6,−9.1)` → `(−1.5,−9.1)` 640‑room‑2.9x3.3 ⏸ → `(−1.5,−5.0)` 640‑master‑bed ⏸ →
+   `(4.66,−14.5)` start → `(4.66,−12.0)` kitchen ⏸ → `(4.66,−13.9)` → `(2.6,−13.9)` → `(1.0,−13.9)` bath‑S ⏸ →
+   `(2.6,−13.9)` → `(4.35,−13.9)` → `(4.35,−5.0)` project‑rm ⏸ → `(7.25,−5.0)` →
+   `(7.25,−2.55)` **open glass door** → `(5.8,−2.55)` → `(5.8,−1.0)` cross to patio →
+   `(6.6,−1.0)` patio ⏸ → `(3.25,−1.0)` patio‑recessed ⏸ → `(3.25,−5.0)` guest‑bed ⏸ →
+   `(0.7,−5.0)` → `(0.7,−1.0)` bath‑N ⏸ → `(0.7,−5.0)` → `(3.25,−5.0)` → `(3.25,−9.1)` →
+   `(−1.5,−9.1)` 640‑room‑2.9x3.3 ⏸ → `(−1.5,−5.0)` → `(−7.0,−5.0)` 640‑master‑bed ⏸ →
    `(−4.3,−5.0)` → `(−4.3,−1.0)` 640‑closet ⏸ → `(−4.3,−5.0)` → `(−0.75,−5.0)` → `(−0.75,−1.0)`
    640‑bath ⏸ (end).
    Straight legs only (doom‑stick strafes are axis‑aligned), each leg one joystick bit.
 5. **Tasks.** `task tour-condo-639` builds the tour level from the path file (deps `tools-build`;
    `sources:` the `.blend`, the level script, the path file) and `task video-condo-639` records +
    post‑processes it into `wflevels/condo_639_640/tour-639.mp4` + `tour-639.srt` (`sources:` the tour
-   standalone `.iff` + the recorder script). Both idempotent via `generates:`.
+   standalone `.iff` + path data + recorder script). Both idempotent via `generates:`.
 6. **Verification artefacts**: the mp4, the srt, and three frames grabbed at kitchen / bath‑S /
    patio into `docs/plans/screenshots/`.
 
@@ -200,3 +205,31 @@ task: Task "video-condo-639" is up to date
 ```
 
 **PASS** — the deliverable on disk is that last recorded take (30.4 s).
+
+## Current result — project room → glass door → patio → guest bedroom (2026‑09‑20)
+
+The route was revised so the tour demonstrates the new door interaction instead of
+reaching the patio through the guest-side doorway. The tour-only level initializes the
+glass doors closed, holds in `639-project-rm`, stops at the wall switch, opens the door,
+waits for the two-second slide to finish, crosses its clear middle bay, holds at
+`639-patio` and `639-patio-recessed`, and then enters `639-guest-bed` before continuing.
+
+```
+$ python3 tests/record_condo_639_tour.py --verify-only --timeout 300
+HOLD 639-project-rm       t=  7.80s wall= 39.69s pos=(4.28,-5.14) inside=True
+HOLD 639-patio            t= 13.60s wall= 65.70s pos=(6.48,-1.18) inside=True
+HOLD 639-patio-recessed   t= 17.60s wall= 82.21s pos=(3.24,-1.17) inside=True
+HOLD 639-guest-bed        t= 21.70s wall= 98.66s pos=(3.20,-4.82) inside=True
+TOUR_DONE t=46.20s wall=203.48s
+RESULT: PASS  route verified (11 rooms; no video requested)
+
+$ task video-condo-639
+RESULT: PASS  …/tour-639.mp4 (40.400000s, 640x480; raw 311.8s, speed x7.79; 11 rooms)
+```
+
+**PASS.** The generated tour has 39 legs, including exactly one `DOOR_OPEN` action.
+The recorder requires the exact expected room order, checks every hold against the
+exported target bbox, and confirms door closedness is zero at completion. The final
+MP4 is 640×480 at 30 fps with 11 wall-time-aligned cues; sampled frames at 8/10/12/14 s
+show the project-room approach, switch/door traversal, and patio arrival, while frames
+at 14.5/18/20.5/22 s show patio → recessed patio → guest-bedroom progression.

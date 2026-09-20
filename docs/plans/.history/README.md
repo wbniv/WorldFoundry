@@ -1,5 +1,6 @@
 | Date | Change |
 |------|--------|
+| [2026-09-20](https://github.com/wbniv/WorldFoundry/commit/1f0a27ad) | docs(plans): index the macOS Metal renderer plan |
 | [2026-09-20](https://github.com/wbniv/WorldFoundry/commit/3fccf5fa) | docs(plans): index the relight-swept-levels plan |
 | [2026-09-20](https://github.com/wbniv/WorldFoundry/commit/29e5bcbd) | docs(plans): index the engine multi-directional-light-fix plan |
 | [2026-09-20](https://github.com/wbniv/WorldFoundry/commit/782e821d) | docs(plans): index the Jolt kinematic-position-sync plan |
@@ -21,6 +22,11 @@
 | [2026-06-26](https://github.com/wbniv/WorldFoundry/commit/16d72fa6) | docs: add plan index (docs/plans/README.md) |
 
 <!--history-meta v1
+1f0a27ad	author	Will Norris
+1f0a27ad	added	1
+1f0a27ad	deleted	0
+1f0a27ad	files	1
+1f0a27ad	body	Co-Authored-By: Claude Sonnet 5 <noreply@anthropic.com>\nClaude-Session: https://claude.ai/code/session_015ksFy3ZSSz2XMdto3jVA9v
 3fccf5fa	author	Will Norris
 3fccf5fa	added	1
 3fccf5fa	deleted	0

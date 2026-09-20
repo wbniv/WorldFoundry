@@ -144,11 +144,12 @@
 ## Done
 
 - ✅ 2026-09-20 — [qbert-golden-schema-path] Fixture `.blend`'s stale absolute `wf_schema_path`s rewritten to Blender `//`-relative; schema-load failures now loud on stderr; golden regenerated. See [plan](docs/plans/2026-09-20-export-level-light-field-duplication.md).
-- ✅ 2026-09-20 — [condo-doors] Closed doors really block: 3 always-solid sliding panels, Director lerps their `X_POS` — no collision mailbox needed. See [plan](docs/plans/2026-09-20-condo-project-room-telescoping-doors.md).
+- ✅ 2026-09-20 — [condo-doors] Door collision is continuous: every glass leaf explicitly carries Mass 75; the gathered one-third stack, all three extended thirds, and both closed-state seams block the player. See [plan](docs/plans/2026-09-20-condo-project-room-telescoping-doors.md).
 - ✅ 2026-09-20 — [condo-doors] True continuous sliding animation (per-tick position lerp, 2 s open/close) replaces the instant visibility swap. See [plan](docs/plans/2026-09-20-condo-project-room-telescoping-doors.md).
+- ✅ 2026-09-20 — [condo-doors] A visible wall switch beside 639-project-rm explicitly toggles the glass doors on B/keyboard-2 while within reach; proximity alone no longer operates them, and mid-slide presses reverse smoothly. See [plan](docs/plans/2026-09-20-condo-project-room-telescoping-doors.md).
 - ✅ 2026-09-20 — [jolt-pos-sync] Scripted `X/Y/Z_POS` writes already sync into Jolt every frame for body actors; no engine fix needed. See [plan](docs/plans/2026-09-20-jolt-kinematic-position-sync.md).
 - ✅ 2026-09-20 — [relight] Real key light + ~0.4 ambient for all 10 swept levels (marble-madness{,-2}, pilot_demo, qbert, smb_w1_1..4, snowgoons{,-blender}). See [plan](docs/plans/2026-09-20-relight-swept-levels.md).
-- ✅ 2026-09-20 — [condo-doors] 639-project-rm's **patio** wall (y=−2.0, not the x=7.8 north wall) is 3 telescoping glass panels, open by default, proximity-swapped. See [plan](docs/plans/2026-09-20-condo-project-room-telescoping-doors.md).
+- ✅ 2026-09-20 — [condo-doors] 639-project-rm's **patio** wall (y=−2.0, not the x=7.8 north wall) is 3 telescoping glass panels, open by default and operated by its nearby wall switch. See [plan](docs/plans/2026-09-20-condo-project-room-telescoping-doors.md).
 - ✅ 2026-09-20 — [condo-doors] What's beyond that wall: nothing to build — `639-patio` + `639-patio-recessed` already span it, floored and walled. See [plan](docs/plans/2026-09-20-condo-project-room-telescoping-doors.md).
 - ✅ 2026-09-19 — [window-flags] `-width/-height/-xpos/-ypos/-window/-fullscreen` now survive main.cc's parser (`-height=` was mistaken for `-h`); documented; `TOUR_SIZE` on the tour recorder. See [plan](docs/plans/2026-09-19-window-size-flags-reach-the-game-parser.md).
 - ✅ 2026-09-19 — [condo-floors] Floor-top faces get a 0.55× shade of the unit colour so walls/doorways read; tour re-recorded. See [plan](docs/plans/2026-09-19-condo-darker-floors.md).
