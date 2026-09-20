@@ -25,6 +25,22 @@ struct RBVertex
     float u, v;
 };
 
+// Opaque, backend-owned GPU texture. The GL backend keeps a texture name in
+// here; the Metal backend keeps an id<MTLTexture>. NULL means "no texture".
+//
+// void* rather than an integer typedef so it is pointer-sized by definition,
+// with no <cstdint> in a runtime header (coding-conventions §4). The one cast
+// either direction lives inside the backend that owns the representation.
+typedef void* RBTextureHandle;
+
+// Pixel layout of the data handed to CreateTexture. Matches what PixelMap
+// actually stores, which is chosen by the SIXTEEN_BIT_VRAM build switch.
+enum RBTextureFormat
+{
+    RB_TEX_RGBA8,       // 4 bytes/texel, tightly packed
+    RB_TEX_RGB5         // GL_RGB5 internal, RGB bytes in (SIXTEEN_BIT_VRAM builds)
+};
+
 class RendererBackend
 {
 public:
@@ -82,6 +98,32 @@ public:
     // the swap-buffers. Legacy fixed-function backend is a no-op; modern
     // VBO backend uses this to drain its accumulated vertex buffer.
     virtual void EndFrame() = 0;
+
+    // ---- textures (D4/O3 of docs/plans/2026-09-20-macos-metal-renderer.md) --
+    //
+    // PixelMap used to own a GLuint and call glGenTextures/glTexImage2D
+    // directly, which welded shared code to GL and uploaded into the no-op GL
+    // stubs on macOS. Ownership now sits behind this seam: PixelMap holds an
+    // opaque handle and the backend decides what it is and how it is filled.
+    //
+    // Sampler policy (wrap, filtering) is deliberately the BACKEND's business,
+    // not the caller's — it used to be inlined in pixelmap.cc next to the
+    // upload, which is why GFX_ZBUFFER leaked into a pixel container.
+    //
+    // Creation is by design all-at-once rather than create-then-upload: the
+    // pixels are needed to build an MTLTexture anyway, and it makes the handle
+    // lazy, so PixelMaps that never become textures (CPU-only maps, and
+    // sub-maps that delegate to a parent) never allocate a GPU object at all.
+    // Returns NULL on failure, which callers must tolerate.
+    virtual RBTextureHandle CreateTexture(int width, int height,
+                                          RBTextureFormat format,
+                                          const void* pixels) = 0;
+
+    // Releases a handle from CreateTexture. NULL is a no-op, so callers do not
+    // need to guard — which is what makes the zero-initialised handle safe in
+    // ~PixelMap, where the old code passed an uninitialised GLuint to
+    // glDeleteTextures for every sub-pixelmap.
+    virtual void DestroyTexture(RBTextureHandle handle) = 0;
 
     // Debug-bridge hot reload: recompile the backend's shader program from
     // the given GLSL sources. Returns true on success; on failure leaves the

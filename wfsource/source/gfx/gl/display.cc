@@ -77,6 +77,24 @@ extern GLuint gCaptureFBO;
 static void EnsureCaptureFBO(int w, int h);
 static void CaptureFrame(int xSize, int ySize, int liveW, int liveH);
 
+// PNG encoder for --capture-frame below. The implementation is instantiated
+// once, unconditionally, in engine/stubs/stb_image_write_impl.cc.
+#include "../../../../engine/vendor/stb/stb_image_write.h"
+
+// --capture-frame=N=<path.png> (game/main.cc). The macOS Metal display has the
+// same flag; both count frames that reached the BACKEND, so asking each
+// platform for frame N yields the same simulation instant and the captures are
+// comparable. That matched pair is what plan steps 9 and 10 of
+// docs/plans/2026-09-20-macos-metal-renderer.md need — the Phase 2 attempt
+// failed precisely because the old WF_GAME_SCREENSHOT_PPM path hardcoded its
+// own trigger and counted presents instead.
+extern int         gCaptureFrame;
+extern const char* gCapturePath;
+
+// Set by RenderEnd on the frame that matches, consumed by CaptureFrame during
+// the following PageFlip, where the capture FBO is still readable.
+static bool gCapturePending = false;
+
 static void DrawHudText(float x, float y, const char* text)
 {
     static char vbuf[65536];
@@ -871,6 +889,19 @@ Display::RenderBegin()
 void
 Display::RenderEnd()
 {
+#if DESIGNER_CHEATS && defined(__LINUX__)
+    // Count BACKEND frames, not presents. RenderEnd runs inside WFGame::
+    // StepFrame's `camera()->ValidView()` gate (game.cc:584), which is the
+    // same gate the macOS display counts behind — so frame N here and frame N
+    // there are the same simulation instant. Counting presents instead is what
+    // made the Phase 2 Linux reference incomparable.
+    if (gCaptureFrame > 0 && gCapturePath)
+    {
+        static unsigned long s_backendFrames = 0;
+        if ((int)++s_backendFrames == gCaptureFrame)
+            gCapturePending = true;
+    }
+#endif
 }
 
 //==============================================================================
@@ -982,6 +1013,44 @@ CaptureFrame(int xSize, int ySize, int liveW, int liveH)
     // mp4 entirely. Wait a few frames so the first textured frame is
     // ready (the FBO blits are immediate, but the level-load cascade can
     // present a partial frame on frame 0).
+    // --capture-frame=N=<path.png>: the matched-frame sibling of the macOS
+    // capture in hal/macos/display_macos.cc. Reads from the capture FBO, which
+    // is still bound as READ here — that FBO is the whole reason this is
+    // trustworthy on a non-composited X11 desktop, where the back buffer
+    // contains whatever window is occluding us.
+    if (gCapturePending && gCapturePath)
+    {
+        gCapturePending = false;
+        // glReadPixels gave BGR bottom-up; stb wants RGB(A) top-down.
+        const size_t rowRGB = (size_t)xSize * 3;
+        uint8_t* rgb = (uint8_t*)malloc(rowRGB * (size_t)ySize);
+        unsigned long lit = 0;
+        for (int y = 0; y < ySize; ++y)
+        {
+            const uint8_t* src = pixels + (size_t)(ySize - 1 - y) * rowRGB;
+            uint8_t*       dst = rgb    + (size_t)y * rowRGB;
+            for (int x = 0; x < xSize; ++x)
+            {
+                dst[x*3+0] = src[x*3+2];
+                dst[x*3+1] = src[x*3+1];
+                dst[x*3+2] = src[x*3+0];
+                if (dst[x*3+0] | dst[x*3+1] | dst[x*3+2]) ++lit;
+            }
+        }
+        const int ok = stbi_write_png(gCapturePath, xSize, ySize, 3,
+                                      rgb, (int)rowRGB);
+        free(rgb);
+        // Same non-black report the macOS side prints, for the same reason: a
+        // PNG that exists but is uniformly the clear colour is how a blank
+        // capture gets mistaken for a pass.
+        std::printf("linux: capture frame %d -> %s (%dx%d) %s, "
+                    "non-black pixels %lu/%lu\n",
+                    gCaptureFrame, gCapturePath, xSize, ySize,
+                    ok ? "written" : "stbi_write_png FAILED",
+                    lit, (unsigned long)((size_t)xSize * (size_t)ySize));
+        std::fflush(stdout);
+    }
+
     static int  gPpmFrame    = 0;
     static bool gPpmDone     = false;
     if (!gPpmDone)

@@ -33,6 +33,7 @@
 #include <pigsys/pigsys.hp>
 #include <gfx/color.hp>
 #include <gfx/renderer.hp>
+#include <gfx/renderer_backend.hp>
     
 //==============================================================================
 
@@ -67,6 +68,11 @@ public:
     // kts temp
     void SetGLTexture() const;                 // make this pixelmap the current GL texture
 
+    // The backend-owned texture, or NULL. Follows _parent, so a sub-pixelmap
+    // reports the texture it actually samples from. Used by the Metal backend
+    // to bind at draw time; the GL backend binds via SetGLTexture above.
+    RBTextureHandle GetTextureHandle() const;
+
 
 	void Validate() const;
 	enum
@@ -89,7 +95,12 @@ private:
 
     PixelMap* _parent;
 
-    GLuint _glTextureName;              // index of this pixelmaps texture
+    // Opaque GPU texture owned by the RendererBackend (GL name / MTLTexture).
+    // NULL until something actually uploads pixels, and NULL forever for
+    // CPU-only maps and sub-maps that delegate to a parent. Zero-init matters:
+    // ~PixelMap used to hand an UNINITIALISED GLuint to glDeleteTextures for
+    // every sub-pixelmap, which could delete an unrelated live texture.
+    RBTextureHandle _textureHandle;
 
 #if SIXTEEN_BIT_VRAM
      uint16* _pixelBuffer;

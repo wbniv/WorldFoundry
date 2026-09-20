@@ -52,6 +52,12 @@ public:
         std::fflush(stdout);
         _trianglesThisFrame = 0;
     }
+    // No GPU, so no textures. Returning NULL is a contract-honouring answer,
+    // not a failure: PixelMap tolerates it and the draw path already handles
+    // an absent texture. DestroyTexture(NULL) is a no-op by contract.
+    RBTextureHandle CreateTexture(int, int, RBTextureFormat,
+                                  const void*) override { return NULL; }
+    void DestroyTexture(RBTextureHandle) override {}
     // ReloadProgram uses the base no-op default.
 
 private:

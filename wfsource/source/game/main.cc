@@ -307,8 +307,18 @@ ParseCommandLine(int argc, char** argv)
 		else if ( strncmp( argv[index]+1, (char*)szRate, strlen( szRate ) ) == 0)
 		{
 		    int value = atoi( argv[index] + strlen( szRate ) + 1 );
-          FakeFrameRate = Scalar::one / Scalar(value,0);
-			FakeFrameRate = SCALAR_CONSTANT(0.05);
+			// `-rateN` means "simulate a fixed N Hz clock" (see
+			// docs/command-line-switches.md), and it is the only lever that makes
+			// a run reproducible: level.cc:821 advances the level clock by
+			// FakeFrameRate instead of the wall-clock delta. Until 2026-09-21 the
+			// computed rate was immediately overwritten by a hardcoded 0.05, so
+			// every -rateN silently meant 20 Hz and `value` was a dead store.
+			// Found while building the macOS/Linux matched-frame capture, which
+			// depends on this flag doing what it says.
+			if ( value > 0 )
+				FakeFrameRate = Scalar::one / Scalar(value,0);
+			else
+				FakeFrameRate = SCALAR_CONSTANT(0.05);   // bare -rate: 20 Hz
 			DBSTREAM1( cerror << "Fake clock delta = " << FakeFrameRate << std::endl; )
 		}
 #if defined(DESIGNER_CHEATS)

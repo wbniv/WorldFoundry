@@ -129,6 +129,18 @@ PixelMap::GetYPositionInVideoMemory() const		// only valid for video memory pixe
 
 //==============================================================================
 
+inline RBTextureHandle
+PixelMap::GetTextureHandle() const
+{
+    // Follows the parent chain for the same reason SetGLTexture does: a
+    // sub-pixelmap has no texture of its own, it samples the parent's.
+    if(_parent)
+        return _parent->GetTextureHandle();
+    return _textureHandle;
+}
+
+//==============================================================================
+
 inline void
 PixelMap::SetGLTexture() const                 // make this pixelmap the current GL texture
 {
@@ -139,7 +151,12 @@ PixelMap::SetGLTexture() const                 // make this pixelmap the current
     if(_parent)
         _parent->SetGLTexture();
     else
-        glBindTexture(GL_TEXTURE_2D,_glTextureName);
+        // The handle IS the GL texture name under the GL backend — the cast is
+        // the inverse of the one backend_modern.cc makes in CreateTexture, and
+        // is the only place outside that backend which assumes the
+        // representation. Harmless elsewhere: this method is GL-only and is
+        // never called on the Metal path.
+        glBindTexture(GL_TEXTURE_2D,(GLuint)(uintptr_t)_textureHandle);
     AssertGLOK();
 }
 

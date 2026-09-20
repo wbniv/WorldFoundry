@@ -57,10 +57,11 @@ PixelMap::PixelMap(int flags, int xSize, int ySize)
 #endif		                            // sixteen_bit
     ValidatePtr(_pixelBuffer);
 
-   AssertGLOK();
-    glGenTextures(1,&_glTextureName);
-    assert(_glTextureName);
-   AssertGLOK();
+    // No GPU texture yet — it is created on the first Load(), which is the
+    // only place the pixels exist. Before D4/O3 this ran glGenTextures here
+    // unconditionally, so every PixelMap burned a texture name whether or not
+    // it ever became a texture.
+    _textureHandle = NULL;
 
 
 
@@ -92,6 +93,11 @@ PixelMap::PixelMap(PixelMap& parent,int xPos, int yPos, int xSize, int ySize)
 	_ySize = ySize;
     _parent = &parent;
     _pixelBuffer = NULL;
+    // A sub-pixelmap owns no texture; it samples the parent's. This member was
+    // previously left UNINITIALISED here, and ~PixelMap then passed the garbage
+    // to glDeleteTextures — which silently deletes an unrelated texture if the
+    // value happens to name a live one.
+    _textureHandle = NULL;
 	Validate();
     std::cout << "PixelMap::PixelMap: subpixelmap = " << this << std::endl;
 }
@@ -103,7 +109,9 @@ PixelMap::~PixelMap()
     Validate();
     if(_pixelBuffer)
         delete [] _pixelBuffer;
-    glDeleteTextures(1,(GLuint*)&_glTextureName);
+    // NULL-safe by contract, so sub-pixelmaps and CPU-only maps cost nothing.
+    RendererBackendGet().DestroyTexture(_textureHandle);
+    _textureHandle = NULL;
 }
 
 //==============================================================================
@@ -191,57 +199,26 @@ PixelMap::Load(const void* memory, int xOffset, int yOffset, int xSize, int ySiz
 
     if(_flags == MEMORY_VIDEO)
     {
-        AssertGLOK();
-
-        assert(_glTextureName);
-        glBindTexture(GL_TEXTURE_2D,_glTextureName);
-
+        // D4/O3: the upload, the internal format and the sampler policy all
+        // moved behind the RendererBackend seam. This used to be ~40 lines of
+        // glBindTexture / glTexParameteri / glTexImage2D inline here, which is
+        // why a pixel container had a GFX_ZBUFFER #ifdef in it and why macOS
+        // uploaded into the no-op GL stubs.
+        //
+        // Recreate rather than re-upload: Load() can be called repeatedly, the
+        // size can change with it, and CreateTexture needs the pixels anyway.
+        // DestroyTexture(NULL) is a no-op, so the first call is fine.
+        RendererBackend& backend = RendererBackendGet();
+        backend.DestroyTexture(_textureHandle);
 #if SIXTEEN_BIT_VRAM
-#define TEXTURE_INTERNAL_FORMAT GL_RGB5
-#define TEXTURE_FORMAT GL_RGB
+        const RBTextureFormat fmt = RB_TEX_RGB5;
 #else
-#define TEXTURE_INTERNAL_FORMAT GL_RGBA
-#define TEXTURE_FORMAT GL_RGBA
+        const RBTextureFormat fmt = RB_TEX_RGBA8;
 #endif
-
-
-        glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_REPEAT);
-        AssertGLOK();
-        glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_REPEAT);
-        AssertGLOK();
-#if defined ( GFX_ZBUFFER )
-        glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
-        AssertGLOK();
-        glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
-        AssertGLOK();
-        glEnable(GL_DEPTH_TEST);
-        AssertGLOK();
-        glEnable(GL_BLEND);
-        AssertGLOK();
-#else /* GFX_ZBUFFER */
-        glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_NEAREST);
-        AssertGLOK();
-        glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_NEAREST);
-        AssertGLOK();
-#endif /* GFX_ZBUFFER */
-
-          glTexImage2D(GL_TEXTURE_2D, 0, TEXTURE_INTERNAL_FORMAT, _xSize, _ySize,
-                  0, TEXTURE_FORMAT, GL_UNSIGNED_BYTE, pPB);
-        AssertGLOK();
-//        // kts temp code
-//          char* foo = new char[_xSize*_ySize*4];
-//          assert(foo);
-//          for(int index = 0; index < (_xSize*_ySize*4);index++)
-//              foo[index] = 0x0;
-
-//             glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA, _xSize, _ySize,
-//                     0, GL_RGBA, GL_UNSIGNED_BYTE, foo);
-//   AssertGLOK();
-
-//             delete [] foo;
-
-
-        AssertGLOK();
+        _textureHandle = backend.CreateTexture(_xSize, _ySize, fmt, pPB);
+        // NULL is tolerated, not asserted: a backend with no GPU (the headless
+        // stub) legitimately returns it, and the draw path already handles an
+        // absent texture.
     }
 
 }

@@ -56,6 +56,40 @@ namespace
 // runtime with a message that does not name the mismatch.
 static constexpr MTLPixelFormat kDepthFormat = MTLPixelFormatDepth32Float;
 
+// ---- RBTextureHandle <-> id<MTLTexture> -------------------------------------
+// The handle crosses a void* boundary into shared C++ (PixelMap), so ownership
+// has to be transferred explicitly. This build is manual retain/release — there
+// is no -fobjc-arc anywhere in CMakeLists.txt or codemagic.yaml — but the ARC
+// arm is written out so switching it on later fails to compile rather than
+// silently leaking or over-releasing every texture.
+static inline RBTextureHandle TexToHandle(id<MTLTexture> t)
+{
+#if __has_feature(objc_arc)
+    return (RBTextureHandle)CFBridgingRetain(t);
+#else
+    return (RBTextureHandle)[t retain];
+#endif
+}
+
+static inline id<MTLTexture> HandleToTex(RBTextureHandle h)
+{
+#if __has_feature(objc_arc)
+    return (__bridge id<MTLTexture>)h;
+#else
+    return (id<MTLTexture>)h;
+#endif
+}
+
+static inline void ReleaseTexHandle(RBTextureHandle h)
+{
+    if (!h) return;
+#if __has_feature(objc_arc)
+    CFBridgingRelease(h);
+#else
+    [(id<MTLTexture>)h release];
+#endif
+}
+
 static constexpr const char* kMSL = R"MSL(
 #include <metal_stdlib>
 using namespace metal;
@@ -124,11 +158,18 @@ vertex VertexOut wf_vs(VertexIn v                  [[stage_in]],
 }
 
 fragment float4 wf_fs(VertexOut v                  [[stage_in]],
-                      constant Uniforms& u         [[buffer(1)]])
+                      constant Uniforms& u         [[buffer(1)]],
+                      texture2d<float> tex         [[texture(0)]],
+                      sampler          smp         [[sampler(0)]])
 {
     float4 c = float4(v.color * v.lit, 1.0);
-    // Phase 2B3: texture path disabled, PixelMap→MTLTexture upload lands
-    // with the frame-loop wiring in Phase 2C.
+    // Phase 3: modulate by the texture, matching backend_modern's GL path
+    // (vertex colour * lighting * texel). use_tex is 0 whenever the draw has
+    // no PixelMap or the upload failed, so this stays correct on a device
+    // where CreateTexture returned nil.
+    if (u.use_tex != 0) {
+        c.rgb *= tex.sample(smp, v.uv).rgb;
+    }
     if (u.fog != 0) {
         c.rgb = mix(u.fog_color, c.rgb, v.fog_factor);
     }
@@ -383,6 +424,49 @@ public:
         _encoder = nil;
     }
 
+    // ---- textures (Phase 3, D4/O3) -----------------------------------------
+    RBTextureHandle CreateTexture(int width, int height,
+                                  RBTextureFormat format,
+                                  const void* pixels) override
+    {
+        if (!EnsureInited() || width <= 0 || height <= 0 || !pixels)
+            return NULL;
+        // RB_TEX_RGB5 is the SIXTEEN_BIT_VRAM path, which feeds 3 bytes/texel.
+        // Metal has no 24-bit format, and this build does not use it, so refuse
+        // loudly rather than silently sample garbage if it is ever switched on.
+        if (format != RB_TEX_RGBA8) {
+            NSLog(@"wf_game: MetalBackend: RB_TEX_RGB5 not implemented");
+            return NULL;
+        }
+
+        MTLTextureDescriptor* td = [MTLTextureDescriptor
+            texture2DDescriptorWithPixelFormat:MTLPixelFormatRGBA8Unorm
+                                         width:(NSUInteger)width
+                                        height:(NSUInteger)height
+                                     mipmapped:NO];
+        td.usage       = MTLTextureUsageShaderRead;
+        td.storageMode = MTLStorageModeManaged;
+        id<MTLTexture> tex = [_device newTextureWithDescriptor:td];
+        if (!tex) {
+            NSLog(@"wf_game: MetalBackend: texture %dx%d alloc failed", width, height);
+            return NULL;
+        }
+        [tex replaceRegion:MTLRegionMake2D(0, 0, (NSUInteger)width, (NSUInteger)height)
+               mipmapLevel:0
+                 withBytes:pixels
+               bytesPerRow:(NSUInteger)width * 4];
+
+        // +1 from `new...`, handed to the caller. PixelMap owns it from here and
+        // releases it through DestroyTexture; TexToHandle balances that
+        // ownership across the opaque-handle boundary under either ARC or MRR.
+        return TexToHandle(tex);
+    }
+
+    void DestroyTexture(RBTextureHandle handle) override
+    {
+        ReleaseTexHandle(handle);
+    }
+
     // ---- offscreen support (Phase 2) ---------------------------------------
     // The wf_metal:: free functions below are the public face of this; these
     // are the accessors they need. LazyInitPublic exists so the offscreen path
@@ -405,6 +489,9 @@ private:
     id<MTLDepthStencilState>   _depthState      = nil;
     id<MTLRenderCommandEncoder> _encoder        = nil;
     id<MTLBuffer>              _vbuf            = nil;
+    id<MTLSamplerState>        _sampler         = nil;
+    id<MTLTexture>             _whiteTexture    = nil;
+    RBTextureHandle            _boundTexture    = NULL;
     bool                       _inited          = false;
 
     // Phase 1 measured 1563 triangles/frame against the headless backend; these
@@ -507,6 +594,31 @@ private:
         dsd.depthWriteEnabled    = YES;
         _depthState = [_device newDepthStencilStateWithDescriptor:dsd];
 
+        // Repeat + linear, matching the GL backend's GFX_ZBUFFER policy that
+        // CreateTexture in backend_modern.cc applies via glTexParameteri.
+        MTLSamplerDescriptor* sd = [[MTLSamplerDescriptor alloc] init];
+        sd.minFilter    = MTLSamplerMinMagFilterLinear;
+        sd.magFilter    = MTLSamplerMinMagFilterLinear;
+        sd.sAddressMode = MTLSamplerAddressModeRepeat;
+        sd.tAddressMode = MTLSamplerAddressModeRepeat;
+        _sampler = [_device newSamplerStateWithDescriptor:sd];
+
+        // 1x1 opaque white, bound whenever a batch has no texture. The
+        // fragment function declares texture(0) as a required argument, and
+        // Metal's validation layer flags an unbound argument even when the
+        // shader guards the sample behind use_tex. Four bytes buys that away.
+        MTLTextureDescriptor* wd = [MTLTextureDescriptor
+            texture2DDescriptorWithPixelFormat:MTLPixelFormatRGBA8Unorm
+                                         width:1 height:1 mipmapped:NO];
+        wd.usage       = MTLTextureUsageShaderRead;
+        wd.storageMode = MTLStorageModeManaged;
+        _whiteTexture  = [_device newTextureWithDescriptor:wd];
+        const uint8_t white[4] = { 255, 255, 255, 255 };
+        [_whiteTexture replaceRegion:MTLRegionMake2D(0, 0, 1, 1)
+                         mipmapLevel:0
+                           withBytes:white
+                         bytesPerRow:4];
+
         _queue = [_device newCommandQueue];
 
         NSLog(@"wf_game: MetalBackend ready (device=%@)", _device.name);
@@ -534,8 +646,12 @@ private:
         u.fog       = _fogEnabled ? 1 : 0;
         u.fog_start = _fogStart;
         u.fog_end   = _fogEnd;
-        u.use_tex   = 0;  // Phase 2C adds texture binding.
-        u._pad      = 0;
+        // Phase 3: texture on iff this batch has a PixelMap that actually owns a
+        // GPU texture. GetTextureHandle() follows the _parent chain, so a
+        // sub-pixelmap correctly reports its atlas parent's texture.
+        _boundTexture = _curTexture ? _curTexture->GetTextureHandle() : NULL;
+        u.use_tex     = _boundTexture ? 1 : 0;
+        u._pad        = 0;
     }
 
     void Flush()
@@ -580,6 +696,13 @@ private:
         [_encoder setRenderPipelineState:_pipeline];
         if (_depthState)
             [_encoder setDepthStencilState:_depthState];
+        // One batch = one texture (DrawTriangle flushes on a texture change),
+        // so a single bind per flush is correct.
+        // Always bind something at texture(0) — see _whiteTexture in LazyInit.
+        [_encoder setFragmentTexture:(u.use_tex ? HandleToTex(_boundTexture)
+                                                : _whiteTexture)
+                             atIndex:0];
+        [_encoder setFragmentSamplerState:_sampler atIndex:0];
         [_encoder setVertexBuffer:_vbuf offset:0 atIndex:0];
         [_encoder setVertexBytes:&u
                            length:sizeof(Uniforms)

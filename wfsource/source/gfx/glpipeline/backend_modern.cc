@@ -28,6 +28,7 @@
 #endif
 
 #include <gfx/renderer_backend.hp>
+#include <cstdint>   // uintptr_t for the RBTextureHandle cast
 #include <gfx/pixelmap.hp>
 #include <math/matrix34.hp>
 
@@ -405,6 +406,53 @@ public:
     void EndFrame() override
     {
         Flush();
+    }
+
+    // ---- textures (D4/O3) --------------------------------------------------
+    // Verbatim relocation of what pixelmap.cc used to do inline, so GL
+    // behaviour is unchanged: same internal/external formats, same wrap and
+    // filter policy, same GFX_ZBUFFER split. The only difference is that it
+    // now lives in the backend that owns the representation.
+    RBTextureHandle CreateTexture(int width, int height,
+                                  RBTextureFormat format,
+                                  const void* pixels) override
+    {
+        GLuint name = 0;
+        glGenTextures(1, &name);
+        if (!name)
+            return NULL;
+
+        glBindTexture(GL_TEXTURE_2D, name);
+        glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_REPEAT);
+        glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_REPEAT);
+#if defined ( GFX_ZBUFFER )
+        glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
+        glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
+        // Global state, and misplaced in a texture upload — but this is where
+        // it has always been enabled, so moving it would be a behaviour change
+        // smuggled into a refactor. Left as-is, flagged rather than fixed.
+        glEnable(GL_DEPTH_TEST);
+        glEnable(GL_BLEND);
+#else
+        glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_NEAREST);
+        glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_NEAREST);
+#endif
+        const GLint  internalFormat =
+            (format == RB_TEX_RGB5) ? GL_RGB5 : GL_RGBA;
+        const GLenum externalFormat =
+            (format == RB_TEX_RGB5) ? GL_RGB  : GL_RGBA;
+        glTexImage2D(GL_TEXTURE_2D, 0, internalFormat, width, height,
+                     0, externalFormat, GL_UNSIGNED_BYTE, pixels);
+
+        return (RBTextureHandle)(uintptr_t)name;
+    }
+
+    void DestroyTexture(RBTextureHandle handle) override
+    {
+        if (!handle)
+            return;
+        GLuint name = (GLuint)(uintptr_t)handle;
+        glDeleteTextures(1, &name);
     }
 
     // Hot-reload the program from new GLSL. Called from the game thread
