@@ -53,6 +53,12 @@ char gDebugBind[256] = "127.0.0.1";    // bind address; set by --debug-bind ADDR
 int  gFrameStepSmokeCount = 0;          // >0 = run --frame-step-smoke=N path
 bool gWfmutSmoke          = false;      // true = run --wfmut-smoke path
 bool gMemoryTest          = false;      // true = run --memory-test and exit (no level, no window)
+// --capture-frame=N=<path.png>: write backend frame N to a PNG. macOS/Metal
+// only today (hal/macos/display_macos.cc renders offscreen); a no-op elsewhere.
+// N counts frames that actually reached the backend, not engine steps — the two
+// differ whenever the camera has no valid view. See the macOS Metal plan Phase 2.
+int         gCaptureFrame = 0;
+const char* gCapturePath  = nullptr;
 bool gWfmutThreadTest     = false;      // true = run --wfmut-thread-test (X5 death-test)
 int  gFrameStepCycles = 1;              // --cycles=N: how many Load/Unload cycles to run
 // Always defined: rooms.cc/level.cc reference it unconditionally as a runtime
@@ -247,6 +253,21 @@ ParseCommandLine(int argc, char** argv)
 		{
 			gFrameStepSmokeCount = atoi( argv[index] + 1 + 18 );
 			DBSTREAM1( cprogress << "Frame-step API smoke: " << gFrameStepSmokeCount << " frames" << std::endl; )
+		}
+		else if ( strncmp( argv[index]+1, "-capture-frame=", 15 ) == 0 )
+		{
+			// --capture-frame=N=<path.png>
+			const char* spec = argv[index] + 1 + 15;
+			const char* eq   = strchr( spec, '=' );
+			if ( eq && eq[1] )
+			{
+				gCaptureFrame = atoi( spec );
+				gCapturePath  = eq + 1;
+			}
+			AssertMsg( gCaptureFrame > 0 && gCapturePath,
+			           "--capture-frame wants N=<path.png>, got: " << spec );
+			DBSTREAM1( cprogress << "Capture frame " << gCaptureFrame
+			                     << " -> " << gCapturePath << std::endl; )
 		}
 		else if ( strcmp( argv[index]+1, "-memory-test" ) == 0 )
 		{

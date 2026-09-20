@@ -52,10 +52,11 @@
 #  include <GL/gl.h>
 #endif
 
-// stb_image_write — vendored single-header PNG encoder. Implementation lives
-// in this TU; no other unit defines STB_IMAGE_WRITE_IMPLEMENTATION.
-#define STB_IMAGE_WRITE_IMPLEMENTATION
-#define STBI_WRITE_NO_STDIO_FILESYSTEM 0
+// stb_image_write — vendored single-header PNG encoder. The implementation
+// lives in engine/stubs/stb_image_write_impl.cc, which is compiled
+// unconditionally; this TU (and the macOS frame capture) only need the
+// declarations. It used to be instantiated here, but this whole file is inside
+// `#ifdef WF_DEBUG_BRIDGE`, so the encoder vanished whenever the bridge was off.
 #include "../vendor/stb/stb_image_write.h"
 
 // Bind address: set by --debug-bind in main.cc; defaults to "127.0.0.1".

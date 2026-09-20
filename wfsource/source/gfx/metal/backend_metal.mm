@@ -1,24 +1,37 @@
 //=============================================================================
-// hal/ios/backend_metal.mm: Metal implementation of RendererBackend
+// gfx/metal/backend_metal.mm: Metal implementation of RendererBackend
 // Copyright ( c ) 2026 World Foundry Group
 // Part of the World Foundry 3D video game engine/production environment
 // for more information about World Foundry, see www.worldfoundry.org
 //=============================================================================
-// Phase 2B3: the Metal sibling of gfx/glpipeline/backend_modern.cc.
+// The Metal sibling of gfx/glpipeline/backend_modern.cc, shared by both Apple
+// targets. It lived in hal/ios/ until Phase 2 of
+// docs/plans/2026-09-20-macos-metal-renderer.md; it imports only Metal, simd
+// and engine headers — no UIKit, no AppKit — so it was never iOS HAL code (D3).
 //
 // Mirrors backend_modern's CPU-side state + triangle batching; MSL shaders
 // inline and runtime-compiled via [MTLDevice newLibraryWithSource:] so the
 // build stays Codemagic-native (no .metal file + Xcode build phase).
 //
-// For Phase 2B3 the deliverable is "compiles + links + MetalBackendInstance()
-// is reachable via RendererBackendGet()". Nothing in the engine drives it
-// yet — Phase 2C wires MetalView's CADisplayLink callback to the engine
-// frame loop and hands the backend a live MTLRenderCommandEncoder each
-// frame via SetCurrentEncoder / ClearCurrentEncoder.
+// Phase 2 (macOS) added, on top of the iOS Phase 2B3 skeleton:
+//   * the OFFSCREEN path at the bottom of this file (wf_metal::), which owns a
+//     device, queue, colour + depth MTLTexture and command buffer, so the
+//     engine can render a frame with no window and no drawable. This target is
+//     deliberately shaped as the editor's future viewport handshake surface
+//     (plan O2), which is why ColorTextureHandle() is part of the interface.
+//   * a DEPTH attachment — pipeline depth format, depth texture, and a
+//     Less/write-enabled MTLDepthStencilState.
+//   * three first-light fixes, all of which were latent in the iOS skeleton and
+//     could never have fired there because no encoder was ever set (so Flush()
+//     always dropped the batch). See the comments at each site:
+//       - Mat4Perspective emitted GL's [-1,1] NDC z; Metal's is [0,1].
+//       - vertices went through setVertexBytes, which is capped at 4 KB.
+//       - no depth state at all.
 //
-// Textures are not yet supported — DrawTriangle ignores the PixelMap*
-// argument and always draws flat-lit. Phase 2C+ adds a PixelMap→MTLTexture
-// upload path that parallels PixelMap::SetGLTexture on the GL side.
+// Textures are still not supported — DrawTriangle ignores the PixelMap* and
+// draws flat-lit. That is Phase 3, and per the resolved D4/O3 it lands by
+// widening the RendererBackend seam (CreateTexture/DestroyTexture + an opaque
+// handle on PixelMap), not by a Metal-side sidecar.
 //=============================================================================
 
 #import <Metal/Metal.h>
@@ -26,15 +39,22 @@
 
 #include <gfx/renderer_backend.hp>
 #include <gfx/pixelmap.hp>
+#include <gfx/metal/metal_offscreen.h>
 #include <math/matrix34.hp>
 
 #include <cmath>
+#include <cstdio>
 #include <cstdlib>
 #include <cstring>
 #include <vector>
 
 namespace
 {
+
+// One place for the depth format: the pipeline descriptor, the depth texture
+// and the render pass descriptor must all agree or pipeline creation fails at
+// runtime with a message that does not name the mismatch.
+static constexpr MTLPixelFormat kDepthFormat = MTLPixelFormatDepth32Float;
 
 static constexpr const char* kMSL = R"MSL(
 #include <metal_stdlib>
@@ -148,6 +168,15 @@ static void Mat4Identity(float m[16])
     m[0] = m[5] = m[10] = m[15] = 1.0f;
 }
 
+// NOTE (Phase 2 first light): this emits METAL's clip convention, z in [0,1],
+// not OpenGL's [-1,1]. It previously used the GL form
+//     out[10] = (fz+nz)/(nz-fz);  out[14] = 2*fz*nz/(nz-fz);
+// which maps the near half of the frustum to negative z. Metal clips anything
+// with z < 0, so with a depth buffer cleared to 1 and a Less test, roughly the
+// front half of every scene would have been silently discarded. It could not
+// have shown up on iOS: no encoder was ever set there, so Flush() dropped every
+// batch before a pixel was rasterised. The plan predicted this exact class of
+// bug ("NDC Z range [0,1] on Metal vs [-1,1] on GL") — it was real.
 static void Mat4Perspective(float fovDegY, float aspect, float nz, float fz,
                             float out[16])
 {
@@ -156,9 +185,9 @@ static void Mat4Perspective(float fovDegY, float aspect, float nz, float fz,
     std::memset(out, 0, sizeof(float) * 16);
     out[0]  = f / aspect;
     out[5]  = f;
-    out[10] = (fz + nz) / (nz - fz);
+    out[10] = fz / (nz - fz);           // Metal: nz -> 0, fz -> 1
     out[11] = -1.0f;
-    out[14] = (2.0f * fz * nz) / (nz - fz);
+    out[14] = (fz * nz) / (nz - fz);
 }
 
 static void Mat4Multiply(const float a[16], const float b[16], float out[16])
@@ -329,11 +358,16 @@ public:
         _cpu.push_back(tri[0]);
         _cpu.push_back(tri[1]);
         _cpu.push_back(tri[2]);
+        ++_trianglesThisFrame;
     }
 
     void EndFrame() override
     {
         Flush();
+        ++_renderedFrames;
+        _trianglesLastFrame = _trianglesThisFrame;
+        _trianglesTotal    += _trianglesThisFrame;
+        _trianglesThisFrame = 0;
     }
 
     // Phase 2C: MetalView's CADisplayLink callback calls SetCurrentEncoder
@@ -349,11 +383,36 @@ public:
         _encoder = nil;
     }
 
+    // ---- offscreen support (Phase 2) ---------------------------------------
+    // The wf_metal:: free functions below are the public face of this; these
+    // are the accessors they need. LazyInitPublic exists so the offscreen path
+    // can create the device/queue/pipeline BEFORE any draw call, rather than on
+    // the first Flush the way the iOS path did.
+    bool EnsureInited()          { LazyInit(); return _inited; }
+    id<MTLDevice>       Device() { return _device; }
+    id<MTLCommandQueue> Queue()  { return _queue;  }
+
+    unsigned long RenderedFrames()   const { return _renderedFrames; }
+    unsigned long TrianglesLast()    const { return _trianglesLastFrame; }
+    unsigned long TrianglesRunning() const { return _trianglesTotal; }
+
 private:
+    friend struct OffscreenTarget;
+
     id<MTLDevice>              _device          = nil;
+    id<MTLCommandQueue>        _queue           = nil;
     id<MTLRenderPipelineState> _pipeline        = nil;
+    id<MTLDepthStencilState>   _depthState      = nil;
     id<MTLRenderCommandEncoder> _encoder        = nil;
+    id<MTLBuffer>              _vbuf            = nil;
     bool                       _inited          = false;
+
+    // Phase 1 measured 1563 triangles/frame against the headless backend; these
+    // keep that number comparable now that Metal has replaced it.
+    unsigned long _trianglesThisFrame = 0;
+    unsigned long _trianglesLastFrame = 0;
+    unsigned long _trianglesTotal     = 0;
+    unsigned long _renderedFrames     = 0;
 
     float _proj[16];
     float _mv[16];
@@ -430,6 +489,9 @@ private:
         pd.fragmentFunction                = fs;
         pd.vertexDescriptor                = vd;
         pd.colorAttachments[0].pixelFormat = MTLPixelFormatBGRA8Unorm;
+        // Depth (Phase 2). Must match the depth texture's format and the
+        // render pass descriptor, or pipeline creation fails at runtime.
+        pd.depthAttachmentPixelFormat      = kDepthFormat;
 
         _pipeline = [_device newRenderPipelineStateWithDescriptor:pd
                                                             error:&err];
@@ -437,6 +499,15 @@ private:
             NSLog(@"wf_game: MetalBackend pipeline create failed: %@", err);
             return;
         }
+
+        // Standard opaque depth test. GL's default is GL_LESS with writes on,
+        // so this matches backend_modern.cc rather than inventing a policy.
+        MTLDepthStencilDescriptor* dsd = [[MTLDepthStencilDescriptor alloc] init];
+        dsd.depthCompareFunction = MTLCompareFunctionLess;
+        dsd.depthWriteEnabled    = YES;
+        _depthState = [_device newDepthStencilStateWithDescriptor:dsd];
+
+        _queue = [_device newCommandQueue];
 
         NSLog(@"wf_game: MetalBackend ready (device=%@)", _device.name);
         _inited = true;
@@ -492,10 +563,24 @@ private:
         Uniforms u;
         BuildUniforms(u);
 
+        // Vertices go through an MTLBuffer, NOT setVertexBytes (Phase 2 first
+        // light). setVertexBytes is capped at 4 KB; one snowgoons frame batches
+        // ~1563 triangles = ~206 KB, so every flush would have been rejected.
+        // Uniforms stay on setVertexBytes — sizeof(Uniforms) is well under the
+        // cap and this avoids a second buffer's worth of bookkeeping.
+        const size_t bytes = _cpu.size() * sizeof(Vert);
+        EnsureVertexBuffer(bytes);
+        if (!_vbuf) {
+            _cpu.clear();
+            _curTexture = nullptr;
+            return;
+        }
+        std::memcpy([_vbuf contents], _cpu.data(), bytes);
+
         [_encoder setRenderPipelineState:_pipeline];
-        [_encoder setVertexBytes:_cpu.data()
-                           length:_cpu.size() * sizeof(Vert)
-                          atIndex:0];
+        if (_depthState)
+            [_encoder setDepthStencilState:_depthState];
+        [_encoder setVertexBuffer:_vbuf offset:0 atIndex:0];
         [_encoder setVertexBytes:&u
                            length:sizeof(Uniforms)
                           atIndex:1];
@@ -509,9 +594,90 @@ private:
         _cpu.clear();
         _curTexture = nullptr;
     }
+
+    // Grow-only staging buffer for one flush's vertices. Shared storage: this
+    // is a unified-memory write from the CPU each flush, which is what the
+    // batching design already implies.
+    void EnsureVertexBuffer(size_t bytes)
+    {
+        if (_vbuf && [_vbuf length] >= bytes)
+            return;
+        size_t want = 1;
+        while (want < bytes) want <<= 1;
+        _vbuf = [_device newBufferWithLength:want
+                                     options:MTLResourceStorageModeShared];
+        if (!_vbuf)
+            NSLog(@"wf_game: MetalBackend vertex buffer alloc failed (%zu bytes)", want);
+    }
 };
 
 MetalRendererBackend sMetalBackend;
+
+// ---- offscreen render target (Phase 2) --------------------------------------
+//
+// Owns the colour + depth attachments and this frame's command buffer. Kept a
+// plain struct with a single static instance to match the backend's own shape.
+//
+// macOS ONLY, deliberately. iOS renders into a CAMetalDrawable and has no need
+// for this yet, and the storage modes diverge: MTLStorageModeManaged (and the
+// synchronizeResource blit it requires) do not exist on iOS, where all
+// resources are already shared. Guarding the whole block is cleaner than
+// #ifdef-ing three storage modes, and keeps iOS behaviour byte-identical to
+// before the file moved here.
+#if defined(WF_TARGET_MACOS)
+
+struct OffscreenTarget
+{
+    id<MTLTexture>             color   = nil;
+    id<MTLTexture>             depth   = nil;
+    id<MTLCommandBuffer>       cmd     = nil;
+    id<MTLRenderCommandEncoder> enc    = nil;
+    int  width   = 0;
+    int  height  = 0;
+    bool haveFrame = false;
+
+    bool EnsureTextures(int w, int h)
+    {
+        if (color && width == w && height == h)
+            return true;
+
+        id<MTLDevice> dev = sMetalBackend.Device();
+        if (!dev) return false;
+
+        MTLTextureDescriptor* cd = [MTLTextureDescriptor
+            texture2DDescriptorWithPixelFormat:MTLPixelFormatBGRA8Unorm
+                                         width:(NSUInteger)w
+                                        height:(NSUInteger)h
+                                     mipmapped:NO];
+        // RenderTarget to draw into; ShaderRead so the editor can sample this
+        // same texture in its viewport without a copy (plan O2).
+        cd.usage       = MTLTextureUsageRenderTarget | MTLTextureUsageShaderRead;
+        cd.storageMode = MTLStorageModeManaged;
+        color = [dev newTextureWithDescriptor:cd];
+
+        MTLTextureDescriptor* dd = [MTLTextureDescriptor
+            texture2DDescriptorWithPixelFormat:kDepthFormat
+                                         width:(NSUInteger)w
+                                        height:(NSUInteger)h
+                                     mipmapped:NO];
+        dd.usage       = MTLTextureUsageRenderTarget;
+        dd.storageMode = MTLStorageModePrivate;   // never read back
+        depth = [dev newTextureWithDescriptor:dd];
+
+        if (!color || !depth) {
+            NSLog(@"wf_game: offscreen target %dx%d creation failed", w, h);
+            color = nil; depth = nil;
+            return false;
+        }
+        width = w; height = h;
+        NSLog(@"wf_game: offscreen Metal target %dx%d ready", w, h);
+        return true;
+    }
+};
+
+OffscreenTarget sOffscreen;
+
+#endif  // WF_TARGET_MACOS
 
 }  // namespace
 
@@ -519,3 +685,120 @@ RendererBackend* MetalBackendInstance()
 {
     return &sMetalBackend;
 }
+
+//=============================================================================
+// wf_metal:: — the pure-C++ interface declared in gfx/metal/metal_offscreen.h.
+//=============================================================================
+
+#if defined(WF_TARGET_MACOS)
+
+namespace wf_metal
+{
+
+bool Available()
+{
+    return sMetalBackend.EnsureInited();
+}
+
+bool BeginFrame(int width, int height)
+{
+    if (width <= 0 || height <= 0) return false;
+    if (!sMetalBackend.EnsureInited()) return false;
+    if (!sOffscreen.EnsureTextures(width, height)) return false;
+
+    id<MTLCommandQueue> q = sMetalBackend.Queue();
+    if (!q) return false;
+
+    MTLRenderPassDescriptor* rp = [MTLRenderPassDescriptor renderPassDescriptor];
+    rp.colorAttachments[0].texture     = sOffscreen.color;
+    rp.colorAttachments[0].loadAction  = MTLLoadActionClear;
+    rp.colorAttachments[0].storeAction = MTLStoreActionStore;
+    // Opaque black. Not cornflower blue: a debug clear colour that looks like
+    // "something rendered" is exactly how a blank frame gets called a pass.
+    rp.colorAttachments[0].clearColor  = MTLClearColorMake(0.0, 0.0, 0.0, 1.0);
+
+    rp.depthAttachment.texture      = sOffscreen.depth;
+    rp.depthAttachment.loadAction   = MTLLoadActionClear;
+    rp.depthAttachment.storeAction  = MTLStoreActionDontCare;
+    rp.depthAttachment.clearDepth   = 1.0;
+
+    sOffscreen.cmd = [q commandBuffer];
+    sOffscreen.enc = [sOffscreen.cmd renderCommandEncoderWithDescriptor:rp];
+    if (!sOffscreen.enc) {
+        sOffscreen.cmd = nil;
+        return false;
+    }
+    // Written out rather than as a compound literal: (MTLViewport){...} is a C
+    // construct that Clang only accepts in C++ as an extension.
+    MTLViewport vp;
+    vp.originX = 0.0;
+    vp.originY = 0.0;
+    vp.width   = (double)width;
+    vp.height  = (double)height;
+    vp.znear   = 0.0;
+    vp.zfar    = 1.0;
+    [sOffscreen.enc setViewport:vp];
+
+    sMetalBackend.SetCurrentEncoder(sOffscreen.enc);
+    return true;
+}
+
+void EndFrame()
+{
+    if (!sOffscreen.enc) return;
+
+    [sOffscreen.enc endEncoding];
+    sMetalBackend.ClearCurrentEncoder();
+
+    // Managed storage: the GPU-side copy must be synchronised before the CPU
+    // can see it. Without this blit the readback returns the cleared texture on
+    // discrete-GPU Macs even though the draw succeeded.
+    id<MTLBlitCommandEncoder> blit = [sOffscreen.cmd blitCommandEncoder];
+    [blit synchronizeResource:sOffscreen.color];
+    [blit endEncoding];
+
+    [sOffscreen.cmd commit];
+    [sOffscreen.cmd waitUntilCompleted];
+
+    sOffscreen.enc = nil;
+    sOffscreen.cmd = nil;
+    sOffscreen.haveFrame = true;
+}
+
+bool ReadbackRGBA8(unsigned char* dst, int width, int height)
+{
+    if (!dst || !sOffscreen.haveFrame || !sOffscreen.color) return false;
+    if (width != sOffscreen.width || height != sOffscreen.height) return false;
+
+    const size_t rowBytes = (size_t)width * 4;
+    std::vector<unsigned char> bgra(rowBytes * (size_t)height);
+    [sOffscreen.color getBytes:bgra.data()
+                   bytesPerRow:rowBytes
+                    fromRegion:MTLRegionMake2D(0, 0,
+                                               (NSUInteger)width,
+                                               (NSUInteger)height)
+                   mipmapLevel:0];
+
+    // BGRA -> RGBA. Row order already matches: Metal's texture origin is
+    // top-left, which is also stb_image_write's first row, so no vertical flip.
+    for (size_t i = 0; i < bgra.size(); i += 4) {
+        dst[i + 0] = bgra[i + 2];
+        dst[i + 1] = bgra[i + 1];
+        dst[i + 2] = bgra[i + 0];
+        dst[i + 3] = bgra[i + 3];
+    }
+    return true;
+}
+
+void* ColorTextureHandle()
+{
+    return (__bridge void*)sOffscreen.color;
+}
+
+unsigned long RenderedFrameCount() { return sMetalBackend.RenderedFrames();   }
+unsigned long TrianglesLastFrame() { return sMetalBackend.TrianglesLast();    }
+unsigned long TrianglesTotal()     { return sMetalBackend.TrianglesRunning(); }
+
+}  // namespace wf_metal
+
+#endif  // WF_TARGET_MACOS

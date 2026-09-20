@@ -19,14 +19,37 @@
 #include <hal/hal.h>
 #include <memory/memory.hp>
 #include <gfx/renderer_backend.hp>
+#include <gfx/metal/metal_offscreen.h>
 
 #include <sys/time.h>
 #include <unistd.h>
 #include <cstdio>
 #include <climits>
+#include <cstdlib>
+#include <cstring>
+#include <vector>
+
+#include "../../../../engine/vendor/stb/stb_image_write.h"
 
 extern int _halWindowWidth;
 extern int _halWindowHeight;
+
+// --capture-frame=N=<path.png>, parsed in game/main.cc. 0 = no capture.
+extern int         gCaptureFrame;
+extern const char* gCapturePath;
+
+//==============================================================================
+// Frame accounting.
+//
+// Phase 1 found 29 backend frames for 30 engine steps and could not say which
+// step was skipped, because the only counter lived on EndFrame. The render
+// block in WFGame::StepFrame is gated on camera()->ValidView() (game.cc:584),
+// so a step that has no valid view renders nothing and never reaches EndFrame.
+// MeasureAndAdvance below runs exactly once per StepFrame (via PageFlip or
+// MeasureDelta), so counting here gives the other half of the pair and makes
+// "engine stepped N, backend rendered M" directly observable.
+//==============================================================================
+static unsigned long s_stepFrames = 0;
 
 //==============================================================================
 
@@ -91,8 +114,16 @@ void
 Display::RenderBegin()
 {
     Validate();
-    // No clear / drawable acquisition — no window. Just per-frame renderer
-    // state (all no-ops against the headless backend).
+    // No window and no CAMetalDrawable: the frame is rendered into an
+    // engine-owned offscreen MTLTexture instead (gfx/metal/metal_offscreen.h).
+    // wf_metal::BeginFrame opens the command buffer + encoder and hands the
+    // encoder to the Metal backend, so the DrawTriangle batches that follow
+    // have somewhere real to go. If Metal is unavailable the draws still run
+    // and the backend drops them — the smoke must not abort on a GPU-less box.
+    const int w = (_halWindowWidth  > 0) ? _halWindowWidth  : _xSize;
+    const int h = (_halWindowHeight > 0) ? _halWindowHeight : _ySize;
+    wf_metal::BeginFrame(w, h);
+
     RendererBackendGet().SetLightingEnabled(true);
     RendererBackendGet().ResetModelView();
 }
@@ -102,7 +133,42 @@ Display::RenderBegin()
 void
 Display::RenderEnd()
 {
+    // Flush the batch into the live encoder FIRST, then close the frame —
+    // EndFrame() is what issues the draw call, so committing before it would
+    // present an empty target.
     RendererBackendGet().EndFrame();
+    wf_metal::EndFrame();
+
+    if (gCaptureFrame > 0 &&
+        (int)wf_metal::RenderedFrameCount() == gCaptureFrame &&
+        gCapturePath)
+    {
+        const int w = (_halWindowWidth  > 0) ? _halWindowWidth  : _xSize;
+        const int h = (_halWindowHeight > 0) ? _halWindowHeight : _ySize;
+        std::vector<unsigned char> rgba((size_t)w * (size_t)h * 4);
+        if (wf_metal::ReadbackRGBA8(rgba.data(), w, h))
+        {
+            const int ok = stbi_write_png(gCapturePath, w, h, 4,
+                                          rgba.data(), w * 4);
+            // Report a non-black pixel count too. A PNG that exists but is
+            // uniformly the clear colour is the single most likely way this
+            // milestone gets called green while rendering nothing.
+            unsigned long lit = 0;
+            for (size_t i = 0; i < rgba.size(); i += 4)
+                if (rgba[i] | rgba[i+1] | rgba[i+2]) ++lit;
+            std::printf("macos: capture frame %d -> %s (%dx%d) %s, "
+                        "non-black pixels %lu/%lu\n",
+                        gCaptureFrame, gCapturePath, w, h,
+                        ok ? "written" : "stbi_write_png FAILED",
+                        lit, (unsigned long)(rgba.size() / 4));
+        }
+        else
+        {
+            std::printf("macos: capture frame %d FAILED — no readable "
+                        "offscreen frame at %dx%d\n", gCaptureFrame, w, h);
+        }
+        std::fflush(stdout);
+    }
 }
 
 //==============================================================================
@@ -124,6 +190,18 @@ MeasureAndAdvance(struct timeval& clockLastTime)
     }
 
     clockLastTime = tvNow;
+
+    // One line per engine step, carrying both counters (see the note at the top
+    // of this file). "rendered" lagging "step" is the ValidView gate, not a
+    // dropped draw call.
+    ++s_stepFrames;
+    std::printf("macos: step=%lu rendered=%lu triangles=%lu (total %lu)\n",
+                s_stepFrames,
+                wf_metal::RenderedFrameCount(),
+                wf_metal::TrianglesLastFrame(),
+                wf_metal::TrianglesTotal());
+    std::fflush(stdout);
+
     return ConvertTimeToScalar(delta);
 }
 

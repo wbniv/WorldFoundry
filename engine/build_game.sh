@@ -482,6 +482,11 @@ case "$WF_PILOT_ENGINE" in
     none) : ;;
 esac
 compile_stub "$STUB_SRC/platform_stubs.cc" "$OUT/stubs__platform_stubs.o"
+# Sole instantiation of the vendored stb_image_write PNG encoder. It used to be
+# inside debug_server.cc, whose body is #ifdef WF_DEBUG_BRIDGE — which made the
+# encoder disappear with the bridge. Unconditional here, mirroring the
+# always-compiled stubs list in CMakeLists.txt.
+compile_stub "$STUB_SRC/stb_image_write_impl.cc" "$OUT/stubs__stb_image_write_impl.o"
 
 # JS engine plug — compiled and linked only when a non-`none` flavour is selected.
 declare -a JS_LINK_EXTRA=()

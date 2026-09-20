@@ -240,7 +240,7 @@ elseif(IOS)
     set(WF_DIRS
         pigsys streams cpplib math memory iff mailbox
         hal hal/ios
-        gfx
+        gfx gfx/metal
         input asset baseobject movement room physics
         anim timer scripting game ini loadfile
         profile renderassets savegame savegame/linux
@@ -266,7 +266,7 @@ elseif(APPLE)
     set(WF_DIRS
         pigsys streams cpplib math memory iff mailbox
         hal hal/macos
-        gfx gfx/glpipeline
+        gfx gfx/glpipeline gfx/metal
         input asset baseobject movement room physics
         anim timer scripting game ini loadfile
         profile renderassets savegame savegame/linux
@@ -380,6 +380,11 @@ endforeach()
 list(APPEND WF_SOURCES
     ${STUB_SRC}/scripting_stub.cc
     ${STUB_SRC}/platform_stubs.cc
+    # Sole instantiation of the vendored stb_image_write PNG encoder. Was inside
+    # debug_server.cc, whose body is #ifdef WF_DEBUG_BRIDGE — which made the
+    # encoder vanish with the bridge. The macOS --capture-frame path needs it
+    # regardless, so it is unconditional here.
+    ${STUB_SRC}/stb_image_write_impl.cc
 )
 
 # iOS: link stubs for the 8 GL-backend RenderObject3D::RenderPoly3D* methods
@@ -977,13 +982,18 @@ elseif(IOS)
         "-framework CoreAudio"
     )
 elseif(APPLE)
-    # macOS desktop — renderer-agnostic bring-up. miniaudio uses CoreAudio (it
-    # pulls AVFoundation + AudioToolbox on Darwin). NO Metal/MetalKit/QuartzCore
-    # yet (rendering is a no-op), NO OpenGL.framework (GL entry points are
-    # stubbed in hal/macos/gl_stubs.cc), NO X11.
+    # macOS desktop. Metal + QuartzCore added in Phase 2 of
+    # docs/plans/2026-09-20-macos-metal-renderer.md — gfx/metal/backend_metal.mm
+    # now renders the frame into an offscreen MTLTexture (no window, no
+    # drawable, so no MetalKit and no AppKit yet; those arrive with Phase 4's
+    # window). miniaudio uses CoreAudio (it pulls AVFoundation + AudioToolbox on
+    # Darwin). Still NO OpenGL.framework — the GL entry points the shared gfx/
+    # code still references are stubbed in hal/macos/gl_stubs.cc — and NO X11.
     list(APPEND WF_LINK_LIBS
         "-framework Foundation"
         "-framework CoreFoundation"
+        "-framework Metal"
+        "-framework QuartzCore"
         "-framework CoreAudio"
         "-framework AudioToolbox"
         "-framework AVFoundation"
