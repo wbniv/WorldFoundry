@@ -1149,10 +1149,24 @@ def export_scene_to_lev(context, filepath: str, mesh_dir: str = "") -> tuple[boo
             for fl in _emit_lev_fields(obj, schema, fp):
                 lines.append("\t\t" + fl)
         except Exception as e_oad:
+            # Loud, not silent: a schema that fails to load means this actor
+            # silently loses its entire field set in the emitted .lev, which is
+            # exactly the failure mode that hid a stale wf_schema_path in the
+            # qbert_practice fixture for months (see
+            # docs/plans/2026-09-20-export-level-light-field-duplication.md).
+            # Report on stderr — visible in Blender's console, in CI logs, and in
+            # the headless-export test's captured output — instead of a hidden
+            # /tmp file. Still non-fatal: a level may legitimately carry an actor
+            # whose schema isn't resolvable on this machine, and failing the whole
+            # export for that would be a regression.
+            import sys
             import traceback
-            with open("/tmp/wf_export_errors.log", "a") as _ef:
-                _ef.write(f"[wf_export] {obj.name}: {e_oad}\n")
-                traceback.print_exc(file=_ef)
+            print(
+                f"[wf_export] ERROR: {obj.name}: schema load failed for "
+                f"{schema_path!r} — NO fields emitted for this actor: {e_oad}",
+                file=sys.stderr,
+            )
+            traceback.print_exc(file=sys.stderr)
 
         if obj.data and hasattr(obj.data, 'polygons') and obj.data.polygons:
             mesh = obj.data

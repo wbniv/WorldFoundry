@@ -329,3 +329,51 @@ Three ways forward, none of which is mine to pick:
 
 Landed and verified independently of that decision: the `export_level.py` change itself
 and the step-4 regression tests. Step 2 stays **FAIL** until (a)/(b)/(c) is chosen.
+
+#### Resolved — 2026‑09‑20: (b) + (c)
+
+~~Blocked pending a decision~~ — **(b) and (c) were both taken**, (a) rejected.
+
+- **(b)** `wflevels/qbert_practice/qbert_practice.blend`'s 66 `wf_schema_path` custom
+  properties were rewritten from absolute paths into two deleted checkouts
+  (`/home/will/WorldFoundry/…` ×17, `/home/will/WorldFoundry.2026-new-level/…` ×49) to
+  Blender's own blend-relative form, `//../../wftools/wf_oad/tests/fixtures/<name>.oad`.
+  `export_level.py` already resolves these through `bpy.path.abspath()` (line 1147), so no
+  exporter change was needed, and the fixture no longer rots when the checkout moves. The
+  `.blend` was re-saved with **Blender 4.0.2** (the CI matrix's oldest job) so the file
+  stays at format `BLENDER-v400` and all four matrix versions can still open it.
+- **(c)** The `except Exception as e_oad` handler no longer writes to
+  `/tmp/wf_export_errors.log`; it prints the actor name, the unresolved `wf_schema_path`
+  and "NO fields emitted for this actor" plus a traceback to **stderr**, where Blender's
+  console, CI logs and this test's captured output all surface it. Deliberately still
+  non-fatal — failing a whole export because one actor's schema is unresolvable on this
+  machine would be a regression.
+- **(a) rejected** for the reason given above: it would have baked "a Light actor whose
+  schema fails to load emits no light fields" into the golden.
+
+The golden was then regenerated (`73103` → `266019` bytes — every actor gains its full
+schema field set, exactly the "changes the golden enormously" that (b) predicted), and the
+light fields are emitted **once** each, from the schema walk:
+
+```
+$ for f in lightRed lightGreen lightBlue lightType Mobility; do \
+    printf "%-12s golden=%s\n" "$f" "$(grep -c "\"$f\"" tests/fixtures/qbert_practice-golden.lev)"; done
+lightRed     golden=1
+lightGreen   golden=1
+lightBlue    golden=1
+lightType    golden=1
+Mobility     golden=65     # 66 schema-bearing actors, minus the 1 Light (light.oas has no Mobility)
+
+$ BLENDER_BIN=/usr/bin/blender python3 -m pytest tests/test_blender_addon_export.py -q
+..                                                                       [100%]
+2 passed in 32.50s
+
+$ BLENDER_BIN=/tmp/blender-4.0.2/blender python3 -m pytest tests/test_blender_addon_export.py -q
+..                                                                       [100%]
+2 passed in 11.13s
+```
+
+**Step 2 → PASS** (as far as this fixture goes). The plan's step-2 finding that no level or
+test fixture exports a *native Blender `LIGHT` object* still stands: the qbert fixture's
+Light actor is a plain object with `wf_light*` custom properties, so the native-`LIGHT`
+branch remains uncovered.
