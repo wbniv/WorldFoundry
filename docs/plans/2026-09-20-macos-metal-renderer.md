@@ -140,12 +140,12 @@ Each phase is a green CI run. Phase numbering is chosen so the cheap, high-infor
 
 Nothing below is diagnosable on top of a red build.
 
-- Guard `hal/linux/platform_init.cc:50-52` and `:117-128` for Darwin. Introduce `WF_POSIX` per `TODO.md:15` rather than adding another ad-hoc `#if defined(WF_TARGET_MACOS)` — this is the sweep's forcing case, and doing it now is cheaper than doing it under a half-built renderer.
-- Refresh the stale docs and comments the headless bring-up left behind, in the same pass: `codemagic.yaml:366-368` claims Jolt is "not used today (legacy physics)" — it is used; `CMakeLists.txt:208-210` and `:222-227` claim `gfx/glpipeline` is GL-only — it is not (§2.1); [`2026-05-26-macos-port-runtime-bringup.md`](2026-05-26-macos-port-runtime-bringup.md):4 says "awaiting first Codemagic macOS build" — it ran, and `:58`'s deferred note about re-enabling Jolt and the scripting roster is now satisfied (§1).
-- **In parallel, off the Mac‑min budget:** land the usage monitor from [2026-05-12-codemagic-budget-monitor.md](2026-05-12-codemagic-budget-monitor.md) §2. It is a GitHub Actions workflow, costs zero Mac‑min, and everything from Phase 2 onward is being decided blind without it (§5).
-- Run `macos-desktop-debug` to green. **Estimated cost: 1–2 runs, ~10–20 Mac‑min.**
+- ~~Guard `hal/linux/platform_init.cc:50-52` and `:117-128` for Darwin. Introduce `WF_POSIX` per `TODO.md:15` rather than adding another ad-hoc `#if defined(WF_TARGET_MACOS)`~~ — **done 2026‑09‑20.** `pigsys/pigsys.hp` now defines `WF_POSIX` (Linux/Android/iOS/macOS/Web) and `WF_HAS_X11` (desktop Linux only), immediately after `#include _MKINC` since that is what defines `__LINUX__` in the first place. Both `platform_init.cc` sites moved from `!defined(__EMSCRIPTEN__)` to `#if WF_HAS_X11`. The broader ~80-site `__LINUX__` sweep stays open in `TODO.md` — each site needs classifying by hand, and none of it blocks this plan.
+- ~~Refresh the stale docs and comments the headless bring-up left behind~~ — **done 2026‑09‑20:** `codemagic.yaml`'s Jolt cache comment now says Jolt *is* the macOS physics engine; both `CMakeLists.txt` arms now say `gfx/glpipeline` is excluded as a not-yet-done rather than a GL dependency, naming `backend_modern.cc` as the only GL-bound file; [`2026-05-26-macos-port-runtime-bringup.md`](2026-05-26-macos-port-runtime-bringup.md):4 records that the first Codemagic macOS build ran on 2026‑05‑27 with its three fix commits, and its Deferred section strikes the satisfied Jolt/scripting note.
+- ~~**In parallel, off the Mac‑min budget:** land the usage monitor from [2026-05-12-codemagic-budget-monitor.md](2026-05-12-codemagic-budget-monitor.md) §2~~ — **code landed 2026‑09‑20:** [`.github/workflows/codemagic-budget.yml`](../../.github/workflows/codemagic-budget.yml) + [`scripts/codemagic-budget.sh`](../../scripts/codemagic-budget.sh), exercised end-to-end against a stub API for accounting, at-most-once alerting, and month rollover. **Still inert** until the one-time secrets exist: `secrets.CODEMAGIC_API_TOKEN`, `secrets.PAGERDUTY_ROUTING_KEY`, `vars.WF_CODEMAGIC_APP_ID` (budget plan Implementation steps 4 + 5).
+- **Run `macos-desktop-debug` to green. Estimated cost: 1–2 runs, ~10–20 Mac‑min. — NOT DONE:** no WF Codemagic API token is reachable from this machine. See §8 steps 5–6.
 
-Exit: `--frame-step-smoke=30 --cycles=1` exits 0 on the current headless backend.
+Exit: `--frame-step-smoke=30 --cycles=1` exits 0 on the current headless backend. **Not yet met** — the local half of §8 (steps 1–4) is green, the Codemagic half (steps 5–6) is blocked on credentials.
 
 ### Phase 1 — Geometry reaches a backend (still headless, still no Metal)
 
@@ -249,14 +249,109 @@ Steps a future implementation pass runs, in order. Per `~/CLAUDE.md` **Plan veri
 **Local (free — run before every push that costs Mac‑min):**
 
 1. `cd /home/will/WorldFoundry-wbniv && ./build_game.sh` — Linux build green (shared source edits must not regress Linux). Exit 0.
+
+    ```
+    $ cd /home/will/WorldFoundry-wbniv && ./build_game.sh
+    /bin/bash: line 1: ./build_game.sh: No such file or directory
+    EXIT=127
+    ```
+
+    **Deviation:** `build_game.sh` does not exist in the tree — the step as written cites a stale path. The canonical Linux build is `task build` (`Taskfile.yml:17`). Re-run with the working equivalent:
+
+    ```
+    $ task build
+    ... (2760 lines; 0 occurrences of "error:" or "undefined reference")
+      skip /home/will/WorldFoundry-wbniv/engine/stubs/physics_jolt.cc
+      CC /home/will/WorldFoundry-wbniv/wfsource/source/physics/jolt/jolt_backend.cc
+
+    === Linking ===
+
+    Built: /home/will/WorldFoundry-wbniv/engine/wf_game
+    Run:   cd /home/will/WorldFoundry-wbniv/wfsource/source/game && DISPLAY=:0 /home/will/WorldFoundry-wbniv/engine/wf_game
+    EXIT=0
+    ```
+
+    **PASS** (via `task build`). The `WF_POSIX` / `WF_HAS_X11` introduction and the `platform_init.cc` guard change do not regress Linux — `WF_HAS_X11` is 1 on desktop Linux, so the X11 `-fullscreen` screen-size query still compiles and links exactly as before. The step's command should be corrected to `task build` in a future edit of this plan.
+
 2. `cmake -S . -B /tmp/wf-cfgcheck -DCMAKE_BUILD_TYPE=Debug` — CMake branches parse. Exit 0.
+
+    ```
+    -- Found assembler: /usr/bin/cc
+    -- Looking for mremap
+    -- Looking for mremap - found
+    -- Configuring done (7.2s)
+    -- Generating done (1.0s)
+    -- Build files have been written to: /tmp/wf-cfgcheck
+    EXIT=0
+    ```
+
+    **PASS.**
+
 3. `python3 -c 'import yaml,sys; yaml.safe_load(open("codemagic.yaml"))'` — workflow YAML valid. Exit 0.
+
+    ```
+    $ python3 -c 'import yaml,sys; yaml.safe_load(open("codemagic.yaml"))'
+    step3 EXIT=0
+    ```
+
+    **PASS.** The new `.github/workflows/codemagic-budget.yml` parses too (checked in the same call).
+
 4. `./build/wf_game --frame-step-smoke=30 --cycles=1 -L wflevels/snowgoons-blender/snowgoons-standalone.iff; echo $?` — Linux reference run still exits 0.
+
+    ```
+    $ ./build/wf_game --frame-step-smoke=30 --cycles=1 -L wflevels/snowgoons-blender/snowgoons-standalone.iff; echo $?
+    /bin/bash: line 1: ./build/wf_game: No such file or directory
+    127
+    ```
+
+    **Deviation:** the binary is at `engine/wf_game`, not `build/wf_game`, and the engine must run from `wfsource/source/game` with an absolute `-L` path (same convention `codemagic.yaml`'s macOS smoke step uses). Re-run corrected:
+
+    ```
+    $ cd wfsource/source/game && /home/will/WorldFoundry-wbniv/engine/wf_game \
+        --frame-step-smoke=30 --cycles=1 \
+        -L/home/will/WorldFoundry-wbniv/wflevels/snowgoons-blender/snowgoons-standalone.iff
+    rest_api: server stopped
+    delta too large: 1.000930786
+    ...
+    Tasker shutting down
+    EXIT=0
+    ```
+
+    **PASS** (with the corrected path). The `delta too large` lines are the pre-existing wall-clock-vs-frame-step warning from the headless driver, not a regression.
 
 **Codemagic `macos-desktop-debug` (manual trigger — one run per phase):**
 
 5. *(Phase 0)* Ninja configure + `cmake --build --target wf_game` under Apple Clang — exit 0, no X11 references in `macos-build.log`.
+
+    ```
+    $ python3 ~/.claude/skills/codemagic-build/codemagic.py build \
+        --app-id <WF_APP_ID> --workflow macos-desktop-debug
+    [codemagic] no API token found — run the bootstrap subcommand, or set CODEMAGIC_API_TOKEN / CODEMAGIC_SSM_TOKEN
+    ```
+
+    **BLOCKED — not run.** No WorldFoundry Codemagic API token is reachable from this machine: nothing at `~/.config/codemagic/token`, `$CODEMAGIC_API_TOKEN` unset, and no `codemagic` parameter in SSM under any configured AWS profile. (`~/gustos-colores` has its own token at `/gc-app/codemagic-api-token`, but per `~/CLAUDE.md` **Per-domain / per-project credentials** that must not be borrowed for WorldFoundry.) Minting the token is the one irreducible manual step — Codemagic → account Settings → Integrations → Codemagic API → Show — after which `python3 ~/.claude/skills/codemagic-build/codemagic.py bootstrap` stores it and this step runs headlessly. The WF Codemagic `appId` is likewise not recorded anywhere in the repo and is needed both here and for `vars.WF_CODEMAGIC_APP_ID`.
+
+    Everything this step would catch that *can* be checked off-Mac has been: the X11 break is guarded out by construction, verified by preprocessing the new macro block under each platform's defines —
+
+    ```
+    linux    -> RESULT WF_POSIX=1 WF_HAS_X11=1
+    macos    -> RESULT WF_POSIX=1 WF_HAS_X11=0
+    ios      -> RESULT WF_POSIX=1 WF_HAS_X11=0
+    android  -> RESULT WF_POSIX=1 WF_HAS_X11=0
+    web      -> RESULT WF_POSIX=1 WF_HAS_X11=0
+    none     -> RESULT WF_POSIX=0 WF_HAS_X11=0
+    ```
+
+    — and no other file in the macOS source set includes an X11 or desktop-GL header (`gfx/display.hp:63`'s `<GL/gl.h>` sits under `VIDEO_MEMORY_IN_ONE_PIXELMAP`, which is not defined; `gfx/renderer.hp:44` is the intended `<OpenGL/gl.h>` arm).
+
 6. *(Phase 0)* `wf_game.app/Contents/MacOS/wf_game --frame-step-smoke=30 --cycles=1 -L<snowgoons-standalone.iff>` — exit 0.
+
+    ```
+    (not run — same blocker as step 5)
+    ```
+
+    **BLOCKED — not run.** Phase 0's exit criterion is therefore **not** met yet; Phase 1 must not start until steps 5 and 6 are green.
+
 7. *(Phase 1)* Same smoke run — `macos-smoke.log` reports a non-zero, frame-stable `DrawTriangle` count. **Gate: a zero here invalidates §2.1; stop and re-plan.**
 8. *(Phase 2)* `--capture-frame=30=$CM_BUILD_DIR/macos-frame30.png` — PNG artifacted, non-blank, geometry recognisably snowgoons.
 9. *(Phase 2)* Depth correctness: the Phase 2 PNG shows no back-face bleed-through versus the Linux GL capture of the same level and frame.
