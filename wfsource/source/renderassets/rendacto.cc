@@ -34,6 +34,7 @@
 #include <cpplib/libstrm.hp>
 
 #include "rendacto.hp"
+#include <renderassets/box_color.h>
                                      
 //============================================================================
 
@@ -237,14 +238,18 @@ MakeCube(Memory& memory, const Vector3& min, const Vector3& max)
 
 
 Material*
-MakeRandMaterialList(Memory& memory, int count)
+MakeBoxMaterialList(Memory& memory, int count)
 {
 	assert(count > 0);
 #pragma message ("KTS: yet another memory leak brought to you by the cool guys at KevCo")
 	Material* materialList = new (memory) Material[count];
 	assert(ValidPtr(materialList));
-   //Color tempColor(rand()%128 + 128,rand()%128 + 128,rand()%128 + 128);
-   Color tempColor(rand()%230 + 26,rand()%230 + 26,rand()%230 + 26);
+   // Preserve the old three libc draws per box so existing gameplay random
+   // sequences do not shift; only the visual color uses the portable stream.
+   for (int i = 0; i < 3; ++i) (void)rand();
+   static wf_render::BoxColorSequence colors;
+   const auto rgb = colors.NextColor();
+   const Color tempColor(rgb.red, rgb.green, rgb.blue);
 	for(int index=0;index < count; index++)
 	{
 		materialList[index] = Material(tempColor,Material::FLAT_SHADED|Material::SOLID_COLOR,emptyTexture,NULL);
@@ -411,7 +416,7 @@ RenderActor3DAnimates::Render(RenderCamera& renderCamera, const PhysicalObject& 
 #include <cstddef>
 
 RenderActor3DBox::RenderActor3DBox(Memory& memory, const Vector3 min, const Vector3 max)
-: RenderActor3D(memory, 8,MakeCube(memory,min,max),12,cubeFaceList,MakeRandMaterialList(memory,6))
+: RenderActor3D(memory, 8,MakeCube(memory,min,max),12,cubeFaceList,MakeBoxMaterialList(memory,6))
 {
 //	std::cout << "RenderActor3DBox::sizeof( TriFace ) = " << sizeof( TriFace ) << std::endl;
 

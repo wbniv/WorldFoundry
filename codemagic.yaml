@@ -425,6 +425,12 @@ workflows:
           # exit code via pipefail so a compile/link failure fails the step.
           cmake --build . --target wf_game 2>&1 | tee ../macos-build.log
 
+      - name: Verify portable box colors
+        script: |
+          set -euo pipefail
+          c++ -std=c++17 -Iwfsource/source tests/box_color_test.cc -o /tmp/wf-box-color-test
+          /tmp/wf-box-color-test
+
       - name: Run headless frame-step smoke
         script: |
           set -euo pipefail
@@ -453,6 +459,15 @@ workflows:
           "$WF_GAME" --frame-step-smoke=30 --cycles=1 -L"$LEVEL" -rate20 \
             --capture-frame=20="$CM_BUILD_DIR/macos-frame20.png" \
             2>&1 | tee -a "$CM_BUILD_DIR/macos-smoke.log"
+
+      - name: Compare deterministic capture with Linux reference
+        script: |
+          set -euo pipefail
+          # Small interpolation/filter rounding differences are allowed; the
+          # former solid-face color mismatch had a channel delta of 148.
+          python3 tests/compare_renderer_frames.py \
+            tests/fixtures/renderer/snowgoons-linux-frame20.png \
+            macos-frame20.png --tolerance 3 | tee macos-comparison.log
 
       - name: Run windowed smoke (Phase 4 proxy gate)
         script: |
@@ -498,6 +513,7 @@ workflows:
       - macos-configure.log
       - macos-build.log
       - macos-smoke.log
+      - macos-comparison.log
       # Phase 2's deliverable: a real Metal frame rendered with no window. This
       # is what turns macos-desktop-debug from a build gate into a visual gate.
       - macos-frame20.png
