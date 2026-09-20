@@ -39,4 +39,12 @@ void glEnable(GLenum /*cap*/) {}
 
 GLenum glGetError(void) { return GL_NO_ERROR; }
 
+// debug_server.cc's SCREENSHOT op. A true no-op glGetIntegerv leaves its
+// caller's GLint vp[4] = {0}, which already takes that code's own graceful
+// "viewport not initialised" reply path -- no special-casing needed here.
+void glGetIntegerv(GLenum /*pname*/, GLint* /*params*/) {}
+void glPixelStorei(GLenum /*pname*/, GLint /*param*/) {}
+void glReadPixels(GLint /*x*/, GLint /*y*/, GLsizei /*width*/, GLsizei /*height*/,
+                   GLenum /*format*/, GLenum /*type*/, void* /*pixels*/) {}
+
 }  // extern "C"

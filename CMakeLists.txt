@@ -121,16 +121,22 @@ elseif(APPLE)
     # macOS Codemagic build (list-init of a char[] with UTF-8 bytes >127 is a
     # hard error under Clang, warning-only under GCC) — rather than patch
     # around that one symptom, scope macOS's scripting roster down to match
-    # the other non-desktop-Linux targets. Debug bridge and REST API are
-    # untouched: those are a separate, deliberately-enabled desktop feature
-    # (04061deb) unrelated to which script languages compile. WAMR stays off
-    # (macOS arm64 unverified, same x86_64-asm concern as mobile). Editor and
-    # Steam not yet ported.
+    # the other non-desktop-Linux targets. Debug bridge stays on: a separate,
+    # deliberately-enabled desktop feature (04061deb) unrelated to which
+    # script languages compile (its 3 GL calls are stubbed in
+    # hal/macos/gl_stubs.cc, same pattern as pixelmap.cc's 6). WF_REST_API is
+    # OFF here, unlike the bridge: it's an explicitly-labeled PoC (see its own
+    # header comment), already off on every mobile platform, and its
+    # immediate-mode GL debug-draw calls (glBegin/glVertex3f/...) aren't
+    # covered by gl_stubs.cc and have no window/render context to draw into
+    # on macOS today regardless. WAMR stays off (macOS arm64 unverified, same
+    # x86_64-asm concern as mobile). Editor and Steam not yet ported.
     set(WF_LUA_ENGINE    "none"   CACHE STRING "" FORCE)
     set(WF_ENABLE_FENNEL OFF      CACHE BOOL   "" FORCE)
     set(WF_JS_ENGINE     "none"   CACHE STRING "" FORCE)
     set(WF_WASM_ENGINE   "none"   CACHE STRING "" FORCE)
     set(WF_ENABLE_WREN   OFF      CACHE BOOL   "" FORCE)
+    set(WF_REST_API      OFF      CACHE BOOL   "" FORCE)
     set(WF_FORTH_ENGINE  "zforth" CACHE STRING "" FORCE)
     set(WF_PILOT_ENGINE  "none"   CACHE STRING "" FORCE)
     set(WF_ENABLE_EDITOR OFF      CACHE BOOL   "" FORCE)

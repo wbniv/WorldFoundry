@@ -25,7 +25,7 @@
 ### Camera & Rendering
 
 - [ ] **Snowgoons-import fog trap: inherited Earth-fog defaults grey out distant terrain.** Levels scaffolded off snowgoons inherit `FoggingColor=0x888888`, `FoggingStartDistance=20`, `FoggingCompleteDistance=30` → any pixel past ~30 m fades to flat `#888888`. Workaround overrides the three fields per-level; consider adding an opt-in "strip snowgoons fog" to `wf_blender` import_level. [plan](docs/plans/2026-05-31-uninitialised-fog-defaults.md)
-- [ ] Investigate https://github.com/jtsiomb/stereowrap
+- [ ] Investigate [stereowrap](https://github.com/jtsiomb/stereowrap)
 
 ### Engine Robustness
 
@@ -84,7 +84,7 @@
 - [ ] **Marble-madness: script-based input remapping** — `Script Controls Input = True`; script reads raw joystick (1008), remaps, writes `EMAILBOX_INPUT` (3024). Current impl handles LEFT/RIGHT strafe in `movement.cc` (TurnRate==0 branch); the script approach is a viable future refactor. See `player.cc:192` for the passthrough pattern.
 - [ ] **Object-model / class taxonomy — collectibles shouldn't masquerade as coins.** Mushroom/FireFlower/Star are all authored as `gold` actors with `Gold Value = 0` + a pickup script (the only stock class with the right walk-through + floor-landing collision profile). Real fix: a base `Collectible` (collision profile + pluggable pickup effect + despawn/TTL + visual) that `Gold`/`Mushroom`/`Star`/`1-Up`/`FireFlower` specialise. Four clones now exist (the trigger has fired). Pairs with the dead-`Gold::Collision` cleanup. [plan](docs/plans/2026-05-26-smb-super-mushroom-powerup.md)
 
-- [ ] Investigate https://studio.tripo3d.ai/?from=landingpage_header&category=featured&model_type=all&recommended=recommended&use_case=all
+- [ ] Investigate [Tripo3D studio](https://studio.tripo3d.ai/?from=landingpage_header&category=featured&model_type=all&recommended=recommended&use_case=all)
 
 
 ## Watch
@@ -116,6 +116,7 @@
 - Strip spurious BOX3 chunks from non-geometry actors in `wflevels/snowgoons/snowgoons.lev`. [plan](docs/plans/2026-04-19-strip-nongeom-box3.md)
 - Per-level `MAX_ACTIVE_ROOMS` — currently compile-time constant. [plan](docs/plans/per-level-max-active-rooms.md)
 - PILOT Phase 5 (language-aware hot-reload) + Phase 6 (turtle graphics: 2D `GR:` + 3D H/L/U-frame). [plan](docs/plans/2026-05-30-pilot-for-world-foundry-in-engine-object-script-la.md)
+- **Re-enabling Fennel/Lua/JS/Wren on macOS desktop.** Deliberately scoped to Forth-only in the `elseif(APPLE)` block of `CMakeLists.txt` (2026-09-20, matching Android/iOS) — config-only, nothing deleted. Root cause of the original blocker, already diagnosed: `scripts/gen_fennel_source.sh` takes `xxd -i`'s safe `unsigned char[]` output and its own `sed` rewrites it to `char[]`, which AppleClang rejects as a narrowing-conversion error on any UTF-8 byte ≥128 (GCC only warns). Real fix when wanted back: keep the generator's array `unsigned char`, update the `extern` declaration in `engine/stubs/scripting_lua.cc:108` to match, and cast to `const char*` at the one `luaL_loadbuffer` call site — not a redesign. [plan](docs/plans/2026-09-20-macos-metal-renderer.md)
 
 ### Scripting engine variants
 

@@ -42,6 +42,12 @@
 #include <hal/hal.h>
 #ifdef __ANDROID__
 #  include <GLES3/gl3.h>
+#elif defined(WF_TARGET_MACOS)
+// See gfx/renderer.hp / hal/macos/gl_stubs.cc: legacy OpenGL.framework header
+// for the GL type/constant vocabulary only -- entry points are stubbed,
+// OpenGL.framework is not linked.
+#  define GL_SILENCE_DEPRECATION
+#  include <OpenGL/gl.h>
 #else
 #  include <GL/gl.h>
 #endif

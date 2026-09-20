@@ -105,8 +105,12 @@ static int lua_write_mailbox(lua_State* L)
 }
 
 #ifdef WF_ENABLE_FENNEL
-extern "C" const char         kFennelSource[];
-extern "C" const unsigned int kFennelSourceLen;
+// unsigned char, matching gen_fennel_source.sh's generator: Fennel's source
+// embeds UTF-8 bytes >127, which Clang (unlike GCC) refuses to narrow into a
+// signed char in a braced initializer list. Cast to const char* at the one
+// luaL_loadbuffer call site below, where it's just a byte-buffer pointer.
+extern "C" const unsigned char kFennelSource[];
+extern "C" const unsigned int  kFennelSourceLen;
 #endif
 
 // --------------------------------------------------------------------------
@@ -151,7 +155,7 @@ void Init(MailboxesManager& mgr)
     lua_setglobal(gL, "set_music_volume");
 
 #ifdef WF_ENABLE_FENNEL
-    if (luaL_loadbuffer(gL, kFennelSource, kFennelSourceLen, "fennel.lua") != LUA_OK
+    if (luaL_loadbuffer(gL, reinterpret_cast<const char*>(kFennelSource), kFennelSourceLen, "fennel.lua") != LUA_OK
         || lua_pcall(gL, 0, 1, 0) != LUA_OK) {
         std::fprintf(stderr, "fennel: load failed: %s\n", lua_tostring(gL, -1));
         lua_pop(gL, 1);
