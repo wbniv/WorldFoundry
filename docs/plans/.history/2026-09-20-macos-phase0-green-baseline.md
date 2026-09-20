@@ -1,8 +1,14 @@
 | Date | Change |
 |------|--------|
+| [2026-09-20](https://github.com/wbniv/WorldFoundry/commit/cb9a1318) | docs(plans): record the arm64 array-cookie root cause; Phase 0 is green |
 | [2026-09-20](https://github.com/wbniv/WorldFoundry/commit/aa1b7072) | feat(macos): disable REST API, stub debug-bridge GL calls for macOS |
 
 <!--history-meta v1
+cb9a1318	author	Will Norris
+cb9a1318	added	219
+cb9a1318	deleted	7
+cb9a1318	files	1
+cb9a1318	body	Fix 6 in the macOS Phase 0 plan: the full diagnosis of the DMalloc cookie\nassertion that blocked the first headless macOS run — the backtrace and header\ndump that located it, the ARM-vs-Itanium array-cookie table, the pointer\narithmetic closing exactly against the free list, the design rejected\n(per-ABI cookie sizes in the macro) and the one taken.\n\nVerification section filled in per ~/CLAUDE.md's format: fix 5's build-green /\nsmoke-red run, the regression guard failing on the pre-fix code on x86_64, the\nLinux regression check, and the Phase 0 exit criterion — now PASS on build\n6aafcf69903254faf05d7835.\n\nTODO gets a Monitor bullet: `new (pool) T[n]` is a trap on arm64, and the four\nremaining sites are safe only because their element types are trivially\ndestructible today.\n\nCo-Authored-By: Claude Opus 5 (1M context) <noreply@anthropic.com>\nClaude-Session: https://claude.ai/code/session_015ksFy3ZSSz2XMdto3jVA9v
 aa1b7072	author	Will Norris
 aa1b7072	added	119
 aa1b7072	deleted	0

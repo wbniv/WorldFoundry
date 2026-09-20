@@ -174,8 +174,13 @@ DMalloc::Free read header at 0x458037628  → _size=24, _cookie=0
 
 So the macro handed `Free()` a pointer 8 bytes past the real allocation base, `Free()` read the
 middle of the cookie as an allocation header, and the guard fired. Correct on x86_64 by
-coincidence of the cookie size; wrong on **every** arm64 target — this was equally latent on
-Android arm64‑v8a and iOS, which simply hadn't run this teardown under assertions yet.
+coincidence of the cookie size; wrong on **every** arm64 target.
+
+This is a **dormant pre-2026 bug**, not a regression from this port: the macro is in the
+2010‑05‑01 first commit (`a2784f6e`) and `memory.hp` carries a 1998–2003 copyright. Authored
+1998–2003 → reachable only once the arm64 ports landed (2026‑04) → first hit on macOS,
+2026‑09‑20. Full provenance, including why the mobile arm64 ports didn't surface it first, is
+logged in [`docs/BUGS.md`](../BUGS.md) per that file's eligibility rule.
 
 #### Fix (`18188fd1`)
 

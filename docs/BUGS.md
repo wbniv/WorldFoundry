@@ -13,6 +13,63 @@ Format per entry:
 
 ---
 
+## `MEMORY_DELETE_ARRAY` hardcodes an 8‑byte array cookie — arm64's is 16 — 2026-09-20
+
+**Status:** FIXED [`18188fd1`](https://github.com/wbniv/WorldFoundry/commit/18188fd1) (`wfsource/source/memory/memory.hp` — new cookie-free `MEMORY_NEW_ARRAY`; `room.cc`, `rooms.cc` call sites).
+
+**Symptom:** The first-ever macOS (arm64) headless run dies in its own heap guard on level teardown, after loading the whole level and running all 30 frames: `_cookie == ALLOCATED_COOKIE` at `memory/dmalloc.hpi`. Not reproducible on Linux/x86_64 — same level, same flags, ASan on or off, clean every time.
+
+**Root cause:** `Room::~Room` frees `_objectLists` via `MEMORY_DELETE_ARRAY` (`memory/memory.hp:96`), which computed the allocation base as `long* count = ((long*)classptr)-1` — hardcoding an **8‑byte array cookie**. `Room::Construct` (`room/room.cc:123`) allocated that array with `new (memory) Int16List[n]`, and because `Int16List` has a non-trivial destructor the compiler reserves a hidden array cookie in front of the block whose size is **ABI-defined**: 8 bytes under the generic Itanium C++ ABI (x86_64) — one `size_t` count — but **16** under the ARM C++ ABI (IHI0041), used by *every* AArch64 target (Apple arm64, Android arm64‑v8a, aarch64 Linux), which stores **two** words, `{ element size, element count }`. So on arm64 the macro handed `DMalloc::Free` a pointer 8 bytes past the real base; `Free` read the middle of the cookie as an allocation header and the guard fired. The dump from the failing machine is that ARM cookie verbatim — `24` (`sizeof(Int16List)`), then `5` (`_checkListEntries`), then the array — and the arithmetic closes exactly against the free list:
+
+```
+real chunk header   0x458037620   _size = 16 + 5*24 = 136
+user pointer        0x458037628   ← 16-byte ARM cookie starts here
+_objectLists        0x458037638
+chunk end           0x4580376b0   == free[00] start ✓
+MEMORY_DELETE_ARRAY passed 0x458037630  (8 bytes too high)
+```
+
+**Why dormant:** The line is from the 2010 first commit (`a2784f6e`); `memory.hp` carries a 1998–2003 copyright, and that import even ships *two* variants of the macro — the live `((long*)classptr)-1` and an `#if`-disabled `((long*)classptr)-2` — so the original authors were already guessing at cookie layout rather than deriving it. It survived ~16 years because the assumption it encodes, *cookie size == `sizeof(long)`*, happens to hold on every target WF had ever built for: 4 and 4 on 32‑bit (PSX MIPS, Win32 x86), 8 and 8 on x86_64. It only breaks where the two diverge, which is the ARM C++ ABI — so it became *reachable* only with the arm64 ports (Android arm64‑v8a / iOS, 2026‑04) and was first actually *hit* by macOS desktop five months later. Why the mobile arm64 ports didn't surface it in between is **not established**; the plausible reading is that mobile is killed by the OS rather than running `Level` teardown, and the `--frame-step-smoke` path that forces `UnloadLevel` is desktop-only. (Sibling bug, same family, opposite direction: `Array<T>::SetMax` assumed a cookie that a *trivially* destructible `T` never gets — fixed earlier, see `cpplib/array.hpi`'s comment.)
+
+**Fix:** Stop guessing — take the compiler out of the arithmetic. New `MEMORY_NEW_ARRAY` allocates raw from the pool and placement-constructs each element, so the pointer handed out **is** the allocation base on every ABI and `MEMORY_DELETE_ARRAY` frees exactly what it was given. Rejected: teaching the macro per-ABI cookie sizes — that bakes an ABI table into a macro and is still wrong for 32‑bit ARM (two 4‑byte words) and for any `T` with `alignof(T) > 8` under Itanium, where the cookie grows to `alignof(T)`.
+
+**Diff** (`wfsource/source/memory/memory.hp` + `room/room.cc`, `room/rooms.cc`):
+```diff
++template <class T> T*
++_MemoryNewArray(Memory& memory, int entries ASSERTIONS( COMMA const char* file COMMA int line))
++{
++	T* items = (T*)memory.Allocate(sizeof(T) * entries ASSERTIONS( COMMA file COMMA line));
++	for(int index = 0; index < entries; ++index)
++		new (&items[index]) T();
++	return items;
++}
++#define MEMORY_NEW_ARRAY( memory, classname, entries ) \
++	_MemoryNewArray<classname>( (memory), (entries) ASSERTIONS( COMMA __FILE__ COMMA __LINE__ ) )
++
+ #define MEMORY_DELETE_ARRAY( memory, classptr, classname, entries) \
+ {	\
+-	long* count = ((long*)classptr)-1; \
+ 	for(int index=0;index<entries;index++) \
+ 		classptr [index].~classname (); \
+-	(memory).Free(count); \
++	(memory).Free( classptr ); \
+ }
+
+-   _objectLists = new (memory) Int16List[_checkListEntries];
++   _objectLists = MEMORY_NEW_ARRAY(memory, Int16List, _checkListEntries);
+
+-	_rooms = new (HALLmalloc) Room[numRooms];
++	_rooms = MEMORY_NEW_ARRAY(HALLmalloc, Room, numRooms);
+```
+
+**Regression guard:** `wf_game --memory-test` (`memory/pooltest.cc`, ctest `memory_pool_arrays`, and the first command of the macOS CI smoke step). It pins the invariant that makes the pair ABI-independent — *the pointer `MEMORY_NEW_ARRAY` returns is the pool allocation base* — by spying on the pool's `Allocate()`, so it **fails on x86_64 too** if anyone reintroduces `new (pool) T[n]`; it does not need an arm64 box to bite. Build that file with `-DWF_POOLTEST_USE_OLD_ARRAY_NEW` to reproduce the pre-fix failure locally. The four surviving `new (pool) T[n]` sites (`gfx/rendobj3.cc`, `anim/anim.cc`, `iff/disktoc.cc`, `cpplib/int16li.hpi`) are safe **only** because those element types are trivially destructible and so carry no cookie at all — adding a destructor to any of them reintroduces this bug (TODO `## Watch → Monitor`).
+
+**Diagnosis aid, kept:** `_sys_assert` now prints a `backtrace_symbols_fd()` dump before exiting, and `DMalloc::Free` names the pool, the bad chunk's offset within it and the whole free list ([`a5694c38`](https://github.com/wbniv/WorldFoundry/commit/a5694c38)). Failure-path only. This turned an un-debuggable CI assert into a one-run diagnosis and is the reason this entry exists.
+
+**Investigation:** [`docs/plans/2026-09-20-macos-phase0-green-baseline.md`](plans/2026-09-20-macos-phase0-green-baseline.md) fix 6.
+
+---
+
 ## `_HALScratchLmalloc` dangles after the emscripten stack unwind — 2026-06-13
 
 **Status:** FIXED [`59dc44d3`](https://github.com/wbniv/WorldFoundry/commit/59dc44d3) (`wfsource/source/hal/hal.cc` — `static` scratch allocator on web).
