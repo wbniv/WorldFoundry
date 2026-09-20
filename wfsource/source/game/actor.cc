@@ -416,7 +416,6 @@ Actor::BindAssets(Memory& memory)
 
 		case MODEL_TYPE_BOX:
 		{
-            if (getenv("WF_TRACE_RENDER")) std::cerr << "RB box actor " << *this << " position " << currentPos() << std::endl;
 			Vector3 min(_physicalAttributes.GetColSpace().Min());
 			Vector3 max(_physicalAttributes.GetColSpace().Max());
 			_renderActor = new (memory) RenderActor3DBox(memory,min,max);

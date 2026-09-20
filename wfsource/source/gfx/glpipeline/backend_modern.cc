@@ -406,7 +406,6 @@ public:
     void EndFrame() override
     {
         Flush();
-        ++_traceFrame;
     }
 
     // ---- textures (D4/O3) --------------------------------------------------
@@ -514,7 +513,6 @@ public:
     }
 
 private:
-    unsigned long _traceFrame = 0;
     bool   _inited   = false;
     GLuint _vao      = 0;
     GLuint _vbo      = 0;
@@ -651,16 +649,6 @@ private:
         else
         {
             glUniform1i(_uUseTex, 0);
-        }
-
-        if (std::getenv("WF_TRACE_RENDER") && _traceFrame == 19) {
-            static unsigned batch = 0;
-            std::fprintf(stderr, "RB batch=%u vertices=%zu use_tex=%d handle=%p lighting=%d\n", ++batch, _cpu.size(), (_curTexture ? 1 : 0), (_curTexture ? _curTexture->GetTextureHandle() : nullptr), int(_lightingEnabled));
-            std::fprintf(stderr, "RB mv");
-            for (float f : _mv) std::fprintf(stderr, " %.9g", f);
-            std::fprintf(stderr, "\n");
-            for (const Vert& v : _cpu)
-                std::fprintf(stderr, "RB v %.9g %.9g %.9g rgb %.9g %.9g %.9g uv %.9g %.9g n %.9g %.9g %.9g\n", v.x,v.y,v.z,v.r,v.g,v.b,v.u,v.v,v.nx,v.ny,v.nz);
         }
 
         glBindVertexArray(_vao);

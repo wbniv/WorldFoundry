@@ -623,14 +623,94 @@ Steps a future implementation pass runs, in order. Per `~/CLAUDE.md` **Plan veri
     `backend_modern.cc`'s). Left as a follow-up rather than churned on — 0.15 % of one frame, fully
     characterised, and cheap to re-open with a per-object dump.
 
-    **Single-face follow-up — 2026-09-21 (in progress).** Work isolated on
-    `fix/macos-metal-face-color`. Compare frame-20 per-flush texture selection,
-    vertex colors, UVs and model-view matrices before changing shader behavior.
-    Also trace procedural box material creation: `MakeRandMaterialList` uses
-    platform libc `rand()` in three constructor arguments with unspecified evaluation order. Localized
-    mismatch: `(313,389)`–`(330,422)`, 455 pixels. The matching Linux baseline is
-    `det1.png` / `linux-seam20.png` / `lx20.png` in the prior scratchpad;
-    `linux-frame20.png` there is an older unmatched capture.
+    **Single-face follow-up — 2026-09-21.** Work isolated on
+    `fix/macos-metal-face-color`. Diagnostic commit `4f6aa018`, Codemagic build
+    `6ab052b08915493520db2424`: every step succeeded. The matching prior Linux
+    baseline is `det1.png` / `linux-seam20.png` / `lx20.png`; the scratchpad's
+    `linux-frame20.png` is an older unmatched capture. The reproduction command
+    also requires `-record_video` on Linux: PNG capture currently lives inside
+    that path. The fresh Linux capture is byte-identical to `det1.png`.
+
+    **Root cause established upstream of the renderer.** Actor #11 (`matte_11`
+    in `wflevels/snowgoons-blender/snowgoons.lev`), position
+    `(3.071487427,3.636245728,1.370666504)`, uses `MODEL_TYPE_BOX` and a procedural
+    `RenderActor3DBox`, not an imported mesh or texture. Batch 5's -X face
+    (`cubeFaceList` triangles 6–7, material index 1) projects to corners
+    `(312.816,389.023)`, `(331.198,397.801)`, `(331.131,423.642)`,
+    `(312.857,413.765)`: the 455-pixel mismatch at `(313,389)`–`(330,422)`.
+
+    ```
+    Linux:
+    RB box material rgb=193,72,129
+    RB batch=5 vertices=36 use_tex=0 handle=(nil) lighting=1
+    RB v -0.5 0.5 1 rgb 0.75390625 0.28125 0.50390625 uv 0 0 n -0 0 1
+    macOS:
+    RB libc rand seed=1: [16807, 282475249, 1622650073]
+    RB box material rgb=43,85,99
+    RB batch=5 vertices=36 use_tex=0 handle=0x0 lighting=1
+    RB v -0.5 0.5 1 rgb 0.16796875 0.33203125 0.38671875 uv 0 0 n -0 0 1
+    Aligned frame-20 trace comparison:
+    batch/matrix/vertex trace lines: [4707, 4707]
+    differing lines: 108
+    all differences are RGB only: True
+    batch counts: 9
+    ```
+
+    **PASS — diagnosis.** Both backends explicitly disable texturing on the
+    affected batch. Positions, normals, UVs, model-view matrices and batch
+    counts agree exactly. The 108 differing vertex records are three procedural
+    boxes; only the lit face of actor #11 contributes differing visible pixels.
+    GL's diagnostic counter initially included empty startup `PageFlip` calls;
+    counting only frames with submitted triangles aligned it with Metal.
+
+    `MakeRandMaterialList` calls `Color(rand()%230+26, rand()%230+26,
+    rand()%230+26)`. Both libc RNGs default to seed 1, but Linux's first draws
+    are `1804289383,846930886,1681692777` and Darwin's are
+    `16807,282475249,1622650073`. Additionally, GCC evaluates these constructor
+    arguments B,G,R and Apple Clang R,G,B. The resulting material RGBs above,
+    divided by 256 in `rendfcl.cc` and lit by the identical shader inputs,
+    produce Linux `(191,71,128)` and Metal `(43,84,98)`. Seeding libc explicitly
+    cannot fix either platform-dependent algorithm or argument ordering.
+    This code predates the Metal backend (present in repository root commit
+    `a2784f6e`, 2010-05-01); shader/atlas/fallback-texture changes are unnecessary.
+
+    **Fix:** `MakeBoxMaterialList` uses a private, specified degree-31 additive
+    color sequence initialized to reproduce the Linux seed-1 reference, with
+    explicit B,G,R draw order. Keep the original three libc draws per box so
+    gameplay's existing random sequence does not shift. Colors themselves are
+    independent of gameplay RNG state. Remove the temporary render traces.
+    `tests/box_color_test.cc` checks the first four reference colors and a
+    checksum of 10,000 RGB triples, including independence from libc reseeding.
+    `tests/compare_renderer_frames.py` and the frozen Linux PNG add a Codemagic
+    capture gate with a maximum per-channel tolerance of 3 (the old face
+    difference was 148). No pixel-count allowance hides a changed face.
+
+    Linux preflight for the fixed Mac run:
+
+    ```
+    $ task build
+    === Linking ===
+    Built: /tmp/wf-metal-face/engine/wf_game
+    EXIT=0
+    $ engine/wf_game --memory-test
+    memory pool-array test: 0 failure(s)
+    EXIT=0
+    $ /tmp/wf-metal-face/engine/wf_game --frame-step-smoke=30 --cycles=1 -rate20 -record_video --capture-frame=20=/tmp/wf-face-linux-fixed.png -L/tmp/wf-metal-face/wflevels/snowgoons-blender/snowgoons-standalone.iff
+    linux: capture frame 20 -> /tmp/wf-face-linux-fixed.png (640x480) written, non-black pixels 62109/307200
+    EXIT=0
+    $ python3 tests/compare_renderer_frames.py tests/fixtures/renderer/snowgoons-linux-frame20.png /tmp/wf-face-linux-fixed.png
+    640x480: exact=307200/307200 (100.000000%)
+    max channel delta histogram: {0: 307200}
+    coverage IoU=62109/62109 (100.000000%)
+    pixels exceeding tolerance 0: 0
+    PASS
+    $ /tmp/wf-box-color-test
+    PASS: 10000 box colors match Linux reference; independent of libc RNG
+    ```
+
+    **PASS — Linux regression.** Capture from the fixed binary is byte-identical
+    to the reference. CMake configuration and workflow YAML validation also pass.
+    Final macOS verification: pending the fixed run.
 
 11. *(Phase 4)* Interactive `.app` launches, renders, accepts keyboard/gamepad input, and closes cleanly (`HALWindowCloseRequested` path, `game/game.cc:296`).
 12. *(Phase 4)* `-width=800 -height=600` and `-fullscreen` produce correctly sized windows — closes `TODO.md:7`.

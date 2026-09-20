@@ -419,6 +419,12 @@ workflows:
           # exit code via pipefail so a compile/link failure fails the step.
           cmake --build . --target wf_game 2>&1 | tee ../macos-build.log
 
+      - name: Verify portable box colors
+        script: |
+          set -euo pipefail
+          c++ -std=c++17 -Iwfsource/source tests/box_color_test.cc -o /tmp/wf-box-color-test
+          /tmp/wf-box-color-test
+
       - name: Run headless frame-step smoke
         script: |
           set -euo pipefail
@@ -434,7 +440,6 @@ workflows:
           # array cookie is 16 bytes here vs 8 on x86_64). Fails loudly and
           # early rather than as a cookie assert 30 frames in.
           "$WF_GAME" --memory-test 2>&1 | tee "$CM_BUILD_DIR/macos-smoke.log"
-          python3 -c 'import ctypes; c=ctypes.CDLL(None); c.srand(1); print("RB libc rand seed=1:", [c.rand() for _ in range(3)])' | tee -a "$CM_BUILD_DIR/macos-smoke.log"
           # --capture-frame=N counts frames that reached the BACKEND, not engine
           # steps: Phase 1 measured 29 rendered frames for 30 steps (the render
           # block is gated on camera()->ValidView()). So capture at 20, safely
@@ -445,14 +450,24 @@ workflows:
           # not reproducible even on the same machine, let alone comparable with
           # a Linux capture — which is what plan steps 9 and 10 need. Verified
           # locally: two -rate20 runs produce byte-identical PNGs.
-          WF_TRACE_RENDER=1 "$WF_GAME" --frame-step-smoke=30 --cycles=1 -L"$LEVEL" -rate20 \
+          "$WF_GAME" --frame-step-smoke=30 --cycles=1 -L"$LEVEL" -rate20 \
             --capture-frame=20="$CM_BUILD_DIR/macos-frame20.png" \
             2>&1 | tee -a "$CM_BUILD_DIR/macos-smoke.log"
+
+      - name: Compare deterministic capture with Linux reference
+        script: |
+          set -euo pipefail
+          # Small interpolation/filter rounding differences are allowed; the
+          # former solid-face color mismatch had a channel delta of 148.
+          python3 tests/compare_renderer_frames.py \
+            tests/fixtures/renderer/snowgoons-linux-frame20.png \
+            macos-frame20.png --tolerance 3 | tee macos-comparison.log
 
     artifacts:
       - macos-configure.log
       - macos-build.log
       - macos-smoke.log
+      - macos-comparison.log
       # Phase 2's deliverable: a real Metal frame rendered with no window. This
       # is what turns macos-desktop-debug from a build gate into a visual gate.
       - macos-frame20.png

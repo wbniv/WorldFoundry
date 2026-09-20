@@ -681,16 +681,6 @@ private:
         Uniforms u;
         BuildUniforms(u);
 
-        if (std::getenv("WF_TRACE_RENDER") && _renderedFrames == 19) {
-            static unsigned batch = 0;
-            std::fprintf(stderr, "RB batch=%u vertices=%zu use_tex=%d handle=%p lighting=%d\n", ++batch, _cpu.size(), u.use_tex, _boundTexture, int(_lightingEnabled));
-            std::fprintf(stderr, "RB mv");
-            for (float f : _mv) std::fprintf(stderr, " %.9g", f);
-            std::fprintf(stderr, "\n");
-            for (const Vert& v : _cpu)
-                std::fprintf(stderr, "RB v %.9g %.9g %.9g rgb %.9g %.9g %.9g uv %.9g %.9g n %.9g %.9g %.9g\n", v.x,v.y,v.z,v.r,v.g,v.b,v.u,v.v,v.nx,v.ny,v.nz);
-        }
-
         // Vertices go through an MTLBuffer, NOT setVertexBytes: the latter is
         // capped at 4 KB and one snowgoons frame batches ~1563 triangles
         // (~206 KB), so every flush would be rejected.
