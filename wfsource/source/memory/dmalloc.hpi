@@ -141,9 +141,37 @@ DMalloc::Free(const void* mem,int32 /*size*/)
 
 //============================================================================
 
+#if DO_ASSERTIONS
+
+inline bool
+DMalloc::AllocatedChunk::HeaderLooksValid() const
+{
+	return _size > 0 && _cookie == ALLOCATED_COOKIE;
+}
+
+inline void
+DMalloc::AllocatedChunk::DumpHeader() const
+{
+	const unsigned char* raw = (const unsigned char*)this;
+	printf("DMalloc::AllocatedChunk @ %p: sizeof(AllocatedChunk)=%u _size=%d _cookie=0x%08x (expected 0x%08x)\n",
+	       (const void*)this, (unsigned)sizeof(AllocatedChunk), (int)_size,
+	       (unsigned)_cookie, (unsigned)ALLOCATED_COOKIE);
+	printf("  header+payload bytes [0..47]:");
+	for(int i = 0; i < 48; ++i)
+		printf(" %02x", raw[i]);
+	printf("\n");
+	fflush(stdout);
+}
+
+#endif	// DO_ASSERTIONS
+
 inline void
 DMalloc::AllocatedChunk::Validate() const
 {
+#if DO_ASSERTIONS
+	if(!HeaderLooksValid())
+		DumpHeader();
+#endif
 	assert(_size > 0);
 	assert(_cookie == ALLOCATED_COOKIE);
 }

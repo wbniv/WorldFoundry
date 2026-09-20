@@ -8,6 +8,17 @@
 #include <cstdlib>
 #undef abort
 
+// A firing assert is the engine's only postmortem on a CI box we can't attach a
+// debugger to, and "expr/file/line" alone doesn't say who called it — which is
+// useless for the assertions that live in shared leaf code (DMalloc's chunk
+// cookie, ValidatePtr, RangeCheck). glibc and Darwin libSystem both ship
+// <execinfo.h>; Emscripten does not (and its asserts are non-fatal anyway).
+#if !defined(__EMSCRIPTEN__) && (defined(__linux__) || defined(__APPLE__))
+#	include <execinfo.h>
+#	include <unistd.h>
+#	define WF_HAVE_EXECINFO 1
+#endif
+
 #pragma message( "TODO: HAL should probably provide an interface to the debugger [very simple to start with--like is it there?]" )
 
 //===========================================================================*/
@@ -41,6 +52,18 @@ _sys_assert( int, const char* expr, const char* file, int line )
 		printf( "|%-77s|\n", expr );
 	printf( "|in file \"%s\" on line %s%*s|\n",	file, szLineNumber, 58-strlen(file)-strlen(szLineNumber), "" );
     printf( "+-----------------------------------------------------------------------------+\n" );
+
+#if defined(WF_HAVE_EXECINFO)
+	{
+		void* frames[ 64 ];
+		int   count = backtrace( frames, 64 );
+		printf( "+- BACKTRACE (%d frames) ------------------------------------------------------+\n", count );
+		fflush( stdout );
+		backtrace_symbols_fd( frames, count, STDOUT_FILENO );
+		printf( "+-----------------------------------------------------------------------------+\n" );
+		fflush( stdout );
+	}
+#endif
 
 #if defined(__EMSCRIPTEN__)
 	return;   // web: non-fatal — warn + continue (see above)

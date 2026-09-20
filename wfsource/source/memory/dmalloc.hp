@@ -33,6 +33,7 @@
 #include <streams/dbstrm.hp>
 #include <memory/memory.hp>
 #include <cpplib/align.hp>
+#include <cstdio>		// AllocatedChunk::DumpHeader's postmortem printf
 
 //==============================================================================
 
@@ -95,6 +96,12 @@ private:
 		inline int32 Size() const;
 
 		inline void Validate() const;
+#if DO_ASSERTIONS
+		// Non-asserting form of Validate(), so callers that hold extra context
+		// (DMalloc::Free knows the pool) can dump it *before* the assert exits.
+		inline bool HeaderLooksValid() const;
+		inline void DumpHeader() const;
+#endif
 
 	private:
 		int32 _size;

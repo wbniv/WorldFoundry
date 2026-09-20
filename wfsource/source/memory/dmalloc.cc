@@ -241,6 +241,28 @@ DMalloc::Free(const void* mem)
 //	assert(mem < _endMemory);
 	AllocatedChunk* allocatedChunk = ((AllocatedChunk*)mem)-1;
 	assert((char*)allocatedChunk >= _memory);
+#if DO_ASSERTIONS
+	if(!allocatedChunk->HeaderLooksValid())
+	{
+		// Postmortem before Validate() exits the process: which pool, where in
+		// it, and what the free list looked like. Without this the only clue on
+		// a CI box is "cookie mismatch in dmalloc.hpi".
+		printf("DMalloc::Free: corrupt allocation header\n");
+		MEMORY_NAMED(printf("  pool          = \"%s\"\n", _name);)
+		printf("  pool range    = [%p,%p)  size = %td\n",
+		       (void*)_memory, (void*)_endMemory, (ptrdiff_t)(_endMemory-_memory));
+		printf("  freeing mem   = %p (chunk %p, offset %td into pool)\n",
+		       mem, (void*)allocatedChunk, (ptrdiff_t)((char*)allocatedChunk - _memory));
+		printf("  sizeof(FreeChunk) = %u, sizeof(AllocatedChunk) = %u, WF_POINTER_ALIGN = %u\n",
+		       (unsigned)sizeof(FreeChunk), (unsigned)sizeof(AllocatedChunk),
+		       (unsigned)WF_POINTER_ALIGN);
+		int n = 0;
+		for(FreeChunk* c = _firstChunk; c && n < 64; c = c->Next(), ++n)
+			printf("  free[%02d] %p size=%d end=%p\n",
+			       n, (void*)c, (int)c->Size(), (void*)(((char*)c)+c->Size()));
+		fflush(stdout);
+	}
+#endif
 	allocatedChunk->Validate();
 	assert((char*)mem+allocatedChunk->Size() <= _endMemory);
 
