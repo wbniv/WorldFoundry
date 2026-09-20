@@ -1117,6 +1117,32 @@ def export_scene_to_lev(context, filepath: str, mesh_dir: str = "") -> tuple[boo
             lines.append(f'\t\t{{ \'FILE\' {{ \'NAME\' "Mesh Name" }} {{ \'STR\' "{mesh_filename}" }} }}')
             lines.append(f'\t\t{{ \'I32\'  {{ \'NAME\' "Model Type" }} {{ \'DATA\' {model_type}l }} {{ \'STR\' "{"Mesh" if model_type == 1 else "None"}" }} }}')
 
+        # A native Blender LIGHT object carries its colour/type on the datablock
+        # rather than in wf_light* custom properties.  Derive them into those
+        # properties *before* the schema walk so `_emit_lev_fields` remains the
+        # single emission path for lightRed/Green/Blue/lightType — light.oas stays
+        # the only authority on the "Directional|Ambient" ordering (the index is
+        # looked up from the schema's own enum_items(), never hand-written here).
+        if typename.lower() == "light":
+            if obj.type == 'LIGHT' and obj.data:
+                obj[_prop_key("lightRed")]   = float(obj.data.color[0])
+                obj[_prop_key("lightGreen")] = float(obj.data.color[1])
+                obj[_prop_key("lightBlue")]  = float(obj.data.color[2])
+                obj[_prop_key("lightType")]  = "Ambient" if obj.data.type == 'POINT' else "Directional"
+            else:
+                # A Light actor authored as a plain object without wf_light*
+                # properties (e.g. the qbert_practice fixture) used to get these
+                # defaults from the hand-written block; keep supplying them so the
+                # emitted values are unchanged, just now via the schema walk.
+                if obj.get(_prop_key("lightRed")) is None:
+                    obj[_prop_key("lightRed")] = 1.0
+                if obj.get(_prop_key("lightGreen")) is None:
+                    obj[_prop_key("lightGreen")] = 1.0
+                if obj.get(_prop_key("lightBlue")) is None:
+                    obj[_prop_key("lightBlue")] = 1.0
+                if obj.get(_prop_key("lightType")) is None:
+                    obj[_prop_key("lightType")] = "Directional"
+
         try:
             resolved = bpy.path.abspath(schema_path)
             schema = wf_core.load_schema(resolved)
@@ -1127,23 +1153,6 @@ def export_scene_to_lev(context, filepath: str, mesh_dir: str = "") -> tuple[boo
             with open("/tmp/wf_export_errors.log", "a") as _ef:
                 _ef.write(f"[wf_export] {obj.name}: {e_oad}\n")
                 traceback.print_exc(file=_ef)
-
-        is_light = typename.lower() == "light"
-        if is_light:
-            if obj.type == 'LIGHT' and obj.data:
-                r, g, b = obj.data.color[0], obj.data.color[1], obj.data.color[2]
-                lt = 1 if obj.data.type == 'POINT' else 0
-            else:
-                r = float(obj.get(_prop_key("lightRed"), 1.0))
-                g = float(obj.get(_prop_key("lightGreen"), 1.0))
-                b = float(obj.get(_prop_key("lightBlue"), 1.0))
-                lt_raw = obj.get(_prop_key("lightType"), 0)
-                lt_map = {"directional": 0, "ambient": 1}
-                lt = lt_map.get(str(lt_raw).lower(), int(lt_raw) if str(lt_raw).isdigit() else 0)
-            lines.append(f"\t\t{{ 'FX32' {{ 'NAME' \"lightRed\" }} {{ 'DATA' {fp(r)} }} {{ 'STR' \"{r:f}\" }} }}")
-            lines.append(f"\t\t{{ 'FX32' {{ 'NAME' \"lightGreen\" }} {{ 'DATA' {fp(g)} }} {{ 'STR' \"{g:f}\" }} }}")
-            lines.append(f"\t\t{{ 'FX32' {{ 'NAME' \"lightBlue\" }} {{ 'DATA' {fp(b)} }} {{ 'STR' \"{b:f}\" }} }}")
-            lines.append(f"\t\t{{ 'I32' {{ 'NAME' \"lightType\" }} {{ 'DATA' {lt}l }} {{ 'STR' \"{'Ambient' if lt else 'Directional'}\" }} }}  //Directional|Ambient")
 
         if obj.data and hasattr(obj.data, 'polygons') and obj.data.polygons:
             mesh = obj.data
