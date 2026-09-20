@@ -163,12 +163,15 @@ fragment float4 wf_fs(VertexOut v                  [[stage_in]],
                       sampler          smp         [[sampler(0)]])
 {
     float4 c = float4(v.color * v.lit, 1.0);
-    // Phase 3: modulate by the texture, matching backend_modern's GL path
-    // (vertex colour * lighting * texel). use_tex is 0 whenever the draw has
-    // no PixelMap or the upload failed, so this stays correct on a device
-    // where CreateTexture returned nil.
+    // Phase 3: REPLACE-IF-WHITE, character for character the rule in
+    // backend_modern.cc's kFS. WF's convention is that a white vertex colour
+    // means "this face is textured" and any other colour means "flat coloured,
+    // ignore the texture" — so it is a mix() selected by whiteness, NOT a
+    // modulate. Modulating (the obvious guess) happens to agree on white faces
+    // and silently darkens every coloured-but-textured face.
     if (u.use_tex != 0) {
-        c.rgb *= tex.sample(smp, v.uv).rgb;
+        float is_white = step(0.99, min(v.color.r, min(v.color.g, v.color.b)));
+        c = float4(mix(v.color, tex.sample(smp, v.uv).rgb, is_white) * v.lit, 1.0);
     }
     if (u.fog != 0) {
         c.rgb = mix(u.fog_color, c.rgb, v.fog_factor);
@@ -488,7 +491,6 @@ private:
     id<MTLRenderPipelineState> _pipeline        = nil;
     id<MTLDepthStencilState>   _depthState      = nil;
     id<MTLRenderCommandEncoder> _encoder        = nil;
-    id<MTLBuffer>              _vbuf            = nil;
     id<MTLSamplerState>        _sampler         = nil;
     id<MTLTexture>             _whiteTexture    = nil;
     RBTextureHandle            _boundTexture    = NULL;
@@ -679,19 +681,30 @@ private:
         Uniforms u;
         BuildUniforms(u);
 
-        // Vertices go through an MTLBuffer, NOT setVertexBytes (Phase 2 first
-        // light). setVertexBytes is capped at 4 KB; one snowgoons frame batches
-        // ~1563 triangles = ~206 KB, so every flush would have been rejected.
-        // Uniforms stay on setVertexBytes — sizeof(Uniforms) is well under the
-        // cap and this avoids a second buffer's worth of bookkeeping.
+        // Vertices go through an MTLBuffer, NOT setVertexBytes: the latter is
+        // capped at 4 KB and one snowgoons frame batches ~1563 triangles
+        // (~206 KB), so every flush would be rejected.
+        //
+        // A FRESH buffer per flush, not a reused one. Flush() runs on every
+        // state change — there are ten call sites — and none of those draws
+        // execute until waitUntilCompleted at EndFrame. A single buffer bound
+        // at offset 0 by all of them means every draw in the frame reads
+        // whatever the LAST flush happened to leave there, so only the final
+        // batch renders its own geometry. That is exactly what the first
+        // textured macOS capture showed: the right triangle count, most of the
+        // scene wrong or missing. Metal's encoder retains the buffer until the
+        // command buffer completes, so releasing our reference here is safe and
+        // the allocations are bounded by the flush count, not the frame rate.
         const size_t bytes = _cpu.size() * sizeof(Vert);
-        EnsureVertexBuffer(bytes);
-        if (!_vbuf) {
+        id<MTLBuffer> vbuf = [_device newBufferWithBytes:_cpu.data()
+                                                  length:bytes
+                                                 options:MTLResourceStorageModeShared];
+        if (!vbuf) {
+            NSLog(@"wf_game: MetalBackend vertex buffer alloc failed (%zu bytes)", bytes);
             _cpu.clear();
             _curTexture = nullptr;
             return;
         }
-        std::memcpy([_vbuf contents], _cpu.data(), bytes);
 
         [_encoder setRenderPipelineState:_pipeline];
         if (_depthState)
@@ -703,7 +716,7 @@ private:
                                                 : _whiteTexture)
                              atIndex:0];
         [_encoder setFragmentSamplerState:_sampler atIndex:0];
-        [_encoder setVertexBuffer:_vbuf offset:0 atIndex:0];
+        [_encoder setVertexBuffer:vbuf offset:0 atIndex:0];
         [_encoder setVertexBytes:&u
                            length:sizeof(Uniforms)
                           atIndex:1];
@@ -714,23 +727,11 @@ private:
                      vertexStart:0
                      vertexCount:_cpu.size()];
 
+#if !__has_feature(objc_arc)
+        [vbuf release];   // the encoder holds it until the command buffer ends
+#endif
         _cpu.clear();
         _curTexture = nullptr;
-    }
-
-    // Grow-only staging buffer for one flush's vertices. Shared storage: this
-    // is a unified-memory write from the CPU each flush, which is what the
-    // batching design already implies.
-    void EnsureVertexBuffer(size_t bytes)
-    {
-        if (_vbuf && [_vbuf length] >= bytes)
-            return;
-        size_t want = 1;
-        while (want < bytes) want <<= 1;
-        _vbuf = [_device newBufferWithLength:want
-                                     options:MTLResourceStorageModeShared];
-        if (!_vbuf)
-            NSLog(@"wf_game: MetalBackend vertex buffer alloc failed (%zu bytes)", want);
     }
 };
 
