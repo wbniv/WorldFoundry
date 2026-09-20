@@ -1,5 +1,6 @@
 | Date | Change |
 |------|--------|
+| [2026-09-20](https://github.com/wbniv/WorldFoundry/commit/98c5c10b) | docs(plans): index the project-room telescoping-doors plan |
 | [2026-09-20](https://github.com/wbniv/WorldFoundry/commit/cc693845) | docs(plans): index the condo sun solar-position plan |
 | [2026-09-20](https://github.com/wbniv/WorldFoundry/commit/84b41c6b) | docs(plans): index the condo wall shading definition plan |
 | [2026-09-19](https://github.com/wbniv/WorldFoundry/commit/1ba2bae5) | docs: index the exporter face-hand plan |
@@ -16,6 +17,11 @@
 | [2026-06-26](https://github.com/wbniv/WorldFoundry/commit/16d72fa6) | docs: add plan index (docs/plans/README.md) |
 
 <!--history-meta v1
+98c5c10b	author	Will Norris
+98c5c10b	added	1
+98c5c10b	deleted	0
+98c5c10b	files	1
+98c5c10b	body	Co-Authored-By: Claude Sonnet 5 <noreply@anthropic.com>\nClaude-Session: https://claude.ai/code/session_011WmfFdmKRi46BtcEyu8pkT
 cc693845	author	Will Norris
 cc693845	added	1
 cc693845	deleted	0
