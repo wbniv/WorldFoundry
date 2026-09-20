@@ -7,7 +7,7 @@ code paths rather than just toggling features.
 
 | Switch | Options | What it controls |
 |--------|---------|-----------------|
-| `WF_TARGET` | `linux` / `android` *(future)* / `ios` *(future)* | Platform — drives toolchain, HAL, input, `__LINUX__` etc. |
+| `WF_TARGET_*` | `LINUX` / `ANDROID` / `IOS` / `MACOS` / `WEB` | Platform — drives toolchain, HAL, input, renderer. **Not a switch you pass**: exactly one is defined by `CMakeLists.txt`'s platform block from the toolchain/generator in use, alongside the matching `RENDERER_*`. Linux and web get `RENDERER_GL`/`RENDERER_GLES` + `__LINUX__` (which here means *POSIX*, not Linux — see `WF_POSIX` in `pigsys/pigsys.hp`); Android gets `RENDERER_GLES`; iOS and macOS get **no** `RENDERER_*` at all, because both render through a Metal path that is not finished — macOS currently uses the true no-op backend (`engine/stubs/renderer_stub.cc`). All five define `SCALAR_TYPE_FLOAT`. |
 | `BUILDMODE` | `debug` / `safe-fast` / `release` / `final` / `profile` / `tool` / `kts` | Assertions, cheats, optimizations, debug streaming (see table below) |
 | `SCALAR_TYPE` | `fixed` / `float` / `double` | All math, physics, and vector/matrix operations |
 | `BUILD_STREAMING` | `hd` / `cd` / `off` | Asset streaming strategy |
