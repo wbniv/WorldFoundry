@@ -1,6 +1,10 @@
 # Codemagic budget: caching + monitor + bleed reduction
 
-**Status:** OPEN — design complete; no CI/budget changes implemented (no budget workflow; mac trigger not gated).
+**Status:** PARTIAL.
+
+- **Step 1 (stop the bleed) — landed.** Every Mac workflow in `codemagic.yaml` is now manual-trigger (`triggering: events: []`): `ios-simulator-debug` with its `branch_patterns` commented out, and `macos-desktop-debug` manual by design.
+- **Steps 6 + 7 (the usage monitor) — code landed 2026‑09‑20** as [`.github/workflows/codemagic-budget.yml`](../../.github/workflows/codemagic-budget.yml) + [`scripts/codemagic-budget.sh`](../../scripts/codemagic-budget.sh), by Phase 0 of [2026-09-20-macos-metal-renderer.md](2026-09-20-macos-metal-renderer.md). **Inert until steps 4 + 5 are done** — it needs `secrets.CODEMAGIC_API_TOKEN`, `secrets.PAGERDUTY_ROUTING_KEY` and `vars.WF_CODEMAGIC_APP_ID`, all of which start from manual console actions.
+- **Steps 2 (caching on `ios-simulator-debug`), 3 (dedupe `android-apk-debug`), 4 (API token), 5 (PagerDuty service) — still OPEN.** `macos-desktop-debug` does carry caching; `ios-simulator-debug` still does not.
 
 ## Context
 
@@ -23,7 +27,7 @@ Outcome: stop the bleed for the rest of May, make every future Mac build cheaper
 | Duplicate cleanup | Rename to `android-apk-debug-linux` + `android-apk-debug-mac` so both are distinct workflow IDs |
 | Monitor home | `.github/workflows/codemagic-budget.yml` in `WorldFoundry-wbniv` |
 | Cadence | Hourly during 06-22 UTC, daily at 00:00 UTC (rollover) |
-| Data source | `GET https://api.codemagic.io/builds?appId=<wf-app-id>` filtered to `started_at` in current UTC month, sum `duration` (seconds) where `instance_type` matches `mac_*` |
+| Data source | `GET api.codemagic.io/builds?appId=<wf-app-id>` (https) filtered to `started_at` in current UTC month, sum `duration` (seconds) where `instance_type` matches `mac_*` |
 | Alert channel | **PagerDuty** — new service `worldfoundry-codemagic-budget`, Events API v2 |
 | Thresholds | **50% / 80% / 95%**, escalating severity (info / warning / critical), each fires at most once per UTC month |
 | State store | GHA `actions/cache` keyed by `codemagic-budget-<YYYY-MM>` holding a JSON of which thresholds already fired |
@@ -125,7 +129,14 @@ jobs:
 `scripts/codemagic-budget.sh`:
 
 - Compute first-of-month UTC `since=$(date -u +%Y-%m-01T00:00:00Z)`
-- `curl -H "x-auth-token: $CODEMAGIC_API_TOKEN" "https://api.codemagic.io/builds?appId=$WF_APP_ID&buildAfter=$since" | jq` — confirm parameter name during step 5 verification; if `/builds` is per-app, query each WF appId and sum
+- Fetch the build list and pipe through `jq`:
+
+    ```bash
+    curl -H "x-auth-token: $CODEMAGIC_API_TOKEN" \
+      "https://api.codemagic.io/builds?appId=$WF_APP_ID&buildAfter=$since" | jq
+    ```
+
+    — confirm parameter name during step 5 verification; if `/builds` is per-app, query each WF appId and sum
 - Sum `(.builds[] | select(.instanceType | startswith("mac_")) | .buildDuration)` seconds; divide by 60 for minutes
 - Compute `pct = 100 * used / BUDGET_MINUTES`
 - Load `.budget-state.json` (`{ "month": "YYYY-MM", "fired": ["50"] }`); if `.month` doesn't match current month, reset `fired = []`

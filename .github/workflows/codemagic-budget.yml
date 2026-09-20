@@ -1,0 +1,78 @@
+name: Codemagic budget
+
+# Mac-minute budget monitor for the Codemagic account.
+#
+# Codemagic's 500 free Mac-min/month quota is dashboard-only — there is no
+# /usage REST endpoint — so this job reconstructs usage from GET /builds and
+# alerts PagerDuty at 50 / 80 / 95 %. It runs on a GitHub-hosted ubuntu runner
+# and therefore costs ZERO Mac-minutes, which is why it can run hourly.
+#
+# Plan: docs/plans/2026-05-12-codemagic-budget-monitor.md (Implementation 6+7)
+# Consumer: docs/plans/2026-09-20-macos-metal-renderer.md Phase 0 / O1 — the
+# Metal renderer work opens an iteration loop against this pool, and every
+# option in that plan's §5 table is being chosen blind without this monitor.
+#
+# Required repo config (one-time, see the plan's Implementation steps 4 + 5):
+#   secrets.CODEMAGIC_API_TOKEN    Codemagic -> Settings -> Integrations -> API
+#   secrets.PAGERDUTY_ROUTING_KEY  Events API v2 key for the
+#                                  worldfoundry-codemagic-budget service
+#   vars.WF_CODEMAGIC_APP_ID       hex id from the codemagic.io/app/<id> URL
+# With the app id or token missing the job fails loudly; with only the
+# PagerDuty key missing it still reports usage and just logs the alerts.
+
+on:
+  schedule:
+    # Hourly through the working day, plus a run right after UTC rollover so a
+    # new month resets the fired-threshold state promptly.
+    - cron: "0 6-22 * * *"
+    - cron: "0 0 * * *"
+  workflow_dispatch:
+    inputs:
+      override_minutes:
+        description: "Override BUDGET_MINUTES for dry-run testing (e.g. 1 to force all thresholds)"
+        required: false
+        type: string
+      dry_run:
+        description: "Report only; never POST to PagerDuty"
+        required: false
+        type: boolean
+        default: false
+
+permissions:
+  contents: read
+
+concurrency:
+  # Overlapping runs would double-fire on the same threshold, since the state
+  # file only lands in the cache at job end.
+  group: codemagic-budget
+  cancel-in-progress: false
+
+jobs:
+  check:
+    name: Check Mac-minute usage
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v6
+
+      - id: month
+        run: echo "key=$(date -u +%Y-%m)" >> "$GITHUB_OUTPUT"
+
+      # The state file is the only thing carried between runs: which thresholds
+      # have already alerted this UTC month. Keying the cache on the month means
+      # rollover starts from an empty state even if the script's own rollover
+      # check never sees the old file.
+      - uses: actions/cache@v4
+        with:
+          path: .budget-state.json
+          key: codemagic-budget-${{ steps.month.outputs.key }}-${{ github.run_id }}
+          restore-keys: |
+            codemagic-budget-${{ steps.month.outputs.key }}-
+
+      - name: Check budget
+        run: bash scripts/codemagic-budget.sh
+        env:
+          CODEMAGIC_API_TOKEN: ${{ secrets.CODEMAGIC_API_TOKEN }}
+          PAGERDUTY_ROUTING_KEY: ${{ secrets.PAGERDUTY_ROUTING_KEY }}
+          WF_APP_ID: ${{ vars.WF_CODEMAGIC_APP_ID }}
+          BUDGET_MINUTES: ${{ inputs.override_minutes || '500' }}
+          DRY_RUN: ${{ inputs.dry_run && '1' || '0' }}
