@@ -1,5 +1,6 @@
 | Date | Change |
 |------|--------|
+| [2026-09-20](https://github.com/wbniv/WorldFoundry/commit/17bdceb1) | feat(condo): improve patio and window camera pans |
 | [2026-09-20](https://github.com/wbniv/WorldFoundry/commit/91a5fab2) | feat(condo): add button door and patio tour |
 | [2026-09-20](https://github.com/wbniv/WorldFoundry/commit/1f0a27ad) | docs(plans): index the macOS Metal renderer plan |
 | [2026-09-20](https://github.com/wbniv/WorldFoundry/commit/3fccf5fa) | docs(plans): index the relight-swept-levels plan |
@@ -23,6 +24,10 @@
 | [2026-06-26](https://github.com/wbniv/WorldFoundry/commit/16d72fa6) | docs: add plan index (docs/plans/README.md) |
 
 <!--history-meta v1
+17bdceb1	author	Will Norris
+17bdceb1	added	2
+17bdceb1	deleted	2
+17bdceb1	files	1
 91a5fab2	author	Will Norris
 91a5fab2	added	2
 91a5fab2	deleted	2
