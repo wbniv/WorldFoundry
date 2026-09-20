@@ -144,6 +144,7 @@
 
 ## Done
 
+- ✅ 2026-09-20 — [condo-camera-pans] Patio and master-window POVs now use distant near-horizon targets, 52° FOV, one-second blends, and smoothstep sweeps; patio trigger/holds keep the shot out of the doorway and stationary during the pan. See [plans](docs/plans/2026-09-19-condo-master-window-pov.md).
 - ✅ 2026-09-20 — [qbert-golden-schema-path] Fixture `.blend`'s stale absolute `wf_schema_path`s rewritten to Blender `//`-relative; schema-load failures now loud on stderr; golden regenerated. See [plan](docs/plans/2026-09-20-export-level-light-field-duplication.md).
 - ✅ 2026-09-20 — [condo-doors] Door collision is continuous: every glass leaf explicitly carries Mass 75; the gathered one-third stack, all three extended thirds, and both closed-state seams block the player. See [plan](docs/plans/2026-09-20-condo-project-room-telescoping-doors.md).
 - ✅ 2026-09-20 — [condo-doors] True continuous sliding animation (per-tick position lerp, 2 s open/close) replaces the instant visibility swap. See [plan](docs/plans/2026-09-20-condo-project-room-telescoping-doors.md).
