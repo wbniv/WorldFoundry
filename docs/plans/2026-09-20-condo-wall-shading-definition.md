@@ -53,6 +53,17 @@ requiring engine changes (shadow-mapping is out of scope — see below):
    > is read as `AMBIENT_LIGHT` at runtime whatever it is authored as, and the engine
    > asserts. The code is shipped gated off behind `CONDO_FILL_INTENSITY=0`; see
    > Verification step 1 for the evidence.
+   >
+   > **Update 2026‑09‑20: landed after all — the premise was right, the engine was
+   > wrong.** The root cause was `AMBIENT_LIGHT=0 / DIRECTIONAL_LIGHT=1` in
+   > `wfsource/source/oas/levelcon.h`, the reverse of the `"Directional|Ambient"` enum
+   > in `light.oas` that every tool writes — so *every* light in *every* level went into
+   > the wrong slot, and two authored Directionals became two ambients. Fixed, together
+   > with a position leak in `Light::Set` that aimed all directional beams at the
+   > ceiling, in
+   > [docs/plans/2026-09-20-engine-multi-directional-light-fix.md](2026-09-20-engine-multi-directional-light-fix.md).
+   > `CONDO_FILL_INTENSITY` now defaults to `0.35`; the fill raises the sun-shadowed
+   > left partition wall by +22 % luminance against +4 % on the sun-facing wall.
 
 2. **Generalize `darken_floors()` into a seam-shade pass.** Extend the exact same
    per-face-material-tint trick already shipped and proven for floors
@@ -221,8 +232,14 @@ RESULT: PASS  /home/will/WorldFoundry-wbniv/wflevels/condo_639_640/tour-639.mp4 
 
 ### Known gaps
 
-- **Second directional light is not landed** (step 1). Blocked on the OAD/`lightType`
-  defect above; needs its own investigation.
+- ~~**Second directional light is not landed** (step 1). Blocked on the OAD/`lightType`
+  defect above; needs its own investigation.~~ **Landed 2026‑09‑20** — the defect was an
+  inverted enum in `wfsource/source/oas/levelcon.h`, not an OAD/levcomp problem; the
+  level data was correct all along. `CONDO_FILL_INTENSITY` now defaults to `0.35`. See
+  [docs/plans/2026-09-20-engine-multi-directional-light-fix.md](2026-09-20-engine-multi-directional-light-fix.md).
+  Note that the seam-darkening this plan shipped was compensating for lighting that was
+  being applied wrong; with the engine fixed, the seam band may now be doing more work
+  than it needs to — worth an eye-test before adding more of it.
 - **`unit-640` gets only 4 corner-seam faces to `unit-639`'s 83.** 640's wall corners
   are largely not edge-shared in the source mesh, so the concave-corner detector finds
   almost nothing there. Its floor and ceiling seam bands (288 / 300 faces) are

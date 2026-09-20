@@ -90,6 +90,21 @@ for obj in list(bpy.data.objects):
             seen.add(cn)
 print("[pilot_demo] classes after strip:", sorted({get_class(o) for o in bpy.data.objects}))
 
+# The dedup above keeps exactly one object per class, so whichever `light` it
+# kept is snowgoons' Directional — and `u_ambient` defaults to `Color::black`
+# (game/level.cc), so a face no Directional light faces renders pure black.
+# snowgoons' Directional points along world +X (rotation_euler's first angle is
+# the X euler, and rotating +X about X is a no-op on the +X axis `Light::Set`
+# reads the direction from), so nothing the camera sees is lit by it: without an
+# Ambient the level is black.  White, matching the flat look it shipped with.
+# See docs/plans/2026-09-20-engine-multi-directional-light-fix.md.
+_light = find_by_class('light')
+assert _light is not None, "no light object imported from snowgoons"
+_ambient = _light.copy()
+scene.collection.objects.link(_ambient)
+_ambient.name = 'AmbientLight'
+_ambient['wf_lightType'] = 'Ambient'
+
 # 4. Retarget the player's Script to PILOT.
 player = find_by_class('player')
 assert player is not None, "no player object imported from snowgoons"

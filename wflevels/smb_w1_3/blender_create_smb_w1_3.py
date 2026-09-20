@@ -155,6 +155,19 @@ if light:
     light['wf_lightGreen'] = 1.0
     light['wf_lightBlue']  = 1.0
 
+    # Ambient — mandatory, not decoration.  `u_ambient` defaults to
+    # `Color::black` (game/level.cc), so a face that no Directional light faces
+    # renders pure black.  This level's Directional points along world +X
+    # (rotation_euler's first angle is the X euler, and rotating +X about X is a
+    # no-op on the +X axis `Light::Set` reads the direction from), so nothing the
+    # side-view camera sees is lit by it at all — without this the level is
+    # black.  White, to match the flat look this level has always shipped with.
+    # See docs/plans/2026-09-20-engine-multi-directional-light-fix.md.
+    ambient = light.copy()
+    scene.collection.objects.link(ambient)
+    ambient.name = 'AmbientLight'
+    ambient['wf_lightType'] = 'Ambient'
+
 # ── 5. Ground strips (start + end) + the continuous pit-death sensor ──────────
 grid_tex_path = _make_grid_tile_tga(os.path.join(SCRIPT_DIR, 'grid_tile.tga'))
 SMB_PLAYER_HURT = 1804   # INDEXOF_SMB_PLAYER_HURT

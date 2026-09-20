@@ -235,6 +235,19 @@ if light:
     light['wf_lightGreen'] = 1.0
     light['wf_lightBlue']  = 1.0
 
+    # Ambient — mandatory, not decoration.  `u_ambient` defaults to
+    # `Color::black` (game/level.cc), so a face that no Directional light faces
+    # renders pure black.  This level's Directional points along world +X
+    # (rotation_euler's first angle is the X euler, and rotating +X about X is a
+    # no-op on the +X axis `Light::Set` reads the direction from), so nothing the
+    # side-view camera sees is lit by it at all — without this the level is
+    # black.  White, to match the flat look this level has always shipped with.
+    # See docs/plans/2026-09-20-engine-multi-directional-light-fix.md.
+    ambient = light.copy()
+    scene.collection.objects.link(ambient)
+    ambient.name = 'AmbientLight'
+    ambient['wf_lightType'] = 'Ambient'
+
 # ── Helpers ───────────────────────────────────────────────────────────────────
 # ── 5. Ground platform ────────────────────────────────────────────────────────
 # Texture-mapped 1-unit grid on top of the ground so screenshots can be read
@@ -881,6 +894,13 @@ if light:
     coin_light.name = 'Light_coin'
     coin_light.location = (CR_MID, -22.0, CR_FLOOR_TOP + 6.0)
     coin_light.rotation_euler = (math.pi / 3, 0, 0)
+
+    # …and its Ambient, for the same reason as the surface one above: the
+    # ambient slot is reset per room, so the coin room needs its own.
+    coin_ambient = coin_light.copy()
+    scene.collection.objects.link(coin_ambient)
+    coin_ambient.name = 'AmbientLight_coin'
+    coin_ambient['wf_lightType'] = 'Ambient'
 
 # Exit pipe + walk-into warp back to the surface (Mario collects coins L→R then exits).
 EXIT_PIPE_X0, EXIT_PIPE_X1 = 13*T, 15*T

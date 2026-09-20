@@ -49,9 +49,11 @@ enum { LEVEL_VERSION = 28 };
 #define ADJACENT_ROOM_NULL -1		/* index of invalid adjacent room */
 
 enum	// These go in the lightType field of a Light OAD
-{
-	AMBIENT_LIGHT=0,
-	DIRECTIONAL_LIGHT
+{	// Mirror of wfsource/source/oas/levelcon.h — keep the two in step.
+	// 0 = Directional, 1 = Ambient, per light.oas's "Directional|Ambient"
+	// enum-string list.  Locked by tests/test_light_type_enum.py.
+	DIRECTIONAL_LIGHT=0,
+	AMBIENT_LIGHT
 };
 
 /*============================================================================*/

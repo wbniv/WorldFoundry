@@ -1188,8 +1188,15 @@ Level::RenderScene()
 			assert(actor->kind() == Actor::Light_KIND);
 			const Light* light = (const Light*)actor;
 
+			DBSTREAM3( cdebug << "light actor " << actor->GetActorIndex()
+				<< " type " << light->Type()
+				<< " (DIRECTIONAL=" << int(DIRECTIONAL_LIGHT)
+				<< " AMBIENT=" << int(AMBIENT_LIGHT) << ")" << std::endl; )
+
 			if(light->Type() == DIRECTIONAL_LIGHT)
 			{
+				// RenderCamera::MAX_LIGHTS — a level may author up to 3
+				// Directional Lights per room plus 1 Ambient.
 				assert(directionalLightIndex < 3);
 				light->Set(*_camera,directionalLightIndex);
 				directionalLightIndex++;

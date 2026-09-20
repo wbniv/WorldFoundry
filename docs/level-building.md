@@ -422,10 +422,22 @@ If you author only Directional lights, any face whose normal isn't facing one of
 
 ```python
 # Directional — your "sun" / key light. Affects which surfaces get lit.
+#
+# Aim: `Light::Set` (wfsource/source/game/light.hpi) takes the direction as the
+# actor's local +X axis, dir = Rz(C)·Ry(B)·Rx(A)·(1,0,0). Rotating +X *about* X
+# does nothing, so altitude goes in B (the Y euler), NOT A:
+#
+#     Rz(C)·Ry(B)·(1,0,0) = (cos B·cos C, cos B·sin C, -sin B)
+#
+# B = altitude tips the beam down by that many degrees; C = azimuth is the
+# bearing the light travels toward. The older `(pi/2 - alt, 0, az)` recipe put
+# altitude in A and produced an exactly horizontal beam; it only looked lit from
+# above because of a since-fixed engine bug that leaked the light's *position*
+# into its direction. See docs/plans/2026-09-20-engine-multi-directional-light-fix.md.
 light = find_by_class('light')           # or create from scratch
 light.name = 'Sun'
-light.rotation_euler = (math.pi/2 - math.radians(SUN_ALT_DEG),
-                        0.0,
+light.rotation_euler = (0.0,
+                        math.radians(SUN_ALT_DEG),
                         math.radians(SUN_AZ_DEG))
 light['wf_lightType']  = 'Directional'
 light['wf_lightRed']   = 1.0
@@ -445,6 +457,15 @@ ambient['wf_lightRed']   = 0.40
 ambient['wf_lightGreen'] = 0.42
 ambient['wf_lightBlue']  = 0.50
 ```
+
+A room may hold up to **three** Directional Lights plus **one** Ambient
+(`RenderCamera::MAX_LIGHTS`, `wfsource/source/gfx/camera.hp:82`; the room loop in
+`wfsource/source/game/level.cc`). A second Directional is the usual "fill from the
+opposite quarter" trick — see `FillLight` in
+`wflevels/condo_639_640/blender_create_condo.py` and its `wf_light_aim()` helper. Before
+2026-09-20 an `AMBIENT_LIGHT`/`DIRECTIONAL_LIGHT` mix-up in `levelcon.h` made the 2nd
+Directional actor die on `assert(ambientLightIndex < 1)`; if you hit that assert on an
+old build, that is why.
 
 `levcomp-rs` warns at build time if your level has no `Ambient`-type Light, plus warns on the STR/DATA mismatch shape (`STR "Ambient" + DATA 0`) that's an easy authoring slip. Don't ignore those warnings.
 

@@ -42,9 +42,16 @@ Light::Set(Camera& camera,int index) const
 		Matrix34 m(e,Vector3::zero);
 		src *= m;
 #else
+		// `operator*=(Vector3&, const Matrix34&)` (math/matrix34.cc:261) adds the
+		// matrix's translation row, so multiplying by the actor's *world* matrix
+		// leaked the light's position into its direction: a Sun at (0,-8,23.75)
+		// came out as normalize(0.87,-7.5,23.75) ≈ straight up, lighting ceilings
+		// and leaving every floor on the ambient term alone.  `temp` — with the
+		// translation zeroed — was already being built for exactly this and then
+		// not used.  See docs/plans/2026-09-20-engine-multi-directional-light-fix.md.
       Matrix34 temp = GetPhysicalAttributes().Matrix();
       temp[3] = Vector3::zero;
-      src *= GetPhysicalAttributes().Matrix();
+      src *= temp;
 #endif
 
 		camera.GetRenderCamera().SetDirectionalLight(index,src,Color48(_color));
@@ -53,7 +60,10 @@ Light::Set(Camera& camera,int index) const
 	else
 	{
 		assert(myOAD->lightType == AMBIENT_LIGHT);
-		assert(index = -1);
+		assert(index == -1);		// was `index = -1` — an assignment, so it
+									// asserted nothing.  Ambient lights own no
+									// directional slot; Level::RenderScene()
+									// passes -1.
 		camera.GetRenderCamera().SetAmbientColor(_color);
 	}
 }

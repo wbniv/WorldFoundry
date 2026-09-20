@@ -53,9 +53,18 @@ enum { LEVEL_VERSION = 28 };
 #define ADJACENT_ROOM_NULL -1		/* index of invalid adjacent room */
 
 enum	// These go in the lightType field of a Light OAD
-{
-	AMBIENT_LIGHT=0,
-	DIRECTIONAL_LIGHT
+{	// Order is fixed by light.oas's enum-string list for the field:
+	//   TYPEENTRYINT32(lightType,, 0, 1, 0, "Directional|Ambient", ...)
+	// so 0 = Directional, 1 = Ambient.  That is what the Blender exporter
+	// (wftools/wf_blender/export_level.py), levcomp-rs and every .lev in the
+	// tree write.  These two constants were reversed from the 2010 import
+	// until 2026-09-20, which silently swapped every level's key light with
+	// its ambient term and made a 2nd Directional Light actor trip
+	// assert(ambientLightIndex < 1) in Level::RenderScene().
+	// See docs/plans/2026-09-20-engine-multi-directional-light-fix.md;
+	// locked by tests/test_light_type_enum.py.
+	DIRECTIONAL_LIGHT=0,
+	AMBIENT_LIGHT
 };
 
 /*============================================================================*/
