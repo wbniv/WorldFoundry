@@ -1,5 +1,6 @@
 | Date | Change |
 |------|--------|
+| [2026-09-21](https://github.com/wbniv/WorldFoundry/commit/f88573c2) | docs(macos): human verification runs over Codemagic VNC — nobody has a Mac |
 | [2026-09-20](https://github.com/wbniv/WorldFoundry/commit/ee02a948) | docs(plans): index the macOS Phase 0 green-baseline plan |
 | [2026-09-20](https://github.com/wbniv/WorldFoundry/commit/17bdceb1) | feat(condo): improve patio and window camera pans |
 | [2026-09-20](https://github.com/wbniv/WorldFoundry/commit/91a5fab2) | feat(condo): add button door and patio tour |
@@ -25,6 +26,11 @@
 | [2026-06-26](https://github.com/wbniv/WorldFoundry/commit/16d72fa6) | docs: add plan index (docs/plans/README.md) |
 
 <!--history-meta v1
+f88573c2	author	Will Norris
+f88573c2	added	1
+f88573c2	deleted	0
+f88573c2	files	1
+f88573c2	body	Reframe the Phase 4 human-verification runbook around the path that\nactually exists: a VNC session on the build runner. Per Codemagic's\nremote-access docs the VM stays connectable for 10 min after the steps\nfinish and a connected session lives until max_build_duration, so raise\nmacos-desktop-debug's limit from 20 to 60 (unattended runs still end at\n~4 min). Rows 2-6 of the checklist close over VNC; Retina cannot (the\nrunner is scale 1.0) and stays parked on real hardware. Index the plan.\n\nCo-Authored-By: Claude Fable 5.1 <noreply@anthropic.com>\nClaude-Session: https://claude.ai/code/session_015ksFy3ZSSz2XMdto3jVA9v
 ee02a948	author	Will Norris
 ee02a948	added	1
 ee02a948	deleted	0

@@ -72,8 +72,8 @@ Alternative if the VNC desktop is awkward: run the **SSH command** from Step 2 i
 Do these in order and note what happens for each. "It didn't work" is a useful answer too — just say what you saw.
 
 1. **Move.** Arrow keys / WASD. Does the player move? Does the camera follow? Walk into the house — does it stop you?
-2. **Quit with Esc.** Does the window close cleanly? In the terminal, run `echo $?` — it should print `0`.
-3. **Launch again, quit with ⌘Q.** Same check.
+2. **Esc must NOT quit.** Press Esc a couple of times: the window stays, and the arrow keys still move the player afterwards.
+3. **Quit with ⌘Q.** Does the window close cleanly? In the terminal, run `echo $?` — it should print `0`.
 4. **Launch again, click the red close button** (top-left of the window). Same check.
 5. **Different size.** Launch with `-width=800 -height=600` added before `-L…`. Is the window bigger? The terminal line should say `800x600`.
 6. **Fullscreen.** Launch with `-fullscreen` added. Does it take over the whole display? Does quitting bring the desktop back? (On a virtual display this may do something odd — just describe it.)

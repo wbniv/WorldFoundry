@@ -15,7 +15,7 @@ The Codemagic `mac_mini_m2` runner reports a display scale of **1.0** and inject
 |---|---|---|
 | **Retina** (`contentsScale`, drawable pixels vs window points) | runner is scale 1.0 — the 2× branch of the sizing code never executes | crisp vs. blurry/quarter-size/offset image on a Retina display |
 | **Interactivity** (keyboard, gamepad → `_HALSetJoystickButtons`) | nothing injects events | the player actually moves |
-| **Close paths** (red button, ⌘Q, Esc, gamepad Start → `HALWindowCloseRequested`) | never triggered | the app exits cleanly, no hang, no crash on teardown |
+| **Close paths** (red button, ⌘Q, gamepad Start → `HALWindowCloseRequested`; **Esc must not quit** — Will, 2026‑09‑21) | never triggered | the app exits cleanly, no hang, no crash on teardown; Esc leaves it running |
 | **`-fullscreen`** (`glfwSetWindowMonitor`) | a headless runner has no display to take over | fullscreen on the real display, and back |
 
 Plus one path CI deliberately bypasses with `-L`: **launching the bundle by double-click**, which loads `cd.iff` from `Contents/Resources` through `NSBundleAccessor` and starts at level 0 (SMB W1‑1).
@@ -81,7 +81,7 @@ From Terminal, in the directory holding `wf_game.app` and the level file:
 `--windowed` is opt-in; without it the engine renders offscreen and shows nothing, by design (keeps the headless CI smoke unchanged). The first line of engine output to look for is
 `macos: window WxH points, WxH pixels (scale S), CAMetalLayer attached` — on Retina, `pixels` should be 2× `points` and `scale 2.0`.
 
-Controls mirror the Linux keyboard map in `gfx/gl/mesa.cc` (arrows/WASD move; see `hal/macos/window_macos.mm` for the full chord table) and a GLFW-recognised gamepad is OR'd in. Esc, ⌘Q, the red close button, and gamepad Start all request close.
+Controls mirror the Linux keyboard map in `gfx/gl/mesa.cc` (arrows/WASD move; see `hal/macos/window_macos.mm` for the full chord table) and a GLFW-recognised gamepad is OR'd in. ⌘Q, the red close button, and gamepad Start request close; Esc deliberately does nothing.
 
 ## Verification
 
@@ -91,7 +91,7 @@ Fill each step in with what actually happened — a sentence and, where it appli
 
 2. **Interactive — the real exit criterion.** In run (1), the player moves with keyboard (and gamepad if you have one), the camera follows, physics behaves (walk into the house, it blocks). This is "plays snowgoons".
 
-3. **Close paths.** From run (1), try each of: Esc, ⌘Q, red button, gamepad Start (if present). Each exits cleanly — no hang, no crash in the terminal, exit status 0 (`echo $?`).
+3. **Close paths.** From run (1), first press Esc twice: the app must **stay running** and still take arrow-key input. Then try each of ⌘Q, the red button, gamepad Start (if present): each exits cleanly — no hang, no crash in the terminal, exit status 0 (`echo $?`).
 
 4. **`-width`/`-height`.** Run (2a): the window opens at 800×600 points and the log line says so. (Already proven on CI at scale 1.0; this re-checks it on Retina.)
 
@@ -100,6 +100,19 @@ Fill each step in with what actually happened — a sentence and, where it appli
 6. **Double-click launch.** Run (3): Gatekeeper prompt handled, the app opens a window without any `-L`, and SMB W1‑1 loads from the bundled `cd.iff`. (If it opens no window: expected — `--windowed` is opt-in and Finder passes no args. Note that, and we decide whether the bundle should default to windowed; that's a one-line change in `main.cc`.)
 
 When 1–6 are recorded: move *macOS Metal renderer* and *macOS: `-fullscreen` window flag* to `## Done`, and mark Phase 4 in the parent plan as **real exit met**, replacing "proxy gate only".
+
+### Results — 2026‑09‑21, Codemagic VNC/SSH session (build `6ab05bfd14ac4c81a4d0ebca`, ~35 Mac‑min)
+
+Driven entirely from Linux: SSH for launching and reading logs, a scripted VNC client (`vncdotool`, which speaks Apple's ARD auth) for keystrokes and framebuffer captures. Evidence in `2026-09-21-macos-human-verification/`.
+
+1. **Window + Retina — window PASS, Retina not exercised.** `macos: window 640x480 points, 640x480 pixels (scale 1.0), CAMetalLayer attached`; `vnc-01-window-live.png` shows the "World Foundry" window on the desktop rendering snowgoons; System Events lists `wf_game` as visible. The runner has no Retina display, so the 2× path still never ran.
+2. **Interactive — PASS.** Right+Up held over VNC: `ball pos` (‑1.000, ‑0.075) → (12.364, ‑9.854), four distinct positions; camera followed (`vnc-02-after-keyboard-input.png`). Gamepad not exercised.
+3. **Close paths — Esc PASS (does not quit, by decision); ⌘Q and red button NOT VERIFIED.** Esc twice → still running (`vnc-03-after-esc-still-running.png`). The scripted client's ⌘ chords (Super/Meta keysyms, fast and slow) failed the ⌘H control test and its pointer events did nothing even on the Dock, so every ⌘Q/red-button attempt was void. The System Events route needs an Accessibility grant on the VM; the harness's safety classifier refused the TCC edit. See [2026-09-21-macos-close-paths.md](2026-09-21-macos-close-paths.md).
+4. **`-width`/`-height` — PASS on CI** (800×600 window logged, build `6ab056a80032a8f1e6ff325e`); not repeated in the session.
+5. **`-fullscreen` — not exercised** (session ended first).
+6. **Double-click / `cd.iff` bundle path — not exercised** (session ended first).
+
+Still open after this session: ⌘Q, red button, `-fullscreen`, double-click, Retina. For the first four, the runbook's VNC path works if the client speaks ARD auth **and** delivers pointer/modifier events — TigerVNC fails at auth; use Remmina's VNC plugin or RealVNC Viewer — or grant Accessibility over SSH (SIP is off on the runner) and drive System Events. Retina needs hardware.
 
 ## Out of scope
 

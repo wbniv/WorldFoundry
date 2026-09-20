@@ -1,5 +1,10 @@
 | Date | Change |
 |------|--------|
+| [2026-09-21](https://github.com/wbniv/WorldFoundry/commit/2d51768b) | docs(investigations): explain macOS procedural face color mismatch |
+| [2026-09-21](https://github.com/wbniv/WorldFoundry/commit/853886b2) | docs(plans): Phase 4 result — proxy gate MET, real exit deliberately NOT claimed |
+| [2026-09-21](https://github.com/wbniv/WorldFoundry/commit/b61bff0e) | docs(plans): verify box color parity with screenshots and pixel evidence |
+| [2026-09-21](https://github.com/wbniv/WorldFoundry/commit/8bb1a162) | fix(renderassets): make procedural box colors portable |
+| [2026-09-21](https://github.com/wbniv/WorldFoundry/commit/4f6aa018) | chore(gfx): trace frame-20 batches to isolate macOS face color |
 | [2026-09-21](https://github.com/wbniv/WorldFoundry/commit/288246dd) | docs(plans): Phase 3 result — textured macOS output is pixel-identical to Linux |
 | [2026-09-20](https://github.com/wbniv/WorldFoundry/commit/0c299a9a) | docs(plans): Phase 2 result — Metal renders snowgoons offscreen, CI is a visual gate |
 | [2026-09-20](https://github.com/wbniv/WorldFoundry/commit/babb113c) | docs(plans): resolve D4/O3 — widen the RendererBackend texture seam |
@@ -9,6 +14,27 @@
 | [2026-09-20](https://github.com/wbniv/WorldFoundry/commit/72f650bd) | docs(plans): scope the macOS Metal renderer port |
 
 <!--history-meta v1
+2d51768b	author	Will Norris
+2d51768b	added	1
+2d51768b	deleted	1
+2d51768b	files	1
+853886b2	author	Will Norris
+853886b2	added	97
+853886b2	deleted	0
+853886b2	files	1
+853886b2	body	Builds 6ab0551a0032a8f1e6ff3196 and 6ab056a80032a8f1e6ff325e, all steps green.\n\nThe finding that mattered: a Codemagic mac_mini_m2 CAN create a window. That\nwas genuinely unknown, which is why the whole path was written fail-soft.\n\n    macos: window 640x480 points, 640x480 pixels (scale 1.0), CAMetalLayer attached\n    presented=29\n    cmp macos-frame20-windowed.png macos-frame20.png   -> identical\n    vs Linux GL: coverage IoU 100.0%, 455/307200 differing (Phase 3's residual)\n\nSo the drawable path introduces no error of its own: 29 drawables reached the\ncompositor, and the presented frames are byte-identical to the already-verified\noffscreen render.\n\n§8 step 11 records the proxy and the real criterion SEPARATELY rather than\nletting one stand in for the other. CI cannot show the app is interactive: it\ninjects no input, so the keyboard/gamepad mapping is wired but never exercised;\nthe red-button/Cmd-Q close path exists but is untried; and — the largest\nuntested surface — the runner reports scale 1.0, so the Retina\ncontentsScale/pixels-vs-points logic, the part most likely to be wrong, never\nran at 2x. Recorded as untested rather than assumed correct.\n\nTODO.md:7 narrowed rather than closed: -width/-height ARE verified on a Mac\n(-width=800 -height=600 logs an 800x600 window against the 640x480 default,\nafter a first run that used the default size and so proved nothing), but\n-fullscreen stays open because a headless runner is not where to assert what\nglfwSetWindowMonitor does to a real display.\n\nThe macOS Metal item stays OPEN. Closing it needs either a human on a Mac or an\nexplicit decision to accept the proxy gate as the exit — Will's call, not one to\nmake silently in a commit message.\n\nCo-Authored-By: Claude Opus 5 (1M context) <noreply@anthropic.com>\nClaude-Session: https://claude.ai/code/session_015ksFy3ZSSz2XMdto3jVA9v
+b61bff0e	author	Will Norris
+b61bff0e	added	118
+b61bff0e	deleted	1
+b61bff0e	files	1
+8bb1a162	author	Will Norris
+8bb1a162	added	88
+8bb1a162	deleted	8
+8bb1a162	files	1
+4f6aa018	author	Will Norris
+4f6aa018	added	9
+4f6aa018	deleted	0
+4f6aa018	files	1
 288246dd	author	Will Norris
 288246dd	added	104
 288246dd	deleted	25

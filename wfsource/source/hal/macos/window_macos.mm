@@ -87,13 +87,12 @@ joystickButtonsF ButtonForKey(int key)
     }
 }
 
+// Escape deliberately does NOT quit (Will, 2026-09-21): a game window should
+// close through the window's own close paths -- red button, Cmd-Q, gamepad
+// Start -- not a key that is easy to hit mid-play. Esc is simply unmapped here,
+// same as any other key ButtonForKey does not know.
 void KeyCallback(GLFWwindow*, int key, int, int action, int)
 {
-    if (key == GLFW_KEY_ESCAPE && action == GLFW_PRESS)
-    {
-        g_closeRequested.store(1, std::memory_order_release);
-        return;
-    }
     const joystickButtonsF bit = ButtonForKey(key);
     if (!bit) return;
     if      (action == GLFW_PRESS)   g_buttons |=  bit;

@@ -914,6 +914,25 @@ Steps a future implementation pass runs, in order. Per `~/CLAUDE.md` **Plan veri
     - `-fullscreen` is unverified; a headless runner is not where to assert what
       `glfwSetWindowMonitor` does to a real display.
 
+    **Real-exit evidence added 2026‑09‑21** (Codemagic VNC/SSH session on the same runner class,
+    no Mac owned — see [2026-09-21-macos-human-verification.md](2026-09-21-macos-human-verification.md)
+    and [2026-09-21-macos-close-paths.md](2026-09-21-macos-close-paths.md)). Three of the five
+    "does not establish" items above are now established, two are not:
+
+    - **Visible to a person: YES.** The VNC framebuffer (`2026-09-21-macos-human-verification/vnc-01-window-live.png`)
+      shows a "World Foundry" window on the macOS desktop rendering snowgoons live; System Events
+      lists `wf_game` as a visible process.
+    - **Keyboard input drives the player: YES.** Right+Up held over VNC moved the ball from
+      (‑1.000, ‑0.075) to (12.364, ‑9.854) — four distinct positions logged — and the camera followed
+      (`vnc-02-after-keyboard-input.png`). Gamepad: not exercised (none reachable over VNC).
+    - **Esc does NOT quit — by decision** (Will): the Phase‑4 Esc→close mapping was removed;
+      verified on the runner after an in-place rebuild (`vnc-03-after-esc-still-running.png`).
+    - **Red button / ⌘Q: STILL NOT VERIFIED.** The scripted VNC client's pointer events and ⌘
+      chords never reached the desktop (control tests: a Dock click and ⌘H did nothing), so every
+      attempt was void rather than a failure; the Accessibility grant that would let System Events
+      drive them was blocked by the harness. Untested, not disproven — see the close-paths plan.
+    - **Retina: still untested** (runner is `scale 1.0`). **`-fullscreen`: still untested.**
+
     **`-width`/`-height` ARE verified** (build `6ab056a80032a8f1e6ff325e`). The first proxy run
     used the default size, so the flags were compiled but never exercised — not enough to close
     `TODO.md:7`. A second short windowed run at a non-default size settles the width/height half:
