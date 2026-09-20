@@ -1,9 +1,15 @@
 | Date | Change |
 |------|--------|
+| [2026-09-20](https://github.com/wbniv/WorldFoundry/commit/ab2f36fa) | docs(bugs): log the arm64 array-cookie bug as a dormant pre-2026 bug |
 | [2026-09-20](https://github.com/wbniv/WorldFoundry/commit/cb9a1318) | docs(plans): record the arm64 array-cookie root cause; Phase 0 is green |
 | [2026-09-20](https://github.com/wbniv/WorldFoundry/commit/aa1b7072) | feat(macos): disable REST API, stub debug-bridge GL calls for macOS |
 
 <!--history-meta v1
+ab2f36fa	author	Will Norris
+ab2f36fa	added	7
+ab2f36fa	deleted	2
+ab2f36fa	files	1
+ab2f36fa	body	Qualifies under docs/BUGS.md's eligibility rule: the macro is in the 2010-05-01\nfirst commit (a2784f6e) and memory.hp carries a 1998-2003 copyright, so the\nbuggy code predates 2026-01-01 by a wide margin.\n\nIt survived ~16 years because the assumption it encodes — cookie size ==\nsizeof(long) — happens to hold on every target WF had ever built for: 4 and 4\non 32-bit (PSX MIPS, Win32 x86), 8 and 8 on x86_64. It only breaks where the\ntwo diverge, which is the ARM C++ ABI, so it became reachable only with the\n2026-04 arm64 ports and was first hit by macOS desktop five months later. Why\nthe mobile arm64 ports didn't surface it in between is recorded as\nnot-established rather than guessed at.\n\nThe plan doc's duplicate provenance paragraph collapses to a cross-reference.\n\nCo-Authored-By: Claude Opus 5 (1M context) <noreply@anthropic.com>\nClaude-Session: https://claude.ai/code/session_015ksFy3ZSSz2XMdto3jVA9v
 cb9a1318	author	Will Norris
 cb9a1318	added	219
 cb9a1318	deleted	7

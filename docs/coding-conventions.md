@@ -223,6 +223,22 @@ Identifiers:
 - **No STL containers in runtime code.** Use `Array<T>`, `MinList`,
   `Int16List` from `cpplib/`. Every container takes an explicit `Memory*`
   allocator (default `HALLmalloc`); see `cpplib/array.hp:44`.
+- **Never `new (pool) T[n]` for a pool-allocated array.** Use
+  `MEMORY_NEW_ARRAY` / `MEMORY_DELETE_ARRAY` (`memory/memory.hp`), or allocate
+  raw and placement-construct each element as `Array<T>::SetMax` does. Array
+  placement-new makes the compiler reserve a hidden **array cookie** in front of
+  the block whenever `T` has a non-trivial destructor, so the pointer you get
+  back is *not* the pointer the pool returned — and the cookie's size is
+  ABI-defined: **8 bytes** under the generic Itanium C++ ABI (x86_64), **16**
+  under the ARM C++ ABI that every AArch64 target uses (Apple arm64, Android
+  arm64‑v8a, aarch64 Linux), which stores two words rather than one. Any code
+  doing arithmetic over that prefix is therefore correct on one platform and
+  silently corrupts the heap on another. This is not hypothetical: it is what
+  blocked the first macOS run, and the symmetric mistake (assuming a cookie that
+  a *trivially* destructible `T` never gets) had already bitten `Array<T>`. See
+  [`docs/BUGS.md`](BUGS.md) (2026‑09‑20). Guarded on every host by
+  `wf_game --memory-test` (ctest `memory_pool_arrays`) — but that guard covers
+  the helpers, not a fresh call site, so this rule is the real defence.
 - **No exceptions in runtime code.** Return codes, out-parameters, and
   assertions cover the uses. The one historical exception —
   `WRLExporterException` in `pigsys/assert.hp` — is for tool builds only.

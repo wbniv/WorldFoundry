@@ -41,6 +41,33 @@ wf_game {switches} [level#]
 > [level-design troubleshooting note](level-design-troubleshooting.md). Not
 > web-specific; native needs the same switches.
 
+## Headless / CI switches
+
+These drive `wf_game` without a window or a human, and are what the `ctest`
+targets and the mobile/desktop CI workflows invoke. All exit with a status code
+so a red is detectable (`0` = pass).
+
+| Switch | Available | Meaning |
+|---|---|---|
+| `--frame-step-smoke=N` | always | Load the `-L` level, step `N` frames, unload. Requires `-L<path>`. The engine's main smoke test. |
+| `--cycles=M` | always | Run the `--frame-step-smoke` load/step/unload sequence `M` times (default 1). Catches teardown and re-entry bugs that a single cycle hides. |
+| `--memory-test` | always | Allocator self-check only (`memory/pooltest.cc`) — no level, no window, no assets. Exits with the failure count. Pins the invariant that a WF pool array carries **no** compiler array cookie, so the `MEMORY_NEW_ARRAY` / `MEMORY_DELETE_ARRAY` pair stays correct on every ABI (see [BUGS.md](BUGS.md), 2026‑09‑20). |
+| `--wfmut-smoke` | `WF_DEBUG_BRIDGE` or `WF_ENABLE_EDITOR` | Run the mutation-API smoke suite against the loaded level; exits with the failure count. |
+| `--wfmut-thread-test` | `WF_DEBUG_BRIDGE` or `WF_ENABLE_EDITOR` | Cross-thread death-test — expected to abort inside the X5 guard. |
+| `--debug-port N` | `WF_DEBUG_BRIDGE` | Debug-bridge listen port (default 7777). `0` disables the bridge. |
+| `--debug-bind ADDR` | `WF_DEBUG_BRIDGE` | Debug-bridge bind address (default `127.0.0.1`). |
+| `--debug-print-actors` | always | Dump the actor table after level load. |
+| `--editor` | `WF_ENABLE_EDITOR` | Start the collaborative editor instead of the game. |
+| `-record_video` | `DESIGNER_CHEATS` | Capture frames to video (size from `-width`/`-height`). |
+
+> **The double dash is required on this group, not stylistic.**
+> `ParseCommandLine` (`wfsource/source/game/main.cc`) matches on `argv[i]+1` —
+> one leading character is already consumed — against a pattern that itself
+> starts with `-`. So `--memory-test` runs the test and `-memory-test` silently
+> does not (verified: the single-dash form produces no test output and falls
+> through to the single-letter fallbacks). The older switches in the table above
+> take one dash; these take two.
+
 ## Stream Redirection
 
 Three families of debug output streams can be redirected independently.

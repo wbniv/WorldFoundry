@@ -143,9 +143,9 @@ Nothing below is diagnosable on top of a red build.
 - ~~Guard `hal/linux/platform_init.cc:50-52` and `:117-128` for Darwin. Introduce `WF_POSIX` per `TODO.md:15` rather than adding another ad-hoc `#if defined(WF_TARGET_MACOS)`~~ — **done 2026‑09‑20.** `pigsys/pigsys.hp` now defines `WF_POSIX` (Linux/Android/iOS/macOS/Web) and `WF_HAS_X11` (desktop Linux only), immediately after `#include _MKINC` since that is what defines `__LINUX__` in the first place. Both `platform_init.cc` sites moved from `!defined(__EMSCRIPTEN__)` to `#if WF_HAS_X11`. The broader ~80-site `__LINUX__` sweep stays open in `TODO.md` — each site needs classifying by hand, and none of it blocks this plan.
 - ~~Refresh the stale docs and comments the headless bring-up left behind~~ — **done 2026‑09‑20:** `codemagic.yaml`'s Jolt cache comment now says Jolt *is* the macOS physics engine; both `CMakeLists.txt` arms now say `gfx/glpipeline` is excluded as a not-yet-done rather than a GL dependency, naming `backend_modern.cc` as the only GL-bound file; [`2026-05-26-macos-port-runtime-bringup.md`](2026-05-26-macos-port-runtime-bringup.md):4 records that the first Codemagic macOS build ran on 2026‑05‑27 with its three fix commits, and its Deferred section strikes the satisfied Jolt/scripting note.
 - ~~**In parallel, off the Mac‑min budget:** land the usage monitor from [2026-05-12-codemagic-budget-monitor.md](2026-05-12-codemagic-budget-monitor.md) §2~~ — **code landed 2026‑09‑20:** [`.github/workflows/codemagic-budget.yml`](../../.github/workflows/codemagic-budget.yml) + [`scripts/codemagic-budget.sh`](../../scripts/codemagic-budget.sh), exercised end-to-end against a stub API for accounting, at-most-once alerting, and month rollover. **Still inert** until the one-time secrets exist: `secrets.CODEMAGIC_API_TOKEN`, `secrets.PAGERDUTY_ROUTING_KEY`, `vars.WF_CODEMAGIC_APP_ID` (budget plan Implementation steps 4 + 5).
-- **Run `macos-desktop-debug` to green. Estimated cost: 1–2 runs, ~10–20 Mac‑min. — NOT DONE:** no WF Codemagic API token is reachable from this machine. See §8 steps 5–6.
+- ~~**Run `macos-desktop-debug` to green. Estimated cost: 1–2 runs, ~10–20 Mac‑min.**~~ — **done 2026‑09‑20.** The token gap is closed (`task setup`, `docs/SETUP.md`) and the run is green on build `6aafcf69903254faf05d7835` (`18188fd1`). Actual cost **15 Mac‑min across 8 runs** — the estimate was right per-run, wrong on run count, because the workflow had never executed: it surfaced six genuine defects one at a time. Five were build/config (missing Jolt extraction step; Jolt's PCH vs `-fno-rtti` under every Clang family; a Fennel UTF‑8 narrowing error, answered by scoping macOS to Forth-only; REST‑API immediate-mode GL; three missing debug-bridge GL stubs). The sixth was **not** a porting issue at all but a dormant 1998–2003 heap-corruption bug that only an arm64 ABI could expose — `MEMORY_DELETE_ARRAY` hardcoding an 8‑byte array cookie where the ARM C++ ABI uses 16. Full log: [2026-09-20-macos-phase0-green-baseline.md](2026-09-20-macos-phase0-green-baseline.md); the dormant bug: [BUGS.md](../BUGS.md).
 
-Exit: `--frame-step-smoke=30 --cycles=1` exits 0 on the current headless backend. **Not yet met** — the local half of §8 (steps 1–4) is green, the Codemagic half (steps 5–6) is blocked on credentials.
+Exit: `--frame-step-smoke=30 --cycles=1` exits 0 on the current headless backend. **MET — 2026‑09‑20.** Both halves of §8 are green (local steps 1–4, Codemagic steps 5–6). **Phase 1 is unblocked.**
 
 ### Phase 1 — Geometry reaches a backend (still headless, still no Metal)
 
@@ -329,7 +329,10 @@ Steps a future implementation pass runs, in order. Per `~/CLAUDE.md` **Plan veri
     [codemagic] no API token found — run the bootstrap subcommand, or set CODEMAGIC_API_TOKEN / CODEMAGIC_SSM_TOKEN
     ```
 
-    **BLOCKED — not run.** No WorldFoundry Codemagic API token is reachable from this machine: nothing at `~/.config/codemagic/token`, `$CODEMAGIC_API_TOKEN` unset, and no `codemagic` parameter in SSM under any configured AWS profile. (`~/gustos-colores` has its own token at `/gc-app/codemagic-api-token`, but per `~/CLAUDE.md` **Per-domain / per-project credentials** that must not be borrowed for WorldFoundry.) Minting the token is the one irreducible manual step — Codemagic → account Settings → Integrations → Codemagic API → Show — after which `python3 ~/.claude/skills/codemagic-build/codemagic.py bootstrap` stores it and this step runs headlessly. The WF Codemagic `appId` is likewise not recorded anywhere in the repo and is needed both here and for `vars.WF_CODEMAGIC_APP_ID`.
+    **PASS — 2026‑09‑20** (`Build wf_game: success` on build `6aafcf69903254faf05d7835`). The
+    original blocker below is kept for the record; it is resolved.
+
+    ~~**BLOCKED — not run.**~~ No WorldFoundry Codemagic API token is reachable from this machine: nothing at `~/.config/codemagic/token`, `$CODEMAGIC_API_TOKEN` unset, and no `codemagic` parameter in SSM under any configured AWS profile. (`~/gustos-colores` has its own token at `/gc-app/codemagic-api-token`, but per `~/CLAUDE.md` **Per-domain / per-project credentials** that must not be borrowed for WorldFoundry.) Minting the token is the one irreducible manual step — Codemagic → account Settings → Integrations → Codemagic API → Show — after which `python3 ~/.claude/skills/codemagic-build/codemagic.py bootstrap` stores it and this step runs headlessly. The WF Codemagic `appId` is likewise not recorded anywhere in the repo and is needed both here and for `vars.WF_CODEMAGIC_APP_ID`.
 
     Everything this step would catch that *can* be checked off-Mac has been: the X11 break is guarded out by construction, verified by preprocessing the new macro block under each platform's defines —
 
@@ -347,10 +350,19 @@ Steps a future implementation pass runs, in order. Per `~/CLAUDE.md` **Plan veri
 6. *(Phase 0)* `wf_game.app/Contents/MacOS/wf_game --frame-step-smoke=30 --cycles=1 -L<snowgoons-standalone.iff>` — exit 0.
 
     ```
-    (not run — same blocker as step 5)
+    build 6aafcf69903254faf05d7835 (18188fd1)   status: finished
+        Build wf_game                      success
+        Run headless frame-step smoke      success
     ```
 
-    **BLOCKED — not run.** Phase 0's exit criterion is therefore **not** met yet; Phase 1 must not start until steps 5 and 6 are green.
+    **PASS — 2026‑09‑20.** The token blocker above is closed (`task setup`, see
+    `docs/SETUP.md`), and steps 5 and 6 were then carried the rest of the way to green in
+    [2026-09-20-macos-phase0-green-baseline.md](2026-09-20-macos-phase0-green-baseline.md),
+    which logs the six real failures Codemagic surfaced along the way — five build/config
+    breaks and one genuine runtime heap corruption (a dormant 1998–2003 array-cookie bug that
+    only an arm64 ABI could expose; see [BUGS.md](../BUGS.md)).
+
+    **Phase 0's exit criterion is met. Phase 1 is unblocked.**
 
 7. *(Phase 1)* Same smoke run — `macos-smoke.log` reports a non-zero, frame-stable `DrawTriangle` count. **Gate: a zero here invalidates §2.1; stop and re-plan.**
 8. *(Phase 2)* `--capture-frame=30=$CM_BUILD_DIR/macos-frame30.png` — PNG artifacted, non-blank, geometry recognisably snowgoons.

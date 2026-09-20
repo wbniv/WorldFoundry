@@ -1,8 +1,14 @@
 | Date | Change |
 |------|--------|
+| [2026-09-20](https://github.com/wbniv/WorldFoundry/commit/ce9bf2d9) | docs(plans): record Phase 0 verification for the macOS Metal renderer |
 | [2026-09-20](https://github.com/wbniv/WorldFoundry/commit/72f650bd) | docs(plans): scope the macOS Metal renderer port |
 
 <!--history-meta v1
+ce9bf2d9	author	Will Norris
+ce9bf2d9	added	100
+ce9bf2d9	deleted	5
+ce9bf2d9	files	1
+ce9bf2d9	body	Local steps 1-4 of the plan's §8 pass and carry their raw output. Two of\nthem cite paths that do not exist — build_game.sh (the build is\n`task build`) and build/wf_game (the binary is engine/wf_game, run from\nwfsource/source/game with an absolute -L). Both are recorded as written,\nwith the failure output, then re-run corrected, per the plan-verification\nformat; the steps themselves are left verbatim for a later fix.\n\nCodemagic steps 5-6 are BLOCKED, not failed: no WorldFoundry Codemagic\nAPI token is reachable from this machine (nothing in ~/.config/codemagic,\nno CODEMAGIC_API_TOKEN, no such SSM parameter under any configured AWS\nprofile), and gustos-colores' token must not be borrowed across projects.\nMinting it is the one irreducible manual step. So Phase 0's exit\ncriterion is not met and Phase 1 must not start.\n\nWhat could be checked off-Mac is checked: the WF_HAS_X11 truth table is\npreprocessed per platform, and no other file in the macOS source set\npulls an X11 or desktop-GL header.\n\nCo-Authored-By: Claude Sonnet 5 <noreply@anthropic.com>\nClaude-Session: https://claude.ai/code/session_015ksFy3ZSSz2XMdto3jVA9v
 72f650bd	author	Will Norris
 72f650bd	added	284
 72f650bd	deleted	0

@@ -74,6 +74,16 @@ private:
 	void* _lastAllocation;
 };
 
+// Its one notable property is a non-trivial destructor — that, and nothing else,
+// is what makes the compiler emit an array cookie for `new T[n]`. Used to
+// *measure* this ABI's cookie rather than assume it.
+struct CookieProbe
+{
+	int32 _pad;
+	CookieProbe() : _pad(0) {}
+	~CookieProbe() {}
+};
+
 }	// anonymous namespace
 
 //==============================================================================
@@ -91,16 +101,34 @@ TestPoolArrays()
 
 	const int kEntries = 5;		// what snowgoons' rooms actually use
 
+	// --- 0. measure THIS ABI's array cookie, don't assume it -----------------
+	// `new (pool) T[n]` on a non-trivially-destructible T prefixes the block
+	// with a cookie whose size is ABI-defined. Measuring it costs nothing, runs
+	// in every build on every host, and puts the number in the log of every CI
+	// run — so the x86_64-vs-arm64 divergence that caused the 2026-09-20 bug is
+	// visible as data rather than as a claim in a comment. Freed through the
+	// pool base the spy recorded, which is exact whatever the cookie turns out
+	// to be.
+	{
+		CookieProbe* probe = new (pool) CookieProbe[kEntries];
+		void*  probeBase   = pool.LastAllocation();
+		size_t cookie      = (size_t)((char*)probe - (char*)probeBase);
+
+		printf("memory pool-array test: this ABI's compiler array cookie = %u bytes "
+		       "(8 = generic Itanium / x86_64, 16 = ARM C++ ABI / arm64)\n",
+		       (unsigned)cookie);
+
+		for (int index = 0; index < kEntries; ++index)
+			probe[index].~CookieProbe();
+		pool.Free(probeBase);
+	}
+
 	// --- 1. the array helper must hand back the pool allocation base ---------
-	// Compile this TU with -DWF_POOLTEST_USE_OLD_ARRAY_NEW to reproduce the
-	// pre-fix behaviour on any host: the check below then reports the compiler's
-	// real cookie size (8 on x86_64, 16 on arm64) and the Free further down
-	// reproduces the exact macOS corruption signature locally.
-#if defined(WF_POOLTEST_USE_OLD_ARRAY_NEW)
-	Int16List* lists = new (pool) Int16List[kEntries];
-#else
+	// This is the invariant that makes MEMORY_NEW_ARRAY / MEMORY_DELETE_ARRAY
+	// ABI-independent: no hidden prefix at all, so DELETE frees exactly what NEW
+	// returned. It fails on any host — including x86_64, where the pre-fix code
+	// happened to work — the moment someone reintroduces `new (pool) T[n]`.
 	Int16List* lists = MEMORY_NEW_ARRAY(pool, Int16List, kEntries);
-#endif
 	void* base = pool.LastAllocation();
 
 	if ((void*)lists != base)

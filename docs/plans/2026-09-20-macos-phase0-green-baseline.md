@@ -245,8 +245,8 @@ red is a *different* defect — the runtime memory corruption diagnosed as fix 6
 regression of fix 5.
 
 4. **Regression guard for fix 6 fails on the pre-fix code, on x86_64** — proving the guard does
-   not need an arm64 box to bite. Rebuild `memory/pooltest.cc` with
-   `-DWF_POOLTEST_USE_OLD_ARRAY_NEW` (restores the `new (pool) Int16List[n]` form) and run:
+   not need an arm64 box to bite. Done once, by temporarily restoring the
+   `new (pool) Int16List[n]` form in `memory/pooltest.cc` behind a `-D` and rebuilding that TU:
 
 ```
 $ engine/wf_game --memory-test
@@ -265,6 +265,13 @@ TEST-EXIT=255
 
 **PASS** — the guard reproduces the macOS corruption signature locally and exits non-zero.
 
+> That `-D` was **not kept**. A second compilation mode that no build ever selects is dead code
+> that rots, and it needed a hand-written `-D` plus a manual TU rebuild, so it would never have
+> been run again. It was also unnecessary: the thing it demonstrated is *measurable*. The test
+> now allocates a `new (pool) CookieProbe[n]` unconditionally, measures the prefix against the
+> same spy, and prints it — one code path, compiled and run in every build on every host, which
+> puts the ABI's actual cookie size in the log of every CI run. Step 5 below shows it.
+
 5. **Linux regression check after fix 6** — the allocator self-check and the full smoke, both on
    the canonical `task build` config (ASan on, Jolt, zForth, Lua/REST_API/debug-bridge on):
 
@@ -274,6 +281,7 @@ BUILD-EXIT=0
 Built: /home/will/WorldFoundry-wbniv/engine/wf_game
 
 $ cd wfsource/source/game && wf_game --memory-test
+memory pool-array test: this ABI's compiler array cookie = 8 bytes (8 = generic Itanium / x86_64, 16 = ARM C++ ABI / arm64)
 memory pool-array test: 0 failure(s)
 MEMTEST-EXIT=0
 
