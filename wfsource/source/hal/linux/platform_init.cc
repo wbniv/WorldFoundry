@@ -47,7 +47,12 @@
 #include <hal/salloc.hp>
 #include <hal/asset_accessor.hp>
 #include <signal.h>
-#if !defined(__EMSCRIPTEN__)
+// X11 is desktop-Linux only. This file is shared with the macOS desktop and the
+// Emscripten/web builds (see the APPLE / EMSCRIPTEN arms of CMakeLists.txt), and
+// neither has an Xlib — macOS has no X11 in the SDK at all. WF_HAS_X11
+// (pigsys/pigsys.hp) is the honest guard; the older !__EMSCRIPTEN__ spelling
+// silently broke the macOS build when this include landed in 42b4c665.
+#if WF_HAS_X11
 #include <X11/Xlib.h>   // XOpenDisplay/DisplayWidth/Height for -fullscreen screen-size query
 #endif
 
@@ -113,8 +118,10 @@ ParseWindowSwitches( int __argc, char* __argv[] )
 			bFullScreen = true;
 			// Query actual screen dimensions so the FBO (and recording) match.
 			// Only overrides size if -width/-height were not already given.
-			// X11 only — on web the canvas drives its own size (WFResizeSurface).
-#if !defined(__EMSCRIPTEN__)
+			// X11 only — on web the canvas drives its own size (WFResizeSurface);
+			// on macOS the Metal window will supply this (Phase 4 of the Metal
+			// renderer plan), so -fullscreen keeps the default size for now.
+#if WF_HAS_X11
 			if ( _halWindowWidth == 0 )
 			{
 				::Display* xd = XOpenDisplay(NULL);

@@ -95,6 +95,43 @@ typedef enum _MachineType
 
 #include _MKINC
 
+//=============================================================================
+// WF_POSIX / WF_HAS_X11 — guards that say what they actually mean.
+//
+// Historically `#ifdef __LINUX__` meant "POSIX-like": cf_linux.h (used by
+// Linux, iOS, macOS and the Emscripten/web build) and cf_android.h both
+// #define __LINUX__ unconditionally, so every Darwin/Android/web translation
+// unit silently satisfies a `__LINUX__` guard. That aliasing is fine for
+// POSIX facilities and wrong the moment a guard means something genuinely
+// Linux-specific (epoll, inotify, /proc) or X11-specific.
+//
+//   WF_POSIX    1 wherever the POSIX / cf_linux.h family applies:
+//               Linux, Android, iOS, macOS, Web.
+//   WF_HAS_X11  1 only where an X11 display server is actually available:
+//               desktop Linux. NOT macOS or iOS (no X11 in the Apple SDKs),
+//               NOT Android, NOT Emscripten.
+//
+// New shared Darwin+Linux code guards on WF_POSIX; code that is genuinely
+// Linux-only keeps __LINUX__ or gains a narrower WF_HAS_* macro. The sweep of
+// the remaining legacy __LINUX__ sites is tracked in TODO.md.
+//
+// Note: this block deliberately sits *after* `#include _MKINC`, because
+// cf_linux.h / cf_android.h are what define __LINUX__ in the first place.
+//=============================================================================
+
+#if defined(__LINUX__) || defined(__ANDROID__) || defined(WF_TARGET_IOS) || defined(WF_TARGET_MACOS)
+#define WF_POSIX 1
+#else
+#define WF_POSIX 0
+#endif
+
+#if WF_POSIX && !defined(WF_TARGET_MACOS) && !defined(WF_TARGET_IOS) \
+             && !defined(__ANDROID__)    && !defined(__EMSCRIPTEN__)
+#define WF_HAS_X11 1
+#else
+#define WF_HAS_X11 0
+#endif
+
 
 // List of externally specifiable options:
 // DEBUG (default 1)
