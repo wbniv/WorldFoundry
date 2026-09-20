@@ -801,6 +801,14 @@ struct OffscreenTarget
 
 OffscreenTarget sOffscreen;
 
+// ---- windowed (CAMetalLayer) path, Phase 4 ----------------------------------
+// Shares the depth attachment and the encoder handoff with the offscreen path;
+// only the colour attachment and the present differ.
+id<CAMetalDrawable>  sDrawable        = nil;
+id<MTLTexture>       sLastPresented   = nil;   // for --capture-frame readback
+bool                 sUsingLayer      = false;
+unsigned long        sPresentedCount  = 0;
+
 #endif  // WF_TARGET_MACOS
 
 }  // namespace
@@ -891,12 +899,17 @@ void EndFrame()
 
 bool ReadbackRGBA8(unsigned char* dst, int width, int height)
 {
-    if (!dst || !sOffscreen.haveFrame || !sOffscreen.color) return false;
-    if (width != sOffscreen.width || height != sOffscreen.height) return false;
+    if (!dst || !sOffscreen.haveFrame) return false;
+    // Follow whichever target the frame actually went to, so --capture-frame
+    // works identically windowed and headless.
+    id<MTLTexture> src = sUsingLayer ? sLastPresented : sOffscreen.color;
+    if (!src) return false;
+    if ((NSUInteger)width  != [src width] ||
+        (NSUInteger)height != [src height]) return false;
 
     const size_t rowBytes = (size_t)width * 4;
     std::vector<unsigned char> bgra(rowBytes * (size_t)height);
-    [sOffscreen.color getBytes:bgra.data()
+    [src getBytes:bgra.data()
                    bytesPerRow:rowBytes
                     fromRegion:MTLRegionMake2D(0, 0,
                                                (NSUInteger)width,
@@ -918,6 +931,82 @@ void* ColorTextureHandle()
 {
     return (__bridge void*)sOffscreen.color;
 }
+
+bool BeginFrameToLayer(void* caMetalLayer, int width, int height)
+{
+    if (!caMetalLayer || width <= 0 || height <= 0) return false;
+    if (!sMetalBackend.EnsureInited()) return false;
+
+    CAMetalLayer* layer = (__bridge CAMetalLayer*)caMetalLayer;
+    sDrawable = [layer nextDrawable];
+    if (!sDrawable) {
+        // Legitimate and transient: the layer hands out a bounded pool and
+        // returns nil when they are all in flight. Skipping the frame is
+        // correct; asserting would turn a hitch into a crash.
+        return false;
+    }
+#if !__has_feature(objc_arc)
+    [sDrawable retain];
+#endif
+
+    // Depth must match the drawable's size, so reuse the offscreen target's
+    // depth texture and let it resize with the window.
+    if (!sOffscreen.EnsureTextures(width, height)) return false;
+
+    id<MTLCommandQueue> q = sMetalBackend.Queue();
+    if (!q) return false;
+
+    MTLRenderPassDescriptor* rp = [MTLRenderPassDescriptor renderPassDescriptor];
+    rp.colorAttachments[0].texture     = sDrawable.texture;
+    rp.colorAttachments[0].loadAction  = MTLLoadActionClear;
+    rp.colorAttachments[0].storeAction = MTLStoreActionStore;
+    rp.colorAttachments[0].clearColor  = MTLClearColorMake(0.0, 0.0, 0.0, 1.0);
+    rp.depthAttachment.texture      = sOffscreen.depth;
+    rp.depthAttachment.loadAction   = MTLLoadActionClear;
+    rp.depthAttachment.storeAction  = MTLStoreActionDontCare;
+    rp.depthAttachment.clearDepth   = 1.0;
+
+    sOffscreen.cmd = [q commandBuffer];
+    sOffscreen.enc = [sOffscreen.cmd renderCommandEncoderWithDescriptor:rp];
+    if (!sOffscreen.enc) { sOffscreen.cmd = nil; return false; }
+
+    MTLViewport vp;
+    vp.originX = 0.0; vp.originY = 0.0;
+    vp.width   = (double)width; vp.height = (double)height;
+    vp.znear   = 0.0; vp.zfar = 1.0;
+    [sOffscreen.enc setViewport:vp];
+
+    sUsingLayer = true;
+    sMetalBackend.SetCurrentEncoder(sOffscreen.enc);
+    return true;
+}
+
+void EndFrameToLayer()
+{
+    if (!sOffscreen.enc) return;
+
+    [sOffscreen.enc endEncoding];
+    sMetalBackend.ClearCurrentEncoder();
+
+    // Keep the drawable's texture readable for --capture-frame. The layer is
+    // created with framebufferOnly = NO precisely so this is allowed.
+    sLastPresented = sDrawable.texture;
+
+    [sOffscreen.cmd presentDrawable:sDrawable];
+    [sOffscreen.cmd commit];
+    [sOffscreen.cmd waitUntilCompleted];
+    ++sPresentedCount;
+
+#if !__has_feature(objc_arc)
+    [sDrawable release];
+#endif
+    sDrawable      = nil;
+    sOffscreen.enc = nil;
+    sOffscreen.cmd = nil;
+    sOffscreen.haveFrame = true;
+}
+
+unsigned long PresentedDrawableCount() { return sPresentedCount; }
 
 unsigned long RenderedFrameCount() { return sMetalBackend.RenderedFrames();   }
 unsigned long TrianglesLastFrame() { return sMetalBackend.TrianglesLast();    }

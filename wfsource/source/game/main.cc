@@ -59,6 +59,11 @@ bool gMemoryTest          = false;      // true = run --memory-test and exit (no
 // differ whenever the camera has no valid view. See the macOS Metal plan Phase 2.
 int         gCaptureFrame = 0;
 const char* gCapturePath  = nullptr;
+// --windowed: open a real window (macOS Phase 4). Opt-in rather than default so
+// the existing headless CI smoke keeps running exactly as it did in Phases 2-3,
+// and so a machine with no window-server session is never asked for a window it
+// cannot provide. Ignored on platforms whose HAL already owns a window.
+bool        gWindowed     = false;
 bool gWfmutThreadTest     = false;      // true = run --wfmut-thread-test (X5 death-test)
 int  gFrameStepCycles = 1;              // --cycles=N: how many Load/Unload cycles to run
 // Always defined: rooms.cc/level.cc reference it unconditionally as a runtime
@@ -268,6 +273,11 @@ ParseCommandLine(int argc, char** argv)
 			           "--capture-frame wants N=<path.png>, got: " << spec );
 			DBSTREAM1( cprogress << "Capture frame " << gCaptureFrame
 			                     << " -> " << gCapturePath << std::endl; )
+		}
+		else if ( strcmp( argv[index]+1, "-windowed" ) == 0 )
+		{
+			gWindowed = true;
+			DBSTREAM1( cprogress << "Windowed mode requested" << std::endl; )
 		}
 		else if ( strcmp( argv[index]+1, "-memory-test" ) == 0 )
 		{

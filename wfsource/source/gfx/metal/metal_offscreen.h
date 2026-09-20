@@ -59,6 +59,23 @@ bool ReadbackRGBA8(unsigned char* dst, int width, int height);
 // the frame capture does not use it.
 void* ColorTextureHandle();
 
+// ---- windowed path (Phase 4) ------------------------------------------------
+// Same frame lifecycle as BeginFrame/EndFrame above, but the colour attachment
+// is the CAMetalLayer's next drawable instead of the engine-owned texture, and
+// EndFrameToLayer presents it. `caMetalLayer` is the opaque handle from
+// wf_macos_window::MetalLayer().
+//
+// The offscreen path is deliberately NOT replaced by this: --capture-frame and
+// the headless CI smoke still use it, and it is the editor's future viewport
+// surface (O2). Two targets, one renderer.
+bool BeginFrameToLayer(void* caMetalLayer, int width, int height);
+void EndFrameToLayer();
+
+// Drawables actually handed to the compositor. The machine-checkable half of
+// "the window is live": a window that exists but presents nothing would
+// otherwise look identical in a log to one that is drawing.
+unsigned long PresentedDrawableCount();
+
 // Frame/triangle accounting, so a caller can report how many frames actually
 // reached the backend versus how many the engine stepped. Phase 1 measured
 // 1563 triangles/frame on the headless backend and found 29 rendered frames for

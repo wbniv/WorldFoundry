@@ -989,7 +989,25 @@ elseif(APPLE)
     # window). miniaudio uses CoreAudio (it pulls AVFoundation + AudioToolbox on
     # Darwin). Still NO OpenGL.framework — the GL entry points the shared gfx/
     # code still references are stubbed in hal/macos/gl_stubs.cc — and NO X11.
+    # Phase 4 (D5/O4): GLFW owns the window + input, shared with the editor
+    # rather than forked into a bespoke AppKit host. GLFW_BUILD_COCOA already
+    # defaults ON for APPLE (third_party/glfw/CMakeLists.txt:28), so nothing
+    # needs flipping — the only obstacle was that the editor's GLFW block sits
+    # inside if(WF_ENABLE_EDITOR ...), which the macOS arm forces OFF. Adding it
+    # here, guarded, so an editor-enabled build cannot add the subdirectory
+    # twice.
+    if(NOT TARGET glfw)
+        set(GLFW_BUILD_DOCS     OFF CACHE BOOL "" FORCE)
+        set(GLFW_BUILD_TESTS    OFF CACHE BOOL "" FORCE)
+        set(GLFW_BUILD_EXAMPLES OFF CACHE BOOL "" FORCE)
+        set(GLFW_BUILD_WAYLAND  OFF CACHE BOOL "" FORCE)
+        add_subdirectory(${CMAKE_SOURCE_DIR}/third_party/glfw
+                         ${CMAKE_BINARY_DIR}/glfw)
+    endif()
     list(APPEND WF_LINK_LIBS
+        glfw
+        "-framework Cocoa"
+        "-framework IOKit"
         "-framework Foundation"
         "-framework CoreFoundation"
         "-framework Metal"
