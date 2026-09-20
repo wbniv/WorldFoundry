@@ -1,5 +1,6 @@
 | Date | Change |
 |------|--------|
+| [2026-09-21](https://github.com/wbniv/WorldFoundry/commit/288246dd) | docs(plans): Phase 3 result — textured macOS output is pixel-identical to Linux |
 | [2026-09-20](https://github.com/wbniv/WorldFoundry/commit/0c299a9a) | docs(plans): Phase 2 result — Metal renders snowgoons offscreen, CI is a visual gate |
 | [2026-09-20](https://github.com/wbniv/WorldFoundry/commit/babb113c) | docs(plans): resolve D4/O3 — widen the RendererBackend texture seam |
 | [2026-09-20](https://github.com/wbniv/WorldFoundry/commit/00623f5d) | docs(plans): Phase 1 result — 1563 triangles/frame, §2.1 confirmed |
@@ -8,6 +9,11 @@
 | [2026-09-20](https://github.com/wbniv/WorldFoundry/commit/72f650bd) | docs(plans): scope the macOS Metal renderer port |
 
 <!--history-meta v1
+288246dd	author	Will Norris
+288246dd	added	104
+288246dd	deleted	25
+288246dd	files	1
+288246dd	body	Build 6ab0490d410d20f2488e1eea (69aa72f3), all ten steps success, zero asserts.\n\n§8 step 10 PASS: the textured hedge renders 52.5/62.3/51.4 on BOTH platforms\nexactly, and the whole frame differs by 455 pixels out of 307200 (0.15%).\n§8 step 9 PASS: coverage IoU 100.0% — a 2-pixel difference between an OpenGL\nrasteriser and a Metal one, which no depth fault could survive.\n\nStep 9's Phase 2 deferral reason is corrected, because it was incomplete. I\nblamed frame indexing; the real cause is that the smoke is not deterministic at\nall (_deltaTime comes from gettimeofday), and the only lever that fixes it,\n-rateN, was a dead store. That is what had made any cross-platform comparison\nimpossible.\n\nStep 8's Phase 2 note is corrected too, and this one reflects badly on my own\nearlier work: that capture was WRONG, not merely coarse. The vertex-buffer\naliasing bug was already present, so the PNG did not show the scene correctly.\nIt was non-blank and "recognisably snowgoons", which is all the criterion\nasked — which is the point. That bar cannot distinguish a correct render from a\nbadly broken one, and I recorded a pass without noticing what it wasn't\nchecking. Left the original evidence intact above the correction.\n\nThe UV-orientation risk is recorded as predicted-and-falsified: GL maps texture\nrow 0 to the bottom, Metal to the top, so a vertical flip was expected. It is\ndemonstrably absent. Noted because the prediction was written down before the\ncapture and no pre-emptive flip was applied, precisely so it could be falsified.\n\nResidual named rather than waved past: all 455 differing pixels are one cube,\npink on Linux and blue-grey on macOS. Cause NOT established — three hypotheses\ntried, each contradicted by the hedge matching exactly. Recorded as a follow-up\nrather than churned on.\n\nCo-Authored-By: Claude Opus 5 (1M context) <noreply@anthropic.com>\nClaude-Session: https://claude.ai/code/session_015ksFy3ZSSz2XMdto3jVA9v
 0c299a9a	author	Will Norris
 0c299a9a	added	113
 0c299a9a	deleted	0

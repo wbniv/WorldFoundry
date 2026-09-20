@@ -283,6 +283,39 @@ not have found either.
 
 Exit: an interactive `.app` that plays snowgoons.
 
+**PROXY GATE MET — 2026‑09‑21, `5629850c`+`7fd04b45`+`6b78d129`, three runs (≈8 Mac‑min).
+The REAL exit is NOT met and cannot be met by CI** — see the split below, which is deliberate
+and should not be blurred.
+
+**O4 → GLFW, and D5's escape hatch was not needed.** `GLFW_BUILD_COCOA` already defaults ON for
+Apple (`third_party/glfw/CMakeLists.txt:28`); the only obstacle was that the editor's GLFW block
+sits inside `if(WF_ENABLE_EDITOR …)`, which the macOS arm forces OFF. Cocoa attached a
+`CAMetalLayer` without a fight, so `wf_game` and `wf_edit` keep one windowing and input path and
+GLFW gamepad support comes free. D2 is preserved: the window is `GLFW_NO_API`, so GLFW creates no
+context and drives no draw callback — `Display` still owns the frame, which is exactly why D5
+rejected `MTKView`.
+
+**Two render targets, one renderer.** With a window, `RenderBegin` acquires the layer's
+`nextDrawable` and `RenderEnd` presents it; without one the Phase 2–3 offscreen texture is used
+unchanged. The offscreen path was **not** removed: CI's headless smoke depends on it and
+`ColorTextureHandle()` is the editor's future viewport surface (O2).
+
+**Three bugs, three runs — all mine, all caught by the Mac rather than by reading:**
+
+1. `backend_metal.mm` used `CAMetalLayer`/`CAMetalDrawable` while importing only
+   `<Metal/Metal.h>`. Those are QuartzCore types.
+2. `setLayer:` must precede `setWantsLayer:` to make the content view *layer-hosting*. Reversed,
+   AppKit creates its own layer and ours becomes a sublayer — it still renders, but resizes and
+   scales on AppKit's terms. Fixed pre-emptively while fixing (1), not discovered by a run.
+3. `_HALSetJoystickButtons` is **C++ linkage**, not `extern "C"`. I assumed a HAL seam would be C.
+   `hal/linux/input.cc:68` — the `input.cc` macOS actually links — defines it with C++ linkage.
+   Worth recording that the platforms genuinely differ rather than one being wrong:
+   `hal/android/input.cc:16` *does* define it `extern "C"`. The spelling to use is whichever
+   `input.cc` the target links, which is invisible until a new platform links a shared file for
+   the first time. (`hal/lifecycle.h` really does wrap its HAL functions in `extern "C"`, so
+   `HALWindowCloseRequested`/`HALCloseWindow` are correct as written — both seams were audited
+   rather than one flipped hopefully.)
+
 ### Phase 5 — Cleanups the renderer unblocks
 
 - Re-enable WAMR on macOS (`CMakeLists.txt:119` → remove the `WF_WASM_ENGINE none` force; `:464-472` is already correct). Closes the last stale clause of `TODO.md:9`.
@@ -624,6 +657,70 @@ Steps a future implementation pass runs, in order. Per `~/CLAUDE.md` **Plan veri
     characterised, and cheap to re-open with a per-object dump.
 
 11. *(Phase 4)* Interactive `.app` launches, renders, accepts keyboard/gamepad input, and closes cleanly (`HALWindowCloseRequested` path, `game/game.cc:296`).
+
+    **This step as written cannot be executed by CI, and is NOT claimed.** What follows is a
+    machine-checkable *proxy*, reported separately from the real criterion on purpose.
+
+    Build `6ab0551a0032a8f1e6ff3196` (`6b78d129`), `macos-desktop-debug`, `mac_mini_m2` — all ten
+    steps `success`, including the new windowed step.
+
+    ```
+    $ grep "macos: window" macos-windowed.log
+    macos: window 640x480 points, 640x480 pixels (scale 1.0), CAMetalLayer attached
+
+    $ grep -o "presented=[0-9]*" macos-windowed.log | tail -1
+    presented=29
+
+    $ grep "capture frame" macos-windowed.log
+    macos: capture frame 20 -> macos-frame20-windowed.png (640x480) written,
+    non-black pixels 62111/307200
+
+    $ cmp macos-frame20-windowed.png macos-frame20.png
+    (identical)
+
+    $ python3 cmp_frames.py macos-frame20-windowed.png linux-frame20.png
+      coverage IoU 100.0%   (macOS-only 2 px, linux-only 0)
+      pixels differing >8: 455 / 307200  (0.15%)
+    ```
+
+    **PROXY PASS**, and the first finding is the one that mattered: **a Codemagic
+    `mac_mini_m2` CAN create a window** — the run has a window-server session. That was genuinely
+    unknown going in, which is why the whole path was written fail-soft.
+
+    What this **does** establish:
+    - a real `NSWindow` exists with a layer-hosting `CAMetalLayer` attached;
+    - **29 drawables were presented to the compositor** — the one thing a window that exists but
+      draws nothing cannot fake, and it equals the 29 rendered frames exactly (step 1 is skipped
+      by the `ValidView` gate, as established in Phase 2);
+    - the presented frames are **byte-identical** to the verified offscreen render, so the
+      drawable path introduces no error of its own;
+    - and they match Linux GL to **exactly the same 455-pixel residual** as Phase 3 — the window
+      path adds nothing new.
+
+    What it **does not** establish, and still needs a human on a Mac:
+    - that the window is *visible and interactive* to a person;
+    - that keyboard/gamepad input drives the player — **CI injects no input**, so the mapping in
+      `window_macos.mm` is compiled and wired but never exercised;
+    - that closing via the red button or Cmd‑Q works (only the code path exists);
+    - **Retina is untested.** The runner reported `scale 1.0`, so the `contentsScale` /
+      pixels-vs-points logic — the part most likely to be wrong — never ran at 2×. This is the
+      largest untested surface in the phase and should not be assumed correct.
+    - `-fullscreen` is unverified; a headless runner is not where to assert what
+      `glfwSetWindowMonitor` does to a real display.
+
+    **`-width`/`-height` ARE verified** (build `6ab056a80032a8f1e6ff325e`). The first proxy run
+    used the default size, so the flags were compiled but never exercised — not enough to close
+    `TODO.md:7`. A second short windowed run at a non-default size settles the width/height half:
+
+    ```
+    $ grep "^macos: window " macos-windowsize.log     # run with -width=800 -height=600
+    macos: window 800x600 points, 800x600 pixels (scale 1.0), CAMetalLayer attached
+
+    $ grep "^macos: window " macos-windowed.log       # default-size run, for contrast
+    macos: window 640x480 points, 640x480 pixels (scale 1.0), CAMetalLayer attached
+    ```
+
+    `TODO.md:7` therefore stays **OPEN**, narrowed to `-fullscreen` alone.
 12. *(Phase 4)* `-width=800 -height=600` and `-fullscreen` produce correctly sized windows — closes `TODO.md:7`.
 13. *(Phase 5)* `-DWF_WASM_ENGINE=wamr` configures and links on arm64 Darwin; smoke run exits 0.
 
