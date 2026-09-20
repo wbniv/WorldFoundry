@@ -191,6 +191,40 @@ Still no windowing, still driven by `--frame-step-smoke`, but now through real M
 
 Exit: CI artifacts a PNG of snowgoons frame N. **This is the milestone that turns CI from a build gate into a visual gate** — see §5. Expect several runs of first-light debugging here (winding order, column-vs-row-major MVP, NDC Z range `[0,1]` on Metal vs `[-1,1]` on GL).
 
+**DONE — 2026‑09‑20, `e197185f`, one run (3 Mac‑min).** `macos-frame20.png` is artifacted, non-blank
+(18 670 / 307 200 non-black pixels) and recognisably snowgoons — see §8 step 8. `macos-desktop-debug`
+is now a **visual** gate.
+
+The "several runs of first-light debugging" did not happen, because the three bugs that would have
+caused them were found by *reading* the backend before spending a run. All three were latent in the
+iOS skeleton and none could ever have fired there: no encoder was ever set on iOS, so `Flush()`
+dropped every batch before anything rasterised.
+
+1. **NDC Z range — exactly the failure this section predicted.** `Mat4Perspective` emitted GL's
+   `[-1,1]`; Metal's is `[0,1]`. With depth cleared to 1 and a `Less` test, roughly the front half
+   of every scene would have been clipped.
+2. **`setVertexBytes` is capped at 4 KB.** One snowgoons frame batches ~1563 triangles ≈ 206 KB, so
+   every flush would have been silently rejected. Now a grow-only `MTLBuffer`.
+3. **No depth state at all** — the item this phase already called for.
+
+Landed as specified (D3 move to `gfx/metal/`, both Apple arms, Metal + QuartzCore linked, factory
+arm, depth attachment, offscreen target, `--capture-frame`), plus three things the spec implied but
+did not name:
+
+- **The offscreen target is shaped for O2, not for CI.** `gfx/metal/metal_offscreen.h` is
+  deliberately pure C++ (its caller `display_macos.cc` compiles as C++) and exposes
+  `ColorTextureHandle()` with **no current consumer** — the capture path goes through
+  `ReadbackRGBA8` instead. The editor viewport must be able to composite the texture directly
+  rather than pay for a CPU readback, so the two are separate from the start.
+- **The capture reports a non-black pixel count**, not just "file written". A PNG that exists but is
+  uniformly the clear colour is the single likeliest way this milestone gets called green while
+  rendering nothing; the clear colour is opaque black for the same reason, not a debug tint that
+  would look like content.
+- **The `stb_image_write` implementation moved out of `debug_server.cc`**, whose entire body is
+  `#ifdef WF_DEBUG_BRIDGE` — so the PNG encoder vanished whenever the bridge was off. It now lives
+  in `engine/stubs/stb_image_write_impl.cc`, compiled unconditionally by both CMake and
+  `build_game.sh`.
+
 The offscreen target is not throwaway: the editor's viewport embed (`wf_edit`) needs exactly this, and `docs/investigations/2026-05-26-macos-port-estimate.md` §E2 already identifies it as the editor's critical path.
 
 ### Phase 3 — Textures
@@ -428,8 +462,87 @@ Steps a future implementation pass runs, in order. Per `~/CLAUDE.md` **Plan veri
     - **The `--memory-test` guard still passes on this build**, and prints
       `this ABI's compiler array cookie = 16 bytes`, so the Phase 0 arm64 fix is unaffected by
       pulling eight new TUs into the macOS build.
+
+    **RESOLVED in Phase 2 (`e197185f`).** The step counter this note asked for now exists
+    (`display_macos.cc` counts in `MeasureAndAdvance`, which runs exactly once per `StepFrame`), and
+    it confirms the hypothesis that Phase 1 could only guess at — **it is the first frame**:
+
+    ```
+    macos: step=1  rendered=0  triangles=0    (total 0)
+    macos: step=2  rendered=1  triangles=1563 (total 1563)
+    ...
+    macos: step=30 rendered=29 triangles=1563 (total 45327)
+    macos: step=31 rendered=29 triangles=1563 (total 45327)
+    macos: step=32 rendered=29 triangles=1563 (total 45327)
+    ```
+
+    Step 1 renders nothing — the camera has no valid view yet, so `WFGame::StepFrame`'s
+    `camera()->ValidView()` gate (`game/game.cc:584`) skips the whole render block. Every subsequent
+    step renders, at a flat 1563 triangles.
+
+    Steps 31 and 32 are **not** engine steps: `WFGame::UnloadLevel` calls `_display->PageFlip()`
+    twice to flush in-flight rendering before teardown, and `MeasureAndAdvance` runs on those too.
+    30 steps + 2 teardown flips = the 32 lines above, with `rendered` correctly frozen at 29. The
+    Phase 1 count of 29 backend frames is fully accounted for.
 8. *(Phase 2)* `--capture-frame=30=$CM_BUILD_DIR/macos-frame30.png` — PNG artifacted, non-blank, geometry recognisably snowgoons.
+
+    Build `6aafd50924494f8afe051661`… superseded by `6aafe5e7ca453cfeba7bf096` (`e197185f`),
+    `macos-desktop-debug`, `mac_mini_m2` / AppleClang 21 / arm64 — every step `success`.
+
+    **Captured at frame 20, not 30, and that is not a shortcut.** `--capture-frame=N` counts frames
+    that reached the *backend*, and the new step counter (below) shows only 29 of those exist in a
+    30-step run. `--capture-frame=30` would have silently never fired.
+
+    ```
+    $ grep 'capture frame' macos-smoke.log
+    macos: capture frame 20 -> /Users/builder/clone/macos-frame20.png (640x480) written,
+    non-black pixels 18670/307200
+
+    $ grep -i 'MetalBackend\|offscreen Metal' macos-smoke.log
+    wf_game: MetalBackend ready (device=Apple Paravirtual device)
+    wf_game: offscreen Metal target 640x480 ready
+
+    $ grep -c ASSERTION macos-smoke.log
+    0
+    ```
+
+    **PASS.** PNG artifacted (27 350 bytes, 640×480), non-blank at 6.1 % lit pixels, and the image
+    is recognisably the snowgoons house: grey roof planes occluding the body correctly, blue window
+    panels, and a tree. Triangle throughput is **1563/frame, identical to Phase 1's headless
+    reference** — Metal is consuming exactly the geometry the no-op backend counted, nothing lost or
+    doubled.
+
+    The tree renders as thin white spikes rather than foliage. That is **textures being off until
+    Phase 3**, not a geometry fault: the level's material list includes `G_Bark.tga` and
+    `G_TrSnow.tga`, and `BuildUniforms` still forces `use_tex = 0`. Untextured branch geometry
+    flat-shaded white is what that looks like. Stated as the evidenced explanation, not a proof —
+    step 10 settles it once textures land.
+
 9. *(Phase 2)* Depth correctness: the Phase 2 PNG shows no back-face bleed-through versus the Linux GL capture of the same level and frame.
+
+    **NOT VERIFIED — and deliberately not claimed.** A Linux GL reference was captured locally
+    (`WF_GAME_SCREENSHOT_PPM` + `-record_video`, 640×480, 42 598/307 200 non-black) but it is **not
+    comparable to the macOS frame**, for two independent reasons:
+
+    - **Different frame.** The Linux PPM path hardcodes its own trigger (`++gPpmFrame >= 30` inside
+      the `bRecordVideo` branch of `gfx/gl/display.cc`) and counts presents, not backend frames.
+      With the camera animating, a different index is a different view — the two captures show
+      different parts of the level, so a pixel or structural diff is meaningless.
+    - **Different texture state.** Linux renders the hedge textured green; macOS renders it
+      untextured. Any diff would be dominated by that, not by depth.
+
+    What the macOS frame *does* show, on its own, is correct occlusion — roof planes hide the body
+    behind them, and the window panels layer in the right order — which is consistent with the
+    depth attachment working. That is an observation about one image, not the controlled comparison
+    this step asks for.
+
+    **To actually close this step**, the Linux GL display needs the same `--capture-frame=N=<path>`
+    flag the macOS display now has, counting the same backend frames, so both platforms can be told
+    to capture *the same* frame. That is ~the same shape as the macOS implementation but has to go
+    through the existing capture FBO rather than the back buffer (the FBO exists precisely because
+    a non-composited X11 back buffer captures whatever occludes the window). Worth doing as the
+    prerequisite for step 10, which needs a matched pair anyway — not worth bolting on here, where
+    it would risk a working Linux path to produce a comparison that textures will invalidate.
 10. *(Phase 3)* Texture correctness: Phase 2 PNG is texture-matched against the Linux GL capture.
 11. *(Phase 4)* Interactive `.app` launches, renders, accepts keyboard/gamepad input, and closes cleanly (`HALWindowCloseRequested` path, `game/game.cc:296`).
 12. *(Phase 4)* `-width=800 -height=600` and `-fullscreen` produce correctly sized windows — closes `TODO.md:7`.

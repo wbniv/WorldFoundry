@@ -1,11 +1,17 @@
 | Date | Change |
 |------|--------|
+| [2026-09-20](https://github.com/wbniv/WorldFoundry/commit/babb113c) | docs(plans): resolve D4/O3 — widen the RendererBackend texture seam |
 | [2026-09-20](https://github.com/wbniv/WorldFoundry/commit/00623f5d) | docs(plans): Phase 1 result — 1563 triangles/frame, §2.1 confirmed |
 | [2026-09-20](https://github.com/wbniv/WorldFoundry/commit/41510bae) | refactor(memory): measure the array cookie instead of switching on it |
 | [2026-09-20](https://github.com/wbniv/WorldFoundry/commit/ce9bf2d9) | docs(plans): record Phase 0 verification for the macOS Metal renderer |
 | [2026-09-20](https://github.com/wbniv/WorldFoundry/commit/72f650bd) | docs(plans): scope the macOS Metal renderer port |
 
 <!--history-meta v1
+babb113c	author	Will Norris
+babb113c	added	3
+babb113c	deleted	1
+babb113c	files	1
+babb113c	body	Will's call: option (a) over the sidecar-then-(a) staging the plan\noriginally leaned toward. Accept the cross-platform pixelmap.* change\nnow rather than defer it through a use-after-free-prone sidecar cache.\n\nCo-Authored-By: Claude Sonnet 5 <noreply@anthropic.com>\nClaude-Session: https://claude.ai/code/session_015ksFy3ZSSz2XMdto3jVA9v
 00623f5d	author	Will Norris
 00623f5d	added	61
 00623f5d	deleted	0
