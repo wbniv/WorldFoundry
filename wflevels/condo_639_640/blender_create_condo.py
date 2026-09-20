@@ -90,8 +90,32 @@ SUN_AZ_DEG    = 30.0
 # CONDO_FILL_INTENSITY override). CONDO_AMBIENT sets the flat ambient level.
 FILL_AZ_DEG    = float(os.environ.get('CONDO_FILL_AZ_DEG', 195.0))
 FILL_ALT_DEG   = 35.0
-FILL_INTENSITY = float(os.environ.get('CONDO_FILL_INTENSITY', 0.0))   # 0 = off; see § 8
+FILL_INTENSITY = float(os.environ.get('CONDO_FILL_INTENSITY', 0.35))  # 0 = off; see § 8
 AMBIENT        = float(os.environ.get('CONDO_AMBIENT', 0.38))
+
+
+def wf_light_aim(alt_deg: float, az_deg: float):
+    """Blender `rotation_euler` that aims a WF Directional Light.
+
+    `Light::Set` (wfsource/source/game/light.hpi) takes the light's direction as
+    the actor's **local +X axis** in world space: `dir = Rz(C)·Ry(B)·Rx(A)·(1,0,0)`.
+    Rotating +X about X is a no-op, so the long-standing
+    `(pi/2 - alt, 0, az)` recipe put the altitude in the one angle that cannot
+    move the axis — every light authored that way came out exactly horizontal
+    (`dir = (cos az, sin az, 0)`), and the only reason levels looked lit from
+    above was a separate engine bug that leaked the actor's *position* into the
+    direction vector.  Both are written up in
+    docs/plans/2026-09-20-engine-multi-directional-light-fix.md.
+
+    Altitude belongs in **B** (the Y euler):
+
+        Ry(B)·(1,0,0)       = ( cos B, 0, -sin B)
+        Rz(C)·Ry(B)·(1,0,0) = ( cos B·cos C, cos B·sin C, -sin B)
+
+    so B = altitude tips the beam downward by that many degrees, and C = azimuth
+    keeps its existing meaning (the compass bearing the light *travels toward*).
+    """
+    return (0.0, math.radians(alt_deg), math.radians(az_deg))
 
 # ── 1. Clean scene, enable add-on, import the snowgoons scaffold ─────────────
 bpy.ops.wm.read_factory_settings(use_empty=True)
@@ -984,12 +1008,159 @@ zone_interior = add_zone('zone-interior', Vector((min(cx0, -8.2), cy0 - 0.5, -0.
                          Vector((max(cx1, 8.2), bal_min.y - pad, WALL_H + 0.5)),
                          MB_ZONE_INTERIOR, 'cs_dollhouse')
 
+# ── 7c. 639-project-rm patio wall: telescoping glass doors, not a wall ───────
+# Plan: docs/plans/2026-09-20-condo-project-room-telescoping-doors.md
+#
+# THE WALL, corrected 2026-09-20. The first pass targeted the room's x ≈ 7.8 face
+# (the compass-north one, where `639-window-1` sits) and was wrong: that is a
+# genuine exterior wall with nothing beyond it, carried by `unit-639`'s shell mesh
+# (49 collidable faces), and `639-window-1` is a real window on it. Left alone.
+#
+# The door wall is the room's **y = −2.0 face**, the one it shares with the two
+# already-modelled patio rooms that together span its whole width:
+#   639-patio-recessed  x 2.70…5.40, y −2.0…0.0
+#   639-patio           x 5.40…7.80, y −2.0…0.0
+# Both are real floored, enclosed, ceilinged rooms in `unit-639`'s shell (floor
+# faces at z = 0, perimeter walls to z = 2.7), so opening this wall exposes nothing
+# and **no new balcony geometry is needed**.
+#
+# On that face `unit-639`'s shell carries only 3 stray faces in the x 3.5…8.0 band
+# (all at the far x ≈ 7.95 corner) — the wall is a single separate object,
+# `639-front-strip-S-wall-jamb2` (6 polys, x 3.65…7.80, y −2.05…−1.95, z 0…2.70).
+# It is the S-wall run's last solid segment; its two door openings (the
+# `…-door-header` pairs at x 0.30…1.10 and 2.85…3.65) both front the guest side.
+# So the correction is object-level, not shell surgery: shrink jamb2 back to the
+# x 3.65…3.80 slice that fronts the guest bedroom, and put the doors across the
+# project room's own x 3.80…7.80 frontage.
+#
+# MECHANISM: two static mesh states swapped by a `Visibility Mailbox`
+# (mesh.inc:10 → `Actor::isVisible()`, actor.cc:894 — the actor renders iff its
+# mailbox is truthy), driven by an ActBoxOR proximity zone. Both patterns already
+# ship in this file.
+#
+# COLLISION is a settled limitation, resolved from the engine source rather than
+# assumed: `isVisible()` is read in exactly one place, the render loop
+# (game/level.cc:1223), and `Actor::CanCollide()` is
+# `collisionTable[kind()] && Mass > 0` (actor.cc:1081) — it never consults
+# visibility. **A hidden actor still collides**, and there is no MASS/collision
+# mailbox in wfsource/source/mailbox/mailbox.inc to change that at runtime. Both
+# states therefore carry `Mass 0` (the skydome/site-buildings idiom above), so the
+# doorway is always physically passable and the closed state is a visual cue only.
+# Accepted for this iteration — see the plan's Out-of-scope for the follow-ups.
+# ON by default since the wall correction: CONDO_DOORS=0 builds the plain wall back.
+CONDO_DOORS = os.environ.get('CONDO_DOORS', '1') not in ('', '0', 'false', 'False')
+MB_DOOR_ZONE, MB_DOOR_VISITED = 92, 91     # 90–94 are free: the other local zone
+MB_DOOR_OPEN, MB_DOOR_CLOSED  = 93, 94     # mailboxes in this level are 95–99
+DOOR_ROOM    = '639-project-rm'
+DOOR_WALL    = '639-front-strip-S-wall-jamb2'
+DOOR_PANELS  = 3
+DOOR_TRACK_D = 0.11          # centre-to-centre spacing of the three tracks, in Y
+DOOR_ZONE_D  = 1.6           # how far either side of the wall the proximity strip reaches
+_door_forth  = ''            # Director clause; empty unless the doors are built
+
+if CONDO_DOORS:
+    _door_room = next(((mn, mx) for name, mn, mx in room_outlines if name == DOOR_ROOM), None)
+    assert _door_room is not None, f"{DOOR_ROOM} outline missing"
+    _dr_mn, _dr_mx = _door_room
+
+    _wall = bpy.data.objects.get(DOOR_WALL)
+    assert _wall is not None, f"{DOOR_WALL} missing — the source .blend changed shape"
+    _wc = [_wall.matrix_world @ Vector(c) for c in _wall.bound_box]
+    _wx0, _wx1 = min(c.x for c in _wc), max(c.x for c in _wc)
+    DOOR_Y = sum(c.y for c in _wc) / len(_wc)    # keep the glass on the surveyed wall plane (−2.00)
+
+    _glass = bpy.data.materials.get('glass')
+    assert _glass is not None, "no `glass` material in the appended source"
+
+    # This wall runs along X: x 3.80 (compass south, the guest-bedroom corner) →
+    # x 7.80 (compass north, the 639-patio corner). 4.00 m, three equal bays.
+    DOOR_X0, DOOR_X1 = _dr_mn.x, _dr_mx.x
+    DOOR_W = (DOOR_X1 - DOOR_X0) / DOOR_PANELS   # 1.33 m per panel (assumption, see the plan)
+
+    # Shrink jamb2 to the slice that fronts the guest bedroom (x 3.65…3.80); the
+    # project room's own frontage becomes the doorway. The mesh is already baked to
+    # world space (bake_transform in § 3), so remap its X linearly — that keeps the
+    # object's material and poly structure intact.
+    _sx = (DOOR_X0 - _wx0) / (_wx1 - _wx0)
+    _tx = _wall.matrix_world.translation.x     # bake_transform leaves only a translation
+    for _v in _wall.data.vertices:
+        _v.co.x = (_wx0 + (_v.co.x + _tx - _wx0) * _sx) - _tx
+    _wall.data.update()
+    print(f"[condo] {DOOR_ROOM}: {DOOR_WALL} trimmed x {_wx0:.2f}…{_wx1:.2f} → "
+          f"{_wx0:.2f}…{DOOR_X0:.2f}; x {DOOR_X0:.2f}…{DOOR_X1:.2f} becomes telescoping doors")
+
+    def _door_state_mesh(name, bays):
+        """One mesh actor per state: `bays` is a list of (track index, x0, x1)."""
+        bm = _bmesh.new()
+        for track, x0, x1 in bays:
+            yc = DOOR_Y + (track - (DOOR_PANELS - 1) / 2.0) * DOOR_TRACK_D
+            cube = _bmesh.ops.create_cube(bm, size=1.0)['verts']
+            for v in cube:
+                v.co = ((x0 + x1) / 2 + v.co.x * (x1 - x0), yc + v.co.y * GLASS_T,
+                        WALL_H / 2 + v.co.z * WALL_H)
+        _bmesh.ops.recalc_face_normals(bm, faces=bm.faces)
+        me = bpy.data.meshes.new(name)
+        bm.to_mesh(me)
+        bm.free()
+        me.materials.append(_glass)
+        obj = bpy.data.objects.new(name, me)
+        scene.collection.objects.link(obj)
+        clean_mesh(me, recalc=False)
+        as_statplat(obj)
+        obj['wf_Mass'] = 0.0         # hidden actors still collide — see the COLLISION note above
+        return obj
+
+    # Closed: one panel per track, each in its own 1.33 m bay, spanning the full 4 m.
+    door_closed = _door_state_mesh(
+        '639-project-doors-closed',
+        [(i, DOOR_X0 + i * DOOR_W, DOOR_X0 + (i + 1) * DOOR_W) for i in range(DOOR_PANELS)])
+    door_closed['wf_Visibility Mailbox'] = MB_DOOR_CLOSED
+
+    # Open: all three panels telescoped into the last bay (x 6.47…7.80) — the fixed
+    # panel's own bay — leaving the other 2.67 m an open threshold onto 639-patio.
+    # Which end they gather at is the one genuinely cosmetic choice here: this wall's
+    # faces point ±Y, so neither end is literally "east" under the level's
+    # `+X north / −Y east` convention. The x = 7.80 end wins because it is the corner
+    # the wide main patio (x 5.40…7.80) starts from, so the stack opens onto the usable
+    # patio rather than onto the narrow recessed nook by the guest bedroom.
+    door_open = _door_state_mesh(
+        '639-project-doors-open',
+        [(i, DOOR_X1 - DOOR_W, DOOR_X1) for i in range(DOOR_PANELS)])
+    door_open['wf_Visibility Mailbox'] = MB_DOOR_OPEN
+
+    # Proximity zone: the strip within DOOR_ZONE_D either side of the wall, so the doors
+    # open whether the player approaches from the room or back from the patio. It writes
+    # its own mailbox only (no camshot forwarding), so it cannot disturb zone-interior /
+    # zone-balcony / zone-master, which overlap it.
+    zone_doors = add_zone('zone-project-doors',
+                          Vector((DOOR_X0 - pad, DOOR_Y - DOOR_ZONE_D, -0.5)),
+                          Vector((DOOR_X1 + pad, DOOR_Y + DOOR_ZONE_D, WALL_H + 0.5)),
+                          MB_DOOR_ZONE, door_closed.name)
+
+    # Director clause. Mailboxes are 0 at load, so "never visited" is the natural default
+    # and the level opens depicting the doors **open**, gathered at x 7.80 (plan § Context).
+    # Entering the strip latches visited + open; leaving it after a visit closes them.
+    _door_forth = (
+        f"{MB_DOOR_ZONE} read-mailbox 0 <> if "
+        f"1 {MB_DOOR_VISITED} write-mailbox 0 {MB_DOOR_ZONE} write-mailbox "
+        f"1 {MB_DOOR_OPEN} write-mailbox 0 {MB_DOOR_CLOSED} write-mailbox "
+        f"else {MB_DOOR_VISITED} read-mailbox 0 = if "
+        f"1 {MB_DOOR_OPEN} write-mailbox 0 {MB_DOOR_CLOSED} write-mailbox "
+        f"else 0 {MB_DOOR_OPEN} write-mailbox 1 {MB_DOOR_CLOSED} write-mailbox then then\n")
+    print(f"[condo] {DOOR_ROOM} telescoping doors: closed = {DOOR_PANELS} panels "
+          f"x {DOOR_X0:.2f}…{DOOR_X1:.2f} ({DOOR_W:.2f} m each), open = 1 fixed + {DOOR_PANELS - 1} folded "
+          f"x {DOOR_X1 - DOOR_W:.2f}…{DOOR_X1:.2f}; both z 0.00…{WALL_H:.2f} at y {DOOR_Y:.2f}, "
+          f"Mass 0; mailboxes zone {MB_DOOR_ZONE} visited {MB_DOOR_VISITED} open {MB_DOOR_OPEN} closed {MB_DOOR_CLOSED}")
+else:
+    print(f"[condo] {DOOR_ROOM} telescoping doors: OFF (CONDO_DOORS=0 set; the plain "
+          f"{DOOR_WALL} stays — see docs/plans/2026-09-20-condo-project-room-telescoping-doors.md)")
+
 # ── 8. Lights, matte, director, levelobj ─────────────────────────────────────
 light = find_by_class('light')
 assert light is not None
 light.name = 'Sun'
 light.location = (0.0, -8.0, 8.0)
-light.rotation_euler = (math.pi / 2 - math.radians(SUN_ALT_DEG), 0.0, math.radians(SUN_AZ_DEG))
+light.rotation_euler = wf_light_aim(SUN_ALT_DEG, SUN_AZ_DEG)
 light['wf_lightType']  = 'Directional'
 light['wf_lightRed']   = 1.0
 light['wf_lightGreen'] = 1.0
@@ -1009,30 +1180,25 @@ ambient['wf_lightRed']   = AMBIENT
 ambient['wf_lightGreen'] = AMBIENT
 ambient['wf_lightBlue']  = AMBIENT * (0.50 / 0.45)
 
-# Second directional slot — DISABLED by default (CONDO_FILL_INTENSITY=0).
+# Second directional slot — ON by default since 2026-09-20.
 #
-# The plan assumed this was pure authoring: the render camera does offer 3
-# directional slots (RB_MAX_LIGHTS, gfx/camera.hpi) and
-# RenderCamera::SetDirectionalLight range-checks against MAX_LIGHTS. But the
-# actor→light path in front of it does not deliver them. Adding a third `light`
-# actor makes wf_game die on `assert(ambientLightIndex < 1)`
-# (game/level.cc:1200), and it still dies when *all three* actors are authored
-# `lightType = Directional` (DATA 0l) in condo_639_640.lev — verified by hand-
-# patching the .lev and rebuilding. So the 2nd and 3rd Light actors are read as
-# AMBIENT_LIGHT at runtime regardless of what is authored: Light::Type() reads
-# getOad()->lightType (game/light.hpi:63) and is not picking up the per-actor
-# OAD blob. That is an engine/levcomp defect, not a level-script one, and
-# fixing it is outside this plan's scope.
-#
-# The code below is kept, wired and documented so the fill light is one env var
-# away once that defect is fixed: CONDO_FILL_INTENSITY=0.35 re-enables it.
+# History, because it was mis-diagnosed once: this looked like "the 2nd and 3rd
+# Light actors are read as AMBIENT regardless of what is authored", since adding
+# a third `light` actor killed wf_game on `assert(ambientLightIndex < 1)`
+# (game/level.cc:1200) even with all three authored `lightType = Directional`.
+# The level data was never wrong. `wfsource/source/oas/levelcon.h` had
+# AMBIENT_LIGHT=0 / DIRECTIONAL_LIGHT=1, the reverse of the `"Directional|Ambient"`
+# enum in light.oas that every tool writes — so *every* light in *every* level
+# went into the wrong slot, and two Directionals became two ambients. Fixed in
+# docs/plans/2026-09-20-engine-multi-directional-light-fix.md, together with the
+# position leak in Light::Set that made these beams point at the ceiling.
 if FILL_INTENSITY > 0.0:
     fill = light.copy()
     fill.data = light.data.copy() if light.data else None
     scene.collection.objects.link(fill)
     fill.name = 'FillLight'
     fill.location = (0.0, -8.0, 8.0)
-    fill.rotation_euler = (math.pi / 2 - math.radians(FILL_ALT_DEG), 0.0, math.radians(FILL_AZ_DEG))
+    fill.rotation_euler = wf_light_aim(FILL_ALT_DEG, FILL_AZ_DEG)
     fill['wf_lightType']  = 'Directional'
     fill['wf_lightRed']   = FILL_INTENSITY * 0.85
     fill['wf_lightGreen'] = FILL_INTENSITY * 0.92
@@ -1042,8 +1208,7 @@ if FILL_INTENSITY > 0.0:
           f"alt {FILL_ALT_DEG}° intensity {FILL_INTENSITY}, Ambient {AMBIENT:.2f}")
 else:
     print(f"[condo] lights: Sun az {SUN_AZ_DEG}° alt {SUN_ALT_DEG}°, Ambient {AMBIENT:.2f}; "
-          f"FillLight disabled (2nd Light actor reads as AMBIENT at runtime — "
-          f"level.cc:1200 assert; set CONDO_FILL_INTENSITY>0 once fixed)")
+          f"FillLight disabled (CONDO_FILL_INTENSITY=0)")
 
 matte = find_by_class('matte')
 assert matte is not None
@@ -1075,7 +1240,8 @@ def _zone_forward(zone_mb, t0_mb=None):
 # occupied (the strips lie inside the interior zone).
 director['wf_Script'] = ("\\ wf\n" + _zone_forward(MB_ZONE_INTERIOR)
                          + _zone_forward(MB_ZONE_BALCONY, MB_BALCONY_T0)
-                         + _zone_forward(MB_ZONE_MASTER, MB_MASTER_T0))
+                         + _zone_forward(MB_ZONE_MASTER, MB_MASTER_T0)
+                         + _door_forth)
 
 levelobj = find_by_class('levelobj')
 assert levelobj is not None
