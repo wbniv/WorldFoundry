@@ -342,3 +342,22 @@ Absence of that line is a build-config difference, not a truncated run.)
 
 **Phase 0 is green.** `macos-desktop-debug` builds, links and runs the headless frame-step
 smoke to completion on `mac_mini_m2` / AppleClang 21 / arm64.
+
+7. **The ABI claim behind fix 6, measured on both hosts rather than cited.** After the
+   `WF_POOLTEST_USE_OLD_ARRAY_NEW` switch was replaced by the always-on measurement, the same
+   shipped binary reports the cookie size it actually observes. Build
+   `6aafd50924494f8afe051661` (`41510bae`), `Run headless frame-step smoke: success`:
+
+```
+# x86_64 / GCC 15, local
+memory pool-array test: this ABI's compiler array cookie = 8 bytes (8 = generic Itanium / x86_64, 16 = ARM C++ ABI / arm64)
+memory pool-array test: 0 failure(s)
+
+# arm64 / AppleClang 21, Codemagic mac_mini_m2
+memory pool-array test: this ABI's compiler array cookie = 16 bytes (8 = generic Itanium / x86_64, 16 = ARM C++ ABI / arm64)
+memory pool-array test: 0 failure(s)
+```
+
+**PASS** — 8 vs 16 on the same source, confirming the root cause by direct measurement rather
+than by inference from the crash dump. Every future macOS CI log carries this line, so the
+divergence stays visible instead of living only in a comment.

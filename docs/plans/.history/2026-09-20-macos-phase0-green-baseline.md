@@ -1,10 +1,16 @@
 | Date | Change |
 |------|--------|
+| [2026-09-20](https://github.com/wbniv/WorldFoundry/commit/41510bae) | refactor(memory): measure the array cookie instead of switching on it |
 | [2026-09-20](https://github.com/wbniv/WorldFoundry/commit/ab2f36fa) | docs(bugs): log the arm64 array-cookie bug as a dormant pre-2026 bug |
 | [2026-09-20](https://github.com/wbniv/WorldFoundry/commit/cb9a1318) | docs(plans): record the arm64 array-cookie root cause; Phase 0 is green |
 | [2026-09-20](https://github.com/wbniv/WorldFoundry/commit/aa1b7072) | feat(macos): disable REST API, stub debug-bridge GL calls for macOS |
 
 <!--history-meta v1
+41510bae	author	Will Norris
+41510bae	added	10
+41510bae	deleted	2
+41510bae	files	1
+41510bae	body	WF_POOLTEST_USE_OLD_ARRAY_NEW was a second compilation mode of pooltest.cc that\nno build ever selects — dead code that rots, needing a hand-written -D and a\nmanual TU rebuild to exercise, so it would never have been run again. It was\nalso unnecessary: the thing it demonstrated is measurable.\n\nThe test now allocates `new (pool) CookieProbe[n]` unconditionally against the\nsame spy allocator, measures the prefix, prints it, and frees through the\nrecorded pool base (exact whatever the cookie turns out to be). One code path,\ncompiled and run in every build on every host, and it puts the ABI's real\ncookie size in the log of every CI run:\n\n    memory pool-array test: this ABI's compiler array cookie = 8 bytes\n    (8 = generic Itanium / x86_64, 16 = ARM C++ ABI / arm64)\n\nso the divergence behind the 2026-09-20 bug is observed data in every macOS\nbuild rather than a claim in a comment. The invariant assertion is unchanged and\nstill fails on x86_64 if anyone reintroduces `new (pool) T[n]`.\n\nDocs brought in line with the shipped state:\n- coding-conventions §4 gains the rule that would have prevented the bug —\n  never `new (pool) T[n]`, with the ABI table and why.\n- command-line-switches gains a Headless/CI section; it documented none of\n  --frame-step-smoke / --cycles / --memory-test / --wfmut-* / --debug-port.\n  Records (verified) that this group REQUIRES the double dash: the parser\n  matches on argv[i]+1 against a pattern that itself starts with '-', so\n  -memory-test silently does nothing.\n- compile-time-switches loses the row for the switch this commit deletes.\n- the Metal-renderer parent plan's Phase 0 goes from BLOCKED to MET, with the\n  actual cost (15 Mac-min / 8 runs vs the 1-2 run estimate) and why.\n\nCo-Authored-By: Claude Opus 5 (1M context) <noreply@anthropic.com>\nClaude-Session: https://claude.ai/code/session_015ksFy3ZSSz2XMdto3jVA9v
 ab2f36fa	author	Will Norris
 ab2f36fa	added	7
 ab2f36fa	deleted	2
