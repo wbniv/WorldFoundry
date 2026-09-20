@@ -159,6 +159,25 @@ Exit: the smoke run reports a **non-zero, stable per-frame triangle count** for 
 
 **Estimated cost: 1–2 runs. Do not proceed past a zero.**
 
+**DONE — 2026‑09‑20, `ec6c5e4d`, one run (3 Mac‑min).** The number came back
+**1563 triangles per frame, identical on every rendered frame** — see §8 step 7. §2.1 is
+confirmed: the eight geometry files are backend-agnostic, they compile and link on macOS with
+no GL, and real snowgoons geometry reaches `RendererBackend::DrawTriangle` on a build with no
+window and no renderer. **"Write eight Metal `RenderPoly3D` implementations" is work that does
+not exist.** Phase 2 may start.
+
+Landed exactly as specified, plus two things the spec implied but did not name:
+
+- `backend_factory.cc` also came off the macOS explicit source list — it lives in
+  `gfx/glpipeline`, so the new directory glob now supplies it; leaving both would double-add it.
+- That `backend_modern.cc` is the *only* GL-bound file in the directory was **verified by grep,
+  not assumed**: no `gl*()` call appears in any of the eight, nor in `glpipeline/rendobj3.cc`.
+
+Two link hazards were cleared statically rather than by spending a run on them: `renderer.hp`
+already has a `WF_TARGET_MACOS` arm supplying GL *types* via `<OpenGL/gl.h>` with the framework
+unlinked (`renderer.hp:38-44`), and `globalRendererVariables` is defined in
+`glpipeline/rendobj3.cc:48`, which `gfx/rendobj3.cc:36` already `#include`s on macOS.
+
 ### Phase 2 — Metal renders offscreen to a PNG (no window)
 
 Still no windowing, still driven by `--frame-step-smoke`, but now through real Metal.
@@ -365,6 +384,48 @@ Steps a future implementation pass runs, in order. Per `~/CLAUDE.md` **Plan veri
     **Phase 0's exit criterion is met. Phase 1 is unblocked.**
 
 7. *(Phase 1)* Same smoke run — `macos-smoke.log` reports a non-zero, frame-stable `DrawTriangle` count. **Gate: a zero here invalidates §2.1; stop and re-plan.**
+
+    Build `6aafd761e700ec9d4c515095` (`ec6c5e4d`), `macos-desktop-debug`, `mac_mini_m2` /
+    AppleClang 21 / arm64 — `Build wf_game: success`, `Run headless frame-step smoke: success`.
+
+    ```
+    $ grep -c '^headless: frame' macos-smoke.log
+    29
+
+    $ grep '^headless: frame' macos-smoke.log | head -3
+    headless: frame 1 DrawTriangle=1563 (total 1563)
+    headless: frame 2 DrawTriangle=1563 (total 3126)
+    headless: frame 3 DrawTriangle=1563 (total 4689)
+
+    $ grep '^headless: frame' macos-smoke.log | tail -2
+    headless: frame 28 DrawTriangle=1563 (total 43764)
+    headless: frame 29 DrawTriangle=1563 (total 45327)
+
+    $ grep -o 'DrawTriangle=[0-9]*' macos-smoke.log | sort | uniq -c
+         29 DrawTriangle=1563
+
+    $ grep -c 'ASSERTION\|corrupt' macos-smoke.log
+    0
+    ```
+
+    **PASS — non-zero and exactly stable.** One distinct value across every rendered frame, zero
+    variance; 45 327 triangles submitted in total. The gate is cleared, §2.1 is confirmed, and
+    Phase 2 is unblocked.
+
+    Two details worth carrying forward rather than glossing:
+
+    - **29 `EndFrame` calls, not 30.** `StepFrame` runs the render block only under
+      `if(_curLevel->camera() && _curLevel->camera()->ValidView())` (`game/game.cc:584`), and
+      `EndFrame` is reached from `Display::RenderEnd` inside it — so one of the 30 steps drew
+      nothing. The likely cause is the first frame, before the camera handler has produced a
+      valid view. **Not proven from this log**: the counter numbers `EndFrame` calls, not
+      `StepFrame` calls, so it cannot say *which* step was skipped. Harmless for this gate
+      (non-zero + stable are both satisfied), but Phase 2 compares Metal's count against this
+      reference, so a silently dropped frame would muddy that comparison — count `StepFrame`s
+      alongside `EndFrame`s before leaning on the number.
+    - **The `--memory-test` guard still passes on this build**, and prints
+      `this ABI's compiler array cookie = 16 bytes`, so the Phase 0 arm64 fix is unaffected by
+      pulling eight new TUs into the macOS build.
 8. *(Phase 2)* `--capture-frame=30=$CM_BUILD_DIR/macos-frame30.png` — PNG artifacted, non-blank, geometry recognisably snowgoons.
 9. *(Phase 2)* Depth correctness: the Phase 2 PNG shows no back-face bleed-through versus the Linux GL capture of the same level and frame.
 10. *(Phase 3)* Texture correctness: Phase 2 PNG is texture-matched against the Linux GL capture.
