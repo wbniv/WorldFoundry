@@ -42,10 +42,21 @@
 
 // The joystick-button seam the engine reads. Linux feeds it from
 // ProcessXEvents (gfx/gl/mesa.cc:263), Android from native_app_entry.cc:134.
-// This file is the macOS feeder. Declared with the real joystickButtonsF type
-// from sjoystic.h rather than a hand-written `unsigned int`: it has C linkage,
-// so a mismatched parameter type would link cleanly and misbehave at runtime.
-extern "C" void _HALSetJoystickButtons(joystickButtonsF joystickButtons);
+// This file is the macOS feeder.
+//
+// C++ LINKAGE, not extern "C" — matching the definition macOS actually links
+// against, hal/linux/input.cc:68, and the declaration in gfx/gl/mesa.cc:262.
+// I first wrote extern "C" here on the assumption that a HAL seam would be C;
+// it is not, and the linker caught it. Note the platforms genuinely differ:
+// hal/android/input.cc:16 DOES define it extern "C", consistently with
+// android/native_app_entry.cc:45 — so neither spelling is universally right,
+// and the one to match is whichever input.cc this target links.
+// (hal/lifecycle.h, by contrast, really does wrap its HAL functions in
+// extern "C" — hence the ones at the bottom of this file.)
+//
+// joystickButtonsF comes from sjoystic.h rather than a hand-written
+// `unsigned int` so the declaration cannot drift from the definition silently.
+extern void _HALSetJoystickButtons(joystickButtonsF joystickButtons);
 
 namespace {
 
