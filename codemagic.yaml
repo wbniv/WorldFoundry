@@ -498,4 +498,10 @@ workflows:
       - macos-frame20-windowed.png
       - macos-windowed.log
       - macos-windowsize.log
-      - engine/wf_game
+      # The runnable product on macOS is the .app bundle, not a bare binary:
+      # `engine/wf_game` matches nothing here (the Mach-O lives at
+      # engine/wf_game.app/Contents/MacOS/wf_game), which is why earlier
+      # artifact zips were ~200 KB of logs and PNGs with no app in them. The
+      # bundle carries cd.iff/level0.mid in Resources (CMakeLists.txt bundles
+      # whatever assets exist at configure time) so a human can double-click it.
+      - engine/wf_game.app
