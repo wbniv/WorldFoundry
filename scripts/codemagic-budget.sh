@@ -122,9 +122,11 @@ fetch_app_minutes() {
                  // (.buildSettings // {} | .instanceType // .instance_type)
                  // "");
             def started: (.startedAt // .started_at // .createdAt // .created_at // "");
-            # Codemagic stamps milliseconds ("...T00:00:00.000Z"), which
-            # fromdateiso8601 refuses; strip the fraction before parsing.
-            def epoch: sub("\\.[0-9]+Z$"; "Z") | fromdateiso8601;
+            # Codemagic stamps fractional seconds ("...T00:00:00.000Z" or
+            # "...T00:00:00.746000+00:00"), and fromdateiso8601 only accepts
+            # a bare "Z"-suffixed UTC timestamp with no fraction: strip the
+            # fraction first, then normalize a "+00:00" offset to "Z".
+            def epoch: sub("\\.[0-9]+"; "") | sub("\\+00:00$"; "Z") | fromdateiso8601;
             def secs:
                 if (.buildDuration // .build_duration) then
                     (.buildDuration // .build_duration)
