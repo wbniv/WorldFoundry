@@ -673,7 +673,7 @@ Steps a future implementation pass runs, in order. Per `~/CLAUDE.md` **Plan veri
     `backend_modern.cc`'s). Left as a follow-up rather than churned on — 0.15 % of one frame, fully
     characterised, and cheap to re-open with a per-object dump.
 
-    **Single-face follow-up — 2026-09-21.** Work isolated on
+    **Single-face follow-up — 2026-09-21.** Standalone [investigation and fix](../investigations/2026-09-21-macos-metal-face-color.md). Work isolated on
     `fix/macos-metal-face-color`. Diagnostic commit `4f6aa018`, Codemagic build
     `6ab052b08915493520db2424`: every step succeeded. The matching prior Linux
     baseline is `det1.png` / `linux-seam20.png` / `lx20.png`; the scratchpad's
