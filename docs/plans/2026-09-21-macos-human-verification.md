@@ -1,7 +1,7 @@
 # macOS Metal renderer — human verification on a real Mac (Phase 4 real exit)
 
 **Date:** 2026‑09‑21
-**Status:** Runbook written; artifact publishing fixed; awaiting a human run.
+**Status:** Runbook written; artifact publishing fixed; `max_build_duration` raised to 60 so a VNC session fits. Awaiting a human session. **Nobody on this project owns a Mac** — the primary path is Codemagic's VNC session on the build runner (next section); the physical-Mac sections after it are kept for whenever hardware does appear, and are the only way to close the Retina row.
 **Parent:** [2026-09-20-macos-metal-renderer.md](2026-09-20-macos-metal-renderer.md) — Phase 4's exit criterion is *"an interactive .app that plays snowgoons"*. CI proved everything it can (§8 step 11: a real window, 29 drawables presented, pixels identical to the verified offscreen render and to Linux GL). What CI **cannot** prove is listed below, and this document is the one ask that closes it: run the app once on a Mac and fill in the checklist.
 **TODO:** `TODO.md` — *macOS Metal renderer* (Open → Platform / Display) and *macOS: `-fullscreen` window flag*.
 
@@ -24,7 +24,32 @@ Plus one path CI deliberately bypasses with `-L`: **launching the bundle by doub
 
 `codemagic.yaml`'s `macos-desktop-debug` artifact list said `engine/wf_game`. On macOS the binary lives at `engine/wf_game.app/Contents/MacOS/wf_game`, so that pattern matched nothing — every artifact zip so far (~200 KB) was logs and PNGs with no app in it. Changed to `engine/wf_game.app`, which Codemagic publishes as a zip of the bundle. The bundle carries `cd.iff` and `level0.mid` in `Contents/Resources` (CMake bundles whichever of `cd.iff`, `level0.mid`, `florestan-subset.sf2` exist at configure time; the soundfont is Android-only in this repo, so there is no music — a pre-existing gap, non-fatal, tracked separately).
 
-## Requirements
+## No Mac: drive the app over VNC on the Codemagic runner (primary path)
+
+Codemagic lets you open a VNC desktop on the very VM that just built the app ([remote access docs](https://docs.codemagic.io/troubleshooting/accessing-builder-machine-via-ssh/)). Facts that shape the procedure, from those docs: access must be ticked **per build** in the Start-new-build modal; credentials are shown on the build page while it runs and stay usable for **10 minutes after the steps finish**; once connected, the session lives until the build is cancelled or `max_build_duration` is hit (now 60 min for `macos-desktop-debug`). The runner already proved it has a window-server session (Phase 4 proxy gate), so the app draws on the VNC desktop.
+
+Cost: the whole thing is one Mac-minute per wall-clock minute — a 20-minute session ≈ 20 min of the 400/month budget. Cancel the build when done rather than letting it idle to the limit.
+
+1. [codemagic.io/app/6aafa6886ab3f21cf431a6cb](https://codemagic.io/app/6aafa6886ab3f21cf431a6cb) → **Start new build** → branch `2026-new-level`, workflow **macOS Desktop (Debug, headless)** → tick **Enable SSH/VNC access** → Start.
+2. Have a VNC client ready on Linux (`sudo apt install tigervnc-viewer`, or Remmina). While the build runs (~4 min) or within 10 min after, click **Explore build machine via SSH or VNC/RDP client** above the build steps; use the shown **Host:Port**, **Username**, **Password** (`vncviewer <Host>:<Port>`). Also copy the SSH command — a terminal on the VM is handy for launching with flags.
+3. On the VM (VNC desktop → Terminal, or the SSH session; note an app launched from SSH still appears on the VNC desktop since it's the same login session):
+   ```bash
+   cd "$CM_BUILD_DIR"          # ~/clone if the variable isn't in your shell
+   APP=./engine/wf_game.app/Contents/MacOS/wf_game
+   LEVEL="$PWD/wflevels/snowgoons-blender/snowgoons-standalone.iff"
+   cd wfsource/source/game
+   "$CM_BUILD_DIR"/$APP --windowed -L"$LEVEL"                           # run (1): interactive
+   "$CM_BUILD_DIR"/$APP --windowed -width=800 -height=600 -L"$LEVEL"    # run (2a)
+   "$CM_BUILD_DIR"/$APP --windowed -fullscreen -L"$LEVEL"               # run (2b)
+   open "$CM_BUILD_DIR"/engine/wf_game.app                              # run (3): the double-click path
+   ```
+   Everything is already built and in place — no download, no Gatekeeper, no level copying.
+4. Work the **Verification** checklist below. Rows 2, 3, 4, 5 and 6 are all closable here. Row 1 (Retina) is **not**: the runner is scale 1.0 — record it as *not exercised* and leave that row for real hardware. Take screenshots (`screencapture ~/shot.png` on the VM, then `scp` via the SSH session, or your VNC client's capture) into `docs/plans/2026-09-21-macos-human-verification/`.
+5. **Cancel the build** in the Codemagic UI when finished.
+
+If a headless VNC session can't do fullscreen sensibly (a virtual display with no real monitor), record what actually happened — that's still evidence, and it moves `-fullscreen` from "untested" to "untestable without hardware", which is a legitimate terminal state for that TODO item.
+
+## If a physical Mac ever appears (secondary path)
 
 - **Apple Silicon.** The build is `-DCMAKE_OSX_ARCHITECTURES=arm64` only. An Intel Mac needs a rebuild with `x86_64` (or a universal binary) — not done, say so if that's the machine you have.
 - **macOS 12.0+** (`LSMinimumSystemVersion` in `macos/Info.plist`).

@@ -354,7 +354,13 @@ workflows:
   macos-desktop-debug:
     name: macOS Desktop (Debug, headless)
     instance_type: mac_mini_m2
-    max_build_duration: 20
+    # 60, not the 20 a headless build needs: with "Enable SSH/VNC access"
+    # ticked on Start new build, the VM stays connectable for 10 min after the
+    # steps finish and a connected VNC session then lives until this limit.
+    # That session is how a human plays the .app without owning a Mac
+    # (docs/plans/2026-09-21-macos-human-verification.md). Unattended runs
+    # still end at ~4 min; only a connected session uses the headroom.
+    max_build_duration: 60
 
     cache:
       cache_paths:

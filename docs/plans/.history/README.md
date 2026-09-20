@@ -1,5 +1,6 @@
 | Date | Change |
 |------|--------|
+| [2026-09-20](https://github.com/wbniv/WorldFoundry/commit/ee02a948) | docs(plans): index the macOS Phase 0 green-baseline plan |
 | [2026-09-20](https://github.com/wbniv/WorldFoundry/commit/17bdceb1) | feat(condo): improve patio and window camera pans |
 | [2026-09-20](https://github.com/wbniv/WorldFoundry/commit/91a5fab2) | feat(condo): add button door and patio tour |
 | [2026-09-20](https://github.com/wbniv/WorldFoundry/commit/1f0a27ad) | docs(plans): index the macOS Metal renderer plan |
@@ -24,6 +25,11 @@
 | [2026-06-26](https://github.com/wbniv/WorldFoundry/commit/16d72fa6) | docs: add plan index (docs/plans/README.md) |
 
 <!--history-meta v1
+ee02a948	author	Will Norris
+ee02a948	added	1
+ee02a948	deleted	0
+ee02a948	files	1
+ee02a948	body	Co-Authored-By: Claude Sonnet 5 <noreply@anthropic.com>\nClaude-Session: https://claude.ai/code/session_015ksFy3ZSSz2XMdto3jVA9v
 17bdceb1	author	Will Norris
 17bdceb1	added	2
 17bdceb1	deleted	2
