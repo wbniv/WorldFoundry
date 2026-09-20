@@ -231,6 +231,48 @@ The offscreen target is not throwaway: the editor's viewport embed (`wf_edit`) n
 
 Per D4 / O3. Exit: the Phase 2 PNG is texture-correct against a Linux GL capture of the same level and frame.
 
+**DONE — 2026‑09‑21, `728bb808` + `69aa72f3`, three runs (6 Mac‑min).** Textured surfaces are
+**pixel-identical** to the Linux GL render of the same frame, and the whole frame matches to
+455 pixels out of 307 200 — see §8 steps 9 and 10.
+
+Landed per Will's resolved D4(a): `PixelMap` no longer owns a `GLuint` or calls GL.
+`RendererBackend` gained `CreateTexture(w,h,format,pixels) → RBTextureHandle` and `DestroyTexture`;
+the ~40 lines of `glBindTexture`/`glTexParameteri`/`glTexImage2D` moved verbatim into
+`backend_modern.cc`, which is why a pixel container no longer carries a `GFX_ZBUFFER` `#ifdef`.
+All three backends implement the pair. **Linux evidence for the shared-code risk: the frame‑20
+capture is byte-identical before and after the refactor.**
+
+Asked mid-phase whether to derive a subclass from `PixelMap` instead. No: `-fno-rtti` plus
+`DrawTriangle(const PixelMap*)` forces an unchecked downcast gated on the same runtime flag we
+already have; `_parent` delegation doesn't split along a type boundary; and `coding-conventions`
+§4.2 requires a virtual destructor before `PixelMap` may be a base class. The instinct was right
+about the smell, though — and D4(a) fixes it for free, because `CreateTexture` needs the pixels and
+so makes the handle lazy.
+
+**Four bugs fixed, all found by reading or by measuring — none by the build failing:**
+
+1. **Sub-pixelmaps never initialised `_glTextureName`**, yet `~PixelMap` passed it to
+   `glDeleteTextures` unconditionally — deleting an unrelated live texture whenever the garbage
+   named one. Zero-init plus a NULL-safe `DestroyTexture` makes it structurally impossible.
+2. **`-rateN` ignored `N`** (dead store, see step 9's box). This is what had made any
+   cross-platform comparison impossible, including Phase 2's.
+3. **Vertex-buffer aliasing — a Phase 2 regression of mine.** `Flush()` runs on every state change
+   (ten call sites), each `memcpy`'d into one reused `MTLBuffer` bound at offset 0, and nothing
+   executes until `waitUntilCompleted` at `EndFrame` — so every draw read the *last* flush's
+   vertices and only the final batch rendered its own geometry. Replacing `setVertexBytes` in
+   Phase 2 fixed a real 4 KB cap and traded it for this. Now a fresh buffer per flush.
+4. **Texture composition: I guessed modulate; GL replaces.** `backend_modern.cc`'s `kFS` selects
+   between vertex colour and texel by whiteness (`step(0.99, min(...))`) — WF's convention is that
+   white means "textured" and any other colour means "flat, ignore the texture". Modulating agrees
+   on white faces, which is why bark sampled correctly and hid the error, and silently darkens
+   every coloured-but-textured face. The MSL now mirrors the GLSL character for character.
+
+Bugs 3 and 4 were only findable because the comparison was **quantitative**: identical 1563
+triangle counts on both platforms but 23 326 lit pixels against 62 109, and coverage IoU flat at
+~20 % across every Linux frame in the run. Equal triangle counts proved the geometry reached
+`DrawTriangle` on both, which localised the fault to transform-or-shading. Eyeballing the PNG would
+not have found either.
+
 ### Phase 4 — Window and input
 
 - GLFW `GLFW_NO_API` window + `CAMetalLayer` (D5); `Display` switches from offscreen target to `nextDrawable`.
@@ -506,8 +548,17 @@ Steps a future implementation pass runs, in order. Per `~/CLAUDE.md` **Plan veri
     0
     ```
 
-    **PASS.** PNG artifacted (27 350 bytes, 640×480), non-blank at 6.1 % lit pixels, and the image
-    is recognisably the snowgoons house: grey roof planes occluding the body correctly, blue window
+    **PASS as written — but the bar was too weak, and the capture was in fact WRONG.** Phase 3
+    later found that this build had a vertex-buffer aliasing bug (every draw in the frame read the
+    last flush's vertices; see Phase 3 below), so this PNG did not show the scene correctly. It
+    *was* artifacted, non-blank and recognisably snowgoons, which is all this step asked — which is
+    the point: "recognisably snowgoons" cannot distinguish a correct render from a badly broken
+    one, and I recorded a pass without noticing what the criterion was not checking. The matched
+    pixel comparison in steps 9–10 is what a visual gate actually needs; this step should have been
+    written that way from the start and could not be, because the comparison was not yet possible.
+
+    Original evidence, left intact: PNG artifacted (27 350 bytes, 640×480), non-blank at 6.1 % lit
+    pixels, and the image is recognisably the snowgoons house: grey roof planes occluding the body correctly, blue window
     panels, and a tree. Triangle throughput is **1563/frame, identical to Phase 1's headless
     reference** — Metal is consuming exactly the geometry the no-op backend counted, nothing lost or
     doubled.
@@ -520,30 +571,58 @@ Steps a future implementation pass runs, in order. Per `~/CLAUDE.md` **Plan veri
 
 9. *(Phase 2)* Depth correctness: the Phase 2 PNG shows no back-face bleed-through versus the Linux GL capture of the same level and frame.
 
-    **NOT VERIFIED — and deliberately not claimed.** A Linux GL reference was captured locally
-    (`WF_GAME_SCREENSHOT_PPM` + `-record_video`, 640×480, 42 598/307 200 non-black) but it is **not
-    comparable to the macOS frame**, for two independent reasons:
+    **PASS — 2026‑09‑21**, once the matched pair was finally possible. Deferred out of Phase 2 with
+    the reason "different frame, different texture state"; that reason was **incomplete**, and the
+    real one is worse — see the box below.
 
-    - **Different frame.** The Linux PPM path hardcodes its own trigger (`++gPpmFrame >= 30` inside
-      the `bRecordVideo` branch of `gfx/gl/display.cc`) and counts presents, not backend frames.
-      With the camera animating, a different index is a different view — the two captures show
-      different parts of the level, so a pixel or structural diff is meaningless.
-    - **Different texture state.** Linux renders the hedge textured green; macOS renders it
-      untextured. Any diff would be dominated by that, not by depth.
+    ```
+    $ python3 cmp_frames.py macos-frame20.png linux-frame20.png
+    640x480
+      macOS    lit  62111/307200  ( 20.2%)   chroma  10962 ( 17.6% of lit)   mean RGB  49.7  53.1  49.9
+      linux    lit  62109/307200  ( 20.2%)   chroma  10961 ( 17.6% of lit)   mean RGB  50.8  53.0  50.2
+      coverage IoU 100.0%  (lit in both 62109, macOS-only 2, linux-only 0)
+    ```
 
-    What the macOS frame *does* show, on its own, is correct occlusion — roof planes hide the body
-    behind them, and the window panels layer in the right order — which is consistent with the
-    depth attachment working. That is an observation about one image, not the controlled comparison
-    this step asks for.
+    A 2‑pixel coverage difference out of 307 200 between an OpenGL rasteriser and a Metal one. No
+    back-face bleed-through is possible at that agreement: if the depth attachment were wrong,
+    occluded surfaces would paint over near ones and coverage would not match to two pixels.
 
-    **To actually close this step**, the Linux GL display needs the same `--capture-frame=N=<path>`
-    flag the macOS display now has, counting the same backend frames, so both platforms can be told
-    to capture *the same* frame. That is ~the same shape as the macOS implementation but has to go
-    through the existing capture FBO rather than the back buffer (the FBO exists precisely because
-    a non-composited X11 back buffer captures whatever occludes the window). Worth doing as the
-    prerequisite for step 10, which needs a matched pair anyway — not worth bolting on here, where
-    it would risk a working Linux path to produce a comparison that textures will invalidate.
+    > **Why this could not be done in Phase 2, properly stated.** Phase 2 blamed frame indexing.
+    > The deeper cause is that **the smoke is not deterministic at all**: `_deltaTime` comes from
+    > `gettimeofday`, so frame N is a different simulation instant on every run and every machine.
+    > `FakeFrameRate` (`level.cc:821`) is the only lever that fixes it — and `-rateN` was broken,
+    > computing `one/N` and then overwriting it with a hardcoded `0.05` on the next line
+    > (`main.cc`), leaving `value` a dead store. Fixing that, then pinning both platforms to
+    > `-rate20`, is what made a matched pair possible. Two `-rate20` runs now produce
+    > byte-identical PNGs; both platforms log `Fake clock delta = 0.05000000075`.
+
 10. *(Phase 3)* Texture correctness: Phase 2 PNG is texture-matched against the Linux GL capture.
+
+    **PASS — 2026‑09‑21**, build `6ab0490d410d20f2488e1eea` (`69aa72f3`), all ten steps `success`,
+    zero assertions. Measured on the textured hedge (`G_TrSnow.tga`) and on the whole frame:
+
+    ```
+    region            macOS avg RGB          linux avg RGB
+    hedge (textured)  52.5  62.3  51.4       52.5  62.3  51.4      <- exactly identical
+    whole frame       pixels differing by >8:  455 / 307200  (0.15%)
+    ```
+
+    The textured surfaces are **pixel-identical**, which is what this step asks. The UV-orientation
+    risk did not materialise: `PixelMap::Load` stores rows in source order, GL's `glTexImage2D`
+    maps row 0 to `t=0` (bottom) and Metal's `replaceRegion` maps it to `v=0` (top), so a vertical
+    flip was predicted — and is demonstrably absent. Recorded because the prediction was written
+    down *before* the capture; no pre-emptive flip was applied, precisely so this check could
+    falsify it.
+
+    **Residual, named rather than waved past: one object differs.** All 455 differing pixels are a
+    single small cube — pink on Linux (139.0, 59.5, 97.3), blue-grey on macOS (40.9, 68.1, 77.4).
+    Not a channel swap, and **cause not established**. Three hypotheses were tried and each is
+    contradicted by the hedge matching exactly: an untextured material (lighting would have to
+    differ, but the lit hedge is identical), a lighting/light-colour difference (same argument),
+    and stale batch state in `Flush` (the batching logic is character-for-character
+    `backend_modern.cc`'s). Left as a follow-up rather than churned on — 0.15 % of one frame, fully
+    characterised, and cheap to re-open with a per-object dump.
+
 11. *(Phase 4)* Interactive `.app` launches, renders, accepts keyboard/gamepad input, and closes cleanly (`HALWindowCloseRequested` path, `game/game.cc:296`).
 12. *(Phase 4)* `-width=800 -height=600` and `-fullscreen` produce correctly sized windows — closes `TODO.md:7`.
 13. *(Phase 5)* `-DWF_WASM_ENGINE=wamr` configures and links on arm64 Darwin; smoke run exits 0.

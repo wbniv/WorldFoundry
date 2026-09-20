@@ -1,5 +1,6 @@
 | Date | Change |
 |------|--------|
+| [2026-09-20](https://github.com/wbniv/WorldFoundry/commit/0c299a9a) | docs(plans): Phase 2 result — Metal renders snowgoons offscreen, CI is a visual gate |
 | [2026-09-20](https://github.com/wbniv/WorldFoundry/commit/babb113c) | docs(plans): resolve D4/O3 — widen the RendererBackend texture seam |
 | [2026-09-20](https://github.com/wbniv/WorldFoundry/commit/00623f5d) | docs(plans): Phase 1 result — 1563 triangles/frame, §2.1 confirmed |
 | [2026-09-20](https://github.com/wbniv/WorldFoundry/commit/41510bae) | refactor(memory): measure the array cookie instead of switching on it |
@@ -7,6 +8,11 @@
 | [2026-09-20](https://github.com/wbniv/WorldFoundry/commit/72f650bd) | docs(plans): scope the macOS Metal renderer port |
 
 <!--history-meta v1
+0c299a9a	author	Will Norris
+0c299a9a	added	113
+0c299a9a	deleted	0
+0c299a9a	files	1
+0c299a9a	body	Build 6aafe5e7ca453cfeba7bf096 (e197185f), every step success. macos-frame20.png\nis artifacted, 640x480, non-blank at 18670/307200 lit pixels, and recognisably\nthe snowgoons house — roof planes occluding correctly, window panels, a tree.\nTriangle throughput 1563/frame, identical to Phase 1's headless reference, so\nMetal consumes exactly the geometry the no-op backend counted.\n\n§8 step 8 PASS, with the reason the capture is frame 20 rather than the nominal\n30 recorded: --capture-frame counts BACKEND frames and only 29 exist in a\n30-step run, so 30 would silently never have fired.\n\n§8 step 9 (depth vs a matched Linux GL frame) written up as NOT VERIFIED rather\nthan glossed. A Linux reference was captured locally but is not comparable: the\nPPM path hardcodes its own trigger and counts presents, not backend frames, so\nwith the camera animating it is a different view — and Linux renders textured\nwhere macOS does not. Recorded what would actually close it (give the Linux GL\ndisplay the same --capture-frame=N, through the capture FBO), and why that is\nbetter done as Phase 3's prerequisite than bolted on here.\n\nPhase 1's open question is now RESOLVED, not guessed: the step counter shows\nstep=1 rendered=0 — the first frame is skipped by the ValidView gate — and\nsteps 31/32 are UnloadLevel's two teardown PageFlips, not engine steps. 30 + 2\n= the 32 lines observed, with rendered correctly frozen at 29.\n\nThe tree rendering as white spikes is textures being off until Phase 3, and is\nevidenced rather than asserted: the level's materials include G_Bark.tga and\nG_TrSnow.tga, and BuildUniforms still forces use_tex = 0.\n\nCo-Authored-By: Claude Opus 5 (1M context) <noreply@anthropic.com>\nClaude-Session: https://claude.ai/code/session_015ksFy3ZSSz2XMdto3jVA9v
 babb113c	author	Will Norris
 babb113c	added	3
 babb113c	deleted	1
