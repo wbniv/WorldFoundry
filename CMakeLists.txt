@@ -662,12 +662,22 @@ if(WF_PHYSICS_ENGINE STREQUAL "jolt")
         COMPILE_DEFINITIONS "NDEBUG"
         COMPILE_OPTIONS     "-O2;-w;-fno-rtti"
     )
-    if(EMSCRIPTEN)
+    if(CMAKE_CXX_COMPILER_ID MATCHES "Clang")
         # Jolt.cmake unconditionally enables a PCH, but the source-file
         # properties above (-O2 -fno-rtti) don't apply to the PCH compile.
-        # GCC silently ignores a flag-mismatched PCH; emcc (clang) hard-errors
-        # ("run-time type information was enabled in precompiled file").
-        # Disable the PCH for the web build — flags then match per-TU.
+        # GCC silently ignores a flag-mismatched PCH; every Clang family
+        # (upstream Clang under Emscripten/Android, AppleClang under macOS)
+        # hard-errors ("run-time type information was enabled in precompiled
+        # file"). Originally scoped to EMSCRIPTEN only; broadened after the
+        # first real macOS Codemagic build hit the identical error on
+        # AppleClang — macOS uses the Ninja generator (D2: keeps Jolt's
+        # add_library modifiable, see the macOS Metal renderer plan), which
+        # exercises Jolt.cmake's PCH path the same way Emscripten's does. iOS
+        # never hit this because it uses the Xcode generator, which handles
+        # Jolt's PCH differently (see the Xcode/global-flags note above).
+        # CMAKE_CXX_COMPILER_ID MATCHES "Clang" catches both "Clang" and
+        # "AppleClang" (substring match) while leaving GCC untouched, since
+        # this is a compiler-family issue, not a platform one.
         set_target_properties(Jolt PROPERTIES DISABLE_PRECOMPILE_HEADERS ON)
     endif()
     list(APPEND WF_LINK_LIBS Jolt)
