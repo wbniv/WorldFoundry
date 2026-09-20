@@ -1,5 +1,6 @@
 | Date | Change |
 |------|--------|
+| [2026-09-20](https://github.com/wbniv/WorldFoundry/commit/29e5bcbd) | docs(plans): index the engine multi-directional-light-fix plan |
 | [2026-09-20](https://github.com/wbniv/WorldFoundry/commit/782e821d) | docs(plans): index the Jolt kinematic-position-sync plan |
 | [2026-09-20](https://github.com/wbniv/WorldFoundry/commit/7e0300b1) | docs(plans): index the export_level light-field-duplication plan |
 | [2026-09-20](https://github.com/wbniv/WorldFoundry/commit/98c5c10b) | docs(plans): index the project-room telescoping-doors plan |
@@ -19,6 +20,11 @@
 | [2026-06-26](https://github.com/wbniv/WorldFoundry/commit/16d72fa6) | docs: add plan index (docs/plans/README.md) |
 
 <!--history-meta v1
+29e5bcbd	author	Will Norris
+29e5bcbd	added	1
+29e5bcbd	deleted	0
+29e5bcbd	files	1
+29e5bcbd	body	Co-Authored-By: Claude Sonnet 5 <noreply@anthropic.com>\nClaude-Session: https://claude.ai/code/session_011WmfFdmKRi46BtcEyu8pkT
 782e821d	author	Will Norris
 782e821d	added	1
 782e821d	deleted	0
