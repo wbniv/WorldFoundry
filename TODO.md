@@ -145,6 +145,7 @@
 
 ## Done
 
+- ✅ 2026-09-20 — [macos-phase0-green] macOS `wf_game` builds, links, and runs headless end-to-end on Codemagic for the first time ever: Jolt extraction, Jolt PCH/RTTI Clang fix, Forth-only scripting scope, REST API/debug-bridge GL fixes, and a real arm64 array-cookie heap-corruption bug (`MEMORY_DELETE_ARRAY` assumed the Itanium ABI's 8-byte cookie; ARM's is 16) root-caused and fixed via `MEMORY_NEW_ARRAY`, with a regression guard (`wf_game --memory-test`) wired into CI. See [plan](docs/plans/2026-09-20-macos-phase0-green-baseline.md).
 - ✅ 2026-09-20 — [condo-camera-pans] Patio and master-window POVs now use distant near-horizon targets, 52° FOV, one-second blends, and smoothstep sweeps; patio trigger/holds keep the shot out of the doorway and stationary during the pan. See [plans](docs/plans/2026-09-19-condo-master-window-pov.md).
 - ✅ 2026-09-20 — [qbert-golden-schema-path] Fixture `.blend`'s stale absolute `wf_schema_path`s rewritten to Blender `//`-relative; schema-load failures now loud on stderr; golden regenerated. See [plan](docs/plans/2026-09-20-export-level-light-field-duplication.md).
 - ✅ 2026-09-20 — [condo-doors] Door collision is continuous: every glass leaf explicitly carries Mass 75; the gathered one-third stack, all three extended thirds, and both closed-state seams block the player. See [plan](docs/plans/2026-09-20-condo-project-room-telescoping-doors.md).
