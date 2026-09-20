@@ -28,6 +28,22 @@ never called anywhere. So a script-driven position write on a door panel today e
 moves nothing in Jolt at all (if the actor has no character ID), or — worse — moves the
 visible mesh while its stale collision volume stays behind.
 
+> **Research correction (2026‑09‑20, implementation pass).** The two claims in the
+> paragraph above are **false**, and the approach below does not work as written. Left
+> in place above for traceability; corrected here. See **Status** at the bottom.
+>
+> 1. `JoltBodySetPosition()` does **not** have zero callers. It has two:
+>    `wfsource/source/game/actor.hpi:107` (in `setCurrentPosition`) and, critically,
+>    `wfsource/source/physics/jolt/physical.hpi:24` inside `PhysicalAttributes::Update()`.
+> 2. Because of that second caller, scripted position writes on a body actor **do**
+>    already reach Jolt. `Update()` runs once per physics frame from
+>    `MovementObject::DoneWithPhysics()` (`wfsource/source/movement/movementobject.cc:77`)
+>    and unconditionally pushes `_position` into the body. The premise that collision
+>    stays stale behind the mesh is wrong — collision already follows, every frame.
+>
+> The real gap is narrower than the plan states: the existing sync is a **teleport**, not
+> a sweep. That is a genuine limitation, but it is not what the Approach below fixes.
+
 Also checked, and rejected as the fix target: building out `Platform::initPath()` into a
 generic OAD-authored waypoint/path system. `platform.hp/.cc`'s `initPath()` is a fully
 empty stub (its only line is a commented-out call to a base-class method that doesn't
@@ -103,6 +119,71 @@ surface, not this one's. Mockups section dropped per the plan template's allowan
 4. Once this lands, re-verify the telescoping door's Forth script actually slides with
    working collision (the follow-up task's own verification, referenced here for
    traceability, not duplicated).
+
+**Not run — no code was written.** The implementation pass stopped before editing any
+source file, because the Approach does not survive contact with the code (see the
+Research correction in Context, and Status below). Recording why each step was not
+reached, rather than leaving them blank:
+
+1. **Build a small scratch test actor … confirm Jolt's body position actually updates
+   every frame.** Not run. Investigating this step is what surfaced the blocker: the body
+   position *already* updates every frame today, via
+   `PhysicalAttributes::Update()` → `JoltBodySetPosition()`
+   (`wfsource/source/physics/jolt/physical.hpi:22-28`), called from
+   `MovementObject::DoneWithPhysics()` (`wfsource/source/movement/movementobject.cc:77`).
+   The behaviour this step was written to prove absent is present. **N/A** — premise
+   invalid.
+
+2. **Confirm the sweep behavior … doesn't tunnel through a thin static collider.** Not
+   run, and believed **not achievable by this mechanism**. Actor bodies are `Kinematic`
+   in the `DYNAMIC` object layer (`jolt_backend.cc:215-219`). A kinematic body has
+   effectively infinite mass and is never positionally corrected by a static body, so it
+   passes through static geometry whether moved by `SetPosition` or `MoveKinematic`. The
+   object-layer filter (`jolt_backend.cc:92-94`) does let DYNAMIC↔STATIC contacts be
+   *detected*, but detection is not blocking. `MoveKinematic`'s sweep buys correct
+   pushing of *dynamic* bodies and `CharacterVirtual` contact resolution — i.e. the door
+   shoving the player out of the way — not static-collider tunnelling. This step needs
+   rewriting against a dynamic/character obstacle before it can pass or fail.
+
+3. **No regression to character-controlled actors.** Trivially satisfied — no code was
+   changed. **N/A.**
+
+4. **Re-verify the telescoping door's Forth script.** Not reached; blocked behind steps
+   1–2, and the script itself is out of scope per **Out of scope**.
+
+## Status: blocked, escalated
+
+Implementing the Approach literally — calling `JoltBodyMoveKinematic` from the three
+mailbox-write handlers — would produce a **silent no-op**. `MoveKinematic` works by
+setting a velocity for Jolt to integrate across the next step. But
+`PhysicalAttributes::Update()` runs later in the same frame and unconditionally does
+`JoltBodySetPosition(_joltBodyID, _position)` followed by
+`JoltBodySetLinVelocity(_joltBodyID, Vector3::zero)` — teleporting the body and zeroing
+exactly the velocity `MoveKinematic` just established. The change would compile, read
+correctly, and do nothing.
+
+Making the sweep effective means changing the authority model that
+`wfsource/source/physics/jolt/physical.hpi:16-28` states deliberately and in comments:
+*"WF fully controls kinematic positions; Jolt only maintains the broadphase collision
+structure."* That is a cross-cutting decision this plan never made, and it opens
+questions with no authored answer:
+
+- **Which actors opt into sweep authority?** All bodies, or only scripted movers (a new
+  per-actor flag, `Mass == 0`, something else)? Flipping it globally changes physics for
+  every body actor in every level.
+- **Who wins when a swept move is blocked?** There is no body-side read-back path — the
+  character path has `JoltSyncFromCharacter()`, bodies have nothing equivalent. Either
+  WF's `_position` gets corrected from Jolt (new plumbing, and scripts then fight the
+  correction), or the mesh visually desyncs from its collision volume.
+- **Is a kinematic body even the right body type** for a door that should be stopped by
+  the world, given the layer analysis in verification step 2 above?
+
+**ESCALATE: this needs T4/T5** — the fix requires redesigning the WF↔Jolt authority model
+for kinematic bodies, not the additive plumbing change this plan describes.
+
+Nothing was landed: no source file was modified, and no helper was added (adding a
+`JoltBodyMoveKinematic` with no working caller would just be a second dead function
+beside the one this plan wrongly believed was dead). This plan file is the only change.
 
 <!--
 When the work lands, this section becomes the permanent record:
