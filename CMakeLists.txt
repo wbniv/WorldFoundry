@@ -247,11 +247,17 @@ elseif(IOS)
         menu particle audio/linux
     )
 elseif(APPLE)
-    # macOS desktop — mirrors iOS: gfx/gl (X11/GLX) excluded, and gfx/glpipeline
-    # excluded too for now. As on the iOS arm above, that exclusion is a
-    # not-yet-done, not a GL dependency: only backend_modern.cc in that directory
-    # is GL-bound. Rendering is a true no-op (engine/stubs/renderer_stub.cc)
-    # until Phase 1 of docs/plans/2026-09-20-macos-metal-renderer.md.
+    # macOS desktop — gfx/gl (X11/GLX) excluded; gfx/glpipeline is IN as of
+    # Phase 1 of docs/plans/2026-09-20-macos-metal-renderer.md. That directory
+    # was never GL-only: since the RendererBackend seam landed, the eight
+    # rend{f,g}{c,t}{l,p}.cc geometry files include only gfx/renderer_backend.hp
+    # + WF math and end in RendererBackendGet().DrawTriangle(). backend_modern.cc
+    # is the single GL-bound file (verified by grep, not by assumption) and is
+    # skipped for APPLE just below. Compiling the eight is what lets real
+    # geometry reach a backend; engine/stubs/renderpoly3d_stubs.cc is dropped
+    # from the macOS list in the same change, since these files define the same
+    # eight symbols for real. The backend itself is still a no-op
+    # (engine/stubs/renderer_stub.cc) — Metal lands in Phase 2.
     # hal/macos provides the entry shell, the
     # headless Display, and GL/window stubs. The portable Linux HAL files
     # (platform_init/audio/input/lifecycle/asset_accessor_posix) are reused
@@ -260,7 +266,7 @@ elseif(APPLE)
     set(WF_DIRS
         pigsys streams cpplib math memory iff mailbox
         hal hal/macos
-        gfx
+        gfx gfx/glpipeline
         input asset baseobject movement room physics
         anim timer scripting game ini loadfile
         profile renderassets savegame savegame/linux
@@ -332,8 +338,15 @@ if(IOS)
 elseif(APPLE)
     # display_macos.cc is #included from gfx/display.cc (same pattern as
     # display_ios.cc / gfx/gl/display.cc), not a standalone TU.
+    #
+    # backend_modern.cc is the one genuinely GL-bound file in gfx/glpipeline
+    # (it includes <GL/gl.h>); the other eight rend*.cc in that directory are
+    # backend-agnostic and ARE compiled here — see the WF_DIRS comment above.
+    # Its RendererBackend slot is filled by engine/stubs/renderer_stub.cc, which
+    # backend_factory.cc selects on WF_TARGET_MACOS.
     list(APPEND WF_SKIP
         hal/macos/display_macos.cc
+        gfx/glpipeline/backend_modern.cc
     )
 elseif(EMSCRIPTEN)
     list(APPEND WF_SKIP
@@ -382,16 +395,18 @@ if(IOS)
         ${SRC}/gfx/glpipeline/backend_factory.cc
     )
 elseif(APPLE)
-    # macOS desktop — renderer-agnostic bring-up. The 8 RenderPoly3D link stubs +
-    # the no-op RendererBackend + backend_factory (picks the headless backend via
-    # WF_TARGET_MACOS), plus the portable Linux HAL files reused verbatim
-    # (hal/macos holds the macOS-specific shell, headless Display, GL/window stubs,
-    # and the NSBundle asset accessor). platform_init.cc selects NSBundle vs POSIX
-    # via WF_TARGET_MACOS guard; asset_accessor_posix.cc is NOT compiled on macOS.
+    # macOS desktop — Phase 1: real geometry, no-op backend. renderpoly3d_stubs.cc
+    # is GONE from this list — gfx/glpipeline's eight rend*.cc (now in WF_DIRS)
+    # define those same eight RenderObject3D::RenderPoly3D* symbols for real, and
+    # keeping both would be a duplicate-symbol link error. backend_factory.cc is
+    # likewise no longer listed here: the gfx/glpipeline glob picks it up.
+    # What remains: the no-op RendererBackend, plus the portable Linux HAL files
+    # reused verbatim (hal/macos holds the macOS-specific shell, headless Display,
+    # GL/window stubs, and the NSBundle asset accessor). platform_init.cc selects
+    # NSBundle vs POSIX via WF_TARGET_MACOS guard; asset_accessor_posix.cc is NOT
+    # compiled on macOS.
     list(APPEND WF_SOURCES
-        ${STUB_SRC}/renderpoly3d_stubs.cc
         ${STUB_SRC}/renderer_stub.cc
-        ${SRC}/gfx/glpipeline/backend_factory.cc
         ${SRC}/hal/linux/platform_init.cc
         ${SRC}/hal/linux/audio.cc
         ${SRC}/hal/linux/input.cc
