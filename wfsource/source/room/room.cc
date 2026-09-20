@@ -120,7 +120,11 @@ Room::Construct
    _masterObjectList = &masterObjectList;
    assert(ValidPtr(_masterObjectList));
    _memory = &memory;                       // remember pool for ~Room
-   _objectLists = new (memory) Int16List[_checkListEntries];
+   // MEMORY_NEW_ARRAY, not `new (memory) Int16List[n]` — the latter prefixes the
+   // block with an ABI-sized array cookie (8 bytes on x86_64, 16 on every
+   // arm64) that ~Room's MEMORY_DELETE_ARRAY would have to guess at. See
+   // memory.hp.
+   _objectLists = MEMORY_NEW_ARRAY(memory, Int16List, _checkListEntries);
 
 	DBSTREAM1( croom << "Room::Construct: roomIndex  = " << roomIndex << std::endl; )
 

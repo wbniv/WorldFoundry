@@ -93,13 +93,55 @@ protected:
 }
 #endif
 
+//==============================================================================
+// Pool-allocated arrays: allocate raw, construct in place, and NEVER let the
+// compiler put an array cookie in front of the block.
+//
+// `new (pool) T[n]` on a T with a non-trivial destructor makes the compiler
+// reserve a hidden prefix ("array cookie") holding the element count, so the
+// pointer it hands back is NOT the pointer the pool's Allocate() returned. The
+// size of that prefix is ABI-defined and differs between the targets WF ships:
+//
+//   generic Itanium C++ ABI (x86_64 Linux/macOS): 8 bytes — one size_t count
+//   ARM C++ ABI (IHI0041), used by EVERY AArch64 target — Apple arm64,
+//     Android arm64-v8a, aarch64 Linux: 16 bytes — TWO words,
+//     { element size, element count }
+//
+// MEMORY_DELETE_ARRAY used to hardcode the 8-byte form (`((long*)ptr)-1`),
+// which is right on x86_64 and 8 bytes short on every arm64 target: Free() then
+// read an allocation header 8 bytes past the real one and tripped DMalloc's
+// cookie assert during ~Room on the first macOS run
+// (docs/plans/2026-09-20-macos-phase0-green-baseline.md, fix 6).
+//
+// Allocating raw and placement-constructing each element removes the compiler
+// from the arithmetic entirely: the pointer handed out IS the allocation base
+// on every ABI, so MEMORY_DELETE_ARRAY frees exactly what it was given. This is
+// the same trade Array<T>::SetMax already makes (cpplib/array.hpi).
+//
+// MEMORY_NEW_ARRAY and MEMORY_DELETE_ARRAY are a matched pair — a block made by
+// one must be released by the other. Never mix either with `new (pool) T[n]`.
+//==============================================================================
+
+template <class T> T*
+_MemoryNewArray(Memory& memory, int entries ASSERTIONS( COMMA const char* file COMMA int line))
+{
+	assert(entries > 0);
+	memory.Validate();
+	T* items = (T*)memory.Allocate(sizeof(T) * entries ASSERTIONS( COMMA file COMMA line));
+	assert(ValidPtr(items));
+	for(int index = 0; index < entries; ++index)
+		new (&items[index]) T();
+	return items;
+}
+
+#define MEMORY_NEW_ARRAY( memory, classname, entries ) \
+	_MemoryNewArray<classname>( (memory), (entries) ASSERTIONS( COMMA __FILE__ COMMA __LINE__ ) )
+
 #define MEMORY_DELETE_ARRAY( memory, classptr, classname, entries) \
 {	\
-	long* count = ((long*)classptr)-1; \
-/*	assert(*count == entries); kts doesn't always work*/ \
 	for(int index=0;index<entries;index++) \
 		classptr [index].~classname (); \
-	(memory).Free(count); \
+	(memory).Free( classptr ); \
 }
 
 

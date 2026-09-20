@@ -52,6 +52,7 @@ int  gDebugPort = 7777;                 // default-on; --debug-port N overrides,
 char gDebugBind[256] = "127.0.0.1";    // bind address; set by --debug-bind ADDR
 int  gFrameStepSmokeCount = 0;          // >0 = run --frame-step-smoke=N path
 bool gWfmutSmoke          = false;      // true = run --wfmut-smoke path
+bool gMemoryTest          = false;      // true = run --memory-test and exit (no level, no window)
 bool gWfmutThreadTest     = false;      // true = run --wfmut-thread-test (X5 death-test)
 int  gFrameStepCycles = 1;              // --cycles=N: how many Load/Unload cycles to run
 // Always defined: rooms.cc/level.cc reference it unconditionally as a runtime
@@ -247,6 +248,11 @@ ParseCommandLine(int argc, char** argv)
 			gFrameStepSmokeCount = atoi( argv[index] + 1 + 18 );
 			DBSTREAM1( cprogress << "Frame-step API smoke: " << gFrameStepSmokeCount << " frames" << std::endl; )
 		}
+		else if ( strcmp( argv[index]+1, "-memory-test" ) == 0 )
+		{
+			gMemoryTest = true;
+			DBSTREAM1( cprogress << "memory pool-array test enabled" << std::endl; )
+		}
 		else if ( strcmp( argv[index]+1, "-wfmut-smoke" ) == 0 )
 		{
 			gWfmutSmoke = true;
@@ -405,6 +411,15 @@ PIGSMain( int argc, char* * argv )
 
 	DBSTREAM1( std::cout << ", Built:" << (char*)szDate << "," << (char*)szTime << " by " << szBuildUser << std::endl; )
 	int commandIndex = ParseCommandLine(argc,argv);
+
+	// --memory-test: pure allocator self-check (memory/pooltest.cc). Runs before
+	// any Display/Level/asset work so it stays usable on a headless CI box, and
+	// exits with the failure count so ctest sees a red on regression.
+	if (gMemoryTest)
+	{
+		extern int TestPoolArrays();
+		std::_Exit( TestPoolArrays() );
+	}
 
 
 #if defined(JOYSTICK_RECORDER)

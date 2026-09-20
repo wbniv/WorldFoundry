@@ -1071,6 +1071,15 @@ if(NOT ANDROID AND NOT IOS AND NOT APPLE AND NOT EMSCRIPTEN)
     set(WF_TEST_RUN_DIR
         ${CMAKE_SOURCE_DIR}/wfsource/source/game)  # so cd.iff resolves
 
+    # Allocator self-check — no level, no window, no assets. Pins the invariant
+    # that a WF pool array carries no compiler array cookie, so the alloc/free
+    # pair stays correct on every ABI (8-byte Itanium cookie on x86_64 vs
+    # 16-byte ARM cookie on arm64 is what broke ~Room on macOS; see
+    # memory/pooltest.cc and docs/plans/2026-09-20-macos-phase0-green-baseline.md).
+    add_test(NAME memory_pool_arrays
+        COMMAND $<TARGET_FILE:wf_game> --memory-test
+        WORKING_DIRECTORY ${WF_TEST_RUN_DIR})
+
     add_test(NAME wf_game_smoke_cycle1
         COMMAND $<TARGET_FILE:wf_game> --frame-step-smoke=30 --cycles=1 -L${WF_TEST_LEVEL}
         WORKING_DIRECTORY ${WF_TEST_RUN_DIR})

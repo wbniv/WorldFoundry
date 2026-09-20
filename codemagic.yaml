@@ -429,8 +429,13 @@ workflows:
           WF_GAME="$CM_BUILD_DIR/engine/wf_game.app/Contents/MacOS/wf_game"
           LEVEL="$CM_BUILD_DIR/wflevels/snowgoons-blender/snowgoons-standalone.iff"
           cd wfsource/source/game
+          # Allocator self-check first — sub-second, no level/window/assets, and
+          # it is the one check that is *about* this arm64 ABI (the compiler's
+          # array cookie is 16 bytes here vs 8 on x86_64). Fails loudly and
+          # early rather than as a cookie assert 30 frames in.
+          "$WF_GAME" --memory-test 2>&1 | tee "$CM_BUILD_DIR/macos-smoke.log"
           "$WF_GAME" --frame-step-smoke=30 --cycles=1 -L"$LEVEL" \
-            2>&1 | tee "$CM_BUILD_DIR/macos-smoke.log"
+            2>&1 | tee -a "$CM_BUILD_DIR/macos-smoke.log"
 
     artifacts:
       - macos-configure.log

@@ -74,7 +74,10 @@ LevelRooms::InitRooms(int numRooms,	_LevelOnDisk* levelData, PRoomObjectListChec
 	_roomArray = ( int32 * )( (char * )_levelData + ( _levelData->roomsOffset ));
 	AssertMsg( numRooms > 0, "No rooms in level" );
 
-	_rooms = new (HALLmalloc) Room[numRooms];
+	// MEMORY_NEW_ARRAY, not `new (HALLmalloc) Room[numRooms]` — see memory.hp:
+	// the compiler's array cookie is 8 bytes on x86_64 and 16 on arm64, and
+	// ~LevelRooms's MEMORY_DELETE_ARRAY must free the exact allocation base.
+	_rooms = MEMORY_NEW_ARRAY(HALLmalloc, Room, numRooms);
 
 	assert( ValidPtr( _rooms ) );
 
