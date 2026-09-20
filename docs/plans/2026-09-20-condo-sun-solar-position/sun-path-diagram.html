@@ -1,0 +1,87 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<title>Condo real solar position</title>
+<style>
+  :root { --bg:#1c1f26; --panel:#262b35; --ink:#e8ecf1; --dim:#9aa4b2; --sun:#ffcf5f; --accent:#5fb0ff; }
+  * { box-sizing: border-box; }
+  html, body { margin:0; width:1440px; height:900px; background:var(--bg); color:var(--ink);
+    font-family:-apple-system,"Segoe UI",Helvetica,Arial,sans-serif; overflow:hidden; }
+  .wrap { display:flex; flex-direction:column; height:100%; padding:28px 36px; gap:16px; }
+  h1 { margin:0; font-size:22px; font-weight:600; }
+  h1 span { color:var(--dim); font-weight:400; font-size:15px; margin-left:10px; }
+  .row { display:flex; gap:24px; flex:1; min-height:0; }
+  .panel { background:var(--panel); border-radius:10px; padding:16px 18px; display:flex; flex-direction:column; gap:10px; }
+  .panel h2 { margin:0; font-size:13px; text-transform:uppercase; letter-spacing:.06em; color:var(--dim); }
+  .diagram { flex: 1.3; }
+  .diagram svg { flex:1; width:100%; }
+  .table-panel { flex:1; }
+  table { border-collapse:collapse; width:100%; font-size:13px; }
+  th, td { text-align:left; padding:7px 10px; border-bottom:1px solid #333a48; }
+  th { color:var(--dim); font-weight:600; font-size:12px; text-transform:uppercase; }
+  td.num { font-variant-numeric: tabular-nums; color:var(--accent); }
+  .notes { background:var(--panel); border-radius:10px; padding:14px 18px; font-size:13px; color:var(--dim); line-height:1.55; }
+  .notes b { color:var(--ink); }
+  code { background:#12151a; padding:1px 5px; border-radius:4px; color:var(--accent); font-size:12px; }
+  .current { background: var(--panel); border-radius:10px; padding:12px 16px; font-size:13px; color:var(--dim); }
+  .current b { color: var(--sun); }
+</style>
+</head>
+<body>
+<div class="wrap">
+  <h1>Condo sun — fixed art direction vs. true solar position <span>docs/plans/2026-09-20-condo-sun-solar-position.md</span></h1>
+  <div class="current"><b>Today's fixed sun</b> (site_constants.py): altitude 50°, azimuth 150° (SSE) — an artist pick with no real match at this site's latitude (13.69°N). Closest real moment anywhere in the year is off by ≈29° combined (2026-06-21 ~11:55, alt 78.6°/az 150°).</div>
+  <div class="row">
+    <div class="panel diagram">
+      <h2>Sun path at 13.69°N, 2026-09-20 (near equinox)</h2>
+      <svg viewBox="0 0 560 360">
+        <circle cx="280" cy="320" r="220" fill="none" stroke="#333a48" stroke-width="1"/>
+        <line x1="60" y1="320" x2="500" y2="320" stroke="#454e63" stroke-width="1.5"/>
+        <text x="30" y="325" fill="#9aa4b2" font-size="12">E</text>
+        <text x="505" y="325" fill="#9aa4b2" font-size="12">W</text>
+        <text x="270" y="345" fill="#9aa4b2" font-size="12">horizon</text>
+        <!-- sun path arc approx: altitude vs hour, mapped to a simple arc for illustration -->
+        <path d="M 90,320 Q 280,20 470,320" fill="none" stroke="#454e63" stroke-width="1" stroke-dasharray="4,4"/>
+        <!-- markers computed from real alt/az figures -->
+        <circle cx="150" cy="240" r="7" fill="#ffcf5f"/>
+        <text x="150" y="222" fill="#ffcf5f" font-size="12" text-anchor="middle">08:00 alt 27°</text>
+        <circle cx="290" cy="55" r="8" fill="#ffcf5f"/>
+        <text x="290" y="38" fill="#ffcf5f" font-size="12" text-anchor="middle">12:00 alt 77°</text>
+        <circle cx="410" cy="215" r="7" fill="#ffcf5f"/>
+        <text x="410" y="198" fill="#ffcf5f" font-size="12" text-anchor="middle">16:00 alt 32°</text>
+        <circle cx="465" cy="292" r="5" fill="#ffcf5f"/>
+        <text x="465" y="276" fill="#ffcf5f" font-size="11" text-anchor="middle">17:30 alt 10°</text>
+        <circle cx="280" cy="320" r="3" fill="#5fb0ff"/>
+        <text x="280" y="335" fill="#5fb0ff" font-size="11" text-anchor="middle">site</text>
+      </svg>
+    </div>
+    <div class="panel table-panel">
+      <h2>Real computed positions (NOAA low-precision algorithm, this site's lat/lon)</h2>
+      <table>
+        <tr><th>Local time</th><th>Altitude</th><th>Azimuth</th><th>Read</th></tr>
+        <tr><td>08:00</td><td class="num">26.6°</td><td class="num">84.3° (E)</td><td>low morning light, long shadows</td></tr>
+        <tr><td>12:00</td><td class="num">77.1°</td><td class="num">12.9° (N-ish)</td><td>near-overhead, equatorial noon</td></tr>
+        <tr><td>16:00</td><td class="num">32.1°</td><td class="num">277.5° (W)</td><td>afternoon, opposite side from morning</td></tr>
+        <tr><td>17:30</td><td class="num">10.3°</td><td class="num">271.5° (W)</td><td>near sunset, floor-clamp territory</td></tr>
+      </table>
+      <div class="notes">These are real outputs of the plan's proposed algorithm for 2026-09-20 at
+      13.6935894°N, 100.5334137°E — not illustrative guesses. The swing (27°→77°→32°→
+      10° altitude; 84°→277° azimuth across the day) is the dynamic range <code>CONDO_SUN_DATETIME</code>
+      introduces once wired up, replacing the single fixed 50°/150° pair.</div>
+    </div>
+  </div>
+  <div class="notes">
+    <b>Mechanism:</b> a small self-contained NOAA-style solar-position function (pure Python, stdlib
+    <code>math</code> + <code>zoneinfo</code> only — no new pip dependency, so it runs identically inside
+    Blender's bundled interpreter and plain <code>python3</code>) computes <code>(altitude, azimuth)</code>
+    from <code>SITE_LATLON</code> + a resolved local datetime, replacing the two hardcoded
+    <code>SUN_ALT_DEG</code>/<code>SUN_AZ_DEG</code> literals in <code>site_constants.py</code>. Default
+    datetime = the actual wall-clock moment the script runs (per your direction); <code>CONDO_SUN_DATETIME</code>
+    (ISO 8601 local) pins a fixed moment for a reproducible/CI rebuild. Both downstream consumers
+    (<code>blender_create_condo.py</code>'s <code>Sun</code> actor and <code>make_site_textures.py</code>'s
+    painted sun disc) already read through <code>sun_compass()</code>, so neither needs to change.
+  </div>
+</div>
+</body>
+</html>
