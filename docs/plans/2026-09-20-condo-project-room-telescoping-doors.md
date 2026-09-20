@@ -190,11 +190,29 @@ Z-fighting) and aren't blocking anything, because they simply aren't there anymo
 which is how a real telescoping door works. The fixed panel never scripts — it's just a
 normal solid actor at rest in the gather bay from the start.
 
-Not yet implemented. Tracked as the next iteration on this plan rather than a separate
+~~Not yet implemented.~~ **Shipped 2026‑09‑20** — see the Verification result for this
+iteration below. Tracked as the next iteration on this plan rather than a separate
 plan, since it changes this same feature's mechanism, not its geometry or wall
-identification. Superseded design (the `Visibility Mailbox` two-state swap, `Mass 0`
-both states) stays shipped and live (`CONDO_DOORS=1`) until this lands — it is a strict
-improvement, not a prerequisite fix, so there's no reason to ship broken in between.
+identification. The superseded design (the `Visibility Mailbox` two-state swap, `Mass 0`
+both states) has been removed, not left running alongside.
+
+**One mechanism correction, found in the engine during implementation.** The paragraph
+above says the two movable panels each carry a per-tick script. They cannot: a `StatPlat`
+— the only actor kind that both gets a solid Jolt body from its mesh and is what every
+ordinary wall in this level already is — hard-asserts
+`"No scripts allowed on StatPlat's"` and `"No local mailboxes allowed on StatPlat's"`
+(`wfsource/source/game/actor.cc:752-754`). The actor kinds that *can* carry a script
+(anchored `Platform`, `Target`, …) get **no Jolt body at all** under
+`PHYSICS_ENGINE_JOLT` — `Construct()` creates none, and only `JoltMakeStatic()` (StatPlats
+and anchored mesh Generators) and `JoltMakeCharacter()` (`MOBILITY_PHYSICS`) ever do
+(`wfsource/source/physics/physical.hpi:188-196`, `actor.cc:747-824`) — so a scripted
+panel of that kind would not collide with anything. The panels are therefore StatPlats and
+the **Director** drives them by actor index with `write-actor-mailbox`
+(zForth custom syscall 2, `( val idx actor_idx -- )`), exactly as qbert's per-cube colour
+and Coily-snake fan-out already do. Same lerp, same `t/SECS` fraction, same trigger, same
+result; only the script's owner differs. Everything else in the design above — solid
+panels, real collision, physical relocation into the gather bay, `zone-project-doors`
+mailboxes 91/92 reused — is as written.
 
 ## Out of scope
 
@@ -204,14 +222,18 @@ improvement, not a prerequisite fix, so there's no reason to ship broken in betw
   with their own floor, ceiling and perimeter walls, spanning the full x 3.80→7.80
   frontage. Nothing had to be added, and no `CORRIDOR`/`PARAPET_H`-style balcony
   treatment was needed.
-- A runtime collision toggle so the closed state actually re-blocks the doorway — needs
+- ~~A runtime collision toggle so the closed state actually re-blocks the doorway — needs
   engine work (a collision/mass mailbox) and is a design decision nobody has made. The
-  doors ship `Mass 0` in both states; see Collision under Approach.
-- True continuous sliding animation (mailbox-driven per-tick position lerp, the
+  doors ship `Mass 0` in both states; see Collision under Approach.~~ → **resolved 2026‑09‑20
+  without the mailbox it assumed was needed.** The panels are now always-solid actors that
+  physically move, so "closed" blocks because a solid object is standing in the doorway.
+  No engine change; measured in Verification step 2 of this iteration.
+- ~~True continuous sliding animation (mailbox-driven per-tick position lerp, the
   `fsn_flydown()` pattern) — rejected for v1 as a first-of-its-kind, Jolt-sync-risk
   pattern with no precedent in this codebase; the two-state `Visibility Mailbox` swap
   ships first. Revisit once that's proven and if the instant-swap look isn't good
-  enough.
+  enough.~~ → **shipped 2026‑09‑20.** The Jolt-sync risk was the premise that turned out
+  false (`PhysicalAttributes::Update()` syncs the body every frame already).
 - A generic "mover/door" actor class or Forth "move actor over time" syscall — the real
   engine gap this surfaced (`TODO.md:131`, `docs/investigations/2026-05-26-spawn-template-forth-primitive.md`).
   Worth its own engine-level investigation if more than one level ever wants true
@@ -430,8 +452,222 @@ the project‑room→patio threshold is now open rather than walled, which canno
 scripted walker. The tour's own script does not write mailboxes 91–94, so the doors are in
 the Director's default (**open**) unless the walker enters the door strip.
 
-<!--
-When the work lands, this section becomes the permanent record:
+### Result (2026‑09‑20, real sliding motion): PASS — shipped live
+
+The doors now provide **real physical collision when closed**, which the first iteration
+could not. Verification steps and raw output below.
+
+A fresh set of steps for the second iteration (three always-solid sliding panels), written
+to test the thing the first iteration could not deliver: **real collision when closed**.
+The steps above are the first iteration's record and stand as written.
+
+1. **Rebuild headless and confirm the `[condo]` stdout reports three panel actors with
+   real Mass (not 0), and that the removed two-state objects are gone.**
+
+```
+$ task condo-level --force
+[condo] 639-project-rm: 639-front-strip-S-wall-jamb2 trimmed x 3.65…7.80 → 3.65…3.80; x 3.80…7.80 becomes telescoping doors
+[condo] 639-project-rm telescoping doors: 3 solid panels (1.33 m each, statplat default Mass); panel 2 fixed at x 6.47…7.80, panels 0…1 slide -2.67 m, -1.33 m to close the x 3.80…7.80 frontage over 2.0 s; z 0.00…2.70 at y -2.00, tracks 0.11 m apart; mailboxes zone 92 visited 91 closing 93 deadline 94
+[condo] lights: Sun az 30.0° alt 50.0°, FillLight az 195.0° alt 35.0° intensity 0.35, Ambient 0.38
+[condo] 639-project-rm telescoping doors: movable panels are runtime actors 37…38 (export positions 36…38 + bias 1); verify with `wf_game --debug-print-actors`
+[condo] exporting 104 actors → /home/will/WorldFoundry-wbniv/wflevels/condo_639_640/condo_639_640.lev
+✓ built /home/will/WorldFoundry-wbniv/wflevels/condo_639_640.iff (2377728 bytes)
+✓ built /home/will/WorldFoundry-wbniv/wflevels/condo_639_640-standalone.iff (2381824 bytes)
+```
+
+Mass and the removal, read back out of the exported `.lev` (a `Mass` entry is written only
+when the Blender object overrides it, so "None" means the actor takes the `statplat` OAD
+default of **75** — `wfsource/source/oas/movebloc.inc:15` — which is exactly what the
+neighbouring ordinary walls carry):
+
+```
+$ python3 <.lev field probe>
+639-project-door-panel-0                 Mass=      None VisMB=  1
+639-project-door-panel-1                 Mass=      None VisMB=  1
+639-project-door-panel-2                 Mass=      None VisMB=  1
+zone-project-doors                       Mass=75.0000000000000000 VisMB=  1
+639-front-strip-S-wall-jamb2             Mass=      None VisMB=  1
+639-guest-project-wall                   Mass=      None VisMB=  1
+--- doors-closed/open present? False False
+```
+
+**PASS.** 104 actors (was 103 = 100 + two mesh states + zone; now 100 + three panels +
+zone). `639-project-doors-closed` / `-open` no longer appear anywhere in the `.lev`, and
+their generated meshes (`639_project_doors_{closed,open}.iff`) are deleted from both level
+directories. All three panels carry the same (unset ⇒ default 75) Mass as
+`639-guest-project-wall` and the trimmed `…-jamb2`, and `Visibility Mailbox 1` = always
+visible — no visibility swap left anywhere.
+
+1b. **Confirm the Director's hardcoded actor indices match the engine's runtime ones**
+    (`docs/level-design-troubleshooting.md` § "Runtime actor indices do NOT match the .lev
+    OBJECT ordering" — this is the one number that cannot be derived by eye).
+
+```
+$ wf_game … -Lwflevels/condo_639_640-standalone.iff --debug-print-actors | grep project_door_panel
+actor idx=37 mesh=639_project_door_panel_0.iff mobility=Anchored pos=(0.00,0.00,15.75)
+actor idx=38 mesh=639_project_door_panel_1.iff mobility=Anchored pos=(0.00,0.00,15.75)
+actor idx=39 mesh=639_project_door_panel_2.iff mobility=Anchored pos=(0.00,0.00,15.75)
+```
+
+Director clause as exported (`condo_639_640.lev:150`, last line of the Script string):
+
+```
+92 read-mailbox 0 <> if 1 91 write-mailbox 0 92 write-mailbox 0 else 91 read-mailbox 0 = if 0 else 1 then then
+dup 93 read-mailbox <> if dup 93 write-mailbox INDEXOF_TIME read-mailbox 2.0 + 94 write-mailbox then
+1 94 read-mailbox INDEXOF_TIME read-mailbox - 2.0 / -
+dup 1 > if drop 1 then dup 0 < if drop 0 then
+swap 0 = if 1 swap - then
+dup -2.6667 * INDEXOF_X_POS 37 write-actor-mailbox
+dup -1.3333 * INDEXOF_X_POS 38 write-actor-mailbox drop
+```
+
+**PASS.** Panels 0/1 are runtime actors 37/38, which is what the script writes; panel 2
+(actor 39) is never addressed, as intended. The build derives these from the export list
+position + bias 1 and prints them, so adding or removing any actor re-derives them.
+
+2. **Load the level and empirically confirm: (a) with the doors closed the player CANNOT
+   walk through; (b) approaching the zone slides them open over a few seconds, not
+   instantly; (c) once open, the player CAN walk through cleanly.**
+
+The shipped trigger re-opens the doors whenever the player is close enough to touch them,
+so (a) is tested by hot-swapping the Director's clause for a constant one over the debug
+bridge (`reload_script`) — the level file is untouched, only the runtime script. The
+player then walks `+Y` (`JOY_UP`, `1 << 11`) from inside the project room at two different
+bays.
+
+```
+$ python3 <debug-bridge probe, condo_639_640-standalone.iff>
+=== C) proximity slide (shipped Director) ===
+  player parked at (5.80,-5.00), outside the zone; panel37 X=-0.000
+  panel37 X over 4 s after leaving the zone:
+    [(0.0, -0.0), (0.3, -0.133335), (0.4, -0.26667), (0.5, -0.400005), (0.6, -0.533339),
+     (0.8, -0.666674), (0.9, -0.800009), (1.0, -0.933344), (1.2, -1.200014), (1.3, -1.324222),
+     (1.4, -1.454025), (1.5, -1.578925), (1.61, -1.71226), (1.81, -1.845595), (1.91, -1.978929),
+     (2.01, -2.112264), (2.11, -2.245599), (2.21, -2.378934), (2.31, -2.512269), (2.41, -2.645604),
+     (2.51, -2.6667), (2.61, -2.6667), … (3.91, -2.6667)]
+
+=== A) forced CLOSED ===
+  panel37 X=-2.667  panel38 X=-1.333 (expect -2.667 / -1.333)
+  start mid-bay x=4.40: (4.40, -3.20)
+  after +Y hold: (4.40, -2.38)   crossed y=-2.00? False
+  start mid-bay x=5.80: (5.80, -3.20)
+  after +Y hold: (5.80, -2.27)   crossed y=-2.00? False
+
+=== B) forced OPEN ===
+  panel37 X=+0.000  panel38 X=+0.000 (expect 0 / 0)
+  start mid-bay x=4.40: (4.40, -3.20)
+  after +Y hold: (4.41, -0.32)   crossed y=-2.00? True
+  start mid-bay x=5.80: (5.80, -3.20)
+  after +Y hold: (5.79, -0.77)   crossed y=-2.00? True
+```
+
+**PASS on all three, and (a) is the whole point of this iteration.**
+
+- **(a) CLOSED blocks — real collision.** Holding `+Y` for 6 s from `(4.40, −3.20)` and
+  `(5.80, −3.20)` walks the player up to `y = −2.38` and `y = −2.27` and stops him dead
+  against the glass. He never reaches `y = −2.00`. The first iteration recorded this same
+  step as **FAIL, accepted**; it now passes, with no engine change, because the closed
+  panel is a solid `Mass 75` StatPlat actually standing in the doorway.
+- **(b) It slides, it does not jump.** The sampled `X_POS` offset of panel 0 ramps
+  monotonically `0 → −2.6667` across ~2.4 s of samples and then holds — 20+ distinct
+  intermediate positions, matching `DOOR_SLIDE_S = 2.0` plus sampling latency. Panel 1
+  tracks at exactly half the offset throughout (`−1.3333` vs `−2.6667` shift), so the two
+  leaves stay proportionally spaced, as a real telescoping set does.
+- **(c) OPEN passes cleanly.** From the same two starts the player crosses `y = −2.00`
+  and ends at `y = −0.32` / `y = −0.77`, out on `639-patio` against its parapet.
+
+3. **Confirm the slide doesn't visually glitch (Z-fighting, panels overlapping
+   incorrectly, jumping instead of sliding).**
+
+Four frames at fixed slide fractions, same camera, same player position, only the panel
+offset differing — a controlled series, so any mis-stacking at an intermediate position
+would show. Captured in-engine on a scratch `condo_639_640_doors` build
+(`CONDO_CAM=0,-2.5,1.6 CONDO_LOOK=0,4.0,1.3`; **the shipped dollhouse camera is
+unchanged** — it is a 9 m‑high follow shot and cannot frame this wall).
+
+| open (default) | 1/3 closed | 2/3 closed | closed |
+|---|---|---|---|
+| <img src="2026-09-20-condo-project-room-telescoping-doors/slide-0-open.png" width="210"> | <img src="2026-09-20-condo-project-room-telescoping-doors/slide-1-third.png" width="210"> | <img src="2026-09-20-condo-project-room-telescoping-doors/slide-2-twothirds.png" width="210"> | <img src="2026-09-20-condo-project-room-telescoping-doors/slide-3-closed.png" width="210"> |
+
+Measured rather than eyeballed — the extent of glass-coloured pixels along one scanline of
+each frame:
+
+```
+$ python3 <glass-run scan, row y=200>
+  series-0-open          frac=0.00  panel37 X=-0.0     glass columns: [[365,365],[367,448]]
+  series-1-third         frac=0.33  panel37 X=-0.88    glass columns: [[301,510]]
+  series-2-twothirds     frac=0.66  panel37 X=-1.76    glass columns: [[194,537]]
+  series-3-closed        frac=1.00  panel37 X=-2.6667  glass columns: [[91,241],[244,540]]
+```
+
+**PASS.** The glazed span grows monotonically and contiguously — 84 px (the 1.33 m gathered
+stack, sitting right of the standpoint at x = 5.80) → 210 px → 344 px → 450 px (the full
+4.00 m frontage). The only interior break is a 2 px seam at columns 242–243 in the closed
+frame: that is the intended `DOOR_TRACK_D = 0.11 m` Y offset between two panels on adjacent
+tracks showing at the bay joint, which is what keeps the gathered stack from Z-fighting.
+No flicker, no doubled or inverted panel, no position jump between steps.
+
+4. **Rebuild `condo_639_640_tour` and confirm no regression.**
+
+```
+$ task tour-condo-639 --force
+[condo] tour: 37 legs, 11 room holds, 10078 bytes of Forth
+[condo] 639-project-rm: 639-front-strip-S-wall-jamb2 trimmed x 3.65…7.80 → 3.65…3.80; x 3.80…7.80 becomes telescoping doors
+[condo] 639-project-rm telescoping doors: 3 solid panels (1.33 m each, statplat default Mass); panel 2 fixed at x 6.47…7.80, panels 0…1 slide -2.67 m, -1.33 m to close the x 3.80…7.80 frontage over 2.0 s; z 0.00…2.70 at y -2.00, tracks 0.11 m apart; mailboxes zone 92 visited 91 closing 93 deadline 94
+[condo] 639-project-rm telescoping doors: movable panels are runtime actors 37…38 (export positions 36…38 + bias 1); verify with `wf_game --debug-print-actors`
+[condo] exporting 104 actors → /home/will/WorldFoundry-wbniv/wflevels/condo_639_640_tour/condo_639_640_tour.lev
+✓ built /home/will/WorldFoundry-wbniv/wflevels/condo_639_640_tour.iff (2387968 bytes)
+✓ built /home/will/WorldFoundry-wbniv/wflevels/condo_639_640_tour-standalone.iff (2392064 bytes)
+```
+
+And actually walked, not just built — `wf_game` on
+`condo_639_640_tour-standalone.iff`, player position sampled from the engine's own
+`ball pos:` trace, closest approach to each labelled waypoint:
+
+```
+$ python3 <tour trajectory probe>
+samples: 117
+first: (4.659, -13.056, 15.991)  last: (-0.611, -0.941, 15.75)
+  639-kitchen            target=( 4.66,-12.00) closest approach 1.056 m at sample 0
+  639-bath-S             target=( 1.00,-13.90) closest approach 0.138 m at sample 1
+  639-project-rm         target=( 4.35, -5.00) closest approach 0.119 m at sample 9
+  639-guest-bed          target=( 3.25, -5.00) closest approach 0.612 m at sample 12
+  639-bath-N             target=( 0.70, -1.00) closest approach 1.312 m at sample 24
+  639-patio-recessed     target=( 3.25, -1.00) closest approach 0.072 m at sample 13
+  639-patio              target=( 6.60, -1.00) closest approach 0.181 m at sample 15
+  640-room-2.9x3.3       target=(-1.50, -9.10) closest approach 0.156 m at sample 17
+  640-master-bed         target=(-7.00, -5.00) closest approach 0.135 m at sample 19
+  640-closet             target=(-4.30, -1.00) closest approach 3.334 m at sample 22
+  640-bath               target=(-0.75, -1.00) closest approach 0.151 m at sample 24
+samples in the door plane band (x>3.8, |y+2|<0.2): 0
+```
+
+**PASS.** The tour builds identically to the main level (104 actors, panels at runtime
+37/38 so the Director literal is the same in both) and walks its whole route, finishing at
+`(−0.611, −0.941)` — the last waypoint, `640-bath` at `(−0.75, −1.00)`. The two large
+closest-approach figures (`639-kitchen`, `640-closet`, and to a lesser degree
+`639-guest-bed` / `639-bath-N`) are sampling gaps, not misses: the engine's position trace
+emits only 117 samples over the ~7 min run, so a waypoint can be passed between two of
+them. **Nothing on the route touches the doors** — zero samples anywhere in the door plane
+(`x > 3.80`, `|y + 2.00| < 0.20`), because the path reaches the patio through the guest-side
+door header at `x 2.85…3.65`, not through the project room's frontage. Making the panels
+solid therefore cannot strand the scripted walker, which was the only regression risk this
+iteration introduced. The tour does clip the corner of `zone-project-doors` on its
+`(3.25, −1.00) → (6.60, −1.00)` patio leg, which latches "visited" and starts a close as it
+leaves — visible in the level, harmless to the walk.
+
+5. **`CONDO_DOORS=0` still builds the plain original wall.**
+
+```
+$ CONDO_DOORS=0 CONDO_LEVEL=condo_639_640_nodoors blender --background --python … blender_create_condo.py
+[condo] 639-project-rm telescoping doors: OFF (CONDO_DOORS=0 set; the plain 639-front-strip-S-wall-jamb2 stays — see docs/plans/2026-09-20-condo-project-room-telescoping-doors.md)
+[condo] exporting 100 actors → /home/will/WorldFoundry-wbniv/wflevels/condo_639_640_nodoors/condo_639_640_nodoors.lev
+```
+
+**PASS.** 100 actors (the level without the doors feature at all), untrimmed jamb2, no
+panels, no zone — the escape hatch survives the rewrite.
+
+
 
 1. **Step as originally written.**
 

@@ -1033,30 +1033,63 @@ zone_interior = add_zone('zone-interior', Vector((min(cx0, -8.2), cy0 - 0.5, -0.
 # x 3.65…3.80 slice that fronts the guest bedroom, and put the doors across the
 # project room's own x 3.80…7.80 frontage.
 #
-# MECHANISM: two static mesh states swapped by a `Visibility Mailbox`
-# (mesh.inc:10 → `Actor::isVisible()`, actor.cc:894 — the actor renders iff its
-# mailbox is truthy), driven by an ActBoxOR proximity zone. Both patterns already
-# ship in this file.
+# MECHANISM (2026-09-20, 2nd iteration — real sliding motion, real collision).
+# Three individual statplat panel actors, all solid at the ordinary wall Mass
+# (the `statplat` schema default of 75, movebloc.inc:15 — `as_statplat()` leaves
+# `Mass` unset exactly as every other wall in this file does). One is fixed in
+# the gather bay; the other two physically slide along X between the gather bay
+# and their closed bays, driven by a per-tick lerp in the Director's Forth that
+# writes their `INDEXOF_X_POS` mailbox — the `fsn_flydown()` t/SECS pattern
+# (engine/stubs/scripting_zforth.cc:189-201), triggered off the same
+# `zone-project-doors` ActBoxOR proximity mailboxes as before.
 #
-# COLLISION is a settled limitation, resolved from the engine source rather than
-# assumed: `isVisible()` is read in exactly one place, the render loop
-# (game/level.cc:1223), and `Actor::CanCollide()` is
-# `collisionTable[kind()] && Mass > 0` (actor.cc:1081) — it never consults
-# visibility. **A hidden actor still collides**, and there is no MASS/collision
-# mailbox in wfsource/source/mailbox/mailbox.inc to change that at runtime. Both
-# states therefore carry `Mass 0` (the skydome/site-buildings idiom above), so the
-# doorway is always physically passable and the closed state is a visual cue only.
-# Accepted for this iteration — see the plan's Out-of-scope for the follow-ups.
+# COLLISION IS NOW REAL, and that is the point of this iteration. Superseded:
+# the `Visibility Mailbox` two-state swap with `Mass 0` on both states, which
+# could only ever be a visual cue (`Actor::CanCollide()` never consults
+# visibility, actor.cc:1081). Because these panels carry real Mass and are
+# StatPlats, each gets a trimesh Jolt body (actor.cc:747-762 + BindAssets,
+# actor.cc:543-590), and `PhysicalAttributes::Update()`
+# (physics/jolt/physical.hpi:22-28) pushes `_position` into that body
+# unconditionally every physics frame for every actor on the update list
+# (`Actor::CanUpdate()` returns true for all, actor.cc:1070). So a scripted
+# position write moves the collision with the mesh, in real time — no engine
+# change, no collision-toggle mailbox. When the doors are closed the panels are
+# solid objects standing in the doorway; when open they are simply somewhere
+# else.
+#
+# DEVIATION FROM THE PLAN, forced by the engine and recorded in the plan's
+# Verification: the plan says the two movable panels each carry their own
+# per-tick script. A StatPlat cannot — `actor.cc:752-754` hard-asserts
+# "No scripts allowed on StatPlat's" and "No local mailboxes allowed on
+# StatPlat's" — and the actor kinds that *can* script (anchored Platform /
+# Target / …) get no Jolt body at all (only StatPlats, MOBILITY_PHYSICS
+# characters and anchored mesh Generators do), so they would not collide. The
+# Director therefore drives the panels by index with `write-actor-mailbox`
+# (zForth custom syscall 2, `( val idx actor_idx -- )`), the same primitive
+# qbert uses for its per-cube fan-out. Same lerp, same trigger, same result.
+#
 # ON by default since the wall correction: CONDO_DOORS=0 builds the plain wall back.
 CONDO_DOORS = os.environ.get('CONDO_DOORS', '1') not in ('', '0', 'false', 'False')
 MB_DOOR_ZONE, MB_DOOR_VISITED = 92, 91     # 90–94 are free: the other local zone
-MB_DOOR_OPEN, MB_DOOR_CLOSED  = 93, 94     # mailboxes in this level are 95–99
+MB_DOOR_CLOSING, MB_DOOR_T1   = 93, 94     # mailboxes in this level are 95–99
+#   91 visited-latch   92 ActBoxOR zone
+#   93 target state: 0 = open (the load-time default, mailboxes are 0), 1 = closed
+#   94 level time at which the in-flight slide finishes (0 at load ⇒ already settled)
 DOOR_ROOM    = '639-project-rm'
 DOOR_WALL    = '639-front-strip-S-wall-jamb2'
 DOOR_PANELS  = 3
 DOOR_TRACK_D = 0.11          # centre-to-centre spacing of the three tracks, in Y
 DOOR_ZONE_D  = 1.6           # how far either side of the wall the proximity strip reaches
-_door_forth  = ''            # Director clause; empty unless the doors are built
+DOOR_SLIDE_S = 2.0           # seconds for a full open or close — reads as a real door
+# The Director addresses the movable panels by runtime actor index, which is NOT
+# something to count by hand out of the .lev (docs/level-design-troubleshooting.md
+# § "Runtime actor indices do NOT match the .lev OBJECT ordering"). It is taken
+# from the export list's own ordering in § 9c, after every actor exists, plus
+# DOOR_ACTOR_IDX_BIAS — the constant offset between that list position and the
+# engine's index, measured once with `wf_game --debug-print-actors` and asserted
+# in the plan's Verification step 1b.
+DOOR_ACTOR_IDX_BIAS = int(os.environ.get('CONDO_DOOR_IDX_BIAS', '1'))
+_door_forth_fn = None        # Director clause factory; None unless the doors are built
 
 if CONDO_DOORS:
     _door_room = next(((mn, mx) for name, mn, mx in room_outlines if name == DOOR_ROOM), None)
@@ -1089,15 +1122,19 @@ if CONDO_DOORS:
     print(f"[condo] {DOOR_ROOM}: {DOOR_WALL} trimmed x {_wx0:.2f}…{_wx1:.2f} → "
           f"{_wx0:.2f}…{DOOR_X0:.2f}; x {DOOR_X0:.2f}…{DOOR_X1:.2f} becomes telescoping doors")
 
-    def _door_state_mesh(name, bays):
-        """One mesh actor per state: `bays` is a list of (track index, x0, x1)."""
+    def _door_panel(name, track, x0, x1):
+        """One solid glass panel actor, baked in world space on its own Y track.
+
+        Mass is deliberately left unset: `as_statplat()` gives it the statplat
+        schema default (75, movebloc.inc:15), which is what every ordinary wall
+        in this level carries, so the panel collides like a wall.
+        """
         bm = _bmesh.new()
-        for track, x0, x1 in bays:
-            yc = DOOR_Y + (track - (DOOR_PANELS - 1) / 2.0) * DOOR_TRACK_D
-            cube = _bmesh.ops.create_cube(bm, size=1.0)['verts']
-            for v in cube:
-                v.co = ((x0 + x1) / 2 + v.co.x * (x1 - x0), yc + v.co.y * GLASS_T,
-                        WALL_H / 2 + v.co.z * WALL_H)
+        yc = DOOR_Y + (track - (DOOR_PANELS - 1) / 2.0) * DOOR_TRACK_D
+        cube = _bmesh.ops.create_cube(bm, size=1.0)['verts']
+        for v in cube:
+            v.co = ((x0 + x1) / 2 + v.co.x * (x1 - x0), yc + v.co.y * GLASS_T,
+                    WALL_H / 2 + v.co.z * WALL_H)
         _bmesh.ops.recalc_face_normals(bm, faces=bm.faces)
         me = bpy.data.meshes.new(name)
         bm.to_mesh(me)
@@ -1107,26 +1144,29 @@ if CONDO_DOORS:
         scene.collection.objects.link(obj)
         clean_mesh(me, recalc=False)
         as_statplat(obj)
-        obj['wf_Mass'] = 0.0         # hidden actors still collide — see the COLLISION note above
         return obj
 
-    # Closed: one panel per track, each in its own 1.33 m bay, spanning the full 4 m.
-    door_closed = _door_state_mesh(
-        '639-project-doors-closed',
-        [(i, DOOR_X0 + i * DOOR_W, DOOR_X0 + (i + 1) * DOOR_W) for i in range(DOOR_PANELS)])
-    door_closed['wf_Visibility Mailbox'] = MB_DOOR_CLOSED
+    # The gather bay is the last one (x 6.47…7.80). Which end they gather at is the
+    # one genuinely cosmetic choice here: this wall's faces point ±Y, so neither end
+    # is literally "east" under the level's `+X north / −Y east` convention. The
+    # x = 7.80 end wins because it is the corner the wide main patio (x 5.40…7.80)
+    # starts from, so the stack opens onto the usable patio rather than onto the
+    # narrow recessed nook by the guest bedroom.
+    DOOR_GATHER_X0 = DOOR_X1 - DOOR_W
 
-    # Open: all three panels telescoped into the last bay (x 6.47…7.80) — the fixed
-    # panel's own bay — leaving the other 2.67 m an open threshold onto 639-patio.
-    # Which end they gather at is the one genuinely cosmetic choice here: this wall's
-    # faces point ±Y, so neither end is literally "east" under the level's
-    # `+X north / −Y east` convention. The x = 7.80 end wins because it is the corner
-    # the wide main patio (x 5.40…7.80) starts from, so the stack opens onto the usable
-    # patio rather than onto the narrow recessed nook by the guest bedroom.
-    door_open = _door_state_mesh(
-        '639-project-doors-open',
-        [(i, DOOR_X1 - DOOR_W, DOOR_X1) for i in range(DOOR_PANELS)])
-    door_open['wf_Visibility Mailbox'] = MB_DOOR_OPEN
+    # Geometry is baked at the panel's OPEN position, so zero offset = open = the
+    # load-time default. The Director writes a negative X offset to close. (The
+    # X_POS mailbox on a world-baked mesh is an additive offset, not an absolute
+    # world X — docs/level-design-troubleshooting.md § 6.)
+    #
+    # Panel 2 (own track, own bay) is the fixed one and is never scripted; panels
+    # 0 and 1 slide out to their own closed bays.
+    door_panels, door_shift = [], []
+    for _i in range(DOOR_PANELS):
+        _p = _door_panel(f'639-project-door-panel-{_i}', _i, DOOR_GATHER_X0, DOOR_X1)
+        door_panels.append(_p)
+        door_shift.append((DOOR_X0 + _i * DOOR_W) - DOOR_GATHER_X0)   # 0 for the fixed panel
+    assert abs(door_shift[DOOR_PANELS - 1]) < 1e-6, "the last bay must be the gather bay"
 
     # Proximity zone: the strip within DOOR_ZONE_D either side of the wall, so the doors
     # open whether the player approaches from the room or back from the patio. It writes
@@ -1135,22 +1175,43 @@ if CONDO_DOORS:
     zone_doors = add_zone('zone-project-doors',
                           Vector((DOOR_X0 - pad, DOOR_Y - DOOR_ZONE_D, -0.5)),
                           Vector((DOOR_X1 + pad, DOOR_Y + DOOR_ZONE_D, WALL_H + 0.5)),
-                          MB_DOOR_ZONE, door_closed.name)
+                          MB_DOOR_ZONE, door_panels[0].name)
 
-    # Director clause. Mailboxes are 0 at load, so "never visited" is the natural default
-    # and the level opens depicting the doors **open**, gathered at x 7.80 (plan § Context).
-    # Entering the strip latches visited + open; leaving it after a visit closes them.
-    _door_forth = (
-        f"{MB_DOOR_ZONE} read-mailbox 0 <> if "
-        f"1 {MB_DOOR_VISITED} write-mailbox 0 {MB_DOOR_ZONE} write-mailbox "
-        f"1 {MB_DOOR_OPEN} write-mailbox 0 {MB_DOOR_CLOSED} write-mailbox "
-        f"else {MB_DOOR_VISITED} read-mailbox 0 = if "
-        f"1 {MB_DOOR_OPEN} write-mailbox 0 {MB_DOOR_CLOSED} write-mailbox "
-        f"else 0 {MB_DOOR_OPEN} write-mailbox 1 {MB_DOOR_CLOSED} write-mailbox then then\n")
-    print(f"[condo] {DOOR_ROOM} telescoping doors: closed = {DOOR_PANELS} panels "
-          f"x {DOOR_X0:.2f}…{DOOR_X1:.2f} ({DOOR_W:.2f} m each), open = 1 fixed + {DOOR_PANELS - 1} folded "
-          f"x {DOOR_X1 - DOOR_W:.2f}…{DOOR_X1:.2f}; both z 0.00…{WALL_H:.2f} at y {DOOR_Y:.2f}, "
-          f"Mass 0; mailboxes zone {MB_DOOR_ZONE} visited {MB_DOOR_VISITED} open {MB_DOOR_OPEN} closed {MB_DOOR_CLOSED}")
+    # Director clause, per tick:
+    #   1. want := 0 (open) while the player is in the strip, or until the strip has
+    #      ever been entered; 1 (closed) once they have visited and left. Mailboxes
+    #      are 0 at load, so the level opens with the doors **open**, gathered at
+    #      x 7.80 (plan § Context, user direction 1).
+    #   2. On a change of `want`, latch it in mb 93 and stamp mb 94 with the level
+    #      time the slide will finish (now + DOOR_SLIDE_S).
+    #   3. f := 1 − (deadline − now)/DOOR_SLIDE_S, clamped 0…1 — the fraction of the
+    #      current slide already travelled. At load mb 94 = 0 < now, so f = 1 and the
+    #      panels are already settled at their target; no start-of-level animation.
+    #   4. c := "closedness" = f when closing, 1 − f when opening; each movable
+    #      panel's X offset is c × its closed-minus-open shift.
+    def _door_forth_fn(idx0):
+        return (
+            f"{MB_DOOR_ZONE} read-mailbox 0 <> if "
+            f"1 {MB_DOOR_VISITED} write-mailbox 0 {MB_DOOR_ZONE} write-mailbox 0 "
+            f"else {MB_DOOR_VISITED} read-mailbox 0 = if 0 else 1 then then "
+            f"dup {MB_DOOR_CLOSING} read-mailbox <> if "
+            f"dup {MB_DOOR_CLOSING} write-mailbox "
+            f"INDEXOF_TIME read-mailbox {DOOR_SLIDE_S} + {MB_DOOR_T1} write-mailbox then "
+            f"1 {MB_DOOR_T1} read-mailbox INDEXOF_TIME read-mailbox - {DOOR_SLIDE_S} / - "
+            f"dup 1 > if drop 1 then dup 0 < if drop 0 then "
+            f"swap 0 = if 1 swap - then "
+            + "".join(f"dup {door_shift[_i]:.4f} * INDEXOF_X_POS "
+                      f"{idx0 + _i} write-actor-mailbox "
+                      for _i in range(DOOR_PANELS - 1))
+            + "drop\n")
+    print(f"[condo] {DOOR_ROOM} telescoping doors: {DOOR_PANELS} solid panels "
+          f"({DOOR_W:.2f} m each, statplat default Mass); panel {DOOR_PANELS - 1} fixed at "
+          f"x {DOOR_GATHER_X0:.2f}…{DOOR_X1:.2f}, panels 0…{DOOR_PANELS - 2} slide "
+          f"{', '.join(f'{s:+.2f} m' for s in door_shift[:-1])} to close the "
+          f"x {DOOR_X0:.2f}…{DOOR_X1:.2f} frontage over {DOOR_SLIDE_S:.1f} s; "
+          f"z 0.00…{WALL_H:.2f} at y {DOOR_Y:.2f}, tracks {DOOR_TRACK_D:.2f} m apart; "
+          f"mailboxes zone {MB_DOOR_ZONE} visited {MB_DOOR_VISITED} closing {MB_DOOR_CLOSING} "
+          f"deadline {MB_DOOR_T1}")
 else:
     print(f"[condo] {DOOR_ROOM} telescoping doors: OFF (CONDO_DOORS=0 set; the plain "
           f"{DOOR_WALL} stays — see docs/plans/2026-09-20-condo-project-room-telescoping-doors.md)")
@@ -1240,8 +1301,9 @@ def _zone_forward(zone_mb, t0_mb=None):
 # occupied (the strips lie inside the interior zone).
 director['wf_Script'] = ("\\ wf\n" + _zone_forward(MB_ZONE_INTERIOR)
                          + _zone_forward(MB_ZONE_BALCONY, MB_BALCONY_T0)
-                         + _zone_forward(MB_ZONE_MASTER, MB_MASTER_T0)
-                         + _door_forth)
+                         + _zone_forward(MB_ZONE_MASTER, MB_MASTER_T0))
+# The telescoping-door clause is appended in § 9c, once the export ordering (and
+# therefore each panel's runtime actor index) is known.
 
 levelobj = find_by_class('levelobj')
 assert levelobj is not None
@@ -1298,8 +1360,25 @@ outside = [o.name for o in scene.objects
            and not all(lo[i] < o.matrix_world.to_translation()[i] < hi[i] for i in range(3))]
 assert not outside, f"actors outside room bbox {lo}..{hi}: {outside}"
 
-# ── 10. Export ───────────────────────────────────────────────────────────────
+# ── 9c. Door panels: resolve runtime actor indices, finish the Director clause ─
+# The exporter writes actors in this exact list order, and the engine's runtime
+# index is that position plus DOOR_ACTOR_IDX_BIAS. Doing it here — rather than
+# guessing from creation order back in § 7c — means adding or removing any actor
+# anywhere in this file re-derives the indices instead of silently aiming the
+# door script at the wrong actor.
 wf_objects = [o for o in scene.objects if o.get('wf_schema_path')]
+if _door_forth_fn is not None:
+    _panel_pos = [wf_objects.index(p) for p in door_panels]
+    assert _panel_pos == list(range(_panel_pos[0], _panel_pos[0] + DOOR_PANELS)), \
+        f"door panels are not contiguous in the export list: {_panel_pos}"
+    DOOR_PANEL0_ACTOR_IDX = _panel_pos[0] + DOOR_ACTOR_IDX_BIAS
+    director['wf_Script'] += _door_forth_fn(DOOR_PANEL0_ACTOR_IDX)
+    print(f"[condo] {DOOR_ROOM} telescoping doors: movable panels are runtime actors "
+          f"{DOOR_PANEL0_ACTOR_IDX}…{DOOR_PANEL0_ACTOR_IDX + DOOR_PANELS - 2} "
+          f"(export positions {_panel_pos[0]}…{_panel_pos[-1]} + bias {DOOR_ACTOR_IDX_BIAS}); "
+          f"verify with `wf_game --debug-print-actors`")
+
+# ── 10. Export ───────────────────────────────────────────────────────────────
 os.makedirs(OUT_DIR, exist_ok=True)
 _wrapper = os.path.join(OUT_DIR, LEVEL_NAME + '-standalone.iff.txt')
 if LEVEL_NAME != 'condo_639_640':

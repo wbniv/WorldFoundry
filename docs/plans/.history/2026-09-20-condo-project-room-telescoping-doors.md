@@ -1,9 +1,15 @@
 | Date | Change |
 |------|--------|
+| [2026-09-20](https://github.com/wbniv/WorldFoundry/commit/8a172a0e) | docs(plans): real sliding doors are achievable with no engine change |
 | [2026-09-20](https://github.com/wbniv/WorldFoundry/commit/fbcbba8a) | feat(condo): 639-project-rm's patio wall is telescoping glass doors |
 | [2026-09-20](https://github.com/wbniv/WorldFoundry/commit/2b1c8c86) | docs(plans): 639-project-rm north wall is telescoping doors (design plan) |
 
 <!--history-meta v1
+8a172a0e	author	Will Norris
+8a172a0e	added	36
+8a172a0e	deleted	0
+8a172a0e	files	1
+8a172a0e	body	The Jolt kinematic-sync agent's escalation found the original premise\nbackwards: PhysicalAttributes::Update() already pushes an actor's\nposition into its Jolt body every frame unconditionally, for any actor\nwith a JoltBodyID, not just character-controlled ones. Scripted\nposition-mailbox writes on a solid rigid actor already move its\ncollision correctly today.\n\nThis means the shipped Mass=0 visibility-swap doesn't need a\ncollision-toggle mailbox to be superseded - three always-solid panel\nactors that physically slide via the existing fsn_flydown() lerp\npattern sidestep the blocker entirely, since a moved-away panel isn't\nblocking anything because it isn't there, not because collision was\ntoggled off. Recorded as the next iteration on this plan.\n\nCo-Authored-By: Claude Sonnet 5 <noreply@anthropic.com>\nClaude-Session: https://claude.ai/code/session_011WmfFdmKRi46BtcEyu8pkT
 fbcbba8a	author	Will Norris
 fbcbba8a	added	306
 fbcbba8a	deleted	58
