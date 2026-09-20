@@ -468,6 +468,13 @@ workflows:
           "$WF_GAME" --windowed --frame-step-smoke=30 --cycles=1 -L"$LEVEL" -rate20 \
             --capture-frame=20="$CM_BUILD_DIR/macos-frame20-windowed.png" \
             2>&1 | tee "$CM_BUILD_DIR/macos-windowed.log" || true
+          # TODO.md:7 — -width/-height must actually reach the window, not just
+          # compile. Second short run at a non-default size; the window line
+          # echoes the size it was created with, so a mismatch is visible.
+          "$WF_GAME" --windowed --frame-step-smoke=3 --cycles=1 -L"$LEVEL" -rate20 \
+            -width=800 -height=600 \
+            2>&1 | tee "$CM_BUILD_DIR/macos-windowsize.log" || true
+
           echo "--- windowed run verdict ---"
           if grep -q "CAMetalLayer attached" "$CM_BUILD_DIR/macos-windowed.log"; then
             echo "WINDOW: created"
@@ -477,6 +484,9 @@ workflows:
             grep -E "glfwInit failed|glfwCreateWindow.*failed|glfw error" \
               "$CM_BUILD_DIR/macos-windowed.log" | head -3 || true
           fi
+          echo "--- -width/-height verdict (TODO.md:7) ---"
+          grep -E "^macos: window " "$CM_BUILD_DIR/macos-windowsize.log" || \
+            echo "SIZE: no window line — flags not verified"
 
     artifacts:
       - macos-configure.log
@@ -487,4 +497,5 @@ workflows:
       - macos-frame20.png
       - macos-frame20-windowed.png
       - macos-windowed.log
+      - macos-windowsize.log
       - engine/wf_game
