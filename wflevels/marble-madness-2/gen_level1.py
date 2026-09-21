@@ -54,8 +54,32 @@ def write_mesh(verts, faces, path):
         f.write(data)
     print(f"  {len(data):5d}B  {path}")
 
-def both_sides(faces):
-    return faces + [(c, b, a) for a, b, c in faces]
+def reversed_faces(faces):
+    """Flip each triangle's hand: (a,b,c) -> (c,b,a)."""
+    return [(c, b, a) for a, b, c in faces]
+
+
+# Every mesh here used to be emitted by a `both_sides()` helper that appended a
+# reversed duplicate of every triangle, so each surface existed twice with
+# opposite normals. That is invisible with backface culling off — but only by
+# accident: the two coincident polygons z-fight, the first-listed one wins ties,
+# and under WF_CULL=1 the loser is the one that survives, so the course changed
+# appearance the moment culling was switched on (see
+# docs/plans/2026-06-13-planetarium-dome-view-engine-wide-backface-culling.md
+# "Effort 1d"/"Effort 1e"). Meshes are now single-sided and wound OUTWARD in
+# WF's hand — normal = (v2-v0)x(v1-v0), gfx/face.hpi:34 — which means:
+#
+#   floors: the literal (0,1,2),(0,2,3) winding gives a DOWN (-Z) normal, so the
+#           floor is listed reversed — single-sided, nobody looks at a floor from
+#           underneath;
+#   walls:  zero-thickness and seen from BOTH sides (the near wall's outside, the
+#           far wall's inside, from the course camera), so each wall keeps an
+#           outward face (-X / +X) plus its inward twin. Under WF_CULL=1 exactly
+#           the camera-facing one draws; with culling off the pair z-fights as it
+#           always did.
+
+def two_sided(faces):
+    return faces + reversed_faces(faces)
 
 # ── Mesh builders ─────────────────────────────────────────────────────────────
 
@@ -73,10 +97,9 @@ def flat_with_walls(hx, hy, wh=WH, path=None):
         (1.0, 0.0,  hx, -hy,  wh),  # 6 near-right wall top
         (1.0, 1.0,  hx,  hy,  wh),  # 7 far-right  wall top
     ]
-    faces = both_sides([
-        (0, 1, 2), (0, 2, 3),   # floor
-        (0, 5, 4), (0, 3, 5),   # left wall
-        (1, 6, 7), (1, 7, 2),   # right wall
+    faces = reversed_faces([(0, 1, 2), (0, 2, 3)]) + two_sided([   # floor -> up (+Z)
+        (0, 5, 4), (0, 3, 5),   # left wall  (outward -X, plus inner twin)
+        (1, 6, 7), (1, 7, 2),   # right wall (outward +X, plus inner twin)
     ])
     write_mesh(verts, faces, path)
 
@@ -95,10 +118,9 @@ def slope_with_walls(hx, hy, z_drop, wh=WH, path=None):
         (1.0, 0.0,  hx, -hy,         wh ),  # 6
         (1.0, 1.0,  hx,  hy, -z_drop+wh),   # 7
     ]
-    faces = both_sides([
-        (0, 1, 2), (0, 2, 3),
-        (0, 5, 4), (0, 3, 5),
-        (1, 6, 7), (1, 7, 2),
+    faces = reversed_faces([(0, 1, 2), (0, 2, 3)]) + two_sided([   # slope face -> up
+        (0, 5, 4), (0, 3, 5),   # left wall  (outward -X, plus inner twin)
+        (1, 6, 7), (1, 7, 2),   # right wall (outward +X, plus inner twin)
     ])
     write_mesh(verts, faces, path)
 
@@ -318,8 +340,31 @@ def generate_lev():
     print(f"  cutting at line {cut_idx + 1} (keeping {11} infrastructure objects)")
 
     kept = lines[:cut_idx]
+
+    # Lights authored AFTER the infrastructure block must survive the cut.
+    # The 2026-09-20 relight sweep (docs/plans/2026-09-20-relight-swept-levels.md)
+    # *appended* an Ambient fill to marble-madness.lev, i.e. past object 11, so a
+    # plain prefix cut silently dropped it and the regenerated level lost its
+    # ambient term entirely. Carry any light-class object across instead of
+    # widening the positional count, which would break again on the next append.
+    bounds = obj_starts + [len(lines)]
+    carried = []
+    for start, stop in zip(bounds[11:], bounds[12:]):
+        block = lines[start:stop]
+        if any('"Class Name"' in l and '"light"' in l for l in block):
+            # Trim the file's trailing close brace if it fell inside this block.
+            # Only the unindented file-level `}` — the object's own `\t}` stays.
+            while block and block[-1].rstrip("\n") == "}":
+                block.pop()
+            carried.append("".join(block))
+            # The object's own name is the bare `{ 'NAME' "Omni01" }` line
+            # right after `{ 'OBJ'`; field lines are `{ 'TYPE' { 'NAME' ... }`.
+            name = next((l.split('"')[1] for l in block
+                         if l.strip().startswith("{ 'NAME'")), "?")
+            print(f"  carrying light object across the cut: {name}")
+
     new_objs = "\n".join(statplat_obj(s) for s in SECTIONS)
-    out = "".join(kept) + new_objs + "\n}\n"
+    out = "".join(kept) + new_objs + "\n" + "".join(carried) + "}\n"
 
     depth = sum(1 if c == '{' else -1 if c == '}' else 0 for c in out)
     if depth != 0:

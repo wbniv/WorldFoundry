@@ -613,3 +613,56 @@ design calls outside a T2 remit. No files changed; `floor.iff` and `mm1_*.iff` w
 restored to HEAD (`git status --short` clean) after each experiment.
 
 **ESCALATE → T4** (design call on lighting/material semantics, not implementation).
+
+## Effort 1e — marble-madness / -2 fixed: dedupe + re-aim the light + right the ball, 2026‑09‑21
+
+Will's call on the Effort 1d fork: **re-light** ("so why don't you move the light???").
+Done inline (T5) after the T3 agent was stopped mid-way; its `gen_level1.py` rewrite was
+kept and finished. Acceptance was the TODO item's: cull-on byte-identical to cull-off,
+cull-off equal-or-brighter than the shipped look, nothing else changed.
+
+### 1. What actually had to change (three things, not one)
+
+| Cause | Where | Fix |
+|---|---|---|
+| Floor/path quads carried both windings (z-fight, down-facing twin wins) | `floor.iff` 4→2 faces, `beginner_path.iff` 112→104, `intermediate_path.iff` 40→36, `practice_path.iff` 176→144, `ramp.iff` 4→2; mm-2's 7 `mm1_*.iff` via `gen_level1.py` | keep the +Z twin, drop the −Z one (VRTX record is `u,v,rgb,x,y,z` — position at byte 12) |
+| Key light below the floor (`Omni01` B=−52°) | `marble-madness.lev`; `marble-madness-2.lev` inherits via the generator | `relight_level.py --alt -52 --az 235` → B=+52°, 52° above the horizon |
+| **The ball was inside-out** — all 960 faces of `sphere.iff` wound inward (normal·(centroid→face) < 0 for every face) | `marble-madness/sphere.iff`, `marble-madness-2/sphere.iff` | swap v1/v2 on every face. With cull-off its *lower* half lit up through the front (inner faces facing the light); with cull-on it went flat — the 241 px residual after the floor/path dedupe |
+
+Two things that would have been wrong to do:
+
+- **Single-sided channel walls in mm-2.** The stopped agent wound the walls outward-only;
+  from the course camera the far wall's *inner* face is the visible one, so cull-on
+  deleted the far-wall lips (787 px of thin slivers). A zero-thickness wall seen from
+  both sides needs both polygons — `two_sided()` in `gen_level1.py` keeps the pair, and
+  cull-on draws exactly the camera-facing one. Floors stay single-sided (+Z).
+- **Deduping the shared `ramp.iff`.** `marble-madness/ramp.iff` was a symlink →
+  `mm_practice_blender/ramp.iff` → `mm_practice/ramp.iff`, and `mm_practice` looks at
+  that ramp from **underneath** (its whole first frame is the ramp's underside): the
+  up-only ramp vanished there under culling (93 146 px). Unshared: `marble-madness/ramp.iff`
+  is now a real file with the deduped quad; `mm_practice/ramp.iff` is untouched and
+  `mm_practice` renders byte-identical to HEAD with cull off *and* on.
+
+Also fixed in `gen_level1.py`'s light carry (the agent's prefix-cut fix, which dropped
+`AmbientLight` from `marble-madness-2.lev`): the object name is the bare
+`{ 'NAME' "Omni01" }` line (`split('"')[1]`, not `[3]`), and only the *unindented*
+file-level `}` is trimmed — `strip()=="}"` also ate the object's own `\t}` and left a
+brace imbalance that failed `levcomp`.
+
+### 2. Verification, frame 20, `--frame-step-smoke=30 --cycles=1 -rate20`
+
+```
+marble-madness    cull0 vs cull1:   0 px (byte-identical)   floor luma 86.0  (shipped cull-off baseline 84.8)
+                  vs shipped cull-off: 4042 px differ — the relit shading + correctly top-lit ball
+marble-madness-2  cull0 vs cull1:   0 px (byte-identical)   mean luma 8.51 (HEAD cull-off 8.51, HEAD cull-on 8.3)
+                  HEAD cull0 vs cull1 was 7436 px; vs HEAD cull-off now 1118 px (light + ball)
+mm_practice       cull0/cull1 vs HEAD: 0 px / 0 px  (ramp unshared, level untouched)
+```
+
+**PASS** on all three acceptance criteria. Captures (bundle dir):
+[![marble-madness after, cull on](2026-06-13-planetarium-dome-view-engine-wide-backface-culling/marble-madness-after-cull-on.png)](2026-06-13-planetarium-dome-view-engine-wide-backface-culling/marble-madness-after-cull-on.png)
+[![marble-madness-2 after, cull on](2026-06-13-planetarium-dome-view-engine-wide-backface-culling/marble-madness-2-after-cull-on.png)](2026-06-13-planetarium-dome-view-engine-wide-backface-culling/marble-madness-2-after-cull-on.png)
+
+Neither level is packed into `cd.iff` (no `marble`/`mm_practice` entry in the bundle
+list), so the rebuilt `wflevels/marble-madness{,-2}{,-standalone}.iff` are the shipped
+artifacts. The last blocker before flipping the `WF_CULL` default is cleared.

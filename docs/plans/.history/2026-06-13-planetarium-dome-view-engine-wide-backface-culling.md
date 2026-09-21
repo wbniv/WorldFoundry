@@ -1,10 +1,16 @@
 | Date | Change |
 |------|--------|
+| [2026-09-21](https://github.com/wbniv/WorldFoundry/commit/8d215cf2) | docs(plan): Effort 1d — marble-madness not fixable by winding alone (numbers) |
 | [2026-09-21](https://github.com/wbniv/WorldFoundry/commit/6f955900) | docs(plan): record Effort 1c - prelit is unlit (trace, fix, proofs) |
 | [2026-09-21](https://github.com/wbniv/WorldFoundry/commit/69f9233b) | fix(dome): rewind the dome patches for the post-flip exporter hand |
 | [2026-06-13](https://github.com/wbniv/WorldFoundry/commit/d1e98510) | feat(gfx): software backface culling, opt-in via WF_CULL=1 (default off) |
 
 <!--history-meta v1
+8d215cf2	author	Will Norris
+8d215cf2	added	94
+8d215cf2	deleted	0
+8d215cf2	files	1
+8d215cf2	body	Both levels have coincident floor polygons wound both ways; the shipped\nbright look is a z-fight artifact. Keeping the up-facing pair is stable\nunder culling but ~30% darker, because the light is aimed from below.\nRecorded by the T2 that escalated; the fix is a relight + dedupe.\n\nCo-Authored-By: Claude Fable 5.1 <noreply@anthropic.com>\nClaude-Session: https://claude.ai/code/session_015ksFy3ZSSz2XMdto3jVA9v
 6f955900	author	Will Norris
 6f955900	added	180
 6f955900	deleted	0
