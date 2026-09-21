@@ -139,6 +139,8 @@
 
 ## Done
 
+- [x] 2026-09-21 — Reusable World Foundry symbol and Linux window icon. [plan](docs/plans/2026-09-21-world-foundry-window-icon.md)
+
 - [x] 2026-09-21 — [marble-astra-cd] Added Astra as bundled level 6, retained all six existing payloads, and verified the main-checkout Task launcher with a zero-fall playthrough. [Plan](docs/plans/2026-09-21-add-marble-astra-to-cd-iff.md).
 
 - ✅ 2026-09-21 — [backface-cull-default] Flipped `WF_CULL` ON by default (`WF_CULL=0` opts out) after a 20-level A/B sweep: 15 byte-identical, 5 within their known 93–167 px back-face-bleed residual; docs + `tests/test_backface_cull_invariant.py` guard. See [plan](docs/plans/2026-06-13-planetarium-dome-view-engine-wide-backface-culling.md).
