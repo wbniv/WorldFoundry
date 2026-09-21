@@ -34,7 +34,11 @@ TOP-DOWN (fills the floor; walk on it / read like 2D KDirStat)
   ratio improves; finalize the row, shrink the rect, recurse per dir) and the **extension →
   type-id classifier** (`tm_classify`; the *string* stays in C). Emits a flat table of cells
   `{x, y, w, h, type, depth}` (`TmCell`) + `tm-x/y/w/h/type/depth ( i -- v )` accessors. Pure
-  arithmetic — `tm_worst` is the Bruls closed form, no trig.
+  arithmetic — `tm_worst` is the Bruls closed form, no trig. `tm-scan` walks `g_tm_root`
+  (default `"."`, i.e. the process cwd) — set `WF_TM_ROOT=<dir>` before launch to point the
+  scan at a fixed directory instead (needed for deterministic A/B captures, since the cwd is
+  otherwise perturbed by files the capture harness itself writes there); the root in use is
+  logged once to stderr at scan time (`TM: laid out '<root>' — N cells`).
 - **Render policy in the Director `.fth`** — iterates the table and spawns a corner-pivot unit
   box per cell, `set-scale3 (w,h,slab)`, `set-color (type>rgb type)`. The **file-type color
   palette and slab height are hot-reloadable** Director policy (same mechanism proven for

@@ -1,8 +1,14 @@
 | Date | Change |
 |------|--------|
+| [2026-06-13](https://github.com/wbniv/WorldFoundry/commit/24fe66ca) | feat(treemap): density bump to 678 cells — finer squarified detail |
 | [2026-06-13](https://github.com/wbniv/WorldFoundry/commit/86e790e4) | feat(treemap): KDirStat/QDirStat squarified disk-usage treemap view |
 
 <!--history-meta v1
+24fe66ca	author	Will Norris
+24fe66ca	added	16
+24fe66ca	deleted	8
+24fe66ca	files	1
+24fe66ca	body	Lower the squarified-treemap cull thresholds and deepen the recursion so the\nKDirStat view renders finer detail across the whole floor:\n\n- TM_MIN_AREA 11 → 1.5, TM_MIN_LEAF 2.5 → 0.4 (scripting_zforth.cc)\n- MAX_DEPTH 5 → 6, MAXNODES 480 → 1900, pool 500 → 2000 (blender_treemap.py,\n  treemap.lev)\n- Room::Construct RangeCheck(numberOfTemporaryObjects) 1000 → 4000 — the\n  arbitrary cap that gated the larger pool; shared by all fs-viz levels.\n\nResult: ~247 → 678 cells, fills the rect, no asserts / out-of-room / terminate.\nVerified on '.' (this repo); new screenshot + plan verification updated.\n\nFollow-up to 86e790e4 (treemap view).\n\nCo-Authored-By: Claude Opus 4.8 (1M context) <noreply@anthropic.com>
 86e790e4	author	Will Norris
 86e790e4	added	72
 86e790e4	deleted	0

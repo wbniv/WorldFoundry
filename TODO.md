@@ -25,7 +25,6 @@
 ### Camera & Rendering
 
 - [T2] **Snowgoons-import fog trap: inherited Earth-fog defaults grey out distant terrain.** Levels scaffolded off snowgoons inherit `FoggingColor=0x888888`, `FoggingStartDistance=20`, `FoggingCompleteDistance=30` → any pixel past ~30 m fades to flat `#888888`. Workaround overrides the three fields per-level; consider adding an opt-in "strip snowgoons fog" to `wf_blender` import_level. [plan](docs/plans/2026-05-31-uninitialised-fog-defaults.md)
-- [wip T1] **`treemap` renders non-deterministically at a fixed timestep — root cause known.** `tm-scan` hardcodes `g_tm_root = "."` (`engine/stubs/scripting_zforth.cc:1197`), so it scans the real on-disk sizes under the cwd (`wfsource/source/game`), which the capture harness itself perturbs (it writes `output.mp4` there). Add a `WF_TM_ROOT` env override (default unchanged) and point the A/B harness at a fixed fixture directory; then the level is testable. Found 2026‑09‑21 in the backface-culling audit. <!-- agent:a5eb4e9581c13ca56 -->
 - [T2] Investigate [stereowrap](https://github.com/jtsiomb/stereowrap)
 
 ### Engine Robustness
@@ -144,6 +143,7 @@
 
 ## Done
 
+- ✅ 2026-09-21 — [treemap-tm-root-env] Added `WF_TM_ROOT` env override for `tm-scan`'s hardcoded `g_tm_root = "."` (`engine/stubs/scripting_zforth.cc:1197`), with a stderr log line; verified two runs against a fixed fixture dir produce byte-identical PNGs. Documented in [plan](docs/plans/2026-06-13-kdirstat-treemap-view.md).
 - ✅ 2026-09-21 — [gold-collision-dead] Gold::Collision annotated as unreachable for MOBILITY_PHYSICS coins; live pickup path named. See gold.cc.
 - ✅ 2026-09-21 — [preincrement-sweep-game-stubs] Converted bare `i++;`/`i--;` statements and `for`-loop steps to pre-increment/decrement form in `wfsource/source/game/` and `engine/stubs/` (coding-conventions.md §4). No new `ARRAY_COUNT` violations found in scope — one candidate (`debug_server.cc`'s `float out[3]` parameter) is a decayed-pointer param where `ARRAY_COUNT` would be wrong, left alone. `wfsource/source/gfx/rendmatt.cc` and the rest of the tree remain (tracked as a new Open item).
 - ✅ 2026-09-20 — [export-level-light-dup] export_level.py no longer double-emits light fields from a hardcoded block; schema walk is the single source. See [plan](docs/plans/2026-09-20-export-level-light-field-duplication.md).

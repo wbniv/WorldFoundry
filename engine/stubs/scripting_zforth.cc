@@ -1195,6 +1195,9 @@ zf_input_state zf_host_sys(zf_ctx* ctx, zf_syscall_id id, const char* /*last_wor
                 g_fsn_maxNodes = (int)zf_pop(ctx);   // shared spawn budget
                 g_tm_maxDepth  = (int)zf_pop(ctx);
                 g_tm_root = ".";
+                if (const char* envRoot = std::getenv("WF_TM_ROOT")) {
+                    g_tm_root = envRoot;
+                }
             } else if (custom == 33) {
                 // tm-scan ( -- nCells ) — run the squarified layout, fill the table.
                 int n = tm_scan();
