@@ -139,6 +139,8 @@
 
 ## Done
 
+- [x] 2026-09-21 — [marble-astra-cd] Added Astra as bundled level 6, retained all six existing payloads, and verified the main-checkout Task launcher with a zero-fall playthrough. [Plan](docs/plans/2026-09-21-add-marble-astra-to-cd-iff.md).
+
 - ✅ 2026-09-21 — [backface-cull-default] Flipped `WF_CULL` ON by default (`WF_CULL=0` opts out) after a 20-level A/B sweep: 15 byte-identical, 5 within their known 93–167 px back-face-bleed residual; docs + `tests/test_backface_cull_invariant.py` guard. See [plan](docs/plans/2026-06-13-planetarium-dome-view-engine-wide-backface-culling.md).
 - ✅ 2026-09-21 — [android-launcher-polish] Adaptive-icon XML (`mipmap-anydpi-v26/ic_launcher{,_round}.xml`, `..._log{,_round}.xml`) over generated foreground/background drawables at all 5 densities, plus a distinct icon for `LogViewerActivity`; verified via XML validation, manifest↔resource cross-check, and rendered icon preview (no local Android SDK/device on this machine, so the plan's gradle-build + on-device verification steps are still outstanding). See [plan](docs/plans/2026-04-18-android-launcher-polish.md).
 - ✅ 2026-09-21 — [marble-madness-cull] Deduped floors/paths, relit from +52°, righted the inside-out ball; cull on == off. See [plan](docs/plans/2026-06-13-planetarium-dome-view-engine-wide-backface-culling.md).

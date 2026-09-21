@@ -49,6 +49,8 @@
 extern int wf_hud_score;
 extern int wf_hud_timer;
 extern int wf_hud_lives;
+extern int wf_hud_marble_state;
+extern int wf_hud_marble_falls;
 extern int wf_hud_game_over;
 extern int wf_hud_entering_initials;
 extern char wf_hud_initials[4];
@@ -183,11 +185,28 @@ static void DrawHud(int xSize, int ySize)
         DrawHudText(0, 0, buf); glPopMatrix();
     }
 
-    snprintf(buf, sizeof(buf), "LIVES %d", wf_hud_lives);
+    if (wf_hud_marble_state)
+        snprintf(buf, sizeof(buf), "FALLS %d", wf_hud_marble_falls);
+    else
+        snprintf(buf, sizeof(buf), "LIVES %d", wf_hud_lives);
     {
         float lw = (float)stb_easy_font_width((char*)buf) * kScale;
         glPushMatrix(); glTranslatef((float)xSize - lw - 8, 8, 0); glScalef(kScale, kScale, 1);
         DrawHudText(0, 0, buf); glPopMatrix();
+    }
+
+    if (wf_hud_marble_state) {
+        const char* title = wf_hud_marble_state == 2 ? "FINISHED!" :
+                            wf_hud_marble_state == 3 ? "TIME UP" : "PRACTICE RACE";
+        float width = (float)stb_easy_font_width((char*)title) * kScale;
+        glPushMatrix();
+        glTranslatef(xSize * 0.5f - width * 0.5f, ySize - 52, 0);
+        glScalef(kScale, kScale, 1);
+        DrawHudText(0, 0, title);
+        glPopMatrix();
+        const char* help = "ARROWS: ROLL    SPACE: RESTART";
+        width = (float)stb_easy_font_width((char*)help);
+        DrawHudText(xSize * 0.5f - width * 0.5f, ySize - 22, help);
     }
 
     // ── Moon Site 01 position-display HUD overlay ──────────────────────────
@@ -976,8 +995,6 @@ CaptureFrame(int xSize, int ySize, int liveW, int liveH)
     // -record_video and --capture-frame are independent consumers of this
     // function — a single-shot PNG capture must not require the ffmpeg pipe.
     const bool wantsPngThisFrame = gCapturePending && gCapturePath;
-    if (!bRecordVideo && !wantsPngThisFrame)
-        return;
 
     if (bRecordVideo && !gCapturePipe)
     {
@@ -1001,8 +1018,6 @@ CaptureFrame(int xSize, int ySize, int liveW, int liveH)
         signal(SIGINT,  CaptureCleanup);
     }
 
-    const int pixelBytes = xSize * ySize * 3;
-    glFinish();
 
     // When rendering to the offscreen capture FBO, blit it onto the back
     // buffer (so the user still sees the game) and then read from the FBO
@@ -1017,6 +1032,18 @@ CaptureFrame(int xSize, int ySize, int liveW, int liveH)
         // FBO remains bound as the READ framebuffer for glReadPixels below.
     }
 
+    // Presentation is required on EVERY offscreen frame, including frames
+    // before and after a one-shot PNG. Returning before the blit swaps stale
+    // back buffers and makes the entire live window flash.
+    if (!bRecordVideo && !wantsPngThisFrame)
+    {
+        if (gCaptureFBO)
+            glBindFramebuffer(GL_FRAMEBUFFER, 0);
+        return;
+    }
+
+    const int pixelBytes = xSize * ySize * 3;
+    glFinish();
     uint8_t* pixels = (uint8_t*)malloc(pixelBytes);
     glReadPixels(0, 0, xSize, ySize, GL_BGR, GL_UNSIGNED_BYTE, pixels);
     if (bRecordVideo && gCapturePipe)
@@ -1222,7 +1249,7 @@ Display::PageFlip()
     // mm_practice / moon_site01 never touch the mailboxes and stay HUD-less.
     // See docs/plans/2026-05-31-hud-gate-on-level-opt-in.md.
     if (wf_hud_score | wf_hud_timer | wf_hud_lives | wf_hud_game_over
-        | wf_hud_entering_initials | wf_moon_overlay_enabled)
+        | wf_hud_entering_initials | wf_moon_overlay_enabled | wf_hud_marble_state)
     {
         // Surface-size policy (capture FBO vs live window) lives in
         // Display::GetSurfaceSize — see refactor plan.

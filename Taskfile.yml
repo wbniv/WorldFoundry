@@ -579,7 +579,7 @@ tasks:
     deps: [ensure-build]
     dir: wfsource/source/game
     cmds:
-      - LD_LIBRARY_PATH=../../../engine/libs DISPLAY=:0 ../../../engine/wf_game
+      - LD_LIBRARY_PATH=../../../engine/libs DISPLAY=:0 ../../../engine/wf_game {{.CLI_ARGS}}
 
   gdb:
     desc: "Run wf_game under gdb (-batch backtrace), tee to /tmp/wfgdb.log"
@@ -715,7 +715,7 @@ tasks:
         bash wftools/wf_blender/build_level_binary.sh "$1"
 
   build-cd-iff:
-    desc: "Assemble wfsource/source/game/cd.iff from shell.fth + standalone level IFFs via cdpack-rs (SMB W1-1=0, W1-2=1, W1-3=2, W1-4=3, snowgoons=4, qbert=5)"
+    desc: "Assemble wfsource/source/game/cd.iff from shell.fth + standalone level IFFs via cdpack-rs (SMB W1-1=0, W1-2=1, W1-3=2, W1-4=3, snowgoons=4, qbert=5, Astra Marble Madness=6)"
     cmds:
       - cargo build --release --manifest-path wftools/cdpack-rs/Cargo.toml
       # Feed the *-standalone.iff (L4-rooted) files, NOT the bare LVAS *.iff:
@@ -725,7 +725,7 @@ tasks:
       # boots into Mario. Flagpole/axe advance ActBoxes chain the loop:
       # W1-1 writes LEVEL_TO_RUN=1 (-> W1-2), W1-2 writes 2 (-> W1-3), W1-3 writes 3
       # (-> W1-4), W1-4 writes 0 (-> W1-1) — an endless W1-1->W1-2->W1-3->W1-4 loop.
-      # snowgoons/qbert stay at 4/5 (reachable by writing LEVEL_TO_RUN).
+      # snowgoons/qbert stay at 4/5; Astra Marble Madness is appended at 6.
       # See docs/plans/2026-06-03-build-faithful-smb-w1-4.md.
       - |
         wftools/cdpack-rs/target/release/cdpack \
@@ -736,15 +736,15 @@ tasks:
           wflevels/smb_w1_4-standalone.iff \
           wflevels/snowgoons-standalone.iff \
           wflevels/qbert_practice-standalone.iff \
+          wflevels/marble-madness-3d-astra-standalone.iff \
           -o wfsource/source/game/cd.iff
 
   run-marble-3d-astra:
-    desc: "Run the Astra Marble Madness implementation from its sibling worktree"
-    preconditions:
-      - sh: test -f "{{.ROOT_DIR}}/../WorldFoundry-wbniv-mm3d-astra/Taskfile.yml"
-        msg: "The Astra worktree must exist alongside this checkout at ../WorldFoundry-wbniv-mm3d-astra."
+    desc: "Run Astra Marble Madness from cd.iff (level 6; arrows roll, Space restarts)"
+    deps: [ensure-build]
+    dir: wfsource/source/game
     cmds:
-      - task --dir "{{.ROOT_DIR}}/../WorldFoundry-wbniv-mm3d-astra" run-marble-3d-astra -- {{.CLI_ARGS}}
+      - LD_LIBRARY_PATH=../../../engine/libs DISPLAY=${DISPLAY:-:0} ../../../engine/wf_game {{.CLI_ARGS}} 6
 
   run-qbert:
     desc: "Run wf_game on wflevels/qbert_practice-standalone.iff directly (bypass cd.iff). WF_RECORD=1 records video. WF_FULLSCREEN=1 for fullscreen."
