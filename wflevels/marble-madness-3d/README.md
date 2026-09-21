@@ -1,13 +1,13 @@
-# Marble Madness: Practice in real 3D
+# Astra — Marble Madness: Practice in real 3D
 
-An independent standalone WorldFoundry conversion of the **Practice collision surface**, with a playable timed race. Built directly from the arcade terrain sampler, without the old WF course geometry or Blender conversion scripts. The other five courses are not implemented.
+The Astra implementation: an independent standalone WorldFoundry conversion of the **Practice collision surface**, with a playable timed race. Built directly from the arcade terrain sampler, without the old WF course geometry or Blender conversion scripts. The other five courses are not implemented.
 
 ## Play
 
 From this checkout:
 
 ```sh
-task run-marble-3d
+task run-marble-3d-astra
 ```
 
 Arrow keys apply camera-relative acceleration. Countersteer to brake; momentum and downhill acceleration matter. Space restarts the 60-second race. Cross between the checkered flags to finish. Falling returns to the start while the timer continues. Escape exits.

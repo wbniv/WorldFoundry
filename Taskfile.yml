@@ -738,8 +738,8 @@ tasks:
           wflevels/qbert_practice-standalone.iff \
           -o wfsource/source/game/cd.iff
 
-  run-marble-3d:
-    desc: "Run standalone Marble Madness Practice (arrows roll; Space restarts)"
+  run-marble-3d-astra:
+    desc: "Run Astra Marble Madness Practice (arrows roll; Space restarts)"
     deps: [ensure-build]
     cmds:
       - python3 wflevels/marble-madness-3d/run.py {{.CLI_ARGS}}
