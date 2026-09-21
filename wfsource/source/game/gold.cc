@@ -91,6 +91,12 @@ Gold::update()
 void
 Gold::Collision(PhysicalObject& other, const Vector3& normal)
 {
+	// NOT REACHED for MOBILITY_PHYSICS coins (every Gold coin in the game): they're
+	// CharacterVirtual bodies, which don't appear in gBodies, so JoltContactDispatch
+	// can't find them via FindActorForBodyID and this never fires. The live pickup
+	// path is TryPickup() (proximity-based, called from Gold::update()) above — see
+	// the file header. Don't "fix" coin value here; fix it there.
+	//
 	// Preserve base behaviour: per-actor collider mailboxes (3044-3047) +
 	// supporting-object bookkeeping.
 	Actor::Collision(other, normal);
