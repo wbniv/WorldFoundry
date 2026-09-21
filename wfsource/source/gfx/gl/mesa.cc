@@ -38,6 +38,7 @@
 #include <GL/glu.h>
 #undef Display
 #include <X11/Xatom.h>  // XA_ATOM, for _NET_WM_STATE_FULLSCREEN
+#include "world_foundry_icon.h"
 
 //==============================================================================
 
@@ -154,6 +155,14 @@ OpenMainWindow( char *title )
     if(!halDisplay.win)
         FatalError("Couldn't open X window!");
     XStoreName(halDisplay.mainDisplay, halDisplay.win, title);
+
+    // Publish all icon sizes before mapping so the desktop can choose one
+    // for the title bar or task switcher. Embedded data needs no loose files.
+    const Atom wmIcon = XInternAtom(halDisplay.mainDisplay, "_NET_WM_ICON", False);
+    XChangeProperty(halDisplay.mainDisplay, halDisplay.win,
+                    wmIcon, XA_CARDINAL, 32, PropModeReplace,
+                    reinterpret_cast<const unsigned char*>(kWorldFoundryWindowIcon),
+                    sizeof(kWorldFoundryWindowIcon) / sizeof(kWorldFoundryWindowIcon[0]));
 
     // Tell the WM this is a normal application window so it gets decorations.
     {

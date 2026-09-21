@@ -139,6 +139,8 @@
 
 ## Done
 
+- [x] 2026-09-21 — Reusable World Foundry symbol and Linux window icon. [plan](docs/plans/2026-09-21-world-foundry-window-icon.md)
+
 - [x] 2026-09-21 — [marble-madness-3d-astra] Independent Practice collision-surface conversion, playable Jolt/zForth race, full input-only run, and live screenshot-flicker regression fix. Fidelity limits and evidence: [plan](docs/plans/2026-09-21-marble-madness-true-3d-reimplementation.md).
 
 - ✅ 2026-09-21 — [backface-cull-default] Flipped `WF_CULL` ON by default (`WF_CULL=0` opts out) after a 20-level A/B sweep: 15 byte-identical, 5 within their known 93–167 px back-face-bleed residual; docs + `tests/test_backface_cull_invariant.py` guard. See [plan](docs/plans/2026-06-13-planetarium-dome-view-engine-wide-backface-culling.md).
