@@ -339,3 +339,183 @@ one‑sided lighting now hitting the patches' other face (expected when a normal
 `WF_CULL` remains opt‑in in both `backend_modern.cc` and `backend_metal.mm`; the docs
 (`level-design-troubleshooting.md`, `level-building.md`) still describe it correctly as
 off‑by‑default and are unchanged.
+
+---
+
+## Effort 1c — prelit is unlit, 2026‑09‑21
+
+Unblocks Effort 1b blocker (c) and the `qbert_practice` half of blocker 3: both were
+stalled on the same measured fact — **reversing the winding of a `LIGHTING_PRELIT` face
+changed its colour with culling off**, so a rewind could never be "visibility only".
+
+### The trace — where the normal entered a prelit face's colour
+
+1. `wfsource/source/gfx/material.cc:67` — `Get3DRenderObjectPtr()` indexes
+   `_rendererList[_materialFlags & RENDERER_SELECTION_MASK]`, and
+   `RENDERER_SELECTION_MASK` (`gfx/material.hp:126`) includes `LIGHTING_PRELIT`. So the
+   flag **did** pick a different renderer: `rendfcp.cc` instead of `rendfcl.cc`
+   (`gfx/glpipeline/renderer.ext:7-15`).
+2. `wfsource/source/gfx/glpipeline/rendfcp.cc:33-63` vs `rendfcl.cc:33-63` — the two
+   functions were **byte‑for‑byte identical**. The "prelit" renderer differed from the lit
+   one in name only. Same for `rendgcp`/`rendgcl`, `rendftp`/`rendftl`, `rendgtp`/`rendgtl`.
+3. `wfsource/source/gfx/rendobj3.cc:119-136` (`ApplyMaterials`) and
+   `material.cc:258-438` (`InitPrimitive`) — the bake writes **only** the material/vertex
+   colour and UVs into the `Primitive`. No lighting term, no normal. The two previous
+   agents' hypothesis that the normal was folded in during the `RenderObject3D` bake is
+   **wrong**: nothing normal‑dependent happens there.
+4. `wfsource/source/gfx/glpipeline/backend_modern.cc:83-91` — the normal enters in the
+   **GL vertex shader**, which every renderer feeds:
+
+   ```glsl
+   if (u_lighting != 0) {
+       vec3 N = normalize((u_mv * vec4(a_normal, 0.0)).xyz);
+       vec3 lit = u_ambient;
+       for (int i = 0; i < 3; ++i)
+           lit += u_light_color[i] * max(0.0, dot(N, u_light_dir[i]));
+       v_lit = lit;
+   } else { v_lit = vec3(1.0); }
+   ```
+
+   and the fragment shader (`backend_modern.cc:114-118`) outputs `v_color * v_lit`.
+   `a_normal` is the per‑face normal replicated into all three verts by
+   `backend_modern.cc:398-400`. `u_lighting` was a **global** uniform, set once per frame
+   from `SetLightingEnabled` (`gfx/rendmatt.cc:146,261`, `gfx/gl/display.cc:838`) — the
+   material's prelit flag never reached it.
+5. `wfsource/source/gfx/rendobj3.cc:239` — that per‑face normal is
+   `CalculateNormal(v0, v1, v2)` at load time, i.e. **derived from winding**. Reverse the
+   triangle, negate `N`, change `dot(N, L)`, change the colour. `gfx/metal/backend_metal.mm:143-152`
+   is the same term in MSL.
+
+So `LIGHTING_PRELIT` was honoured by the *dispatch* and dropped by the *draw*.
+
+### The fix
+
+`prelit` is now a per‑triangle argument on the backend seam
+(`gfx/renderer_backend.hp:86-107`), passed `true` by the four prelit renderers
+(`rendfcp.cc:68`, `rendgcp.cc:62`, `rendftp.cc:81`, `rendgtp.cc:106`). Each backend makes
+it part of the **batch key** alongside the texture and clears the lighting uniform for a
+prelit batch: `backend_modern.cc:398-405` (break), `:558` (`_curPrelit`), `:641` (uniform);
+`backend_metal.mm:400-406`, `:534`, `:656`. Faces are already material‑sorted by
+`RenderObject3D::Render`, so this costs at most one extra draw call per material run.
+
+*Rejected:* a per‑vertex `a_unlit` attribute, which would avoid the batch break but
+changes the vertex layout **and** the shader in both backends — more surface in the Metal
+path, which cannot be run or tested on this host. The flush‑and‑toggle reuses machinery
+both backends already have for texture changes and needs no shader edit at all.
+
+The Metal change is a deliberate line‑for‑line mirror of the GL one and is **unverified** —
+there is no macOS host here.
+
+### Verification
+
+All captures: `wf_game --frame-step-smoke=30 --cycles=1 -rate20 -record_video
+--capture-frame=20=<png> -L<level>` from `wfsource/source/game`, with `WF_CULL=0`.
+`-record_video` is required on Linux or the PNG is silently not written.
+
+**1. Which materials are actually prelit.** Scan every `MATL` chunk under `wflevels/`
+and `assets/` for flag bit 4.
+
+```
+$ python3 scan_prelit.py wflevels assets | grep -v "prelit=  0"
+wflevels/qbert_practice/cube.iff                materials=  3 prelit=  3  flagset=['0x4']
+$ python3 scan_prelit.py wflevels assets | wc -l
+319
+```
+
+One file out of 319 with materials. **PASS** — the blast radius is the `qbert_practice`
+cubes and nothing else.
+
+**2. Before the fix: a prelit face's colour depends on its winding.** Reverse every cube
+triangle `(v1, v2, v3) → (v1, v3, v2)` in `gen_cube.py`, regenerate `cube.iff`, rebuild
+the level, capture frame 20 both ways against a binary with the fix backed out.
+
+```
+orig -> f1663c8b3a3788f3be27cea719567395
+flip -> 02e5a873ff45b41d69574a31aa41fdaa
+bytes_identical=False  pixels_differing=5009/307200  max_channel_delta=111
+```
+
+**PASS (bug reproduced)** — 5009 px, exactly the count the 09‑21 backface audit reported.
+
+| shipped winding | reversed winding |
+|---|---|
+| <img src="2026-06-13-planetarium-dome-view-engine-wide-backface-culling/prelit-before-shipped-winding.png" width="330"> | <img src="2026-06-13-planetarium-dome-view-engine-wide-backface-culling/prelit-before-reversed-winding.png" width="330"> |
+
+**3. After the fix: the two windings are byte‑identical.**
+
+```
+a=caps/after/qbert_practice.png md5=90e1c1d0806f9e984dd57ef7cba1b349
+b=caps/after_flipped/qbert_practice.png md5=90e1c1d0806f9e984dd57ef7cba1b349
+bytes_identical=True  pixels_differing=0/307200  max_channel_delta=0
+```
+
+**PASS.** <img src="2026-06-13-planetarium-dome-view-engine-wide-backface-culling/prelit-after-both-windings.png" width="330">
+
+The cube tops are back to the director's per‑round `ROUND_TOP_COLORS[0][0] = 0x5646EF`
+under *both* windings — the `FACE_COLOR` override now reaches the screen unmodulated,
+which is what "prelit" was always supposed to mean. `qbert_practice` frame 20 therefore
+**does** change against HEAD (`f1663c8b…` → `90e1c1d0…`); that is the fix, not a regression.
+
+**4. Non‑prelit levels are untouched.** Frame 20, `WF_CULL=0`, before vs after the fix.
+
+```
+                     before                            after
+snowgoons-blender    933c23b00026a073c447003a209ea9fe  933c23b00026a073c447003a209ea9fe
+smb_w1_1             99d59e94d14ddc1f910922533ddeec3d  99d59e94d14ddc1f910922533ddeec3d
+pilot_demo           1f92c5d2cb4d9d3dcc7b2c95a26fb620  1f92c5d2cb4d9d3dcc7b2c95a26fb620
+condo_639_640        8fa09b261aa8091f2fd5a86fa464193e  8fa09b261aa8091f2fd5a86fa464193e
+```
+
+**PASS** — all four byte‑identical. (Each was also captured twice pre‑fix to confirm the
+capture itself is deterministic; identical both times.)
+
+**5. `condo_639_640` sky‑dome banding — unchanged, and why.** `wflevels/condo_639_640/skydome.iff`
+carries material flags **`0x2`** = `TEXTURE_MAPPED | LIGHTING_LIT`. It is **not** prelit, so
+this engine fix cannot affect it, and step 4 confirms the frame is byte‑identical. The
+banding on `condo_sky.tga` is per‑face `dot(N, L)` on a lit dome and stays until the
+material is actually marked prelit — i.e. until `export_level.py` learns to set
+`LIGHTING_PRELIT` from a Blender `wf_prelit` property. **PASS (predicted result observed);
+the sky half of the TODO item is now a pure exporter task, no longer blocked on the engine.**
+
+```
+wflevels/condo_639_640/skydome.iff        materials=  1 prelit=  0  flagset=['0x2']
+wflevels/condo_639_640_tour/skydome.iff   materials=  1 prelit=  0  flagset=['0x2']
+wflevels/moon_site01/skydome.iff          materials=  1 prelit=  0  flagset=['0x2']
+```
+
+**6. Regression guard.** `tests/test_prelit_winding_invariant.py` renders `qbert_practice`
+frame 20 twice — shipped level, and the same bundle with the cube MODL spliced out for a
+reversed‑winding one — and requires byte‑identical PNGs. The flipped mesh is generated at
+test time rather than committed: reversing a triangle permutes shorts inside the FACE chunk
+without changing its length, and `cube.iff` is embedded verbatim exactly once in
+`qbert_practice-standalone.iff`, so the splice is safe and cannot go stale. Proof that the
+splice equals a real `task build-level` run with the flipped `gen_cube.py`:
+
+```
+spliced md5 : 8d583bcff61517505d433d6f94c7d62c
+rebuilt md5 : 8d583bcff61517505d433d6f94c7d62c
+identical   : True
+```
+
+```
+$ python3 -m pytest tests/test_prelit_winding_invariant.py -q
+.                                                                        [100%]
+1 passed in 3.73s
+```
+
+**PASS.** Since the spliced level *is* the rebuilt level, and step 2 shows that level
+rendered `02e5a873…` against the pre‑fix binary while the shipped one rendered `f1663c8b…`,
+this test would have failed on the old code.
+
+### What this unblocks
+
+- **Effort 1b blocker (c), marble‑madness.** The "bright look depends on a back‑facing
+  polygon being drawn" entanglement is one‑sided lighting on a **lit** material, not a
+  prelit one — `marble-madness*.iff` has no prelit materials (step 1). So this fix does not
+  by itself unblock it; the decision there is still `FACE_COLOR`/one‑sided‑lighting
+  semantics. Recorded here so the next attempt does not re‑test the same hypothesis.
+- **The `qbert_practice` cube rewind** (TODO `[T1]`) is now genuinely visibility‑only: flip
+  `FACES` in `gen_cube.py`, regenerate `cube.iff`, `task build-level -- qbert_practice`,
+  `task build-cd-iff`. Frame 20 with `WF_CULL=0` is byte‑identical either way, as step 3
+  proves; only the `WF_CULL=1` coverage changes.
+- **The sky‑dome banding** is now an exporter task (step 5).

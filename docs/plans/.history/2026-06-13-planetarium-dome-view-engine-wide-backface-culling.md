@@ -1,8 +1,14 @@
 | Date | Change |
 |------|--------|
+| [2026-09-21](https://github.com/wbniv/WorldFoundry/commit/69f9233b) | fix(dome): rewind the dome patches for the post-flip exporter hand |
 | [2026-06-13](https://github.com/wbniv/WorldFoundry/commit/d1e98510) | feat(gfx): software backface culling, opt-in via WF_CULL=1 (default off) |
 
 <!--history-meta v1
+69f9233b	author	Will Norris
+69f9233b	added	185
+69f9233b	deleted	0
+69f9233b	files	1
+69f9233b	body	The dome has rendered completely black under WF_CULL=1 since 9c36ba82 — the\ncommit that flipped the exporter's face hand and rebuilt it. spherical_band_geo\nand cap_geo were hand-wound against the engine's own (v2-v0)x(v1-v0) formula\nback when the exporter wrote loop order unchanged; now that the exporter\nreverses every face loop, those patches export WF-OUTWARD and the player at the\ncentre sees nothing. The level whose whole point is being the first correct\nWF_CULL=1 consumer was the one level that culling broke.\n\nReverse both face lists so they are inward in BLENDER, which the exporter's\nreversal carries through to WF-inward — the "author for Blender" rule from\ndocs/plans/2026-09-19-exporter-face-hand.md. Docstrings and the module header\nnow state that rule instead of the engine formula.\n\nMeasured (frame-20 headless capture, -rate20, wf_game --capture-frame):\n  before   WF_CULL=0 lit 67522   WF_CULL=1 lit     0   IoU   0.00%\n  after    WF_CULL=0 lit 67522   WF_CULL=1 lit 67522   IoU 100.00%  pxdiff 0\nand vs the pre-fix cull-off baseline: lit 67522 both, maxdiff 34 (the one-sided\nlighting now hitting the patches' other face).\n\ndome.lev is deliberately kept at HEAD: re-running blender_dome.py drops\nlightRed/lightGreen/lightBlue/lightType from both lights, which renders the\nlevel black with culling off too. That is a separate export_level.py defect,\nrecorded in the plan.\n\nAlso records the full Effort 1b A/B sweep (all 20 shipped standalone levels,\nWF_CULL=0 vs =1, plus a determinism control) in the culling plan. The default\nis NOT flipped — marble-madness / marble-madness-2 hit the (c) colour\nentanglement, treemap is not byte-reproducible, and three levels cannot be\nrebuilt from their scripts.\n\nCo-Authored-By: Claude Opus 5 (1M context) <noreply@anthropic.com>\nClaude-Session: https://claude.ai/code/session_015ksFy3ZSSz2XMdto3jVA9v
 d1e98510	author	Will Norris
 d1e98510	added	156
 d1e98510	deleted	0
