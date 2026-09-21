@@ -81,7 +81,7 @@ LevelRooms::InitRooms(int numRooms,	_LevelOnDisk* levelData, PRoomObjectListChec
 
 	assert( ValidPtr( _rooms ) );
 
-	for( int index = 0; index < numRooms; index++ )
+	for( int index = 0; index < numRooms; ++index)
 	{
 		_RoomOnDisk * roomData = ( _RoomOnDisk * )( (( char * )_levelData ) + _roomArray[index] );
       
@@ -89,7 +89,7 @@ LevelRooms::InitRooms(int numRooms,	_LevelOnDisk* levelData, PRoomObjectListChec
 
 		_rooms[index].Construct( roomData,_levelData->objectCount,_rooms,numRooms,index, memory,levelOad.NumberOfTemporaryObjects,listCheckFuncList,checkListEntries,masterObjectList, _roomCallbacks  );				
       _rooms[index].Validate();
-      _numRooms++;                  // kts kludge so that objects constructed inside of the room don't crash when they iterate all of the rooms to see which they are in
+      ++_numRooms;                  // kts kludge so that objects constructed inside of the room don't crash when they iterate all of the rooms to see which they are in
                                     // (only occurs when an object is not in the room it is supposed to be in)
 	}
 
@@ -104,7 +104,7 @@ Room*
 LevelRooms::FindContainingRoom(const ColSpace& object, const Vector3& objpos) const
 {
    Validate();
-	for( int index = 0; index < _numRooms; index++ )
+	for( int index = 0; index < _numRooms; ++index)
 	{
       _rooms[index].Validate();
       if(_rooms[index].CheckCollision( object, objpos))
@@ -156,7 +156,7 @@ LevelRooms::AddObjectToRoom( int32 objectIndex )
 	int roomnum = -1;
 	// figure out which room to add to
 	assert( ValidPtr( _rooms ) );
-	for ( int roomIndex = 0; roomIndex < _numRooms; roomIndex++ )
+	for ( int roomIndex = 0; roomIndex < _numRooms; ++roomIndex)
 	{
 		if ( _rooms[roomIndex].CheckCollision( *po ) )
 		{
@@ -211,7 +211,7 @@ LevelRooms::RemoveObjectFromRoom( int32 idxObject )
 	assert( ValidPtr( _rooms ) );
 	// figure out which room to remove from
 	int roomIndex = 0;
-	for ( roomIndex = 0; roomIndex < _numRooms; roomIndex++ )
+	for ( roomIndex = 0; roomIndex < _numRooms; ++roomIndex)
 	{
 		if ( _rooms[roomIndex].CheckCollision( *po ) )
 		{
@@ -396,7 +396,7 @@ LevelRooms::InitRoomSlotMap()
   // kts added
 #if SW_DBSTREAM
 	croomslots << "room slot list:" << std::endl;
-	for(int debugIndex=0;debugIndex<_numRooms;debugIndex++)
+	for(int debugIndex=0;debugIndex<_numRooms;++debugIndex)
 		croomslots << debugIndex << ": " << _roomSlotMap[debugIndex] << std::endl;
 #endif
 

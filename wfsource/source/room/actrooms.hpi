@@ -42,7 +42,7 @@ ActiveRooms::Validate() const
 	ValidatePtr(_tblToRooms);
 	ValidatePtr(_fromActiveRooms);
 #if DO_VALIDATION > 1
-	for(int index=0;index<MAX_ACTIVE_ROOMS;index++)
+	for(int index=0;index<MAX_ACTIVE_ROOMS;++index)
 	{
 		if(_activeRooms[index])
 		{

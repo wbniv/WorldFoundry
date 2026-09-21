@@ -41,7 +41,7 @@ MsgPort::MsgPort(SMemPool* msgPortMemPool)
    //msgPortMemPool->Validate();
    if(msgPortMemPool && _msgPortMemPool)
       AssertMsg(msgPortMemPool == _msgPortMemPool, "msgPortMemPool = " << msgPortMemPool << ", _msgPortMemPool = " << _msgPortMemPool);     // if this fires then more than one mempool was passed in
-   _portCount++;
+   ++_portCount;
    _msgPortMemPool = msgPortMemPool;
 	ListConstruct(&_messages);		// Initialize list header
 }
@@ -53,7 +53,7 @@ MsgPort::~MsgPort()
 	while ( ListRemoveTail( &_messages ) )
 		;		// Make sure message queue is empty
 	ListDestruct( &_messages );				// Null out the list header
-   _portCount--;
+   --_portCount;
    if(_portCount == 0)
       _msgPortMemPool = NULL;
 

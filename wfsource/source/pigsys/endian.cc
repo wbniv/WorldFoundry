@@ -223,7 +223,7 @@ utl_xtol( const char * theStr )
 	assert( theStr != NULL );
 	AssertMsg( isxdigit( *theStr ), "Non-hex number to utl_xtol" );
 	assert( sizeof(theVal) == 4 );
-	for ( i = 0; i < sizeof(theVal)*2 && isxdigit( *theStr ); i++, theStr++ )
+	for ( i = 0; i < sizeof(theVal)*2 && isxdigit( *theStr ); ++i, ++theStr)
 	{
 		theVal <<= 4;
 		if( isdigit(*theStr) )

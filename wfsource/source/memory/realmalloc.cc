@@ -155,7 +155,7 @@ RealMalloc::Allocate(size_t size ASSERTIONS( COMMA const char* file COMMA int li
 //	printf("memory allocated from RealMalloc ");
 //	DBSTREAM1( printf(" named %s ",_name); )
 //	printf(" at %p,size = %d, left = %d\n",retVal, size, _endMemory-_currentFree);
-	_allocationCount++;
+	++_allocationCount;
 	return(retVal);
 }
 
@@ -207,7 +207,7 @@ RealMalloc::Free(const void* mem)
 #endif
 #endif
 	free((void*)mem);
-	_allocationCount--;
+	--_allocationCount;
 }
 
 //=============================================================================

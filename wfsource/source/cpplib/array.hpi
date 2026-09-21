@@ -150,7 +150,7 @@ Array<T>::Add(T value)
 	{
 		assert(_num < _max);
 		_items[_num] = value;
-		_num++;
+		++_num;
 	}
 	assert(_num <= _max);
 }
@@ -168,7 +168,7 @@ Array<T>::Find(T value)
 	{
 		if(_items[listIndex] == value)
 			return listIndex;
-		listIndex++;
+		++listIndex;
 	}
 	return(-1);
 //	AssertMsg(0,"Didn't find value " << value << "  in Array<T>");					// actor not found in this actor list

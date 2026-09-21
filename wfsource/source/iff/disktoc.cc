@@ -124,7 +124,7 @@ DiskTOC::LoadTOC(_DiskFile& diskFile, int32 tocOffset)
 //#pragma message ("KTS " __FILE__ ": turn this assertion back on when iffcomp is fixed")
 		assert(tocOnDisk.size >= 0); 
 		_toc[_tocEntries]._size = tocOnDisk.size + (DiskFileCD::_SECTOR_SIZE-(tocOnDisk.size%DiskFileCD::_SECTOR_SIZE));  // round up to next sector size
-		_tocEntries++;
+		++_tocEntries;
 		assert(_tocEntries <= entryCount);
 	}
 	HALScratchLmalloc.Free(tocMem,DiskFileCD::_SECTOR_SIZE);

@@ -75,7 +75,7 @@ Scalar::AsText(char* buffer, int length)
       if(length > 0)
       {
          *buffer++ = '-';
-         length--;
+         --length;
       }
 	}
 	else
@@ -96,7 +96,7 @@ Scalar::AsText(char* buffer, int length)
       if(length > 0)
       {
          *buffer++ = '.';
-         length--;
+         --length;
       }
 
 		assert(frac.WholePart() == 0);
@@ -110,7 +110,7 @@ Scalar::AsText(char* buffer, int length)
          if(length > 0)
          {
             *buffer++ = '0'+digit;
-            length--;
+            --length;
          }
 
 			frac = Scalar((long)frac.AsUnsignedFraction());
@@ -128,7 +128,7 @@ Scalar::AsText(char* buffer, int length)
    while(pos > 0 && (buffer[pos] == '0'))
    {
       buffer[pos] = 0;        
-      pos--;
+      --pos;
    }
    if(buffer[pos] == '.')
       buffer[pos] = 0;        
@@ -986,7 +986,7 @@ Sqrt64(long __a1,long __a0)
 	__t1 = __a0;
 	__t2 = __a1;
 
- 	for(__i=0; __i<16; __i++) 			// 16 bit pairs from high dword
+ 	for(__i=0; __i<16; ++__i) 			// 16 bit pairs from high dword
 	{
 		ShiftLeft64(__Error,__t2,2); // 2 bits into error
 
@@ -1002,7 +1002,7 @@ Sqrt64(long __a1,long __a0)
 		}
 	}
 
-	for(__i=0; __i<16; __i++) 				// 16 bit pairs from low dword
+	for(__i=0; __i<16; ++__i) 				// 16 bit pairs from low dword
 	{
 
 		ShiftLeft64(__Error,__t1,2); 		// 2 bits into error

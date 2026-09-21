@@ -408,7 +408,7 @@ sys_init(int* argcp, char*** argvp)
 			//  this out of the command line.  This is because there is no safe way
 			//  of doing it short of allocating our own memory block which does not
 			//  seem like it is worth the trouble.
-		for ( i = 1; i < (*argcp); i++ )
+		for ( i = 1; i < (*argcp); ++i)
 		{
 			if ( 0 )
 				;
@@ -447,7 +447,7 @@ sys_init(int* argcp, char*** argvp)
 
 		_sys_printenv();
 		printf("argc = %d, argv: ", (*argcp));
-		for ( i = 0; i < (*argcp); i++ ) {
+		for ( i = 0; i < (*argcp); ++i) {
 			printf("%s ", (*argvp)[i] ? (*argvp)[i] : "<NULL>");
 		}
 		printf("\n");

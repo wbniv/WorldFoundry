@@ -89,7 +89,7 @@ MemPool::Allocate(size_t size ASSERTIONS( COMMA const char* file COMMA int line)
 	if(_firstFree._next)
 	 {
 //#if DO_ASSERTIONS
-		_currentEntries++;
+		++_currentEntries;
 //#endif
 		void* mem = (void*)_firstFree._next;
 		_firstFree._next = _firstFree._next->_next;
@@ -100,7 +100,7 @@ MemPool::Allocate(size_t size ASSERTIONS( COMMA const char* file COMMA int line)
 		return(0);					// out of entries
 #else					// ! MEMPOOL_REALTRACKING
 //#if DO_ASSERTIONS
-	_currentEntries++;
+	++_currentEntries;
 //#endif
 #error !!!
 	void* mem = malloc(_size);
@@ -120,7 +120,7 @@ MemPool::Free(const void* mem)
 	Validate();
 	assert(ValidPtr(mem));
 //#if DO_ASSERTIONS
-	_currentEntries--;
+	--_currentEntries;
 //#endif
 	DBSTREAM5(cprogress << "Freeing an entry from Memory Pool " << this << " at address " << mem ASSERTIONS( << " leaving " << _currentEntries << " entries") << std::endl; )
 	assert(_currentEntries >= 0);
@@ -238,7 +238,7 @@ MemPool::_Validate() const
 		assert(((char*)fe->_next) < (_buffer+(_maxEntries*_size)));
 		fe = fe->_next;
 		AssertMsg(count < _maxEntries, "mempool list must be looped");
-		count++;
+		++count;
 	 }
 }
 #endif

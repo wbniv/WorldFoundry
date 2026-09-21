@@ -213,8 +213,8 @@ operator >> ( binistream& binis, Matrix34& x )
 	binios::streampos data_start = binis.tellg();
 #endif
 
-	for( int row = 0; row < 4; row++ )
-		for( int column = 0; column < 3; column++ )
+	for( int row = 0; row < 4; ++row)
+		for( int column = 0; column < 3; ++column)
 //			binis >> BR_SCALAR_TO_QSCALAR_REF( _matrix[row][column] );
 			binis >> x._matrix[row][column];
 
@@ -240,8 +240,8 @@ operator << ( binostream& binos, const Matrix34& x )
 	binos.align( binos.alignobject() );
 	binios::streampos data_start = binos.tellp();
 
-	for( int row = 0; row < 4; row++ )
-		for( int column = 0; column < 3; column++ )
+	for( int row = 0; row < 4; ++row)
+		for( int column = 0; column < 3; ++column)
 			binos << x._matrix[row][column];
 
 	if( gTargetMachineType == gHostMachineType )

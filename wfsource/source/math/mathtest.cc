@@ -196,7 +196,7 @@ PIGSMain( int argc, char* argv[] )
 	int index=0;
 	// sin
    MATH_DEBUG( std::cout << "testing sin\n");
-	for(index=0;index<ENTRIES;index++)
+	for(index=0;index<ENTRIES;++index)
 	{
 		unsigned int temp = index % 4;
 		temp *= 0x4000;
@@ -209,7 +209,7 @@ PIGSMain( int argc, char* argv[] )
 
 	// cos
    MATH_DEBUG( std::cout << "testing cos\n");
-	for(index=0;index<ENTRIES;index++)
+	for(index=0;index<ENTRIES;++index)
 	{
 		unsigned int temp = index % 4;
 		temp *= 0x4000;
@@ -221,7 +221,7 @@ PIGSMain( int argc, char* argv[] )
 
 	// now do atan2
    MATH_DEBUG( std::cout << "testing atan2\n");
-	for(index=0;index<360;index++)
+	for(index=0;index<360;++index)
 	{
 		Angle angle = Angle(Angle::Degree(Scalar(index,0)));
 		Scalar Y = angle.Sin();
@@ -257,7 +257,7 @@ PIGSMain( int argc, char* argv[] )
 #endif
    MATH_DEBUG( std::cout << "testing positive asin\n");
 	// now do positive asin
-	for(index=0;index<ENTRIES/4;index++)
+	for(index=0;index<ENTRIES/4;++index)
 	{
 		unsigned int temp = index % 4;
 		temp *= 0x4000;
@@ -276,7 +276,7 @@ PIGSMain( int argc, char* argv[] )
 
    MATH_DEBUG( std::cout << "testing negative asin\n");
 	// now do negative asin
-	for(index=ENTRIES/2;index<(ENTRIES/2)+(ENTRIES/4);index++)
+	for(index=ENTRIES/2;index<(ENTRIES/2)+(ENTRIES/4);++index)
 	{
 		unsigned int temp = index % 4;
 		temp *= 0x4000;
@@ -431,7 +431,7 @@ PIGSMain( int argc, char* argv[] )
    AssertMsg(outEuler == euler, "euler = " << euler << ", outEuler = " << outEuler << std::endl);
 
 #define max(a,b) ((a)>(b)?(a):(b))
-	for(index=0;index<360;index++)
+	for(index=0;index<360;++index)
 	{
 		Angle angle = Angle(Angle::Degree(Scalar(index,0)));
       euler.SetA(angle);
@@ -444,8 +444,8 @@ PIGSMain( int argc, char* argv[] )
 
       // now compare the 2 matricies
 
-      for(int y=0;y<2;y++)
-         for(int x=0;x<2;x++)
+      for(int y=0;y<2;++y)
+         for(int x=0;x<2;++x)
          {
             Scalar orig = matrix[y][x];
             Scalar comp = compmatrix[y][x];
@@ -488,7 +488,7 @@ PIGSMain( int argc, char* argv[] )
 
    euler = Euler::zero;
 
-	for(index=0;index<360;index++)
+	for(index=0;index<360;++index)
 	{
 		Angle angle = Angle(Angle::Degree(Scalar(index,0)));
       euler.SetB(angle);
@@ -502,8 +502,8 @@ PIGSMain( int argc, char* argv[] )
 
       // now compare the 2 matricies
 
-      for(int y=0;y<2;y++)
-         for(int x=0;x<2;x++)
+      for(int y=0;y<2;++y)
+         for(int x=0;x<2;++x)
          {
             Scalar orig = matrix[y][x];
             Scalar comp = compmatrix[y][x];
@@ -521,7 +521,7 @@ PIGSMain( int argc, char* argv[] )
 
    euler = Euler::zero;
 
-	for(index=0;index<360;index++)
+	for(index=0;index<360;++index)
 	{
 		Angle angle = Angle(Angle::Degree(Scalar(index,0)));
       euler.SetC(angle);
@@ -535,8 +535,8 @@ PIGSMain( int argc, char* argv[] )
 
       // now compare the 2 matricies
 
-      for(int y=0;y<2;y++)
-         for(int x=0;x<2;x++)
+      for(int y=0;y<2;++y)
+         for(int x=0;x<2;++x)
          {
             Scalar orig = matrix[y][x];
             Scalar comp = compmatrix[y][x];

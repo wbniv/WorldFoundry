@@ -139,7 +139,7 @@ _MemoryNewArray(Memory& memory, int entries ASSERTIONS( COMMA const char* file C
 
 #define MEMORY_DELETE_ARRAY( memory, classptr, classname, entries) \
 {	\
-	for(int index=0;index<entries;index++) \
+	for(int index=0;index<entries;++index) \
 		classptr [index].~classname (); \
 	(memory).Free( classptr ); \
 }

@@ -65,7 +65,7 @@ MailboxesWithStorage::MailboxesWithStorage(int32 mailboxBase, int32 numberOfLoca
     RangeCheck(0,_mailboxBase,10000);   // kts arbitrary
     RangeCheck(0,numberOfLocalMailboxes,10000);   // kts arbitrary
 
-    for(int index=0; index < numberOfLocalMailboxes;index++)
+    for(int index=0; index < numberOfLocalMailboxes;++index)
         _localMailboxes[index] = Scalar::zero;
 }
 

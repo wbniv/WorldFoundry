@@ -17,8 +17,8 @@ int
 sys_atexit(sys_atexitFunctionPtr atfunc)
 {
 	assert( atfunc != NULL );
-	assert( sizeof(_atFuns)/sizeof(*_atFuns) == SYS_MAC_ATEXIT_FUNCS );
-	assert( _num_atFuns <= sizeof(_atFuns)/sizeof(*_atFuns) );
+	assert( ARRAY_COUNT(_atFuns) == SYS_MAC_ATEXIT_FUNCS );
+	assert( _num_atFuns <= (unsigned int)ARRAY_COUNT(_atFuns) );
 	if ( _num_atFuns >= SYS_MAC_ATEXIT_FUNCS ) {
 		Fail("Too many calls to sys_atexit, please increase SYS_MAC_ATEXIT_FUNCS (" << SYS_MAC_ATEXIT_FUNCS << ")\n");
 		return -1;
@@ -35,9 +35,9 @@ _sys_call_atexit_funs(int code)
 	int		i;
     printf("sys_call_atexit function called, num_atFuns = %d\n",_num_atFuns);
 
-	assert( sizeof(_atFuns)/sizeof(*_atFuns) == SYS_MAC_ATEXIT_FUNCS );
-	assert( _num_atFuns <= sizeof(_atFuns)/sizeof(*_atFuns) );
-	for ( i = _num_atFuns-1; i >= 0; i-- ) 
+	assert( ARRAY_COUNT(_atFuns) == SYS_MAC_ATEXIT_FUNCS );
+	assert( _num_atFuns <= (unsigned int)ARRAY_COUNT(_atFuns) );
+	for ( i = _num_atFuns-1; i >= 0; --i)
     {
 		assert( _atFuns[i] != NULL );
         printf("Calling atexit function at address %p\n",*_atFuns[i]);

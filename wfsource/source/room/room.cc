@@ -158,7 +158,7 @@ Room::Construct
 		// create list of rooms to be active when this one is
 		// the current room is always in index 0, followed by the others
 	DBSTREAM1( croom << "  Creating adjacent room list" << std::endl; )
-	for (entry = 0; entry < MAX_ADJACENT_ROOMS; entry++)
+	for (entry = 0; entry < MAX_ADJACENT_ROOMS; ++entry)
 	 {
 		int roomnum = roomData->adjacentRooms[entry];
 		if (roomnum == ADJACENT_ROOM_NULL)
@@ -177,7 +177,7 @@ Room::Construct
    RangeCheck(0,_checkListEntries, 20);         // kts if this fires just increase the size of the following array
    int maxListEntries[20];
 
-   for(int index=0;index<_checkListEntries;index++)
+   for(int index=0;index<_checkListEntries;++index)
    {
       maxListEntries[index] = 0;
    }
@@ -190,16 +190,16 @@ Room::Construct
 	while(!allIter.Empty())
 	 {
 		BaseObject& object = *allIter;
-      for(int listIndex=0;listIndex<_checkListEntries;listIndex++)
+      for(int listIndex=0;listIndex<_checkListEntries;++listIndex)
       {
          PRoomObjectListCheckFunc func = _listCheckFuncList[listIndex];
          if((object.*func)())
-            maxListEntries[listIndex]++;
+            ++maxListEntries[listIndex];
       }
 		++allIter;
 	 }
 	 // kts this is not really right, since objects can move between rooms
-   for(int listIndex=0;listIndex<_checkListEntries;listIndex++)
+   for(int listIndex=0;listIndex<_checkListEntries;++listIndex)
    {
       _objectLists[listIndex].Construct(memory,maxListEntries[listIndex]+numberOfTemporaryObjects);
    }
@@ -217,7 +217,7 @@ Room::Construct
 		 {
  			DBSTREAM1( croom << "checking object <" << *allObjectsIter <<">, object->kind() = " << object->kind() << std::endl; )
 
-         for(int listIndex=0;listIndex<_checkListEntries;listIndex++)
+         for(int listIndex=0;listIndex<_checkListEntries;++listIndex)
          {
             PRoomObjectListCheckFunc func = _listCheckFuncList[listIndex];
             if((object->*func)())
@@ -305,7 +305,7 @@ Room::AddObject( int32 objectIndex )
 	BaseObject* object = (*_masterObjectList)[ objectIndex ];
 	assert( ValidPtr( object ) );
 
-   for(int listIndex=0;listIndex<_checkListEntries;listIndex++)
+   for(int listIndex=0;listIndex<_checkListEntries;++listIndex)
    {
       PRoomObjectListCheckFunc func = _listCheckFuncList[listIndex];
       if((object->*func)())
@@ -326,7 +326,7 @@ Room::RemoveObject(int32 objectIndex)
 	BaseObject* object = (*_masterObjectList)[objectIndex];
 	assert(object);
 
-   for(int listIndex=0;listIndex<_checkListEntries;listIndex++)
+   for(int listIndex=0;listIndex<_checkListEntries;++listIndex)
    {
       PRoomObjectListCheckFunc func = _listCheckFuncList[listIndex];
       if((object->*func)())

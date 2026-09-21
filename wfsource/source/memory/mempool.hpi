@@ -26,7 +26,7 @@ MemPool::Clear()						// warning: all previous allocations are now invalid
 	ASSERTIONS( _currentEntries = 0; )
 	MemPoolFreeEntry* freeEntry = &_firstFree;
 	char* nextFree = _buffer;
-	for(int entry=0;entry<_maxEntries;entry++)
+	for(int entry=0;entry<_maxEntries;++entry)
 	 {
 		freeEntry->_next = (MemPoolFreeEntry*)nextFree;
 		freeEntry = freeEntry->_next;

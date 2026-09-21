@@ -62,7 +62,7 @@ std::ostream *
 _FindOpenStream( const char * fname )
 {
 	DBSTREAM1( cdebug << "_FindOpenStream( " << fname << " )"; )
-	for( int i = 0; i < gNumStreams; i++ )
+	for( int i = 0; i < gNumStreams; ++i)
 	{
 		if( !strcmp( fname, gStreamNames[i] ) )
 		{
@@ -85,7 +85,7 @@ _RegisterStream( const char * fname, std::ostream * os )
 	assert( fname );
 	assert( strlen( fname ) + 1 < _MAX_PATH );
 	strcpy( gStreamNames[gNumStreams], fname );
-	gNumStreams++;
+	++gNumStreams;
 }
 
 // ------------------------------------------------------------------------

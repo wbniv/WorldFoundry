@@ -52,7 +52,7 @@ ActiveRooms::Construct(int numRooms)
 	ValidatePtr( _tblFromRooms );
 	_tblToRooms = new (_memory) int[_numRooms];
 	ValidatePtr( _tblToRooms );
-	for(int index=0;index<MAX_ACTIVE_ROOMS;index++)
+	for(int index=0;index<MAX_ACTIVE_ROOMS;++index)
 		_activeRooms[index] = NULL;
 	Validate();
 }
@@ -117,12 +117,12 @@ ActiveRooms::ChangeActiveRoom( int toRoom )
 
 #if SW_DBSTREAM
 	croomslots << "active room array before:" << std::endl;
-	for( int debugactiveRoomIndex = 0; debugactiveRoomIndex<MAX_ACTIVE_ROOMS; debugactiveRoomIndex++)
+	for( int debugactiveRoomIndex = 0; debugactiveRoomIndex<MAX_ACTIVE_ROOMS; ++debugactiveRoomIndex)
 		croomslots << debugactiveRoomIndex << ": " << _activeRooms[debugactiveRoomIndex] << std::endl;
 #endif
 
     {		                            // until msvc gets with the 90's
-	for(int activeRoomIndex=0;activeRoomIndex<MAX_ACTIVE_ROOMS;activeRoomIndex++)
+	for(int activeRoomIndex=0;activeRoomIndex<MAX_ACTIVE_ROOMS;++activeRoomIndex)
 		_fromActiveRooms[activeRoomIndex] = _activeRooms[activeRoomIndex];
 	}
 
@@ -150,7 +150,7 @@ ActiveRooms::ChangeActiveRoom( int toRoom )
 #if SW_DBSTREAM
 	{
 	croomslots << "from active rooms, active room array after:" << std::endl;
-	for( int debugactiveRoomIndex = 0; debugactiveRoomIndex<MAX_ACTIVE_ROOMS; debugactiveRoomIndex++)
+	for( int debugactiveRoomIndex = 0; debugactiveRoomIndex<MAX_ACTIVE_ROOMS; ++debugactiveRoomIndex)
 		croomslots << debugactiveRoomIndex << ": " << _fromActiveRooms[debugactiveRoomIndex] << "," << _activeRooms[debugactiveRoomIndex] << std::endl;
 	croomslots << "from and to arrays: " << std::endl;
 	for( int debugroomIndex = 0; debugroomIndex < _numRooms; ++debugroomIndex )
@@ -230,7 +230,7 @@ ActiveRooms::ChangeActiveRoom( int toRoom )
 #if SW_DBSTREAM
 	{
 	croomslots << "from active rooms, active room array way after:" << std::endl;
-	for( int debugactiveRoomIndex = 0; debugactiveRoomIndex<MAX_ACTIVE_ROOMS; debugactiveRoomIndex++)
+	for( int debugactiveRoomIndex = 0; debugactiveRoomIndex<MAX_ACTIVE_ROOMS; ++debugactiveRoomIndex)
 		croomslots << debugactiveRoomIndex << ": " << _fromActiveRooms[debugactiveRoomIndex] << "," << _activeRooms[debugactiveRoomIndex] << std::endl;
 	croomslots << "from and to arrays: " << std::endl;
 	for( int debugroomIndex = 0; debugroomIndex < _numRooms; ++debugroomIndex )
@@ -300,7 +300,7 @@ ActiveRooms::UpdateRoom(const PhysicalObject* watchObject)
 	assert( ValidPtr( _activeRooms[0] ) );									// insure current room is set
 	if( !_activeRooms[0]->CheckCollision( * watchObject ))
 	{ // figure out new room that I'm in now
-		for ( int roomIndex = 0; roomIndex < _numRooms; roomIndex++ )
+		for ( int roomIndex = 0; roomIndex < _numRooms; ++roomIndex)
 		{
 			assert(ValidPtr(&_levelRooms.GetRoom(roomIndex)));
 			if ( _levelRooms.GetRoom(roomIndex).CheckCollision( * watchObject ))
@@ -417,7 +417,7 @@ ActiveRooms::DetectCollision(const Clock& currentTime)
 		{
 			// Process the collision at the END of the list, and decrement the list length
 			ResolveCollisionEvent( collisionEventList[collisionEventListLength-1], currentTime );
-			collisionEventListLength--;
+			--collisionEventListLength;
 		}
 
 		// re-collide any objects who changed their position as a result of collision
@@ -435,7 +435,7 @@ ActiveRooms::DetectCollision(const Clock& currentTime)
 				room1->CheckCollisionWithObjects( *recollisionList[(recollisionListLength) - 1], currentTime, ROOM_OBJECT_LIST_COLLIDE );
 			if (room2)
 				room2->CheckCollisionWithObjects( *recollisionList[(recollisionListLength) - 1], currentTime, ROOM_OBJECT_LIST_COLLIDE );
-			recollisionListLength--;
+			--recollisionListLength;
 		}
 	}
 	Validate();
