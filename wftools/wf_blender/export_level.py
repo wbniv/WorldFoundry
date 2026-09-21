@@ -1146,8 +1146,11 @@ def export_scene_to_lev(context, filepath: str, mesh_dir: str = "") -> tuple[boo
         try:
             resolved = bpy.path.abspath(schema_path)
             schema = wf_core.load_schema(resolved)
-            for fl in _emit_lev_fields(obj, schema, fp):
+            emitted = _emit_lev_fields(obj, schema, fp)
+            for fl in emitted:
                 lines.append("\t\t" + fl)
+            if typename.lower() == "light":
+                _warn_if_light_fields_missing(obj, emitted, resolved)
         except Exception as e_oad:
             # Loud, not silent: a schema that fails to load means this actor
             # silently loses its entire field set in the emitted .lev, which is
@@ -1375,6 +1378,54 @@ def _emit_path_block(obj, fp) -> list[str]:
 
     lines.append("}")
     return lines
+
+
+def _light_prop_keys() -> list[str]:
+    """The four custom-property keys a Light actor carries for its colour+type.
+
+    Named via ``_prop_key`` so this stays a *property* lookup, not a second
+    ``.lev`` emission path — see ``tests/test_export_level_light_fields.py``.
+    """
+    return [_prop_key("lightRed"), _prop_key("lightGreen"),
+            _prop_key("lightBlue"), _prop_key("lightType")]
+
+
+def _warn_if_light_fields_missing(obj, emitted, resolved_schema_path) -> None:
+    """Loud on stderr when a Light actor's colour/type never reached the .lev.
+
+    The schema walk is the single emission path for these fields, so it emits
+    one only when the actor's schema *declares it visible*.  A stale or trimmed
+    per-level `.oad` that marks them ``show_as == 6`` (hidden) therefore drops
+    them in total silence, and `levcomp` falls back to light.oas's own default
+    of 0 — a **black** light, i.e. a level that renders as an empty screen with
+    no error anywhere.  That is exactly how `wflevels/dome` came to render
+    black: `wflevels/oad/light.oad` is an older generation that hides all four.
+
+    Non-fatal, matching the schema-load handler below: a level may legitimately
+    carry an actor whose schema is odd on this machine, and failing the whole
+    export for it would be a regression.  See
+    docs/plans/2026-09-20-export-level-light-field-duplication.md.
+    """
+    import sys
+
+    authored = [k for k in _light_prop_keys() if obj.get(k) is not None]
+    if not authored:
+        return                      # not a colour/type-carrying light; nothing to check
+    blob = "\n".join(emitted)
+    missing = [k for k in authored
+               if f'"{k[len("wf_"):]}"' not in blob]
+    if not missing:
+        return
+    print(
+        f"[wf_export] ERROR: {obj.name}: authored "
+        f"{', '.join(k[len('wf_'):] for k in missing)} as custom propert"
+        f"{'y' if len(missing) == 1 else 'ies'}, but the schema walk emitted "
+        f"NO chunk for them — {resolved_schema_path} does not declare them "
+        f"visible (show_as 6 = hidden, or absent). levcomp will default them "
+        f"to 0, i.e. a BLACK light. Point this level's OAD_DIR at a current "
+        f"schema set, or refresh that .oad.",
+        file=sys.stderr,
+    )
 
 
 def _emit_lev_fields(obj, schema, fp) -> list[str]:
