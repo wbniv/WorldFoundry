@@ -43,6 +43,8 @@
         <activity
             android:name="org.worldfoundry.wf_game.LogViewerActivity"
             android:label="@string/log_viewer_label"
+            android:icon="@mipmap/ic_launcher_log"
+            android:roundIcon="@mipmap/ic_launcher_log_round"
             android:exported="true">
             <intent-filter>
                 <action android:name="android.intent.action.MAIN" />

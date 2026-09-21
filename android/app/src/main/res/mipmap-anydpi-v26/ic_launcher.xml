@@ -1,0 +1,10 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!-- Android 8+ (API 26) adaptive icon for the main "World Foundry" launcher
+     entry. Falls back to mipmap-*/ic_launcher.png on pre-26 devices. See
+     docs/plans/2026-04-18-android-launcher-polish.md and
+     scripts/gen-android-adaptive-icon.py, which generates the foreground
+     bitmaps this references. -->
+<adaptive-icon xmlns:android="http://schemas.android.com/apk/res/android">
+    <background android:drawable="@color/ic_launcher_background" />
+    <foreground android:drawable="@mipmap/ic_launcher_foreground" />
+</adaptive-icon>

@@ -1,0 +1,11 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <!-- Adaptive-icon backgrounds. Solid fills rather than bitmaps, since
+         both launcher marks' legacy PNGs already have solid-color corners
+         (see scripts/gen-android-adaptive-icon.py). -->
+    <color name="ic_launcher_background">#000000</color>
+    <!-- Distinct from the main app icon so the two launcher entries
+         ("World Foundry" and "WF Log Viewer") are visually different at a
+         glance, per docs/plans/2026-04-18-android-launcher-polish.md step 4. -->
+    <color name="ic_launcher_log_background">#1B2733</color>
+</resources>
