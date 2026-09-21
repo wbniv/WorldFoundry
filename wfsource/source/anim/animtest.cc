@@ -294,7 +294,7 @@ TestGFX()
 #if ANIMATE_OBJECT
 	AnimateRenderObject3D* animArray[MODEL_COUNT];
 #endif
-	for(int index=0;index<MODEL_COUNT;index++)
+	for(int index=0;index<MODEL_COUNT;++index)
 	{
 		binistream binis( "torus.iff" );
 
@@ -360,7 +360,7 @@ TestGFX()
 
 
 #if ANIMATE_OBJECT
-	for(int index=0;index<MODEL_COUNT;index++)
+	for(int index=0;index<MODEL_COUNT;++index)
 	{
 		animArray[index]->Animate(time,*(objectArray[index]));
 	}
@@ -396,7 +396,7 @@ TestGFX()
 #endif
 
 #if TEST_MODEL_LOAD
-		for(index=0;index<MODEL_COUNT;index++)
+		for(index=0;index<MODEL_COUNT;++index)
 		{
 			Vector3 position(position3D3);
 			position += Vector3(SCALAR_CONSTANT(2)*Scalar(index%3,0),SCALAR_CONSTANT(2)*Scalar(index/3,0),0);
@@ -433,7 +433,7 @@ ParseCommandLine(int argc, char** argv)
 	int index;
 	const char szDebugger[] = "debugger";
 
-	for( index=1; index < argc && argv[index] && ((*argv[index] == '-') || (*argv[index] == '/')); index++)
+	for( index=1; index < argc && argv[index] && ((*argv[index] == '-') || (*argv[index] == '/')); ++index)
 	{
         if ( strncmp( argv[index]+1, (char*)szDebugger,strlen( szDebugger) ) == 0 )
 		{

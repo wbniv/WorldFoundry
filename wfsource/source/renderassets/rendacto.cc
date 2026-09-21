@@ -250,7 +250,7 @@ MakeBoxMaterialList(Memory& memory, int count)
    static wf_render::BoxColorSequence colors;
    const auto rgb = colors.NextColor();
    const Color tempColor(rgb.red, rgb.green, rgb.blue);
-	for(int index=0;index < count; index++)
+	for(int index=0;index < count; ++index)
 	{
 		materialList[index] = Material(tempColor,Material::FLAT_SHADED|Material::SOLID_COLOR,emptyTexture,NULL);
 	}

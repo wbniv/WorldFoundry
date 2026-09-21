@@ -102,14 +102,14 @@ static ma_result ds_read(ma_data_source* pDs, void* buf, ma_uint64 frameCount,
 		// Render one frame
 		tsf_render_float(impl->synth, out + done * CHANNELS, 1, 0);
 		impl->msElapsed += msPerFrame;
-		done++;
+		++done;
 
 		// Loop when MIDI ends: reset voices but keep channel presets
 		if (!impl->cursor) {
 			impl->cursor    = impl->midi;
 			impl->msElapsed = 0.0;
 			tsf_reset(impl->synth);
-			for (int ch = 0; ch < 16; ch++)
+			for (int ch = 0; ch < 16; ++ch)
 				tsf_channel_set_presetnumber(impl->synth, ch, 0, ch == 9);
 		}
 	}
@@ -117,7 +117,7 @@ static ma_result ds_read(ma_data_source* pDs, void* buf, ma_uint64 frameCount,
 	// Apply volume
 	if (impl->volume < 0.999f) {
 		ma_uint64 total = frameCount * CHANNELS;
-		for (ma_uint64 i = 0; i < total; i++) out[i] *= impl->volume;
+		for (ma_uint64 i = 0; i < total; ++i) out[i] *= impl->volume;
 	}
 
 	if (pFramesRead) *pFramesRead = frameCount;
@@ -186,7 +186,7 @@ bool MusicPlayer::play(const char* midiPath)
 	// GM default: pre-init all 16 channels so note-ons work without a
 	// preceding program-change event (many simple MIDI files omit them).
 	tsf_reset(_impl->synth);
-	for (int ch = 0; ch < 16; ch++)
+	for (int ch = 0; ch < 16; ++ch)
 		tsf_channel_set_presetnumber(_impl->synth, ch, 0, ch == 9);
 
 	// Load MIDI via AssetAccessor. tml_load_memory parses in-place without

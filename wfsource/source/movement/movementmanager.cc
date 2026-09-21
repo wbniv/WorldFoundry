@@ -139,7 +139,7 @@ MovementManager::InitMovementHandler(MovementObject& movementObject)
          {
             if(mhe->mobility == _movementBlock->Mobility)
                _currentMovementHandler = mhe->handler;
-            mhe++;
+            ++mhe;
 
          }
          AssertMsg(_currentMovementHandler, movementObject << " has unknown Mobility of " << _movementBlock->Mobility);

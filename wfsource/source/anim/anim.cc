@@ -81,7 +81,7 @@ AnimateRenderObject3D::AnimateRenderObject3D(Memory& memory, IFFChunkIter& animI
 				assert(ValidPtr(vertexList));
 
 				Vertex3DOnDisk tempVertex;
-				for(int count=0;count<vertexCount;count++)
+				for(int count=0;count<vertexCount;++count)
 				{
 					chunkIter->ReadBytes(&tempVertex,sizeof(Vertex3DOnDisk));
 
@@ -161,7 +161,7 @@ AnimateRenderObject3D::Animate(Scalar time,RenderObject3D& renderObject)
 	int32* dest = (int32*)vertexList;
 	assert(((vertexCount*sizeof(Vertex3D)) % 4) == 0);
 	int count = (vertexCount*sizeof(Vertex3D)) / 4;
-	for(int memIndex=0;memIndex<count;memIndex++)
+	for(int memIndex=0;memIndex<count;++memIndex)
 		*dest++ = *source++;
 //	memcpy(vertexList,&_animArray[frame*vertexCount],vertexCount*sizeof(Vertex3D));
 

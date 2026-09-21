@@ -263,7 +263,7 @@ Preview(char* objectFileName)
 	AnimationCycleArray* animCycleArray[MODEL_COUNT];
 //	AnimateRenderObject3D* animArray[MODEL_COUNT];
 #endif
-	for(int index=0;index<MODEL_COUNT;index++)
+	for(int index=0;index<MODEL_COUNT;++index)
 	{
 		binistream binis( objectFileName );
 		{
@@ -302,7 +302,7 @@ Preview(char* objectFileName)
 	buttons2 = JoystickGetButtonsF(joy2);
 
 #if ANIMATE_OBJECT
-	for(int index=0;index<MODEL_COUNT;index++)
+	for(int index=0;index<MODEL_COUNT;++index)
 	{
 		if(animCycleArray[index])
 		{
@@ -332,7 +332,7 @@ Preview(char* objectFileName)
 		vp.Clear();
 		camera.RenderBegin();
 
-		for(int objectIndex=0;objectIndex<MODEL_COUNT;objectIndex++)
+		for(int objectIndex=0;objectIndex<MODEL_COUNT;++objectIndex)
 		{
 			Vector3 position(position3D3);
 			position += Vector3(SCALAR_CONSTANT(2)*Scalar(objectIndex%3,0),SCALAR_CONSTANT(2)*Scalar(objectIndex/3,0),Scalar::zero);
@@ -360,7 +360,7 @@ Preview(char* objectFileName)
 		{
 			while (JoystickGetButtonsF(joy1) & EJ_BUTTONF_I)
 				;
-			animationCycle++;
+			++animationCycle;
 			if(animationCycle > AnimationManager::MAX_ANIMATION_CYCLES)
 				animationCycle = 0;
 		}
@@ -379,7 +379,7 @@ ParseCommandLine(int argc, char** argv)
 	int index;
 	const char szDebugger[] = "debugger";
 
-	for( index=1; index < argc && argv[index] && ((*argv[index] == '-') || (*argv[index] == '/')); index++)
+	for( index=1; index < argc && argv[index] && ((*argv[index] == '-') || (*argv[index] == '/')); ++index)
 	{
 		if ( 0 )
 			;

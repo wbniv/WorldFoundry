@@ -59,7 +59,7 @@ AssetManager::AssetManager( size_t cbPermMemory, size_t cbRoomMemory, int numAct
 AssetManager::~AssetManager()
 {
 	// Free the asset slots first (per-level pool — order-independent).
-	for(int index=0;index < MAX_ACTIVE_SLOTS;index++)
+	for(int index=0;index < MAX_ACTIVE_SLOTS;++index)
 	{
 		if(_assets[index])
 			MEMORY_DELETE(_memory,_assets[index],AssetSlot);
@@ -152,7 +152,7 @@ AssetManager::LoadPermanents()
 		{
 			assert(roomStream.good());
 			IFFChunkIter roomChunkIter(roomStream);
-			maxAsset++;
+			++maxAsset;
 			assert(maxAsset < 4000);	// arbitrary; bumped 1000→4000 for qbert 1344-actor pyramid (2026-05-09)
 		}
 	}
@@ -209,7 +209,7 @@ AssetManager::LoadRoomSlot(int roomIndex, int slotNum)
 		{
 			assert(roomStream.good());
 			IFFChunkIter roomChunkIter(roomStream);
-			maxAsset++;
+			++maxAsset;
 			assert(maxAsset < 4000);	// arbitrary; bumped 1000→4000 for qbert 1344-actor pyramid (2026-05-09)
 		}
 	}
@@ -254,7 +254,7 @@ AssetManager::ReadAssetMap(binistream& mapStream)
 		assert(stringIter->BytesLeft() < 32);
 		stringIter->ReadBytes(&_assetStringMap[_assetStringMapEntries]._name,stringIter->BytesLeft());
 		MEMORY_DELETE(HALScratchLmalloc,stringIter,IFFChunkIter);
-		_assetStringMapEntries++;
+		++_assetStringMapEntries;
 		assert(_assetStringMapEntries <= 1024);   // bumped to 4000 on 2026-05-10 for qbert fan-out, reverted 2026-05-10 after Phase 1 (pair with assets.hp:116)
 	}
 

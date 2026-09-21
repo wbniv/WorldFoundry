@@ -74,7 +74,7 @@ ColSpace::CheckCollisionWithSlope(const Vector3& mypos, const ColSpace& object, 
 	Scalar distance, vertexX, vertexY, vertexZ;
 	Vector3 xform = objpos - mypos;		// transform to "my" local space
 
-	for (int index=0; index < 8; index++)	// iterate over all points of the colbox
+	for (int index=0; index < 8; ++index)	// iterate over all points of the colbox
 	{
       Vector3 omin = object.Min(xform);
       Vector3 omax = object.Max(xform);
@@ -108,7 +108,7 @@ ColSpace::PremoveCollisionCheckWithSlope(const Vector3& mypos, const ColSpace& o
 	Scalar distance, vertexX, vertexY, vertexZ;
 	Vector3 xform = objpos - mypos;		// transform to "my" local space
 
-	for (int index=0; index < 8; index++)	// iterate over all points of the colbox
+	for (int index=0; index < 8; ++index)	// iterate over all points of the colbox
 	{
       Vector3 omin = object.UnExpMin(xform);
       Vector3 omax = object.UnExpMax(xform);
@@ -168,7 +168,7 @@ ColSpace::TimeToHitSlope(const Vector3& mypos, const ColSpace& object, const Vec
 	Vector3 xform = objpos - mypos;		// transform to "my" local space
 //	Scalar deltaT = theLevel->getDeltaClock();
 
-	for (int index=0; index < 8; index++)	// iterate over all points of the colbox
+	for (int index=0; index < 8; ++index)	// iterate over all points of the colbox
 	{
 		if (index & 0x01)
 		{

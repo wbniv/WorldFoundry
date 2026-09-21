@@ -33,7 +33,7 @@ AnimationCycleArray::AnimationCycleArray(Memory& memory, binistream& input, cons
  _cycleIndex(0)
 {
 #if DO_ASSERTIONS
-	for(int index=0;index<AnimationManager::MAX_ANIMATION_CYCLES;index++)
+	for(int index=0;index<AnimationManager::MAX_ANIMATION_CYCLES;++index)
 		_cycles[index] = NULL;
 #endif
 
@@ -41,7 +41,7 @@ AnimationCycleArray::AnimationCycleArray(Memory& memory, binistream& input, cons
 	{
 		int16 cycleIndexArray[AnimationManager::MAX_ANIMATION_CYCLES];
 #if DO_ASSERTIONS
-		for(int debugcycleIndex=0;debugcycleIndex<AnimationManager::MAX_ANIMATION_CYCLES;debugcycleIndex++)
+		for(int debugcycleIndex=0;debugcycleIndex<AnimationManager::MAX_ANIMATION_CYCLES;++debugcycleIndex)
 			cycleIndexArray[debugcycleIndex] = -1;
 #endif
 
@@ -63,7 +63,7 @@ AnimationCycleArray::AnimationCycleArray(Memory& memory, binistream& input, cons
 		int32 currentCyclePtrIndex = 0;
 		AnimateRenderObject3D* cyclePtrArray[AnimationManager::MAX_ANIMATION_CYCLES];  // array of pointers to animateRenderObject3D's
 #if DO_ASSERTIONS
-		for(int cyclePtrIndex=0;cyclePtrIndex<AnimationManager::MAX_ANIMATION_CYCLES;cyclePtrIndex++)
+		for(int cyclePtrIndex=0;cyclePtrIndex<AnimationManager::MAX_ANIMATION_CYCLES;++cyclePtrIndex)
 			cyclePtrArray[cyclePtrIndex] = NULL;
 #endif
 		while(input.getFilelen() > input.tellg())
@@ -80,10 +80,10 @@ AnimationCycleArray::AnimationCycleArray(Memory& memory, binistream& input, cons
 #endif
 			cyclePtrArray[currentCyclePtrIndex] = new (memory) AnimateRenderObject3D(memory,animIter,object);
 			assert(ValidPtr(cyclePtrArray[currentCyclePtrIndex]));
-			currentCyclePtrIndex++;
+			++currentCyclePtrIndex;
 		}
 
-		for(int cycleIndex=0;cycleIndex<AnimationManager::MAX_ANIMATION_CYCLES;cycleIndex++)
+		for(int cycleIndex=0;cycleIndex<AnimationManager::MAX_ANIMATION_CYCLES;++cycleIndex)
 		{
 			assert(cycleIndexArray[cycleIndex] < currentCyclePtrIndex);
 			assert(ValidPtr(cyclePtrArray[cycleIndexArray[cycleIndex]]));
@@ -92,14 +92,14 @@ AnimationCycleArray::AnimationCycleArray(Memory& memory, binistream& input, cons
 //	_cycleIndex = AnimationManager::RUN_HARD;
 
 #if DO_ASSERTIONS
-		for(int index=0;index<AnimationManager::MAX_ANIMATION_CYCLES;index++)
+		for(int index=0;index<AnimationManager::MAX_ANIMATION_CYCLES;++index)
 			assert(_cycles[index] != NULL);
 #endif
 	}
 	else
 	{
 		DBSTREAM1( cwarn << "RenderActor3DAnimates constructed with no animations!" << std::endl; )
-		for(int index=0;index<AnimationManager::MAX_ANIMATION_CYCLES;index++)
+		for(int index=0;index<AnimationManager::MAX_ANIMATION_CYCLES;++index)
 			_cycles[index] = NULL;
 	}
 }

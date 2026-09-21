@@ -31,7 +31,7 @@ SortCollisionEventList(const Clock& clock)
 	AssertMsg(collisionEventListLength > 0, "The collision event list is empty; why was I called?");
 
 	{
-		for (int eventIndex=0; eventIndex < collisionEventListLength; eventIndex++)
+		for (int eventIndex=0; eventIndex < collisionEventListLength; ++eventIndex)
 		{
 			ComputeCollisionEventTime( collisionEventList[eventIndex], clock );
 		}
@@ -40,7 +40,7 @@ SortCollisionEventList(const Clock& clock)
 #pragma message("PERFORMANCE WARNING:  This sort routine really sucks.  Write a better one.")
 
 	collisionEvent tempEvent;
-	for (int eventIndex=1; eventIndex < collisionEventListLength; eventIndex++)
+	for (int eventIndex=1; eventIndex < collisionEventListLength; ++eventIndex)
 	{
 		if ( collisionEventList[eventIndex].eventTime > collisionEventList[eventIndex-1].eventTime )
 		{
@@ -53,7 +53,7 @@ SortCollisionEventList(const Clock& clock)
 
 	DBSTREAM3(
 		ccollision << std::endl << "Sorted collision event list: (" << collisionEventListLength << " events)" << std::endl;
-		for (int debugIndex=0; debugIndex < collisionEventListLength; debugIndex++)
+		for (int debugIndex=0; debugIndex < collisionEventListLength; ++debugIndex)
 		{
 			ccollision << "Event #" << debugIndex << ":" << std::endl;
 			ccollision << "\tobject1:     " << *collisionEventList[debugIndex].object1 << std::endl;
@@ -245,7 +245,7 @@ ObjectMustReCollide( PhysicalObject* thisObject )
 	recollisionList[recollisionListLength++] = thisObject;
 
 	// Walk the pending collision list and invalidate any events that involve this object
-	for (int eventIndex=0; eventIndex < collisionEventListLength; eventIndex++)
+	for (int eventIndex=0; eventIndex < collisionEventListLength; ++eventIndex)
 	{
 		if ( (collisionEventList[eventIndex].object1 == thisObject) ||
 			 (collisionEventList[eventIndex].object2 == thisObject) )

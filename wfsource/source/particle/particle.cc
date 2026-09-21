@@ -50,7 +50,7 @@ Particle::Update(const Clock& /*clock*/, const _Mesh& meshOAD)
 
 	const SingleForce* force = (SingleForce*)&meshOAD.forceType;
 
-	for(int forceIndex=0;forceIndex<forceEntries;forceIndex++,force++)
+	for(int forceIndex=0;forceIndex<forceEntries;++forceIndex,++force)
 	{
 		// now do forces
 		switch(force->forceType)

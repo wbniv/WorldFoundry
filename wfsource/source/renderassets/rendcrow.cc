@@ -234,7 +234,7 @@ RenderActorScarecrow::_Validate() const
 	RangeCheck(0,_nTextures,100);			// kts arbitrary
 	ValidatePtr(_texture);
 #if DO_VALIDATION > 1
-	for(int textureIndex=0;textureIndex<_nTextures;textureIndex++)
+	for(int textureIndex=0;textureIndex<_nTextures;++textureIndex)
 	{
 		ValidatePtr(_texture[textureIndex]);
 //?		_texture[textureIndex]->Validate();

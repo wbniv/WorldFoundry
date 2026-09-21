@@ -60,7 +60,7 @@ inline const char*
 AssetManager::LookupAssetName(packedAssetID matteID)
 {
 	int index;
-	for(index=0;index<_assetStringMapEntries && _assetStringMap[index]._id != matteID;index++)
+	for(index=0;index<_assetStringMapEntries && _assetStringMap[index]._id != matteID;++index)
 	{
 //		std::cout << "checking " << hex << _assetStringMap[index]._id << "," << _assetStringMap[index]._name << std::endl;
 	}

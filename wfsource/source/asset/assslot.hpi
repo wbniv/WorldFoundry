@@ -34,7 +34,7 @@ AssetMap::Validate() const
 	assert(_entries < AssetManager::MAX_ASSETS_PER_ROOM);
 
 #if DO_VALIDATION > 1
-	for(int index=0;index < _entries; index++)
+	for(int index=0;index < _entries; ++index)
 	{
 		_assetMapArray[index]._id.Validate();
 		if(_assetMapArray[index]._memory)
@@ -52,7 +52,7 @@ inline std::ostream& operator << ( std::ostream& s, const AssetMap& am )
 	am.Validate();
 
 	s << "AssetMap:" << std::endl;
-	for(int index=0;index<am._entries;index++)
+	for(int index=0;index<am._entries;++index)
 	{
 		s << am._assetMapArray[index]._id;
 		s << ", memory = " << am._assetMapArray[index]._memory;
@@ -91,7 +91,7 @@ AssetMap::LookupAsset(packedAssetID id) const
 {
 	Validate();
 
-	for(int index=0;index<_entries;index++)
+	for(int index=0;index<_entries;++index)
 	{
 		if(_assetMapArray[index]._id == id && _assetMapArray[index]._memory)
 		{
@@ -110,7 +110,7 @@ AssetMap::LookupAssetMemory(packedAssetID id) const
 {
 	Validate();
 
-	for(int index=0;index<_entries;index++)
+	for(int index=0;index<_entries;++index)
 	{
 		if(_assetMapArray[index]._id == id && _assetMapArray[index]._memory)
 		{

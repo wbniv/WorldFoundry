@@ -292,7 +292,7 @@ uint32_t JoltBodyCreateStaticMesh(const Vector3& pos,
     // Use MeshShape — correctly handles flat and sloped surfaces.
     // Vertices are in actor-local space; body is placed at actor world position.
     // Add both windings so the surface is two-sided (ball can approach from either side).
-    for (int i = 0; i < vertCount; i++) {
+    for (int i = 0; i < vertCount; ++i) {
         std::fprintf(stderr, "jolt: mesh v%d local=(%.3f,%.3f,%.3f) world=(%.3f,%.3f,%.3f)\n",
                      i, verts[i].x, verts[i].y, verts[i].z,
                      verts[i].x + worldOffset.GetX(),
@@ -302,7 +302,7 @@ uint32_t JoltBodyCreateStaticMesh(const Vector3& pos,
 
     JPH::TriangleList triangles;
     triangles.reserve((size_t)(faceCount * 2));
-    for (int i = 0; i < faceCount; i++) {
+    for (int i = 0; i < faceCount; ++i) {
         const JoltMeshVertex& a = verts[faces[i].v0];
         const JoltMeshVertex& b = verts[faces[i].v1];
         const JoltMeshVertex& c = verts[faces[i].v2];
