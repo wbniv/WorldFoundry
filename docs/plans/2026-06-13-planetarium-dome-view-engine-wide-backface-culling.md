@@ -814,3 +814,191 @@ separate defect from the winding bug and would change the shipped look for reaso
 have nothing to do with culling, so the winding fix was landed against the era‑correct
 `.lev` instead. These two levels remain in the "does not rebuild from HEAD's source"
 bucket alongside the dome.
+
+---
+
+## Effort 2 — the flip: `WF_CULL` ON by default, 2026‑09‑21
+
+Plan steps 5 (flip the default) and 6 (regression‑guard it), both `FAIL / DEFERRED` since
+Effort 1b. **Both now PASS.** `WF_CULL` defaults to ON in `backend_modern.cc` and
+`backend_metal.mm`; `WF_CULL=0` opts out.
+
+**Why this was re‑verified rather than just landed.** An *uncommitted* flip was already
+sitting in the working tree, carrying a comment that claimed "every shipped level renders
+frame 20 byte‑identical … see the plan's Effort 2 table". There was no Effort 2 section —
+the session that wrote it died (laptop battery) four minutes after its own
+`mm_practice_blender` attempt, which a later agent found broken. The claim had no
+evidence behind it. This section is that evidence, measured fresh.
+
+No mockups: the change has no new visible surface — it is a rendering default, and the
+before/after captures live in Efforts 1b–1f above.
+
+### 1. Build green with the flip in the tree
+
+```
+$ task build
+=== Linking ===
+
+Built: /home/will/WorldFoundry-wbniv/engine/wf_game
+EXIT=0
+```
+
+**PASS.**
+
+### 2. Determinism control + cull A/B, all 20 shipped levels, frame 20
+
+Three legs per level — `WF_CULL=0` **twice** (the determinism control Effort 1b's method
+notes require) and `WF_CULL=1` once — 60 runs, all `rc=0` with a PNG written:
+
+```
+WF_TM_ROOT=<fixed fixture> WF_CULL=<0|1> engine/wf_game --frame-step-smoke=30 --cycles=1 \
+  -rate20 -record_video [--vram-*] -L<abs>/wflevels/<level>-standalone.iff \
+  --capture-frame=20=<out.png>
+```
+
+from `wfsource/source/game`, with `run-condo`/`run-moon`'s `--vram-*` flags for
+`condo_639_640{,_tour}` and `moon_site01`. `ctrl_px` = pixels differing between the two
+`WF_CULL=0` runs; `ab_px` / `ab_max` = pixels differing and max channel delta between
+`WF_CULL=0` and `WF_CULL=1`.
+
+```
+level                       lit0    lit1   delta  ctrl_px   ab_px  ab_max  verdict
+condo_639_640             307200  307200       0        0     143      70  DIFFERS n=143
+    bbox=(152,65)-(161,88) cull0mean=[24. 52. 90.] cull1mean=[ 46. 101. 160.] darker=0 brighter=143
+condo_639_640_tour        307200  307200       0        0     167      70  DIFFERS n=167
+    bbox=(146,144)-(157,169) cull0mean=[24. 52. 90.] cull1mean=[ 46. 101. 160.] darker=0 brighter=167
+dome                       67522   67522       0        0       0       0  IDENTICAL
+filelight                 121396  121396       0        0       0       0  IDENTICAL
+filesys                    64574   64574       0        0       0       0  IDENTICAL
+marble-madness             29619   29619       0        0       0       0  IDENTICAL
+marble-madness-2           19268   19268       0        0       0       0  IDENTICAL
+mm_practice                94094   94094       0        0       0       0  IDENTICAL
+mm_practice_blender       122851  122851       0        0       0       0  IDENTICAL
+mm_practice_blender_rt    122851  122851       0        0       0       0  IDENTICAL
+moon_site01               175321  175321       0        0       0       0  IDENTICAL
+pilot_demo                 94731   94731       0        0       0       0  IDENTICAL
+qbert_practice              6043    6042      -1        0      93     238  DIFFERS n=93
+    bbox=(304,198)-(354,418) cull0mean=[116.2  57.4 139.3] cull1mean=[71.4 35.7 88. ] darker=89 brighter=4
+smb_w1_1                   14041   14041       0        0       0       0  IDENTICAL
+smb_w1_2                   25772   25772       0        0       0       0  IDENTICAL
+smb_w1_3                   10794   10794       0        0       0       0  IDENTICAL
+smb_w1_4                   83492   83492       0        0       0       0  IDENTICAL
+snowgoons                 100849  100849       0   103974      98     217  NON-DETERMINISTIC
+    bbox=(99,298)-(173,469) cull0mean=[65.  63.2 63.2] cull1mean=[135.6 134.6 145.5] darker=13 brighter=85
+snowgoons-blender          96831  100849    4018   102610  102610     255  NON-DETERMINISTIC
+    bbox=(0,268)-(639,479) cull0mean=[146.2 144.5 149.5] cull1mean=[148.3 146.3 151. ] darker=52317 brighter=49758
+treemap                   163850  163850       0        0       0       0  IDENTICAL
+```
+
+**PASS with two levels deferred to step 3.** 14 levels byte‑identical (including every
+level Efforts 1b–1f fixed, and `treemap`, whose `WF_TM_ROOT` determinism gate stays
+clear). Three levels differ by 93–167 px; `snowgoons{,-blender}` failed the control and
+are resolved below.
+
+Every `lit` count and every residual reproduces Effort 1b's 06‑13 baseline **exactly** —
+143, 167, 93 — so nothing has drifted in the 12 levels nobody had re‑checked since.
+
+### 3. The `snowgoons{,-blender}` control failure — concrete cause, not culling
+
+Each capture run's log names the culprit, and it correlates perfectly with which frame
+came out odd (`fellout` = count of `Room::UpdateRoomContents: … fell out of room 0;
+re-adding`):
+
+```
+snowgoons.cull0-r1         fellout=1   md5 4b694ca0…   <- modal
+snowgoons.cull0-r2         fellout=2   md5 71621ba4…   <- outlier
+snowgoons.cull1            fellout=1   md5 a515eee3…   <- modal
+snowgoons-blender.cull0-r1 fellout=2   md5 7894f27c…   <- outlier
+snowgoons-blender.cull0-r2 fellout=1   md5 933c23b0…   <- modal
+snowgoons-blender.cull1    fellout=1   md5 84a8396a…   <- modal
+```
+
+`WFGame::StepFrame` advances the simulation by a **measured wall‑clock** delta —
+`_deltaTime = do_swap ? _display->PageFlip() : _display->MeasureDelta()`
+(`wfsource/source/game/game.cc:691`, clamped at `kMaxSimDeltaSeconds`). The smoke harness
+is therefore *not* a fixed‑step simulation: frame‑pacing jitter changes how far an actor
+travels per frame. Both snowgoons levels have an actor sitting on a room boundary, and an
+extra `fell out of room 0 … re-adding` event repositions it, moving ~100 k px of ground.
+The outlier landed on a `WF_CULL=0` leg in one level and (in the repeats below) on a
+`WF_CULL=1` leg in the other, so it is **independent of the cull**.
+
+Six repeats per leg, back to back:
+
+```
+snowgoons         WF_CULL=0  4b694ca0ebc39848ee54cc17ce465ce3  x6/6
+snowgoons         WF_CULL=1  a515eee3bd8f2ac6fba655bf987675bd  x5/6  (1x ba99e592…)
+snowgoons-blender WF_CULL=0  933c23b00026a073c447003a209ea9fe  x6/6
+snowgoons-blender WF_CULL=1  84a8396a5b1f1b7bac7ff6bab8bdbb61  x6/6
+```
+
+`933c23b00026a073c447003a209ea9fe` is also the `snowgoons-blender` md5 Effort 1c step 4
+recorded, so the modal frame is stable across sessions and across the prelit fix.
+
+**PASS** — the anomaly has a named mechanism (wall‑clock sim delta + a room‑boundary
+actor), it is reproducible, and it is orthogonal to `WF_CULL`.
+
+### 4. Modal A/B for `snowgoons{,-blender}`
+
+```
+snowgoons            lit0=100849 lit1=100849 n=98 maxdiff=217 bbox=(99,298)-(173,469)
+                     cull0mean=[65.0 63.2 63.2] cull1mean=[135.6 134.6 145.5] darker=13 brighter=85
+snowgoons-blender    lit0=100849 lit1=100849 n=97 maxdiff=217 bbox=(99,298)-(173,469)
+                     cull0mean=[65.5 63.7 63.7] cull1mean=[136.7 135.7 146.6] darker=13 brighter=84
+```
+
+**PASS** — 98 and 97 px, identical to Effort 1b's numbers, same bounding box, same
+"mostly brighter" signature.
+
+### 5. Acceptance — every residual is a previously‑classified one
+
+| level | Δpx | class | why it is accepted |
+|---|---|---|---|
+| 15 levels | 0 | — | byte‑identical cull‑on vs cull‑off |
+| `condo_639_640` | 143 | 1b (a) | 10×23 px box, **all 143 brighter**, silhouette unchanged — a back‑facing polygon was bleeding over a brighter front face |
+| `condo_639_640_tour` | 167 | 1b (a) | same box, same signature |
+| `snowgoons` | 98 | 1b (a) | 85 of 98 brighter, one small prop |
+| `snowgoons-blender` | 97 | 1b (a) | same prop, same signature |
+| `qbert_practice` | 93 | 1c | z‑fight tie on the convex props; the documented residual of the `72b1471b` rewind |
+
+No level loses geometry (`lit` counts match on all 20), none is newly non‑deterministic
+under the cull, and no residual grew. **PASS — the flip is safe to land.**
+
+`marble-madness` and `marble-madness-2` came back byte‑identical on both legs, so Effort
+1e's fix holds and nothing further was needed. (Will's standing note, recorded here so it
+is not rediscovered: if either level ever needs more than a trivial culling fix, **archive
+them rather than invest further** — the maps were never accurate arcade conversions. Not
+acted on here; no new problem was found.)
+
+### 6. The flip and its docs
+
+- `wfsource/source/gfx/glpipeline/backend_modern.cc` — `cullEnabled` reads
+  `!e || atoi(e) != 0`; the comment now carries this section's actual numbers instead of
+  promising a table that did not exist.
+- `wfsource/source/gfx/metal/backend_metal.mm` — mirrored, and explicitly marked
+  unverified (no macOS host here; the sweep is GL‑only).
+- `docs/level-design-troubleshooting.md` — "Mesh face normals & backface culling" now
+  reads ON‑by‑default, including the "Diagnosing" and "Enable / disable" paragraphs.
+- `docs/level-building.md` — "Mesh face winding" likewise.
+
+### 7. Regression guard (plan step 6)
+
+`tests/test_backface_cull_invariant.py`, two invariants:
+
+- **`test_cull_is_on_by_default`** — renders a *deliberately inside‑out* level (every
+  `qbert_practice` cube triangle reversed, spliced into a copy of the standalone bundle in
+  a tmp dir, the Effort 1c/1f technique) three times: `WF_CULL` unset, `=1`, `=0`. Unset
+  must equal `=1`, and `=0` must differ. Shipped content cannot test this — it is
+  culling‑clean, so it renders the same under either default; only backwards‑wound
+  geometry can tell the two apart.
+- **`test_cull_is_a_noop_on_shipped_levels`** — parametrized over all 19 named levels,
+  `WF_CULL=0` vs `WF_CULL=1` within that level's accepted residual (the step 5 table,
+  encoded as `ACCEPTED`). `snowgoons{,-blender}` skip with step 3's reason, so the guard
+  is not flaky.
+
+```
+$ DISPLAY=:0 python3 -m pytest tests/test_backface_cull_invariant.py -q
+..................ss                                                     [100%]
+18 passed, 2 skipped in 78.43s (0:01:18)
+```
+
+**PASS.**

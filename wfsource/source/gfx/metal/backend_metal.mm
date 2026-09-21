@@ -376,11 +376,14 @@ public:
         // Software backface cull — mirrors backend_modern.cc. Cull from the
         // object-space face normal + model->eye _mv (winding-independent): a face
         // points away when dot(Ne, Pe) > 0 in eye space. DOUBLE_SIDED/matte pass
-        // cullExempt=true. OFF BY DEFAULT (opt-in via WF_CULL=1) — see the long
-        // note in backend_modern.cc::DrawTriangle for why.
+        // cullExempt=true. ON BY DEFAULT since 2026-09-21; WF_CULL=0 opts OUT —
+        // see the long note in backend_modern.cc::DrawTriangle for why, and for
+        // the per-level evidence that the flip is a no-op on shipped content.
+        // That evidence is GL-only: the sweep behind the flip cannot be run on
+        // this path (no macOS host here), so this mirror stays unverified.
         static const bool cullEnabled = []() {
             const char* e = getenv("WF_CULL");
-            return e && atoi(e) != 0;   // opt-in
+            return !e || atoi(e) != 0;   // default ON; opt out with WF_CULL=0
         }();
         if (cullEnabled && !cullExempt)
         {

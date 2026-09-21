@@ -1,5 +1,6 @@
 | Date | Change |
 |------|--------|
+| [2026-09-21](https://github.com/wbniv/WorldFoundry/commit/3296a72b) | docs(plan): Effort 1f — mm_practice_blender{,_rt} + treemap gates cleared |
 | [2026-09-21](https://github.com/wbniv/WorldFoundry/commit/f3e17612) | fix(levels): marble-madness{,-2} — dedupe floors, relight from above, right the ball |
 | [2026-09-21](https://github.com/wbniv/WorldFoundry/commit/8d215cf2) | docs(plan): Effort 1d — marble-madness not fixable by winding alone (numbers) |
 | [2026-09-21](https://github.com/wbniv/WorldFoundry/commit/6f955900) | docs(plan): record Effort 1c - prelit is unlit (trace, fix, proofs) |
@@ -7,6 +8,11 @@
 | [2026-06-13](https://github.com/wbniv/WorldFoundry/commit/d1e98510) | feat(gfx): software backface culling, opt-in via WF_CULL=1 (default off) |
 
 <!--history-meta v1
+3296a72b	author	Will Norris
+3296a72b	added	148
+3296a72b	deleted	0
+3296a72b	files	1
+3296a72b	body	Records the winding diagnosis, the proof that the recovered ramp.iff is the\ngenuine mesh source (levcomp reproduces HEAD's .lvl byte-for-byte from the\nera-correct .lev), the 4-byte pipeline diff, the three acceptance criteria all\nPASS at maxdelta=0, the unaffected neighbours that share the ramp, and the\ntreemap determinism re-run under WF_TM_ROOT (cull0 x2 + cull1 all one md5).\n\nAlso notes the stale .lev/artifact drift at 33d0d730 as a separate defect.\n\nTODO item updated: every level gate is cleared; only the default flip and its\ndoc/regression-guard follow-ups remain.\n\nCo-Authored-By: Claude Opus 5 (1M context) <noreply@anthropic.com>\nClaude-Session: https://claude.ai/code/session_01VmWZ9jdstVw5bSH1TtiJ7s
 f3e17612	author	Will Norris
 f3e17612	added	53
 f3e17612	deleted	0

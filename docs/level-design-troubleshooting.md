@@ -723,15 +723,16 @@ Full root-cause analysis: [docs/investigations/2026-05-16-textile-rs-rgba555-ded
 
 ## Mesh face normals & backface culling
 
-> **NEW 2026-06-13 — opt-in software backface culling (`WF_CULL=1`, OFF by default).** WF draws
-> both sides of every polygon by default. The `glpipeline`/Metal backends now have a **software
-> backface cull** — a triangle whose normal points away from the camera is skipped — but it stays
-> **off unless you run with `WF_CULL=1`**. It is opt-in because several shipped mesh generators are
-> wound INWARD (see "the inside-out box" below): enabling it globally makes their visible faces
-> *vanish*, and their look is entangled with one-sided lighting + the `FACE_COLOR` override, so
-> making every level culling-correct is a separate effort. **When culling is on, winding/normal
-> direction is load-bearing** — a face wound the wrong way vanishes, not just shades wrong. Plan:
-> [2026-06-13 planetarium-dome + culling](plans/2026-06-13-planetarium-dome-view-engine-wide-backface-culling.md).
+> **UPDATED 2026‑09‑21 — software backface culling is ON BY DEFAULT (`WF_CULL=0` opts out).**
+> The `glpipeline`/Metal backends skip any triangle whose normal points away from the camera.
+> It shipped opt‑in on 2026‑06‑13 because several shipped meshes were wound INWARD; those have
+> since been rewound level by level (dome, qbert cubes, marble‑madness, `mm_practice_blender`)
+> and the flip landed after a 20‑level A/B sweep — 15 levels byte‑identical cull‑on vs cull‑off,
+> the other five differing only in 93–167 px of back‑face bleed the cull correctly removes.
+> **Winding/normal direction is now load‑bearing** — a face wound the wrong way **vanishes**,
+> it does not merely shade wrong. Plan:
+> [2026-06-13 planetarium-dome + culling](plans/2026-06-13-planetarium-dome-view-engine-wide-backface-culling.md)
+> ("Effort 2" for the sweep). Guard: `tests/test_backface_cull_invariant.py`.
 
 **How it works.** Each face normal is computed once at load from winding order —
 `CalculateNormal = (v2-v0) × (v1-v0)` (`gfx/face.hpi:35`). The cull (in
@@ -757,8 +758,8 @@ only an interior (dome) gets `reverse_faces`. A level script that compensated fo
 hand before the flip is now inside-out and must drop the compensation. Only hand-written `.iff`
 text still needs the engine's hand. Guard: `tests/test_blender_addon_export.py::test_exported_faces_are_wf_outward`.
 
-**Diagnosing.** With `WF_CULL=1`, a face that **disappears** from the intended view is wound
-backwards (toggle `WF_CULL` off and on — if the surface reappears with culling off, it's a
+**Diagnosing.** A face that **disappears** from the intended view is wound
+backwards (toggle `WF_CULL` off and on — if the surface reappears with `WF_CULL=0`, it's a
 winding bug, not a missing mesh). With culling off, a wrong-way prop is not invisible but **lit
 from the far side**: walls and roofs come out one flat tone, easily mistaken for a depth-sort
 fault. Do the recalc **per closed shell before merging** shells that share vertices (welded
@@ -777,9 +778,9 @@ background, a thin billboard/flag) should set the material's `DOUBLE_SIDED` flag
 (`gfx/material.hp`), which exempts it from culling. The matte path passes this automatically;
 the engine never culls the background.
 
-**Enable / disable:** culling is **off by default**; run with `WF_CULL=1` (env) to turn it on
-engine-wide (and `WF_CULL=0` or unset to turn it off). Toggling it is the quickest way to tell a
-culling/winding issue from a genuinely missing mesh.
+**Enable / disable:** culling is **on by default** (since 2026‑09‑21); run with `WF_CULL=0` (env)
+to turn it off engine-wide, and `WF_CULL=1` or unset to turn it on. Toggling it is the quickest
+way to tell a culling/winding issue from a genuinely missing mesh.
 
 ---
 

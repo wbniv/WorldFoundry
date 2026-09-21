@@ -377,8 +377,8 @@ rule, not a physics quirk. See also the scale-mailbox note in
 
 ### Mesh face winding — author for Blender; the exporter adapts (2026-09-19)
 
-**The renderer has an opt-in software backface cull** (`WF_CULL=1`, off by default — see the note
-below on why it isn't global yet). **When it's on**, a face is kept only if its normal points toward
+**The renderer has a software backface cull, ON by default** (`WF_CULL=0` opts out; the flip
+landed 2026‑09‑21). A face is kept only if its normal points toward
 where it is seen from — **outward/up** for exterior geometry (props, floors, treemap cells,
 terrain), **inward** for interior geometry the player stands inside (rooms, a dome/skybox). A
 wrong-way face **vanishes** under culling, and with culling off it is **lit from the wrong side**
@@ -395,11 +395,11 @@ the engine's hand in a level script** — the pre-2026-09-19 advice to "reverse 
 "recalc then reverse" is retired (a script that still does it is now inside-out). Recalc **per
 closed shell before merging** shells that share vertices, or the recalc flips faces at random.
 A lone open quad has no "outside" for the recalc to find: wind it counter-clockwise as seen from
-its visible side. Verify with `WF_CULL=1`, not by whether a box survives (a box keeps its inner
-faces either way). Genuinely two-sided surfaces (matte, billboards) set the material
-`DOUBLE_SIDED` flag. **Note:** culling is opt-in because levels authored before the exporter flip
-may still carry hand-compensated windings; turning it on globally is a separate effort. Full
-rules + the `WF_CULL` toggle: [level-design-troubleshooting.md → Mesh face normals & backface culling](level-design-troubleshooting.md#mesh-face-normals--backface-culling).
+its visible side. Verify by A/B-ing `WF_CULL=0` against the default, not by whether a box survives
+(a box keeps its inner faces either way). Genuinely two-sided surfaces (matte, billboards) set the
+material `DOUBLE_SIDED` flag. **Note:** a level authored before the 2026‑09‑19 exporter flip may
+still carry a hand-compensated winding — under the default-on cull it now *vanishes* rather than
+merely shading wrong. Full rules + the `WF_CULL` toggle: [level-design-troubleshooting.md → Mesh face normals & backface culling](level-design-troubleshooting.md#mesh-face-normals--backface-culling).
 Hand-written `.iff` text (no exporter) still needs the engine's hand. Plan:
 [2026-09-19-exporter-face-hand](plans/2026-09-19-exporter-face-hand.md).
 

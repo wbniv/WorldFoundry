@@ -364,17 +364,25 @@ public:
         // dot(Ne, Pe) > 0 — cull it. DOUBLE_SIDED materials and the matte pass
         // cullExempt=true.
         //
-        // OFF BY DEFAULT (opt-in via WF_CULL=1). Enabling it engine-wide today
-        // regresses shipped levels: several mesh generators are wound INWARD
-        // (box/disk "top" faces have -Z normals), so their visible faces get
-        // culled and their appearance is entangled with one-sided lighting +
-        // the FACE_COLOR override. Making every level culling-correct is a
-        // separate effort; until then this is opt-in (e.g. the dome authored
-        // with correct outward/inward normals runs with WF_CULL=1). See
-        // docs/level-design-troubleshooting.md "Mesh face normals & backface culling".
+        // ON BY DEFAULT since 2026-09-21; WF_CULL=0 opts OUT. 15 of the 20
+        // shipped wflevels/*-standalone.iff render frame 20 byte-identical
+        // with culling on and off; the other five differ only in 93-167 px of
+        // back-face bleed the cull correctly removes (qbert_practice 93,
+        // condo_639_640 143, condo_639_640_tour 167, snowgoons 98,
+        // snowgoons-blender 97 — silhouettes unchanged, mostly *brighter*
+        // after). Per-level numbers: the plan's "Effort 2" table. So the cull
+        // is a no-op on correct content and a correctness fix on the rest.
+        // Getting here took rewinding the dome and the qbert cubes, making
+        // LIGHTING_PRELIT faces genuinely unlit, deduping + relighting
+        // marble-madness, and righting mm_practice_blender's ground quad.
+        // Keep WF_CULL=0 for A/B-ing a suspect mesh: a face that vanishes when
+        // culling is on is wound backwards for the view it is authored for.
+        // Guard: tests/test_backface_cull_invariant.py.
+        // See docs/plans/2026-06-13-planetarium-dome-view-engine-wide-backface-culling.md
+        // and docs/level-design-troubleshooting.md "Mesh face normals & backface culling".
         static const bool cullEnabled = []() {
             const char* e = getenv("WF_CULL");
-            return e && atoi(e) != 0;   // opt-in
+            return !e || atoi(e) != 0;   // default ON; opt out with WF_CULL=0
         }();
         if (cullEnabled && !cullExempt)
         {
