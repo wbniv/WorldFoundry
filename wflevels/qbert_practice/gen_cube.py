@@ -52,7 +52,31 @@ CORNERS = [
     (-S,  S,  S),  # 7
 ]
 
-# Each face is two triangles, CCW from outside, with material index per face.
+# Each face is two triangles wound OUTWARD in the ENGINE's hand, with a
+# material index per face.
+#
+# This file writes the FACE chunk straight to disk — it never passes through the
+# Blender exporter, so the 2026-09-19 face-hand reversal
+# (docs/plans/2026-09-19-exporter-face-hand.md) does not reach it and these
+# tuples must be in WF's hand, not Blender's. WF computes a face normal as
+# (v2-v0)x(v1-v0) (gfx/face.hpi:34) — the opposite of every right-handed tool —
+# so a triangle listed "CCW from outside" comes out pointing INWARD.
+#
+# These were listed CCW-from-outside until 2026-09-21 and were therefore all
+# inward: the top face (4,5,6) gave a -Z normal. Under WF_CULL=1 every cube lost
+# its top and front and the pyramid rendered as a flat teal mass. Each triangle
+# is now reversed (v1, v3, v2), so top (4,6,5) -> +Z.
+#
+# Reversing is visibility-only: all three materials are LIGHTING_PRELIT, and
+# since 2c80521f prelit faces genuinely skip the lighting term, so a prelit
+# face's colour cannot depend on its winding — the WF_CULL=0 render is
+# byte-identical across this change. tests/test_prelit_winding_invariant.py
+# pins that. (Before 2c80521f the prelit renderers were byte-for-byte copies of
+# the lit ones, which is why an earlier attempt at this flip darkened the cube
+# tops and was reverted.) See
+# docs/plans/2026-06-13-planetarium-dome-view-engine-wide-backface-culling.md
+# "Effort 1b"/"Effort 1c".
+#
 # Cubes are rotated 45° about Z by blender_create_qbert.py. After that
 # rotation:
 #   pre-rotation -X face → LEFT visible side  → LIT  (mat 1)
@@ -62,23 +86,23 @@ CORNERS = [
 # Bottom is hidden by the staircase below; assigned shadow.
 FACES = [
     # Bottom (-Z)
-    (0, 3, 2, 2),
-    (0, 2, 1, 2),
+    (0, 2, 3, 2),
+    (0, 1, 2, 2),
     # Top (+Z) — state-dependent color via mat 0
-    (4, 5, 6, 0),
-    (4, 6, 7, 0),
+    (4, 6, 5, 0),
+    (4, 7, 6, 0),
     # Front (-Y) → SHADOW
-    (0, 1, 5, 2),
-    (0, 5, 4, 2),
+    (0, 5, 1, 2),
+    (0, 4, 5, 2),
     # Right (+X) → SHADOW
-    (1, 2, 6, 2),
-    (1, 6, 5, 2),
+    (1, 6, 2, 2),
+    (1, 5, 6, 2),
     # Back (+Y) → LIT
-    (2, 3, 7, 1),
-    (2, 7, 6, 1),
+    (2, 7, 3, 1),
+    (2, 6, 7, 1),
     # Left (-X) → LIT
-    (3, 0, 4, 1),
-    (3, 4, 7, 1),
+    (3, 4, 0, 1),
+    (3, 7, 4, 1),
 ]
 
 # ── Placeholder material colors ───────────────────────────────────────────────

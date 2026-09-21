@@ -9,13 +9,18 @@ shaded by `dot(N, L)` in the vertex shader. `N` is the per-face normal, and
 `rendobj3.cc`'s load path derives it from winding via `CalculateNormal`, so
 reversing a prelit triangle changed its rendered colour even with backface
 culling off. That entanglement is what blocked rewinding the `qbert_practice`
-cubes (and marble-madness) as pure visibility fixes.
+cubes as a pure visibility fix; with it gone they were rewound outward in
+"Effort 1b". (marble-madness is *not* this defect — it has no prelit
+materials, so its darkening under culling is one-sided lighting on genuinely
+lit faces, and this guard says nothing about it.)
 
 Method: this is a **fixed-timestep capture comparison**, not a unit test —
 the term lived in the GL vertex shader, which needs a real context. The test
 renders `qbert_practice` frame 20 twice with `WF_CULL=0`, once from the
 shipped level and once from the same level with every cube triangle reversed,
-and requires the two PNGs to be byte-identical.
+and requires the two PNGs to be byte-identical. The invariant is symmetric, so
+it holds whichever hand ships: since "Effort 1b" the shipped cube is the
+outward one and the spliced copy is the old inward winding.
 
 The flipped level is built here rather than committed as a fixture: the cube
 mesh is `wflevels/qbert_practice/cube.iff`, embedded verbatim in the level's
