@@ -1,5 +1,6 @@
 | Date | Change |
 |------|--------|
+| [2026-09-21](https://github.com/wbniv/WorldFoundry/commit/ceaab73d) | feat(macos): Esc no longer quits; Phase 4 real-exit evidence from a VNC session |
 | [2026-09-21](https://github.com/wbniv/WorldFoundry/commit/2d51768b) | docs(investigations): explain macOS procedural face color mismatch |
 | [2026-09-21](https://github.com/wbniv/WorldFoundry/commit/853886b2) | docs(plans): Phase 4 result — proxy gate MET, real exit deliberately NOT claimed |
 | [2026-09-21](https://github.com/wbniv/WorldFoundry/commit/b61bff0e) | docs(plans): verify box color parity with screenshots and pixel evidence |
@@ -14,6 +15,11 @@
 | [2026-09-20](https://github.com/wbniv/WorldFoundry/commit/72f650bd) | docs(plans): scope the macOS Metal renderer port |
 
 <!--history-meta v1
+ceaab73d	author	Will Norris
+ceaab73d	added	19
+ceaab73d	deleted	0
+ceaab73d	files	1
+ceaab73d	body	Will's call: a game window closes through the window's own paths -- red\nbutton, Cmd-Q, gamepad Start -- not a key that is easy to hit mid-play.\nRemove the Esc->close branch Phase 4 added to KeyCallback; Esc is now\nsimply unmapped. Rebuilt and exercised on the Codemagic runner over SSH\nbefore the session ended: two Escapes, still running.\n\nWhat the session established, driven entirely from Linux (SSH + a\nscripted VNC client that speaks Apple's ARD auth), recorded in the\nrunbook, the close-paths plan, the parent plan's s8 step 11 and TODO:\nthe window is really on the macOS desktop (framebuffer capture),\nkeyboard input moves the player (ball moved 13 units, camera followed),\nEsc does not quit. Not established, honestly: Cmd-Q and the red button\n-- the scripted client's modifier chords and pointer events never\nreached the desktop (control tests with Cmd-H and a Dock click did\nnothing), so every attempt was void rather than a failure; the\nAccessibility grant that would let System Events drive them was refused\nby the harness. Retina and -fullscreen remain untested.\n\nCo-Authored-By: Claude Fable 5.1 <noreply@anthropic.com>\nClaude-Session: https://claude.ai/code/session_015ksFy3ZSSz2XMdto3jVA9v
 2d51768b	author	Will Norris
 2d51768b	added	1
 2d51768b	deleted	1

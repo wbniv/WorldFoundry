@@ -266,6 +266,14 @@ ParseCommandLine(int argc, char** argv)
 			const char* eq   = strchr( spec, '=' );
 			if ( eq && eq[1] )
 			{
+				if ( gCaptureFrame > 0 )
+				{
+					// gCaptureFrame is a scalar — only one capture per run is
+					// supported, so a second flag silently overwrote the first.
+					std::cerr << "wf_game: WARNING: --capture-frame given more "
+					             "than once; only the last (" << (eq + 1)
+					          << ") wins" << std::endl;
+				}
 				gCaptureFrame = atoi( spec );
 				gCapturePath  = eq + 1;
 			}

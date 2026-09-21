@@ -71,7 +71,8 @@ extern float wf_moon_launch_t_minus;
 
 // Forward declarations for the offscreen capture FBO — definitions live in
 // the second DESIGNER_CHEATS block below (with CaptureFrame). RenderBegin
-// (much earlier in the file) needs to bind the FBO when bRecordVideo.
+// (much earlier in the file) needs to bind the FBO whenever a capture of any
+// kind (video recording or a single --capture-frame PNG) is in play.
 extern bool bRecordVideo;
 extern GLuint gCaptureFBO;
 static void EnsureCaptureFBO(int w, int h);
@@ -94,6 +95,16 @@ extern const char* gCapturePath;
 // Set by RenderEnd on the frame that matches, consumed by CaptureFrame during
 // the following PageFlip, where the capture FBO is still readable.
 static bool gCapturePending = false;
+
+// True whenever rendering should go through the offscreen capture FBO: either
+// -record_video is on, or a single-shot --capture-frame is pending. The FBO
+// path (not a raw front-buffer read) is what makes a capture immune to X11
+// window occlusion on a non-composited desktop, so both consumers need it —
+// -record_video must not be a prerequisite for --capture-frame to work.
+static bool WfCaptureActive()
+{
+    return bRecordVideo || (gCaptureFrame > 0 && gCapturePath);
+}
 
 static void DrawHudText(float x, float y, const char* text)
 {
@@ -690,8 +701,7 @@ void Display::SetLiveWindowSize(int w, int h)
 void Display::GetSurfaceSize(int& w, int& h) const
 {
 #if DESIGNER_CHEATS && defined(__LINUX__)
-    extern bool bRecordVideo;
-    if (bRecordVideo) { w = _xSize; h = _ySize; return; }
+    if (WfCaptureActive()) { w = _xSize; h = _ySize; return; }
 #endif
     w = _liveWidth;
     h = _liveHeight;
@@ -817,7 +827,7 @@ Display::RenderBegin()
    AssertGLOK();
    AssertMsg( _drawPage == 0 || _drawPage == 1, "_drawPage = " << _drawPage );
 #if DESIGNER_CHEATS && defined(__LINUX__)
-   if (bRecordVideo)
+   if (WfCaptureActive())
    {
        EnsureCaptureFBO(_xSize, _ySize);
        glBindFramebuffer(GL_FRAMEBUFFER, gCaptureFBO);
@@ -963,7 +973,13 @@ EnsureCaptureFBO(int w, int h)
 static void
 CaptureFrame(int xSize, int ySize, int liveW, int liveH)
 {
-    if (!gCapturePipe)
+    // -record_video and --capture-frame are independent consumers of this
+    // function — a single-shot PNG capture must not require the ffmpeg pipe.
+    const bool wantsPngThisFrame = gCapturePending && gCapturePath;
+    if (!bRecordVideo && !wantsPngThisFrame)
+        return;
+
+    if (bRecordVideo && !gCapturePipe)
     {
         // Frames are stamped with the wall clock as ffmpeg reads them (the pipe is
         // effectively synchronous: one 900 KB frame vs a 64 KB pipe buffer) and
@@ -984,8 +1000,6 @@ CaptureFrame(int xSize, int ySize, int liveW, int liveH)
         signal(SIGTERM, CaptureCleanup);
         signal(SIGINT,  CaptureCleanup);
     }
-    if (!gCapturePipe)
-        return;
 
     const int pixelBytes = xSize * ySize * 3;
     glFinish();
@@ -1005,7 +1019,8 @@ CaptureFrame(int xSize, int ySize, int liveW, int liveH)
 
     uint8_t* pixels = (uint8_t*)malloc(pixelBytes);
     glReadPixels(0, 0, xSize, ySize, GL_BGR, GL_UNSIGNED_BYTE, pixels);
-    fwrite(pixels, 1, pixelBytes, gCapturePipe);
+    if (bRecordVideo && gCapturePipe)
+        fwrite(pixels, 1, pixelBytes, gCapturePipe);
 
     // Optional one-shot PPM dump (env WF_GAME_SCREENSHOT_PPM=path). The
     // ffmpeg pipe occasionally buffers indefinitely under fragmented mp4 +
@@ -1018,7 +1033,7 @@ CaptureFrame(int xSize, int ySize, int liveW, int liveH)
     // is still bound as READ here — that FBO is the whole reason this is
     // trustworthy on a non-composited X11 desktop, where the back buffer
     // contains whatever window is occluding us.
-    if (gCapturePending && gCapturePath)
+    if (wantsPngThisFrame)
     {
         gCapturePending = false;
         // glReadPixels gave BGR bottom-up; stb wants RGB(A) top-down.
@@ -1221,7 +1236,7 @@ Display::PageFlip()
     AssertGLOK();
 
 #if DESIGNER_CHEATS && defined(__LINUX__)
-    if (bRecordVideo)
+    if (WfCaptureActive())
         CaptureFrame(_xSize, _ySize, _liveWidth, _liveHeight);
 #endif
 

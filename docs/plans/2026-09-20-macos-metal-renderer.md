@@ -496,8 +496,10 @@ Steps a future implementation pass runs, in order. Per `~/CLAUDE.md` **Plan veri
     EXIT=0
     ```
 
-    **PASS.** Corrected binary/cwd/level paths as above; `-record_video` is
-    required for the Linux PNG capture path. Full image comparison is under step 10.
+    **PASS.** Corrected binary/cwd/level paths as above; `-record_video` was
+    required for the Linux PNG capture path at the time this was run (fixed
+    2026‑09‑21 — `--capture-frame` no longer needs `-record_video`, see
+    [TODO.md](../../TODO.md) Done log). Full image comparison is under step 10.
 
 **Codemagic `macos-desktop-debug` (manual trigger — one run per phase):**
 
@@ -711,8 +713,10 @@ Steps a future implementation pass runs, in order. Per `~/CLAUDE.md` **Plan veri
     `6ab052b08915493520db2424`: every step succeeded. The matching prior Linux
     baseline is `det1.png` / `linux-seam20.png` / `lx20.png`; the scratchpad's
     `linux-frame20.png` is an older unmatched capture. The reproduction command
-    also requires `-record_video` on Linux: PNG capture currently lives inside
-    that path. The fresh Linux capture is byte-identical to `det1.png`.
+    below also passed `-record_video` on Linux because, at the time, PNG
+    capture lived inside that path — since fixed 2026-09-21, `--capture-frame`
+    no longer requires `-record_video`. The fresh Linux capture is
+    byte-identical to `det1.png`.
 
     **Root cause established upstream of the renderer.** Actor #11 (`matte_11`
     in `wflevels/snowgoons-blender/snowgoons.lev`), position
