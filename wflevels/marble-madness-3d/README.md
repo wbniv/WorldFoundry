@@ -7,7 +7,7 @@ An independent standalone WorldFoundry conversion of the **Practice collision su
 From this checkout:
 
 ```sh
-python3 wflevels/marble-madness-3d/run.py
+task run-marble-3d
 ```
 
 Arrow keys apply camera-relative acceleration. Countersteer to brake; momentum and downhill acceleration matter. Space restarts the 60-second race. Cross between the checkered flags to finish. Falling returns to the start while the timer continues. Escape exits.

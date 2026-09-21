@@ -738,6 +738,12 @@ tasks:
           wflevels/qbert_practice-standalone.iff \
           -o wfsource/source/game/cd.iff
 
+  run-marble-3d:
+    desc: "Run standalone Marble Madness Practice (arrows roll; Space restarts)"
+    deps: [ensure-build]
+    cmds:
+      - python3 wflevels/marble-madness-3d/run.py {{.CLI_ARGS}}
+
   run-qbert:
     desc: "Run wf_game on wflevels/qbert_practice-standalone.iff directly (bypass cd.iff). WF_RECORD=1 records video. WF_FULLSCREEN=1 for fullscreen."
     deps: [ensure-build]
