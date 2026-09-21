@@ -40,7 +40,7 @@ Scalar::Scalar() { }
 
 // ------------------------------------------------------------------------
 
-#if defined(SCALAR_TYPE_FIXED) 
+#if defined(SCALAR_TYPE_FIXED)
 inline
 Scalar::Scalar( long value )
 {
@@ -52,13 +52,27 @@ Scalar::Scalar( long value )
 #error SCALAR TYPE not defined
 #endif
 }
+
+#if defined(__LP64__)
+inline
+Scalar::Scalar( int32 value )
+{
+	_value = value;
+}
+#endif
 #endif
 
 // ------------------------------------------------------------------------
 
-#if defined(SCALAR_TYPE_FLOAT) 
-inline 
+#if defined(SCALAR_TYPE_FLOAT)
+inline
 Scalar::Scalar( float value )
+{
+   _value = value;
+}
+
+inline
+Scalar::Scalar( int32 value )
 {
    _value = value;
 }
