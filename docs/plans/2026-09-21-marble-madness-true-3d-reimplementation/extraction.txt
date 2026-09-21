@@ -1,0 +1,1 @@
+PASS: 251 MAME queries matched; 1823 terrain cells extracted

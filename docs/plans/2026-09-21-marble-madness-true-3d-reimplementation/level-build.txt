@@ -1,0 +1,19 @@
+levcomp v0.1.0
+  input : marble-madness-3d.lev.bin
+  .lc   : /home/will/WorldFoundry-wbniv-mm3d-astra/wfsource/source/oas/objects.lc
+  output: marble-madness-3d.lvl
+  oad   : /home/will/WorldFoundry-wbniv-mm3d-astra/wfsource/source/oas
+  meshes: .
+  parsed 10 objects
+  loaded 29 classes
+  loaded OAD schemas
+  mesh bbox for terrain.iff: [-655360, -655360, -589824, 4325376, 4128768, 80265]
+  mesh bbox for marble.iff: [-31457, -31457, -31457, 31457, 31457, 31457]
+  mesh bbox for finish.iff: [2981888, 3601203, -240795, 3440640, 3607757, -44187]
+  wrote 4528 bytes
+  wrote asset.inc
+  wrote marble-madness-3d.iff.txt
+  wrote marble-madness-3d.ini
+Practice: 1823 source cells, 3502 surface triangles, 4818 total triangles, 7970 vertices
+Bounds: (-10, -10, -9, 66, 63, 1.224744871391589)
+Built: /home/will/WorldFoundry-wbniv-mm3d-astra/wflevels/marble-madness-3d/marble-madness-3d-standalone.iff

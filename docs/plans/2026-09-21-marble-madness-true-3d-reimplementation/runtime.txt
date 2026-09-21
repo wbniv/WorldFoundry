@@ -1,0 +1,31 @@
+PASS: 79 presented frames before/after PNG; minimum visible pixels 90295
+t=0 waypoint=0 xyz=-0.00,0.00,0.48 race=1 falls=0 time=59.8
+t=1 waypoint=0 xyz=2.43,2.45,0.43 race=1 falls=0 time=58.8
+t=2 waypoint=1 xyz=3.60,6.20,-0.42 race=1 falls=0 time=57.8
+t=3 waypoint=1 xyz=3.65,10.60,-0.98 race=1 falls=0 time=56.8
+t=4 waypoint=3 xyz=4.65,14.15,-1.25 race=1 falls=0 time=55.8
+t=5 waypoint=4 xyz=6.59,17.49,-1.97 race=1 falls=0 time=54.8
+t=6 waypoint=5 xyz=9.95,19.03,-2.36 race=1 falls=0 time=53.8
+t=7 waypoint=5 xyz=14.30,19.21,-3.19 race=1 falls=0 time=52.8
+t=8 waypoint=5 xyz=18.46,19.45,-3.19 race=1 falls=0 time=51.8
+t=9 waypoint=6 xyz=21.25,21.29,-3.17 race=1 falls=0 time=50.8
+t=10 waypoint=6 xyz=23.90,23.92,-3.19 race=1 falls=0 time=49.8
+t=11 waypoint=6 xyz=27.05,27.17,-3.17 race=1 falls=0 time=48.8
+t=12 waypoint=6 xyz=30.36,30.25,-3.87 race=1 falls=0 time=47.8
+t=13 waypoint=7 xyz=32.08,32.17,-3.22 race=1 falls=0 time=46.9
+t=14 waypoint=8 xyz=35.02,32.71,-3.54 race=1 falls=0 time=46.1
+t=15 waypoint=9 xyz=38.17,35.11,-4.04 race=1 falls=0 time=45.1
+t=16 waypoint=9 xyz=38.43,38.92,-3.90 race=1 falls=0 time=44.1
+t=17 waypoint=10 xyz=39.52,42.24,-3.88 race=1 falls=0 time=43.1
+t=18 waypoint=11 xyz=40.87,43.24,-3.85 race=1 falls=0 time=42.4
+t=19 waypoint=11 xyz=44.90,43.69,-3.99 race=1 falls=0 time=41.4
+t=20 waypoint=13 xyz=48.09,45.08,-4.07 race=1 falls=0 time=40.5
+t=21 waypoint=13 xyz=48.70,48.78,-3.97 race=1 falls=0 time=39.5
+t=22 waypoint=13 xyz=48.87,53.10,-4.01 race=1 falls=0 time=38.4
+PASS: input-only Practice completion, zero falls, 37.76s remaining, score 4776
+PASS: restart after finish resets score, time and position
+PASS: forced fall increments counter and respawns at start
+PASS: timeout stops directional movement
+PASS: restart after timeout
+PASS: expired deadline takes precedence over goal overlap
+PASS: no AddressSanitizer or script compile errors

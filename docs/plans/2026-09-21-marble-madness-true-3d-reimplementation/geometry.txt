@@ -1,0 +1,10 @@
+test_captured_source_identity (__main__.PracticeGeometry.test_captured_source_identity) ... ok
+test_independent_arcade_interpolation_and_voids (__main__.PracticeGeometry.test_independent_arcade_interpolation_and_voids) ... ok
+test_native_projection_scale (__main__.PracticeGeometry.test_native_projection_scale) ... ok
+test_nondegenerate_unique_upward_surface (__main__.PracticeGeometry.test_nondegenerate_unique_upward_surface) ... ok
+test_start_support_and_finish_channel (__main__.PracticeGeometry.test_start_support_and_finish_channel) ... ok
+
+----------------------------------------------------------------------
+Ran 5 tests in 0.179s
+
+OK

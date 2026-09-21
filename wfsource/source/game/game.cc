@@ -601,6 +601,7 @@ WFGame::StepFrame(bool do_swap, Scalar* out_dt)
 #if DESIGNER_CHEATS
 		{
 			extern int wf_hud_score, wf_hud_timer, wf_hud_lives, wf_hud_game_over;
+			extern int wf_hud_marble_state, wf_hud_marble_falls;
 			extern int wf_hud_entering_initials, wf_hud_initials_pos;
 			extern char wf_hud_initials[4];
 			// Moon Site 01 position-display HUD overlay — see docs/plans/2026-05-31-position-display-hud-overlay-on-the-moon-level-tex.md
@@ -614,6 +615,9 @@ WFGame::StepFrame(bool do_swap, Scalar* out_dt)
 			wf_hud_score     = mb.ReadMailbox(70).WholePart();
 			wf_hud_timer     = mb.ReadMailbox(71).WholePart();
 			wf_hud_lives     = mb.ReadMailbox(72).WholePart();
+			// Opt-in standalone Marble Madness HUD (0 disables it).
+			wf_hud_marble_state = mb.ReadMailbox(1770).WholePart();
+			wf_hud_marble_falls = mb.ReadMailbox(1771).WholePart();
 			wf_hud_game_over = mb.ReadMailbox(420).WholePart();
 			wf_moon_overlay_enabled     = mb.ReadMailbox(1875).WholePart();
 			wf_moon_player_x_m          = mb.ReadMailbox(1876).AsFloat();
