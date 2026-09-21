@@ -519,3 +519,97 @@ this test would have failed on the old code.
   `task build-cd-iff`. Frame 20 with `WF_CULL=0` is byte‑identical either way, as step 3
   proves; only the `WF_CULL=1` coverage changes.
 - **The sky‑dome banding** is now an exporter task (step 5).
+
+---
+
+## Effort 1d — marble-madness winding, confirmed not fixable by winding alone, 2026‑09‑21
+
+Dispatched as a T2 "purely geometric" fix on the premise that Effort 1c's prelit finding
+left only a mechanical winding bug. **Result: the premise doesn't hold — this is exactly
+the (c) blocker Effort 1c already flagged (line 512 above), now confirmed with numbers
+instead of a hypothesis.** No source change made; working tree is clean.
+
+### 1. Reproduce the A/B, both levels, frame 20
+
+`WF_CULL=<0|1> engine/wf_game --frame-step-smoke=30 --cycles=1 -rate20 -record_video
+--capture-frame=20=<png> -L<level>-standalone.iff` from `wfsource/source/game`.
+
+```
+marble-madness:   n=29071 bbox=(0,164)-(423,423)   cull0=[72.4 116.4 57.0] cull1=[59.0 76.0 47.5] darker=29006 brighter=63
+marble-madness-2: n=7436  bbox=(224,188)-(383,281) cull0=[137.4 137.4 137.3] cull1=[128.2 128.2 128.2] darker=7435 brighter=0
+```
+
+**PASS** — matches Effort 1b's Step 1/2 numbers exactly (29 006 / 7 435 darker).
+
+### 2. Found the duplicate-wound faces
+
+`wflevels/marble-madness/floor.iff` (raw `MODL/VRTX/MATL/FACE` binary, 4 verts, 4 faces —
+no `.iff.txt`/generator, hand-authored or lost its source) carries the floor quad as
+**both windings**: `FACE` = `(0,1,2),(0,2,3),(0,2,1),(0,3,2)` — the second pair is
+`both_sides()`-style reversed duplicates of the first, byte-for-byte the case‑(b) pattern
+("two-sided floor built as two polygons") this task was dispatched to fix. Per the
+engine's `(v2−v0)×(v1−v0)` convention (`gfx/rendobj3.cc:239`): faces 0‑1 → normal
+`(0,0,−800)` (down), faces 2‑3 → normal `(0,0,+800)` (up, camera‑facing — confirmed by
+which pair survives `WF_CULL=1`).
+
+`wflevels/marble-madness-2/gen_level1.py:57‑103` (`both_sides()`, `flat_with_walls()`,
+`slope_with_walls()`) generates all 7 `mm1_*.iff` course pieces with the **identical**
+pattern: floor triangles `(0,1,2),(0,2,3)` (down, wrong) doubled by `both_sides()` into
+`(2,1,0),(3,2,0)` (up, correct); side-wall triangles are single-direction-correct already
+(outward-facing) and don't need touching.
+
+### 3. Tried the mechanical fix — keep only the camera-facing winding, drop the duplicate
+
+**marble-madness** (`floor.iff` FACE chunk rewritten to the 2 up-normal faces only,
+`task build-level -- marble-madness`):
+
+```
+new cull0 vs new cull1:        IDENTICAL (0 px) — winding fix does make culling a no-op ✓
+new cull0 vs OLD cull0:        n=25071 bbox=(0,308)-(254,423) darker=25071 brighter=0
+                                mean 62.3/121.5/62.3 → 51.3/77.1/51.3  (luma 97.1 → 66.4)
+```
+
+Culling stability is achieved, but the new cull‑OFF render is **~30 % darker** than the
+shipped cull‑OFF look — it fails "equal‑or‑brighter" outright. Tried the opposite
+(keep only the original down-normal faces instead): cull0 reproduces the shipped
+baseline exactly (0 px diff), but that face is the one culling removes, so cull1 goes
+to near‑black (mean 14.8/9.5/3.3) — full visible-face loss, case (b) on the nose.
+There is no third winding choice for a single quad; one of these two is unavoidable.
+
+**marble-madness-2** (all 7 `mm1_*.iff`: floor → up-normal only, walls → their existing
+outward-facing single copy, dropping the inward duplicate — the analytically "obviously
+correct" single-sided mesh; `task build-level -- marble-madness-2`):
+
+```
+new cull0 vs new cull1:  n=900 bbox=(166,153)-(384,243) darker=899   ← NOT fully stable:
+                          a different wall piece still flips under culling even after
+                          this "correct by inspection" pass, luma 135.3 → 17.3
+new cull0 vs OLD cull0:  n=7323 bbox=(224,188)-(383,281) darker=7323 brighter=0
+                          mean 137.4 → 128.2 (identical numbers to the *old* cull0→cull1
+                          delta) — i.e. the "corrected" unculled render now looks exactly
+                          like the shipped buggy level already did *with* culling on.
+```
+
+So for `marble-madness-2`, even after fixing every mesh's winding by inspection, (a) the
+result is still darker than today's shipped look (same "equal-or-brighter" failure as
+`marble-madness`), and (b) a residual culling-dependent flicker survives on at least one
+more piece, meaning the "walls are already correct, only the floor needs reversing"
+read isn't uniformly true across all 7 course sections either.
+
+### Conclusion
+
+Confirms Effort 1c's line 512 prediction directly: `marble-madness`/`-2` are **`LIGHTING_LIT`**
+materials (not prelit), so the one-sided `dot(N,L)` term is genuinely part of the visible
+result, and the shipped bright look is an artifact of two coincident, oppositely-wound
+polygons z-fighting (draw-order-dependent — the first-listed face wins ties, not the
+"more correct" one). Making the mesh winding-consistent is necessary for `WF_CULL=1`
+stability but is **not sufficient** to preserve the current appearance, because the
+correct-for-culling winding is also the one lit from the "wrong" side by the current
+light placement. **This is a lighting/`FACE_COLOR` semantics decision, not a winding bug**
+— exactly the fork the TODO item already names: two-sided lighting for
+`DOUBLE_SIDED`/`FACE_COLOR` materials, hand-flip and accept the darker look, or re-light
+(reposition/re-add a light) so the correct winding is also the bright one. All three are
+design calls outside a T2 remit. No files changed; `floor.iff` and `mm1_*.iff` were
+restored to HEAD (`git status --short` clean) after each experiment.
+
+**ESCALATE → T4** (design call on lighting/material semantics, not implementation).

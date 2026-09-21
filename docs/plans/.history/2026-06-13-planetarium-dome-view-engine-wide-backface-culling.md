@@ -1,9 +1,15 @@
 | Date | Change |
 |------|--------|
+| [2026-09-21](https://github.com/wbniv/WorldFoundry/commit/6f955900) | docs(plan): record Effort 1c - prelit is unlit (trace, fix, proofs) |
 | [2026-09-21](https://github.com/wbniv/WorldFoundry/commit/69f9233b) | fix(dome): rewind the dome patches for the post-flip exporter hand |
 | [2026-06-13](https://github.com/wbniv/WorldFoundry/commit/d1e98510) | feat(gfx): software backface culling, opt-in via WF_CULL=1 (default off) |
 
 <!--history-meta v1
+6f955900	author	Will Norris
+6f955900	added	180
+6f955900	deleted	0
+6f955900	files	1
+6f955900	body	Adds the dated section to the backface-culling plan: the file:line trace of\nwhere the normal entered a prelit face's colour (it was the GL/MSL vertex\nshader's dot(N, L), not the RenderObject3D bake the two earlier attempts\nsuspected), the design chosen and the one rejected, and the numbered\nverification with raw output - 5009 px before, 0 px after, four non-prelit\nlevels byte-identical, and the condo sky-dome verdict.\n\nThe sky dome is NOT prelit (skydome.iff material flags 0x2 =\nTEXTURE_MAPPED | LIGHTING_LIT), so its banding is unchanged by this fix and\nis now purely an export_level.py task - the wf_prelit property half of the\nTODO item, no longer blocked on the engine.\n\nAlso corrects the marble-madness expectation: those levels have no prelit\nmaterials either, so their cull-on darkening is one-sided lighting on lit\nfaces and is still blocked on a FACE_COLOR semantics decision.\n\nTODO: prelit item to Done; the qbert cube-rewind item ungated.\n\nCo-Authored-By: Claude Opus 5 (1M context) <noreply@anthropic.com>\nClaude-Session: https://claude.ai/code/session_015ksFy3ZSSz2XMdto3jVA9v
 69f9233b	author	Will Norris
 69f9233b	added	185
 69f9233b	deleted	0
