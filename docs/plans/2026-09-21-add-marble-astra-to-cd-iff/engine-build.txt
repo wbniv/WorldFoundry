@@ -1,0 +1,360 @@
+task: [vendor-unpack] git submodule update --init cmake/Corrosion wftools/y-crdt third_party/glfw third_party/imgui
+task: [vendor-unpack] test -d engine/vendor/jolt-physics-5.5.0 || tar -xzf engine/vendor/jolt-physics-5.5.0.tar.gz --one-top-level=engine/vendor/jolt-physics-5.5.0 --strip-components=1
+task: [build] bash engine/build_game.sh
+=== Compiling source files ===
+  skip /home/will/WorldFoundry-wbniv/wfsource/source/pigsys/_atexit.cc
+  skip /home/will/WorldFoundry-wbniv/wfsource/source/pigsys/_cf_linux.cc
+  skip /home/will/WorldFoundry-wbniv/wfsource/source/pigsys/assert.cc
+  skip /home/will/WorldFoundry-wbniv/wfsource/source/pigsys/endian.cc
+  skip /home/will/WorldFoundry-wbniv/wfsource/source/pigsys/fatal.cc
+  skip /home/will/WorldFoundry-wbniv/wfsource/source/pigsys/new.cc
+  skip /home/will/WorldFoundry-wbniv/wfsource/source/pigsys/pigsys.cc
+  SKIP /home/will/WorldFoundry-wbniv/wfsource/source/pigsys/psystest.cc
+  SKIP /home/will/WorldFoundry-wbniv/wfsource/source/pigsys/scanf.cc
+  skip /home/will/WorldFoundry-wbniv/wfsource/source/pigsys/stack.cc
+  skip /home/will/WorldFoundry-wbniv/wfsource/source/streams/binstrm.cc
+  SKIP /home/will/WorldFoundry-wbniv/wfsource/source/streams/strtest.cc
+  SKIP /home/will/WorldFoundry-wbniv/wfsource/source/cpplib/cpptest.cc
+  skip /home/will/WorldFoundry-wbniv/wfsource/source/cpplib/libstrm.cc
+  skip /home/will/WorldFoundry-wbniv/wfsource/source/cpplib/range.cc
+  skip /home/will/WorldFoundry-wbniv/wfsource/source/cpplib/stdstrm.cc
+  skip /home/will/WorldFoundry-wbniv/wfsource/source/cpplib/strmnull.cc
+  skip /home/will/WorldFoundry-wbniv/wfsource/source/math/angle.cc
+  skip /home/will/WorldFoundry-wbniv/wfsource/source/math/euler.cc
+  SKIP /home/will/WorldFoundry-wbniv/wfsource/source/math/mathtest.cc
+  skip /home/will/WorldFoundry-wbniv/wfsource/source/math/matrix34.cc
+  skip /home/will/WorldFoundry-wbniv/wfsource/source/math/plane.cc
+  skip /home/will/WorldFoundry-wbniv/wfsource/source/math/scalar.cc
+  skip /home/will/WorldFoundry-wbniv/wfsource/source/math/vector2.cc
+  skip /home/will/WorldFoundry-wbniv/wfsource/source/math/vector3.cc
+  skip /home/will/WorldFoundry-wbniv/wfsource/source/memory/dmalloc.cc
+  skip /home/will/WorldFoundry-wbniv/wfsource/source/memory/lmalloc.cc
+  skip /home/will/WorldFoundry-wbniv/wfsource/source/memory/memory.cc
+  skip /home/will/WorldFoundry-wbniv/wfsource/source/memory/mempool.cc
+  SKIP /home/will/WorldFoundry-wbniv/wfsource/source/memory/memtest.cc
+  skip /home/will/WorldFoundry-wbniv/wfsource/source/memory/pooltest.cc
+  skip /home/will/WorldFoundry-wbniv/wfsource/source/memory/realmalloc.cc
+  skip /home/will/WorldFoundry-wbniv/wfsource/source/iff/disktoc.cc
+  skip /home/will/WorldFoundry-wbniv/wfsource/source/iff/iffread.cc
+  skip /home/will/WorldFoundry-wbniv/wfsource/source/mailbox/mailbox.cc
+  skip /home/will/WorldFoundry-wbniv/wfsource/source/hal/_list.cc
+  skip /home/will/WorldFoundry-wbniv/wfsource/source/hal/asset_accessor.cc
+  skip /home/will/WorldFoundry-wbniv/wfsource/source/hal/dfhd.cc
+  skip /home/will/WorldFoundry-wbniv/wfsource/source/hal/diskfile.cc
+  skip /home/will/WorldFoundry-wbniv/wfsource/source/hal/general.cc
+  skip /home/will/WorldFoundry-wbniv/wfsource/source/hal/hal.cc
+  SKIP /home/will/WorldFoundry-wbniv/wfsource/source/hal/haltest.cc
+  skip /home/will/WorldFoundry-wbniv/wfsource/source/hal/mempool.cc
+  skip /home/will/WorldFoundry-wbniv/wfsource/source/hal/message.cc
+  skip /home/will/WorldFoundry-wbniv/wfsource/source/hal/salloc.cc
+  skip /home/will/WorldFoundry-wbniv/wfsource/source/hal/sjoystic.cc
+  skip /home/will/WorldFoundry-wbniv/wfsource/source/hal/time.cc
+  skip /home/will/WorldFoundry-wbniv/wfsource/source/hal/linux/asset_accessor_posix.cc
+  skip /home/will/WorldFoundry-wbniv/wfsource/source/hal/linux/audio.cc
+  skip /home/will/WorldFoundry-wbniv/wfsource/source/hal/linux/input.cc
+  skip /home/will/WorldFoundry-wbniv/wfsource/source/hal/linux/lifecycle.cc
+  skip /home/will/WorldFoundry-wbniv/wfsource/source/hal/linux/platform_init.cc
+  skip /home/will/WorldFoundry-wbniv/wfsource/source/hal/linux/platform_main.cc
+  skip /home/will/WorldFoundry-wbniv/wfsource/source/hal/linux/steam.cc
+  skip /home/will/WorldFoundry-wbniv/wfsource/source/gfx/callbacks.cc
+  skip /home/will/WorldFoundry-wbniv/wfsource/source/gfx/camera.cc
+  skip /home/will/WorldFoundry-wbniv/wfsource/source/gfx/ccyc.cc
+  skip /home/will/WorldFoundry-wbniv/wfsource/source/gfx/ccycle.cc
+  skip /home/will/WorldFoundry-wbniv/wfsource/source/gfx/color.cc
+  CC /home/will/WorldFoundry-wbniv/wfsource/source/gfx/display.cc
+In file included from /home/will/WorldFoundry-wbniv/wfsource/source/gfx/face.hp:67,
+                 from /home/will/WorldFoundry-wbniv/wfsource/source/gfx/rendobj3.hp:39,
+                 from /home/will/WorldFoundry-wbniv/wfsource/source/gfx/gl/display.cc:42,
+                 from /home/will/WorldFoundry-wbniv/wfsource/source/gfx/display.cc:45:
+/home/will/WorldFoundry-wbniv/wfsource/source/gfx/face.hpi:26:71: note: ‘#pragma message: KTS /home/will/WorldFoundry-wbniv/wfsource/source/gfx/face.hpi: move this into the math directory’
+   26 | #pragma message ("KTS " __FILE__ ": move this into the math directory")
+      |                                                                       ^
+In file included from /home/will/WorldFoundry-wbniv/wfsource/source/gfx/viewport.hp:103,
+                 from /home/will/WorldFoundry-wbniv/wfsource/source/gfx/rendobj3.hp:41:
+/home/will/WorldFoundry-wbniv/wfsource/source/gfx/viewport.hpi: In member function ‘void ViewPort::Render()’:
+/home/will/WorldFoundry-wbniv/wfsource/source/gfx/viewport.hpi:114:67: note: ‘#pragma message: KTS /home/will/WorldFoundry-wbniv/wfsource/source/gfx/viewport.hpi: write viewport gl render code’
+  114 | #pragma message ("KTS " __FILE__ ": write viewport gl render code")
+      |                                                                   ^
+In file included from /home/will/WorldFoundry-wbniv/wfsource/source/gfx/rendobj3.hp:44:
+/home/will/WorldFoundry-wbniv/wfsource/source/gfx/handle.hp: At global scope:
+/home/will/WorldFoundry-wbniv/wfsource/source/gfx/handle.hp:12:73: note: ‘#pragma message: WBN: merge various ID/FOURCC classes into single one’
+   12 | #pragma message( "WBN: merge various ID/FOURCC classes into single one" )
+      |                                                                         ^
+In file included from /home/will/WorldFoundry-wbniv/wfsource/source/gfx/rendobj3.hp:45:
+/home/will/WorldFoundry-wbniv/wfsource/source/gfx/material.hp:183:135: note: ‘#pragma message: /home/will/WorldFoundry-wbniv/wfsource/source/gfx/material.hp KTS: MAX_RENDERERS hard coded to 8 to prevent cyclic dependencies, consider moving renderers into Material’
+  183 | #pragma message(__FILE__ " KTS: MAX_RENDERERS hard coded to 8 to prevent cyclic dependencies, consider moving renderers into Material")
+      |                                                                                                                                       ^
+  SKIP /home/will/WorldFoundry-wbniv/wfsource/source/gfx/gfxtest.cc
+  skip /home/will/WorldFoundry-wbniv/wfsource/source/gfx/handle.cc
+  skip /home/will/WorldFoundry-wbniv/wfsource/source/gfx/material.cc
+  skip /home/will/WorldFoundry-wbniv/wfsource/source/gfx/pixelmap.cc
+  skip /home/will/WorldFoundry-wbniv/wfsource/source/gfx/rendmatt.cc
+  skip /home/will/WorldFoundry-wbniv/wfsource/source/gfx/rendobj2.cc
+  skip /home/will/WorldFoundry-wbniv/wfsource/source/gfx/rendobj3.cc
+  skip /home/will/WorldFoundry-wbniv/wfsource/source/gfx/rmuv.cc
+  skip /home/will/WorldFoundry-wbniv/wfsource/source/gfx/texture.cc
+  skip /home/will/WorldFoundry-wbniv/wfsource/source/gfx/viewport.cc
+  skip /home/will/WorldFoundry-wbniv/wfsource/source/gfx/vmem.cc
+  SKIP /home/will/WorldFoundry-wbniv/wfsource/source/gfx/gl/android_window.cc
+  SKIP /home/will/WorldFoundry-wbniv/wfsource/source/gfx/gl/display.cc
+  SKIP /home/will/WorldFoundry-wbniv/wfsource/source/gfx/gl/emscripten_window.cc
+  skip /home/will/WorldFoundry-wbniv/wfsource/source/gfx/gl/host_gl_context.cc
+  SKIP /home/will/WorldFoundry-wbniv/wfsource/source/gfx/gl/mesa.cc
+  SKIP /home/will/WorldFoundry-wbniv/wfsource/source/gfx/gl/rendobj3.cc
+  SKIP /home/will/WorldFoundry-wbniv/wfsource/source/gfx/gl/viewport.cc
+  skip /home/will/WorldFoundry-wbniv/wfsource/source/gfx/glpipeline/backend_factory.cc
+  skip /home/will/WorldFoundry-wbniv/wfsource/source/gfx/glpipeline/backend_modern.cc
+  skip /home/will/WorldFoundry-wbniv/wfsource/source/gfx/glpipeline/rendfcl.cc
+  skip /home/will/WorldFoundry-wbniv/wfsource/source/gfx/glpipeline/rendfcp.cc
+  skip /home/will/WorldFoundry-wbniv/wfsource/source/gfx/glpipeline/rendftl.cc
+  skip /home/will/WorldFoundry-wbniv/wfsource/source/gfx/glpipeline/rendftp.cc
+  skip /home/will/WorldFoundry-wbniv/wfsource/source/gfx/glpipeline/rendgcl.cc
+  skip /home/will/WorldFoundry-wbniv/wfsource/source/gfx/glpipeline/rendgcp.cc
+  skip /home/will/WorldFoundry-wbniv/wfsource/source/gfx/glpipeline/rendgtl.cc
+  skip /home/will/WorldFoundry-wbniv/wfsource/source/gfx/glpipeline/rendgtp.cc
+  SKIP /home/will/WorldFoundry-wbniv/wfsource/source/gfx/glpipeline/rendobj3.cc
+  skip /home/will/WorldFoundry-wbniv/wfsource/source/input/inputdig.cc
+  skip /home/will/WorldFoundry-wbniv/wfsource/source/asset/assets.cc
+  SKIP /home/will/WorldFoundry-wbniv/wfsource/source/asset/assettest.cc
+  skip /home/will/WorldFoundry-wbniv/wfsource/source/asset/assslot.cc
+  skip /home/will/WorldFoundry-wbniv/wfsource/source/baseobject/baseobject.cc
+  skip /home/will/WorldFoundry-wbniv/wfsource/source/baseobject/commonblock.cc
+  skip /home/will/WorldFoundry-wbniv/wfsource/source/baseobject/msgport.cc
+  skip /home/will/WorldFoundry-wbniv/wfsource/source/movement/movefoll.cc
+  skip /home/will/WorldFoundry-wbniv/wfsource/source/movement/movement.cc
+  skip /home/will/WorldFoundry-wbniv/wfsource/source/movement/movementmanager.cc
+  skip /home/will/WorldFoundry-wbniv/wfsource/source/movement/movementobject.cc
+  SKIP /home/will/WorldFoundry-wbniv/wfsource/source/movement/movementtest.cc
+  skip /home/will/WorldFoundry-wbniv/wfsource/source/movement/movepath.cc
+  skip /home/will/WorldFoundry-wbniv/wfsource/source/movement/movevehicle.cc
+  skip /home/will/WorldFoundry-wbniv/wfsource/source/room/actroit.cc
+  skip /home/will/WorldFoundry-wbniv/wfsource/source/room/actrooms.cc
+  skip /home/will/WorldFoundry-wbniv/wfsource/source/room/room.cc
+  skip /home/will/WorldFoundry-wbniv/wfsource/source/room/rooms.cc
+  skip /home/will/WorldFoundry-wbniv/wfsource/source/physics/activate.cc
+  skip /home/will/WorldFoundry-wbniv/wfsource/source/physics/colbox.cc
+  skip /home/will/WorldFoundry-wbniv/wfsource/source/physics/collision.cc
+  skip /home/will/WorldFoundry-wbniv/wfsource/source/physics/colspace.cc
+  skip /home/will/WorldFoundry-wbniv/wfsource/source/physics/physical.cc
+  skip /home/will/WorldFoundry-wbniv/wfsource/source/physics/physicalobject.cc
+  SKIP /home/will/WorldFoundry-wbniv/wfsource/source/physics/physicstest.cc
+  skip /home/will/WorldFoundry-wbniv/wfsource/source/anim/anim.cc
+  skip /home/will/WorldFoundry-wbniv/wfsource/source/anim/animcycl.cc
+  skip /home/will/WorldFoundry-wbniv/wfsource/source/anim/animmang.cc
+  SKIP /home/will/WorldFoundry-wbniv/wfsource/source/anim/animtest.cc
+  skip /home/will/WorldFoundry-wbniv/wfsource/source/anim/channel.cc
+  skip /home/will/WorldFoundry-wbniv/wfsource/source/anim/path.cc
+  SKIP /home/will/WorldFoundry-wbniv/wfsource/source/anim/preview.cc
+  SKIP /home/will/WorldFoundry-wbniv/wfsource/source/anim/test.cc
+  skip /home/will/WorldFoundry-wbniv/wfsource/source/timer/clock.cc
+  SKIP /home/will/WorldFoundry-wbniv/wfsource/source/timer/testtime.cc
+  SKIP /home/will/WorldFoundry-wbniv/wfsource/source/scripting/scriptingtest.cc
+  skip /home/will/WorldFoundry-wbniv/wfsource/source/game/actbox.cc
+  skip /home/will/WorldFoundry-wbniv/wfsource/source/game/actboxor.cc
+  skip /home/will/WorldFoundry-wbniv/wfsource/source/game/actor.cc
+  skip /home/will/WorldFoundry-wbniv/wfsource/source/game/callbacks.cc
+  skip /home/will/WorldFoundry-wbniv/wfsource/source/game/camera.cc
+  skip /home/will/WorldFoundry-wbniv/wfsource/source/game/camshot.cc
+  skip /home/will/WorldFoundry-wbniv/wfsource/source/game/destroyer.cc
+  skip /home/will/WorldFoundry-wbniv/wfsource/source/game/dir.cc
+  skip /home/will/WorldFoundry-wbniv/wfsource/source/game/director.cc
+  skip /home/will/WorldFoundry-wbniv/wfsource/source/game/enemy.cc
+  skip /home/will/WorldFoundry-wbniv/wfsource/source/game/explode.cc
+  skip /home/will/WorldFoundry-wbniv/wfsource/source/game/file.cc
+  CC /home/will/WorldFoundry-wbniv/wfsource/source/game/game.cc
+In file included from /home/will/WorldFoundry-wbniv/wfsource/source/game/level.hp:52,
+                 from /home/will/WorldFoundry-wbniv/wfsource/source/game/game.cc:30:
+/home/will/WorldFoundry-wbniv/wfsource/source/asset/assets.hp:130:94: note: ‘#pragma message: KTS /home/will/WorldFoundry-wbniv/wfsource/source/asset/assets.hp: can only have 1024 assets until this kludge is removed ’
+  130 |  #pragma message ("KTS " __FILE__ ": can only have 1024 assets until this kludge is removed ")
+      |                                                                                              ^
+In file included from /home/will/WorldFoundry-wbniv/wfsource/source/gfx/viewport.hp:103,
+                 from /home/will/WorldFoundry-wbniv/wfsource/source/game/level.hp:57:
+/home/will/WorldFoundry-wbniv/wfsource/source/gfx/viewport.hpi: In member function ‘void ViewPort::Render()’:
+/home/will/WorldFoundry-wbniv/wfsource/source/gfx/viewport.hpi:114:67: note: ‘#pragma message: KTS /home/will/WorldFoundry-wbniv/wfsource/source/gfx/viewport.hpi: write viewport gl render code’
+  114 | #pragma message ("KTS " __FILE__ ": write viewport gl render code")
+      |                                                                   ^
+In file included from /home/will/WorldFoundry-wbniv/wfsource/source/gfx/rendmatt.hp:32,
+                 from /home/will/WorldFoundry-wbniv/wfsource/source/game/level.hp:58:
+/home/will/WorldFoundry-wbniv/wfsource/source/gfx/material.hp: At global scope:
+/home/will/WorldFoundry-wbniv/wfsource/source/gfx/material.hp:183:135: note: ‘#pragma message: /home/will/WorldFoundry-wbniv/wfsource/source/gfx/material.hp KTS: MAX_RENDERERS hard coded to 8 to prevent cyclic dependencies, consider moving renderers into Material’
+  183 | #pragma message(__FILE__ " KTS: MAX_RENDERERS hard coded to 8 to prevent cyclic dependencies, consider moving renderers into Material")
+      |                                                                                                                                       ^
+In file included from /home/will/WorldFoundry-wbniv/wfsource/source/gfx/face.hp:67,
+                 from /home/will/WorldFoundry-wbniv/wfsource/source/gfx/rendobj3.hp:39,
+                 from /home/will/WorldFoundry-wbniv/wfsource/source/gfx/material.hpi:26,
+                 from /home/will/WorldFoundry-wbniv/wfsource/source/gfx/material.hp:190:
+/home/will/WorldFoundry-wbniv/wfsource/source/gfx/face.hpi:26:71: note: ‘#pragma message: KTS /home/will/WorldFoundry-wbniv/wfsource/source/gfx/face.hpi: move this into the math directory’
+   26 | #pragma message ("KTS " __FILE__ ": move this into the math directory")
+      |                                                                       ^
+In file included from /home/will/WorldFoundry-wbniv/wfsource/source/gfx/rendobj3.hp:44:
+/home/will/WorldFoundry-wbniv/wfsource/source/gfx/handle.hp:12:73: note: ‘#pragma message: WBN: merge various ID/FOURCC classes into single one’
+   12 | #pragma message( "WBN: merge various ID/FOURCC classes into single one" )
+      |                                                                         ^
+In file included from /home/will/WorldFoundry-wbniv/wfsource/source/movement/movementobject.hpi:31,
+                 from /home/will/WorldFoundry-wbniv/wfsource/source/movement/movementobject.hp:117,
+                 from /home/will/WorldFoundry-wbniv/wfsource/source/game/actor.hp:37,
+                 from /home/will/WorldFoundry-wbniv/wfsource/source/game/level.hp:65:
+/home/will/WorldFoundry-wbniv/wfsource/source/oas/movement.h:31:74: note: ‘#pragma message: Is there an automatic way to create this enum from oas?’
+   31 | #pragma message("Is there an automatic way to create this enum from oas?")
+      |                                                                          ^
+/home/will/WorldFoundry-wbniv/wfsource/source/movement/movementobject.hpi: In constructor ‘MovementObject::MovementObject(const SObjectStartupData*, const void*, const CommonBlock&, const Clock&)’:
+/home/will/WorldFoundry-wbniv/wfsource/source/movement/movementobject.hpi:54:114: note: ‘#pragma message: kts fix: pathed objects get their position set in game/actor.cc since we cant do it here (yet)’
+   54 | #pragma message ("kts fix: pathed objects get their position set in game/actor.cc since we cant do it here (yet)")
+      |                                                                                                                  ^
+/home/will/WorldFoundry-wbniv/wfsource/source/game/actor.hp: At global scope:
+/home/will/WorldFoundry-wbniv/wfsource/source/game/actor.hp:253:105: note: ‘#pragma message: /home/will/WorldFoundry-wbniv/wfsource/source/game/actor.hp: I guess I should make protected accessor functions for these data members’
+  253 | #pragma message( __FILE__ ": I guess I should make protected accessor functions for these data members" )
+      |                                                                                                         ^
+/home/will/WorldFoundry-wbniv/wfsource/source/game/level.hp:238:58: note: ‘#pragma message: /home/will/WorldFoundry-wbniv/wfsource/source/game/level.hp: remove _idealMainCharacter’
+  238 | #pragma message( __FILE__ ": remove _idealMainCharacter" )
+      |                                                          ^
+/home/will/WorldFoundry-wbniv/wfsource/source/game/game.cc: In member function ‘void WFGame::RunLevel(_DiskFile*)’:
+/home/will/WorldFoundry-wbniv/wfsource/source/game/game.cc:728:83: note: ‘#pragma message: KTS: write code to handle lives and restarting same level, etc.’
+  728 | #pragma message ("KTS: write code to handle lives and restarting same level, etc.")
+      |                                                                                   ^
+  skip /home/will/WorldFoundry-wbniv/wfsource/source/game/gamestrm.cc
+  skip /home/will/WorldFoundry-wbniv/wfsource/source/game/generator.cc
+  skip /home/will/WorldFoundry-wbniv/wfsource/source/game/gold.cc
+  skip /home/will/WorldFoundry-wbniv/wfsource/source/game/hscore.cc
+  skip /home/will/WorldFoundry-wbniv/wfsource/source/game/level.cc
+  skip /home/will/WorldFoundry-wbniv/wfsource/source/game/levelobj.cc
+  skip /home/will/WorldFoundry-wbniv/wfsource/source/game/light.cc
+  skip /home/will/WorldFoundry-wbniv/wfsource/source/game/mailbox.cc
+  CC /home/will/WorldFoundry-wbniv/wfsource/source/game/main.cc
+In file included from /home/will/WorldFoundry-wbniv/wfsource/source/gfx/viewport.hp:103,
+                 from /home/will/WorldFoundry-wbniv/wfsource/source/game/game.hp:41,
+                 from /home/will/WorldFoundry-wbniv/wfsource/source/game/main.cc:29:
+/home/will/WorldFoundry-wbniv/wfsource/source/gfx/viewport.hpi: In member function ‘void ViewPort::Render()’:
+/home/will/WorldFoundry-wbniv/wfsource/source/gfx/viewport.hpi:114:67: note: ‘#pragma message: KTS /home/will/WorldFoundry-wbniv/wfsource/source/gfx/viewport.hpi: write viewport gl render code’
+  114 | #pragma message ("KTS " __FILE__ ": write viewport gl render code")
+      |                                                                   ^
+In file included from /home/will/WorldFoundry-wbniv/wfsource/source/movement/movementobject.hpi:31,
+                 from /home/will/WorldFoundry-wbniv/wfsource/source/movement/movementobject.hp:117,
+                 from /home/will/WorldFoundry-wbniv/wfsource/source/game/actor.hp:37,
+                 from /home/will/WorldFoundry-wbniv/wfsource/source/game/game.hp:42:
+/home/will/WorldFoundry-wbniv/wfsource/source/oas/movement.h: At global scope:
+/home/will/WorldFoundry-wbniv/wfsource/source/oas/movement.h:31:74: note: ‘#pragma message: Is there an automatic way to create this enum from oas?’
+   31 | #pragma message("Is there an automatic way to create this enum from oas?")
+      |                                                                          ^
+/home/will/WorldFoundry-wbniv/wfsource/source/movement/movementobject.hpi: In constructor ‘MovementObject::MovementObject(const SObjectStartupData*, const void*, const CommonBlock&, const Clock&)’:
+/home/will/WorldFoundry-wbniv/wfsource/source/movement/movementobject.hpi:54:114: note: ‘#pragma message: kts fix: pathed objects get their position set in game/actor.cc since we cant do it here (yet)’
+   54 | #pragma message ("kts fix: pathed objects get their position set in game/actor.cc since we cant do it here (yet)")
+      |                                                                                                                  ^
+In file included from /home/will/WorldFoundry-wbniv/wfsource/source/gfx/face.hp:67,
+                 from /home/will/WorldFoundry-wbniv/wfsource/source/gfx/rendobj3.hp:39,
+                 from /home/will/WorldFoundry-wbniv/wfsource/source/gfx/camera.hp:36,
+                 from /home/will/WorldFoundry-wbniv/wfsource/source/renderassets/rendacto.hp:41,
+                 from /home/will/WorldFoundry-wbniv/wfsource/source/game/actor.hp:51:
+/home/will/WorldFoundry-wbniv/wfsource/source/gfx/face.hpi: At global scope:
+/home/will/WorldFoundry-wbniv/wfsource/source/gfx/face.hpi:26:71: note: ‘#pragma message: KTS /home/will/WorldFoundry-wbniv/wfsource/source/gfx/face.hpi: move this into the math directory’
+   26 | #pragma message ("KTS " __FILE__ ": move this into the math directory")
+      |                                                                       ^
+In file included from /home/will/WorldFoundry-wbniv/wfsource/source/gfx/rendobj3.hp:44:
+/home/will/WorldFoundry-wbniv/wfsource/source/gfx/handle.hp:12:73: note: ‘#pragma message: WBN: merge various ID/FOURCC classes into single one’
+   12 | #pragma message( "WBN: merge various ID/FOURCC classes into single one" )
+      |                                                                         ^
+In file included from /home/will/WorldFoundry-wbniv/wfsource/source/gfx/rendobj3.hp:45:
+/home/will/WorldFoundry-wbniv/wfsource/source/gfx/material.hp:183:135: note: ‘#pragma message: /home/will/WorldFoundry-wbniv/wfsource/source/gfx/material.hp KTS: MAX_RENDERERS hard coded to 8 to prevent cyclic dependencies, consider moving renderers into Material’
+  183 | #pragma message(__FILE__ " KTS: MAX_RENDERERS hard coded to 8 to prevent cyclic dependencies, consider moving renderers into Material")
+      |                                                                                                                                       ^
+In file included from /home/will/WorldFoundry-wbniv/wfsource/source/renderassets/rendacto.hp:48:
+/home/will/WorldFoundry-wbniv/wfsource/source/asset/assets.hp:130:94: note: ‘#pragma message: KTS /home/will/WorldFoundry-wbniv/wfsource/source/asset/assets.hp: can only have 1024 assets until this kludge is removed ’
+  130 |  #pragma message ("KTS " __FILE__ ": can only have 1024 assets until this kludge is removed ")
+      |                                                                                              ^
+/home/will/WorldFoundry-wbniv/wfsource/source/game/actor.hp:253:105: note: ‘#pragma message: /home/will/WorldFoundry-wbniv/wfsource/source/game/actor.hp: I guess I should make protected accessor functions for these data members’
+  253 | #pragma message( __FILE__ ": I guess I should make protected accessor functions for these data members" )
+      |                                                                                                         ^
+In file included from /home/will/WorldFoundry-wbniv/wfsource/source/game/main.cc:40:
+/home/will/WorldFoundry-wbniv/wfsource/source/game/level.hp:238:58: note: ‘#pragma message: /home/will/WorldFoundry-wbniv/wfsource/source/game/level.hp: remove _idealMainCharacter’
+  238 | #pragma message( __FILE__ ": remove _idealMainCharacter" )
+      |                                                          ^
+/home/will/WorldFoundry-wbniv/wfsource/source/game/main.cc: In function ‘void PIGSMain(int, char**)’:
+/home/will/WorldFoundry-wbniv/wfsource/source/game/main.cc:484:97: note: ‘#pragma message: kts: should not read level from command line (leave until profiling is done!)’
+  484 | #pragma message ("kts: should not read level from command line (leave until profiling is done!)")
+      |                                                                                                 ^
+/home/will/WorldFoundry-wbniv/wfsource/source/game/main.cc:494:64: note: ‘#pragma message: System streams should be in HAL [framework]’
+  494 | #pragma message( "System streams should be in HAL [framework]" )
+      |                                                                ^
+  skip /home/will/WorldFoundry-wbniv/wfsource/source/game/matte.cc
+  skip /home/will/WorldFoundry-wbniv/wfsource/source/game/missile.cc
+  skip /home/will/WorldFoundry-wbniv/wfsource/source/game/movecam.cc
+  skip /home/will/WorldFoundry-wbniv/wfsource/source/game/platform.cc
+  skip /home/will/WorldFoundry-wbniv/wfsource/source/game/player.cc
+  skip /home/will/WorldFoundry-wbniv/wfsource/source/game/scripting_stub.cc
+  skip /home/will/WorldFoundry-wbniv/wfsource/source/game/shadow.cc
+  skip /home/will/WorldFoundry-wbniv/wfsource/source/game/shield.cc
+  skip /home/will/WorldFoundry-wbniv/wfsource/source/game/spike.cc
+  skip /home/will/WorldFoundry-wbniv/wfsource/source/game/statplat.cc
+  skip /home/will/WorldFoundry-wbniv/wfsource/source/game/target.cc
+  skip /home/will/WorldFoundry-wbniv/wfsource/source/game/tool.cc
+  skip /home/will/WorldFoundry-wbniv/wfsource/source/game/toolngun.cc
+  skip /home/will/WorldFoundry-wbniv/wfsource/source/game/toolshld.cc
+  skip /home/will/WorldFoundry-wbniv/wfsource/source/game/version.cc
+  skip /home/will/WorldFoundry-wbniv/wfsource/source/game/warp.cc
+  skip /home/will/WorldFoundry-wbniv/wfsource/source/renderassets/rendacto.cc
+  skip /home/will/WorldFoundry-wbniv/wfsource/source/renderassets/rendcrow.cc
+  skip /home/will/WorldFoundry-wbniv/wfsource/source/particle/emitter.cc
+  skip /home/will/WorldFoundry-wbniv/wfsource/source/particle/particle.cc
+  SKIP /home/will/WorldFoundry-wbniv/wfsource/source/particle/test.cc
+  skip /home/will/WorldFoundry-wbniv/wfsource/source/audio/linux/buffer.cc
+  skip /home/will/WorldFoundry-wbniv/wfsource/source/audio/linux/device.cc
+  skip /home/will/WorldFoundry-wbniv/wfsource/source/audio/linux/miniaudio_impl.cc
+  skip /home/will/WorldFoundry-wbniv/wfsource/source/audio/linux/music.cc
+  skip /home/will/WorldFoundry-wbniv/wfsource/source/audio/linux/sfx_library.cc
+  skip /home/will/WorldFoundry-wbniv/engine/stubs/scripting_lua.cc
+  CC (vendor) lua/lapi.c
+  CC (vendor) lua/lauxlib.c
+  CC (vendor) lua/lbaselib.c
+  CC (vendor) lua/lcode.c
+  CC (vendor) lua/lcorolib.c
+  CC (vendor) lua/lctype.c
+  CC (vendor) lua/ldblib.c
+  CC (vendor) lua/ldebug.c
+  CC (vendor) lua/ldo.c
+  CC (vendor) lua/ldump.c
+  CC (vendor) lua/lfunc.c
+  CC (vendor) lua/lgc.c
+  CC (vendor) lua/linit.c
+  CC (vendor) lua/liolib.c
+  CC (vendor) lua/llex.c
+  CC (vendor) lua/lmathlib.c
+  CC (vendor) lua/lmem.c
+  CC (vendor) lua/loadlib.c
+  CC (vendor) lua/lobject.c
+  CC (vendor) lua/lopcodes.c
+  CC (vendor) lua/loslib.c
+  CC (vendor) lua/lparser.c
+  CC (vendor) lua/lstate.c
+  CC (vendor) lua/lstring.c
+  CC (vendor) lua/lstrlib.c
+  CC (vendor) lua/ltable.c
+  CC (vendor) lua/ltablib.c
+  CC (vendor) lua/ltm.c
+  CC (vendor) lua/lundump.c
+  CC (vendor) lua/lutf8lib.c
+  CC (vendor) lua/lvm.c
+  CC (vendor) lua/lzio.c
+  skip /home/will/WorldFoundry-wbniv/engine/stubs/scripting_stub.cc
+  skip /home/will/WorldFoundry-wbniv/engine/stubs/scripting_pilot.cc
+  skip /home/will/WorldFoundry-wbniv/engine/pilot/pilot_core.cc
+  skip /home/will/WorldFoundry-wbniv/engine/stubs/platform_stubs.cc
+  skip /home/will/WorldFoundry-wbniv/engine/stubs/stb_image_write_impl.cc
+  skip /home/will/WorldFoundry-wbniv/engine/stubs/scripting_zforth.cc
+  CC (vendor) zforth/zforth.c
+  CC neural-forth/dictionary.c
+  CC neural-forth/tensor.c
+  CC neural-forth/autograd.c
+  CC neural-forth/fuzzy.c
+  CC neural-forth/nn.c
+  CC neural-forth/slot.c
+  skip /home/will/WorldFoundry-wbniv/engine/stubs/rest_api.cc
+  skip /home/will/WorldFoundry-wbniv/engine/stubs/debug_server.cc
+  skip /home/will/WorldFoundry-wbniv/engine/mutation/wfmut.cpp
+  skip /home/will/WorldFoundry-wbniv/engine/mutation/wfmut_smoke.cpp
+  skip /home/will/WorldFoundry-wbniv/engine/stubs/physics_jolt.cc
+  skip /home/will/WorldFoundry-wbniv/wfsource/source/physics/jolt/jolt_backend.cc
+
+=== Linking ===
+
+Built: /home/will/WorldFoundry-wbniv/engine/wf_game
+Run:   cd /home/will/WorldFoundry-wbniv/wfsource/source/game && DISPLAY=:0 /home/will/WorldFoundry-wbniv/engine/wf_game

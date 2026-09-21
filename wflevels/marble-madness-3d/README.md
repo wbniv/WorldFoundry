@@ -12,7 +12,7 @@ task run-marble-3d-astra
 
 Arrow keys apply camera-relative acceleration. Countersteer to brake; momentum and downhill acceleration matter. Space restarts the 60-second race. Cross between the checkered flags to finish. Falling returns to the start while the timer continues. Escape exits.
 
-The checked-in `marble-madness-3d-standalone.iff` needs this branch's built `engine/wf_game`. It is independent of the shipped level selector and `cd.iff`.
+The Task launcher now reads **level 6 from `cd.iff`**. Will explicitly requested bundle inclusion after the standalone attempt was verified. For direct standalone loading, use `python3 wflevels/marble-madness-3d/run.py`. The main checkout includes the same course as `wflevels/marble-madness-3d-astra-standalone.iff`; its named Task also loads local bundled level 6.
 
 ## Rebuild and verify
 
@@ -20,6 +20,7 @@ The checked-in `marble-madness-3d-standalone.iff` needs this branch's built `eng
 task build
 task tools-build
 python3 wflevels/marble-madness-3d/build.py
+task build-cd-iff
 python3 wflevels/marble-madness-3d/verify_geometry.py
 ```
 

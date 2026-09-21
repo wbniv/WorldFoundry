@@ -185,3 +185,7 @@ $ git diff --check
 ```
 
 PASS. Existing course assets and shipped bundles are untouched; only this independent attempt and its small shared HUD/presentation changes are staged.
+
+## Subsequent authorization: bundle inclusion
+
+After reviewing the course and its video, Will explicitly requested: "add this level to cd.iff". This supersedes the standalone-only restriction above. Astra is now appended as level 6 in both this worktree and the main checkout; the original six payloads and shell/default boot are unchanged. `task run-marble-3d-astra` now loads the local bundle, and `task run -- 6` also selects it. Direct `run.py` standalone loading remains available. See the [bundle integration plan](2026-09-21-add-marble-astra-to-cd-iff.md) for the new verification; the original standalone verification above remains a historical record.
