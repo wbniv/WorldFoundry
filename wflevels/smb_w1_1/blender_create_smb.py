@@ -35,7 +35,7 @@ SCRIPT_DIR = os.path.dirname(os.path.abspath(__file__))
 REPO       = os.path.normpath(os.path.join(SCRIPT_DIR, '..', '..'))
 SNOWGOONS  = os.path.join(REPO, 'wflevels', 'snowgoons-blender', 'snowgoons-blender.lev')
 OUT_LEV    = os.path.join(SCRIPT_DIR, 'smb_w1_1.lev')
-OAD_DIR    = os.path.join(REPO, 'wftools', 'wf_oad', 'tests', 'fixtures')
+OAD_DIR    = os.path.join(REPO, 'wfsource', 'source', 'oas')
 
 # ── Layout (T = NES tile size in WF metres) ───────────────────────────────────
 T = 1.5
