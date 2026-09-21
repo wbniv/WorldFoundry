@@ -16,10 +16,12 @@ Architecture — REUSES Filelight's emitter VERBATIM (no engine code):
     template per arc wedge, Z-rotating it to its azimuth (set-rotation, revolutions)
     and colouring by hue. The zenith cap is spawned once for depth 0.
 
-Meshes are wound for INWARD normals (toward the player at the centre) so they're
-visible from inside under backface culling — run with WF_CULL=1 (the dome is the
-first opt-in consumer; see docs/level-design-troubleshooting.md). With culling off
-(default) they render regardless.
+Dome meshes are wound for INWARD normals **in Blender** (toward the player at the
+centre) so they're visible from inside under backface culling — run with WF_CULL=1
+(the dome is the first opt-in consumer; see docs/level-design-troubleshooting.md).
+The exporter reverses each face loop since 2026-09-19, so "inward in Blender" is
+"inward in WF": author for the Blender viewport, never for the engine's
+(v2-v0)x(v1-v0) formula. With culling off (default) they render regardless.
 
 Run headlessly:
     blender --background --python blender_dome.py
@@ -252,9 +254,13 @@ def _sph(R, th, phi):
 def spherical_band_geo(R, phi0_deg, phi1_deg, sweep_deg, az_segs=4, el_segs=3):
     """One spherical-shell patch: azimuth [0, sweep], elevation [phi0, phi1], on
     radius R. Centred on azimuth 0 so a spawned instance needs only a Z-rotation to
-    land on its arc. Wound for INWARD normals (toward the player at the centre): the
-    face order (j,i)(j,i+1)(j+1,i+1)(j+1,i) gives n = (v2-v0)x(v1-v0) pointing
-    -radial (verified)."""
+    land on its arc. Wound for INWARD normals **in Blender** (toward the player at
+    the centre): the loop order (j+1,i)(j+1,i+1)(j,i+1)(j,i) gives a Blender normal
+    (v1-v0)x(v2-v0) pointing -radial. Since 2026-09-19 the exporter reverses every
+    face loop so Blender-outward is WF-outward
+    (docs/plans/2026-09-19-exporter-face-hand.md), hence Blender-inward here lands
+    as WF-inward and the patch survives WF_CULL from the centre. Author for
+    Blender, not for the engine's (v2-v0)x(v1-v0) formula."""
     phi0, phi1, sw = map(math.radians, (phi0_deg, phi1_deg, sweep_deg))
     n_th = az_segs + 1
     verts = []
@@ -263,20 +269,21 @@ def spherical_band_geo(R, phi0_deg, phi1_deg, sweep_deg, az_segs=4, el_segs=3):
         for i in range(az_segs + 1):
             verts.append(_sph(R, sw * i / az_segs, phi))
     idx = lambda j, i: j * n_th + i
-    faces = [(idx(j, i), idx(j, i + 1), idx(j + 1, i + 1), idx(j + 1, i))
+    faces = [(idx(j + 1, i), idx(j + 1, i + 1), idx(j, i + 1), idx(j, i))
              for j in range(el_segs) for i in range(az_segs)]
     return verts, faces
 
 
 def cap_geo(R, phi_lo_deg, segs=24):
     """Zenith spherical cap: a fan from the pole (0,0,R) out to the phi_lo circle,
-    full 360°. Wound (pole, rim[i], rim[i+1]) for an INWARD/downward normal (toward
-    the player below)."""
+    full 360°. Wound (pole, rim[i+1], rim[i]) for an INWARD/downward normal **in
+    Blender** (toward the player below); the exporter's loop reversal (2026-09-19)
+    carries that through to a WF-inward normal."""
     phi_lo = math.radians(phi_lo_deg)
     verts = [(0.0, 0.0, R)]                                   # 0 = pole
     verts += [_sph(R, 2 * math.pi * i / segs, phi_lo) for i in range(segs)]
     rim = lambda i: 1 + (i % segs)
-    faces = [(0, rim(i), rim(i + 1)) for i in range(segs)]
+    faces = [(0, rim(i + 1), rim(i)) for i in range(segs)]
     return verts, faces
 
 
