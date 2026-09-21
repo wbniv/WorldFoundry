@@ -721,6 +721,10 @@ Level::~Level()
 		}
 	}
 
+	// Shut down the scripting VMs while their mailboxes and script data are
+	// still alive, before releasing the per-level allocator that owns them.
+	MEMORY_DELETE((*_memory), _interpreter, ScriptInterpreter);
+
 	// #5 — _actors._items was allocated from HALLmalloc at level.cc:505,
 	// BETWEEN _commonBlock (alloc'd before) and _templateObjects array
 	// (alloc'd after). Free it here so HALLmalloc stays LIFO-disciplined.

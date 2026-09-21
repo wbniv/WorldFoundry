@@ -146,6 +146,9 @@ WFGame::~WFGame()
 	assert(!_gameMailboxes);
 
 #if defined(DO_CD_IFF)
+	// LoadTOC allocates after _gameFile. Release it before the older game
+	// resources; waiting for the member destructor would violate HAL LIFO.
+	_gameTOC.Clear();
 	if ( _gameFile != nullptr )
 	{
 		DBSTREAM1( std::cout <<"closing cd.iff" << std::endl; )
@@ -255,46 +258,49 @@ WFGame::RunGameScript()				// runs the whole game, returns when game (really) ov
 	const void* _pScript = (const void*)pMetaScript;
 #endif
 	
-	DBSTREAM2( cflow << "WFGame::RunGameScript:construct MetaScript" << std::endl; )
-	assert( ValidPtr( _pScript ) );
-   GameMailboxes mailboxes(*this);
-   SingleMailboxesManager mailboxesManager(mailboxes);
-   ScriptInterpreter* interpreter = ScriptInterpreterFactory(mailboxesManager, HALLmalloc);
-   assert(ValidPtr(interpreter));
-	DBSTREAM1( cprogress << "meta script interpreter created" << std::endl; )
-
 	char* pScript = (char*)_pScript;
-	for ( ;; )
+	// Destroy mailbox storage before freeing the older script allocation.
 	{
-		DBSTREAM2( cflow << "WFGame::RunGameScript::loop top" << std::endl; )
-      //Scalar data = 
-      interpreter->RunScript(pScript,0,3);  // meta script is always Forth (shell.aib)
-  		//  cerr << "EvalScript(" << szScript << ")=" << data << endl;
-  		//return data;
-      
-		if(_overrideLevelNum != -1)
-			_desiredLevelNum = _overrideLevelNum;
+		DBSTREAM2( cflow << "WFGame::RunGameScript:construct MetaScript" << std::endl; )
+		assert( ValidPtr( _pScript ) );
+		GameMailboxes mailboxes(*this);
+		SingleMailboxesManager mailboxesManager(mailboxes);
 
-		assert(_desiredLevelNum >= 0);
-		assert(_desiredLevelNum < 9999);
-		DBSTREAM3( cprogress << "Loading level " << _desiredLevelNum << std::endl; )
+		for ( ;; )
+		{
+			DBSTREAM2( cflow << "WFGame::RunGameScript::loop top" << std::endl; )
+			// The scripting backends hold process-global VM state. Release the
+			// shell interpreter before RunLevel creates its own interpreter, and
+			// recreate it for the next shell evaluation. Persistent state lives in
+			// GameMailboxes, which stays alive across level transitions.
+			ScriptInterpreter* interpreter = ScriptInterpreterFactory(mailboxesManager, HALLmalloc);
+			assert(ValidPtr(interpreter));
+			interpreter->RunScript(pScript,0,3);  // meta script is always Forth (shell.aib)
+			MEMORY_DELETE(HALLmalloc, interpreter, ScriptInterpreter);
+
+			if(_overrideLevelNum != -1)
+				_desiredLevelNum = _overrideLevelNum;
+
+			assert(_desiredLevelNum >= 0);
+			assert(_desiredLevelNum < 9999);
+			DBSTREAM3( cprogress << "Loading level " << _desiredLevelNum << std::endl; )
 #if defined(DO_CD_IFF)
 
-		const DiskTOC::TOCEntry& tocLevelEntry = _gameTOC.GetTOCEntry(GAMEFILE_LEVELSTART+_desiredLevelNum);
-//		std::cout << "seeking to level at offset " << tocLevelEntry._offsetInDiskFile+DiskFileCD::_SECTOR_SIZE << std::endl;
-		_gameFile->SeekRandom(tocLevelEntry._offsetInDiskFile+DiskFileCD::_SECTOR_SIZE);
-		RunLevel(_gameFile);
+			const DiskTOC::TOCEntry& tocLevelEntry = _gameTOC.GetTOCEntry(GAMEFILE_LEVELSTART+_desiredLevelNum);
+			_gameFile->SeekRandom(tocLevelEntry._offsetInDiskFile+DiskFileCD::_SECTOR_SIZE);
+			RunLevel(_gameFile);
 #else
-		char szLevelName[ _MAX_PATH ];
-		sprintf( szLevelName, "level%d.iff", _desiredLevelNum );
-		_DiskFile* diskFile = CreateDiskFile(szLevelName, HALLmalloc);
-		assert(ValidPtr(diskFile));
-		RunLevel(diskFile);
-		assert(ValidPtr(diskFile));
-		MEMORY_DELETE( HALLmalloc, diskFile,DiskFile);
+			char szLevelName[ _MAX_PATH ];
+			sprintf( szLevelName, "level%d.iff", _desiredLevelNum );
+			_DiskFile* diskFile = CreateDiskFile(szLevelName, HALLmalloc);
+			assert(ValidPtr(diskFile));
+			RunLevel(diskFile);
+			assert(ValidPtr(diskFile));
+			MEMORY_DELETE( HALLmalloc, diskFile,DiskFile);
 #endif
-		if (HALWindowCloseRequested())
-			break;
+			if (HALWindowCloseRequested())
+				break;
+		}
 	}
 #if defined(DO_CD_IFF)
 	HALLmalloc.Free((void*)pScript);
