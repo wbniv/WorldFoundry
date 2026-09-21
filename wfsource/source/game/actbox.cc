@@ -81,7 +81,8 @@ ActBox::activate( const Actor* pActor )
     assert( ValidPtr( pActor ) );
     DBSTREAM1( cactor << "actbox update: writing " << getOad()->MailBoxValue << " to mailbox " << getOad()->MailBox << std::endl; )
     GetMailboxes().WriteMailbox( getOad()->MailBox, Scalar( (float)getOad()->MailBoxValue ) );
-    GetMailboxes().WriteMailbox( getOad()->ActivatedActorMailbox, Scalar( pActor->GetActorIndex(), 0 ) );
+    if ( getOad()->ActivatedActorMailbox >= 2 )
+        GetMailboxes().WriteMailbox( getOad()->ActivatedActorMailbox, Scalar( pActor->GetActorIndex(), 0 ) );
 }
 
 //============================================================================
@@ -128,7 +129,8 @@ ActBox::update()
 	if ( getOad()->ClearOnExit )
     {
 		GetMailboxes().WriteMailbox( getOad()->MailBox, getOad()->GetMailboxExitValue() );
-        GetMailboxes().WriteMailbox( getOad()->ActivatedActorMailbox, Scalar::zero );
+        if ( getOad()->ActivatedActorMailbox >= 2 )
+            GetMailboxes().WriteMailbox( getOad()->ActivatedActorMailbox, Scalar::zero );
     }
 
 	DBSTREAM1( cnull << "actbox::update on " << *this << std::endl; )
