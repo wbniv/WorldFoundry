@@ -38,7 +38,7 @@ public:
     void SetFog(float, float, float, float, float) override {}
     void SetFogEnabled(bool) override {}
     void DrawTriangle(const RBVertex&, const RBVertex&, const RBVertex&,
-                      float, float, float, const PixelMap*, bool) override
+                      float, float, float, const PixelMap*, bool, bool) override
     {
         ++_trianglesThisFrame;
     }

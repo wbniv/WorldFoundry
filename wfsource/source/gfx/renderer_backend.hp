@@ -87,12 +87,24 @@ public:
     // face normal — the modern backend replicates it into all three verts.
     // `cullExempt` skips backface culling for this triangle (DOUBLE_SIDED
     // materials, the matte/HUD background) — see the cull in backend_modern.cc.
+    //
+    // `prelit` is Material::LIGHTING_PRELIT reaching the draw: the triangle's
+    // color is taken as final and the diffuse/ambient term is NOT applied to
+    // it. Without this the flag selected a renderer (rend*p.cc) that was a
+    // byte-for-byte copy of the lit one, so every "prelit" face was still
+    // shaded by `dot(N, L)` in the vertex shader — which made its color a
+    // function of its winding, because the face normal is derived from winding
+    // at load (rendobj3.cc's CalculateNormal). Backends honour it by breaking
+    // the batch and clearing the lighting uniform, exactly as they already do
+    // for a texture change. See docs/plans/2026-06-13-planetarium-dome-view-
+    // engine-wide-backface-culling.md "Effort 1c".
     virtual void DrawTriangle(const RBVertex& v0,
                               const RBVertex& v1,
                               const RBVertex& v2,
                               float nx, float ny, float nz,
                               const PixelMap* texture,
-                              bool cullExempt = false) = 0;
+                              bool cullExempt = false,
+                              bool prelit = false) = 0;
 
     // Flush any pending batched draws. Called once per frame, right before
     // the swap-buffers. Legacy fixed-function backend is a no-op; modern

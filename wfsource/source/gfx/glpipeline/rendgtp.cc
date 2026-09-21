@@ -97,13 +97,19 @@ RenderObject3D::RenderPoly3DGouraudTexturePreLit(Primitive* primitive)
     v[2].b = float(poly.b2) / 256.0f;
     CalcUV(poly.tpage, poly.u2, poly.v2, *poly.pPixelMap, v[2].u, v[2].v);
 
+    // The normal is handed to the backend for the backface cull only. prelit=true
+    // tells it not to shade with the normal: this renderer was selected because
+    // the material carries Material::LIGHTING_PRELIT, so the color above is
+    // final. Without the flag the face's color would depend on its winding,
+    // since the normal is derived from winding in rendobj3.cc's load path.
     const Vector3_PS& n = globalRendererVariables.currentRenderFace->normal;
     RendererBackendGet().DrawTriangle(v[0], v[1], v[2],
                                       n.X().AsFloat(),
                                       n.Y().AsFloat(),
                                       n.Z().AsFloat(),
                                       poly.pPixelMap,
-                                      globalRendererVariables.currentRenderMaterial->IsDoubleSided());
+                                      globalRendererVariables.currentRenderMaterial->IsDoubleSided(),
+                                      /*prelit=*/true);
     return 1;
 }
 

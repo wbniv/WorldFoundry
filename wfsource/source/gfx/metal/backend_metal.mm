@@ -370,7 +370,8 @@ public:
                       const RBVertex& v2,
                       float nx, float ny, float nz,
                       const PixelMap* texture,
-                      bool cullExempt) override
+                      bool cullExempt,
+                      bool prelit) override
     {
         // Software backface cull — mirrors backend_modern.cc. Cull from the
         // object-space face normal + model->eye _mv (winding-independent): a face
@@ -396,9 +397,13 @@ public:
                 return;
         }
 
-        if (texture != _curTexture && !_cpu.empty())
+        // Batch key = (texture, prelit) — mirrors backend_modern.cc. A
+        // LIGHTING_PRELIT run is drawn with u.lighting cleared, which is
+        // per-draw state, so a change breaks the batch like a texture change.
+        if ((texture != _curTexture || prelit != _curPrelit) && !_cpu.empty())
             Flush();
         _curTexture = texture;
+        _curPrelit  = prelit;
 
         Vert tri[3];
         Pack(tri[0], v0, nx, ny, nz);
@@ -524,6 +529,9 @@ private:
     float _fogEnd   = 1000.0f;
 
     const PixelMap* _curTexture = nullptr;
+    // Whether the triangles pending in _cpu came from a LIGHTING_PRELIT
+    // material. Part of the batch key alongside _curTexture.
+    bool  _curPrelit = false;
     std::vector<Vert> _cpu;
 
     static void Pack(Vert& dst, const RBVertex& v,
@@ -644,7 +652,8 @@ private:
         u.mvp = Float16ToSimd(_mvp);
         u.mv  = Float16ToSimd(_mv);
         u.ambient  = simd::float3{ _ambient[0], _ambient[1], _ambient[2] };
-        u.lighting = _lightingEnabled ? 1 : 0;
+        // A prelit batch is unlit by definition: its vertex colors are final.
+        u.lighting = (_lightingEnabled && !_curPrelit) ? 1 : 0;
         for (int i = 0; i < RB_MAX_LIGHTS; ++i) {
             u.light_dir[i]   = simd::float4{ _lightDir[i][0],   _lightDir[i][1],   _lightDir[i][2],   0.0f };
             u.light_color[i] = simd::float4{ _lightColor[i][0], _lightColor[i][1], _lightColor[i][2], 0.0f };
@@ -665,6 +674,7 @@ private:
     {
         if (_cpu.empty()) {
             _curTexture = nullptr;
+            _curPrelit  = false;
             return;
         }
         if (!_encoder) {
@@ -673,12 +683,14 @@ private:
             // encoder each frame.
             _cpu.clear();
             _curTexture = nullptr;
+            _curPrelit  = false;
             return;
         }
         LazyInit();
         if (!_inited) {
             _cpu.clear();
             _curTexture = nullptr;
+            _curPrelit  = false;
             return;
         }
         UpdateMvp();
@@ -708,6 +720,7 @@ private:
             NSLog(@"wf_game: MetalBackend vertex buffer alloc failed (%zu bytes)", bytes);
             _cpu.clear();
             _curTexture = nullptr;
+            _curPrelit  = false;
             return;
         }
 
@@ -737,6 +750,7 @@ private:
 #endif
         _cpu.clear();
         _curTexture = nullptr;
+        _curPrelit  = false;
     }
 };
 

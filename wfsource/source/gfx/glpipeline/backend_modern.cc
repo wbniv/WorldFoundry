@@ -350,7 +350,8 @@ public:
                       const RBVertex& v2,
                       float nx, float ny, float nz,
                       const PixelMap* texture,
-                      bool cullExempt) override
+                      bool cullExempt,
+                      bool prelit) override
     {
         // Software backface cull (winding-independent). The renderer never
         // enables GL_CULL_FACE, and mesh winding is inconsistent across asset
@@ -390,9 +391,15 @@ public:
                 return;   // back-facing — skip
         }
 
-        if (texture != _curTexture && !_cpu.empty())
+        // Batch key = (texture, prelit). A LIGHTING_PRELIT run must be drawn
+        // with the lighting uniform off, which is per-draw state, so a change
+        // breaks the batch the same way a texture change does. Faces are
+        // material-sorted by RenderObject3D::Render, so this costs at most one
+        // extra draw call per material run, not one per triangle.
+        if ((texture != _curTexture || prelit != _curPrelit) && !_cpu.empty())
             Flush();
         _curTexture = texture;
+        _curPrelit  = prelit;
 
         Vert tri[3];
         Pack(tri[0], v0, nx, ny, nz);
@@ -546,6 +553,9 @@ private:
     float _fogEnd   = 1000.0f;
 
     const PixelMap* _curTexture = nullptr;
+    // Whether the triangles currently pending in _cpu came from a
+    // LIGHTING_PRELIT material. Part of the batch key alongside _curTexture.
+    bool  _curPrelit = false;
     std::vector<Vert> _cpu;
 
     static void Pack(Vert& dst, const RBVertex& v,
@@ -622,6 +632,7 @@ private:
         if (_cpu.empty())
         {
             _curTexture = nullptr;
+            _curPrelit  = false;
             return;
         }
         LazyInit();
@@ -630,7 +641,8 @@ private:
         glUseProgram(_prog);
         glUniformMatrix4fv(_uMvp, 1, GL_FALSE, _mvp);
         glUniformMatrix4fv(_uMv,  1, GL_FALSE, _mv);
-        glUniform1i(_uLighting, _lightingEnabled ? 1 : 0);
+        // A prelit batch is unlit by definition: its vertex colors are final.
+        glUniform1i(_uLighting, (_lightingEnabled && !_curPrelit) ? 1 : 0);
         glUniform3fv(_uAmbient, 1, _ambient);
         glUniform3fv(_uLightDir,   RB_MAX_LIGHTS, &_lightDir[0][0]);
         glUniform3fv(_uLightColor, RB_MAX_LIGHTS, &_lightColor[0][0]);
@@ -665,6 +677,7 @@ private:
 
         _cpu.clear();
         _curTexture = nullptr;
+        _curPrelit  = false;
     }
 };
 
