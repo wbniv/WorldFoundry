@@ -52,9 +52,9 @@
 		{ 'STR' { 'NAME' "Class Name" } { 'DATA' "light" } }
 		{ 'I32' { 'NAME' "Mobility" } { 'STR' "Anchored" } }
 		{ 'I32' { 'NAME' "Model Type" } { 'STR' "None" } }
-		{ 'FX32' { 'NAME' "lightRed" } { 'DATA' 0.6500000000000000(1.15.16) } { 'STR' "0.650000" } }
-		{ 'FX32' { 'NAME' "lightGreen" } { 'DATA' 0.6500000000000000(1.15.16) } { 'STR' "0.650000" } }
-		{ 'FX32' { 'NAME' "lightBlue" } { 'DATA' 0.8500000000000000(1.15.16) } { 'STR' "0.850000" } }
+		{ 'FX32' { 'NAME' "lightRed" } { 'DATA' 0.6500000000000000(1.15.16) } { 'STR' "0.65" } }
+		{ 'FX32' { 'NAME' "lightGreen" } { 'DATA' 0.6500000000000000(1.15.16) } { 'STR' "0.65" } }
+		{ 'FX32' { 'NAME' "lightBlue" } { 'DATA' 0.8500000000000000(1.15.16) } { 'STR' "0.85" } }
 		{ 'I32' { 'NAME' "lightType" } { 'DATA' 0l } { 'STR' "Directional" } }  //Directional|Ambient
 	}
 	{ 'OBJ' 
@@ -193,10 +193,10 @@
 		{ 'I32' { 'NAME' "Model Type" } { 'STR' "Mesh" } }
 		{ 'I32' { 'NAME' "Visibility Mailbox" } { 'DATA' 1l } { 'STR' "1" } }
 		{ 'I32' { 'NAME' "Template Object" } { 'DATA' 1l } { 'STR' "True" } }  //False|True
-		{ 'FX32' { 'NAME' "slopeA" } { 'DATA' 0.4813295950492223(1.15.16) } { 'STR' "0.481330" } }
-		{ 'FX32' { 'NAME' "slopeB" } { 'DATA' 0.0252254383716111(1.15.16) } { 'STR' "0.025225" } }
-		{ 'FX32' { 'NAME' "slopeC" } { 'DATA' 0.8698327243328094(1.15.16) } { 'STR' "0.869833" } }
-		{ 'FX32' { 'NAME' "slopeD" } { 'DATA' -5.0450876743222270(1.15.16) } { 'STR' "-5.045088" } }
+		{ 'FX32' { 'NAME' "slopeA" } { 'DATA' -0.4813295950492223(1.15.16) } { 'STR' "-0.481330" } }
+		{ 'FX32' { 'NAME' "slopeB" } { 'DATA' -0.0252254383716111(1.15.16) } { 'STR' "-0.025225" } }
+		{ 'FX32' { 'NAME' "slopeC" } { 'DATA' -0.8698327243328094(1.15.16) } { 'STR' "-0.869833" } }
+		{ 'FX32' { 'NAME' "slopeD" } { 'DATA' 5.0450876743222270(1.15.16) } { 'STR' "5.045088" } }
 	}
 	{ 'OBJ' 
 		{ 'NAME' "Band2Template" }
@@ -213,10 +213,10 @@
 		{ 'I32' { 'NAME' "Model Type" } { 'STR' "Mesh" } }
 		{ 'I32' { 'NAME' "Visibility Mailbox" } { 'DATA' 1l } { 'STR' "1" } }
 		{ 'I32' { 'NAME' "Template Object" } { 'DATA' 1l } { 'STR' "True" } }  //False|True
-		{ 'FX32' { 'NAME' "slopeA" } { 'DATA' 0.7715440193812052(1.15.16) } { 'STR' "0.771544" } }
-		{ 'FX32' { 'NAME' "slopeB" } { 'DATA' 0.0404349830156813(1.15.16) } { 'STR' "0.040435" } }
-		{ 'FX32' { 'NAME' "slopeC" } { 'DATA' 0.6258570750554403(1.15.16) } { 'STR' "0.625857" } }
-		{ 'FX32' { 'NAME' "slopeD" } { 'DATA' -5.0008205256114397(1.15.16) } { 'STR' "-5.000821" } }
+		{ 'FX32' { 'NAME' "slopeA" } { 'DATA' -0.7715440193812052(1.15.16) } { 'STR' "-0.771544" } }
+		{ 'FX32' { 'NAME' "slopeB" } { 'DATA' -0.0404349830156813(1.15.16) } { 'STR' "-0.040435" } }
+		{ 'FX32' { 'NAME' "slopeC" } { 'DATA' -0.6258570750554403(1.15.16) } { 'STR' "-0.625857" } }
+		{ 'FX32' { 'NAME' "slopeD" } { 'DATA' 5.0008205256114397(1.15.16) } { 'STR' "5.000821" } }
 	}
 	{ 'OBJ' 
 		{ 'NAME' "Band3Template" }
@@ -233,10 +233,10 @@
 		{ 'I32' { 'NAME' "Model Type" } { 'STR' "Mesh" } }
 		{ 'I32' { 'NAME' "Visibility Mailbox" } { 'DATA' 1l } { 'STR' "1" } }
 		{ 'I32' { 'NAME' "Template Object" } { 'DATA' 1l } { 'STR' "True" } }  //False|True
-		{ 'FX32' { 'NAME' "slopeA" } { 'DATA' 0.9450750797986984(1.15.16) } { 'STR' "0.945075" } }
-		{ 'FX32' { 'NAME' "slopeB" } { 'DATA' 0.0495293585894009(1.15.16) } { 'STR' "0.049529" } }
-		{ 'FX32' { 'NAME' "slopeC" } { 'DATA' 0.3076007775962353(1.15.16) } { 'STR' "0.307601" } }
-		{ 'FX32' { 'NAME' "slopeD" } { 'DATA' -2.3452710794905833(1.15.16) } { 'STR' "-2.345271" } }
+		{ 'FX32' { 'NAME' "slopeA" } { 'DATA' -0.9450750797986984(1.15.16) } { 'STR' "-0.945075" } }
+		{ 'FX32' { 'NAME' "slopeB" } { 'DATA' -0.0495293585894009(1.15.16) } { 'STR' "-0.049529" } }
+		{ 'FX32' { 'NAME' "slopeC" } { 'DATA' -0.3076007775962353(1.15.16) } { 'STR' "-0.307601" } }
+		{ 'FX32' { 'NAME' "slopeD" } { 'DATA' 2.3452710794905833(1.15.16) } { 'STR' "2.345271" } }
 	}
 	{ 'OBJ' 
 		{ 'NAME' "CapTemplate" }
@@ -255,7 +255,7 @@
 		{ 'I32' { 'NAME' "Template Object" } { 'DATA' 1l } { 'STR' "True" } }  //False|True
 		{ 'FX32' { 'NAME' "slopeA" } { 'DATA' 0.0000000000000000(1.15.16) } { 'STR' "0.000000" } }
 		{ 'FX32' { 'NAME' "slopeB" } { 'DATA' 0.0000000000000000(1.15.16) } { 'STR' "0.000000" } }
-		{ 'FX32' { 'NAME' "slopeC" } { 'DATA' 0.9874789714813232(1.15.16) } { 'STR' "0.987479" } }
+		{ 'FX32' { 'NAME' "slopeC" } { 'DATA' -0.9874789714813232(1.15.16) } { 'STR' "-0.987479" } }
 		{ 'FX32' { 'NAME' "slopeD" } { 'DATA' 0.0000000000000000(1.15.16) } { 'STR' "0.000000" } }
 	}
 	{ 'OBJ' 
@@ -288,9 +288,9 @@
 		{ 'STR' { 'NAME' "Class Name" } { 'DATA' "light" } }
 		{ 'I32' { 'NAME' "Mobility" } { 'STR' "Anchored" } }
 		{ 'I32' { 'NAME' "Model Type" } { 'STR' "None" } }
-		{ 'FX32' { 'NAME' "lightRed" } { 'DATA' 0.4000000000000000(1.15.16) } { 'STR' "0.400000" } }
-		{ 'FX32' { 'NAME' "lightGreen" } { 'DATA' 0.4000000000000000(1.15.16) } { 'STR' "0.400000" } }
-		{ 'FX32' { 'NAME' "lightBlue" } { 'DATA' 0.5000000000000000(1.15.16) } { 'STR' "0.500000" } }
+		{ 'FX32' { 'NAME' "lightRed" } { 'DATA' 0.4000000000000000(1.15.16) } { 'STR' "0.4" } }
+		{ 'FX32' { 'NAME' "lightGreen" } { 'DATA' 0.4000000000000000(1.15.16) } { 'STR' "0.4" } }
+		{ 'FX32' { 'NAME' "lightBlue" } { 'DATA' 0.5000000000000000(1.15.16) } { 'STR' "0.5" } }
 		{ 'I32' { 'NAME' "lightType" } { 'DATA' 1l } { 'STR' "Ambient" } }  //Directional|Ambient
 	}
 }
