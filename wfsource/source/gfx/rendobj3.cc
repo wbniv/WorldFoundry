@@ -52,7 +52,7 @@ RenderObject3D::_InitPrimList( Memory& memory )
 {
 	_primList[0] = new (memory) Primitive[ORDER_TABLES*_faceCount];
 	assert(ValidPtr(_primList[0]));
-	for(int index=1;index<ORDER_TABLES;index++)
+	for(int index=1;index<ORDER_TABLES;++index)
 	{
 		_primList[index] = _primList[0] + (_faceCount*index);			// kts to reduce # of allocations
 	}
@@ -96,7 +96,7 @@ RenderObject3D::Construct( Memory& memory, int vertexCount,Vertex3D* vertexList,
 	_faceList = faceList;
 
 #if DO_ASSERTIONS
-	for(int debugIndex = 0;debugIndex < _faceCount;debugIndex++)
+	for(int debugIndex = 0;debugIndex < _faceCount;++debugIndex)
 	{
 		assert(_faceList[debugIndex].v1Index < _vertexCount);
 		assert(_faceList[debugIndex].v2Index < _vertexCount);
@@ -120,8 +120,8 @@ void
 RenderObject3D::ApplyMaterials(Material* materialList )
 {
 	_materialList = materialList;
-	for(int page=0;page<ORDER_TABLES;page++)
-		for(int index=0;index<_faceCount;index++)
+	for(int page=0;page<ORDER_TABLES;++page)
+		for(int index=0;index<_faceCount;++index)
 		{
 			const TriFace& face = _faceList[index];
 			const Material* pMaterial = &( materialList[face.materialIndex] );
@@ -172,7 +172,7 @@ RenderObject3D::RenderObject3D(Memory& memory, binistream& input,int32 userData,
 				vertexList = new (memory) Vertex3D[vertexCount];
 				assert(ValidPtr(vertexList));
 				Vertex3DOnDisk tempVertex;
-				for(int count=0;count<vertexCount;count++)
+				for(int count=0;count<vertexCount;++count)
 				{
 					chunkIter->ReadBytes(&tempVertex,sizeof(Vertex3DOnDisk));
 
@@ -193,7 +193,7 @@ RenderObject3D::RenderObject3D(Memory& memory, binistream& input,int32 userData,
 //				ciffread << "materialCount = " << materialCount << std::endl;
 				materials = new (memory) Material[materialCount];
 				assert(ValidPtr(materials));
-				for(int index=0;index < materialCount; index++)
+				for(int index=0;index < materialCount; ++index)
 				{
 #pragma message ("KTS: this causes two memory copies, is there a better way?")
 					_MaterialOnDisk mod;
@@ -228,7 +228,7 @@ RenderObject3D::RenderObject3D(Memory& memory, binistream& input,int32 userData,
 				assert(ValidPtr(faceList));
 				TriFace* tempFaceList = new(memory) TriFace[faceCount];
 				assert(ValidPtr(tempFaceList));
-				for(int index=0;index < faceCount; index++)
+				for(int index=0;index < faceCount; ++index)
 				{
 #pragma message ("KTS: this causes two memory copies, is there a better way?")
 					// kts since TriFaceOnDisk is a sub-set of triface, this works
@@ -250,19 +250,19 @@ RenderObject3D::RenderObject3D(Memory& memory, binistream& input,int32 userData,
 				{
 					// find next unused material index
 					materialIndex = MATERIAL_CLEARED;
-					for(int faceIndex=0;faceIndex < faceCount&&materialIndex == MATERIAL_CLEARED;faceIndex++)
+					for(int faceIndex=0;faceIndex < faceCount&&materialIndex == MATERIAL_CLEARED;++faceIndex)
 						materialIndex = tempFaceList[faceIndex].materialIndex;
 
 					if(materialIndex != MATERIAL_CLEARED)
 					{
 						// now copy all of the faces which use this material to the facelist
-						for(int index=0;index< faceCount;index++)
+						for(int index=0;index< faceCount;++index)
 						{
 							if(tempFaceList[index].materialIndex == materialIndex)
 							{
 								faceList[nextFreeFace] = tempFaceList[index];
 								tempFaceList[index].materialIndex = MATERIAL_CLEARED;
-								nextFreeFace++;
+								++nextFreeFace;
 							}
 						}
 					}

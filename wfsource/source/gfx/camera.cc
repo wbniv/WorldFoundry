@@ -221,7 +221,7 @@ RenderCamera::RenderBegin()
    ConvertToGLColor(_ambientColor, lightColor);
    RendererBackendGet().SetAmbient(lightColor[0], lightColor[1], lightColor[2]);
 
-    for(int index=0;index < MAX_LIGHTS;index++)
+    for(int index=0;index < MAX_LIGHTS;++index)
     {
         // negate because we store the direction the light travels, where the
         // backend (like GL) expects the direction toward the light source.
@@ -242,7 +242,7 @@ RenderCamera::RenderBegin()
 
 
 #if 0
-	for(int debugIndex=0;debugIndex < 3;debugIndex++)
+	for(int debugIndex=0;debugIndex < 3;++debugIndex)
 		cout << "dirlight[" << debugIndex << "] = " << _dirLightColors[debugIndex] << std::endl;
 #endif
 

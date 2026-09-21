@@ -27,7 +27,7 @@ VideoMemory::Validate() const
 {
 #if DO_VALIDATION
 #if DO_VALIDATION > 1
-	for(int index=0;index < MAX_SLOTS;index++)
+	for(int index=0;index < MAX_SLOTS;++index)
 	{
 		if(_textures[index])
 		{

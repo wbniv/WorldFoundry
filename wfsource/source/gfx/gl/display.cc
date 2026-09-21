@@ -516,14 +516,14 @@ static void DrawHud(int xSize, int ySize)
             snprintf(buf, sizeof(buf), "%2d) %s %d", i + 1,
                      g_hiscores[i].name, g_hiscores[i].score);
             DrawHudText(colL, ty, buf);
-            i++;
+            ++i;
             // Right entry (may be absent if count is odd)
             if (i < HS_COUNT)
             {
                 snprintf(buf, sizeof(buf), "%2d) %s %d", i + 1,
                          g_hiscores[i].name, g_hiscores[i].score);
                 DrawHudText(colR, ty, buf);
-                i++;
+                ++i;
             }
             ty += trow;
         }
@@ -735,7 +735,7 @@ _memory(memory)
 
     assert(orderTableSize > 0);
 #if defined(USE_ORDER_TABLES)
-    for(int index=0;index<ORDER_TABLES;index++)
+    for(int index=0;index<ORDER_TABLES;++index)
     {
         _orderTable[index] = new (_memory) OrderTable(orderTableSize,_memory);
         assert(ValidPtr(_orderTable[index]));
@@ -774,7 +774,7 @@ Display::~Display()
     }
 
 #if defined(USE_ORDER_TABLES)
-    for(int index=ORDER_TABLES-1;index>= 0;index--)
+    for(int index=ORDER_TABLES-1;index>= 0;--index)
         _memory.Free(_orderTable[index],sizeof(OrderTable));
 #endif
 
@@ -1293,8 +1293,8 @@ Display::MeasureDelta()
     while(deltatime.tv_usec < 0)
     {
         deltatime.tv_usec += 1000000;
-        deltatime.tv_sec--;
-        tempCounter++;
+        --deltatime.tv_sec;
+        ++tempCounter;
     }
 
     assert(tempCounter < 5);

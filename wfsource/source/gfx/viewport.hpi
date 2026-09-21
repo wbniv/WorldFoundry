@@ -31,7 +31,7 @@ ViewPort::Validate() const					// test integrity of class instance
 #if defined(USE_ORDER_TABLES)
 	assert(_orderTableDepth > 0);
 
-	for(int index=0;index < ORDER_TABLES;index++)
+	for(int index=0;index < ORDER_TABLES;++index)
 	{
 		AssertMsg(ValidPtr(_orderTable[index]),"index = " << index << ", orderTable[index] = " << _orderTable[index]);
 		_orderTable[index]->Validate();

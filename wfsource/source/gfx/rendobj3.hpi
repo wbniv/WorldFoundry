@@ -36,7 +36,7 @@ RenderObject3D::Validate() const
 
 #if DO_ASSERTIONS
 #if defined(USE_ORDER_TABLES)
-	for(int index=0;index<ORDER_TABLES;index++)
+	for(int index=0;index<ORDER_TABLES;++index)
 		assert(ValidPtr(_primList[index]));
 #endif
 #endif
@@ -70,7 +70,7 @@ RenderObject3D::GetVertexCount() const	// should only be used by the animation s
 INLINE bool
 RenderObject3D::GetHandle(const HandleID thisHandle, Vector3& position) const
 {
-	for (int handleIdx = 0; handleIdx < _handleCount; handleIdx++)
+	for (int handleIdx = 0; handleIdx < _handleCount; ++handleIdx)
 	{
 		if (_handleList[handleIdx].ID() == thisHandle)
 		{

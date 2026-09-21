@@ -146,7 +146,7 @@ _JoystickButtonsF(IJoystick joystick)
 #if 0
 		if ( joyGetPos( 0, &ji ) != JOYERR_UNPLUGGED )
 		{
-			for(int index=0;joystickRemapTable[index][0];index++)
+			for(int index=0;joystickRemapTable[index][0];++index)
 				if(ji.wButtons & joystickRemapTable[index][0])
 					buttons |= joystickRemapTable[index][1];
 //			buttons = ji.wButtons & 0x3FF;
@@ -167,7 +167,7 @@ _JoystickButtonsF(IJoystick joystick)
 #if 0
 		if ( joyGetPos( 1, &ji ) != JOYERR_UNPLUGGED )
 		{
-			for(int index=0;joystickRemapTable[index][0];index++)
+			for(int index=0;joystickRemapTable[index][0];++index)
 				if(ji.wButtons & joystickRemapTable[index][0])
 					buttons |= joystickRemapTable[index][1];
 //			buttons = ji.wButtons & 0x3FF;

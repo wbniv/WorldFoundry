@@ -247,7 +247,7 @@ MeasureAndAdvance(struct timeval& clockLastTime)
     delta.tv_usec = tvNow.tv_usec - clockLastTime.tv_usec;
     if (delta.tv_usec < 0) {
         delta.tv_usec += 1000000;
-        delta.tv_sec--;
+        --delta.tv_sec;
     }
 
     clockLastTime = tvNow;

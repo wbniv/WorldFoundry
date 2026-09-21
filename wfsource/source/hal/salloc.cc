@@ -64,7 +64,7 @@ SAlloc::Allocate(size_t size)
 	AssertMsg(size < left,"out of stack space, asked for " << size << ", only have " << left);			// will it fit?
 
 #if DO_ASSERTIONS
-	_allocIndex++;
+	++_allocIndex;
 	_allocPtrs[_allocIndex] = _freeMemory;
 #endif
 
@@ -81,7 +81,7 @@ SAlloc::Free(void* memory)
 #if DO_ASSERTIONS
 	assert(_allocIndex >= 0);
 	assert(memory == _allocPtrs[_allocIndex]);
-	_allocIndex--;
+	--_allocIndex;
 #endif
 	_freeMemory = (char*)memory;
 }

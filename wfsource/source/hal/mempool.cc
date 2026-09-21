@@ -53,7 +53,7 @@ MemPoolConstruct(size_t size,int entries,Memory& memory)
 
 	_MemPoolFreeEntry* freeEntry = &memPool->_firstFree;
 	char* nextFree = memPool->_buffer;
-	for(int entry=0;entry<entries;entry++)
+	for(int entry=0;entry<entries;++entry)
 	 {
 		freeEntry->_next = (_MemPoolFreeEntry*)nextFree;
 		freeEntry = freeEntry->_next;
@@ -97,7 +97,7 @@ MemPoolAllocate(SMemPool* memPool, size_t size)
 	if(memPool->_firstFree._next)
 	 {
 #if  DO_ASSERTIONS
-		memPool->_currentEntries++;
+		++memPool->_currentEntries;
 #endif
 		void* mem = (void*)memPool->_firstFree._next;
 		memPool->_firstFree._next = memPool->_firstFree._next->_next;
@@ -108,7 +108,7 @@ MemPoolAllocate(SMemPool* memPool, size_t size)
 		return(0);					// out of entries
 #else
 #if  DO_ASSERTIONS
-	memPool->_currentEntries++;
+	++memPool->_currentEntries;
 #endif
 	assert(0);
 	void* mem = malloc(memPool->_size);
@@ -128,7 +128,7 @@ MemPoolFree(SMemPool* memPool, void* mem)
 	VALIDATEMEMPOOL(memPool);
 	assert(ValidPtr(mem));
 #if  DO_ASSERTIONS
-	memPool->_currentEntries--;
+	--memPool->_currentEntries;
 #endif
 	DBSTREAM5(cprogress <<  "Freeing an entry from Memory Pool " << memPool << " at address " << mem ASSERTIONS( << " leaving " << memPool->_currentEntries << " entries") << endl; )
 	assert(memPool->_currentEntries >= 0);

@@ -193,7 +193,7 @@ PixelMap::Load(const void* memory, int xOffset, int yOffset, int xSize, int ySiz
 			else
 				destPixel[3] = 255;	// be solid
 #endif // SIXTEEN_BIT_VRAM
-			pixels++;
+			++pixels;
 		}
 	}
 

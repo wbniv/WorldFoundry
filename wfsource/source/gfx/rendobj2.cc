@@ -44,7 +44,7 @@ RenderObject2D::RenderObject2D(Memory& memory, int vertexCount,Vertex2D* vertexL
 	_faceList = faceList;
 
 #if DO_ASSERTIONS
-	for(int idxFace = 0;idxFace < _faceCount;idxFace++)
+	for(int idxFace = 0;idxFace < _faceCount;++idxFace)
 	{
 		assert(_faceList[idxFace].v1Index < _vertexCount);
 		assert(_faceList[idxFace].v2Index < _vertexCount);
@@ -80,8 +80,8 @@ void
 RenderObject2D::ApplyMaterial(const Material* materialList)
 {
 #if defined(USE_ORDER_TABLES)
-	for(int idxPage=0;idxPage<ORDER_TABLES;idxPage++)
-		for(int idxFace=0;idxFace<_faceCount;idxFace++)
+	for(int idxPage=0;idxPage<ORDER_TABLES;++idxPage)
+		for(int idxFace=0;idxFace<_faceCount;++idxFace)
 		{
 			Material material = materialList[_faceList[idxFace].materialIndex];
 			Color color = material.GetColor();

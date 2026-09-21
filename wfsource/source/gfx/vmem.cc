@@ -45,7 +45,7 @@ int VideoMemory::VRAMTransientHeight = 256;
 
 VideoMemory::VideoMemory(Display& display)
 {
-	for(int index=0;index < MAX_SLOTS;index++)
+	for(int index=0;index < MAX_SLOTS;++index)
 	{
 		_textures[index] = NULL;
 		_palettes[index] = NULL;
@@ -59,7 +59,7 @@ VideoMemory::VideoMemory(Display& display)
 VideoMemory::~VideoMemory()
 {
 	Validate();
-	for(int index=MAX_TRANSIENT_SLOTS-1;index >= 0;index--)
+	for(int index=MAX_TRANSIENT_SLOTS-1;index >= 0;--index)
 	{
 		MEMORY_DELETE(HALLmalloc,_textures[index],PixelMap);
 		MEMORY_DELETE(HALLmalloc,_palettes[index],PixelMap);
@@ -158,7 +158,7 @@ VideoMemory::AllocateTextureSlots(Display& display)
 #endif
 
 	// allocate the transient texture slots
-	for( int transientIndex = 0; transientIndex < MAX_TRANSIENT_SLOTS; transientIndex++ )
+	for( int transientIndex = 0; transientIndex < MAX_TRANSIENT_SLOTS; ++transientIndex)
 	{
 		_palettes[transientIndex] = AllocateTextureSlot
 		(
@@ -191,7 +191,7 @@ VideoMemory::AllocateTextureSlots(Display& display)
 
 #if defined(DESIGNER_CHEATS)
     // so that designer can tell by looking at video memory which slots have been loaded
-	for(int slotIndex=0;slotIndex<MAX_SLOTS;slotIndex++)
+	for(int slotIndex=0;slotIndex<MAX_SLOTS;++slotIndex)
 		ClearSlot(slotIndex);
 #endif
 }

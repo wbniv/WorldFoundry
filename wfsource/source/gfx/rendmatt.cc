@@ -44,17 +44,17 @@ ScrollingMatte::ScrollingMatte(const char* textureName, const Texture& texture, 
 	_texture(texture),_depth(depth)
 {
 #if defined(USE_ORDER_TABLES)
-	for(int xIndex=0;xIndex<MATTE_XSIZE;xIndex++)
-		for(int yIndex=0;yIndex<MATTE_YSIZE;yIndex++)
+	for(int xIndex=0;xIndex<MATTE_XSIZE;++xIndex)
+		for(int yIndex=0;yIndex<MATTE_YSIZE;++yIndex)
 #pragma message( "Move this to the outer loop" )
-			for(int page=0;page<ORDER_TABLES;page++)
+			for(int page=0;page<ORDER_TABLES;++page)
 			{
 				SPRT_16& sprite = mem[page][xIndex][yIndex];
 				setSprt16(&sprite); 				// set SPRT_16 primitve ID
 				setSemiTrans(&sprite, 0);			// semi-amibient is OFF
 				setRGB0(&sprite, 0x80, 0x80, 0x80); // half color
 			}
-	for(int page=0;page<ORDER_TABLES;page++)
+	for(int page=0;page<ORDER_TABLES;++page)
 		SetDrawMode(&dr_mode[page], 0, 0, getTPage(TEXTURE_MODE_16BIT_DIRECT, 0, _texture.u, _texture.v), 0);
 #else
    AssertMsg(strlen(textureName),"invalid texture name in matte:" << textureName);
@@ -151,11 +151,11 @@ ScrollingMatte::Render(ViewPort&
 	int tileModulo = _texture.w/16;
 #if 1
 #if 0
-   for(int yIndex=2;yIndex<3;yIndex++)
-      for(int xIndex=2;xIndex<3;xIndex++)
+   for(int yIndex=2;yIndex<3;++yIndex)
+      for(int xIndex=2;xIndex<3;++xIndex)
 #else
-   for(int yIndex=0;yIndex<MATTE_YSIZE;yIndex++)
-      for(int xIndex=0;xIndex<MATTE_XSIZE;xIndex++)
+   for(int yIndex=0;yIndex<MATTE_YSIZE;++yIndex)
+      for(int xIndex=0;xIndex<MATTE_XSIZE;++xIndex)
 #endif
 		{
 			RangeCheck(0,((xIndex+xCoarseScroll)% map.xSize),map.xSize);
@@ -240,7 +240,7 @@ ScrollingMatte::Render(ViewPort&
    const int ZOFFSET = -350;
 
    static int foo=0;
-   foo++;
+   ++foo;
    if(foo > 100)
       foo = 0;
 

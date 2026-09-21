@@ -78,7 +78,7 @@ LoadTexture(binistream& texturestream, PixelMap& map)
 		// kts hack, image needs to be long word aligned on disk
 	int16* from = (int16*)buffer;
 	int16* to = (int16*)((char*)buffer-2);
-	for(int index=0;index < (width*height);index++)
+	for(int index=0;index < (width*height);++index)
 	{
 		*to++ = *from++;
 	}

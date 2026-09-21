@@ -51,7 +51,7 @@ RMUV::Validate() const
 	{
 		RangeCheckExclusive(0,_nEntries,100);  // kts arbitrary
 		assert(ValidPtr(_tblRMUV));
-		for(int rmuvIndex=0;rmuvIndex<_nEntries;rmuvIndex++)
+		for(int rmuvIndex=0;rmuvIndex<_nEntries;++rmuvIndex)
 		{
 			_tblRMUV[rmuvIndex].Validate();
 		}

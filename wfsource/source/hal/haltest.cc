@@ -77,7 +77,7 @@ PIGSMain(int argc, char* argv[])
 //
 	printf("HAL Test Program ('%s', %d)\n", argv[0] ? argv[0] : "", argc);
 	printf("argc = %d\n", argc);
-	for(int index = 0;index < argc; index++)
+	for(int index = 0;index < argc; ++index)
 	 {
 		assert(argv[index]);
 		printf("argv[%d] = %s\n",index, argv[index]);
@@ -90,7 +90,7 @@ extern void UpdateSimpleDisplay();
 #if 0
 	InitSimpleDisplay();
 
-	for(int i=0;i<100;i++)
+	for(int i=0;i<100;++i)
 		VSync(0);
 
 	FntPrint("test 1\nmultiple lines");

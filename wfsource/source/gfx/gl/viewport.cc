@@ -41,7 +41,7 @@ ViewPort::ViewPort(Display& display, int orderTableDepth, Scalar xSize, Scalar y
 {
 	_memory.Validate();
 #if defined(USE_ORDER_TABLES)
-	for(int index=0;index<ORDER_TABLES;index++)
+	for(int index=0;index<ORDER_TABLES;++index)
 	{
 		new ((void*)&_primitives[index]) LMalloc(HALLmalloc,sizeof(Primitive)*subdividePrimitivesCount 	MEMORY_NAMED( COMMA "ViewPort Primitives" ) 	);
 		_primitives[index].Validate();
@@ -50,7 +50,7 @@ ViewPort::ViewPort(Display& display, int orderTableDepth, Scalar xSize, Scalar y
 	RangeCheck(0,orderTableDepth,10000);  // kts arbitrary
 	_orderTableDepth = orderTableDepth;
 
-	for(int otIndex=0;otIndex<ORDER_TABLES;otIndex++)
+	for(int otIndex=0;otIndex<ORDER_TABLES;++otIndex)
 	{
 		_orderTable[otIndex] = new (_memory) OrderTable(orderTableDepth,_memory);
 		assert(ValidPtr(_orderTable[otIndex]));
@@ -64,7 +64,7 @@ ViewPort::ViewPort(Display& display, int orderTableDepth, Scalar xSize, Scalar y
 ViewPort::~ViewPort()
 {
 #if defined(USE_ORDER_TABLES)
-	for(int index=ORDER_TABLES-1;index>=0;index--)
+	for(int index=ORDER_TABLES-1;index>=0;--index)
 		MEMORY_DELETE(_memory,_orderTable[index],OrderTable);
 #endif
 }

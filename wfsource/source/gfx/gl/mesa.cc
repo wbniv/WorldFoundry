@@ -513,7 +513,7 @@ void XEventLoop()
     num_events = XPending(halDisplay.mainDisplay);
     while((num_events != 0))
     {
-        num_events--;
+        --num_events;
         XNextEvent(halDisplay.mainDisplay, &xev);
         ProcessXEvents(xev);
     }

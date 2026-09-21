@@ -35,7 +35,7 @@ Display::Validate() const
 #if defined(USE_ORDER_TABLES)
 	RangeCheck(0,_constructionOrderTableIndex,ORDER_TABLES);
 	RangeCheck(0,_renderOrderTableIndex,ORDER_TABLES);
-	for(int index = 0; index < ORDER_TABLES;index++)
+	for(int index = 0; index < ORDER_TABLES;++index)
 	{
 		assert(ValidPtr(_orderTable[index]));
 		_orderTable[index]->Validate();
