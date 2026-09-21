@@ -666,3 +666,151 @@ mm_practice       cull0/cull1 vs HEAD: 0 px / 0 px  (ramp unshared, level untouc
 Neither level is packed into `cd.iff` (no `marble`/`mm_practice` entry in the bundle
 list), so the rebuilt `wflevels/marble-madness{,-2}{,-standalone}.iff` are the shipped
 artifacts. The last blocker before flipping the `WF_CULL` default is cleared.
+
+---
+
+## Effort 1f — `mm_practice_blender{,_rt}` fixed: a pure winding fix after all, 2026‑09‑21
+
+The last (b) level. **It really was the dome case, not the marble‑madness case** — frame 20
+comes out byte‑identical with culling off *and* on, and byte‑identical to HEAD's cull‑off
+baseline. No lighting or material change was needed, and none was made.
+
+### What was wrong
+
+The "ground plane" in both levels is one quad: `ramp.iff`, 4 verts, **2 faces**,
+`G_SnowyGrass1.tga`, material flags `0x2` (`TEXTURE_MAPPED`, **not** `LIGHTING_PRELIT` —
+Effort 1c's step‑1 scan already said no level but `qbert_practice` is prelit). Faces were
+`(0,1,2),(0,3,1)`, which under the engine's `(v2−v0)×(v1−v0)` convention
+(`gfx/rendobj3.cc:239`) give normal **`(0,−40,−200)`** — pointing down and toward −Y, away
+from the only side the camera ever sees. Culling removed both triangles and the frame went
+to 0 lit px. Unlike `marble-madness`, there was **no second, oppositely‑wound copy**, so
+nothing was z‑fighting and nothing depended on the back face being drawn.
+
+The level's own data already disagreed with the mesh: the `Ramp` object in
+`mm_practice_blender.lev` carries `slopeB = +0.196116`, `slopeC = +0.980581` — the same
+plane, normal **up**. The mesh was inward‑wound relative to its own level file.
+
+**The mesh source was also mis‑symlinked.** `wflevels/mm_practice_blender/ramp.iff` was a
+symlink to `../mm_practice/ramp.iff`, which is a *different* mesh (10×8×8, untextured,
+`color=0xff8000`, 4 faces both windings) belonging to `mm_practice` — not the mesh either
+blender level ships. That is why the crashed session's `task build-level` produced a flat
+orange shape in the wrong place: it was building with `mm_practice`'s ramp. It is now a
+real file holding the shipped mesh, with the winding corrected;
+`wflevels/mm_practice_blender_rt/ramp.iff` symlinks to it, so both levels stay in step.
+`wflevels/marble-madness-2/ramp.iff` pointed through the old symlink and was repointed at
+`../mm_practice/ramp.iff` so it resolves to the same bytes as before.
+
+### 1. Reproduce the A/B on HEAD
+
+`WF_CULL=<0|1> engine/wf_game --frame-step-smoke=30 --cycles=1 -rate20 -record_video
+-L<abs>/wflevels/<level>-standalone.iff --capture-frame=20=<png>` from
+`wfsource/source/game`.
+
+```
+mm_practice_blender    cull 0 lit 122851 of 307200 bbox (0,200)-(639,479) md5 29a84651bbbcff16c1c71a326fe99e80
+mm_practice_blender    cull 1 lit      0 of 307200 bbox None              md5 d20726fa6f42608a5a80f52f695059fc
+mm_practice_blender_rt cull 0 lit 122851 of 307200 bbox (0,200)-(639,479) md5 29a84651bbbcff16c1c71a326fe99e80
+mm_practice_blender_rt cull 1 lit      0 of 307200 bbox None              md5 d20726fa6f42608a5a80f52f695059fc
+```
+
+**PASS** — matches Effort 1b's table exactly (122851 → 0), and the two levels are already
+byte‑identical to each other. All four runs exit 0; no segfault on HEAD.
+
+### 2. Prove the recovered `ramp.iff` is the genuine source
+
+`wflevels/mm_practice_blender/ramp.iff` was reconstructed from the `MODL` embedded at
+offset 26804 of `mm_practice_blender-standalone.iff` (672 bytes; the `_rt` bundle carries
+the identical blob). Run `levcomp-rs` against it plus the **era‑correct** `.lev`
+(`628d24af`, the commit that built the shipped `.iff`):
+
+```
+  mesh bbox for ramp.iff: [-327680, -655360, -131072, 327680, 655360, 131072]
+  wrote 4956 bytes
+LVL IDENTICAL to HEAD
+```
+
+**PASS** — bbox `±5, ±10, ±2` matches the `Ramp` object's `Global Bounding Box` in the
+`.lev`, and the compiled `.lvl` is byte‑for‑byte HEAD's. The old symlinked mesh gives
+`±5, ±4, ±4` and a 5084‑byte `.lvl`.
+
+### 3. Rebuild through the real pipeline with the winding reversed
+
+`(0,1,2),(0,3,1) → (0,2,1),(0,1,3)`, then `iffcomp → levcomp → textile → iffcomp` (the
+`build_level_binary.sh` chain), run in a scratch tree against the era‑correct `.lev`:
+
+```
+--- pipeline output vs splice ---
+standalone IDENTICAL to splice
+inner differs from HEAD (expected: FACE bytes)
+inner lens 24576 24576 ndiff 4 offsets [23366, 23368, 23374, 23376]
+```
+
+**PASS** — the pipeline build and a direct FACE‑chunk splice of HEAD's bundle are the same
+bytes (the Effort 1c splice argument again: reversing a triangle permutes shorts inside
+`FACE` without changing its length), and the whole change against HEAD is **4 bytes**. The
+`_rt` pair was produced by the splice, which step 3 has just shown equals a pipeline build.
+
+```
+wflevels/mm_practice_blender.iff               len 24576 24576 ndiff 4 offsets [23366, 23368, 23374, 23376]
+wflevels/mm_practice_blender-standalone.iff    len 28672 28672 ndiff 4 offsets [27462, 27464, 27470, 27472]
+wflevels/mm_practice_blender_rt.iff            len 24576 24576 ndiff 4 offsets [23366, 23368, 23374, 23376]
+wflevels/mm_practice_blender_rt-standalone.iff len 28672 28672 ndiff 4 offsets [27462, 27464, 27470, 27472]
+```
+
+### 4. Acceptance — the three Effort 1e criteria
+
+```
+HEAD  mm_practice_blender    cull0: lit 122851 md5 29a84651bbbcff16c1c71a326fe99e80
+FIXED mm_practice_blender    cull0: lit=122851 md5=29a84651bbbcff16c1c71a326fe99e80 vs HEADcull0 diff=0 maxdelta=0
+FIXED mm_practice_blender    cull1: lit=122851 md5=29a84651bbbcff16c1c71a326fe99e80 vs HEADcull0 diff=0 maxdelta=0
+FIXED mm_practice_blender_rt cull0: lit=122851 md5=29a84651bbbcff16c1c71a326fe99e80 vs HEADcull0 diff=0 maxdelta=0
+FIXED mm_practice_blender_rt cull1: lit=122851 md5=29a84651bbbcff16c1c71a326fe99e80 vs HEADcull0 diff=0 maxdelta=0
+```
+
+**PASS on all three** — (1) cull‑on ≡ cull‑off, (2) cull‑off ≡ HEAD's cull‑off *exactly*
+(`maxdelta=0`; no shading change at all, so this was never a lighting question), (3) the
+two levels are identical to each other. All eight runs exit 0 — no `actor.hpi:184`
+segfault, no "fell out of room 0".
+
+| `WF_CULL=1` before | `WF_CULL=1` after |
+|---|---|
+| <img src="2026-06-13-planetarium-dome-view-engine-wide-backface-culling/mm-practice-blender-before-cull-on.png" width="330"> | <img src="2026-06-13-planetarium-dome-view-engine-wide-backface-culling/mm-practice-blender-after-cull-on.png" width="330"> |
+
+### 5. Neighbours that share the ramp are unaffected
+
+```
+mm_practice:      cull0 lit=94094 md5=3de3a72d8ad4f1f508fd8544ee736812 | cull1 identical: True
+marble-madness:   cull0 lit=29619 md5=5fb02eca38bb3517f6d09a6d8cdc100e | cull1 identical: True
+marble-madness-2: cull0 lit=19268 md5=c28be7674f4ba9decbd6b9de8db3d37b | cull1 identical: True
+```
+
+**PASS** — Effort 1e's warning (the shared `ramp.iff` chain) was the reason to check; no
+shipped bytes of those three levels changed.
+
+### 6. `treemap`'s non‑determinism gate is cleared
+
+Two `WF_CULL=0` runs plus one `WF_CULL=1` run, all with `WF_TM_ROOT` pointed at a fixed
+fixture directory (the override added in `0bd4c25c`):
+
+```
+6bafe813005f63aa1bee5a184e62f790  treemap/cull0-r1.png
+6bafe813005f63aa1bee5a184e62f790  treemap/cull0-r2.png
+6bafe813005f63aa1bee5a184e62f790  treemap/cull1.png
+```
+
+**PASS** — `treemap` is now byte‑reproducible run‑to‑run *and* culling‑stable. Effort 1b's
+blocker 2 is gone; the 21653‑px "difference" was the harness perturbing the scanned
+directory, exactly as `0bd4c25c` predicted.
+
+### Known‑stale, deliberately not touched
+
+`wflevels/mm_practice/mm_practice_blender.lev` moved on at `33d0d730`
+("correct inverted light-type enum, position leak, altitude axis") and
+`mm_practice_blender_rt.lev` at the same commit, without either level's artifacts being
+rebuilt. A plain `task build-level -- mm_practice_blender` today therefore produces a
+**different level** — brightly lit (mean RGB 180 vs 7) and differently framed (lit bbox
+starts at y=104 vs y=200) — because the light fix has never been baked in. That is a
+separate defect from the winding bug and would change the shipped look for reasons that
+have nothing to do with culling, so the winding fix was landed against the era‑correct
+`.lev` instead. These two levels remain in the "does not rebuild from HEAD's source"
+bucket alongside the dome.

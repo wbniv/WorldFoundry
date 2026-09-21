@@ -1,11 +1,17 @@
 | Date | Change |
 |------|--------|
+| [2026-09-21](https://github.com/wbniv/WorldFoundry/commit/f3e17612) | fix(levels): marble-madness{,-2} — dedupe floors, relight from above, right the ball |
 | [2026-09-21](https://github.com/wbniv/WorldFoundry/commit/8d215cf2) | docs(plan): Effort 1d — marble-madness not fixable by winding alone (numbers) |
 | [2026-09-21](https://github.com/wbniv/WorldFoundry/commit/6f955900) | docs(plan): record Effort 1c - prelit is unlit (trace, fix, proofs) |
 | [2026-09-21](https://github.com/wbniv/WorldFoundry/commit/69f9233b) | fix(dome): rewind the dome patches for the post-flip exporter hand |
 | [2026-06-13](https://github.com/wbniv/WorldFoundry/commit/d1e98510) | feat(gfx): software backface culling, opt-in via WF_CULL=1 (default off) |
 
 <!--history-meta v1
+f3e17612	author	Will Norris
+f3e17612	added	53
+f3e17612	deleted	0
+f3e17612	files	1
+f3e17612	body	Last blocker before flipping the WF_CULL default. Culling on is now\nbyte-identical to culling off in both levels (frame 20), and the floor\nis as bright as the shipped z-fight look (luma 86.0 vs 84.8).\n\nThree causes, not one (plan "Effort 1e"):\n- floor/path quads carried both windings; the down-facing twin won the\n  z-fight and was the one lit. Kept only the +Z twin in floor.iff and\n  the three *_path.iff, and made gen_level1.py emit single-sided floors.\n- Omni01 lit the floor from below (B=-52°); relight_level.py --alt -52\n  --az 235 puts it 52° above. marble-madness-2.lev inherits it.\n- sphere.iff was inside-out: all 960 faces wound inward, so the ball's\n  lower half lit up through its front with culling off and went flat\n  with it on. Flipped every face (both levels' copies).\n\nKept the mm-2 channel walls two-sided (the far wall's inner face is the\nvisible one; single-sided outward deleted its lip), and unshared\nmarble-madness/ramp.iff from mm_practice's copy: mm_practice views that\nramp from underneath, so the up-only quad vanished there. mm_practice\nis untouched and renders identically to HEAD.\n\ngen_level1.py's light carry (which had dropped AmbientLight from the\nregenerated .lev) now reads the object name from the bare 'NAME' line\nand trims only the unindented file-level brace.\n\nCo-Authored-By: Claude Fable 5.1 <noreply@anthropic.com>\nClaude-Session: https://claude.ai/code/session_015ksFy3ZSSz2XMdto3jVA9v
 8d215cf2	author	Will Norris
 8d215cf2	added	94
 8d215cf2	deleted	0
