@@ -143,7 +143,7 @@ Level::initLevelOad()
 	_levelOad = NULL;
 	assert( ValidPtr( _levelData ) );
 	assert( _levelData->objectCount);
-	for ( int index = 0; index < _levelData->objectCount; index++ )
+	for ( int index = 0; index < _levelData->objectCount; ++index )
 	{
 		int32 * objArray = ( int32 * )( (char * )_levelData + ( _levelData->objectsOffset ));
 		_ObjectOnDisk * objdata = ( _ObjectOnDisk * )( (( char * )_levelData ) + objArray[index] );
@@ -591,7 +591,7 @@ Level::Level
 
    // call reset on all actors after Level::reset() so that temp objects (tools, shadows)
    // are created AFTER reset() clears the temp-object slots and sets up the active rooms
-   for(int roomIndex=0;roomIndex<_theLevelRooms->NumberOfRooms();roomIndex++)     // kts: there should be a Room iterator
+   for(int roomIndex=0;roomIndex<_theLevelRooms->NumberOfRooms();++roomIndex)     // kts: there should be a Room iterator
    {
       const Room& room = _theLevelRooms->GetRoom( roomIndex );
       BaseObjectIteratorWrapper iter = room.ListIter(ROOM_OBJECT_LIST_UPDATE);
@@ -712,7 +712,7 @@ Level::~Level()
 	// expect the active/level rooms internals to have been torn down first
 	// and the per-template HAL data to be gone. It does NOT touch HALLmalloc.
 	DBSTREAM1( cprogress << "~Level:: deleting actors" << std::endl; )
-	for ( int actorIndex = 0; actorIndex < _actors.Size(); actorIndex++ )
+	for ( int actorIndex = 0; actorIndex < _actors.Size(); ++actorIndex )
 	{
 		if ( _actors[actorIndex] != NULL )
 		{
@@ -824,7 +824,7 @@ Level::update(Scalar deltaTime)
 	static int counter=0;
 	if(!(counter % 100))
 		std::cout << "delta time = " << (Scalar::one / deltaTime).WholePart() << std::endl;
-	counter++;
+	++counter;
 #endif
 
 #if defined(JOYSTICK_RECORDER)
@@ -1199,14 +1199,14 @@ Level::RenderScene()
 				// Directional Lights per room plus 1 Ambient.
 				assert(directionalLightIndex < 3);
 				light->Set(*_camera,directionalLightIndex);
-				directionalLightIndex++;
+				++directionalLightIndex;
 			}
 			else
 			{
 				assert(light->Type() == AMBIENT_LIGHT);
 				assert(ambientLightIndex < 1);
 				light->Set(*_camera,-1);
-				ambientLightIndex++;
+				++ambientLightIndex;
 			}
 			++lightIter;
 		}
@@ -1257,7 +1257,7 @@ Level::reset( )
 
 	DBSTREAM1( cflow << "Level::reset(): temp objects" << std::endl; )
    // temp objects go immediatly after the level objects in the array, so to iterate the temp objects start at objectCount
-	for ( i = _levelData->objectCount; i < _actors.Size(); i++ )
+	for ( i = _levelData->objectCount; i < _actors.Size(); ++i )
 	{
 		if ( _actors[i] != NULL )
 			MEMORY_DELETE( *_memory, _actors[i], Actor );
@@ -1288,7 +1288,7 @@ int
 Level::GetObjectIndex( const BaseObject* object )
 {
 	assert( ValidPtr( object ) );
-	for( int objectIndex=1;objectIndex<_actors.Size();objectIndex++ )
+	for( int objectIndex=1;objectIndex<_actors.Size();++objectIndex )
 	{
 		if( object == GetObject( objectIndex ))
 			return objectIndex;
@@ -1381,7 +1381,7 @@ Level::SetPendingRemove( const BaseObject* object )
 	assert( _numToBeRemovedObjects < ARRAY_COUNT(_toBeRemovedObjects) );
 
 	// check if already set to be removed
-	for ( int i = 0; i < _numToBeRemovedObjects; i++ )
+	for ( int i = 0; i < _numToBeRemovedObjects; ++i )
 	{
 		if ( _toBeRemovedObjects[i] == idxActor )
 		{
@@ -1827,7 +1827,7 @@ ObjectIsInWhichRoom( int32 idxObject, const _LevelOnDisk* _levelData )
 	int32 * roomArray = ( int32 * )( (char * )_levelData + ( _levelData->roomsOffset ));
 	assert( ValidPtr( roomArray ) );
 
-	for( int roomnum = 0; roomnum < _levelData->roomCount; roomnum++ )
+	for( int roomnum = 0; roomnum < _levelData->roomCount; ++roomnum )
 		{
 		_RoomOnDisk * roomData = ( _RoomOnDisk * )( (( char * )_levelData ) + roomArray[roomnum] );
 		assert( ValidPtr( roomData ) );
@@ -1835,7 +1835,7 @@ ObjectIsInWhichRoom( int32 idxObject, const _LevelOnDisk* _levelData )
 		// check objects in the room
 		_RoomOnDiskEntry * entryArray = ( _RoomOnDiskEntry * )( (char * )roomData + sizeof( _RoomOnDisk ));
 		assert( ValidPtr( entryArray ) );
-		for( int entry = 0; entry < roomData->count; entry++ )
+		for( int entry = 0; entry < roomData->count; ++entry )
 			{
 			if ( entryArray[entry].object == idxObject )
 				{

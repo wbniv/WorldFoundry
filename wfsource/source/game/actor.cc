@@ -192,7 +192,7 @@ Actor::Print( std::ostream& s ) const
 						AssertMsg(actorCount == idxActor,"ActorCount = " << actorCount << ", idxActor = " << idxActor);
 						actorNames[idxActor] = strdup(_szActor);
 						assert(actorNames[idxActor]);
-						actorCount++;
+						++actorCount;
 					}
 				}
 				fclose( fp );
@@ -559,7 +559,7 @@ Actor::BindAssets(Memory& memory)
 					if (chunk->GetChunkID().ID() == IFFTAG('V','R','T','X'))
 					{
 						int count = chunk->Size() / (int)sizeof(Vertex3DOnDisk);
-						for (int i = 0; i < count; i++)
+						for (int i = 0; i < count; ++i)
 						{
 							Vertex3DOnDisk v;
 							chunk->ReadBytes(&v, sizeof(v));
@@ -571,7 +571,7 @@ Actor::BindAssets(Memory& memory)
 					else if (chunk->GetChunkID().ID() == IFFTAG('F','A','C','E'))
 					{
 						int count = chunk->Size() / (int)sizeof(_TriFaceOnDisk);
-						for (int i = 0; i < count; i++)
+						for (int i = 0; i < count; ++i)
 						{
 							_TriFaceOnDisk f;
 							chunk->ReadBytes(&f, sizeof(f));

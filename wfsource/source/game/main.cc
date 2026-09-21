@@ -218,7 +218,7 @@ int
 ParseCommandLine(int argc, char** argv)
 {
 	int index;
-	for( index=1; index < argc && argv[index] && ((*argv[index] == '-') || (*argv[index] == '/')); index++)
+	for( index=1; index < argc && argv[index] && ((*argv[index] == '-') || (*argv[index] == '/')); ++index)
 	{
 #if 0
 #endif

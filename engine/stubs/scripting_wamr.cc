@@ -175,7 +175,7 @@ void Shutdown()
 
 void AddConstantArray(IntArrayEntry* entryList)
 {
-    for (IntArrayEntry* p = entryList; p->name; p++)
+    for (IntArrayEntry* p = entryList; p->name; ++p)
         g_consts[p->name] = p->value;
 }
 
@@ -191,7 +191,7 @@ float RunScript(const char* src, int objectIndex)
     // Skip sigil line: `#b64\n`
     const char* b64 = strchr(src, '\n');
     if (!b64) return 0.0f;
-    b64++; // skip '\n'
+    ++b64; // skip '\n'
 
     // Decode base64 payload.
     std::vector<uint8_t> wasm_bytes = base64_decode(b64, strlen(b64));
@@ -254,7 +254,7 @@ float RunScript(const char* src, int objectIndex)
     std::vector<wasm_global_t*> owned_globals;
 
     bool ok = true;
-    for (size_t i = 0; i < n; i++) {
+    for (size_t i = 0; i < n; ++i) {
         const wasm_importtype_t* imp  = import_types.data[i];
         const wasm_name_t*       mod  = wasm_importtype_module(imp);
         const wasm_name_t*       name = wasm_importtype_name(imp);
@@ -349,7 +349,7 @@ float RunScript(const char* src, int objectIndex)
             wasm_instance_exports(instance, &exports);
 
             wasm_func_t* main_fn = nullptr;
-            for (size_t i = 0; i < exports.size; i++) {
+            for (size_t i = 0; i < exports.size; ++i) {
                 // The module must export a function named "main".
                 // We look at type: exports order matches the wasm export section.
                 if (wasm_extern_kind(exports.data[i]) == WASM_EXTERN_FUNC) {

@@ -274,7 +274,7 @@ static void fsn_place_files(const std::vector<FsnEntry>& entries, float x, float
         int fh = fsn_isqrt((int)(e.size / 1000)); if (fh < 1) fh = 1; if (fh > 4) fh = 4;
         int file = fsn_spawn(g_fsn_fileT, fx, fy, topZ);
         if (file) { fsn_set_scale(file, 1.0f, 1.0f, (float)fh); fsn_color_by_age(file, e.mtime); }
-        fi++;
+        ++fi;
     }
 }
 
@@ -314,7 +314,7 @@ static int fsn_spawn_tree() {
         int fh = fsn_isqrt((int)(e.size / 1000)); if (fh < 1) fh = 1; if (fh > 4) fh = 4;
         int file = fsn_spawn(g_fsn_fileT, fx, fy, 0.0f);
         if (file) { fsn_set_scale(file, 1.0f, 1.0f, (float)fh); fsn_color_by_age(file, e.mtime); }
-        fi++;
+        ++fi;
     }
 
     // Seed the BFS queue with the root's child dirs, fanned wide across +Y (15°..165°).
@@ -326,7 +326,7 @@ static int fsn_spawn_tree() {
         float t = (nd > 1) ? ((float)ci / (float)(nd - 1)) : 0.5f;
         float a = (15.0f + 150.0f * t) * (FSN_PI / 180.0f);
         q.push_back(FsnJob{ e.path, 30.0f * std::cos(a), 30.0f * std::sin(a), 0.0f, 0.0f, 1 });
-        ci++;
+        ++ci;
     }
 
     // Process breadth-first: each job spawns its wire-to-parent + tower + files,
@@ -357,7 +357,7 @@ static int fsn_spawn_tree() {
                 float ang  = outward + (FSN_PI * 0.78f) * frac;   // ±70° cone
                 q.push_back(FsnJob{ e.path, job.x + R * std::cos(ang),
                                     job.y + R * std::sin(ang), job.x, job.y, job.depth + 1 });
-                si++;
+                ++si;
             }
         }
     }
@@ -389,7 +389,7 @@ static void fsn_emit_place_files(const std::vector<FsnEntry>& entries, float x, 
         float fr  = (nf > 1) ? 0.6f : 0.0f;
         float fx = x + fr * std::cos(ang), fy = y + fr * std::sin(ang);
         if (!fsn_emit(FSN_KIND_FILE, fx, fy, topZ, (float)(e.size / 1000), fsn_age_days(e.mtime))) break;
-        fi++;
+        ++fi;
     }
 }
 
@@ -409,7 +409,7 @@ static int fsn_emit_tree() {
         float ang = (nf > 1) ? (2.0f * FSN_PI * (float)fi / (float)nf) : 0.0f;
         float fx = 6.0f * std::cos(ang), fy = 6.0f * std::sin(ang);
         fsn_emit(FSN_KIND_FILE, fx, fy, 0.0f, (float)(e.size / 1000), fsn_age_days(e.mtime));
-        fi++;
+        ++fi;
     }
 
     // Seed the BFS queue with the root's child dirs, fanned wide across +Y (15°..165°).
@@ -421,7 +421,7 @@ static int fsn_emit_tree() {
         float t = (nd > 1) ? ((float)ci / (float)(nd - 1)) : 0.5f;
         float a = (15.0f + 150.0f * t) * (FSN_PI / 180.0f);
         q.push_back(FsnJob{ e.path, 30.0f * std::cos(a), 30.0f * std::sin(a), 0.0f, 0.0f, 1 });
-        ci++;
+        ++ci;
     }
 
     for (size_t qi = 0; qi < q.size(); ++qi) {
@@ -455,7 +455,7 @@ static int fsn_emit_tree() {
                 float ang  = outward + (FSN_PI * 0.78f) * frac;   // ±70° cone
                 q.push_back(FsnJob{ e.path, job.x + R * std::cos(ang),
                                     job.y + R * std::sin(ang), job.x, job.y, job.depth + 1 });
-                si++;
+                ++si;
             }
         }
     }
@@ -641,7 +641,7 @@ static int fl_navigate() {
     // the despawn→re-scan→re-render path can be smoke-tested. No effect unset.
     if (getenv("WF_FL_TEST_DESCEND")) {
         static int s_n = 0;
-        s_n++;
+        ++s_n;
         if (s_n == 8) {                      // descend into the largest depth-1 segment
             for (const FlSeg& s : g_fl_segments)
                 if (s.depth == 1) { g_fl_root = s.path; fsn_despawn(); g_fl_pendingBuild = true; break; }
@@ -1567,7 +1567,7 @@ void AddConstantArray(IntArrayEntry* entryList)
     // `constant` (r> + postpone literal) is compile-time-only and broken
     // at runtime in zForth's embedding model.
     char buf[128];
-    for (IntArrayEntry* p = entryList; p->name; p++) {
+    for (IntArrayEntry* p = entryList; p->name; ++p) {
         snprintf(buf, sizeof(buf), ": %s %d ;", p->name, p->value);
         zf_result r = zf_eval(&g_ctx, buf);
         if (r != ZF_OK)

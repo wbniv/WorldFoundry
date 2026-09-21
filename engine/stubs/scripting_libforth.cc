@@ -163,7 +163,7 @@ void Shutdown()
 void AddConstantArray(IntArrayEntry* entryList)
 {
     if (!g_forth) return;
-    for (IntArrayEntry* p = entryList; p->name; p++) {
+    for (IntArrayEntry* p = entryList; p->name; ++p) {
         int r = forth_define_constant(g_forth, p->name, (forth_cell_t)p->value);
         if (r < 0)
             fprintf(stderr, "libforth: failed to define constant %s: %d\n", p->name, r);

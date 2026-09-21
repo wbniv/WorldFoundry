@@ -102,19 +102,19 @@ ActBox::doFieldEffect( BaseObject& pColObject )
 	if ( (temp = getOad()->GetVectorX()).AsBool() )
 	{
 		pColObject.sendMsg( MsgPort::MOVEMENT_FORCE_X, &temp,sizeof(Scalar) );
-		count++;
+		++count;
 	}
 
 	if ( (temp = getOad()->GetVectorY()).AsBool() )
 	{
 		pColObject.sendMsg( MsgPort::MOVEMENT_FORCE_Y, &temp,sizeof(Scalar) );
-		count++;
+		++count;
 	}
 
 	if ( (temp = getOad()->GetVectorZ()).AsBool() )
 	{
 		pColObject.sendMsg( MsgPort::MOVEMENT_FORCE_Z, &temp,sizeof(Scalar) );
-		count++;
+		++count;
 	}
 }
 

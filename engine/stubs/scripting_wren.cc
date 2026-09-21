@@ -230,7 +230,7 @@ void AddConstantArray(IntArrayEntry* entryList)
 {
     // Append `var NAME = VALUE\n` to the preamble injected before each script.
     char buf[128];
-    for (IntArrayEntry* p = entryList; p->name; p++) {
+    for (IntArrayEntry* p = entryList; p->name; ++p) {
         snprintf(buf, sizeof(buf), "var %s = %d\n", p->name, p->value);
         g_preamble += buf;
     }

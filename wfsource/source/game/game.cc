@@ -668,7 +668,7 @@ WFGame::StepFrame(bool do_swap, Scalar* out_dt)
 				{
 					if (s_initials_pos < 2)
 					{
-						s_initials_pos++;
+						++s_initials_pos;
 					}
 					else
 					{
@@ -681,7 +681,7 @@ WFGame::StepFrame(bool do_swap, Scalar* out_dt)
 					}
 				}
 				if ((joy & 0x4000) && s_initials_pos > 0)  // LEFT: back
-					s_initials_pos--;
+					--s_initials_pos;
 
 				memcpy(wf_hud_initials, s_initials, 4);
 				wf_hud_initials_pos = s_initials_pos;

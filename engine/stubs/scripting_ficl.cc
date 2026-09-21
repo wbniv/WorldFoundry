@@ -109,7 +109,7 @@ void AddConstantArray(IntArrayEntry* entryList)
     if (!g_vm) return;
     // Eval each constant as: `N constant NAME`
     char buf[128];
-    for (IntArrayEntry* p = entryList; p->name; p++) {
+    for (IntArrayEntry* p = entryList; p->name; ++p) {
         snprintf(buf, sizeof(buf), "%d constant %s", p->value, p->name);
         int r = ficlEvaluate(g_vm, buf);
         if (r == VM_ERREXIT)

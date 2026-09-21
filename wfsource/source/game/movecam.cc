@@ -840,7 +840,7 @@ DelayCameraHandler::update(MovementManager& movementManager, MovementObject& mov
 
 	cameraData& cd  = GetCameraMovementData(movementObject);
 	DBSTREAM3( ccamera << "  cd.delayCounter = " << cd.delayCounter << std::endl; )
-	cd.delayCounter++;
+	++cd.delayCounter;
 	AssertMsg(cd.delayCounter < 5, "Camera " << movementObject << " found no ActBoxOR, possible cause: Player is not in any actboxor");
 	return true;
 }

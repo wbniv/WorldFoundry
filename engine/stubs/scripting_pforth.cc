@@ -254,7 +254,7 @@ void AddConstantArray(IntArrayEntry* entryList)
     // Eval each constant as `N CONSTANT FOO` via ffInterpret + TIB.
     // pForth names are upper-case; scripts may use either case.
     char buf[256];
-    for (IntArrayEntry* p = entryList; p->name; p++) {
+    for (IntArrayEntry* p = entryList; p->name; ++p) {
         // Write the constant definition into the TIB and interpret it.
         int len = snprintf(buf, sizeof(buf), "%d constant %s\n", p->value, p->name);
         memcpy(gCurrentTask->td_TIB, buf, (size_t)len + 1);

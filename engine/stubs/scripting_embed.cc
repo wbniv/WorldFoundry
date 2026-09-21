@@ -136,7 +136,7 @@ void AddConstantArray(IntArrayEntry* entryList)
 {
     // Eval each constant. eForth provides `constant` as a built-in word.
     char buf[256];
-    for (IntArrayEntry* p = entryList; p->name; p++) {
+    for (IntArrayEntry* p = entryList; p->name; ++p) {
         snprintf(buf, sizeof(buf), "%d constant %s", p->value, p->name);
         int r = embed_eval(&g_embed, buf);
         if (r < 0)

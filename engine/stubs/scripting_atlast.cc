@@ -137,7 +137,7 @@ void AddConstantArray(IntArrayEntry* entryList)
 {
     // Eval each constant as `N constant NAME`. atl_eval takes mutable char*.
     char buf[256];
-    for (IntArrayEntry* p = entryList; p->name; p++) {
+    for (IntArrayEntry* p = entryList; p->name; ++p) {
         snprintf(buf, sizeof(buf), "%d constant %s", p->value, p->name);
         int r = atl_eval(buf);
         if (r != ATL_SNORM)

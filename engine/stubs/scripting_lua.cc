@@ -134,7 +134,7 @@ void Init(MailboxesManager& mgr)
         { LUA_COLIBNAME,    luaopen_coroutine },
         { NULL, NULL }
     };
-    for (const luaL_Reg* lib = kSafeLibs; lib->func; lib++) {
+    for (const luaL_Reg* lib = kSafeLibs; lib->func; ++lib) {
         luaL_requiref(gL, lib->name, lib->func, 1);
         lua_pop(gL, 1);
     }
@@ -258,7 +258,7 @@ void Shutdown()
 
 void AddConstantArray(IntArrayEntry* entryList)
 {
-    for (IntArrayEntry* p = entryList; p->name; p++) {
+    for (IntArrayEntry* p = entryList; p->name; ++p) {
         lua_pushinteger(gL, p->value);
         lua_setglobal(gL, p->name);
     }
@@ -266,7 +266,7 @@ void AddConstantArray(IntArrayEntry* entryList)
 
 void DeleteConstantArray(IntArrayEntry* entryList)
 {
-    for (IntArrayEntry* p = entryList; p->name; p++) {
+    for (IntArrayEntry* p = entryList; p->name; ++p) {
         lua_pushnil(gL);
         lua_setglobal(gL, p->name);
     }
