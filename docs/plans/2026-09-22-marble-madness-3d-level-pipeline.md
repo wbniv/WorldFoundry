@@ -134,4 +134,11 @@ the **absence** of `jolt: character N ignoring zone body` in the engine log.
 
 Numbered steps with raw output live in
 [`wflevels/marble-madness-3d/README.md`](../../wflevels/marble-madness-3d/README.md)
-§ Verification, per house convention.
+§ Verification, per house convention. Summary of the recorded results (2026‑09‑22):
+
+1. `course_geom.py --selftest` and `--check` on `course-test.json` — **PASS** (592 tris, 1 chunk, 355 verts).
+2. Clean build → `marble-madness-3d-standalone.iff` (51200 bytes), Player exported before the course chunks — **PASS**.
+3. 15 s run: 0 matches for `AssertMsg|zforth compile|fell out of room|ignoring zone body|terminate called` — **PASS**.
+4. Rolls downhill with no input: `(1.15, 2.00, 8.15) → … → (27.34, 12.06, −3.900)` = floor(−4.4) + radius(0.5), at rest on the goal — **PASS**.
+5. Frames inspected: floor visible under default backface culling, checkerboard/cliff/rim/goal legible, HUD live — **PASS**.
+6. Real arcade `course.json` (1729 cells): `--check` PASS, 2 chunks, built to 147 KB, 22 s run with 0 asserts / 0 zone exclusions — **PASS**; end‑to‑end traversal with injected input is recorded in the [parent plan](2026-09-21-marble-madness-true-3d-reimplementation.md) § Verification step 5.
