@@ -770,6 +770,28 @@ tasks:
         LD_LIBRARY_PATH=engine/libs DISPLAY=:0 engine/wf_game -Lwflevels/smb_w1_1-standalone.iff $FSFLAG $RECFLAG 2>&1 | tee "$LOG"
         [ -n "$RECOUT" ] && [ -f output.mp4 ] && mv output.mp4 "$RECOUT" && echo "Saved → $RECOUT"
 
+  build-mm3d:
+    desc: "Build wflevels/marble-madness-3d from a course-description JSON (usage: task build-mm3d -- [course.json]; default course-test.json). Runs headless Blender then build-level."
+    deps: [tools-build]
+    cmds:
+      - bash wflevels/marble-madness-3d/build.sh {{.CLI_ARGS}}
+
+  run-mm3d:
+    desc: "Run wf_game on wflevels/marble-madness-3d-standalone.iff directly (bypass cd.iff). WF_RECORD=1 records video. WF_FULLSCREEN=1 for fullscreen."
+    deps: [ensure-build]
+    cmds:
+      - |
+        LOG=/tmp/wfgame_mm3d.log
+        echo "Logging to $LOG"
+        RECFLAG=""; RECOUT=""; FSFLAG=""
+        if [ -n "${WF_RECORD:-}" ]; then
+          RECOUT="${WF_RECORD}"; [ "$RECOUT" = "1" ] && RECOUT="$(date +%Y%m%d_%H%M%S)_mm3d.mp4"
+          RECFLAG="-record_video"; echo "Recording → $RECOUT"
+        fi
+        [ "${WF_FULLSCREEN:-}" = "1" ] && FSFLAG="-fullscreen"
+        LD_LIBRARY_PATH=engine/libs DISPLAY=:0 engine/wf_game -Lwflevels/marble-madness-3d-standalone.iff $FSFLAG $RECFLAG 2>&1 | tee "$LOG"
+        [ -n "$RECOUT" ] && [ -f output.mp4 ] && mv output.mp4 "$RECOUT" && echo "Saved → $RECOUT"
+
   condo-osm-fetch:
     desc: "Refresh wflevels/condo_639_640/site-osm.json from Overpass (network; the committed copy makes builds offline + byte-stable)"
     cmds:

@@ -1,0 +1,33 @@
+// marble-madness-3d-standalone.iff.txt -- L4-wrapped form of marble-madness-3d
+// for `wf_game -L`.  The `-L` loader asserts plmc->tagRam == 'RAM' (level.cc:426),
+// so the bare inner LVAS iff is NOT loadable -- this wrapper is what you run.
+//
+// Build (the standard pipeline emits both inner and standalone):
+//   bash wflevels/marble-madness-3d/build.sh
+//   # or, if the .lev is already current:
+//   task build-level -- marble-madness-3d
+//
+// Run:
+//   task run-mm3d
+//   # or:
+//   LD_LIBRARY_PATH=engine/libs DISPLAY=:0 \
+//     engine/wf_game -Lwflevels/marble-madness-3d-standalone.iff
+//
+// Pool sizing. Actor count is tiny (1 marble + N course chunks + 8 infrastructure
+// actors), but the course mesh is the whole level: one chunk is capped at 20000
+// verts (course_geom.MAX_VERTS_PER_CHUNK) = 480 KB VRTX + FACE, and a real arcade
+// course may run to several chunks.  ROOM is sized for ~8 full chunks so a large
+// course does not need this file edited; PERM holds only the marble sphere.
+{ 'L4'
+    { 'ALGN' .align( 2048 ) }
+    { 'RAM'
+        'OBJD' 200000l                  // actor pool -- matches snowgoons/qbert class
+        'PERM' 300000l                  // marble sphere only (20x12 UV sphere, ~15 KB)
+        'ROOM' 6000000l                 // course chunk meshes; see sizing note above
+        'FLAG' 1l 1l                    // doomStickFlag, bungeeCamFlag -- both required:
+                                        // doom-stick for TurnRate==0 strafe in AirHandler,
+                                        // bungeeCam for the Relative-axis follow shot.
+    }
+    { 'ALGN' .align( 2048 ) }
+    [ "../marble-madness-3d.iff" ]
+}

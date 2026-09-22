@@ -64,11 +64,83 @@ Follow this repo's normal conventions: plan-first (this doc, update it as you go
 
 **Courses:** Practice — geometry done, level build in progress. Beginner … Ultimate — not attempted (the sweep captures Beginner too; courses taller than 128 iso rows need the VRAM wrap handled, see investigation "Limitations").
 
+## Screenshots
+
+**Arcade vs decoded geometry** — 31 MAME captures stitched by scroll register (left) against the decoded heightfield rendered in the arcade's own 2:1 projection (right):
+
+<img src="2026-09-21-marble-madness-true-3d-reimplementation/decoded-vs-arcade.png" width="700">
+
+**Start plateau, enlarged** — the two gate pits, the central pyramid pit with its two spike cones and stepped bowl, and the side ramps line up:
+
+<img src="2026-09-21-marble-madness-true-3d-reimplementation/top-plateau-compare.png" width="700">
+
+**In engine** — arcade start screen (MAME) next to the WF level at spawn, then the central pit, the chute, and the goal trough (amber) during the scripted traversal:
+
+<img src="2026-09-21-marble-madness-true-3d-reimplementation/arcade-start.png" width="336"> <img src="2026-09-21-marble-madness-true-3d-reimplementation/engine-spawn.png" width="360">
+
+<img src="2026-09-21-marble-madness-true-3d-reimplementation/engine-central-pit.png" width="350"> <img src="2026-09-21-marble-madness-true-3d-reimplementation/engine-chute.png" width="350">
+
+<img src="2026-09-21-marble-madness-true-3d-reimplementation/engine-goal.png" width="350">
+
 ## Verification
 
 1. `bash wflevels/marble-madness-3d/extract_course.sh --out-dir /tmp/mm3d-sweep` regenerates `course-practice.json` with 1729 cells.
+
+    ```
+    2026-09-22T12:06:15Z ROM=/home/will/Downloads/marble.zip level=0 out=…/verify-sweep
+    31 usable dumps for level 0
+    wrote 1729 cells, extent [7, 7, 80, 83], 48 conflicts -> wflevels/marble-madness-3d/course-practice.json
+    1729 cells, cell_size=0.8 m, spawn=[-13.997, -14.0, 0.55], goal={'min': [-64.8, -54.4, -4.17], 'max': [-61.6, -51.2, 0.06]}, kill_z=-6.25
+    2026-09-22T12:06:33Z done
+    ```
+    **PASS** (the 48 "conflicts" are the 4 animated goal‑gate cells seen in 12 dumps each).
+
 2. `python3 wflevels/marble-madness-3d/mm_surface.py … --cell 60 62` on the frame‑1000 demo dump prints `16342 ×4 | 16339 ×8 | 16342 ×4`, matching the game's words at `0x401C28`.
-3. `task build-mm3d` succeeds and `task run-mm3d` runs ≥ 10 s without assert.
+
+    ```
+    level 0: struct=02BEE2 tile_tbl=081874 nrows=160
+    cell (60,62) iso=(102, 12) -> 16342 16342 16342 16342 | 16339 16339 16339 16339 | 16339 16339 16339 16339 | 16342 16342 16342 16342
+    ```
+    Game (MAME Lua, frame 1000): `heights: 3FD6 3FD6 3FD6 3FD6 3FD3 3FD3 3FD3 3FD3 3FD3 3FD3 3FD3 3FD3 3FD6 3FD6 3FD6 3FD6` = 16342/16339. **PASS**
+
+3. `task build-mm3d -- wflevels/marble-madness-3d/course.json` succeeds and `task run-mm3d` runs ≥ 10 s without assert.
+
+    ```
+    [5/5] iffcomp-rs  marble-madness-3d-standalone.iff.txt  →  ../marble-madness-3d-standalone.iff
+    ✓ built /home/will/WorldFoundry-wbniv-mm3d-fable/wflevels/marble-madness-3d-standalone.iff (147456 bytes)
+    $ WF_RECORD=… timeout 25 task run-mm3d; grep -cE 'AssertMsg|zforth compile|fell out of room|ignoring zone body|terminate called' log
+    0
+    EXIT=124   (killed by the 25 s timeout — it survived; recording 24.5 s)
+    ```
+    **PASS** — frame at 24 s is `engine-spawn.png` above.
+
 4. A recorded frame shows the Practice plateau and chute from the iso camera; the marble rolls down the start slope with no input.
 
-(Results are pasted below each step once run.)
+    First half PASS (frames above). Second half **N/A → replaced**: the arcade Practice start is flat (`h = 0` across cells 16–18), so the marble correctly stays put without input — the arcade also needs the joystick here. Replaced by step 5.
+
+5. `tests/verify_mm3d_traversal.py` drives the marble with injected joystick input over the debug bridge (DOWN 8 s, DOWN+LEFT 8 s, DOWN+RIGHT 8 s) and parses the engine's `ball pos:` trace.
+
+    ```
+    19:24:39 hold DOWN (0x1000) for 8s
+    19:24:47 hold DOWN+LEFT (0x5000) for 8s
+    19:24:55 hold DOWN+RIGHT (0x3000) for 8s
+    39 ball-pos samples; 0 bad log lines
+      ball pos: (-14.00, -14.00, 0.50)
+      ball pos: (-26.54, -26.80, -1.14)
+      ball pos: (-57.59, -50.32, -1.73)
+      ball pos: (-61.81, -52.93, -3.11)
+      ball pos: (-61.80, -52.80, -3.15)   ← at rest in the goal AABB, FINISH freeze
+    max horizontal travel 61.76 m; z from 0.50 to min -3.15
+    video -> tests/screenshots/mm3d_traversal.mp4
+    PASS
+    ```
+    **PASS with a caveat.** The marble rolls on the real terrain, drops into the chute and stops in the goal trough at `floor(−3.6) + radius 0.5`. But it got there in ~8 s by dropping off ledges (start plateau → central pit → chute): there is no fall‑death rule yet, so the course can be shortcut. Contact sheet (2 s per frame):
+
+    <img src="2026-09-21-marble-madness-true-3d-reimplementation/traversal-contact.png" width="700">
+
+## Next
+
+- Fall‑death: shatter/respawn when the marble lands after a drop taller than the arcade's threshold (needs peak‑Z tracking in the player script). Until then the course is traversable but not *enforced*.
+- Decorative lower terraces (−58/−84 levels) as non‑walkable geometry.
+- Beginner: sweep already captures it; handle the VRAM row wrap for courses taller than 128 iso rows.
+- Physics constant (`Running Deceleration = 0.004`) is by feel; calibrate against the MAME demo trajectory (`scripts/research/mame/mm/mm_demo_dump_validate.lua` logs X,Y,Z per frame).
