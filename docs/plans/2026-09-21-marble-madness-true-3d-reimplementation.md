@@ -1,7 +1,7 @@
 # Plan: Marble Madness — true-3D reimplementation (independent attempt)
 
 **Date:** 2026-09-21
-**Status:** Not started
+**Status:** In progress 2026‑09‑22 — real course geometry recovered from the arcade (see Approach); WF pipeline being built
 **Goal:** A faithful, true-3D reimplementation of arcade Marble Madness's courses in WorldFoundry, built fresh — not by extending the existing stalled implementation. This is one of **two independent, parallel attempts** (this one, on branch `marble-madness-3d-fable`; a second on branch `marble-madness-3d-astra`, built by a different AI tool in a separate worktree). Will is comparing the two approaches; they must not share code or coordinate with each other.
 
 ## Why "start fresh" — read this first
@@ -38,3 +38,37 @@ New level(s) under `wflevels/marble-madness-3d/` (or similar — your call), **n
 ## Process
 
 Follow this repo's normal conventions: plan-first (this doc, update it as you go), commit at natural checkpoints on your branch (`marble-madness-3d-fable`), don't touch files outside your remit. `task build` must stay green throughout. Write up verification the way this repo does it elsewhere (numbered steps + raw output + PASS/FAIL) rather than prose claims.
+
+---
+
+## Approach (Fable attempt) — added 2026‑09‑22
+
+**Ground truth first.** The decoded `levels.json` from the May effort is *not* the course geometry: Practice decodes there to 13 segments with one 27° bend, Intermediate to 4 — while the arcade Practice is a plateau with pits and a multi‑hairpin chute. So this attempt reverse‑engineered the surface code in the running ROM instead. Full write‑up: [2026‑09‑22 surface algorithm investigation](../investigations/2026-09-22-marble-madness-surface-algorithm.md). In one paragraph: the arcade stores no height map; the game reads the isometric *tile art* under the marble from playfield VRAM, maps the tile through a per‑level tile→surface table, and gets four height words per 8×8‑unit cell that describe one lattice vertex from its four neighbours (cliffs = differing words, void = 0). A Python re‑implementation of the two 68000 routines, driven by MAME memory dumps, reproduces the game's own ground height exactly along the attract‑mode demo.
+
+**Pipeline (all under `wflevels/marble-madness-3d/`):**
+
+1. `extract_course.sh` → runs MAME headless with `scripts/research/mame/mm/mm_demo_sweep.lua` (dumps RAM + VRAM every 50 frames while the attract demo plays the course), then `mm_merge_course.py` (the decoder, merging the scrolling VRAM window across dumps) → `course-practice.json` (1729 solid cells, arcade units).
+2. `mm_course_to_level.py` → `course.json` in the generator's contract: 1 arcade unit = 0.1 m (cell = 0.8 m, marble radius 0.5 m), height unit = 0.08165 m (2:1 iso ⇒ 30° elevation ⇒ Z = 0.8165·h), course point‑mirrored so the WF camera at (−d,−d,+h) looking toward +X+Y reproduces the arcade view (screen‑right = Y−X).
+3. `gen_course.py` (headless Blender) → `.lev` → `task build-mm3d` → `wflevels/marble-madness-3d-standalone.iff`; `task run-mm3d`.
+
+**Faithful vs approximated:**
+
+| aspect | status |
+|---|---|
+| course floor geometry (Practice) | faithful — every walkable cell's four corner heights are the game's own values |
+| cliffs / drops | faithful (vertex‑per‑side data) |
+| decorative lower terraces (−58/−84 levels, non‑walkable) | omitted for now |
+| camera | SW iso follow camera; perspective, not the arcade's orthographic 2:1 |
+| physics | Jolt + MarbleHandler; tuned by feel, not the arcade's fixed‑point integrator |
+| hazards, checkpoints, timer HUD, sounds | not attempted |
+
+**Courses:** Practice — geometry done, level build in progress. Beginner … Ultimate — not attempted (the sweep captures Beginner too; courses taller than 128 iso rows need the VRAM wrap handled, see investigation "Limitations").
+
+## Verification
+
+1. `bash wflevels/marble-madness-3d/extract_course.sh --out-dir /tmp/mm3d-sweep` regenerates `course-practice.json` with 1729 cells.
+2. `python3 wflevels/marble-madness-3d/mm_surface.py … --cell 60 62` on the frame‑1000 demo dump prints `16342 ×4 | 16339 ×8 | 16342 ×4`, matching the game's words at `0x401C28`.
+3. `task build-mm3d` succeeds and `task run-mm3d` runs ≥ 10 s without assert.
+4. A recorded frame shows the Practice plateau and chute from the iso camera; the marble rolls down the start slope with no input.
+
+(Results are pasted below each step once run.)
