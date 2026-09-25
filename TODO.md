@@ -139,6 +139,10 @@
 
 ## Done
 
+- [x] 2026-09-25 — C / 3 switches between remembered condo positions; engine checks pass. [plan](docs/plans/2026-09-25-condo-unit-teleport.md)
+
+- [x] 2026-09-25 — 640 Xiaomi placement and pumped drain updated; both levels verified. [plan](docs/plans/2026-09-25-condo-xiaomi-installed.md)
+
 - [x] 2026-09-21 — Reusable World Foundry symbol and Linux window icon. [plan](docs/plans/2026-09-21-world-foundry-window-icon.md)
 
 - [x] 2026-09-21 — [marble-astra-cd] Added Astra as bundled level 6, retained all six existing payloads, and verified the main-checkout Task launcher with a zero-fall playthrough. [Plan](docs/plans/2026-09-21-add-marble-astra-to-cd-iff.md).

@@ -63,8 +63,11 @@ CORRIDOR      = (-9.0, -17.4, 9.0, -15.4)   # x0, y0, x1, y1: open-air corridor 
 PARAPET_H     = 1.1                          # railing on its outer edge — a 16 m drop otherwise
 PARAPET_T     = 0.15
 PLAYER_H      = 1.70
+# Door-centre X from the source plan; land 0.85 m inside the front wall.
+UNIT_ENTRIES = {639: (74.5 / 16.0, -14.5, 0.30),
+                640: (-62.0 / 16.0, -14.5, 0.30)}
 PLAYER_SPAWN  = tuple(float(v) for v in os.environ['CONDO_SPAWN'].split(',')) if os.environ.get('CONDO_SPAWN') \
-                else (4.66, -14.5, 0.30)     # just inside 639's front door — the unit is on the 6th floor, so
+                else UNIT_ENTRIES[639]       # just inside 639's front door — the unit is on the 6th floor, so
                                              # the level starts in the condo, not on the street (CONDO_SPAWN=x,y,z overrides)
 TOUR = None
 if TOUR_PATH:
@@ -768,11 +771,80 @@ player['wf_Script Controls Input'] = 'True'
 
 JOY_UP, JOY_DOWN, JOY_RIGHT, JOY_LEFT = 1 << 11, 1 << 12, 1 << 13, 1 << 14   # hal/sjoystic.h EJ_BUTTONB_*
 MB_LEG, MB_HOLD_UNTIL, MB_DONE = 500, 501, 502   # global user mailboxes (2–999, shared)
+MB_UNIT_INIT, MB_CURRENT_UNIT, MB_UNIT_PRESS_LATCH = 80, 81, 82
+MB_UNIT_POS = {639: (83, 84, 85), 640: (86, 87, 88)}
 MB_DOOR_TOUR_INIT   = 90                    # tour-only: initialise the door closed once
 MB_DOOR_PRESS_LATCH = 91                    # one toggle per physical button press
 MB_DOOR_BUTTON_ZONE = 92                    # ActBoxOR reach gate for the wall switch
 MB_DOOR_TARGET      = 93                    # 0 = open, 1 = closed
 MB_DOOR_CLOSEDNESS  = 94                    # continuous 0..1 slide position
+
+
+def unit_teleport_forth(camera_idx, dollhouse_idx):
+    """Remember indoor positions and switch apartments once per C press.
+
+    Coordinates read from mailboxes already include UNIT_Z. The blue joined
+    rooms are 639; 640 is the remaining southern area. The outside corridor
+    and any fall below the floor do not overwrite the last indoor positions.
+    Runtime camera indices come from the same export-order pass as the doors.
+    """
+    axes = ('X', 'Y', 'Z')
+    lines = ['\\ wf', f'{MB_UNIT_INIT} read-mailbox 0 = if']
+    for unit, pos in UNIT_ENTRIES.items():
+        for i, mb in enumerate(MB_UNIT_POS[unit]):
+            value = pos[i] + (UNIT_Z if i == 2 else 0)
+            lines.append(f'{value} {mb} write-mailbox')
+    lines += [f'639 {MB_CURRENT_UNIT} write-mailbox',
+              f'1 {MB_UNIT_INIT} write-mailbox then']
+
+    # Only record a position on the condo floor, inside the front/back edges.
+    # Collision keeps the player inside the actual curved/notched shell. The
+    # narrower front of 640 also excludes its exterior recess (x < -5.2).
+    lines += [
+        f'INDEXOF_Z_POS read-mailbox {UNIT_Z - 0.1} > '
+        f'INDEXOF_Z_POS read-mailbox {UNIT_Z + WALL_H} < & '
+        'INDEXOF_Y_POS read-mailbox -15.15 > & '
+        'INDEXOF_Y_POS read-mailbox -0.15 < & '
+        'INDEXOF_X_POS read-mailbox -7.8 > & '
+        'INDEXOF_X_POS read-mailbox 7.8 < & '
+        'INDEXOF_Y_POS read-mailbox -12.45 > '
+        'INDEXOF_X_POS read-mailbox -5.0 > | & if',
+        # 639's original footprint, master suite, and joined 2.9 x 3.3 m room.
+        'INDEXOF_X_POS read-mailbox 0 > '
+        'INDEXOF_Y_POS read-mailbox -6.75 > | '
+        'INDEXOF_X_POS read-mailbox -2.9 > '
+        'INDEXOF_Y_POS read-mailbox -10.05 > & | if',
+    ]
+    for unit in (639, 640):
+        if unit == 640:
+            lines.append('else')
+        lines.append(f'{unit} {MB_CURRENT_UNIT} write-mailbox')
+        for axis, mb in zip(axes, MB_UNIT_POS[unit]):
+            lines.append(f'INDEXOF_{axis}_POS read-mailbox {mb} write-mailbox')
+    lines.append('then then')
+
+    # RAW remains high while held; the latch prevents back-and-forth each tick.
+    lines += ['INDEXOF_HARDWARE_JOYSTICK1_RAW read-mailbox INDEXOF_INPUT write-mailbox',
+              'INDEXOF_HARDWARE_JOYSTICK1_RAW read-mailbox JOYSTICK_BUTTON_C & 0 <> if',
+              f'{MB_UNIT_PRESS_LATCH} read-mailbox 0 = if',
+              f'{MB_CURRENT_UNIT} read-mailbox 639 = if']
+    for unit in (640, 639):
+        if unit == 639:
+            lines.append('else')
+        lines.append(f'{unit} {MB_CURRENT_UNIT} write-mailbox')
+        for i, (axis, mb) in enumerate(zip(axes, MB_UNIT_POS[unit])):
+            lines.append(f'{mb} read-mailbox dup INDEXOF_{axis}_POS write-mailbox '
+                         f'{CAM_OFFSET[i]} + INDEXOF_{axis}_POS {camera_idx} write-actor-mailbox')
+    lines.append('then')
+    for axis in axes:
+        lines.append(f'0 INDEXOF_{axis}SPEED write-mailbox')
+    lines += ['0 INDEXOF_INPUT write-mailbox',
+              f'{dollhouse_idx} INDEXOF_CAMSHOT write-mailbox']
+    for mb in (MB_ZONE_INTERIOR, MB_ZONE_BALCONY, MB_ZONE_MASTER, MB_BALCONY_T0, MB_MASTER_T0):
+        lines.append(f'0 {mb} write-mailbox')
+    lines += [f'then 1 {MB_UNIT_PRESS_LATCH} write-mailbox',
+              f'else 0 {MB_UNIT_PRESS_LATCH} write-mailbox then']
+    return '\n'.join(lines) + '\n'
 
 
 def tour_forth(tour):
@@ -1449,6 +1521,11 @@ assert not outside, f"actors outside room bbox {lo}..{hi}: {outside}"
 # anywhere in this file re-derives the indices instead of silently aiming the
 # door script at the wrong actor.
 wf_objects = [o for o in scene.objects if o.get('wf_schema_path')]
+if not TOUR:
+    player['wf_Script'] = unit_teleport_forth(
+        wf_objects.index(camera) + DOOR_ACTOR_IDX_BIAS,
+        wf_objects.index(camshot) + DOOR_ACTOR_IDX_BIAS)
+    print('[condo] C / keyboard 3: switch apartments, remembering each indoor position')
 if _door_forth_fn is not None:
     _panel_pos = [wf_objects.index(p) for p in door_panels]
     assert _panel_pos == list(range(_panel_pos[0], _panel_pos[0] + DOOR_PANELS)), \
