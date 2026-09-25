@@ -98,64 +98,33 @@ Isometric view (top = away from camera, bottom = toward camera):
 
 ---
 
-## Marble Madness Practice (`marble-madness`)
+## Marble Madness Practice (Astra, bundled level 6)
 
-**Source:** Atari arcade original (1984). ROM-faithful geometry via `rom_to_blender.py`; path data from `levels.json`. See also: [decode_levels.py](../wflevels/marble-madness/decode_levels.py).
+**Source:** The arcade terrain sampler, reconstructed with ROM and captured
+runtime collision state. Launch with `task run-marble-3d-astra` or `task run -- 6`.
+The [bundle guide](../wflevels/marble-madness-3d-astra.md) links the authoring
+source and integration evidence.
 
-### Practice path structure
+The surface contains 1,823 nonempty cells and 3,502 top triangles, preserving
+slopes, gaps and discontinuities. Renderer and Jolt use the same mesh. Native
+XY are swapped into WF XY, with one native eight-unit cell per WF unit.
 
-13 segments (0–12), ~60 s time limit.
+| Feature | Delivered Practice behavior |
+| --- | --- |
+| Marble spawn | WF `(0,0,0.48)` |
+| Camera | Fixed follow offset `(20,20,16.32993)`; perspective, 30-degree elevation |
+| Finish | Cross WF Y=55 between the finish markers; terrain height comes from the sampled mesh |
+| Race | 60 seconds; falling respawns at the start while the timer continues |
+| Controls | Arrows accelerate; countersteer to brake; Space restarts |
 
-```
-Plan view (approximate; 1 unit ≈ 1 m, Y axis upward):
+Only Practice is delivered. Artwork, camera projection, motion, frozen dynamic
+terrain, score and respawn rules remain approximations.
 
-     Y
-    14 ┤         [11═══12 GOAL]
-    13 ┤          ╱
-    12 ┤    seg9-10 (NE trough)
-    11 ┤       ╱
-    10 ┤      ╱
-     9 ┤     ╱
-     8 ┤    ╱  segs 0-8 (ENE, crowned — steering required)
-     7 ┤   ╱
-     6 ┤  ╱
-     5 ┤ ╱
-     4 ┤╱
-     3 ┤
-     2 ┤
-     1 ┤·  ← spawn (0.3, 0.3)
-     0 ╚════════════════════ X
-       0    5   10   15   20   25   28
-```
-
-| Segment group | Heading | Profile | Notes |
-|---|---|---|---|
-| Segs 0–8 | 18.28° (ENE) | Crowned (no walls) | Must steer; marble falls off edges |
-| Segs 9–10 | 45.0° (NE) | Trough (contained) | Automatic containment |
-| Segs 11–12 | — | Goal platform (Z=0) | Level end trigger |
-
-### Key positions
-
-| Object | X (m) | Y (m) | Z (m) | Notes |
-|---|---|---|---|---|
-| Marble spawn | 0.3 | 0.3 | 1.1 | Top of crowned hill, seg 0 |
-| Goal | ~27 | ~13.5 | 0 | Segs 11–12 |
-| Camera (at spawn) | −5.7 | −7.7 | 11.1 | SW isometric offset (−6, −8, +10) from marble |
-| Light | 12 | 4 | 16 | Overhead, centre of room |
-| Room position | 12 | 4 | 8.5 | — |
-| Room bbox (world) | −7..30 | −9..16 | −5.5..18 | Floor −5.5 < respawn threshold −2 ✓ |
-
-**Timer:** 60 s. Lives: 3. Respawn: back to seg 0 if Z < −2.
-
-### Variants in `marble-madness/`
-
-| File | Status | Notes |
-|---|---|---|
-| `blender_mm_practice_rom.py` | **Primary** | ROM-faithful path geometry |
-| `blender_mm_fromscratch.py` | Experimental | Hand-authored paths |
-| `blender_mm_aerial.py` | Experimental | Aerial level attempt |
-| `blender_mm_intermediate.py` | Experimental | Intermediate level |
-| `blender_mm_silly.py` / `ultimate.py` | Experimental | Misc variants |
+**Correction (2026-09-22):** The previous 13-segment diagram and its 18.28°/45°
+heading table were derived from object-spawn records, not terrain. The old
+`marble-madness`, `marble-madness-2` and Blender variants are legacy prototypes;
+`levels.json` is not a ground-truth map. See the [decoding correction](investigations/2026-09-22-marble-madness-terrain-decoding-correction.md)
+and [legacy prototype catalog](marble-madness/README.md).
 
 ---
 
@@ -264,7 +233,7 @@ T = 1.5 m/tile. `smb_w1_1.iff` ships in `smb_w1_1-standalone.iff`.
 - SMB disassembly: [SMBDIS.ASM](https://gist.github.com/1wErt3r/4048722)
 - SMB maps: [mariowiki.com](https://www.mariowiki.com/World_1-1)
 - Q*bert arcade: [MAME / arcade-history.com](https://www.arcade-history.com/?n=qbert&page=detail&id=2080)
-- Marble Madness ROM data: `wflevels/marble-madness/levels.json` + `decode_levels.py`
+- Marble Madness terrain: [Astra source, correction and evidence](investigations/2026-09-22-marble-madness-terrain-decoding-correction.md)
 - Moon terrain: PGDA GeoTIFF (lunar DEM); see `wflevels/moon_site01/blender_create_moon.py`
 - [WF level-building guide](level-building.md) — technical pipeline (.lev → .lvl → .iff)
 - [CLAUDE.md coordinate system tables](../CLAUDE.md)

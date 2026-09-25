@@ -4,9 +4,11 @@
 **Source data:** [`wflevels/marble-madness/levels.json`](../../wflevels/marble-madness/levels.json)  
 **Related:** [ROM level-data investigation](2026-05-01-marble-madness-rom-level-data.md)
 
+> **Superseded 2026-09-22:** These elevation, heading and shape tables were calculated from misidentified object-spawn/script data. They are not arcade height measurements. The screenshot-to-segment associations and “correct arcade behaviour” claims below are also withdrawn; the captures remain visual references only. See the [terrain-decoding correction](2026-09-22-marble-madness-terrain-decoding-correction.md).
+
 ---
 
-## Context
+## Historical context — invalid elevation model
 
 The current WF implementation (`mm_fromscratch`) is built from the **Practice** level — Marble Madness's tutorial/demo, not a race. The first actual playable race is **Beginner**. This doc dumps full elevation tables for both so we can compare the ROM geometry against what the engine currently renders.
 
@@ -147,7 +149,7 @@ Included for reference: the cliff hazard geometry (sharp drop-offs with danger a
 
 ---
 
-## What the current WF implementation has
+## Historical implementation assessment — superseded
 
 `mm_fromscratch` is built from the **Practice** level. The Beginner level has not been converted. The main geometry difference: Practice segs 0–8 are crowned (open-sided), which is why the marble tends to fall off — there are no walls on most of the path. That is correct arcade behaviour for Practice; it is *not* what Beginner looks like.
 

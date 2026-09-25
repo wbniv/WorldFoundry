@@ -1,11 +1,14 @@
 # Marble Madness — Faithful Replication Plan
 
 **Date:** 2026-05-01  
-**Status:** M3 complete — timer/lives/respawn/HUD wired; mm_practice plays without crash  
+**Status:** Superseded 2026-09-22 — historical prototype milestones, not verified arcade fidelity
+
 **Design source:** [`/home/will/wf-games/marble-madness.md`](../../../../../../wf-games/marble-madness.md) and [`/home/will/wf-games/marble-madness/`](../../../../../../wf-games/marble-madness/)  
 **Level dir:** `wflevels/marble-madness-2/` (prototype), moving to `wflevels/mm_practice/` et al.
 
-## Goal
+> **Correction:** The earlier recreation did not establish faithful terrain. `0x1DEC0` is an object-spawn table; the derived heights, headings and goal-platform heuristic are invalid. All milestones, completion labels and build instructions below describe the historical attempt, not the current supported reconstruction. Do not extend its `levels.json` geometry pipeline. Use the [correction and verified Astra sources](../investigations/2026-09-22-marble-madness-terrain-decoding-correction.md) and [bundled Practice guide](../../wflevels/marble-madness-3d-astra.md).
+
+## Historical goal
 
 Replicate Atari's Marble Madness (1984) faithfully inside World Foundry — same fixed isometric camera framing, same camera-relative controls, same six-stage structure — then diverge into 3D-specific expansions. The wf-games design docs are the source of truth; this plan tracks engine/level status against them.
 

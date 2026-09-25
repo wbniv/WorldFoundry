@@ -1,6 +1,8 @@
 # Plan: Level Recreation Workflow + mm_beginner (M4)
 
-**Status:** DONE — ROM extraction complete and the recreation workflow is proven end-to-end; MM Blender levels built ([`wflevels/mm_practice*`](../../wflevels)).
+**Status:** Superseded 2026-09-22 — build workflow ran, but the terrain interpretation was wrong.
+
+> `0x1DEC0` contains object-spawn rectangle lists, not course geometry. The height/heading interpretation and completion claims below are historical and must not guide further conversion. See the [correction and verified Astra sources](../investigations/2026-09-22-marble-madness-terrain-decoding-correction.md).
 
 ## Context
 
@@ -39,16 +41,16 @@ NES map PNG URLs (direct):
 
 (Verify URLs before use; nesmaps.com naming may differ. Source: [NES Maps - Marble Madness](https://nesmaps.com/maps/MarbleMadness/MarbleMadness.html) — complete maps originally by Ray Dempsey / Nintendo Player.)
 
-### ROM extraction — COMPLETE ✓
+### Historical ROM extraction — terrain interpretation rejected
 
-ROM format fully reverse-engineered 2026-05-01 via MAME Lua runtime analysis. See [`docs/investigations/2026-05-01-marble-madness-rom-level-data.md`](../../WorldFoundry.2026-new-level/docs/investigations/2026-05-01-marble-madness-rom-level-data.md) for full methodology.
+The May 1 claim of a fully decoded terrain format was incorrect. The [original investigation](../investigations/2026-05-01-marble-madness-rom-level-data.md) is retained with its supersession notice.
 
 **What's done:**
 - `assets/arcade-roms/marble.zip` — 38-file complete ROM vendored (git binary)
 - `assets/arcade-roms/reference/practice_start.png` — MAME screenshot
 - `wflevels/marble-madness/decode_levels.py` — decoder for all 6 levels; run against `assets/arcade-roms/marble.zip` to get `wflevels/marble-madness/levels.json`
 
-**Format confirmed:** Level pointer table at `0x01DEC0` → per-level descriptor arrays (6-byte `[type:u16][addr:u32]` entries, sentinel `0xFFFF`) → 24-byte segment records at `+02` h_left, `+04` h_right, `+0A` h_center. Segments with h_center=5 are goal zones.
+**Historical format claim — rejected:** Level pointer table at `0x01DEC0` → per-level descriptor arrays (6-byte `[type:u16][addr:u32]` entries, sentinel `0xFFFF`) → 24-byte segment records at `+02` h_left, `+04` h_right, `+0A` h_center. Segments with h_center=5 are goal zones.
 
 **All 6 levels decoded:**
 

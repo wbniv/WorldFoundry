@@ -1082,177 +1082,67 @@ logs clean.
 
 ## Worked example — Marble Madness arcade-ROM pipeline
 
-Marble Madness level paths are not hand-authored — they are faithfully reproduced from the
-arcade ROM. The pipeline goes: **ROM → JSON → Blender mesh → WF level**. Treat this section
-as a worked example of "reproducing arcade geometry from extracted data" — the Q✱bert MVP
-is the worked example for "synthesising a pyramid from a Python loop", and `mm_practice` is
-the worked example for "the simplest possible WF level."
+**Corrected 2026-09-22:** The old `decode_levels.py` → `levels.json` →
+`rom_to_blender.py` pipeline misidentified object-spawn records as terrain.
+Its height fields, heading formula, constant-width track and goal heuristic
+must not be used for new arcade conversions. The historical workflow remains
+in the [superseded plan](plans/2026-05-02-level-recreation-workflow.md).
 
-### Tools
+### Current delivered course and sources
 
-| Script | Location | Purpose |
-|--------|----------|---------|
-| `decode_levels.py` | `wflevels/marble-madness/` | Extracts all 6 level segment records from the ROM ZIP into `levels.json` |
-| `rom_to_blender.py` | `wflevels/marble-madness/` | Converts `levels.json` into a trough mesh in the live Blender scene |
-| `blender_mm_fromscratch.py` | `wflevels/marble-madness/` | Full level build: clear scene, run converter, place all actors, export `.lev` |
+Astra Practice is bundled at index 6. From the repository root:
 
-### Step 1 — Extract ROM data
-
-```bash
-cd wflevels/marble-madness
-python3 decode_levels.py ../../assets/arcade-roms/marble.zip
-# → levels.json  (all 6 levels; h_left / h_right / h_center per segment)
+```sh
+task run-marble-3d-astra
+# Equivalent numeric selection:
+task run -- 6
 ```
 
-`levels.json` is committed; only re-run if the ROM source changes.
+The [bundle guide](../wflevels/marble-madness-3d-astra.md) covers controls and
+repacking. Authoring sources remain on branch `marble-madness-3d-astra` under
+`wflevels/marble-madness-3d/`; they are not part of this checkout's bundle-only
+integration. The [implementation README](https://github.com/wbniv/WorldFoundry/blob/13c96e2ea5a5ec9f823fa8eda94237f9bdbf9c45/wflevels/marble-madness-3d/README.md)
+provides build and verification commands for that authoring checkout.
 
-### Step 2 — Build path mesh in Blender (via MCP)
+### Terrain extraction and mesh construction
 
-With a Blender session open and MCP connected:
+Astra's decoder adapts Marble Love's existing reverse engineering, with runtime
+checks against MAME. It did not independently discover the ROM format. The
+[reference-access review](investigations/2026-09-22-marble-madness-terrain-decoding-correction.md#reference-access-and-attribution)
+found no recorded use of that source in the earlier attempt, but did not
+establish its public availability at that time.
 
-```python
-import bpy, os
-script = '/path/to/wflevels/marble-madness/blender_mm_fromscratch.py'
-exec(open(script).read(), {'__file__': script, '__name__': 'blender_mm_fromscratch'})
-# → mm_fromscratch.lev
-```
+The actual level header table is `0x2BE00`, with Practice at `0x2BEE2`.
+`extract.py` follows the arcade sampler at `0x1CABA`, combining ROM tables with
+captured playfield and runtime indirect-table state. `generate.py` preserves
+sampled heights, the split-triangle interpolation, voids and discontinuities;
+renderer and Jolt consume the same mesh. The old table at `0x1DEC0` drives
+object spawning, and does not describe the terrain surface.
 
-Or run `rom_to_blender.py` alone to add just the path mesh to an existing scene:
+The result has 1,823 nonempty cells and 3,502 top triangles. Native XY axes are
+swapped into WF XY; the native start `(136,136)` maps to WF `(0,0)`. One native
+eight-unit cell maps to one WF unit. Height conversion is
+`(native_height - 16384) * sqrt(2/3) / 8`. The marble starts at WF `(0,0,0.48)`.
+These transforms belong to this recovered terrain model, not the old segment
+converter.
 
-```python
-ns = {'__file__': '/path/to/rom_to_blender.py', '__name__': 'rom_to_blender', 'bpy': bpy}
-exec(open('/path/to/rom_to_blender.py').read(), ns)
-ns['build_path_mesh']('Practice', ns['load_levels']())
-```
+The camera follows with offset `(20,20,16.32993)`, using perspective at a
+30-degree elevation. Authored CamShot FOV is currently ignored by the engine;
+this is an approximation to the arcade presentation. Only Practice is delivered.
+See the [correction, evidence and fidelity limits](investigations/2026-09-22-marble-madness-terrain-decoding-correction.md).
 
-### Step 3 — Build pipeline (unchanged)
+### Verification for further courses
 
-```bash
-cd wflevels/marble-madness
-bash build_level.sh
-```
-
-### ROM Segment Format
-
-Level pointer table at `0x01DEC0` → per-level descriptor arrays (6-byte `[type:u16][addr:u32]`
-entries, sentinel `0xFFFF`) → 24-byte segment records.
-
-| Offset | Field | Notes |
-|--------|-------|-------|
-| `+02` | `h_left` | Wall/edge height — left side |
-| `+04` | `h_right` | Wall/edge height — right side |
-| `+0A` | `h_center` | Floor height at path centre |
-
-Segments with `h_center == H_ZERO (5)` are goal zones — replaced by a flat platform.
-
-Full reverse-engineering notes: [`docs/investigations/2026-05-01-marble-madness-rom-level-data.md`](investigations/2026-05-01-marble-madness-rom-level-data.md).
-
-### Coordinate Mapping
-
-The 16-bit `type` field encodes the **path heading** in its lower byte:
-
-```
-heading_angle = (type & 0xFF) / 256 × 2π  radians, CCW from +X axis (East = 0°)
-```
-
-Cross-section positions accumulate along the heading:
-
-```
-pos_{i+1} = pos_i + SEG_LEN × (cos θ_i, sin θ_i, 0)
-```
-
-Each cross-section has 3 vertices perpendicular to the heading (`right_perp = (sin θ, −cos θ, 0)`):
-
-```
-left   = (pos − PATH_HALF × right_perp,  Z(h_left))
-center = (pos,                            Z(h_center))
-right  = (pos + PATH_HALF × right_perp,  Z(h_right))
-```
-
-Height conversion: `Z(h) = (h − H_ZERO) × GAME_UNIT`
-
-#### Trough vs. crowned sections
-
-- `h_edge > h_center` → **walled trough**: edges rise above floor — ball is contained.
-- `h_edge < h_center` → **crowned / open-sided**: edges drop below centre — ball rolls off without joystick steering (correct arcade geometry).
-
-#### Practice level heading table
-
-| Segments | `type` | Lower byte | Heading | Geometry |
-|----------|--------|------------|---------|----------|
-| 0–8 | `0x000D` | 13 | 18.28° (ENE) | Crowned S-curve — requires joystick |
-| 9–10 | `0x0320` | 32 | 45.00° (NE) | Walled trough — rolls to goal unaided |
-| 11–12 | `0x0D20` | 32 | — | Goal sentinel (`h_center=5`) → flat platform |
-
-### Calibration Constants (`rom_to_blender.py`)
-
-```python
-H_ZERO    = 5      # goal h_center; subtracting puts goal at Z=0
-GAME_UNIT = 0.05   # metres per game height unit  ← tune this
-SEG_LEN   = 2.5    # metres per path segment       ← tune this
-PATH_HALF = 2.0    # metres, centre → edge vertex  ← tune this
-```
-
-`GAME_UNIT=0.05` and `PATH_HALF=2.0` (calibrated 2026-05-02 against MAME screenshot):
-trough walls at ΔH≈46–89 units over `PATH_HALF=2.0 m` give 30–48° slope angles, matching
-the ~30–50° trough profiles in `assets/arcade-roms/reference/practice_start.png`.
-`PATH_HALF=4.0` was visually too wide; `GAME_UNIT=0.1` produced 49–66° walls, too steep.
-
-Compare viewport screenshots against `assets/arcade-roms/reference/practice_start.png` and
-iterate GAME_UNIT / SEG_LEN until proportions match.
-
-### Actor Spawn Placement
-
-Spawn the Player above the **first walled (trough) segment** so the ball rolls toward the goal
-without requiring joystick input during testing. For Practice this is seg 9:
-
-```python
-# heading-based position of seg-9 start: 9 segs × SEG_LEN × (cos 18.28°, sin 18.28°)
-SPAWN_POS = (21.364, 7.058, 3.2)   # 0.6 m above seg-9 floor at Z=2.6
-```
-
-To play the full S-curve (segs 0–8), a joystick must be connected.
-
-### Camera Setup for Marble Madness (SW Isometric)
-
-The arcade original uses a fixed SW isometric view: camera is above-and-SW of the marble,
-looking NE+down at roughly 45° elevation. All three BungeeCam axes must be `Relative` so
-the camera offset stays fixed relative to the player position each frame.
-
-**CamShot offset** (`CAMSHOT_POS`): `(-6, -8, 10)` from the marble works for Practice.
-This gives ~45° elevation, camera is SW, and the sight line clears the west trough wall
-(camera z=7.9 at wall crossing vs. wall top z≈5.1).
-
-```python
-SPAWN_POS    = (21.364, 7.058, 3.2)   # marble spawn
-CAMSHOT_POS  = (-6.0, -8.0, 10.0)    # offset from marble
-CAMERA_POS   = tuple(s + c for s, c in zip(SPAWN_POS, CAMSHOT_POS))
-# → (-15.636+21.364, -0.942+7.058, 13.2) = approx (−15.6, −0.9, 13.2)
-```
-
-**CamShot `Target` field must be `'Player'`**, not a fixed Target02 empty. A fixed world
-point causes the camera to look through the trough walls as the marble moves away from spawn.
-With `Target='Player'` the camera always rotates to face the ball directly.
-
-```python
-props={
-    'X Axis': 'Relative', 'Y Axis': 'Relative', 'Z Axis': 'Relative',
-    'Target': 'Player',
-    'Track Object': 'Target01',  # origin anchor at (0,0,0)
-    'Follow': 'Target01',
-    ...
-}
-```
-
-**Sight-line geometry rule**: camera clears a wall of height `wall_z` when:
-`cam_z - 0.5*(cam_z - marble_z) > wall_z`
-i.e. the midpoint of the sight line is above the wall top.
-With CAMSHOT_Z=10 and marble_z≈3.2: midpoint z = 10+3.2)/2 ≈ 6.6 > 5.1 ✓.
-
-The camera-relative input bit-rotation Forth word for this SW iso view is in
-[§4 — Camera-relative input (SW iso pattern)](#camera-relative-input-sw-iso-pattern) above.
+Establish field meanings from the routines that consume them. Check sampled
+heights and voids against MAME or an independent implementation before tuning
+appearance. Verify mesh winding and nondegeneracy separately, then complete an
+input-driven traversal. A valid mesh and a crash-free run do not establish
+arcade terrain fidelity.
 
 ### Marble Physics: Friction and Deceleration
+
+The following values are legacy prototype tuning, not measured arcade constants
+or the Astra course specification.
 
 The player OAD fields that most affect rolling feel:
 
@@ -1266,12 +1156,12 @@ The player OAD fields that most affect rolling feel:
 is present. On a 2.2° slope gravity = 0.38 m/s²; any `Running Deceleration` above ~0.35
 will freeze the ball. Setting it to `0.0` leaves all braking to surface friction.
 
-### Goal Platform: Back Wall
+### Goal placement
 
-`rom_to_blender.py` adds a 2 m tall vertical quad face at the far end of the goal platform
-(`PATH_HALF * 1.5` wide) to stop the marble rolling off. This is separate from the trough
-walls and is always emitted when `goal_segs` is non-empty. If the marble still escapes,
-increase `wall_h` in `build_path_mesh()`.
+The old converter's `h_center <= 5` platform rule and added containment wall
+were workarounds for misdecoded data. Astra places finish markers using recovered
+object-script positions and implements a separate finish trigger; terrain still
+comes from the sampler. Do not infer a flat goal surface from an object record.
 
 ### Marble Actor: Use `sphere.iff`, Not `player.iff`
 

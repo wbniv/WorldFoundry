@@ -1,7 +1,12 @@
 # Marble Madness — Level Recreation
 
-Six arcade levels reproduced from the original ROM data.  
-Source is `assets/arcade-roms/marble.zip`; all geometry derives from `decode_levels.py` → `levels.json`.
+The verified delivered reconstruction is **Astra Practice**, bundled as level 6. From the repository root, run `task run-marble-3d-astra` or `task run -- 6`. See the [bundle guide](../../wflevels/marble-madness-3d-astra.md) for controls and rebuilding.
+
+**Correction (2026-09-22):** The earlier claim that six arcade courses had been reproduced was wrong. `decode_levels.py` → `levels.json` interpreted object-spawn/script data as terrain; its derived heights and headings are invalid. The remaining five courses have not been converted by Astra. Read [what failed and how it was corrected](../investigations/2026-09-22-marble-madness-terrain-decoding-correction.md).
+
+Astra adapted Marble Love's existing reverse engineering and validated the resulting extraction and mesh. The earlier attempt apparently did not use that reference; its public availability in May has not been established. See the [reference-access and attribution findings](../investigations/2026-09-22-marble-madness-terrain-decoding-correction.md#reference-access-and-attribution).
+
+The legacy launch commands and build records below are preserved for inspecting old prototypes. They do not rebuild Astra or establish arcade fidelity.
 
 Related plans and investigations:
 
@@ -12,7 +17,7 @@ Related plans and investigations:
 
 ---
 
-## Running a Level
+## Running a legacy prototype
 
 All level files live in `wflevels/marble-madness/`.  
 The engine must be launched from `wfsource/source/game/` (it looks for `cd.iff` there).
@@ -61,7 +66,7 @@ Then pass the standalone IFF with `-L`:
 
 ---
 
-## Build Pipeline (per level)
+## Legacy build pipeline (per level)
 
 Run these from `wflevels/marble-madness/`.  
 Set `IFFCOMP` and `LEVCOMP` to the release binaries once and reuse:
@@ -98,9 +103,9 @@ the lowercase level name (`practice_rom`, `fromscratch`, `intermediate`, `aerial
 
 ---
 
-## Level Summary
+## Historical prototype summary
 
-| Level | Script | Segs | Path extent | Timer | Status |
+| Prototype | Script | Generated segments | Generated extent | Timer | Historical runtime status |
 |-------|--------|------|-------------|-------|--------|
 | Practice | `blender_mm_practice_rom.py` | 9 path + 2 goal | ~28 m ENE + 7 m NE | 60 s | ✓ running |
 | Beginner | `blender_mm_fromscratch.py` | 7 path + 2 goal | ~18 m NE | 25 s | ✓ running |
@@ -111,12 +116,12 @@ the lowercase level name (`practice_rom`, `fromscratch`, `intermediate`, `aerial
 
 ---
 
-## Source Files
+## Legacy source files
 
 | File | Purpose |
 |------|---------|
 | `decode_levels.py` | Reads `assets/arcade-roms/marble.zip` → `levels.json` |
-| `levels.json` | Decoded ROM segment data for all 6 levels |
+| `levels.json` | Misinterpreted ROM records; not terrain data |
 | `rom_to_blender.py` | Converts `levels.json` → Blender collision mesh |
 | `blender_mm_<level>.py` | Per-level Blender scene script (actors + path) |
 | `mm_<level>.lev` | Exported level source (generated) |

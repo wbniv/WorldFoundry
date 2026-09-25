@@ -1128,13 +1128,21 @@ Applies to any I32 field with a `//ValueA|ValueB` OAD comment. Numeric I32 field
 
 ---
 
-## Goal-zone segment type 0x0D20 — h_left/h_right are not wall heights
+## Marble Madness: spikes or incorrect course shape from the legacy ROM decoder
 
-**Symptom:** ROM-decoded path mesh has absurdly tall spikes (30+ m) at the end of the level.
+**Symptom:** The old Blender converter produces tall spikes, an almost straight
+track, or a course that differs substantially from the arcade layout.
 
-**Cause:** Goal segments (MM segment type `0x0D20`, always `h_center = 5`) use a completely different internal layout from normal path segments. The values at offsets `+02`/`+04` (decoded as `h_left`/`h_right`) likely encode funnel attraction, visual animation, or entrance dimensions — not wall heights. Interpreting them as geometric heights with `GAME_UNIT = 0.5` produces 30+ m walls.
+**Cause (corrected 2026-09-22):** The table at `0x1DEC0` supplies object-spawn
+rectangle lists and script pointers. The legacy decoder's `h_left`, `h_right`,
+`h_center` and heading labels misidentify those fields. This affects the whole
+course, not just records previously called “goal segments.”
 
-**Fix:** Detect goal segments by `h_center ≤ H_ZERO` (or by checking the segment type's upper byte `= 0x0D`) and replace with level-appropriate flat platform geometry at `Z = 0`. See `rom_to_blender.py` `build_path_mesh()`.
+**Fix:** Use the verified terrain sampler reconstruction described in the
+[correction](investigations/2026-09-22-marble-madness-terrain-decoding-correction.md) and [Astra bundle guide](../wflevels/marble-madness-3d-astra.md).
+The earlier advice to replace `h_center <= 5` records with flat platforms is
+withdrawn: it hides one symptom without recovering the terrain. Changing scale,
+winding or camera settings cannot repair the wrong source-data interpretation.
 
 ---
 

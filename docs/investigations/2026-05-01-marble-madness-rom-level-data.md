@@ -3,11 +3,17 @@
 **Date:** 2026-05-01  
 **ROM:** Atari Marble Madness (Set 1), 1984  
 **Hardware:** Atari System 1, Motorola 68000 @ 7 MHz  
-**Status:** Structure confirmed; semantic field meaning partially understood
+**Status:** Superseded 2026-09-22 — terrain field interpretation disproved
+
+> **Correction:** `0x1DEC0` selects object-spawn rectangle lists, not terrain. The `h_left` / `h_right` / `h_center` labels, heading formula and goal heuristic below are invalid. The actual level header table is `0x2BE00`; Astra reconstructs Practice through the arcade terrain sampler. See the [correction and evidence](2026-09-22-marble-madness-terrain-decoding-correction.md).
+>
+> The original findings below are retained as a historical record of the failed interpretation. Do not use their tables or “confirmed” claims as an authoring specification.
+
+The later correction relied on Marble Love's existing reverse engineering. This May investigation's recorded sources did not include that reference; whether it was publicly available then has not been established. See [reference access and attribution](2026-09-22-marble-madness-terrain-decoding-correction.md#reference-access-and-attribution).
 
 ---
 
-## Summary
+## Historical summary — withdrawn terrain interpretation
 
 All six Marble Madness level maps are stored in ROM as sequences of **24-byte path-segment records**, each containing three height values (left edge, right edge, centre spine). A **level pointer table** at ROM address `0x01DEC0` points to per-level **descriptor arrays** that list segment addresses with a type code. Segment addresses cluster in the ROM range `0x01D7D0–0x01DEXX`.
 
@@ -283,7 +289,7 @@ Seg  Type   Addr      h_left  h_right  h_center
 
 ---
 
-## Type Field — Path Heading (Confirmed)
+## Type Field — rejected path-heading interpretation
 
 The **lower byte** of the 16-bit descriptor-entry type encodes the **path heading angle** in 256ths of a full revolution, CCW from the +X axis (East = 0°, North = 64/256 = 90°). Evidence:
 
@@ -338,7 +344,7 @@ The ROM gives only one heading change for Practice (13→32 = 18.28°→45° = *
 
 ---
 
-## Unknowns / Next Steps
+## Historical unknowns — superseded by the correction
 
 1. **Type field upper byte**: upper byte increases monotonically per level; meaning unknown. Candidates: camera view angle (in 256ths rev), per-zone physics ID, or a cumulative frame counter.
 2. **Segment 0 `+12` field anomaly**: `0x6658` and `0x0096` differ from the constant `0x0C14` in normal segments. May encode respawn/start-camera heading.
@@ -349,7 +355,7 @@ The ROM gives only one heading change for Practice (13→32 = 18.28°→45° = *
 
 ---
 
-## Decoder Script
+## Legacy decoder — invalid terrain semantics
 
 See [`wflevels/marble-madness/decode_levels.py`](../../wflevels/marble-madness/decode_levels.py) for the full decoder that produces per-level segment tables and ASCII height profiles.
 

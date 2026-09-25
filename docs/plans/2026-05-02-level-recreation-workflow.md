@@ -1,14 +1,17 @@
 # Marble Madness — Level Recreation Workflow
 
 **Date:** 2026-05-02  
-**Status:** Practice level running; workflow proven end-to-end  
+**Status:** Superseded 2026-09-22 — historical prototype milestones, not verified arcade fidelity
+
 **Related:** [`marble-madness-faithful.md`](2026-05-01-marble-madness-faithful.md) | [`ROM level-data investigation`](../investigations/2026-05-01-marble-madness-rom-level-data.md) | [`level elevations`](../investigations/2026-05-01-mm-level-elevations.md)
+
+> **Correction:** The earlier recreation did not establish faithful terrain. `0x1DEC0` is an object-spawn table; the derived heights, headings and goal-platform heuristic are invalid. All milestones, completion labels and build instructions below describe the historical attempt, not the current supported reconstruction. Do not extend its `levels.json` geometry pipeline. Use the [correction and verified Astra sources](../investigations/2026-09-22-marble-madness-terrain-decoding-correction.md) and [bundled Practice guide](../../wflevels/marble-madness-3d-astra.md).
 
 ---
 
 ## Overview
 
-Six Marble Madness levels are reproduced from the arcade ROM, not designed from scratch.  
+The old pipeline produced six named level attempts from incorrectly interpreted ROM records; it did not reproduce the six arcade courses.
 The source-of-truth hierarchy:
 
 1. **Arcade ROM** — canonical geometry; vendored at `assets/arcade-roms/marble.zip`
@@ -18,7 +21,7 @@ The source-of-truth hierarchy:
 
 ---
 
-## ROM Extraction — COMPLETE ✓
+## Historical ROM extraction — terrain interpretation rejected
 
 `decode_levels.py` reads `assets/arcade-roms/marble.zip` → `levels.json`.
 
@@ -28,7 +31,7 @@ All 6 levels decoded in `levels.json`.
 
 ---
 
-## Converter — COMPLETE ✓
+## Historical converter — generates inaccurate terrain
 
 `rom_to_blender.py` converts `levels.json` segment data to a Blender collision mesh.
 
@@ -154,7 +157,7 @@ For Practice: `ROOM_POS=(12,4,8.5)`, `ROOM_LOCAL_BBOX=(-19,-13,-14, 18,12,9.5)` 
 
 ---
 
-## Per-Level Checklist
+## Historical per-level checklist — do not use for new conversions
 
 For each remaining level:
 - [ ] Identify heading angles and segment types from `levels.json`
