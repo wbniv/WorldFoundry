@@ -1,0 +1,71 @@
+// Source boundaries for WF's existing definitions-then-body script convention.
+// This recognizes the standard parsing words used by WF, not arbitrary custom
+// parsing words. Both initial loading and debug reload must use this helper.
+#pragma once
+#include <cctype>
+#include <cstring>
+#include <string>
+
+namespace forth_source {
+inline bool space(char c) { return std::isspace(static_cast<unsigned char>(c)) != 0; }
+inline const char* SkipMarker(const char* source)
+{
+    const char* p = source;
+    while (*p && space(*p)) ++p;
+    if (*p != '\\') return p;
+    const char* end = p;
+    while (*end && *end != '\n' && *end != '\r') ++end;
+    const char* marker = p + 1;
+    if (marker == end || !space(*marker)) return p;
+    while (marker < end && space(*marker)) ++marker;
+    if (end - marker < 2 || marker[0] != 'w' || marker[1] != 'f') return p;
+    marker += 2;
+    while (marker < end && space(*marker)) ++marker;
+    return marker == end ? end : p;
+}
+
+inline const char* LastDefinitionEnd(const char* source)
+{
+    const char* last = nullptr;
+    const char* p = source;
+    bool literalWord = false;
+    while (*p) {
+        while (*p && space(*p)) ++p;
+        if (!*p) break;
+        const char* start = p;
+        while (*p && !space(*p)) ++p;
+        const std::string token(start, p);
+        if (literalWord) { literalWord = false; continue; }
+        if (token == ":" || token == "'" || token == "postpone") {
+            literalWord = true;
+        } else if (token == "\\") {
+            // The token's separating newline already ended a bare comment.
+            while (*p && *p != '\n' && *p != '\r') ++p;
+        } else if (token == "(") {
+            while (*p && *p != ')') ++p;
+            if (*p) ++p;
+        } else if (token == "s\"" || token == ".\"") {
+            // Plain Forth strings end at the next quote; no C-style escapes.
+            while (*p && *p != '"') ++p;
+            if (*p) ++p;
+        } else if (token == ";") {
+            last = start;
+        }
+    }
+    return last;
+}
+
+struct Parts { std::string definitions, body; };
+inline Parts Split(const char* source)
+{
+    const char* start = SkipMarker(source);
+    const char* semi = LastDefinitionEnd(start);
+    return {semi ? std::string(start, semi + 1) + "\n" : std::string(),
+            std::string(semi ? semi + 1 : start)};
+}
+inline std::string Wrap(const std::string& name, const std::string& body)
+{
+    // A final line comment must not swallow the wrapper's closing semicolon.
+    return ": " + name + " " + body + "\n;\n";
+}
+} // namespace forth_source

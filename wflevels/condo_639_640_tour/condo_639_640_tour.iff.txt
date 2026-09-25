@@ -88,15 +88,16 @@
 		$300003cl { 'STR' "640_window_0.iff" }  // IFF RM0 000:03c
 		$300003dl { 'STR' "640_xiaomi_18k_nongic_e8a4.iff" }  // IFF RM0 000:03d
 		$300003el { 'STR' "640_xiaomi_18k_nongic_4c79.iff" }  // IFF RM0 000:03e
-		$300003fl { 'STR' "640_xiaomi_condensate_pump.iff" }  // IFF RM0 000:03f
+		$300003fl { 'STR' "640_xiaomi_power.iff" }  // IFF RM0 000:03f
 		$3000040l { 'STR' "640_xiaomi_drain.iff" }  // IFF RM0 000:040
 		$3000041l { 'STR' "640_xiaomi_lineset.iff" }  // IFF RM0 000:041
-		$3000042l { 'STR' "640_xiaomi_power.iff" }  // IFF RM0 000:042
-		$3000043l { 'STR' "640_midea_24k_master_219b.iff" }  // IFF RM0 000:043
-		$3000044l { 'STR' "640_midea_24k_master_94f8.iff" }  // IFF RM0 000:044
-		$3000045l { 'STR' "640_midea_drain_a_clo_57b6.iff" }  // IFF RM0 000:045
-		$3000046l { 'STR' "640_midea_lineset_a_c_09f9.iff" }  // IFF RM0 000:046
-		$3000047l { 'STR' "640_midea_power_a_clo_39bb.iff" }  // IFF RM0 000:047
+		$3000042l { 'STR' "640_living_nw_column.iff" }  // IFF RM0 000:042
+		$3000043l { 'STR' "640_xiaomi_condensate_pump.iff" }  // IFF RM0 000:043
+		$3000044l { 'STR' "640_midea_24k_master_219b.iff" }  // IFF RM0 000:044
+		$3000045l { 'STR' "640_midea_24k_master_94f8.iff" }  // IFF RM0 000:045
+		$3000046l { 'STR' "640_midea_drain_a_clo_57b6.iff" }  // IFF RM0 000:046
+		$3000047l { 'STR' "640_midea_lineset_a_c_09f9.iff" }  // IFF RM0 000:047
+		$3000048l { 'STR' "640_midea_power_a_clo_39bb.iff" }  // IFF RM0 000:048
 	}
 	{ 'ALGN' .align(2048) }
 	{ 'LVL' [ "condo_639_640_tour.lvl" ] }
@@ -178,15 +179,16 @@
 		{ 'ASS' $300003cl [ "640_window_0.iff" ] }  // IFF RM0 000:03c
 		{ 'ASS' $300003dl [ "640_xiaomi_18k_nongic_e8a4.iff" ] }  // IFF RM0 000:03d
 		{ 'ASS' $300003el [ "640_xiaomi_18k_nongic_4c79.iff" ] }  // IFF RM0 000:03e
-		{ 'ASS' $300003fl [ "640_xiaomi_condensate_pump.iff" ] }  // IFF RM0 000:03f
+		{ 'ASS' $300003fl [ "640_xiaomi_power.iff" ] }  // IFF RM0 000:03f
 		{ 'ASS' $3000040l [ "640_xiaomi_drain.iff" ] }  // IFF RM0 000:040
 		{ 'ASS' $3000041l [ "640_xiaomi_lineset.iff" ] }  // IFF RM0 000:041
-		{ 'ASS' $3000042l [ "640_xiaomi_power.iff" ] }  // IFF RM0 000:042
-		{ 'ASS' $3000043l [ "640_midea_24k_master_219b.iff" ] }  // IFF RM0 000:043
-		{ 'ASS' $3000044l [ "640_midea_24k_master_94f8.iff" ] }  // IFF RM0 000:044
-		{ 'ASS' $3000045l [ "640_midea_drain_a_clo_57b6.iff" ] }  // IFF RM0 000:045
-		{ 'ASS' $3000046l [ "640_midea_lineset_a_c_09f9.iff" ] }  // IFF RM0 000:046
-		{ 'ASS' $3000047l [ "640_midea_power_a_clo_39bb.iff" ] }  // IFF RM0 000:047
+		{ 'ASS' $3000042l [ "640_living_nw_column.iff" ] }  // IFF RM0 000:042
+		{ 'ASS' $3000043l [ "640_xiaomi_condensate_pump.iff" ] }  // IFF RM0 000:043
+		{ 'ASS' $3000044l [ "640_midea_24k_master_219b.iff" ] }  // IFF RM0 000:044
+		{ 'ASS' $3000045l [ "640_midea_24k_master_94f8.iff" ] }  // IFF RM0 000:045
+		{ 'ASS' $3000046l [ "640_midea_drain_a_clo_57b6.iff" ] }  // IFF RM0 000:046
+		{ 'ASS' $3000047l [ "640_midea_lineset_a_c_09f9.iff" ] }  // IFF RM0 000:047
+		{ 'ASS' $3000048l [ "640_midea_power_a_clo_39bb.iff" ] }  // IFF RM0 000:048
 	}
 	{ 'ALGN' .align(2048) }
 }

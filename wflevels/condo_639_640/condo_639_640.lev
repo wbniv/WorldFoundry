@@ -147,7 +147,7 @@
 		{ 'STR' { 'NAME' "Poof" } { 'STR' "" } }
 		{ 'I32' { 'NAME' "Is Needle Gun Target" } { 'DATA' 0l } { 'STR' "False" } }  //False|True
 		{ 'I32' { 'NAME' "Write To Mailbox On Death" } { 'DATA' 0l } { 'STR' "0" } }
-		{ 'STR' { 'NAME' "Script" } { 'STR' "\\ wf\n98 read-mailbox dup 0 <> if INDEXOF_CAMSHOT write-mailbox 0 98 write-mailbox else drop then\n99 read-mailbox dup 0 <> if INDEXOF_CAMSHOT write-mailbox 0 99 write-mailbox 97 read-mailbox 0 = if INDEXOF_TIME read-mailbox 97 write-mailbox then else drop 0 97 write-mailbox then\n95 read-mailbox dup 0 <> if INDEXOF_CAMSHOT write-mailbox 0 95 write-mailbox 96 read-mailbox 0 = if INDEXOF_TIME read-mailbox 96 write-mailbox then else drop 0 96 write-mailbox then\nINDEXOF_HARDWARE_JOYSTICK1_RAW_JUSTPRESSED read-mailbox JOYSTICK_BUTTON_B & 0 <> if 92 read-mailbox 0 <> if 91 read-mailbox 0 = if 1 93 read-mailbox - 93 write-mailbox 1 91 write-mailbox then then else 0 91 write-mailbox then 0 92 write-mailbox 94 read-mailbox INDEXOF_DELTA_TIME read-mailbox 2.0 / 93 read-mailbox 0 <> if + else - then dup 1 > if drop 1 then dup 0 < if drop 0 then dup 94 write-mailbox dup -2.6667 * INDEXOF_X_POS 37 write-actor-mailbox dup -1.3333 * INDEXOF_X_POS 38 write-actor-mailbox drop\n" } }
+		{ 'STR' { 'NAME' "Script" } { 'STR' "\\ wf\n98 read-mailbox dup 0 <> if INDEXOF_CAMSHOT write-mailbox 0 98 write-mailbox else drop then\n99 read-mailbox dup 0 <> if INDEXOF_CAMSHOT write-mailbox 0 99 write-mailbox 97 read-mailbox 0 = if INDEXOF_TIME read-mailbox 97 write-mailbox then else drop 0 97 write-mailbox then\n95 read-mailbox dup 0 <> if INDEXOF_CAMSHOT write-mailbox 0 95 write-mailbox 96 read-mailbox 0 = if INDEXOF_TIME read-mailbox 96 write-mailbox then else drop 0 96 write-mailbox then\n113 read-mailbox 0 <> if 5 INDEXOF_CAMSHOT write-mailbox then\n119 read-mailbox 0 <> if 92 read-mailbox 0 <> if 91 read-mailbox 0 = if 1 93 read-mailbox - 93 write-mailbox 1 91 write-mailbox then then else 0 91 write-mailbox then 0 92 write-mailbox 94 read-mailbox INDEXOF_DELTA_TIME read-mailbox 2.0 / 93 read-mailbox 0 <> if + else - then dup 1 > if drop 1 then dup 0 < if drop 0 then dup 94 write-mailbox dup -2.6667 * INDEXOF_X_POS 37 write-actor-mailbox dup -1.3333 * INDEXOF_X_POS 38 write-actor-mailbox drop\n" } }
 		{ 'I32' { 'NAME' "Script Controls Input" } { 'DATA' 0l } { 'STR' "False" } }  //False|True
 		{ 'FILE' { 'NAME' "Mesh Name" } { 'STR' "" } }
 		{ 'I32' { 'NAME' "Model Type" } { 'STR' "None" } }
@@ -804,7 +804,7 @@
 		{ 'STR' { 'NAME' "Poof" } { 'STR' "" } }
 		{ 'I32' { 'NAME' "Is Needle Gun Target" } { 'DATA' 0l } { 'STR' "False" } }  //False|True
 		{ 'I32' { 'NAME' "Write To Mailbox On Death" } { 'DATA' 0l } { 'STR' "0" } }
-		{ 'STR' { 'NAME' "Script" } { 'STR' "\\ wf\n80 read-mailbox 0 = if\n4.65625 83 write-mailbox\n-14.5 84 write-mailbox\n16.05 85 write-mailbox\n-3.875 86 write-mailbox\n-14.5 87 write-mailbox\n16.05 88 write-mailbox\n639 81 write-mailbox\n1 80 write-mailbox then\nINDEXOF_Z_POS read-mailbox 15.65 > INDEXOF_Z_POS read-mailbox 18.45 < & INDEXOF_Y_POS read-mailbox -15.15 > & INDEXOF_Y_POS read-mailbox -0.15 < & INDEXOF_X_POS read-mailbox -7.8 > & INDEXOF_X_POS read-mailbox 7.8 < & INDEXOF_Y_POS read-mailbox -12.45 > INDEXOF_X_POS read-mailbox -5.0 > | & if\nINDEXOF_X_POS read-mailbox 0 > INDEXOF_Y_POS read-mailbox -6.75 > | INDEXOF_X_POS read-mailbox -2.9 > INDEXOF_Y_POS read-mailbox -10.05 > & | if\n639 81 write-mailbox\nINDEXOF_X_POS read-mailbox 83 write-mailbox\nINDEXOF_Y_POS read-mailbox 84 write-mailbox\nINDEXOF_Z_POS read-mailbox 85 write-mailbox\nelse\n640 81 write-mailbox\nINDEXOF_X_POS read-mailbox 86 write-mailbox\nINDEXOF_Y_POS read-mailbox 87 write-mailbox\nINDEXOF_Z_POS read-mailbox 88 write-mailbox\nthen then\nINDEXOF_HARDWARE_JOYSTICK1_RAW read-mailbox INDEXOF_INPUT write-mailbox\nINDEXOF_HARDWARE_JOYSTICK1_RAW read-mailbox JOYSTICK_BUTTON_C & 0 <> if\n82 read-mailbox 0 = if\n81 read-mailbox 639 = if\n640 81 write-mailbox\n86 read-mailbox dup INDEXOF_X_POS write-mailbox 0.0 + INDEXOF_X_POS 1 write-actor-mailbox\n87 read-mailbox dup INDEXOF_Y_POS write-mailbox -3.5 + INDEXOF_Y_POS 1 write-actor-mailbox\n88 read-mailbox dup INDEXOF_Z_POS write-mailbox 9.0 + INDEXOF_Z_POS 1 write-actor-mailbox\nelse\n639 81 write-mailbox\n83 read-mailbox dup INDEXOF_X_POS write-mailbox 0.0 + INDEXOF_X_POS 1 write-actor-mailbox\n84 read-mailbox dup INDEXOF_Y_POS write-mailbox -3.5 + INDEXOF_Y_POS 1 write-actor-mailbox\n85 read-mailbox dup INDEXOF_Z_POS write-mailbox 9.0 + INDEXOF_Z_POS 1 write-actor-mailbox\nthen\n0 INDEXOF_XSPEED write-mailbox\n0 INDEXOF_YSPEED write-mailbox\n0 INDEXOF_ZSPEED write-mailbox\n0 INDEXOF_INPUT write-mailbox\n5 INDEXOF_CAMSHOT write-mailbox\n0 98 write-mailbox\n0 99 write-mailbox\n0 95 write-mailbox\n0 97 write-mailbox\n0 96 write-mailbox\nthen 1 82 write-mailbox\nelse 0 82 write-mailbox then\n" } }
+		{ 'STR' { 'NAME' "Script" } { 'STR' "\\ wf\n: cc-shot 5 ;\n: cc-camera 1 ;\n: cc-touch 0 ;\n: cc-default-yaw 0.0 ;\n: cc-default-elevation 0.18508579676810535 ;\n: cc-default-range 8.823831367382311 ;\n: cc-unit-z 15.75 ;\n: cc-label-0 0 ;\n: cc-label-1 0 ;\n: cc-label-2 0 ;\n: cc-look-x 0.0 ;\n: cc-look-y 0.0 ;\n: cc-look-z 0.9 ;\n: cc-default-x 0.0 ;\n: cc-default-y -3.5 ;\n: cc-default-z 9.0 ;\n\\ Camera policy only. Build supplies cc-shot, cc-camera, cc-touch,\n\\ cc-default-yaw/elevation/range, cc-look-x/y/z and cc-unit-z words.\n\\ Global mailboxes 110..139 belong to this controller (see README).\n: cc-key 111 read-mailbox & 0 <> ;\n: cc-was 121 read-mailbox & 0 <> ;\n: cc-wrap dup 0 < if 1 + then dup 1 >= if 1 - then ;\n: cc-sin\n  cc-wrap dup 0.5 > if 0.5 - -1 else 1 then >r\n  2 * dup 1 swap - * dup 16 * swap 4 * 5 swap - / r> * ;\n: cc-cos 0.25 + cc-sin ;\n: cc-stop 0 INDEXOF_INPUT write-mailbox\n  0 INDEXOF_XSPEED write-mailbox 0 INDEXOF_YSPEED write-mailbox ;\n: cc-reset\n  cc-default-yaw 114 write-mailbox\n  cc-default-elevation 115 write-mailbox\n  cc-default-range 116 write-mailbox\n  0 113 write-mailbox 0 112 write-mailbox ;\n: cc-init 110 read-mailbox 0 = if\n  cc-reset 1 110 write-mailbox then ;\n: cc-directions\n  JOYSTICK_BUTTON_RIGHT cc-key if 1 else 0 then\n  JOYSTICK_BUTTON_LEFT cc-key if 1 else 0 then - 133 write-mailbox\n  JOYSTICK_BUTTON_UP cc-key if 1 else 0 then\n  JOYSTICK_BUTTON_DOWN cc-key if 1 else 0 then - 134 write-mailbox ;\n: cc-touch-input\n  \\ Chord is latched until BOTH fingers release. It cancels pending taps.\n  JOYSTICK_BUTTON_A cc-key JOYSTICK_BUTTON_B cc-key & if\n    123 read-mailbox 0 = if 1 120 write-mailbox then\n    1 123 write-mailbox 1 124 write-mailbox\n  then\n  123 read-mailbox 0 <> if\n    JOYSTICK_BUTTON_A cc-key JOYSTICK_BUTTON_B cc-key | 0 = if\n      0 123 write-mailbox 0 124 write-mailbox 0 122 write-mailbox then\n  else\n    JOYSTICK_BUTTON_B cc-key if\n      122 read-mailbox 117 read-mailbox + 122 write-mailbox\n      122 read-mailbox 0.6 >= 124 read-mailbox 0 = & if\n        cc-reset 1 124 write-mailbox then\n    else\n      JOYSTICK_BUTTON_B cc-was 124 read-mailbox 0 = & if\n        1 119 write-mailbox then\n      0 122 write-mailbox 0 124 write-mailbox\n    then\n    JOYSTICK_BUTTON_A cc-key 0 = JOYSTICK_BUTTON_A cc-was & if\n      112 read-mailbox 1 + dup 3 >= if drop 0 then 112 write-mailbox\n    then\n  then\n  112 read-mailbox 0 <> if 1 135 write-mailbox 1 113 write-mailbox then\n  123 read-mailbox 0 = if\n    112 read-mailbox 1 = if 1 136 write-mailbox then\n    112 read-mailbox 2 = if 134 read-mailbox negate 137 write-mailbox then\n  then ;\n: cc-desktop-input\n  JOYSTICK_BUTTON_C cc-key if 1 120 write-mailbox then\n  JOYSTICK_BUTTON_D cc-key if\n    1 135 write-mailbox\n    JOYSTICK_BUTTON_A cc-key if\n      125 read-mailbox 0 = if cc-reset then\n      1 125 write-mailbox\n    else\n      0 125 write-mailbox\n      JOYSTICK_BUTTON_B cc-key if\n        134 read-mailbox negate 137 write-mailbox\n      else 1 136 write-mailbox then\n    then\n  else\n    0 125 write-mailbox\n    JOYSTICK_BUTTON_B cc-key JOYSTICK_BUTTON_B cc-was 0 = &\n    INDEXOF_HARDWARE_JOYSTICK1_RAW_JUSTPRESSED read-mailbox JOYSTICK_BUTTON_B & 0 <> | if\n      1 119 write-mailbox then\n  then\n  125 read-mailbox 0 = if\n    JOYSTICK_BUTTON_F cc-key if 1 else 0 then\n    JOYSTICK_BUTTON_E cc-key if 1 else 0 then -\n    137 read-mailbox + -1 max 1 min 137 write-mailbox then ;\n: cc-adjust\n  136 read-mailbox 0 <> if\n    133 read-mailbox 0 <> 134 read-mailbox 0 <> | if\n      1 113 write-mailbox\n      114 read-mailbox 133 read-mailbox 117 read-mailbox * 6 / + cc-wrap 114 write-mailbox\n      115 read-mailbox 134 read-mailbox 117 read-mailbox * 12 / +\n      0.097222222 max 0.222222222 min 115 write-mailbox\n    then\n  then\n  137 read-mailbox 0 <> if\n    1 113 write-mailbox\n    116 read-mailbox 137 read-mailbox 117 read-mailbox * 3 * + 116 write-mailbox\n  then ;\n: cc-pose\n  113 read-mailbox 0 <> if\n    115 read-mailbox 0.097222222 max 0.222222222 min 115 write-mailbox\n    115 read-mailbox cc-sin 128 write-mailbox\n    \\ Clearance and room-top constraints are coupled to elevation.\n    116 read-mailbox 4 max 12 min\n    3.2 128 read-mailbox / max\n    27.5 INDEXOF_Z_POS read-mailbox - cc-look-z - 3.2 max\n    10.8 min 128 read-mailbox / min 116 write-mailbox\n    115 read-mailbox cc-cos 116 read-mailbox * 129 write-mailbox\n    114 read-mailbox cc-sin 129 read-mailbox * cc-look-x + 130 write-mailbox\n    114 read-mailbox cc-cos 129 read-mailbox * negate cc-look-y + 131 write-mailbox\n    128 read-mailbox 116 read-mailbox * cc-look-z + 132 write-mailbox\n  else\n    cc-default-x 130 write-mailbox cc-default-y 131 write-mailbox cc-default-z 132 write-mailbox\n  then\n  130 read-mailbox INDEXOF_X_POS cc-shot write-actor-mailbox\n  131 read-mailbox INDEXOF_Y_POS cc-shot write-actor-mailbox\n  132 read-mailbox cc-unit-z + INDEXOF_Z_POS cc-shot write-actor-mailbox ;\n: cc-input\n  cc-init INDEXOF_HARDWARE_JOYSTICK1_RAW read-mailbox 111 write-mailbox\n  INDEXOF_DELTA_TIME read-mailbox 0 max 0.05 min 117 write-mailbox\n  0 119 write-mailbox 0 120 write-mailbox\n  0 135 write-mailbox 0 136 write-mailbox 0 137 write-mailbox\n  cc-directions\n  cc-touch if cc-touch-input else cc-desktop-input then\n  cc-adjust cc-pose\n  111 read-mailbox 30720 & 118 write-mailbox\n  cc-touch 0 = 135 read-mailbox 0 = & if\n    118 read-mailbox JOYSTICK_BUTTON_A cc-key if 1 else 0 then | 118 write-mailbox then\n  135 read-mailbox 0 <> if 0 118 write-mailbox cc-stop then\n  111 read-mailbox 121 write-mailbox ;\n\n: cc-label\n  >r dup 112 read-mailbox = swap 140 + write-mailbox\n  INDEXOF_X_POS read-mailbox INDEXOF_X_POS r@ write-actor-mailbox\n  INDEXOF_Y_POS read-mailbox INDEXOF_Y_POS r@ write-actor-mailbox\n  INDEXOF_Z_POS read-mailbox 3.2 + INDEXOF_Z_POS r@ write-actor-mailbox\n  114 read-mailbox INDEXOF_ROTATION_C r@ write-actor-mailbox\n  r> drop ;\n: cc-labels cc-touch if\n  0 cc-label-0 cc-label 1 cc-label-1 cc-label 2 cc-label-2 cc-label\n  then ;\n\ncc-input\n\\ wf\n80 read-mailbox 0 = if\n4.65625 83 write-mailbox\n-14.5 84 write-mailbox\n16.05 85 write-mailbox\n-3.875 86 write-mailbox\n-14.5 87 write-mailbox\n16.05 88 write-mailbox\n639 81 write-mailbox\n1 80 write-mailbox then\nINDEXOF_Z_POS read-mailbox 15.65 > INDEXOF_Z_POS read-mailbox 18.45 < & INDEXOF_Y_POS read-mailbox -15.15 > & INDEXOF_Y_POS read-mailbox -0.15 < & INDEXOF_X_POS read-mailbox -7.8 > & INDEXOF_X_POS read-mailbox 7.8 < & INDEXOF_Y_POS read-mailbox -12.45 > INDEXOF_X_POS read-mailbox -5.0 > | & if\nINDEXOF_X_POS read-mailbox 0 > INDEXOF_Y_POS read-mailbox -6.75 > | INDEXOF_X_POS read-mailbox -2.9 > INDEXOF_Y_POS read-mailbox -10.05 > & | if\n639 81 write-mailbox\nINDEXOF_X_POS read-mailbox 83 write-mailbox\nINDEXOF_Y_POS read-mailbox 84 write-mailbox\nINDEXOF_Z_POS read-mailbox 85 write-mailbox\nelse\n640 81 write-mailbox\nINDEXOF_X_POS read-mailbox 86 write-mailbox\nINDEXOF_Y_POS read-mailbox 87 write-mailbox\nINDEXOF_Z_POS read-mailbox 88 write-mailbox\nthen then\n118 read-mailbox INDEXOF_INPUT write-mailbox\n120 read-mailbox 0 <> if\n82 read-mailbox 0 = if\n81 read-mailbox 639 = if\n640 81 write-mailbox\n86 read-mailbox dup INDEXOF_X_POS write-mailbox 130 read-mailbox + INDEXOF_X_POS 1 write-actor-mailbox\n87 read-mailbox dup INDEXOF_Y_POS write-mailbox 131 read-mailbox + INDEXOF_Y_POS 1 write-actor-mailbox\n88 read-mailbox dup INDEXOF_Z_POS write-mailbox 132 read-mailbox + INDEXOF_Z_POS 1 write-actor-mailbox\nelse\n639 81 write-mailbox\n83 read-mailbox dup INDEXOF_X_POS write-mailbox 130 read-mailbox + INDEXOF_X_POS 1 write-actor-mailbox\n84 read-mailbox dup INDEXOF_Y_POS write-mailbox 131 read-mailbox + INDEXOF_Y_POS 1 write-actor-mailbox\n85 read-mailbox dup INDEXOF_Z_POS write-mailbox 132 read-mailbox + INDEXOF_Z_POS 1 write-actor-mailbox\nthen\n0 INDEXOF_XSPEED write-mailbox\n0 INDEXOF_YSPEED write-mailbox\n0 INDEXOF_ZSPEED write-mailbox\n0 INDEXOF_INPUT write-mailbox\n5 INDEXOF_CAMSHOT write-mailbox\n0 98 write-mailbox\n0 99 write-mailbox\n0 95 write-mailbox\n0 97 write-mailbox\n0 96 write-mailbox\nthen 1 82 write-mailbox\nelse 0 82 write-mailbox then\n\ncc-labels\n" } }
 		{ 'I32' { 'NAME' "Script Controls Input" } { 'DATA' 1l } { 'STR' "True" } }  //False|True
 		{ 'FILE' { 'NAME' "Mesh Name" } { 'STR' "" } }
 		{ 'I32' { 'NAME' "Model Type" } { 'STR' "Mesh" } }
@@ -4385,8 +4385,84 @@
 		{ 'FX32' { 'NAME' "slopeD" } { 'DATA' 0.0000000000000000(1.15.16) } { 'STR' "0.000000" } }
 	}
 	{ 'OBJ' 
+		{ 'NAME' "640-xiaomi-power" }
+		{ 'VEC3' { 'NAME' "Position" } { 'DATA' 0.0000000000000000(1.15.16) 0.0000000000000000(1.15.16) 15.7500000000000000(1.15.16)  //x,y,z
+		} }
+		{ 'EULR' { 'NAME' "Orientation" } { 'DATA' 0.0000000000000000(1.15.16) -0.0000000000000000(1.15.16) 0.0000000000000000(1.15.16)  //a,b,c
+		} }
+		{ 'BOX3' { 'NAME' "Global Bounding Box" } { 'DATA' -5.4874997138977051(1.15.16) -15.3000001907348633(1.15.16) 1.6625000238418579(1.15.16) -2.0499999523162842(1.15.16) -6.8000001907348633(1.15.16) 2.0875000953674316(1.15.16)  //min(x,y,z)-max(x,y,z)
+		} }
+		{ 'STR' { 'NAME' "Class Name" } { 'DATA' "statplat" } }
+		{ 'FILE' { 'NAME' "Mesh Name" } { 'STR' "640_xiaomi_power.iff" } }
+		{ 'I32'  { 'NAME' "Model Type" } { 'DATA' 1l } { 'STR' "Mesh" } }
+		{ 'I32' { 'NAME' "Mobility" } { 'STR' "Anchored" } }
+		{ 'I32' { 'NAME' "Model Type" } { 'STR' "Mesh" } }
+		{ 'I32' { 'NAME' "Visibility Mailbox" } { 'DATA' 1l } { 'STR' "1" } }
+		{ 'FX32' { 'NAME' "slopeA" } { 'DATA' -0.0000000450521037(1.15.16) } { 'STR' "-0.000000" } }
+		{ 'FX32' { 'NAME' "slopeB" } { 'DATA' -0.0000000010691005(1.15.16) } { 'STR' "-0.000000" } }
+		{ 'FX32' { 'NAME' "slopeC" } { 'DATA' 0.0000000756876700(1.15.16) } { 'STR' "0.000000" } }
+		{ 'FX32' { 'NAME' "slopeD" } { 'DATA' 0.0000011920808021(1.15.16) } { 'STR' "0.000001" } }
+	}
+	{ 'OBJ' 
+		{ 'NAME' "640-xiaomi-drain" }
+		{ 'VEC3' { 'NAME' "Position" } { 'DATA' 0.0000000000000000(1.15.16) 0.0000000000000000(1.15.16) 15.7500000000000000(1.15.16)  //x,y,z
+		} }
+		{ 'EULR' { 'NAME' "Orientation" } { 'DATA' 0.0000000000000000(1.15.16) -0.0000000000000000(1.15.16) 0.0000000000000000(1.15.16)  //a,b,c
+		} }
+		{ 'BOX3' { 'NAME' "Global Bounding Box" } { 'DATA' -5.4882726669311523(1.15.16) -13.6667995452880859(1.15.16) 0.9625001549720764(1.15.16) -1.2124999761581421(1.15.16) -6.8000001907348633(1.15.16) 2.5877957344055176(1.15.16)  //min(x,y,z)-max(x,y,z)
+		} }
+		{ 'STR' { 'NAME' "Class Name" } { 'DATA' "statplat" } }
+		{ 'FILE' { 'NAME' "Mesh Name" } { 'STR' "640_xiaomi_drain.iff" } }
+		{ 'I32'  { 'NAME' "Model Type" } { 'DATA' 1l } { 'STR' "Mesh" } }
+		{ 'I32' { 'NAME' "Mobility" } { 'STR' "Anchored" } }
+		{ 'I32' { 'NAME' "Model Type" } { 'STR' "Mesh" } }
+		{ 'I32' { 'NAME' "Visibility Mailbox" } { 'DATA' 1l } { 'STR' "1" } }
+		{ 'FX32' { 'NAME' "slopeA" } { 'DATA' 0.0000000000000000(1.15.16) } { 'STR' "0.000000" } }
+		{ 'FX32' { 'NAME' "slopeB" } { 'DATA' -0.0000000217826485(1.15.16) } { 'STR' "-0.000000" } }
+		{ 'FX32' { 'NAME' "slopeC" } { 'DATA' 0.0000001527812509(1.15.16) } { 'STR' "0.000000" } }
+		{ 'FX32' { 'NAME' "slopeD" } { 'DATA' 0.0000024063047022(1.15.16) } { 'STR' "0.000002" } }
+	}
+	{ 'OBJ' 
+		{ 'NAME' "640-xiaomi-lineset" }
+		{ 'VEC3' { 'NAME' "Position" } { 'DATA' 0.0000000000000000(1.15.16) 0.0000000000000000(1.15.16) 15.7500000000000000(1.15.16)  //x,y,z
+		} }
+		{ 'EULR' { 'NAME' "Orientation" } { 'DATA' 0.0000000000000000(1.15.16) -0.0000000000000000(1.15.16) 0.0000000000000000(1.15.16)  //a,b,c
+		} }
+		{ 'BOX3' { 'NAME' "Global Bounding Box" } { 'DATA' -8.3500003814697266(1.15.16) -8.2875003814697266(1.15.16) 0.5625000000000000(1.15.16) -6.3125000000000000(1.15.16) -6.8000001907348633(1.15.16) 2.0875000953674316(1.15.16)  //min(x,y,z)-max(x,y,z)
+		} }
+		{ 'STR' { 'NAME' "Class Name" } { 'DATA' "statplat" } }
+		{ 'FILE' { 'NAME' "Mesh Name" } { 'STR' "640_xiaomi_lineset.iff" } }
+		{ 'I32'  { 'NAME' "Model Type" } { 'DATA' 1l } { 'STR' "Mesh" } }
+		{ 'I32' { 'NAME' "Mobility" } { 'STR' "Anchored" } }
+		{ 'I32' { 'NAME' "Model Type" } { 'STR' "Mesh" } }
+		{ 'I32' { 'NAME' "Visibility Mailbox" } { 'DATA' 1l } { 'STR' "1" } }
+		{ 'FX32' { 'NAME' "slopeA" } { 'DATA' 0.0000000911853492(1.15.16) } { 'STR' "0.000000" } }
+		{ 'FX32' { 'NAME' "slopeB" } { 'DATA' -0.0000000125861205(1.15.16) } { 'STR' "-0.000000" } }
+		{ 'FX32' { 'NAME' "slopeC" } { 'DATA' -0.0000000074447657(1.15.16) } { 'STR' "-0.000000" } }
+		{ 'FX32' { 'NAME' "slopeD" } { 'DATA' -0.0000001172550590(1.15.16) } { 'STR' "-0.000000" } }
+	}
+	{ 'OBJ' 
+		{ 'NAME' "640-living-nw-column" }
+		{ 'VEC3' { 'NAME' "Position" } { 'DATA' -7.5999999046325684(1.15.16) -7.0000000000000000(1.15.16) 17.1000003814697266(1.15.16)  //x,y,z
+		} }
+		{ 'EULR' { 'NAME' "Orientation" } { 'DATA' 0.0000000000000000(1.15.16) -0.0000000000000000(1.15.16) 0.0000000000000000(1.15.16)  //a,b,c
+		} }
+		{ 'BOX3' { 'NAME' "Global Bounding Box" } { 'DATA' -0.2000000029802322(1.15.16) -0.2000000029802322(1.15.16) -1.3500000238418579(1.15.16) 0.2000000029802322(1.15.16) 0.2000000029802322(1.15.16) 1.3500000238418579(1.15.16)  //min(x,y,z)-max(x,y,z)
+		} }
+		{ 'STR' { 'NAME' "Class Name" } { 'DATA' "statplat" } }
+		{ 'FILE' { 'NAME' "Mesh Name" } { 'STR' "640_living_nw_column.iff" } }
+		{ 'I32'  { 'NAME' "Model Type" } { 'DATA' 1l } { 'STR' "Mesh" } }
+		{ 'I32' { 'NAME' "Mobility" } { 'STR' "Anchored" } }
+		{ 'I32' { 'NAME' "Model Type" } { 'STR' "Mesh" } }
+		{ 'I32' { 'NAME' "Visibility Mailbox" } { 'DATA' 1l } { 'STR' "1" } }
+		{ 'FX32' { 'NAME' "slopeA" } { 'DATA' 0.0000000000000000(1.15.16) } { 'STR' "0.000000" } }
+		{ 'FX32' { 'NAME' "slopeB" } { 'DATA' 0.0000000000000000(1.15.16) } { 'STR' "0.000000" } }
+		{ 'FX32' { 'NAME' "slopeC" } { 'DATA' 0.0000000000000000(1.15.16) } { 'STR' "0.000000" } }
+		{ 'FX32' { 'NAME' "slopeD" } { 'DATA' 0.0000000000000000(1.15.16) } { 'STR' "0.000000" } }
+	}
+	{ 'OBJ'
 		{ 'NAME' "640-xiaomi-condensate-pump" }
-		{ 'VEC3' { 'NAME' "Position" } { 'DATA' -3.0499999523162842(1.15.16) -6.9124999046325684(1.15.16) 17.8299999237060547(1.15.16)  //x,y,z
+		{ 'VEC3' { 'NAME' "Position" } { 'DATA' -3.0499999523162842(1.15.16) -6.9124999046325684(1.15.16) 17.7500000000000000(1.15.16)  //x,y,z
 		} }
 		{ 'EULR' { 'NAME' "Orientation" } { 'DATA' 0.0000000000000000(1.15.16) -0.0000000000000000(1.15.16) 0.0000000000000000(1.15.16)  //a,b,c
 		} }
@@ -4402,63 +4478,6 @@
 		{ 'FX32' { 'NAME' "slopeB" } { 'DATA' 0.0000000000000000(1.15.16) } { 'STR' "0.000000" } }
 		{ 'FX32' { 'NAME' "slopeC" } { 'DATA' 0.0000000000000000(1.15.16) } { 'STR' "0.000000" } }
 		{ 'FX32' { 'NAME' "slopeD" } { 'DATA' 0.0000000000000000(1.15.16) } { 'STR' "0.000000" } }
-	}
-	{ 'OBJ' 
-		{ 'NAME' "640-xiaomi-drain" }
-		{ 'VEC3' { 'NAME' "Position" } { 'DATA' 0.0000000000000000(1.15.16) 0.0000000000000000(1.15.16) 15.7500000000000000(1.15.16)  //x,y,z
-		} }
-		{ 'EULR' { 'NAME' "Orientation" } { 'DATA' 0.0000000000000000(1.15.16) -0.0000000000000000(1.15.16) 0.0000000000000000(1.15.16)  //a,b,c
-		} }
-		{ 'BOX3' { 'NAME' "Global Bounding Box" } { 'DATA' -5.9009823799133301(1.15.16) -13.6649761199951172(1.15.16) 1.0000000000000000(1.15.16) -1.2100235223770142(1.15.16) -6.8724999427795410(1.15.16) 2.5779571533203125(1.15.16)  //min(x,y,z)-max(x,y,z)
-		} }
-		{ 'STR' { 'NAME' "Class Name" } { 'DATA' "statplat" } }
-		{ 'FILE' { 'NAME' "Mesh Name" } { 'STR' "640_xiaomi_drain.iff" } }
-		{ 'I32'  { 'NAME' "Model Type" } { 'DATA' 1l } { 'STR' "Mesh" } }
-		{ 'I32' { 'NAME' "Mobility" } { 'STR' "Anchored" } }
-		{ 'I32' { 'NAME' "Model Type" } { 'STR' "Mesh" } }
-		{ 'I32' { 'NAME' "Visibility Mailbox" } { 'DATA' 1l } { 'STR' "1" } }
-		{ 'FX32' { 'NAME' "slopeA" } { 'DATA' 0.0016371645612404(1.15.16) } { 'STR' "0.001637" } }
-		{ 'FX32' { 'NAME' "slopeB" } { 'DATA' 0.0010394228347650(1.15.16) } { 'STR' "0.001039" } }
-		{ 'FX32' { 'NAME' "slopeC" } { 'DATA' 0.0014015095392905(1.15.16) } { 'STR' "0.001402" } }
-		{ 'FX32' { 'NAME' "slopeD" } { 'DATA' 0.0220737752438254(1.15.16) } { 'STR' "0.022074" } }
-	}
-	{ 'OBJ' 
-		{ 'NAME' "640-xiaomi-lineset" }
-		{ 'VEC3' { 'NAME' "Position" } { 'DATA' 0.0000000000000000(1.15.16) 0.0000000000000000(1.15.16) 15.7500000000000000(1.15.16)  //x,y,z
-		} }
-		{ 'EULR' { 'NAME' "Orientation" } { 'DATA' 0.0000000000000000(1.15.16) -0.0000000000000000(1.15.16) 0.0000000000000000(1.15.16)  //a,b,c
-		} }
-		{ 'BOX3' { 'NAME' "Global Bounding Box" } { 'DATA' -8.3719062805175781(1.15.16) -8.2975406646728516(1.15.16) 0.5642157196998596(1.15.16) -5.9000000953674316(1.15.16) -6.8524999618530273(1.15.16) 2.4099998474121094(1.15.16)  //min(x,y,z)-max(x,y,z)
-		} }
-		{ 'STR' { 'NAME' "Class Name" } { 'DATA' "statplat" } }
-		{ 'FILE' { 'NAME' "Mesh Name" } { 'STR' "640_xiaomi_lineset.iff" } }
-		{ 'I32'  { 'NAME' "Model Type" } { 'DATA' 1l } { 'STR' "Mesh" } }
-		{ 'I32' { 'NAME' "Mobility" } { 'STR' "Anchored" } }
-		{ 'I32' { 'NAME' "Model Type" } { 'STR' "Mesh" } }
-		{ 'I32' { 'NAME' "Visibility Mailbox" } { 'DATA' 1l } { 'STR' "1" } }
-		{ 'FX32' { 'NAME' "slopeA" } { 'DATA' -0.0060892589228590(1.15.16) } { 'STR' "-0.006089" } }
-		{ 'FX32' { 'NAME' "slopeB" } { 'DATA' 0.0004097692047556(1.15.16) } { 'STR' "0.000410" } }
-		{ 'FX32' { 'NAME' "slopeC" } { 'DATA' 0.0005337045036463(1.15.16) } { 'STR' "0.000534" } }
-		{ 'FX32' { 'NAME' "slopeD" } { 'DATA' 0.0084058459324297(1.15.16) } { 'STR' "0.008406" } }
-	}
-	{ 'OBJ' 
-		{ 'NAME' "640-xiaomi-power" }
-		{ 'VEC3' { 'NAME' "Position" } { 'DATA' 0.0000000000000000(1.15.16) 0.0000000000000000(1.15.16) 15.7500000000000000(1.15.16)  //x,y,z
-		} }
-		{ 'EULR' { 'NAME' "Orientation" } { 'DATA' 0.0000000000000000(1.15.16) -0.0000000000000000(1.15.16) 0.0000000000000000(1.15.16)  //a,b,c
-		} }
-		{ 'BOX3' { 'NAME' "Global Bounding Box" } { 'DATA' -5.9395136833190918(1.15.16) -15.1649999618530273(1.15.16) 1.7000000476837158(1.15.16) -2.3662500381469727(1.15.16) -6.8729863166809082(1.15.16) 2.5893263816833496(1.15.16)  //min(x,y,z)-max(x,y,z)
-		} }
-		{ 'STR' { 'NAME' "Class Name" } { 'DATA' "statplat" } }
-		{ 'FILE' { 'NAME' "Mesh Name" } { 'STR' "640_xiaomi_power.iff" } }
-		{ 'I32'  { 'NAME' "Model Type" } { 'DATA' 1l } { 'STR' "Mesh" } }
-		{ 'I32' { 'NAME' "Mobility" } { 'STR' "Anchored" } }
-		{ 'I32' { 'NAME' "Model Type" } { 'STR' "Mesh" } }
-		{ 'I32' { 'NAME' "Visibility Mailbox" } { 'DATA' 1l } { 'STR' "1" } }
-		{ 'FX32' { 'NAME' "slopeA" } { 'DATA' 0.0003847935332791(1.15.16) } { 'STR' "0.000385" } }
-		{ 'FX32' { 'NAME' "slopeB" } { 'DATA' -0.0004703754559159(1.15.16) } { 'STR' "-0.000470" } }
-		{ 'FX32' { 'NAME' "slopeC" } { 'DATA' 0.0080721211270429(1.15.16) } { 'STR' "0.008072" } }
-		{ 'FX32' { 'NAME' "slopeD" } { 'DATA' 0.1271359077509260(1.15.16) } { 'STR' "0.127136" } }
 	}
 	{ 'OBJ' 
 		{ 'NAME' "640-midea-24k-master-indoor-A-closet-wall" }

@@ -29,6 +29,7 @@
 #ifdef WF_FORTH_ENGINE_ZFORTH
 
 #include "scripting_forth.hp"
+#include "forth_source.hp"
 
 extern "C" {
 #include <zforth.h>
@@ -1612,65 +1613,32 @@ float RunScript(const char* src, int objectIndex)
         return 0.0f;
     }
 
-    // Skip leading whitespace, then the `\ wf` sigil line.
-    while (*src == ' ' || *src == '\t' || *src == '\r' || *src == '\n') ++src;
-    while (*src && *src != '\n') ++src;
-    if (*src == '\n') ++src;
-    if (!*src) return 0.0f;
-
-    // Flush any suspended \ (line-comment) loop left by a prior partial eval.
-    // shell.aib's defs string ends at a ; inside a \ comment with no trailing \n,
-    // leaving the \ loop in ZF_INPUT_PASS_CHAR. Feeding \n here lets it exit
-    // cleanly before this script's compilation begins.
-    zf_eval(&g_ctx, "\n");
-
     // Compile each unique script once (keyed by src pointer) into a named word
     // so if/else/then work correctly (they require compile mode) and the
     // dictionary doesn't grow every frame.
     //
     // Scripts may contain `: word ... ;` definitions followed by a call body.
     // We can't nest `:` definitions inside the wrapper word, so we split:
-    //   1. Eval the definitions part (everything up to and including the last `;`)
+    //   1. Eval the definitions part (everything through the last executable `;`, ignoring comments/strings)
     //      directly — compiled once, never re-eval'd.
     //   2. Wrap only the call body (everything after the last `;`) in `_wfsN`.
     auto it = g_scriptCache.find(src);
     if (it == g_scriptCache.end()) {
-        const char* callBody = src;
-
-        // Find last `;` to locate the boundary between definitions and call body.
-        const char* lastSemi = nullptr;
-        for (const char* p = src; *p; ++p)
-            if (*p == ';') lastSemi = p;
-
-        if (lastSemi) {
-            std::string defs(src, static_cast<size_t>(lastSemi + 1 - src));
-            zf_result rc = zf_eval(&g_ctx, defs.c_str());
+        const auto parts = forth_source::Split(src);
+        if (!parts.definitions.empty()) {
+            zf_result rc = zf_eval(&g_ctx, parts.definitions.c_str());
             if (rc != ZF_OK) {
                 fprintf(stderr, "zforth compile error %d (defs): %.120s\n", rc, src);
                 return 0.0f;
             }
-            callBody = lastSemi + 1;
-            while (*callBody == ' ' || *callBody == '\t' || *callBody == '\r' || *callBody == '\n')
-                ++callBody;
         }
-
         char wordName[32];
         snprintf(wordName, sizeof(wordName), "_wfs%zu", g_scriptCache.size());
-        if (*callBody) {
-            std::string def = ": ";
-            def += wordName;
-            def += " ";
-            def += callBody;
-            def += " ;";
-            zf_result rc = zf_eval(&g_ctx, def.c_str());
-            if (rc != ZF_OK) {
-                fprintf(stderr, "zforth compile error %d (call): %.120s\n", rc, callBody);
-                return 0.0f;
-            }
-        } else {
-            // No call body — define an empty word so cache is populated.
-            std::string def = ": "; def += wordName; def += " ;";
-            zf_eval(&g_ctx, def.c_str());
+        const std::string def = forth_source::Wrap(wordName, parts.body);
+        zf_result rc = zf_eval(&g_ctx, def.c_str());
+        if (rc != ZF_OK) {
+            fprintf(stderr, "zforth compile error %d (call): %.120s\n", rc, src);
+            return 0.0f;
         }
         g_scriptCache[src] = wordName;
         it = g_scriptCache.find(src);
@@ -1702,39 +1670,18 @@ bool ReloadActorScript(int actor_idx, const char* source, std::string& log_out)
         return false;
     }
 
-    // Skip leading whitespace + optional `\ wf` sigil line (same as RunScript).
-    const char* src = source;
-    while (*src == ' ' || *src == '\t' || *src == '\r' || *src == '\n') ++src;
-    if (src[0] == '\\') {
-        while (*src && *src != '\n') ++src;
-        if (*src == '\n') ++src;
-    }
-
-    // Split definitions (everything up to last `;`) from the call body.
-    const char* lastSemi = nullptr;
-    for (const char* p = src; *p; ++p)
-        if (*p == ';') lastSemi = p;
-
-    const char* callBody = src;
-    if (lastSemi) {
-        std::string defs(src, static_cast<size_t>(lastSemi + 1 - src));
-        zf_result rc = zf_eval(&g_ctx, defs.c_str());
+    const auto parts = forth_source::Split(source);
+    if (!parts.definitions.empty()) {
+        zf_result rc = zf_eval(&g_ctx, parts.definitions.c_str());
         if (rc != ZF_OK) {
             log_out = std::string("defs: ") + zf_result_str(rc);
             return false;
         }
-        callBody = lastSemi + 1;
-        while (*callBody == ' ' || *callBody == '\t' || *callBody == '\r' || *callBody == '\n')
-            ++callBody;
     }
 
     char wordName[40];
     snprintf(wordName, sizeof(wordName), "_wfsRld%d", g_reloadCounter++);
-    std::string def = ": ";
-    def += wordName;
-    def += " ";
-    def += (*callBody) ? callBody : "";
-    def += " ;";
+    const std::string def = forth_source::Wrap(wordName, parts.body);
     zf_result rc = zf_eval(&g_ctx, def.c_str());
     if (rc != ZF_OK) {
         log_out = std::string("call: ") + zf_result_str(rc);

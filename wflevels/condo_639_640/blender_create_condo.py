@@ -37,6 +37,8 @@ LEVEL_NAME = os.environ.get('CONDO_LEVEL', 'condo_639_640')   # e.g. condo_639_6
 OUT_DIR    = os.path.join(REPO, 'wflevels', LEVEL_NAME)
 OUT_LEV    = os.path.join(OUT_DIR, LEVEL_NAME + '.lev')
 OUT_BLEND  = os.path.join(OUT_DIR, LEVEL_NAME + '.blend')      # the assembled WF scene, for inspection in Blender
+CAMERA_PROFILE = os.environ.get('CONDO_CAMERA_PROFILE', 'desktop')
+assert CAMERA_PROFILE in ('desktop', 'touch'), CAMERA_PROFILE
 TOUR_PATH  = os.environ.get('CONDO_TOUR', '')                  # path .json → player walks it (see tour_forth below)
 
 _argv = sys.argv[sys.argv.index('--') + 1:] if '--' in sys.argv else []
@@ -85,7 +87,7 @@ LOOK_OFFSET   = tuple(float(v) for v in os.environ['CONDO_LOOK'].split(',')) if 
 ROOM_CENTRE   = (0.0, -8.0, 12.0)            # z −4…28: ground quad and dome centres, the lifted units, the camera
 ROOM_HALF     = (170.0, 170.0, 16.0)         # levcomp places an actor by its mesh-bbox centre: the merged
                                              # site-buildings mesh (±150 m) must land inside (moon_site01 uses ±505 m)
-NUM_MAILBOXES = 100
+NUM_MAILBOXES = 160
 SUN_ALT_DEG   = 50.0
 SUN_AZ_DEG    = 30.0
 # Fill light: the engine's idle 2nd directional slot, aimed roughly opposite the
@@ -824,8 +826,8 @@ def unit_teleport_forth(camera_idx, dollhouse_idx):
     lines.append('then then')
 
     # RAW remains high while held; the latch prevents back-and-forth each tick.
-    lines += ['INDEXOF_HARDWARE_JOYSTICK1_RAW read-mailbox INDEXOF_INPUT write-mailbox',
-              'INDEXOF_HARDWARE_JOYSTICK1_RAW read-mailbox JOYSTICK_BUTTON_C & 0 <> if',
+    lines += ['118 read-mailbox INDEXOF_INPUT write-mailbox',
+              '120 read-mailbox 0 <> if',
               f'{MB_UNIT_PRESS_LATCH} read-mailbox 0 = if',
               f'{MB_CURRENT_UNIT} read-mailbox 639 = if']
     for unit in (640, 639):
@@ -834,7 +836,7 @@ def unit_teleport_forth(camera_idx, dollhouse_idx):
         lines.append(f'{unit} {MB_CURRENT_UNIT} write-mailbox')
         for i, (axis, mb) in enumerate(zip(axes, MB_UNIT_POS[unit])):
             lines.append(f'{mb} read-mailbox dup INDEXOF_{axis}_POS write-mailbox '
-                         f'{CAM_OFFSET[i]} + INDEXOF_{axis}_POS {camera_idx} write-actor-mailbox')
+                         f'{130+i} read-mailbox + INDEXOF_{axis}_POS {camera_idx} write-actor-mailbox')
     lines.append('then')
     for axis in axes:
         lines.append(f'0 INDEXOF_{axis}SPEED write-mailbox')
@@ -1338,8 +1340,9 @@ if CONDO_DOORS:
         return (
             _tour_init
             +
-            f"INDEXOF_HARDWARE_JOYSTICK1_RAW_JUSTPRESSED read-mailbox "
-            f"JOYSTICK_BUTTON_B & 0 <> if "
+            (f"INDEXOF_HARDWARE_JOYSTICK1_RAW_JUSTPRESSED read-mailbox JOYSTICK_BUTTON_B & 0 <> if "
+             if TOUR else "119 read-mailbox 0 <> if ")
+            +
             f"{MB_DOOR_BUTTON_ZONE} read-mailbox 0 <> if "
             f"{MB_DOOR_PRESS_LATCH} read-mailbox 0 = if "
             f"1 {MB_DOOR_TARGET} read-mailbox - {MB_DOOR_TARGET} write-mailbox "
@@ -1495,6 +1498,35 @@ for o in scene.objects:
                                                     'matte', 'levelobj', 'director'):
         o.display_type = 'WIRE'
 
+# Touch mode indicators are ordinary level meshes, controlled entirely by Forth.
+# Horizontal text plates remain readable from the elevated inspection camera.
+camera_labels = []
+if not TOUR and CAMERA_PROFILE == 'touch':
+    for mode, text in enumerate(('WALK  |  A: LOOK', 'LOOK  |  A: ZOOM', 'ZOOM  |  A: WALK')):
+        curve = bpy.data.curves.new(f'camera-mode-{mode}', 'FONT')
+        curve.body = text; curve.size = 0.16; curve.align_x = 'CENTER'
+        curve.align_y = 'CENTER'; curve.resolution_u = 2
+        label = bpy.data.objects.new(f'camera-mode-{mode}', curve)
+        scene.collection.objects.link(label)
+        bpy.ops.object.select_all(action='DESELECT')
+        label.select_set(True); bpy.context.view_layer.objects.active = label
+        bpy.ops.object.convert(target='MESH'); label = bpy.context.object
+        label.data.materials.append(make_flat_material(f'camera-mode-ink-{mode}', (0.95, 0.95, 0.75)))
+        # Backing plate and raised letters share a mesh (no engine UI dependency).
+        for v in label.data.vertices: v.co.z += .012
+        bm = bmesh.new(); bm.from_mesh(label.data)
+        verts = bmesh.ops.create_cube(bm, size=1)['verts']
+        for v in verts: v.co.x *= 1.95; v.co.y *= .32; v.co.z *= .016
+        for face in bm.faces:
+            if all(v in verts for v in face.verts): face.material_index = 1
+        bm.to_mesh(label.data); bm.free()
+        label.data.materials.append(make_flat_material(f'camera-mode-bg-{mode}', (0.04, 0.12, 0.10)))
+        clean_mesh(label.data)
+        as_statplat(label); label['wf_Mass'] = 0.0
+        label['wf_Visibility Mailbox'] = 140 + mode
+        label.location = (PLAYER_SPAWN[0], PLAYER_SPAWN[1], 3.5)
+        camera_labels.append(label)
+
 # ── 9b. Lift to the 6th floor ────────────────────────────────────────────────
 # Everything above was authored with the unit floor at z = 0 (slab_outline, darken_floors
 # and the tour's spawn all assume it); the ground map and the dome are world-space already.
@@ -1522,9 +1554,28 @@ assert not outside, f"actors outside room bbox {lo}..{hi}: {outside}"
 # door script at the wrong actor.
 wf_objects = [o for o in scene.objects if o.get('wf_schema_path')]
 if not TOUR:
-    player['wf_Script'] = unit_teleport_forth(
-        wf_objects.index(camera) + DOOR_ACTOR_IDX_BIAS,
-        wf_objects.index(camshot) + DOOR_ACTOR_IDX_BIAS)
+    _shot_idx = wf_objects.index(camshot) + DOOR_ACTOR_IDX_BIAS
+    _camera_idx = wf_objects.index(camera) + DOOR_ACTOR_IDX_BIAS
+    _dx, _dy, _dz = (CAM_OFFSET[i] - LOOK_OFFSET[i] for i in range(3))
+    _constants = {
+        'shot': _shot_idx, 'camera': _camera_idx, 'touch': int(CAMERA_PROFILE == 'touch'),
+        'default-yaw': math.atan2(_dx, -_dy) / math.tau % 1,
+        'default-elevation': math.atan2(_dz, math.hypot(_dx, _dy)) / math.tau,
+        'default-range': math.sqrt(_dx*_dx + _dy*_dy + _dz*_dz),
+        'unit-z': UNIT_Z,
+        **{f'label-{i}': 0 for i in range(3)},
+        **{f'label-{i}': wf_objects.index(label) + DOOR_ACTOR_IDX_BIAS
+           for i, label in enumerate(camera_labels)},
+        **{f'look-{a}': v for a, v in zip('xyz', LOOK_OFFSET)},
+        **{f'default-{a}': v for a, v in zip('xyz', CAM_OFFSET)},
+    }
+    _header = '\\ wf\n' + ''.join(f': cc-{k} {v} ;\n' for k, v in _constants.items())
+    with open(os.path.join(SCRIPT_DIR, 'camera_controls.fth')) as _f:
+        _controls = _f.read()
+    player['wf_Script'] = (_header + _controls + '\ncc-input\n'
+                           + unit_teleport_forth(_camera_idx, _shot_idx) + '\ncc-labels\n')
+    director['wf_Script'] += f'113 read-mailbox 0 <> if {_shot_idx} INDEXOF_CAMSHOT write-mailbox then\n'
+    print(f'[condo] Forth camera profile: {CAMERA_PROFILE}')
     print('[condo] C / keyboard 3: switch apartments, remembering each indoor position')
 if _door_forth_fn is not None:
     _panel_pos = [wf_objects.index(p) for p in door_panels]

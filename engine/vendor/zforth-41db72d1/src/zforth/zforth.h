@@ -73,6 +73,7 @@ typedef struct {
 	/* Input buffer */
 	char read_buf[32];
 	size_t read_len;
+	char input_char; /* Current delimiter, for an empty backslash comment. */
 
 	/* Name buffer */
 	char name_buf[32];

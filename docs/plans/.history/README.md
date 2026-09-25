@@ -1,5 +1,6 @@
 | Date | Change |
 |------|--------|
+| [2026-09-21](https://github.com/wbniv/WorldFoundry/commit/b3fc2cea) | docs(plans): index the macOS close-paths plan |
 | [2026-09-21](https://github.com/wbniv/WorldFoundry/commit/ceaab73d) | feat(macos): Esc no longer quits; Phase 4 real-exit evidence from a VNC session |
 | [2026-09-21](https://github.com/wbniv/WorldFoundry/commit/f88573c2) | docs(macos): human verification runs over Codemagic VNC — nobody has a Mac |
 | [2026-09-20](https://github.com/wbniv/WorldFoundry/commit/ee02a948) | docs(plans): index the macOS Phase 0 green-baseline plan |
@@ -27,6 +28,11 @@
 | [2026-06-26](https://github.com/wbniv/WorldFoundry/commit/16d72fa6) | docs: add plan index (docs/plans/README.md) |
 
 <!--history-meta v1
+b3fc2cea	author	Will Norris
+b3fc2cea	added	1
+b3fc2cea	deleted	1
+b3fc2cea	files	1
+b3fc2cea	body	Co-Authored-By: Claude Fable 5.1 <noreply@anthropic.com>\nClaude-Session: https://claude.ai/code/session_015ksFy3ZSSz2XMdto3jVA9v
 ceaab73d	author	Will Norris
 ceaab73d	added	1
 ceaab73d	deleted	0

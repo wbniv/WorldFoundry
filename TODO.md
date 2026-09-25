@@ -141,6 +141,7 @@
 
 - [x] 2026-09-25 — C / 3 switches between remembered condo positions; engine checks pass. [plan](docs/plans/2026-09-25-condo-unit-teleport.md)
 
+- [x] 2026-09-25 — Added confirmed 640 corner column and surface AC trunking; both levels and teleport verified. [plan](docs/plans/2026-09-25-condo-xiaomi-installed.md)
 - [x] 2026-09-25 — 640 Xiaomi placement and pumped drain updated; both levels verified. [plan](docs/plans/2026-09-25-condo-xiaomi-installed.md)
 
 - [x] 2026-09-21 — Reusable World Foundry symbol and Linux window icon. [plan](docs/plans/2026-09-21-world-foundry-window-icon.md)
@@ -353,3 +354,13 @@ _Auto-added from plan "Out of scope"/"Deferred" sections at commit time. Triage 
 - [ ] **(triage)** **`main_game`** — no runtime-verifiable build path here, same as in the sweep. — _from [2026-09-20-relight-swept-levels.md](docs/plans/2026-09-20-relight-swept-levels.md)_  <!-- fp:cefb356499b6f864 -->
 - [ ] **(triage)** **Making the inward-wound levels culling-correct.** Re-winding those meshes would flip every aim in the table above; it is the real fix and a separate effort (it is what `WF_CULL=1` is waiting on). — _from [2026-09-20-relight-swept-levels.md](docs/plans/2026-09-20-relight-swept-levels.md)_  <!-- fp:67bda35b5dbf3154 -->
 <!-- END auto-captured-deferrals -->
+
+- [x] Implemented Forth-only condo camera inspection controls; desktop/touch input regressions passed. [Plan and mockups](docs/plans/2026-09-25-condo-camera-controls.md)
+
+- [ ] Validate condo camera touch controls on physical Android phones/tablets and confirm iPhone/iPad host bindings. [Plan](docs/plans/2026-09-25-condo-camera-controls.md)
+
+- [x] Fixed shared Forth comments and comment/string-aware script splitting; removed the condo workaround and verified loading/reload. [Plan](docs/plans/2026-09-25-forth-comments-and-script-loading.md)
+
+- [ ] Redesign the shared Forth script loader around parser/compiler boundaries, including arbitrary defining/immediate-word layouts; separate from the focused comment fix. [Context](docs/plans/2026-09-25-forth-comments-and-script-loading.md)
+- [ ] Investigate transactional Forth hot-reload dictionary rollback and reclamation; preserving an actor entry alone does not undo changed definitions. [Context](docs/plans/2026-09-25-forth-comments-and-script-loading.md)
+- [ ] Improve Forth diagnostics with source positions and token context across initial loading and hot reload. [Context](docs/plans/2026-09-25-forth-comments-and-script-loading.md)

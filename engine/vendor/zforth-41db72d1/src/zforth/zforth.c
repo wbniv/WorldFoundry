@@ -49,7 +49,7 @@ typedef enum {
 	PRIM_JMP,     PRIM_JMP0,      PRIM_TICK, PRIM_COMMENT, PRIM_PUSHR,    PRIM_POPR,
 	PRIM_EQUAL,   PRIM_SYS,       PRIM_PICK, PRIM_COMMA,   PRIM_KEY,      PRIM_LITS,
 	PRIM_LEN,     PRIM_AND,       PRIM_OR,   PRIM_XOR,     PRIM_SHL,      PRIM_SHR,
-	PRIM_LITERAL,
+	PRIM_LITERAL, PRIM_LINE_COMMENT,
 	PRIM_COUNT
 } zf_prim;
 
@@ -60,7 +60,7 @@ static const char prim_names[] =
 	_("jmp")     _("jmp0")       _("'")     _("_(")    _(">r")        _("r>")
 	_("=")       _("sys")        _("pick")  _(",,")    _("key")       _("lits")
 	_("##")      _("&")          _("|")     _("^")     _("<<")        _(">>")
-	_("_literal");
+	_("_literal") _("_\\");
 
 
 /* User variables are variables which are shared between forth and C. From
@@ -734,6 +734,16 @@ static void do_prim(zf_ctx *ctx, zf_prim op, const char *input)
 			}
 			break;
 
+        case PRIM_LINE_COMMENT:
+            /* The delimiter that completed the word may itself be EOL/EOF.
+             * Unlike a key-based Forth definition, also handle a bare backslash
+             * followed immediately by newline without swallowing the next line. */
+            if (input ? (*input != '\n' && *input != '\r' && *input != '\0')
+                      : (ctx->input_char != '\n' && ctx->input_char != '\r' && ctx->input_char != '\0')) {
+                ctx->input_state = ZF_INPUT_PASS_CHAR;
+            }
+            break;
+
 		case PRIM_PUSHR:
 			/* Push top of data stack to return stack */
 			zf_pushr(ctx, zf_pop(ctx));
@@ -866,6 +876,7 @@ static void handle_word(zf_ctx *ctx, const char *buf)
 
 static void handle_char(zf_ctx *ctx, char c)
 {
+	ctx->input_char = c;
 	if(ctx->input_state == ZF_INPUT_PASS_CHAR) {
 
 		ctx->input_state = ZF_INPUT_INTERPRET;

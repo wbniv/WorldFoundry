@@ -103,3 +103,42 @@ PASS: condo_639_640_tour: exit 0, rendered frame 20, 640x480, no assertion
 Both levels rebuilt successfully. Refreshed the source model, top/oblique renders
 and labelled diagram. Also corrected the installation record and diagram caption:
 **installed by HomePro on 2026-09-24**; placement reported by Will on 2026-09-25.
+
+## Follow-up: corner column and surface trunking
+
+Will confirmed a 40 × 40 cm column at the living room’s top-left corner and
+surface-mounted services. Model the column from the finished wall faces. Route
+the compressor connection around its two room-facing sides, along the interior
+wall, and through the exterior wall only opposite the compressor. All Xiaomi
+services receive white rectangular AC covers, with nominal 75 mm dimensions
+for illustration. Power follows the wall surfaces around the front bathroom to
+the consumer unit, below the drop ceiling. The pumped drain still rises into
+the drop ceiling as previously reported. Heights and the penetration height
+remain schematic; the exterior drop is directly opposite the compressor.
+
+- [x] Rebuild the source and both levels with column and covered service routes.
+- [x] Inspect source renders and diagram; check routing and smoke-load both levels.
+
+Validation passed: column dimensions, column clearance, exterior routing only
+opposite the compressor, white covers on all three Xiaomi service meshes, and
+surface power below the drop ceiling. Both engine levels loaded and rendered
+frame 20 without assertions. The full 639/640 teleport regression passed,
+including saved positions, button isolation and reset on reload. Source model,
+generators and reference renders were copied to their canonical home locations.
+
+## Follow-up: below-window compressor run
+
+From the compressor the route enters below the window, runs horizontally inside
+around the column and onto the divider, then rises there to the head’s bottom
+edge. Both left and right connections align with that bottom edge (2.05 m in the
+model). The low run is illustrated at 0.60 m, below the assumed 0.90 m sill; its
+exact height and the rise’s offset along the divider are unmeasured. The pump
+centre is lowered to 2.00 m to retain a slight fall from the head into the pump.
+This supersedes the high window run/exterior drop in the previous revision.
+
+- [x] Rebuild source, renders and both levels; check height sequence and connections.
+
+Verified the level below-window run, column clearance, single rise on the divider,
+left/right connections at the head bottom and downward fall to the pump. Inspected
+the corrected diagram and oblique render. Both rebuilt engine levels loaded and
+rendered frame 20 without assertions.

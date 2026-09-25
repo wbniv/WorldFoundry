@@ -51,6 +51,11 @@ tasks:
     cmds:
       - bash engine/build_game.sh
 
+  test-forth-source:
+    desc: "Test shared Forth comments and script boundaries against the actual VM"
+    cmds:
+      - python3 tests/verify_forth_source.py
+
   ensure-build:
     desc: "Build wf_game only when the binary is missing or older than engine sources"
     cmds:
@@ -815,6 +820,7 @@ tasks:
       - bash wftools/wf_blender/build_level_binary.sh condo_639_640
     sources:
       - wflevels/condo_639_640/blender_create_condo.py
+      - wflevels/condo_639_640/camera_controls.fth
       - wflevels/condo_639_640/site_constants.py
       - wflevels/condo_639_640/condo_sky.tga
       - wflevels/condo_639_640/condo_ground.tga
@@ -823,6 +829,20 @@ tasks:
       - '{{.CONDO_BLEND}}'
     generates:
       - wflevels/condo_639_640-standalone.iff
+
+  condo-touch:
+    desc: "Build the condo with Forth two-button touch camera controls"
+    deps: [tools-build, condo-textures]
+    vars:
+      CONDO_BLEND: '{{.CONDO_BLEND | default (printf "%s/docs/aircon/units-639-640.blend" (env "HOME"))}}'
+    cmds:
+      - |
+        set -euo pipefail
+        CONDO_CAMERA_PROFILE=touch CONDO_LEVEL=condo_639_640_touch \
+          blender --background --python-exit-code 1 \
+          --python wflevels/condo_639_640/blender_create_condo.py -- "{{.CONDO_BLEND}}" \
+          2>&1 | { grep -E '^\[condo\]|^Info: Exported|Error|Traceback|Assert' || true; }
+      - bash wftools/wf_blender/build_level_binary.sh condo_639_640_touch
 
   tour-condo-639:
     desc: "Build the self-walking 639 tour: project room → open glass door → patio → guest bedroom → remaining blue rooms"
@@ -840,6 +860,7 @@ tasks:
       - bash wftools/wf_blender/build_level_binary.sh condo_639_640_tour
     sources:
       - wflevels/condo_639_640/blender_create_condo.py
+      - wflevels/condo_639_640/camera_controls.fth
       - wflevels/condo_639_640/site_constants.py
       - wflevels/condo_639_640/condo_sky.tga
       - wflevels/condo_639_640/condo_ground.tga

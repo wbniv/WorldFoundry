@@ -101,7 +101,7 @@ def game(label):
     with log.open('w') as out:
         proc = subprocess.Popen([
             str(REPO/'engine/wf_game'),
-            f'-L{REPO}/wflevels/condo_639_640-standalone.iff',
+            f'-L{REPO}/wflevels/{os.environ.get("CONDO_TEST_LEVEL", "condo_639_640")}-standalone.iff',
             '--vram-width=4096', '--vram-height=2048',
             '--vram-slot-width=1024', '--vram-slot-height=1024',
             '--vram-perm-width=1024', '--vram-perm-height=1024',
@@ -132,57 +132,58 @@ def game(label):
                 proc.wait(timeout=4)
 
 
-with game('switch') as (cli, player):
-    start = values(cli, player, POS)
-    check('639 starts inside front doors', near(start[:2], (4.65625, -14.5)), str(start))
-    check('unvisited 640 seeded inside front doors', near(values(cli, 1, SAVED[640]), (-3.875, -14.5, 16.05)))
-    screenshot(cli, '639.png')
-    cli.inject_input('joystick1_raw', C, duration_frames=-1)
-    assert wait(lambda: value(cli, 1, CURRENT) == 640), 'initial C press failed'
-    time.sleep(0.6)
-    check('held C switches once to 640', value(cli, 1, CURRENT) == 640
-          and near(values(cli, player, POS)[:2], (-3.875, -14.5)))
-    release(cli)
-    screenshot(cli, '640.png')
-    saved640 = walk(cli, player)
-    check('640 can walk after teleport', saved640[1] > -13.85, str(saved640))
-    switch(cli, 639)
-    check('return restores 639 position', near(values(cli, player, POS), start))
-    saved639 = walk(cli, player)
-    switch(cli, 640)
-    check('return restores moved 640 position', near(values(cli, player, POS), saved640))
-    # Inject motion immediately before the press; it must not carry into 639.
-    cli.set_mailbox(SPEED[0], 4, idx=player)
-    switch(cli, 639)
-    check('return restores moved 639 position', near(values(cli, player, POS), saved639))
-    check('teleport stops horizontal momentum', all(abs(v or 0) < 0.03 for v in values(cli, player, SPEED[:2])))
-    # The shell's negative-X rooms joined to 639 must count as 639, not 640.
-    place(cli, player, (-5, -4, 16.05))
-    check('joined master suite counts as 639', value(cli, 1, CURRENT) == 639)
-    joined = values(cli, player, POS)
-    switch(cli, 640)
-    switch(cli, 639)
-    check('joined-room position remembered', near(values(cli, player, POS), joined))
-    # Enter 640 without using the button, then leave into the shared corridor.
-    place(cli, player, (-3.875, -14.2, 16.05))
-    check('entering 640 updates active unit', value(cli, 1, CURRENT) == 640)
-    remembered640 = values(cli, 1, SAVED[640])
-    place(cli, player, (-3.875, -16.2, 16.05))
-    check('corridor preserves indoor position', near(values(cli, 1, SAVED[640]), remembered640))
-    switch(cli, 639)
-    switch(cli, 640)
-    check('return from corridor lands indoors', near(values(cli, player, POS), remembered640))
-    door_target = value(cli, 1, 93)
-    for name, button in (('A', 1), ('B', 2)):
-        cli.inject_input('joystick1_raw', button, duration_frames=3)
-        time.sleep(0.25)
-        check(f'{name} does not teleport', value(cli, 1, CURRENT) == 640)
-    check('C does not toggle project doors', value(cli, 1, 93) == door_target)
+if __name__ == '__main__':
+    with game('switch') as (cli, player):
+        start = values(cli, player, POS)
+        check('639 starts inside front doors', near(start[:2], (4.65625, -14.5)), str(start))
+        check('unvisited 640 seeded inside front doors', near(values(cli, 1, SAVED[640]), (-3.875, -14.5, 16.05)))
+        screenshot(cli, '639.png')
+        cli.inject_input('joystick1_raw', C, duration_frames=-1)
+        assert wait(lambda: value(cli, 1, CURRENT) == 640), 'initial C press failed'
+        time.sleep(0.6)
+        check('held C switches once to 640', value(cli, 1, CURRENT) == 640
+              and near(values(cli, player, POS)[:2], (-3.875, -14.5)))
+        release(cli)
+        screenshot(cli, '640.png')
+        saved640 = walk(cli, player)
+        check('640 can walk after teleport', saved640[1] > -13.85, str(saved640))
+        switch(cli, 639)
+        check('return restores 639 position', near(values(cli, player, POS), start))
+        saved639 = walk(cli, player)
+        switch(cli, 640)
+        check('return restores moved 640 position', near(values(cli, player, POS), saved640))
+        # Inject motion immediately before the press; it must not carry into 639.
+        cli.set_mailbox(SPEED[0], 4, idx=player)
+        switch(cli, 639)
+        check('return restores moved 639 position', near(values(cli, player, POS), saved639))
+        check('teleport stops horizontal momentum', all(abs(v or 0) < 0.03 for v in values(cli, player, SPEED[:2])))
+        # The shell's negative-X rooms joined to 639 must count as 639, not 640.
+        place(cli, player, (-5, -4, 16.05))
+        check('joined master suite counts as 639', value(cli, 1, CURRENT) == 639)
+        joined = values(cli, player, POS)
+        switch(cli, 640)
+        switch(cli, 639)
+        check('joined-room position remembered', near(values(cli, player, POS), joined))
+        # Enter 640 without using the button, then leave into the shared corridor.
+        place(cli, player, (-3.875, -14.2, 16.05))
+        check('entering 640 updates active unit', value(cli, 1, CURRENT) == 640)
+        remembered640 = values(cli, 1, SAVED[640])
+        place(cli, player, (-3.875, -16.2, 16.05))
+        check('corridor preserves indoor position', near(values(cli, 1, SAVED[640]), remembered640))
+        switch(cli, 639)
+        switch(cli, 640)
+        check('return from corridor lands indoors', near(values(cli, player, POS), remembered640))
+        door_target = value(cli, 1, 93)
+        for name, button in (('A', 1), ('B', 2)):
+            cli.inject_input('joystick1_raw', button, duration_frames=3)
+            time.sleep(0.25)
+            check(f'{name} does not teleport', value(cli, 1, CURRENT) == 640)
+        check('C does not toggle project doors', value(cli, 1, 93) == door_target)
 
-with game('reload') as (cli, player):
-    check('reload resets 639 entry', near(values(cli, player, POS)[:2], (4.65625, -14.5)))
-    switch(cli, 640)
-    check('reload resets 640 entry', near(values(cli, player, POS)[:2], (-3.875, -14.5)))
+    with game('reload') as (cli, player):
+        check('reload resets 639 entry', near(values(cli, player, POS)[:2], (4.65625, -14.5)))
+        switch(cli, 640)
+        check('reload resets 640 entry', near(values(cli, player, POS)[:2], (-3.875, -14.5)))
 
-print('RESULT:', 'PASS' if not failures else f'FAIL {failures}')
-raise SystemExit(bool(failures))
+    print('RESULT:', 'PASS' if not failures else f'FAIL {failures}')
+    raise SystemExit(bool(failures))

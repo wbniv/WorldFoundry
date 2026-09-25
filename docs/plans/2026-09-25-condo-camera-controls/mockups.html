@@ -1,0 +1,80 @@
+<!doctype html>
+<html lang="en"><meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Condo camera controls · proposed interaction</title>
+<style>
+*{box-sizing:border-box}body{margin:0;background:#edf1ed;color:#203b39;font:17px system-ui,sans-serif}main{max-width:1440px;padding:40px 48px;margin:auto}h1{font-size:38px;letter-spacing:-1px;margin:8px 0}h2{font-size:23px;margin:0 0 14px}h3{font-size:19px;margin:16px 0 6px}p{line-height:1.5;margin:8px 0}.eyebrow{font-size:13px;letter-spacing:2px;text-transform:uppercase;color:#58736b}.intro{max-width:1050px;color:#516760}.badge{display:inline-block;border:1px solid #b4c7bd;padding:5px 12px;border-radius:30px;font-size:13px}.cards{display:grid;grid-template-columns:repeat(3,1fr);gap:20px;margin:28px 0}.card{background:#fff;border:1px solid #d0ddd6;border-radius:14px;overflow:hidden}.caption{padding:4px 19px 18px;font-size:15px}.scene{height:274px;position:relative;background:#172825;overflow:hidden}.scene img{width:100%;height:100%;object-fit:cover;opacity:.83}.tag{position:absolute;top:14px;left:14px;background:#1d3836e8;color:white;padding:6px 10px;border-radius:5px;font-size:12px}.controls{position:absolute;bottom:12px;left:12px;right:12px;padding:10px;background:#102c2bf0;border:1px solid #638c7e;border-radius:7px;color:#eff7f2;font-size:12px;line-height:1.9}kbd{font:inherit;font-weight:650;border:1px solid #9fbab0;background:#e8f2eb;color:#193e35;border-radius:4px;padding:1px 5px;white-space:nowrap}.overlay{position:absolute;inset:0;width:100%;height:100%;pointer-events:none}.success{position:absolute;top:51px;left:14px;background:#ddf2db;color:#2d543a;padding:8px 12px;border-radius:5px;font-size:13px}.panels{display:grid;grid-template-columns:1fr 1fr;gap:22px;margin:24px 0}.panel{border:1px solid #d0ddd6;border-radius:14px;background:white;padding:23px}.diagram{width:100%;height:280px}.small{font-size:14px;color:#536f64}.flow{width:100%;height:215px}.rule{background:#203f39;color:#f3f6ed;border-radius:12px;padding:16px 22px;display:flex;gap:30px;align-items:center}.rule strong{white-space:nowrap}.rule p{font-size:15px;margin:0}svg text{font-family:system-ui,sans-serif}.footer{font-size:13px;color:#5d746a;margin-top:16px}@media(max-width:900px){main{padding:24px}.cards,.panels{grid-template-columns:1fr}.rule{display:block}.scene{height:330px}}@media print{.card,.panel,.rule{break-inside:avoid}h2,h3{break-after:avoid}p{orphans:3;widows:3}}
+</style>
+<main>
+<div class="eyebrow">205/639 + 205/640 · architectural walkthrough</div>
+<h1>Walk to it. Turn the view. Inspect the detail.</h1>
+<p class="intro">A player-centred inspection camera with orbit, tilt and distance controls. Existing movement, apartment switching and door controls remain available.</p>
+<span class="badge">DESIGN MOCKUPS · proposed overlays</span><p><a href="runtime.html" style="color:#287455">Controls are now implemented — view actual engine captures</a></p>
+<div class="cards">
+<section class="card"><div class="scene"><img src="walkthrough-reference.png" alt="Existing condo walkthrough capture"><span class="tag">01 · WALK</span><div class="controls"><kbd>↑ ↓ ← →</kbd> Walk &nbsp; <kbd>3</kbd> Switch apartment<br>Hold <kbd>4</kbd> + arrows to inspect · <kbd>5 / 6</kbd> Zoom</div></div><div class="caption"><h3>Move through the apartment</h3><p>The existing view follows the player. Walk to the room or installation you want to examine.</p></div></section>
+<section class="card"><div class="scene"><img src="walkthrough-reference.png" alt="Same reference capture with proposed inspection overlay"><span class="tag">02 · INSPECT CAMERA</span><svg class="overlay" viewBox="0 0 400 274" aria-label="Proposed orbit and tilt hints"><ellipse cx="200" cy="135" rx="80" ry="30" fill="none" stroke="#e3d58d" stroke-width="2" stroke-dasharray="6 5"/><path d="M274 117l9 16-18-2M126 154l-9-16 18 2M200 91v-24m-6 7 6-7 6 7M200 165v24m-6-7 6 7 6-7" fill="none" stroke="#f2e7b3" stroke-width="3"/><circle cx="200" cy="135" r="4" fill="#f2e7b3"/></svg><div class="controls">Hold <kbd>4</kbd> &nbsp; <kbd>← →</kbd> Orbit &nbsp; <kbd>↑ ↓</kbd> Tilt<br><kbd>5 / 6</kbd> Closer / farther &nbsp; <kbd>4 + 1</kbd> Reset</div></div><div class="caption"><h3>Keep your place while looking around</h3><p>Arrows adjust the camera while 4 is held. The player stays still. Releasing 4 restores walking.</p></div></section>
+<section class="card"><div class="scene"><img src="walkthrough-reference.png" alt="Same reference capture with proposed reset confirmation"><span class="tag">03 · RESET</span><div class="success">View reset · automatic views restored</div><div class="controls"><kbd>4 + 1</kbd> Reset view &nbsp; <kbd>3</kbd> Switch apartment<br>Manual settings persist until reset or level reload.</div></div><div class="caption"><h3>Return to a familiar view</h3><p>Reset restores the authored view and automatic patio/window shots. Teleport keeps your chosen inspection settings.</p></div></section>
+</div>
+<div class="rule"><strong>One modifier. Six familiar keys.</strong><p><b>4 + arrows:</b> orbit and tilt · <b>5 / 6:</b> distance · <b>4 + 1:</b> reset. No mouse capture or new engine input bindings. Overlay presentation is subject to existing level UI capabilities.</p></div>
+<div class="panels">
+<section class="panel"><h2>Keyboard · existing key mappings</h2>
+<svg class="diagram" viewBox="0 0 570 280" role="img" aria-label="Keys 1 to 6 and arrow keys with camera mappings">
+<g fill="#eaf1eb" stroke="#9eb8aa" stroke-width="2">
+<rect x="25" y="28" width="70" height="58" rx="7"/><rect x="110" y="28" width="70" height="58" rx="7"/><rect x="195" y="28" width="70" height="58" rx="7"/><rect x="280" y="28" width="70" height="58" rx="7" fill="#c8dfce"/><rect x="365" y="28" width="70" height="58" rx="7"/><rect x="450" y="28" width="70" height="58" rx="7"/>
+<rect x="395" y="144" width="52" height="48" rx="6"/><rect x="335" y="199" width="52" height="48" rx="6"/><rect x="395" y="199" width="52" height="48" rx="6"/><rect x="455" y="199" width="52" height="48" rx="6"/></g>
+<g text-anchor="middle" fill="#294b3e" font-size="24"><text x="60" y="65">1</text><text x="145" y="65">2</text><text x="230" y="65">3</text><text x="315" y="65">4</text><text x="400" y="65">5</text><text x="485" y="65">6</text><text x="421" y="176">↑</text><text x="361" y="231">←</text><text x="421" y="231">↓</text><text x="481" y="231">→</text></g>
+<g text-anchor="middle" fill="#526c60" font-size="13"><text x="60" y="109">A / reset*</text><text x="145" y="109">B / door</text><text x="230" y="109">C / switch</text><text x="315" y="109">D / hold</text><text x="400" y="109">E / closer</text><text x="485" y="109">F / farther</text></g>
+<g fill="#365847" font-size="16"><text x="28" y="168">Arrows: walk</text><text x="28" y="200">Hold 4 + arrows: orbit / tilt</text><text x="28" y="232">* 4 + 1 (or Space): reset</text></g></svg>
+<p class="small">Number-row keys are confirmed in the Linux and macOS mappings. Camera chords consume movement/jump before locomotion sees them.</p></section>
+<section class="panel"><h2>Joystick / gamepad · Xbox-style labels</h2>
+<svg class="diagram" viewBox="0 0 570 280" role="img" aria-label="Gamepad with left directional controls and Y camera modifier, X teleport, B door and A reset chord">
+<path d="M150 67Q100 59 83 119L60 223Q60 252 93 250L160 200H405L475 249Q509 258 510 222L487 120Q470 61 420 67Z" fill="#e8efea" stroke="#9eb8aa" stroke-width="3"/>
+<rect x="128" y="49" width="92" height="21" rx="7" fill="#c6d9ca"/><rect x="350" y="49" width="92" height="21" rx="7" fill="#c6d9ca"/>
+<path d="M143 111h27v25h25v27h-25v25h-27v-25h-25v-27h25Z" fill="#567b66"/>
+<circle cx="236" cy="193" r="23" fill="#b4cab9"/><circle cx="336" cy="193" r="23" fill="#d8e2da"/><path d="M321 179l30 28" stroke="#84998b" stroke-width="2"/>
+<g stroke="#456c55" fill="#fff"><circle cx="413" cy="104" r="20" fill="#e9dfb2"/><circle cx="376" cy="141" r="20"/><circle cx="450" cy="141" r="20"/><circle cx="413" cy="178" r="20"/></g>
+<g text-anchor="middle" font-size="17" fill="#2c4f3b"><text x="413" y="110">Y</text><text x="376" y="147">X</text><text x="450" y="147">B</text><text x="413" y="184">A</text></g>
+<g font-size="13" fill="#45634f"><text x="115" y="35">LB: closer*</text><text x="345" y="35">RB: farther*</text><text x="23" y="99">Directions</text><text x="464" y="101">Hold Y</text><text x="197" y="237">Left stick*</text><text x="314" y="269">Right stick: not mapped</text></g>
+</svg>
+<p class="small"><b>Y + directions:</b> orbit/tilt · <b>X:</b> apartment · <b>B:</b> door · <b>Y+A:</b> reset. <b>Y+B+↑/↓:</b> zoom fallback. * Left stick and shoulders depend on host mappings; macOS needs the zoom fallback.</p></section>
+</div>
+<section class="panel"><h2>Phone / tablet · two-button touch profile</h2>
+<div style="display:grid;grid-template-columns:1.2fr 1fr;gap:25px;align-items:center">
+<svg viewBox="0 0 650 325" style="width:100%" role="img" aria-label="Landscape phone with existing D-pad at bottom left, A mode button and B action button at bottom right">
+<rect x="8" y="8" width="634" height="303" rx="30" fill="#25443b"/><rect x="22" y="23" width="606" height="273" rx="18" fill="#173a33"/>
+<image href="walkthrough-reference.png" x="22" y="23" width="606" height="273" preserveAspectRatio="xMidYMid slice" opacity=".65"/>
+<rect x="171" y="39" width="312" height="32" rx="8" fill="#17382fed"/><text x="327" y="61" text-anchor="middle" fill="#fff4bf" font-size="16">WALK → LOOK → ZOOM → WALK</text>
+<path d="M86 171h35v34h34v35h-34v34H86v-34H52v-35h34Z" fill="#deebdb" stroke="#467a5a" stroke-width="2"/>
+<g fill="#274d3b" text-anchor="middle" font-size="20"><text x="103" y="194">↑</text><text x="103" y="264">↓</text><text x="69" y="229">←</text><text x="138" y="229">→</text></g>
+<circle cx="500" cy="240" r="32" fill="#e9efdd" stroke="#799478" stroke-width="2"/><circle cx="578" cy="240" r="32" fill="#e9dfb2" stroke="#a7945d" stroke-width="2"/>
+<g text-anchor="middle" font-size="23" fill="#284d3a"><text x="500" y="248">B</text><text x="578" y="248">A</text></g>
+<g text-anchor="middle" font-size="13" fill="#fff"><text x="500" y="195">Door / reset</text><text x="578" y="195">Mode</text><text x="318" y="280">A + B: switch apartment</text></g>
+</svg>
+<div><p><b>Tap A</b> to choose what the D-pad does:</p><p><b>Walk:</b> move player<br><b>Look:</b> orbit left/right, tilt up/down<br><b>Zoom:</b> up closer, down farther</p><p><b>Tap B:</b> nearby door<br><b>Hold B, 0.6 s:</b> reset + Walk mode<br><b>A+B:</b> teleport once</p><p class="small">Taps fire on release. Chords cancel taps. A changes modes instead of jumping in this profile.</p></div>
+</div>
+<p class="small"><b>Existing Android input:</b> D-pad + A/B touch regions. Labels and mode strip above are proposed, not native UI changes. Select the touch profile in the level build. No pinch, drag-look or added touch buttons. Test fixed-pixel hitboxes on real phones/tablets. iPhone/iPad host bindings remain unverified.</p>
+</section>
+
+<div class="panels">
+<section class="panel"><h2>Orbit around a stable point</h2><svg class="diagram" viewBox="0 0 570 280" role="img" aria-label="Top view of a camera orbiting the player's chest target">
+<defs><marker id="arr" markerWidth="8" markerHeight="8" refX="6" refY="4" orient="auto"><path d="M0 0L8 4L0 8" fill="#aa7433"/></marker></defs>
+<path d="M60 25H500V240H360V200H60Z" fill="#edf3ed" stroke="#b7cbbd" stroke-width="3"/><path d="M60 85H175V25M405 25V95H500" fill="none" stroke="#b7cbbd" stroke-width="3"/>
+<ellipse cx="275" cy="133" rx="136" ry="83" fill="none" stroke="#799b8b" stroke-dasharray="7 5" stroke-width="2"/>
+<path d="M142 154Q149 191 201 207" fill="none" stroke="#aa7433" stroke-width="3" marker-end="url(#arr)"/>
+<path d="M275 133L390 178" stroke="#aa7433" stroke-width="2"/><circle cx="275" cy="133" r="13" fill="#315f51"/><path d="M383 167l25 10-12 20-23-10Z" fill="#aa7433"/>
+<text x="275" y="110" text-anchor="middle" font-size="16" fill="#315f51">Player / aim point</text><text x="398" y="225" text-anchor="middle" font-size="15" fill="#805221">Camera</text><text x="83" y="269" font-size="15" fill="#526c60">4 + ← → changes azimuth; aim stays on the player.</text></svg>
+<p class="small">Top-view concept. The camera’s actual room clearance must be validated. This drawing does not imply unrestricted movement through walls.</p></section>
+<section class="panel"><h2>Tilt and zoom to reveal detail</h2><svg class="diagram" viewBox="0 0 570 280" role="img" aria-label="Side view of camera elevation and distance from its target"><path d="M35 232H535" stroke="#96b3a2" stroke-width="3"/><path d="M90 232V190" stroke="#315f51" stroke-width="9"/><circle cx="90" cy="178" r="12" fill="#315f51"/><circle cx="90" cy="198" r="4" fill="#aa7433"/>
+<path d="M90 198L371 55" stroke="#aa7433" stroke-width="2"/><path d="M90 198H390" stroke="#aabfb1" stroke-dasharray="5 4"/><path d="M161 198Q161 173 150 167" fill="none" stroke="#315f51" stroke-width="2"/>
+<path d="M366 43l28 13-11 21-27-14Z" fill="#aa7433"/><path d="M210 149L305 101" stroke="#aa7433" stroke-width="2" marker-end="url(#arr)"/>
+<text x="258" y="86" text-anchor="middle" font-size="16" fill="#805221">5 / 6 · distance</text><text x="179" y="185" font-size="15" fill="#315f51">4 + ↑ ↓ · elevation</text><text x="45" y="263" font-size="15" fill="#526c60">Aim at chest height; clamp distance and angle together.</text></svg>
+<p class="small">Zoom changes camera distance. Elevated bounds keep the view away from the shell collision response and vertical look-at singularities.</p></section>
+</div>
+<section class="panel"><h2>Forth owns the behavior</h2><svg class="flow" viewBox="0 0 1230 215" role="img" aria-label="Existing input mailboxes feed Forth camera controls, which write the existing camera rig. Director resolves automatic versus manual camera selection.">
+<g fill="#edf3ed" stroke="#bfd1c5"><rect x="5" y="20" width="255" height="83" rx="9"/><rect x="320" y="20" width="310" height="83" rx="9"/><rect x="690" y="20" width="250" height="83" rx="9"/><rect x="1000" y="20" width="225" height="83" rx="9"/></g>
+<g fill="#284c40" text-anchor="middle" font-size="18"><text x="132" y="54">Existing input mailboxes</text><text x="475" y="54">Forth camera controls</text><text x="815" y="54">Existing camera rig</text><text x="1112" y="54">Rendered view</text></g>
+<g fill="#526c60" text-anchor="middle" font-size="14"><text x="132" y="80">Buttons + frame delta</text><text x="475" y="80">State · orbit maths · limits · reset</text><text x="815" y="80">CamShot + LookAt + Camera</text><text x="1112" y="80">Unmodified engine</text></g>
+<g stroke="#aa7433" stroke-width="2" marker-end="url(#arr)"><path d="M265 61H309"/><path d="M635 61H679"/><path d="M945 61H989"/></g>
+<rect x="320" y="135" width="620" height="63" rx="9" fill="#f4efdf" stroke="#d9cba4"/><text x="630" y="160" text-anchor="middle" font-size="17" fill="#745126">Director Forth: manual view takes priority until reset</text><text x="630" y="183" text-anchor="middle" font-size="14" fill="#745126">Clear zone mailboxes each tick · reset restores automatic window/patio views</text><path d="M815 135V112" stroke="#aa7433" stroke-width="2" marker-end="url(#arr)"/>
+</svg></section>
+<p class="footer">25 September 2026 · Planning artifact. Same existing capture used in all three mockups; no simulated after-image is presented as runtime evidence. Engine source changes are prohibited.</p>
+</main></html>

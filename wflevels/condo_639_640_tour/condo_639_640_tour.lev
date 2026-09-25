@@ -4385,8 +4385,84 @@
 		{ 'FX32' { 'NAME' "slopeD" } { 'DATA' 0.0000000000000000(1.15.16) } { 'STR' "0.000000" } }
 	}
 	{ 'OBJ' 
+		{ 'NAME' "640-xiaomi-power" }
+		{ 'VEC3' { 'NAME' "Position" } { 'DATA' 0.0000000000000000(1.15.16) 0.0000000000000000(1.15.16) 15.7500000000000000(1.15.16)  //x,y,z
+		} }
+		{ 'EULR' { 'NAME' "Orientation" } { 'DATA' 0.0000000000000000(1.15.16) -0.0000000000000000(1.15.16) 0.0000000000000000(1.15.16)  //a,b,c
+		} }
+		{ 'BOX3' { 'NAME' "Global Bounding Box" } { 'DATA' -5.4874997138977051(1.15.16) -15.3000001907348633(1.15.16) 1.6625000238418579(1.15.16) -2.0499999523162842(1.15.16) -6.8000001907348633(1.15.16) 2.0875000953674316(1.15.16)  //min(x,y,z)-max(x,y,z)
+		} }
+		{ 'STR' { 'NAME' "Class Name" } { 'DATA' "statplat" } }
+		{ 'FILE' { 'NAME' "Mesh Name" } { 'STR' "640_xiaomi_power.iff" } }
+		{ 'I32'  { 'NAME' "Model Type" } { 'DATA' 1l } { 'STR' "Mesh" } }
+		{ 'I32' { 'NAME' "Mobility" } { 'STR' "Anchored" } }
+		{ 'I32' { 'NAME' "Model Type" } { 'STR' "Mesh" } }
+		{ 'I32' { 'NAME' "Visibility Mailbox" } { 'DATA' 1l } { 'STR' "1" } }
+		{ 'FX32' { 'NAME' "slopeA" } { 'DATA' -0.0000000450521037(1.15.16) } { 'STR' "-0.000000" } }
+		{ 'FX32' { 'NAME' "slopeB" } { 'DATA' -0.0000000010691005(1.15.16) } { 'STR' "-0.000000" } }
+		{ 'FX32' { 'NAME' "slopeC" } { 'DATA' 0.0000000756876700(1.15.16) } { 'STR' "0.000000" } }
+		{ 'FX32' { 'NAME' "slopeD" } { 'DATA' 0.0000011920808021(1.15.16) } { 'STR' "0.000001" } }
+	}
+	{ 'OBJ' 
+		{ 'NAME' "640-xiaomi-drain" }
+		{ 'VEC3' { 'NAME' "Position" } { 'DATA' 0.0000000000000000(1.15.16) 0.0000000000000000(1.15.16) 15.7500000000000000(1.15.16)  //x,y,z
+		} }
+		{ 'EULR' { 'NAME' "Orientation" } { 'DATA' 0.0000000000000000(1.15.16) -0.0000000000000000(1.15.16) 0.0000000000000000(1.15.16)  //a,b,c
+		} }
+		{ 'BOX3' { 'NAME' "Global Bounding Box" } { 'DATA' -5.4882726669311523(1.15.16) -13.6667995452880859(1.15.16) 0.9625001549720764(1.15.16) -1.2124999761581421(1.15.16) -6.8000001907348633(1.15.16) 2.5877957344055176(1.15.16)  //min(x,y,z)-max(x,y,z)
+		} }
+		{ 'STR' { 'NAME' "Class Name" } { 'DATA' "statplat" } }
+		{ 'FILE' { 'NAME' "Mesh Name" } { 'STR' "640_xiaomi_drain.iff" } }
+		{ 'I32'  { 'NAME' "Model Type" } { 'DATA' 1l } { 'STR' "Mesh" } }
+		{ 'I32' { 'NAME' "Mobility" } { 'STR' "Anchored" } }
+		{ 'I32' { 'NAME' "Model Type" } { 'STR' "Mesh" } }
+		{ 'I32' { 'NAME' "Visibility Mailbox" } { 'DATA' 1l } { 'STR' "1" } }
+		{ 'FX32' { 'NAME' "slopeA" } { 'DATA' 0.0000000000000000(1.15.16) } { 'STR' "0.000000" } }
+		{ 'FX32' { 'NAME' "slopeB" } { 'DATA' -0.0000000217826485(1.15.16) } { 'STR' "-0.000000" } }
+		{ 'FX32' { 'NAME' "slopeC" } { 'DATA' 0.0000001527812509(1.15.16) } { 'STR' "0.000000" } }
+		{ 'FX32' { 'NAME' "slopeD" } { 'DATA' 0.0000024063047022(1.15.16) } { 'STR' "0.000002" } }
+	}
+	{ 'OBJ' 
+		{ 'NAME' "640-xiaomi-lineset" }
+		{ 'VEC3' { 'NAME' "Position" } { 'DATA' 0.0000000000000000(1.15.16) 0.0000000000000000(1.15.16) 15.7500000000000000(1.15.16)  //x,y,z
+		} }
+		{ 'EULR' { 'NAME' "Orientation" } { 'DATA' 0.0000000000000000(1.15.16) -0.0000000000000000(1.15.16) 0.0000000000000000(1.15.16)  //a,b,c
+		} }
+		{ 'BOX3' { 'NAME' "Global Bounding Box" } { 'DATA' -8.3500003814697266(1.15.16) -8.2875003814697266(1.15.16) 0.5625000000000000(1.15.16) -6.3125000000000000(1.15.16) -6.8000001907348633(1.15.16) 2.0875000953674316(1.15.16)  //min(x,y,z)-max(x,y,z)
+		} }
+		{ 'STR' { 'NAME' "Class Name" } { 'DATA' "statplat" } }
+		{ 'FILE' { 'NAME' "Mesh Name" } { 'STR' "640_xiaomi_lineset.iff" } }
+		{ 'I32'  { 'NAME' "Model Type" } { 'DATA' 1l } { 'STR' "Mesh" } }
+		{ 'I32' { 'NAME' "Mobility" } { 'STR' "Anchored" } }
+		{ 'I32' { 'NAME' "Model Type" } { 'STR' "Mesh" } }
+		{ 'I32' { 'NAME' "Visibility Mailbox" } { 'DATA' 1l } { 'STR' "1" } }
+		{ 'FX32' { 'NAME' "slopeA" } { 'DATA' 0.0000000911853492(1.15.16) } { 'STR' "0.000000" } }
+		{ 'FX32' { 'NAME' "slopeB" } { 'DATA' -0.0000000125861205(1.15.16) } { 'STR' "-0.000000" } }
+		{ 'FX32' { 'NAME' "slopeC" } { 'DATA' -0.0000000074447657(1.15.16) } { 'STR' "-0.000000" } }
+		{ 'FX32' { 'NAME' "slopeD" } { 'DATA' -0.0000001172550590(1.15.16) } { 'STR' "-0.000000" } }
+	}
+	{ 'OBJ' 
+		{ 'NAME' "640-living-nw-column" }
+		{ 'VEC3' { 'NAME' "Position" } { 'DATA' -7.5999999046325684(1.15.16) -7.0000000000000000(1.15.16) 17.1000003814697266(1.15.16)  //x,y,z
+		} }
+		{ 'EULR' { 'NAME' "Orientation" } { 'DATA' 0.0000000000000000(1.15.16) -0.0000000000000000(1.15.16) 0.0000000000000000(1.15.16)  //a,b,c
+		} }
+		{ 'BOX3' { 'NAME' "Global Bounding Box" } { 'DATA' -0.2000000029802322(1.15.16) -0.2000000029802322(1.15.16) -1.3500000238418579(1.15.16) 0.2000000029802322(1.15.16) 0.2000000029802322(1.15.16) 1.3500000238418579(1.15.16)  //min(x,y,z)-max(x,y,z)
+		} }
+		{ 'STR' { 'NAME' "Class Name" } { 'DATA' "statplat" } }
+		{ 'FILE' { 'NAME' "Mesh Name" } { 'STR' "640_living_nw_column.iff" } }
+		{ 'I32'  { 'NAME' "Model Type" } { 'DATA' 1l } { 'STR' "Mesh" } }
+		{ 'I32' { 'NAME' "Mobility" } { 'STR' "Anchored" } }
+		{ 'I32' { 'NAME' "Model Type" } { 'STR' "Mesh" } }
+		{ 'I32' { 'NAME' "Visibility Mailbox" } { 'DATA' 1l } { 'STR' "1" } }
+		{ 'FX32' { 'NAME' "slopeA" } { 'DATA' 0.0000000000000000(1.15.16) } { 'STR' "0.000000" } }
+		{ 'FX32' { 'NAME' "slopeB" } { 'DATA' 0.0000000000000000(1.15.16) } { 'STR' "0.000000" } }
+		{ 'FX32' { 'NAME' "slopeC" } { 'DATA' 0.0000000000000000(1.15.16) } { 'STR' "0.000000" } }
+		{ 'FX32' { 'NAME' "slopeD" } { 'DATA' 0.0000000000000000(1.15.16) } { 'STR' "0.000000" } }
+	}
+	{ 'OBJ'
 		{ 'NAME' "640-xiaomi-condensate-pump" }
-		{ 'VEC3' { 'NAME' "Position" } { 'DATA' -3.0499999523162842(1.15.16) -6.9124999046325684(1.15.16) 17.8299999237060547(1.15.16)  //x,y,z
+		{ 'VEC3' { 'NAME' "Position" } { 'DATA' -3.0499999523162842(1.15.16) -6.9124999046325684(1.15.16) 17.7500000000000000(1.15.16)  //x,y,z
 		} }
 		{ 'EULR' { 'NAME' "Orientation" } { 'DATA' 0.0000000000000000(1.15.16) -0.0000000000000000(1.15.16) 0.0000000000000000(1.15.16)  //a,b,c
 		} }
@@ -4402,63 +4478,6 @@
 		{ 'FX32' { 'NAME' "slopeB" } { 'DATA' 0.0000000000000000(1.15.16) } { 'STR' "0.000000" } }
 		{ 'FX32' { 'NAME' "slopeC" } { 'DATA' 0.0000000000000000(1.15.16) } { 'STR' "0.000000" } }
 		{ 'FX32' { 'NAME' "slopeD" } { 'DATA' 0.0000000000000000(1.15.16) } { 'STR' "0.000000" } }
-	}
-	{ 'OBJ' 
-		{ 'NAME' "640-xiaomi-drain" }
-		{ 'VEC3' { 'NAME' "Position" } { 'DATA' 0.0000000000000000(1.15.16) 0.0000000000000000(1.15.16) 15.7500000000000000(1.15.16)  //x,y,z
-		} }
-		{ 'EULR' { 'NAME' "Orientation" } { 'DATA' 0.0000000000000000(1.15.16) -0.0000000000000000(1.15.16) 0.0000000000000000(1.15.16)  //a,b,c
-		} }
-		{ 'BOX3' { 'NAME' "Global Bounding Box" } { 'DATA' -5.9009823799133301(1.15.16) -13.6649761199951172(1.15.16) 1.0000000000000000(1.15.16) -1.2100235223770142(1.15.16) -6.8724999427795410(1.15.16) 2.5779571533203125(1.15.16)  //min(x,y,z)-max(x,y,z)
-		} }
-		{ 'STR' { 'NAME' "Class Name" } { 'DATA' "statplat" } }
-		{ 'FILE' { 'NAME' "Mesh Name" } { 'STR' "640_xiaomi_drain.iff" } }
-		{ 'I32'  { 'NAME' "Model Type" } { 'DATA' 1l } { 'STR' "Mesh" } }
-		{ 'I32' { 'NAME' "Mobility" } { 'STR' "Anchored" } }
-		{ 'I32' { 'NAME' "Model Type" } { 'STR' "Mesh" } }
-		{ 'I32' { 'NAME' "Visibility Mailbox" } { 'DATA' 1l } { 'STR' "1" } }
-		{ 'FX32' { 'NAME' "slopeA" } { 'DATA' 0.0016371645612404(1.15.16) } { 'STR' "0.001637" } }
-		{ 'FX32' { 'NAME' "slopeB" } { 'DATA' 0.0010394228347650(1.15.16) } { 'STR' "0.001039" } }
-		{ 'FX32' { 'NAME' "slopeC" } { 'DATA' 0.0014015095392905(1.15.16) } { 'STR' "0.001402" } }
-		{ 'FX32' { 'NAME' "slopeD" } { 'DATA' 0.0220737752438254(1.15.16) } { 'STR' "0.022074" } }
-	}
-	{ 'OBJ' 
-		{ 'NAME' "640-xiaomi-lineset" }
-		{ 'VEC3' { 'NAME' "Position" } { 'DATA' 0.0000000000000000(1.15.16) 0.0000000000000000(1.15.16) 15.7500000000000000(1.15.16)  //x,y,z
-		} }
-		{ 'EULR' { 'NAME' "Orientation" } { 'DATA' 0.0000000000000000(1.15.16) -0.0000000000000000(1.15.16) 0.0000000000000000(1.15.16)  //a,b,c
-		} }
-		{ 'BOX3' { 'NAME' "Global Bounding Box" } { 'DATA' -8.3719062805175781(1.15.16) -8.2975406646728516(1.15.16) 0.5642157196998596(1.15.16) -5.9000000953674316(1.15.16) -6.8524999618530273(1.15.16) 2.4099998474121094(1.15.16)  //min(x,y,z)-max(x,y,z)
-		} }
-		{ 'STR' { 'NAME' "Class Name" } { 'DATA' "statplat" } }
-		{ 'FILE' { 'NAME' "Mesh Name" } { 'STR' "640_xiaomi_lineset.iff" } }
-		{ 'I32'  { 'NAME' "Model Type" } { 'DATA' 1l } { 'STR' "Mesh" } }
-		{ 'I32' { 'NAME' "Mobility" } { 'STR' "Anchored" } }
-		{ 'I32' { 'NAME' "Model Type" } { 'STR' "Mesh" } }
-		{ 'I32' { 'NAME' "Visibility Mailbox" } { 'DATA' 1l } { 'STR' "1" } }
-		{ 'FX32' { 'NAME' "slopeA" } { 'DATA' -0.0060892589228590(1.15.16) } { 'STR' "-0.006089" } }
-		{ 'FX32' { 'NAME' "slopeB" } { 'DATA' 0.0004097692047556(1.15.16) } { 'STR' "0.000410" } }
-		{ 'FX32' { 'NAME' "slopeC" } { 'DATA' 0.0005337045036463(1.15.16) } { 'STR' "0.000534" } }
-		{ 'FX32' { 'NAME' "slopeD" } { 'DATA' 0.0084058459324297(1.15.16) } { 'STR' "0.008406" } }
-	}
-	{ 'OBJ' 
-		{ 'NAME' "640-xiaomi-power" }
-		{ 'VEC3' { 'NAME' "Position" } { 'DATA' 0.0000000000000000(1.15.16) 0.0000000000000000(1.15.16) 15.7500000000000000(1.15.16)  //x,y,z
-		} }
-		{ 'EULR' { 'NAME' "Orientation" } { 'DATA' 0.0000000000000000(1.15.16) -0.0000000000000000(1.15.16) 0.0000000000000000(1.15.16)  //a,b,c
-		} }
-		{ 'BOX3' { 'NAME' "Global Bounding Box" } { 'DATA' -5.9395136833190918(1.15.16) -15.1649999618530273(1.15.16) 1.7000000476837158(1.15.16) -2.3662500381469727(1.15.16) -6.8729863166809082(1.15.16) 2.5893263816833496(1.15.16)  //min(x,y,z)-max(x,y,z)
-		} }
-		{ 'STR' { 'NAME' "Class Name" } { 'DATA' "statplat" } }
-		{ 'FILE' { 'NAME' "Mesh Name" } { 'STR' "640_xiaomi_power.iff" } }
-		{ 'I32'  { 'NAME' "Model Type" } { 'DATA' 1l } { 'STR' "Mesh" } }
-		{ 'I32' { 'NAME' "Mobility" } { 'STR' "Anchored" } }
-		{ 'I32' { 'NAME' "Model Type" } { 'STR' "Mesh" } }
-		{ 'I32' { 'NAME' "Visibility Mailbox" } { 'DATA' 1l } { 'STR' "1" } }
-		{ 'FX32' { 'NAME' "slopeA" } { 'DATA' 0.0003847935332791(1.15.16) } { 'STR' "0.000385" } }
-		{ 'FX32' { 'NAME' "slopeB" } { 'DATA' -0.0004703754559159(1.15.16) } { 'STR' "-0.000470" } }
-		{ 'FX32' { 'NAME' "slopeC" } { 'DATA' 0.0080721211270429(1.15.16) } { 'STR' "0.008072" } }
-		{ 'FX32' { 'NAME' "slopeD" } { 'DATA' 0.1271359077509260(1.15.16) } { 'STR' "0.127136" } }
 	}
 	{ 'OBJ' 
 		{ 'NAME' "640-midea-24k-master-indoor-A-closet-wall" }
