@@ -1189,6 +1189,11 @@ DOOR_TRACK_D = 0.11          # centre-to-centre spacing of the three tracks, in 
 DOOR_SLIDE_S = 2.0           # seconds for a full open or close — reads as a real door
 DOOR_COLLISION_MASS = 75.0    # explicit ordinary-wall collision for every glass leaf
 DOOR_REACH = 0.8             # metres from each panel bounds, either side
+# Photographed pull: 33 cm high, 7.5 cm projection.  It is fitted to the left
+# leaf (panel 0) and baked into that moving panel so it stays with the glass.
+DOOR_HANDLE_H = 0.33
+DOOR_HANDLE_D = 0.075
+DOOR_HANDLE_R = 0.028
 # The Director addresses the movable panels by runtime actor index, which is NOT
 # something to count by hand out of the .lev (docs/level-design-troubleshooting.md
 # § "Runtime actor indices do NOT match the .lev OBJECT ordering"). It is taken
@@ -1230,7 +1235,7 @@ if CONDO_DOORS:
     print(f"[condo] {DOOR_ROOM}: {DOOR_WALL} trimmed x {_wx0:.2f}…{_wx1:.2f} → "
           f"{_wx0:.2f}…{DOOR_X0:.2f}; x {DOOR_X0:.2f}…{DOOR_X1:.2f} becomes telescoping doors")
 
-    def _door_panel(name, track, x0, x1):
+    def _door_panel(name, track, x0, x1, add_hardware=False):
         """One solid glass panel actor, baked in world space on its own Y track.
 
         Mass is explicitly 75 (the ordinary-wall/statplat default in
@@ -1243,11 +1248,63 @@ if CONDO_DOORS:
         for v in cube:
             v.co = ((x0 + x1) / 2 + v.co.x * (x1 - x0), yc + v.co.y * GLASS_T,
                     WALL_H / 2 + v.co.z * WALL_H)
+        if add_hardware:
+            # A U-pull on each face: cylindrical vertical bar plus the two short
+            # standoffs that bridge the glass.  The vertical handle centre is
+            # 1.45 m above the finished floor, with the key cylinder below it.
+            def add_cylinder(center, radius, depth, axis, material_index):
+                result = _bmesh.ops.create_cone(
+                    bm, cap_ends=True, cap_tris=True, segments=12,
+                    radius1=radius, radius2=radius, depth=depth)
+                rotation = Vector((0.0, 0.0, 1.0)).rotation_difference(Vector(axis))
+                _bmesh.ops.transform(
+                    bm, matrix=Matrix.Translation(center) @ rotation.to_matrix().to_4x4(),
+                    verts=result['verts'])
+                new_verts = set(result['verts'])
+                for face in bm.faces:
+                    if all(vert in new_verts for vert in face.verts):
+                        face.material_index = material_index
+
+            def add_box(center, size, material_index):
+                verts = _bmesh.ops.create_cube(bm, size=1.0)['verts']
+                vset = set(verts)
+                for vert in verts:
+                    vert.co = (center[0] + vert.co.x * size[0],
+                               center[1] + vert.co.y * size[1],
+                               center[2] + vert.co.z * size[2])
+                for face in bm.faces:
+                    if all(vert in vset for vert in face.verts):
+                        face.material_index = material_index
+
+            handle_x = x0 + 0.25
+            handle_z = 1.45
+            for side in (-1.0, 1.0):
+                face_y = yc + side * (GLASS_T / 2)
+                bar_y = face_y + side * (DOOR_HANDLE_D - DOOR_HANDLE_R)
+                add_cylinder((handle_x, bar_y, handle_z), DOOR_HANDLE_R,
+                             DOOR_HANDLE_H, (0.0, 0.0, 1.0), 1)
+                for z in (handle_z - DOOR_HANDLE_H / 2 + DOOR_HANDLE_R,
+                          handle_z + DOOR_HANDLE_H / 2 - DOOR_HANDLE_R):
+                    add_cylinder((handle_x, (face_y + bar_y) / 2, z),
+                                 DOOR_HANDLE_R, abs(bar_y - face_y), (0.0, side, 0.0), 1)
+
+                # Cylindrical keyed lock below the handle on both faces. The key
+                # projects from the project-room side (negative Y), as in the photo.
+                lock_y = face_y + side * 0.014
+                add_cylinder((handle_x, lock_y, 1.05), 0.055, 0.018, (0.0, side, 0.0), 1)
+                add_box((handle_x, lock_y + side * 0.011, 1.05),
+                        (0.018, 0.006, 0.034), 2)
+            add_box((handle_x, yc - GLASS_T / 2 - 0.085, 1.05),
+                    (0.025, 0.10, 0.018), 2)
+
         _bmesh.ops.recalc_face_normals(bm, faces=bm.faces)
         me = bpy.data.meshes.new(name)
         bm.to_mesh(me)
         bm.free()
         me.materials.append(_glass)
+        if add_hardware:
+            me.materials.append(make_flat_material('door-hardware-black', (0.035, 0.035, 0.040)))
+            me.materials.append(make_flat_material('door-key-metal', (0.52, 0.48, 0.35)))
         obj = bpy.data.objects.new(name, me)
         scene.collection.objects.link(obj)
         clean_mesh(me, recalc=False)
@@ -1272,7 +1329,8 @@ if CONDO_DOORS:
     # 0 and 1 slide out to their own closed bays.
     door_panels, door_shift = [], []
     for _i in range(DOOR_PANELS):
-        _p = _door_panel(f'639-project-door-panel-{_i}', _i, DOOR_GATHER_X0, DOOR_X1)
+        _p = _door_panel(f'639-project-door-panel-{_i}', _i, DOOR_GATHER_X0, DOOR_X1,
+                         add_hardware=(_i == 0))
         door_panels.append(_p)
         door_shift.append((DOOR_X0 + _i * DOOR_W) - DOOR_GATHER_X0)   # 0 for the fixed panel
     assert abs(door_shift[DOOR_PANELS - 1]) < 1e-6, "the last bay must be the gather bay"
@@ -1337,6 +1395,7 @@ if CONDO_DOORS:
           f"{', '.join(f'{s:+.2f} m' for s in door_shift[:-1])} to close the "
           f"x {DOOR_X0:.2f}…{DOOR_X1:.2f} frontage over {DOOR_SLIDE_S:.1f} s; "
           f"z 0.00…{WALL_H:.2f} at y {DOOR_Y:.2f}, tracks {DOOR_TRACK_D:.2f} m apart; "
+          f"panel 0 has 33 cm black pull handles on both faces and keyed lock below; "
           f"interaction reach {DOOR_REACH:.2f} m from any panel, either side; "
           f"B/keyboard-2 toggles while in mailbox zone {MB_DOOR_REACH}; "
           f"mailboxes press-latch {MB_DOOR_PRESS_LATCH}, target {MB_DOOR_TARGET}, "
