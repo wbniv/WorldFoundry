@@ -1,7 +1,7 @@
 #!/usr/bin/env python3
 """In-engine verification for the 639 project-room glass-door button.
 
-Checks that B is ignored away from the wall switch, toggles the door while the
+Checks that B is ignored away from the glass panels, toggles the door while the
 player is within reach, drives a continuous two-second slide, and reverses an
 in-flight slide without snapping. It also walks the player into the gathered
 glass stack and all three fully-extended bays to prove that every visible part
@@ -138,8 +138,8 @@ try:
     time.sleep(2.0)
     player = actor_index(r"actor idx=(\d+) mesh=player\.iff mobility=Physics")
     panel0 = actor_index(r"actor idx=(\d+) mesh=639_project_door_panel_0\.iff")
-    button = actor_index(r"actor idx=(\d+) mesh=639_project_door_button\.iff")
-    print(f"actors: player={player} panel0={panel0} button={button}")
+    check("physical button removed", "mesh=639_project_door_button.iff" not in LOG.read_text(), "no wall switch actor")
+    print(f"actors: player={player} panel0={panel0}")
 
     cli = BridgeClient("127.0.0.1", PORT, timeout=15.0)
     for mailbox in (MB_ZONE, MB_TARGET, MB_CLOSEDNESS):
@@ -173,7 +173,7 @@ try:
         f"target={value(cli, 1, MB_TARGET)}",
     )
 
-    # Inside the authored interaction box: x 6.80..7.90, y -3.10..-2.05.
+    # Within reach of the gathered glass stack.
     move(cli, player, 7.25, -2.55)
     press_b(cli)
     target = wait_value(cli, 1, MB_TARGET, lambda v: v > 0.5, timeout=1.0)
@@ -189,9 +189,33 @@ try:
         f"closedness={closed} panel0.x={panel_x}",
     )
 
+    # Each closed leaf can be reached from the room and the patio. Reclose
+    # immediately after each opening request, also exercising moving-panel reach.
+    for x in (4.45, 5.80, 7.10):
+        for y in (-2.65, -1.35):
+            move(cli, player, x, y)
+            press_b(cli)
+            target = wait_value(cli, 1, MB_TARGET, lambda v: v < .5, timeout=1)
+            check(f"panel at {x} from side {y} opens", target is not None and target < .5, str(target))
+            press_b(cli)
+            wait_value(cli, 1, MB_CLOSEDNESS, lambda v: v > .995, timeout=12)
+    move(cli, player, 7.25, -2.55)
+
     press_b(cli)
     reopened = wait_value(cli, 1, MB_CLOSEDNESS, lambda v: v < 0.005, timeout=18.0)
     check("second press opens", reopened is not None and reopened < 0.005, f"closedness={reopened}")
+
+    move(cli, player, 4.45, -2.65)
+    press_b(cli)
+    check("empty open bay ignores press", value(cli, 1, MB_TARGET) == 0, str(value(cli, 1, MB_TARGET)))
+    move(cli, player, 7.25, -2.55)
+    cli.inject_input("joystick1_raw_justpressed", BUTTON_B, duration_frames=30)
+    time.sleep(1)
+    check("held press toggles once", value(cli, 1, MB_TARGET) == 1, str(value(cli, 1, MB_TARGET)))
+    cli.inject_input("joystick1_raw_justpressed", 0, duration_frames=1)
+    time.sleep(.2)
+    press_b(cli)
+    wait_value(cli, 1, MB_CLOSEDNESS, lambda v: v < .005, timeout=12)
 
     # Start closing, reverse around one-quarter travel, and require the next sample
     # to remain near that position rather than snap to an endpoint.
@@ -220,7 +244,7 @@ try:
         f"final y={gathered_y} vs door plane -2.00",
     )
 
-    # Close from beside the switch, then test the centre of each extended bay.
+    # Close from beside the gathered glass, then test the centre of each extended bay.
     move(cli, player, 7.25, -2.55)
     press_b(cli)
     closed = wait_value(cli, 1, MB_CLOSEDNESS, lambda v: v > 0.995, timeout=12.0)

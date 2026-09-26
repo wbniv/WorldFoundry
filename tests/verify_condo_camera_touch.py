@@ -13,7 +13,7 @@ with h.game('touch') as (cli,player):
     h.check('touch starts in Walk',read(112)==0)
     grounded_z=h.value(cli,player,3011)
     c.hold(cli,c.A,.12)
-    h.check('A tap selects Look and manual camera',read(112)==1 and read(113)==1)
+    h.check('A tap selects Look and manual camera',h.wait(lambda:read(112)==1 and read(113)==1))
     before=h.values(cli,player,h.POS);yaw=read(114)
     c.hold(cli,c.RIGHT,.4)
     h.check('Look directions orbit without walking',read(114)!=yaw and h.near(h.values(cli,player,h.POS),before,.05))
@@ -44,7 +44,7 @@ with h.game('touch') as (cli,player):
     p=h.values(cli,player,h.POS);c.hold(cli,c.UP,.4)
     h.check('Walk movement works',h.value(cli,player,3010)>p[1]+.1)
     h.check('A taps never jump',abs(h.value(cli,player,3011)-grounded_z)<.05)
-    # Approach the existing wall-button zone, then tap B.
+    # Approach the gathered glass panels, then tap B.
     h.place(cli,player,(7.3,-2.45,16.05))
     door=h.value(cli,1,93);c.hold(cli,c.B,.1)
     h.check('B tap operates nearby door',h.value(cli,1,93)!=door)

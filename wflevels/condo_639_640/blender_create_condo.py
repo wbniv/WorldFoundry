@@ -777,7 +777,7 @@ MB_UNIT_INIT, MB_CURRENT_UNIT, MB_UNIT_PRESS_LATCH = 80, 81, 82
 MB_UNIT_POS = {639: (83, 84, 85), 640: (86, 87, 88)}
 MB_DOOR_TOUR_INIT   = 90                    # tour-only: initialise the door closed once
 MB_DOOR_PRESS_LATCH = 91                    # one toggle per physical button press
-MB_DOOR_BUTTON_ZONE = 92                    # ActBoxOR reach gate for the wall switch
+MB_DOOR_REACH = 92                    # Forth proximity to the current glass panel positions
 MB_DOOR_TARGET      = 93                    # 0 = open, 1 = closed
 MB_DOOR_CLOSEDNESS  = 94                    # continuous 0..1 slide position
 
@@ -861,7 +861,7 @@ def tour_forth(tour):
     leg (bits 0) timed on INDEXOF_TIME via mailbox 501. The last leg sets mailbox
     502 = 1 so a recorder knows the tour is over. A waypoint may also carry
     `"action": "open-project-door"`; that emits a stationary action leg which
-    commands the same target mailbox as the wall button and waits until the
+    commands the same target mailbox as manual door interaction and waits until the
     panels are fully open. Position-based → replays the same at any frame rate.
     """
     hold = float(tour.get('hold_seconds', 0.5))
@@ -1144,15 +1144,14 @@ zone_interior = add_zone('zone-interior', Vector((min(cx0, -8.2), cy0 - 0.5, -0.
 # x 3.65…3.80 slice that fronts the guest bedroom, and put the doors across the
 # project room's own x 3.80…7.80 frontage.
 #
-# MECHANISM (2026-09-20, 3rd iteration — wall-button control).
+# MECHANISM (2026-09-26 — interaction beside any glass panel).
 # Three individual statplat panel actors, all solid at the ordinary wall Mass
 # (75, movebloc.inc:15), explicitly authored so a schema/default change cannot
 # silently turn the glass into a pass-through surface. One is fixed in
 # the gather bay; the other two physically slide along X between the gather bay
-# and their closed bays. A visible switch on the project-room side of the
-# x=7.80 jamb has a small ActBoxOR interaction-range volume. Pressing B
-# (keyboard 2) while inside that volume toggles the target; merely approaching
-# or leaving does nothing. The Director integrates a continuous 0..1
+# and their closed bays. Forth checks reach against each moving glass panel
+# from either side. Pressing B (keyboard 2) within reach toggles the target;
+# merely approaching or leaving does nothing. The Director integrates a continuous 0..1
 # closedness mailbox toward that target and writes the panels'
 # `INDEXOF_X_POS` mailboxes. A second press in flight reverses smoothly.
 #
@@ -1189,7 +1188,7 @@ DOOR_PANELS  = 3
 DOOR_TRACK_D = 0.11          # centre-to-centre spacing of the three tracks, in Y
 DOOR_SLIDE_S = 2.0           # seconds for a full open or close — reads as a real door
 DOOR_COLLISION_MASS = 75.0    # explicit ordinary-wall collision for every glass leaf
-DOOR_BUTTON_Y = -2.45         # wall switch on the project-room side of the x=7.80 jamb
+DOOR_REACH = 0.8             # metres from each panel bounds, either side
 # The Director addresses the movable panels by runtime actor index, which is NOT
 # something to count by hand out of the .lev (docs/level-design-troubleshooting.md
 # § "Runtime actor indices do NOT match the .lev OBJECT ordering"). It is taken
@@ -1278,49 +1277,9 @@ if CONDO_DOORS:
         door_shift.append((DOOR_X0 + _i * DOOR_W) - DOOR_GATHER_X0)   # 0 for the fixed panel
     assert abs(door_shift[DOOR_PANELS - 1]) < 1e-6, "the last bay must be the gather bay"
 
-    # A visible wall switch, mounted on the project-room side of the x=7.80 jamb.
-    # It is intentionally Mass 0: the cap protrudes enough to read from the doll-house
-    # camera, but should not snag the player's collision capsule. The nearby ActBoxOR
-    # is only an interaction-range gate; entering/leaving it never moves the doors.
-    _button_plate_mat = make_flat_material('door-button-plate', (0.16, 0.18, 0.20))
-    _button_cap_mat = make_flat_material('door-button-cap', (0.95, 0.32, 0.08))
-    _button_bm = _bmesh.new()
-
-    def _button_box(center, size, material_index):
-        _verts = _bmesh.ops.create_cube(_button_bm, size=1.0)['verts']
-        _vset = set(_verts)
-        for _v in _verts:
-            _v.co = (center[0] + _v.co.x * size[0],
-                     center[1] + _v.co.y * size[1],
-                     center[2] + _v.co.z * size[2])
-        for _face in _button_bm.faces:
-            if all(_v in _vset for _v in _face.verts):
-                _face.material_index = material_index
-
-    # x=7.80 is the perpendicular wall: both pieces protrude toward the room (−X).
-    _button_box((DOOR_X1 - 0.02, DOOR_BUTTON_Y, 1.15), (0.04, 0.26, 0.34), 0)
-    _button_box((DOOR_X1 - 0.07, DOOR_BUTTON_Y, 1.15), (0.06, 0.14, 0.14), 1)
-    _bmesh.ops.recalc_face_normals(_button_bm, faces=_button_bm.faces)
-    _button_me = bpy.data.meshes.new('639-project-door-button')
-    _button_bm.to_mesh(_button_me)
-    _button_bm.free()
-    _button_me.materials.append(_button_plate_mat)
-    _button_me.materials.append(_button_cap_mat)
-    door_button = bpy.data.objects.new('639-project-door-button', _button_me)
-    scene.collection.objects.link(door_button)
-    clean_mesh(_button_me, recalc=False)
-    as_statplat(door_button)
-    door_button['wf_Mass'] = 0.0
-
-    zone_door_button = add_zone(
-        'zone-project-door-button',
-        Vector((DOOR_X1 - 1.00, DOOR_Y - 1.10, 0.0)),
-        Vector((DOOR_X1 + 0.10, DOOR_Y - 0.05, 2.10)),
-        MB_DOOR_BUTTON_ZONE, door_button.name)
-
     # Director clause, per tick:
-    #   1. ActBoxOR mailbox 92 says only whether the player is within reach of the
-    #      physical switch. While in reach, a fresh B press toggles target mailbox 93.
+    #   1. Forth updates mailbox 92 from proximity to the current panel bounds.
+    #      While in reach, a fresh B press toggles target mailbox 93.
     #      Mailbox 91 latches that press until the just-pressed bit clears, preventing
     #      a long/synthetic input pulse from toggling on consecutive Director ticks.
     #      B / keyboard 2 is deliberately separate from A / Space, the player's jump.
@@ -1329,26 +1288,39 @@ if CONDO_DOORS:
     #      moving door without the deadline-based implementation's position snap.
     #   3. Each movable panel's X offset is closedness × its closed-minus-open shift.
     # Mailboxes initialise to zero, so the interactive level loads open. The tour
-    # variant initialises once to closed, allowing its switch stop to visibly open it.
-    def _door_forth_fn(idx0):
+    # variant initialises once to closed, allowing its door stop to visibly open it.
+    def _door_forth_fn(idx0, player_idx):
         _tour_init = (
             f"{MB_DOOR_TOUR_INIT} read-mailbox 0 = if "
             f"1 {MB_DOOR_TARGET} write-mailbox 1 {MB_DOOR_CLOSEDNESS} write-mailbox "
             f"1 {MB_DOOR_TOUR_INIT} write-mailbox then "
             if TOUR else ""
         )
+        # Meshes are baked in world space; X_POS is their sliding offset.
+        # Recompute reach each tick so an empty open bay is not an interaction zone.
+        reach = "0 "
+        for i in range(DOOR_PANELS):
+            px = f"INDEXOF_X_POS {player_idx} read-actor-mailbox "
+            offset = f"INDEXOF_X_POS {idx0 + i} read-actor-mailbox "
+            py = f"INDEXOF_Y_POS {player_idx} read-actor-mailbox "
+            yc = DOOR_Y + (i - (DOOR_PANELS - 1) / 2) * DOOR_TRACK_D
+            reach += (px + offset + f"{DOOR_GATHER_X0 - DOOR_REACH:.4f} + >= "
+                      + px + offset + f"{DOOR_X1 + DOOR_REACH:.4f} + <= & "
+                      + py + f"{yc:.4f} - abs {DOOR_REACH + GLASS_T / 2:.4f} <= & | ")
+        reach += (f"INDEXOF_Z_POS {player_idx} read-actor-mailbox {UNIT_Z - .1} >= & "
+                  f"INDEXOF_Z_POS {player_idx} read-actor-mailbox {UNIT_Z + WALL_H} <= & "
+                  f"{MB_DOOR_REACH} write-mailbox ")
         return (
-            _tour_init
+            _tour_init + reach
             +
             (f"INDEXOF_HARDWARE_JOYSTICK1_RAW_JUSTPRESSED read-mailbox JOYSTICK_BUTTON_B & 0 <> if "
              if TOUR else "119 read-mailbox 0 <> if ")
             +
-            f"{MB_DOOR_BUTTON_ZONE} read-mailbox 0 <> if "
+            f"{MB_DOOR_REACH} read-mailbox 0 <> if "
             f"{MB_DOOR_PRESS_LATCH} read-mailbox 0 = if "
             f"1 {MB_DOOR_TARGET} read-mailbox - {MB_DOOR_TARGET} write-mailbox "
             f"1 {MB_DOOR_PRESS_LATCH} write-mailbox then then "
             f"else 0 {MB_DOOR_PRESS_LATCH} write-mailbox then "
-            f"0 {MB_DOOR_BUTTON_ZONE} write-mailbox "
             f"{MB_DOOR_CLOSEDNESS} read-mailbox "
             f"INDEXOF_DELTA_TIME read-mailbox {DOOR_SLIDE_S} / "
             f"{MB_DOOR_TARGET} read-mailbox 0 <> if + else - then "
@@ -1365,8 +1337,8 @@ if CONDO_DOORS:
           f"{', '.join(f'{s:+.2f} m' for s in door_shift[:-1])} to close the "
           f"x {DOOR_X0:.2f}…{DOOR_X1:.2f} frontage over {DOOR_SLIDE_S:.1f} s; "
           f"z 0.00…{WALL_H:.2f} at y {DOOR_Y:.2f}, tracks {DOOR_TRACK_D:.2f} m apart; "
-          f"wall button at ({DOOR_X1:.2f}, {DOOR_BUTTON_Y:.2f}, 1.15), "
-          f"B/keyboard-2 toggles while in mailbox zone {MB_DOOR_BUTTON_ZONE}; "
+          f"interaction reach {DOOR_REACH:.2f} m from any panel, either side; "
+          f"B/keyboard-2 toggles while in mailbox zone {MB_DOOR_REACH}; "
           f"mailboxes press-latch {MB_DOOR_PRESS_LATCH}, target {MB_DOOR_TARGET}, "
           f"closedness {MB_DOOR_CLOSEDNESS}")
 else:
@@ -1582,7 +1554,7 @@ if _door_forth_fn is not None:
     assert _panel_pos == list(range(_panel_pos[0], _panel_pos[0] + DOOR_PANELS)), \
         f"door panels are not contiguous in the export list: {_panel_pos}"
     DOOR_PANEL0_ACTOR_IDX = _panel_pos[0] + DOOR_ACTOR_IDX_BIAS
-    director['wf_Script'] += _door_forth_fn(DOOR_PANEL0_ACTOR_IDX)
+    director['wf_Script'] += _door_forth_fn(DOOR_PANEL0_ACTOR_IDX, wf_objects.index(player) + DOOR_ACTOR_IDX_BIAS)
     print(f"[condo] {DOOR_ROOM} telescoping doors: movable panels are runtime actors "
           f"{DOOR_PANEL0_ACTOR_IDX}…{DOOR_PANEL0_ACTOR_IDX + DOOR_PANELS - 2} "
           f"(export positions {_panel_pos[0]}…{_panel_pos[-1]} + bias {DOOR_ACTOR_IDX_BIAS}); "

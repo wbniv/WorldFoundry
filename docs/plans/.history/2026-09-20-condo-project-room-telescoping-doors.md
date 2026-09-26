@@ -1,11 +1,16 @@
 | Date | Change |
 |------|--------|
+| [2026-09-20](https://github.com/wbniv/WorldFoundry/commit/91a5fab2) | feat(condo): add button door and patio tour |
 | [2026-09-20](https://github.com/wbniv/WorldFoundry/commit/24c81892) | feat(condo): project-room doors really slide, and really block when closed |
 | [2026-09-20](https://github.com/wbniv/WorldFoundry/commit/8a172a0e) | docs(plans): real sliding doors are achievable with no engine change |
 | [2026-09-20](https://github.com/wbniv/WorldFoundry/commit/fbcbba8a) | feat(condo): 639-project-rm's patio wall is telescoping glass doors |
 | [2026-09-20](https://github.com/wbniv/WorldFoundry/commit/2b1c8c86) | docs(plans): 639-project-rm north wall is telescoping doors (design plan) |
 
 <!--history-meta v1
+91a5fab2	author	Will Norris
+91a5fab2	added	198
+91a5fab2	deleted	9
+91a5fab2	files	1
 24c81892	author	Will Norris
 24c81892	added	246
 24c81892	deleted	10

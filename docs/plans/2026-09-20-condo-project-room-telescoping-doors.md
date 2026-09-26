@@ -869,3 +869,13 @@ continues afterward.
 640×480, 30 fps MP4. The recorder verifies exact room order and final door-open state;
 sampled frames confirm the project-room, door crossing, both patio stops, and guest
 bedroom captions align with the picture.
+
+
+## 2026-09-26 — interact beside any glass panel
+
+- [x] Removed the physical wall switch and its fixed interaction volume.
+- [x] Press B / keyboard 2 within 0.8 m of any glass panel from either side to toggle the whole door set. On the touch profile, tap B; its existing long-press camera reset and A+B teleport retain their behavior.
+- [x] Compute proximity in Forth from the current panel positions, including sliding and gathered panels. An empty open bay does not accept a press. Merely approaching does not toggle the doors.
+- [x] Rebuilt desktop, touch and tour bundles. Retained the continuous slide, reversal and solid panel collision.
+
+Runtime verification: `python3 tests/verify_condo_door_button.py` covers each closed leaf from both sides, remote and empty-bay presses, held presses, reversal, gathered-stack collision and all closed bays/seams. `python3 tests/verify_condo_camera_touch.py` checks the touch tap, hold and chord behavior against the rebuilt touch level.

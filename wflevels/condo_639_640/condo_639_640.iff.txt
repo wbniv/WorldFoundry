@@ -33,71 +33,70 @@
 		$3000005l { 'STR' "639_project_door_panel_0.iff" }  // IFF RM0 000:005
 		$3000006l { 'STR' "639_project_door_panel_1.iff" }  // IFF RM0 000:006
 		$3000007l { 'STR' "639_project_door_panel_2.iff" }  // IFF RM0 000:007
-		$3000008l { 'STR' "639_project_door_button.iff" }  // IFF RM0 000:008
-		$3000009l { 'STR' "unit_639.iff" }  // IFF RM0 000:009
-		$300000al { 'STR' "639_front_strip_s_wal_97eb.iff" }  // IFF RM0 000:00a
-		$300000bl { 'STR' "639_front_strip_s_wal_6196.iff" }  // IFF RM0 000:00b
-		$300000cl { 'STR' "639_front_strip_s_wal_a77d.iff" }  // IFF RM0 000:00c
-		$300000dl { 'STR' "639_front_strip_s_wal_9daf.iff" }  // IFF RM0 000:00d
-		$300000el { 'STR' "639_front_strip_s_wal_f6c7.iff" }  // IFF RM0 000:00e
-		$300000fl { 'STR' "639_bath_n_e_wall.iff" }  // IFF RM0 000:00f
-		$3000010l { 'STR' "639_guest_project_wall.iff" }  // IFF RM0 000:010
-		$3000011l { 'STR' "639_kitchen_n_wall_jamb0.iff" }  // IFF RM0 000:011
-		$3000012l { 'STR' "639_kitchen_n_wall_do_c21b.iff" }  // IFF RM0 000:012
-		$3000013l { 'STR' "639_kitchen_n_wall_jamb1.iff" }  // IFF RM0 000:013
-		$3000014l { 'STR' "639_kitchen_n_wall_do_8213.iff" }  // IFF RM0 000:014
-		$3000015l { 'STR' "639_kitchen_n_wall_jamb2.iff" }  // IFF RM0 000:015
-		$3000016l { 'STR' "639_bath_s_n_wall.iff" }  // IFF RM0 000:016
-		$3000017l { 'STR' "639_bath_s_e_wall_jamb0.iff" }  // IFF RM0 000:017
-		$3000018l { 'STR' "639_bath_s_e_wall_doo_9132.iff" }  // IFF RM0 000:018
-		$3000019l { 'STR' "639_bath_s_e_wall_jamb1.iff" }  // IFF RM0 000:019
-		$300001al { 'STR' "639_consumer_unit.iff" }  // IFF RM0 000:01a
-		$300001bl { 'STR' "639_window_1.iff" }  // IFF RM0 000:01b
-		$300001cl { 'STR' "639_daikin_18k_guest_b546.iff" }  // IFF RM0 000:01c
-		$300001dl { 'STR' "639_daikin_18k_guest_d870.iff" }  // IFF RM0 000:01d
-		$300001el { 'STR' "639_daikin_drain.iff" }  // IFF RM0 000:01e
-		$300001fl { 'STR' "639_daikin_lineset.iff" }  // IFF RM0 000:01f
-		$3000020l { 'STR' "639_daikin_power.iff" }  // IFF RM0 000:020
-		$3000021l { 'STR' "unit_640.iff" }  // IFF RM0 000:021
-		$3000022l { 'STR' "640_master_bed_s_wall_w.iff" }  // IFF RM0 000:022
-		$3000023l { 'STR' "640_master_bed_s_wall_w2.iff" }  // IFF RM0 000:023
-		$3000024l { 'STR' "640_master_bed_s_wall_e.iff" }  // IFF RM0 000:024
-		$3000025l { 'STR' "640_master_bed_s_door_9839.iff" }  // IFF RM0 000:025
-		$3000026l { 'STR' "640_bath_closet_s_wal_61af.iff" }  // IFF RM0 000:026
-		$3000027l { 'STR' "640_bath_closet_s_wal_724f.iff" }  // IFF RM0 000:027
-		$3000028l { 'STR' "640_bath_closet_s_wal_5139.iff" }  // IFF RM0 000:028
-		$3000029l { 'STR' "640_bath_closet_s_wal_200d.iff" }  // IFF RM0 000:029
-		$300002al { 'STR' "640_bath_closet_s_wal_0083.iff" }  // IFF RM0 000:02a
-		$300002bl { 'STR' "640_bath_closet_divider.iff" }  // IFF RM0 000:02b
-		$300002cl { 'STR' "640_room_s_of_master_b087.iff" }  // IFF RM0 000:02c
-		$300002dl { 'STR' "640_room_s_of_master_f291.iff" }  // IFF RM0 000:02d
-		$300002el { 'STR' "640_nong_ice_w_wall_jamb0.iff" }  // IFF RM0 000:02e
-		$300002fl { 'STR' "640_nong_ice_w_wall_d_9703.iff" }  // IFF RM0 000:02f
-		$3000030l { 'STR' "640_nong_ice_w_wall_jamb1.iff" }  // IFF RM0 000:030
-		$3000031l { 'STR' "640_nong_ice_s_wall.iff" }  // IFF RM0 000:031
-		$3000032l { 'STR' "640_bath_s_w_wall_jamb0.iff" }  // IFF RM0 000:032
-		$3000033l { 'STR' "640_bath_s_w_wall_doo_9831.iff" }  // IFF RM0 000:033
-		$3000034l { 'STR' "640_bath_s_w_wall_jamb1.iff" }  // IFF RM0 000:034
-		$3000035l { 'STR' "640_consumer_unit.iff" }  // IFF RM0 000:035
-		$3000036l { 'STR' "640_curve_window_1.iff" }  // IFF RM0 000:036
-		$3000037l { 'STR' "640_curve_window_2.iff" }  // IFF RM0 000:037
-		$3000038l { 'STR' "640_curve_window_3.iff" }  // IFF RM0 000:038
-		$3000039l { 'STR' "640_curve_window_4.iff" }  // IFF RM0 000:039
-		$300003al { 'STR' "640_curve_window_5.iff" }  // IFF RM0 000:03a
-		$300003bl { 'STR' "640_curve_window_6.iff" }  // IFF RM0 000:03b
-		$300003cl { 'STR' "640_window_0.iff" }  // IFF RM0 000:03c
-		$300003dl { 'STR' "640_xiaomi_18k_nongic_e8a4.iff" }  // IFF RM0 000:03d
-		$300003el { 'STR' "640_xiaomi_18k_nongic_4c79.iff" }  // IFF RM0 000:03e
-		$300003fl { 'STR' "640_xiaomi_power.iff" }  // IFF RM0 000:03f
-		$3000040l { 'STR' "640_xiaomi_drain.iff" }  // IFF RM0 000:040
-		$3000041l { 'STR' "640_xiaomi_lineset.iff" }  // IFF RM0 000:041
-		$3000042l { 'STR' "640_living_nw_column.iff" }  // IFF RM0 000:042
-		$3000043l { 'STR' "640_xiaomi_condensate_pump.iff" }  // IFF RM0 000:043
-		$3000044l { 'STR' "640_midea_24k_master_219b.iff" }  // IFF RM0 000:044
-		$3000045l { 'STR' "640_midea_24k_master_94f8.iff" }  // IFF RM0 000:045
-		$3000046l { 'STR' "640_midea_drain_a_clo_57b6.iff" }  // IFF RM0 000:046
-		$3000047l { 'STR' "640_midea_lineset_a_c_09f9.iff" }  // IFF RM0 000:047
-		$3000048l { 'STR' "640_midea_power_a_clo_39bb.iff" }  // IFF RM0 000:048
+		$3000008l { 'STR' "unit_639.iff" }  // IFF RM0 000:008
+		$3000009l { 'STR' "639_front_strip_s_wal_97eb.iff" }  // IFF RM0 000:009
+		$300000al { 'STR' "639_front_strip_s_wal_6196.iff" }  // IFF RM0 000:00a
+		$300000bl { 'STR' "639_front_strip_s_wal_a77d.iff" }  // IFF RM0 000:00b
+		$300000cl { 'STR' "639_front_strip_s_wal_9daf.iff" }  // IFF RM0 000:00c
+		$300000dl { 'STR' "639_front_strip_s_wal_f6c7.iff" }  // IFF RM0 000:00d
+		$300000el { 'STR' "639_bath_n_e_wall.iff" }  // IFF RM0 000:00e
+		$300000fl { 'STR' "639_guest_project_wall.iff" }  // IFF RM0 000:00f
+		$3000010l { 'STR' "639_kitchen_n_wall_jamb0.iff" }  // IFF RM0 000:010
+		$3000011l { 'STR' "639_kitchen_n_wall_do_c21b.iff" }  // IFF RM0 000:011
+		$3000012l { 'STR' "639_kitchen_n_wall_jamb1.iff" }  // IFF RM0 000:012
+		$3000013l { 'STR' "639_kitchen_n_wall_do_8213.iff" }  // IFF RM0 000:013
+		$3000014l { 'STR' "639_kitchen_n_wall_jamb2.iff" }  // IFF RM0 000:014
+		$3000015l { 'STR' "639_bath_s_n_wall.iff" }  // IFF RM0 000:015
+		$3000016l { 'STR' "639_bath_s_e_wall_jamb0.iff" }  // IFF RM0 000:016
+		$3000017l { 'STR' "639_bath_s_e_wall_doo_9132.iff" }  // IFF RM0 000:017
+		$3000018l { 'STR' "639_bath_s_e_wall_jamb1.iff" }  // IFF RM0 000:018
+		$3000019l { 'STR' "639_consumer_unit.iff" }  // IFF RM0 000:019
+		$300001al { 'STR' "639_window_1.iff" }  // IFF RM0 000:01a
+		$300001bl { 'STR' "639_daikin_18k_guest_b546.iff" }  // IFF RM0 000:01b
+		$300001cl { 'STR' "639_daikin_18k_guest_d870.iff" }  // IFF RM0 000:01c
+		$300001dl { 'STR' "639_daikin_drain.iff" }  // IFF RM0 000:01d
+		$300001el { 'STR' "639_daikin_lineset.iff" }  // IFF RM0 000:01e
+		$300001fl { 'STR' "639_daikin_power.iff" }  // IFF RM0 000:01f
+		$3000020l { 'STR' "unit_640.iff" }  // IFF RM0 000:020
+		$3000021l { 'STR' "640_master_bed_s_wall_w.iff" }  // IFF RM0 000:021
+		$3000022l { 'STR' "640_master_bed_s_wall_w2.iff" }  // IFF RM0 000:022
+		$3000023l { 'STR' "640_master_bed_s_wall_e.iff" }  // IFF RM0 000:023
+		$3000024l { 'STR' "640_master_bed_s_door_9839.iff" }  // IFF RM0 000:024
+		$3000025l { 'STR' "640_bath_closet_s_wal_61af.iff" }  // IFF RM0 000:025
+		$3000026l { 'STR' "640_bath_closet_s_wal_724f.iff" }  // IFF RM0 000:026
+		$3000027l { 'STR' "640_bath_closet_s_wal_5139.iff" }  // IFF RM0 000:027
+		$3000028l { 'STR' "640_bath_closet_s_wal_200d.iff" }  // IFF RM0 000:028
+		$3000029l { 'STR' "640_bath_closet_s_wal_0083.iff" }  // IFF RM0 000:029
+		$300002al { 'STR' "640_bath_closet_divider.iff" }  // IFF RM0 000:02a
+		$300002bl { 'STR' "640_room_s_of_master_b087.iff" }  // IFF RM0 000:02b
+		$300002cl { 'STR' "640_room_s_of_master_f291.iff" }  // IFF RM0 000:02c
+		$300002dl { 'STR' "640_nong_ice_w_wall_jamb0.iff" }  // IFF RM0 000:02d
+		$300002el { 'STR' "640_nong_ice_w_wall_d_9703.iff" }  // IFF RM0 000:02e
+		$300002fl { 'STR' "640_nong_ice_w_wall_jamb1.iff" }  // IFF RM0 000:02f
+		$3000030l { 'STR' "640_nong_ice_s_wall.iff" }  // IFF RM0 000:030
+		$3000031l { 'STR' "640_bath_s_w_wall_jamb0.iff" }  // IFF RM0 000:031
+		$3000032l { 'STR' "640_bath_s_w_wall_doo_9831.iff" }  // IFF RM0 000:032
+		$3000033l { 'STR' "640_bath_s_w_wall_jamb1.iff" }  // IFF RM0 000:033
+		$3000034l { 'STR' "640_consumer_unit.iff" }  // IFF RM0 000:034
+		$3000035l { 'STR' "640_curve_window_1.iff" }  // IFF RM0 000:035
+		$3000036l { 'STR' "640_curve_window_2.iff" }  // IFF RM0 000:036
+		$3000037l { 'STR' "640_curve_window_3.iff" }  // IFF RM0 000:037
+		$3000038l { 'STR' "640_curve_window_4.iff" }  // IFF RM0 000:038
+		$3000039l { 'STR' "640_curve_window_5.iff" }  // IFF RM0 000:039
+		$300003al { 'STR' "640_curve_window_6.iff" }  // IFF RM0 000:03a
+		$300003bl { 'STR' "640_window_0.iff" }  // IFF RM0 000:03b
+		$300003cl { 'STR' "640_xiaomi_18k_nongic_e8a4.iff" }  // IFF RM0 000:03c
+		$300003dl { 'STR' "640_xiaomi_18k_nongic_4c79.iff" }  // IFF RM0 000:03d
+		$300003el { 'STR' "640_xiaomi_power.iff" }  // IFF RM0 000:03e
+		$300003fl { 'STR' "640_xiaomi_drain.iff" }  // IFF RM0 000:03f
+		$3000040l { 'STR' "640_xiaomi_lineset.iff" }  // IFF RM0 000:040
+		$3000041l { 'STR' "640_living_nw_column.iff" }  // IFF RM0 000:041
+		$3000042l { 'STR' "640_xiaomi_condensate_pump.iff" }  // IFF RM0 000:042
+		$3000043l { 'STR' "640_midea_24k_master_219b.iff" }  // IFF RM0 000:043
+		$3000044l { 'STR' "640_midea_24k_master_94f8.iff" }  // IFF RM0 000:044
+		$3000045l { 'STR' "640_midea_drain_a_clo_57b6.iff" }  // IFF RM0 000:045
+		$3000046l { 'STR' "640_midea_lineset_a_c_09f9.iff" }  // IFF RM0 000:046
+		$3000047l { 'STR' "640_midea_power_a_clo_39bb.iff" }  // IFF RM0 000:047
 	}
 	{ 'ALGN' .align(2048) }
 	{ 'LVL' [ "condo_639_640.lvl" ] }
@@ -124,71 +123,70 @@
 		{ 'ASS' $3000005l [ "639_project_door_panel_0.iff" ] }  // IFF RM0 000:005
 		{ 'ASS' $3000006l [ "639_project_door_panel_1.iff" ] }  // IFF RM0 000:006
 		{ 'ASS' $3000007l [ "639_project_door_panel_2.iff" ] }  // IFF RM0 000:007
-		{ 'ASS' $3000008l [ "639_project_door_button.iff" ] }  // IFF RM0 000:008
-		{ 'ASS' $3000009l [ "unit_639.iff" ] }  // IFF RM0 000:009
-		{ 'ASS' $300000al [ "639_front_strip_s_wal_97eb.iff" ] }  // IFF RM0 000:00a
-		{ 'ASS' $300000bl [ "639_front_strip_s_wal_6196.iff" ] }  // IFF RM0 000:00b
-		{ 'ASS' $300000cl [ "639_front_strip_s_wal_a77d.iff" ] }  // IFF RM0 000:00c
-		{ 'ASS' $300000dl [ "639_front_strip_s_wal_9daf.iff" ] }  // IFF RM0 000:00d
-		{ 'ASS' $300000el [ "639_front_strip_s_wal_f6c7.iff" ] }  // IFF RM0 000:00e
-		{ 'ASS' $300000fl [ "639_bath_n_e_wall.iff" ] }  // IFF RM0 000:00f
-		{ 'ASS' $3000010l [ "639_guest_project_wall.iff" ] }  // IFF RM0 000:010
-		{ 'ASS' $3000011l [ "639_kitchen_n_wall_jamb0.iff" ] }  // IFF RM0 000:011
-		{ 'ASS' $3000012l [ "639_kitchen_n_wall_do_c21b.iff" ] }  // IFF RM0 000:012
-		{ 'ASS' $3000013l [ "639_kitchen_n_wall_jamb1.iff" ] }  // IFF RM0 000:013
-		{ 'ASS' $3000014l [ "639_kitchen_n_wall_do_8213.iff" ] }  // IFF RM0 000:014
-		{ 'ASS' $3000015l [ "639_kitchen_n_wall_jamb2.iff" ] }  // IFF RM0 000:015
-		{ 'ASS' $3000016l [ "639_bath_s_n_wall.iff" ] }  // IFF RM0 000:016
-		{ 'ASS' $3000017l [ "639_bath_s_e_wall_jamb0.iff" ] }  // IFF RM0 000:017
-		{ 'ASS' $3000018l [ "639_bath_s_e_wall_doo_9132.iff" ] }  // IFF RM0 000:018
-		{ 'ASS' $3000019l [ "639_bath_s_e_wall_jamb1.iff" ] }  // IFF RM0 000:019
-		{ 'ASS' $300001al [ "639_consumer_unit.iff" ] }  // IFF RM0 000:01a
-		{ 'ASS' $300001bl [ "639_window_1.iff" ] }  // IFF RM0 000:01b
-		{ 'ASS' $300001cl [ "639_daikin_18k_guest_b546.iff" ] }  // IFF RM0 000:01c
-		{ 'ASS' $300001dl [ "639_daikin_18k_guest_d870.iff" ] }  // IFF RM0 000:01d
-		{ 'ASS' $300001el [ "639_daikin_drain.iff" ] }  // IFF RM0 000:01e
-		{ 'ASS' $300001fl [ "639_daikin_lineset.iff" ] }  // IFF RM0 000:01f
-		{ 'ASS' $3000020l [ "639_daikin_power.iff" ] }  // IFF RM0 000:020
-		{ 'ASS' $3000021l [ "unit_640.iff" ] }  // IFF RM0 000:021
-		{ 'ASS' $3000022l [ "640_master_bed_s_wall_w.iff" ] }  // IFF RM0 000:022
-		{ 'ASS' $3000023l [ "640_master_bed_s_wall_w2.iff" ] }  // IFF RM0 000:023
-		{ 'ASS' $3000024l [ "640_master_bed_s_wall_e.iff" ] }  // IFF RM0 000:024
-		{ 'ASS' $3000025l [ "640_master_bed_s_door_9839.iff" ] }  // IFF RM0 000:025
-		{ 'ASS' $3000026l [ "640_bath_closet_s_wal_61af.iff" ] }  // IFF RM0 000:026
-		{ 'ASS' $3000027l [ "640_bath_closet_s_wal_724f.iff" ] }  // IFF RM0 000:027
-		{ 'ASS' $3000028l [ "640_bath_closet_s_wal_5139.iff" ] }  // IFF RM0 000:028
-		{ 'ASS' $3000029l [ "640_bath_closet_s_wal_200d.iff" ] }  // IFF RM0 000:029
-		{ 'ASS' $300002al [ "640_bath_closet_s_wal_0083.iff" ] }  // IFF RM0 000:02a
-		{ 'ASS' $300002bl [ "640_bath_closet_divider.iff" ] }  // IFF RM0 000:02b
-		{ 'ASS' $300002cl [ "640_room_s_of_master_b087.iff" ] }  // IFF RM0 000:02c
-		{ 'ASS' $300002dl [ "640_room_s_of_master_f291.iff" ] }  // IFF RM0 000:02d
-		{ 'ASS' $300002el [ "640_nong_ice_w_wall_jamb0.iff" ] }  // IFF RM0 000:02e
-		{ 'ASS' $300002fl [ "640_nong_ice_w_wall_d_9703.iff" ] }  // IFF RM0 000:02f
-		{ 'ASS' $3000030l [ "640_nong_ice_w_wall_jamb1.iff" ] }  // IFF RM0 000:030
-		{ 'ASS' $3000031l [ "640_nong_ice_s_wall.iff" ] }  // IFF RM0 000:031
-		{ 'ASS' $3000032l [ "640_bath_s_w_wall_jamb0.iff" ] }  // IFF RM0 000:032
-		{ 'ASS' $3000033l [ "640_bath_s_w_wall_doo_9831.iff" ] }  // IFF RM0 000:033
-		{ 'ASS' $3000034l [ "640_bath_s_w_wall_jamb1.iff" ] }  // IFF RM0 000:034
-		{ 'ASS' $3000035l [ "640_consumer_unit.iff" ] }  // IFF RM0 000:035
-		{ 'ASS' $3000036l [ "640_curve_window_1.iff" ] }  // IFF RM0 000:036
-		{ 'ASS' $3000037l [ "640_curve_window_2.iff" ] }  // IFF RM0 000:037
-		{ 'ASS' $3000038l [ "640_curve_window_3.iff" ] }  // IFF RM0 000:038
-		{ 'ASS' $3000039l [ "640_curve_window_4.iff" ] }  // IFF RM0 000:039
-		{ 'ASS' $300003al [ "640_curve_window_5.iff" ] }  // IFF RM0 000:03a
-		{ 'ASS' $300003bl [ "640_curve_window_6.iff" ] }  // IFF RM0 000:03b
-		{ 'ASS' $300003cl [ "640_window_0.iff" ] }  // IFF RM0 000:03c
-		{ 'ASS' $300003dl [ "640_xiaomi_18k_nongic_e8a4.iff" ] }  // IFF RM0 000:03d
-		{ 'ASS' $300003el [ "640_xiaomi_18k_nongic_4c79.iff" ] }  // IFF RM0 000:03e
-		{ 'ASS' $300003fl [ "640_xiaomi_power.iff" ] }  // IFF RM0 000:03f
-		{ 'ASS' $3000040l [ "640_xiaomi_drain.iff" ] }  // IFF RM0 000:040
-		{ 'ASS' $3000041l [ "640_xiaomi_lineset.iff" ] }  // IFF RM0 000:041
-		{ 'ASS' $3000042l [ "640_living_nw_column.iff" ] }  // IFF RM0 000:042
-		{ 'ASS' $3000043l [ "640_xiaomi_condensate_pump.iff" ] }  // IFF RM0 000:043
-		{ 'ASS' $3000044l [ "640_midea_24k_master_219b.iff" ] }  // IFF RM0 000:044
-		{ 'ASS' $3000045l [ "640_midea_24k_master_94f8.iff" ] }  // IFF RM0 000:045
-		{ 'ASS' $3000046l [ "640_midea_drain_a_clo_57b6.iff" ] }  // IFF RM0 000:046
-		{ 'ASS' $3000047l [ "640_midea_lineset_a_c_09f9.iff" ] }  // IFF RM0 000:047
-		{ 'ASS' $3000048l [ "640_midea_power_a_clo_39bb.iff" ] }  // IFF RM0 000:048
+		{ 'ASS' $3000008l [ "unit_639.iff" ] }  // IFF RM0 000:008
+		{ 'ASS' $3000009l [ "639_front_strip_s_wal_97eb.iff" ] }  // IFF RM0 000:009
+		{ 'ASS' $300000al [ "639_front_strip_s_wal_6196.iff" ] }  // IFF RM0 000:00a
+		{ 'ASS' $300000bl [ "639_front_strip_s_wal_a77d.iff" ] }  // IFF RM0 000:00b
+		{ 'ASS' $300000cl [ "639_front_strip_s_wal_9daf.iff" ] }  // IFF RM0 000:00c
+		{ 'ASS' $300000dl [ "639_front_strip_s_wal_f6c7.iff" ] }  // IFF RM0 000:00d
+		{ 'ASS' $300000el [ "639_bath_n_e_wall.iff" ] }  // IFF RM0 000:00e
+		{ 'ASS' $300000fl [ "639_guest_project_wall.iff" ] }  // IFF RM0 000:00f
+		{ 'ASS' $3000010l [ "639_kitchen_n_wall_jamb0.iff" ] }  // IFF RM0 000:010
+		{ 'ASS' $3000011l [ "639_kitchen_n_wall_do_c21b.iff" ] }  // IFF RM0 000:011
+		{ 'ASS' $3000012l [ "639_kitchen_n_wall_jamb1.iff" ] }  // IFF RM0 000:012
+		{ 'ASS' $3000013l [ "639_kitchen_n_wall_do_8213.iff" ] }  // IFF RM0 000:013
+		{ 'ASS' $3000014l [ "639_kitchen_n_wall_jamb2.iff" ] }  // IFF RM0 000:014
+		{ 'ASS' $3000015l [ "639_bath_s_n_wall.iff" ] }  // IFF RM0 000:015
+		{ 'ASS' $3000016l [ "639_bath_s_e_wall_jamb0.iff" ] }  // IFF RM0 000:016
+		{ 'ASS' $3000017l [ "639_bath_s_e_wall_doo_9132.iff" ] }  // IFF RM0 000:017
+		{ 'ASS' $3000018l [ "639_bath_s_e_wall_jamb1.iff" ] }  // IFF RM0 000:018
+		{ 'ASS' $3000019l [ "639_consumer_unit.iff" ] }  // IFF RM0 000:019
+		{ 'ASS' $300001al [ "639_window_1.iff" ] }  // IFF RM0 000:01a
+		{ 'ASS' $300001bl [ "639_daikin_18k_guest_b546.iff" ] }  // IFF RM0 000:01b
+		{ 'ASS' $300001cl [ "639_daikin_18k_guest_d870.iff" ] }  // IFF RM0 000:01c
+		{ 'ASS' $300001dl [ "639_daikin_drain.iff" ] }  // IFF RM0 000:01d
+		{ 'ASS' $300001el [ "639_daikin_lineset.iff" ] }  // IFF RM0 000:01e
+		{ 'ASS' $300001fl [ "639_daikin_power.iff" ] }  // IFF RM0 000:01f
+		{ 'ASS' $3000020l [ "unit_640.iff" ] }  // IFF RM0 000:020
+		{ 'ASS' $3000021l [ "640_master_bed_s_wall_w.iff" ] }  // IFF RM0 000:021
+		{ 'ASS' $3000022l [ "640_master_bed_s_wall_w2.iff" ] }  // IFF RM0 000:022
+		{ 'ASS' $3000023l [ "640_master_bed_s_wall_e.iff" ] }  // IFF RM0 000:023
+		{ 'ASS' $3000024l [ "640_master_bed_s_door_9839.iff" ] }  // IFF RM0 000:024
+		{ 'ASS' $3000025l [ "640_bath_closet_s_wal_61af.iff" ] }  // IFF RM0 000:025
+		{ 'ASS' $3000026l [ "640_bath_closet_s_wal_724f.iff" ] }  // IFF RM0 000:026
+		{ 'ASS' $3000027l [ "640_bath_closet_s_wal_5139.iff" ] }  // IFF RM0 000:027
+		{ 'ASS' $3000028l [ "640_bath_closet_s_wal_200d.iff" ] }  // IFF RM0 000:028
+		{ 'ASS' $3000029l [ "640_bath_closet_s_wal_0083.iff" ] }  // IFF RM0 000:029
+		{ 'ASS' $300002al [ "640_bath_closet_divider.iff" ] }  // IFF RM0 000:02a
+		{ 'ASS' $300002bl [ "640_room_s_of_master_b087.iff" ] }  // IFF RM0 000:02b
+		{ 'ASS' $300002cl [ "640_room_s_of_master_f291.iff" ] }  // IFF RM0 000:02c
+		{ 'ASS' $300002dl [ "640_nong_ice_w_wall_jamb0.iff" ] }  // IFF RM0 000:02d
+		{ 'ASS' $300002el [ "640_nong_ice_w_wall_d_9703.iff" ] }  // IFF RM0 000:02e
+		{ 'ASS' $300002fl [ "640_nong_ice_w_wall_jamb1.iff" ] }  // IFF RM0 000:02f
+		{ 'ASS' $3000030l [ "640_nong_ice_s_wall.iff" ] }  // IFF RM0 000:030
+		{ 'ASS' $3000031l [ "640_bath_s_w_wall_jamb0.iff" ] }  // IFF RM0 000:031
+		{ 'ASS' $3000032l [ "640_bath_s_w_wall_doo_9831.iff" ] }  // IFF RM0 000:032
+		{ 'ASS' $3000033l [ "640_bath_s_w_wall_jamb1.iff" ] }  // IFF RM0 000:033
+		{ 'ASS' $3000034l [ "640_consumer_unit.iff" ] }  // IFF RM0 000:034
+		{ 'ASS' $3000035l [ "640_curve_window_1.iff" ] }  // IFF RM0 000:035
+		{ 'ASS' $3000036l [ "640_curve_window_2.iff" ] }  // IFF RM0 000:036
+		{ 'ASS' $3000037l [ "640_curve_window_3.iff" ] }  // IFF RM0 000:037
+		{ 'ASS' $3000038l [ "640_curve_window_4.iff" ] }  // IFF RM0 000:038
+		{ 'ASS' $3000039l [ "640_curve_window_5.iff" ] }  // IFF RM0 000:039
+		{ 'ASS' $300003al [ "640_curve_window_6.iff" ] }  // IFF RM0 000:03a
+		{ 'ASS' $300003bl [ "640_window_0.iff" ] }  // IFF RM0 000:03b
+		{ 'ASS' $300003cl [ "640_xiaomi_18k_nongic_e8a4.iff" ] }  // IFF RM0 000:03c
+		{ 'ASS' $300003dl [ "640_xiaomi_18k_nongic_4c79.iff" ] }  // IFF RM0 000:03d
+		{ 'ASS' $300003el [ "640_xiaomi_power.iff" ] }  // IFF RM0 000:03e
+		{ 'ASS' $300003fl [ "640_xiaomi_drain.iff" ] }  // IFF RM0 000:03f
+		{ 'ASS' $3000040l [ "640_xiaomi_lineset.iff" ] }  // IFF RM0 000:040
+		{ 'ASS' $3000041l [ "640_living_nw_column.iff" ] }  // IFF RM0 000:041
+		{ 'ASS' $3000042l [ "640_xiaomi_condensate_pump.iff" ] }  // IFF RM0 000:042
+		{ 'ASS' $3000043l [ "640_midea_24k_master_219b.iff" ] }  // IFF RM0 000:043
+		{ 'ASS' $3000044l [ "640_midea_24k_master_94f8.iff" ] }  // IFF RM0 000:044
+		{ 'ASS' $3000045l [ "640_midea_drain_a_clo_57b6.iff" ] }  // IFF RM0 000:045
+		{ 'ASS' $3000046l [ "640_midea_lineset_a_c_09f9.iff" ] }  // IFF RM0 000:046
+		{ 'ASS' $3000047l [ "640_midea_power_a_clo_39bb.iff" ] }  // IFF RM0 000:047
 	}
 	{ 'ALGN' .align(2048) }
 }
