@@ -31,7 +31,7 @@ Those records are real data (the game walks them per frame — see `0x26882`, a 
 
 ---
 
-## Method
+## Method (summary)
 
 1. **Boot headless.** `mame -video none -sound none -nothrottle -autoboot_script …` runs at ~7× real time; Lua `emu.register_frame_done` drives coin/start and dumps memory.
 2. **Address map** (`mem.map.entries` from Lua): work RAM is only `0x400000–0x401FFF` (8 KB); `0x900000–0x9FFFFF` is an unused 1 MB mirror (all zero); playfield VRAM `0xA00000–0xA01FFF`; sprite RAM `0xA03000`; slapstic bank `0x080000–0x081FFF`.
@@ -39,7 +39,59 @@ Those records are real data (the game walks them per frame — see `0x26882`, a 
 4. **Find the surface code.** Routine `0x1BB50` splits X,Y into `cell = coord >> 3`, `sub = coord & 7` and sets `0x4006A2 = (sub_y >= sub_x)` — the diagonal‑triangle flag. When the cell changes, `0x1BAB2` calls `0x1CABA`. A read tap with PC filter `0x1CA00–0x1D000` logged every table it touches; `unidasm` gave the rest.
 5. **Validate.** Dump RAM+VRAM+bank at three demo frames and compare the 16 words the game leaves at `0x401C28` with the Python decode (exact match at frames 600 and 1000), then compare the ball's Z with `ground(X,Y)` at 60 points along the attract‑mode demo (Z − ground = 0 at every point whose row was still in VRAM).
 
-All Lua scripts: [`scripts/research/mame/mm/`](../../scripts/research/mame/mm/).
+Six representative Lua scripts are kept at [`scripts/research/mame/mm/`](../../scripts/research/mame/mm/), one per confirmed step above (plus the full sweep and the attract survey). They are the *reproduction* path, not the discovery path — see below for the actual funnel, which ran roughly 15 script variants and included two genuine dead ends.
+
+## Discovery process (how each address was actually found)
+
+Reverse-engineering a raw 68000 image with no symbols is a search problem: the memory map gives no hints about which of ~8 KB of RAM words is "X position" versus "credits remaining." The approach throughout was to narrow by **behavior** (diff RAM across frames where something visibly changed) until a small enough cluster of addresses remained to confirm by **provenance** (tap the exact instruction that writes it).
+
+### Round 1 — broad diff, mostly noise
+
+First pass: dump the full 8 KB RAM at four points (frames 700/760/820/1300) spanning a coin-insert, start, and several seconds of gameplay, then scan for 16-bit words whose value changed by a small, same-signed step at every sample — a monotonic-drift heuristic meant to catch position/velocity-like data and reject flags or one-shot counters. This produced 20 candidates (`0x400012`, `0x40008C`–`0x4000B6`, `0x4000DC`, `0x400AB8`, `0x401DC0`, `0x401DD8`, `0x401F38`, `0x401FFA`). None of these turned out to be position — narrowing the sampling to every 4 frames over a longer window and re-running the same heuristic collapsed the "real" candidates to just `0x400012`, `0x4000DC`, `0x400AB8`, `0x401F38`, `0x401FFA`, all of which have the up-then-plateau shape of **timers or scores**, not a coordinate. Loosening the threshold again to see what was excluded surfaced dozens more addresses, several of which were revealed later to be genuinely important (`0x4003A6`, `0x400674`–`0x400682`) but for the wrong reason — those are **table pointers**, constant during a fixed level and only "changing" because the level itself changed mid-scan.
+
+### Round 2 — two dead ends that were still useful
+
+`mem.map.entries` (a Lua introspection call that lists the CPU's installed address ranges) showed the 68000 sees a **1 MB region at `0x900000`–`0x9FFFFF`** in addition to the real 8 KB work RAM. Dumping it at two gameplay frames 60 frames apart found it entirely zero and byte-identical page to page — an unused mirror, not a second RAM bank. Ruling this out mattered because early candidate-hunting scripts were scanning it as if it might hold level data.
+
+Dumping playfield/sprite VRAM (`0xA00000`–`0xA03FFF`) at the same two frames found only 8 changed words, all in the sprite table around `0xA030A6`–`0xA0312C` — two sprites' on-screen pixel coordinates (confirmed later to be the marble and a gate marker). Useful as a sanity check that *something* was moving where expected, but screen-space pixel coordinates are a dead end for recovering world-space physics: the isometric projection folds X and Y into one screen axis, so it can't be inverted back to a unique (X, Y).
+
+### Round 3 — the cluster, then a write-tap instead of more diffing
+
+A wider, denormalized capture — every 2 frames for ~350 samples across frames 800–1500, work RAM and sprite RAM together — turned up dozens of changing addresses, too many to eyeball individually. The one structural pattern worth pursuing: six contiguous words at `0x400024`–`0x40002E`, forming three adjacent 32-bit pairs that all changed together, smoothly, every sample. That shape (three co-varying 32-bit values) is what a 3-D position vector looks like; nothing else in the capture had it.
+
+Rather than keep diffing to confirm, the cluster was narrow enough to **tap directly**: MAME's `install_read_tap`/`install_write_tap` fire a callback with the current program counter on every access to a chosen range. Tapping reads+writes on just `0x400020`–`0x40003F` for a few physics frames gave the exact writer for each word — no ambiguity:
+
+| address | writer PC | field |
+|---|---|---|
+| `0x400024`/`26` | `0x0122B2` | **X** |
+| `0x400028`/`2A` | `0x0122BA` | **Y** |
+| `0x40002C`/`2E` | `0x0122C2` and `0x012700` (two call sites — jump vs. fall path) | **Z** |
+| `0x400034` | `0x012824`, `0x012840`, `0x0253EA` (three call sites) | a state/flag byte, not decoded further |
+| `0x400036`/`38` | `0x01BAAC` | not decoded — see "Loose ends" |
+| `0x40003A`/`3C`/`3E` | `0x01BAA2` | not decoded — see "Loose ends" |
+
+This is the actual discovery step for X/Y/Z; the broad diffing rounds only got the search down to "somewhere in this cluster," and would not by themselves have distinguished position from a dozen other plausible interpretations.
+
+### Round 4 — from writer PC to the cell-lookup routine
+
+Disassembling around `0x01BAA2`–`0x01BB94` (`unidasm -arch m68000`, after one false start — the first attempt used a byte offset one instruction short of a real boundary and produced ~60 bytes of garbage/`ILLEGAL` opcodes before the stream resynchronized on a recognizable `movem.l …,-(A7)` prologue) revealed routine `0x1BB50`: it takes a working position pair at `0x400690`/`0x400692`, right-shifts by 3 into `0x400696`/`0x400698` (**cx, cy** — the world cell), masks by 7 into `0x40069E`/`0x4006A0` (**sub-cell offset**), and compares them into `0x4006A2` (the diagonal-triangle flag). Two different call sites feed `0x400690`/`0x400692`: one copies the live actor's X/Y fields directly (the moving-marble path), the other computes `byte × 8` from a small lookup (used for a fixed spawn-tile coordinate elsewhere) — only the first path mattered for course geometry.
+
+From there, a **PC-filtered read tap** — log every ROM read whose instruction address falls in `0x1CA00`–`0x1D000`, alongside the marble's current position and cx/cy — run for ~200 frames of the demo, showed a stable, repeating set of table reads every time cx/cy changed. `unidasm` on that PC range gave the full routine (`0x1CABA`), including the four constant tables (`0x1EB3A`, `0x1ED0A` ×2, `0x1ED62`, `0x24B3A`) documented in "The algorithm" below.
+
+### Round 5 — validating against the game, not against intuition
+
+Two independent checks, both against the *running game's own computed state* rather than against each other:
+
+- **Exact-word match.** Dumped RAM+VRAM+bank at three demo frames, decoded each with the Python re-implementation, and compared against the 16 words the game itself leaves at `0x401C28` after doing the same lookup. Frames 600 and 1000 matched exactly. Frame 1400 initially looked like a failure — all 16 words zero, versus a real dump elsewhere in the level — until checking the *raw* VRAM word at that address showed it was itself zero: the row had scrolled out of the video window by then, so "all zero" was the correct decode of "no tile is currently drawn here," not a decoder bug. This is why `mm_merge_course.py` treats a raw VRAM word of 0 as "not yet seen" rather than "void," and sweeps multiple frames instead of trusting one dump.
+- **Trajectory match.** Logged (X, Y, Z, cx, cy, sub_x, sub_y) at ~60 points along a full attract-mode demo run and ran the decoder's `ground()` function against every sample. Z matched the decoded ground height everywhere except two samples: one at a cell whose row genuinely hadn't scrolled into VRAM yet at that frame (same cause as above, not a real disagreement), and one **unexplained residual of 0.75 height units** partway through the run — small enough not to affect the geometry (it's below one texel of the interpolation), but the cause was never run down. Noted here rather than left silently rounded away.
+
+### Round 6 — the merge step's own false-positive rate
+
+Sweeping dumps every 50 frames across a full demo run and merging per-cell (first-seen-wins) initially produced 3685 "solid" cells — but comparing to the MAME captures, over half of those (1956) had at least one corner word implying a height more than 300 units from sea level, which is not a real slope, it's the interpolation formula degenerating when one side of a cell has no floor (a corner word of 0, meaning "void from this neighbor"). The fix — reject a cell unless all four corner words are non-zero — is in `mm_merge_course.py`; it was found by comparing the "clean" cell count (1729) against the visually-obvious course extent in the stitched screenshot, not derived from the disassembly.
+
+### Visual proof, last
+
+Only after all of the above did rendering matter: the merged, filtered heightfield was drawn in the exact isometric projection recovered from the sprite-placement code (`screen_x = Y − X + 0x88`, …), and 31 raw MAME screenshots were stitched into one full-course reference by their scroll-register value. The two matched — rim shape, both gate pits, the central pyramid pit's two spike cones, the side ramps, the chute's zig-zags — which is the confirmation that the numeric validation in Round 5 corresponds to the geometry an arcade player actually sees.
 
 ---
 
@@ -114,6 +166,8 @@ The attract mode plays Practice (frames ~200–1150) then Beginner (~1750–3100
 
 ## Limitations / open items
 
+- **Two fields found by the write-tap were never decoded.** `0x400036`/`0x400038` (written by PC `0x01BAAC`) and `0x40003A`/`0x40003C`/`0x40003E` (written by PC `0x01BAA2`) sit right next to X/Y/Z in the same object and update every physics frame, but weren't needed for the surface algorithm so their meaning was never chased down — candidates include a previous-frame position (for a velocity/delta calc) or a second tracked point. `0x400034` similarly has three distinct writer call sites and was left as an unidentified state/flag byte.
+- **One unexplained 0.75-height-unit residual.** In the trajectory validation (Round 5 of "Discovery process") the decoded ground height matched the ball's actual Z at every sampled point except one, where it was off by 0.75 units — smaller than one texel of the interpolation and with no visible effect on the geometry, but the cause (rounding in the slope table? a stale cx/cy read mid-transition?) was not run down.
 - **VRAM is a window.** `ROWTBL` maps iso row‑pair *i* to VRAM row *i* with no wrap for rows < 128 and the game blanks rows that scroll off, so one dump never holds a whole course. `mm_merge_course.py` merges a sweep (dump every 50 frames). Courses taller than 128 iso rows (Beginner has 216) will need the wrap handled (`ROWTBL` entries 64+ continue past 0x2000 — to be checked against the write side).
 - **Decorative lower floors.** The orange/yellow terraces at −58/−84 around the chute have zero words on at least one side; they are not walkable in the arcade (the marble shatters on them) and are currently omitted from the geometry.
 - **Dynamic tiles** (`0x800–0xFFF`) are resolved through RAM at dump time; only 4 cells near the goal differed between dumps (the animated goal gate).
