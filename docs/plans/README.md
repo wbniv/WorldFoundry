@@ -345,6 +345,7 @@ rows on commit.*
 | [macOS: prove ⌘Q and the red close button quit cleanly — and that Esc does not](2026-09-21-macos-close-paths.md) | Will's call: ⌘Q and the red button are the close paths, Esc must not quit (Phase 4 had mapped it; removed). Live on a Codemagic VNC/SSH session: the window, keyboard input and Esc-not-quitting were verified; ⌘Q and the red button could not be — the scripted VNC client's ⌘ chords and pointer events never reach the desktop, and the TCC-grant workaround was blocked by the harness — so they stay unverified pending a client that speaks Apple's ARD auth or a human at the desktop. | [`ceaab73d`](https://github.com/wbniv/WorldFoundry/commit/ceaab73d) | Platform |
 | [Condo architectural walkthrough camera controls](2026-09-25-condo-camera-controls.md) | Implemented Forth-only orbit, tilt, zoom, reset and touch profile; includes keyboard/gamepad diagrams and actual runtime captures. | Uncommitted | Feature |
 | [Shared Forth comments and safe semicolon scanning](2026-09-25-forth-comments-and-script-loading.md) | Implemented shared line comments and comment/string-aware script splitting; runtime regressions pass, broader redesign deferred. | Uncommitted | Fix |
+| [Aquarium level — 55 gal acrylic tank, clownfish, anemone](2026-09-30-aquarium-level.md) | Plan for a swimmable aquarium level: acrylic tank at exact 55 gal dimensions, translucent-pane spike, gravity-free clownfish, anemone; three mockups. | Uncommitted | Feature |
 
 ---
 

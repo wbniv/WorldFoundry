@@ -1,5 +1,6 @@
 | Date | Change |
 |------|--------|
+| [2026-09-25](https://github.com/wbniv/WorldFoundry/commit/ddef745d) | Correct Marble Madness terrain documentation and source attribution |
 | [2026-09-25](https://github.com/wbniv/WorldFoundry/commit/00978ee7) | Add condo walkthrough controls and shared Forth comment support |
 | [2026-09-21](https://github.com/wbniv/WorldFoundry/commit/b3fc2cea) | docs(plans): index the macOS close-paths plan |
 | [2026-09-21](https://github.com/wbniv/WorldFoundry/commit/ceaab73d) | feat(macos): Esc no longer quits; Phase 4 real-exit evidence from a VNC session |
@@ -29,6 +30,11 @@
 | [2026-06-26](https://github.com/wbniv/WorldFoundry/commit/16d72fa6) | docs: add plan index (docs/plans/README.md) |
 
 <!--history-meta v1
+ddef745d	author	Will Norris
+ddef745d	added	3
+ddef745d	deleted	3
+ddef745d	files	1
+ddef745d	body	Mark the old object-spawn interpretation as superseded and withdraw its\nterrain, heading and six-course fidelity claims. Document the delivered\nAstra Practice reconstruction, credit Marble Love, and update authoring\nguides, legacy plans, the plan index and bundle documentation.\n\nValidation: reviewed documentation diff and whitespace checks. No runtime\ncode or assets changed; historical validation remains explicitly identified.\n\nAI-Tool: Codex 0.157.0\nAI-Model: gpt-6-astra\nAI-Reasoning-Effort: medium
 00978ee7	author	Will Norris
 00978ee7	added	2
 00978ee7	deleted	0
