@@ -21,6 +21,7 @@ plan reuses that pipeline unchanged and spends its risk budget on the three thin
 - [x] Phase 2 — tank, sand, rock, anemone, lighting, fog — **static scene built; placeholder fish until Phase 3**
 - [x] Phase 3 — integrate the idle-spike clownfish (not a new mesh), controls, camera zones — **done; step 14 logic-verified, hardware unverified**
 - [x] Phase 4 — anemone sway (optional), docs, tasks, regression test — **done, plus steer and swim; Will's own look at the motion video and a phone run are still open**
+- [ ] Phase 5 — the aquarium as its own app on macOS and iOS (Metal), Android and Chromecast: **planned**, see [2026‑09‑30‑aquarium‑platforms](2026-09-30-aquarium-platforms.md)
 - [ ] macOS Metal parity of the aquarium (step 21) — **Linux reference generated and reproducible; the Metal half is pending the first Codemagic run**
 
 ## Mockups
@@ -1560,11 +1561,20 @@ Whenever the fish's path passes within 2.2 m of the anemone (the climb, the div
     clownfish left of it, above a dark stand. (Every pixel counts as non-black because the background is dark blue, so
     the "coverage IoU" line carries no information for this level.)
 
-    macOS half: **PENDING the first Codemagic run of `macos-desktop-debug`. Not run, not claimed.** The step is
-    informational (`|| true`, then a verdict block), so a difference does not fail the build. What the run must
-    produce, and what to read from it: artifacts `macos-aquarium-frame20.png` and `macos-aquarium-comparison.log`; the
-    step's tail prints `differing pixels: N of 307200`, `maximum channel delta: D` and `AQUARIUM PARITY: MATCH` or
-    `DIFFERS`. Snowgoons, for scale, differs by 495 pixels (494 at delta 1, one at delta 3) and passes `--tolerance 3`.
+    macOS half: **PASS.** Codemagic build `6abd118f026528c4b225b7bd` (`macos-desktop-debug`, commit `82eb561d`, 2026‑09‑30, 3.2 min).
+    Artifact `macos-aquarium-comparison.log`:
+
+    ```
+    640x480: exact=306865/307200 (99.890951%)
+    max channel delta histogram: {0: 306865, 1: 335}
+    coverage IoU=307200/307200 (100.000000%)
+    pixels exceeding tolerance 3: 0
+    PASS
+    ```
+
+    Metal renders the aquarium like Linux GL: 335 pixels are off by one level and none exceeds the tolerance (snowgoons,
+    for scale: 497 off by 1 and one by 3). I opened `macos-aquarium-frame20.png`: it is the aquarium, with the tank, the
+    water gradient and light shafts, the sand, the rock, the anemone's pink-tipped crown and the clownfish left of it.
     Once the real numbers are known, choose the tolerance and drop the `|| true`s so the step gates.
 
     What could be checked without a Mac (`python3 -m pytest tests/test_codemagic_aquarium_parity.py -v`): the yaml
@@ -1578,7 +1588,7 @@ Whenever the fish's path passes within 2.2 m of the anemone (the climb, the div
     11 passed in 5.9s
     ```
 
-    **PENDING (macOS).**
+    **PASS (macOS): see the macOS half above.**
 
 ## Regression guard
 

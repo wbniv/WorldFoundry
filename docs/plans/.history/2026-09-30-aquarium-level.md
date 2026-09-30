@@ -1,5 +1,8 @@
 | Date | Change |
 |------|--------|
+| [2026-09-30](https://github.com/wbniv/WorldFoundry/commit/74a2529a) | Plan the aquarium on every platform: macOS and iOS Metal, Android, Chromecast |
+| [2026-09-30](https://github.com/wbniv/WorldFoundry/commit/be6694e9) | codemagic: aquarium Metal-vs-GL frame parity step (informational), Linux reference, static test |
+| [2026-09-30](https://github.com/wbniv/WorldFoundry/commit/819f6a9a) | Save the aquarium Phase 4 motion demo in tests/recordings |
 | [2026-09-30](https://github.com/wbniv/WorldFoundry/commit/2a9f1868) | aquarium plan: Phase 4 verification (steps 16-20), re-runs of 12-15, verdict, tables, controls |
 | [2026-09-30](https://github.com/wbniv/WorldFoundry/commit/8a48df87) | Aquarium Phase 3: canonical clownfish, swim/dart controls, camshot B, touch profile |
 | [2026-09-30](https://github.com/wbniv/WorldFoundry/commit/68499439) | Aquarium Phase 2: tank, sand, rock, anemone, lighting, fog (static scene, placeholder fish) |
@@ -11,6 +14,21 @@
 | [2026-09-30](https://github.com/wbniv/WorldFoundry/commit/f964a400) | Plan aquarium level (55 gal acrylic, clownfish, anemone) and correct condo alpha note |
 
 <!--history-meta v1
+74a2529a	author	Will Norris
+74a2529a	added	1
+74a2529a	deleted	0
+74a2529a	files	1
+74a2529a	body	Umbrella plan for the user's request (2026-09-30): first verify WF still builds\nand runs on macOS, iOS (iPhone and iPad), Android and Chromecast, then run the\naquarium as its own app on each. Records what CI showed today (macOS gate red\nfrom a stale Linux reference, iOS simulator configure failing, Android pending),\nthe shared aquarium-only cd.iff, the Mac-minute budget and month-end caveat, and\na numbered Verification section, all steps PENDING except the reference guard.\nLink it from the aquarium plan's phase list as Phase 5.\n\nCo-Authored-By: Claude Sonnet 5.5 <noreply@anthropic.com>\nClaude-Session: https://claude.ai/code/session_01NNPhRbrqjqMDkScPvTE9yC
+be6694e9	author	Will Norris
+be6694e9	added	51
+be6694e9	deleted	0
+be6694e9	files	1
+be6694e9	body	macos-desktop-debug gains "Compare aquarium capture with Linux reference\n(informational)": the snowgoons method (30 steps, 1 cycle, -rate20, frame 20,\n--tolerance 3) on wflevels/aquarium-standalone.iff. It never fails the build;\nit prints AQUARIUM PARITY: MATCH/DIFFERS with the differing-pixel count and the\nmaximum channel delta so a tolerance can be chosen from real numbers.\n\ntests/fixtures/renderer/aquarium-linux-frame20.png is the Linux GL capture,\nbyte-identical across three runs. tests/test_codemagic_aquarium_parity.py pins\nthe yaml, the referenced files, the artifacts and the verdict block (driven with\na stub wf_game). Plan step 21 records the Linux half; the macOS half is pending\nthe first Codemagic run.\n\nCo-Authored-By: Claude Sonnet 5.5 <noreply@anthropic.com>\nClaude-Session: https://claude.ai/code/session_01NNPhRbrqjqMDkScPvTE9yC
+819f6a9a	author	Will Norris
+819f6a9a	added	3
+819f6a9a	deleted	3
+819f6a9a	files	1
+819f6a9a	body	The steer-and-swim demo (33.9 s, 640x480, real time, CLEAN run) only lived in\n~/tmp, which disk-hygiene ages out after 14 days. Commit it with its .srt and\nsegment list, and correct the "not committed" wording in the recorder, the\nlevel notes and the plan. The recorder still writes to ~/tmp by default.\n\nCo-Authored-By: Claude Sonnet 5.5 <noreply@anthropic.com>\nClaude-Session: https://claude.ai/code/session_01NNPhRbrqjqMDkScPvTE9yC
 2a9f1868	author	Will Norris
 2a9f1868	added	483
 2a9f1868	deleted	18

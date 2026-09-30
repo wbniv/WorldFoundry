@@ -22,7 +22,10 @@
 
 // backtrace() lives in <execinfo.h> on glibc + macOS/iOS, absent on wasm and on
 // Android before API 33 — guard so the handler degrades to no-backtrace there.
-#if !defined(__EMSCRIPTEN__) && defined(__has_include)
+// The header alone is not enough on Android: NDK r26 ships it but declares
+// backtrace() only from API 33, so test the API level too.
+#if !defined(__EMSCRIPTEN__) && defined(__has_include) \
+    && (!defined(__ANDROID__) || __ANDROID_API__ >= 33)
 #  if __has_include(<execinfo.h>)
 #    include <execinfo.h>
 #    define WF_HAVE_BACKTRACE 1

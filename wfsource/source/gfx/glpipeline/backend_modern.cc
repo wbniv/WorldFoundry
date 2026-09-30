@@ -452,8 +452,17 @@ public:
         glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_NEAREST);
         glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_NEAREST);
 #endif
+        // GL_RGB5 is a desktop-GL sized format; GLES 3.0 has no such enum (only
+        // GL_RGB565 / GL_RGB5_A1), so the Android build broke on it (728bb808).
+        // GL_RGB8 keeps the uploaded bytes exactly, which is what GL_RGB5 stores
+        // for data that is already 5 bits per channel.
+#if defined(__ANDROID__) || defined(__EMSCRIPTEN__)
+        const GLint  rgb5Format = GL_RGB8;
+#else
+        const GLint  rgb5Format = GL_RGB5;
+#endif
         const GLint  internalFormat =
-            (format == RB_TEX_RGB5) ? GL_RGB5 : GL_RGBA;
+            (format == RB_TEX_RGB5) ? rgb5Format : GL_RGBA;
         const GLenum externalFormat =
             (format == RB_TEX_RGB5) ? GL_RGB  : GL_RGBA;
         glTexImage2D(GL_TEXTURE_2D, 0, internalFormat, width, height,

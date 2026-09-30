@@ -1,7 +1,7 @@
 # macOS: prove ⌘Q and the red close button quit cleanly — and that Esc does not
 
 **Date:** 2026‑09‑21
-**Status:** Partially verified, session ended 2026‑09‑21 ~22:55 (Will shut the instance down). Esc-does-not-quit **PASS**; ⌘Q and red button **NOT VERIFIED** — see Verification. Code change (Esc unmapped) committed; rebuilt and exercised on the runner before the session ended.
+**Status:** **⌘Q and red button PASS in CI (2026‑09‑30)** on real System Events input, no human. `-fullscreen` covers the display but switches its mode. Esc-does-not-quit is PASS from the 09‑21 VNC session but unproven in CI. See **CI step** below. (Session history: the 09‑21 VNC session ended ~22:55 UTC+7 / 15:55 UTC. Esc was unmapped then.)
 **Parent:** [2026-09-20-macos-metal-renderer.md](2026-09-20-macos-metal-renderer.md) Phase 4 · runbook [2026-09-21-macos-human-verification.md](2026-09-21-macos-human-verification.md)
 **TODO:** `TODO.md` — *macOS Metal renderer* (close paths are the last unproven interactive item besides Retina).
 
@@ -70,6 +70,39 @@ after Esc x2: still running (PASS)
 4. **Linux unaffected.** `task build` green (the `.mm` is macOS-only; this guards the docs/TODO edits and nothing else).
 
 Not re-run for this change: the only source edit is inside `hal/macos/window_macos.mm`, which Linux does not compile; it was rebuilt and run on the macOS runner (step 1).
+
+## CI step (2026‑09‑30): "Close paths and fullscreen (⌘Q, red button, Esc, -fullscreen)"
+
+`codemagic.yaml` → `macos-desktop-debug` runs [`scripts/macos/close-paths-ci.sh`](../../scripts/macos/close-paths-ci.sh) after the windowed smoke. The script compiles [`scripts/macos/wf_ui_probe.swift`](../../scripts/macos/wf_ui_probe.swift) on the runner. The probe reads window bounds from CGWindowList and screen modes, and it posts CGEvents (to a pid or at the HID tap) and AX presses. The script launches `wf_game --windowed -L<snowgoons>` in real time, with no `--frame-step-smoke`, through a wrapper that writes the exit status to `macos-close-<run>.rc`. It prints `MACOS CMD-Q`, `MACOS RED BUTTON`, `MACOS ESC STAYS OPEN`, `MACOS FULLSCREEN` and `MACOS FULLSCREEN NATIVE MODE` with the numbers behind each. Guard: `tests/test_codemagic_close_paths.py`, which checks the YAML and bash statically and drives the verdict logic against stubs.
+
+**TCC grant, ephemeral VM only.** The runner is macOS 26.5.1 with SIP **disabled** and passwordless sudo, all printed in the log. The script `INSERT OR REPLACE`s these rows into the VM's TCC databases:
+
+- **Services:** `kTCCServiceAccessibility`, `kTCCServicePostEvent` and `kTCCServiceScreenCapture` in the system database.
+- **Apple Events:** `kTCCServiceAppleEvents` targeting `com.apple.systemevents` in the user database.
+- **Clients:** `/usr/bin/osascript`, `sshd-keygen-wrapper`, the shells, the probe, and every ancestor of the step (Codemagic's `./builder` agent).
+
+It then restarts `tccd`. It wrote 24 of 24 rows. `AXIsProcessTrusted=true`, and System Events `UI elements enabled` → `true`. This is acceptable only because Codemagic destroys the VM after the build. Never run the script on a kept machine.
+
+| Check | Build [`6abd322f`](https://codemagic.io/app/6aafa6886ab3f21cf431a6cb/build/6abd322f1544023b80d90c2b) (4.3 min) | Build [`6abd3554`](https://codemagic.io/app/6aafa6886ab3f21cf431a6cb/build/6abd35542a780946d0f991cc) (3.7 min, strict) |
+|---|---|---|
+| ⌘Q (`keystroke "q" using command down`) | OK: exited, status 0 | OK: exited, status 0 |
+| Red button (System Events `click` on the `AXCloseButton`; AX saw close/fullscreen/minimize buttons, close at 200,75 16×16) | OK: exited, status 0 | OK: exited, status 0 |
+| Esc ×2 per mechanism → still running 4 s later | running; control = ⌘Q only | running; **no key-handler control** → FAIL (unproven) |
+| `-fullscreen` window frame vs main display | OK: 0,0 800×600 = 0,0 800×600 | OK: same |
+| Native mode kept | display switched 1024×768 → 800×600, restored after exit | FAIL: same switch |
+
+What this **does** prove:
+
+- **Real OS events.** macOS's own event paths delivered the chord and the button press to the running app: the menu key-equivalent for ⌘Q, and `performClose` via AX for the red button. Neither is an in-app self-post, so the fallback (b) hook was **not** needed and was not added.
+- **Clean exit.** The process exited with status 0 each time. Both builds ran them strict (`CLOSE_PATHS_STRICT="cmdq red fullscreen"`).
+- **Fullscreen.** The window takes the entire display.
+
+What it **does not** prove:
+
+- **Shutdown path.** This Debug build compiles `DBSTREAM1` out, so no `Calling PIGSExit()` line is logged. The engine shutdown path is inferred from exit status 0 and from GLFW's `applicationShouldTerminate` → close-request routing; no log line shows it.
+- **Esc in CI.** Right-arrow controls moved nothing by any route: a System Events press, `postToPid`, or a 3 s hold posted at the HID tap. So there is no evidence that plain keys reached GLFW's key callback in these runs, and Esc stays on the 09‑21 VNC evidence. The cause is not established. The ball stayed at (‑1.000, ‑0.075, ‑0.017) in every sample, while on 09‑21 VNC input moved it. The step keeps Esc informational.
+- **Display mode.** `-fullscreen` **changes the display mode**. `glfwCreateWindow(640, 480, monitor)` picks the mode nearest 640×480 (800×600 here) instead of covering the display at its native mode. That is an engine finding, not fixed here: the likely fix is to create the window at the monitor's current video-mode size when `bFullScreen` is set.
+- **Other gaps.** Retina (the runner is scale 1.0), a physical display, and the double-click launch.
 
 ### Next attempt, whoever does it
 

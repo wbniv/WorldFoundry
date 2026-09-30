@@ -13,7 +13,10 @@
 // useless for the assertions that live in shared leaf code (DMalloc's chunk
 // cookie, ValidatePtr, RangeCheck). glibc and Darwin libSystem both ship
 // <execinfo.h>; Emscripten does not (and its asserts are non-fatal anyway).
-#if !defined(__EMSCRIPTEN__) && (defined(__linux__) || defined(__APPLE__))
+// Android defines __linux__ and NDK r26 ships the header, but declares
+// backtrace() only from API 33 (`__INTRODUCED_IN(33)`), and the app targets 21.
+#if !defined(__EMSCRIPTEN__) && (defined(__linux__) || defined(__APPLE__)) \
+    && (!defined(__ANDROID__) || __ANDROID_API__ >= 33)
 #	include <execinfo.h>
 #	include <unistd.h>
 #	define WF_HAVE_EXECINFO 1
