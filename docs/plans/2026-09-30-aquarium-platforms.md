@@ -64,7 +64,8 @@ the build page; keystrokes work through `vncdotool`, pointer and ⌘ do not, see
 **Phase D: iOS aquarium app.** Its own bundle id and name; the aquarium-only `cd.iff`; the **touch profile**
 (`task aquarium-touch-level`: a D-pad plus A and B). CI boots iPhone and iPad simulators, installs, launches, and
 captures screenshots. The touch profile has never run on real touch input, so simulator taps are the only evidence
-available here.
+available here. The iOS touch layer (iOS plan § Phase 3) is written and unit-tested on Linux but has not been run in a
+simulator. Its scripted taps (`SIMCTL_CHILD_WF_TOUCH_SCRIPT`) are the planned evidence.
 
 **Phase E: Chromecast.** The Android app for the aquarium, gamepad profile, sideloaded with `adb` over the network; the
 only manual step is enabling Network debugging on the device and giving its IP. Details in the sub-plan.

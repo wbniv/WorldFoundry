@@ -76,6 +76,21 @@ Recommendation: native Metal. The fallback exists only if MSL translation become
 3. Wire `viewWillDisappear` / `viewDidAppear` / `applicationWillResignActive` / `applicationDidBecomeActive` to `HALNotifySuspend` / `HALNotifyResume`. Events-during-suspend handling mirrors Android's `0b19119`.
 4. **Verify:** Snowgoons plays in Simulator via touch: walk around, cameras cut, audio plays through CoreAudio. Send to background (Cmd-H in Simulator) and foreground again — game resumes without crashing. Demo-quality video artifact captured from Simulator for follow-up reference.
 
+**Status (2026‑10‑01): implemented, CI‑unverified** (branch `worktree-agent-a13fd904ea2308381`, not pushed: the push was refused by the permission system).
+- `hal/ios/touch_pad.{hp,cc}`: platform-independent layout, hit test, per-finger tracker and the touch-script parser. Unit-tested on Linux by `python3 -m pytest tests/test_ios_touch_pad.py`: 313 checks cover the arms and diagonals, A+B chords, drags, cancel, iPhone and iPad sizes and safe areas. The test also checks that the bits match `EJ_BUTTONF_*`.
+- `hal/ios/input.mm`: `WFTouchHudView` is a UIKit overlay that draws the pad and receives the touches. The HAL bitmask is atomic, because the engine runs on its own thread.
+- `native_app_entry.mm`: resign/disappear → suspend (`HALNotifySuspend`, release all touch bits, pause the display link); become-active/appear → resume. `HALPumpSuspendedEvents` stays a no-op on purpose (see `lifecycle.mm`).
+- Deliberate differences from Android:
+  - sizes are in points, clamped between 44 and 72 per cell, and placed inside the safe area;
+  - the D‑pad corners give diagonals;
+  - lifting a finger releases only that finger's button;
+  - the HUD is a UIKit overlay rather than GL quads, and a held button is drawn brighter.
+- Where the plan no longer matches the code: Android's hit test and HUD live in `native_app_entry.cc` and `android_window.cc`, not `input.cc`. The HUD therefore could not be a straight copy.
+- Simulator verification (prepared, not run):
+  - `simctl` has no tap command (assumed from its subcommand list). Instead, launch with `SIMCTL_CHILD_WF_TOUCH_SCRIPT='right@12+5,left@26+4'` (the `SIMCTL_CHILD_` pass-through is documented) or with `-WFTouchScript`. This plays the synthetic touches through `touch_pad` and the HAL, but it does **not** exercise UIKit touch delivery.
+  - Assert the log lines `touch buttons 0x2000` / `0x4000`, `suspend (applicationWillResignActive)` / `resume (applicationDidBecomeActive)` around a trip out to Settings and back (`simctl launch … com.apple.Preferences`, then relaunch the app), and that the pid survives. Compare screenshots taken before and after the RIGHT hold.
+  - `idb ui tap` (`brew install facebook/fb/idb-companion` + `pip install fb-idb`, coordinates in points per `hid.py`) is the option that would also exercise UIKit, at the cost of installing it on every run.
+
 ### Phase 4 — Apple Developer Program + signed IPA on Codemagic (**gated on $99 spend**)
 
 This is the first phase that costs real money. Only start after Phase 3 is green and there's a working Simulator build worth pushing to hardware.
@@ -143,6 +158,6 @@ This is the first phase that costs real money. Only start after Phase 3 is green
 | 0 | Codemagic log shows CMake error about missing iOS HAL | Codemagic build run |
 | 1 | `.app` launches in Simulator, no crash on `HALGetAssetAccessor` | Codemagic artifact + Simulator log |
 | 2 | snowgoons first frame renders in Simulator | Golden-image diff vs. Android frame 1 |
-| 3 | snowgoons plays end-to-end in Simulator with touch + audio | Demo video from Simulator |
+| 3 | snowgoons plays end-to-end in Simulator with touch + audio — **logic PASS on Linux (313 checks); Simulator run not yet done** | Demo video from Simulator; `tests/test_ios_touch_pad.py` |
 | 4 | `codesign -v` on the release IPA passes | `.ipa` in Codemagic artifacts |
 | 5 | Collaborator runs snowgoons on iPhone; `wf.log` returned; lifecycle torture clean | Video + log from collaborator |
