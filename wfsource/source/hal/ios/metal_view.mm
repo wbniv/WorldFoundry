@@ -21,6 +21,7 @@
     id<MTLDevice>        _device;
     id<MTLCommandQueue>  _queue;
     CADisplayLink*       _displayLink;
+    BOOL                 _renderingPaused;
 }
 
 + (Class)layerClass { return [CAMetalLayer class]; }
@@ -60,10 +61,17 @@
                                                    selector:@selector(tick:)];
         [_displayLink addToRunLoop:[NSRunLoop mainRunLoop]
                            forMode:NSRunLoopCommonModes];
+        _displayLink.paused = _renderingPaused;
     } else if (!self.window && _displayLink) {
         [_displayLink invalidate];
         _displayLink = nil;
     }
+}
+
+- (void)setRenderingPaused:(BOOL)paused
+{
+    _renderingPaused    = paused;
+    _displayLink.paused = paused;   // nil-safe before didMoveToWindow
 }
 
 - (void)tick:(CADisplayLink*)link
