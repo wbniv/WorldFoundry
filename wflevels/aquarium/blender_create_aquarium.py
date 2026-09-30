@@ -473,7 +473,7 @@ rock_pos = (C.ANEMONE_X, C.ANEMONE_Y, C.SAND_TOP_M)
 statplat('rock', rk.finish(), location=rock_pos)
 
 # ═════════════════════════════════════════════════════════════════════════════
-# 6. Anemone (bubble-tip, plan § 5): pedal disc, column, flared oral disc, and 27 tentacles, each a
+# 6. Anemone (bubble-tip, plan § 5): pedal disc, column, flared oral disc, and 18 tentacles, each a
 #    three-segment tapered strip (darker toward the disc) with a bulb tip. Base at local z = 0; it
 #    sits on the rock's flat top. Phase 4: a large E. quadricolor, C.ANEMONE_SPAN (12 in) across
 #    the crown, with a taller column; still small at the base, so it does not block swimming.
@@ -495,6 +495,12 @@ FLARE_H, RIM_H, DISC_R = 0.006 * S, 0.004 * S, 0.050 * S  # the oral disc flares
 TENT_Y = 0.040 * S                               # back row at +TENT_Y, front row at −TENT_Y
 TENT_BASE_X = 0.018 * S                          # bases spread |x| ≤ 0.18 m: inside the rim at |y| 0.4
 BULB_R = (0.0085 * S, 0.0100 * S)
+# Cost (plan step 18): the tentacle meshes were almost all of Phase 4's added frame time. With 27
+# tentacles and 8 × 5 uv-sphere bulbs (40 faces each) the level took 14.7 ms/frame; the same level with
+# the six clump meshes swapped for a box took 9.1 ms (Phase 3: 9.7). The bulbs were 93 % of those faces,
+# so: 18 tentacles (10 back, 8 front; the mockup draws about 16) and 6 × 4 bulbs (24 faces).
+N_BACK, N_FRONT = 10, 8
+BULB_SEG = (6, 4)                                # uv-sphere u, v segments
 ab = MeshBuilder('anemone')
 
 
@@ -524,10 +530,10 @@ assert math.hypot(TENT_BASE_X, TENT_Y) < DISC_R * 0.97 - 0.004 * S, 'tentacle ba
 
 rnd = random.Random(17)
 TENTACLES = []                                   # (row, angle from vertical, deg; length m)
-for k in range(15):
-    TENTACLES.append(('back', -80 + 160 * k / 14 + rnd.uniform(-3, 3), rnd.uniform(0.105, 0.125) * S))
-for k in range(12):
-    TENTACLES.append(('front', -76 + 152 * k / 11 + rnd.uniform(-3, 3), rnd.uniform(0.095, 0.115) * S))
+for k in range(N_BACK):
+    TENTACLES.append(('back', -80 + 160 * k / (N_BACK - 1) + rnd.uniform(-3, 3), rnd.uniform(0.105, 0.125) * S))
+for k in range(N_FRONT):
+    TENTACLES.append(('front', -76 + 152 * k / (N_FRONT - 1) + rnd.uniform(-3, 3), rnd.uniform(0.095, 0.115) * S))
 
 
 def clump_side(ang_deg):
@@ -552,7 +558,7 @@ def tentacle(builder, pivot, row, ang_deg, length, bulb_r):
              (qx_ + nx * wq, qz_ + nz * wq), (qx_ - nx * wq, qz_ - nz * wq)]
         builder.face([(x - pivot[0], y - pivot[1], z - pivot[2]) for x, z in q], key)
     tip = (pts[-1][0], y, pts[-1][1])
-    bulb = bmesh.ops.create_uvsphere(builder.bm, u_segments=8, v_segments=5, radius=bulb_r)
+    bulb = bmesh.ops.create_uvsphere(builder.bm, u_segments=BULB_SEG[0], v_segments=BULB_SEG[1], radius=bulb_r)
     for v in bulb['verts']:
         v.co.x += tip[0] - pivot[0]
         v.co.y += tip[1] - pivot[1]
@@ -584,7 +590,7 @@ for row, side, *_ in C.ANEMONE_CLUMPS:
     obj = statplat(name, cb.finish(), location=tuple(a + p for a, p in zip(anemone_pos, pivot)))
     attach_schema(obj, 'platform')               # anchored platform, Mass 0: drawn, no Jolt body
     clump_objs[name], clump_pivots[name] = obj, pivot
-assert len(tips) == len(TENTACLES) == 27, 'every tentacle belongs to exactly one clump'
+assert len(tips) == len(TENTACLES) == N_BACK + N_FRONT, 'every tentacle belongs to exactly one clump'
 crown_top = max(t[2] + r for t, r in zip(tips, bulb_rs))
 crown_span = max(t[0] + r for t, r in zip(tips, bulb_rs)) - min(t[0] - r for t, r in zip(tips, bulb_rs))
 assert abs(crown_span - m(C.ANEMONE_SPAN)) < 0.05 * m(C.ANEMONE_SPAN), \

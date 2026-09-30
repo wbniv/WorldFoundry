@@ -975,6 +975,12 @@ tasks:
           -Lwflevels/aquarium-standalone.iff $FSFLAG $RECFLAG 2>&1 | tee "$LOG"
         if [ -n "$RECOUT" ] && [ -f output.mp4 ]; then mv output.mp4 "$RECOUT" && echo "Saved → $RECOUT"; fi
 
+  video-aquarium:
+    desc: "Record the aquarium steer-and-swim demo in real time (640x480, injected input, CLEAN runs only) → ~/tmp/aquarium-phase4/motion-demo.mp4 + .srt + .txt segment list. AQUARIUM_VIDEO=path overrides."
+    deps: [ensure-build, aquarium-level]
+    cmds:
+      - python3 tests/record_aquarium_motion_demo.py --out "${AQUARIUM_VIDEO:-$HOME/tmp/aquarium-phase4/motion-demo.mp4}"
+
   aquarium-idle-level:
     desc: "Clownfish idle-animation spike: the canonical aquarium clownfish (wflevels/aquarium/clownfish.py) → wflevels/aquarium_idle-standalone.iff. Needs the wf_blender add-on."
     deps: [tools-build]

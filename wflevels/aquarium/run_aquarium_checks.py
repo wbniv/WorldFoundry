@@ -29,8 +29,10 @@ Keyboard profile (default), one run:
            leaves the tank, and the fish's visible extents stay inside the inner faces.
 
 --profile touch (step 14, logic only; the phone hardware is not exercised):
-  A taps cycle Swim → Depth → Swim (mailbox aq-mode), D-pad up/down move Z in Swim mode and Y
-  in Depth mode, left/right move X in both, B taps dart, and C (keyboard depth) does nothing.
+  A taps cycle Swim → Depth → Swim (mailbox aq-mode), D-pad up/down steer in Z in Swim mode and
+  in Y in Depth mode, left/right in X in both, B taps dart, and C (keyboard depth) does nothing.
+  Phase 4: steer and swim, so each move is judged by the facing it turns to and the way it swam
+  (Up climbs forward, never straight up), and the velocity stays along the facing on every tick.
 
 --sway (step 16, Phase 4): 10 s with no input, every tick of each anemone clump's ROTATION_A/B/C
   and position recorded: bounded by its amplitude, periodic (B(t) = B(t + period)), net zero over
@@ -385,9 +387,10 @@ class Run:
         return n, worst_off, worst_xy, worst_bob
 
 
-def navigate(r, target, speed_now, glide_k, limit=400):
+def navigate(r, target, speed_now, glide_k, limit=400, on_tick=None):
     """Hold the buttons that point at `target` each tick (as a player steers); release when the
-    glide would carry the fish there. Returns the recorded frames."""
+    glide would carry the fish there. Returns the recorded frames. `on_tick()` runs after every
+    tick (the demo recorder takes its video frame there)."""
     g = r.g
     fr = []
     while len(fr) < limit:
@@ -402,6 +405,8 @@ def navigate(r, target, speed_now, glide_k, limit=400):
         if bits != g.injected:
             g.inject(bits)
         fr += g.step(1)
+        if on_tick:
+            on_tick()
     g.inject(0)
     return fr
 
@@ -597,32 +602,53 @@ def touch():
                ('settle2', None, 1.5), ('depth-down', 'DOWN', 1.0), ('settle3', None, 3.0),
                ('depth-right', 'RIGHT', 0.5), ('settle4', None, 4.0), ('tap-A2', 'A', 0.05), ('settle5', None, 0.5),
                ('swim-down', 'DOWN', 1.0), ('settle6', None, 3.0), ('key-C', 'C', 1.0), ('settle7', None, 1.0),
+               # Phase 4: the dive ends near the right wall facing it, and a dart into a wall only eases to
+               # a stop there; turn back into open water first, so the dart has room to show
+               ('turn-left', 'LEFT', 0.8), ('settle8', None, 2.0),
                ('tap-B', 'B', 0.05), ('dart-glide', None, 3.0)]
         modes = {}
         for name, btn, secs in seq:
             r.phase(name, btn, secs)
             modes[name] = g.v(r.dir, AQ['aq-mode'])
         r.print_rows(r.rows)
-        row = {n: (a, b) for n, _, _, a, b, _ in r.rows}
+        row = {n: (a, b, fr) for n, _, _, a, b, fr in r.rows}
 
-        def moved(name):
-            a, b = row[name]
+        # Phase 4 steer and swim: a held direction turns the fish toward it and it swims along its
+        # facing, so a move is judged by where the fish ends up FACING and which way it went over the
+        # hold plus the glide that follows (never "one axis only": Up climbs forward, a reversal arcs).
+        def moved(a_name, b_name=None):
+            a = row[a_name][0]
+            b = row[b_name or a_name][1]
             return tuple(round(bb - aa, 3) for aa, bb in zip(a, b))
-        OFF = 0.01                      # off-axis tolerance: residual glide (× 0.9 per tick) and 1 mm contact nudges
+
+        def yaw_end(name):
+            return round(r.m('aq-yaw', row[name][2][-1]), 3)
+        OFF = 0.05                      # off-axis tolerance (m): the pitch relaxing after a climb, 1 mm contact nudges
         tests = [
-            ('Swim mode: UP swims +Z only', moved('swim-up'), lambda d: d[2] > 0.5 and abs(d[0]) < OFF and abs(d[1]) < OFF),
+            ('Swim mode: UP climbs forward along the pitched facing (z up, x forward, y unchanged)',
+             moved('swim-up', 'settle1'), lambda d: d[2] > 0.3 and d[0] > 0.3 and abs(d[1]) < OFF),
             ('A tap → Depth mode (aq-mode 1)', modes['tap-A'], lambda m: m == 1),
-            ('Depth mode: UP swims +Y (away from the glass) only', moved('depth-up'), lambda d: d[1] > 0.3 and abs(d[0]) < OFF and abs(d[2]) < OFF),
-            ('Depth mode: DOWN swims −Y only', moved('depth-down'), lambda d: d[1] < -0.3 and abs(d[0]) < OFF and abs(d[2]) < OFF),
-            ('Depth mode: RIGHT still swims +X', moved('depth-right'), lambda d: d[0] > 0.5 and abs(d[1]) < OFF and abs(d[2]) < OFF),
+            ('Depth mode: UP turns to face +Y (away from the glass, yaw +0.25 rev) and swims that way',
+             (yaw_end('depth-up'), moved('depth-up', 'settle2')), lambda v: abs(v[0] - 0.25) < 0.02 and v[1][1] > 0.3),
+            ('Depth mode: DOWN turns to face −Y (toward the glass, yaw −0.25 rev) and swims that way',
+             (yaw_end('depth-down'), moved('depth-down', 'settle3')), lambda v: abs(v[0] + 0.25) < 0.02 and v[1][1] < -0.3),
+            ('Depth mode: RIGHT still turns to +X and swims +X',
+             (yaw_end('depth-right'), moved('depth-right', 'settle4')), lambda v: abs(v[0]) < 0.02 and v[1][0] > 0.5),
+            ('Depth mode never changes z', moved('depth-up', 'settle4'), lambda d: abs(d[2]) < OFF),
             ('second A tap → Swim mode (aq-mode 0)', modes['tap-A2'], lambda m: m == 0),
-            ('Swim mode: DOWN swims −Z only', moved('swim-down'), lambda d: d[2] < -0.5 and abs(d[0]) < OFF and abs(d[1]) < OFF),
-            ('C (keyboard depth) does nothing in the touch profile', moved('key-C'), lambda d: max(abs(v) for v in d) < OFF),
+            ('Swim mode: DOWN dives forward (z down)', moved('swim-down', 'settle6'), lambda d: d[2] < -0.3),
+            ('C (keyboard depth) does nothing in the touch profile', moved('key-C'), lambda d: max(abs(v) for v in d) < 0.01),
         ]
         a = row['tap-B'][0]
         b = row['dart-glide'][1]
-        tests.append(('B tap darts along the facing (+X)', tuple(round(bb - aa, 3) for aa, bb in zip(a, b)),
-                      lambda d: d[0] > 1.0 and abs(d[1]) < OFF and abs(d[2]) < OFF))
+        f = facing(r.m('aq-yaw', row['tap-B'][2][0]), r.m('aq-pitch', row['tap-B'][2][0]))
+        d = [bb - aa for aa, bb in zip(a, b)]
+        n = math.sqrt(sum(c * c for c in d)) or 1e-9
+        ang = math.degrees(math.acos(max(-1.0, min(1.0, sum(x * y for x, y in zip(d, f)) / n))))
+        tests.append(('B tap darts along the facing it had', (round(n, 3), round(ang, 3)), lambda v: v[0] > 1.0 and v[1] < 1.0))
+        _, st = motion_stats(r, [f for _, _, _, _, _, fr in r.rows for f in fr])
+        tests.append(('velocity ∥ facing on every moving tick (worst angle °, pushes excluded)',
+                      (round(st['worst_angle'], 3), st['pushed']), lambda v: v[0] < 1.0))
         ok = True
         for label, got, pred in tests:
             good = bool(pred(got))
@@ -780,8 +806,23 @@ def sway():
     print('SUMMARY ' + ' '.join(f'step {s}: {verdict(v) if clean else "INVALID (contaminated)"}' for s, v in ok.items()))
 
 
+def displays_blanked():
+    """True when every connected output is in DPMS off. Then Xwayland paces a window that is on no
+    live output at 1 Hz (every engine frame takes 1.000 s, "delta too large: 1.0" in the log), so
+    wall-clock costs are meaningless and bridge steps crawl (Phase 4: the screen blanked at 18:1x
+    mid-run). Wake it and hold it on for the run: `kscreen-doctor --dpms on` and
+    `kde-inhibit --power --screenSaver <command>`."""
+    import glob
+    states = [open(p).read().strip() for p in glob.glob('/sys/class/drm/card*-*/dpms')
+              if open(os.path.join(os.path.dirname(p), 'status')).read().strip() == 'connected']
+    return bool(states) and all(s == 'Off' for s in states)
+
+
 def cost(extra_iffs):
     """Step 18: frame cost from --frame-step-smoke wall time (100 vs 600 frames, vsync off)."""
+    if displays_blanked():
+        raise SystemExit('step 18: every display is blanked (DPMS off): frames are paced at 1 Hz, so a cost '
+                         'measured now is meaningless; see displays_blanked()')
     env = dict(os.environ, LD_LIBRARY_PATH=LIBS, vblank_mode='0', __GL_SYNC_TO_VBLANK='0')
 
     def run(iff, n):
