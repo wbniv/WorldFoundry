@@ -1,7 +1,7 @@
 # Aquarium level — 55 gal acrylic tank, one clownfish, one anemone
 
 Status: **Phase 0 run 2026‑09‑30 — the engine as it is cannot draw a translucent pane, so the level
-goes ahead on Plan B** (no front face) unless an engine change is approved; see [§ Phase 0 verdict](#phase-0-verdict).
+goes ahead on Plan B** (no front face). **Will chose Plan B on 2026‑09‑30**; Plan A (translucent pane) is deferred to its own TODO item because it needs an engine shader change. See [§ Phase 0 verdict](#phase-0-verdict).
 Phases 1–4 not started.
 
 Will asked for an aquarium level: a **55 gallon acrylic tank**, **an anemone and a clownfish**, planned in
@@ -117,9 +117,9 @@ Coordinates (X right, Y depth, Z up, per the project convention). Origin is the 
 
 The pane is the level's identity, so it is decided by measurement, not hope:
 
-1. **Plan A (preferred):** `tank-front-pane` carries a small textured material whose texels have bit 15 set, so it draws at
+1. **Plan A (deferred — needs an engine change; own TODO item):** `tank-front-pane` carries a small textured material whose texels have bit 15 set, so it draws at
    about 50 %. The pane is tinted very slightly blue to double as "the water". End and back faces are the same material.
-2. **Plan B:** leave the front face out entirely. The four acrylic edges, the rim, the bevel highlights and a blue back film
+2. **Plan B (chosen 2026‑09‑30):** leave the front face out entirely. The four acrylic edges, the rim, the bevel highlights and a blue back film
    still read as a tank, and the fish is never occluded. Fully within the engine as it is today.
 3. **Plan C (rejected, shown in the mockup so nobody reinvents it):** an opaque tinted pane hides the fish and the anemone.
    It survives only for the side and back faces, which the camera never looks through.
