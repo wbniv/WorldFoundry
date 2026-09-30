@@ -112,7 +112,7 @@ Coordinates (X right, Y depth, Z up, per the project convention). Origin is the 
 | `wflevels/aquarium/aquarium.md` | **Exists (Phase 2).** Level README: build/run, controls, what is and is not modelled, Plan B. |
 | `wflevels/aquarium/run_aquarium_checks.py` | **Exists (Phase 2; rewritten in Phase 3).** Steps 11–15 over the debug bridge. The engine runs **paused** and is stepped one tick at a time, with a sticky injected joystick value on every tick, so desktop keys cannot reach the fish. Every tick's watched mailboxes are recorded, and the joystick the engine saw is compared with what was injected (`run isolation: CLEAN`). `--profile touch` runs step 14 and `--trace-sand` prints a per-tick trace. **Phase 4:** one engine tick per bridge step (the watch batch arrives in hash order, so a multi-tick step mis-assigned keys by a tick); `--sway` (step 16), `--cost` (18) and `--steer` (20: motion strips, trajectory plot, per-tick trace); step 12 steers like a player (`navigate()`); step 14 judges steer and swim. |
 | `Taskfile.yml` | **Exists (Phase 2).** `aquarium-level` (`deps: [tools-build]`; `sources`/`generates`, so a second run is a no-op) and `run-aquarium` (`deps: [ensure-build, aquarium-level]`), cloned from the condo entries. No texture task: Plan B has no textures. **Phase 3:** `aquarium-level` also tracks `clownfish.py`, `clownfish_idle.fth` and `aquarium_swim.fth`. New `aquarium-touch-level` builds the touch profile. `aquarium-idle-level` now tracks `aquarium_constants.py`. **Phase 4:** `video-aquarium` records the real-time demo. |
-| `tests/record_aquarium_motion_demo.py` | **New (Phase 4).** The steer-and-swim demo video: the harness's paused, injected-input run (CLEAN or no video), one screenshot per tick encoded at 20 fps, so the video plays in real time; segment captions burnt in, plus `.srt` and a segment list. Writes `~/tmp/aquarium-phase4/motion-demo.mp4` (never committed) |
+| `tests/record_aquarium_motion_demo.py` | **New (Phase 4).** The steer-and-swim demo video: the harness's paused, injected-input run (CLEAN or no video), one screenshot per tick encoded at 20 fps, so the video plays in real time; segment captions burnt in, plus `.srt` and a segment list. Writes `~/tmp/aquarium-phase4/motion-demo.mp4` (scratch; the reference copy is committed in `tests/recordings/`) |
 | `tests/test_aquarium_level.py` | **Exists (Phase 2).** Regression guard (see § Regression guard). |
 | `wflevels/aquarium_swim_spike/` | **Exists (Phase 1).** Open box tank + placeholder `Physics` fish at any `WORLD_SCALE`, its `aquarium_constants.py` (the tank table as code: promote it to `wflevels/aquarium/` unchanged), and `run_swim_spike.py`, which drives the fish over the debug bridge with frame-exact held buttons and prints positions, clamps and wall gaps. Re-run it with the canonical fish for step 15. |
 | `wflevels/aquarium_spike/` | **Exists (Phase 0).** The translucency test card and `run_spike.py` (build, capture, bridge alpha diagnostic, pixel samples). Re-run it after any engine change to the shader or draw order. |
@@ -1412,7 +1412,7 @@ CLEAN`. Every capture was opened and looked at.
 
     A real-time video of the same moves, recorded from a CLEAN injected run: `task video-aquarium`
     ([`tests/record_aquarium_motion_demo.py`](../../tests/record_aquarium_motion_demo.py)), written to
-    `~/tmp/aquarium-phase4/motion-demo.mp4` (not committed): 33.9 s, 677 ticks, CLEAN; its segments and
+    `~/tmp/aquarium-phase4/motion-demo.mp4`, saved as [`tests/recordings/aquarium_phase4_motion_demo.mp4`](../../tests/recordings/aquarium_phase4_motion_demo.mp4): 33.9 s, 677 ticks, CLEAN; its segments and
     timestamps are listed in the Phase 4 verdict.
 
     Step 14 (touch) was re-run too, because the old Swim/Depth checks tested per-axis motion; its record is under
@@ -1513,7 +1513,7 @@ one frame a second under Xwayland, which made two `test_aquarium_idle.py` runtim
 screen woken and held on (`kscreen-doctor --dpms on`, `kde-inhibit`) all 38 pass, and `--cost` now refuses to run on a
 blanked screen.
 
-**Demo video** (real time, 640 × 480, a CLEAN injected run; not committed): `~/tmp/aquarium-phase4/motion-demo.mp4` (33.9 s, 640 × 480, 20 frames of level time per second encoded at 30 fps, captions burnt in, plus `.srt` and `.txt`; 677 ticks, `run isolation: CLEAN`). Segments (mm:ss):
+**Demo video** (real time, 640 × 480, a CLEAN injected run; saved as [`tests/recordings/aquarium_phase4_motion_demo.mp4`](../../tests/recordings/aquarium_phase4_motion_demo.mp4), scratch copy `~/tmp/aquarium-phase4/motion-demo.mp4`) (33.9 s, 640 × 480, 20 frames of level time per second encoded at 30 fps, captions burnt in, plus `.srt` and `.txt`; 677 ticks, `run isolation: CLEAN`). Segments (mm:ss):
 
 - 00:00.00–00:02.00 — Hover: no input: the idle — a small bob, pectorals sculling, the anemone swaying
 - 00:02.00–00:04.20 — U-turn left: Left: the fish turns in an arc (head first, banking) and swims off along its facing
