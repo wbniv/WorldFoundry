@@ -6,8 +6,8 @@
 //=============================================================================
 // AppDelegate / UIViewController lifecycle callbacks (native_app_entry.mm)
 // call HALNotifySuspend / Resume on applicationWillResignActive /
-// applicationDidBecomeActive; the game loop reads HALIsSuspended to skip
-// rendering. Atomic bool — identical shape to hal/android/lifecycle.cc.
+// viewWillDisappear and applicationDidBecomeActive / viewDidAppear; the game
+// loop reads HALIsSuspended to skip rendering. Atomic bool — identical shape to hal/android/lifecycle.cc.
 //=============================================================================
 
 #include <hal/lifecycle.h>
@@ -51,9 +51,14 @@ HALCloseWindow(void)
 {
 }
 
-// Phase 3 will drive this from the CADisplayLink / UIApplication run loop so
-// queued events reach their handlers on resume. For Phase 1 there's nothing
-// to pump — the game loop isn't running yet.
+// Android needs this (0b19119): its events are drained on the game thread,
+// so while the suspended loop slept, APP_CMD_RESUME was never delivered and
+// the app stayed stuck. On iOS UIKit delivers lifecycle and touch events on
+// the main thread, independent of the engine thread that runs this loop, and
+// HALNotifyResume is a plain atomic store — so there is nothing to pump and
+// the stuck-on-resume failure cannot occur. The Android fix's other half,
+// no input state surviving a suspend, is WFIosInputSuspend (input.mm), which
+// releases every held touch bit.
 extern "C" void
 HALPumpSuspendedEvents(void)
 {

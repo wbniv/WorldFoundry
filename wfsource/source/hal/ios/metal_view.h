@@ -12,6 +12,10 @@
 #import <QuartzCore/CAMetalLayer.h>
 
 @interface WFMetalView : UIView
+// Pauses the CADisplayLink while the app is inactive / backgrounded, so no
+// drawable is acquired or presented then (iOS rejects GPU work from the
+// background). Driven by the suspend/resume path in native_app_entry.mm.
+- (void)setRenderingPaused:(BOOL)paused;
 @end
 
 #endif

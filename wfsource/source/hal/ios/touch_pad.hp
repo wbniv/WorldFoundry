@@ -1,0 +1,146 @@
+//=============================================================================
+// hal/ios/touch_pad.hp: platform-independent on-screen touch pad logic
+// Copyright ( c ) 2026 World Foundry Group
+// Part of the World Foundry 3D video game engine/production environment
+// for more information about World Foundry, see www.worldfoundry.org
+//=============================================================================
+// The pure half of the iOS touch shim (hal/ios/input.mm): layout math, hit
+// testing and multi-touch bookkeeping, with no UIKit and no engine headers so
+// it compiles and is unit-tested on Linux (tests/touch_pad_test.cc, driven by
+// tests/test_ios_touch_pad.py). input.mm feeds it UITouch points and forwards
+// Buttons() to _HALSetJoystickButtons.
+//
+// Same layout and semantics as the Android shim (hal/android/
+// native_app_entry.cc HitTestTouch + gfx/gl/android_window.cc HUD): a 3x3-cell
+// D-pad cross bottom-left, A in the bottom-right corner, B immediately left of
+// A on the same row. Differences, all deliberate (see docs/plans/
+// 2026-04-21-ios-port-codemagic.md, Phase 3):
+//   - Units are points, sized from the view's short side and clamped, and
+//     placed inside the safe area (Android: fixed raw pixels, no insets), so
+//     the pad is neither tiny on an iPad nor huge on an iPhone SE.
+//   - The D-pad's corner cells emit the diagonal pair (UP|LEFT, ...). On
+//     Android the corners are dead; every point that hits on Android hits
+//     the same button here.
+//   - Touches are tracked per finger: lifting one finger clears only its
+//     button (Android recomputes from the pointer list and clears everything
+//     on the final ACTION_UP).
+//=============================================================================
+
+#ifndef _WF_HAL_IOS_TOUCH_PAD_HP
+#define _WF_HAL_IOS_TOUCH_PAD_HP
+
+#include <cstdint>
+#include <cstddef>
+
+namespace wf_touch
+{
+
+// Button bits. Must equal EJ_BUTTONF_* in hal/sjoystic.h — input.mm
+// static_asserts this on iOS, and tests/test_ios_touch_pad.py checks it
+// against the header on Linux.
+constexpr uint32_t kBtnA     = 1u << 0;
+constexpr uint32_t kBtnB     = 1u << 1;
+constexpr uint32_t kBtnUp    = 1u << 11;
+constexpr uint32_t kBtnDown  = 1u << 12;
+constexpr uint32_t kBtnRight = 1u << 13;
+constexpr uint32_t kBtnLeft  = 1u << 14;
+constexpr uint32_t kDPadBits = kBtnUp | kBtnDown | kBtnLeft | kBtnRight;
+
+// Sizing, in points. The D-pad cell is kCellFraction of the view's short
+// side, clamped to [kMinCellPt, kMaxCellPt] (44 pt = Apple's minimum tap
+// target). A/B are kActionScale cells square — Android's 120 px / 66 px.
+constexpr float kCellFraction = 0.15f;
+constexpr float kMinCellPt    = 44.0f;
+constexpr float kMaxCellPt    = 72.0f;
+constexpr float kActionScale  = 120.0f / 66.0f;
+constexpr float kMarginPt     = 12.0f;
+
+struct Rect
+{
+    float x0 = 0, y0 = 0, x1 = 0, y1 = 0;   // origin top-left, +y down
+    bool  Contains(float x, float y) const { return x >= x0 && x < x1 && y >= y0 && y < y1; }
+    float Width()  const { return x1 - x0; }
+    float Height() const { return y1 - y0; }
+    float CenterX() const { return 0.5f * (x0 + x1); }
+    float CenterY() const { return 0.5f * (y0 + y1); }
+};
+
+struct Insets
+{
+    float top = 0, left = 0, bottom = 0, right = 0;
+};
+
+struct Layout
+{
+    bool  valid = false;
+    float cell  = 0;     // D-pad cell edge, points
+    Rect  dpad;          // the whole 3x3 square
+    Rect  a;
+    Rect  b;
+
+    // One D-pad cell (col, row in 0..2) — for drawing the cross arms.
+    Rect Cell(int col, int row) const;
+    Rect Up() const    { return Cell(1, 0); }
+    Rect Down() const  { return Cell(1, 2); }
+    Rect Left() const  { return Cell(0, 1); }
+    Rect Right() const { return Cell(2, 1); }
+};
+
+// Layout for a view of viewW x viewH points with the given safe-area insets.
+// If the pad and A/B would not fit side by side (e.g. an iPad Split View
+// sliver), both shrink uniformly until they do. Invalid (hits nothing) for
+// a zero or negative size.
+Layout ComputeLayout(float viewW, float viewH, const Insets& safe);
+
+// Button bits for one point. D-pad cross arms, diagonal corners, dead
+// centre; then A; then B. 0 when nothing is hit.
+uint32_t HitTest(const Layout& layout, float x, float y);
+
+// Per-finger bookkeeping. Ids are opaque (input.mm uses the UITouch pointer).
+// Main-thread only; not thread-safe.
+class TouchTracker
+{
+public:
+    static constexpr int kMaxTouches = 16;   // iPad reports up to 11
+
+    void Began(uintptr_t id, float x, float y);
+    void Moved(uintptr_t id, float x, float y);   // unknown id → Began
+    void Ended(uintptr_t id);                     // also used for cancelled
+    void ReleaseAll();
+
+    int      Count() const { return _count; }
+    uint32_t Buttons(const Layout& layout) const;
+
+private:
+    struct Touch { uintptr_t id; float x, y; };
+    int   Find(uintptr_t id) const;
+    Touch _touches[kMaxTouches] = {};
+    int   _count = 0;
+};
+
+// Scripted synthetic touches for Simulator CI (see input.mm and the plan's
+// "Simulator verification" section). Script grammar, whitespace-free:
+//   entry  := button '@' start '+' duration      (seconds, decimal)
+//   script := entry (',' entry)*
+//   button := up | down | left | right | a | b
+// e.g. "right@2+3,a@6+0.2,up@7+1". Overlapping entries are chords.
+struct ScriptEntry
+{
+    uint32_t button = 0;
+    float    start  = 0;
+    float    duration = 0;
+};
+
+constexpr int kMaxScriptEntries = 64;
+
+// Returns the number of entries parsed into out[0..max), or -1 on any
+// syntax error (nothing is played then).
+int ParseScript(const char* text, ScriptEntry* out, int max);
+
+// The point to press for a script button: that button's centre in the
+// layout (a D-pad arm's cell centre, or A/B's centre).
+bool ButtonCenter(const Layout& layout, uint32_t button, float* x, float* y);
+
+}  // namespace wf_touch
+
+#endif
