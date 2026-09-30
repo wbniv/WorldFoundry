@@ -461,7 +461,11 @@ public:
                                         height:(NSUInteger)height
                                      mipmapped:NO];
         td.usage       = MTLTextureUsageShaderRead;
+#if TARGET_OS_IOS
+        td.storageMode = MTLStorageModeShared;    // iOS has no MTLStorageModeManaged (macOS only)
+#else
         td.storageMode = MTLStorageModeManaged;
+#endif
         id<MTLTexture> tex = [_device newTextureWithDescriptor:td];
         if (!tex) {
             NSLog(@"wf_game: MetalBackend: texture %dx%d alloc failed", width, height);
@@ -629,7 +633,11 @@ private:
             texture2DDescriptorWithPixelFormat:MTLPixelFormatRGBA8Unorm
                                          width:1 height:1 mipmapped:NO];
         wd.usage       = MTLTextureUsageShaderRead;
+#if TARGET_OS_IOS
+        wd.storageMode = MTLStorageModeShared;    // iOS has no MTLStorageModeManaged (macOS only)
+#else
         wd.storageMode = MTLStorageModeManaged;
+#endif
         _whiteTexture  = [_device newTextureWithDescriptor:wd];
         const uint8_t white[4] = { 255, 255, 255, 255 };
         [_whiteTexture replaceRegion:MTLRegionMake2D(0, 0, 1, 1)
