@@ -1,5 +1,7 @@
 | Date | Change |
 |------|--------|
+| [2026-09-30](https://github.com/wbniv/WorldFoundry/commit/be6694e9) | codemagic: aquarium Metal-vs-GL frame parity step (informational), Linux reference, static test |
+| [2026-09-21](https://github.com/wbniv/WorldFoundry/commit/05551770) | fix(capture): decouple --capture-frame PNG capture from -record_video on Linux |
 | [2026-09-21](https://github.com/wbniv/WorldFoundry/commit/ceaab73d) | feat(macos): Esc no longer quits; Phase 4 real-exit evidence from a VNC session |
 | [2026-09-21](https://github.com/wbniv/WorldFoundry/commit/2d51768b) | docs(investigations): explain macOS procedural face color mismatch |
 | [2026-09-21](https://github.com/wbniv/WorldFoundry/commit/853886b2) | docs(plans): Phase 4 result — proxy gate MET, real exit deliberately NOT claimed |
@@ -15,6 +17,16 @@
 | [2026-09-20](https://github.com/wbniv/WorldFoundry/commit/72f650bd) | docs(plans): scope the macOS Metal renderer port |
 
 <!--history-meta v1
+be6694e9	author	Will Norris
+be6694e9	added	1
+be6694e9	deleted	0
+be6694e9	files	1
+be6694e9	body	macos-desktop-debug gains "Compare aquarium capture with Linux reference\n(informational)": the snowgoons method (30 steps, 1 cycle, -rate20, frame 20,\n--tolerance 3) on wflevels/aquarium-standalone.iff. It never fails the build;\nit prints AQUARIUM PARITY: MATCH/DIFFERS with the differing-pixel count and the\nmaximum channel delta so a tolerance can be chosen from real numbers.\n\ntests/fixtures/renderer/aquarium-linux-frame20.png is the Linux GL capture,\nbyte-identical across three runs. tests/test_codemagic_aquarium_parity.py pins\nthe yaml, the referenced files, the artifacts and the verdict block (driven with\na stub wf_game). Plan step 21 records the Linux half; the macOS half is pending\nthe first Codemagic run.\n\nCo-Authored-By: Claude Sonnet 5.5 <noreply@anthropic.com>\nClaude-Session: https://claude.ai/code/session_01NNPhRbrqjqMDkScPvTE9yC
+05551770	author	Will Norris
+05551770	added	8
+05551770	deleted	4
+05551770	files	1
+05551770	body	CaptureFrame() unconditionally tried to open the ffmpeg pipe first and\nreturned early if that failed, so a plain --capture-frame (no\n-record_video) never reached the PNG-write code, and the offscreen\ncapture FBO was only bound in RenderBegin/GetSurfaceSize when\nbRecordVideo was set. Added WfCaptureActive() (true for -record_video\nOR a pending --capture-frame) and used it everywhere the FBO path was\ngated; split the ffmpeg pipe/video-frame write out from the PNG write\ninside CaptureFrame so the PNG path no longer depends on the pipe.\nAlso warn if --capture-frame is given twice, since gCaptureFrame is a\nscalar and only the last one wins.\n\nVerified: qbert capture-frame PNG is byte-identical with and without\n-record_video; snowgoons with no capture flag still exits 0 and writes\nno PNG.\n\nCo-Authored-By: Claude Sonnet 5 <noreply@anthropic.com>\nClaude-Session: https://claude.ai/code/session_015ksFy3ZSSz2XMdto3jVA9v
 ceaab73d	author	Will Norris
 ceaab73d	added	19
 ceaab73d	deleted	0
