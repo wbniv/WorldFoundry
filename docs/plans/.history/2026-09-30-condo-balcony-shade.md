@@ -1,5 +1,6 @@
 | Date | Change |
 |------|--------|
+| [2026-09-30](https://github.com/wbniv/WorldFoundry/commit/20c29cbd) | Balcony shade: see-through waterproof (clear PVC) fabric wanted; packet, LINE message and plan updated |
 | [2026-09-30](https://github.com/wbniv/WorldFoundry/commit/10836a51) | Condo 639 balcony: zip screen, 7 cm recess + grass, west-façade ledge; POV cuts off |
 | [2026-09-30](https://github.com/wbniv/WorldFoundry/commit/613a692a) | RFQ packet: awning removal is out of the shops' scope (someone else removes it first) |
 | [2026-09-30](https://github.com/wbniv/WorldFoundry/commit/e39a69b3) | Balcony shade plan: grass covers the whole recessed floor, turns up edges |
@@ -14,6 +15,11 @@
 | [2026-09-30](https://github.com/wbniv/WorldFoundry/commit/ce0a2fa6) | Plan condo 639 balcony zip screen (solar-strip motor) and 7 cm floor recess |
 
 <!--history-meta v1
+20c29cbd	author	Will Norris
+20c29cbd	added	16
+20c29cbd	deleted	16
+20c29cbd	files	1
+20c29cbd	body	Co-Authored-By: Claude Sonnet 5.5 <noreply@anthropic.com>\nClaude-Session: https://claude.ai/code/session_01TfMcgfFyhXKC4CNP5iF7Nz
 10836a51	author	Will Norris
 10836a51	added	335
 10836a51	deleted	2
