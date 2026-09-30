@@ -1,0 +1,23 @@
+// aquarium-standalone.iff.txt — L4-wrapped form of the aquarium level for wf_game -L.
+//
+// The aquarium level (docs/plans/2026-09-30-aquarium-level.md): a 55 gal acrylic tank at
+// WORLD_SCALE 10, sand, rock, a bubble-tip anemone and a swimming fish.
+//
+// Build (the standard pipeline emits both inner and standalone):
+//   task aquarium-level
+//
+// Run:
+//   task run-aquarium
+//
+// Pools are snowgoons-class (generous) — this level is tiny (a dozen objects), so these are far more than enough.
+{ 'L4'
+    { 'ALGN' .align( 2048 ) }
+    { 'RAM'
+        'OBJD' 200000l
+        'PERM' 1000000l
+        'ROOM' 1000000l
+        'FLAG' 1l 1l                    // doomstick, bungeecam (snowgoons defaults)
+    }
+    { 'ALGN' .align( 2048 ) }
+    [ "../aquarium.iff" ]
+}
