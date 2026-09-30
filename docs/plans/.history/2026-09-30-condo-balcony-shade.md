@@ -1,5 +1,6 @@
 | Date | Change |
 |------|--------|
+| [2026-09-30](https://github.com/wbniv/WorldFoundry/commit/f71c1241) | Balcony shade plan: the ledge runs the full west wall of 639 and 640 |
 | [2026-09-30](https://github.com/wbniv/WorldFoundry/commit/3dd48d3a) | Balcony shade: view and airflow when raised is the top priority; spec 'when raised' row |
 | [2026-09-30](https://github.com/wbniv/WorldFoundry/commit/4f7b172c) | Balcony shade: rain protection is required (waterproof fabric), RF remote + Zigbee inquiry, grass under 1 cm |
 | [2026-09-30](https://github.com/wbniv/WorldFoundry/commit/42adeac4) | Balcony shade: artificial grass, pigeons, rain; fix section (recess spans whole patio); RFQ packet updated |
@@ -10,6 +11,11 @@
 | [2026-09-30](https://github.com/wbniv/WorldFoundry/commit/ce0a2fa6) | Plan condo 639 balcony zip screen (solar-strip motor) and 7 cm floor recess |
 
 <!--history-meta v1
+f71c1241	author	Will Norris
+f71c1241	added	8
+f71c1241	deleted	5
+f71c1241	files	1
+f71c1241	body	Co-Authored-By: Claude Sonnet 5.5 <noreply@anthropic.com>\nClaude-Session: https://claude.ai/code/session_01TfMcgfFyhXKC4CNP5iF7Nz
 3dd48d3a	author	Will Norris
 3dd48d3a	added	3
 3dd48d3a	deleted	3
