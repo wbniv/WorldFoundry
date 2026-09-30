@@ -1,0 +1,8 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <!-- Adaptive-icon background behind the aquarium's full-bleed foreground
+         (scripts/gen-aquarium-android-art.py): the tank water's mid blue, so
+         a launcher that shrinks the foreground shows water, not black. The
+         log viewer keeps main's ic_launcher_log_background. -->
+    <color name="ic_launcher_background">#1E7FA0</color>
+</resources>

@@ -20,14 +20,28 @@ After it finishes, add the env-var lines it prints to `~/.bashrc` /
 ## Build + install
 
 ```
-task build-apk        # → android/app/build/outputs/apk/debug/worldfoundry-debug.apk
-task install-apk      # adb install + start NativeActivity
+task build-apk        # → android/app/build/outputs/apk/<app>/release/worldfoundry-<app>-release.apk
+task build-apk-debug  # → android/app/build/outputs/apk/<app>/debug/worldfoundry-<app>-debug.apk
+task install-apk      # APP=aquarium|snowgoons: install + start the release APK (scripts/android-device-run.sh)
+task chromecast-aquarium -- <ip>   # network ADB: install, launch, screenshot, logcat, frame pacing → ~/tmp
 adb logcat -s wf_game # stream engine logs
 ```
 
-`cd.iff` is bundled in the APK under `assets/` via a symlink
-(`android/app/src/main/assets/cd.iff → ../../../../../wfsource/source/game/cd.iff`);
-the AAssetAccessor reads it directly from the APK at runtime.
+Without sudo, the SDK + NDK in `~/android-sdk-local` also build it:
+`cd android && ANDROID_HOME=~/android-sdk-local ./gradlew :app:assembleDebug`.
+
+**One app per game.** Gradle product flavors (`android/app/build.gradle.kts`) build the same
+`libwf_game.so` and Java glue into separate apps that install side by side
+(`docs/plans/2026-09-30-aquarium-chromecast.md`):
+
+| Flavor (`<app>`) | applicationId | Label / banner | `assets/cd.iff` |
+|---|---|---|---|
+| `snowgoons` | `org.worldfoundry.wf_game` | World Foundry (`src/main/res`) | `wfsource/source/game/cd.iff` (task `build-cd-iff`; boots TOC level 0), plus `level0.mid` + soundfont |
+| `aquarium` | `org.worldfoundry.wf_game.aquarium` | WF Aquarium (`src/aquarium/res`) | `wflevels/aquarium-cd.iff` (task `build-cd-iff-aquarium`) |
+
+Each flavor's `cd.iff` is a symlink in `android/app/src/<app>/assets/`; the AAssetAccessor reads
+it directly from the APK at runtime. The aquarium's banner and icons come from
+`scripts/gen-aquarium-android-art.py`.
 
 Gradle calls the repo-root CMake (via `externalNativeBuild`) for arm64-v8a
 with `-DCMAKE_BUILD_TYPE=RelWithDebInfo` and packages the resulting

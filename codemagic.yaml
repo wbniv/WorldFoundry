@@ -79,7 +79,7 @@ workflows:
           find . -name '*.apk' -exec ls -lh {} \;
 
     artifacts:
-      - android/app/build/outputs/apk/debug/*.apk
+      - android/app/build/outputs/apk/*/debug/*.apk
       - gradle-build.log
 
   ios-simulator-debug:
@@ -491,7 +491,9 @@ workflows:
           ./gradlew :app:assembleDebug --info 2>&1 | tee ../gradle-build.log
 
     artifacts:
-      - android/app/build/outputs/apk/debug/*.apk
+      # One APK per app flavor: apk/<flavor>/debug/worldfoundry-<flavor>-debug.apk
+      # (snowgoons, aquarium; docs/plans/2026-09-30-aquarium-chromecast.md).
+      - android/app/build/outputs/apk/*/debug/*.apk
       - gradle-build.log
 
   #------------------------------------------------------------------------------
