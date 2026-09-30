@@ -4,7 +4,7 @@ Status: **plan only, nothing built.** Written 2026‑09‑30. The only shipped p
 aquarium (`be6694e9`) and the stale-reference guard (`82eb561d`). Sub-plan for Android and Chromecast:
 [2026‑09‑30‑aquarium‑chromecast](2026-09-30-aquarium-chromecast.md) (being written by its own agent).
 
-- [ ] Phase A: baseline. World Foundry still builds and runs on macOS, iOS (iPhone **and** iPad), Android and Chromecast
+- [ ] Phase A: baseline (macOS done and green; iOS and Android failing, being fixed). World Foundry still builds and runs on macOS, iOS (iPhone **and** iPad), Android and Chromecast
 - [ ] Phase B: one aquarium-only `cd.iff`, reused by every app
 - [ ] Phase C: **macOS** `Aquarium.app` on Metal
 - [ ] Phase D: **iOS** aquarium app on Metal (iPhone and iPad simulators)
@@ -97,7 +97,7 @@ Free minutes apply to **M2 machines only** (M4 is charged), so every workflow st
 
 Numbered, runnable steps. Each stays **PENDING** until run; results are pasted under the step with PASS or FAIL.
 
-1. **macOS baseline.** Run `macos-desktop-debug` on the fixed commit. Expected: exit 0; "Compare deterministic capture with Linux reference" PASS (0 px beyond tolerance 3); the aquarium step prints `AQUARIUM PARITY: MATCH` or `DIFFERS` with its counts. **PENDING** (build `6abd118f`).
+1. **macOS baseline.** Run `macos-desktop-debug` on the fixed commit. Expected: exit 0; "Compare deterministic capture with Linux reference" PASS (0 px beyond tolerance 3); the aquarium step prints `AQUARIUM PARITY: MATCH` or `DIFFERS` with its counts. **PASS** on build `6abd118f026528c4b225b7bd` (commit `82eb561d`, 3.2 min): snowgoons `exact=306702/307200`, 0 px beyond tolerance 3, `PASS`; **aquarium** `exact=306865/307200`, histogram `{0: 306865, 1: 335}`, 0 px beyond tolerance 3, `PASS`, and the frame is the aquarium. Metal already renders the aquarium as Linux GL does.
 2. **Reference freshness guard.** `python3 -m pytest tests/test_renderer_references_fresh.py tests/test_codemagic_aquarium_parity.py -q`. Expected: all pass on Linux; the guard fails when the old snowgoons reference is put back. Done on 2026‑09‑30: 13 passed, and the guard failed on the old reference.
 3. **iOS baseline.** `ios-simulator-debug` on iPhone **and** iPad simulators. Expected: configure, build, install and launch succeed; each screenshot is non-blank; the log artifact is present. **PENDING**.
 4. **Android baseline.** `android-apk-debug`. Expected: build succeeds and the APK artifact is published. **PENDING** (build `6abd0e34`).

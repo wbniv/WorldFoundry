@@ -1,5 +1,6 @@
 | Date | Change |
 |------|--------|
+| [2026-09-30](https://github.com/wbniv/WorldFoundry/commit/82eb561d) | Regenerate the snowgoons Linux frame reference; guard references against going stale |
 | [2026-09-30](https://github.com/wbniv/WorldFoundry/commit/be6694e9) | codemagic: aquarium Metal-vs-GL frame parity step (informational), Linux reference, static test |
 | [2026-09-21](https://github.com/wbniv/WorldFoundry/commit/05551770) | fix(capture): decouple --capture-frame PNG capture from -record_video on Linux |
 | [2026-09-21](https://github.com/wbniv/WorldFoundry/commit/ceaab73d) | feat(macos): Esc no longer quits; Phase 4 real-exit evidence from a VNC session |
@@ -17,6 +18,11 @@
 | [2026-09-20](https://github.com/wbniv/WorldFoundry/commit/72f650bd) | docs(plans): scope the macOS Metal renderer port |
 
 <!--history-meta v1
+82eb561d	author	Will Norris
+82eb561d	added	1
+82eb561d	deleted	0
+82eb561d	files	1
+82eb561d	body	The macOS gate "Compare deterministic capture with Linux reference" failed on\nbuild 6abd0d96 (35 pixels beyond tolerance). The macOS frame matches a fresh\nLinux frame with 0 pixels beyond tolerance: the Linux reference was stale since\n4c02b471 (WF_CULL on by default). Regenerate it from the Linux engine (two runs\nbyte-identical).\n\nAdd tests/test_renderer_references_fresh.py, which re-renders both committed\nreferences (snowgoons, aquarium) on Linux with the CI flags and compares, so a\nstale reference fails on Linux instead of in a Mac build. It fails on the old\nfixture and passes on the new one. Record the finding in the macOS plan (step 15).\n\nCo-Authored-By: Claude Sonnet 5.5 <noreply@anthropic.com>\nClaude-Session: https://claude.ai/code/session_01NNPhRbrqjqMDkScPvTE9yC
 be6694e9	author	Will Norris
 be6694e9	added	1
 be6694e9	deleted	0

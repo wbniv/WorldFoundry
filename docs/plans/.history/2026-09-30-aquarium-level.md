@@ -1,5 +1,6 @@
 | Date | Change |
 |------|--------|
+| [2026-09-30](https://github.com/wbniv/WorldFoundry/commit/74a2529a) | Plan the aquarium on every platform: macOS and iOS Metal, Android, Chromecast |
 | [2026-09-30](https://github.com/wbniv/WorldFoundry/commit/be6694e9) | codemagic: aquarium Metal-vs-GL frame parity step (informational), Linux reference, static test |
 | [2026-09-30](https://github.com/wbniv/WorldFoundry/commit/819f6a9a) | Save the aquarium Phase 4 motion demo in tests/recordings |
 | [2026-09-30](https://github.com/wbniv/WorldFoundry/commit/2a9f1868) | aquarium plan: Phase 4 verification (steps 16-20), re-runs of 12-15, verdict, tables, controls |
@@ -13,6 +14,11 @@
 | [2026-09-30](https://github.com/wbniv/WorldFoundry/commit/f964a400) | Plan aquarium level (55 gal acrylic, clownfish, anemone) and correct condo alpha note |
 
 <!--history-meta v1
+74a2529a	author	Will Norris
+74a2529a	added	1
+74a2529a	deleted	0
+74a2529a	files	1
+74a2529a	body	Umbrella plan for the user's request (2026-09-30): first verify WF still builds\nand runs on macOS, iOS (iPhone and iPad), Android and Chromecast, then run the\naquarium as its own app on each. Records what CI showed today (macOS gate red\nfrom a stale Linux reference, iOS simulator configure failing, Android pending),\nthe shared aquarium-only cd.iff, the Mac-minute budget and month-end caveat, and\na numbered Verification section, all steps PENDING except the reference guard.\nLink it from the aquarium plan's phase list as Phase 5.\n\nCo-Authored-By: Claude Sonnet 5.5 <noreply@anthropic.com>\nClaude-Session: https://claude.ai/code/session_01NNPhRbrqjqMDkScPvTE9yC
 be6694e9	author	Will Norris
 be6694e9	added	51
 be6694e9	deleted	0
