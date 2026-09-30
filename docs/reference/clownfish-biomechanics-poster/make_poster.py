@@ -691,11 +691,12 @@ def polish(doc):
 
 
 def header_html(k):
-    icon = (f'<svg width="120" height="66" viewBox="-70 -38 140 76">{fish_icon(k, 0, 0, 0.5, 0, "hd")}</svg>')
+    # No hero fish icon here: the subtitle (nowrap) + 290 px note already fill the 277 mm header, so an icon
+    # after them overflowed the page and left a 0.7 mm sliver of its nose at the right edge of the PDF.
     return (f'<header><div><h1>How a clownfish swims</h1><div class="sub">the biomechanics behind the aquarium level’s fish rig · Amphiprion ocellaris · '
             f'numbers, formulas and how far to trust each one</div></div><div class="scale">The level is ×{k.C.WORLD_SCALE:g} in <b>space</b> and real in <b>time</b>: '
             f'speeds are in body lengths per second, frequencies in hertz. The fish is {k.C.FISH_LEN:g} in ({k.C.FISH_LEN * 2.54:.1f} cm) real, '
-            f'{k.L:.3f} m in the level; cruise {k.V:.3f} m/s ({k.V_bl:.2f} BL/s).</div>{icon}</header>')
+            f'{k.L:.3f} m in the level; cruise {k.V:.3f} m/s ({k.V_bl:.2f} BL/s).</div></header>')
 
 
 def build_html(k, resolved):

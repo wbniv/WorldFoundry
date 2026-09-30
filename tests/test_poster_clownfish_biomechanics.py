@@ -458,3 +458,21 @@ def test_png_preview_exists(built):
     from PIL import Image
     w, h = Image.open(built / 'poster.png').size
     assert (w, h) == (1754, 2482)                          # A3 at 150 dpi
+
+
+def _edge_strips_are_blank(pdf, workdir, mm=5, dpi=150):
+    """Names of the page edges whose outer `mm` strip has anything but white in it, in a render of `pdf`."""
+    from PIL import Image
+    subprocess.run(['pdftoppm', '-r', str(dpi), '-png', str(pdf), str(workdir / 'edge')], check=True)
+    img = Image.open(next(workdir.glob('edge*.png'))).convert('L')
+    w, h = img.size
+    e = round(mm / 25.4 * dpi)
+    strips = {'left': (0, 0, e, h), 'right': (w - e, 0, w, h), 'top': (0, 0, w, e), 'bottom': (0, h - e, w, h)}
+    return [name for name, box in strips.items() if img.crop(box).getextrema()[0] < 245]
+
+
+@needs_pdf
+def test_pdf_page_edges_are_blank(built, tmp_path):
+    """Nothing may be drawn in the outer 5 mm of the page. (A hero fish icon once overflowed the header and left
+    a 0.7 mm sliver of its nose at the right edge of the PDF, invisible in the HTML but there in the print.)"""
+    assert _edge_strips_are_blank(built / 'poster.pdf', tmp_path) == []

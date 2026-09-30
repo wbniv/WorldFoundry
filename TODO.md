@@ -70,7 +70,6 @@
 
 ### Level / Gameplay
 
-- [T2] **Clownfish biomechanics poster (A3).** Plan and two mockups written 2026‑09‑30, nothing built: seven computed diagrams (traveling body wave, Strouhal chart, burst-and-coast trace, pectoral fins, turning, facing/control chain, damped steering), a parameter table with a verified / unverified / ours chip on every number, live source links, PDF + HTML + PNG at A3 portrait. **Unblocked:** aquarium Phase 4 merged 2026‑09‑30 (`b884b30c`), so the "ours" column can read its final constants from `wflevels/aquarium/clownfish.py`. [plan](docs/plans/2026-09-30-clownfish-biomechanics-poster.md)
 - [verify T4] **Condo 639 back balcony: motorised zip screen (solar-strip motor) + 7 cm floor recess + grass + west-façade ledge.** Built in `10836a51`: recess across the whole patio, 1 cm grass, 8-slat shade on B (only-shade-or-only-doors, asserted), façade ledge in the wall's colour, auto POV cuts off (`CONDO_POV_TRIGGERS`). Plan Verification 1–7 PASS with raw output; **step 8 (on-site measure) not run** — that, and the shops' answers to the RFQ (waterproof fabric, RF/Zigbee), are what remain. Rain vs airflow is settled: fully waterproof, closed in rain, retracted otherwise. [plan](docs/plans/2026-09-30-condo-balcony-shade.md)
 - [T4] **`tests/verify_condo_camera_controls.py` fails intermittently, on HEAD too** — different `cardinal orbit` / timed checks fail from run to run on both the old and the new level; `camera_controls.fth` unchanged. Unknown root cause, so debug with the 3-attempt cap. Found 2026‑09‑30 during the balcony work. [plan](docs/plans/2026-09-25-condo-camera-controls.md)
 - [T5] **Survey conflict: the Daikin lineset passes through the new façade ledge** at x 2.59, z 2.25–2.35 (above the real soffit 2.15). On site the pipe hole must sit below the beam; decide with Will whether to move it in the model. Source is `~/scripts/aircon-blender.py`.
@@ -145,6 +144,8 @@
 
 
 ## Done
+
+- ✅ 2026-09-30 — [clownfish-poster] A3 biomechanics poster built (PDF, 35 tests); print unverified, S2/S9 URLs missing. See [plan](docs/plans/2026-09-30-clownfish-biomechanics-poster.md).
 
 - ✅ 2026-09-30 — [aquarium-level] Phases 0–4 merged (Plan B, ×10, steer-and-swim gait); phone run unverified. See [plan](docs/plans/2026-09-30-aquarium-level.md).
 
