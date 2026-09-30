@@ -99,7 +99,7 @@ Coordinates (X right, Y depth, Z up, per the project convention). Origin is the 
 | File | Purpose |
 |---|---|
 | `wflevels/aquarium/blender_create_aquarium.py` | Headless Blender build, same shape as `blender_create_moon.py` / `blender_create_condo.py`: import the snowgoons scaffold, strip to one of each infrastructure class, add geometry, export. |
-| `wflevels/aquarium/clownfish.py` | **The canonical clownfish**: its Blender mesh builder, part split, materials and scale constant, plus the idle-animation Forth. Written by the idle-animation spike (plan [2026-09-30-clownfish-idle-animation](2026-09-30-clownfish-idle-animation.md)), then imported by `blender_create_aquarium.py`. One definition, so the level cannot drift from the animated model. |
+| `wflevels/aquarium/clownfish.py` | **The canonical clownfish**: its Blender mesh builder, part split, materials and scale constant, plus the idle-animation Forth. **Exists (merged 2026‑09‑30).** Written by the idle-animation spike (plan [2026-09-30-clownfish-idle-animation](2026-09-30-clownfish-idle-animation.md)), then imported by `blender_create_aquarium.py`. One definition, so the level cannot drift from the animated model. |
 | `wflevels/aquarium/aquarium_constants.py` | The table above as code: inches, `WORLD_SCALE`, derived metres. Imported by the build script **and** the regression test, so the docs, the level and the test cannot drift. |
 | `wflevels/aquarium/make_pane_texture.py` | Writes the pane's 16-bit BGR555 TGA (bit 15 set) deterministically. |
 | `wflevels/aquarium/aquarium.md` | Level README: build/run, controls, what is and is not modelled. |
@@ -112,8 +112,8 @@ Coordinates (X right, Y depth, Z up, per the project convention). Origin is the 
 
 | Actor name | Class / mobility | Mesh | Notes |
 |---|---|---|---|
-| `Player` (clownfish body) | `Physics` | body part of the canonical clownfish (§ 4, *Model ownership*) | Gravity 0, script-driven speeds, see § 4 |
-| `clownfish-*` parts (tail, fins…) | anchored, Mesh | remaining parts of the canonical clownfish | **Only if the idle spike ends up multi-part.** Moved from the Director each frame relative to the body (no parent/child hierarchy), as the condo doors are |
+| `Player` (invisible collision hull) | `Physics` | a copy of the clownfish body mesh, **not drawn** (`PLAYER_MESH` in `clownfish.py`) | Gravity 0, script-driven speeds, authored symmetric `wf_original_bbox` ±0.362 × ±0.125 × ±0.195 m; see § 4. **Nobody writes `ROTATION_C` on it** — the capsule never turns and the rig owns the visual heading |
+| `fish-body`, `fish-tail`, `fish-dorsal`, `fish-pectoral-l/-r` (exact names: `PART_NAMES` in `clownfish.py`) | anchored `platform`, Mass 0, Mesh | the five visible parts of the canonical clownfish | **Decided by the idle spike.** Posed every tick by the Director's `fish-rig-tick` (`write-actor-mailbox`: position, `ROTATION_A/B/C`, dorsal `Z_SCALE`). **Never statplats:** every statplat gets a Jolt body and pinned the Player. Runtime index = export-list position + 1. Mailboxes 600–627 belong to the fish |
 | `tank-shell` | `statplat`, Mesh | bottom, back wall and two end walls; open at the front and top | Trimesh body keeps the fish inside. Acrylic faces, flat pale cyan. **Phase 1:** one piece works *only because the `Player` is created first* — `JoltCharacterCreate` ignores any static body whose AABB already encloses the character (`jolt_backend.cc`, "zone body"), and a one-piece tank encloses the fish. Keep `Player` ahead of the tank in actor order, or build the tank from separate slabs (what the swim spike does) |
 | `tank-front-collider` | `statplat`, Mesh, **`Visibility Mailbox` 0** | a slab in the front-glass plane | **Plan B needs it:** with no front face the fish swims out of the tank. An invisible Mesh statplat still gets its trimesh (verified: 6 of 6 slabs `MESH_STATIC`) and stops the fish at the glass line |
 | `tank-front-pane` | `statplat`, Mesh | one quad, thin | **Translucent, textured.** No collision needed, but it gets one from E2; the shell's own front lip stops the fish first |
@@ -154,8 +154,17 @@ approved mockup outline (flat-shaded, three white bands, black-edged fins) at 0.
 decides how it is split into parts. Phase 3 **consumes** that model from `wflevels/aquarium/clownfish.py` and does not
 draw its own. The Phase 1 fish (a stretched sphere with a wedge tail) and the Phase 0 test-card fish are throwaway
 placeholders and are never promoted. Consequence: the Phase 1 control values were measured on a **single-actor** fish, so
-they are a starting point, and Phase 3 re-validates hover, speed, wall contact and heading on the real, possibly
-multi-part, fish. That is what verification step 15 covers.
+they are a starting point, and Phase 3 re-validates hover, speed, wall contact and heading on the real, **multi-part**
+fish. That is what verification step 15 covers.
+
+**The rig, as built by the idle spike** (plan [2026-09-30-clownfish-idle-animation](2026-09-30-clownfish-idle-animation.md),
+merged; its § "Hand-off to the aquarium level" is the integration contract). The visible fish is five anchored parts;
+the `Physics` `Player` is an **invisible collision hull**. The Director's `fish-rig-tick` reads the Player's position
+and an idle weight each tick and poses every part, so the idle bob, sway, tail beat and fin flutter provably never touch
+physics (measured Player drift 0.00000 m). The alternative, a visible Player, would move the collision capsule with the
+bob. Consequences for the level: the Player and the parts are created in that order; the swim controller replaces
+`fish-swim-tick` and calls `( moving? ) fish-idle-sense` every tick; the level owns the X/Z clamps, using the
+exported `extents()` (nose +0.362, tail tip −0.528, dorsal top +0.289, belly −0.181 m from the body centre).
 
 A `Physics` actor: it is the one class that both scripts and collides. It is a kinematic Jolt `CharacterVirtual`, so the
 tank shell's trimesh contains it without any extra collision authoring.
@@ -185,8 +194,11 @@ Controls reuse the existing logical buttons; **no engine or host change** (same 
 | A (`1`) | Dart: a short speed burst, then glide |
 
 Each frame the script reads `JOYSTICK1_RAW`, maps directions to `XSPEED` / `ZSPEED` (and `YSPEED` on B/C), damps toward
-zero for the glide, writes `ROTATION_C` to face the direction of travel, and clamps `Z` under the water line so the fish
-cannot leave the water. Phase 1 confirms that `ROTATION_C` writes take effect on a `Physics` actor.
+zero for the glide, sets `fish-heading-target` (0 = +X, −0.5 = −X) so the rig turns the visible parts to face the
+direction of travel, and clamps `Z` under the water line so the fish cannot leave the water. **The script does not write
+`ROTATION_C` on the Player.** Phase 1 confirmed `ROTATION_C` writes turn a `Physics` actor's mesh; the idle spike confirmed
+them on anchored and static actors too (values in revolutions; write A, then B, then C every time, because only the C
+write applies all three; reads wrap into [0, 1)).
 
 **Phase 1 measured the working script** (`wflevels/aquarium_swim_spike/blender_create_swim_spike.py`, ×10): while a
 direction is held, write ±`V` = 3.048 m/s (12 in/s × `WORLD_SCALE`, about 0.3 m/s for a real ocellaris) to that axis's
@@ -626,7 +638,7 @@ Open for Phase 3 (neither blocks):
 12. Swim into the anemone zone; capture frame B. Expected: the close-up camshot engages, and the fish is partly overlapped by front tentacles.
 13. Hold each direction into every wall for 5 s. Expected: the fish never leaves the tank volume.
 14. Run on a phone-landscape build with the touch profile. Expected: swim and dart reachable with existing A/B + D-pad regions. **Unverified on hardware; report, do not claim.**
-15. Re-run Phase 1 steps 5–7 (hover, scripted speeds and clamps, heading) on the **canonical clownfish** from `clownfish.py`, idle animation running. Expected: same results as the Phase 1 placeholder; idle motion is net-zero, and every part stays attached to the body through turns and wall contact.
+15. Re-run Phase 1 steps 5–7 (hover, scripted speeds and clamps, heading) on the **canonical clownfish** from `clownfish.py`, idle animation running. Expected: same results as the Phase 1 placeholder; idle motion is net-zero (Player drift 0), every part stays attached to the body through turns and wall contact, and the Player's `ROTATION_C` is never written.
 
 ## Regression guard
 
