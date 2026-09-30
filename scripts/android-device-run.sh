@@ -25,7 +25,7 @@ TARGET  Chromecast / phone IP for network debugging (port 5555 is added when
         already lists.
 
 Options:
-  --app NAME     aquarium (default) or snowgoons
+  --app NAME     aquarium (default), snowgoons or condo
   --release      install the release APK (-O3 + LTO, debug-keystore signed)
                  instead of the debug APK (-O0); the release APK is the one to
                  judge frame rate with
@@ -84,7 +84,8 @@ done
 case "$APP" in
     aquarium)  PKG=org.worldfoundry.wf_game.aquarium ;;
     snowgoons) PKG=org.worldfoundry.wf_game ;;
-    *) echo "android-device-run: --app must be aquarium or snowgoons, not '$APP'" >&2; exit 2 ;;
+    condo)     PKG=org.worldfoundry.wf_game.condo ;;
+    *) echo "android-device-run: --app must be aquarium, snowgoons or condo, not '$APP'" >&2; exit 2 ;;
 esac
 [[ "$SECONDS_TO_RUN" =~ ^[0-9]+$ ]] || { echo "android-device-run: --seconds wants a whole number" >&2; exit 2; }
 
@@ -204,6 +205,9 @@ fi
 result PASS "installed $PKG"
 
 "${A[@]}" shell am force-stop "$PKG" >/dev/null 2>&1 || true
+# A Chromecast left idle ~5 min goes to Dreaming (screensaver) and the app stops drawing: wake it
+# (no settings change) at the start of every run and again before the screenshot.
+"${A[@]}" shell input keyevent KEYCODE_WAKEUP >/dev/null 2>&1 || true
 "${A[@]}" logcat -c >/dev/null 2>&1 || true
 say "launching $ACTIVITY"
 start="$("${A[@]}" shell am start -W -n "$ACTIVITY" 2>&1 | tr -d '\r')"
@@ -222,6 +226,10 @@ if [[ -n "$pid" ]]; then result PASS "process alive after $SECONDS_TO_RUN s (pid
 else result FAIL "process not running after $SECONDS_TO_RUN s (crashed or exited; see logcat-wf.txt)"; fi
 
 # ---- evidence ---------------------------------------------------------------------------
+"${A[@]}" shell input keyevent KEYCODE_WAKEUP >/dev/null 2>&1 || true
+"${A[@]}" shell dumpsys meminfo "$PKG" 2>/dev/null | tr -d '\r' > "$OUTDIR/meminfo.txt" || true
+pss="$(grep -m1 'TOTAL PSS:' "$OUTDIR/meminfo.txt" | awk '{print $3}' || true)"
+[[ -n "$pss" ]] && result INFO "memory: TOTAL PSS ${pss} KB (meminfo.txt)"
 "${A[@]}" exec-out screencap -p > "$OUTDIR/screen.png" 2>/dev/null || true
 "${A[@]}" logcat -d -v threadtime > "$OUTDIR/logcat-full.txt" 2>/dev/null || true
 "${A[@]}" logcat -d -v threadtime -s wf_game:V AndroidRuntime:E DEBUG:V libc:F ActivityManager:I \
@@ -262,7 +270,7 @@ grep -q 'android_main: EGL ready' "$OUTDIR/logcat-wf.txt" \
 
 # Frame pacing: SurfaceFlinger's last ~127 present times of the app's layer. The engine logs no
 # per-frame timing of its own, so this is the frame interval the display actually got.
-layer="$("${A[@]}" shell dumpsys SurfaceFlinger --list 2>/dev/null | tr -d '\r' | grep -F "$PKG" | grep -F NativeActivity | head -1 || true)"
+layer="$("${A[@]}" shell dumpsys SurfaceFlinger --list 2>/dev/null | tr -d '\r' | grep -E "^${PKG//./\\.}/android\\.app\\.NativeActivity#[0-9]+\$" | head -1 || true)"
 if [[ -n "$layer" ]]; then
     "${A[@]}" shell dumpsys SurfaceFlinger --latency "\"$layer\"" 2>/dev/null | tr -d '\r' > "$OUTDIR/frames.txt" || true
     pacing="$(awk 'NR == 1 {refresh = $1 / 1e6; next}
@@ -272,8 +280,8 @@ if [[ -n "$layer" ]]; then
                        for (i = 1; i < n; i++) d[i - 1] = (t[i] - t[i - 1]) / 1e6
                        m = n - 1
                        for (i = 0; i < m; i++) for (j = i + 1; j < m; j++) if (d[j] < d[i]) {x = d[i]; d[i] = d[j]; d[j] = x}
-                       printf "%d frames: median %.1f ms (%.1f fps), p90 %.1f ms, worst %.1f ms; display refresh %.2f ms",
-                              n, d[int(m / 2)], ((d[int(m / 2)] > 0) ? 1000 / d[int(m / 2)] : 0), d[int(m * 0.9)], d[m - 1], refresh
+                       printf "%d frames: min %.1f ms, median %.1f ms (%.1f fps), p90 %.1f ms, worst %.1f ms; display refresh %.2f ms",
+                              n, d[0], d[int(m / 2)], ((d[int(m / 2)] > 0) ? 1000 / d[int(m / 2)] : 0), d[int(m * 0.9)], d[m - 1], refresh
                    }' "$OUTDIR/frames.txt")"
     result INFO "frame pacing ($layer): $pacing"
 else

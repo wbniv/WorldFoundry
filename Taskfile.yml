@@ -550,27 +550,27 @@ tasks:
         echo "Gradle itself is via the repo-vendored android/gradlew wrapper — no system install needed."
 
   build-apk:
-    desc: "Assemble the Android APKs, one per app flavor (snowgoons, aquarium) (release: -O3 + LTO + section GC; debug-keystore signed for sideload)"
+    desc: "Assemble the Android APKs, one per app flavor (snowgoons, aquarium, condo) (release: -O3 + LTO + section GC; debug-keystore signed for sideload)"
     deps: [android-sdk-install]
     dir: android
     env:
       ANDROID_HOME: /usr/lib/android-sdk
     cmds:
       - ./gradlew assembleRelease
-      - echo "APKs → android/app/build/outputs/apk/{snowgoons,aquarium}/release/worldfoundry-{snowgoons,aquarium}-release.apk"
+      - echo "APKs → android/app/build/outputs/apk/{snowgoons,aquarium,condo}/release/worldfoundry-{snowgoons,aquarium,condo}-release.apk"
 
   build-apk-debug:
-    desc: "Assemble the Android APKs, one per app flavor (snowgoons, aquarium) (debug: -O0 -g, for attaching ndk-gdb / lldb)"
+    desc: "Assemble the Android APKs, one per app flavor (snowgoons, aquarium, condo) (debug: -O0 -g, for attaching ndk-gdb / lldb)"
     deps: [android-sdk-install]
     dir: android
     env:
       ANDROID_HOME: /usr/lib/android-sdk
     cmds:
       - ./gradlew assembleDebug
-      - echo "APKs → android/app/build/outputs/apk/{snowgoons,aquarium}/debug/worldfoundry-{snowgoons,aquarium}-debug.apk"
+      - echo "APKs → android/app/build/outputs/apk/{snowgoons,aquarium,condo}/debug/worldfoundry-{snowgoons,aquarium,condo}-debug.apk"
 
   install-apk:
-    desc: "Install + start one app's release APK on a device (APP=aquarium|snowgoons, default aquarium; -- <ip> for network ADB), evidence → ~/tmp/android-device-run/ (scripts/android-device-run.sh)"
+    desc: "Install + start one app's release APK on a device (APP=aquarium|snowgoons|condo, default aquarium; -- <ip> for network ADB), evidence → ~/tmp/android-device-run/ (scripts/android-device-run.sh)"
     vars:
       APP: '{{.APP | default "aquarium"}}'
     cmds:
@@ -580,6 +580,11 @@ tasks:
     desc: "Aquarium app on a Chromecast with Google TV (usage: task chromecast-aquarium -- <ip> [--release] [--build] [--poke]): adb connect, install, launch, wait, screenshot + logcat + frame pacing → ~/tmp/android-device-run/, PASS/FAIL. docs/plans/2026-09-30-aquarium-chromecast.md"
     cmds:
       - bash scripts/android-device-run.sh --app aquarium {{.CLI_ARGS}}
+
+  chromecast-condo:
+    desc: "Condo app on a Chromecast (usage: task chromecast-condo -- [<ip>] --release [--build] [--poke]): same as chromecast-aquarium for org.worldfoundry.wf_game.condo. docs/plans/2026-10-01-condo-chromecast.md"
+    cmds:
+      - bash scripts/android-device-run.sh --app condo {{.CLI_ARGS}}
 
 
   run:
@@ -760,6 +765,17 @@ tasks:
       # tests/test_aquarium_android.py, so rebuild it (task aquarium-level does) whenever the level changes.
       - mkdir -p "$(dirname '{{.CD_OUT}}')"
       - wftools/cdpack-rs/target/release/cdpack wfsource/source/game/shell.fth wflevels/aquarium-standalone.iff -o '{{.CD_OUT}}'
+
+  build-cd-iff-condo:
+    desc: "Assemble the condo-only cd.iff (shell.fth boots TOC level 0 = wflevels/condo_639_640-standalone.iff) via cdpack-rs → wflevels/condo-cd.iff, or CD_OUT=<path>. The Android condo app bundles it (docs/plans/2026-10-01-condo-chromecast.md)"
+    vars:
+      CD_OUT: '{{.CD_OUT | default "wflevels/condo-cd.iff"}}'
+    cmds:
+      - cargo build --release --manifest-path wftools/cdpack-rs/Cargo.toml
+      # Same recipe as build-cd-iff-aquarium. The tracked wflevels/condo-cd.iff is checked against
+      # wflevels/condo_639_640-standalone.iff by tests/test_condo_android.py: rebuild it whenever the level changes.
+      - mkdir -p "$(dirname '{{.CD_OUT}}')"
+      - wftools/cdpack-rs/target/release/cdpack wfsource/source/game/shell.fth wflevels/condo_639_640-standalone.iff -o '{{.CD_OUT}}'
 
   run-marble-3d-astra:
     desc: "Run Astra Marble Madness from cd.iff (level 6; arrows roll, Space restarts)"

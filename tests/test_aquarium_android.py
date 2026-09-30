@@ -173,7 +173,7 @@ def test_device_script_parses_and_helps():
     h = subprocess.run(["bash", str(SCRIPT), "-h"], capture_output=True, text=True, timeout=30)
     assert h.returncode == 0 and h.stdout.startswith("Usage:"), h
     bad = subprocess.run(["bash", str(SCRIPT), "--app", "mario"], capture_output=True, text=True, timeout=30)
-    assert bad.returncode == 2 and "aquarium or snowgoons" in bad.stderr, bad
+    assert bad.returncode == 2 and "aquarium, snowgoons or condo" in bad.stderr, bad
     for pkg in ("org.worldfoundry.wf_game.aquarium", "org.worldfoundry.wf_game"):
         assert pkg in body
 

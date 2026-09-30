@@ -40,6 +40,7 @@
 
 #include <hal/hal.h>
 #include <hal/lifecycle.h>
+#include <pigsys/pigsys.hp>
 #include <hal/android/wf_android_export.hp>
 
 extern "C" void _HALSetJoystickButtons(joystickButtonsF joystickButtons);
@@ -400,9 +401,33 @@ android_main(struct android_app* app)
     }
     WFLOG("android_main: EGL ready, entering HALStart");
 
+    // Per-app command line: an app flavor may ship assets/wf_args.txt, whitespace-
+    // separated arguments appended after argv[0] (the condo app's VRAM overrides,
+    // the same flags `task run-condo` passes on the desktop). Absent → argv[0] only,
+    // as before. docs/plans/2026-10-01-condo-chromecast.md.
+    static char argBuf[1024];
     char arg0[] = "wf_game";
-    char* argv[1] = { arg0 };
-    HALStart(1, argv, HAL_MAX_TASKS, HAL_MAX_MESSAGES, HAL_MAX_PORTS);
+    char* argv[33] = { arg0 };
+    int argc = 1;
+    if (gAssetMgr)
+    {
+        if (AAsset* a = AAssetManager_open(gAssetMgr, "wf_args.txt", AASSET_MODE_BUFFER))
+        {
+            const int n = AAsset_read(a, argBuf, sizeof(argBuf) - 1);
+            AAsset_close(a);
+            argBuf[n > 0 ? n : 0] = '\0';
+            for (char* tok = strtok(argBuf, " \t\r\n"); tok && argc < 32; tok = strtok(nullptr, " \t\r\n"))
+                argv[argc++] = tok;
+            WFLOG("android_main: wf_args.txt gave %d argument(s)", argc - 1);
+        }
+    }
+    argv[argc] = nullptr;
+    // HALStart hands PIGSMain the pigsys globals, not its own argc/argv; on the
+    // desktop sys_init() fills them, Android never called it, so PIGSMain saw
+    // argc = 0 and every argument was dropped. Set them here.
+    __argc = argc;
+    __argv = argv;
+    HALStart(argc, argv, HAL_MAX_TASKS, HAL_MAX_MESSAGES, HAL_MAX_PORTS);
 
     // HALStart returns when the game exits (PIGSMain's loop terminates).
     WFLOG("android_main: HALStart returned, tearing down EGL");

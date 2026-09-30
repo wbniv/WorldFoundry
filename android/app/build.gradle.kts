@@ -45,6 +45,11 @@ android {
             applicationIdSuffix = ".aquarium"   // org.worldfoundry.wf_game.aquarium
             versionNameSuffix   = "-aquarium"
         }
+        create("condo") {
+            dimension = "game"
+            applicationIdSuffix = ".condo"      // org.worldfoundry.wf_game.condo
+            versionNameSuffix   = "-condo"
+        }
     }
 
     externalNativeBuild {
@@ -117,4 +122,6 @@ android {
     //   aquarium: cd.iff → wflevels/aquarium-cd.iff (task build-cd-iff-aquarium).
     //     No MIDI or soundfont: the level has no music, and MusicPlayer::play
     //     returns quietly when the soundfont asset is absent.
+    //   condo: cd.iff → wflevels/condo-cd.iff (task build-cd-iff-condo; the
+    //     condo_639_640 standalone level, docs/plans/2026-10-01-condo-chromecast.md).
 }
