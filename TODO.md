@@ -371,6 +371,13 @@ _Auto-added from plan "Out of scope"/"Deferred" sections at commit time. Triage 
 - [ ] **(triage)** A solar-yield model tied to `SUN_ALT_DEG` / `SUN_AZ_DEG`; the existing sun-position item ([plan](2026-09-20-condo-sun-solar-position.md)) is the prerequisite. — _from [2026-09-30-condo-balcony-shade.md](docs/plans/2026-09-30-condo-balcony-shade.md)_  <!-- fp:156c3bc9f97e1790 -->
 - [verify] **2026-09-30-condo-balcony-shade** — Verification section present but no PASS recorded — run + record the steps. _from [2026-09-30-condo-balcony-shade.md](docs/plans/2026-09-30-condo-balcony-shade.md)_  <!-- fp:c04fa8539735b0dc -->
 - [ ] **(triage)** Raising the whole level to 3 m ceilings (filed separately). — _from [2026-09-30-condo-balcony-shade.md](docs/plans/2026-09-30-condo-balcony-shade.md)_  <!-- fp:bee87167a74482ee -->
+- [ ] **(triage)** **Real iPhone or iPad hardware:** needs Apple signing and provisioning; TestFlight and the App Store as well. Only simulators here. — _from [2026-09-30-aquarium-platforms.md](docs/plans/2026-09-30-aquarium-platforms.md)_  <!-- fp:c143501dbef6ded0 -->
+- [ ] **(triage)** **Play Store submission** and any distribution beyond `adb` sideload. — _from [2026-09-30-aquarium-platforms.md](docs/plans/2026-09-30-aquarium-platforms.md)_  <!-- fp:20c1c06f5cf53a29 -->
+- [ ] **(triage)** **Sound** on any platform (silent stub; see the "Audio assets from IFF" item in `TODO.md`). — _from [2026-09-30-aquarium-platforms.md](docs/plans/2026-09-30-aquarium-platforms.md)_  <!-- fp:9de4a427d7d9820a -->
+- [ ] **(triage)** **Steering the fish with only a TV remote** (a D-pad and OK, no B, C or A). The gamepad profile is the target. — _from [2026-09-30-aquarium-platforms.md](docs/plans/2026-09-30-aquarium-platforms.md)_  <!-- fp:e378060a87727024 -->
+- [ ] **(triage)** **Changing `WORLD_SCALE`** or the engine's fixed limits (decided 2026‑09‑30). — _from [2026-09-30-aquarium-platforms.md](docs/plans/2026-09-30-aquarium-platforms.md)_  <!-- fp:e6e06cfbf2275f98 -->
+- [ ] **(triage)** **macOS close paths** (⌘Q, red button, Retina, `-fullscreen`): stay under the macOS Metal renderer item in `TODO.md`. — _from [2026-09-30-aquarium-platforms.md](docs/plans/2026-09-30-aquarium-platforms.md)_  <!-- fp:ccfb790dafc1e941 -->
+- [ ] **(triage)** **Restoring texture alpha** (translucent front pane): its own `TODO.md` item. — _from [2026-09-30-aquarium-platforms.md](docs/plans/2026-09-30-aquarium-platforms.md)_  <!-- fp:09c4e8b813280bea -->
 <!-- END auto-captured-deferrals -->
 
 - [x] Implemented Forth-only condo camera inspection controls; desktop/touch input regressions passed. [Plan and mockups](docs/plans/2026-09-25-condo-camera-controls.md)

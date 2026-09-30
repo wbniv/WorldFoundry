@@ -21,6 +21,7 @@ plan reuses that pipeline unchanged and spends its risk budget on the three thin
 - [x] Phase 2 — tank, sand, rock, anemone, lighting, fog — **static scene built; placeholder fish until Phase 3**
 - [x] Phase 3 — integrate the idle-spike clownfish (not a new mesh), controls, camera zones — **done; step 14 logic-verified, hardware unverified**
 - [x] Phase 4 — anemone sway (optional), docs, tasks, regression test — **done, plus steer and swim; Will's own look at the motion video and a phone run are still open**
+- [ ] Phase 5 — the aquarium as its own app on macOS and iOS (Metal), Android and Chromecast: **planned**, see [2026‑09‑30‑aquarium‑platforms](2026-09-30-aquarium-platforms.md)
 - [ ] macOS Metal parity of the aquarium (step 21) — **Linux reference generated and reproducible; the Metal half is pending the first Codemagic run**
 
 ## Mockups
