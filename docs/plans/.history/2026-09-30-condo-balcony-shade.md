@@ -1,5 +1,6 @@
 | Date | Change |
 |------|--------|
+| [2026-09-30](https://github.com/wbniv/WorldFoundry/commit/10836a51) | Condo 639 balcony: zip screen, 7 cm recess + grass, west-façade ledge; POV cuts off |
 | [2026-09-30](https://github.com/wbniv/WorldFoundry/commit/613a692a) | RFQ packet: awning removal is out of the shops' scope (someone else removes it first) |
 | [2026-09-30](https://github.com/wbniv/WorldFoundry/commit/e39a69b3) | Balcony shade plan: grass covers the whole recessed floor, turns up edges |
 | [2026-09-30](https://github.com/wbniv/WorldFoundry/commit/f71c1241) | Balcony shade plan: the ledge runs the full west wall of 639 and 640 |
@@ -13,6 +14,11 @@
 | [2026-09-30](https://github.com/wbniv/WorldFoundry/commit/ce0a2fa6) | Plan condo 639 balcony zip screen (solar-strip motor) and 7 cm floor recess |
 
 <!--history-meta v1
+10836a51	author	Will Norris
+10836a51	added	335
+10836a51	deleted	2
+10836a51	files	1
+10836a51	body	Level model for docs/plans/2026-09-30-condo-balcony-shade.md part B (§ 7d of\nblender_create_condo.py, CONDO_SHADE=0 builds the old level back):\n\n- Whole recessed patio (x 2.75..5.55, y -1.95..-0.10) dropped 7 cm by a bmesh\n  split of unit-639's floor, closed with welded risers; 1 cm darker-green grass\n  slab on top (CONDO_GRASS), so the walk-on step is 6 cm.\n- Shell parapet replaced: 1.11 m / 10 cm pony wall, north jamb + pier, and one\n  west-facade-ledge actor along both units' west wall (x -4.21..7.90, soffit\n  2.15), cut around every wall top and coloured from the wall under it (fixes\n  the ochre-over-blue ledge; regression check in the model test).\n- Shade: cassette with solar-strip material, two guides, 8 edge-free fabric\n  slats + bar driven from the Director (Z_POS = lift + (1-c) park), B / key 2\n  within 0.9 m, 2 s travel, reversible; bar stows in the cassette when raised;\n  wall switch cue on the south jamb. Mailboxes 60-64; reach band disjoint from\n  the glass doors' (asserted).\n- Automatic window/patio POV cuts gated behind CONDO_POV_TRIGGERS (default\n  off, Will); doll-house is the only automatic shot. camera-controls test\n  expects the doll-house after a reset; superseded notes on three plans.\n- Rebuilt condo_639_640, _tour and _touch. tour-639.mp4 is now stale.\n\nTests: tests/verify_condo_balcony_shade_model.py (headless geometry, on/off),\ntests/verify_condo_balcony_shade.py (in-engine bridge: step, walls, reach,\ntravel, reversal, one-press-one-thing, no camera cut). Verification 1-7 with\nraw output in the plan.\n\nCo-Authored-By: Claude Sonnet 5.5 <noreply@anthropic.com>\nClaude-Session: https://claude.ai/code/session_01TfMcgfFyhXKC4CNP5iF7Nz
 613a692a	author	Will Norris
 613a692a	added	3
 613a692a	deleted	3
