@@ -4,6 +4,8 @@
 
 The back balcony of 639 is an open opening onto the west (Bangkok afternoon sun, monsoon rain, gusts, 6th floor ≈ 16 m up). Will wants a **motorised outdoor zip screen in a cassette, mounted under the concrete ledge (beam) of the opening**, with the **solar-strip motor option** (battery motor charged by a thin photovoltaic strip — no mains wiring to the balcony).
 
+**What the shade is for** (Will, 2026‑09‑30): cut heat and glare; keep **pigeons** out of the balcony and the project room behind it (the glass doors are usually open when Will is home); keep **rain off the artificial grass** that now covers the recessed patio floor, which would go mouldy; and replace the existing fixed awning, which does little against rain and which pigeons land on noisily. Pigeons and rain both favour a sealed screen; the real tension is with airflow, heat and view, since a fully closed waterproof screen on a west-facing balcony traps heat and damp and the grass has to dry (Open question 8).
+
 Measured by Will (2026‑09‑30; the ledge depth vs. height and the datum were clarified the same day):
 
 | Item | Value |
@@ -15,7 +17,8 @@ Measured by Will (2026‑09‑30; the ledge depth vs. height and the datum were 
 | Pony wall thickness | 10 cm |
 | Patio width (`639-patio-recessed`) | 280 cm; the opening is centred in it |
 | Ceiling | 3 m walls, no drop ceilings anywhere in 639 |
-| Floor in front of the opening | recessed **7 cm** below the interior floor |
+| Floor in front of the opening | recessed **7 cm** below the interior floor, across the whole recessed patio (glass-door threshold to pony wall, about 2 m) |
+| Floor covering | **artificial grass** over the recessed patio floor; thickness not measured (assumed 3 cm) |
 
 **The level model does not match these numbers today** (queried read-only from `~/docs/aircon/units-639-640.blend`, `unit-639` shell, y = 0 plane):
 
@@ -40,7 +43,9 @@ Product class: **outdoor zip screen, cassette (head box) on the soffit, inside-r
 | Cassette | ≈ 10 × 10 cm, aluminium, under the soffit **flush with the pony wall's outer face**, so the bottom bar lands on the 10 cm cap. The 35 cm-deep ledge leaves 25 cm of soffit on the balcony side, which shades but does not obstruct | A 111 cm drop rolls to a small diameter; the cassette costs ≈ 10 cm of the opening, so the fabric drops ≈ 98 cm |
 | Guides | zip tracks on both reveals, ≈ 5 cm wide each | Keep the fabric taut in gusts; fabric width ≈ 257 cm |
 | Bottom bar | ≈ 3 cm, with rubber seal, lands on the pony-wall cap | Cap must be flat and level — a 0–10 mm error shows as a gap along 2.6 m |
-| Fabric | 3–5 % openness, light exterior colour | Heat rejection matters more than see-through in Bangkok; darker fabric keeps more view but passes more heat |
+| Fabric (rain) | **waterproof** fabric (coated PVC or similar) in the lower part of the drop, or a second roller; ask each shop what they offer | The screen must keep wind-driven rain off the artificial grass, which would go mouldy. An open-weave screen fabric (3–5 % openness) passes most rain |
+| Fabric (sun) | 3–5 % openness screen fabric, light exterior colour, if a sun-only layer is wanted | Heat rejection matters more than see-through in Bangkok; darker fabric keeps more view but passes more heat |
+| Airflow | a gap or vent at the bottom, or a way to leave it partly raised | A fully sealed, waterproof screen on a west-facing balcony traps heat and damp; the grass has to dry |
 | Wind | ask for the supplier's **EN 13561 class** and the **test size**; it must cover 2.67 × 1.11 m | A 6th-floor west face takes squall gusts; do not accept a class without the test size |
 | Motor | battery tubular motor, **solar strip** on the cassette's west face, plus a **DC/USB charge port** | Monsoon weeks give little sun; a charge port is the fallback |
 | Battery | ask for chemistry and **operating temperature** | The cassette sits in direct afternoon sun at 35 °C+ ambient; a cell that is only rated to 45–60 °C ages fast |
@@ -55,7 +60,8 @@ Product class: **outdoor zip screen, cassette (head box) on the soffit, inside-r
 The source `.blend` is read-only, so all of this is a new section (**§ 7d**) in `wflevels/condo_639_640/blender_create_condo.py`, following the pattern of § 7c (telescoping glass doors) and gated by `CONDO_SHADE=0` to switch it off.
 
 1. **Pin the opening.** Constants in metres, all derived from Will's numbers: `SHADE_W = 2.68`, `PONY_H = 1.11`, `PONY_T = 0.10`, `OPEN_H = 1.11`, `LEDGE_DEEP = 0.35`, `FLOOR_RECESS = 0.07`, `PATIO_W = 2.80`. The patio is widened from 2.70 to 2.80 m keeping its south edge on the south wall (x 2.75…5.55); the opening is **flush to the south wall**, x 2.75…5.43, and the remaining 12 cm to the north edge (x 5.43…5.55) is the north jamb stub (Will: 10 cm, plus about 2 cm of slack).
-2. **Recess the floor 7 cm** across the opening's frontage. The shell floor is a single z = 0 face set inside `unit-639`, so this is a `bmesh` bisect of the top faces over the rectangle, dropping the cut region by 0.07 m and closing it with a step wall on the interior side. The player walks down 7 cm; Jolt's character step handles that.
+2. **Recess the floor 7 cm** across the whole recessed patio, from the glass-door threshold (y −2.0) to the pony wall (Will, 2026‑09‑30: the grass covers this area, and the step up is at the door, about 192 cm inboard of the pony wall's inner face). Earlier drafts, including the section mockup, drew the recess as a strip beside the opening; that was wrong. The shell floor is a single z = 0 face set inside `unit-639`, so this is a `bmesh` bisect of the top faces over the rectangle, dropping the cut region by 0.07 m and closing it with a step wall on the interior side. The player walks down 7 cm; Jolt's character step handles that.
+2b. **Artificial grass**: a flat green `statplat` slab (`GRASS_T = 0.03`, assumed) over that floor, so the walk-on top is at z −0.04 and the step from the project room is 4 cm. Added 2026‑09‑30 after the first build brief; the build agent was told by message.
 3. **Rebuild the opening** as solid geometry: parapet raised from 1.00 m to 1.11 m and 10 cm thick, flush with the outer face (y −0.10…0); a **ledge** 35 cm deep (y −0.35…0) with its soffit at the opening head (z 2.15) up to the model's 2.70 m ceiling, i.e. 55 cm tall against the real ≈ 64 cm; the 12 cm north jamb stub at x 5.43…5.55 and a solid pier from there to the model's existing post at x 5.70…5.80. The south jamb is the existing full wall (x 2.75 face), which needs no new geometry.
 4. **Build the shade** as separate actors:
    - `639-balcony-shade-cassette` (static box with the solar strip as a second material on its west face, the strip length a placeholder);
@@ -89,7 +95,10 @@ Answers of 2026‑09‑30 are folded in; what is left has a default that the bui
 4. **Which face is the pony wall flush with, and which way does the ledge overhang?** The wall is 10 cm and the ledge 35 cm deep, so one face is flush and the ledge sticks out 25 cm on the other side. Default: both flush on the outer (west) face, ledge overhanging into the balcony. If it is the other way round, the cassette sits on the balcony side of the cap and the bottom bar needs a bar-to-cap check on site.
 5. ~~Reveals~~ **Answered (2026‑09‑30):** the north jamb is a 10 cm wall; the south jamb is a full wall, 202 cm from the outside of the guest-bedroom wall to the outside edge of the pony wall. The 12 cm left over between the 280 cm patio and the 268 cm opening is read as that 10 cm north stub plus ≈ 2 cm slack, so the opening sits against the south wall — **inferred, please confirm**. The south guide gets a flat 2 m face; the north guide gets a 10 cm face, enough for a 5 cm guide but with little margin — check it is plumb on site. The model's patio depth is 2.00 m against the real 2.02 m; left at 2.00.
 
-6. ~~Existing awning.~~ **Answered (2026‑09‑30):** the existing fixed awning (about 2.5 m wide, so it does not even cover the 2.68 m opening) is being **removed and replaced** by the shade. Everything then sits inside the line of the exterior wall, except possibly the small solar strip, whose position depends on the product chosen. The awning's shading of the strip therefore goes away; the strip's outward projection, if any, is what the juristic person (condo management) needs to approve. A draft LINE message is in the RFQ packet ([docs/rfq](../rfq/2026-09-30-639-balcony-zip-screen-rfq.pdf)). The photo also shows a thin cord or cable along the ledge face; check it does not obstruct the cassette. The level model does not include the awning, and now never needs to.
+6. ~~Existing awning.~~ **Answered (2026‑09‑30):** the existing fixed awning (about 2.5 m wide, so it does not even cover the 2.68 m opening) is being **removed and replaced** by the shade. Everything then sits inside the line of the exterior wall, except possibly the small solar strip, whose position depends on the product chosen. The awning's shading of the strip therefore goes away; the strip's outward projection, if any, is what the juristic person (condo management) needs to approve. A draft LINE message is in the RFQ packet ([docs/rfq](../rfq/2026-09-30-639-balcony-zip-screen-rfq.pdf)). The photo also shows a thin cord or cable along the ledge face; check it does not obstruct the cassette. The level model does not include the awning, and now never needs to.
+
+7. **Grass thickness and extent.** Assumed 3 cm and the whole recessed patio floor. Measure the pile height (it changes the step from the room) and say whether it stops short of the walls.
+8. **Rain versus screen.** The reason for the shade has changed from sun control to also keeping rain off the grass. A standard zip screen fabric (3–5 % openness) will not do that. Which trade-off do you want: a waterproof lower section (rain-proof, hotter, less airflow), or a screen fabric plus a separate solution for the grass? The RFQ packet asks shops to quote waterproof fabric and to say how the side zips and bottom bar seal against wind-driven rain; the level model does not distinguish fabrics.
 
 ## Out of scope
 
@@ -103,7 +112,7 @@ Answers of 2026‑09‑30 are folded in; what is left has a default that the bui
 ## Verification
 
 1. `CONDO_SHADE=1 task condo-level` completes and prints a `[condo] balcony shade:` line giving the span, cassette, slat count and mailboxes.
-2. A headless read of the built `wflevels/condo_639_640/condo_639_640.blend` reports: floor z = −0.07 over the frontage, pony-wall cap z = 1.04, soffit z = 2.15, clear opening width 2.680 m, and 8 fabric slats plus the bar.
+2. A headless read of the built `wflevels/condo_639_640/condo_639_640.blend` reports: floor z = −0.07 over the whole recessed patio, an artificial-grass slab on top of it (top at z −0.04), pony-wall cap z = 1.04, soffit z = 2.15, clear opening width 2.680 m, and 8 fabric slats plus the bar.
 3. `CONDO_SHADE=0 task condo-level` reproduces today's level (same parapet, no beam, floor at 0).
 4. `task run-condo`, spawn on the balcony (`CONDO_SPAWN`): stepping down onto the balcony works, and the player cannot walk through the pony wall or the guides.
 5. In-engine capture at closedness 0, ~0.5 and 1.0 (`-rate20 --capture-frame`): slats tile without gaps or z-fighting at 1.0 and vanish into the cassette at 0.
