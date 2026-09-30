@@ -37,6 +37,20 @@ HALIsSuspended(void)
     return g_suspended.load(std::memory_order_acquire) ? 1 : 0;
 }
 
+// An iOS app has no window-close button (the user leaves via the home gesture,
+// which arrives as the suspend callbacks above). These stubs satisfy the shared
+// main loop (game.cc, main.cc), exactly as hal/android/lifecycle.cc does.
+extern "C" int
+HALWindowCloseRequested(void)
+{
+    return 0;
+}
+
+extern "C" void
+HALCloseWindow(void)
+{
+}
+
 // Android needs this (0b19119): its events are drained on the game thread,
 // so while the suspended loop slept, APP_CMD_RESUME was never delivered and
 // the app stayed stuck. On iOS UIKit delivers lifecycle and touch events on
@@ -47,21 +61,6 @@ HALIsSuspended(void)
 // releases every held touch bit.
 extern "C" void
 HALPumpSuspendedEvents(void)
-{
-}
-
-// iOS apps are never closed from inside (no window close button; the system
-// terminates a backgrounded app without notice). Same stubs as Android's
-// lifecycle.cc: the shared game loop polls this, main.cc calls HALCloseWindow
-// on the way out.
-extern "C" int
-HALWindowCloseRequested(void)
-{
-    return 0;
-}
-
-extern "C" void
-HALCloseWindow(void)
 {
 }
 

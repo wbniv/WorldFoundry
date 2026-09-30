@@ -189,6 +189,23 @@ bool Create(int width, int height, bool fullscreen, const char* title)
     glfwWindowHint(GLFW_SCALE_TO_MONITOR, GLFW_TRUE);
 
     GLFWmonitor* monitor = fullscreen ? glfwGetPrimaryMonitor() : nullptr;
+    if (monitor)
+    {
+        // Ask for the display's CURRENT mode, not width x height: with a monitor
+        // GLFW switches the display to the nearest mode to the request (the
+        // macOS CI runner went 1024x768 -> 800x600 for a 640x480 request and
+        // back on exit). This is GLFW's "windowed full screen" recipe, and what
+        // SetFullscreen() below already does.
+        if (const GLFWvidmode* mode = glfwGetVideoMode(monitor))
+        {
+            glfwWindowHint(GLFW_RED_BITS,     mode->redBits);
+            glfwWindowHint(GLFW_GREEN_BITS,   mode->greenBits);
+            glfwWindowHint(GLFW_BLUE_BITS,    mode->blueBits);
+            glfwWindowHint(GLFW_REFRESH_RATE, mode->refreshRate);
+            width  = mode->width;
+            height = mode->height;
+        }
+    }
     g_window = glfwCreateWindow(width, height,
                                 title ? title : "World Foundry",
                                 monitor, nullptr);

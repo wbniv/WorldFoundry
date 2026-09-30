@@ -67,7 +67,7 @@ trigger only (no webhook yet). Trigger from Codemagic dashboard to verify APK ar
 This is the unfinished Phase 3 Step 7 from the Android port plan. Verify on phone
 before TV to isolate any issues from TV-specific behaviour.
 
-1. `adb install android/app/build/outputs/apk/debug/app-debug.apk`
+1. `adb install android/app/build/outputs/apk/<app>/debug/worldfoundry-<app>-debug.apk` (`<app>` = `snowgoons` or `aquarium` since 2026‑09‑30; `task chromecast-aquarium -- <ip>` automates this, see [aquarium-chromecast](2026-09-30-aquarium-chromecast.md))
 2. Verify:
    - App launches to game (snowgoons level loads)
    - Touch d-pad (bottom-left) and A/B (bottom-right) move player
@@ -84,7 +84,7 @@ Chromecast has no USB host port — ADB is over the network:
 1. Enable Developer Options: TV Settings → Device Preferences → About → Build → click 7×
 2. Enable Network debugging: Developer Options → Network debugging → ON
 3. `adb connect <chromecast-ip>:5555` (IP at Settings → Network → About)
-4. `adb install android/app/build/outputs/apk/debug/app-debug.apk`
+4. `adb install android/app/build/outputs/apk/<app>/debug/worldfoundry-<app>-debug.apk` (`<app>` = `snowgoons` or `aquarium` since 2026‑09‑30; `task chromecast-aquarium -- <ip>` automates this, see [aquarium-chromecast](2026-09-30-aquarium-chromecast.md))
 
 Verify:
 - TV launcher grid shows WF tile with the banner image from Phase 0

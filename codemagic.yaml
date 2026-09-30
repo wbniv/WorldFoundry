@@ -2,7 +2,7 @@
 #
 # Workflows:
 #   android-apk-debug   (push to 2026-ios) — Linux arm64 APK, no signing.
-#   ios-simulator-debug (push to 2026-ios) — Phases 0-3, no signing.
+#   ios-simulator-debug (manual)           — Simulator .app, run on iPhone + iPad, no signing.
 #   ios-device-release  (manual/tag)       — Phase 4+, signed arm64 IPA.
 #
 # Build budget: 500 free Mac-min/month on the individual plan (the free-tier
@@ -79,7 +79,7 @@ workflows:
           find . -name '*.apk' -exec ls -lh {} \;
 
     artifacts:
-      - android/app/build/outputs/apk/debug/*.apk
+      - android/app/build/outputs/apk/*/debug/*.apk
       - gradle-build.log
 
   ios-simulator-debug:
@@ -91,7 +91,9 @@ workflows:
       cache_paths:
         # CMake/Xcode project dir — avoids full project re-gen + recompile.
         - build-ios-sim
-        # Jolt extraction — once the iOS Jolt block lands this avoids re-tar.
+        # Jolt extraction — Jolt is the physics engine on iOS too (the iOS-only
+        # force to legacy physics was deleted in 92b325a2), so configure needs
+        # the extracted tree. Caching it keeps the tar -xzf step off every run.
         - engine/vendor/jolt-physics-5.5.0
 
     environment:
@@ -115,135 +117,343 @@ workflows:
       #     source: true
       cancel_previous_builds: true
 
+    # Every step tees into cm-build.log (listed under artifacts:) — Codemagic
+    # has no log API, so that file is the only way to read a red build from
+    # the shell (~/.claude/skills/codemagic-build).
     scripts:
       - name: Toolchain versions
         script: |
           set -euo pipefail
+          exec > >(tee -a "$CM_BUILD_DIR/cm-build.log") 2>&1
           sw_vers
           xcodebuild -version
           cmake --version
           which xcrun
           xcrun --sdk iphonesimulator --show-sdk-path
+          # Which simulator runtimes/devices this image ships — the last step
+          # needs an iPhone AND an iPad on one iOS runtime.
+          xcrun simctl list runtimes available
+
+      - name: Extract Jolt vendor archive
+        script: |
+          set -euo pipefail
+          exec > >(tee -a "$CM_BUILD_DIR/cm-build.log") 2>&1
+          # Same as macos-desktop-debug. CMakeLists.txt defaults
+          # WF_PHYSICS_ENGINE=jolt and include()s
+          # engine/vendor/jolt-physics-5.5.0/Jolt/Jolt.cmake, which only exists
+          # once the vendored tarball is extracted. Without this step configure
+          # stops at "include could not find requested file" (CMakeLists.txt,
+          # Jolt Physics block) — the 2026-09-30 failure of this workflow.
+          cd engine/vendor
+          if [ ! -d jolt-physics-5.5.0 ]; then
+            echo "Extracting jolt-physics-5.5.0.tar.gz..."
+            tar -xzf jolt-physics-5.5.0.tar.gz
+            # GitHub archive extracts to jrouwe-JoltPhysics-<sha>/; rename to
+            # match the JOLT_DIR path CMakeLists.txt expects.
+            extracted=$(tar -tzf jolt-physics-5.5.0.tar.gz | head -1 | cut -d/ -f1)
+            mv "$extracted" jolt-physics-5.5.0
+            echo "Renamed $extracted -> jolt-physics-5.5.0"
+          else
+            echo "Jolt already extracted"
+          fi
 
       - name: Configure CMake for iOS Simulator (arm64)
         script: |
           set -euo pipefail
+          exec > >(tee -a "$CM_BUILD_DIR/cm-build.log") 2>&1
+          # CMakeLists.txt has full if(IOS) branches (Forth-only scripting,
+          # hal/ios + gfx/metal, Jolt, MACOSX_BUNDLE with ios/Info.plist and
+          # ios/LaunchScreen.storyboard). A configure failure here is a real
+          # regression, not an expected Phase 0 signal.
+          # A cached CMakeCache.txt can pin options from an older tree; start
+          # every configure clean (the Xcode build products stay cached).
           mkdir -p build-ios-sim
+          rm -rf build-ios-sim/CMakeCache.txt build-ios-sim/CMakeFiles
           cd build-ios-sim
-          # Phase 0: the CMakeLists.txt has no if(IOS) branch yet; this
-          # configure is expected to fail or fall through to the Linux path
-          # and then break at build time. That failure *is* the Phase 0
-          # signal — the pipeline reached the Mac toolchain.
           cmake -G Xcode \
             -DCMAKE_SYSTEM_NAME=iOS \
             -DCMAKE_OSX_SYSROOT=iphonesimulator \
             -DCMAKE_OSX_ARCHITECTURES=arm64 \
             -DCMAKE_OSX_DEPLOYMENT_TARGET=13.0 \
             -DCMAKE_BUILD_TYPE=Debug \
-            ..
+            -DCMAKE_XCODE_GENERATE_SCHEME=ON \
+            .. 2>&1 | tee ../ios-configure.log
 
       - name: Build
         script: |
           set -euo pipefail
+          exec > >(tee -a "$CM_BUILD_DIR/cm-build.log") 2>&1
           cd build-ios-sim
+          # The full xcodebuild transcript (thousands of lines) goes to
+          # xcodebuild.log only; cm-build.log gets the error lines and the
+          # BUILD SUCCEEDED/FAILED line. ContinueBuildingAfterErrors makes one
+          # red run report every failing TU instead of the first.
+          status=0
           xcodebuild \
             -project wf_game.xcodeproj \
             -scheme wf_game \
             -configuration Debug \
             -sdk iphonesimulator \
             -destination 'generic/platform=iOS Simulator' \
+            -IDEBuildingContinueBuildingAfterErrors=YES \
             build \
-            | tee ../xcodebuild.log
-          # xcodebuild exit code is what we care about; `tee` preserves it
-          # via pipefail.
+            > ../xcodebuild.log 2>&1 || status=$?
+          cd "$CM_BUILD_DIR"
+          echo "xcodebuild exit status: $status ($(wc -l < xcodebuild.log) lines in xcodebuild.log)"
+          echo "--- errors (first 120 lines) ---"
+          grep -E -A3 ': (fatal )?error:|^ld: |Undefined symbols|\*\* BUILD' xcodebuild.log \
+            | head -120 || true
+          if [ "$status" -ne 0 ]; then
+            echo "--- last 40 lines of xcodebuild.log ---"
+            tail -40 xcodebuild.log
+          fi
+          exit "$status"
 
-      - name: Boot Simulator, install .app, capture screenshot + log
-        # Phase 1 Verify proxy for users without a local Mac: Codemagic's Mac
-        # runner has Xcode + xcrun simctl, so we install the .app on a boot'd
-        # Simulator and capture a screenshot + unified-log output from the
-        # launched process. NSLog from WFRootViewController::viewDidLoad
-        # (cd.iff sanity probe via HALGetAssetAccessor) is our target signal.
+      - name: Run on iPhone + iPad Simulators (screenshot, log, verdict)
+        # Proxy for users without a local Mac: install the one .app on an
+        # iPhone Simulator and then an iPad Simulator of the same iOS runtime
+        # (TARGETED_DEVICE_FAMILY is "1,2"), launch it, and keep a screenshot
+        # + launch log per device. A device is OK when install + launch
+        # succeed, the app is still alive 20 s later (the old CoreAudio abort
+        # hit at ~11 s, after an 8 s check had already passed), and the CENTRE
+        # CROP of its screenshot (middle 40% x 40%, downscaled to 240 px) has
+        # more than 50 distinct colours. A flat fill — clear colour, or the
+        # old cornflower blue with black letterbox bars that a whole-frame
+        # count mistook for a scene — is FAIL; a rendered scene is OK.
         script: |
           set -euo pipefail
-
-          SIM_ART="$CM_BUILD_DIR/sim-artifacts"
-          mkdir -p "$SIM_ART"
-
-          APP="$CM_BUILD_DIR/engine/Debug/wf_game.app"
+          exec > >(tee -a "$CM_BUILD_DIR/cm-build.log") 2>&1
+          cd "$CM_BUILD_DIR"
           BUNDLE_ID="org.worldfoundry.wf-game"
+          VERDICT="$CM_BUILD_DIR/ios-verdict.txt"
+          : > "$VERDICT"
 
-          # Pick the first available iPhone simulator that matches the SDK.
-          DEVICE_ID=$(xcrun simctl list -j devices available \
-            | python3 -c '
-          import json, sys
-          j = json.load(sys.stdin)["devices"]
-          for runtime, devs in j.items():
-              if "iOS" not in runtime: continue
-              for d in devs:
-                  if "iPhone" in d["name"] and d["isAvailable"]:
-                      print(d["udid"]); sys.exit(0)
+          # RUNTIME_OUTPUT_DIRECTORY is engine/, and the Xcode generator adds a
+          # per-config subdirectory (Debug or Debug-iphonesimulator depending on
+          # CMake's EFFECTIVE_PLATFORM_NAME handling) — find it, don't guess.
+          # engine/ first: build-ios-sim/ is cached and could hold a stale one.
+          { find engine -type d -name wf_game.app -prune
+            find build-ios-sim -type d -name wf_game.app -prune; } 2>/dev/null \
+            > ios-app-candidates.txt || true
+          echo "wf_game.app candidates:"; cat ios-app-candidates.txt
+          APP=$(head -1 ios-app-candidates.txt)
+          if [ -z "$APP" ]; then
+            echo "no wf_game.app under engine/ or build-ios-sim/"
+            echo "IOS IPHONE: FAIL (no .app)"
+            echo "IOS IPAD: FAIL (no .app)"
+            exit 1
+          fi
+          APP="$CM_BUILD_DIR/$APP"
+          echo "App bundle: $APP"
+          plutil -p "$APP/Info.plist" \
+            | grep -E -A2 'CFBundleIdentifier|CFBundleSupportedPlatforms|MinimumOSVersion|UIDeviceFamily' \
+            || true
+
+          # Newest iOS runtime that has both an iPhone and an iPad; if none
+          # does, the newest with an iPhone (the iPad half then FAILs with the
+          # device list printed). Output: runtime|phone udid|phone name|pad udid|pad name
+          SEL=$(xcrun simctl list -j devices available | python3 -c '
+          import json, re, sys
+          devs = json.load(sys.stdin)["devices"]
+          def ver(rt):
+              m = re.search(r"iOS-(\d+)-(\d+)", rt)
+              return tuple(int(x) for x in m.groups()) if m else (0, 0)
+          def first(ds, kind):
+              return next((d for d in ds if d["name"].startswith(kind)), None)
+          rts = sorted((r for r in devs if "SimRuntime.iOS" in r), key=ver, reverse=True)
+          for need_pad in (True, False):
+              for rt in rts:
+                  ds = [d for d in devs[rt] if d.get("isAvailable")]
+                  phone, pad = first(ds, "iPhone"), first(ds, "iPad")
+                  if phone and (pad or not need_pad):
+                      print("|".join([rt, phone["udid"], phone["name"],
+                                      pad["udid"] if pad else "", pad["name"] if pad else ""]))
+                      sys.exit(0)
           sys.exit(1)
-          ')
-          echo "Using simulator UDID: $DEVICE_ID"
-
-          xcrun simctl boot "$DEVICE_ID" || true
-          xcrun simctl bootstatus "$DEVICE_ID" -b
-
-          echo "--- install ---"
-          xcrun simctl install "$DEVICE_ID" "$APP"
-
-          echo "--- launch ---"
-          LAUNCH_OUTPUT=$(xcrun simctl launch --terminate-running-process "$DEVICE_ID" "$BUNDLE_ID")
-          echo "$LAUNCH_OUTPUT"
-          APP_PID=$(echo "$LAUNCH_OUTPUT" | awk '{print $NF}')
-          echo "Launched PID: $APP_PID"
-
-          echo "--- sleep 3s to let viewDidLoad run ---"
-          sleep 3
-
-          echo "--- screenshot ---"
-          xcrun simctl io "$DEVICE_ID" screenshot "$SIM_ART/screenshot.png"
-
-          echo "--- capture unified log (last 60s, wf_game process) ---"
-          # log show reads finished log entries — no streaming, no GNU timeout
-          # needed (which doesn't exist on macOS).
-          xcrun simctl spawn "$DEVICE_ID" log show \
-              --predicate 'processImagePath CONTAINS "wf_game"' \
-              --style compact \
-              --last 60s \
-            > "$SIM_ART/launch.log" 2>&1 || true
-          echo "--- last 40 lines of sim log ---"
-          tail -40 "$SIM_ART/launch.log" || true
-
-          echo "--- process still alive check ---"
-          # If the app crashed, it won't be listed. Non-fatal.
-          if xcrun simctl spawn "$DEVICE_ID" launchctl list 2>/dev/null | grep -q wf_game; then
-              echo "wf_game still running after 3s"
-          else
-              echo "NOTE: wf_game not in launchctl list (may have exited cleanly or crashed)"
+          ' || true)
+          IFS='|' read -r RUNTIME IPHONE_ID IPHONE_NAME IPAD_ID IPAD_NAME <<EOF
+          $SEL
+          EOF
+          echo "runtime: ${RUNTIME:-none}"
+          echo "iPhone:  ${IPHONE_NAME:-none} ${IPHONE_ID:-}"
+          echo "iPad:    ${IPAD_NAME:-none} ${IPAD_ID:-}"
+          if [ -z "${IPAD_ID:-}" ]; then
+            echo "--- no iPad on an iOS runtime with an iPhone; simctl shows ---"
+            xcrun simctl list devices available || true
           fi
 
-          ls -la "$SIM_ART/"
+          # run_device LABEL UDID NAME — never aborts the step; appends one
+          # "label|name|install|launch|alive|colours" line to $VERDICT.
+          run_device() {
+            local label="$1" udid="$2" name="$3"
+            local shot="$CM_BUILD_DIR/ios-$label-screenshot.png"
+            local log="$CM_BUILD_DIR/ios-$label-launch.log"
+            local out="$CM_BUILD_DIR/ios-$label-stdout.tmp"
+            local err="$CM_BUILD_DIR/ios-$label-stderr.tmp"
+            local install=no launch=no alive=no colours=0 dominant=100 pid="" launch_out=""
+            local marker="$CM_BUILD_DIR/.ios-$label-start"
+            touch "$marker"
+            echo "=== $label: $name ($udid) ==="
+            # "Unable to boot device in current state: Booted" is not an error.
+            xcrun simctl boot "$udid" || true
+            if ! xcrun simctl bootstatus "$udid" -b; then
+              echo "$label: boot failed"
+              echo "$label|$name|$install|$launch|$alive|$colours|$dominant" >> "$VERDICT"
+              return 0
+            fi
+            echo "--- install ---"
+            xcrun simctl install "$udid" "$APP" && install=yes
+            if [ "$install" = yes ]; then
+              echo "--- launch ---"
+              if launch_out=$(xcrun simctl launch --terminate-running-process \
+                    --stdout="$out" --stderr="$err" "$udid" "$BUNDLE_ID"); then
+                launch=yes
+                pid=$(echo "$launch_out" | awk '{print $NF}')
+                echo "$launch_out (pid $pid)"
+              fi
+            fi
+            if [ "$launch" = yes ]; then
+              # 20 s: HALStart, cd.iff load, steady-state frames, and well past
+              # the ~11 s at which the simulator CoreAudio RPC used to abort.
+              sleep 20
+              # Simulator apps are host processes, so ps sees the launched pid.
+              if ps -p "$pid" > /dev/null 2>&1; then alive=yes; fi
+              echo "--- screenshot ---"
+              xcrun simctl io "$udid" screenshot "$shot" || true
+              if [ -s "$shot" ]; then
+                stats=$(python3 - "$shot" <<'PY' || echo "0 100"
+          import os, subprocess, sys, tempfile
+          sys.path.insert(0, "tests")
+          from compare_renderer_frames import read_png   # no-dependency 8-bit PNG reader
+          small = os.path.join(tempfile.mkdtemp(), "small.png")
+          subprocess.run(["sips", "-Z", "240", "-s", "format", "png", sys.argv[1], "--out", small],
+                         check=True, stdout=subprocess.DEVNULL)
+          w, h, px = read_png(small)
+          from collections import Counter
+          # Middle 40% x 40%: clear of letterbox bars, rounded corners and the
+          # home indicator on both iPhone and iPad.
+          c = Counter(bytes(px[(y * w + x) * 3:(y * w + x) * 3 + 3])
+                      for y in range(h * 3 // 10, h * 7 // 10)
+                      for x in range(w * 3 // 10, w * 7 // 10))
+          n = sum(c.values()) or 1
+          print(len(c), c.most_common(1)[0][1] * 100 // n if c else 100)
+          PY
+                )
+                colours=${stats%% *}; dominant=${stats##* }
+              fi
+            fi
+            {
+              echo "=== $label: $name ($udid) on ${RUNTIME} ==="
+              echo "install=$install launch=$launch pid=${pid:-none} alive_after_20s=$alive centre_colours=$colours dominant_pct=$dominant"
+              echo "=== stdout ==="; cat "$out" 2>/dev/null || true
+              echo "=== stderr ==="; cat "$err" 2>/dev/null || true
+              echo "=== unified log (wf_game, last 2m) ==="
+              # log show reads finished entries — no streaming, no GNU timeout.
+              xcrun simctl spawn "$udid" log show \
+                  --predicate 'processImagePath CONTAINS "wf_game"' \
+                  --style compact --last 2m 2>&1 || true
+            } > "$log"
+            rm -f "$out" "$err"
+            echo "--- last 30 lines of ios-$label-launch.log ---"
+            tail -30 "$log" || true
+            # A crash leaves an .ips on the host; keep this run's next to the log.
+            find "$HOME/Library/Logs/DiagnosticReports" -name 'wf_game*' \
+                -newer "$marker" 2>/dev/null > "$marker.crashes" || true
+            while IFS= read -r f; do
+              echo "crash report: $f"
+              cp "$f" "$CM_BUILD_DIR/ios-crash-$label-$(basename "$f")" || true
+            done < "$marker.crashes"
+            rm -f "$marker" "$marker.crashes"
+            xcrun simctl terminate "$udid" "$BUNDLE_ID" 2>/dev/null || true
+            xcrun simctl shutdown "$udid" || true
+            echo "$label|$name|$install|$launch|$alive|$colours|$dominant" >> "$VERDICT"
+          }
 
-          echo "--- shutdown ---"
-          xcrun simctl shutdown "$DEVICE_ID" || true
+          if [ -n "${IPHONE_ID:-}" ]; then run_device iphone "$IPHONE_ID" "$IPHONE_NAME"; fi
+          if [ -n "${IPAD_ID:-}" ]; then run_device ipad "$IPAD_ID" "$IPAD_NAME"; fi
 
-          # Non-fatal — the sanity probe is informational.
-          if grep -q "cd.iff opened" "$SIM_ART/launch.log"; then
-              echo "Phase 1 Verify: HALGetAssetAccessor opened cd.iff"
+          # Aquarium screenshots — informational, never part of the verdict or
+          # exit code. A COPY of the built .app gets wflevels/aquarium-cd.iff
+          # in place of its cd.iff (the default bundle is untouched; the
+          # simulator build is unsigned, so no re-sign). Same checks as above;
+          # set WF_IOS_AQUARIUM=0 to skip (about 1 Mac-minute).
+          AQ_IFF="$CM_BUILD_DIR/wflevels/aquarium-cd.iff"
+          if [ "${WF_IOS_AQUARIUM:-1}" != 0 ] && [ -f "$AQ_IFF" ]; then
+            rm -rf "$CM_BUILD_DIR/aquarium-app"; mkdir -p "$CM_BUILD_DIR/aquarium-app"
+            AQ_APP="$CM_BUILD_DIR/aquarium-app/wf_game.app"
+            cp -R "$APP" "$AQ_APP"
+            find "$AQ_APP" -name cd.iff > aquarium-cdiff.txt || true
+            echo "aquarium: replacing $(wc -l < aquarium-cdiff.txt) cd.iff in the copy"
+            while IFS= read -r f; do cp "$AQ_IFF" "$f"; done < aquarium-cdiff.txt
+            DEFAULT_APP="$APP"; APP="$AQ_APP"
+            if [ -n "${IPHONE_ID:-}" ]; then run_device aquarium-iphone "$IPHONE_ID" "$IPHONE_NAME"; fi
+            if [ -n "${IPAD_ID:-}" ]; then run_device aquarium-ipad "$IPAD_ID" "$IPAD_NAME"; fi
+            APP="$DEFAULT_APP"
+            for d in iphone ipad; do
+              if [ -s "ios-aquarium-$d-screenshot.png" ]; then
+                mv "ios-aquarium-$d-screenshot.png" "ios-aquarium-$d.png"
+              fi
+            done
           else
-              echo "WARN: did not observe 'cd.iff opened' in sim log — see artifacts"
+            echo "aquarium: skipped (WF_IOS_AQUARIUM=${WF_IOS_AQUARIUM:-1}, $AQ_IFF present: $([ -f "$AQ_IFF" ] && echo yes || echo no))"
           fi
+
+          echo "=== iOS simulator verdict (runtime ${RUNTIME:-none}) ==="
+          rc=0
+          for label in iphone ipad; do
+            line=$(grep "^$label|" "$VERDICT" || true)
+            upper=$(echo "$label" | tr '[:lower:]' '[:upper:]')
+            if [ -z "$line" ]; then
+              echo "IOS $upper: FAIL (no $label simulator available)"; rc=1; continue
+            fi
+            IFS='|' read -r _ name install launch alive colours dominant <<EOF
+          $line
+          EOF
+            echo "$label: $name install=$install launch=$launch alive_after_20s=$alive centre_colours=$colours dominant_pct=${dominant:-100} (OK needs centre_colours > 50)"
+            if [ "$install" = yes ] && [ "$launch" = yes ] && [ "$alive" = yes ] \
+               && [ "${colours:-0}" -gt 50 ] 2>/dev/null; then
+              echo "IOS $upper: OK"
+            else
+              echo "IOS $upper: FAIL"; rc=1
+            fi
+          done
+          for label in aquarium-iphone aquarium-ipad; do
+            line=$(grep "^$label|" "$VERDICT" || true)
+            [ -n "$line" ] || continue
+            upper=$(echo "$label" | tr '[:lower:]-' '[:upper:] ')
+            IFS='|' read -r _ name install launch alive colours dominant <<EOF
+          $line
+          EOF
+            echo "$label: $name install=$install launch=$launch alive_after_20s=$alive centre_colours=$colours dominant_pct=${dominant:-100}"
+            if [ "$install" = yes ] && [ "$launch" = yes ] && [ "$alive" = yes ] \
+               && [ "${colours:-0}" -gt 50 ] 2>/dev/null; then
+              echo "IOS $upper: OK (informational)"
+            else
+              echo "IOS $upper: FAIL (informational)"
+            fi
+          done
+          exit "$rc"
 
     artifacts:
-      - sim-artifacts/**
-      # CMake sets RUNTIME_OUTPUT_DIRECTORY to ${CMAKE_SOURCE_DIR}/engine, so
-      # the .app + its dSYM land under engine/Debug/ on iOS Sim builds.
+      - cm-build.log
+      - ios-configure.log
+      - xcodebuild.log
+      - ios-iphone-screenshot.png
+      - ios-ipad-screenshot.png
+      - ios-aquarium-iphone.png
+      - ios-aquarium-ipad.png
+      - ios-aquarium-*-launch.log
+      - ios-iphone-launch.log
+      - ios-ipad-launch.log
+      - ios-crash-*
+      - ios-verdict.txt
+      # RUNTIME_OUTPUT_DIRECTORY is ${CMAKE_SOURCE_DIR}/engine, so the .app
+      # (+ dSYM, if generated) lands under engine/<config>/.
       - engine/**/*.app
       - engine/**/*.dSYM
       - build-ios-sim/**/*.app
       - build-ios-sim/CMakeFiles/**/*.log
-      - xcodebuild.log
+      - build-ios-sim/CMakeFiles/CMakeConfigureLog.yaml
 
   #------------------------------------------------------------------------------
   # android-apk-debug — debug APK (arm64-v8a) for phone + Google TV sideload.
@@ -334,7 +544,9 @@ workflows:
           ./gradlew :app:assembleDebug --info 2>&1 | tee ../gradle-build.log
 
     artifacts:
-      - android/app/build/outputs/apk/debug/*.apk
+      # One APK per app flavor: apk/<flavor>/debug/worldfoundry-<flavor>-debug.apk
+      # (snowgoons, aquarium; docs/plans/2026-09-30-aquarium-chromecast.md).
+      - android/app/build/outputs/apk/*/debug/*.apk
       - gradle-build.log
 
   #------------------------------------------------------------------------------
@@ -522,6 +734,26 @@ workflows:
             echo "AQUARIUM PARITY: DIFFERS"
           fi
 
+      - name: Aquarium screenshots through Metal (later frames + a real window)
+        script: |
+          set -euo pipefail
+          exec > >(tee -a "$CM_BUILD_DIR/cm-build.log") 2>&1
+          # Same flags as the parity step. Frame 20 is already captured there; later frames
+          # show the idle animation (anemone sway, tail, pectorals), and the --windowed run
+          # shows the aquarium presented to a real CAMetalLayer window. Informational.
+          WF_GAME="$CM_BUILD_DIR/engine/wf_game.app/Contents/MacOS/wf_game"
+          LEVEL="$CM_BUILD_DIR/wflevels/aquarium-standalone.iff"
+          cd wfsource/source/game
+          for N in 100 200; do
+            "$WF_GAME" --frame-step-smoke=$((N + 10)) --cycles=1 -L"$LEVEL" -rate20 \
+              --capture-frame=$N="$CM_BUILD_DIR/macos-aquarium-frame$N.png" \
+              2>&1 | tee "$CM_BUILD_DIR/macos-aquarium-frame$N.log" || true
+          done
+          "$WF_GAME" --windowed --frame-step-smoke=30 --cycles=1 -L"$LEVEL" -rate20 \
+            --capture-frame=20="$CM_BUILD_DIR/macos-aquarium-windowed.png" \
+            2>&1 | tee "$CM_BUILD_DIR/macos-aquarium-windowed.log" || true
+          echo "AQUARIUM SHOTS: $(ls "$CM_BUILD_DIR"/macos-aquarium-frame*.png "$CM_BUILD_DIR"/macos-aquarium-windowed.png 2>/dev/null | wc -l) png file(s) written"
+
       - name: Run windowed smoke (Phase 4 proxy gate)
         script: |
           set -euo pipefail
@@ -562,6 +794,31 @@ workflows:
           grep -E "^macos: window " "$CM_BUILD_DIR/macos-windowsize.log" || \
             echo "SIZE: no window line — flags not verified"
 
+      - name: Close paths and fullscreen (⌘Q, red button, Esc, -fullscreen)
+        script: |
+          set -euo pipefail
+          exec > >(tee -a "$CM_BUILD_DIR/cm-build.log") 2>&1
+          # docs/plans/2026-09-21-macos-close-paths.md ("CI step"). The windowed
+          # smoke above proved this runner has a window-server session, so the
+          # close paths can be driven here with real OS events and no human:
+          # launch wf_game --windowed on snowgoons in real time (no
+          # --frame-step-smoke, so it runs until closed), send ⌘Q / press the
+          # red button / send Esc / launch with -fullscreen, and assert on the
+          # process: exit status 0, still running, window frame == display.
+          #
+          # The script grants Accessibility/PostEvent/ScreenCapture (and Apple
+          # Events -> System Events) in this VM's TCC database with sudo. That is
+          # acceptable ONLY because the Codemagic VM is destroyed after the
+          # build; the grant is printed in the log, never done on a kept machine.
+          #
+          # CLOSE_PATHS_STRICT lists the checks that fail the build. Build
+          # 6abd322f passed cmdq/red/fullscreen with real System Events input,
+          # so those are strict; esc stays informational until its key-handler
+          # control is proven, and the native-mode line is a known engine gap.
+          CLOSE_PATHS_STRICT="cmdq red fullscreen" OUT_DIR="$CM_BUILD_DIR" \
+            bash scripts/macos/close-paths-ci.sh \
+            2>&1 | tee "$CM_BUILD_DIR/macos-close-paths.log"
+
     artifacts:
       - macos-configure.log
       - macos-build.log
@@ -573,9 +830,23 @@ workflows:
       # Aquarium Metal-vs-GL parity (informational; plan step 21).
       - macos-aquarium-frame20.png
       - macos-aquarium-comparison.log
+      - macos-aquarium-frame100.png
+      - macos-aquarium-frame200.png
+      - macos-aquarium-windowed.png
+      - macos-aquarium-windowed.log
       - macos-frame20-windowed.png
       - macos-windowed.log
       - macos-windowsize.log
+      # Close paths + -fullscreen (scripts/macos/close-paths-ci.sh): the
+      # verdict log, one log per wf_game run, display/window probes, and a
+      # screenshot taken while -fullscreen was up.
+      - macos-close-paths.log
+      - macos-close-*.log
+      - macos-close-*.txt
+      - macos-screen-*.txt
+      - macos-fullscreen-windows.txt
+      - macos-fullscreen.png
+      - cm-build.log
       # The runnable product on macOS is the .app bundle, not a bare binary:
       # `engine/wf_game` matches nothing here (the Mach-O lives at
       # engine/wf_game.app/Contents/MacOS/wf_game), which is why earlier

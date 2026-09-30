@@ -11,15 +11,17 @@
 // acquisition, clear, and present. So this impl is a thin timer + projection-
 // setup wrapper over RendererBackendGet().
 //
-// Phase 2C-A scope: boot the engine main loop on a background thread and
-// watch where it crashes. PageFlip currently just computes deltaTime + sleeps
-// ~16ms; proper main-thread CADisplayLink sync lands when Phase 2C-B wires
-// the Metal encoder handoff.
+// Phase 2C-B: the engine thread owns the frame, like hal/macos/display_macos.cc.
+// RenderBegin acquires the layer's next drawable and hands the backend an
+// encoder (wf_metal::BeginFrameToLayer); RenderEnd flushes the batch and
+// presents (wf_metal::EndFrameToLayer); PageFlip waits for the main-thread
+// CADisplayLink tick (hal/ios/metal_view.mm) instead of sleeping.
 //=============================================================================
 
 #include <hal/hal.h>
 #include <memory/memory.hp>
 #include <gfx/renderer_backend.hp>
+#include <gfx/metal/metal_offscreen.h>
 
 #include <sys/time.h>
 #include <unistd.h>
@@ -28,6 +30,28 @@
 
 extern int _halWindowWidth;
 extern int _halWindowHeight;
+
+// hal/ios/metal_view.mm
+extern "C" void* WFIosMetalLayer(void);
+extern "C" bool  WFIosWaitForVSync(int timeout_ms);
+
+// Surface size the projection was last built for; re-derived when the view
+// lays out after the Display was constructed (rotation, or a layout that
+// lands after the engine thread got here).
+static int s_projW = 0;
+static int s_projH = 0;
+
+static void
+IosUpdateProjection(int fallbackW, int fallbackH)
+{
+    const int w = (_halWindowWidth  > 0) ? _halWindowWidth  : fallbackW;
+    const int h = (_halWindowHeight > 0) ? _halWindowHeight : fallbackH;
+    if (w == s_projW && h == s_projH) return;
+    s_projW = w;
+    s_projH = h;
+    RendererBackendGet().SetProjection(60.0f, float(w) / float(h ? h : 1),
+                                       1.0f, 1000.0f);
+}
 
 //==============================================================================
 
@@ -61,12 +85,9 @@ Display::Display(int /*orderTableSize*/,
 
     // Window size comes from hal/ios/platform.mm's WFIosSetSurfaceSize,
     // fed from the UIView's bounds * contentScaleFactor on layout.
-    const int w = (_halWindowWidth  > 0) ? _halWindowWidth  : xSize;
-    const int h = (_halWindowHeight > 0) ? _halWindowHeight : ySize;
-    const float aspect = float(w) / float(h ? h : 1);
-
     RendererBackendGet().ResetModelView();
-    RendererBackendGet().SetProjection(60.0f, aspect, 1.0f, 1000.0f);
+    s_projW = s_projH = 0;
+    IosUpdateProjection(xSize, ySize);
 
     ResetTime();
 }
@@ -94,8 +115,10 @@ void
 Display::RenderBegin()
 {
     Validate();
-    // Clear + drawable acquisition are WFMetalView's job; Display here just
-    // sets per-frame renderer state.
+    IosUpdateProjection(_xSize, _ySize);
+    // No drawable (pool exhausted, or no layer yet): the backend drops this
+    // frame's triangles because no encoder is set, and RenderEnd is a no-op.
+    wf_metal::BeginFrameToLayer(WFIosMetalLayer(), _halWindowWidth, _halWindowHeight);
     RendererBackendGet().SetLightingEnabled(true);
     RendererBackendGet().ResetModelView();
 }
@@ -105,34 +128,50 @@ Display::RenderBegin()
 void
 Display::RenderEnd()
 {
-    // Flush batched triangles into the current frame's Metal encoder (set up
-    // by WFMetalView's CADisplayLink callback — Phase 2C-B wiring).
+    // Flush the batch into the live encoder FIRST, then present — EndFrame()
+    // issues the draw call, so presenting before it would show an empty frame.
     RendererBackendGet().EndFrame();
+    wf_metal::EndFrameToLayer();
 }
 
 //==============================================================================
 
-Scalar
-Display::PageFlip()
+// Time since the last call, advancing `last`; shared by PageFlip and MeasureDelta.
+static Scalar
+MeasureAndAdvance(struct timeval& last)
 {
-    // Phase 2C-A: no vsync sync yet — just rate-limit to ~60 fps and return
-    // the measured deltaTime. Phase 2C-B swaps this for a semaphore wait
-    // signaled by the main-thread CADisplayLink callback.
-    usleep(16000);
-
     struct timeval tvNow;
     gettimeofday(&tvNow, nullptr);
 
     struct timeval delta;
-    delta.tv_sec  = tvNow.tv_sec  - _clockLastTime.tv_sec;
-    delta.tv_usec = tvNow.tv_usec - _clockLastTime.tv_usec;
+    delta.tv_sec  = tvNow.tv_sec  - last.tv_sec;
+    delta.tv_usec = tvNow.tv_usec - last.tv_usec;
     if (delta.tv_usec < 0) {
         delta.tv_usec += 1000000;
         --delta.tv_sec;
     }
 
-    _clockLastTime = tvNow;
+    last = tvNow;
     return ConvertTimeToScalar(delta);
+}
+
+Scalar
+Display::PageFlip()
+{
+    // Pace to the display: wait for the CADisplayLink tick. The timeout keeps
+    // the loop alive when the link is paused (app backgrounded) or not yet
+    // created; it then degrades to the old ~16 ms rate limit.
+    if (!WFIosWaitForVSync(100))
+        usleep(16000);
+    return MeasureAndAdvance(_clockLastTime);
+}
+
+// Same delta PageFlip returns, without the sleep or a swap: WFGame::StepFrame
+// (the stepped/`-rate` path) calls it on every platform, so iOS must define it.
+Scalar
+Display::MeasureDelta()
+{
+    return MeasureAndAdvance(_clockLastTime);
 }
 
 //==============================================================================

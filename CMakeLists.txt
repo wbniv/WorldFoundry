@@ -171,8 +171,8 @@ if(ANDROID)
     list(APPEND WF_DEFS WF_TARGET_ANDROID __ANDROID__
                         RENDERER_GLES RENDERER_PIPELINE_GLES SCALAR_TYPE_FLOAT)
 elseif(IOS)
-    # Phase 2B2: most of the engine (incl. game/physics) compiles; only gfx/gl +
-    # gfx/glpipeline (X11/GLX, GL-only) stay out — iOS renders via hal/ios Metal.
+    # Phase 2B2: most of the engine (incl. game/physics) compiles; gfx/gl
+    # (X11/GLX) stays out, gfx/glpipeline minus backend_modern.cc is in (2C-B).
     # No RENDERER_* define yet. Physics is Jolt (the Xcode-safe Jolt block below).
     list(APPEND WF_DEFS WF_TARGET_IOS SCALAR_TYPE_FLOAT)
 elseif(APPLE)
@@ -233,14 +233,16 @@ elseif(IOS)
     # and end in RendererBackendGet().DrawTriangle()). backend_modern.cc is the
     # only genuinely GL-bound file in the directory. Compiling the eight and
     # skipping backend_modern.cc is Phase 1 of
-    # docs/plans/2026-09-20-macos-metal-renderer.md; until then iOS renders
-    # through hal/ios/metal_view.mm + a Metal RendererBackend and uses the
-    # engine/stubs/renderpoly3d_stubs.cc link stubs.
+    # docs/plans/2026-09-20-macos-metal-renderer.md, which macOS did first.
+    # iOS now does the same (Phase 2C-B, docs/plans/2026-04-21-ios-port-codemagic.md):
+    # while it linked engine/stubs/renderpoly3d_stubs.cc instead, every frame
+    # presented with triangles_last=0 (Codemagic build 6abd456f) — the no-op
+    # RenderPoly3D* stubs meant no geometry ever reached the Metal backend.
     # savegame/linux is reused — it's POSIX file I/O, works on Darwin too.
     set(WF_DIRS
         pigsys streams cpplib math memory iff mailbox
         hal hal/ios
-        gfx gfx/metal
+        gfx gfx/glpipeline gfx/metal
         input asset baseobject movement room physics
         anim timer scripting game ini loadfile
         profile renderassets savegame savegame/linux
@@ -334,6 +336,9 @@ set(WF_SKIP
 if(IOS)
     list(APPEND WF_SKIP
         hal/ios/display_ios.cc
+        # The one GL-bound file in gfx/glpipeline; iOS's backend is Metal
+        # (backend_factory.cc selects it on WF_TARGET_IOS).
+        gfx/glpipeline/backend_modern.cc
     )
 elseif(APPLE)
     # display_macos.cc is #included from gfx/display.cc (same pattern as
@@ -387,18 +392,14 @@ list(APPEND WF_SOURCES
     ${STUB_SRC}/stb_image_write_impl.cc
 )
 
-# iOS: link stubs for the 8 GL-backend RenderObject3D::RenderPoly3D* methods
-# that Material::Get3DRenderObjectPtr references unconditionally. Real impls
-# land with the Metal backend in Phase 2B3.
-#
-# backend_factory.cc lives in gfx/glpipeline/ which is excluded from the
-# iOS build (rest of glpipeline hard-depends on GLES), but it's
-# backend-agnostic and picks Metal on iOS via a WF_TARGET_IOS #ifdef.
+# iOS: gfx/glpipeline is compiled (see WF_DIRS), so its eight rend*.cc give
+# the real RenderObject3D::RenderPoly3D* methods and backend_factory.cc picks
+# Metal via a WF_TARGET_IOS #ifdef.
 if(IOS)
-    list(APPEND WF_SOURCES
-        ${STUB_SRC}/renderpoly3d_stubs.cc
-        ${SRC}/gfx/glpipeline/backend_factory.cc
-    )
+    # Nothing extra since Phase 2C-B: gfx/glpipeline is in WF_DIRS (above), so
+    # its eight rend*.cc define RenderObject3D::RenderPoly3D* for real and the
+    # glob picks up backend_factory.cc — listing either here, or keeping
+    # renderpoly3d_stubs.cc, would be a duplicate-symbol link error.
 elseif(APPLE)
     # macOS desktop — Phase 1: real geometry, no-op backend. renderpoly3d_stubs.cc
     # is GONE from this list — gfx/glpipeline's eight rend*.cc (now in WF_DIRS)

@@ -24,6 +24,27 @@ android {
         }
     }
 
+    // One app per game, all from the same native library and Java glue
+    // (docs/plans/2026-09-30-aquarium-chromecast.md). A flavor differs only in
+    // its applicationId (so the apps install side by side), its assets/cd.iff
+    // (src/<flavor>/assets/) and its launcher label, icons and TV banner
+    // (src/<flavor>/res/ overriding src/main/res/). The native build config is
+    // identical across flavors, so AGP configures and compiles CMake once per
+    // build type and every flavor packages the same libwf_game.so.
+    flavorDimensions += "game"
+    productFlavors {
+        create("snowgoons") {
+            dimension = "game"
+            // The original app: keeps the pre-flavor applicationId, label,
+            // icon, banner (src/main/res) and the multi-level cd.iff.
+        }
+        create("aquarium") {
+            dimension = "game"
+            applicationIdSuffix = ".aquarium"   // org.worldfoundry.wf_game.aquarium
+            versionNameSuffix   = "-aquarium"
+        }
+    }
+
     externalNativeBuild {
         cmake {
             path = file("../../CMakeLists.txt")
@@ -73,19 +94,25 @@ android {
         }
     }
 
-    // Override the AGP default (app-debug.apk) so the file uploaded to Drive
-    // and downloaded on the phone shows up as "worldfoundry-debug.apk".
+    // Override the AGP default (app-<flavor>-debug.apk) so the file uploaded to
+    // Drive and downloaded on the phone shows up as, e.g.,
+    // "worldfoundry-aquarium-debug.apk" (in apk/<flavor>/<buildType>/).
     applicationVariants.all {
         val variant = this
         outputs.all {
             (this as com.android.build.gradle.internal.api.BaseVariantOutputImpl)
-                .outputFileName = "worldfoundry-${variant.buildType.name}.apk"
+                .outputFileName = "worldfoundry-${variant.flavorName}-${variant.buildType.name}.apk"
         }
     }
 
-    // Asset pipeline (Phase 3 step 5): Gradle bundles src/main/assets/ into
-    // the APK. Transitional layout: three symlinks into wfsource/source/game/
-    // (cd.iff + level0.mid + florestan-subset.sf2) — the loose MIDI + soundfont
-    // are a dev shortcut. Real remediation is docs/plans/2026-04-18-audio-
-    // assets-from-iff.md: move audio inside cd.iff so only cd.iff ships.
+    // Asset pipeline (Phase 3 step 5): Gradle bundles src/<flavor>/assets/
+    // into that flavor's APK (src/main/assets/ is empty). Every asset is a
+    // symlink to a tracked file:
+    //   snowgoons: cd.iff → wfsource/source/game/cd.iff (task build-cd-iff),
+    //     plus level0.mid + florestan-subset.sf2 — the loose MIDI + soundfont
+    //     are a dev shortcut; the real remediation is docs/plans/2026-04-18-
+    //     audio-assets-from-iff.md (move audio inside cd.iff).
+    //   aquarium: cd.iff → wflevels/aquarium-cd.iff (task build-cd-iff-aquarium).
+    //     No MIDI or soundfont: the level has no music, and MusicPlayer::play
+    //     returns quietly when the soundfont asset is absent.
 }
