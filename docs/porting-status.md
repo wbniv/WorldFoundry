@@ -12,7 +12,7 @@ run on that day, and each claim links to its evidence. **—** means not assesse
 | **macOS desktop** (Metal) | ✅ [build 6abd3923](https://codemagic.io/app/6aafa6886ab3f21cf431a6cb/build/6abd3923a7c72c2289f7506c) | ✅ window, close paths, fullscreen | ✅ pixel-matches Linux | 🟡 keyboard ✅, ⌘Q ✅, red button ✅, Esc not provable in CI | ⬜ no Mac owned; Retina untested |
 | **iOS, iPhone and iPad** (Metal) | ✅ ([build](https://codemagic.io/app/6aafa6886ab3f21cf431a6cb/build/6abd4a709ee70f86b0ffeff6)) | ✅ installs, launches and stays alive in the iPhone and iPad simulators | ✅ the game and the aquarium, in both simulators | ⬜ touch not implemented yet | ⬜ needs the $99 Apple account |
 | **Android phone and tablet** (GLES 3) | ✅ [build 6abd1529](https://codemagic.io/app/6aafa6886ab3f21cf431a6cb/build/6abd1529669c35dd0f161d7a) (was broken 09‑21 to 09‑30, fixed) | ✅ the aquarium app runs in an Android emulator on this PC (x86_64 with ARM translation, software graphics) | ✅ in the emulator | 🟡 the on-screen touch D-pad and A/B buttons are drawn; not exercised | ⬜ never on a real phone |
-| **Chromecast with Google TV** (same APK) | ✅ aquarium app [build 6abd1c20](https://codemagic.io/app/6aafa6886ab3f21cf431a6cb/build/6abd1c20874cdae673caf7ae) | 🟡 runs in a TV-shaped (1920×1080) emulator; not a real Chromecast | 🟡 in the emulator | ⬜ gamepad profile ready, not exercised | ⬜ needs the device's IP address |
+| **Chromecast with Google TV** (same APK) | ✅ aquarium app [build 6abd1c20](https://codemagic.io/app/6aafa6886ab3f21cf431a6cb/build/6abd1c20874cdae673caf7ae) | ⬜ not run on a Chromecast (the TV-shaped emulator below is an Android test and does not count here) | ⬜ | ⬜ gamepad profile ready, not exercised | ⬜ needs the device's IP address |
 
 ## The aquarium on each platform
 
@@ -46,7 +46,7 @@ real-time play. The same level file and the same flags on every platform.
 | <img src="porting-status/ios-aquarium-iphone.png" width="200"> | <img src="porting-status/ios-aquarium-ipad.png" width="320"> |
 | The aquarium-only `cd.iff` in the iOS simulator ([CI run](https://codemagic.io/app/6aafa6886ab3f21cf431a6cb/build/6abd4f31103ed7df74f88df3), scripted, no input). **Rotated 90°:** the level is landscape and the app is landscape-only, but the screenshot was taken with the simulator in portrait. | Same on the iPad: the landscape frame sits letterboxed inside the portrait screen. Simulator only, not a real device. |
 
-| Android emulator, TV-shaped (1920×1080) |
+| Android emulator, TV-shaped screen (1920×1080) |
 |---|
 | <img src="porting-status/android-emulator-tv.png" width="420"> |
 | The aquarium app in an Android emulator on this PC: x86_64 image with ARM translation, software graphics, scripted launch, no input. The D-pad and A/B in the corners are the touch overlay. About 0.4 s per frame in this setup, which says nothing about a Chromecast. **Not a real device.** |
