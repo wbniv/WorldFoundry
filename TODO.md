@@ -378,6 +378,7 @@ _Auto-added from plan "Out of scope"/"Deferred" sections at commit time. Triage 
 - [ ] **(triage)** **Changing `WORLD_SCALE`** or the engine's fixed limits (decided 2026‑09‑30). — _from [2026-09-30-aquarium-platforms.md](docs/plans/2026-09-30-aquarium-platforms.md)_  <!-- fp:e6e06cfbf2275f98 -->
 - [ ] **(triage)** **macOS close paths** (⌘Q, red button, Retina, `-fullscreen`): stay under the macOS Metal renderer item in `TODO.md`. — _from [2026-09-30-aquarium-platforms.md](docs/plans/2026-09-30-aquarium-platforms.md)_  <!-- fp:ccfb790dafc1e941 -->
 - [ ] **(triage)** **Restoring texture alpha** (translucent front pane): its own `TODO.md` item. — _from [2026-09-30-aquarium-platforms.md](docs/plans/2026-09-30-aquarium-platforms.md)_  <!-- fp:09c4e8b813280bea -->
+- [verify] **2026-09-30-ios-ci-revival** — Verification section present but no PASS recorded — run + record the steps. _from [2026-09-30-ios-ci-revival.md](docs/plans/2026-09-30-ios-ci-revival.md)_  <!-- fp:4257e8581a6c5b8f -->
 <!-- END auto-captured-deferrals -->
 
 - [x] Implemented Forth-only condo camera inspection controls; desktop/touch input regressions passed. [Plan and mockups](docs/plans/2026-09-25-condo-camera-controls.md)
