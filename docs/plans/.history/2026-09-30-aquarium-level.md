@@ -1,9 +1,15 @@
 | Date | Change |
 |------|--------|
+| [2026-09-30](https://github.com/wbniv/WorldFoundry/commit/4e5ce347) | Aquarium: go with Plan B (no front pane); file translucent-texture shader fix as its own TODO |
 | [2026-09-30](https://github.com/wbniv/WorldFoundry/commit/1aa8e779) | Run aquarium Phase 0 translucency spike: pane is opaque, fall back to Plan B |
 | [2026-09-30](https://github.com/wbniv/WorldFoundry/commit/f964a400) | Plan aquarium level (55 gal acrylic, clownfish, anemone) and correct condo alpha note |
 
 <!--history-meta v1
+4e5ce347	author	Will Norris
+4e5ce347	added	3
+4e5ce347	deleted	3
+4e5ce347	files	1
+4e5ce347	body	Will chose Plan B after the Phase 0 spike showed the GL/Metal fragment shader\ndiscards texture alpha. Mockups updated to drop the translucent pane. Plan A\nbecomes a separate T4 item (restore alpha in both backends + capture sweep).\n\nCo-Authored-By: Claude Sonnet 5.5 <noreply@anthropic.com>\nClaude-Session: https://claude.ai/code/session_0148itHvh6GL5Qc7uwSjFC2n
 1aa8e779	author	Will Norris
 1aa8e779	added	188
 1aa8e779	deleted	4
