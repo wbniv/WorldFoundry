@@ -372,6 +372,32 @@ workflows:
           if [ -n "${IPHONE_ID:-}" ]; then run_device iphone "$IPHONE_ID" "$IPHONE_NAME"; fi
           if [ -n "${IPAD_ID:-}" ]; then run_device ipad "$IPAD_ID" "$IPAD_NAME"; fi
 
+          # Aquarium screenshots — informational, never part of the verdict or
+          # exit code. A COPY of the built .app gets wflevels/aquarium-cd.iff
+          # in place of its cd.iff (the default bundle is untouched; the
+          # simulator build is unsigned, so no re-sign). Same checks as above;
+          # set WF_IOS_AQUARIUM=0 to skip (about 1 Mac-minute).
+          AQ_IFF="$CM_BUILD_DIR/wflevels/aquarium-cd.iff"
+          if [ "${WF_IOS_AQUARIUM:-1}" != 0 ] && [ -f "$AQ_IFF" ]; then
+            rm -rf "$CM_BUILD_DIR/aquarium-app"; mkdir -p "$CM_BUILD_DIR/aquarium-app"
+            AQ_APP="$CM_BUILD_DIR/aquarium-app/wf_game.app"
+            cp -R "$APP" "$AQ_APP"
+            find "$AQ_APP" -name cd.iff > aquarium-cdiff.txt || true
+            echo "aquarium: replacing $(wc -l < aquarium-cdiff.txt) cd.iff in the copy"
+            while IFS= read -r f; do cp "$AQ_IFF" "$f"; done < aquarium-cdiff.txt
+            DEFAULT_APP="$APP"; APP="$AQ_APP"
+            if [ -n "${IPHONE_ID:-}" ]; then run_device aquarium-iphone "$IPHONE_ID" "$IPHONE_NAME"; fi
+            if [ -n "${IPAD_ID:-}" ]; then run_device aquarium-ipad "$IPAD_ID" "$IPAD_NAME"; fi
+            APP="$DEFAULT_APP"
+            for d in iphone ipad; do
+              if [ -s "ios-aquarium-$d-screenshot.png" ]; then
+                mv "ios-aquarium-$d-screenshot.png" "ios-aquarium-$d.png"
+              fi
+            done
+          else
+            echo "aquarium: skipped (WF_IOS_AQUARIUM=${WF_IOS_AQUARIUM:-1}, $AQ_IFF present: $([ -f "$AQ_IFF" ] && echo yes || echo no))"
+          fi
+
           echo "=== iOS simulator verdict (runtime ${RUNTIME:-none}) ==="
           rc=0
           for label in iphone ipad; do
@@ -391,6 +417,21 @@ workflows:
               echo "IOS $upper: FAIL"; rc=1
             fi
           done
+          for label in aquarium-iphone aquarium-ipad; do
+            line=$(grep "^$label|" "$VERDICT" || true)
+            [ -n "$line" ] || continue
+            upper=$(echo "$label" | tr '[:lower:]-' '[:upper:] ')
+            IFS='|' read -r _ name install launch alive colours dominant <<EOF
+          $line
+          EOF
+            echo "$label: $name install=$install launch=$launch alive_after_20s=$alive centre_colours=$colours dominant_pct=${dominant:-100}"
+            if [ "$install" = yes ] && [ "$launch" = yes ] && [ "$alive" = yes ] \
+               && [ "${colours:-0}" -gt 50 ] 2>/dev/null; then
+              echo "IOS $upper: OK (informational)"
+            else
+              echo "IOS $upper: FAIL (informational)"
+            fi
+          done
           exit "$rc"
 
     artifacts:
@@ -399,6 +440,9 @@ workflows:
       - xcodebuild.log
       - ios-iphone-screenshot.png
       - ios-ipad-screenshot.png
+      - ios-aquarium-iphone.png
+      - ios-aquarium-ipad.png
+      - ios-aquarium-*-launch.log
       - ios-iphone-launch.log
       - ios-ipad-launch.log
       - ios-crash-*

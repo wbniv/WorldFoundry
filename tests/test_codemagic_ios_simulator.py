@@ -130,7 +130,7 @@ def _exe(path, body):
 
 
 def _run(wf, tmp_path, ipad=True, blank_udid='', launch_fail=False, app=True, devices=None,
-         blank_fn=lambda x, y: (0, 0, 0)):
+         blank_fn=lambda x, y: (0, 0, 0), aquarium=False):
     build = tmp_path / 'build'
     stubs = tmp_path / 'stubs'
     build.mkdir()
@@ -138,6 +138,10 @@ def _run(wf, tmp_path, ipad=True, blank_udid='', launch_fail=False, app=True, de
     os.symlink(os.path.join(REPO, 'tests'), build / 'tests')
     if app:
         (build / 'engine/Debug-iphonesimulator/wf_game.app').mkdir(parents=True)
+        (build / 'engine/Debug-iphonesimulator/wf_game.app/cd.iff').write_bytes(b'DEFAULT')
+    if aquarium:
+        (build / 'wflevels').mkdir()
+        (build / 'wflevels/aquarium-cd.iff').write_bytes(b'AQUARIUM')
     (tmp_path / 'devices.json').write_text(devices or DEVICES_JSON % (IPAD if ipad else
         '{"udid": "PHONE-2", "name": "iPhone SE", "isAvailable": true}'))
     (tmp_path / 'shot.png').write_bytes(_png(40, 40, lambda x, y: (x * 6, y * 6, 90)))
@@ -210,6 +214,25 @@ def test_alive_window_outlasts_coreaudio_abort(wf):
     assert 'sleep 20' in script and 'sleep 8' not in script
     assert 'alive_after_20s' in script
     assert '-gt 50' in script and '-gt 1 ' not in script
+
+
+def test_aquarium_pass_is_informational_and_leaves_default_bundle(wf, tmp_path):
+    r, build, calls = _run(wf, tmp_path, aquarium=True, blank_udid='PAD-1')
+    out = r.stdout
+    # default verdict unchanged; aquarium iPad (blank) FAIL does not add to the exit code
+    assert 'IOS IPHONE: OK' in out and 'IOS IPAD: FAIL' in out
+    assert 'IOS AQUARIUM IPHONE: OK (informational)' in out, out + r.stderr
+    assert 'IOS AQUARIUM IPAD: FAIL (informational)' in out
+    assert (build / 'ios-aquarium-iphone.png').exists() and (build / 'ios-aquarium-ipad.png').exists()
+    assert (build / 'engine/Debug-iphonesimulator/wf_game.app/cd.iff').read_bytes() == b'DEFAULT'
+    assert (build / 'aquarium-app/wf_game.app/cd.iff').read_bytes() == b'AQUARIUM'
+    assert 'install PHONE-1 ' + str(build / 'aquarium-app/wf_game.app') in calls
+
+
+def test_aquarium_pass_skipped_without_level_file(wf, tmp_path):
+    r, build, _ = _run(wf, tmp_path)
+    assert 'aquarium: skipped' in r.stdout and 'IOS AQUARIUM' not in r.stdout
+    assert r.returncode == 0
 
 
 def test_no_ipad_runtime_fails_ipad_and_prints_list(wf, tmp_path):
