@@ -112,6 +112,25 @@ Display::RenderEnd()
 
 //==============================================================================
 
+// Time since the last call, advancing `last`; shared by PageFlip and MeasureDelta.
+static Scalar
+MeasureAndAdvance(struct timeval& last)
+{
+    struct timeval tvNow;
+    gettimeofday(&tvNow, nullptr);
+
+    struct timeval delta;
+    delta.tv_sec  = tvNow.tv_sec  - last.tv_sec;
+    delta.tv_usec = tvNow.tv_usec - last.tv_usec;
+    if (delta.tv_usec < 0) {
+        delta.tv_usec += 1000000;
+        --delta.tv_sec;
+    }
+
+    last = tvNow;
+    return ConvertTimeToScalar(delta);
+}
+
 Scalar
 Display::PageFlip()
 {
@@ -119,20 +138,15 @@ Display::PageFlip()
     // the measured deltaTime. Phase 2C-B swaps this for a semaphore wait
     // signaled by the main-thread CADisplayLink callback.
     usleep(16000);
+    return MeasureAndAdvance(_clockLastTime);
+}
 
-    struct timeval tvNow;
-    gettimeofday(&tvNow, nullptr);
-
-    struct timeval delta;
-    delta.tv_sec  = tvNow.tv_sec  - _clockLastTime.tv_sec;
-    delta.tv_usec = tvNow.tv_usec - _clockLastTime.tv_usec;
-    if (delta.tv_usec < 0) {
-        delta.tv_usec += 1000000;
-        --delta.tv_sec;
-    }
-
-    _clockLastTime = tvNow;
-    return ConvertTimeToScalar(delta);
+// Same delta PageFlip returns, without the sleep or a swap: WFGame::StepFrame
+// (the stepped/`-rate` path) calls it on every platform, so iOS must define it.
+Scalar
+Display::MeasureDelta()
+{
+    return MeasureAndAdvance(_clockLastTime);
 }
 
 //==============================================================================

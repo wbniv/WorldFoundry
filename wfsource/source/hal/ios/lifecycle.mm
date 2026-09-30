@@ -37,6 +37,20 @@ HALIsSuspended(void)
     return g_suspended.load(std::memory_order_acquire) ? 1 : 0;
 }
 
+// An iOS app has no window-close button (the user leaves via the home gesture,
+// which arrives as the suspend callbacks above). These stubs satisfy the shared
+// main loop (game.cc, main.cc), exactly as hal/android/lifecycle.cc does.
+extern "C" int
+HALWindowCloseRequested(void)
+{
+    return 0;
+}
+
+extern "C" void
+HALCloseWindow(void)
+{
+}
+
 // Phase 3 will drive this from the CADisplayLink / UIApplication run loop so
 // queued events reach their handlers on resume. For Phase 1 there's nothing
 // to pump — the game loop isn't running yet.
