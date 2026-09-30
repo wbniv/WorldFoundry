@@ -19,8 +19,10 @@ android {
         versionName   = "0.1"
 
         ndk {
-            // arm64 only — the port plan's settled decision.
-            abiFilters += setOf("arm64-v8a")
+            // arm64 for phones and the Chromecast 4K, armeabi-v7a for the Chromecast HD: its SoC
+            // (Amlogic S805X2) runs a 32-bit-only Android build (adb: ABIs armeabi-v7a,armeabi),
+            // so an arm64-only APK cannot even be installed there (verified 2026-10-01).
+            abiFilters += setOf("arm64-v8a", "armeabi-v7a")
         }
     }
 
