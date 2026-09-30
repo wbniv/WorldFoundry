@@ -18,7 +18,9 @@ What it holds
   ``clownfish-dorsal``, ``clownfish-pec-near``, ``clownfish-pec-far``. Flat-colour
   materials only, one material per colour, shared across parts (``COLOURS``).
 * Scale: ``FISH_REAL_LENGTH_M`` (an ocellaris, 3.5 in) × ``world_scale``. The aquarium
-  plan authors at ``WORLD_SCALE = 10`` → 0.89 m; pass ``world_scale=1`` for ×1.
+  plan authors at ``WORLD_SCALE = 10`` → 0.889 m; pass ``world_scale=1`` for ×1. Both
+  numbers come from ``aquarium_constants.py`` (``FISH_LEN``, ``WORLD_SCALE``), the one
+  source for the tank table.
   Every length tunable scales with it; angles and frequencies do not.
 * Every animation tunable, the fish's global mailboxes (600..639), and the Forth:
   ``clownfish_idle.fth`` plus a generated constants header (``Clownfish.forth_header``).
@@ -57,6 +59,7 @@ Plan: docs/plans/2026-09-30-clownfish-idle-animation.md
 
 from __future__ import annotations
 
+import importlib.util
 import math
 import os
 
@@ -64,8 +67,16 @@ HERE = os.path.dirname(os.path.abspath(__file__))
 FORTH_PATH = os.path.join(HERE, 'clownfish_idle.fth')
 OAD_DIR = os.path.normpath(os.path.join(HERE, '..', '..', 'wftools', 'wf_oad', 'tests', 'fixtures'))
 
-FISH_REAL_LENGTH_M = 0.089       # ocellaris, 3.5 in; × WORLD_SCALE 10 = 0.89 m
-DEFAULT_WORLD_SCALE = 10         # aquarium plan § "Scale decision"
+# The tank table (aquarium_constants.py) is the single source for the scale and the fish's
+# real length. Loaded by path under a private name, so a caller that has another module called
+# `aquarium_constants` on sys.path (the Phase 1 swim spike has one) cannot shadow it.
+_spec = importlib.util.spec_from_file_location('_aquarium_tank_constants',
+                                               os.path.join(HERE, 'aquarium_constants.py'))
+_TANK = importlib.util.module_from_spec(_spec)
+_spec.loader.exec_module(_TANK)
+
+FISH_REAL_LENGTH_M = _TANK.FISH_LEN * _TANK.IN   # ocellaris, 3.5 in = 0.0889 m; × WORLD_SCALE 10 = 0.889 m
+DEFAULT_WORLD_SCALE = _TANK.WORLD_SCALE          # aquarium plan § "Scale decision" (10)
 REAL_HALF_THICKNESS_M = 0.010    # → 0.2 m through the widest point at ×10, tapered
 
 # ── Outline, in mockup drawing units (x forward, y DOWN: negative y = dorsal) ──
@@ -274,7 +285,7 @@ def _band_colour(x):
 
 
 class Clownfish:
-    """The canonical clownfish at one world scale (default ×10 → 0.89 m)."""
+    """The canonical clownfish at one world scale (default ×10 → 0.889 m)."""
 
     def __init__(self, world_scale=DEFAULT_WORLD_SCALE):
         self.world_scale = float(world_scale)
@@ -475,14 +486,19 @@ class Clownfish:
         with open(FORTH_PATH) as f:
             return self.forth_header(actor_indices, player_index) + f.read()
 
-    def player_script(self, actor_indices, player_index, extra=''):
-        """Complete `wf_Script` for the Physics Player."""
-        return ('\\ wf\n' + self.forth_library(actor_indices, player_index) + extra
-                + f'\n{ENTRY_PLAYER}\n')
+    # The zForth host compiles everything up to the script's LAST `;` once, at load, and runs
+    # only what follows it every tick (engine/stubs/scripting_zforth.cc). So extra word
+    # definitions go in `defs` (before the entry call); `extra` must hold calls only.
+    def player_script(self, actor_indices, player_index, extra='', defs='', entry=ENTRY_PLAYER):
+        """Complete `wf_Script` for the Physics Player. A level with its own swim controller
+        passes its words in `defs` and its tick word as `entry` (it replaces fish-swim-tick)."""
+        return ('\\ wf\n' + self.forth_library(actor_indices, player_index) + defs
+                + f'\n{entry}\n' + extra)
 
-    def director_script(self, actor_indices, player_index, extra=''):
-        """Complete `wf_Script` for the Director (append other Director clauses via `extra`)."""
-        return ('\\ wf\n' + self.forth_library(actor_indices, player_index)
+    def director_script(self, actor_indices, player_index, extra='', defs=''):
+        """Complete `wf_Script` for the Director: `defs` (definitions), then `fish-rig-tick`,
+        then `extra` (calls only)."""
+        return ('\\ wf\n' + self.forth_library(actor_indices, player_index) + defs
                 + f'\n{ENTRY_DIRECTOR}\n' + extra)
 
     # ---- Blender -----------------------------------------------------------

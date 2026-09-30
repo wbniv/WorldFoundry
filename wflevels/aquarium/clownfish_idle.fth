@@ -14,7 +14,8 @@
 \   ( moving? ) fish-idle-sense   and   fish-turn   itself.
 \
 \ The Player is an invisible collision hull. The five visible parts are Mass-0
-\ statplats placed here each tick; nothing below writes the Player's position,
+\ anchored platforms (never statplats: every statplat gets a Jolt body) placed
+\ here each tick; nothing below writes the Player's position,
 \ so the idle motion cannot move the physics body.
 \ Plan: docs/plans/2026-09-30-clownfish-idle-animation.md
 

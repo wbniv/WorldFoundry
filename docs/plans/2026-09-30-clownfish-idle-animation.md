@@ -121,7 +121,7 @@ change. A hovering clownfish is propelled by its pectorals, so they carry the mo
 | `PART_NAMES`, `ROLES`, `PLAYER_MESH`, `mesh_file(name)` | Actor and mesh names |
 | `ENTRY_PLAYER` = `fish-player-tick`, `ENTRY_DIRECTOR` = `fish-rig-tick` | The two Forth entry points |
 | `TUNABLES`, `PHYSICS`, `MAILBOXES`/`MB` (600–627), `COLOURS` | Every number, as constants |
-| `FISH_REAL_LENGTH_M` (0.089) × `world_scale`, `DEFAULT_WORLD_SCALE` 10 | 0.89 m at ×10 |
+| `FISH_REAL_LENGTH_M` × `world_scale`, `DEFAULT_WORLD_SCALE` 10 | 0.889 m at ×10. Since aquarium Phase 3 both come from `aquarium_constants.py` (`FISH_LEN` 3.5 in × `IN`, `WORLD_SCALE`); the spike used 0.089 m |
 | `MIN_COLLISION_SPAN_M` 0.25, `ENGINE_MIN_TRIANGLE_M2` 3.05e‑5 | Engine floors that the model is checked against |
 | `RigState`, `part_poses`, `rot_matrix` | A Python mirror of the tick maths, for mockups and reasoning |
 
@@ -145,10 +145,10 @@ defaults by `physics()` and `apply_player_fields()`:
   turns anyway.
 - The idle writes no speeds, positions or rotations on the Player, ever. It is net-zero by construction: step 4
   measured Player drift of 0.00000 m.
-- Clamps are the level's job. `extents()` at ×10 gives nose x +0.362, tail tip −0.528, dorsal top z +0.289, belly
+- Clamps are the level's job. `extents()` at ×10 gives nose x +0.361 (0.362 before aquarium Phase 3), tail tip −0.528, dorsal top z +0.289, belly
   −0.181 and half-width 0.110 (pectorals included), in metres from the body origin. Heading −0.5 mirrors x. The body
   origin is the **body centre**: a swimming fish is the documented exception to the base-at-z = 0 rule.
-- `apply_player_fields()` sets the Player's box to `collision_box()` = ±0.362 × ±0.125 × ±0.195 m. It is authored and
+- `apply_player_fields()` sets the Player's box to `collision_box()` = ±0.361 × ±0.125 × ±0.195 m. It is authored and
   symmetric, and every side is ≥ 0.25 m, so levcomp's thin-span rule leaves it alone and the capsule is centred
   (`ctr=(0.00,0.00,0.00)` in step 2). The capsule radius is 0.125.
 - The mesh is ×10 only. Its smallest triangle (the pupil) is 7.45e‑5 m², 2.4 × the engine floor. At ×1 it would be

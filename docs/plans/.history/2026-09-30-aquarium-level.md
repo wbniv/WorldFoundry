@@ -1,5 +1,6 @@
 | Date | Change |
 |------|--------|
+| [2026-09-30](https://github.com/wbniv/WorldFoundry/commit/68499439) | Aquarium Phase 2: tank, sand, rock, anemone, lighting, fog (static scene, placeholder fish) |
 | [2026-09-30](https://github.com/wbniv/WorldFoundry/commit/52a5bfe6) | Aquarium plan: Player is an invisible collision hull; visible clownfish is five Director-posed parts |
 | [2026-09-30](https://github.com/wbniv/WorldFoundry/commit/6d902226) | Run aquarium Phase 1 swim-and-scale spike: gravity-free fish works at x10 |
 | [2026-09-30](https://github.com/wbniv/WorldFoundry/commit/2b485281) | Aquarium: idle-spike clownfish becomes the canonical model; commit mockup generator |
@@ -8,6 +9,11 @@
 | [2026-09-30](https://github.com/wbniv/WorldFoundry/commit/f964a400) | Plan aquarium level (55 gal acrylic, clownfish, anemone) and correct condo alpha note |
 
 <!--history-meta v1
+68499439	author	Will Norris
+68499439	added	180
+68499439	deleted	20
+68499439	files	1
+68499439	body	New level wflevels/aquarium/ at WORLD_SCALE 10, Plan B (no front pane, nothing translucent):\none-piece tank-shell with water/water-line/air inner faces, invisible front collider, chamfered\nrim, faceted sand, low-poly rock, static bubble-tip anemone with back/front tentacle sets\n(+-0.36 m gap, verified the fish passes between them untouched), anemone-zone target, stand and\nbackdrop, Directional + cool Ambient, teal fog 6->40 m, locked camshot A at y -11 m.\nPlaceholder Player (Phase 1 fish, recentred, authored symmetric bbox, X/Z clamps) marked\n"# PHASE 3: replace with wflevels/aquarium/clownfish.py".\n\nAdds aquarium_constants.py, aquarium.md, run_aquarium_checks.py (frame A + walls over the\nbridge, reusing the swim spike's Session, flags desktop-input contamination), Taskfile\naquarium-level / run-aquarium, tests/test_aquarium_level.py (regression guard, Plan B form).\nPlan: verification steps 9, 10, 11, 13 recorded (all PASS), Phase 2 verdict, actor/files tables.\n\nCo-Authored-By: Claude Opus 5.5 <noreply@anthropic.com>\nClaude-Session: https://claude.ai/code/session_0148itHvh6GL5Qc7uwSjFC2n
 52a5bfe6	author	Will Norris
 52a5bfe6	added	20
 52a5bfe6	deleted	8

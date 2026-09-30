@@ -6,7 +6,8 @@ and tests/test_aquarium_level.py, so the docs, the level and the test cannot dri
 
 Every level-space length is `inches × IN × WORLD_SCALE`. WORLD_SCALE is one constant:
 Phase 1 (wflevels/aquarium_swim_spike/) measured ×1 and ×10 and ×10 won, so this is
-not an env override any more.
+not an env override any more. clownfish.py takes WORLD_SCALE and FISH_LEN from here
+(its DEFAULT_WORLD_SCALE and FISH_REAL_LENGTH_M), so the fish and the tank agree.
 
 Run it to print the table: python3 wflevels/aquarium/aquarium_constants.py
 """
@@ -61,6 +62,26 @@ FOG_COMPLETE = 4.0 * WORLD_SCALE                        # 40 m at ×10
 # ── Camshot A: locked, straight-on from outside the front, whole tank in frame ─
 CAM_A_POS = (0.0, -1.1 * WORLD_SCALE, EXT_Z_M / 2)      # y −11 m at ×10
 CAM_A_LOOK = (0.0, 0.0, EXT_Z_M / 2)                    # the tank's centre
+
+# ── Camshot B: the anemone close-up (Phase 3), outside the front glass like A. The
+#    Camera actor's bbox (CAMERA_HALF) must stay clear of every place the fish's box can
+#    reach, or the bungee camera "collides" with the Mass-1 Player and climbs.
+CAM_B_POS = (ANEMONE_X, -0.22 * WORLD_SCALE, 0.175 * WORLD_SCALE)   # tuned from captures (plan § Phase 3)
+CAM_B_LOOK = (ANEMONE_X, ANEMONE_Y, 0.162 * WORLD_SCALE)            # LookB's rest point (anemone column)
+CAM_B_LOOK_FOLLOW = 0.35                                # share of (fish − look) LookB leans toward the fish
+CAMERA_HALF = 0.02 * WORLD_SCALE                        # Camera actor bbox half-size (0.2 m at ×10)
+ANEMONE_ZONE_HYST = 0.03 * WORLD_SCALE                  # leave B only 0.3 m past the entry radius
+
+# ── Controls (Phase 1, measured on the placeholder; re-validated in Phase 3 step 15) ─────
+SWIM_SPEED = m(12.0)                                    # 12 in/s × scale = 3.048 m/s written while held
+DART_SPEED = 2 * SWIM_SPEED                             # 6.096 = Max Air Speed (AirHandler caps to it)
+DART_TIME = 0.15                                        # s of burst (3 ticks at 20 Hz), then the glide
+CLAMP_MARGIN = m(0.25)                                  # keep the visible fish 0.25 in off a wall / the water line
+# Jolt's CharacterVirtual counts any contact within its padding (0.02 m) + predictive contact
+# distance (0.1 m) under the capsule as floor (OnGround → MarbleHandler, walk-stairs, stick-to-
+# floor). The floor clamp keeps the capsule this far over the sand so the fish is never "standing".
+# Jolt's constants are absolute metres, so this does not scale with WORLD_SCALE.
+GROUND_CLEARANCE = 0.15
 
 if __name__ == '__main__':
     print(f'WORLD_SCALE={WORLD_SCALE}: exterior {EXT_X_M:.3f} × {EXT_Y_M:.3f} × {EXT_Z_M:.3f} m, '
