@@ -178,8 +178,14 @@ soc="$(prop ro.soc.model)"; [[ -n "$soc" ]] || soc="$(prop ro.board.platform)"
 size="$("${A[@]}" shell wm size 2>/dev/null | tr -d '\r' | tail -1)"
 uimode="$("${A[@]}" shell dumpsys uimode 2>/dev/null | tr -d '\r' | grep -m1 -o 'mCurUiMode=0x[0-9a-f]*' || true)"
 result INFO "model '$model', SoC '$soc', API $sdk, ABIs $abis, $size, $uimode"
-[[ ",$abis," == *",arm64-v8a,"* ]] || die "the device has no arm64-v8a ABI ($abis); the APK is arm64-only" \
-    "this device cannot run it"
+# The APK's native ABIs (lib/<abi>/) must overlap the device's. The Chromecast HD is armeabi-v7a only
+# (Amlogic S805X2, 32-bit Android), the Chromecast 4K and phones are arm64-v8a.
+apk_abis="$(unzip -l "$APK" | grep -o 'lib/[A-Za-z0-9_-]*/' | cut -d/ -f2 | sort -u | tr '\n' ' ')"
+match=""
+for a in $apk_abis; do [[ ",$abis," == *",$a,"* ]] && match="$match$a "; done
+result INFO "APK ABIs: ${apk_abis:-none}; usable on this device: ${match:-none}"
+[[ -n "$match" ]] || die "the APK has no native ABI this device supports (APK: ${apk_abis:-none}; device: $abis)" \
+    "build the missing ABI (android/app/build.gradle.kts abiFilters) and re-run"
 
 # ---- install + launch -------------------------------------------------------------------
 say "installing $APK ($(stat -c%s "$APK") bytes)"
@@ -188,7 +194,7 @@ if ! out="$("${A[@]}" install -r "$APK" 2>&1)"; then
     case "$out" in
         *INSTALL_FAILED_UPDATE_INCOMPATIBLE*) die "install failed: signature differs from the installed $PKG" \
             "$ADB -s $TARGET uninstall $PKG   (drops the app's data), then re-run" ;;
-        *INSTALL_FAILED_NO_MATCHING_ABIS*) die "install failed: no matching ABI (the APK is arm64-v8a only)" ;;
+        *INSTALL_FAILED_NO_MATCHING_ABIS*) die "install failed: no matching ABI (APK: ${apk_abis:-none}; device: $abis)" ;;
         *INSTALL_FAILED_INSUFFICIENT_STORAGE*) die "install failed: not enough storage" \
             "free space on the device (Settings → System → Storage), then re-run" ;;
         *INSTALL_FAILED_OLDER_SDK*) die "install failed: device API $sdk is below the APK's minSdk" ;;

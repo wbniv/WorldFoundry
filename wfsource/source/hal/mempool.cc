@@ -29,7 +29,11 @@ SMemPool*
 MemPoolConstruct(size_t size,int entries,Memory& memory)
 {
 	assert(size);
-	AssertMsg((size % WF_POINTER_ALIGN) == 0,"MemPool entry size must be a multiple of " << WF_POINTER_ALIGN << " bytes, got " << size);
+	// Every entry must start WF_POINTER_ALIGN-aligned. Callers pass sizeof(T); on 64-bit hosts that is already
+	// a multiple of 8, but on 32-bit ARM (WF_POINTER_ALIGN is 8 there) sizeof(SMsg) etc. are 20 bytes, which
+	// tripped the old "must be a multiple" assertion and aborted the Android armeabi-v7a build on the Chromecast HD.
+	// Round the entry size up instead: _size (and so the stride) is the rounded size, MemPoolAllocate rounds too.
+	size = ALIGN_POW2(size, WF_POINTER_ALIGN);
 	assert(entries);
 	assert(size >= sizeof(_MemPoolFreeEntry));				// make sure our free entry struct will fit
 
@@ -89,7 +93,7 @@ MemPoolAllocate(SMemPool* memPool, size_t size)
 	(void)size;
 //	printf("mempool = %x\n",memPool);
 	VALIDATEMEMPOOL(memPool);			// input validation
-	assert(size == memPool->_size);
+	assert(ALIGN_POW2(size, WF_POINTER_ALIGN) == memPool->_size);	// _size is the rounded entry size
 	AssertMsg( memPool->_currentEntries < memPool->_maxEntries,"memPool->_currentEntries=" << memPool->_currentEntries << " memPool->_maxEntries=" << memPool->_maxEntries );
 
 #if MEMPOOL_REALTRACKING

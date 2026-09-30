@@ -39,7 +39,7 @@ Android CI), not new HAL code.
 ## Prerequisites
 
 - Hardware: an Android phone for Phase 2; a Chromecast with Google TV for Phase 3
-  (Chromecast 4K gen 2 / HD gen 2 both work — arm64-v8a, API 29+)
+  (Chromecast 4K: arm64-v8a. **Chromecast HD: 32-bit only, armeabi-v7a** (verified on a real device 2026‑10‑01), so the APK needs both ABIs)
 - No code prerequisites; the Android port is the foundation
 
 ## Steps
