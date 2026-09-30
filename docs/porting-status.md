@@ -12,7 +12,7 @@ platform (real hardware, or real macOS/Linux), 🟡 partial or only in a simulat
 | **macOS desktop** (Metal) | ✅ [build 6abd3923](https://codemagic.io/app/6aafa6886ab3f21cf431a6cb/build/6abd3923a7c72c2289f7506c) | ✅ window, close paths, fullscreen | ✅ pixel-matches Linux | 🟡 keyboard ✅, ⌘Q ✅, red button ✅, Esc not provable in CI | ⬜ no Mac owned; Retina untested |
 | **iOS, iPhone and iPad** (Metal) | ✅ ([build](https://codemagic.io/app/6aafa6886ab3f21cf431a6cb/build/6abd4a709ee70f86b0ffeff6)) | 🟡 installs, launches and stays alive in the iPhone and iPad simulators (no real device) | 🟡 the game and the aquarium, in both simulators (no real device) | ⬜ touch not implemented yet | ⬜ needs the $99 Apple account |
 | **Android phone and tablet** (GLES 3) | ✅ [build 6abd1529](https://codemagic.io/app/6aafa6886ab3f21cf431a6cb/build/6abd1529669c35dd0f161d7a) (was broken 09‑21 to 09‑30, fixed) | 🟡 the aquarium app runs in an Android emulator on this PC (x86_64 with ARM translation, software graphics; no real phone) | 🟡 in the emulator | 🟡 the on-screen touch D-pad and A/B buttons are drawn; not exercised | ⬜ never on a real phone |
-| **Chromecast with Google TV** (same APK) | ✅ aquarium app ([CI build 6abd1c20](https://codemagic.io/app/6aafa6886ab3f21cf431a6cb/build/6abd1c20874cdae673caf7ae); 32-bit `armeabi-v7a` added 2026‑10‑01) | ✅ runs on a **real Chromecast HD**: alive after 30 s, no crashes (debug APK, about 2.5 frames per second) | ✅ the aquarium, on the TV | ✅ the remote's D-pad moves the fish; a gamepad is not tested | ✅ a real device (Chromecast HD, Amlogic S805X2, Android 14) |
+| **Chromecast with Google TV** (same APK) | ✅ aquarium app ([CI build 6abd1c20](https://codemagic.io/app/6aafa6886ab3f21cf431a6cb/build/6abd1c20874cdae673caf7ae); 32-bit `armeabi-v7a` added 2026‑10‑01) | ✅ runs on a **real Chromecast HD**: alive after 30 s, no crashes; the **release APK presents at 60 frames per second** (125 consecutive frames at 17 ms, locked to the TV's refresh), the debug APK only about 2.5 | ✅ the aquarium, on the TV | ✅ the remote's D-pad moves the fish; a gamepad is not tested | ✅ a real device (Chromecast HD, Amlogic S805X2, Android 14) |
 
 ## The aquarium on each platform
 
@@ -54,7 +54,7 @@ real-time play. The same level file and the same flags on every platform.
 | Real Chromecast HD: the aquarium after 30 s | Same, after the remote's D-pad was held RIGHT, then UP |
 |---|---|
 | <img src="porting-status/chromecast-hd-aquarium.png" width="420"> | <img src="porting-status/chromecast-hd-aquarium-after-dpad.png" width="420"> |
-| Screenshot taken on the device over adb (1920×1080). The debug APK draws at roughly 0.4 s per frame; a release build is being measured. | **The fish moved right and up:** the engine log shows its position going from (−1.600, 2.400) to (−0.725, 2.526). |
+| Screenshot taken on the device over adb (1920×1080). The debug APK draws at roughly 0.4 s per frame; the release APK presents at 60 fps (measured from SurfaceFlinger's real drawing layer). | **The fish moved right and up:** the engine log shows its position going from (−1.600, 2.400) to (−0.725, 2.526). |
 
 ## Details
 
@@ -74,7 +74,8 @@ real-time play. The same level file and the same flags on every platform.
 - Codemagic's free Mac machines cannot run an Android emulator ([no nested virtualization](https://docs.codemagic.io/yaml-testing/testing/)), so the emulator run was done locally on this PC (KVM).
 - **The Chromecast HD is 32-bit only** (`armeabi-v7a`, Amlogic S805X2 running Android 14), so the arm64-only APK could not even be installed: the Chromecast plan's assumption that the HD model takes arm64 was wrong (the 4K model is arm64). The APK now carries both ABIs.
 - The first ever 32-bit run exposed a memory-pool alignment assertion (entry sizes had to be multiples of 8; a message entry is 20 bytes on 32-bit). The pool now rounds entry sizes up. On 64-bit nothing changes.
-- **Open:** frame rate of a release build on the Chromecast, a gamepad, audio (silent stub), and a real phone.
+- The TV's screensaver starts after about 5 minutes idle and stops the app drawing, so device runs wake it first. Frame pace is read from SurfaceFlinger's drawing layer (the script's own probe used a wrong layer; fixed in the condo work).
+- **Open:** a gamepad, audio (silent stub), and a real phone.
 
 - The phone-shaped emulator also started the game and drew it (the tank frame and the touch overlay are visible), but its screenshot is covered by the emulator's own "System UI isn't responding" dialog, which software graphics under load can trigger, so it is not shown.
 
