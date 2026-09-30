@@ -214,10 +214,12 @@ workflows:
         # iPhone Simulator and then an iPad Simulator of the same iOS runtime
         # (TARGETED_DEVICE_FAMILY is "1,2"), launch it, and keep a screenshot
         # + launch log per device. A device is OK when install + launch
-        # succeed, the app is still alive 8 s later, and its screenshot is not
-        # one flat colour. Info.plist sets UIStatusBarHidden, so an app that
-        # draws nothing really is a single colour; the centre crop keeps the
-        # home indicator out of the count.
+        # succeed, the app is still alive 20 s later (the old CoreAudio abort
+        # hit at ~11 s, after an 8 s check had already passed), and the CENTRE
+        # CROP of its screenshot (middle 40% x 40%, downscaled to 240 px) has
+        # more than 50 distinct colours. A flat fill — clear colour, or the
+        # old cornflower blue with black letterbox bars that a whole-frame
+        # count mistook for a scene — is FAIL; a rendered scene is OK.
         script: |
           set -euo pipefail
           exec > >(tee -a "$CM_BUILD_DIR/cm-build.log") 2>&1
@@ -288,7 +290,7 @@ workflows:
             local log="$CM_BUILD_DIR/ios-$label-launch.log"
             local out="$CM_BUILD_DIR/ios-$label-stdout.tmp"
             local err="$CM_BUILD_DIR/ios-$label-stderr.tmp"
-            local install=no launch=no alive=no colours=0 pid="" launch_out=""
+            local install=no launch=no alive=no colours=0 dominant=100 pid="" launch_out=""
             local marker="$CM_BUILD_DIR/.ios-$label-start"
             touch "$marker"
             echo "=== $label: $name ($udid) ==="
@@ -296,7 +298,7 @@ workflows:
             xcrun simctl boot "$udid" || true
             if ! xcrun simctl bootstatus "$udid" -b; then
               echo "$label: boot failed"
-              echo "$label|$name|$install|$launch|$alive|$colours" >> "$VERDICT"
+              echo "$label|$name|$install|$launch|$alive|$colours|$dominant" >> "$VERDICT"
               return 0
             fi
             echo "--- install ---"
@@ -311,14 +313,15 @@ workflows:
               fi
             fi
             if [ "$launch" = yes ]; then
-              # 8 s: HALStart, cd.iff load and the first Metal frames.
-              sleep 8
+              # 20 s: HALStart, cd.iff load, steady-state frames, and well past
+              # the ~11 s at which the simulator CoreAudio RPC used to abort.
+              sleep 20
               # Simulator apps are host processes, so ps sees the launched pid.
               if ps -p "$pid" > /dev/null 2>&1; then alive=yes; fi
               echo "--- screenshot ---"
               xcrun simctl io "$udid" screenshot "$shot" || true
               if [ -s "$shot" ]; then
-                colours=$(python3 - "$shot" <<'PY' || echo 0
+                stats=$(python3 - "$shot" <<'PY' || echo "0 100"
           import os, subprocess, sys, tempfile
           sys.path.insert(0, "tests")
           from compare_renderer_frames import read_png   # no-dependency 8-bit PNG reader
@@ -326,16 +329,22 @@ workflows:
           subprocess.run(["sips", "-Z", "240", "-s", "format", "png", sys.argv[1], "--out", small],
                          check=True, stdout=subprocess.DEVNULL)
           w, h, px = read_png(small)
-          seen = {bytes(px[(y * w + x) * 3:(y * w + x) * 3 + 3])
-                  for y in range(h // 5, h - h // 5) for x in range(w // 5, w - w // 5)}
-          print(len(seen))
+          from collections import Counter
+          # Middle 40% x 40%: clear of letterbox bars, rounded corners and the
+          # home indicator on both iPhone and iPad.
+          c = Counter(bytes(px[(y * w + x) * 3:(y * w + x) * 3 + 3])
+                      for y in range(h * 3 // 10, h * 7 // 10)
+                      for x in range(w * 3 // 10, w * 7 // 10))
+          n = sum(c.values()) or 1
+          print(len(c), c.most_common(1)[0][1] * 100 // n if c else 100)
           PY
                 )
+                colours=${stats%% *}; dominant=${stats##* }
               fi
             fi
             {
               echo "=== $label: $name ($udid) on ${RUNTIME} ==="
-              echo "install=$install launch=$launch pid=${pid:-none} alive_after_8s=$alive centre_colours=$colours"
+              echo "install=$install launch=$launch pid=${pid:-none} alive_after_20s=$alive centre_colours=$colours dominant_pct=$dominant"
               echo "=== stdout ==="; cat "$out" 2>/dev/null || true
               echo "=== stderr ==="; cat "$err" 2>/dev/null || true
               echo "=== unified log (wf_game, last 2m) ==="
@@ -357,7 +366,7 @@ workflows:
             rm -f "$marker" "$marker.crashes"
             xcrun simctl terminate "$udid" "$BUNDLE_ID" 2>/dev/null || true
             xcrun simctl shutdown "$udid" || true
-            echo "$label|$name|$install|$launch|$alive|$colours" >> "$VERDICT"
+            echo "$label|$name|$install|$launch|$alive|$colours|$dominant" >> "$VERDICT"
           }
 
           if [ -n "${IPHONE_ID:-}" ]; then run_device iphone "$IPHONE_ID" "$IPHONE_NAME"; fi
@@ -371,12 +380,12 @@ workflows:
             if [ -z "$line" ]; then
               echo "IOS $upper: FAIL (no $label simulator available)"; rc=1; continue
             fi
-            IFS='|' read -r _ name install launch alive colours <<EOF
+            IFS='|' read -r _ name install launch alive colours dominant <<EOF
           $line
           EOF
-            echo "$label: $name install=$install launch=$launch alive=$alive centre_colours=$colours"
+            echo "$label: $name install=$install launch=$launch alive_after_20s=$alive centre_colours=$colours dominant_pct=${dominant:-100} (OK needs centre_colours > 50)"
             if [ "$install" = yes ] && [ "$launch" = yes ] && [ "$alive" = yes ] \
-               && [ "${colours:-0}" -gt 1 ] 2>/dev/null; then
+               && [ "${colours:-0}" -gt 50 ] 2>/dev/null; then
               echo "IOS $upper: OK"
             else
               echo "IOS $upper: FAIL"; rc=1

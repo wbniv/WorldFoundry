@@ -1059,3 +1059,135 @@ unsigned long TrianglesTotal()     { return sMetalBackend.TrianglesRunning(); }
 }  // namespace wf_metal
 
 #endif  // WF_TARGET_MACOS
+
+//=============================================================================
+// iOS: the CAMetalLayer path (Phase 2C-B). iOS-only, so macOS and Linux
+// compile exactly what they did before this block existed.
+//
+// Same encoder handoff as the macOS windowed path above, minus the
+// offscreen/readback machinery (MTLStorageModeManaged does not exist on iOS).
+// Called on the ENGINE thread (hal/ios/display_ios.cc RenderBegin/RenderEnd):
+// CAMetalLayer -nextDrawable and command-buffer submission are thread-safe,
+// so the engine renders and presents directly; the main-thread CADisplayLink
+// only paces it (hal/ios/metal_view.mm).
+//
+// The engine thread is a bare pthread with no run loop and therefore no
+// autorelease pool that ever drains. The drawable and command buffer are
+// autoreleased, so each frame runs inside its own pool — without it every
+// drawable would leak, the layer's pool of three would run dry, and
+// -nextDrawable would block for a second and return nil from frame four on.
+//=============================================================================
+
+#if defined(WF_TARGET_IOS)
+
+extern "C" void* objc_autoreleasePoolPush(void);
+extern "C" void  objc_autoreleasePoolPop(void* pool);
+
+namespace
+{
+id<MTLTexture>              sIosDepth     = nil;
+id<CAMetalDrawable>         sIosDrawable  = nil;
+id<MTLCommandBuffer>        sIosCmd       = nil;
+id<MTLRenderCommandEncoder> sIosEnc       = nil;
+void*                       sIosPool      = nullptr;
+unsigned long               sIosPresented = 0;
+
+bool IosEnsureDepth(NSUInteger w, NSUInteger h)
+{
+    if (sIosDepth && [sIosDepth width] == w && [sIosDepth height] == h)
+        return true;
+    MTLTextureDescriptor* dd = [MTLTextureDescriptor
+        texture2DDescriptorWithPixelFormat:kDepthFormat
+                                     width:w height:h mipmapped:NO];
+    dd.usage       = MTLTextureUsageRenderTarget;
+    dd.storageMode = MTLStorageModePrivate;
+#if !__has_feature(objc_arc)
+    [sIosDepth release];
+#endif
+    sIosDepth = [sMetalBackend.Device() newTextureWithDescriptor:dd];
+    if (sIosDepth)
+        NSLog(@"wf_game: iOS depth target %lux%lu ready",
+              (unsigned long)w, (unsigned long)h);
+    return sIosDepth != nil;
+}
+
+void IosDropFrame()
+{
+    sIosEnc      = nil;
+    sIosCmd      = nil;
+    sIosDrawable = nil;
+    if (sIosPool) { objc_autoreleasePoolPop(sIosPool); sIosPool = nullptr; }
+}
+}  // namespace
+
+namespace wf_metal
+{
+
+bool Available() { return sMetalBackend.EnsureInited(); }
+
+// width/height are advisory: the drawable's own texture size is authoritative
+// (the layer's drawableSize is set on the main thread at layout time).
+bool BeginFrameToLayer(void* caMetalLayer, int /*width*/, int /*height*/)
+{
+    if (!caMetalLayer || sIosEnc) return false;
+    if (!sMetalBackend.EnsureInited()) return false;
+
+    sIosPool = objc_autoreleasePoolPush();
+    CAMetalLayer* layer = (__bridge CAMetalLayer*)caMetalLayer;
+    sIosDrawable = [layer nextDrawable];
+    if (!sIosDrawable) { IosDropFrame(); return false; }
+
+    id<MTLTexture> tex = sIosDrawable.texture;
+    const NSUInteger w = [tex width], h = [tex height];
+    id<MTLCommandQueue> q = sMetalBackend.Queue();
+    if (!q || !IosEnsureDepth(w, h)) { IosDropFrame(); return false; }
+
+    MTLRenderPassDescriptor* rp = [MTLRenderPassDescriptor renderPassDescriptor];
+    rp.colorAttachments[0].texture     = tex;
+    rp.colorAttachments[0].loadAction  = MTLLoadActionClear;
+    rp.colorAttachments[0].storeAction = MTLStoreActionStore;
+    rp.colorAttachments[0].clearColor  = MTLClearColorMake(0.0, 0.0, 0.0, 1.0);
+    rp.depthAttachment.texture     = sIosDepth;
+    rp.depthAttachment.loadAction  = MTLLoadActionClear;
+    rp.depthAttachment.storeAction = MTLStoreActionDontCare;
+    rp.depthAttachment.clearDepth  = 1.0;
+
+    sIosCmd = [q commandBuffer];
+    sIosEnc = [sIosCmd renderCommandEncoderWithDescriptor:rp];
+    if (!sIosEnc) { IosDropFrame(); return false; }
+
+    MTLViewport vp;
+    vp.originX = 0.0; vp.originY = 0.0;
+    vp.width   = (double)w; vp.height = (double)h;
+    vp.znear   = 0.0; vp.zfar = 1.0;
+    [sIosEnc setViewport:vp];
+
+    sMetalBackend.SetCurrentEncoder(sIosEnc);
+    return true;
+}
+
+void EndFrameToLayer()
+{
+    if (!sIosEnc) return;
+    [sIosEnc endEncoding];
+    sMetalBackend.ClearCurrentEncoder();
+    [sIosCmd presentDrawable:sIosDrawable];
+    [sIosCmd commit];
+    // The backend reuses one vertex buffer per frame (see Flush), so the GPU
+    // must finish before the next frame's batch overwrites it — same as macOS.
+    [sIosCmd waitUntilCompleted];
+    if (++sIosPresented == 1 || sIosPresented % 600 == 0)
+        NSLog(@"wf_game: presented=%lu rendered=%lu triangles_last=%lu",
+              sIosPresented, sMetalBackend.RenderedFrames(),
+              sMetalBackend.TrianglesLast());
+    IosDropFrame();
+}
+
+unsigned long PresentedDrawableCount() { return sIosPresented; }
+unsigned long RenderedFrameCount() { return sMetalBackend.RenderedFrames();   }
+unsigned long TrianglesLastFrame() { return sMetalBackend.TrianglesLast();    }
+unsigned long TrianglesTotal()     { return sMetalBackend.TrianglesRunning(); }
+
+}  // namespace wf_metal
+
+#endif  // WF_TARGET_IOS

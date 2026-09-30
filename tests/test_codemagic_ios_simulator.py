@@ -11,6 +11,7 @@ verdicts when driven with stub xcrun / plutil / sips / sleep binaries.
     python3 -m pytest tests/test_codemagic_ios_simulator.py -v
 """
 import os
+import re
 import stat
 import struct
 import subprocess
@@ -128,7 +129,8 @@ def _exe(path, body):
     os.chmod(path, os.stat(path).st_mode | stat.S_IEXEC)
 
 
-def _run(wf, tmp_path, ipad=True, blank_udid='', launch_fail=False, app=True, devices=None):
+def _run(wf, tmp_path, ipad=True, blank_udid='', launch_fail=False, app=True, devices=None,
+         blank_fn=lambda x, y: (0, 0, 0)):
     build = tmp_path / 'build'
     stubs = tmp_path / 'stubs'
     build.mkdir()
@@ -139,7 +141,7 @@ def _run(wf, tmp_path, ipad=True, blank_udid='', launch_fail=False, app=True, de
     (tmp_path / 'devices.json').write_text(devices or DEVICES_JSON % (IPAD if ipad else
         '{"udid": "PHONE-2", "name": "iPhone SE", "isAvailable": true}'))
     (tmp_path / 'shot.png').write_bytes(_png(40, 40, lambda x, y: (x * 6, y * 6, 90)))
-    (tmp_path / 'blank.png').write_bytes(_png(40, 40, lambda x, y: (0, 0, 0)))
+    (tmp_path / 'blank.png').write_bytes(_png(40, 40, blank_fn))
     _exe(stubs / 'xcrun', XCRUN)
     _exe(stubs / 'sips', SIPS)
     _exe(stubs / 'plutil', '#!/bin/sh\necho "CFBundleIdentifier => org.worldfoundry.wf-game"\n')
@@ -175,6 +177,39 @@ def test_blank_ipad_screenshot_fails(wf, tmp_path):
     assert 'IOS IPHONE: OK' in r.stdout and 'IOS IPAD: FAIL' in r.stdout, r.stdout
     assert 'centre_colours=1' in r.stdout
     assert r.returncode != 0
+
+
+def _letterboxed_clear(x, y):
+    """Build 6abd3f6b's iPad frame: cornflower clear colour between black bars, plus a few
+    blended edge pixels. The old whole-crop "more than 1 colour" rule called this OK."""
+    if y < 9 or y >= 31:
+        return (0, 0, 0)
+    if y in (9, 30):
+        return (38 + x % 3, 57, 92)
+    return (99, 148, 237)
+
+
+def test_letterboxed_clear_colour_fails(wf, tmp_path):
+    # Regression guard for the false-positive "IOS IPAD: OK" on a solid clear colour.
+    r, _, _ = _run(wf, tmp_path, blank_udid='PAD-1', blank_fn=_letterboxed_clear)
+    assert 'IOS IPHONE: OK' in r.stdout and 'IOS IPAD: FAIL' in r.stdout, r.stdout + r.stderr
+    assert re.search(r'ipad: .* centre_colours=1 dominant_pct=100', r.stdout), r.stdout
+    assert r.returncode != 0
+
+
+def test_few_colours_are_not_a_scene(wf, tmp_path):
+    # 16 distinct colours in the centre crop is still below the > 50 bar.
+    r, _, _ = _run(wf, tmp_path, blank_udid='PAD-1', blank_fn=lambda x, y: (x % 4 * 60, y % 4 * 60, 0))
+    assert 'IOS IPAD: FAIL' in r.stdout, r.stdout
+    assert 'centre_colours=16 ' in r.stdout
+
+
+def test_alive_window_outlasts_coreaudio_abort(wf):
+    # The simulator CoreAudio RPC abort hit ~11 s after launch; an 8 s liveness check passed it.
+    script = _script(wf, RUN_STEP)
+    assert 'sleep 20' in script and 'sleep 8' not in script
+    assert 'alive_after_20s' in script
+    assert '-gt 50' in script and '-gt 1 ' not in script
 
 
 def test_no_ipad_runtime_fails_ipad_and_prints_list(wf, tmp_path):
