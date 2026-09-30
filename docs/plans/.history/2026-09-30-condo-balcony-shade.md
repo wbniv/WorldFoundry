@@ -1,10 +1,16 @@
 | Date | Change |
 |------|--------|
+| [2026-09-30](https://github.com/wbniv/WorldFoundry/commit/fc046f37) | RFQ packet: add annotated opening photo; plan: existing awning open question |
 | [2026-09-30](https://github.com/wbniv/WorldFoundry/commit/510882a8) | Condo balcony shade: jambs (south full wall, north 10 cm stub), opening flush south |
 | [2026-09-30](https://github.com/wbniv/WorldFoundry/commit/8883f82d) | Condo balcony shade: fold in Will's answers (ledge 35 deep x 64 tall, patio 280, 3 m ceilings) |
 | [2026-09-30](https://github.com/wbniv/WorldFoundry/commit/ce0a2fa6) | Plan condo 639 balcony zip screen (solar-strip motor) and 7 cm floor recess |
 
 <!--history-meta v1
+fc046f37	author	Will Norris
+fc046f37	added	2
+fc046f37	deleted	0
+fc046f37	files	1
+fc046f37	body	Co-Authored-By: Claude Sonnet 5.5 <noreply@anthropic.com>\nClaude-Session: https://claude.ai/code/session_01TfMcgfFyhXKC4CNP5iF7Nz
 510882a8	author	Will Norris
 510882a8	added	5
 510882a8	deleted	5
