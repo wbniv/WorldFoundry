@@ -67,6 +67,7 @@ real-time play. The same level file and the same flags on every platform.
 ### Android and Chromecast (GLES 3): builds and runs in an emulator
 - The Android build had been **broken since 09‑21** (`GL_RGB5` is not in GLES 3.0; `backtrace()` needs API 33) and is fixed. Both apps (snowgoons and the aquarium, separate app ids) build in CI, on the free Mac machines.
 - Codemagic's free Mac machines cannot run an Android emulator ([no nested virtualization](https://docs.codemagic.io/yaml-testing/testing/)), so the emulator run was done locally on this PC (KVM).
+- The phone-shaped emulator also started the game and drew it (the tank frame and the touch overlay are visible), but its screenshot is covered by the emulator's own "System UI isn't responding" dialog, which software graphics under load can trigger, so it is not shown.
 - **Open:** a real phone or Chromecast (needs the device's IP address with Network debugging enabled, ideally a paired gamepad), frame cost on Chromecast hardware, audio (silent stub), input exercised.
 
 ### Linux: the reference
