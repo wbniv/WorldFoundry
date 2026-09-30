@@ -254,6 +254,10 @@ if start_run cmdq; then
     # Input control: does each mechanism reach the game's key handler at all?
     # Right arrow (key code 124) held moves the player; the engine logs
     # "ball pos" about once a second.
+    # Build 1 (6abd322f): neither of these moved the player — System Events'
+    # press+release lands inside one glfwPollEvents (net zero), and postToPid
+    # never reached GLFW's keyDown. A hold posted at the HID tap is what a
+    # physical key does, so it is the control that means something.
     b0=$(ballpos)
     probe hold "$RUN_PID" 124 2.5 || true
     sleep 1.5
@@ -261,13 +265,18 @@ if start_run cmdq; then
     se 'tell application "System Events"' 'repeat 25 times' 'key code 124' 'delay 0.1' 'end repeat' 'end tell' || true
     sleep 1.5
     b2=$(ballpos)
-    say "  ball pos: start [$b0] after cgevent-pid hold [$b1] after system-events presses [$b2]"
-    IN_CG=no IN_SE=no
+    front
+    probe hidhold 124 3 || true
+    sleep 1.5
+    b3=$(ballpos)
+    say "  ball pos: start [$b0] after cgevent-pid hold [$b1] after system-events presses [$b2] after hid-tap hold [$b3]"
+    IN_CG=no IN_SE=no IN_HID=no
     [ -n "$b1" ] && [ "$b1" != "$b0" ] && IN_CG=yes
     [ -n "$b2" ] && [ "$b2" != "$b1" ] && IN_SE=yes
-    say "INPUT CONTROL: cgevent-pid moved=$IN_CG, system-events moved=$IN_SE"
+    [ -n "$b3" ] && [ "$b3" != "$b2" ] && IN_HID=yes
+    say "INPUT CONTROL: cgevent-pid moved=$IN_CG, system-events moved=$IN_SE, hid-tap moved=$IN_HID"
 
-    # Esc x2 via both mechanisms, then it must still be running.
+    # Esc x2 via each mechanism, then it must still be running.
     front
     se 'tell application "System Events" to key code 53' || true
     sleep 0.5
@@ -275,9 +284,13 @@ if start_run cmdq; then
     probe key "$RUN_PID" 53 || true
     sleep 0.5
     probe key "$RUN_PID" 53 || true
+    front
+    probe hidkey 53 || true
+    sleep 0.5
+    probe hidkey 53 || true
     sleep 4
     if alive; then ESC_ALIVE=yes; else ESC_ALIVE=no; fi
-    say "  after Esc x2 (system-events) + Esc x2 (cgevent-pid), 4 s later: still running=$ESC_ALIVE"
+    say "  after Esc x2 each via system-events, cgevent-pid, hid-tap; 4 s later: still running=$ESC_ALIVE"
 
     # ⌘Q ladder.
     if [ "$ESC_ALIVE" = yes ]; then
@@ -304,15 +317,18 @@ if start_run cmdq; then
     fi
 
     # Esc is only a pass if keys demonstrably reached the app in this process.
+    # The control must use the same route as Esc: a plain key reaching GLFW's
+    # key callback. ⌘Q is a menu key-equivalent, a different route, so it
+    # proves the app was frontmost but not that Esc reached the key handler.
     ctrl=""
-    [ -n "$KEY_MECH" ] && ctrl="⌘Q via $KEY_MECH quit the same process"
+    [ "$IN_HID" = yes ] && ctrl="Right via hid-tap moved the player"
     [ "$IN_CG" = yes ] && ctrl="${ctrl:+$ctrl; }Right via cgevent-pid moved the player"
     [ "$IN_SE" = yes ] && ctrl="${ctrl:+$ctrl; }Right via system-events moved the player"
     if [ "$ESC_ALIVE" = yes ] && [ -n "$ctrl" ]; then
         R_ESC=OK
-        V_ESC="OK (still running 4 s after Esc x4; delivery control: $ctrl)"
+        V_ESC="OK (still running 4 s after Esc x6; key-handler control: $ctrl)"
     elif [ "$ESC_ALIVE" = yes ]; then
-        V_ESC="FAIL (still running, but no control shows keys reached the app — vacuous)"
+        V_ESC="FAIL (still running, but no Right-arrow control reached the key handler, so Esc delivery is unproven; ⌘Q mechanism: ${KEY_MECH:-none})"
     else
         V_ESC="FAIL (process gone after Esc; exit status $rc)"
     fi
@@ -402,6 +418,13 @@ if start_run fullscreen -fullscreen; then
     rc=$(cat "$RUN_RC" 2>/dev/null || echo "?")
     detail="window [$(echo $wins)] vs main display [$disp]; mode before $mode_before, during $mode_during, after $mode_after (restored: $restored); backingScaleFactor $scale — Retina NOT testable here; engine: $winline; exit status $rc"
     if [ "$match" = yes ]; then R_FS=OK; V_FS="OK ($detail)"; else V_FS="FAIL ($detail)"; fi
+    # Build 1 found GLFW switching the display to the mode nearest the 640x480
+    # request (1024x768 -> 800x600) instead of covering it at native size.
+    if [ -n "$mode_before" ] && [ "$mode_during" = "$mode_before" ]; then
+        V_FSN="OK (display stayed at $mode_before)"
+    else
+        V_FSN="FAIL (display mode switched $mode_before -> $mode_during while fullscreen; restored after exit: $restored)"
+    fi
 else
     V_FS="FAIL (no window)"
     stop_run
@@ -414,8 +437,11 @@ echo "MACOS CMD-Q: $V_CMDQ"
 echo "MACOS RED BUTTON: $V_RED"
 echo "MACOS ESC STAYS OPEN: $V_ESC"
 echo "MACOS FULLSCREEN: $V_FS"
-echo "(mechanisms: system-events/ax-api/cgevent-pid are real OS events delivered to the"
-echo " running app; none is an in-app self-post. Retina: runner scale ${scale:-?}, untested.)"
+echo "MACOS FULLSCREEN NATIVE MODE: ${V_FSN:-FAIL (not run)}"
+echo "(mechanisms: system-events/ax-api/cgevent-pid/hid-tap are real OS events delivered to"
+echo " the running app; none is an in-app self-post. Retina: runner scale ${scale:-?}, untested."
+echo " This Debug build compiles DBSTREAM1 out, so no engine shutdown line is logged: exit"
+echo " status 0 is the evidence, not a 'Calling PIGSExit()' line.)"
 
 fail=0
 for k in $STRICT; do

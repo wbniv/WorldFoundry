@@ -579,10 +579,11 @@ workflows:
           # acceptable ONLY because the Codemagic VM is destroyed after the
           # build; the grant is printed in the log, never done on a kept machine.
           #
-          # CLOSE_PATHS_STRICT lists the checks that fail the build. Empty on
-          # the first iteration (informational: one failing check must not hide
-          # the others); tighten once each check's behaviour is known.
-          CLOSE_PATHS_STRICT="" OUT_DIR="$CM_BUILD_DIR" \
+          # CLOSE_PATHS_STRICT lists the checks that fail the build. Build
+          # 6abd322f passed cmdq/red/fullscreen with real System Events input,
+          # so those are strict; esc stays informational until its key-handler
+          # control is proven, and the native-mode line is a known engine gap.
+          CLOSE_PATHS_STRICT="cmdq red fullscreen" OUT_DIR="$CM_BUILD_DIR" \
             bash scripts/macos/close-paths-ci.sh \
             2>&1 | tee "$CM_BUILD_DIR/macos-close-paths.log"
 

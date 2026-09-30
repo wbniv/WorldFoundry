@@ -149,6 +149,21 @@ case "hold":
     postKey(pid, code, down: false, cmd: false)
     out("hold: posted code \(code) down for \(secs) s to pid \(pid)")
 
+case "hidkey", "hidhold":
+    // Posted at the HID tap: delivered to the frontmost app exactly like a
+    // physical key (needs PostEvent). hidkey CODE; hidhold CODE SECS.
+    guard args.count > 2, let code = UInt16(args[2]) else { usage(); exit(2) }
+    let secs = args[1] == "hidhold" ? (args.count > 3 ? Double(args[3]) ?? 0 : 0) : 0.06
+    let src = CGEventSource(stateID: .hidSystemState)
+    for down in [true, false] {
+        guard let e = CGEvent(keyboardEventSource: src, virtualKey: code, keyDown: down) else {
+            out("hid: CGEvent create failed"); exit(1)
+        }
+        e.post(tap: .cghidEventTap)
+        if down { usleep(useconds_t(secs * 1_000_000)) }
+    }
+    out("\(args[1]): posted code \(code) at the HID tap, held \(secs) s")
+
 case "axbutton":
     let pid = pidArg(2)
     guard let btn = axCloseButton(pid) else { exit(1) }
