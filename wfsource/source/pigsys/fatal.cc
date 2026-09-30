@@ -37,6 +37,10 @@ static const char* g_appName = "wf";
 static void WfTerminateHandler()
 {
     std::fprintf(stderr, "\n=== %s: std::terminate fired ===\n", g_appName);
+    // Release Clang builds (the Android release APK) compile wfengine with
+    // -fno-exceptions (CMakeLists.txt, the wfengine Release options), where a
+    // try block does not compile and no exception can be active anyway.
+#if defined(__cpp_exceptions) || defined(__EXCEPTIONS)
     if (std::exception_ptr ep = std::current_exception()) {
         try {
             std::rethrow_exception(ep);
@@ -50,6 +54,9 @@ static void WfTerminateHandler()
                      "(likely joinable std::thread destroyed without join, "
                      "or noexcept function throwing)\n");
     }
+#else
+    std::fprintf(stderr, "  (built without exceptions)\n");
+#endif
 #if defined(WF_HAVE_BACKTRACE)
     void* frames[64];
     const int n = ::backtrace(frames, 64);
