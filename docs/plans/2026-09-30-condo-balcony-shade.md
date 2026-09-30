@@ -85,7 +85,15 @@ Rejected: a two-state visibility swap (open/closed with no travel) — cheap but
 
 **Section** — the 7 cm floor step, pony wall, cassette under the soffit, beam, and a sun-altitude slider to judge what the west-facing strip sees. [Open the interactive mockup](2026-09-30-condo-balcony-shade/section.html).
 
-The in-engine states (open, half, closed, seen from the balcony POV and from the doll-house camera) are captured during Verification and appended here.
+The in-engine states are captured in Verification 5 and 6 (`-rate20 --capture-frame` on scratch builds of this level with a spawn / camera / start-closedness override; the shipped level loads open):
+
+| open (raised) | half | closed |
+|---|---|---|
+| <img src="2026-09-30-condo-balcony-shade/inside-open.png" width="280"> | <img src="2026-09-30-condo-balcony-shade/inside-half.png" width="280"> | <img src="2026-09-30-condo-balcony-shade/inside-closed.png" width="280"> |
+
+| grass and the 6 cm step, from the grass | the façade ledge over 640's west rooms | the ledge band, overview |
+|---|---|---|
+| <img src="2026-09-30-condo-balcony-shade/grass-step.png" width="280"> | <img src="2026-09-30-condo-balcony-shade/ledge-640.png" width="280"> | <img src="2026-09-30-condo-balcony-shade/ledge-overview.png" width="280"> |
 
 ## Open questions
 
@@ -115,11 +123,336 @@ Answers of 2026‑09‑30 are folded in; what is left has a default that the bui
 
 ## Verification
 
+Run 2026‑09‑30 on the default build (shade on, grass on, `CONDO_POV_TRIGGERS` off), by one script in order 3 → 1 → 2 → 4/7 → 5/6, so the committed outputs are the step-1 build. Steps 4 and 7 use `tests/verify_condo_balcony_shade.py`: the real `wf_game` with `run-condo`'s flags, driven over the debug bridge (the player is teleported with `scene:set_transform`, and B is injected as `joystick1_raw_justpressed`). The frames in steps 5–6 spawn on the balcony with `CONDO_SPAWN`.
+
 1. `CONDO_SHADE=1 task condo-level` completes and prints a `[condo] balcony shade:` line giving the span, cassette, slat count and mailboxes.
+
+    ```
+    $ CONDO_SHADE=1 task condo-level --force 2>&1 | grep -E "^\[condo\] (balcony|window POV|west|exporting)|built"
+    [condo] window POV cameras: OFF — no automatic cuts, cs_dollhouse is the only automatic shot (CONDO_POV_TRIGGERS=1 restores cs_balcony / cs_master and their zones)
+    [condo] west-façade ledge: west-facade-ledge along the façade x -4.21…8.05, built x -4.21…7.90 (cut at wall tops), z 2.15…2.70, 18 boxes (2 sub-1 cm dropped), full 35 cm depth only where a floor is behind it; intersects: 639-daikin-lineset (11 verts, x 2.53…2.65 z 2.24…2.36); unit-640 (1 verts, x -4.11…-4.11 z 2.58…2.58)
+    [condo] west-façade ledge colours (from the wall at each x): x -4.21…-3.80 unit-639.001, x -3.70…-0.10 unit-639.001, x 0.05…0.25 unit-639.001, x 0.25…0.40 unit-639, x 0.55…2.65 unit-639, x 2.75…5.70 unit-639, x 5.80…6.55 unit-639, x 6.70…7.90 unit-639; across wall gaps, nearest wall's colour: x 0.05…0.25 unit-639.001, x 0.25…0.40 unit-639, x 2.75…5.43 unit-639, x 5.43…5.70 unit-639, x 5.80…6.55 unit-639
+    [condo] balcony shade: 639-patio-recessed x 2.75…5.55 (2.80 m), 639-patio from x 5.55; floor recessed 7 cm over x 2.75…5.55 y -1.95…-0.10 (4 faces, 10 risers, 0 degenerate triangles dropped = 0.0e+00 m²; drain 24 verts eased); old parapet 20 faces removed; grass 1 cm over the recess, top z -0.06 → 6 cm step
+    [condo] balcony shade: span x 2.75…5.43 (2.680 m), floor z -0.07, cap z 1.04 (10 cm pony wall), soffit z 2.15 (west-façade ledge y -0.35…0.00 to z 2.70); north jamb x 5.43…5.70; cassette 10×10 cm (solar strip 1.00 m on its west face); 2 guides; 8 slats × 12.23 cm + bar, all stowed in the cassette when raised; 2.0 s travel; B/keyboard-2 within 0.90 m (player y ≥ -1.00; door reach ends at y -1.04); wall switch on the south jamb at y -0.30, z 1.14; mailboxes init 60, press-latch 61, reach 62, target 63, closedness 64; overhead parts Mass statplat default
+    [condo] balcony shade: slats + bar are runtime actors 40…48 (export positions 39…47 + bias 1); verify with `wf_game --debug-print-actors`
+    [condo] exporting 115 actors → /home/will/WorldFoundry-wbniv/wflevels/condo_639_640/condo_639_640.lev
+    ✓ built /home/will/WorldFoundry-wbniv/wflevels/condo_639_640.iff (2414592 bytes)
+    ✓ built /home/will/WorldFoundry-wbniv/wflevels/condo_639_640-standalone.iff (2418688 bytes)
+    [exit 0]
+    ```
+
+    **PASS.** The `[condo] balcony shade:` lines give the span (x 2.75…5.43, 2.680 m), the cassette (10 × 10 cm with the solar strip), 8 slats + bar, and mailboxes 60–64. The ledge line lists what it intersects: the Daikin lineset, which the survey routes through the wall above the real soffit, and a one-vertex graze of 640's faceted corner (B.3).
+
 2. A headless read of the built `wflevels/condo_639_640/condo_639_640.blend` reports: floor z = −0.07 over the whole recessed patio, an artificial-grass slab on top of it (top at z −0.06), pony-wall cap z = 1.04, soffit z = 2.15, clear opening width 2.680 m, and 8 fabric slats plus the bar.
+
+    ```
+    $ blender --background wflevels/condo_639_640/condo_639_640.blend --python-exit-code 1 --python tests/verify_condo_balcony_shade_model.py -- on 2>&1 | grep -E "^(PASS|FAIL|RESULT)"
+    PASS  floor over the frontage: z values [-0.07], area 5.1800 m² of 5.1800 (x 2.75…5.55, y -1.95…-0.1)
+    PASS  step risers close the recess: riser area by side {'x1': 0.1295, 'y0': 0.196, 'y1': 0.196, 'x0': 0.1295}
+    PASS  shell parapet cap at z 1.00: 0 cap faces (must be none)
+    PASS  artificial grass covers the recess, top z −0.06: x 2.750…5.550 y -1.950…-0.100 z -0.070…-0.060 → step from the interior floor 6 cm
+    PASS  all shade actors present: 15/15
+    PASS  pony-wall cap z 1.04: cap z 1.040, y -0.100…0.000
+    PASS  soffit z 2.15: west-facade-ledge z 2.150…2.700, y -0.350…0.000
+    PASS  ledge runs the whole west façade, full depth over the opening: x -4.21…7.90 (640's rounded corner → 639's north wall); over the opening y -0.350…0.000; 214 tris
+    PASS  ledge colour matches the wall it sits on (no ochre over blue): ledge materials ['unit-639', 'unit-639.001']; mismatches []
+    PASS  clear opening width 2.680 m: south wall face x 2.750 → north jamb x 5.430 = 2.680 m
+    PASS  8 slats + bar tile the drop (baked closed), overlapping at every seam: slat 0 top 2.052 (cassette bottom 2.050), seam overlaps [2.0, 4.0] mm, bar 1.042…1.072, slat y centres [-0.0535, -0.0525, -0.0515, -0.0505, -0.0495, -0.0485, -0.0475, -0.0465]
+    PASS  wall switch on the south jamb beside the opening: x 2.750…2.775 y -0.345…-0.255 z 1.070…1.210, Mass 0.0
+    PASS  cassette carries the solar-strip material: ['shade-cassette', 'shade-solar']
+    RESULT: PASS
+    [exit 0]
+    ```
+
+    Regression guard for Will's ledge-colour report (ochre over blue walls): the same check on a scratch build that used the old x-sign colour rule fails:
+
+    ```
+    $ blender --background wflevels/condo_colour_before/condo_colour_before.blend --python tests/verify_condo_balcony_shade_model.py -- on   # old x-sign colour rule
+    FAIL  ledge colour matches the wall it sits on (no ochre over blue): ledge materials ['unit-639', 'unit-640']; mismatches [(-4.18, 'unit-640', 'unit-639.001'), (-4.18, 'unit-640', 'unit-639.001'), (-4.13, 'unit-640', 'unit-639.001'), (-4.13, 'unit-640', 'unit-639.001')] …
+    RESULT: FAIL ['ledge colour matches the wall it sits on (no ochre over blue)']
+    ```
+
+    **PASS.** Floor z −0.07 over the whole recessed patio (5.18 m², closed by four risers), grass top z −0.06, cap 1.04, soffit 2.15 on a west-façade ledge x −4.21…7.90, clear width 2.680 m, 8 slats + bar tiling the drop, the wall switch, and the ledge coloured from the wall under it.
+
 3. `CONDO_SHADE=0 task condo-level` reproduces today's level (same parapet, no beam, floor at 0).
+
+    ```
+    $ CONDO_SHADE=0 task condo-level --force 2>&1 | grep -E "^\[condo\] (balcony|window POV|west|exporting)|built"
+    [condo] window POV cameras: OFF — no automatic cuts, cs_dollhouse is the only automatic shot (CONDO_POV_TRIGGERS=1 restores cs_balcony / cs_master and their zones)
+    [condo] balcony shade: OFF (CONDO_SHADE=0 — shell parapet, no beam, flat floor; see docs/plans/2026-09-30-condo-balcony-shade.md)
+    [condo] exporting 98 actors → /home/will/WorldFoundry-wbniv/wflevels/condo_639_640/condo_639_640.lev
+    ✓ built /home/will/WorldFoundry-wbniv/wflevels/condo_639_640.iff (2394112 bytes)
+    ✓ built /home/will/WorldFoundry-wbniv/wflevels/condo_639_640-standalone.iff (2398208 bytes)
+    [exit 0]
+
+    $ blender --background wflevels/condo_639_640/condo_639_640.blend --python-exit-code 1 --python tests/verify_condo_balcony_shade_model.py -- off 2>&1 | grep -E "^(PASS|FAIL|RESULT)"
+    PASS  floor over the frontage: z values [0.0] over 4 faces overlapping the frontage
+    PASS  step risers close the recess: riser area by side {}
+    PASS  shell parapet cap at z 1.00: 2 cap faces (expected)
+    PASS  no grass: absent
+    PASS  no shade / beam actors: present: []
+    RESULT: PASS
+    [exit 0]
+
+    $ CONDO_SHADE=0 CONDO_POV_TRIGGERS=1 task condo-level --force 2>&1 | grep -E "^\[condo\] (balcony shade|exporting)|built"; git diff --quiet HEAD -- wflevels/condo_639_640-standalone.iff && echo "standalone .iff: byte-identical to HEAD"; git diff -w --quiet HEAD -- wflevels/condo_639_640/condo_639_640.lev && echo ".lev: identical to HEAD ignoring whitespace ($(git diff --numstat HEAD -- wflevels/condo_639_640/condo_639_640.lev | cut -f1) lines differ only in trailing blanks)"
+    [condo] balcony shade: OFF (CONDO_SHADE=0 — shell parapet, no beam, flat floor; see docs/plans/2026-09-30-condo-balcony-shade.md)
+    [condo] exporting 105 actors → /home/will/WorldFoundry-wbniv/wflevels/condo_639_640/condo_639_640.lev
+    ✓ built /home/will/WorldFoundry-wbniv/wflevels/condo_639_640.iff (2396160 bytes)
+    ✓ built /home/will/WorldFoundry-wbniv/wflevels/condo_639_640-standalone.iff (2400256 bytes)
+    standalone .iff: byte-identical to HEAD
+    .lev: identical to HEAD ignoring whitespace (106 lines differ only in trailing blanks)
+    [exit 0]
+    ```
+
+    **PASS.** `CONDO_SHADE=0` gives the 1.00 m shell parapet, no beam, no grass and a flat floor. The POV cameras are now a separate gate, off by default, so the full "today's level" also needs `CONDO_POV_TRIGGERS=1`; with it, the standalone `.iff` is byte-identical to HEAD, and the `.lev` differs only in trailing blanks (the commit hook strips them).
+
 4. `task run-condo`, spawn on the balcony (`CONDO_SPAWN`): stepping down onto the balcony works, and the player cannot walk through the pony wall or the guides.
+
+    ```
+    $ python3 tests/verify_condo_balcony_shade.py
+    PASS  steps down 6 cm onto the grass: project room (4.400, -3.200, 15.750) → balcony (4.409, -0.645, 15.690), drop 6.0 cm
+    PASS  pony wall stops the player mid-span: held +Y from the balcony: (4.409, -0.320, 15.690) (pony wall inner face y −0.10)
+    PASS  steps back up 6 cm into the project room: (4.392, -3.091, 15.750) vs room z 15.750
+    PASS  south guide blocks: x=2.97: (3.314, -0.320, 15.690)
+    PASS  north guide blocks: x=5.22: (5.219, -0.320, 15.690)
+    PASS  north jamb blocks: x=5.52: (5.363, -0.320, 15.690)
+    RESULT: PASS
+    (lines from the step-7 run below)
+    ```
+
+    **PASS.** The player steps down 6 cm (7 cm recess under 1 cm of grass) and back up 6 cm into the project room. The pony wall stops them at y −0.32 (inner face −0.10, capsule radius 0.2), including at both guides and the north jamb. Spawning on the balcony with `CONDO_SPAWN` loads normally (the patio frames in step 6).
+
 5. In-engine capture at closedness 0, ~0.5 and 1.0 (`-rate20 --capture-frame`): slats tile without gaps or z-fighting at 1.0 and vanish into the cassette at 0.
-6. Balcony POV shot (`cs_balcony`) and the doll-house shot are captured with the shade open and closed; the view is not blocked when open.
+
+    ```
+    $ bash /tmp/claude-1000/-home-will-WorldFoundry-wbniv/5f39bcf9-a84c-4377-a12e-94ca155c8218/scratchpad/capture_shade.sh docs/plans/2026-09-30-condo-balcony-shade
+    2026-09-30T02:24:26Z ── inside-open (spawn 4.6,-3.4,0.3 cam 0,1.0,1.35 look -0.5,3.4,1.3 closedness 0)
+       → /home/will/WorldFoundry-wbniv/docs/plans/2026-09-30-condo-balcony-shade/inside-open.png
+    2026-09-30T02:24:37Z ── inside-half (spawn 4.6,-3.4,0.3 cam 0,1.0,1.35 look -0.5,3.4,1.3 closedness 0.5)
+       → /home/will/WorldFoundry-wbniv/docs/plans/2026-09-30-condo-balcony-shade/inside-half.png
+    2026-09-30T02:24:50Z ── inside-closed (spawn 4.6,-3.4,0.3 cam 0,1.0,1.35 look -0.5,3.4,1.3 closedness 1)
+       → /home/will/WorldFoundry-wbniv/docs/plans/2026-09-30-condo-balcony-shade/inside-closed.png
+    ```
+
+| closedness 0 | ≈ 0.5 | 1.0 |
+|---|---|---|
+| <img src="2026-09-30-condo-balcony-shade/inside-open.png" width="280"> | <img src="2026-09-30-condo-balcony-shade/inside-half.png" width="280"> | <img src="2026-09-30-condo-balcony-shade/inside-closed.png" width="280"> |
+
+    **PASS**, after one fix. The first closed capture showed 35 single darker pixels in slightly sloping rows, one row per slat. They were neither gaps nor z-fighting. First guess: seam cracks between separate meshes. A 2 mm overlap (`SLAT_OVERLAP`, neighbours now overlap by 4 mm) left the count unchanged, so that was wrong, and other large quads in the same frame had none, which ruled out the renderer. The cause: each slat's 3 mm horizontal bottom face, seen nearly edge-on from below, catching the odd pixel centre. That face is fabric-coloured at 0.54× brightness, lit as a downward face. Slats now have no top/bottom faces (fabric has no edge), and the closed frame counts 0 such pixels. The overlap stays, as a structural guarantee that no seam can open. At 1.0 the eight slats tile the drop from the cassette to the bottom bar on the cap; at 0 the slats and the bar are all inside the cassette, so nothing hangs in the opening and the guides and cassette are all that is left.
+
+6. Walking onto the patio and to the master window produces no camera cut; the doll-house shot is captured with the shade open and closed. *(Step text replaced 2026‑09‑30 at the coordinator's request when the automatic POV cuts were turned off; was: ~~Balcony POV shot (`cs_balcony`) and the doll-house shot are captured with the shade open and closed; the view is not blocked when open.~~)*
+
+    ```
+    $ python3 tests/verify_condo_balcony_shade.py
+    PASS  no camera cut, shade open, patio zone entry: camshots seen [5.0] (doll-house 5.0); camera − player = 9.0 (authored 9.0)
+    PASS  no camera cut, shade open, patio: camshots seen [5.0] (doll-house 5.0); camera − player = 9.0 (authored 9.0)
+    PASS  no camera cut, shade closed, patio zone entry: camshots seen [5.0] (doll-house 5.0); camera − player = 9.0 (authored 9.0)
+    PASS  no camera cut, shade closed, patio: camshots seen [5.0] (doll-house 5.0); camera − player = 9.0 (authored 9.0)
+    PASS  no camera cut at 640's master window: player at (-6.9, -4.4); camshots seen [5.0]
+    PASS  no camera cut while walking onto the patio and back: 439 samples during the walks, camshots [5.0]
+    RESULT: PASS
+    (lines from the step-7 run below)
+    ```
+
+    ```
+    $ bash /tmp/claude-1000/-home-will-WorldFoundry-wbniv/5f39bcf9-a84c-4377-a12e-94ca155c8218/scratchpad/capture_shade.sh docs/plans/2026-09-30-condo-balcony-shade
+    2026-09-30T02:25:30Z ── dollhouse-open (spawn 4.6,-2.8,0.3 cam 0,-3.5,9 look 0,0,0.9 closedness 0)
+       → /home/will/WorldFoundry-wbniv/docs/plans/2026-09-30-condo-balcony-shade/dollhouse-open.png
+    2026-09-30T02:25:42Z ── dollhouse-closed (spawn 4.6,-2.8,0.3 cam 0,-3.5,9 look 0,0,0.9 closedness 1)
+       → /home/will/WorldFoundry-wbniv/docs/plans/2026-09-30-condo-balcony-shade/dollhouse-closed.png
+    2026-09-30T02:25:55Z ── patio-open (spawn 4.1,-1.0,0.3 cam default look default closedness 0)
+       → /home/will/WorldFoundry-wbniv/docs/plans/2026-09-30-condo-balcony-shade/patio-open.png
+    2026-09-30T02:26:07Z ── patio-closed (spawn 4.1,-1.0,0.3 cam default look default closedness 1)
+       → /home/will/WorldFoundry-wbniv/docs/plans/2026-09-30-condo-balcony-shade/patio-closed.png
+    2026-09-30T02:26:20Z ── master-window (spawn -6.9,-4.4,0.3 cam default look default closedness 0)
+       → /home/will/WorldFoundry-wbniv/docs/plans/2026-09-30-condo-balcony-shade/master-window.png
+    2026-09-30T02:26:35Z ── ledge-640 (spawn -2.0,-1.6,0.3 cam 0,-2.6,3.4 look 0,1.2,1.9 closedness 0)
+       → /home/will/WorldFoundry-wbniv/docs/plans/2026-09-30-condo-balcony-shade/ledge-640.png
+    2026-09-30T02:26:49Z ── ledge-overview (spawn 2.0,-4.5,0.3 cam 0,-6.0,7.0 look 0,4.0,1.5 closedness 0)
+       → /home/will/WorldFoundry-wbniv/docs/plans/2026-09-30-condo-balcony-shade/ledge-overview.png
+    ```
+
+| doll-house, shade open | doll-house, shade closed |
+|---|---|
+| <img src="2026-09-30-condo-balcony-shade/dollhouse-open.png" width="430"> | <img src="2026-09-30-condo-balcony-shade/dollhouse-closed.png" width="430"> |
+| spawned on the patio, open | spawned on the patio, closed |
+| <img src="2026-09-30-condo-balcony-shade/patio-open.png" width="430"> | <img src="2026-09-30-condo-balcony-shade/patio-closed.png" width="430"> |
+| spawned at 640's master window | the ledge over 640's west rooms |
+| <img src="2026-09-30-condo-balcony-shade/master-window.png" width="430"> | <img src="2026-09-30-condo-balcony-shade/ledge-640.png" width="430"> |
+| grass seen from the project room (the step's riser faces away) | the façade ledge, overview |
+| <img src="2026-09-30-condo-balcony-shade/grass-top.png" width="430"> | <img src="2026-09-30-condo-balcony-shade/ledge-overview.png" width="430"> |
+
+    The other camera suites on this build (door, teleport and camera controls; the camera suite then run twice more on this build and twice on HEAD's own level):
+
+    ```
+    $ for t in verify_condo_camera_controls verify_condo_door_button verify_condo_unit_teleport; do echo "=== $t"; python3 tests/$t.py 2>&1 | tail -3; done
+    === verify_condo_camera_controls
+    PASS: reload restores automatic walk 
+    PASS: camera-reload script health 
+    RESULT: ['walk restored after inspect', 'cardinal orbit 0', 'cardinal orbit 0.25', 'cardinal orbit 0.5', 'cardinal orbit 0.75']
+    === verify_condo_door_button
+    PASS  closed middle/right seam third blocks passage: x=6.47 final y=-2.159984 vs door plane -2.00
+    PASS  closed right/fixed third blocks passage: x=7.1 final y=-2.159984 vs door plane -2.00
+    RESULT: PASS
+    === verify_condo_unit_teleport
+    PASS: reload resets 640 entry 
+    PASS: reload script health 
+    RESULT: PASS
+    [exit 0]
+
+    === current build, run 1
+    FAIL: cardinal orbit 0.25 
+    FAIL: cardinal orbit 0.75 
+    RESULT: ['cardinal orbit 0.25', 'cardinal orbit 0.75']
+    === current build, run 2
+    FAIL: controller zoom fallback 
+    FAIL: opposing controls cancel 
+    FAIL: azimuth wraps 
+    FAIL: cardinal orbit 0.5 
+    RESULT: ['controller zoom fallback', 'opposing controls cancel', 'azimuth wraps', 'cardinal orbit 0.5']
+
+    (HEAD level, CONDO_TEST_LEVEL=condo_hd_base)
+    === HEAD level, run 1
+    PASS: cardinal orbit 0 
+    PASS: cardinal orbit 0.25 
+    FAIL: cardinal orbit 0.5 
+    PASS: cardinal orbit 0.75 
+    RESULT: ['reset restores automatic view', 'cardinal orbit 0.5']
+    === HEAD level, run 2
+    PASS: cardinal orbit 0 
+    FAIL: cardinal orbit 0.25 
+    PASS: cardinal orbit 0.5 
+    FAIL: cardinal orbit 0.75 
+    RESULT: ['reset restores automatic view', 'cardinal orbit 0.25', 'cardinal orbit 0.75']
+    ```
+
+    `verify_condo_camera_controls.py` is **timing-flaky, and was before this work**. Against HEAD's own level it failed different `cardinal orbit` checks in each of two runs; on this build, different subsets of its timed checks fail from run to run. The test writes the azimuth over the bridge and reads the derived offset 0.15 s later. `camera_controls.fth` is unchanged, and the failing checks run at the front door and in 640, away from anything built here. The door-button and unit-teleport suites pass. The camera suite's `reset restores automatic view` check now expects the doll-house shot, because there is no automatic window/patio shot left to restore; that check fails against HEAD's level, which still has the POV cuts, and passes here.
+
+    Measured earlier the same day with the POV triggers still on (the evidence for Open question 10). This is camera height above the player over 4 s after a teleport to each patio position:
+
+    ```
+    today's level (CONDO_SHADE=0):
+    == OFF (today's level) run 1
+    closedness=0.0
+    player y -1.50: camera−player dz min 1.700 max 1.928 last 1.700  camshot=31.0 cam.y=0.00
+    player y -1.20: camera−player dz min 1.700 max 1.718 last 1.700  camshot=31.0 cam.y=0.30
+    player y -0.60: camera−player dz min 1.700 max 1.714 last 1.700  camshot=31.0 cam.y=0.90
+    player y -1.50: camera−player dz min 1.700 max 1.713 last 1.700  camshot=31.0 cam.y=0.01
+    player y -1.20: camera−player dz min 1.656 max 1.717 last 1.700  camshot=31.0 cam.y=0.30
+    == OFF (today's level) run 2
+    closedness=0.0
+    player y -1.50: camera−player dz min 1.702 max 3.792 last 1.702  camshot=31.0 cam.y=-0.00
+    player y -1.20: camera−player dz min 1.700 max 1.715 last 1.700  camshot=31.0 cam.y=0.30
+    player y -0.60: camera−player dz min 1.557 max 1.731 last 1.700  camshot=31.0 cam.y=0.90
+    player y -1.50: camera−player dz min 1.700 max 1.715 last 1.700  camshot=31.0 cam.y=0.00
+    player y -1.20: camera−player dz min 1.557 max 1.739 last 1.700  camshot=31.0 cam.y=0.30
+
+    shade build, overhead parts at statplat Mass (as B.6):
+    == SHADE build, open
+    closedness=0.0
+    player y -1.50: camera−player dz min 1.946 max 3.656 last 3.469  camshot=31.0 cam.y=-0.03
+    player y -1.20: camera−player dz min 1.954 max 3.585 last 1.954  camshot=31.0 cam.y=0.28
+    player y -0.60: camera−player dz min 1.701 max 1.928 last 1.701  camshot=31.0 cam.y=0.90
+    player y -1.50: camera−player dz min 1.520 max 1.741 last 1.700  camshot=31.0 cam.y=0.01
+    player y -1.20: camera−player dz min 1.700 max 1.719 last 1.700  camshot=31.0 cam.y=0.30
+    == SHADE build, close
+    closedness=1.0
+    player y -1.50: camera−player dz min 1.529 max 3.564 last 3.263  camshot=31.0 cam.y=0.00
+    player y -1.20: camera−player dz min 1.701 max 3.423 last 1.701  camshot=31.0 cam.y=0.30
+    player y -0.60: camera−player dz min 1.520 max 1.757 last 1.700  camshot=31.0 cam.y=0.90
+    player y -1.50: camera−player dz min 1.701 max 3.560 last 2.719  camshot=31.0 cam.y=0.00
+    player y -1.20: camera−player dz min 1.724 max 3.577 last 1.724  camshot=31.0 cam.y=0.30
+
+    shade build, CONDO_SHADE_OVERHEAD_MASS=0:
+    == SHADE build, overhead Mass 0, open
+    closedness=0.0
+    player y -1.50: camera−player dz min 1.700 max 1.882 last 1.700  camshot=31.0 cam.y=0.00
+    player y -1.20: camera−player dz min 1.700 max 1.716 last 1.700  camshot=31.0 cam.y=0.30
+    player y -0.60: camera−player dz min 1.615 max 1.741 last 1.700  camshot=31.0 cam.y=0.90
+    player y -1.50: camera−player dz min 1.700 max 1.719 last 1.700  camshot=31.0 cam.y=0.00
+    player y -1.20: camera−player dz min 1.700 max 1.720 last 1.700  camshot=31.0 cam.y=0.30
+    == SHADE build, overhead Mass 0, close
+    closedness=1.0
+    player y -1.50: camera−player dz min 1.700 max 1.724 last 1.700  camshot=31.0 cam.y=0.00
+    player y -1.20: camera−player dz min 1.700 max 1.719 last 1.700  camshot=31.0 cam.y=0.30
+    player y -0.60: camera−player dz min 1.700 max 1.717 last 1.700  camshot=31.0 cam.y=0.90
+    player y -1.50: camera−player dz min 1.700 max 1.718 last 1.700  camshot=31.0 cam.y=0.00
+    player y -1.20: camera−player dz min 1.700 max 1.717 last 1.700  camshot=31.0 cam.y=0.30
+    == SHADE build, overhead Mass 0, open
+    closedness=0.0
+    player y -1.50: camera−player dz min 1.701 max 1.899 last 1.701  camshot=31.0 cam.y=0.00
+    player y -1.20: camera−player dz min 1.700 max 1.718 last 1.700  camshot=31.0 cam.y=0.30
+    player y -0.60: camera−player dz min 1.520 max 1.741 last 1.700  camshot=31.0 cam.y=0.90
+    player y -1.50: camera−player dz min 1.700 max 1.722 last 1.700  camshot=31.0 cam.y=0.00
+    player y -1.20: camera−player dz min 1.700 max 1.717 last 1.700  camshot=31.0 cam.y=0.30
+    == SHADE build, overhead Mass 0, close
+    closedness=1.0
+    player y -1.50: camera−player dz min 1.700 max 1.719 last 1.700  camshot=31.0 cam.y=0.01
+    player y -1.20: camera−player dz min 1.700 max 1.719 last 1.700  camshot=31.0 cam.y=0.30
+    player y -0.60: camera−player dz min 1.700 max 1.718 last 1.700  camshot=31.0 cam.y=0.89
+    player y -1.50: camera−player dz min 1.700 max 1.719 last 1.700  camshot=31.0 cam.y=0.01
+    player y -1.20: camera−player dz min 1.700 max 1.719 last 1.700  camshot=31.0 cam.y=0.30
+    ```
+
+    **PASS.** There is no cut anywhere: `INDEXOF_CAMSHOT` stays on the doll-house shot on the patio (open and closed), at 640's master window, and across 439 samples while walking. The camera holds its 9 m offset. The view is never blocked, because the doll-house camera looks down from 9 m and the shade is in no automatic shot.
+
 7. Pressing B (keyboard 2) within reach toggles the shade over about 2 s; a second press mid-travel reverses it smoothly; out of reach does nothing.
+
+    ```
+    $ python3 tests/verify_condo_balcony_shade.py
+    PASS  wall switch beside the opening: 639_balcony_shade_switch.iff loaded
+    actors: player=8 slat0=40 bar=48 camera=1
+    PASS  loads open, slats parked in the cassette: target=0.0 closedness=0.0 slat0.z=15.90725 (want 15.9072) bar.z=16.763 (want 16.7630)
+    PASS  steps down 6 cm onto the grass: project room (4.400, -3.200, 15.750) → balcony (4.409, -0.645, 15.690), drop 6.0 cm
+    PASS  pony wall stops the player mid-span: held +Y from the balcony: (4.409, -0.320, 15.690) (pony wall inner face y −0.10)
+    PASS  steps back up 6 cm into the project room: (4.392, -3.091, 15.750) vs room z 15.750
+    PASS  south guide blocks: x=2.97: (3.314, -0.320, 15.690)
+    PASS  north guide blocks: x=5.22: (5.219, -0.320, 15.690)
+    PASS  north jamb blocks: x=5.52: (5.363, -0.320, 15.690)
+    PASS  press in the project room ignored: target=0.0 reach=0.0
+    PASS  press on the balcony beyond reach ignored (y −1.50 < −1.00): target=0.0 reach=0.0
+    PASS  near press closes: target=1.0 reach=-1.0
+    PASS  continuous travel: closedness sampled mid-travel=0.21315
+    PASS  full close in about 2 s of level time: closedness=0.997536 after 1.9 s level time (2.03 s wall clock, incl. bridge polling)
+    PASS  slats and bar land on their baked positions: slat0.z=15.75 bar.z=15.75 (want 15.75)
+    PASS  mid-travel press reverses without a snap: before=0.704115 after=0.654115 final=1.0
+    PASS  held press toggles once: target=0.0
+    PASS  reopens and parks the slats again: closedness=0.0 slat0.z=15.90725
+    PASS  doors open: B at shade reach (4.10, −0.60) moves shade only: shade target 0.0→1.0, door target 0.0→0.0
+    PASS  doors open: B at door reach from the patio (7.25, −1.35) moves doors only: shade target 0.0→0.0, door target 0.0→1.0
+    PASS  doors open: B at between the bands (4.10, −1.02) moves nothing only: shade target 0.0→0.0, door target 0.0→0.0
+    PASS  doors closed: B at shade reach (4.10, −0.60) moves shade only: shade target 0.0→1.0, door target 1.0→1.0
+    PASS  doors closed: B at door reach from the patio (4.10, −1.30) moves doors only: shade target 0.0→0.0, door target 1.0→0.0
+    PASS  doors closed: B at between the bands (4.10, −1.02) moves nothing only: shade target 0.0→0.0, door target 1.0→1.0
+    PASS  no camera cut, shade open, patio zone entry: camshots seen [5.0] (doll-house 5.0); camera − player = 9.0 (authored 9.0)
+    PASS  no camera cut, shade open, patio: camshots seen [5.0] (doll-house 5.0); camera − player = 9.0 (authored 9.0)
+    PASS  no camera cut, shade closed, patio zone entry: camshots seen [5.0] (doll-house 5.0); camera − player = 9.0 (authored 9.0)
+    PASS  no camera cut, shade closed, patio: camshots seen [5.0] (doll-house 5.0); camera − player = 9.0 (authored 9.0)
+    PASS  no camera cut at 640's master window: player at (-6.9, -4.4); camshots seen [5.0]
+    PASS  no camera cut while walking onto the patio and back: 439 samples during the walks, camshots [5.0]
+    RESULT: PASS
+    [exit 0]
+    ```
+
+    **PASS.** A press in the project room does nothing, and so does one on the balcony beyond reach (y −1.50). A press within reach closes the shade in 1.9 s of level time (2 s by design), with continuous travel. A second press mid-travel reverses it from 0.70 without a snap, and a held press toggles once. Slats and bar land on their baked positions closed and park again when open.
+
+7b. Pressing B in the shade's reach moves only the shade, and in the glass doors' reach only the doors, with the doors open and closed. *(Added 2026‑09‑30 at the coordinator's request.)*
+
+    ```
+    $ python3 tests/verify_condo_balcony_shade.py
+    PASS  doors open: B at shade reach (4.10, −0.60) moves shade only: shade target 0.0→1.0, door target 0.0→0.0
+    PASS  doors open: B at door reach from the patio (7.25, −1.35) moves doors only: shade target 0.0→0.0, door target 0.0→1.0
+    PASS  doors open: B at between the bands (4.10, −1.02) moves nothing only: shade target 0.0→0.0, door target 0.0→0.0
+    PASS  doors closed: B at shade reach (4.10, −0.60) moves shade only: shade target 0.0→1.0, door target 1.0→1.0
+    PASS  doors closed: B at door reach from the patio (4.10, −1.30) moves doors only: shade target 0.0→0.0, door target 1.0→0.0
+    PASS  doors closed: B at between the bands (4.10, −1.02) moves nothing only: shade target 0.0→0.0, door target 1.0→1.0
+    RESULT: PASS
+    (lines from the step-7 run above)
+    ```
+
+    **PASS.** The reach bands are disjoint by construction: the shade's is player y ≥ −1.00, 0.90 m from the pony wall's inner face, and the doors' ends at y ≤ −1.04, 0.85 m from the patio-side track. The build asserts this. Between the bands (y −1.02) a press moves nothing. The wall switch sits in the shade's band, on the south jamb at y −0.30, z 1.14.
+
 8. **On site, before ordering:** measure the clear width at top, middle and bottom, the pony-wall cap level along its length, the face the pony wall is flush with, and the ledge's true height (Open questions 4–5, and the north jamb's plumb); update the constants.
+
+    **Not run** — on site, before ordering.
+

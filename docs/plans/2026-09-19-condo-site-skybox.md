@@ -1,5 +1,7 @@
 # Condo level: site skybox from the real location + 6th‑floor elevation
 
+> **Superseded in part (2026‑09‑30):** the automatic balcony camera cut described here (`zone-balcony` / `zone-interior` → `cs_balcony`, `BalconyLook`, mailboxes 97–99) is **off by default**. Will: "we'll do something better later." `blender_create_condo.py` § 7b builds it only with `CONDO_POV_TRIGGERS=1`. The sky dome, ground map and surroundings are unchanged. See [the balcony-shade plan](2026-09-30-condo-balcony-shade.md), Verification 6.
+
 ## Context
 
 The condo walkthrough (`wflevels/condo_639_640`, plan

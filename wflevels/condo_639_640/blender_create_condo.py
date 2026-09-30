@@ -842,7 +842,8 @@ def unit_teleport_forth(camera_idx, dollhouse_idx):
         lines.append(f'0 INDEXOF_{axis}SPEED write-mailbox')
     lines += ['0 INDEXOF_INPUT write-mailbox',
               f'{dollhouse_idx} INDEXOF_CAMSHOT write-mailbox']
-    for mb in (MB_ZONE_INTERIOR, MB_ZONE_BALCONY, MB_ZONE_MASTER, MB_BALCONY_T0, MB_MASTER_T0):
+    for mb in ((MB_ZONE_INTERIOR, MB_ZONE_BALCONY, MB_ZONE_MASTER, MB_BALCONY_T0, MB_MASTER_T0)
+               if CONDO_POV_TRIGGERS else ()):
         lines.append(f'0 {mb} write-mailbox')
     lines += [f'then 1 {MB_UNIT_PRESS_LATCH} write-mailbox',
               f'else 0 {MB_UNIT_PRESS_LATCH} write-mailbox then']
@@ -969,6 +970,15 @@ camera['wf_FoggingStartDistance']    = 999.0
 camera['wf_FoggingCompleteDistance'] = 1000.0
 
 # ── 7b. Balcony camera: step onto 639's patio and the shot cuts to Bangkok ──────
+# OFF BY DEFAULT since 2026-09-30 (Will: "we'll do something better later"): with
+# CONDO_POV_TRIGGERS unset the level has no automatic camera cuts — no zone-interior /
+# zone-balcony / zone-master, no cs_balcony / cs_master, no BalconyLook / MasterLook and no
+# Director zone clauses; cs_dollhouse is the only automatic shot (the engine seeds
+# INDEXOF_CAMSHOT with the first CamShot it creates, game/level.cc, which is cs_dollhouse).
+# The helpers below stay so a better version can reuse them; CONDO_POV_TRIGGERS=1 builds
+# the old behaviour back. Mailboxes 95–99 stay reserved for it. The manual camera controls
+# (camera_controls.fth, the C / 3 teleport) are unaffected.
+#
 # Two ActBoxOR zones write their camshot's object index to a mailbox every tick the
 # player overlaps them (game/actboxor.cc — it never clears); the Director forwards the
 # mailbox to INDEXOF_CAMSHOT and zeroes it. In bungee-cam mode the handler re-reads
@@ -983,7 +993,9 @@ camera['wf_FoggingCompleteDistance'] = 1000.0
 # collidable actor (BungeeCameraHandler ClimbRate): inside the patio it would hit the player
 # or the walls and sail upward. movecam.cc SetCameraParametersFromShot: position =
 # (camshot − Follow) + Player, direction = Target − camshot, both in world space.
+CONDO_POV_TRIGGERS = os.environ.get('CONDO_POV_TRIGGERS', '0') not in ('', '0', 'false', 'False')
 MB_ZONE_INTERIOR, MB_ZONE_BALCONY, MB_BALCONY_T0 = 98, 99, 97   # 97: level time the player stepped onto the patio (0 = not there)
+MB_ZONE_MASTER, MB_MASTER_T0 = 95, 96
 BALCONY_ROOMS = ('639-patio', '639-patio-recessed')
 _bal = [(mn, mx) for name, mn, mx in room_outlines if name in BALCONY_ROOMS]
 assert len(_bal) == len(BALCONY_ROOMS), f"balcony outlines missing: {[n for n, _, _ in room_outlines]}"
@@ -1087,17 +1099,17 @@ pad = 0.1
 # the glass-door plane. Both tour patio holds sit at y = −1.0, comfortably past
 # this inset trigger edge.
 BALCONY_ZONE_ENTRY_Y = -1.55
-bal_zone_min = Vector((bal_min.x - pad, max(bal_min.y - pad, BALCONY_ZONE_ENTRY_Y), bal_min.z - 0.5))
-bal_zone_max = bal_max + Vector((pad, pad, 0.5))
-cs_balcony, balcony_look, zone_balcony = add_pov_camera(
-    'balcony', BALCONY_CAM, BALCONY_LOOK0, BALCONY_LOOK1,
-    bal_zone_min, bal_zone_max, MB_ZONE_BALCONY, MB_BALCONY_T0)
+if CONDO_POV_TRIGGERS:
+    bal_zone_min = Vector((bal_min.x - pad, max(bal_min.y - pad, BALCONY_ZONE_ENTRY_Y), bal_min.z - 0.5))
+    bal_zone_max = bal_max + Vector((pad, pad, 0.5))
+    cs_balcony, balcony_look, zone_balcony = add_pov_camera(
+        'balcony', BALCONY_CAM, BALCONY_LOOK0, BALCONY_LOOK1,
+        bal_zone_min, bal_zone_max, MB_ZONE_BALCONY, MB_BALCONY_T0)
 
 # Master-bedroom window (plan: docs/plans/2026-09-19-condo-master-window-pov.md). 640's
 # master bedroom has its curved glass along the unit's −X (compass south) wall; the zone is
 # the strip within MASTER_STRIP_W of it. The camera sits 1.8 m further in −X — past the glass
 # and past unit-640's actor bbox (min x −7.95), so the physics camera has nothing to hit.
-MB_ZONE_MASTER, MB_MASTER_T0 = 95, 96
 MASTER_ROOM   = '640-master-bed'
 MASTER_STRIP_W = 1.6
 MASTER_CAM    = (-1.8, 0.0, 1.7)
@@ -1109,15 +1121,19 @@ MASTER_LOOK0  = (-18.0, -11.0, 0.6)
 MASTER_LOOK1  = (-18.0, 2.0, 2.0)
 _mb = next(((mn, mx) for name, mn, mx in room_outlines if name == MASTER_ROOM), None)
 assert _mb is not None, f"{MASTER_ROOM} outline missing"
-cs_master, master_look, zone_master = add_pov_camera(
-    'master', MASTER_CAM, MASTER_LOOK0, MASTER_LOOK1,
-    (_mb[0].x - pad, _mb[0].y - pad, -0.5), (_mb[0].x + MASTER_STRIP_W, _mb[1].y + pad, WALL_H + 0.5),
-    MB_ZONE_MASTER, MB_MASTER_T0)
-
 cx0, cy0, cx1, cy1 = CORRIDOR
-zone_interior = add_zone('zone-interior', Vector((min(cx0, -8.2), cy0 - 0.5, -0.5)),
-                         Vector((max(cx1, 8.2), bal_min.y - pad, WALL_H + 0.5)),
-                         MB_ZONE_INTERIOR, 'cs_dollhouse')
+if CONDO_POV_TRIGGERS:
+    cs_master, master_look, zone_master = add_pov_camera(
+        'master', MASTER_CAM, MASTER_LOOK0, MASTER_LOOK1,
+        (_mb[0].x - pad, _mb[0].y - pad, -0.5), (_mb[0].x + MASTER_STRIP_W, _mb[1].y + pad, WALL_H + 0.5),
+        MB_ZONE_MASTER, MB_MASTER_T0)
+    # The interior zone only exists to cut back from a POV shot to the doll-house.
+    zone_interior = add_zone('zone-interior', Vector((min(cx0, -8.2), cy0 - 0.5, -0.5)),
+                             Vector((max(cx1, 8.2), bal_min.y - pad, WALL_H + 0.5)),
+                             MB_ZONE_INTERIOR, 'cs_dollhouse')
+else:
+    print("[condo] window POV cameras: OFF — no automatic cuts, cs_dollhouse is the only automatic shot "
+          "(CONDO_POV_TRIGGERS=1 restores cs_balcony / cs_master and their zones)")
 
 # ── 7c. 639-project-rm patio wall: telescoping glass doors, not a wall ───────
 # Plan: docs/plans/2026-09-20-condo-project-room-telescoping-doors.md
@@ -1404,6 +1420,566 @@ else:
     print(f"[condo] {DOOR_ROOM} telescoping doors: OFF (CONDO_DOORS=0 set; the plain "
           f"{DOOR_WALL} stays — see docs/plans/2026-09-20-condo-project-room-telescoping-doors.md)")
 
+# ── 7d. 639 back balcony: 7 cm floor recess, rebuilt opening, motorised zip screen ──
+# Plan: docs/plans/2026-09-30-condo-balcony-shade.md (part B). CONDO_SHADE=0 builds today's
+# level back (1.00 m parapet, no beam, flat floor, no shade, no grass).
+#
+# The source .blend is read only, so everything here edits the appended copy:
+#   1. `unit-639`'s floor is ONE z = 0 face over the whole unit. The WHOLE recessed patio
+#      (Will, 2026-09-30: door-wall threshold → pony wall, x 2.75…5.55) drops FLOOR_RECESS:
+#      bisect its floor faces on that rectangle, split it off, lower it and close every
+#      boundary edge with a riser (welded back to the upper floor) — no T-junctions. The
+#      step up to the interior is the riser under the door wall's patio face. Artificial
+#      grass (GRASS_T thick) then covers the recess, so the walk-on step is 6 cm.
+#   2. The shell's own parapet box (x 2.65…5.85, y −0.10…0, z 0…1.00) is deleted and the
+#      opening rebuilt as statplats: pony wall, north jamb stub + pier to the existing post.
+#      The ledge (beam) is NOT local to the opening (Will, 2026-09-30): it runs the whole
+#      west façade of both units, soffit to the model's 2.70 m ceiling — one actor,
+#      `west-facade-ledge`, built by an x-sweep (see _west_ledge_boxes).
+#   3. The shade: cassette (solar strip = 2nd material on its west, +Y, face), two zip
+#      guides, SLAT_N fabric slats and the bottom bar, each its own statplat.
+#   4. Motion (Director, § 9c): slat i is baked CLOSED; at closedness c its INDEXOF_Z_POS is
+#      lift + (1 − c)·((i + 1)·SLAT_H + BAR_H + SLAT_PARK_EPS), so c = 1 tiles the drop and
+#      c = 0 parks every slat AND the bar (which rides the last slat) inside the cassette:
+#      raised, nothing hangs in the opening (plan A, "When raised"). Same integrator,
+#      B-press latch and runtime-index resolution as § 7c; see there for why a StatPlat
+#      cannot carry its own script.
+#
+# DATUM: Will measured 111 / 111 from the RECESSED balcony floor (Open question 1). Level
+# z = 0 is the interior floor, so the recessed floor is z = −0.07, the cap 1.04, the soffit
+# 2.15. Every z below is level z (pre-lift; § 9b adds UNIT_Z).
+CONDO_SHADE = os.environ.get('CONDO_SHADE', '1') not in ('', '0', 'false', 'False')
+# Will's measurements, 2026-09-30 (metres)
+SHADE_W        = 2.68     # clear opening width
+PONY_H         = 1.11     # pony wall, above the recessed floor
+PONY_T         = 0.10     # pony-wall thickness, flush with the outer (west) face — Open question 4 default
+OPEN_H         = 1.11     # cap → beam soffit
+LEDGE_DEEP     = 0.35     # ledge front-to-back, flush with the outer face, overhanging the balcony by 25 cm
+FLOOR_RECESS   = 0.07     # balcony floor below the interior floor
+PATIO_W        = 2.80     # 639-patio-recessed, real width (the survey outline says 2.70)
+# Model anchors (asserted against the appended geometry below)
+SHADE_ROOM     = '639-patio-recessed'
+SHADE_MAIN_PATIO = '639-patio'
+SOUTH_WALL     = '639-bath-N-E-wall'   # full-height south jamb; its +X face is the opening's south edge
+SOUTH_WALL_X   = 2.75     # … at this x: the opening is flush to it (Open question 5, inferred)
+POST_X0        = 5.70     # the shell's existing full-height post, x 5.70…5.80
+OUTER_Y        = 0.0      # outer (west) face of the opening
+OLD_PARAPET    = ((2.65, -0.10, 0.0), (5.85, 0.0, 1.00))   # shell parapet box that is replaced
+THRESHOLD_WALL = DOOR_WALL   # the patio's y ≈ −2.00 door wall (surveyed y −2.05…−1.95) …
+THRESHOLD_Y    = -1.95    # … whose patio-side face is the step: the riser sits flush under it, so no
+                          # slot opens under the wall, and no § 7c leaf floats (tracks 0/1 end at −1.95;
+                          # the patio-side track 2 only carries the fixed leaf, x ≥ 6.47, outside the recess)
+DRAIN_OBJ      = '639-daikin-drain'
+# The west-façade ledge. Extent = union of both shells' outer (+Y) faces at y ≈ OUTER_Y. Per
+# x-slab it is the wall column (y −PONY_T…0) plus the room-side overhang (to −LEDGE_DEEP) where
+# a floor lies behind it, minus the footprint of every wall top already at WALL_H.
+LEDGE_NAME     = 'west-facade-ledge'
+LEDGE_SHELLS   = ('unit-639', 'unit-640')
+LEDGE_OUTER_TOL = 0.03    # |y − OUTER_Y| for an outer-face polygon to count as the west façade
+LEDGE_MIN_DIM  = 0.01     # drop sweep boxes thinner than this (engine face-area floor)
+DRAIN_EASE     = 0.25     # the drain's outlet eases down to the balcony surface over this far past the wall
+# Artificial grass over the recessed patio (Will, 2026-09-30). CONDO_GRASS=0 leaves bare concrete.
+CONDO_GRASS    = os.environ.get('CONDO_GRASS', '1') not in ('', '0', 'false', 'False')
+GRASS_T        = 0.01     # nominally 4 cm pile but it lies flat, under 1 cm (Will): the walk-on step is 7 − 1 = 6 cm
+GRASS_RGB      = (0.13, 0.29, 0.10)   # darker green (Will, 2026-09-30)
+# The shade (plan part A defaults; placeholders until the supplier's drawing)
+CASS_H         = 0.10     # cassette height …
+CASS_D         = PONY_T   # … and depth: flush with the pony wall's outer face so the bar lands on the cap
+GUIDE_W        = 0.05     # zip guide width along the reveal (x)
+GUIDE_D        = 0.04     # guide depth (y), centred on the fabric
+BAR_H, BAR_D   = 0.03, 0.04
+BAR_GAP        = 0.002    # bar's seal clears the cap by 2 mm: no coplanar faces
+SLAT_N         = 8
+SLAT_T         = 0.003    # fabric thickness (y)
+SLAT_DY        = 0.001    # slat i is offset i·1 mm in y: overlapping slats never share a plane
+SLAT_TUCK      = 0.01     # slat ends run this far into the guides (the zip channel)
+SLAT_PARK_EPS  = 0.005    # open: the parked bar sits this far inside the cassette, clear of its bottom face
+SLAT_OVERLAP   = 0.002    # each slat runs this far past its nominal top and bottom, so neighbours overlap
+                          # (SLAT_DY keeps the overlap non-coplanar) and no seam can ever open a gap.
+# Slats have no top/bottom faces: fabric has no edge. A 3 mm horizontal face seen nearly edge-on
+# rendered as a row of single-pixel sparkles along every slat in the closed capture.
+SOLAR_STRIP_L  = 1.00     # placeholder strip length, centred on the cassette's west face
+SOLAR_STRIP_H  = 0.06
+SHADE_TRAVEL_S = 2.0      # seconds for a full roll, like the doors
+SHADE_REACH    = 0.90     # B works within this far of the pony wall's inner face (and the opening's ends):
+                          # player y ≥ −1.00. The § 7c door reach ends at y −1.04 (0.85 from the patio-side
+                          # track), so one B press can never reach both — asserted below.
+# Wall switch (Will, 2026-09-30): a visual cue on the south jamb's inner face beside the opening,
+# styled after the project-room door's former switch (dark plate, orange rocker; Mass 0). It sits
+# inside the reach band; the reach itself stays the Forth proximity test, like the doors'.
+SWITCH_Y       = -0.30    # centre, 20 cm in from the pony wall's inner face
+SWITCH_H_ABOVE = 1.20     # centre height above the walk-on surface
+SWITCH_PLATE   = (0.015, 0.09, 0.14)   # x (proud of the wall), y, z
+SWITCH_ROCKER  = (0.010, 0.05, 0.07)
+SWITCH_RGB     = {'plate': (0.16, 0.18, 0.20), 'rocker': (0.95, 0.32, 0.08)}
+SHADE_INIT     = os.environ.get('CONDO_SHADE_INIT', '')   # capture only: start at this closedness (0…1)
+# Collision of everything above the pony-wall cap (ledge, cassette, guides, slats, bar). The
+# plan (Approach B.6) keeps them ordinary statplats (Mass unset → statplat default 75): the
+# player cannot reach any of them. '' keeps that; CONDO_SHADE_OVERHEAD_MASS=0 takes them out
+# of the physics camera's bbox pass (the skydome / site-buildings precedent) — see the plan's
+# Verification 6 for the balcony-POV measurement that motivates the option.
+SHADE_OVERHEAD_MASS = os.environ.get('CONDO_SHADE_OVERHEAD_MASS', '')
+# Global mailboxes: 60–64 are free (in use: 80–99, 110–142, 500–502; NUM_MAILBOXES 160).
+MB_SHADE_INIT, MB_SHADE_PRESS_LATCH, MB_SHADE_REACH = 60, 61, 62
+MB_SHADE_TARGET, MB_SHADE_CLOSEDNESS = 63, 64      # target 0 = open / 1 = closed; closedness 0…1
+SHADE_RGB = {'cassette': (0.74, 0.75, 0.77), 'solar': (0.07, 0.09, 0.20), 'guide': (0.66, 0.67, 0.69),
+             'fabric': (0.86, 0.83, 0.76), 'bar': (0.50, 0.51, 0.53)}
+# Derived
+OPEN_X0        = SOUTH_WALL_X
+OPEN_X1        = OPEN_X0 + SHADE_W                  # 5.43
+PATIO_X1       = OPEN_X0 + PATIO_W                  # 5.55: north jamb stub OPEN_X1…PATIO_X1, pier → POST_X0
+FLOOR_Z        = -FLOOR_RECESS
+CAP_Z          = FLOOR_Z + PONY_H                   # 1.04
+SOFFIT_Z       = CAP_Z + OPEN_H                     # 2.15
+PONY_Y0        = OUTER_Y - PONY_T
+LEDGE_Y0       = OUTER_Y - LEDGE_DEEP
+FABRIC_Y       = OUTER_Y - CASS_D / 2
+CASS_BOT       = SOFFIT_Z - CASS_H
+BAR_BOT        = CAP_Z + BAR_GAP
+BAR_TOP        = BAR_BOT + BAR_H
+SLAT_H         = (CASS_BOT - BAR_TOP) / SLAT_N
+FAB_X0, FAB_X1 = OPEN_X0 + GUIDE_W - SLAT_TUCK, OPEN_X1 - GUIDE_W + SLAT_TUCK
+_shade_forth_fn = None       # Director clause factory; None unless the shade is built
+shade_slats = []             # slat 0 (top) … SLAT_N − 1, then the bar — contiguous in the export list
+
+if CONDO_SHADE:
+    assert OPEN_X1 < PATIO_X1 <= POST_X0, (OPEN_X1, PATIO_X1, POST_X0)
+    assert SOFFIT_Z < WALL_H, "the ledge needs room between the soffit and the model ceiling"
+    # Parked (c = 0): the bar sits in the cassette and slat 0's top (CASS_BOT + SLAT_H + BAR_H
+    # + eps) stays inside cassette + ledge; every slat's y lies inside both.
+    assert BAR_H + SLAT_PARK_EPS < CASS_H and SLAT_H + BAR_H + SLAT_PARK_EPS + SLAT_OVERLAP < CASS_H + (WALL_H - SOFFIT_Z)
+    assert SLAT_PARK_EPS + BAR_H - SLAT_OVERLAP > 0, "a parked slat's bottom must stay inside the cassette"
+    _sy = FABRIC_Y + ((SLAT_N - 1) / 2) * SLAT_DY + SLAT_T / 2
+    assert OUTER_Y - CASS_D < FABRIC_Y - (_sy - FABRIC_Y) and _sy < OUTER_Y and GUIDE_D / 2 > _sy - FABRIC_Y
+
+    _south = bpy.data.objects.get(SOUTH_WALL)
+    assert _south is not None, f"{SOUTH_WALL} missing — the source .blend changed shape"
+    _sx1 = max((_south.matrix_world @ Vector(c)).x for c in _south.bound_box)
+    assert abs(_sx1 - SOUTH_WALL_X) < 1e-3, f"{SOUTH_WALL} inner face at x {_sx1:.3f}, expected {SOUTH_WALL_X}"
+    _room = next(((mn, mx) for name, mn, mx in room_outlines if name == SHADE_ROOM), None)
+    assert _room is not None, f"{SHADE_ROOM} outline missing"
+    _thr = bpy.data.objects.get(THRESHOLD_WALL)
+    assert _thr is not None, f"{THRESHOLD_WALL} missing — the source .blend changed shape"
+    _ty1 = max((_thr.matrix_world @ Vector(c)).y for c in _thr.bound_box)
+    assert abs(_ty1 - THRESHOLD_Y) < 1e-3, f"{THRESHOLD_WALL} patio face at y {_ty1:.3f}, expected {THRESHOLD_Y}"
+    assert abs(_room[0].y - (THRESHOLD_Y - 0.05)) < 1e-3, f"{SHADE_ROOM} no longer starts at the door wall"
+    RECESS = (OPEN_X0, THRESHOLD_Y, PATIO_X1, PONY_Y0)       # x0, y0, x1, y1: the whole recessed patio
+    SURFACE_Z = FLOOR_Z + (GRASS_T if CONDO_GRASS else 0.0)   # what the player walks on
+
+    _shell = bpy.data.objects['unit-639']
+    _me = _shell.data
+    _mi = {m.name: i for i, m in enumerate(_me.materials)}
+    _wall_mat = _me.materials[_mi['unit-639']]
+    _riser_mi = next((i for n, i in _mi.items() if n.startswith('seam-unit-639')), _mi['unit-639'])
+    _t = _shell.matrix_world.translation            # bake_transform left only a translation
+
+    _bm = bmesh.new()
+    _bm.from_mesh(_me)
+
+    def _floor_faces():
+        _bm.normal_update()
+        return [f for f in _bm.faces
+                if f.normal.z > 0.9 and abs(f.calc_center_median().z + _t.z) < 1e-3]
+
+    # (2a) delete the shell's parapet: every non-floor face wholly inside its box AND lying
+    # on one of the box's six planes (§ 3c's seam cut left a 12 cm band of the bath wall's
+    # x = 2.75 face inside the box too; it is on no parapet plane, so it stays).
+    _lo = Vector(OLD_PARAPET[0]) - _t
+    _hi = Vector(OLD_PARAPET[1]) - _t
+    _floor_set = set(_floor_faces())
+
+    def _on_parapet(f, eps=1e-3):
+        if not all(_lo[k] - eps <= v.co[k] <= _hi[k] + eps for v in f.verts for k in range(3)):
+            return False
+        return any(all(abs(v.co[k] - b[k]) < eps for v in f.verts) for k in range(3) for b in (_lo, _hi))
+    _old = [f for f in _bm.faces if f not in _floor_set and _on_parapet(f)]
+    _old_area = sum(f.calc_area() for f in _old)
+    # 2·(3.20·0.10 + 3.20·1.00 + 0.10·1.00) = 7.24 m² — the whole box, nothing else.
+    assert abs(_old_area - 7.24) < 0.01, f"old parapet faces {len(_old)}, area {_old_area:.3f} m²"
+    _bmesh.ops.delete(_bm, geom=_old, context='FACES_ONLY')
+    _bmesh.ops.delete(_bm, geom=[v for v in _bm.verts if not v.link_faces], context='VERTS')
+
+    # (1) floor recess
+    _rx0, _ry0, _rx1, _ry1 = RECESS[0] - _t.x, RECESS[1] - _t.y, RECESS[2] - _t.x, RECESS[3] - _t.y
+    for _co, _no in (((_rx0, 0, 0), (1, 0, 0)), ((_rx1, 0, 0), (1, 0, 0)),
+                     ((0, _ry0, 0), (0, 1, 0)), ((0, _ry1, 0), (0, 1, 0))):
+        _ff = _floor_faces()
+        _bmesh.ops.bisect_plane(
+            _bm, geom=list({v for f in _ff for v in f.verts}) + list({e for f in _ff for e in f.edges}) + _ff,
+            dist=1e-4, plane_co=_co, plane_no=_no, clear_inner=False, clear_outer=False)
+    _region = [f for f in _floor_faces()
+               if _rx0 < f.calc_center_median().x < _rx1 and _ry0 < f.calc_center_median().y < _ry1]
+    _region_area = sum(f.calc_area() for f in _region)
+    _want = (RECESS[2] - RECESS[0]) * (RECESS[3] - RECESS[1])
+    assert abs(_region_area - _want) < 1e-3, f"recess floor {_region_area:.4f} m², expected {_want:.4f}"
+    _region = [g for g in _bmesh.ops.split(_bm, geom=_region, use_only_faces=False)['geom']
+               if isinstance(g, bmesh.types.BMFace)]
+    for _v in {v for f in _region for v in f.verts}:
+        _v.co.z -= FLOOR_RECESS
+    _risers = 0
+    for _f in _region:
+        _c = _f.calc_center_median()
+        for _e in _f.edges:
+            if len(_e.link_faces) != 1:
+                continue
+            _a, _b = _e.verts
+            _a2 = _bm.verts.new(_a.co + Vector((0, 0, FLOOR_RECESS)))
+            _b2 = _bm.verts.new(_b.co + Vector((0, 0, FLOOR_RECESS)))
+            _rf = _bm.faces.new((_a, _b, _b2, _a2))
+            _rf.normal_update()
+            _mid = (_a.co + _b.co) / 2
+            if _rf.normal.dot(Vector((_c.x - _mid.x, _c.y - _mid.y, 0.0))) < 0:
+                _rf.normal_flip()                   # risers face into the recess (Blender's hand)
+            _rf.material_index = _riser_mi
+            _risers += 1
+    _bmesh.ops.remove_doubles(_bm, verts=_bm.verts, dist=1e-5)    # weld riser tops to the upper floor
+    # Re-triangulate only what the cuts touched (bisected floor triangles become quads and
+    # a wall face sharing a cut edge gains a colinear vertex → a zero-area triangle, which
+    # the engine's face-normal assert would reject). The rest of the shell stays as § 3c left it.
+    _near = [f for f in _bm.faces
+             if any(_rx0 - 0.05 <= v.co.x <= _rx1 + 0.05 and _ry0 - 0.05 <= v.co.y <= _ry1 + 0.15 for v in f.verts)]
+    _tris = _bmesh.ops.triangulate(_bm, faces=_near)['faces']
+    _tiny = [f for f in set(_near) | set(_tris) if f.is_valid and f.calc_area() < MIN_FACE_AREA]
+    _tiny_area = sum(f.calc_area() for f in _tiny)
+    _bmesh.ops.delete(_bm, geom=_tiny, context='FACES_ONLY')
+    _bm.to_mesh(_me)
+    _bm.free()
+    _me.update()
+
+    # The drain outlet (x 3.125, y −0.375) sat on the old floor: ease its tube down onto the
+    # new surface (grass top, or the concrete without it).
+    _drain = bpy.data.objects.get(DRAIN_OBJ)
+    _eased = 0
+    if _drain is not None:
+        _dt = _drain.matrix_world.translation
+        for _v in _drain.data.vertices:
+            _w = _v.co + _dt
+            if RECESS[0] < _w.x < RECESS[2] and RECESS[1] < _w.y < RECESS[3]:
+                _v.co.z -= -SURFACE_Z * min(1.0, (RECESS[3] - _w.y) / DRAIN_EASE)
+                _eased += 1
+        _drain.data.update()
+
+    # The patio outline (a `target` locator from § 4) widens to the real 2.80 m; the main
+    # patio starts where it ends. The § 7b balcony zone is the union of both, so it only
+    # loses the 5 cm the south wall occupies — the camera switch is unchanged.
+    def _set_outline(name, x0=None, x1=None):
+        o = bpy.data.objects[name]
+        h = o['wf_original_bbox']
+        mn = Vector((o.location.x + h[0], o.location.y + h[1], o.location.z + h[2]))
+        mx = Vector((o.location.x + h[3], o.location.y + h[4], o.location.z + h[5]))
+        mn.x = mn.x if x0 is None else x0
+        mx.x = mx.x if x1 is None else x1
+        o.location = (mn + mx) / 2
+        half = (mx - mn) / 2
+        o['wf_original_bbox'] = (-half.x, -half.y, -half.z, half.x, half.y, half.z)
+        return mn, mx
+    _pr = _set_outline(SHADE_ROOM, x0=OPEN_X0, x1=PATIO_X1)
+    _pm = _set_outline(SHADE_MAIN_PATIO, x0=PATIO_X1)
+
+    def _box_actor(name, lo, hi, mat, face_mat=None):
+        """World-baked box statplat. `face_mat(face) → material index` paints extra materials."""
+        bm = _bmesh.new()
+        for v in _bmesh.ops.create_cube(bm, size=1.0)['verts']:
+            v.co = tuple((lo[k] + hi[k]) / 2 + v.co[k] * (hi[k] - lo[k]) for k in range(3))
+        _bmesh.ops.recalc_face_normals(bm, faces=bm.faces)
+        me = bpy.data.meshes.new(name)
+        if face_mat:
+            face_mat(bm)
+        bm.to_mesh(me)
+        bm.free()
+        for m in (mat if isinstance(mat, (list, tuple)) else [mat]):
+            me.materials.append(m)
+        obj = bpy.data.objects.new(name, me)
+        scene.collection.objects.link(obj)
+        clean_mesh(me, recalc=False)
+        as_statplat(obj)
+        return obj
+
+    # Grass: exactly the recess rectangle, bottom on the recessed floor. Its side faces lie
+    # back-to-back against the risers (opposite normals), so nothing is coplanar-and-facing;
+    # the riser's top 6 cm stays visible as the step. Ordinary statplat Mass: the player
+    # walks on its top, and Jolt's 0.4 m stair step handles the 6 cm up to the interior.
+    _grass = None
+    if CONDO_GRASS:
+        _grass = _box_actor('639-patio-grass', (RECESS[0], RECESS[1], FLOOR_Z), (RECESS[2], RECESS[3], SURFACE_Z),
+                            make_flat_material('patio-grass', GRASS_RGB))
+
+    # (2b) the opening
+    _pony = _box_actor('639-balcony-pony-wall', (OPEN_X0, PONY_Y0, 0.0), (OPEN_X1, OUTER_Y, CAP_Z), _wall_mat)
+    _jamb = _box_actor('639-balcony-north-jamb', (OPEN_X1, PONY_Y0, 0.0), (POST_X0, OUTER_Y, WALL_H), _wall_mat)
+    def _west_ledge_boxes():
+        """[(x0, x1, y0, y1, material)] boxes (z SOFFIT_Z…WALL_H) of the west-façade ledge; see LEDGE_NAME.
+
+        Each slab takes the material of the façade wall it sits on — the outer-face polygon at
+        that x that spans the ledge's mid-height (darkened seam variants included), or across
+        a gap in the wall (the opening, the service niche, between the units) the nearest one
+        along x. Never inferred from which side of the party line it is on: 640's master suite
+        is deliberately 639's blue."""
+        def world_polys(o, pred):
+            mw, r = o.matrix_world, o.matrix_world.to_3x3()
+            out = []
+            for pg in o.data.polygons:
+                n = (r @ pg.normal).normalized()
+                vs = [mw @ o.data.vertices[i].co for i in pg.vertices]
+                if pred(n, vs):
+                    out.append(vs)
+            return out
+        shells = [bpy.data.objects[n] for n in LEDGE_SHELLS]
+        facade = []                            # (x0, x1, z0, z1, material) of each outer-face polygon
+        for sh in shells:
+            mw, r = sh.matrix_world, sh.matrix_world.to_3x3()
+            for pg in sh.data.polygons:
+                vs = [mw @ sh.data.vertices[i].co for i in pg.vertices]
+                if ((r @ pg.normal).normalized().y > 0.9 and all(abs(v.y - OUTER_Y) < LEDGE_OUTER_TOL for v in vs)
+                        and max(v.z for v in vs) > SOFFIT_Z):
+                    facade.append((min(v.x for v in vs), max(v.x for v in vs), min(v.z for v in vs),
+                                   max(v.z for v in vs), sh.data.materials[pg.material_index]))
+        assert facade, "no west-façade wall polygons found"
+        lx0, lx1 = min(f[0] for f in facade), max(f[1] for f in facade)
+        z_mid = (SOFFIT_Z + WALL_H) / 2
+
+        def facade_mat(x):
+            """(material, x-distance to that wall piece): the piece at x spanning z_mid, else the nearest."""
+            f = min(facade, key=lambda f: (max(f[0] - x, x - f[1], 0.0), 0 if f[2] <= z_mid <= f[3] else 1))
+            return f[4], max(f[0] - x, x - f[1], 0.0)
+        skip = {site_map.name, skydome.name, site_buildings.name, site_podium.name, corridor.name, parapet.name}
+        tops = []                              # wall tops at WALL_H meeting the band's footprint
+        for o in scene.objects:
+            if o.type != 'MESH' or not o.get('wf_schema_path') or o.name in skip or o.name.startswith('639-balcony-shade'):
+                continue
+            tops += world_polys(o, lambda n, vs: n.z > 0.9 and all(abs(v.z - WALL_H) < 1e-3 for v in vs)
+                                and max(v.y for v in vs) > LEDGE_Y0 and min(v.y for v in vs) < OUTER_Y
+                                and max(v.x for v in vs) > lx0 and min(v.x for v in vs) < lx1)
+        probe_y = (LEDGE_Y0 + PONY_Y0) / 2     # "is there a floor behind the overhang?"
+        floors = [vs for sh in shells for vs in world_polys(
+            sh, lambda n, vs: n.z > 0.9 and all(-FLOOR_RECESS - 1e-3 <= v.z <= 1e-3 for v in vs))]
+
+        def cuts(poly, x):                      # y-interval of a convex polygon on the line X = x
+            ys = []
+            for a, b in zip(poly, poly[1:] + poly[:1]):
+                if (a.x - x) * (b.x - x) <= 0 and abs(b.x - a.x) > 1e-9:
+                    ys.append(a.y + (b.y - a.y) * (x - a.x) / (b.x - a.x))
+            return (min(ys), max(ys)) if ys else None
+
+        xs = {lx0, lx1}
+        for poly in tops:
+            xs |= {v.x for v in poly if lx0 < v.x < lx1}
+        for poly in floors:                     # where a floor edge crosses the probe line
+            for a, b in zip(poly, poly[1:] + poly[:1]):
+                if (a.y - probe_y) * (b.y - probe_y) < 0:
+                    x = a.x + (b.x - a.x) * (probe_y - a.y) / (b.y - a.y)
+                    if lx0 < x < lx1:
+                        xs.add(x)
+            xs |= {v.x for v in poly if lx0 < v.x < lx1}
+        xs = sorted(xs)
+        slabs = []
+        for xa, xb in zip(xs, xs[1:]):
+            if xb - xa < 1e-6:
+                continue
+            xm = (xa + xb) / 2
+            floor = any((c := cuts(poly, xm)) and c[0] <= probe_y <= c[1] for poly in floors)
+            free = [(LEDGE_Y0 if floor else PONY_Y0, OUTER_Y)]
+            for poly in tops:
+                c = cuts(poly, xm)
+                if not c:
+                    continue
+                free = [iv for y0, y1 in free for iv in ((y0, min(y1, c[0])), (max(y0, c[1]), y1)) if iv[1] - iv[0] > 1e-6]
+            free = [(round(y0, 5), round(y1, 5)) for y0, y1 in free if y1 - y0 >= LEDGE_MIN_DIM]
+            mat, gap = facade_mat(xm)
+            if slabs and slabs[-1][2] == free and slabs[-1][3] is mat and abs(slabs[-1][1] - xa) < 1e-6:
+                slabs[-1][1] = xb               # same cross-section and wall: extend the previous slab
+                slabs[-1][4] = max(slabs[-1][4], gap)
+            else:
+                slabs.append([xa, xb, free, mat, gap])
+        boxes = [(xa, xb, y0, y1, mat) for xa, xb, free, mat, _g in slabs for y0, y1 in free]
+        dropped = [b for b in boxes if b[1] - b[0] < LEDGE_MIN_DIM]
+        borrowed = [(xa, xb, mat.name) for xa, xb, free, mat, g in slabs if free and g > 1e-4]
+        return [b for b in boxes if b not in dropped], (lx0, lx1), dropped, borrowed
+
+    _lboxes, _lext, _ldropped, _lborrowed = _west_ledge_boxes()
+    _lbm = _bmesh.new()
+    _lmats = []                                # the ledge mesh's material slots, in first-use order
+    for _b in _lboxes:
+        if all(_b[4] is not _m_ for _m_ in _lmats):
+            _lmats.append(_b[4])
+    for _x0, _x1, _y0, _y1, _lmat in _lboxes:
+        _vs = _bmesh.ops.create_cube(_lbm, size=1.0)['verts']
+        for _v in _vs:
+            _v.co = ((_x0 + _x1) / 2 + _v.co.x * (_x1 - _x0), (_y0 + _y1) / 2 + _v.co.y * (_y1 - _y0),
+                     (SOFFIT_Z + WALL_H) / 2 + _v.co.z * (WALL_H - SOFFIT_Z))
+        _vset = set(_vs)
+        for _f in _lbm.faces:
+            if all(_v in _vset for _v in _f.verts):
+                _f.material_index = next(i for i, _m_ in enumerate(_lmats) if _m_ is _lmat)
+    _bmesh.ops.recalc_face_normals(_lbm, faces=_lbm.faces)
+    _lme = bpy.data.meshes.new(LEDGE_NAME)
+    _lbm.to_mesh(_lme)
+    _lbm.free()
+    for _m_ in _lmats:
+        _lme.materials.append(_m_)
+    _ledge = bpy.data.objects.new(LEDGE_NAME, _lme)
+    scene.collection.objects.link(_ledge)
+    clean_mesh(_lme, recalc=False)
+    as_statplat(_ledge)
+    # Audit: anything with a vertex strictly inside a ledge box intersects it.
+    _hits = {}
+    for _o in scene.objects:
+        if _o is _ledge or _o.type != 'MESH' or not _o.get('wf_schema_path'):
+            continue
+        _mw = _o.matrix_world
+        for _v in _o.data.vertices:
+            _w = _mw @ _v.co
+            if SOFFIT_Z + 1e-4 < _w.z < WALL_H - 1e-4 and any(
+                    b[0] + 1e-4 < _w.x < b[1] - 1e-4 and b[2] + 1e-4 < _w.y < b[3] - 1e-4 for b in _lboxes):
+                _hits.setdefault(_o.name, []).append(_w)
+    _ledge_report = "; ".join(
+        f"{n} ({len(ws)} verts, x {min(w.x for w in ws):.2f}…{max(w.x for w in ws):.2f} "
+        f"z {min(w.z for w in ws):.2f}…{max(w.z for w in ws):.2f})" for n, ws in sorted(_hits.items())) or "nothing"
+    print(f"[condo] west-façade ledge: {LEDGE_NAME} along the façade x {_lext[0]:.2f}…{_lext[1]:.2f}, built x "
+          f"{min(b[0] for b in _lboxes):.2f}…{max(b[1] for b in _lboxes):.2f} (cut at wall tops), z {SOFFIT_Z:.2f}…{WALL_H:.2f}, "
+          f"{len(_lboxes)} boxes ({len(_ldropped)} sub-{LEDGE_MIN_DIM * 100:.0f} cm dropped), full {LEDGE_DEEP * 100:.0f} cm "
+          f"depth only where a floor is behind it; intersects: {_ledge_report}")
+    _runs = []                                 # contiguous x runs per wall material, for the log
+    for _b in sorted(_lboxes, key=lambda b: b[0]):
+        if _runs and _runs[-1][2] is _b[4] and _b[0] <= _runs[-1][1] + 1e-6:
+            _runs[-1][1] = max(_runs[-1][1], _b[1])
+        else:
+            _runs.append([_b[0], _b[1], _b[4]])
+    print("[condo] west-façade ledge colours (from the wall at each x): "
+          + ", ".join(f"x {a:.2f}…{b:.2f} {m.name}" for a, b, m in _runs)
+          + ("; across wall gaps, nearest wall's colour: " + ", ".join(f"x {a:.2f}…{b:.2f} {n}" for a, b, n in _lborrowed)
+             if _lborrowed else ""))
+
+    # (3) the shade
+    _m = {k: make_flat_material(f'shade-{k}', rgb) for k, rgb in SHADE_RGB.items()}
+    _sx0 = (OPEN_X0 + OPEN_X1 - SOLAR_STRIP_L) / 2
+    _sz0 = CASS_BOT + (CASS_H - SOLAR_STRIP_H) / 2
+
+    def _paint_strip(bm):
+        for co, no in (((_sx0, 0, 0), (1, 0, 0)), ((_sx0 + SOLAR_STRIP_L, 0, 0), (1, 0, 0)),
+                       ((0, 0, _sz0), (0, 0, 1)), ((0, 0, _sz0 + SOLAR_STRIP_H), (0, 0, 1))):
+            _bmesh.ops.bisect_plane(bm, geom=list(bm.verts) + list(bm.edges) + list(bm.faces),
+                                    plane_co=co, plane_no=no, clear_inner=False, clear_outer=False)
+        bm.normal_update()
+        for f in bm.faces:
+            c = f.calc_center_median()
+            if f.normal.y > 0.9 and _sx0 < c.x < _sx0 + SOLAR_STRIP_L and _sz0 < c.z < _sz0 + SOLAR_STRIP_H:
+                f.material_index = 1
+    _cass = _box_actor('639-balcony-shade-cassette', (OPEN_X0, OUTER_Y - CASS_D, CASS_BOT),
+                       (OPEN_X1, OUTER_Y, SOFFIT_Z), [_m['cassette'], _m['solar']], face_mat=_paint_strip)
+    _guides = [_box_actor(f'639-balcony-shade-guide-{tag}', (x0, FABRIC_Y - GUIDE_D / 2, CAP_Z),
+                          (x0 + GUIDE_W, FABRIC_Y + GUIDE_D / 2, CASS_BOT), _m['guide'])
+               for tag, x0 in (('s', OPEN_X0), ('n', OPEN_X1 - GUIDE_W))]
+    def _drop_edges(bm):
+        _bmesh.ops.delete(bm, geom=[f for f in bm.faces if abs(f.normal.z) > 0.9], context='FACES_ONLY')
+
+    for _i in range(SLAT_N):
+        _yc = FABRIC_Y + (_i - (SLAT_N - 1) / 2) * SLAT_DY
+        _top = CASS_BOT - _i * SLAT_H
+        shade_slats.append(_box_actor(f'639-balcony-shade-slat-{_i}',
+                                      (FAB_X0, _yc - SLAT_T / 2, _top - SLAT_H - SLAT_OVERLAP),
+                                      (FAB_X1, _yc + SLAT_T / 2, _top + SLAT_OVERLAP), _m['fabric'],
+                                      face_mat=_drop_edges))
+    shade_slats.append(_box_actor('639-balcony-shade-bar', (OPEN_X0 + GUIDE_W, FABRIC_Y - BAR_D / 2, BAR_BOT),
+                                  (OPEN_X1 - GUIDE_W, FABRIC_Y + BAR_D / 2, BAR_TOP), _m['bar']))
+    if SHADE_OVERHEAD_MASS != '':
+        for _o in [_ledge, _cass] + _guides + shade_slats:
+            _o['wf_Mass'] = float(SHADE_OVERHEAD_MASS)
+    # The wall switch (after the slats, so they stay contiguous in the export list).
+    _sw_bm = _bmesh.new()
+    _sw_z = SURFACE_Z + SWITCH_H_ABOVE
+    for _mi_, (_dx, _size) in enumerate(((0.0, SWITCH_PLATE), (SWITCH_PLATE[0], SWITCH_ROCKER))):
+        _vs = _bmesh.ops.create_cube(_sw_bm, size=1.0)['verts']
+        _cx = OPEN_X0 + _dx + _size[0] / 2
+        for _v in _vs:
+            _v.co = (_cx + _v.co.x * _size[0], SWITCH_Y + _v.co.y * _size[1], _sw_z + _v.co.z * _size[2])
+        _vset = set(_vs)
+        for _f in _sw_bm.faces:
+            if all(_v in _vset for _v in _f.verts):
+                _f.material_index = _mi_
+    _bmesh.ops.recalc_face_normals(_sw_bm, faces=_sw_bm.faces)
+    _sw_me = bpy.data.meshes.new('639-balcony-shade-switch')
+    _sw_bm.to_mesh(_sw_me)
+    _sw_bm.free()
+    for _k in ('plate', 'rocker'):
+        _sw_me.materials.append(make_flat_material(f'shade-switch-{_k}', SWITCH_RGB[_k]))
+    shade_switch = bpy.data.objects.new('639-balcony-shade-switch', _sw_me)
+    scene.collection.objects.link(shade_switch)
+    clean_mesh(_sw_me, recalc=False)
+    as_statplat(shade_switch)
+    shade_switch['wf_Mass'] = 0.0          # a cue, not an obstacle (as the door's switch was)
+    assert PONY_Y0 - SHADE_REACH <= SWITCH_Y <= PONY_Y0, "the switch must sit inside the reach band"
+
+    # Park offsets (open, c = 0): slat i rises (i + 1)·SLAT_H + BAR_H + eps; the bar rides slat
+    # N − 1, so it ends with its bottom eps inside the cassette (stowed, nothing in the opening).
+    shade_park = [(_i + 1) * SLAT_H + BAR_H + SLAT_PARK_EPS for _i in range(SLAT_N)]
+    shade_park.append(shade_park[-1])
+    assert abs(BAR_BOT + shade_park[-1] - (CASS_BOT + SLAT_PARK_EPS)) < 1e-9
+
+    if CONDO_DOORS:
+        # One B press must never toggle both the doors and the shade: their reach bands
+        # are disjoint in y (doors: |y − track| ≤ DOOR_REACH + GLASS_T/2 about y ≈ −2).
+        _door_reach_ymax = DOOR_Y + (DOOR_PANELS - 1) / 2 * DOOR_TRACK_D + DOOR_REACH + GLASS_T / 2
+        assert PONY_Y0 - SHADE_REACH > _door_reach_ymax, (PONY_Y0 - SHADE_REACH, _door_reach_ymax)
+
+    def _shade_forth_fn(idx0, player_idx, base_z):
+        """Director clause. idx0 = runtime index of slat 0; base_z[k] = actor k's lifted Position z."""
+        init = ""
+        if SHADE_INIT:
+            c0 = min(1.0, max(0.0, float(SHADE_INIT)))
+            init = (f"{MB_SHADE_INIT} read-mailbox 0 = if {c0} {MB_SHADE_TARGET} write-mailbox "
+                    f"{c0} {MB_SHADE_CLOSEDNESS} write-mailbox 1 {MB_SHADE_INIT} write-mailbox then ")
+        p = f"{player_idx} read-actor-mailbox "
+        reach = (f"INDEXOF_X_POS {p}{OPEN_X0 - SHADE_REACH:.4f} >= "
+                 f"INDEXOF_X_POS {p}{OPEN_X1 + SHADE_REACH:.4f} <= & "
+                 f"INDEXOF_Y_POS {p}{PONY_Y0 - SHADE_REACH:.4f} >= & "
+                 f"INDEXOF_Y_POS {p}{OUTER_Y:.4f} <= & "
+                 f"INDEXOF_Z_POS {p}{UNIT_Z + FLOOR_Z - 0.1:.4f} >= & "
+                 f"INDEXOF_Z_POS {p}{UNIT_Z + WALL_H:.4f} <= & "
+                 f"{MB_SHADE_REACH} write-mailbox ")
+        press = ("INDEXOF_HARDWARE_JOYSTICK1_RAW_JUSTPRESSED read-mailbox JOYSTICK_BUTTON_B & 0 <> if "
+                 if TOUR else "119 read-mailbox 0 <> if ")
+        toggle = (f"{MB_SHADE_REACH} read-mailbox 0 <> if "
+                  f"{MB_SHADE_PRESS_LATCH} read-mailbox 0 = if "
+                  f"{MB_SHADE_TARGET} read-mailbox 0.5 < if 1 else 0 then {MB_SHADE_TARGET} write-mailbox "
+                  f"1 {MB_SHADE_PRESS_LATCH} write-mailbox then then "
+                  f"else 0 {MB_SHADE_PRESS_LATCH} write-mailbox then ")
+        # Constant-speed approach to the target, clamped at it (a mid-travel press reverses
+        # from wherever the fabric is; a capture init of 0.5 holds at 0.5).
+        step = f"INDEXOF_DELTA_TIME read-mailbox {SHADE_TRAVEL_S} / "
+        integrate = (f"{MB_SHADE_CLOSEDNESS} read-mailbox dup {MB_SHADE_TARGET} read-mailbox < if "
+                     f"{step}+ {MB_SHADE_TARGET} read-mailbox min else "
+                     f"{step}- {MB_SHADE_TARGET} read-mailbox max then "
+                     f"dup {MB_SHADE_CLOSEDNESS} write-mailbox 1 swap - ")          # ( 1−c )
+        # Z_POS on a world-baked mesh is an offset on top of the actor's Position, which
+        # § 9b set to the lift (troubleshooting § 6): write lift + park·(1 − c).
+        writes = "".join(f"dup {shade_park[k]:.5f} * {base_z[k]:.4f} + INDEXOF_Z_POS {idx0 + k} write-actor-mailbox "
+                         for k in range(len(shade_park)))
+        return init + reach + press + toggle + integrate + writes + "drop\n"
+
+    print(f"[condo] balcony shade: {SHADE_ROOM} x {_pr[0].x:.2f}…{_pr[1].x:.2f} ({PATIO_W:.2f} m), "
+          f"{SHADE_MAIN_PATIO} from x {_pm[0].x:.2f}; floor recessed {FLOOR_RECESS * 100:.0f} cm over "
+          f"x {RECESS[0]:.2f}…{RECESS[2]:.2f} y {RECESS[1]:.2f}…{RECESS[3]:.2f} ({len(_region)} faces, "
+          f"{_risers} risers, {len(_tiny)} degenerate triangles dropped = {_tiny_area:.1e} m²; drain {_eased} verts eased); "
+          f"old parapet {len(_old)} faces removed; "
+          + (f"grass {GRASS_T * 100:.0f} cm over the recess, top z {SURFACE_Z:.2f} → {-SURFACE_Z * 100:.0f} cm step"
+             if CONDO_GRASS else f"no grass (CONDO_GRASS=0) → {FLOOR_RECESS * 100:.0f} cm step"))
+    print(f"[condo] balcony shade: span x {OPEN_X0:.2f}…{OPEN_X1:.2f} ({SHADE_W:.3f} m), floor z {FLOOR_Z:.2f}, "
+          f"cap z {CAP_Z:.2f} ({PONY_T * 100:.0f} cm pony wall), soffit z {SOFFIT_Z:.2f} (west-façade ledge y {LEDGE_Y0:.2f}…{OUTER_Y:.2f} "
+          f"to z {WALL_H:.2f}); north jamb x {OPEN_X1:.2f}…{POST_X0:.2f}; cassette {CASS_D * 100:.0f}×{CASS_H * 100:.0f} cm "
+          f"(solar strip {SOLAR_STRIP_L:.2f} m on its west face); 2 guides; {SLAT_N} slats × {SLAT_H * 100:.2f} cm + bar, "
+          f"all stowed in the cassette when raised; "
+          f"{SHADE_TRAVEL_S:.1f} s travel; B/keyboard-2 within {SHADE_REACH:.2f} m (player y ≥ {PONY_Y0 - SHADE_REACH:.2f}"
+          + (f"; door reach ends at y {_door_reach_ymax:.2f}" if CONDO_DOORS else "") +
+          f"); wall switch on the south jamb at y {SWITCH_Y:.2f}, z {_sw_z:.2f}; mailboxes init {MB_SHADE_INIT}, "
+          f"press-latch {MB_SHADE_PRESS_LATCH}, reach {MB_SHADE_REACH}, target {MB_SHADE_TARGET}, "
+          f"closedness {MB_SHADE_CLOSEDNESS}; overhead parts Mass "
+          f"{SHADE_OVERHEAD_MASS if SHADE_OVERHEAD_MASS != '' else 'statplat default'}"
+          + (f"; capture init closedness {SHADE_INIT}" if SHADE_INIT else ""))
+else:
+    print("[condo] balcony shade: OFF (CONDO_SHADE=0 — shell parapet, no beam, flat floor; "
+          "see docs/plans/2026-09-30-condo-balcony-shade.md)")
+
 # ── 8. Lights, matte, director, levelobj ─────────────────────────────────────
 light = find_by_class('light')
 assert light is not None
@@ -1487,9 +2063,10 @@ def _zone_forward(zone_mb, t0_mb=None):
 
 # Interior first, the window zones after it, so a window shot wins while its strip is
 # occupied (the strips lie inside the interior zone).
-director['wf_Script'] = ("\\ wf\n" + _zone_forward(MB_ZONE_INTERIOR)
-                         + _zone_forward(MB_ZONE_BALCONY, MB_BALCONY_T0)
-                         + _zone_forward(MB_ZONE_MASTER, MB_MASTER_T0))
+director['wf_Script'] = "\\ wf\n" + ((_zone_forward(MB_ZONE_INTERIOR)
+                                         + _zone_forward(MB_ZONE_BALCONY, MB_BALCONY_T0)
+                                         + _zone_forward(MB_ZONE_MASTER, MB_MASTER_T0))
+                                        if CONDO_POV_TRIGGERS else "")
 # The telescoping-door clause is appended in § 9c, once the export ordering (and
 # therefore each panel's runtime actor index) is known.
 
@@ -1618,6 +2195,19 @@ if _door_forth_fn is not None:
           f"{DOOR_PANEL0_ACTOR_IDX}…{DOOR_PANEL0_ACTOR_IDX + DOOR_PANELS - 2} "
           f"(export positions {_panel_pos[0]}…{_panel_pos[-1]} + bias {DOOR_ACTOR_IDX_BIAS}); "
           f"verify with `wf_game --debug-print-actors`")
+if _shade_forth_fn is not None:
+    # Same derivation as the doors: export-list position + DOOR_ACTOR_IDX_BIAS. The base Z
+    # is each actor's Position after the § 9b lift (its Z_POS mailbox at load).
+    _slat_pos = [wf_objects.index(s) for s in shade_slats]
+    assert _slat_pos == list(range(_slat_pos[0], _slat_pos[0] + len(shade_slats))), \
+        f"shade slats are not contiguous in the export list: {_slat_pos}"
+    SHADE_SLAT0_ACTOR_IDX = _slat_pos[0] + DOOR_ACTOR_IDX_BIAS
+    director['wf_Script'] += _shade_forth_fn(SHADE_SLAT0_ACTOR_IDX,
+                                             wf_objects.index(player) + DOOR_ACTOR_IDX_BIAS,
+                                             [s.location.z for s in shade_slats])
+    print(f"[condo] balcony shade: slats + bar are runtime actors {SHADE_SLAT0_ACTOR_IDX}…"
+          f"{SHADE_SLAT0_ACTOR_IDX + len(shade_slats) - 1} (export positions {_slat_pos[0]}…{_slat_pos[-1]} "
+          f"+ bias {DOOR_ACTOR_IDX_BIAS}); verify with `wf_game --debug-print-actors`")
 
 # ── 10. Export ───────────────────────────────────────────────────────────────
 os.makedirs(OUT_DIR, exist_ok=True)

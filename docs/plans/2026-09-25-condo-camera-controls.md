@@ -1,5 +1,7 @@
 # Condo architectural walkthrough camera controls
 
+> **Superseded in part (2026‑09‑30):** the automatic window/patio views that a reset "restores" are **off by default** (`CONDO_POV_TRIGGERS=1` builds them back; Will: "we'll do something better later"). A reset now returns to the doll-house shot, the level's only automatic shot. The manual controls themselves (`camera_controls.fth`, C / 3 teleport, `CONDO_CAMERA_PROFILE`) are unchanged; `tests/verify_condo_camera_controls.py` expects the doll-house after a reset on the patio. See [the balcony-shade plan](2026-09-30-condo-balcony-shade.md), Verification 6.
+
 Status: implemented and verified in the existing desktop engine. Physical-device
 validation remains open; no engine source changes were made.
 

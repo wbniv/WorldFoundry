@@ -1,8 +1,13 @@
 | Date | Change |
 |------|--------|
+| [2026-09-20](https://github.com/wbniv/WorldFoundry/commit/17bdceb1) | feat(condo): improve patio and window camera pans |
 | [2026-09-19](https://github.com/wbniv/WorldFoundry/commit/00ae68df) | feat(condo): master-bedroom window POV pan; tour cut → 40 s |
 
 <!--history-meta v1
+17bdceb1	author	Will Norris
+17bdceb1	added	30
+17bdceb1	deleted	5
+17bdceb1	files	1
 00ae68df	author	Will Norris
 00ae68df	added	111
 00ae68df	deleted	0

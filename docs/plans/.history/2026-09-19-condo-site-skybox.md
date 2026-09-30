@@ -1,9 +1,14 @@
 | Date | Change |
 |------|--------|
+| [2026-09-20](https://github.com/wbniv/WorldFoundry/commit/17bdceb1) | feat(condo): improve patio and window camera pans |
 | [2026-09-19](https://github.com/wbniv/WorldFoundry/commit/70815109) | feat(condo): the surroundings — near buildings as geometry, 8 km skyline, the bridges, catalog |
 | [2026-09-19](https://github.com/wbniv/WorldFoundry/commit/c3ef550b) | feat(condo): site skybox from the real location, units on the 6th floor, balcony POV pan |
 
 <!--history-meta v1
+17bdceb1	author	Will Norris
+17bdceb1	added	14
+17bdceb1	deleted	0
+17bdceb1	files	1
 70815109	author	Will Norris
 70815109	added	5
 70815109	deleted	1

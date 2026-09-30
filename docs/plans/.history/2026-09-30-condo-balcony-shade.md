@@ -1,5 +1,6 @@
 | Date | Change |
 |------|--------|
+| [2026-09-30](https://github.com/wbniv/WorldFoundry/commit/613a692a) | RFQ packet: awning removal is out of the shops' scope (someone else removes it first) |
 | [2026-09-30](https://github.com/wbniv/WorldFoundry/commit/e39a69b3) | Balcony shade plan: grass covers the whole recessed floor, turns up edges |
 | [2026-09-30](https://github.com/wbniv/WorldFoundry/commit/f71c1241) | Balcony shade plan: the ledge runs the full west wall of 639 and 640 |
 | [2026-09-30](https://github.com/wbniv/WorldFoundry/commit/3dd48d3a) | Balcony shade: view and airflow when raised is the top priority; spec 'when raised' row |
@@ -12,6 +13,11 @@
 | [2026-09-30](https://github.com/wbniv/WorldFoundry/commit/ce0a2fa6) | Plan condo 639 balcony zip screen (solar-strip motor) and 7 cm floor recess |
 
 <!--history-meta v1
+613a692a	author	Will Norris
+613a692a	added	3
+613a692a	deleted	3
+613a692a	files	1
+613a692a	body	Co-Authored-By: Claude Sonnet 5.5 <noreply@anthropic.com>\nClaude-Session: https://claude.ai/code/session_01TfMcgfFyhXKC4CNP5iF7Nz
 e39a69b3	author	Will Norris
 e39a69b3	added	1
 e39a69b3	deleted	1

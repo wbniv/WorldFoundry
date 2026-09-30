@@ -66,7 +66,9 @@ def run():
         h.check('manual camera overrides window zone',h.value(cli,1,1921)==shot)
         ground_z=pos()[2]
         hold(cli,D|A,.4)
-        h.check('reset restores automatic view',read(113)==0 and h.value(cli,1,1921)!=shot)
+        # Since 2026-09-30 the level has no automatic window/patio cuts (CONDO_POV_TRIGGERS
+        # off by default), so the automatic view a reset restores is the doll-house shot.
+        h.check('reset restores automatic view',read(113)==0 and h.value(cli,1,1921)==shot)
         h.check('reset does not jump',abs(pos()[2]-ground_z)<.05)
         h.place(cli,player,(4.65,-14.5,16.05));hold(cli,D|A,.1)
         h.check('reset restores authored shot',h.near(shotpos(),default,.002))

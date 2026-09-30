@@ -1,5 +1,7 @@
 # Condo level: master‑bedroom window POV pan (+5 s in the tour)
 
+> **Superseded in part (2026‑09‑30):** the automatic master-window camera cut described here (`zone-master` → `cs_master`, `MasterLook`, mailboxes 95/96) is **off by default**. Will: "we'll do something better later." `blender_create_condo.py` § 7b builds it only with `CONDO_POV_TRIGGERS=1`; the doll-house shot is the level's only automatic shot. The recorded `tour-639.mp4` still shows the old cuts. See [the balcony-shade plan](2026-09-30-condo-balcony-shade.md), Verification 6.
+
 ## Context
 
 [2026-09-19-condo-site-skybox.md](2026-09-19-condo-site-skybox.md) gave the condo level its
