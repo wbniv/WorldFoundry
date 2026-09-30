@@ -2,7 +2,8 @@
 
 Status: **Phase 0 run 2026‑09‑30 — the engine as it is cannot draw a translucent pane, so the level
 goes ahead on Plan B** (no front face). **Will chose Plan B on 2026‑09‑30**; Plan A (translucent pane) is deferred to its own TODO item because it needs an engine shader change. See [§ Phase 0 verdict](#phase-0-verdict).
-Phases 1–4 not started.
+**Phase 1 run 2026‑09‑30: a gravity-free `Physics` fish works at ×10; ×1 does not load or collide sanely, so
+`WORLD_SCALE = 10` stands** — see [§ Phase 1 verdict](#phase-1-verdict). Phases 2–4 not started.
 
 Will asked for an aquarium level: a **55 gallon acrylic tank**, **an anemone and a clownfish**, planned in
 `docs/plans/` with mockups. The condo walkthrough went through the Blender → `.lev` → `.iff` pipeline first try, so this
@@ -10,7 +11,7 @@ plan reuses that pipeline unchanged and spends its risk budget on the three thin
 **see-through walls, a player that swims, and a very small world.**
 
 - [x] Phase 0 — translucency spike (does an acrylic pane work?) — **no, not without an engine change; Plan B**
-- [ ] Phase 1 — swim and scale spike (does a gravity-free fish work, at ×1 or ×10?)
+- [x] Phase 1 — swim and scale spike (does a gravity-free fish work, at ×1 or ×10?) — **yes at ×10; ×1 rejected**
 - [ ] Phase 2 — tank, sand, rock, anemone, lighting, fog
 - [ ] Phase 3 — integrate the idle-spike clownfish (not a new mesh), controls, camera zones
 - [ ] Phase 4 — anemone sway (optional), docs, tasks, regression test
@@ -73,6 +74,11 @@ fish 0.89 m, the anemone 1.8 m. Every derived number (fog, camera offsets, spe
 choice is one line, not a rewrite. **Phase 1 tests ×1 and ×10 before Phase 2 depends on either.** If ×1 turns out to
 work, the plan switches to ×1 with no other change.
 
+**Phase 1 result: ×10 confirmed.** ×1 fails for three independent reasons, each a fixed constant in the tools or
+engine rather than a tuning value: a smooth 9 cm fish mesh aborts the load (minimum triangle area), levcomp inflates any
+collision box thinner than 0.25 m so the ×1 fish is a 25 cm ball, and the camera's near plane is fixed at 1 m. See
+[§ Phase 1 verdict](#phase-1-verdict).
+
 Coordinates (X right, Y depth, Z up, per the project convention). Origin is the centre of the tank's floor footprint:
 
 | Thing | ×10 position (m) |
@@ -99,6 +105,7 @@ Coordinates (X right, Y depth, Z up, per the project convention). Origin is the 
 | `wflevels/aquarium/aquarium.md` | Level README: build/run, controls, what is and is not modelled. |
 | `Taskfile.yml` | `aquarium-level` and `run-aquarium`, cloned from the condo entries, with `deps` on the tool build and the texture task so nothing needs a manual pre-step. |
 | `tests/test_aquarium_level.py` | Regression guard (see § Regression guard). |
+| `wflevels/aquarium_swim_spike/` | **Exists (Phase 1).** Open box tank + placeholder `Physics` fish at any `WORLD_SCALE`, its `aquarium_constants.py` (the tank table as code: promote it to `wflevels/aquarium/` unchanged), and `run_swim_spike.py`, which drives the fish over the debug bridge with frame-exact held buttons and prints positions, clamps and wall gaps. Re-run it with the canonical fish for step 15. |
 | `wflevels/aquarium_spike/` | **Exists (Phase 0).** The translucency test card and `run_spike.py` (build, capture, bridge alpha diagnostic, pixel samples). Re-run it after any engine change to the shader or draw order. |
 
 ### 2. Actors
@@ -107,7 +114,8 @@ Coordinates (X right, Y depth, Z up, per the project convention). Origin is the 
 |---|---|---|---|
 | `Player` (clownfish body) | `Physics` | body part of the canonical clownfish (§ 4, *Model ownership*) | Gravity 0, script-driven speeds, see § 4 |
 | `clownfish-*` parts (tail, fins…) | anchored, Mesh | remaining parts of the canonical clownfish | **Only if the idle spike ends up multi-part.** Moved from the Director each frame relative to the body (no parent/child hierarchy), as the condo doors are |
-| `tank-shell` | `statplat`, Mesh | bottom, back wall and two end walls; open at the front and top | Trimesh body keeps the fish inside. Acrylic faces, flat pale cyan |
+| `tank-shell` | `statplat`, Mesh | bottom, back wall and two end walls; open at the front and top | Trimesh body keeps the fish inside. Acrylic faces, flat pale cyan. **Phase 1:** one piece works *only because the `Player` is created first* — `JoltCharacterCreate` ignores any static body whose AABB already encloses the character (`jolt_backend.cc`, "zone body"), and a one-piece tank encloses the fish. Keep `Player` ahead of the tank in actor order, or build the tank from separate slabs (what the swim spike does) |
+| `tank-front-collider` | `statplat`, Mesh, **`Visibility Mailbox` 0** | a slab in the front-glass plane | **Plan B needs it:** with no front face the fish swims out of the tank. An invisible Mesh statplat still gets its trimesh (verified: 6 of 6 slabs `MESH_STATIC`) and stops the fish at the glass line |
 | `tank-front-pane` | `statplat`, Mesh | one quad, thin | **Translucent, textured.** No collision needed, but it gets one from E2; the shell's own front lip stops the fish first |
 | `tank-rim` | `statplat`, Mesh | top perimeter bevel | Reads as a tank edge even if the pane fails (Plan B) |
 | `sand`, `rock` | `statplat`, Mesh | flat-shaded low poly | Rock base at local z = 0 (mesh-origin rule) |
@@ -154,11 +162,19 @@ tank shell's trimesh contains it without any extra collision authoring.
 
 | Field | Value | Reason |
 |---|---|---|
-| `Falling Acceleration` | 0 | Neutral buoyancy. Phase 1 must confirm the character controller then holds altitude |
-| `Script Controls Input` | True | As the condo: the script owns `INPUT` and the speed mailboxes |
-| `Turn Rate` | 0 | Heading is set by the script, not by the joystick |
+| `Falling Acceleration` | 0 | Neutral buoyancy. **Phase 1: holds altitude exactly** (0 drift in 10 s) |
+| `Script Controls Input` | True | As the condo: the script owns `INPUT` and the speed mailboxes; it writes `INPUT` 0 every tick |
+| `Turn Rate` | 0 | Heading is set by the script, not by the joystick. (0 also routes a grounded fish to `MarbleHandler`) |
 | `Mass` | ~1 (scaled) | Irrelevant to a kinematic character; kept small |
 | `wf_original_bbox` | **deleted** | Otherwise the imported snowgoons 2 m capsule wins (condo hit exactly this) |
+| `Max Air Speed` | 2 × swim speed (6.096 at ×10) | **Must not be 0**: `AirHandler` scales velocity down to it, so 0 freezes the fish |
+| `Horiz Air Drag`, `Vert Air Drag` | 2.0, 2.0 | The glide: velocity × (1 − 2·0.05) = × 0.9 per tick once a key is released |
+| `Running Deceleration` | 0.05 | While touching the sand the fish is in `MarbleHandler`, whose friction is `decel·dt·30`; the condo's 0.85 gives ≥ 1 at 20 Hz and would zero XY, so the fish could not swim along the sand. *Read from `movement.cc`; swimming along the sand was not exercised at ×10* |
+| `Air Acceleration`, `Running Acceleration`, `Jumping Acceleration` | 0 | The script supplies all motion; no button-driven acceleration, no jump |
+| `Max Ground Speed` | = `Max Air Speed` | `MarbleHandler` caps XY to it |
+
+All of these were measured on the Phase 1 **placeholder**; [§ Phase 1 verdict](#phase-1-verdict) lists which carry over
+to the canonical fish unchanged and which depend on its bounding box.
 
 Controls reuse the existing logical buttons; **no engine or host change** (same rule the condo camera plan set):
 
@@ -171,6 +187,15 @@ Controls reuse the existing logical buttons; **no engine or host change** (same 
 Each frame the script reads `JOYSTICK1_RAW`, maps directions to `XSPEED` / `ZSPEED` (and `YSPEED` on B/C), damps toward
 zero for the glide, writes `ROTATION_C` to face the direction of travel, and clamps `Z` under the water line so the fish
 cannot leave the water. Phase 1 confirms that `ROTATION_C` writes take effect on a `Physics` actor.
+
+**Phase 1 measured the working script** (`wflevels/aquarium_swim_spike/blender_create_swim_spike.py`, ×10): while a
+direction is held, write ±`V` = 3.048 m/s (12 in/s × `WORLD_SCALE`, about 0.3 m/s for a real ocellaris) to that axis's
+`XSPEED`/`YSPEED`/`ZSPEED`; write nothing when released, so the air drag above gives the glide (cruise 2.74 m/s = 0.137 m
+per tick, because the drag applies after the write; glide after release ≈ 1.2 m). The clamp is "if `Z_POS` >
+`ZMAX` then `ZSPEED` := 0 and `Z_POS` := `ZMAX`", with `ZMAX` = water line − fish height − 0.25 in (4.407 m at ×10 for a
+1.4 in tall fish). `ROTATION_C` is in **revolutions** (`actor.cc`, `Angle::Revolution(value)`): 0 faces +X, 0.5 faces −X.
+Add an X clamp as well: the collision capsule is only as wide as the fish is *thick*, so side-on the nose can enter an end wall
+(0.30 m at ×10, see step 6).
 
 ### 5. The anemone
 
@@ -389,10 +414,209 @@ Two things the spike taught that are not about glass (fixed in the docs, used by
 
 **Phase 1 — swim and scale**
 
+Run 2026‑09‑30 on Linux (engine `engine/wf_game` built 2026‑09‑25) in a throwaway worktree. Level:
+[`wflevels/aquarium_swim_spike/`](../../wflevels/aquarium_swim_spike/) — the tank as separate statplat slabs (bottom,
+sand, back, two ends) plus an **invisible** front collider (Plan B), sizes from `aquarium_constants.py`; one placeholder
+`Physics` fish (an ellipsoid body with a white tail wedge so the heading reads side-on, 3.5 in long); a parked bungee
+camera outside the front. `run_swim_spike.py` builds it at the given `WORLD_SCALE`, then drives it over the debug bridge:
+each held button is injected for an exact number of frames (`inject_input … duration_frames`; `-rate20` makes a frame
+0.05 s of level time) and the fish's `X/Y/Z_POS` are watched. Positions are the actor origin = the fish's **feet**
+(mesh base at local z = 0); the tank's inner faces are x ±23.5 in, y ±6 in.
+
+The tables below are raw `run_swim_spike.py` output (repeated per step so each step carries its own evidence).
+
+<img src="2026-09-30-aquarium-level/phase1-x10-grid.png" width="700">
+
 5. Minimal level: an open box (statplat mesh), one `Physics` fish, `Falling Acceleration` 0. Expected: with no input the fish holds altitude for 10 s (Z changes < 1 % of tank height).
+
+    ```
+    [swim_spike] WORLD_SCALE=10.0 shell=slabs fish=ellipsoid fish spawn (-1.6, 0.0, 2.4) ZMAX=4.4069 V=3.0480 inner x ±5.9690 y ±1.5240 sand 0.6350 water 4.8260
+    ## WORLD_SCALE = 10   (player idx 8; walls x ±5.9690, y ±1.5240; sand 0.6350; water 4.8260; clamp ZMAX 4.4069; V 3.0480)
+    jolt: character 0 created at (-1.60, 0.00, 2.40) ctr=(-0.11,0.00,0.18)
+    phase     btn      s              start x,y,z                end x,y,z            x range           y range           z range
+    idle      -     10.0     -1.600  0.000  2.400     -1.600  0.000  2.400     None   None      None   None      None   None
+    step 5: idle Z drift 0.00000 vs 1 % of the water column 0.04191 → PASS
+    ```
+
+    **PASS (×10).** Z is 2.400 at the start and the end of the 10 s and never changes (the bridge sends a value only
+    when it changes, and it sent none). Why it holds: in the air `AirHandler::predictPosition` adds
+    `−Falling Acceleration·dt` = 0 and otherwise only scales the existing velocity by the drag; the script writes no
+    speed, so the velocity stays 0, and Jolt gets zero gravity (`JoltCharacterUpdate` passes `sZero()`).
+
 6. Drive `ZSPEED` from Forth. Expected: the fish rises and stops at a Z clamp under the water line; it does not pass through the sand or the walls.
+
+    ```
+    [swim_spike] WORLD_SCALE=10.0 shell=slabs fish=ellipsoid fish spawn (-1.6, 0.0, 2.4) ZMAX=4.4069 V=3.0480 inner x ±5.9690 y ±1.5240 sand 0.6350 water 4.8260
+    ## WORLD_SCALE = 10   (player idx 8; walls x ±5.9690, y ±1.5240; sand 0.6350; water 4.8260; clamp ZMAX 4.4069; V 3.0480)
+    jolt: character 0 created at (-1.60, 0.00, 2.40) ctr=(-0.11,0.00,0.18)
+    phase     btn      s              start x,y,z                end x,y,z            x range           y range           z range
+    idle      -     10.0     -1.600  0.000  2.400     -1.600  0.000  2.400     None   None      None   None      None   None
+    up        UP     6.0     -1.600  0.000  2.400     -1.600  0.000  4.407     None   None      None   None     2.537  4.407
+    down      DOWN   6.0     -1.600  0.000  4.407     -1.600 -0.000  0.635     None   None    -0.000 -0.000     0.635  4.270
+    rest      -      1.0     -1.600 -0.000  0.635     -1.600 -0.000  0.635     None   None      None   None      None   None
+    rise      UP     0.6     -1.600 -0.000  0.635     -1.600 -0.000  2.721     None   None      None   None     0.787  2.721
+    settle    -      2.0     -1.600 -0.000  2.721     -1.600 -0.000  3.524     None   None      None   None     2.802  3.524
+    right     RIGHT  5.0     -1.600 -0.000  3.524      5.936 -0.000  3.531   -1.463  5.936      None   None     3.524  3.531
+    off-wall  LEFT   1.5      5.936 -0.000  3.531      1.487 -0.000  3.531    1.487  5.799      None   None     3.531  3.531
+    glide     -      2.0      1.487 -0.000  3.531      0.595 -0.000  3.531    0.595  1.397      None   None     3.531  3.531
+    left      LEFT   6.0      0.595 -0.000  3.531     -5.708 -0.000  3.531   -5.708  0.594      None   None     3.531  3.531
+    back      C      5.0     -5.708 -0.000  3.531     -5.708  1.377  3.531     None   None     0.137  1.377     3.531  3.531
+    front     B      5.0     -5.708  1.377  3.531     -5.478 -1.377  3.640   -5.685 -5.478    -1.377  1.240     3.531  3.640
+    end       -      1.0     -5.478 -1.377  3.640     -5.478 -1.377  3.640   -5.478 -5.478      None   None     3.640  3.640
+    step 6: UP stops at the clamp: 4.4069 vs 4.4069 → PASS
+    step 6: DOWN stops on the sand: 0.635 vs 0.6350 → PASS
+    step 6: RIGHT: capsule stays inside the right wall: 5.9363 vs 5.9690 → PASS
+    step 6: LEFT: capsule stays inside the left wall: -5.7077 vs -5.9690 → PASS
+    step 6: C: inside the back wall: 1.377 vs 1.5240 → PASS
+    step 6: B: inside the front collider: -1.377 vs -1.5240 → PASS
+    fish mesh extents (local, from the .lev BOX3): x [-0.5588, 0.3302] y [-0.1270, 0.1270] z [0.0000, 0.3556]; levcomp raises any span < 0.25 m to 0.25 (min side)
+    visual gap mesh→surface at the limit (negative = the mesh pokes through):  right wall -0.2975  left wall -0.0689  back wall +0.0200  front glass +0.0200  sand -0.0000  water line +0.0635
+    glide: released at x 1.4870, 2 s later x 0.5950 → 0.8921
+    ```
+
+    **PASS (×10), with two findings for Phase 3.** Held UP stops the feet at exactly the clamp, 4.407 (the top of the
+    fish 0.064 m under the 4.826 water line); held DOWN stops the feet exactly on the sand, 0.635; held into each wall for
+    5 s the capsule stops 0.020 m from the inner face (Jolt's character padding) and never passes it, the invisible front
+    collider included. The one-piece shell variant (`--shell=one`) contains the fish identically.
+
+    - **The nose enters the end walls.** Visual gap at the limit: right −0.30 m, left −0.07 m. The Jolt capsule is sized
+      `radius = min(halfX, halfY)` of the bounding box (`jolt_backend.cc`, `JoltCharacterCreate`) = half the fish's
+      *thickness* (0.127 m), and it is world-axis aligned (the heading does not rotate it), so a side-on fish is
+      stopped by a 0.25 m-wide capsule while its 0.89 m body sticks out ahead of it. It is asymmetric because the
+      capsule centre is offset −0.114 m in X from the origin (the tail makes the box asymmetric) whichever way the
+      fish faces. Fix in the script (no engine change): clamp X as well as Z, |X| ≤ inner face − nose reach.
+    - **Wall push-off.** After a fish pinned against a wall starts sliding along it, it drifts away from the wall and,
+      a little, vertically: `front` above, +0.23 m in X and +0.11 m in Z. It is not every slide: across four runs
+      the B slide along the left wall drifted every time (+0.23 to +0.33 m X), the C slide just before it never did,
+      and a separate trace saw it on a C slide straight after LEFT (+0.35 m X, −0.04 m Z). The drift decays by exactly
+      × 0.9 per tick, the air drag, so it is a velocity injected on one frame and then carried: `JoltCharacterUpdate`
+      takes an airborne character's velocity from its position change, and `AirHandler` keeps that velocity. What
+      moves the character on that first frame is **not established**. It is not penetration recovery: the capsule
+      sits exactly one padding (0.020 m) off the wall before the slide. Finding it needs a per-contact dump from inside
+      Jolt's `CharacterVirtual::ExtendedUpdate`, which means an engine print. It is bounded (at most 3 % of the tank
+      length) and the X/Z clamps above bound it, so it does not block the level.
+
 7. Write `ROTATION_C` from Forth. Expected: the mesh's heading changes on screen. If not, the recorded fallback is `Turn Rate` > 0.
+
+    ```
+    $ # screenshots over the bridge after RIGHT (script writes ROTATION_C 0) and LEFT (ROTATION_C 0.5)
+    step 7 screenshots: ~/tmp/aquarium-swim/phase1-x10-facing-right.png  ~/tmp/aquarium-swim/phase1-x10-facing-left.png
+    $ # white tail pixels relative to the orange body, from the two PNGs:
+    right orange x 536 539 white-tail mean x 527.5
+    left orange x 109 112 white-tail mean x 120.0
+    ```
+
+    **PASS.** The tail is on the left of the body when facing right and on the right when facing left (grid above,
+    bottom row), so a `ROTATION_C` write turns a `Physics` actor's mesh; the `Turn Rate` fallback is not needed. The
+    value is in **revolutions** (`Actor` mailbox write: `Angle::Revolution(value)`; the same handler also calls
+    `SetRotation`). The collision capsule does not turn with it (above). The clownfish idle-animation branch had not
+    recorded anything on this when I checked (no commits beyond `f964a400`, clean worktree), so this is the first
+    measurement.
+
 8. Repeat 5–7 at ×1 and at ×10. Expected: ×10 passes all three; record what ×1 does. The winner becomes `WORLD_SCALE`.
+
+    ```
+    [swim_spike] WORLD_SCALE=1.0 shell=slabs fish=ellipsoid fish spawn (-0.16, 0.0, 0.24) ZMAX=0.4407 V=0.3048 inner x ±0.5969 y ±0.1524 sand 0.0635 water 0.4826
+    ## WORLD_SCALE = 1
+    ENGINE ABORTED before the bridge came up (exit 255): AssertMsg:Probably have a polygon which is too small, length = 5.494595098e-05 | |length.Abs() > Scalar(0,4)                                                   |
+    [swim_spike] WORLD_SCALE=1.0 shell=slabs fish=box fish spawn (-0.16, 0.0, 0.24) ZMAX=0.4407 V=0.3048 inner x ±0.5969 y ±0.1524 sand 0.0635 water 0.4826
+    ## WORLD_SCALE = 1   (player idx 8; walls x ±0.5969, y ±0.1524; sand 0.0635; water 0.4826; clamp ZMAX 0.4407; V 0.3048)
+    jolt: character 0 created at (-0.16, 0.00, 0.24) ctr=(-0.09,-0.11,-0.09)
+    phase     btn      s              start x,y,z                end x,y,z            x range           y range           z range
+    idle      -     10.0     -0.173  0.105  0.441     -0.173  0.105  0.441   -0.173 -0.173      None   None      None   None
+    up        UP     6.0     -0.173  0.105  0.441     -0.173  0.105  0.441   -0.173 -0.173      None   None      None   None
+    down      DOWN   6.0     -0.173  0.105  0.441     -0.173  0.105  0.278   -0.173 -0.173      None   None     0.278  0.427
+    rest      -      1.0     -0.173  0.105  0.278     -0.173  0.105  0.278     None   None      None   None      None   None
+    rise      UP     0.6     -0.173  0.105  0.278     -0.173  0.105  0.441     None   None      None   None     0.293  0.441
+    settle    -      2.0     -0.173  0.105  0.441     -0.173  0.105  0.441     None   None      None   None      None   None
+    right     RIGHT  5.0     -0.173  0.105  0.441      0.544  0.112  0.278   -0.160  0.544     0.106  0.112     0.278  0.278
+    off-wall  LEFT   1.5      0.544  0.112  0.278      0.108  0.112  0.278    0.108  0.530      None   None      None   None
+    glide     -      2.0      0.108  0.112  0.278     -0.048  0.112  0.278   -0.048  0.096      None   None      None   None
+    left      LEFT   6.0     -0.048  0.112  0.278     -0.360  0.112  0.278   -0.360 -0.048      None   None      None   None
+    back      C      5.0     -0.360  0.112  0.278     -0.360  0.120  0.278     None   None     0.120  0.120      None   None
+    front     B      5.0     -0.360  0.120  0.278     -0.360  0.105  0.278     None   None     0.105  0.106      None   None
+    end       -      1.0     -0.360  0.105  0.278     -0.360  0.105  0.278     None   None      None   None      None   None
+    step 5: idle Z drift 0.00000 vs 1 % of the water column 0.00419 → PASS
+    step 6: UP stops at the clamp: 0.4407 vs 0.4407 → PASS
+    step 6: DOWN stops on the sand: 0.2779 vs 0.0635 → PASS
+    step 6: RIGHT: capsule stays inside the right wall: 0.5439 vs 0.5969 → PASS
+    step 6: LEFT: capsule stays inside the left wall: -0.3599 vs -0.5969 → PASS
+    step 6: C: inside the back wall: 0.1197 vs 0.1524 → PASS
+    step 6: B: inside the front collider: 0.1049 vs -0.1524 → PASS
+    fish mesh extents (local, from the .lev BOX3): x [-0.0559, 0.0330] y [-0.0127, 0.0127] z [0.0000, 0.0356]; levcomp raises any span < 0.25 m to 0.25 (min side)
+    visual gap mesh→surface at the limit (negative = the mesh pokes through):  right wall +0.0200  left wall +0.2040  back wall +0.0200  front glass +0.2446  sand +0.2144  water line +0.0063
+    glide: released at x 0.1079, 2 s later x -0.0481 → 0.1560
+    step 7 screenshots: ~/tmp/aquarium-swim/phase1-x1-box-facing-right.png  ~/tmp/aquarium-swim/phase1-x1-box-facing-left.png
+    ```
+
+    <img src="2026-09-30-aquarium-level/phase1-x1-grid.png" width="700">
+
+    **×10: PASS on 5, 6, 7 (above). ×1: FAIL — `WORLD_SCALE = 10` wins.** The script's automatic `PASS` lines only test
+    that the fish stays *inside* each limit, not that it can *reach* it, so they pass here and mislead; the gaps say
+    what happened. What ×1 actually does:
+
+    - **The level does not load with a smooth fish.** A 12 × 8 ellipsoid at 8.9 cm aborts on
+      `Probably have a polygon which is too small` (`math/vector3.hpi:243`: `|(v2−v0)×(v1−v0)|` must be > 6.1e‑5, so
+      every triangle needs more than about 3e‑5 m²). The rest of ×1 used a coarse box fish (`--fish=box`). A 9 cm fish
+      with fins, or a 1 cm anemone tentacle, cannot be authored at ×1 at all.
+    - **The fish becomes a 25 cm ball.** `levcomp` raises every collision-box axis shorter than 0.25 m to 0.25 m by
+      moving its *min* down (`levcomp-rs/src/lvl_writer.rs:550`, `expand_thin_bbox`, a port of `iff2lvl`). The
+      8.9 × 2.5 × 3.6 cm fish box becomes 25 × 25 × 25 cm hanging below, behind and toward the glass: the character
+      centre offset is (−0.09, −0.11, −0.09) against (−0.011, 0, 0.018) authored, which matches `max − 0.125` on every
+      axis. Consequences measured above: on load it is shoved from (−0.16, 0, 0.24) to (−0.17, 0.105, 0.44); DOWN stops the
+      feet 0.214 m over the sand (44 % of the water column); B moves it 1.5 cm in a 30 cm tank (it stops 0.245 m from the
+      glass); LEFT stops 0.20 m short of the wall.
+    - **The camera cannot come close.** The projection's near plane is fixed at 1.0 m (`gfx/gl/display.cc`,
+      `SetProjection(60°, aspect, 1.0, 1000)`, not changeable per shot: FOV/hither/yon never reach the renderer). At
+      ×1 the anemone close-up (camshot B) would need the camera about 0.3 m from the anemone, which cannot be drawn,
+      and the front edge of the tank is already 0.935 m from the default front camera.
+    - **Also seen, not isolated:** in the RIGHT run the ×1 fish dropped from 0.441 straight to the sand-limited 0.278
+      on the first frame of horizontal motion. The Jolt step constants in `JoltCharacterUpdate` are in metres (stick to
+      floor 0.5 m, step up 0.4 m), about the whole ×1 tank's height, and are the likely cause. That is not verified,
+      and it is moot given the three blockers above.
+    - Fog was not exercised (fog off in the spike). Its distances are `WORLD_SCALE` multiples by construction (§ 7).
+
+    Capsule used at ×10 (the placeholder, for comparison with the canonical fish): mesh box x [−0.559, 0.330],
+    y ±0.127, z [0, 0.356] m → Jolt capsule radius 0.127, cylinder half-height 0.051, total height 0.356, centre at
+    (−0.114, 0, 0.178) from the actor origin, world-axis aligned.
+
+#### Phase 1 verdict
+
+**A gravity-free `Physics` fish works at ×10 with no engine change; `WORLD_SCALE = 10` stands.** At ×10 steps 5, 6
+and 7 pass. ×1 fails on three fixed constants: minimum triangle area, levcomp's 0.25 m minimum collision span, and the
+1 m near plane. No escalation is needed for Phase 2–3.
+
+| Step | ×10 | ×1 |
+|---|---|---|
+| 5 hover | PASS, drift 0 in 10 s | Holds, but only after load shoved it 0.2 m up and 0.1 m back |
+| 6 speeds, clamp, walls | PASS: exact clamp, exact sand stop, 0.020 m wall padding; nose enters the end walls (0.30 m / 0.07 m); wall push-off ≤ 0.35 m | Contained, but cannot reach the sand (0.21 m short), the glass (0.25 m) or the left wall (0.20 m) |
+| 7 `ROTATION_C` | PASS (revolutions; the mesh turns, the capsule does not) | Turns (grid) |
+| 8 | **Winner** | Rejected |
+
+**These values were measured on a single-actor placeholder**, not the canonical clownfish (§ 4, *Model ownership*;
+step 15 re-checks them in Phase 3). How they carry over:
+
+| Carries over unchanged | Depends on the real fish's bounding box / capsule |
+|---|---|
+| Swim speed `V` = 12 in/s × `WORLD_SCALE` (3.048 m/s written; 2.74 m/s cruise) | `ZMAX` = water line − **fish height** − 0.25 in |
+| `Horiz/Vert Air Drag` 2.0 (glide × 0.9 per tick, ≈ 1.2 m) | The X clamp to add: \|X\| ≤ 5.969 − **nose reach** from the origin, per heading |
+| `Max Air Speed` = `Max Ground Speed` = 2 V (never 0) | Capsule radius = min(half length, half **thickness**), world-axis aligned |
+| `Falling Acceleration` 0, `Air/Running/Jumping Acceleration` 0, `Running Deceleration` 0.05, `Turn Rate` 0, `Script Controls Input` True + `INPUT` 0 | Capsule centre offset (from the box's asymmetry) → how far nose and tail enter the walls |
+| The clamp mechanism (`ZSPEED` := 0, `Z_POS` := `ZMAX`) and `ROTATION_C` 0 / 0.5 | **The 0.25 m minimum span** (below) |
+| Invisible front collider; tank as slabs (or `Player` created before a one-piece tank) | Where the feet sit on the sand (mesh base at local z = 0 = feet) |
+
+Placeholder capsule, for comparison: mesh box x [−0.559, 0.330], y ±0.127, z [0, 0.356] m at ×10 → radius 0.127,
+cylinder half-height 0.051, total height 0.356, centre (−0.114, 0, 0.178) from the origin. Its thinnest span, 0.254 m,
+is **just above** levcomp's 0.25 m minimum. A real ocellaris is thinner than it is deep (about ½ in, so about 0.13 m at
+×10), so the canonical fish's box **will** be inflated to 0.25 m by moving its min face, which pushes the capsule about
+0.06 m toward −Y (the glass). Fix without an engine change: give the Player an authored `wf_original_bbox` that is
+symmetric about the body and ≥ 0.25 m on every axis. levcomp takes an authored box verbatim
+(`lvl_writer.rs` ≈ line 310), and the thin-span rule then leaves it alone. Then re-measure.
+
+Open for Phase 3 (neither blocks):
+- The nose enters the end walls. Add the X clamp (script only).
+- Wall push-off. Its first-frame source inside Jolt is unidentified (step 6 says what evidence is missing). It is
+  bounded, and the X/Z clamps contain it.
 
 **Phase 2–3 — level**
 
@@ -418,9 +642,9 @@ Two things the spike taught that are not about glass (fixed in the docs, used by
 | Risk | Consequence | Mitigation |
 |---|---|---|
 | Translucent draw order (§ 3) | Pane hides the fish | **Happened (Phase 0):** opaque today (shader drops alpha), order-dependent once alpha is restored. Plan B unless the engine change is approved |
-| Gravity-free `CharacterVirtual` drifts or sticks | Fish sinks or floats | Phase 1 step 5; script writes speeds every frame as the condo does |
-| Tiny capsule misbehaves at ×1 | Jitter or tunnelling | ×10 authoring, ×1 compared first |
-| `ROTATION_C` writes ignored | Fish swims backwards | Phase 1 step 7; `Turn Rate` fallback |
+| Gravity-free `CharacterVirtual` drifts or sticks | Fish sinks or floats | **Retired (Phase 1):** 0 drift in 10 s at ×10. Residual: wall push-off ≤ 0.35 m after a slide, bounded by the script clamps |
+| Tiny capsule misbehaves at ×1 | Jitter or tunnelling | **Happened, worse (Phase 1):** at ×1 the fish is a 25 cm ball (levcomp's 0.25 m minimum span) and a smooth mesh will not load. ×10 chosen. At ×10 the real fish's ½ in thickness still hits the 0.25 m rule, so author a symmetric `wf_original_bbox` |
+| `ROTATION_C` writes ignored | Fish swims backwards | **Retired (Phase 1):** writes turn the mesh (revolutions). The capsule does not turn, so the nose enters the end walls; clamp X in the script |
 | Anemone sway shears or costs frames | Visual glitch | It is Phase 4 and optional; v1 is static |
 | Real fish is multi-part but Phase 1 tuned a single actor | Parts lag or shear against the body; controls feel different | Phase 3 re-validates on the real fish (step 15); parts are driven from one place with the body's own heading |
 | Any of the above needs an engine change | Scope grows | **Stop and escalate**; do not patch the engine inside this plan |
