@@ -381,6 +381,12 @@ _Auto-added from plan "Out of scope"/"Deferred" sections at commit time. Triage 
 - [verify] **2026-09-30-ios-ci-revival** — Verification section present but no PASS recorded — run + record the steps. _from [2026-09-30-ios-ci-revival.md](docs/plans/2026-09-30-ios-ci-revival.md)_  <!-- fp:4257e8581a6c5b8f -->
 - [ ] **(triage)** 4K framebuffer optimisation (EGL surface from `ANativeWindow` already adapts to the display size — no extra code) — _from [2026-04-23-chromecast-google-tv-port.md](docs/plans/2026-04-23-chromecast-google-tv-port.md)_  <!-- fp:88c667902ef8d2a4 -->
 - [ ] **(triage)** 4K framebuffer optimisation (`EGL` surface from `ANativeWindow` already adapts to the display size — no extra code) — _from [2026-04-23-chromecast-googletv-port.md](docs/plans/2026-04-23-chromecast-googletv-port.md)_  <!-- fp:ad028dd1336e225f -->
+- [ ] **(triage)** The condo on a phone, iPad, iPhone or Mac (the `_touch` profile exists for phones); a separate item. — _from [2026-10-01-condo-chromecast.md](docs/plans/2026-10-01-condo-chromecast.md)_  <!-- fp:027e93b43a4db311 -->
+- [ ] **(triage)** **Fixing the condo's oversized texture.** It belongs to whoever owns the level; this plan reports the finding and checks the Android release build is not corrupted by it. — _from [2026-10-01-condo-chromecast.md](docs/plans/2026-10-01-condo-chromecast.md)_  <!-- fp:93b4ac73c4bb3f92 -->
+- [ ] **(triage)** Audio (silent stub on Android; the "Audio assets from IFF" item in `TODO.md`). — _from [2026-10-01-condo-chromecast.md](docs/plans/2026-10-01-condo-chromecast.md)_  <!-- fp:b10b3902a7a09e2d -->
+- [ ] **(triage)** Mapping remote keys to B/C/D, unless the decision in mockup 2 asks for it. — _from [2026-10-01-condo-chromecast.md](docs/plans/2026-10-01-condo-chromecast.md)_  <!-- fp:9a51dfc8f55b1684 -->
+- [ ] **(triage)** Optimising the frame rate by changing the level or the engine. — _from [2026-10-01-condo-chromecast.md](docs/plans/2026-10-01-condo-chromecast.md)_  <!-- fp:897fca84f38344bc -->
+- [ ] **(triage)** Play Store or any distribution beyond `adb` sideload. — _from [2026-10-01-condo-chromecast.md](docs/plans/2026-10-01-condo-chromecast.md)_  <!-- fp:e39824d2cde904ae -->
 <!-- END auto-captured-deferrals -->
 
 - [x] Implemented Forth-only condo camera inspection controls; desktop/touch input regressions passed. [Plan and mockups](docs/plans/2026-09-25-condo-camera-controls.md)
