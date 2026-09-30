@@ -5,7 +5,10 @@ goes ahead on Plan B** (no front face). **Will chose Plan B on 2026‑09‑30**;
 **Phase 1 run 2026‑09‑30: a gravity-free `Physics` fish works at ×10; ×1 does not load or collide sanely, so
 `WORLD_SCALE = 10` stands** — see [§ Phase 1 verdict](#phase-1-verdict).
 **Phase 2 done 2026‑09‑30: `wflevels/aquarium/` builds with `task aquarium-level`, frame A is in the mockup's range, and
-the placeholder fish stays inside the tank against every wall** — see [§ Phase 2 verdict](#phase-2-verdict). Phases 3–4 not started.
+the placeholder fish stays inside the tank against every wall** — see [§ Phase 2 verdict](#phase-2-verdict).
+**Phase 3 done 2026‑09‑30: the canonical clownfish swims, darts and idles in the tank, hosts in the anemone, and
+camshot B takes over in the anemone zone; steps 12, 13 and 15 pass, and step 14 is logic-verified only (no phone run)** —
+see [§ Phase 3 verdict](#phase-3-verdict). Phase 4 not started.
 
 Will asked for an aquarium level: a **55 gallon acrylic tank**, **an anemone and a clownfish**, planned in
 `docs/plans/` with mockups. The condo walkthrough went through the Blender → `.lev` → `.iff` pipeline first try, so this
@@ -15,7 +18,7 @@ plan reuses that pipeline unchanged and spends its risk budget on the three thin
 - [x] Phase 0 — translucency spike (does an acrylic pane work?) — **no, not without an engine change; Plan B**
 - [x] Phase 1 — swim and scale spike (does a gravity-free fish work, at ×1 or ×10?) — **yes at ×10; ×1 rejected**
 - [x] Phase 2 — tank, sand, rock, anemone, lighting, fog — **static scene built; placeholder fish until Phase 3**
-- [ ] Phase 3 — integrate the idle-spike clownfish (not a new mesh), controls, camera zones
+- [x] Phase 3 — integrate the idle-spike clownfish (not a new mesh), controls, camera zones — **done; step 14 logic-verified, hardware unverified**
 - [ ] Phase 4 — anemone sway (optional), docs, tasks, regression test
 
 ## Mockups
@@ -100,13 +103,14 @@ Coordinates (X right, Y depth, Z up, per the project convention). Origin is the 
 
 | File | Purpose |
 |---|---|
-| `wflevels/aquarium/blender_create_aquarium.py` | **Exists (Phase 2).** Headless Blender build, same shape as the swim spike and `blender_create_condo.py`: import the snowgoons scaffold, strip to one of each infrastructure class, rename survivors and re-author every bbox, add geometry, export. The placeholder `Player` is marked `# PHASE 3: replace with wflevels/aquarium/clownfish.py`. |
-| `wflevels/aquarium/clownfish.py` | **The canonical clownfish**: its Blender mesh builder, part split, materials and scale constant, plus the idle-animation Forth. **Exists (merged 2026‑09‑30).** Written by the idle-animation spike (plan [2026-09-30-clownfish-idle-animation](2026-09-30-clownfish-idle-animation.md)), then imported by `blender_create_aquarium.py`. One definition, so the level cannot drift from the animated model. |
-| `wflevels/aquarium/aquarium_constants.py` | **Exists (Phase 2).** The table above as code: inches, `WORLD_SCALE` (a plain constant now, no env override), derived metres, water line, sand top, interior extents, fog and camera-A values. Imported by the build script **and** the regression test, so the docs, the level and the test cannot drift. |
+| `wflevels/aquarium/blender_create_aquarium.py` | **Exists (Phase 2; Phase 3 fish, cameras, profiles).** Headless Blender build, same shape as the swim spike and `blender_create_condo.py`: import the snowgoons scaffold, strip to one of each infrastructure class, rename survivors and re-author every bbox, add geometry, export. **Phase 3:** the canonical fish from `clownfish.py` (the placeholder and `fish_placeholder.iff` are gone), camshot B and `LookB`, the split anemone, the generated `aq-*` constants header, both scripts, and `AQUARIUM_PROFILE=keyboard\|touch`. |
+| `wflevels/aquarium/clownfish.py` | **The canonical clownfish**: its Blender mesh builder, part split, materials and scale constant, plus the idle-animation Forth. **Exists (merged 2026‑09‑30).** Written by the idle-animation spike (plan [2026‑09‑30-clownfish-idle-animation](2026-09-30-clownfish-idle-animation.md)), then imported by `blender_create_aquarium.py`. One definition, so the level cannot drift from the animated model. **Phase 3 edits:** it takes `WORLD_SCALE` and the 3.5 in length from `aquarium_constants.py` (0.089 → 0.0889 m), and `player_script` / `director_script` take `defs=` (and `entry=`) so a level's words go before the per-tick call. |
+| `wflevels/aquarium/aquarium_swim.fth` | **New (Phase 3).** The level's Forth: the swim controller `aq-player-tick` (keyboard and touch input, the Phase 1 speeds, the dart, the clamps, no uncommanded acceleration, `fish-idle-sense`) and the Director's `aq-camera-tick` (zone with hysteresis, camshot A/B, `LookB`). |
+| `wflevels/aquarium/aquarium_constants.py` | **Exists (Phase 2).** The table above as code: inches, `WORLD_SCALE` (a plain constant now, no env override), derived metres, water line, sand top, interior extents, fog and camera-A values. Imported by the build script **and** the regression test, so the docs, the level and the test cannot drift. **Phase 3:** the single source for the scale and the fish's length (a test asserts `clownfish.py` agrees), plus camera B, the zone hysteresis, the swim/dart speeds, the clamp margin and the ground clearance. |
 | ~~`wflevels/aquarium/make_pane_texture.py`~~ | **Not built (Plan B):** there is no pane. Plan A would bring it back; the Phase 0 writer is `wflevels/aquarium_spike/make_pane_texture.py`. |
 | `wflevels/aquarium/aquarium.md` | **Exists (Phase 2).** Level README: build/run, controls, what is and is not modelled, Plan B. |
-| `wflevels/aquarium/run_aquarium_checks.py` | **Exists (Phase 2).** Steps 11 and 13: captures frame A and holds each direction into every wall over the debug bridge, reusing the swim spike's `Session`; flags a run contaminated by desktop key input. |
-| `Taskfile.yml` | **Exists (Phase 2).** `aquarium-level` (`deps: [tools-build]`; `sources`/`generates`, so a second run is a no-op) and `run-aquarium` (`deps: [ensure-build, aquarium-level]`), cloned from the condo entries. No texture task: Plan B has no textures. |
+| `wflevels/aquarium/run_aquarium_checks.py` | **Exists (Phase 2; rewritten in Phase 3).** Steps 11–15 over the debug bridge. The engine runs **paused** and is stepped one tick at a time, with a sticky injected joystick value on every tick, so desktop keys cannot reach the fish. Every tick's watched mailboxes are recorded, and the joystick the engine saw is compared with what was injected (`run isolation: CLEAN`). `--profile touch` runs step 14 and `--trace-sand` prints a per-tick trace. |
+| `Taskfile.yml` | **Exists (Phase 2).** `aquarium-level` (`deps: [tools-build]`; `sources`/`generates`, so a second run is a no-op) and `run-aquarium` (`deps: [ensure-build, aquarium-level]`), cloned from the condo entries. No texture task: Plan B has no textures. **Phase 3:** `aquarium-level` also tracks `clownfish.py`, `clownfish_idle.fth` and `aquarium_swim.fth`. New `aquarium-touch-level` builds the touch profile. `aquarium-idle-level` now tracks `aquarium_constants.py`. |
 | `tests/test_aquarium_level.py` | **Exists (Phase 2).** Regression guard (see § Regression guard). |
 | `wflevels/aquarium_swim_spike/` | **Exists (Phase 1).** Open box tank + placeholder `Physics` fish at any `WORLD_SCALE`, its `aquarium_constants.py` (the tank table as code: promote it to `wflevels/aquarium/` unchanged), and `run_swim_spike.py`, which drives the fish over the debug bridge with frame-exact held buttons and prints positions, clamps and wall gaps. Re-run it with the canonical fish for step 15. |
 | `wflevels/aquarium_spike/` | **Exists (Phase 0).** The translucency test card and `run_spike.py` (build, capture, bridge alpha diagnostic, pixel samples). Re-run it after any engine change to the shader or draw order. |
@@ -115,18 +119,20 @@ Coordinates (X right, Y depth, Z up, per the project convention). Origin is the 
 
 | Actor name | Class / mobility | Mesh | Notes |
 |---|---|---|---|
-| `Player` (invisible collision hull) | `Physics` | a copy of the clownfish body mesh, **not drawn** (`PLAYER_MESH` in `clownfish.py`) | Gravity 0, script-driven speeds, authored symmetric `wf_original_bbox` ±0.362 × ±0.125 × ±0.195 m; see § 4. **Nobody writes `ROTATION_C` on it** — the capsule never turns and the rig owns the visual heading |
-| `fish-body`, `fish-tail`, `fish-dorsal`, `fish-pectoral-l/-r` (exact names: `PART_NAMES` in `clownfish.py`) | anchored `platform`, Mass 0, Mesh | the five visible parts of the canonical clownfish | **Decided by the idle spike.** Posed every tick by the Director's `fish-rig-tick` (`write-actor-mailbox`: position, `ROTATION_A/B/C`, dorsal `Z_SCALE`). **Never statplats:** every statplat gets a Jolt body and pinned the Player. Runtime index = export-list position + 1. Mailboxes 600–627 belong to the fish |
+| `Player` (invisible collision hull) | `Physics` | a copy of the clownfish body mesh, **not drawn** (`PLAYER_MESH` in `clownfish.py`) | Gravity 0, script-driven speeds, authored symmetric `wf_original_bbox` ±0.361 × ±0.125 × ±0.195 m; see § 4. **Nobody writes `ROTATION_C` on it** — the capsule never turns and the rig owns the visual heading. **Phase 3:** 8th in actor order, script `aq-player-tick` (`aquarium_swim.fth`) |
+| `clownfish-body`, `clownfish-tail`, `clownfish-dorsal`, `clownfish-pec-near`, `clownfish-pec-far` (exact names: `PART_NAMES` in `clownfish.py`) | anchored `platform`, Mass 0, Mesh | the five visible parts of the canonical clownfish | **Decided by the idle spike.** Posed every tick by the Director's `fish-rig-tick` (`write-actor-mailbox`: position, `ROTATION_A/B/C`, dorsal `Z_SCALE`). **Never statplats:** every statplat gets a Jolt body and pinned the Player. Runtime index = export-list position + 1 (10–14, right after the scaffold, before `tank-shell`). Mailboxes 600–639 belong to the fish, 700–719 to the level |
 | `tank-shell` | `statplat`, Mesh | bottom, back wall and two end walls; open at the front and top | Trimesh body keeps the fish inside. Acrylic faces, flat pale cyan. **Phase 1:** one piece works *only because the `Player` is created first* — `JoltCharacterCreate` ignores any static body whose AABB already encloses the character (`jolt_backend.cc`, "zone body"), and a one-piece tank encloses the fish. Keep `Player` ahead of the tank in actor order, or build the tank from separate slabs (what the swim spike does). **Phase 2:** one piece; `Player` is 8th, `tank-shell` 10th (asserted by the test). Each wall is three stacked boxes so its inner face is water-blue below the line, a light band at it, and dark above, with no coplanar overlay |
 | `tank-front-collider` | `statplat`, Mesh, **`Visibility Mailbox` 0** | a slab in the front-glass plane | **Plan B needs it:** with no front face the fish swims out of the tank. An invisible Mesh statplat still gets its trimesh (verified: 6 of 6 slabs `MESH_STATIC`) and stops the fish at the glass line |
 | ~~`tank-front-pane`~~ | — | — | **Not built (Plan B).** Would be translucent and textured; the engine drops texture alpha (Phase 0) |
 | `tank-rim` | `statplat`, Mesh | top perimeter ring, chamfered outer-top edge | Reads as a tank edge (Plan B). Overhangs the walls by 0.25 in each side so no face is coplanar with a wall (no z-fighting in frame A) |
 | `sand`, `rock` | `statplat`, Mesh | flat-shaded low poly | Rock base at local z = 0 (mesh-origin rule). Sand: 24 × 6 quads in three shades. Rock: a convex hull with a flat top for the anemone |
-| `anemone` | `statplat`, Mesh | base disc, faceted column, oral disc, 17 tentacles (two-tone strips + bulbs) | Static in v1, see § 5. Back set at y +0.36 m, front set at y −0.36 m: the gap clears the fish's capsule plus Jolt's predictive contact distance (at ±0.22 m the fish was deflected) |
-| `anemone-zone` | `target` | none | Invisible; carries the zone bbox (condo room-outline pattern) |
+| `anemone` | `statplat`, Mesh | base disc, faceted column, oral disc | Static in v1, see § 5. Solid. **Phase 3:** the tentacles moved out into `anemone-tentacles` |
+| `anemone-tentacles` | anchored `platform`, Mass 0, Mesh | 17 tentacles (two-tone strips + bulbs), back set at y +0.36 m, front set at y −0.36 m | **New in Phase 3:** drawn, but no Jolt body, so the fish nestles among them from any depth; one between the sets is overlapped by the front set by depth. With the tentacles solid, the real hull entered the crown only within \|y\| < 0.035 m (§ Phase 3 verdict) |
+| `anemone-zone` | `target` | none | Invisible; carries the zone bbox (condo room-outline pattern). **Phase 3:** its centre and ±2.2 m radius are baked into the Director's zone test |
+| `cs_anemone` (camshot B), `LookB` | `camshot`; anchored `platform`, Mass 0, no mesh | none | **New in Phase 3.** B sits at (2.5, −2.2, 1.75) m, outside the glass; `Follow = Target = Track Object = LookB`. The Director moves `LookB` from (2.5, 0, 1.62) 35 % of the way toward the fish |
 | ~~`water-surface`~~ | — | — | **Not built (Plan B)**; the water line is an opaque band on the inner faces of the shell |
 | `room-backdrop`, `stand` | `statplat`, Mesh | a navy quad 4 m behind the tank; a dark-brown box under it | So the camera never sees the void |
-| `Director`, `camera`, `levelobj`, `matte`, `light`s, `room`, `camshot`s | scaffold classes | | One of each; **rename the survivors** so no snowgoons `player_33`/`target_14` name leaks into an object reference. **Phase 2:** `Director`, `Camera`, `LevelObj`, `Matte` (Model Type None), `Room`, `cs_front`, `LookAt`, `SunLight` + `AmbientLight`; every bbox re-authored (no snowgoons room or 2 m capsule survives) |
+| `Director`, `camera`, `levelobj`, `matte`, `light`s, `room`, `camshot`s | scaffold classes | | One of each; **rename the survivors** so no snowgoons `player_33`/`target_14` name leaks into an object reference. **Phase 2:** `Director`, `Camera`, `LevelObj`, `Matte` (Model Type None), `Room`, `cs_front`, `LookAt`, `SunLight` + `AmbientLight`; every bbox re-authored (no snowgoons room or 2 m capsule survives). **Phase 3:** all Mass 0 except the `Camera` (snowgoons imports them at 75, and a Mass > 0 box is solid to the Player; `LookAt` sits in the water). The `Camera` box is ±0.2 m. `cs_front` has no script: the Director writes `CAMSHOT` every tick |
 
 ### 3. The acrylic — the fallback ladder
 
@@ -167,7 +173,7 @@ and an idle weight each tick and poses every part, so the idle bob, sway, tail b
 physics (measured Player drift 0.00000 m). The alternative, a visible Player, would move the collision capsule with the
 bob. Consequences for the level: the Player and the parts are created in that order; the swim controller replaces
 `fish-swim-tick` and calls `( moving? ) fish-idle-sense` every tick; the level owns the X/Z clamps, using the
-exported `extents()` (nose +0.362, tail tip −0.528, dorsal top +0.289, belly −0.181 m from the body centre).
+exported `extents()` (nose +0.361 since Phase 3 made the length exactly 3.5 in, tail tip −0.528, dorsal top +0.289, belly −0.181 m from the body centre).
 
 A `Physics` actor: it is the one class that both scripts and collides. It is a kinematic Jolt `CharacterVirtual`, so the
 tank shell's trimesh contains it without any extra collision authoring.
@@ -195,6 +201,16 @@ Controls reuse the existing logical buttons; **no engine or host change** (same 
 | Arrows / D-pad | Swim left/right and up/down; heading turns to face travel |
 | B (`2`) / C (`3`) held | Swim toward / away from the glass (Y) |
 | A (`1`) | Dart: a short speed burst, then glide |
+
+**Phase 3, as built** (`aquarium_swim.fth`; README [`aquarium.md`](../../wflevels/aquarium/aquarium.md) § Controls).
+Keyboard/gamepad is the table above. The dart is edge-triggered: 6.096 m/s (= `Max Air Speed`) along the facing, for
+0.15 s, then the glide, about 3.6 m in all. The **touch profile** (`AQUARIUM_PROFILE=touch`, `task aquarium-touch-level`) has
+only the D-pad, A and B, as in the narrow mockup. A tap cycles Swim → Depth mode. In Depth mode the D-pad's ↑/↓ swim away
+from / toward the glass instead of up/down, and ←/→ swim X in both modes. B taps dart. Clamps come from the fish's
+`extents()`: |x| ≤ 5.378 m (the 0.528 m tail tip, so a turn at an end wall never swings the tail in), |y| ≤ 1.350 m, z ≤ 4.461 m, and
+z ≥ 0.980 m, which keeps the capsule 0.15 m over the sand so Jolt never treats the fish as standing. Two rules were added
+after measurement, both in the Phase 3 verdict: the clamps compare with ±1 mm (16.16 read-back), and no uncommanded
+acceleration.
 
 Each frame the script reads `JOYSTICK1_RAW`, maps directions to `XSPEED` / `ZSPEED` (and `YSPEED` on B/C), damps toward
 zero for the glide, sets `fish-heading-target` (0 = +X, −0.5 = −X) so the rig turns the visible parts to face the
@@ -234,6 +250,12 @@ and writes `CAMSHOT`):
 Both cameras sit **outside** the tank, looking through the front. That avoids the bungee camera's habit of climbing when its
 box overlaps a shell (recorded in the condo camera plan), and it is why Plan B (no front pane) costs nothing to the camera.
 Distances are starting values, tuned in Phase 3 from captured frames.
+
+**Phase 3 values.** B at (2.5, −2.2, 1.75) m aims at `LookB`, which rests at (2.5, 0, 1.62) and is moved 35 % of the
+way toward the fish each tick. Enter B within 2.2 m of the zone centre (2.5, 0, 1.771); leave only past 2.5 m (the
+hysteresis band). The Director writes `CAMSHOT` every tick. This level is in bungee mode, so the 10‑unit slew clamp does not
+apply and the camera's spring flies it between shots. The `Camera` box is ±0.2 m, so B's box (y −2.4 to −2.0) never meets
+the Mass‑1 fish, whose box reaches y −1.475 at most.
 
 ### 7. Lighting and water
 
@@ -725,6 +747,36 @@ Phase 2 was run 2026‑09‑30 on Linux in an isolated worktree, using the main 
     <img src="2026-09-30-aquarium-level/phase2-in-crown.png" width="640">
 
 12. Swim into the anemone zone; capture frame B. Expected: the close-up camshot engages, and the fish is partly overlapped by front tentacles.
+
+    ```
+    $ python3 wflevels/aquarium/run_aquarium_checks.py        # paused, stepped per tick, input injected every tick   (step-12 excerpt)
+    step 11: CAMSHOT 5 (cs_front = 5) → PASS
+    screenshot b-edge: /home/will/tmp/aquarium-phase3/phase3-b-edge.png
+    screenshot phase3-frame-b: /home/will/tmp/aquarium-phase3/phase3-frame-b.png
+    phase     btn       s               start x,y,z                 end x,y,z
+    to-left   LEFT   4.00     2.706  -1.350   3.861    -5.378  -1.350   3.861
+    to-y0     C      2.10    -5.378  -1.350   3.861    -5.378   0.138   3.861
+    to-z      DOWN   2.20    -5.378   0.138   3.861    -5.378   0.158   2.098
+    into-crown RIGHT  7.45    -5.378   0.158   2.098     2.578   0.159   2.078
+    host      -      4.00     2.578   0.159   2.078     2.578   0.159   2.078
+    step 12: entered the zone at (0.383, 0.159, 2.078), 2.145 m from the zone centre (radius 2.2)
+    step 12: in the crown at (2.578, 0.159, 2.078) (target (2.5, 0.0, 2.1)); sideways deflection on the way in 0.0002 m; Player drift while hosting x/y/z 0.00008/0.00000/0.00007 m; idle weight 1.000
+    step 12: CAMSHOT 27 (cs_anemone = 27); camera at (2.5, -2.2, 1.75) vs camshot B (2.5, -2.2, 1.75)
+    screenshot b-reentry (camshot B after re-entering at the zone edge and gliding 3 s): /home/will/tmp/aquarium-phase3/phase3-b-reentry.png  fish at (1.755, 0.159, 2.078)
+    step 12: zone flips (t, in-b, distance m): [(80.65, 0, 2.552), (84.35, 1, 2.143)] — leave at ≥ 2.5, enter at ≤ 2.2, one flip each way → PASS
+    step 12: PASS
+    joystick1_raw seen by the engine vs injected, 2646 ticks: 0 mismatches []
+    run isolation: CLEAN
+    jolt: character 0 created at (-1.60, 0.00, 2.40) ctr=(0.00,0.00,0.00)
+    SUMMARY step 5: PASS step 6: PASS step 7: PASS step 12: PASS step 13: PASS step 15: PASS
+    ```
+
+    <img src="2026-09-30-aquarium-level/phase3-frame-b.png" width="640">
+
+    <img src="2026-09-30-aquarium-level/phase3-b-reentry.png" width="640">
+
+    **PASS.** The fish is driven only by held buttons: from the far left end it swims to the middle depth and height (`to-y0`, `to-z`), then along x at y 0.16, z 2.08 into the crown, and glides to rest at (2.578, 0.159, 2.078). That is between the tentacle sets (y ±0.36 m) and 0.18 m over the oral disc. It enters the zone 2.145 m from the centre, camshot B engages (`CAMSHOT` 27 = `cs_anemone`), and the camera reaches B exactly. On the way in the fish is deflected 0.0002 m sideways, and while hosting the Player moves < 0.1 mm with the idle at full weight. Frame B (first image) shows the idling fish in the crown, partly overlapped by the front tentacles, with the rock below, as in mockup B. Hysteresis: swimming out, the shot returns to A at 2.552 m; swimming back, B returns at 2.143 m, one flip each way. The second image is B after re-entry at the zone edge: the fish is 0.75 m left of the anemone, and LookB's lean keeps it in frame. The `b-edge` capture is the switching tick itself (the camera has not moved yet: it is sprung, not cut), so it is not shown. **Found on the way:** with the Phase 2 anemone (colliding tentacles) the real hull could not reach the crown. It arrived at y 0.158, was stopped at x 2.02 behind the column and pushed sideways, because the gap admits the capsule only within |y| < 0.035 m. The tentacles are now a non-colliding actor (§ Phase 3 verdict).
+
 13. Hold each direction into every wall for 5 s. Expected: the fish never leaves the tank volume.
 
     ```
@@ -767,8 +819,159 @@ Phase 2 was run 2026‑09‑30 on Linux in an isolated worktree, using the main 
 
     **One run was discarded, with a concrete cause.** In it the fish sat at x 0.868 before the first held button, 2.47 m of RIGHT the harness never sent. That engine log recorded X keyboard events (BackSpace, `c`, `a`, Tab, Alt_L as "unknown key"): the wf_game window is on the real desktop (there is no Xvfb on this host) and took keys typed while it had focus. The log names only *unmapped* keys, so a mapped arrow press leaves no line. The script therefore now fails any run with drift from spawn, motion in a no-button phase, or motion off the held axis (`run isolation`). The run above is `CLEAN`.
 
+    **Phase 3 re-run on the canonical fish** (same harness run as step 12; the Player's box is the authored ±0.361 × ±0.125 × ±0.195 m, and the visible fish is checked with `extents()` plus the idle bob):
+
+    ```
+    $ python3 wflevels/aquarium/run_aquarium_checks.py        # paused, stepped per tick, input injected every tick   (step-13 excerpt)
+    phase     btn       s               start x,y,z                 end x,y,z
+    right13   RIGHT  7.00     1.755   0.159   2.078     5.378   0.159   2.078
+    left13    LEFT  10.00     5.378   0.159   2.078    -5.378   0.159   2.077
+    back13    C      6.00    -5.378   0.159   2.077    -5.378   1.350   2.077
+    front13   B      7.00    -5.378   1.350   2.077    -5.378  -1.350   2.077
+    up13      UP     7.00    -5.378  -1.350   2.077    -5.378  -1.350   4.461
+    down13    DOWN   7.00    -5.378  -1.350   4.461    -5.378  -1.350   0.980
+    end13     -      1.00    -5.378  -1.350   0.980    -5.378  -1.350   0.980
+    step 13: time pressed against the limit: RIGHT 5.70 s, LEFT 6.10 s, C 5.60 s, B 6.00 s, UP 6.15 s, DOWN 5.70 s
+    Player box (authored, local): x ±0.3614 y ±0.1250 z ±0.1951; fish extents {'nose_x': 0.361, 'tail_x': -0.528, 'top_z': 0.289, 'bottom_z': -0.181, 'half_width': 0.11}
+    origin extremes over the whole run: x [-5.3779, 5.3779]  y [-1.3501, 1.3501]  z [0.9801, 4.4614]
+    step 13: Player box right edge vs right wall inner face: 5.7393 vs 5.9690 (gap 0.2297) → PASS
+    step 13: Player box left edge vs left wall inner face: -5.7393 vs -5.9690 (gap 0.2297) → PASS
+    step 13: Player box back edge vs back wall inner face: 1.4751 vs 1.5240 (gap 0.0489) → PASS
+    step 13: Player box front edge vs front glass plane: -1.4751 vs -1.5240 (gap 0.0489) → PASS
+    step 13: Player box bottom vs sand top: 0.7850 vs 0.6350 (gap 0.1500) → PASS
+    step 13: Player box top vs water line: 4.6565 vs 4.8260 (gap 0.1695) → PASS
+    step 13: visible fish, tail tip or nose, vs right wall: 5.9055 vs 5.9690 (gap 0.0635) → PASS
+    step 13: visible fish, tail tip or nose, vs left wall: -5.9055 vs -5.9690 (gap 0.0635) → PASS
+    step 13: visible fish pectoral vs back wall: 1.4605 vs 1.5240 (gap 0.0635) → PASS
+    step 13: visible fish pectoral vs front glass plane: -1.4605 vs -1.5240 (gap 0.0635) → PASS
+    step 13: visible fish belly (bob low) vs sand: 0.7875 vs 0.6350 (gap 0.1525) → PASS
+    step 13: visible fish dorsal (bob high) vs water line: 4.7625 vs 4.8260 (gap 0.0635) → PASS
+    ```
+
+    <img src="2026-09-30-aquarium-level/phase3-walls-grid.png" width="700">
+
+    **PASS.** Each wall is held 5.6 to 6.2 s after contact. The script clamps stop the fish before it touches any wall: the Player's box stays 0.230 m off the end walls, 0.049 m off the back wall and the front collider, and 0.150 m over the sand. The visible fish (tail tip or nose, pectorals, dorsal with the bob) stops exactly 0.0635 m (0.25 in) off every wall and the water line, and its belly (with the bob) stays 0.1525 m over the sand. Grid, left to right and top to bottom: facing right, facing left, after a dart, right wall, left wall, back wall, front glass, water line, sand.
+
 14. Run on a phone-landscape build with the touch profile. Expected: swim and dart reachable with existing A/B + D-pad regions. **Unverified on hardware; report, do not claim.**
+
+    ```
+    $ python3 wflevels/aquarium/run_aquarium_checks.py --profile touch   # AQUARIUM_PROFILE=touch build, injected buttons
+    phase     btn       s               start x,y,z                 end x,y,z
+    swim-up   UP     1.00    -1.600   0.000   2.400    -1.600   0.000   4.461
+    tap-A     A      0.05    -1.600   0.000   4.461    -1.600   0.000   4.461
+    settle1   -      1.50    -1.600   0.000   4.461    -1.600   0.000   4.461
+    depth-up  UP     1.00    -1.600   0.000   4.461    -1.600   1.350   4.461
+    settle2   -      1.50    -1.600   1.350   4.461    -1.600   1.350   4.461
+    depth-down DOWN   1.00    -1.600   1.350   4.461    -1.600  -1.256   4.461
+    settle3   -      3.00    -1.600  -1.256   4.461    -1.600  -1.350   4.461
+    depth-right RIGHT  0.50    -1.600  -1.350   4.461    -0.366  -1.350   4.461
+    settle4   -      4.00    -0.366  -1.350   4.461     1.006  -1.350   4.461
+    tap-A2    A      0.05     1.006  -1.350   4.461     1.006  -1.350   4.461
+    settle5   -      0.50     1.006  -1.350   4.461     1.006  -1.350   4.461
+    swim-down DOWN   1.00     1.006  -1.350   4.461     1.005  -1.348   1.842
+    settle6   -      3.00     1.005  -1.348   1.842     1.005  -1.348   0.980
+    key-C     C      1.00     1.005  -1.348   0.980     1.005  -1.348   0.980
+    settle7   -      1.00     1.005  -1.348   0.980     1.005  -1.348   0.980
+    tap-B     B      0.05     1.005  -1.348   0.980     1.005  -1.348   0.980
+    dart-glide -      3.00     1.005  -1.348   0.980     4.565  -1.348   0.980
+    step 14: Swim mode: UP swims +Z only: (0.0, 0.0, 2.061) → PASS
+    step 14: A tap → Depth mode (aq-mode 1): 1.0 → PASS
+    step 14: Depth mode: UP swims +Y (away from the glass) only: (0.0, 1.35, 0.0) → PASS
+    step 14: Depth mode: DOWN swims −Y only: (0.0, -2.606, 0.0) → PASS
+    step 14: Depth mode: RIGHT still swims +X: (1.234, 0.0, 0.0) → PASS
+    step 14: second A tap → Swim mode (aq-mode 0): 0.0 → PASS
+    step 14: Swim mode: DOWN swims −Z only: (-0.001, 0.002, -2.62) → PASS
+    step 14: C (keyboard depth) does nothing in the touch profile: (0.0, 0.0, 0.0) → PASS
+    step 14: B tap darts along the facing (+X): (3.559, 0.0, 0.0) → PASS
+    screenshot touch: /home/will/tmp/aquarium-phase3/phase3-touch.png
+    joystick1_raw seen by the engine vs injected, 493 ticks: 0 mismatches []
+    run isolation: CLEAN
+    jolt: character 0 created at (-1.60, 0.00, 2.40) ctr=(0.00,0.00,0.00)
+    SUMMARY step 14 (logic, injected buttons): PASS; phone hardware: not run
+    ```
+
+    **Logic verified, hardware unverified.** Built with `task aquarium-touch-level`, the touch profile does in the engine what the plan's narrow mockup says: an A tap cycles Swim → Depth → Swim (mailbox 701), D-pad ↑/↓ swim Z in Swim mode and Y in Depth mode, ←/→ swim X in both, a B tap darts, and C (the keyboard's depth button) does nothing. Buttons were injected over the debug bridge on a Linux desktop build. **No phone-landscape build was made or run**, so whether the phone's A/B + D-pad touch regions deliver these buttons is not verified. There is no on-screen mode indicator.
+
 15. Re-run Phase 1 steps 5–7 (hover, scripted speeds and clamps, heading) on the **canonical clownfish** from `clownfish.py`, idle animation running. Expected: same results as the Phase 1 placeholder; idle motion is net-zero (Player drift 0), every part stays attached to the body through turns and wall contact, and the Player's `ROTATION_C` is never written.
+
+    ```
+    $ python3 wflevels/aquarium/run_aquarium_checks.py        # paused, stepped per tick, input injected every tick   (step-15 excerpt)
+    screenshot frame-a: /home/will/tmp/aquarium-phase3/phase3-frame-a.png
+    screenshot idle: /home/will/tmp/aquarium-phase3/phase3-idle.png
+    step 11: CAMSHOT 5 (cs_front = 5) → PASS
+    step 15/5: hover 10 s: Player drift x/y/z 0.00000/0.00000/0.00000 m (limit 1 % of the water column = 0.04191); idle weight at end 1.000; tail yaw rel. body -0.0500..+0.0500 rev; body bob -12.0..+12.0 mm
+    step 15/5: PASS
+    screenshot phase3-facing-right: /home/will/tmp/aquarium-phase3/phase3-facing-right.png
+    screenshot phase3-facing-left: /home/will/tmp/aquarium-phase3/phase3-facing-left.png
+    phase     btn       s               start x,y,z                 end x,y,z
+    up        UP     6.00    -1.600   0.000   2.400    -1.600   0.000   4.461
+    down      DOWN   6.00    -1.600   0.000   4.461    -1.600   0.000   0.980
+    rest      -      1.00    -1.600   0.000   0.980    -1.600   0.000   0.980
+    rise      UP     0.60    -1.600   0.000   0.980    -1.600   0.000   2.489
+    settle    -      2.00    -1.600   0.000   2.489    -1.600   0.000   3.840
+    right     RIGHT  5.00    -1.600   0.000   3.840     5.378   0.000   3.861
+    off-wall  LEFT   1.50     5.378   0.000   3.861     1.400   0.000   3.861
+    glide     -      2.00     1.400   0.000   3.861     0.049   0.000   3.861
+    left      LEFT   6.00     0.049   0.000   3.861    -5.378   0.000   3.861
+    back      C      5.00    -5.378   0.000   3.861    -5.378   1.350   3.861
+    front     B      5.00    -5.378   1.350   3.861    -5.378  -1.350   3.861
+    end       -      1.00    -5.378  -1.350   3.861    -5.378  -1.350   3.861
+    step 15/6: UP stops at the clamp aq-zmax: 4.4614 vs 4.4614 → PASS
+    step 15/6: DOWN stops at the clamp aq-zmin: 0.9801 vs 0.9801 → PASS
+    step 15/6: RIGHT stops at the clamp aq-xmax: 5.3779 vs 5.3779 → PASS
+    step 15/6: LEFT stops at the clamp −aq-xmax: -5.3779 vs -5.3779 → PASS
+    step 15/6: C stops at the clamp aq-ymax: 1.3501 vs 1.3501 → PASS
+    step 15/6: B stops at the clamp −aq-ymax: -1.3501 vs -1.3501 → PASS
+    step 15/6: cruise 2.743 m/s (Phase 1: 2.74); glide over 2 s after release 1.351 m (Phase 1: 0.892 over 2 s)
+    screenshot phase3-dart: /home/will/tmp/aquarium-phase3/phase3-dart.png
+    step 15/6: dart (one A tap, facing +X): 5.486 m/s over the burst, travelled 3.560 m in 3.05 s (burst 6.096 m/s × 0.15 s, then the glide); y/z unchanged → PASS
+    step 15/6: PASS
+    step 15/7: body part heading after RIGHT -0.0070 rev, after LEFT +0.4966 rev; Player ROTATION_C over 1197 ticks: 0..0 → PASS
+    step 15: part attachment over 2646 ticks (turns, darts, wall contact, hosting): worst |part − body| − |offset| tail 0.55 mm, dorsal 0.00 mm, pec-near 0.19 mm, pec-far 0.19 mm; body vs Player horizontal 0.000 mm, vertical 12.00 mm (bob amplitude 12 mm) → PASS
+    joystick1_raw seen by the engine vs injected, 2646 ticks: 0 mismatches []
+    run isolation: CLEAN
+    jolt: character 0 created at (-1.60, 0.00, 2.40) ctr=(0.00,0.00,0.00)
+    SUMMARY step 5: PASS step 6: PASS step 7: PASS step 12: PASS step 13: PASS step 15: PASS
+    ```
+
+    <img src="2026-09-30-aquarium-level/phase3-heading.png" width="700">
+
+    ```
+    $ python3 wflevels/aquarium/run_aquarium_checks.py --trace-sand   # along the sand into the rock, per tick (excerpt)
+    -- settle - 1.5 s
+    -- down DOWN 3.0 s
+    -- rest - 1.0 s
+    -- rise UP 0.2 s
+    -- settle - 1.0 s
+    -- down DOWN 1.0 s
+    -- right RIGHT 3.0 s
+    -- glide - 1.5 s
+    joystick1_raw seen by the engine vs injected, 244 ticks: 0 mismatches []
+    run isolation: CLEAN
+      t    9.00 x +1.6876 y +0.0010 z +0.9827 vx +3.0480 vy +0.0000 vz +0.0000 joy +8192.0000
+      t    9.05 x +1.7309 y +0.0256 z +1.0432 vx +3.0480 vy +0.0000 vz +0.0000 joy +8192.0000
+      t    9.10 x +1.7672 y +0.0546 z +1.1076 vx +3.0480 vy +0.0000 vz +0.0000 joy +8192.0000
+      t    9.15 x +1.8483 y +0.0747 z +1.1617 vx +3.0480 vy +0.0000 vz +0.0000 joy +8192.0000
+      t    9.20 x +1.9085 y +0.1035 z +1.2312 vx +3.0480 vy +0.0000 vz +0.0000 joy +8192.0000
+      t    9.25 x +1.9652 y +0.1318 z +1.2909 vx +3.0480 vy +0.0000 vz +0.0000 joy +8192.0000
+      t    9.30 x +1.9991 y +0.1602 z +1.3331 vx +3.0480 vy +0.0000 vz +0.0000 joy +8192.0000
+      t    9.35 x +2.0425 y +0.1861 z +1.3967 vx +3.0480 vy +0.0000 vz +0.0000 joy +8192.0000
+      t    9.40 x +2.1835 y +0.2184 z +1.8037 vx +3.0480 vy +0.0000 vz +0.0000 joy +8192.0000
+      t    9.45 x +2.2518 y +0.2647 z +1.8670 vx +3.0480 vy +0.0000 vz +0.0000 joy +8192.0000
+      t    9.50 x +2.3660 y +0.2798 z +1.9065 vx +3.0480 vy +0.0000 vz +0.0000 joy +8192.0000
+      t    9.55 x +2.4930 y +0.2864 z +1.9223 vx +3.0480 vy +0.0000 vz +0.0000 joy +8192.0000
+      t    9.60 x +2.6339 y +0.2864 z +1.8585 vx +3.0480 vy +0.0000 vz +0.0000 joy +8192.0000
+      t    9.65 x +2.7715 y +0.2924 z +1.8735 vx +3.0480 vy +0.0000 vz +0.0000 joy +8192.0000
+    ```
+
+    **PASS.** Phase 1 steps 5–7 on the canonical fish, with the idle running:
+
+    - **5 hover:** 10 s with no input, Player drift 0.00000 m on every axis. The idle is at full weight (tail ±0.050 rev, bob ±12 mm), so the idle is cosmetic.
+    - **6 speeds and clamps:** every held direction stops exactly at the level's clamp (to 0.1 mm). Cruise is 2.743 m/s, Phase 1's 0.137 m per tick. The release glide is 1.351 m in 2 s: 3.048 m/s × 0.05 s × Σ 0.9ᵏ, the drag model. Phase 1's table printed 0.892 m for its 2 s glide window, but its prose said ≈ 1.2 m, and this run agrees with the model. One A tap darts 3.56 m (5.49 m/s on the burst ticks, then the glide) with y and z unchanged.
+    - **7 heading:** after RIGHT the body part faces −0.007 rev and after LEFT +0.497 rev (the rest is the tail's counter-yaw). The crops above show the tail on the correct side. The Player's own `ROTATION_C` reads 0 on all 1197 ticks it was sampled: nothing writes it.
+    - **Attachment:** over 2646 ticks (turns, darts, wall contact, hosting) no part leaves its rigid offset from the body part by more than 0.55 mm (Bhaskara sine error). The body part sits on the Player to 0.000 mm horizontally, and vertically within the 12 mm bob. The Director runs after the Player, so the parts never lag.
+    - **Found on the way (fixed):** (a) the floor clamp trapped the fish, because UP read back `ZSPEED` 0 at `ZMIN` (16.16 fixed point: the clamp fired at its own limit); (b) at `ZMIN` 0.891 the capsule was 0.06 m over the sand, inside Jolt's ground distance, so the fish was "standing" (cruise ×0.925 ground friction). Pushed into the rock, it stair-stepped and flew off at vz 7.18 m/s and vy 0.8 m/s to the top clamp. After the fixes (the trace above) it slides up and over the rock and the anemone column with |vz| never above the written 3.048 and vy 0. One 0.41 m step remains at the column (Jolt walk-stairs, t 9.35 → 9.40), plus 0.29 m of sideways slide.
+
 
 #### Phase 2 verdict
 
@@ -793,6 +996,76 @@ Deviations from the plan, all deliberate:
 
 Open for Phase 3: the canonical clownfish replaces the placeholder at the `# PHASE 3` marker in `blender_create_aquarium.py`; camshot B and the Director switch read `anemone-zone`; re-run `run_aquarium_checks.py` for step 15.
 
+#### Phase 3 verdict
+
+**Done: the canonical clownfish is the player, with its idle animation, swim, depth and dart controls, a hosting anemone,
+camshot B on a hysteresis zone, and a touch profile, with no engine change.** Run 2026‑09‑30 on Linux in an isolated
+worktree, with the main checkout's `engine/wf_game` (built 2026‑09‑25) and this worktree's Rust tools. Every capture
+above was opened and looked at.
+
+| Step | Result |
+|---|---|
+| 11 frame A (re-captured with the real fish) | PASS: camshot A, whole tank, the fish at spawn |
+| 12 swim into the anemone zone, frame B | PASS: held buttons only; B engages at 2.145 m; the fish idles in the crown behind the front tentacles; hysteresis 2.2 m in / 2.5 m out |
+| 13 every wall held ≥ 5 s (real fish) | PASS: the box and the visible fish stay inside every face; clamps hold the visible fish 0.25 in off each wall |
+| 14 touch profile | **Logic verified, hardware unverified**: all nine checks pass with injected buttons; no phone build was run |
+| 15 Phase 1 steps 5–7 on the real fish | PASS: drift 0, exact clamps, cruise 2.743 m/s, heading flips, Player `ROTATION_C` never written, every part within 0.55 mm of its offset over 2646 ticks |
+| Regression guards | `tests/test_aquarium_level.py` 19 passed; `tests/test_aquarium_idle.py` 8 passed, runtime included (27 in 21.9 s) |
+
+**Tuning values.** Camera B (2.5, −2.2, 1.75) m; `LookB` rests at (2.5, 0, 1.62) and leans 35 % toward the fish. Zone:
+enter within 2.2 m of (2.5, 0, 1.771), leave past 2.5 m. The `Camera` box is ±0.2 m. Swim: ±3.048 m/s while held,
+nothing on release (cruise 2.743 m/s, glide ≈ 1.37 m). Dart: 6.096 m/s for 0.15 s along the facing, then the glide,
+3.56 m in all. Clamps: |x| ≤ 5.378, |y| ≤ 1.350, 0.980 ≤ z ≤ 4.461 m. Host height: z ≥ 2.05 m over the oral disc.
+
+<img src="2026-09-30-aquarium-level/phase3-vs-mockup.png" width="700">
+
+**Frame A and B against the mockups** (left mockup, right engine), honestly:
+
+- **The anemone is smaller and stubbier than drawn.** The mockup's crown is a fan of long, thin tentacles about 2.5×
+  the width of ours (it measures about 4.5 m at the tank's scale; the spec is 7 in = 1.78 m, and ours is 7.5 in). Ours
+  has fewer visible bulbs, shorter, thicker strips, and a proportionally larger column. **Not changed in Phase 3:** a
+  bigger fan would move the tentacle sets and the hosting geometry just verified. It fits Phase 4's sway work, which
+  rebuilds the tentacles as clumps anyway.
+- **The back wall is plain.** The mockup has light shafts and a vertical gradient; ours is one flat water colour.
+  Not changed (Plan B has no textures, and a gradient needs a textured or subdivided face).
+- **The camera looks slightly down.** Camshot A shows the sand floor in perspective and the end walls as trapezoids,
+  where the mockup is flatter. The framing (tank width in frame, stand below, room above) matches.
+- **The fish reads darker.** Its flanks are lit at about 0.66 by the 65° directional light, so the orange reads brown
+  at camera A. The mockup's fish is flat bright orange.
+- **In B the fish is more hidden** than in the mockup, because our front tentacles are thicker and closer together.
+  The mockup's "tentacles sway" label is Phase 4.
+
+**Deviations from the plan and the brief, each with its reason:**
+
+1. **The tentacles are a separate, non-colliding actor** (`anemone-tentacles`, an anchored Mass-0 platform). Phase 2
+   left open whether the anemone should collide. With solid tentacles the real hull entered the crown only within a
+   ±0.035 m band of y about the gap (0.28 m to the bulbs, minus the 0.125 capsule, 0.02 padding and 0.1 predictive contact).
+   One tick of Y input glides about 1.4 m, so a player cannot aim that closely. Measured: the fish arrived at y 0.158,
+   stopped at x 2.02 and was pushed aside. The base, column and oral disc stay solid. Level authoring only, no engine
+   change.
+2. **No uncommanded acceleration** (`aq-no-kicks`): each tick, any axis that physics made faster than the script left it
+   is put back to that speed. The brief said to write speeds "only while a direction is held". This writes a speed on
+   a released axis only to cancel a physics-injected kick (the 7 m/s rock launch), and never changes the glide.
+3. **The floor clamp is a ground clearance, not the belly margin.** `ZMIN` keeps the capsule 0.15 m over the sand
+   (0.980 m, not 0.891 m), because within 0.12 m Jolt treats the fish as standing (ground friction, walk-stairs).
+   The belly is therefore 0.15 m over the sand at the lowest.
+4. **Clamps compare with ±1 mm** (16.16 fixed point; the floor clamp otherwise trapped the fish).
+5. **One source for the constants:** `clownfish.py` now takes `WORLD_SCALE` and the 3.5 in length from
+   `aquarium_constants.py`. The fish is 0.0889 m × 10 (was 0.089), so the nose is at 0.361 m (was 0.362). The idle
+   spike was rebuilt, and its tests pass.
+6. **`clownfish.py` script assembly:** `player_script` / `director_script` take `defs=` (and `entry=`), because the
+   zForth host compiles up to the last `;` once and runs only what follows it every tick. Passing the level's
+   definitions through `extra` would have put `fish-rig-tick` among the definitions, where it runs once at load.
+7. **`cs_front` lost its self-select script;** the Director writes `CAMSHOT` every tick instead (bungee mode never
+   clears it). The start-up camshot is still the first one constructed (`cs_front`).
+
+**Residuals, not blocking:** pushed into the rock or the anemone column, the fish slides up and over (one 0.41 m
+walk-stairs step, 0.29 m sideways). It is a solid obstacle; how the fish climbs it is Jolt's walker. During a
+0.35 s turn at the front glass the visible nose sweeps toward the camera up to 0.19 m past the front-glass plane
+(computed from `extents()` at |y| = 1.350, not measured): the rig turns through −0.25 rev (nose −Y), per the plan's
+0 / −0.5 heading targets. With no pane (Plan B) nothing is
+pierced; it reads as the fish turning toward the viewer. The touch mode has no on-screen indicator.
+
 ## Regression guard
 
 `tests/test_aquarium_level.py`, in the same commit as the level, reading `aquarium_constants.py`:
@@ -806,6 +1079,16 @@ Open for Phase 3: the canonical clownfish replaces the placeholder at the `# PHA
 - added from Phase 1: `Player` precedes `tank-shell` in actor order, and its bbox is symmetric in X and Y and at least
   0.25 m on every axis; the fog is `FOG_COLOR` (not snowgoons' grey) and completes before 1000 m.
 
+- added in Phase 3 (19 tests in all): the scale and the fish's length have one source (`clownfish.py` agrees with
+  `aquarium_constants.py`); `Player`, then the five parts, then `tank-shell` in actor order; the `Player` is the
+  invisible `Physics` hull running `aq-player-tick`, and its script never writes its own `ROTATION_C`; the parts are Mass-0
+  anchored platforms with no script, never statplats; no placeholder mesh or code remains; the Director runs
+  `fish-rig-tick` then `aq-camera-tick`, and its part, camshot and `LookB` indices equal export position + 1; the level's
+  mailboxes are 700–719; camshots A and B are outside the tank, and B's `Camera` box stays clear of the fish; the zone's
+  centre and radius match `anemone-zone`, with a hysteresis band; the clamps follow from the fish's `extents()`; the
+  anemone body collides and its tentacles do not; the infrastructure actors are Mass 0. The runtime behaviour (steps 11–15)
+  is `run_aquarium_checks.py`.
+
 The test reads the committed `wflevels/aquarium/aquarium.lev`. After changing the build script, run
 `task aquarium-level` before the test.
 
@@ -815,10 +1098,11 @@ The test reads the committed `wflevels/aquarium/aquarium.lev`. After changing th
 |---|---|---|
 | Translucent draw order (§ 3) | Pane hides the fish | **Happened (Phase 0):** opaque today (shader drops alpha), order-dependent once alpha is restored. Plan B unless the engine change is approved |
 | Gravity-free `CharacterVirtual` drifts or sticks | Fish sinks or floats | **Retired (Phase 1):** 0 drift in 10 s at ×10. Residual: wall push-off ≤ 0.35 m after a slide, bounded by the script clamps |
+| Jolt's character is a walker even with no gravity | A floater near a floor is "standing"; contacts stair-step it and the inferred velocity launches it | **Happened (Phase 3):** 7 m/s off the rock. Fixed in the script: a floor clamp 0.15 m of ground clearance, and no uncommanded acceleration. Residual: one 0.4 m walk-stairs step when pushed into the rock or the column |
 | Tiny capsule misbehaves at ×1 | Jitter or tunnelling | **Happened, worse (Phase 1):** at ×1 the fish is a 25 cm ball (levcomp's 0.25 m minimum span) and a smooth mesh will not load. ×10 chosen. At ×10 the real fish's ½ in thickness still hits the 0.25 m rule, so author a symmetric `wf_original_bbox` |
 | `ROTATION_C` writes ignored | Fish swims backwards | **Retired (Phase 1):** writes turn the mesh (revolutions). The capsule does not turn, so the nose enters the end walls; clamp X in the script |
 | Anemone sway shears or costs frames | Visual glitch | It is Phase 4 and optional; v1 is static |
-| Real fish is multi-part but Phase 1 tuned a single actor | Parts lag or shear against the body; controls feel different | Phase 3 re-validates on the real fish (step 15); parts are driven from one place with the body's own heading |
+| Real fish is multi-part but Phase 1 tuned a single actor | Parts lag or shear against the body; controls feel different | Phase 3 re-validates on the real fish (step 15); parts are driven from one place with the body's own heading. **Retired (Phase 3):** every part stays within 0.55 mm of its offset over 2646 ticks, and the controls measure the same as Phase 1 (cruise 2.743 m/s, exact clamps) |
 | Any of the above needs an engine change | Scope grows | **Stop and escalate**; do not patch the engine inside this plan |
 
 **Assumed, not asked (say so if wrong):** the player *is* the clownfish, rather than a fixed viewer; both are scripted from

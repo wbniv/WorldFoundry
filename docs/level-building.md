@@ -730,6 +730,24 @@ Using `and`/`or` compiles silently into a ZF_ABORT_NOT_A_WORD error (code 7)
 that prints `zforth compile error 7 (defs): : cam-remap ...` at runtime —
 the word is simply not executed every tick, leaving `INDEXOF_INPUT` at 0.
 
+#### Definitions compile once; only the text after the last `;` runs every tick
+
+The zForth host splits a script at its **last** `;` token (comments and strings skipped;
+[`engine/stubs/forth_source.hp`](../engine/stubs/forth_source.hp)): everything up to it is evaluated
+**once**, at load, and only the text after it is wrapped into the per-tick word. So a call placed
+*between* two definitions runs once at load and never again. When a script is assembled from
+parts (a library, a generated constants header, a level's own words), put every definition first
+and every per-tick call last. `clownfish.py`'s `player_script` / `director_script` take the
+level's words as `defs=` for exactly this reason (aquarium, 2026‑09‑30).
+
+#### Clamps against a written limit need a tolerance (16.16 fixed point)
+
+Position mailboxes are 16.16 fixed point, so `X_POS` written as a float limit reads back up to
+one LSB beyond it. A clamp of the form "if `Z_POS` < `ZMIN` then `ZSPEED` := 0, `Z_POS` := `ZMIN`"
+then fires on **every** tick at its own limit and zeroes the speed the script wrote a moment
+earlier, so the actor can never leave the limit (the aquarium fish was stuck on its floor clamp
+this way). Compare against the limit ± 1 mm and write the exact limit.
+
 #### Mailbox scope rules
 
 WF mailboxes form a hierarchy. Understanding scope prevents the most common cross-actor scripting bugs.
@@ -877,7 +895,14 @@ not a mesh contact, so: a first-person camera placed inside a room sails up 10�
 shell's bbox is the whole room); a world-sized actor such as a sky dome must have `Mass 0` or
 every camera "collides" with it forever; put POV cameras in free air *outside* every bbox
 (the condo's balcony/window shots sit 1.5–1.8 m past the glass). If a shot is higher and steeper
-than authored, this is why.
+than authored, this is why. The `Camera`'s own bbox is what overlaps, so a close shot can sit
+nearer a Mass > 0 actor's reach if the `Camera` gets a small authored box: the aquarium gives it
+±0.2 m so camshot B sits 0.55 m outside the glass, clear of the Mass‑1 fish at its front limit.
+In bungee mode the 10-unit-per-frame slew clamp (below) never applies (`gBungeeCam`
+short-circuits it). The spring sets the camera's velocity to remaining distance / (Δt ×
+`Elasticity`) ([`movecam.cc:972`](../wfsource/source/game/movecam.cc)), averaged with last tick's,
+so it closes roughly 1/`Elasticity` of the gap per tick (10 % at the default 10). A shot switch
+is a short flight, not a cut.
 
 **Bungee vs normal mode** is a per-level flag: the standalone wrapper's `'FLAG' <doomstick>
 <bungeecam>` ([`level.cc:434`](../wfsource/source/game/level.cc) → `gBungeeCam`). Normal mode
@@ -1033,6 +1058,34 @@ Actors with `wf_Mobility = 'Physics'` are driven by [Jolt's `CharacterVirtual`](
 | `Path` | An OAD path animates the actor | Moving platforms, scripted enemy paths |
 | `Camera` | Camera handler in `movecam.cc` | Camera actors only |
 | `Follow` | Follows another actor | Trailing camera, second-player |
+
+#### A gravity-free swimmer or flyer on `CharacterVirtual` (aquarium, 2026‑09‑30)
+
+`Falling Acceleration` 0 holds altitude exactly (0 drift in 10 s), but the Jolt character is still
+a **walker**, and that leaks into anything that swims or flies
+([`jolt_backend.cc`](../wfsource/source/physics/jolt/jolt_backend.cc) `JoltCharacterCreate` /
+`JoltCharacterUpdate`):
+
+- **Any contact under the capsule within ≈ 0.12 m is "ground".** Jolt counts contacts within its
+  character padding (0.02 m) plus predictive contact distance (0.1 m), and slopes up to
+  `mMaxSlopeAngle` = 80° are floor. A floater parked 0.06 m over the sand was `OnGround`: it
+  ran through `MarbleHandler` (friction ×0.925 per tick instead of the air drag's ×0.9), with
+  walk-stairs (step up 0.4 m) and stick-to-floor (0.5 m) active. Keep a floater's capsule
+  ≥ 0.15 m off any floor with a script clamp. These are absolute metres and do not scale with a
+  level's world scale.
+- **Velocity is inferred from the position change** on every tick, so a contact that *moves* the
+  character becomes velocity that the air drag then carries. Pushed into a sloped rock, the fish
+  stair-stepped 0.36 m in one tick and flew off at 7 m/s (the same mechanism as the swim spike's
+  "wall push-off"). The level-side fix: the script is the only motor. Each tick, before input,
+  any axis now faster than the script left it last tick is put back to that speed. That keeps
+  the drag glide intact and removes every physics-injected kick. The residual is the displacement
+  itself: one 0.4 m walk-stairs step when a floater is pushed into a ledge.
+- **A visible multi-part body on an invisible hull** keeps cosmetic motion (bob, sway, fins) out
+  of physics entirely: the `Physics` actor is an invisible collision hull, and the Director poses
+  Mass-0 anchored `platform` parts from its position every tick (never statplats: every statplat
+  gets a Jolt body). See
+  [`wflevels/aquarium/clownfish.py`](../wflevels/aquarium/clownfish.py) and
+  [the idle plan](plans/2026-09-30-clownfish-idle-animation.md).
 
 ---
 
