@@ -1,5 +1,7 @@
 | Date | Change |
 |------|--------|
+| [2026-09-30](https://github.com/wbniv/WorldFoundry/commit/2a9f1868) | aquarium plan: Phase 4 verification (steps 16-20), re-runs of 12-15, verdict, tables, controls |
+| [2026-09-30](https://github.com/wbniv/WorldFoundry/commit/8a48df87) | Aquarium Phase 3: canonical clownfish, swim/dart controls, camshot B, touch profile |
 | [2026-09-30](https://github.com/wbniv/WorldFoundry/commit/68499439) | Aquarium Phase 2: tank, sand, rock, anemone, lighting, fog (static scene, placeholder fish) |
 | [2026-09-30](https://github.com/wbniv/WorldFoundry/commit/52a5bfe6) | Aquarium plan: Player is an invisible collision hull; visible clownfish is five Director-posed parts |
 | [2026-09-30](https://github.com/wbniv/WorldFoundry/commit/6d902226) | Run aquarium Phase 1 swim-and-scale spike: gravity-free fish works at x10 |
@@ -9,6 +11,16 @@
 | [2026-09-30](https://github.com/wbniv/WorldFoundry/commit/f964a400) | Plan aquarium level (55 gal acrylic, clownfish, anemone) and correct condo alpha note |
 
 <!--history-meta v1
+2a9f1868	author	Will Norris
+2a9f1868	added	483
+2a9f1868	deleted	18
+2a9f1868	files	1
+2a9f1868	body	Steps 16 (sway), 17 (hosting/containment on the 18-tentacle crown), 18 (cost: 14.3 -> 11.1 ms vs\nPhase 3's 9.7, cause located with one-change variants), 19 (frames vs mockups, differences listed)\nand 20 (steer-and-swim traces, motion strips), all from CLEAN paused/stepped injected-input runs.\nSteps 12, 13 and 15 point at the step-17 re-run; step 14 re-run on steer and swim. Phase 4 verdict\nwith tuning maths, sources opened vs not, adopted/rejected constants, deviations and residuals;\nfiles/actors tables, section 4 controls, sections 5-7 as built, regression guard, sway risk row.\n\nCo-Authored-By: Claude Opus 5.5 <noreply@anthropic.com>\nClaude-Session: https://claude.ai/code/session_01NNPhRbrqjqMDkScPvTE9yC
+8a48df87	author	Will Norris
+8a48df87	added	298
+8a48df87	deleted	14
+8a48df87	files	1
+8a48df87	body	Plan: docs/plans/2026-09-30-aquarium-level.md (Phase 3 verdict; steps 12, 13, 15 PASS,\nstep 14 logic-verified, hardware unverified).\n\n- blender_create_aquarium.py: the placeholder fish is gone; the Player is the canonical\n  clownfish's invisible Physics hull, followed by the five Mass-0 anchored platform parts\n  posed by the Director (fish-rig-tick). Camshot B (cs_anemone) aims at LookB, which the\n  Director leans toward the fish; zone switch with hysteresis (in 2.2 m, out 2.5 m).\n  AQUARIUM_PROFILE=keyboard|touch. Infrastructure actors are Mass 0.\n- aquarium_swim.fth (new): swim controller with the Phase 1 values, the dart, clamps from\n  extents() (±1 mm tolerance: 16.16 read-back), a floor clamp with 0.15 m ground clearance,\n  and no uncommanded acceleration (Jolt's walker stair-stepped the fish off the rock at 7 m/s).\n- Anemone split: the body collides, and anemone-tentacles is a non-colliding platform, so the\n  fish can host from any depth.\n- clownfish.py takes WORLD_SCALE and FISH_LEN from aquarium_constants.py (single source);\n  player_script/director_script take defs=/entry= (zForth runs only the text after the last\n  `;` each tick). The idle spike was rebuilt.\n- run_aquarium_checks.py: paused, per-tick stepping with sticky injected input (hermetic),\n  steps 11-15 plus --profile touch and --trace-sand.\n- tests/test_aquarium_level.py: 19 tests (Player first, parts, camshots, zone, clamps,\n  constants agree, no placeholder).\n- Taskfile: aquarium-touch-level; aquarium-level/aquarium-idle-level track the new sources.\n- docs/level-building.md: script compile semantics, fixed-point clamps, gravity-free\n  CharacterVirtual, camera bbox vs Mass > 0 actors in bungee mode.\n\nCo-Authored-By: Claude Opus 5.5 <noreply@anthropic.com>\nClaude-Session: https://claude.ai/code/session_0148itHvh6GL5Qc7uwSjFC2n
 68499439	author	Will Norris
 68499439	added	180
 68499439	deleted	20

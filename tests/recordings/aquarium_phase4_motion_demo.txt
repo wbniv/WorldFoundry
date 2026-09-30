@@ -1,0 +1,11 @@
+00:00.00–00:02.00  Hover: no input: the idle — a small bob, pectorals sculling, the anemone swaying
+00:02.00–00:04.20  U-turn left: Left: the fish turns in an arc (head first, banking) and swims off along its facing
+00:04.20–00:07.30  Cruise across: Right: U-turn back, then burst-and-coast across the tank; release = glide
+00:07.30–00:09.90  Climb facing right: Up alone while facing right: it climbs FORWARD at the 40° pitch limit, then levels on release
+00:09.90–00:13.70  Dive facing left: Left (arc), then Down alone: a forward dive at the pitch limit, levelling on release
+00:13.70–00:16.30  Toward the glass: B: turns to face the camera and swims to the glass, easing to a stop before it
+00:16.30–00:19.10  Away from the glass: C: turns (toward the centre line, never into the glass) and swims to the back
+00:19.10–00:25.70  Into the anemone: arrows + B/C toward the crown; camshot B takes over in the zone; it rests level among the swaying tentacles
+00:25.70–00:29.20  Wall approach: Right out of the crown to the end wall: it eases to a stop facing the wall (camera back to A)
+00:29.20–00:32.35  Turn and dart: Left to turn away from the wall, then an A tap: a dart along the facing, then the glide
+00:32.35–00:33.85  Hover: no input again: the idle fades back in

@@ -17,7 +17,9 @@ Rejected: the engine's own `-record_video` (display.cc) stamps frames with the W
 harness's stepping speed, not in real time; the condo tour needs setpts for the same reason.
 
 Usage: python3 tests/record_aquarium_motion_demo.py [-h] [--out PATH] [--work DIR] [--port N] [--keep-frames]
-Default out: ~/tmp/aquarium-phase4/motion-demo.mp4 (never commit the video). Needs DISPLAY and wf_game
+Default out: ~/tmp/aquarium-phase4/motion-demo.mp4, a scratch copy. The reference recording is committed as
+tests/recordings/aquarium_phase4_motion_demo.mp4 (+ .srt, .txt); replace it deliberately, from a CLEAN run only.
+Needs DISPLAY and wf_game
 (engine/wf_game, else the main checkout's; WF_GAME= overrides), ffmpeg with drawtext.
 Plan: docs/plans/2026-09-30-aquarium-level.md (Phase 4, item B).
 """
