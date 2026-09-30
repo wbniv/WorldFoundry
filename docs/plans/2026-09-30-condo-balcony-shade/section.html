@@ -1,0 +1,95 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<title>Mockup — 639 balcony shade, section</title>
+<style>
+  :root { --bg:#fff; --fg:#1f2328; --muted:#656d76; --line:#d1d9e0; --panel:#f6f8fa; --accent:#0969da;
+          --conc:#c9c6bf; --conc2:#a9a59c; --fab:#e9c46a; --cass:#3d4550; --solar:#1c3a6e; --sun:#e8a100; }
+  @media (prefers-color-scheme: dark) {
+    :root { --bg:#0d1117; --fg:#e6edf3; --muted:#9198a1; --line:#30363d; --panel:#161b22; --accent:#4493f8;
+            --conc:#4a4843; --conc2:#63615a; --fab:#b58b2c; --cass:#8b95a3; --solar:#3a64b8; --sun:#f0b429; }
+  }
+  * { box-sizing:border-box; }
+  body { margin:0; width:1440px; height:900px; overflow:hidden; background:var(--bg); color:var(--fg);
+         font:15px/1.5 ui-sans-serif,system-ui,-apple-system,"Segoe UI",sans-serif; }
+  header { display:flex; align-items:center; gap:12px; padding:14px 24px; border-bottom:1px solid var(--line); background:var(--panel); }
+  header h1 { margin:0; font-size:16px; font-weight:600; }
+  header .tag { margin-left:auto; font:600 11px ui-monospace,Menlo,monospace; letter-spacing:.04em; color:var(--muted);
+                border:1px solid var(--line); border-radius:10px; padding:2px 8px; }
+  main { display:grid; grid-template-columns:760px 1fr; height:843px; }
+  .draw { border-right:1px solid var(--line); padding:6px 0 0 10px; }
+  .side { padding:22px 28px; }
+  h2 { font-size:14px; margin:0 0 6px; text-transform:uppercase; letter-spacing:.05em; color:var(--muted); }
+  label { display:block; font-size:13.5px; margin:8px 0 2px; }
+  input[type=range] { width:100%; }
+  ul { margin:6px 0 14px; padding-left:18px; font-size:13.5px; } li { margin:3px 0; }
+  .note { font-size:13px; color:var(--muted); }
+  svg text { font:12px ui-sans-serif,system-ui,sans-serif; fill:var(--fg); }
+  svg .dim { stroke:var(--muted); stroke-width:1; fill:none; } svg .dimt { fill:var(--muted); font-size:11.5px; }
+</style>
+</head>
+<body>
+<header><h1>639 back balcony — section through the opening (interior left, west / outside right)</h1><span class="tag">MOCKUP — NOT SHIPPED</span></header>
+<main>
+<div class="draw"><svg id="s" width="750" height="830" viewBox="0 0 750 830"></svg></div>
+<div class="side">
+  <h2>Controls</h2>
+  <label>Shade drop: <b id="pl">100</b> %</label><input id="p" type="range" min="0" max="100" value="100">
+  <label>Sun altitude: <b id="al">25</b>° (west, afternoon)</label><input id="a" type="range" min="5" max="75" value="25">
+  <h2 style="margin-top:20px">What the section shows</h2>
+  <ul>
+    <li>The balcony floor steps <b>7 cm down</b> from the interior floor across the whole frontage of the 268 cm opening.</li>
+    <li>The cassette hangs from the beam soffit at 222 cm; it eats about 10 cm of the 111 cm opening, so the fabric drops ≈ 98 cm.</li>
+    <li>The solar strip is on the cassette's <b>west face</b>, vertical. With the sun above ≈ 60° it is nearly edge-on, so the strip charges best in the low afternoon sun and worst at midday.</li>
+    <li>Wall / beam thickness is drawn at 10 cm, copied from the level model. <b>Not measured</b> — it decides whether the screen sits in the wall's thickness or is surface-mounted.</li>
+  </ul>
+  <p class="note">Drawn at 2.7 px/cm. The sun ray is only there to judge shading of the strip by the pony wall and beam.</p>
+</div>
+</main>
+<script>
+const S = 2.7, WX = 300, YB = 790;                 // px/cm, x of the wall's inner face, balcony-floor line
+const REC = 7, PONY = 111, HEAD = 222, BEAM = 35, T = 10, CASS = 10, BAR = 3;
+const Y = z => YB - z * S, X = y => WX + y * S;    // y in cm, + = outside (west)
+const s = document.getElementById('s');
+function el(t, a, txt) { const e = document.createElementNS('http://www.w3.org/2000/svg', t);
+  for (const k in a) e.setAttribute(k, a[k]); if (txt) e.textContent = txt; s.appendChild(e); return e; }
+function box(y0, z0, y1, z1, fill, stroke) { return el('rect', {x:X(y0), y:Y(z1), width:(y1-y0)*S, height:(z1-z0)*S, fill, stroke:stroke||'none'}); }
+function draw(p, alt) {
+  s.innerHTML = '';
+  box(-105, REC-30, 40, 0, 'var(--conc)', 'var(--conc2)');               // balcony slab (below the recessed floor)
+  box(-105, REC, -100, REC, 'none');
+  // interior floor 7 cm above balcony floor: slab stepped
+  el('path', {d:`M${X(-105)},${Y(REC)} L${X(-T*0-105+0)},${Y(REC)} L${X(-0)},${Y(REC)} L${X(0)},${Y(0)} L${X(40)},${Y(0)}`, stroke:'var(--fg)', 'stroke-width':2, fill:'none'});
+  box(-105, 0, 0, REC, 'var(--conc)', 'var(--conc2)');                    // the 7 cm step block (interior side)
+  box(0, 0, T, PONY, 'var(--conc)', 'var(--conc2)');                      // pony wall
+  box(0, HEAD, T, HEAD+BEAM, 'var(--conc)', 'var(--conc2)');              // beam
+  // cassette under the soffit, flush with the wall's outer face
+  box(0, HEAD-CASS, T, HEAD, 'var(--cass)');
+  box(T, HEAD-CASS+1, T+1.2, HEAD-1, 'var(--solar)');                     // solar strip on the west face
+  // fabric
+  const top = HEAD - CASS, fabH = top - PONY - BAR, drop = fabH * p;
+  box(T/2-0.3, top-drop, T/2+0.3, top, 'var(--fab)');
+  box(T/2-1.5, top-drop-BAR+BAR*(p?0:0), T/2+1.5, top-drop+BAR*0, 'var(--cass)');
+  // sun ray hitting the strip
+  const a = alt * Math.PI/180, len = 150, sy0 = HEAD - CASS/2, sx0 = T+1.2;
+  el('line', {x1:X(sx0), y1:Y(sy0), x2:X(sx0+len*Math.cos(a)), y2:Y(sy0+len*Math.sin(a)), stroke:'var(--sun)', 'stroke-width':2.5, 'stroke-dasharray':'6 4'});
+  el('text', {x:X(sx0+len*Math.cos(a))-4, y:Y(sy0+len*Math.sin(a))-6, style:'fill:var(--sun);font-weight:600'}, 'sun');
+  // labels
+  el('text', {x:X(-100), y:Y(REC)-8}, 'interior floor (+7)'); el('text', {x:X(-100), y:Y(0)+16}, 'balcony floor (0)');
+  el('text', {x:X(-100), y:Y(REC/2)+4, style:'font-size:11px'}, '7 cm step');
+  el('text', {x:X(T)+8, y:Y(PONY/2)}, 'pony wall 111'); el('text', {x:X(T)+8, y:Y(HEAD+BEAM/2)+4}, 'beam 35');
+  el('text', {x:X(T)+22, y:Y(HEAD-CASS/2)+4}, 'cassette + solar strip');
+  el('text', {x:X(T)+8, y:Y((HEAD+PONY)/2-4), style:'fill:var(--muted)'}, p>0.02?'':'(open: fabric rolled up)');
+  const dx = X(-60);
+  for (const [a0,b0,l] of [[0,PONY,'111'],[PONY,HEAD,'111'],[HEAD,HEAD+BEAM,'35']]) {
+    el('line', {class:'dim', x1:dx, y1:Y(a0), x2:dx, y2:Y(b0)}); el('line', {class:'dim', x1:dx-5, y1:Y(a0), x2:dx+5, y2:Y(a0)}); el('line', {class:'dim', x1:dx-5, y1:Y(b0), x2:dx+5, y2:Y(b0)});
+    el('text', {class:'dimt', x:dx-8, y:Y((a0+b0)/2)+4, 'text-anchor':'end'}, l); }
+  el('text', {class:'dimt', x:X(T)+8, y:Y(HEAD+BEAM)-6}, 'slab / ceiling');
+}
+const pe = document.getElementById('p'), ae = document.getElementById('a');
+function up() { document.getElementById('pl').textContent = pe.value; document.getElementById('al').textContent = ae.value; draw(pe.value/100, +ae.value); }
+pe.oninput = ae.oninput = up; up();
+</script>
+</body>
+</html>

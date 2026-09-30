@@ -1,0 +1,108 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<title>Mockup — 639 balcony shade, elevation</title>
+<style>
+  :root { --bg:#fff; --fg:#1f2328; --muted:#656d76; --line:#d1d9e0; --panel:#f6f8fa; --accent:#0969da;
+          --conc:#c9c6bf; --conc2:#a9a59c; --fab:#e9c46a; --cass:#3d4550; --solar:#1c3a6e; --sky:#cfe6f5; }
+  @media (prefers-color-scheme: dark) {
+    :root { --bg:#0d1117; --fg:#e6edf3; --muted:#9198a1; --line:#30363d; --panel:#161b22; --accent:#4493f8;
+            --conc:#4a4843; --conc2:#63615a; --fab:#b58b2c; --cass:#8b95a3; --solar:#3a64b8; --sky:#1d3347; }
+  }
+  * { box-sizing:border-box; }
+  body { margin:0; width:1440px; height:900px; overflow:hidden; background:var(--bg); color:var(--fg);
+         font:15px/1.5 ui-sans-serif,system-ui,-apple-system,"Segoe UI",sans-serif; }
+  header { display:flex; align-items:center; gap:12px; padding:14px 24px; border-bottom:1px solid var(--line); background:var(--panel); }
+  header h1 { margin:0; font-size:16px; font-weight:600; }
+  header .tag { margin-left:auto; font:600 11px ui-monospace,Menlo,monospace; letter-spacing:.04em; color:var(--muted);
+                border:1px solid var(--line); border-radius:10px; padding:2px 8px; }
+  main { display:grid; grid-template-columns:930px 1fr; height:843px; }
+  .draw { padding:8px 0 0 10px; border-right:1px solid var(--line); }
+  .side { padding:22px 28px; overflow:hidden; }
+  h2 { font-size:14px; margin:0 0 6px; text-transform:uppercase; letter-spacing:.05em; color:var(--muted); }
+  table { border-collapse:collapse; width:100%; font-size:13.5px; margin-bottom:18px; }
+  td { padding:4px 6px; border-bottom:1px solid var(--line); vertical-align:top; }
+  td:first-child { color:var(--muted); width:46%; }
+  .btns { display:flex; gap:8px; margin:6px 0 16px; }
+  button { font:600 13px inherit; padding:6px 14px; border:1px solid var(--line); background:var(--panel); color:var(--fg);
+           border-radius:6px; cursor:pointer; }
+  button[aria-pressed="true"] { background:var(--accent); color:#fff; border-color:var(--accent); }
+  .note { font-size:13px; color:var(--muted); }
+  svg text { font:12px ui-sans-serif,system-ui,sans-serif; fill:var(--fg); }
+  svg .dim { stroke:var(--muted); stroke-width:1; fill:none; }
+  svg .dimt { fill:var(--muted); font-size:11.5px; }
+</style>
+</head>
+<body>
+<header><h1>639 back balcony — motorised zip screen, elevation from inside looking west</h1><span class="tag">MOCKUP — NOT SHIPPED</span></header>
+<main>
+<div class="draw">
+<svg id="s" width="920" height="830" viewBox="0 0 920 830"></svg>
+</div>
+<div class="side">
+  <h2>State</h2>
+  <div class="btns">
+    <button data-p="0">Open (rolled up)</button><button data-p="0.5">Half</button><button data-p="1" aria-pressed="true">Closed</button>
+  </div>
+  <h2>Dimensions (cm, from the recessed balcony floor)</h2>
+  <table>
+    <tr><td>Clear opening width</td><td>268</td></tr>
+    <tr><td>Pony wall top</td><td>111</td></tr>
+    <tr><td>Opening head (beam soffit)</td><td>222</td></tr>
+    <tr><td>Beam / slab face</td><td>35 → top at 257</td></tr>
+    <tr><td>Order size (W × H, incl. cassette)</td><td>≈ 267 × 111</td></tr>
+    <tr><td>Cassette</td><td>≈ 10 × 10, under the soffit</td></tr>
+    <tr><td>Fabric drop when closed</td><td>≈ 98</td></tr>
+    <tr><td>Zip guides, each side</td><td>≈ 5 wide, on the reveals</td></tr>
+    <tr><td>Solar strip</td><td>on the cassette's west face</td></tr>
+  </table>
+  <p class="note">Drawn at 2.6 px/cm. Bottom bar lands on the pony-wall cap; the 7 cm floor recess sits below this view
+  (see the section mockup). The strip length shown is a placeholder until a supplier is chosen.</p>
+</div>
+</main>
+<script>
+const S = 2.6, X0 = 80, YB = 790;               // px per cm, left edge of opening, balcony-floor line
+const W = 268, PONY = 111, HEAD = 222, BEAM = 35, CASS = 10, GUIDE = 5, BAR = 3;
+const Y = z => YB - z * S, X = x => X0 + x * S;
+const s = document.getElementById('s');
+function el(t, a, txt) { const e = document.createElementNS('http://www.w3.org/2000/svg', t);
+  for (const k in a) e.setAttribute(k, a[k]); if (txt) e.textContent = txt; s.appendChild(e); return e; }
+function dimV(x, z0, z1, label) { el('line', {class:'dim', x1:x, y1:Y(z0), x2:x, y2:Y(z1)});
+  el('line', {class:'dim', x1:x-5, y1:Y(z0), x2:x+5, y2:Y(z0)}); el('line', {class:'dim', x1:x-5, y1:Y(z1), x2:x+5, y2:Y(z1)});
+  el('text', {class:'dimt', x:x-8, y:Y((z0+z1)/2)+4, 'text-anchor':'end'}, label); }
+function draw(p) {
+  s.innerHTML = '';
+  el('rect', {x:X(0), y:Y(HEAD), width:W*S, height:(HEAD-PONY)*S, fill:'var(--sky)'});           // Bangkok beyond
+  el('rect', {x:X(-24), y:Y(PONY), width:(W+48)*S, height:PONY*S, fill:'var(--conc)', stroke:'var(--conc2)'});  // pony wall + piers
+  el('rect', {x:X(-24), y:Y(HEAD+BEAM), width:(W+48)*S, height:BEAM*S, fill:'var(--conc)', stroke:'var(--conc2)'}); // beam
+  el('rect', {x:X(-24), y:Y(HEAD), width:24*S, height:(HEAD-PONY)*S, fill:'var(--conc)', stroke:'var(--conc2)'});
+  el('rect', {x:X(W),  y:Y(HEAD), width:24*S, height:(HEAD-PONY)*S, fill:'var(--conc)', stroke:'var(--conc2)'});
+  el('text', {x:X(-20), y:Y(PONY/2)}, 'pony wall'); el('text', {x:X(-20), y:Y(HEAD+BEAM/2)+4}, 'concrete beam / slab face');
+  // zip guides
+  for (const gx of [0, W-GUIDE]) el('rect', {x:X(gx), y:Y(HEAD-CASS), width:GUIDE*S, height:(HEAD-CASS-PONY)*S, fill:'var(--cass)'});
+  // fabric
+  const top = HEAD - CASS, fabH = top - PONY - BAR, drop = fabH * p;
+  el('rect', {x:X(GUIDE), y:Y(top), width:(W-2*GUIDE)*S, height:Math.max(drop,0)*S, fill:'var(--fab)', opacity:.92});
+  el('rect', {x:X(GUIDE), y:Y(top-drop)+0, width:(W-2*GUIDE)*S, height:BAR*S, fill:'var(--cass)'});     // bottom bar
+  // cassette + solar strip
+  el('rect', {x:X(0), y:Y(HEAD), width:W*S, height:CASS*S, fill:'var(--cass)'});
+  el('rect', {x:X(30), y:Y(HEAD-2), width:(W-60)*S, height:(CASS-4)*S, fill:'var(--solar)'});
+  el('text', {x:X(W/2), y:Y(HEAD-CASS/2)+4, 'text-anchor':'middle', style:'fill:#fff;font-size:11px'}, 'solar strip');
+  // dimensions
+  el('line', {class:'dim', x1:X(0), y1:Y(HEAD+BEAM)-22, x2:X(W), y2:Y(HEAD+BEAM)-22});
+  el('line', {class:'dim', x1:X(0), y1:Y(HEAD+BEAM)-28, x2:X(0), y2:Y(HEAD+BEAM)-16}); el('line', {class:'dim', x1:X(W), y1:Y(HEAD+BEAM)-28, x2:X(W), y2:Y(HEAD+BEAM)-16});
+  el('text', {class:'dimt', x:X(W/2), y:Y(HEAD+BEAM)-28, 'text-anchor':'middle'}, '268 clear opening');
+  const dx = X(W+24) + 40;
+  dimV(dx, 0, PONY, '111'); dimV(dx, PONY, HEAD, '111'); dimV(dx, HEAD, HEAD+BEAM, '35');
+  el('line', {class:'dim', x1:X(-24), y1:YB, x2:X(W+30), y2:YB, 'stroke-width':2, stroke:'var(--fg)'});
+  el('text', {class:'dimt', x:X(-24), y:YB+16}, 'balcony floor (7 cm below the interior floor)');
+  el('text', {x:X(W/2), y:Y(top-drop/2)+4, 'text-anchor':'middle', style:'fill:#000;font-weight:600'}, p===0?'':(p===1?'fabric ≈ 98 drop':''));
+  el('text', {x:X(0)+12, y:Y(PONY)-8, style:'font-size:11px'}, 'bottom bar seals on the cap');
+}
+let p = 1; draw(p);
+document.querySelectorAll('button').forEach(b => b.onclick = () => { p = +b.dataset.p;
+  document.querySelectorAll('button').forEach(o => o.setAttribute('aria-pressed', o === b)); draw(p); });
+</script>
+</body>
+</html>
