@@ -681,6 +681,26 @@ workflows:
             echo "AQUARIUM PARITY: DIFFERS"
           fi
 
+      - name: Aquarium screenshots through Metal (later frames + a real window)
+        script: |
+          set -euo pipefail
+          exec > >(tee -a "$CM_BUILD_DIR/cm-build.log") 2>&1
+          # Same flags as the parity step. Frame 20 is already captured there; later frames
+          # show the idle animation (anemone sway, tail, pectorals), and the --windowed run
+          # shows the aquarium presented to a real CAMetalLayer window. Informational.
+          WF_GAME="$CM_BUILD_DIR/engine/wf_game.app/Contents/MacOS/wf_game"
+          LEVEL="$CM_BUILD_DIR/wflevels/aquarium-standalone.iff"
+          cd wfsource/source/game
+          for N in 100 200; do
+            "$WF_GAME" --frame-step-smoke=$((N + 10)) --cycles=1 -L"$LEVEL" -rate20 \
+              --capture-frame=$N="$CM_BUILD_DIR/macos-aquarium-frame$N.png" \
+              2>&1 | tee "$CM_BUILD_DIR/macos-aquarium-frame$N.log" || true
+          done
+          "$WF_GAME" --windowed --frame-step-smoke=30 --cycles=1 -L"$LEVEL" -rate20 \
+            --capture-frame=20="$CM_BUILD_DIR/macos-aquarium-windowed.png" \
+            2>&1 | tee "$CM_BUILD_DIR/macos-aquarium-windowed.log" || true
+          echo "AQUARIUM SHOTS: $(ls "$CM_BUILD_DIR"/macos-aquarium-frame*.png "$CM_BUILD_DIR"/macos-aquarium-windowed.png 2>/dev/null | wc -l) png file(s) written"
+
       - name: Run windowed smoke (Phase 4 proxy gate)
         script: |
           set -euo pipefail
@@ -757,6 +777,10 @@ workflows:
       # Aquarium Metal-vs-GL parity (informational; plan step 21).
       - macos-aquarium-frame20.png
       - macos-aquarium-comparison.log
+      - macos-aquarium-frame100.png
+      - macos-aquarium-frame200.png
+      - macos-aquarium-windowed.png
+      - macos-aquarium-windowed.log
       - macos-frame20-windowed.png
       - macos-windowed.log
       - macos-windowsize.log
