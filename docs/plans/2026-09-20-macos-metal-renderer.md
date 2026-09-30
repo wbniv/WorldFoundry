@@ -952,6 +952,7 @@ Steps a future implementation pass runs, in order. Per `~/CLAUDE.md` **Plan veri
     `TODO.md:7` therefore stays **OPEN**, narrowed to `-fullscreen` alone.
 12. *(Phase 4)* `-width=800 -height=600` and `-fullscreen` produce correctly sized windows — closes `TODO.md:7`.
 13. *(Phase 5)* `-DWF_WASM_ENGINE=wamr` configures and links on arm64 Darwin; smoke run exits 0.
+14. *(content parity)* aquarium frame 20 through Metal vs `tests/fixtures/renderer/aquarium-linux-frame20.png`, same method as steps 9–10, informational: the `macos-desktop-debug` step "Compare aquarium capture with Linux reference (informational)" prints `AQUARIUM PARITY: MATCH` or `DIFFERS` with the pixel count and maximum channel delta. **PENDING the first Codemagic run**; see [2026-09-30-aquarium-level.md](2026-09-30-aquarium-level.md) step 21.
 
 ## 9. References
 

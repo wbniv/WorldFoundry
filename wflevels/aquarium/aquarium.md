@@ -28,6 +28,7 @@ python3 wflevels/aquarium/run_aquarium_checks.py --sway          # plan step 16:
 python3 wflevels/aquarium/run_aquarium_checks.py --cost [IFF…]   # plan step 18: ms per frame, this build vs others
 python3 wflevels/aquarium/run_aquarium_checks.py --steer         # plan step 20: steer-and-swim traces + motion strips
 task video-aquarium          # real-time demo video → ~/tmp/aquarium-phase4/motion-demo.mp4 (scratch; reference copy: tests/recordings/aquarium_phase4_motion_demo.mp4)
+python3 -m pytest tests/test_codemagic_aquarium_parity.py                   # plan step 21: the macOS Metal-vs-GL parity step in codemagic.yaml (static; the Metal half runs on Codemagic)
 ```
 
 `task aquarium-level` needs the `wf_blender` add-on installed. A second run is a no-op. The profile is chosen at

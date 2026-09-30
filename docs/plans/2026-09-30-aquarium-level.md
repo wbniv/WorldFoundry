@@ -21,6 +21,7 @@ plan reuses that pipeline unchanged and spends its risk budget on the three thin
 - [x] Phase 2 — tank, sand, rock, anemone, lighting, fog — **static scene built; placeholder fish until Phase 3**
 - [x] Phase 3 — integrate the idle-spike clownfish (not a new mesh), controls, camera zones — **done; step 14 logic-verified, hardware unverified**
 - [x] Phase 4 — anemone sway (optional), docs, tasks, regression test — **done, plus steer and swim; Will's own look at the motion video and a phone run are still open**
+- [ ] macOS Metal parity of the aquarium (step 21) — **Linux reference generated and reproducible; the Metal half is pending the first Codemagic run**
 
 ## Mockups
 
@@ -1528,6 +1529,56 @@ blanked screen.
 - 00:32.35–00:33.85 — Hover: no input again: the idle fades back in
 
 Whenever the fish's path passes within 2.2 m of the anemone (the climb, the dive, the dart), camshot B takes over and the bungee camera flies there and back, so those segments are partly seen close up.
+
+**Cross-platform — macOS Metal parity**
+
+21. macOS Metal parity of the aquarium: `wf_game --frame-step-smoke=30 --cycles=1 -L<level> -rate20 --capture-frame=20=<png>` on `wflevels/aquarium-standalone.iff` through the Metal backend, compared with the Linux GL capture `tests/fixtures/renderer/aquarium-linux-frame20.png` by `tests/compare_renderer_frames.py --tolerance 3`. Same method as the snowgoons gate ([macOS Metal renderer plan](2026-09-20-macos-metal-renderer.md) § 8 steps 9–10). Expected: the Linux reference is reproducible byte for byte and shows the tank, the fish and the anemone; the `macos-desktop-debug` step "Compare aquarium capture with Linux reference (informational)" prints `AQUARIUM PARITY: MATCH`, or, if it differs, the count and the largest channel delta so a tolerance can be chosen from real numbers.
+
+    Linux half, run 2026‑09‑30 (main checkout's `engine/wf_game` built 2026‑09‑25, this branch's level, X display `:0`, `ulimit -c 0`, three runs):
+
+    ```
+    $ cd wfsource/source/game && LD_LIBRARY_PATH=/home/will/WorldFoundry-wbniv/engine/libs \
+        /home/will/WorldFoundry-wbniv/engine/wf_game --frame-step-smoke=30 --cycles=1 \
+        -L$PWD/../../../wflevels/aquarium-standalone.iff -rate20 --capture-frame=20=/tmp/aq/runN.png
+    linux: capture frame 20 -> /tmp/aq/run3.png (640x480) written, non-black pixels 307200/307200
+    $ cmp /tmp/aq/run1.png /tmp/aq/run2.png && cmp /tmp/aq/run1.png /tmp/aq/run3.png && echo IDENTICAL
+    IDENTICAL
+    $ sha256sum /tmp/aq/run1.png /tmp/aq/run2.png
+    4fa2758cd729a598b99f988a3d080c5c4e6c6bcaa9e1fec99ce5c0a2114dd583  /tmp/aq/run1.png
+    4fa2758cd729a598b99f988a3d080c5c4e6c6bcaa9e1fec99ce5c0a2114dd583  /tmp/aq/run2.png
+    $ python3 tests/compare_renderer_frames.py tests/fixtures/renderer/aquarium-linux-frame20.png /tmp/aq/run3.png --tolerance 3
+    640x480: exact=307200/307200 (100.000000%)
+    max channel delta histogram: {0: 307200}
+    coverage IoU=307200/307200 (100.000000%)
+    pixels exceeding tolerance 3: 0
+    PASS
+    ```
+
+    **PASS (Linux half).** The reference was generated with the engine's own flags and is byte-identical across three
+    runs. The frame is the whole tank at camera A, not black or blank: the acrylic frame and rim, the water gradient with
+    light shafts on the back wall, the sand and the rock, the anemone's pink-tipped crown on its column, and the orange
+    clownfish left of it, above a dark stand. (Every pixel counts as non-black because the background is dark blue, so
+    the "coverage IoU" line carries no information for this level.)
+
+    macOS half: **PENDING the first Codemagic run of `macos-desktop-debug`. Not run, not claimed.** The step is
+    informational (`|| true`, then a verdict block), so a difference does not fail the build. What the run must
+    produce, and what to read from it: artifacts `macos-aquarium-frame20.png` and `macos-aquarium-comparison.log`; the
+    step's tail prints `differing pixels: N of 307200`, `maximum channel delta: D` and `AQUARIUM PARITY: MATCH` or
+    `DIFFERS`. Snowgoons, for scale, differs by 495 pixels (494 at delta 1, one at delta 3) and passes `--tolerance 3`.
+    Once the real numbers are known, choose the tolerance and drop the `|| true`s so the step gates.
+
+    What could be checked without a Mac (`python3 -m pytest tests/test_codemagic_aquarium_parity.py -v`): the yaml
+    parses, the step exists in `macos-desktop-debug` only, every repo file it names exists, its artifacts are listed,
+    its script is valid bash, and, run against a stub `wf_game`, it prints MATCH for the reference itself and DIFFERS
+    for a different frame, a wrong-sized frame and no frame, and never fails the step.
+
+    ```
+    $ python3 -m pytest tests/test_codemagic_aquarium_parity.py -q
+    ...........                                                              [100%]
+    11 passed in 5.9s
+    ```
+
+    **PENDING (macOS).**
 
 ## Regression guard
 

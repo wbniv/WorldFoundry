@@ -469,6 +469,59 @@ workflows:
             tests/fixtures/renderer/snowgoons-linux-frame20.png \
             macos-frame20.png --tolerance 3 | tee macos-comparison.log
 
+      - name: Compare aquarium capture with Linux reference (informational)
+        script: |
+          set -euo pipefail
+          exec > >(tee -a "$CM_BUILD_DIR/cm-build.log") 2>&1
+          # Same method as the snowgoons gate above, on the newest level
+          # (docs/plans/2026-09-30-aquarium-level.md step 21): frame 20 of a
+          # 30-step, 1-cycle, -rate20 run against a Linux capture that two runs
+          # reproduced byte for byte. The aquarium has never been through the
+          # Metal backend, so this step reports and does NOT fail the build:
+          # snowgoons already differs by 455 of 307200 pixels for a cause not
+          # yet established, and we want this level's real numbers before
+          # choosing a tolerance. Once they are known, drop the `|| true`s.
+          WF_GAME="$CM_BUILD_DIR/engine/wf_game.app/Contents/MacOS/wf_game"
+          LEVEL="$CM_BUILD_DIR/wflevels/aquarium-standalone.iff"
+          cd wfsource/source/game
+          "$WF_GAME" --frame-step-smoke=30 --cycles=1 -L"$LEVEL" -rate20 \
+            --capture-frame=20="$CM_BUILD_DIR/macos-aquarium-frame20.png" \
+            2>&1 | tee "$CM_BUILD_DIR/macos-aquarium.log" || true
+          cd "$CM_BUILD_DIR"
+
+          echo "--- aquarium parity verdict ---"
+          status=1
+          if [ -s macos-aquarium-frame20.png ]; then
+            status=0
+            python3 tests/compare_renderer_frames.py \
+              tests/fixtures/renderer/aquarium-linux-frame20.png \
+              macos-aquarium-frame20.png --tolerance 3 \
+              | tee macos-aquarium-comparison.log || status=$?
+          else
+            echo "no capture written (see macos-aquarium.log)" \
+              | tee macos-aquarium-comparison.log
+          fi
+          # Counts come from the compare script's own report: pixels that differ
+          # at all (total - exact) and the largest per-channel delta.
+          python3 - macos-aquarium-comparison.log <<'PY' || true
+          import ast, re, sys
+          log = open(sys.argv[1]).read()
+          m = re.search(r"exact=(\d+)/(\d+)", log)
+          h = re.search(r"histogram: (\{.*\})", log)
+          if m and h:
+              exact, total = int(m.group(1)), int(m.group(2))
+              print(f"differing pixels: {total - exact} of {total}")
+              print(f"maximum channel delta: {max(ast.literal_eval(h.group(1)))}")
+          else:
+              print("differing pixels: n/a (no comparison output)")
+              print("maximum channel delta: n/a")
+          PY
+          if [ "$status" -eq 0 ]; then
+            echo "AQUARIUM PARITY: MATCH"
+          else
+            echo "AQUARIUM PARITY: DIFFERS"
+          fi
+
       - name: Run windowed smoke (Phase 4 proxy gate)
         script: |
           set -euo pipefail
@@ -517,6 +570,9 @@ workflows:
       # Phase 2's deliverable: a real Metal frame rendered with no window. This
       # is what turns macos-desktop-debug from a build gate into a visual gate.
       - macos-frame20.png
+      # Aquarium Metal-vs-GL parity (informational; plan step 21).
+      - macos-aquarium-frame20.png
+      - macos-aquarium-comparison.log
       - macos-frame20-windowed.png
       - macos-windowed.log
       - macos-windowsize.log
