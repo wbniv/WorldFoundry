@@ -146,9 +146,21 @@
   aq-pitch-t fish@ 0 > if aq-hiz fish@ INDEXOF_Z_POS read-mailbox -
   else INDEXOF_Z_POS read-mailbox aq-loz fish@ - then
   aq-flatten-d / fish-clamp01 dup aq-flat fish! aq-pitch-t fish@ * aq-pitch-t fish! ;
+\ Up or Down alone while facing a wall (last tick's room ahead left less than
+\ 0.3 V): the fish can only climb by swimming forward, so it turns a quarter
+\ turn toward the tank's centre, along the wall, and climbs away from it. It
+\ stops turning as soon as it has room. ( -- +1|-1 ) is the side whose quarter
+\ turn points more toward the centre: the facing turned +1/4 is (-sin, cos),
+\ and its dot with (-x, -y) is x sin - y cos.
+: aq-blocked? aq-cap fish@ aq-v 0.3 * < ;
+: aq-centre-side
+  INDEXOF_X_POS read-mailbox aq-yaw fish@ fish-sin *
+  INDEXOF_Y_POS read-mailbox aq-yaw fish@ fish-cos * - 0 < if -1 else 1 then ;
 \ Input sets the target facing; no input keeps the yaw and levels the pitch.
 : aq-targets
-  aq-hor? if aq-yaw-of-input else aq-yaw fish@ then aq-yaw-t fish!
+  aq-hor? if aq-yaw-of-input
+  else aq-dz fish@ 0 <> aq-blocked? & if aq-yaw fish@ 0.25 aq-centre-side * + aq-wrap-h
+  else aq-yaw fish@ then then aq-yaw-t fish!
   aq-dz fish@ aq-hor? if aq-pitch-diag else aq-pitch-max then * aq-pitch-t fish!
   1 aq-flat fish! aq-pitch-t fish@ 0 <> if aq-flatten then ;
 \ ( err -- err' ) a reversal (|err| near half a turn) turns toward the tank's

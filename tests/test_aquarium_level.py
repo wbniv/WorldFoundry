@@ -233,14 +233,87 @@ def test_anemone_zone_and_hysteresis(objs):
 
 
 def test_clamps_come_from_the_fish_extents(objs):
+    # Phase 4: the script turns the visible fish's box with its facing every tick; the box it uses
+    # must enclose the whole fish (extents() plus the bob and the fins' flare) and the limits must be
+    # the tank's inner faces, sand and water line less the 0.25 in margin.
     h = _header(by_name(objs, 'Player')['script'])
     e = FISH.extents()
-    reach = max(e['nose_x'], -e['tail_x'])
-    assert h['aq-xmax'] + reach == pytest.approx(C.INNER_X_M - C.CLAMP_MARGIN, abs=1e-4), 'tail tip / nose off the end wall'
-    assert h['aq-ymax'] + e['half_width'] == pytest.approx(C.INNER_Y_M - C.CLAMP_MARGIN, abs=1e-4)
-    assert h['aq-zmax'] + e['top_z'] + FISH.T['fish-bob-amp'] == pytest.approx(C.WATER_LINE_M - C.CLAMP_MARGIN, abs=1e-4)
+    bob = FISH.T['fish-bob-amp']
+    assert h['aq-box-cx'] - h['aq-box-hx'] == pytest.approx(e['tail_x'], abs=1e-4)
+    assert h['aq-box-cx'] + h['aq-box-hx'] == pytest.approx(e['nose_x'], abs=1e-4)
+    assert h['aq-box-cz'] - h['aq-box-hz'] == pytest.approx(e['bottom_z'] - bob, abs=1e-4)
+    assert h['aq-box-cz'] + h['aq-box-hz'] == pytest.approx(e['top_z'] + bob, abs=1e-4)
+    assert h['aq-box-hy'] >= e['half_width']
+    assert h['aq-ix'] == pytest.approx(C.INNER_X_M - C.CLAMP_MARGIN, abs=1e-4)
+    assert h['aq-iy'] == pytest.approx(C.INNER_Y_M - C.CLAMP_MARGIN, abs=1e-4)
+    assert h['aq-zlo'] == pytest.approx(C.SAND_TOP_M + C.CLAMP_MARGIN, abs=1e-4)
+    assert h['aq-zhi'] == pytest.approx(C.WATER_LINE_M - C.CLAMP_MARGIN, abs=1e-4)
     # the capsule stays clear of Jolt's floor contact over the sand (never standing on it)
     assert h['aq-zmin'] - FISH.collision_box()[5] - C.SAND_TOP_M == pytest.approx(C.GROUND_CLEARANCE, abs=1e-4)
+
+
+# ── Phase 4: steer and swim (a fish only moves along the way it faces) ─────────────────────
+def test_the_script_is_the_only_motor_and_writes_velocity_only_along_the_facing(objs):
+    p = by_name(objs, 'Player')
+    script = p['script']
+    # the engine's drag is off: the script owns the speed (burst, coast, glide)
+    for f in ('Horiz Air Drag', 'Vert Air Drag'):
+        assert float(re.search(r"\"%s\" \} \{ 'DATA' " % f + NUM, p['block']).group(1)) == 0.0, f
+    # every speed write is either speed × facing (aq-swim-write) or the kick guard putting back the
+    # script's own last value (aq-no-kick); no per-axis "±V while held" is left
+    body = script[script.index(': aq-joy'):]
+    words = {}
+    for name, text in re.findall(r"^: (\S+)(.*?);\s*$", body, re.M | re.S):
+        words[name] = text
+    writers = sorted(n for n, t in words.items() if re.search(r'INDEXOF_[XYZ]SPEED\s+write-mailbox', t))
+    assert writers == ['aq-swim-write'], writers
+    # aq-no-kick writes the speed mailbox it is handed (from the stack) back to the script's own
+    # value from the last tick (fish@), never a new speed
+    assert re.search(r'if fish@ swap write-mailbox else 2drop then', words['aq-no-kick'])
+    assert re.search(r'aq-fx@ \*\s+INDEXOF_XSPEED write-mailbox', words['aq-swim-write'])
+    assert re.search(r'aq-fy@ \*\s+INDEXOF_YSPEED write-mailbox', words['aq-swim-write'])
+    assert re.search(r'aq-fz@ \*\s+INDEXOF_ZSPEED write-mailbox', words['aq-swim-write'])
+    assert not re.search(r'INDEXOF_ROTATION_[ABC]\s+write-mailbox', script), 'nobody writes the Player\'s rotation'
+
+
+def test_steering_and_gait_constants_are_sane():
+    # relaxed bounds: the tunables may change, the physics of the model may not
+    assert 0 < C.PITCH_DIAG <= C.PITCH_MAX <= 45 / 360, 'a fish climbs at a pitch, never vertically'
+    assert C.PITCH_WN < C.YAW_WN, 'pitch changes slower than yaw'
+    assert 0.5 <= C.YAW_ZETA <= 1.0 and 0.5 <= C.PITCH_ZETA <= 1.0, 'damped, at most critically'
+    assert 0 < C.GAIT_DUTY < 1 and 0.2 <= C.GAIT_CYCLE <= 0.8
+    assert C.BURST_SPEED > C.SWIM_SPEED and C.DART_SPEED <= CF.PHYSICS['wf_Max Air Speed'] + 1e-9
+    assert C.TAU_WALL > 0.05, 'the wall cap must stop the fish over several ticks (it caps speed ≤ room / τ)'
+
+
+def test_rig_maths_follows_the_biology():
+    """Python mirror of the rig (clownfish.RigState): Strouhal tail, A. ocellaris pectorals."""
+    T = FISH.T
+    r = CF.RigState(FISH)
+    L = FISH.length_m
+    assert T['fish-tail-app'] == pytest.approx(0.2 * L, rel=1e-3)
+    ratios = []
+    for u in (0.5, 1.5, 2.5, 3.0):                       # below the Nyquist cap
+        r.speed = u
+        f = r.tail_hz()
+        st = f * T['fish-tail-app'] / u
+        assert 0.2 <= st <= 0.4, f'St {st:.3f} at U {u}'
+        assert f <= T['fish-tail-hz-max'] and f < 10.0, 'the beat must be visible at 20 Hz (Nyquist 10 Hz)'
+        ratios.append(f / u)
+    assert max(ratios) / min(ratios) - 1 < 0.15, 'f ∝ U'
+    # the swimming tail's half-amplitude swings the tip A/2 = 0.1 L about the peduncle
+    tail_r = (CF.X_PEDUNCLE - CF.X_TAIL_TIP) * FISH.s
+    assert tail_r * math.sin(math.tau * T['fish-tail-swim-amp']) == pytest.approx(0.1 * L, rel=1e-3)
+    hz = []
+    for u in (0.0, 1.0, 2.0, 3.0, 4.0, 6.0):
+        r.speed = u
+        hz.append(r.pec_hz())
+    assert hz[0] == pytest.approx(2.4) and hz[-1] == pytest.approx(4.6) and hz == sorted(hz), hz
+    # coasting: the envelope takes the tail back to straight
+    r.burst, r.env = 0.0, 1.0
+    for _ in range(4):
+        r.step_rig(0.05)
+    assert r.env < 0.05
 
 
 CLUMPS = [C.clump_name(row, side) for row, side, *_ in C.ANEMONE_CLUMPS]
@@ -380,6 +453,44 @@ def test_sway_is_bounded_periodic_net_zero_and_never_moves_the_player():
         drift = [max(f[1][(r.pl, mb)] for f in fr) - min(f[1][(r.pl, mb)] for f in fr) for mb in (R.X_POS, R.Y_POS, R.Z_POS)]
         print('\nSWAY', report, 'Player drift', drift)
         assert max(drift) < 1e-4, f'the sway moved the Player: drift {drift}'
+    finally:
+        clean = r.isolation()
+        g.close()
+    assert clean, 'run contaminated by desktop input: rerun'
+
+
+@requires_runtime
+def test_steer_and_swim_moves_only_along_the_facing():
+    """Held buttons only (the harness: paused, one tick per step, sticky injected input). While the
+    fish swims, turns, climbs, dives and glides, its motion is parallel to its facing and matches the
+    written speed; Up alone climbs forward at the pitch limit; pitch levels after release; every
+    visible part stays inside the tank; the Player's own rotation and the parts' offsets hold."""
+    os.environ.setdefault('WF_BRIDGE_PORT', '7813')
+    os.environ.setdefault('OUT', os.path.expanduser('~/tmp/aquarium-test'))
+    import run_aquarium_checks as R                            # noqa: E402
+    r = R.Run()
+    g = r.g
+    try:
+        g.step(20)
+        fr = []
+        for btn, secs in (('RIGHT', 1.0), ('UP', 1.0), (None, 1.5), ('LEFT', 1.5), ('DOWN', 1.0), (None, 1.5)):
+            fr += r.phase(str(btn), btn, secs)
+        rows, st = R.motion_stats(r, fr)
+        assert st['moving'] > 60
+        assert st['worst_angle'] < 1.0, f'motion {st["worst_angle"]:.3f}° off the facing'
+        assert st['worst_speed_err'] < 0.02
+        assert st['max_pitch'] <= C.PITCH_MAX + 1e-4
+        assert st['max_dyaw'] <= C.YAW_WMAX * R.DT + 1e-3, 'yaw moved faster than its rate limit'
+        up = rows[20:40]
+        assert sum(q['v'][2] for q in up) > 0 and sum(q['v'][0] for q in up) > 0, 'Up climbs forward, not vertically'
+        assert abs(rows[-1]['pitch']) * 360 < 1.0, 'pitch levels after release'
+        for t, s in fr:
+            lo, hi = R.part_world_extents(s, r.parts)
+            assert lo[0] > -C.INNER_X_M and hi[0] < C.INNER_X_M and lo[1] > -C.INNER_Y_M and hi[1] < C.INNER_Y_M
+            assert lo[2] > C.SAND_TOP_M and hi[2] < C.WATER_LINE_M
+        assert max(abs(R.wrap(s.get((r.pl, mb), 0.0))) for t, s in fr for mb in (R.ROT_A, R.ROT_B, R.ROT_C)) == 0.0
+        n, worst, wxy, _ = r.attachment(fr)
+        assert max(worst.values()) < 0.005 and wxy < 1e-3, worst
     finally:
         clean = r.isolation()
         g.close()

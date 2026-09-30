@@ -235,7 +235,7 @@ class Game:
         self.step_k0 = k0
         self.stepping = True
         self.c.send({'op': 'step', 'frames': n})
-        deadline = time.time() + 10 + n * 0.1
+        deadline = time.time() + 60 + n * 0.1          # a shared host can stall a frame for seconds (Phase 4: load 121)
         while time.time() < deadline:
             if len(self.frames) >= k0 + n and self.now() >= t0 + n * DT - 1e-4:
                 time.sleep(0.03)                  # the rest of the last batch
@@ -385,6 +385,27 @@ class Run:
         return n, worst_off, worst_xy, worst_bob
 
 
+def navigate(r, target, speed_now, glide_k, limit=400):
+    """Hold the buttons that point at `target` each tick (as a player steers); release when the
+    glide would carry the fish there. Returns the recorded frames."""
+    g = r.g
+    fr = []
+    while len(fr) < limit:
+        e = [t - p for t, p in zip(target, r.pos())]
+        if math.dist(target, r.pos()) < glide_k * speed_now() + 0.1:
+            break
+        bits = (BTN['RIGHT'] if e[0] > 0.25 else BTN['LEFT'] if e[0] < -0.25 else 0) | \
+               (BTN['C'] if e[1] > 0.2 else BTN['B'] if e[1] < -0.2 else 0) | \
+               (BTN['UP'] if e[2] > 0.3 else BTN['DOWN'] if e[2] < -0.3 else 0)
+        if not bits:                                     # inside every deadband: let it glide
+            break
+        if bits != g.injected:
+            g.inject(bits)
+        fr += g.step(1)
+    g.inject(0)
+    return fr
+
+
 def keyboard():
     r = Run()
     g, k = r.g, r.k
@@ -393,9 +414,9 @@ def keyboard():
         # ── step 11 + 15/5: settle, frame A, hover 10 s with the idle running ──
         g.step(30)
         shot_a0 = g.v(r.dir, CAMSHOT)
-        print(f'screenshot frame-a: {g.shot("phase3-frame-a")}')
+        print(f'screenshot frame-a: {g.shot("phase4-frame-a")}')
         hover = r.phase('hover', None, 10.0)
-        print(f'screenshot idle: {g.shot("phase3-idle")}')
+        print(f'screenshot idle: {g.shot("phase4-idle")}')
         zs = [f[1].get((r.pl, Z_POS)) for f in hover]
         drift = [max(f[1].get((r.pl, mb)) for f in hover) - min(f[1].get((r.pl, mb)) for f in hover)
                  for mb in (X_POS, Y_POS, Z_POS)]
@@ -411,139 +432,85 @@ def keyboard():
         ok['5'] = max(drift) < 0.01 * col and w_end > 0.999 and max(tail_rel) - min(tail_rel) > 0.05
         print(f'step 15/5: {verdict(ok["5"])}')
 
-        # ── step 15/6 + 15/7: the Phase 1 sequence on the canonical fish ──
-        seq = [('up', 'UP', 6.0, None), ('down', 'DOWN', 6.0, None), ('rest', None, 1.0, None),
-               ('rise', 'UP', 0.6, None), ('settle', None, 2.0, None),
-               ('right', 'RIGHT', 5.0, 'phase3-facing-right'), ('off-wall', 'LEFT', 1.5, None),
-               ('glide', None, 2.0, None), ('left', 'LEFT', 6.0, 'phase3-facing-left'),
-               ('back', 'C', 5.0, None), ('front', 'B', 5.0, None), ('end', None, 1.0, None)]
-        start = len(r.rows)
-        heading = {}
-        for name, btn, secs, shot in seq:
-            fr = r.phase(name, btn, secs, shot)
-            heading[name] = wrap(fr[-1][1].get((r.parts['clownfish-body'], ROT_C)))
-        r.print_rows(r.rows[start:])
-        end = {n: b for n, _, _, _, b, _ in r.rows[start:]}
-        checks = [
-            ('UP stops at the clamp aq-zmax', end['up'][2], k['aq-zmax']),
-            ('DOWN stops at the clamp aq-zmin', end['down'][2], k['aq-zmin']),
-            ('RIGHT stops at the clamp aq-xmax', end['right'][0], k['aq-xmax']),
-            ('LEFT stops at the clamp −aq-xmax', end['left'][0], -k['aq-xmax']),
-            ('C stops at the clamp aq-ymax', end['back'][1], k['aq-ymax']),
-            ('B stops at the clamp −aq-ymax', end['front'][1], -k['aq-ymax']),
-        ]
-        ok6 = True
-        for label, got, want in checks:
-            good = abs(got - want) < 1e-3
-            ok6 &= good
-            print(f'step 15/6: {label}: {got:.4f} vs {want:.4f} → {verdict(good)}')
-        # cruise: the per-tick step in the middle of the RIGHT crossing
-        fr = next(x[5] for x in r.rows[start:] if x[0] == 'right')
-        # About one tick in 40 the bridge delivers a position a tick late (a 0 step, then a
-        # double one), so the per-tick speed is the MEDIAN of the moving ticks, not the max.
-        xs = [f[1].get((r.pl, X_POS)) for f in fr]
-        steps = sorted(b - a for a, b in zip(xs, xs[1:]) if b - a > 1e-6)
-        cruise = steps[len(steps) // 2] / DT if steps else 0.0
-        gl = next(x for x in r.rows[start:] if x[0] == 'glide')
-        glide = abs(gl[4][0] - gl[3][0])
-        print(f'step 15/6: cruise {cruise:.3f} m/s (Phase 1: 2.74); glide over 2 s after release {glide:.3f} m '
-              f'(Phase 1: 0.892 over 2 s)')
-        ok6 &= abs(cruise - 2.743) < 0.02
-        ok['6'] = ok6
-
-        # dart: from rest in mid-tank, facing +X, one A tap
-        r.phase('to-mid', 'RIGHT', 1.2, None)
-        r.phase('rest2', None, 3.0, None)
+        # ── step 15/6 + 15/7 (Phase 4: steer and swim; Phase 1's per-axis clamps are gone) ──
+        def cruise_stats(fr):
+            sp = [math.dist([a[1][(r.pl, mb)] for mb in (X_POS, Y_POS, Z_POS)],
+                            [b[1][(r.pl, mb)] for mb in (X_POS, Y_POS, Z_POS)]) / DT for a, b in zip(fr, fr[1:])]
+            return sum(sp) / len(sp), max(sp)
+        right = r.phase('right', 'RIGHT', 2.0, 'phase4-facing-right')
+        mean_u, peak_u = cruise_stats(right[-20:])
+        heading_right = wrap(right[-1][1][(r.parts['clownfish-body'], ROT_C)])
         a = r.pos()
-        fr = r.phase('dart', 'A', 0.05, None) + r.phase('dart-glide', None, 3.0, 'phase3-dart')
+        r.phase('glide', None, 2.0)
+        glide = math.dist(a, r.pos())
+        left = r.phase('to-mid', 'LEFT', 1.2, 'phase4-facing-left')
+        heading_left = wrap(left[-1][1][(r.parts['clownfish-body'], ROT_C)])
+        r.phase('rest2', None, 3.0)
+        a = r.pos()
+        fr = r.phase('dart', 'A', 0.05) + r.phase('dart-glide', None, 3.0, 'phase4-dart')
         b = r.pos()
-        xs = [a[0]] + [f[1].get((r.pl, X_POS)) for f in fr]
-        burst_n = round(k['aq-dart-time'] / DT)
-        # speed on the burst ticks (median: robust to the bridge's late-delivered tick)
-        bsteps = sorted(bb - aa for aa, bb in zip(xs[1:burst_n + 2], xs[2:burst_n + 2]))
-        peak = bsteps[len(bsteps) // 2] / DT
-        dart_ok = peak > 1.5 * cruise and b[0] - a[0] > 1.0 and abs(b[1] - a[1]) < 1e-3 and abs(b[2] - a[2]) < 1e-3
-        print(f'step 15/6: dart (one A tap, facing +X): {peak:.3f} m/s over the burst, travelled {b[0] - a[0]:.3f} m in 3.05 s '
-              f'(burst {k["aq-dart-v"]:g} m/s × {k["aq-dart-time"]:g} s, then the glide); y/z unchanged → {verdict(dart_ok)}')
-        ok['6'] &= dart_ok
-        print(f'step 15/6: {verdict(ok["6"])}')
+        dmean, dpeak = cruise_stats(fr[:5])
+        f0 = facing(r.m('aq-yaw', fr[0]), r.m('aq-pitch', fr[0]))
+        d = [q - p for p, q in zip(a, b)]
+        dang = math.degrees(math.acos(max(-1.0, min(1.0, sum(x * y for x, y in zip(d, f0)) / math.dist(a, b)))))
+        dart_ok = dpeak > 1.5 * mean_u and math.dist(a, b) > 2.0 and dang < 1.0
+        ok['6'] = abs(mean_u - C.SWIM_SPEED) < 0.1 * C.SWIM_SPEED and 0.8 < glide < 2.0 and dart_ok
+        print(f'step 15/6: cruise (burst-and-coast, last 1 s of RIGHT): mean {mean_u:.3f} m/s (V = {C.SWIM_SPEED}), peak '
+              f'{peak_u:.3f}; glide after release {glide:.3f} m; dart (A tap, facing −x): peak {dpeak:.3f} m/s, travelled '
+              f'{math.dist(a, b):.3f} m, {dang:.3f}° off the facing it darted from → {verdict(ok["6"])}')
+        rot_all = [abs(wrap(f[1].get((r.pl, mb), 0.0))) for f in g.frames for mb in (ROT_A, ROT_B, ROT_C)]
+        ok['7'] = abs(heading_right) < 0.03 and abs(abs(heading_left) - 0.5) < 0.03 and max(rot_all) == 0.0
+        print(f'step 15/7: body part heading after RIGHT {heading_right:+.4f} rev, after LEFT {heading_left:+.4f} rev (the '
+              f'tail-beat recoil swings it ±0.014); Player ROTATION_A/B/C over {len(rot_all) // 3} ticks: max {max(rot_all):g} '
+              f'→ {verdict(ok["7"])}')
 
-        rot_c = [f[1].get((r.pl, ROT_C)) for f in g.frames if f[1].get((r.pl, ROT_C)) is not None]
-        ok7 = abs(heading['right']) < 0.02 and abs(abs(heading['left']) - 0.5) < 0.02 and \
-            rot_c and max(abs(v) for v in rot_c) == 0.0
-        print(f'step 15/7: body part heading after RIGHT {heading["right"]:+.4f} rev, after LEFT {heading["left"]:+.4f} rev; '
-              f'Player ROTATION_C over {len(rot_c)} ticks: {min(rot_c):g}..{max(rot_c):g} → {verdict(ok7)}')
-        ok['7'] = ok7
-
-        # ── step 12: swim into the anemone's crown (held buttons only) ──
+        # ── step 12: swim into the anemone's crown (held buttons only) and rest there ──
         zone_c = (k['aq-zone-x'], k['aq-zone-y'], k['aq-zone-z'])
-        # Host height: the capsule (half-height 0.195) 0.15 m (+5 cm) over the oral disc's top, read
-        # from the .lev, so Jolt never treats the fish as standing on the anemone.
         crown = host_point()
         apos, abox = lev_actor('anemone')
         print(f'step 12: host point {crown} (oral disc top z {apos[2] + abox[5]:.3f})')
         start12 = len(r.rows)
-        r.phase('to-left', 'LEFT', 4.0, None)                   # far end, well outside the zone
-        glide_k = 0.5                                            # a release glides 0.45 × the written 3.048 m/s ≈ 1.37 m
+        r.phase('to-left', 'LEFT', 3.0)
+        glide_k = C.TAU_GLIDE                                     # released at speed U, it glides ≈ U × τ_glide
 
-        def approach(axis, target, plus, minus, name, limit=8.0):
-            """Hold toward `target` until the release glide (0.45 × speed) would carry it there.
-            One tick of input already glides ≈ 1.4 m, so 0.25 m is as close as a tap can aim."""
-            for _ in range(2):
-                p0 = r.pos()
-                if abs(p0[axis] - target) < 0.25:
-                    return
-                btn = plus if target > p0[axis] else minus
-                g.inject(BTN[btn])
-                fr, last = [], p0[axis]
-                while len(fr) * DT < limit:
-                    fr += g.step(1)
-                    p = r.pos()[axis]
-                    spd, last = abs(p - last) / DT, p
-                    if abs(target - p) <= glide_k * spd + 0.02 or (target - p) * (1 if btn == plus else -1) <= 0:
-                        break
-                g.inject(0)
-                fr += g.step(40)
-                r.rows.append((name, btn, len(fr) * DT, p0, r.pos(), fr))
-        approach(1, 0.0, 'C', 'B', 'to-y0')
-        approach(2, crown[2], 'UP', 'DOWN', 'to-z')
-        a = r.pos()
-        entered = None
-        g.inject(BTN['RIGHT'])
-        fr = []
-        while r.pos()[0] < crown[0] - glide_k * 2.743:          # release so the glide ends at the crown
-            fr += g.step(1)
-            if entered is None and g.v(r.dir, AQ['aq-in-b']) == 1:
-                entered = (r.pos(), math.dist(r.pos(), zone_c))
-                print(f'screenshot b-edge: {g.shot("phase3-b-edge")}')
-        g.inject(0)
-        fr += g.step(60)                                        # glide into the crown, camera settles
-        for _ in range(40):
-            fr += g.step(1)
-            if entered is None and g.v(r.dir, AQ['aq-in-b']) == 1:
-                entered = (r.pos(), math.dist(r.pos(), zone_c))
-        r.rows.append(('into-crown', 'RIGHT', len(fr) * DT, a, r.pos(), fr))
-        ys = [f[1].get((r.pl, Y_POS)) for f in fr]
-        idle_crown = r.phase('host', None, 4.0, 'phase3-frame-b')
+        def speed_now():
+            return g.v(r.dir, r.mb['aq-speed']) or 0.0
+        # Steer like a player: every tick hold the buttons that point at the host point (x, y, z with
+        # deadbands, so the fish heads there along one of the 8 yaws, climbing or diving on the way),
+        # and let go when the glide (speed × τ_glide) would carry it the rest of the way.
+        fr = navigate(r, crown, speed_now, glide_k)
+        a = fr[0][1] if fr else None
+        entered = next(((tuple(s.get((r.pl, mb)) for mb in (X_POS, Y_POS, Z_POS)),
+                         math.dist([s.get((r.pl, mb)) for mb in (X_POS, Y_POS, Z_POS)], zone_c))
+                        for t, s in fr if s.get((r.dir, AQ['aq-in-b'])) == 1), None)
+        r.rows.append(('into-crown', 'nav', len(fr) * DT, tuple(a.get((r.pl, mb)) for mb in (X_POS, Y_POS, Z_POS)),
+                       r.pos(), fr))
+        rest = strip_phase(r, 'approach-and-rest', None, 4.0)
+        rows_in, st_in = motion_stats(r, fr + rest)
+        pushes = [tuple(round(v, 2) for v in q['p']) for q in rows_in if q['pushed']]
+        pushes_in_zone = [q for q in pushes if math.dist(q, zone_c) < k['aq-zone-out']]
+        idle_crown = r.phase('host', None, 3.0, 'phase4-frame-b')
         p = r.pos()
         cam = tuple(g.v(r.cam, mb) for mb in (X_POS, Y_POS, Z_POS))
         cs = g.v(r.dir, CAMSHOT)
         w = g.v(r.pl, CF.MB['fish-w'])
+        pitch = max(abs(f[1][(r.dir, r.mb['aq-pitch'])]) for f in idle_crown) * 360
         hd = [max(f[1].get((r.pl, mb)) for f in idle_crown) - min(f[1].get((r.pl, mb)) for f in idle_crown)
               for mb in (X_POS, Y_POS, Z_POS)]
         r.print_rows(r.rows[start12:])
         print(f'step 12: entered the zone at {tuple(round(v, 3) for v in entered[0]) if entered else None}, '
               f'{entered[1] if entered else float("nan"):.3f} m from the zone centre (radius {k["aq-zone-in"]:g})')
-        defl = max(abs(y - a[1]) for y in ys)
-        print(f'step 12: in the crown at {tuple(round(v, 3) for v in p)} (target {crown}); sideways deflection on the way '
-              f'in {defl:.4f} m; Player drift while hosting x/y/z {hd[0]:.5f}/{hd[1]:.5f}/{hd[2]:.5f} m; idle weight {w:.3f}')
+        defl = st_in['worst_angle']
+        print(f'step 12: resting at {tuple(round(v, 3) for v in p)} (host point {crown}); on the way in the fish moved '
+              f'along its facing to {defl:.3f}° (pushed back inside the tank at {pushes}, none of it in the zone: {not pushes_in_zone}), so nothing deflected it; '
+              f'Player drift while hosting x/y/z {hd[0]:.5f}/{hd[1]:.5f}/{hd[2]:.5f} m; '
+              f'idle weight {w:.3f}; |pitch| while resting ≤ {pitch:.2f}°')
         print(f'step 12: CAMSHOT {cs:g} (cs_anemone = {r.idx["cs_anemone"]}); camera at '
               f'{tuple(round(v, 3) for v in cam)} vs camshot B {C.CAM_B_POS}')
-        ok12 = (cs == r.idx['cs_anemone'] and abs(p[0] - crown[0]) < 0.35 and abs(p[1]) < 0.3
-                and defl < 0.02 and max(hd) < 1e-3 and w > 0.999
-                and math.dist(cam, C.CAM_B_POS) < 0.05)
-        # hysteresis: swim out left until the shot returns to A, glide on, then back right until
-        # it is B again; record the distance at every flip (both crossings through the band)
+        ok12 = (cs == r.idx['cs_anemone'] and abs(p[0] - crown[0]) < 0.45 and abs(p[1]) < 0.3
+                and crown[2] - 0.2 < p[2] < crown[2] + 0.6 and defl < 1.0 and not pushes_in_zone and max(hd) < 1e-3 and w > 0.999
+                and pitch < 1.0 and math.dist(cam, C.CAM_B_POS) < 0.05)
+        # hysteresis: swim out left until the shot returns to A, glide on, then back right until B again
         flips, hyst_fr = [], []
         for btn, want in (('LEFT', 0), (None, None), ('RIGHT', 1), (None, None)):
             g.inject(BTN[btn] if btn else 0)
@@ -556,8 +523,7 @@ def keyboard():
                     break
             g.inject(0)
             hyst_fr += fr
-        print(f'screenshot b-reentry (camshot B after re-entering at the zone edge and gliding 3 s): '
-              f'{g.shot("phase3-b-reentry")}  fish at {tuple(round(v, 3) for v in r.pos())}')
+        print(f'screenshot b-reentry: {g.shot("phase4-b-reentry")}  fish at {tuple(round(v, 3) for v in r.pos())}')
         prev = None
         for t, s in hyst_fr:
             v = s.get((r.dir, AQ['aq-in-b']))
@@ -574,59 +540,42 @@ def keyboard():
         ok['12'] = ok12 and bool(hyst_ok)
         print(f'step 12: {verdict(ok["12"])}')
 
-        # ── step 13: every wall held ≥ 5 s after contact ──
+        # ── step 13: hold each direction into every wall; the fish eases to a stop facing it ──
         start13 = len(r.rows)
-        for name, btn, secs, shot in (('right', 'RIGHT', 7.0, 'phase3-right-wall'), ('left', 'LEFT', 10.0, 'phase3-left-wall'),
-                                      ('back', 'C', 6.0, 'phase3-back-wall'), ('front', 'B', 7.0, 'phase3-front-glass'),
-                                      ('up', 'UP', 7.0, 'phase3-water-line'), ('down', 'DOWN', 7.0, 'phase3-sand'),
-                                      ('end', None, 1.0, None)):
-            r.phase(name + '13', btn, secs, shot)
+        walls = (('right', 'RIGHT', 9.0, 1), ('left', 'LEFT', 12.0, 0), ('back', 'C', 7.5, 3), ('front', 'B', 7.5, 2),
+                 ('up', 'UP', 9.0, 5), ('down', 'DOWN', 9.0, 4))
+        reach = []
+        for name, btn, secs, face in walls:
+            fr = r.phase(name + '13', btn, secs, f'phase4-wall-{name}')
+            sp = [math.dist([a[1][(r.pl, mb)] for mb in (X_POS, Y_POS, Z_POS)],
+                            [b[1][(r.pl, mb)] for mb in (X_POS, Y_POS, Z_POS)]) / DT for a, b in zip(fr, fr[1:])]
+            still = next((len(sp) - i for i in range(len(sp) - 1, -1, -1) if sp[i] > 0.05), len(sp)) * DT
+            lo, hi = part_world_extents(fr[-1][1], r.parts)
+            gaps = [lo[0] + C.INNER_X_M, C.INNER_X_M - hi[0], lo[1] + C.INNER_Y_M, C.INNER_Y_M - hi[1],
+                    lo[2] - C.SAND_TOP_M, C.WATER_LINE_M - hi[2]]
+            reach.append((btn, gaps[face], still))
         r.print_rows(r.rows[start13:])
-        held = []
-        for name, btn, secs, a, b, fr in r.rows[start13:]:
-            if not btn:
-                continue
-            ax, _ = AXIS[btn]
-            vals = [f[1].get((r.pl, (X_POS, Y_POS, Z_POS)[ax])) for f in fr]
-            first = next(i for i, v in enumerate(vals) if abs(v - vals[-1]) < 1e-4)
-            held.append(f'{btn} {(len(vals) - first) * DT:.2f} s')
-        print('step 13: time pressed against the limit: ' + ', '.join(held))
-        frames = g.frames
-        ext = {mb: (min(f[1][(r.pl, mb)] for f in frames if (r.pl, mb) in f[1]),
-                    max(f[1][(r.pl, mb)] for f in frames if (r.pl, mb) in f[1])) for mb in (X_POS, Y_POS, Z_POS)}
-        x0, y0, z0, x1, y1, z1 = PLAYER_BOX
-        e = FISH.extents()
-        bob = FISH.T['fish-bob-amp']
-        ix, iy = C.INNER_X_M, C.INNER_Y_M
-        checks = [
-            ('Player box right edge vs right wall inner face', ext[X_POS][1] + x1, ix, 1),
-            ('Player box left edge vs left wall inner face', ext[X_POS][0] + x0, -ix, -1),
-            ('Player box back edge vs back wall inner face', ext[Y_POS][1] + y1, iy, 1),
-            ('Player box front edge vs front glass plane', ext[Y_POS][0] + y0, -iy, -1),
-            ('Player box bottom vs sand top', ext[Z_POS][0] + z0, C.SAND_TOP_M, -1),
-            ('Player box top vs water line', ext[Z_POS][1] + z1, C.WATER_LINE_M, 1),
-            ('visible fish, tail tip or nose, vs right wall', ext[X_POS][1] + max(e['nose_x'], -e['tail_x']), ix, 1),
-            ('visible fish, tail tip or nose, vs left wall', ext[X_POS][0] - max(e['nose_x'], -e['tail_x']), -ix, -1),
-            ('visible fish pectoral vs back wall', ext[Y_POS][1] + e['half_width'], iy, 1),
-            ('visible fish pectoral vs front glass plane', ext[Y_POS][0] - e['half_width'], -iy, -1),
-            ('visible fish belly (bob low) vs sand', ext[Z_POS][0] + e['bottom_z'] - bob, C.SAND_TOP_M, -1),
-            ('visible fish dorsal (bob high) vs water line', ext[Z_POS][1] + e['top_z'] + bob, C.WATER_LINE_M, 1),
-        ]
-        ok13 = True
-        print(f'Player box (authored, local): x ±{x1:.4f} y ±{y1:.4f} z ±{z1:.4f}; fish extents {({a: round(b, 3) for a, b in e.items()})}')
-        print('origin extremes over the whole run: ' + '  '.join(
-            f'{a} [{ext[mb][0]:.4f}, {ext[mb][1]:.4f}]' for a, mb in (('x', X_POS), ('y', Y_POS), ('z', Z_POS))))
-        for label, got, lim, sign in checks:
-            good = (got <= lim) if sign > 0 else (got >= lim)
-            ok13 &= good
-            print(f'step 13: {label}: {got:.4f} vs {lim:.4f} (gap {abs(lim - got):.4f}) → {verdict(good)}')
-        ok['13'] = ok13
+        print('step 13: at the end of each hold: gap from the visible fish to the face it swam at, and time held there '
+              'without moving: ' + ', '.join(f'{b} {gp:.3f} m {st:.2f} s' for b, gp, st in reach))
+        worst = [1e9] * 6
+        for t, s in g.frames:
+            e = part_world_extents(s, r.parts)
+            if e:
+                lo, hi = e
+                worst = [min(q, v) for q, v in zip(worst, [lo[0] + C.INNER_X_M, C.INNER_X_M - hi[0], lo[1] + C.INNER_Y_M,
+                                                           C.INNER_Y_M - hi[1], lo[2] - C.SAND_TOP_M, C.WATER_LINE_M - hi[2]])]
+        print('step 13: every visible part over the whole run, smallest gap to the left wall / right wall / front glass / '
+              'back wall / sand / water line: ' + ' '.join(f'{v:.4f}' for v in worst) + ' m')
+        ok['13'] = (min(worst) > 0 and all(0 < gp < (0.5 if f < 4 else 1.0) for (_, gp, _), (_, _, _, f) in zip(reach, walls))
+                    and all(st >= 5.0 for _, _, st in reach))
+        print(f'step 13: {verdict(ok["13"])}')
 
         # ── step 15: every part attached, every tick of the run ──
+        bob = FISH.T['fish-bob-amp']
         n, worst, wxy, wbob = r.attachment(g.frames)
         att_ok = n > 1000 and max(worst.values()) < 0.005 and wxy < 1e-3 and wbob < bob + 1e-3
-        print(f'step 15: part attachment over {n} ticks (turns, darts, wall contact, hosting): worst |part − body| − |offset| '
-              + ', '.join(f'{a.split("-", 1)[1]} {b * 1000:.2f} mm' for a, b in worst.items())
+        print(f'step 15: part attachment over {n} ticks (turns at any yaw and pitch, banks, darts, walls, hosting): worst '
+              '|part − body| − |offset| ' + ', '.join(f'{a.split("-", 1)[1]} {b * 1000:.2f} mm' for a, b in worst.items())
               + f'; body vs Player horizontal {wxy * 1000:.3f} mm, vertical {wbob * 1000:.2f} mm (bob amplitude {bob * 1000:.0f} mm) '
               f'→ {verdict(att_ok)}')
         ok['15'] = ok['5'] and ok['6'] and ok['7'] and att_ok
@@ -904,24 +853,89 @@ def segments(flags):
     return out
 
 
+def strip_phase(r, name, button, secs, n=10):
+    """Hold `button` for `secs`, taking n frames at fixed intervals, and compose them into
+    OUT/phase4-motion-<name>.png (two rows, left to right = time)."""
+    from PIL import Image, ImageDraw
+    g = r.g
+    ticks = round(secs / DT)
+    per = max(1, ticks // n)
+    a = r.pos()
+    g.inject(BTN[button] if button else 0)
+    fr, shots = [], []
+    while len(fr) < ticks:
+        fr += g.step(min(per, ticks - len(fr)))
+        if len(shots) < n:
+            on_a = g.v(r.dir, CAMSHOT) == r.idx['cs_front'] and \
+                math.dist([g.v(r.cam, mb) for mb in (X_POS, Y_POS, Z_POS)], C.CAM_A_POS) < 0.05
+            shots.append((fr[-1][0], g.shot(f'strip-{name}-{len(shots):02d}'), r.pos() if on_a else None))
+    g.inject(0)
+    r.rows.append((name, button, secs, a, r.pos(), fr))
+    w, h, cols = 256, 192, 5
+    img = Image.new('RGB', (w * cols, h * ((len(shots) + cols - 1) // cols)), (0, 0, 0))
+    f_px = 240 / math.tan(math.radians(30))
+    for k, (t, fn, p) in enumerate(shots):
+        tile = Image.open(fn).convert('RGB')
+        if p:          # camshot A, parked: crop 200 × 150 px around the fish (a 4.7 m × 3.5 m window)
+            cx = screen_x(p[0], p[1])
+            cy = 240 - f_px * (p[2] - C.CAM_A_POS[2]) / (p[1] - C.CAM_A_POS[1])
+            x0 = int(min(max(cx - 100, 0), 440))
+            y0 = int(min(max(cy - 75, 0), 330))
+            tile = tile.crop((x0, y0, x0 + 200, y0 + 150))
+        tile = tile.resize((w, h))
+        ImageDraw.Draw(tile).text((6, 4), f'{name}  t {t:.2f} s', fill=(255, 255, 255))
+        img.paste(tile, ((k % cols) * w, (k // cols) * h))
+    out = os.path.join(OUT, f'phase4-motion-{name}.png')
+    img.save(out)
+    print(f'strip {name}: {out} ({len(shots)} frames, every {per * DT:.2f} s)')
+    return fr
+
+
+def plot_trajectory(rows, seg, base, out):
+    """Top (x–y) and side (x–z) views of the Player's path, coloured by segment."""
+    import matplotlib
+    matplotlib.use('Agg')
+    import matplotlib.pyplot as plt
+    fig, (ax1, ax2) = plt.subplots(2, 1, figsize=(10, 7))
+    for name, (a, b) in seg.items():
+        pts = [q['p'] for q in rows[a - base:b - base]]
+        if pts:
+            ax1.plot([p[0] for p in pts], [p[2] for p in pts], '.-', ms=2, label=name, color=plt.cm.tab20(list(seg).index(name)))
+            ax2.plot([p[0] for p in pts], [p[1] for p in pts], '.-', ms=2, color=plt.cm.tab20(list(seg).index(name)))
+    for ax, lo, hi, lbl in ((ax1, C.SAND_TOP_M, C.WATER_LINE_M, 'z (m)'), (ax2, -C.INNER_Y_M, C.INNER_Y_M, 'y (m), glass at bottom')):
+        ax.axhline(lo, color='k', lw=0.5)
+        ax.axhline(hi, color='k', lw=0.5)
+        for x in (-C.INNER_X_M, C.INNER_X_M):
+            ax.axvline(x, color='k', lw=0.5)
+        ax.set_ylabel(lbl)
+        ax.set_aspect('equal')
+    ax1.set_title('Player path (body centre), side view (x–z) and top view (x–y); one dot per tick')
+    ax1.legend(fontsize=7, ncol=4)
+    ax2.set_xlabel('x (m)')
+    fig.tight_layout()
+    fig.savefig(out, dpi=90)
+    plt.close(fig)
+    print(f'trajectory plot: {out}')
+
+
 def steer():
     """Step 20: steer-and-swim, from the engine trace. Held buttons only, one tick per step."""
     r = Run()
     g = r.g
     k = r.k
     ok = {}
-    seq = [('settle', None, 1.5, None), ('cruise-right', 'RIGHT', 3.0, 'phase4-cruise-right'),
-           ('glide', None, 1.5, None), ('climb-right', 'UP', 1.5, 'phase4-climb-right'), ('level', None, 1.5, None),
-           ('u-turn', 'LEFT', 0.6, 'phase4-u-turn'), ('left', 'LEFT', 1.4, None),
-           ('dive-left', 'DOWN', 1.5, 'phase4-dive-left'), ('level2', None, 1.5, None),
-           ('to-glass', 'B', 1.2, 'phase4-to-glass'), ('stop', None, 1.5, None),
-           ('away', 'C', 1.5, None), ('rest', None, 2.5, None)]
+    # (name, button, seconds, strip?) — every move starts in open water
+    seq = [('settle', None, 1.5, False), ('cruise-right', 'RIGHT', 1.0, False),
+           ('climb-right', 'UP', 1.2, True), ('level', None, 1.5, False),
+           ('u-turn', 'LEFT', 1.5, True), ('dive-left', 'DOWN', 1.2, True), ('level2', None, 1.5, False),
+           ('toward-glass', 'B', 1.5, True), ('stop', None, 1.5, False), ('away', 'C', 1.5, False),
+           ('cruise', 'RIGHT', 2.5, False), ('wall-approach', 'RIGHT', 2.0, True), ('rest', None, 2.0, False)]
     seg = {}
     try:
         g.step(30)
-        for name, btn, secs, shot in seq:
+        for name, btn, secs, strip in seq:
             a = len(g.frames)
-            r.phase(name, btn, secs, shot)
+            strip_phase(r, name, btn, secs) if strip else r.phase(name, btn, secs)
             seg[name] = (a, len(g.frames))
         r.print_rows(r.rows)
         fr = g.frames[seg['settle'][0]:]
@@ -933,20 +947,20 @@ def steer():
               f"{st['worst_speed_err']:.4f} m/s")
         ok['parallel'] = st['worst_angle'] < 1.0 and st['worst_speed_err'] < 0.02
         # climb: Up alone climbs along the pitched facing, so it also moves forward
-        cl = [q for q in sl('climb-right') if q['speed'] > 0.5]
+        cl = [q for q in sl('climb-right') if q['speed'] > 0.5] or [dict(v=(0, 0, 0), pitch=0.0)]
         vz = sum(q['v'][2] for q in cl) / len(cl)
         vh = sum(math.hypot(q['v'][0], q['v'][1]) for q in cl) / len(cl)
         pmax = max(q['pitch'] for q in cl) * 360
         ok['climb'] = vz > 0.3 and vh > 0.3 and pmax <= C.PITCH_MAX * 360 + 0.5
         print(f'step 20: climb (Up alone, facing +x): mean vz {vz:.3f} m/s, horizontal {vh:.3f} m/s, pitch up to '
               f'{pmax:.1f}° (limit {C.PITCH_MAX * 360:.0f}°) → {verdict(ok["climb"])}')
-        dv = [q for q in sl('dive-left') if q['speed'] > 0.5]
+        dv = [q for q in sl('dive-left') if q['speed'] > 0.5] or [dict(v=(0, 0, 0), pitch=0.0)]
         ok['dive'] = sum(q['v'][2] for q in dv) < 0 and sum(q['v'][0] for q in dv) < 0
         print(f'step 20: dive (Down alone, facing −x): mean vz {sum(q["v"][2] for q in dv) / len(dv):.3f}, vx '
               f'{sum(q["v"][0] for q in dv) / len(dv):.3f} m/s, pitch down to {min(q["pitch"] for q in dv) * 360:.1f}° '
               f'→ {verdict(ok["dive"])}')
         # U-turn: the yaw passes through the side (|sin yaw| ≈ 1) and the fish moves in y: an arc
-        ut = sl('u-turn') + sl('left')
+        ut = sl('u-turn')
         side = max(abs(math.sin(math.tau * q['yaw'])) for q in ut)
         ys = [q['p'][1] for q in ut]
         ok['arc'] = side > 0.95 and max(ys) - min(ys) > 0.2 and st['max_dyaw'] <= C.YAW_WMAX * DT + 1e-3
@@ -959,7 +973,7 @@ def steer():
         print(f'step 20: pitch back under 1° {after} s after release; |pitch| never over {st["max_pitch"] * 360:.2f}° '
               f'→ {verdict(ok["level"])}')
         # burst and coast while held (the cruise): durations, the coast decays, the tail is still
-        cr = sl('cruise-right')[20:]
+        cr = sl('cruise')[12:]                  # after the turn toward +x, before the wall
         runs = segments([q['burst'] for q in cr])[1:-1]
         bursts = [n * DT for v, _, n in runs if v]
         coasts = [n * DT for v, _, n in runs if not v]
@@ -973,21 +987,26 @@ def steer():
               f'{sorted(set(round(d, 2) for d in coasts))} s; coast speed decays monotonically: {mono}; tail envelope at '
               f'the end of a coast ≤ {env_coast:.3f} → {verdict(ok["gait"])}')
         # Strouhal: f from the engine's phase accumulator, U the measured speed, A the tail-tip excursion
+        # The Director advances the phase between ticks k and k+1 with the speed the Player
+        # published at tick k+1, so pair each rate with that speed. Ticks at the Nyquist cap
+        # (fish-tail-hz-max) are reported but kept out of the f ∝ U check.
         fs = rates(cr, 'ph_swim')
-        us = [q['speed'] for q in cr[:-1]]
+        us = [q['cmd'] for q in cr[1:]]
+        fmax = FISH.T['fish-tail-hz-max']
         st_n = [f * FISH.T['fish-tail-app'] / u for f, u in zip(fs, us) if u > 0.5]
+        capped = sum(1 for f in fs if f >= fmax - 1e-3)
         bands = {}
         for f, u in zip(fs, us):
-            if u > 0.5:
+            if u > 0.5 and f < fmax - 1e-3:
                 bands.setdefault(min(2, int((u - 1.5) // 1.0)) if u > 1.5 else 0, []).append(f / u)
         ratio = {b: sum(v) / len(v) for b, v in bands.items()}
         prop = max(ratio.values()) / min(ratio.values()) - 1 if ratio else 1.0
         ok['strouhal'] = min(st_n) >= 0.2 - 1e-3 and max(st_n) <= 0.4 and prop < 0.15
         print(f'step 20: tail beat: St = f·A/U over the cruise {min(st_n):.3f}..{max(st_n):.3f} (A = 0.2 L = '
               f'{FISH.T["fish-tail-app"]:.3f} m), f/U by speed band {({b: round(v, 3) for b, v in sorted(ratio.items())})} '
-              f'(spread {prop * 100:.1f} %), f {min(fs):.2f}..{max(fs):.2f} Hz → {verdict(ok["strouhal"])}')
+              f'(spread {prop * 100:.1f} %), f {min(fs):.2f}..{max(fs):.2f} Hz, {capped} ticks at the {fmax:g} Hz cap → {verdict(ok["strouhal"])}')
         pf = rates(rows, 'ph_pec')
-        pu = [q['speed'] for q in rows[:-1]]
+        pu = [q['cmd'] for q in rows[1:]]
         pairs = sorted(zip(pu, pf))
         mono_p = all(b[1] >= a[1] - 1e-3 for a, b in zip(pairs, pairs[1:]) if b[0] - a[0] > 0.05)
         ok['pectoral'] = min(pf) >= 2.4 - 0.01 and max(pf) <= 4.6 + 0.01 and mono_p
@@ -1022,6 +1041,7 @@ def steer():
                 fh.write('\t'.join(f'{v:.4f}' for v in (q['t'], *q['p'], q['speed'], q['cmd'], q['yaw'], q['pitch'],
                                                        q['burst'], q['env'], q['ang'], q['pushed'])) + '\n')
         print(f'step 20: per-tick trace {os.path.join(OUT, "phase4-steer-trace.tsv")}')
+        plot_trajectory(rows, seg, base, os.path.join(OUT, 'phase4-motion-trajectory.png'))
     finally:
         clean = r.isolation()
         g.close()
