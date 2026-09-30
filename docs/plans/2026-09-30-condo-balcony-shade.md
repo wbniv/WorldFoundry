@@ -4,14 +4,17 @@
 
 The back balcony of 639 is an open opening onto the west (Bangkok afternoon sun, monsoon rain, gusts, 6th floor ≈ 16 m up). Will wants a **motorised outdoor zip screen in a cassette, mounted under the concrete ledge (beam) of the opening**, with the **solar-strip motor option** (battery motor charged by a thin photovoltaic strip — no mains wiring to the balcony).
 
-Measured by Will (2026‑09‑30):
+Measured by Will (2026‑09‑30; the ledge depth vs. height and the datum were clarified the same day):
 
 | Item | Value |
 |---|---|
 | Opening width | 268 cm |
 | Opening height (pony-wall cap → beam soffit) | 111 cm |
 | Pony wall height | 111 cm |
-| Concrete beam / slab face above the opening | 35 cm deep |
+| Concrete ledge above the opening | **35 cm deep** (front-to-back), **about 64 cm tall** |
+| Pony wall thickness | 10 cm |
+| Patio width (`639-patio-recessed`) | 280 cm; the opening is centred in it |
+| Ceiling | 3 m walls, no drop ceilings anywhere in 639 |
 | Floor in front of the opening | recessed **7 cm** below the interior floor |
 
 **The level model does not match these numbers today** (queried read-only from `~/docs/aircon/units-639-640.blend`, `unit-639` shell, y = 0 plane):
@@ -19,7 +22,8 @@ Measured by Will (2026‑09‑30):
 - The patio rooms are `639-patio-recessed` (x 2.70–5.40) and `639-patio` (x 5.40–7.80), both floored at z = 0, ceilinged at z = 2.70.
 - The open edge is a **1.00 m parapet** (x 2.65–5.85, y −0.10…0) with **nothing above it** up to the 2.70 m ceiling, i.e. a 1.70 m opening and no beam. A full-height wall starts at x 6.55.
 - A full-height post stands at x 5.70–5.80, so the parapet run is 2.75–5.70 = 2.95 m clear, not 2.68 m.
-- Real stack 111 + 111 + 35 = **257 cm**; the model's ceiling is 270 cm.
+- Real stack 111 + 111 + 64 = **286 cm** from the balcony floor, under a **300 cm** ceiling; the model's ceilings are 270 cm (an assumption in the source survey — see Open questions).
+- The model's recessed patio is 270 cm wide; the real one is 280 cm.
 - The Daikin outdoor unit hangs *outboard* of the parapet at x 2.76–3.56, y 0.19–0.49, z 0.30–0.85; its lineset and drain cross y = 0 at the left end, below the parapet cap.
 
 So the plan has two halves: **(A) the real-world spec** Will can take to a supplier, and **(B) the level model** corrected to the measurements, with the shade built into it and operable.
@@ -33,7 +37,7 @@ Product class: **outdoor zip screen, cassette (head box) on the soffit, inside-r
 | Parameter | Recommendation | Why |
 |---|---|---|
 | Order size | ≈ 267 × 111 cm **overall, cassette included** | 268 cm clear less ~5 mm per side; supplier deducts for guides. Measure the clear width at three heights and order to the smallest |
-| Cassette | ≈ 10 × 10 cm, aluminium, flush under the soffit | A 111 cm drop rolls to a small diameter; the cassette costs ≈ 10 cm of the opening, so the fabric drops ≈ 98 cm |
+| Cassette | ≈ 10 × 10 cm, aluminium, under the soffit **flush with the pony wall's outer face**, so the bottom bar lands on the 10 cm cap. The 35 cm-deep ledge leaves 25 cm of soffit on the balcony side, which shades but does not obstruct | A 111 cm drop rolls to a small diameter; the cassette costs ≈ 10 cm of the opening, so the fabric drops ≈ 98 cm |
 | Guides | zip tracks on both reveals, ≈ 5 cm wide each | Keep the fabric taut in gusts; fabric width ≈ 257 cm |
 | Bottom bar | ≈ 3 cm, with rubber seal, lands on the pony-wall cap | Cap must be flat and level — a 0–10 mm error shows as a gap along 2.6 m |
 | Fabric | 3–5 % openness, light exterior colour | Heat rejection matters more than see-through in Bangkok; darker fabric keeps more view but passes more heat |
@@ -44,15 +48,15 @@ Product class: **outdoor zip screen, cassette (head box) on the soffit, inside-r
 
 **Solar strip placement.** The balcony faces due west, so a vertical strip on the cassette's outer face sees direct sun only from roughly midday on, and edge-on near solar noon (see the section mockup). Morning charge is diffuse. Ask the supplier for the strip's Wp, the battery's Wh, and the cycles per day it is rated for; a 111 cm drop is a small load, which is why this option is plausible here.
 
-**Anchoring.** Side guides bolt into the concrete reveals; the cassette hangs from the soffit. Both need the wall thickness (see Open questions).
+**Anchoring.** Side guides bolt into the concrete reveals (the vertical side faces of the opening); the cassette hangs from the soffit. Both need flat, plumb faces — see Open questions.
 
 ### B. Level model (`blender_create_condo.py`)
 
 The source `.blend` is read-only, so all of this is a new section (**§ 7d**) in `wflevels/condo_639_640/blender_create_condo.py`, following the pattern of § 7c (telescoping glass doors) and gated by `CONDO_SHADE=0` to switch it off.
 
-1. **Pin the opening.** Constants in metres, all derived from Will's numbers: `SHADE_W = 2.68`, `PONY_H = 1.11`, `OPEN_H = 1.11`, `BEAM_H = 0.35`, `FLOOR_RECESS = 0.07`, plus `SHADE_X0` (see Open questions).
+1. **Pin the opening.** Constants in metres, all derived from Will's numbers: `SHADE_W = 2.68`, `PONY_H = 1.11`, `PONY_T = 0.10`, `OPEN_H = 1.11`, `LEDGE_DEEP = 0.35`, `FLOOR_RECESS = 0.07`, `PATIO_W = 2.80`. The patio is widened from 2.70 to 2.80 m keeping its south edge on the party wall (x 2.75…5.55); the opening is centred in it (x 2.81…5.49, 6 cm of jamb each side).
 2. **Recess the floor 7 cm** across the opening's frontage. The shell floor is a single z = 0 face set inside `unit-639`, so this is a `bmesh` bisect of the top faces over the rectangle, dropping the cut region by 0.07 m and closing it with a step wall on the interior side. The player walks down 7 cm; Jolt's character step handles that.
-3. **Rebuild the opening** as solid geometry: parapet raised from 1.00 m to 1.11 m over the shade span; a **beam** over the span with its soffit at the opening head; infill piers where the model's 2.95 m run is wider than 2.68 m.
+3. **Rebuild the opening** as solid geometry: parapet raised from 1.00 m to 1.11 m and 10 cm thick, flush with the outer face (y −0.10…0); a **ledge** 35 cm deep (y −0.35…0) with its soffit at the opening head (z 2.15) up to the model's 2.70 m ceiling, i.e. 55 cm tall against the real ≈ 64 cm; solid piers over the rest of the model's 2.95 m parapet run, outside x 2.81…5.49.
 4. **Build the shade** as separate actors:
    - `639-balcony-shade-cassette` (static box with the solar strip as a second material on its west face, the strip length a placeholder);
    - two static guide boxes on the reveals;
@@ -77,13 +81,13 @@ The in-engine states (open, half, closed, seen from the balcony POV and from the
 
 ## Open questions
 
-Each has a default that the build uses until Will corrects it; all are constants at the top of § 7d.
+Answers of 2026‑09‑30 are folded in; what is left has a default that the build uses until corrected (constants at the top of § 7d).
 
-1. **Datum for 111 / 111 / 35.** Default: measured from the **recessed** balcony floor, so the cap is 1.04 m and the soffit 2.15 m above the *interior* floor. If measured from the interior floor, both move up 7 cm.
-2. **Ceiling.** 257 cm from the balcony floor is 250 cm above the interior floor, but the model's patio ceiling is 270 cm. Default: the beam is modelled from the true soffit (2.15) up to the model ceiling (2.70), i.e. taller than 35 cm, so the level stays watertight; the 20 cm is a model artefact, not a claim about the building.
-3. **Where the 268 cm sits.** The model's parapet run is 2.95 m (x 2.75–5.70). Default: centred, x 2.891–5.559, with 14 cm piers each side. Lineset and drain cross below the cap at the left end, so none of the choices collide with the shade.
-4. **Wall / beam thickness.** The model has 10 cm; unmeasured. It decides whether the 10 cm cassette sits inside the wall's thickness or is surface-mounted, and which face the screen closes on.
-5. **Reveal condition.** Are the two side reveals flat, plumb concrete/plaster? Guides need ≈ 5 cm of flat face each side.
+1. ~~Datum for 111 / 111 / 35.~~ **Answered:** measured from the recessed balcony floor. The cap is 1.04 m and the soffit 2.15 m above the interior floor.
+2. ~~Ceiling.~~ **Answered:** walls are 3 m, no drop ceilings in 639, and the ledge is 35 cm deep × ≈ 64 cm tall (my earlier reading of "35" as its height was wrong). The model's 2.70 m ceilings are therefore an assumption in the source survey, worse than assumed. **Not changed here** — raising every ceiling is a level-wide change to `~/scripts/aircon-blender.py`'s model; filed as its own TODO item. In this patio the ledge fills from the true soffit to the model ceiling (55 cm instead of 64).
+3. ~~Where the 268 cm sits.~~ **Answered:** in the recessed patio, to the south of the main patio, which is 280 cm wide. Centred: x 2.81…5.49.
+4. **Which face is the pony wall flush with, and which way does the ledge overhang?** The wall is 10 cm and the ledge 35 cm deep, so one face is flush and the ledge sticks out 25 cm on the other side. Default: both flush on the outer (west) face, ledge overhanging into the balcony. If it is the other way round, the cassette sits on the balcony side of the cap and the bottom bar needs a bar-to-cap check on site.
+5. **Reveals** (the vertical side faces of the opening, left and right — what the zip guides bolt to): are they flat and plumb, with about 5 cm of clear face each side? With a 280 cm patio and a 268 cm opening there should be about 6 cm of wall at each side, which is the width the guides need.
 
 ## Out of scope
 
@@ -91,6 +95,7 @@ Each has a default that the build uses until Will corrects it; all are constants
 - Shading the *interior* side or the other patio room (x 5.40–7.80, full-height wall).
 - Weather in the level (rain, wind on the fabric).
 - Adding the balcony's real slab thickness, drainage falls or waterproofing lip under the 7 cm recess.
+- Raising the whole level to 3 m ceilings (filed separately).
 - A solar-yield model tied to `SUN_ALT_DEG` / `SUN_AZ_DEG`; the existing sun-position item ([plan](2026-09-20-condo-sun-solar-position.md)) is the prerequisite.
 
 ## Verification
@@ -102,4 +107,4 @@ Each has a default that the build uses until Will corrects it; all are constants
 5. In-engine capture at closedness 0, ~0.5 and 1.0 (`-rate20 --capture-frame`): slats tile without gaps or z-fighting at 1.0 and vanish into the cassette at 0.
 6. Balcony POV shot (`cs_balcony`) and the doll-house shot are captured with the shade open and closed; the view is not blocked when open.
 7. Pressing B (keyboard 2) within reach toggles the shade over about 2 s; a second press mid-travel reverses it smoothly; out of reach does nothing.
-8. **On site, before ordering:** measure the clear width at top, middle and bottom, the pony-wall cap level along its length, the wall thickness, and the datum for the three heights (Open questions 1–5); update the constants.
+8. **On site, before ordering:** measure the clear width at top, middle and bottom, the pony-wall cap level along its length, the face the pony wall is flush with, and the ledge's true height (Open questions 4–5); update the constants.

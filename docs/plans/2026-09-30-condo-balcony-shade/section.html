@@ -42,14 +42,14 @@
     <li>The balcony floor steps <b>7 cm down</b> from the interior floor across the whole frontage of the 268 cm opening.</li>
     <li>The cassette hangs from the beam soffit at 222 cm; it eats about 10 cm of the 111 cm opening, so the fabric drops ≈ 98 cm.</li>
     <li>The solar strip is on the cassette's <b>west face</b>, vertical. With the sun above ≈ 60° it is nearly edge-on, so the strip charges best in the low afternoon sun and worst at midday.</li>
-    <li>Wall / beam thickness is drawn at 10 cm, copied from the level model. <b>Not measured</b> — it decides whether the screen sits in the wall's thickness or is surface-mounted.</li>
+    <li>The pony wall is 10 cm thick (confirmed) and drawn flush with the outer face; the ledge above is 35 cm deep, so it overhangs the balcony side by 25 cm. <b>Which face the pony wall is flush with is assumed</b> — the cassette is flush with it so the fabric lands on the cap.</li>
   </ul>
-  <p class="note">Drawn at 2.7 px/cm. The sun ray is only there to judge shading of the strip by the pony wall and beam.</p>
+  <p class="note">Drawn at 2.7 px/cm; the 64 cm ledge is measured 'about'. The sun ray is only there to judge shading of the strip by the pony wall and beam.</p>
 </div>
 </main>
 <script>
 const S = 2.7, WX = 300, YB = 790;                 // px/cm, x of the wall's inner face, balcony-floor line
-const REC = 7, PONY = 111, HEAD = 222, BEAM = 35, T = 10, CASS = 10, BAR = 3;
+const REC = 7, PONY = 111, HEAD = 222, BEAM = 64, T = 10, CASS = 10, BAR = 3;
 const Y = z => YB - z * S, X = y => WX + y * S;    // y in cm, + = outside (west)
 const s = document.getElementById('s');
 function el(t, a, txt) { const e = document.createElementNS('http://www.w3.org/2000/svg', t);
@@ -63,7 +63,7 @@ function draw(p, alt) {
   el('path', {d:`M${X(-105)},${Y(REC)} L${X(-T*0-105+0)},${Y(REC)} L${X(-0)},${Y(REC)} L${X(0)},${Y(0)} L${X(40)},${Y(0)}`, stroke:'var(--fg)', 'stroke-width':2, fill:'none'});
   box(-105, 0, 0, REC, 'var(--conc)', 'var(--conc2)');                    // the 7 cm step block (interior side)
   box(0, 0, T, PONY, 'var(--conc)', 'var(--conc2)');                      // pony wall
-  box(0, HEAD, T, HEAD+BEAM, 'var(--conc)', 'var(--conc2)');              // beam
+  box(T-35, HEAD, T, HEAD+BEAM, 'var(--conc)', 'var(--conc2)');           // ledge: 35 deep, flush with the outer face
   // cassette under the soffit, flush with the wall's outer face
   box(0, HEAD-CASS, T, HEAD, 'var(--cass)');
   box(T, HEAD-CASS+1, T+1.2, HEAD-1, 'var(--solar)');                     // solar strip on the west face
@@ -78,11 +78,11 @@ function draw(p, alt) {
   // labels
   el('text', {x:X(-100), y:Y(REC)-8}, 'interior floor (+7)'); el('text', {x:X(-100), y:Y(0)+16}, 'balcony floor (0)');
   el('text', {x:X(-100), y:Y(REC/2)+4, style:'font-size:11px'}, '7 cm step');
-  el('text', {x:X(T)+8, y:Y(PONY/2)}, 'pony wall 111'); el('text', {x:X(T)+8, y:Y(HEAD+BEAM/2)+4}, 'beam 35');
+  el('text', {x:X(T)+8, y:Y(PONY/2)}, 'pony wall 111'); el('text', {x:X(T)+8, y:Y(HEAD+BEAM/2)+4}, 'ledge 64 tall × 35 deep');
   el('text', {x:X(T)+22, y:Y(HEAD-CASS/2)+4}, 'cassette + solar strip');
   el('text', {x:X(T)+8, y:Y((HEAD+PONY)/2-4), style:'fill:var(--muted)'}, p>0.02?'':'(open: fabric rolled up)');
   const dx = X(-60);
-  for (const [a0,b0,l] of [[0,PONY,'111'],[PONY,HEAD,'111'],[HEAD,HEAD+BEAM,'35']]) {
+  for (const [a0,b0,l] of [[0,PONY,'111'],[PONY,HEAD,'111'],[HEAD,HEAD+BEAM,'64']]) {
     el('line', {class:'dim', x1:dx, y1:Y(a0), x2:dx, y2:Y(b0)}); el('line', {class:'dim', x1:dx-5, y1:Y(a0), x2:dx+5, y2:Y(a0)}); el('line', {class:'dim', x1:dx-5, y1:Y(b0), x2:dx+5, y2:Y(b0)});
     el('text', {class:'dimt', x:dx-8, y:Y((a0+b0)/2)+4, 'text-anchor':'end'}, l); }
   el('text', {class:'dimt', x:X(T)+8, y:Y(HEAD+BEAM)-6}, 'slab / ceiling');

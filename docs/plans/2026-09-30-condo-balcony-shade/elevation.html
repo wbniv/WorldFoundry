@@ -47,23 +47,23 @@
   </div>
   <h2>Dimensions (cm, from the recessed balcony floor)</h2>
   <table>
-    <tr><td>Clear opening width</td><td>268</td></tr>
+    <tr><td>Clear opening width</td><td>268 (patio itself is 280)</td></tr>
     <tr><td>Pony wall top</td><td>111</td></tr>
     <tr><td>Opening head (beam soffit)</td><td>222</td></tr>
-    <tr><td>Beam / slab face</td><td>35 → top at 257</td></tr>
+    <tr><td>Concrete ledge above</td><td>64 tall (top at 286), 35 deep</td></tr>
     <tr><td>Order size (W × H, incl. cassette)</td><td>≈ 267 × 111</td></tr>
     <tr><td>Cassette</td><td>≈ 10 × 10, under the soffit</td></tr>
     <tr><td>Fabric drop when closed</td><td>≈ 98</td></tr>
     <tr><td>Zip guides, each side</td><td>≈ 5 wide, on the reveals</td></tr>
     <tr><td>Solar strip</td><td>on the cassette's west face</td></tr>
   </table>
-  <p class="note">Drawn at 2.6 px/cm. Bottom bar lands on the pony-wall cap; the 7 cm floor recess sits below this view
+  <p class="note">Drawn at 2.4 px/cm. Bottom bar lands on the pony-wall cap; the 7 cm floor recess sits below this view
   (see the section mockup). The strip length shown is a placeholder until a supplier is chosen.</p>
 </div>
 </main>
 <script>
-const S = 2.6, X0 = 80, YB = 790;               // px per cm, left edge of opening, balcony-floor line
-const W = 268, PONY = 111, HEAD = 222, BEAM = 35, CASS = 10, GUIDE = 5, BAR = 3;
+const S = 2.4, X0 = 80, YB = 790;               // px per cm, left edge of opening, balcony-floor line
+const W = 268, PONY = 111, HEAD = 222, BEAM = 64, CASS = 10, GUIDE = 5, BAR = 3;
 const Y = z => YB - z * S, X = x => X0 + x * S;
 const s = document.getElementById('s');
 function el(t, a, txt) { const e = document.createElementNS('http://www.w3.org/2000/svg', t);
@@ -78,7 +78,7 @@ function draw(p) {
   el('rect', {x:X(-24), y:Y(HEAD+BEAM), width:(W+48)*S, height:BEAM*S, fill:'var(--conc)', stroke:'var(--conc2)'}); // beam
   el('rect', {x:X(-24), y:Y(HEAD), width:24*S, height:(HEAD-PONY)*S, fill:'var(--conc)', stroke:'var(--conc2)'});
   el('rect', {x:X(W),  y:Y(HEAD), width:24*S, height:(HEAD-PONY)*S, fill:'var(--conc)', stroke:'var(--conc2)'});
-  el('text', {x:X(-20), y:Y(PONY/2)}, 'pony wall'); el('text', {x:X(-20), y:Y(HEAD+BEAM/2)+4}, 'concrete beam / slab face');
+  el('text', {x:X(-20), y:Y(PONY/2)}, 'pony wall'); el('text', {x:X(-20), y:Y(HEAD+BEAM/2)+4}, 'concrete ledge: 64 tall, 35 deep');
   // zip guides
   for (const gx of [0, W-GUIDE]) el('rect', {x:X(gx), y:Y(HEAD-CASS), width:GUIDE*S, height:(HEAD-CASS-PONY)*S, fill:'var(--cass)'});
   // fabric
