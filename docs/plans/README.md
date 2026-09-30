@@ -347,6 +347,7 @@ rows on commit.*
 | [Shared Forth comments and safe semicolon scanning](2026-09-25-forth-comments-and-script-loading.md) | Implemented shared line comments and comment/string-aware script splitting; runtime regressions pass, broader redesign deferred. | Uncommitted | Fix |
 | [Aquarium level — 55 gal acrylic tank, clownfish, anemone](2026-09-30-aquarium-level.md) | Plan for a swimmable aquarium level: acrylic tank at exact 55 gal dimensions, translucent-pane spike, gravity-free clownfish, anemone; three mockups. | Uncommitted | Feature |
 | [Clownfish idle animation — the canonical aquarium clownfish, a five-part rig driven from Forth](2026-09-30-clownfish-idle-animation.md) | Canonical aquarium clownfish (wflevels/aquarium/clownfish.py) as an invisible Physics hull plus five Director-posed platform parts; idle bob/sway/tail/fins/dorsal; ROTATION_* probe; spike level, engine captures, regression test. | Uncommitted | Feature |
+| [Clownfish biomechanics poster (A3)](2026-09-30-clownfish-biomechanics-poster.md) | Plan for an A3 poster of the fish-swimming research behind the aquarium rig: seven computed diagrams, a sourced parameter table with verified/unverified/ours chips, two mockups. | Uncommitted | Docs |
 
 ---
 

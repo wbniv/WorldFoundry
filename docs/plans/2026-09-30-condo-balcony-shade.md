@@ -45,8 +45,8 @@ Product class: **outdoor zip screen, cassette (head box) on the soffit, inside-r
 | Cassette | ≈ 10 × 10 cm, aluminium, under the soffit **flush with the pony wall's outer face**, so the bottom bar lands on the 10 cm cap. The 35 cm-deep ledge leaves 25 cm of soffit on the balcony side, which shades but does not obstruct | A 111 cm drop rolls to a small diameter; the cassette costs ≈ 10 cm of the opening, so the fabric drops ≈ 98 cm |
 | Guides | zip tracks on both reveals, ≈ 5 cm wide each | Keep the fabric taut in gusts; fabric width ≈ 257 cm |
 | Bottom bar | ≈ 3 cm, with rubber seal, lands on the pony-wall cap | Cap must be flat and level — a 0–10 mm error shows as a gap along 2.6 m |
-| Fabric (rain) — **required** | **waterproof** fabric (coated PVC or similar), full height, that stops **at least 99 % of rain** reaching the grass; side zips and bottom bar sealed against wind-driven rain | Rain protection is imperative (Will, 2026‑09‑30): the grass goes mouldy if it gets wet. An open-weave screen fabric (3–5 % openness) passes most rain, so it cannot be the rain layer. Shops may not put a number on 99 %; compare their sealing details and ask what they guarantee |
-| Fabric (sun), optional | a second roller or alternative in 3–5 % openness screen fabric, light exterior colour | Only worth it if rain protection is kept; the waterproof layer already gives shade and keeps pigeons out |
+| Fabric (rain) — **required** | **waterproof and see-through** fabric (clear or lightly tinted PVC or similar), full height, that stops **at least 99 % of rain** reaching the grass; side zips and bottom bar sealed against wind-driven rain | Rain protection is imperative and Will wants to see out when it is closed (2026‑09‑30). Clear-PVC zip screens exist. The trade-offs to ask shops about: it lets sun and heat through (tint or solar-control film, or a second roller in screen fabric for the hottest hours), how clear it stays over the years, creasing when rolled, and a thicker roll (a bigger cassette than the 10 cm assumed). An open-weave screen fabric passes most rain, so it cannot be the rain layer |
+| Fabric (sun), optional | a second roller in 3–5 % openness screen fabric, light exterior colour, for the hottest hours | Only worth it if rain protection is kept; a clear PVC layer gives little shade, so this is the heat fix if tint or film is not enough |
 | When raised | the bottom bar stows into the cassette, so nothing hangs in the opening; ask how many cm of the opening the cassette and each guide block | The view and airflow are the point of a retractable shade, so the raised opening must be as clear as the product allows |
 | Wind | ask for the supplier's **EN 13561 class** and the **test size**; it must cover 2.67 × 1.11 m | A 6th-floor west face takes squall gusts; do not accept a class without the test size |
 | Motor | battery tubular motor, **solar strip** on the cassette's west face, plus a **DC/USB charge port** | Monsoon weeks give little sun; a charge port is the fallback |
@@ -109,7 +109,7 @@ Answers of 2026‑09‑30 are folded in; what is left has a default that the bui
 
 7. ~~Grass thickness.~~ **Answered:** nominally 4 cm but it lies flat, under 1 cm; the model uses 1 cm. **Also answered:** it covers the whole recessed patio floor wall to wall and turns up the edges a few cm; Will can trim it. The model uses one flat slab and ignores the upturn.
 8. ~~Rain versus screen.~~ **Answered (2026‑09‑30):** stopping rain, at least 99 % of it, is imperative, so the rain layer is **waterproof fabric**; view and airflow are provided by retracting it, so they no longer pull against rain. The remaining failure case is a shower that arrives while it is raised (Will away, or not noticing): an automatic close on rain (sensor, or Zigbee automation on a forecast) covers it, and is why the RF and Zigbee question matters.
-9. **RF and Zigbee.** The motor needs an RF remote at least. Which RF protocol each shop uses decides whether an RF-to-Zigbee bridge can drive it; ask in every shop.
+9. **RF and Zigbee.** The motor needs an RF remote at least, and it must be **fixed code**, not a **rolling-code (hopping-code)** remote: a universal RF-to-Zigbee bridge can learn and replay a fixed code, but a rolling code changes with every press, so a copied press stops working (Will, 2026‑09‑30; Bluetooth does not help). A motor with Zigbee built in would be simplest but is expected to cost thousands of THB more than Will's own bridge, so it is asked about for price only; the plan is a fixed-code RF remote and a home-built RF-to-Zigbee bridge. Ask every shop for the frequency, the brand or protocol, and fixed vs rolling code. As I understand it, many cheap tubular-motor remotes at 433 MHz are fixed code and Somfy RTS is rolling code, but check each shop's actual remote; I have not verified any model.
 10. **Level model: should the parts above the cap collide? (dormant: decide when a POV camera returns)** The ledge, cassette, guides, slats and bar are ordinary statplats (Mass 75), as B.6 says. The player can reach none of them, but the balcony POV camera can. At the zone entry (player y −1.50…−1.20) its bbox overlaps them and it climbs; in the 4 s probe it had not settled back in 4 of 8 samples at those two positions. Today's level (`CONDO_SHADE=0`) settles in every sample, and with `CONDO_SHADE_OVERHEAD_MASS=0` so does this one, 20 of 20 (Verification 6). Mass 0 is how this level already keeps the skydome, site buildings and podium out of the camera's way. **Default: statplat Mass, as written in B.6. Recommended: 0.** Since the automatic POV cameras are off by default (Verification 6), no shipped camera comes near these parts: the doll-house shot sits 9 m up, and the manual inspection camera stays at 35° or more and 4 m or more from the player, above 3.2 m. So the question only matters for the "something better later" POV.
 
 ## Out of scope
@@ -130,10 +130,10 @@ Run 2026‑09‑30 on the default build (shade on, grass on, `CONDO_POV_TRIGGERS
     ```
     $ CONDO_SHADE=1 task condo-level --force 2>&1 | grep -E "^\[condo\] (balcony|window POV|west|exporting)|built"
     [condo] window POV cameras: OFF — no automatic cuts, cs_dollhouse is the only automatic shot (CONDO_POV_TRIGGERS=1 restores cs_balcony / cs_master and their zones)
-    [condo] west-façade ledge: west-facade-ledge along the façade x -4.21…8.05, built x -4.21…7.90 (cut at wall tops), z 2.15…2.70, 18 boxes (2 sub-1 cm dropped), full 35 cm depth only where a floor is behind it; intersects: 639-daikin-lineset (11 verts, x 2.53…2.65 z 2.24…2.36); unit-640 (1 verts, x -4.11…-4.11 z 2.58…2.58)
+    [condo] west-façade ledge: west-facade-ledge along the façade x -4.21…8.05, built x -4.21…7.90 (cut at wall tops), z 2.15…2.70, 18 boxes (2 sub-1 cm dropped), full 35 cm depth only where a floor is behind it; intersects: 639-daikin-lineset (11 verts, x 2.53…2.65 z 2.24…2.36); unit-640 (1 verts, x -4.11…-4.11 z 2.58…2.58)
     [condo] west-façade ledge colours (from the wall at each x): x -4.21…-3.80 unit-639.001, x -3.70…-0.10 unit-639.001, x 0.05…0.25 unit-639.001, x 0.25…0.40 unit-639, x 0.55…2.65 unit-639, x 2.75…5.70 unit-639, x 5.80…6.55 unit-639, x 6.70…7.90 unit-639; across wall gaps, nearest wall's colour: x 0.05…0.25 unit-639.001, x 0.25…0.40 unit-639, x 2.75…5.43 unit-639, x 5.43…5.70 unit-639, x 5.80…6.55 unit-639
-    [condo] balcony shade: 639-patio-recessed x 2.75…5.55 (2.80 m), 639-patio from x 5.55; floor recessed 7 cm over x 2.75…5.55 y -1.95…-0.10 (4 faces, 10 risers, 0 degenerate triangles dropped = 0.0e+00 m²; drain 24 verts eased); old parapet 20 faces removed; grass 1 cm over the recess, top z -0.06 → 6 cm step
-    [condo] balcony shade: span x 2.75…5.43 (2.680 m), floor z -0.07, cap z 1.04 (10 cm pony wall), soffit z 2.15 (west-façade ledge y -0.35…0.00 to z 2.70); north jamb x 5.43…5.70; cassette 10×10 cm (solar strip 1.00 m on its west face); 2 guides; 8 slats × 12.23 cm + bar, all stowed in the cassette when raised; 2.0 s travel; B/keyboard-2 within 0.90 m (player y ≥ -1.00; door reach ends at y -1.04); wall switch on the south jamb at y -0.30, z 1.14; mailboxes init 60, press-latch 61, reach 62, target 63, closedness 64; overhead parts Mass statplat default
+    [condo] balcony shade: 639-patio-recessed x 2.75…5.55 (2.80 m), 639-patio from x 5.55; floor recessed 7 cm over x 2.75…5.55 y -1.95…-0.10 (4 faces, 10 risers, 0 degenerate triangles dropped = 0.0e+00 m²; drain 24 verts eased); old parapet 20 faces removed; grass 1 cm over the recess, top z -0.06 → 6 cm step
+    [condo] balcony shade: span x 2.75…5.43 (2.680 m), floor z -0.07, cap z 1.04 (10 cm pony wall), soffit z 2.15 (west-façade ledge y -0.35…0.00 to z 2.70); north jamb x 5.43…5.70; cassette 10×10 cm (solar strip 1.00 m on its west face); 2 guides; 8 slats × 12.23 cm + bar, all stowed in the cassette when raised; 2.0 s travel; B/keyboard-2 within 0.90 m (player y ≥ -1.00; door reach ends at y -1.04); wall switch on the south jamb at y -0.30, z 1.14; mailboxes init 60, press-latch 61, reach 62, target 63, closedness 64; overhead parts Mass statplat default
     [condo] balcony shade: slats + bar are runtime actors 40…48 (export positions 39…47 + bias 1); verify with `wf_game --debug-print-actors`
     [condo] exporting 115 actors → /home/will/WorldFoundry-wbniv/wflevels/condo_639_640/condo_639_640.lev
     ✓ built /home/will/WorldFoundry-wbniv/wflevels/condo_639_640.iff (2414592 bytes)
@@ -141,7 +141,7 @@ Run 2026‑09‑30 on the default build (shade on, grass on, `CONDO_POV_TRIGGERS
     [exit 0]
     ```
 
-    **PASS.** The `[condo] balcony shade:` lines give the span (x 2.75…5.43, 2.680 m), the cassette (10 × 10 cm with the solar strip), 8 slats + bar, and mailboxes 60–64. The ledge line lists what it intersects: the Daikin lineset, which the survey routes through the wall above the real soffit, and a one-vertex graze of 640's faceted corner (B.3).
+    **PASS.** The `[condo] balcony shade:` lines give the span (x 2.75…5.43, 2.680 m), the cassette (10 × 10 cm with the solar strip), 8 slats + bar, and mailboxes 60–64. The ledge line lists what it intersects: the Daikin lineset, which the survey routes through the wall above the real soffit, and a one-vertex graze of 640's faceted corner (B.3).
 
 2. A headless read of the built `wflevels/condo_639_640/condo_639_640.blend` reports: floor z = −0.07 over the whole recessed patio, an artificial-grass slab on top of it (top at z −0.06), pony-wall cap z = 1.04, soffit z = 2.15, clear opening width 2.680 m, and 8 fabric slats plus the bar.
 
@@ -150,13 +150,13 @@ Run 2026‑09‑30 on the default build (shade on, grass on, `CONDO_POV_TRIGGERS
     PASS  floor over the frontage: z values [-0.07], area 5.1800 m² of 5.1800 (x 2.75…5.55, y -1.95…-0.1)
     PASS  step risers close the recess: riser area by side {'x1': 0.1295, 'y0': 0.196, 'y1': 0.196, 'x0': 0.1295}
     PASS  shell parapet cap at z 1.00: 0 cap faces (must be none)
-    PASS  artificial grass covers the recess, top z −0.06: x 2.750…5.550 y -1.950…-0.100 z -0.070…-0.060 → step from the interior floor 6 cm
+    PASS  artificial grass covers the recess, top z −0.06: x 2.750…5.550 y -1.950…-0.100 z -0.070…-0.060 → step from the interior floor 6 cm
     PASS  all shade actors present: 15/15
     PASS  pony-wall cap z 1.04: cap z 1.040, y -0.100…0.000
     PASS  soffit z 2.15: west-facade-ledge z 2.150…2.700, y -0.350…0.000
     PASS  ledge runs the whole west façade, full depth over the opening: x -4.21…7.90 (640's rounded corner → 639's north wall); over the opening y -0.350…0.000; 214 tris
     PASS  ledge colour matches the wall it sits on (no ochre over blue): ledge materials ['unit-639', 'unit-639.001']; mismatches []
-    PASS  clear opening width 2.680 m: south wall face x 2.750 → north jamb x 5.430 = 2.680 m
+    PASS  clear opening width 2.680 m: south wall face x 2.750 → north jamb x 5.430 = 2.680 m
     PASS  8 slats + bar tile the drop (baked closed), overlapping at every seam: slat 0 top 2.052 (cassette bottom 2.050), seam overlaps [2.0, 4.0] mm, bar 1.042…1.072, slat y centres [-0.0535, -0.0525, -0.0515, -0.0505, -0.0495, -0.0485, -0.0475, -0.0465]
     PASS  wall switch on the south jamb beside the opening: x 2.750…2.775 y -0.345…-0.255 z 1.070…1.210, Mass 0.0
     PASS  cassette carries the solar-strip material: ['shade-cassette', 'shade-solar']
@@ -172,7 +172,7 @@ Run 2026‑09‑30 on the default build (shade on, grass on, `CONDO_POV_TRIGGERS
     RESULT: FAIL ['ledge colour matches the wall it sits on (no ochre over blue)']
     ```
 
-    **PASS.** Floor z −0.07 over the whole recessed patio (5.18 m², closed by four risers), grass top z −0.06, cap 1.04, soffit 2.15 on a west-façade ledge x −4.21…7.90, clear width 2.680 m, 8 slats + bar tiling the drop, the wall switch, and the ledge coloured from the wall under it.
+    **PASS.** Floor z −0.07 over the whole recessed patio (5.18 m², closed by four risers), grass top z −0.06, cap 1.04, soffit 2.15 on a west-façade ledge x −4.21…7.90, clear width 2.680 m, 8 slats + bar tiling the drop, the wall switch, and the ledge coloured from the wall under it.
 
 3. `CONDO_SHADE=0 task condo-level` reproduces today's level (same parapet, no beam, floor at 0).
 
@@ -210,9 +210,9 @@ Run 2026‑09‑30 on the default build (shade on, grass on, `CONDO_POV_TRIGGERS
 
     ```
     $ python3 tests/verify_condo_balcony_shade.py
-    PASS  steps down 6 cm onto the grass: project room (4.400, -3.200, 15.750) → balcony (4.409, -0.645, 15.690), drop 6.0 cm
+    PASS  steps down 6 cm onto the grass: project room (4.400, -3.200, 15.750) → balcony (4.409, -0.645, 15.690), drop 6.0 cm
     PASS  pony wall stops the player mid-span: held +Y from the balcony: (4.409, -0.320, 15.690) (pony wall inner face y −0.10)
-    PASS  steps back up 6 cm into the project room: (4.392, -3.091, 15.750) vs room z 15.750
+    PASS  steps back up 6 cm into the project room: (4.392, -3.091, 15.750) vs room z 15.750
     PASS  south guide blocks: x=2.97: (3.314, -0.320, 15.690)
     PASS  north guide blocks: x=5.22: (5.219, -0.320, 15.690)
     PASS  north jamb blocks: x=5.52: (5.363, -0.320, 15.690)
@@ -234,7 +234,7 @@ Run 2026‑09‑30 on the default build (shade on, grass on, `CONDO_POV_TRIGGERS
        → /home/will/WorldFoundry-wbniv/docs/plans/2026-09-30-condo-balcony-shade/inside-closed.png
     ```
 
-| closedness 0 | ≈ 0.5 | 1.0 |
+| closedness 0 | ≈ 0.5 | 1.0 |
 |---|---|---|
 | <img src="2026-09-30-condo-balcony-shade/inside-open.png" width="280"> | <img src="2026-09-30-condo-balcony-shade/inside-half.png" width="280"> | <img src="2026-09-30-condo-balcony-shade/inside-closed.png" width="280"> |
 
@@ -328,7 +328,7 @@ Run 2026‑09‑30 on the default build (shade on, grass on, `CONDO_POV_TRIGGERS
 
     `verify_condo_camera_controls.py` is **timing-flaky, and was before this work**. Against HEAD's own level it failed different `cardinal orbit` checks in each of two runs; on this build, different subsets of its timed checks fail from run to run. The test writes the azimuth over the bridge and reads the derived offset 0.15 s later. `camera_controls.fth` is unchanged, and the failing checks run at the front door and in 640, away from anything built here. The door-button and unit-teleport suites pass. The camera suite's `reset restores automatic view` check now expects the doll-house shot, because there is no automatic window/patio shot left to restore; that check fails against HEAD's level, which still has the POV cuts, and passes here.
 
-    Measured earlier the same day with the POV triggers still on (the evidence for Open question 10). This is camera height above the player over 4 s after a teleport to each patio position:
+    Measured earlier the same day with the POV triggers still on (the evidence for Open question 10). This is camera height above the player over 4 s after a teleport to each patio position:
 
     ```
     today's level (CONDO_SHADE=0):
@@ -403,9 +403,9 @@ Run 2026‑09‑30 on the default build (shade on, grass on, `CONDO_POV_TRIGGERS
     PASS  wall switch beside the opening: 639_balcony_shade_switch.iff loaded
     actors: player=8 slat0=40 bar=48 camera=1
     PASS  loads open, slats parked in the cassette: target=0.0 closedness=0.0 slat0.z=15.90725 (want 15.9072) bar.z=16.763 (want 16.7630)
-    PASS  steps down 6 cm onto the grass: project room (4.400, -3.200, 15.750) → balcony (4.409, -0.645, 15.690), drop 6.0 cm
+    PASS  steps down 6 cm onto the grass: project room (4.400, -3.200, 15.750) → balcony (4.409, -0.645, 15.690), drop 6.0 cm
     PASS  pony wall stops the player mid-span: held +Y from the balcony: (4.409, -0.320, 15.690) (pony wall inner face y −0.10)
-    PASS  steps back up 6 cm into the project room: (4.392, -3.091, 15.750) vs room z 15.750
+    PASS  steps back up 6 cm into the project room: (4.392, -3.091, 15.750) vs room z 15.750
     PASS  south guide blocks: x=2.97: (3.314, -0.320, 15.690)
     PASS  north guide blocks: x=5.22: (5.219, -0.320, 15.690)
     PASS  north jamb blocks: x=5.52: (5.363, -0.320, 15.690)
@@ -413,7 +413,7 @@ Run 2026‑09‑30 on the default build (shade on, grass on, `CONDO_POV_TRIGGERS
     PASS  press on the balcony beyond reach ignored (y −1.50 < −1.00): target=0.0 reach=0.0
     PASS  near press closes: target=1.0 reach=-1.0
     PASS  continuous travel: closedness sampled mid-travel=0.21315
-    PASS  full close in about 2 s of level time: closedness=0.997536 after 1.9 s level time (2.03 s wall clock, incl. bridge polling)
+    PASS  full close in about 2 s of level time: closedness=0.997536 after 1.9 s level time (2.03 s wall clock, incl. bridge polling)
     PASS  slats and bar land on their baked positions: slat0.z=15.75 bar.z=15.75 (want 15.75)
     PASS  mid-travel press reverses without a snap: before=0.704115 after=0.654115 final=1.0
     PASS  held press toggles once: target=0.0
