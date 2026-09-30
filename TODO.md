@@ -371,6 +371,7 @@ _Auto-added from plan "Out of scope"/"Deferred" sections at commit time. Triage 
 - [ ] **(triage)** A solar-yield model tied to `SUN_ALT_DEG` / `SUN_AZ_DEG`; the existing sun-position item ([plan](2026-09-20-condo-sun-solar-position.md)) is the prerequisite. — _from [2026-09-30-condo-balcony-shade.md](docs/plans/2026-09-30-condo-balcony-shade.md)_  <!-- fp:156c3bc9f97e1790 -->
 - [verify] **2026-09-30-condo-balcony-shade** — Verification section present but no PASS recorded — run + record the steps. _from [2026-09-30-condo-balcony-shade.md](docs/plans/2026-09-30-condo-balcony-shade.md)_  <!-- fp:c04fa8539735b0dc -->
 - [ ] **(triage)** Raising the whole level to 3 m ceilings (filed separately). — _from [2026-09-30-condo-balcony-shade.md](docs/plans/2026-09-30-condo-balcony-shade.md)_  <!-- fp:bee87167a74482ee -->
+- [verify] **2026-09-30-ios-ci-revival** — Verification section present but no PASS recorded — run + record the steps. _from [2026-09-30-ios-ci-revival.md](docs/plans/2026-09-30-ios-ci-revival.md)_  <!-- fp:4257e8581a6c5b8f -->
 <!-- END auto-captured-deferrals -->
 
 - [x] Implemented Forth-only condo camera inspection controls; desktop/touch input regressions passed. [Plan and mockups](docs/plans/2026-09-25-condo-camera-controls.md)
