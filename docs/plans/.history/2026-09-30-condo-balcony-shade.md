@@ -1,8 +1,14 @@
 | Date | Change |
 |------|--------|
+| [2026-09-30](https://github.com/wbniv/WorldFoundry/commit/8883f82d) | Condo balcony shade: fold in Will's answers (ledge 35 deep x 64 tall, patio 280, 3 m ceilings) |
 | [2026-09-30](https://github.com/wbniv/WorldFoundry/commit/ce0a2fa6) | Plan condo 639 balcony zip screen (solar-strip motor) and 7 cm floor recess |
 
 <!--history-meta v1
+8883f82d	author	Will Norris
+8883f82d	added	19
+8883f82d	deleted	14
+8883f82d	files	1
+8883f82d	body	Co-Authored-By: Claude Sonnet 5.5 <noreply@anthropic.com>\nClaude-Session: https://claude.ai/code/session_01TfMcgfFyhXKC4CNP5iF7Nz
 ce0a2fa6	author	Will Norris
 ce0a2fa6	added	105
 ce0a2fa6	deleted	0
