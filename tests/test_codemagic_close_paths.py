@@ -172,7 +172,6 @@ def _verdict(out, label):
     return m and m.group(1)
 
 
-@pytest.mark.slow
 def test_all_paths_ok_with_working_stubs(tmp_path):
     p = _run(tmp_path, strict='cmdq red esc fullscreen')
     assert p.returncode == 0, p.stdout[-3000:] + p.stderr[-2000:]
@@ -183,7 +182,6 @@ def test_all_paths_ok_with_working_stubs(tmp_path):
     assert 'Retina NOT testable' in p.stdout
 
 
-@pytest.mark.slow
 def test_failures_are_reported_not_swallowed(tmp_path):
     p = _run(tmp_path, cmdq='broken', red='broken', win='100,100 640x480')
     assert p.returncode == 0, 'informational (no strict checks) must not fail the step'
@@ -195,7 +193,6 @@ def test_failures_are_reported_not_swallowed(tmp_path):
     assert _verdict(p.stdout, 'MACOS ESC STAYS OPEN') in ('OK', 'FAIL')
 
 
-@pytest.mark.slow
 def test_strict_check_fails_the_step(tmp_path):
     p = _run(tmp_path, strict='cmdq', cmdq='broken')
     assert p.returncode == 1
