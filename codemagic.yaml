@@ -562,6 +562,30 @@ workflows:
           grep -E "^macos: window " "$CM_BUILD_DIR/macos-windowsize.log" || \
             echo "SIZE: no window line — flags not verified"
 
+      - name: Close paths and fullscreen (⌘Q, red button, Esc, -fullscreen)
+        script: |
+          set -euo pipefail
+          exec > >(tee -a "$CM_BUILD_DIR/cm-build.log") 2>&1
+          # docs/plans/2026-09-21-macos-close-paths.md ("CI step"). The windowed
+          # smoke above proved this runner has a window-server session, so the
+          # close paths can be driven here with real OS events and no human:
+          # launch wf_game --windowed on snowgoons in real time (no
+          # --frame-step-smoke, so it runs until closed), send ⌘Q / press the
+          # red button / send Esc / launch with -fullscreen, and assert on the
+          # process: exit status 0, still running, window frame == display.
+          #
+          # The script grants Accessibility/PostEvent/ScreenCapture (and Apple
+          # Events -> System Events) in this VM's TCC database with sudo. That is
+          # acceptable ONLY because the Codemagic VM is destroyed after the
+          # build; the grant is printed in the log, never done on a kept machine.
+          #
+          # CLOSE_PATHS_STRICT lists the checks that fail the build. Empty on
+          # the first iteration (informational: one failing check must not hide
+          # the others); tighten once each check's behaviour is known.
+          CLOSE_PATHS_STRICT="" OUT_DIR="$CM_BUILD_DIR" \
+            bash scripts/macos/close-paths-ci.sh \
+            2>&1 | tee "$CM_BUILD_DIR/macos-close-paths.log"
+
     artifacts:
       - macos-configure.log
       - macos-build.log
@@ -576,6 +600,16 @@ workflows:
       - macos-frame20-windowed.png
       - macos-windowed.log
       - macos-windowsize.log
+      # Close paths + -fullscreen (scripts/macos/close-paths-ci.sh): the
+      # verdict log, one log per wf_game run, display/window probes, and a
+      # screenshot taken while -fullscreen was up.
+      - macos-close-paths.log
+      - macos-close-*.log
+      - macos-close-*.txt
+      - macos-screen-*.txt
+      - macos-fullscreen-windows.txt
+      - macos-fullscreen.png
+      - cm-build.log
       # The runnable product on macOS is the .app bundle, not a bare binary:
       # `engine/wf_game` matches nothing here (the Mach-O lives at
       # engine/wf_game.app/Contents/MacOS/wf_game), which is why earlier
