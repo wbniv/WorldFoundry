@@ -1,8 +1,26 @@
 | Date | Change |
 |------|--------|
+| [2026-10-01](https://github.com/wbniv/WorldFoundry/commit/ffeecfa7) | iOS Phase 3: record status (implemented, CI-unverified) and the prepared simulator check |
+| [2026-10-01](https://github.com/wbniv/WorldFoundry/commit/1f284673) | docs: iOS Phase 2C-B done on simulator; aquarium-platforms step 3 PASS (builds 6abd4a70, 6abd4f31) |
+| [2026-09-30](https://github.com/wbniv/WorldFoundry/commit/c33c2851) | Record the aquarium's Metal parity result on macOS: PASS |
 | [2026-09-30](https://github.com/wbniv/WorldFoundry/commit/74a2529a) | Plan the aquarium on every platform: macOS and iOS Metal, Android, Chromecast |
 
 <!--history-meta v1
+ffeecfa7	author	Will Norris
+ffeecfa7	added	2
+ffeecfa7	deleted	1
+ffeecfa7	files	1
+ffeecfa7	body	Co-Authored-By: Claude Opus 5.5 <noreply@anthropic.com>\n\nClaude-Session: https://claude.ai/code/session_01NNPhRbrqjqMDkScPvTE9yC
+1f284673	author	Will Norris
+1f284673	added	1
+1f284673	deleted	1
+1f284673	files	1
+1f284673	body	Co-Authored-By: Claude Opus 5.5 <noreply@anthropic.com>\nClaude-Session: https://claude.ai/code/session_01NNPhRbrqjqMDkScPvTE9yC
+c33c2851	author	Will Norris
+c33c2851	added	2
+c33c2851	deleted	2
+c33c2851	files	1
+c33c2851	body	Codemagic build 6abd118f (macos-desktop-debug, commit 82eb561d, 3.2 min) is\ngreen. Snowgoons: 0 px beyond tolerance 3. Aquarium through Metal vs the Linux\nreference: 306865 of 307200 pixels exact, 335 off by one level, none beyond\ntolerance; the frame shows the aquarium. Update the aquarium plan (step 21), the\nmacOS renderer plan (step 14) and the multi-platform plan (step 1).\n\nCo-Authored-By: Claude Sonnet 5.5 <noreply@anthropic.com>\nClaude-Session: https://claude.ai/code/session_01NNPhRbrqjqMDkScPvTE9yC
 74a2529a	author	Will Norris
 74a2529a	added	107
 74a2529a	deleted	0
