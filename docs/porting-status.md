@@ -1,8 +1,8 @@
 # Porting status: World Foundry on every platform
 
 As of 2026‑10‑01 01:33 (+07) = 2026‑09‑30 18:33 UTC. Everything below was observed in a Codemagic build or a local
-run on that day, and each claim links to its evidence. **—** means not assessed today, not "works". Legend: ✅ verified,
-🟡 partial, ❌ not working, ⬜ not tested. Plan: [the aquarium on every platform](plans/2026-09-30-aquarium-platforms.md).
+run on that day, and each claim links to its evidence. **—** means not assessed today, not "works". Legend: ✅ verified on the real
+platform (real hardware, or real macOS/Linux), 🟡 partial or only in a simulator or emulator, ❌ not working, ⬜ not tested. Plan: [the aquarium on every platform](plans/2026-09-30-aquarium-platforms.md).
 
 ## Summary
 
@@ -10,8 +10,8 @@ run on that day, and each claim links to its evidence. **—** means not assesse
 |---|---|---|---|---|---|
 | **Linux desktop** (OpenGL) | ✅ | ✅ | ✅ (the reference renderer) | ✅ keyboard, gamepad | ✅ (this machine) |
 | **macOS desktop** (Metal) | ✅ [build 6abd3923](https://codemagic.io/app/6aafa6886ab3f21cf431a6cb/build/6abd3923a7c72c2289f7506c) | ✅ window, close paths, fullscreen | ✅ pixel-matches Linux | 🟡 keyboard ✅, ⌘Q ✅, red button ✅, Esc not provable in CI | ⬜ no Mac owned; Retina untested |
-| **iOS, iPhone and iPad** (Metal) | ✅ ([build](https://codemagic.io/app/6aafa6886ab3f21cf431a6cb/build/6abd4a709ee70f86b0ffeff6)) | ✅ installs, launches and stays alive in the iPhone and iPad simulators | ✅ the game and the aquarium, in both simulators | ⬜ touch not implemented yet | ⬜ needs the $99 Apple account |
-| **Android phone and tablet** (GLES 3) | ✅ [build 6abd1529](https://codemagic.io/app/6aafa6886ab3f21cf431a6cb/build/6abd1529669c35dd0f161d7a) (was broken 09‑21 to 09‑30, fixed) | ✅ the aquarium app runs in an Android emulator on this PC (x86_64 with ARM translation, software graphics) | ✅ in the emulator | 🟡 the on-screen touch D-pad and A/B buttons are drawn; not exercised | ⬜ never on a real phone |
+| **iOS, iPhone and iPad** (Metal) | ✅ ([build](https://codemagic.io/app/6aafa6886ab3f21cf431a6cb/build/6abd4a709ee70f86b0ffeff6)) | 🟡 installs, launches and stays alive in the iPhone and iPad simulators (no real device) | 🟡 the game and the aquarium, in both simulators (no real device) | ⬜ touch not implemented yet | ⬜ needs the $99 Apple account |
+| **Android phone and tablet** (GLES 3) | ✅ [build 6abd1529](https://codemagic.io/app/6aafa6886ab3f21cf431a6cb/build/6abd1529669c35dd0f161d7a) (was broken 09‑21 to 09‑30, fixed) | 🟡 the aquarium app runs in an Android emulator on this PC (x86_64 with ARM translation, software graphics; no real phone) | 🟡 in the emulator | 🟡 the on-screen touch D-pad and A/B buttons are drawn; not exercised | ⬜ never on a real phone |
 | **Chromecast with Google TV** (same APK) | ✅ aquarium app [build 6abd1c20](https://codemagic.io/app/6aafa6886ab3f21cf431a6cb/build/6abd1c20874cdae673caf7ae) | ⬜ not run on a Chromecast (the TV-shaped emulator below is an Android test and does not count here) | ⬜ | ⬜ gamepad profile ready, not exercised | ⬜ needs the device's IP address |
 
 ## The aquarium on each platform
