@@ -346,6 +346,7 @@ rows on commit.*
 | [Condo architectural walkthrough camera controls](2026-09-25-condo-camera-controls.md) | Implemented Forth-only orbit, tilt, zoom, reset and touch profile; includes keyboard/gamepad diagrams and actual runtime captures. | Uncommitted | Feature |
 | [Shared Forth comments and safe semicolon scanning](2026-09-25-forth-comments-and-script-loading.md) | Implemented shared line comments and comment/string-aware script splitting; runtime regressions pass, broader redesign deferred. | Uncommitted | Fix |
 | [Aquarium level — 55 gal acrylic tank, clownfish, anemone](2026-09-30-aquarium-level.md) | Plan for a swimmable aquarium level: acrylic tank at exact 55 gal dimensions, translucent-pane spike, gravity-free clownfish, anemone; three mockups. | Uncommitted | Feature |
+| [Clownfish idle animation — the canonical aquarium clownfish, a five-part rig driven from Forth](2026-09-30-clownfish-idle-animation.md) | Canonical aquarium clownfish (wflevels/aquarium/clownfish.py) as an invisible Physics hull plus five Director-posed platform parts; idle bob/sway/tail/fins/dorsal; ROTATION_* probe; spike level, engine captures, regression test. | Uncommitted | Feature |
 
 ---
 

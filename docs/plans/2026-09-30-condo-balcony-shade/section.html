@@ -17,7 +17,7 @@
   header h1 { margin:0; font-size:16px; font-weight:600; }
   header .tag { margin-left:auto; font:600 11px ui-monospace,Menlo,monospace; letter-spacing:.04em; color:var(--muted);
                 border:1px solid var(--line); border-radius:10px; padding:2px 8px; }
-  main { display:grid; grid-template-columns:760px 1fr; height:843px; }
+  main { display:grid; grid-template-columns:900px 1fr; height:843px; }
   .draw { border-right:1px solid var(--line); padding:6px 0 0 10px; }
   .side { padding:22px 28px; }
   h2 { font-size:14px; margin:0 0 6px; text-transform:uppercase; letter-spacing:.05em; color:var(--muted); }
@@ -32,14 +32,14 @@
 <body>
 <header><h1>639 back balcony — section through the opening (interior left, west / outside right)</h1><span class="tag">MOCKUP — NOT SHIPPED</span></header>
 <main>
-<div class="draw"><svg id="s" width="750" height="830" viewBox="0 0 750 830"></svg></div>
+<div class="draw"><svg id="s" width="890" height="830" viewBox="0 0 890 830"></svg></div>
 <div class="side">
   <h2>Controls</h2>
   <label>Shade drop: <b id="pl">100</b> %</label><input id="p" type="range" min="0" max="100" value="100">
   <label>Sun altitude: <b id="al">25</b>° (west, afternoon)</label><input id="a" type="range" min="5" max="75" value="25">
   <h2 style="margin-top:20px">What the section shows</h2>
   <ul>
-    <li>The balcony floor steps <b>7 cm down</b> from the interior floor across the whole frontage of the 268 cm opening.</li>
+    <li>The balcony floor is <b>7 cm below</b> the project-room floor from the glass door (left, about 2 m inboard) to the pony wall, and <b>artificial grass</b> covers it. The rain the shade must stop lands on that grass.</li>
     <li>The cassette hangs from the beam soffit at 222 cm; it eats about 10 cm of the 111 cm opening, so the fabric drops ≈ 98 cm.</li>
     <li>The solar strip is on the cassette's <b>west face</b>, vertical. With the sun above ≈ 60° it is nearly edge-on, so the strip charges best in the low afternoon sun and worst at midday.</li>
     <li>The pony wall is 10 cm thick (confirmed) and drawn flush with the outer face; the ledge above is 35 cm deep, so it overhangs the balcony side by 25 cm. <b>Which face the pony wall is flush with is assumed</b> — the cassette is flush with it so the fabric lands on the cap.</li>
@@ -48,7 +48,7 @@
 </div>
 </main>
 <script>
-const S = 2.7, WX = 300, YB = 790;                 // px/cm, x of the wall's inner face, balcony-floor line
+const S = 2.3, WX = 505, YB = 790;                 // px/cm, x of the wall's inner face, balcony-floor line
 const REC = 7, PONY = 111, HEAD = 222, BEAM = 64, T = 10, CASS = 10, BAR = 3;
 const Y = z => YB - z * S, X = y => WX + y * S;    // y in cm, + = outside (west)
 const s = document.getElementById('s');
@@ -57,11 +57,9 @@ function el(t, a, txt) { const e = document.createElementNS('http://www.w3.org/2
 function box(y0, z0, y1, z1, fill, stroke) { return el('rect', {x:X(y0), y:Y(z1), width:(y1-y0)*S, height:(z1-z0)*S, fill, stroke:stroke||'none'}); }
 function draw(p, alt) {
   s.innerHTML = '';
-  box(-105, REC-30, 40, 0, 'var(--conc)', 'var(--conc2)');               // balcony slab (below the recessed floor)
-  box(-105, REC, -100, REC, 'none');
-  // interior floor 7 cm above balcony floor: slab stepped
-  el('path', {d:`M${X(-105)},${Y(REC)} L${X(-T*0-105+0)},${Y(REC)} L${X(-0)},${Y(REC)} L${X(0)},${Y(0)} L${X(40)},${Y(0)}`, stroke:'var(--fg)', 'stroke-width':2, fill:'none'});
-  box(-105, 0, 0, REC, 'var(--conc)', 'var(--conc2)');                    // the 7 cm step block (interior side)
+  box(-215, -30, 60, 0, 'var(--conc)', 'var(--conc2)');                     // recessed balcony slab (top at 0)
+  box(-215, 0, -192, REC, 'var(--conc)', 'var(--conc2)');                  // project-room floor, 7 cm higher, ends at the glass door
+  box(-192, 0, 0, 1, '#4c9a3c', '#2f6a25');                                 // artificial grass, under 1 cm
   box(0, 0, T, PONY, 'var(--conc)', 'var(--conc2)');                      // pony wall
   box(T-35, HEAD, T, HEAD+BEAM, 'var(--conc)', 'var(--conc2)');           // ledge: 35 deep, flush with the outer face
   // cassette under the soffit, flush with the wall's outer face
@@ -76,12 +74,11 @@ function draw(p, alt) {
   el('line', {x1:X(sx0), y1:Y(sy0), x2:X(sx0+len*Math.cos(a)), y2:Y(sy0+len*Math.sin(a)), stroke:'var(--sun)', 'stroke-width':2.5, 'stroke-dasharray':'6 4'});
   el('text', {x:X(sx0+len*Math.cos(a))-4, y:Y(sy0+len*Math.sin(a))-6, style:'fill:var(--sun);font-weight:600'}, 'sun');
   // labels
-  el('text', {x:X(-100), y:Y(REC)-8}, 'interior floor (+7)'); el('text', {x:X(-100), y:Y(0)+16}, 'balcony floor (0)');
-  el('text', {x:X(-100), y:Y(REC/2)+4, style:'font-size:11px'}, '7 cm step');
+  el('text', {x:X(-212), y:Y(REC)-8}, 'project-room floor (+7)'); el('text', {x:X(-150), y:Y(1)-10, style:'fill:#2f6a25;font-weight:600'}, 'artificial grass on the recessed floor'); el('text', {x:X(-212), y:Y(0)+16}, 'recessed balcony floor (0) — 7 cm below the room, from the glass door to the pony wall');
   el('text', {x:X(T)+8, y:Y(PONY/2)}, 'pony wall 111'); el('text', {x:X(T)+8, y:Y(HEAD+BEAM/2)+4}, 'ledge 64 tall × 35 deep');
   el('text', {x:X(T)+22, y:Y(HEAD-CASS/2)+4}, 'cassette + solar strip');
   el('text', {x:X(T)+8, y:Y((HEAD+PONY)/2-4), style:'fill:var(--muted)'}, p>0.02?'':'(open: fabric rolled up)');
-  const dx = X(-60);
+  const dx = X(-70);
   for (const [a0,b0,l] of [[0,PONY,'111'],[PONY,HEAD,'111'],[HEAD,HEAD+BEAM,'64']]) {
     el('line', {class:'dim', x1:dx, y1:Y(a0), x2:dx, y2:Y(b0)}); el('line', {class:'dim', x1:dx-5, y1:Y(a0), x2:dx+5, y2:Y(a0)}); el('line', {class:'dim', x1:dx-5, y1:Y(b0), x2:dx+5, y2:Y(b0)});
     el('text', {class:'dimt', x:dx-8, y:Y((a0+b0)/2)+4, 'text-anchor':'end'}, l); }

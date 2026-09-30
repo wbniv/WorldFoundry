@@ -1,10 +1,22 @@
 | Date | Change |
 |------|--------|
+| [2026-09-30](https://github.com/wbniv/WorldFoundry/commit/6d902226) | Run aquarium Phase 1 swim-and-scale spike: gravity-free fish works at x10 |
+| [2026-09-30](https://github.com/wbniv/WorldFoundry/commit/2b485281) | Aquarium: idle-spike clownfish becomes the canonical model; commit mockup generator |
 | [2026-09-30](https://github.com/wbniv/WorldFoundry/commit/4e5ce347) | Aquarium: go with Plan B (no front pane); file translucent-texture shader fix as its own TODO |
 | [2026-09-30](https://github.com/wbniv/WorldFoundry/commit/1aa8e779) | Run aquarium Phase 0 translucency spike: pane is opaque, fall back to Plan B |
 | [2026-09-30](https://github.com/wbniv/WorldFoundry/commit/f964a400) | Plan aquarium level (55 gal acrylic, clownfish, anemone) and correct condo alpha note |
 
 <!--history-meta v1
+6d902226	author	Will Norris
+6d902226	added	233
+6d902226	deleted	9
+6d902226	files	1
+6d902226	body	A Physics fish with Falling Acceleration 0 holds altitude exactly for 10 s, rises\nand stops on a Forth Z clamp under the water line, stops on the sand and at every\nwall (including an invisible front collider for Plan B), and turns visibly when\nthe script writes ROTATION_C (in revolutions). Driven over the debug bridge with\nframe-exact held buttons by wflevels/aquarium_swim_spike/run_swim_spike.py.\n\nx1 is rejected on fixed constants: a smooth 9 cm mesh trips the minimum-triangle\nassert, levcomp raises every collision span under 0.25 m to 0.25 m (the fish\nbecomes a 25 cm ball), and the near plane is fixed at 1 m. WORLD_SCALE = 10.\n\nRecords steps 5-8, the Phase 1 verdict, the working control values and which of\nthem depend on the real clownfish's bounding box.\n\nCo-Authored-By: Claude Opus 5.5 <noreply@anthropic.com>\nClaude-Session: https://claude.ai/code/session_0148itHvh6GL5Qc7uwSjFC2n
+2b485281	author	Will Norris
+2b485281	added	17
+2b485281	deleted	3
+2b485281	files	1
+2b485281	body	The clownfish built by the idle-animation spike is the real model; Phase 3\nconsumes it from wflevels/aquarium/clownfish.py rather than drawing its own, and\nre-validates the Phase 1 controls on it (new step 15). Phase 0/1 fish are\nthrowaway placeholders.\n\nAlso commits the mockup generator (was only in a session scratchpad); it now\ntargets Plan B and regenerates the committed pages byte-for-byte.\n\nCo-Authored-By: Claude Sonnet 5.5 <noreply@anthropic.com>\nClaude-Session: https://claude.ai/code/session_0148itHvh6GL5Qc7uwSjFC2n
 4e5ce347	author	Will Norris
 4e5ce347	added	3
 4e5ce347	deleted	3
