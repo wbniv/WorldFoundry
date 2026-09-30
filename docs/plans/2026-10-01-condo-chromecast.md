@@ -190,7 +190,9 @@ Numbered, runnable steps; each shows its raw output with PASS or FAIL below it. 
     Codemagic build [6abd6b03](https://codemagic.io/app/6aafa6886ab3f21cf431a6cb/build/6abd6b038c57d072922d7cf7), workflow `android-apk-debug`, branch `2026-new-level`, commit `74797e2b`, 6.1 free Mac-minutes:
       failed steps: -   BUILD SUCCESSFUL in 3m 55s
       artifacts: worldfoundry-aquarium-debug.apk  worldfoundry-condo-debug.apk  worldfoundry-snowgoons-debug.apk
-    (This build predates the resume fix; a rerun on the fix commit is queued below.)
+    Rerun on the resume-fix commit `9cdae452`: [build 6abd6e96](https://codemagic.io/app/6aafa6886ab3f21cf431a6cb/build/6abd6e966215672186731fea), 5.8 free Mac-minutes, failed steps: -
+  (the driver's download of the aquarium APK timed out; the build itself finished green and the condo and snowgoons APKs downloaded)
+  BUILD SUCCESSFUL in 3m 46s
     ```
 
     **PASS**
