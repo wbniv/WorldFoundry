@@ -281,6 +281,11 @@ player.rotation_euler = (0.0, 0.0, 0.0)          # C = 0; the rig owns the visua
 player.scale = (1.0, 1.0, 1.0)
 FISH.apply_player_fields(player)                 # invisible hull, Phase 1 physics, authored box
 player['wf_Mesh Name'] = CF.mesh_file(CF.PLAYER_MESH)
+# Phase 4 steer-and-swim: the script writes speed × facing every tick and owns the speed (its
+# own burst/coast/glide time constants), so the engine's air drag is off. With drag 2.0 the
+# AirHandler scaled every write by (1 − 2·dt), which also depends on the frame rate.
+player['wf_Horiz Air Drag'] = 0.0
+player['wf_Vert Air Drag'] = 0.0
 
 part_objs = []
 for name, mesh, off in FISH.parts():
@@ -292,20 +297,25 @@ for name, mesh, off in FISH.parts():
     part_objs.append(obj)
 
 # Clamps: the level's job (the capsule is only as wide as the fish is thick and never turns).
-# X is symmetric about the body centre with the longer reach (the tail tip), so turning at an
-# end wall never swings the tail into it; Z keeps the dorsal (plus the idle bob) under the water
-# line; Y keeps the pectorals off the back wall and the front collider (margins 0.25 in). The
-# floor clamp keeps the capsule GROUND_CLEARANCE over the sand, so Jolt never treats the fish as
-# standing (that also keeps the belly well clear of the sand). Physics is the backstop.
+# Phase 4: the fish can face any way, so the swim script turns the visible fish's box (below)
+# with its facing each tick and keeps it CLAMP_MARGIN inside the inner faces, the sand and the
+# water line (aquarium_swim.fth aq-limits). The floor clamp ZMIN still keeps the capsule
+# GROUND_CLEARANCE over the sand, so Jolt never treats the fish as standing. Physics is the backstop.
 EXT = FISH.extents()
 BOB = FISH.T['fish-bob-amp']
 HULL = FISH.collision_box()
-REACH_X = max(EXT['nose_x'], -EXT['tail_x'])
-XMAX = C.INNER_X_M - REACH_X - C.CLAMP_MARGIN
-YMAX = C.INNER_Y_M - EXT['half_width'] - C.CLAMP_MARGIN
-ZMAX = C.WATER_LINE_M - EXT['top_z'] - BOB - C.CLAMP_MARGIN
+# the visible fish's box in its own frame: nose/tail, fins (+ flare, tail beat), dorsal/belly (+ bob)
+BOX_X0, BOX_X1 = EXT['tail_x'], EXT['nose_x']
+BOX_Z0, BOX_Z1 = EXT['bottom_z'] - BOB, EXT['top_z'] + BOB
+BOX_HY = max(EXT['half_width'], C.FIN_HALF_WIDTH)
+BOX_C = ((BOX_X0 + BOX_X1) / 2, (BOX_Z0 + BOX_Z1) / 2)
+BOX_H = ((BOX_X1 - BOX_X0) / 2, BOX_HY, (BOX_Z1 - BOX_Z0) / 2)
 ZMIN = C.SAND_TOP_M - HULL[2] + C.GROUND_CLEARANCE
-assert ZMIN - C.SAND_TOP_M + EXT['bottom_z'] - BOB >= C.CLAMP_MARGIN, 'belly would touch the sand'
+# The loosest body-origin bounds over every facing (the box's smallest reach per axis): for the
+# docs and the camera-B clearance test; the script's per-tick limits are always inside these.
+XMAX = C.INNER_X_M - C.CLAMP_MARGIN - BOX_HY
+YMAX = C.INNER_Y_M - C.CLAMP_MARGIN - BOX_HY
+ZMAX = C.WATER_LINE_M - C.CLAMP_MARGIN - BOX_Z1
 V = FISH.T['fish-swim-speed']
 assert abs(V - C.SWIM_SPEED) < 1e-9, 'the fish and the tank disagree on the swim speed'
 
@@ -723,8 +733,14 @@ assert idx['Player'] < idx['tank-shell'], 'Player must be created before the one
 part_idx = {o.name: idx[o.name] for o in part_objs}
 ZONE_C = tuple(zone.location)
 AQ_MAILBOXES = ['aq-prev', 'aq-mode', 'aq-dart-t', 'aq-dart-req', 'aq-in-b', 'aq-dx', 'aq-dy', 'aq-dz',
-                'aq-vx', 'aq-vy', 'aq-vz']
-assert AQ_MB_BASE >= CF.FISH_MB_BASE + 40 and len(AQ_MAILBOXES) <= 20
+                'aq-vx', 'aq-vy', 'aq-vz',
+                # Phase 4 steer-and-swim scratch / state, continued in 740..759 below
+                'aq-t1', 'aq-cap', 'aq-brake', 'aq-flat', 'aq-was-moving']
+AQ_STEER_BASE = 740           # 740..759: the steer-and-swim state (720..739 is the anemone sway)
+AQ_STEER = ['aq-yaw', 'aq-yaw-w', 'aq-yaw-t', 'aq-pitch', 'aq-pitch-w', 'aq-pitch-t', 'aq-roll', 'aq-speed',
+            'aq-cyc', 'aq-burst', 'aq-fx', 'aq-fy', 'aq-fz', 'aq-pushed', 'aq-lox', 'aq-hix', 'aq-loy', 'aq-hiy',
+            'aq-loz', 'aq-hiz']
+assert AQ_MB_BASE >= CF.FISH_MB_BASE + 40 and len(AQ_MAILBOXES) <= 20 and len(AQ_STEER) <= 20
 
 
 def fnum(v):
@@ -733,12 +749,32 @@ def fnum(v):
 
 aq_consts = [
     ('aq-touch', int(PROFILE == 'touch'), 'build profile: 1 = touch (A cycles Swim/Depth, B darts)'),
-    ('aq-xmax', XMAX, f'|x| clamp: tail tip {-EXT["tail_x"]:.3f} / nose {EXT["nose_x"]:.3f} m + 0.25 in off an end wall'),
-    ('aq-ymax', YMAX, '|y| clamp: pectorals 0.25 in off the back wall / front collider'),
-    ('aq-zmax', ZMAX, 'dorsal + bob 0.25 in under the water line'),
+    ('aq-xmax', XMAX, 'loosest |x| of the body origin over every facing (docs/tests; the script is tighter)'),
+    ('aq-ymax', YMAX, 'loosest |y|'),
+    ('aq-zmax', ZMAX, 'loosest z (a level fish: dorsal + bob 0.25 in under the water line)'),
     ('aq-zmin', ZMIN, f'capsule {C.GROUND_CLEARANCE:g} m over the sand: never standing on it (Jolt floor contact)'),
-    ('aq-dart-v', C.DART_SPEED, 'm/s, the burst (= Max Air Speed)'),
-    ('aq-dart-time', C.DART_TIME, 's of burst, then the glide'),
+    ('aq-ix', C.INNER_X_M - C.CLAMP_MARGIN, 'end walls less the 0.25 in margin'),
+    ('aq-iy', C.INNER_Y_M - C.CLAMP_MARGIN, 'back wall / front glass less the margin'),
+    ('aq-zlo', C.SAND_TOP_M + C.CLAMP_MARGIN, 'sand top plus the margin'),
+    ('aq-zhi', C.WATER_LINE_M - C.CLAMP_MARGIN, 'water line less the margin'),
+    ('aq-box-cx', BOX_C[0], 'visible fish box, fish frame: centre x (the tail reaches further than the nose)'),
+    ('aq-box-cz', BOX_C[1], 'centre z'),
+    ('aq-box-hx', BOX_H[0], 'half-sizes: nose-to-tail'),
+    ('aq-box-hy', BOX_H[1], 'fins'),
+    ('aq-box-hz', BOX_H[2], 'dorsal-to-belly with the bob'),
+    ('aq-v', C.SWIM_SPEED, 'm/s mean swim speed (3.4 BL/s)'),
+    ('aq-burst-v', C.BURST_SPEED, 'm/s burst target'),
+    ('aq-cycle', C.GAIT_CYCLE, 's per burst+coast cycle'),
+    ('aq-duty', C.GAIT_DUTY, 'burst share of a cycle'),
+    ('aq-tau-a', C.TAU_ACCEL, 's'), ('aq-tau-c', C.TAU_COAST, 's'), ('aq-tau-glide', C.TAU_GLIDE, 's'),
+    ('aq-tau-dart', C.TAU_DART, 's'),
+    ('aq-dart-v', C.DART_SPEED, 'm/s, the dart (= Max Air Speed)'),
+    ('aq-dart-time', C.DART_TIME, 's of dart, then the glide'),
+    ('aq-yaw-wn', C.YAW_WN, ''), ('aq-yaw-zeta', C.YAW_ZETA, ''), ('aq-yaw-wmax', C.YAW_WMAX, 'rev/s'),
+    ('aq-pitch-wn', C.PITCH_WN, ''), ('aq-pitch-zeta', C.PITCH_ZETA, ''), ('aq-pitch-wmax', C.PITCH_WMAX, 'rev/s'),
+    ('aq-pitch-max', C.PITCH_MAX, 'rev'), ('aq-pitch-diag', C.PITCH_DIAG, 'rev'),
+    ('aq-bank', C.BANK_GAIN, 'rev per rev/s'), ('aq-bank-max', C.BANK_MAX, 'rev'),
+    ('aq-turn-dip', C.TURN_DIP, ''), ('aq-tau-wall', C.TAU_WALL, 's'), ('aq-flatten-d', C.FLATTEN_D, 'm'),
     ('aq-zone-x', ZONE_C[0], 'anemone-zone centre'),
     ('aq-zone-y', ZONE_C[1], ''),
     ('aq-zone-z', ZONE_C[2], ''),
@@ -751,6 +787,7 @@ aq_consts = [
     ('aq-look-b-z', C.CAM_B_LOOK[2], ''),
     ('aq-look-follow', C.CAM_B_LOOK_FOLLOW, ''),
 ] + [(n, AQ_MB_BASE + i, 'mailbox') for i, n in enumerate(AQ_MAILBOXES)] \
+  + [(n, AQ_STEER_BASE + i, 'mailbox') for i, n in enumerate(AQ_STEER)] \
   + [('aq-sway-b', C.SWAY_MB_BASE + len(C.ANEMONE_CLUMPS), 'mailbox: sway scratch (the B angle)')]
 # Anemone sway (Phase 4): one phase accumulator per clump in 720.., then the scratch cell above.
 assert C.SWAY_MB_BASE >= AQ_MB_BASE + 20 and len(C.ANEMONE_CLUMPS) + 1 <= 20

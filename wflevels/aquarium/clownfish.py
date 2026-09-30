@@ -126,16 +126,37 @@ TUNABLES = [
     ('fish-sway-yaw',      0.010,   'rev', 'heading sway'),
     ('fish-sway-pitch',    0.006,   'rev', 'pitch sway, + = nose down'),
     ('fish-sway-hz',       1 / 3.6, 'Hz',  ''),
-    ('fish-tail-idle-amp', 0.050,   'rev', ''),
-    ('fish-tail-idle-hz',  1.4,     'Hz',  ''),
-    ('fish-tail-swim-amp', 0.075,   'rev', ''),
-    ('fish-tail-swim-hz',  3.2,     'Hz',  ''),
-    ('fish-counter-yaw',   0.20,    '',    'share of tail yaw fed back into body heading'),
-    ('fish-pec-idle-amp',  0.080,   'rev', 'pectorals are the hover motor'),
-    ('fish-pec-idle-hz',   2.2,     'Hz',  ''),
-    ('fish-pec-swim-amp',  0.020,   'rev', 'tucked while swimming'),
-    ('fish-pec-swim-hz',   3.0,     'Hz',  ''),
+    ('fish-tail-idle-amp', 0.050,   'rev', 'idle sculling (ours)'),
+    ('fish-tail-idle-hz',  1.4,     'Hz',  'idle sculling (ours)'),
+    # Swimming tail (aquarium Phase 4). Strouhal St = f·A/U with A the peak-to-peak tail-tip
+    # excursion: fish sit in 0.2–0.4 (verified: Knight 2014, JEB 217:2224, summarising Nudds et al.
+    # 2014, JEB 217:2244: trout 0.19–0.22). A = 0.2 L is widely cited, unverified. So f = St·U/A
+    # follows the ACTUAL speed U; the half-amplitude angle is set in Clownfish.__init__ from the
+    # tail's pivot-to-tip length (A/2 = 0.1 L). The tail only beats during a burst (fish-burst):
+    # it coasts straight (burst-and-coast, Wu, Yang & Zeng 2007, JEB 210:2181, verified).
+    ('fish-strouhal',      0.30,    '',    'St (0.2–0.4 verified for fish; 0.3 ours)'),
+    ('fish-tail-app',      0.1778,  'm',   'A = 0.2 L peak-to-peak tail-tip excursion (widely cited, unverified)'),
+    ('fish-tail-swim-amp', 0.0,     'rev', 'set from A/2 and the tail length in __init__'),
+    ('fish-tail-hz-max',   6.0,     'Hz',  'cap: a beat must stay well under the 10 Hz Nyquist rate at -rate20 (ours)'),
+    ('fish-tail-env-t',    0.06,    's',   'tail envelope: on at a burst, straight within ~0.2 s of a coast (ours)'),
+    ('fish-bend',          0.05,    's',   'C-bend: tail yaw = −bend × yaw rate, so the head leads a turn (ours)'),
+    ('fish-counter-yaw',   0.20,    '',    'share of tail yaw fed back into body heading: head/tail recoil'),
+    # Pectorals: A. ocellaris is a pectoral + body–caudal swimmer; its average pectoral beat rose
+    # from 2.4 to 4.6 beats/s with swimming intensity (verified: Marcoux & Korsmeyer 2019, JEB 222,
+    # oscillatory swimming in a wave surge, 0–29 cm/s). Alternating left/right at low speed and
+    # synchronous at high speed, switching at ~3–4 BL/s, is from damselfish (Hale et al. 2006, JEB
+    # 209:3708, verified; clownfish not in that study): a plausible hint only.
+    ('fish-pec-idle-amp',  0.080,   'rev', 'pectorals are the hover motor (ours)'),
+    ('fish-pec-idle-hz',   2.4,     'Hz',  'hover: 2.4 beats/s (A. ocellaris, verified)'),
+    ('fish-pec-hz-hi',     4.6,     'Hz',  'fast: 4.6 beats/s (A. ocellaris, verified)'),
+    ('fish-pec-v-hi',      3.658,   'm/s', 'speed at 4.6 Hz: 1.2 × swim speed (ours)'),
+    ('fish-pec-sync-lo',   0.914,   'm/s', 'alternating below 0.3 V (hint, Hale et al. 2006)'),
+    ('fish-pec-sync-hi',   2.743,   'm/s', 'synchronous above 0.9 V ≈ 3 BL/s (hint, Hale et al. 2006)'),
+    ('fish-pec-swim-amp',  0.040,   'rev', 'beating during a burst (ours)'),
+    ('fish-pec-coast-amp', 0.012,   'rev', 'folded during a coast (ours)'),
     ('fish-pec-flare',     0.030,   'rev', 'pectorals angled off the flank'),
+    ('fish-pec-brake',     0.090,   'rev', 'extra flare while braking to a stop (ours)'),
+    ('fish-pec-fold',      0.025,   'rev', 'flare taken back while coasting (ours)'),
     ('fish-dorsal-amp',    0.15,    '',    'share of fin height lowered at the trough'),
     ('fish-dorsal-hz',     0.7,     'Hz',  ''),
     ('fish-idle-delay',    0.35,    's',   'no input this long before idle starts'),
@@ -196,6 +217,18 @@ MAILBOXES = [
     ('fish-body-c', 'body heading this tick, rev'),
     ('fish-body-b', 'body pitch this tick, rev'),
     ('fish-ws', 'smoothstep(fish-w)'),
+    # Phase 4: what a swim controller tells the rig (the stub sets speed and burst only)
+    ('fish-speed', 'swim controller: speed along the facing, m/s'),
+    ('fish-burst', 'swim controller: 1 while the tail drives (a burst), 0 coasting / idle'),
+    ('fish-brake', 'swim controller: 0..1, pectorals flare to brake'),
+    ('fish-roll', 'swim controller: bank, rev (ROTATION_A)'),
+    ('fish-pitch', 'swim controller: pitch, rev (ROTATION_B, + = nose down)'),
+    ('fish-yaw-rate', 'swim controller: heading rate, rev/s'),
+    ('fish-tail-env', 'rig: swimming tail envelope 0..1'),
+    ('fish-ph-swim', 'rig: swimming tail phase (Strouhal frequency)'),
+    ('fish-sa', 'sin/cos of the bank A'),
+    ('fish-ca', ''),
+    ('fish-pec-far', 'far pectoral swing, rev'),
 ]
 MB = {name: FISH_MB_BASE + i for i, (name, _) in enumerate(MAILBOXES)}
 assert FISH_MB_BASE + len(MAILBOXES) <= 640
@@ -295,9 +328,13 @@ class Clownfish:
         self.fin_thickness = 0.0011 * self.world_scale
         self.fin_gap = 0.0006 * self.world_scale
         k = self.world_scale / 10.0
-        self.tunables = [(n, v * (k if unit in ('m', 'm/s') else 1.0), unit, note)
+        # Swimming tail half-amplitude: the tail tip swings A/2 = 0.1 L about the peduncle pivot.
+        tail_r = (X_PEDUNCLE - X_TAIL_TIP) * self.s
+        amp = math.asin(0.1 * self.length_m / tail_r) / math.tau
+        self.tunables = [(n, (amp if n == 'fish-tail-swim-amp' else v * (k if unit in ('m', 'm/s') else 1.0)), unit, note)
                          for n, v, unit, note in TUNABLES]
         self.T = {n: v for n, v, _, _ in self.tunables}
+        assert abs(self.T['fish-tail-app'] - 0.2 * self.length_m) < 1e-3 * self.length_m, 'A = 0.2 L'
 
     # ---- geometry ------------------------------------------------------
     def half_thickness(self, x):
@@ -563,8 +600,12 @@ class RigState:
     def __init__(self, fish=None):
         self.T = (fish or Clownfish()).T
         self.w = self.idle_t = self.heading = self.heading_target = 0.0
-        self.ph = dict(bob=0.0, sway=0.0, tail=0.0, pec=0.0, dorsal=0.0)
+        self.ph = dict(bob=0.0, sway=0.0, tail=0.0, swim=0.0, pec=0.0, dorsal=0.0)
         self.vx = self.vz = 0.0
+        # What a swim controller tells the rig (Phase 4). The stub path in step() sets speed and
+        # burst like fish-swim-tick; a steering controller sets all of them before step_rig().
+        self.speed = self.burst = self.brake = self.pitch = self.roll = self.yaw_rate = 0.0
+        self.env = 0.0
 
     def copy(self):
         other = RigState.__new__(RigState)
@@ -593,24 +634,43 @@ class RigState:
             self.w = min(1.0, self.w + dt / T['fish-idle-in'])
         else:
             self.w = max(0.0, self.w - dt / T['fish-idle-out'])
-        ws = smoothstep(self.w)
-        for ch, hz in (('bob', T['fish-bob-hz']), ('sway', T['fish-sway-hz']),
-                       ('tail', lerp(T['fish-tail-swim-hz'], T['fish-tail-idle-hz'], ws)),
-                       ('pec', lerp(T['fish-pec-swim-hz'], T['fish-pec-idle-hz'], ws)),
-                       ('dorsal', T['fish-dorsal-hz'])):
+        self.speed, self.burst = (T['fish-swim-speed'], 1.0) if moving else (0.0, 0.0)
+        self.step_rig(dt)
+
+    def tail_hz(self):
+        """Swimming tail-beat frequency: Strouhal f = St·U/A at the actual speed, capped."""
+        T = self.T
+        return min(T['fish-strouhal'] * self.speed / T['fish-tail-app'], T['fish-tail-hz-max'])
+
+    def pec_hz(self):
+        T = self.T
+        return lerp(T['fish-pec-idle-hz'], T['fish-pec-hz-hi'], min(1.0, max(0.0, self.speed / T['fish-pec-v-hi'])))
+
+    def step_rig(self, dt):
+        """fish-phases: advance every phase accumulator and the tail envelope."""
+        T = self.T
+        for ch, hz in (('bob', T['fish-bob-hz']), ('sway', T['fish-sway-hz']), ('tail', T['fish-tail-idle-hz']),
+                       ('swim', self.tail_hz()), ('pec', self.pec_hz()), ('dorsal', T['fish-dorsal-hz'])):
             self.ph[ch] = (self.ph[ch] + hz * dt) % 1.0
+        self.env += (self.burst - self.env) * min(1.0, max(0.0, dt / T['fish-tail-env-t']))
 
     def channels(self):
+        """fish-channels (exact sine instead of Bhaskara)."""
         T = self.T
         ws = smoothstep(self.w)
         s = lambda r: math.sin(math.tau * r)
-        tail = lerp(T['fish-tail-swim-amp'], T['fish-tail-idle-amp'], ws) * s(self.ph['tail'])
-        pec = lerp(T['fish-pec-swim-amp'], T['fish-pec-idle-amp'], ws) * s(self.ph['pec'])
+        tail = (ws * T['fish-tail-idle-amp'] * s(self.ph['tail']) + self.env * T['fish-tail-swim-amp'] * s(self.ph['swim'])
+                - T['fish-bend'] * self.yaw_rate)
+        amp = lerp(lerp(T['fish-pec-coast-amp'], T['fish-pec-swim-amp'], self.env), T['fish-pec-idle-amp'], ws)
+        sync = min(1.0, max(0.0, (self.speed - T['fish-pec-sync-lo']) / (T['fish-pec-sync-hi'] - T['fish-pec-sync-lo'])))
+        flare = (T['fish-pec-flare'] + self.brake * T['fish-pec-brake']
+                 - (1 - ws) * (1 - self.env) * (1 - self.brake) * T['fish-pec-fold'])
         return dict(
-            ws=ws, tail=tail, pec=pec,
+            ws=ws, tail=tail, pec=amp * s(self.ph['pec']), pec_far=amp * s(self.ph['pec'] + 0.5 * (1 - sync)),
+            flare=flare, roll=self.roll,
             bob=ws * T['fish-bob-amp'] * s(self.ph['bob']),
             body_c=self.heading + ws * T['fish-sway-yaw'] * s(self.ph['sway']) - T['fish-counter-yaw'] * tail,
-            body_b=ws * T['fish-sway-pitch'] * s(self.ph['sway'] + 0.25),
+            body_b=self.pitch + ws * T['fish-sway-pitch'] * s(self.ph['sway'] + 0.25),
             dorsal=1.0 - ws * T['fish-dorsal-amp'] * (0.5 - 0.5 * math.cos(math.tau * self.ph['dorsal'])),
         )
 
@@ -631,14 +691,15 @@ def apply(rows, p):
 def part_poses(fish, ch, player_pos):
     """{part: (pivot world position, (a, b, c), z_scale)} for one tick's channels — what fish-rig-tick writes."""
     body = (player_pos[0], player_pos[1], player_pos[2] + ch['bob'])
-    rows = rot_matrix(0.0, ch['body_b'], ch['body_c'])
-    flare = fish.T['fish-pec-flare']
+    a = ch.get('roll', 0.0)
+    rows = rot_matrix(a, ch['body_b'], ch['body_c'])
+    flare = ch.get('flare', fish.T['fish-pec-flare'])
     rot = {
-        'clownfish-body': (0.0, ch['body_b'], ch['body_c']),
-        'clownfish-tail': (0.0, ch['body_b'], ch['body_c'] + ch['tail']),
-        'clownfish-dorsal': (0.0, ch['body_b'], ch['body_c']),
-        'clownfish-pec-near': (0.0, ch['body_b'] + ch['pec'], ch['body_c'] + flare),
-        'clownfish-pec-far': (0.0, ch['body_b'] - ch['pec'], ch['body_c'] - flare),
+        'clownfish-body': (a, ch['body_b'], ch['body_c']),
+        'clownfish-tail': (a, ch['body_b'], ch['body_c'] + ch['tail']),
+        'clownfish-dorsal': (a, ch['body_b'], ch['body_c']),
+        'clownfish-pec-near': (a, ch['body_b'] + ch['pec'], ch['body_c'] + flare),
+        'clownfish-pec-far': (a, ch['body_b'] + ch.get('pec_far', -ch['pec']), ch['body_c'] - flare),
     }
     out = {}
     for name, _, off in fish.parts():

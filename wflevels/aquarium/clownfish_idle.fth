@@ -63,6 +63,9 @@
   fish-dx fish@ 0 > if 0 fish-heading-target fish! then
   fish-dx fish@ 0 < if -0.5 fish-heading-target fish! then
   fish-turn
+  \ tell the rig: speed while held, the tail drives while held (no burst-and-coast in the stub)
+  fish-dx fish@ 0 <> fish-dz fish@ 0 <> |
+  if fish-swim-speed 1 else 0 0 then fish-burst fish! fish-speed fish!
   fish-dx fish@ 0 <> fish-dz fish@ 0 <> | ;
 
 : fish-player-tick fish-swim-tick fish-idle-sense ;
@@ -72,38 +75,68 @@
 \ ( hz slot -- ) phase accumulator: a changing frequency never jumps the phase.
 : fish-advance >r fish-dt * r@ fish@ + fish-wrap r> fish! ;
 
+\ Phase 4: the swimming tail beats at the Strouhal frequency of the ACTUAL speed,
+\ f = St U / A (capped under Nyquist), and only while fish-burst is set (the
+\ envelope eases it in and out, so a coast leaves the body straight); idle
+\ sculling is a separate slow oscillator weighted by the idle weight. The
+\ pectorals speed up from 2.4 to 4.6 beats/s with speed (A. ocellaris).
+: fish-speed@ fish-speed fish@ ;
 : fish-phases
   fish-w fish@ fish-smooth fish-ws fish!
   fish-bob-hz fish-ph-bob fish-advance
   fish-sway-hz fish-ph-sway fish-advance
-  fish-tail-swim-hz fish-tail-idle-hz fish-ws@ fish-lerp fish-ph-tail fish-advance
-  fish-pec-swim-hz fish-pec-idle-hz fish-ws@ fish-lerp fish-ph-pec fish-advance
-  fish-dorsal-hz fish-ph-dorsal fish-advance ;
+  fish-tail-idle-hz fish-ph-tail fish-advance
+  fish-strouhal fish-speed@ * fish-tail-app / fish-tail-hz-max min fish-ph-swim fish-advance
+  fish-pec-idle-hz fish-pec-hz-hi fish-speed@ fish-pec-v-hi / fish-clamp01 fish-lerp fish-ph-pec fish-advance
+  fish-dorsal-hz fish-ph-dorsal fish-advance
+  fish-burst fish@ fish-tail-env fish@ - fish-dt fish-tail-env-t / fish-clamp01 *
+  fish-tail-env fish@ + fish-tail-env fish! ;
+
+\ ( -- env ) 1 at a burst, 0 coasting or idle
+: fish-env@ fish-tail-env fish@ ;
+\ ( -- shift ) far pectoral's phase lag: 0.5 (alternating) at low speed, 0 (synchronous) fast
+: fish-pec-lag 0.5 1 fish-speed@ fish-pec-sync-lo - fish-pec-sync-hi fish-pec-sync-lo - / fish-clamp01 - * ;
+\ ( -- flare ) off the flank; wider to brake, folded while coasting
+: fish-flare@ fish-pec-flare fish-brake fish@ fish-pec-brake * +
+  1 fish-ws@ - 1 fish-env@ - * 1 fish-brake fish@ - * fish-pec-fold * - ;
 
 : fish-channels
-  fish-tail-swim-amp fish-tail-idle-amp fish-ws@ fish-lerp
-  fish-ph-tail fish@ fish-sin * fish-tail fish!
-  fish-pec-swim-amp fish-pec-idle-amp fish-ws@ fish-lerp
-  fish-ph-pec fish@ fish-sin * fish-pec fish!
+  fish-ws@ fish-tail-idle-amp * fish-ph-tail fish@ fish-sin *
+  fish-env@ fish-tail-swim-amp * fish-ph-swim fish@ fish-sin * +
+  fish-bend fish-yaw-rate fish@ * - fish-tail fish!
+  fish-pec-coast-amp fish-pec-swim-amp fish-env@ fish-lerp fish-pec-idle-amp fish-ws@ fish-lerp
+  dup fish-ph-pec fish@ fish-sin * fish-pec fish!
+  fish-ph-pec fish@ fish-pec-lag + fish-sin * fish-pec-far fish!
   1 fish-ws@ fish-dorsal-amp * 0.5 0.5 fish-ph-dorsal fish@ fish-cos * - * - fish-dorsal fish!
   fish-heading fish@ fish-ws@ fish-sway-yaw * fish-ph-sway fish@ fish-sin * +
   fish-counter-yaw fish-tail fish@ * - fish-body-c fish!
-  fish-ws@ fish-sway-pitch * fish-ph-sway fish@ 0.25 + fish-sin * fish-body-b fish!
+  fish-pitch fish@ fish-ws@ fish-sway-pitch * fish-ph-sway fish@ 0.25 + fish-sin * + fish-body-b fish!
   fish-body-c fish@ fish-sin fish-sc fish!  fish-body-c fish@ fish-cos fish-cc fish!
   fish-body-b fish@ fish-sin fish-sb fish!  fish-body-b fish@ fish-cos fish-cb fish!
+  fish-roll fish@ fish-sin fish-sa fish!  fish-roll fish@ fish-cos fish-ca fish!
   INDEXOF_X_POS fish-actor-player read-actor-mailbox fish-bx fish!
   INDEXOF_Y_POS fish-actor-player read-actor-mailbox fish-by fish!
   INDEXOF_Z_POS fish-actor-player read-actor-mailbox
   fish-ws@ fish-bob-amp * fish-ph-bob fish@ fish-sin * + fish-bz fish! ;
 
 \ ( ox oy oz -- ) body-local pivot -> world, into fish-ox/oy/oz.
-\ Engine Euler (matrix34.cc): world = Rz(C) Ry(B) local, +B tips the nose down.
+\ Engine Euler (matrix34.cc): world = Rz(C) Ry(B) Rx(A) local; +B tips the nose
+\ down, A banks (Phase 4: the swim controller's roll into a turn).
+: fish-sa@ fish-sa fish@ ;  : fish-ca@ fish-ca fish@ ;
+: fish-sb@ fish-sb fish@ ;  : fish-cb@ fish-cb fish@ ;
+: fish-sc@ fish-sc fish@ ;  : fish-cc@ fish-cc fish@ ;
+: fish-ox@ fish-ox fish@ ;  : fish-oy@ fish-oy fish@ ;  : fish-oz@ fish-oz fish@ ;
 : fish-place
   fish-oz fish! fish-oy fish! fish-ox fish!
-  fish-ox fish@ fish-cb fish@ * fish-oz fish@ fish-sb fish@ * +
-  dup fish-cc fish@ * fish-oy fish@ fish-sc fish@ * - fish-bx fish@ +
-  swap fish-sc fish@ * fish-oy fish@ fish-cc fish@ * + fish-by fish@ +
-  fish-oz fish@ fish-cb fish@ * fish-ox fish@ fish-sb fish@ * - fish-bz fish@ +
+  fish-ox@ fish-cb@ * fish-cc@ *
+  fish-oy@ fish-sb@ fish-sa@ * fish-cc@ * fish-ca@ fish-sc@ * - * +
+  fish-oz@ fish-sb@ fish-ca@ * fish-cc@ * fish-sa@ fish-sc@ * + * + fish-bx fish@ +
+  fish-ox@ fish-cb@ * fish-sc@ *
+  fish-oy@ fish-sb@ fish-sa@ * fish-sc@ * fish-ca@ fish-cc@ * + * +
+  fish-oz@ fish-sb@ fish-ca@ * fish-sc@ * fish-sa@ fish-cc@ * - * + fish-by fish@ +
+  fish-ox@ fish-sb@ * negate
+  fish-oy@ fish-cb@ * fish-sa@ * +
+  fish-oz@ fish-cb@ * fish-ca@ * + fish-bz fish@ +
   fish-oz fish! fish-oy fish! fish-ox fish! ;
 
 \ ( actor -- )
@@ -118,23 +151,26 @@
   swap INDEXOF_ROTATION_B r@ write-actor-mailbox
   INDEXOF_ROTATION_C r> write-actor-mailbox ;
 
+: fish-a@ fish-roll fish@ ;
 : fish-pose-body
   fish-off-body-x fish-off-body-y fish-off-body-z fish-place fish-actor-body fish-put
-  0 fish-body-b fish@ fish-body-c fish@ fish-actor-body fish-orient ;
+  fish-a@ fish-body-b fish@ fish-body-c fish@ fish-actor-body fish-orient ;
 : fish-pose-tail
   fish-off-tail-x fish-off-tail-y fish-off-tail-z fish-place fish-actor-tail fish-put
-  0 fish-body-b fish@ fish-body-c fish@ fish-tail fish@ + fish-actor-tail fish-orient ;
+  fish-a@ fish-body-b fish@ fish-body-c fish@ fish-tail fish@ + fish-actor-tail fish-orient ;
 : fish-pose-dorsal
   fish-off-dorsal-x fish-off-dorsal-y fish-off-dorsal-z fish-place fish-actor-dorsal fish-put
-  0 fish-body-b fish@ fish-body-c fish@ fish-actor-dorsal fish-orient
+  fish-a@ fish-body-b fish@ fish-body-c fish@ fish-actor-dorsal fish-orient
   fish-dorsal fish@ INDEXOF_Z_SCALE fish-actor-dorsal write-actor-mailbox ;
+\ The far fin's swing is its own channel (fish-pec-far): at low speed it lags
+\ half a beat (alternating, the old mirror image), at speed it beats in phase.
 : fish-pose-pecs
   fish-off-pec-near-x fish-off-pec-near-y fish-off-pec-near-z fish-place fish-actor-pec-near fish-put
-  0 fish-body-b fish@ fish-pec fish@ +
-  fish-body-c fish@ fish-pec-flare + fish-actor-pec-near fish-orient
+  fish-a@ fish-body-b fish@ fish-pec fish@ +
+  fish-body-c fish@ fish-flare@ + fish-actor-pec-near fish-orient
   fish-off-pec-far-x fish-off-pec-far-y fish-off-pec-far-z fish-place fish-actor-pec-far fish-put
-  0 fish-body-b fish@ fish-pec fish@ -
-  fish-body-c fish@ fish-pec-flare - fish-actor-pec-far fish-orient ;
+  fish-a@ fish-body-b fish@ fish-pec-far fish@ +
+  fish-body-c fish@ fish-flare@ - fish-actor-pec-far fish-orient ;
 
 : fish-rig-tick
   fish-phases fish-channels

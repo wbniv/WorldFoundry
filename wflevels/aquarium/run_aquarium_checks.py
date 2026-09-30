@@ -98,6 +98,37 @@ AQ = {n: 700 + i for i, n in enumerate(['aq-prev', 'aq-mode', 'aq-dart-t', 'aq-d
 FISH = CF.Clownfish()
 OFFSETS = {name: off for name, _, off in FISH.parts()}
 PLAYER_BOX = FISH.collision_box()
+STEER_MB = ['aq-yaw', 'aq-yaw-w', 'aq-pitch', 'aq-pitch-w', 'aq-roll', 'aq-speed', 'aq-burst', 'aq-pushed',
+            'aq-cyc', 'aq-brake']
+RIG_MB = ['fish-tail-env', 'fish-ph-swim', 'fish-ph-pec', 'fish-tail', 'fish-pec', 'fish-pec-far', 'fish-heading',
+          'fish-pitch']
+# every visible part's mesh vertices (its own frame), for the exact per-tick clip check
+PART_VERTS = {name: mesh.verts for name, mesh, _ in FISH.parts()}
+
+
+def part_world_extents(s, parts):
+    """World (min, max) over the vertices of every visible part in one recorded frame, posed exactly
+    as the engine drew them: pivot position, Euler A/B/C (rev) and the dorsal's Z_SCALE."""
+    lo, hi = [1e9] * 3, [-1e9] * 3
+    for name, i in parts.items():
+        p = [s.get((i, mb)) for mb in (X_POS, Y_POS, Z_POS)]
+        r = [s.get((i, mb)) for mb in (ROT_A, ROT_B, ROT_C)]
+        if None in p or None in r:
+            return None
+        rows = CF.rot_matrix(*r)
+        zs = s.get((i, Z_SCALE), 1.0) if name == 'clownfish-dorsal' else 1.0
+        for v in PART_VERTS[name]:
+            w = CF.apply(rows, (v[0], v[1], v[2] * zs))
+            for k in range(3):
+                c = p[k] + w[k]
+                lo[k], hi[k] = min(lo[k], c), max(hi[k], c)
+    return lo, hi
+
+
+def facing(yaw, pitch):
+    """The controller's facing unit vector: yaw rev (0 = +x), elevation rev (nose up +)."""
+    y, t = math.tau * yaw, math.tau * pitch
+    return (math.cos(t) * math.cos(y), math.cos(t) * math.sin(y), math.sin(t))
 
 
 def wrap(r):
@@ -269,14 +300,26 @@ class Run:
         self.dir = self.idx['Director']
         self.parts = {n: self.idx[n] for n in CF.PART_NAMES}
         self.cam = self.idx['Camera']
-        watches = [(1, TIME), (self.pl, X_POS), (self.pl, Y_POS), (self.pl, Z_POS), (self.pl, ROT_C),
+        watches = [(1, TIME), (self.pl, X_POS), (self.pl, Y_POS), (self.pl, Z_POS),
+                   (self.pl, ROT_A), (self.pl, ROT_B), (self.pl, ROT_C),
                    (self.pl, CF.MB['fish-w']), (self.dir, JOY_RAW), (self.dir, CAMSHOT),
                    (self.cam, X_POS), (self.cam, Y_POS), (self.cam, Z_POS)]
         watches += [(self.dir, mb) for mb in AQ.values()]
+        # Phase 4 steer-and-swim state (global mailboxes, read through the Director) and the rig's
+        # inputs and phases, so the motion can be measured from the engine trace
+        self.mb = {n: int(self.k[n]) for n in STEER_MB if n in self.k}
+        self.mb.update({n: CF.MB[n] for n in RIG_MB})
+        watches += [(self.dir, mb) for mb in self.mb.values()]
         for n, i in self.parts.items():
-            watches += [(i, X_POS), (i, Y_POS), (i, Z_POS), (i, ROT_C)]
+            watches += [(i, X_POS), (i, Y_POS), (i, Z_POS), (i, ROT_A), (i, ROT_B), (i, ROT_C)]
+        watches.append((self.parts['clownfish-dorsal'], Z_SCALE))
         self.g.watch(watches)
         self.rows = []
+
+    def m(self, name, f=None):
+        """A steering / rig mailbox (by name) in frame f (or now)."""
+        s = f[1] if f else self.g.state
+        return s.get((self.dir, self.mb[name]))
 
     def pos(self, f=None):
         s = f[1] if f else self.g.state
@@ -811,6 +854,183 @@ def cost(extra_iffs):
               f'ms/frame over 3 runs {[round(v, 2) for v in per]} → median {per[1]:.2f} ms')
 
 
+def motion_stats(r, fr):
+    """Per-tick motion measured from the engine trace (step 20 and the pytest guard).
+
+    Between ticks k and k+1 the Player moves by the velocity the script wrote at tick k:
+    speed(k) × facing(yaw(k), pitch(k)). So v = ΔP / dt is compared with that facing. A tick where
+    the script moved the body back inside the tank (aq-pushed, a turn that swung the nose or tail
+    past a limit) also moves it, so those ticks are counted apart, not hidden."""
+    rows = []
+    for (t0, a), (t1, b) in zip(fr, fr[1:]):
+        p0 = [a.get((r.pl, mb)) for mb in (X_POS, Y_POS, Z_POS)]
+        p1 = [b.get((r.pl, mb)) for mb in (X_POS, Y_POS, Z_POS)]
+        v = [(q - p) / DT for p, q in zip(p0, p1)]
+        sp = math.sqrt(sum(c * c for c in v))
+        f = facing(r.m('aq-yaw', (t0, a)), r.m('aq-pitch', (t0, a)))
+        cosang = sum(x * y for x, y in zip(v, f)) / sp if sp > 1e-9 else 1.0
+        rows.append(dict(t=t0, v=v, speed=sp, cmd=r.m('aq-speed', (t0, a)), f=f,
+                         ang=math.degrees(math.acos(max(-1.0, min(1.0, cosang)))),
+                         pushed=b.get((r.dir, r.mb['aq-pushed']), 0) > 0.5,
+                         yaw=r.m('aq-yaw', (t0, a)), pitch=r.m('aq-pitch', (t0, a)),
+                         yaw_w=r.m('aq-yaw-w', (t0, a)), burst=r.m('aq-burst', (t0, a)),
+                         env=r.m('fish-tail-env', (t0, a)), ph_swim=r.m('fish-ph-swim', (t0, a)),
+                         ph_pec=r.m('fish-ph-pec', (t0, a)), p=p0))
+    moving = [q for q in rows if q['speed'] > 0.05]
+    free = [q for q in moving if not q['pushed']]
+    return rows, dict(
+        moving=len(moving), pushed=sum(1 for q in moving if q['pushed']),
+        worst_angle=max((q['ang'] for q in free), default=0.0),
+        worst_speed_err=max((abs(q['speed'] - q['cmd']) for q in free), default=0.0),
+        max_pitch=max((abs(q['pitch']) for q in rows), default=0.0),
+        max_dyaw=max((abs(((b['yaw'] - a['yaw'] + 0.5) % 1.0) - 0.5) for a, b in zip(rows, rows[1:])), default=0.0),
+        max_dv=max((math.dist(a['v'], b['v']) for a, b in zip(free, free[1:]) if b['t'] - a['t'] < DT * 1.5), default=0.0))
+
+
+def rates(rows, key):
+    """A phase accumulator's frequency per tick (Hz), from its wrapped increments."""
+    return [(((b[key] - a[key]) % 1.0) / DT) for a, b in zip(rows, rows[1:])]
+
+
+def segments(flags):
+    """Runs of equal values: [(value, start, length)]."""
+    out, k = [], 0
+    while k < len(flags):
+        j = k
+        while j < len(flags) and flags[j] == flags[k]:
+            j += 1
+        out.append((flags[k], k, j - k))
+        k = j
+    return out
+
+
+def steer():
+    """Step 20: steer-and-swim, from the engine trace. Held buttons only, one tick per step."""
+    r = Run()
+    g = r.g
+    k = r.k
+    ok = {}
+    seq = [('settle', None, 1.5, None), ('cruise-right', 'RIGHT', 3.0, 'phase4-cruise-right'),
+           ('glide', None, 1.5, None), ('climb-right', 'UP', 1.5, 'phase4-climb-right'), ('level', None, 1.5, None),
+           ('u-turn', 'LEFT', 0.6, 'phase4-u-turn'), ('left', 'LEFT', 1.4, None),
+           ('dive-left', 'DOWN', 1.5, 'phase4-dive-left'), ('level2', None, 1.5, None),
+           ('to-glass', 'B', 1.2, 'phase4-to-glass'), ('stop', None, 1.5, None),
+           ('away', 'C', 1.5, None), ('rest', None, 2.5, None)]
+    seg = {}
+    try:
+        g.step(30)
+        for name, btn, secs, shot in seq:
+            a = len(g.frames)
+            r.phase(name, btn, secs, shot)
+            seg[name] = (a, len(g.frames))
+        r.print_rows(r.rows)
+        fr = g.frames[seg['settle'][0]:]
+        rows, st = motion_stats(r, fr)
+        base = seg['settle'][0]
+        sl = lambda n: rows[seg[n][0] - base:seg[n][1] - base - 1]
+        print(f"step 20: {st['moving']} moving ticks; velocity vs the facing: worst angle {st['worst_angle']:.3f}° "
+              f"(pushed back inside the tank on {st['pushed']} ticks, excluded); |v| vs the written speed: worst "
+              f"{st['worst_speed_err']:.4f} m/s")
+        ok['parallel'] = st['worst_angle'] < 1.0 and st['worst_speed_err'] < 0.02
+        # climb: Up alone climbs along the pitched facing, so it also moves forward
+        cl = [q for q in sl('climb-right') if q['speed'] > 0.5]
+        vz = sum(q['v'][2] for q in cl) / len(cl)
+        vh = sum(math.hypot(q['v'][0], q['v'][1]) for q in cl) / len(cl)
+        pmax = max(q['pitch'] for q in cl) * 360
+        ok['climb'] = vz > 0.3 and vh > 0.3 and pmax <= C.PITCH_MAX * 360 + 0.5
+        print(f'step 20: climb (Up alone, facing +x): mean vz {vz:.3f} m/s, horizontal {vh:.3f} m/s, pitch up to '
+              f'{pmax:.1f}° (limit {C.PITCH_MAX * 360:.0f}°) → {verdict(ok["climb"])}')
+        dv = [q for q in sl('dive-left') if q['speed'] > 0.5]
+        ok['dive'] = sum(q['v'][2] for q in dv) < 0 and sum(q['v'][0] for q in dv) < 0
+        print(f'step 20: dive (Down alone, facing −x): mean vz {sum(q["v"][2] for q in dv) / len(dv):.3f}, vx '
+              f'{sum(q["v"][0] for q in dv) / len(dv):.3f} m/s, pitch down to {min(q["pitch"] for q in dv) * 360:.1f}° '
+              f'→ {verdict(ok["dive"])}')
+        # U-turn: the yaw passes through the side (|sin yaw| ≈ 1) and the fish moves in y: an arc
+        ut = sl('u-turn') + sl('left')
+        side = max(abs(math.sin(math.tau * q['yaw'])) for q in ut)
+        ys = [q['p'][1] for q in ut]
+        ok['arc'] = side > 0.95 and max(ys) - min(ys) > 0.2 and st['max_dyaw'] <= C.YAW_WMAX * DT + 1e-3
+        print(f'step 20: U-turn: |sin yaw| peaks at {side:.3f}, y swept {max(ys) - min(ys):.3f} m (an arc, not a flip); '
+              f'largest yaw step {st["max_dyaw"] * 360:.1f}°/tick (limit {C.YAW_WMAX * DT * 360:.1f}) → {verdict(ok["arc"])}')
+        # pitch levels after release
+        lv = sl('level')
+        after = next((q['t'] - lv[0]['t'] for q in lv if abs(q['pitch']) * 360 < 1.0), None)
+        ok['level'] = after is not None and after < 1.5 and st['max_pitch'] <= C.PITCH_MAX + 1e-4
+        print(f'step 20: pitch back under 1° {after} s after release; |pitch| never over {st["max_pitch"] * 360:.2f}° '
+              f'→ {verdict(ok["level"])}')
+        # burst and coast while held (the cruise): durations, the coast decays, the tail is still
+        cr = sl('cruise-right')[20:]
+        runs = segments([q['burst'] for q in cr])[1:-1]
+        bursts = [n * DT for v, _, n in runs if v]
+        coasts = [n * DT for v, _, n in runs if not v]
+        mono = all(b['cmd'] <= a['cmd'] + 1e-4 for v, s0, n in runs if not v for a, b in zip(cr[s0:s0 + n], cr[s0 + 1:s0 + n]))
+        mean_u = sum(q['speed'] for q in cr) / len(cr)
+        env_coast = max((cr[s0 + n - 1]['env'] for v, s0, n in runs if not v), default=1.0)
+        ok['gait'] = (bursts and coasts and all(0.15 <= d <= 0.6 for d in bursts + coasts) and mono and env_coast < 0.1
+                      and abs(mean_u - C.SWIM_SPEED) < 0.1 * C.SWIM_SPEED)
+        print(f'step 20: cruise: mean speed {mean_u:.3f} m/s ({mean_u / C.L_M:.2f} BL/s), peak {max(q["speed"] for q in cr):.3f}, '
+              f'low {min(q["speed"] for q in cr):.3f}; bursts {sorted(set(round(d, 2) for d in bursts))} s, coasts '
+              f'{sorted(set(round(d, 2) for d in coasts))} s; coast speed decays monotonically: {mono}; tail envelope at '
+              f'the end of a coast ≤ {env_coast:.3f} → {verdict(ok["gait"])}')
+        # Strouhal: f from the engine's phase accumulator, U the measured speed, A the tail-tip excursion
+        fs = rates(cr, 'ph_swim')
+        us = [q['speed'] for q in cr[:-1]]
+        st_n = [f * FISH.T['fish-tail-app'] / u for f, u in zip(fs, us) if u > 0.5]
+        bands = {}
+        for f, u in zip(fs, us):
+            if u > 0.5:
+                bands.setdefault(min(2, int((u - 1.5) // 1.0)) if u > 1.5 else 0, []).append(f / u)
+        ratio = {b: sum(v) / len(v) for b, v in bands.items()}
+        prop = max(ratio.values()) / min(ratio.values()) - 1 if ratio else 1.0
+        ok['strouhal'] = min(st_n) >= 0.2 - 1e-3 and max(st_n) <= 0.4 and prop < 0.15
+        print(f'step 20: tail beat: St = f·A/U over the cruise {min(st_n):.3f}..{max(st_n):.3f} (A = 0.2 L = '
+              f'{FISH.T["fish-tail-app"]:.3f} m), f/U by speed band {({b: round(v, 3) for b, v in sorted(ratio.items())})} '
+              f'(spread {prop * 100:.1f} %), f {min(fs):.2f}..{max(fs):.2f} Hz → {verdict(ok["strouhal"])}')
+        pf = rates(rows, 'ph_pec')
+        pu = [q['speed'] for q in rows[:-1]]
+        pairs = sorted(zip(pu, pf))
+        mono_p = all(b[1] >= a[1] - 1e-3 for a, b in zip(pairs, pairs[1:]) if b[0] - a[0] > 0.05)
+        ok['pectoral'] = min(pf) >= 2.4 - 0.01 and max(pf) <= 4.6 + 0.01 and mono_p
+        print(f'step 20: pectoral beat {min(pf):.2f}..{max(pf):.2f} Hz, rising with speed: {mono_p} → {verdict(ok["pectoral"])}')
+        ok['smooth'] = st['max_dv'] < C.BURST_SPEED * DT / C.TAU_ACCEL + 0.2
+        print(f'step 20: largest change of velocity between ticks {st["max_dv"]:.3f} m/s (bound '
+              f'{C.BURST_SPEED * DT / C.TAU_ACCEL + 0.2:.2f}) → {verdict(ok["smooth"])}')
+        # every visible part inside the tank on every tick
+        lo_ok = True
+        worst = [1e9] * 6
+        for t, s in fr:
+            e = part_world_extents(s, r.parts)
+            if e is None:
+                continue
+            lo, hi = e
+            gaps = [lo[0] + C.INNER_X_M, C.INNER_X_M - hi[0], lo[1] + C.INNER_Y_M, C.INNER_Y_M - hi[1],
+                    lo[2] - C.SAND_TOP_M, C.WATER_LINE_M - hi[2]]
+            worst = [min(a, b) for a, b in zip(worst, gaps)]
+        ok['inside'] = min(worst) > 0
+        print('step 20: every visible part, every tick: smallest gap to left/right/front glass/back/sand/water line '
+              + ' '.join(f'{v:.4f}' for v in worst) + f' m → {verdict(ok["inside"])}')
+        rot = [abs(wrap(s.get((r.pl, mb), 0.0))) for t, s in fr for mb in (ROT_A, ROT_B, ROT_C)]
+        ok['player-rot'] = max(rot) == 0.0
+        n, worst_off, wxy, wbob = r.attachment(fr)
+        ok['attached'] = max(worst_off.values()) < 0.005 and wxy < 1e-3
+        print(f'step 20: Player ROTATION_A/B/C over {len(fr)} ticks: max {max(rot):g} → {verdict(ok["player-rot"])}; '
+              f'parts vs body offsets worst ' + ', '.join(f'{a.split("-", 1)[1]} {b * 1000:.2f} mm' for a, b in worst_off.items())
+              + f' → {verdict(ok["attached"])}')
+        with open(os.path.join(OUT, 'phase4-steer-trace.tsv'), 'w') as fh:
+            fh.write('t\tx\ty\tz\tspeed\tcmd\tyaw\tpitch\tburst\tenv\tangle\tpushed\n')
+            for q in rows:
+                fh.write('\t'.join(f'{v:.4f}' for v in (q['t'], *q['p'], q['speed'], q['cmd'], q['yaw'], q['pitch'],
+                                                       q['burst'], q['env'], q['ang'], q['pushed'])) + '\n')
+        print(f'step 20: per-tick trace {os.path.join(OUT, "phase4-steer-trace.tsv")}')
+    finally:
+        clean = r.isolation()
+        g.close()
+    for l in open(g.log_path, errors='replace').read().splitlines():
+        if re.search(r'zforth compile error|Assert|abort', l, re.I):
+            print(l)
+    print('SUMMARY step 20: ' + ' '.join(f'{s} {verdict(v) if clean else "INVALID"}' for s, v in ok.items()))
+
+
 def trace(seq):
     """--trace: print every tick of a short held-button sequence (Player position and speeds)."""
     global TRACE
@@ -835,6 +1055,8 @@ if __name__ == '__main__':
                ('settle', None, 1.0), ('down', 'DOWN', 1.0), ('right', 'RIGHT', 3.0), ('glide', None, 1.5)])
     elif '--sway' in sys.argv:
         sway()
+    elif '--steer' in sys.argv:
+        steer()
     elif '--cost' in sys.argv:
         cost([os.path.abspath(a) for a in sys.argv[sys.argv.index('--cost') + 1:] if not a.startswith('-')])
     else:

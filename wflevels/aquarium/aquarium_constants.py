@@ -90,6 +90,34 @@ CLAMP_MARGIN = m(0.25)                                  # keep the visible fish 
 # Jolt's constants are absolute metres, so this does not scale with WORLD_SCALE.
 GROUND_CLEARANCE = 0.15
 
+# ── Steer and swim (Phase 4). A fish only moves along its facing: input sets a target facing,
+#    yaw/pitch turn toward it as spring-dampers, and the script writes speed × facing each tick.
+#    Lengths/speeds in body lengths where it matters (L = FISH_LEN at WORLD_SCALE; space is ×10,
+#    time is not, so frequencies and time constants are real seconds). Sources in comments:
+#    "verified" = opened and checked, "unverified", or "ours" (tuned by looking at captures).
+L_M = m(FISH_LEN)                                       # 0.889 m at ×10
+# Gait: burst-and-coast (Wu, Yang & Zeng 2007, JEB 210:2181, verified: koi; drag while coasting
+# ≈ 1/4 of bursting, ~45 % energy saved). Fish keep the CYCLE constant and change the burst share to
+# set the speed (Li et al. 2021, Commun. Biol. 4:40: as reported by the orchestrator, not opened).
+GAIT_CYCLE = 0.5                                        # s per burst+coast cycle (unverified; ours)
+GAIT_DUTY = 0.4                                         # burst share at cruise (ours)
+BURST_SPEED = 1.309 * SWIM_SPEED                        # 3.99 m/s: burst target; the mean is SWIM_SPEED
+TAU_ACCEL = 0.10                                        # s, speed-up during a burst (ours)
+TAU_COAST = 0.50                                        # s, coast decay within a cycle (ours)
+TAU_GLIDE = 0.45                                        # s, stop after release: glide ≈ 0.45 × speed ≈ 1.4 m (Phase 1)
+TAU_DART = 0.05                                         # s, the dart's speed-up
+# Steering (ours; second-order: rate' = wn² err − 2 ζ wn rate). Pitch is slower than yaw.
+YAW_WN, YAW_ZETA, YAW_WMAX = 8.0, 0.9, 1.25             # rad/s, -, rev/s (≈ 180° in 0.5 s)
+PITCH_WN, PITCH_ZETA, PITCH_WMAX = 5.0, 0.8, 0.40       # rad/s, -, rev/s (144°/s)
+PITCH_MAX = 40.0 / 360                                  # rev: Up/Down alone climbs/dives this steeply
+PITCH_DIAG = 30.0 / 360                                 # rev: with a horizontal direction too
+BANK_MAX = 15.0 / 360                                   # rev: bank into a turn at the full yaw rate
+BANK_GAIN = BANK_MAX / YAW_WMAX                         # rev of bank per rev/s of yaw
+TURN_DIP = 0.25                                         # burst speed × (1 − 0.25 |yaw rate| / max)
+TAU_WALL = 0.25                                         # s: speed ≤ room ahead / 0.25 s (eases to a stop)
+FLATTEN_D = 0.06 * WORLD_SCALE                          # 0.6 m: pitch flattens within this of the sand/surface
+FIN_HALF_WIDTH = 0.014 * WORLD_SCALE                    # 0.14 m: body 0.11 + flared pectorals / tail beat
+
 # ── Anemone sway (Phase 4). The tentacles are six clumps (back/front row × left/centre/right),
 #    each an anchored Mass-0 platform whose origin is its base on the oral disc. The Director
 #    rotates each one about that base every tick: B (in the X–Z plane) = amp_b·sin φ and
