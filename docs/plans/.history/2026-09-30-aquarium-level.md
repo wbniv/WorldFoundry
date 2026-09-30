@@ -1,5 +1,6 @@
 | Date | Change |
 |------|--------|
+| [2026-09-30](https://github.com/wbniv/WorldFoundry/commit/52a5bfe6) | Aquarium plan: Player is an invisible collision hull; visible clownfish is five Director-posed parts |
 | [2026-09-30](https://github.com/wbniv/WorldFoundry/commit/6d902226) | Run aquarium Phase 1 swim-and-scale spike: gravity-free fish works at x10 |
 | [2026-09-30](https://github.com/wbniv/WorldFoundry/commit/2b485281) | Aquarium: idle-spike clownfish becomes the canonical model; commit mockup generator |
 | [2026-09-30](https://github.com/wbniv/WorldFoundry/commit/4e5ce347) | Aquarium: go with Plan B (no front pane); file translucent-texture shader fix as its own TODO |
@@ -7,6 +8,11 @@
 | [2026-09-30](https://github.com/wbniv/WorldFoundry/commit/f964a400) | Plan aquarium level (55 gal acrylic, clownfish, anemone) and correct condo alpha note |
 
 <!--history-meta v1
+52a5bfe6	author	Will Norris
+52a5bfe6	added	20
+52a5bfe6	deleted	8
+52a5bfe6	files	1
+52a5bfe6	body	Adopts the idle spike's design (merged): anchored platform parts posed by\nfish-rig-tick, no ROTATION_C writes on the Player, statplat parts forbidden\n(every statplat gets a Jolt body), mailboxes 600-627 reserved for the fish.\nUpdates the actor table, section 4 and verification step 15. Also refreshes the\naquarium TODO entry's agent stamp.\n\nCo-Authored-By: Claude Sonnet 5.5 <noreply@anthropic.com>\nClaude-Session: https://claude.ai/code/session_0148itHvh6GL5Qc7uwSjFC2n
 6d902226	author	Will Norris
 6d902226	added	233
 6d902226	deleted	9

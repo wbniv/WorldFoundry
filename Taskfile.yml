@@ -830,6 +830,29 @@ tasks:
     generates:
       - wflevels/condo_639_640-standalone.iff
 
+  aquarium-level:
+    desc: "Aquarium (55 gal acrylic tank, sand, rock, anemone, placeholder fish; docs/plans/2026-09-30-aquarium-level.md): Blender build → wflevels/aquarium → standalone .iff. Needs the wf_blender add-on installed."
+    deps: [tools-build]
+    cmds:
+      - |
+        set -euo pipefail
+        blender --background --python-expr "import addon_utils; raise SystemExit(0 if addon_utils.enable('wf_blender', default_set=False, persistent=False) else 1)" >/dev/null 2>&1 \
+          || { echo "wf_blender add-on not installed — 'sudo apt install worldfoundry-blender-editor-exporter' (apt.worldfoundry.org) or 'task blender-install'" >&2; exit 1; }
+        blender --background --python-exit-code 1 \
+          --python wflevels/aquarium/blender_create_aquarium.py \
+          2>&1 | { grep -E '^\[aquarium\]|^Info: Exported|Error|Traceback|Assert' || true; }
+        test -s wflevels/aquarium/aquarium.lev
+      - bash wftools/wf_blender/build_level_binary.sh aquarium
+    sources:
+      - wflevels/aquarium/blender_create_aquarium.py
+      - wflevels/aquarium/aquarium_constants.py
+      - wflevels/aquarium/aquarium-standalone.iff.txt
+      - wflevels/snowgoons-blender/snowgoons-blender.lev
+    generates:
+      - wflevels/aquarium/aquarium.lev
+      - wflevels/aquarium.iff
+      - wflevels/aquarium-standalone.iff
+
   condo-touch:
     desc: "Build the condo with Forth two-button touch camera controls"
     deps: [tools-build, condo-textures]
@@ -907,6 +930,24 @@ tasks:
           --vram-perm-width=1024 --vram-perm-height=1024 \
           -Lwflevels/condo_639_640-standalone.iff $FSFLAG $RECFLAG 2>&1 | tee "$LOG"
         [ -n "$RECOUT" ] && [ -f output.mp4 ] && mv output.mp4 "$RECOUT" && echo "Saved → $RECOUT"
+
+  run-aquarium:
+    desc: "Run wf_game on wflevels/aquarium-standalone.iff (arrows swim, B/C in/out of the glass). WF_RECORD=1 records video. WF_FULLSCREEN=1 for fullscreen. Checks: python3 wflevels/aquarium/run_aquarium_checks.py"
+    deps: [ensure-build, aquarium-level]
+    cmds:
+      - |
+        set -euo pipefail
+        LOG=/tmp/wfgame_aquarium.log
+        echo "Logging to $LOG"
+        RECFLAG=""; RECOUT=""; FSFLAG=""
+        if [ -n "${WF_RECORD:-}" ]; then
+          RECOUT="${WF_RECORD}"; [ "$RECOUT" = "1" ] && RECOUT="$(date +%Y%m%d_%H%M%S)_aquarium.mp4"
+          RECFLAG="-record_video"; echo "Recording → $RECOUT"
+        fi
+        [ "${WF_FULLSCREEN:-}" = "1" ] && FSFLAG="-fullscreen"
+        LD_LIBRARY_PATH=engine/libs DISPLAY="${DISPLAY:-:0}" engine/wf_game \
+          -Lwflevels/aquarium-standalone.iff $FSFLAG $RECFLAG 2>&1 | tee "$LOG"
+        if [ -n "$RECOUT" ] && [ -f output.mp4 ]; then mv output.mp4 "$RECOUT" && echo "Saved → $RECOUT"; fi
 
   aquarium-idle-level:
     desc: "Clownfish idle-animation spike: the canonical aquarium clownfish (wflevels/aquarium/clownfish.py) → wflevels/aquarium_idle-standalone.iff. Needs the wf_blender add-on."

@@ -3,7 +3,9 @@
 Status: **Phase 0 run 2026‑09‑30 — the engine as it is cannot draw a translucent pane, so the level
 goes ahead on Plan B** (no front face). **Will chose Plan B on 2026‑09‑30**; Plan A (translucent pane) is deferred to its own TODO item because it needs an engine shader change. See [§ Phase 0 verdict](#phase-0-verdict).
 **Phase 1 run 2026‑09‑30: a gravity-free `Physics` fish works at ×10; ×1 does not load or collide sanely, so
-`WORLD_SCALE = 10` stands** — see [§ Phase 1 verdict](#phase-1-verdict). Phases 2–4 not started.
+`WORLD_SCALE = 10` stands** — see [§ Phase 1 verdict](#phase-1-verdict).
+**Phase 2 done 2026‑09‑30: `wflevels/aquarium/` builds with `task aquarium-level`, frame A is in the mockup's range, and
+the placeholder fish stays inside the tank against every wall** — see [§ Phase 2 verdict](#phase-2-verdict). Phases 3–4 not started.
 
 Will asked for an aquarium level: a **55 gallon acrylic tank**, **an anemone and a clownfish**, planned in
 `docs/plans/` with mockups. The condo walkthrough went through the Blender → `.lev` → `.iff` pipeline first try, so this
@@ -12,7 +14,7 @@ plan reuses that pipeline unchanged and spends its risk budget on the three thin
 
 - [x] Phase 0 — translucency spike (does an acrylic pane work?) — **no, not without an engine change; Plan B**
 - [x] Phase 1 — swim and scale spike (does a gravity-free fish work, at ×1 or ×10?) — **yes at ×10; ×1 rejected**
-- [ ] Phase 2 — tank, sand, rock, anemone, lighting, fog
+- [x] Phase 2 — tank, sand, rock, anemone, lighting, fog — **static scene built; placeholder fish until Phase 3**
 - [ ] Phase 3 — integrate the idle-spike clownfish (not a new mesh), controls, camera zones
 - [ ] Phase 4 — anemone sway (optional), docs, tasks, regression test
 
@@ -87,10 +89,10 @@ Coordinates (X right, Y depth, Z up, per the project convention). Origin is the 
 | Interior floor / walls | z 0.127 up; x ±5.969; y ±1.524 |
 | Sand top | z 0.635 |
 | Water line | z 4.826 |
-| Rock | base on sand at x +2.5, y 0 |
+| Rock | base on sand at x +2.5, y 0; flat top at z 1.185 (0.55 m tall) |
 | Anemone | on the rock, x +2.5, y 0 (base at local z = 0) |
 | Fish spawn | x −1.6, y 0, z 2.4 |
-| Front-glass camera | y ≈ −11, aimed at the tank centre (tuned in Phase 3) |
+| Front-glass camera | (0, −11, 2.667), aimed at the tank centre (0, 0, 2.667): Phase 2 value, whole tank in frame at 640×480 |
 
 ## Approach
 
@@ -98,13 +100,14 @@ Coordinates (X right, Y depth, Z up, per the project convention). Origin is the 
 
 | File | Purpose |
 |---|---|
-| `wflevels/aquarium/blender_create_aquarium.py` | Headless Blender build, same shape as `blender_create_moon.py` / `blender_create_condo.py`: import the snowgoons scaffold, strip to one of each infrastructure class, add geometry, export. |
+| `wflevels/aquarium/blender_create_aquarium.py` | **Exists (Phase 2).** Headless Blender build, same shape as the swim spike and `blender_create_condo.py`: import the snowgoons scaffold, strip to one of each infrastructure class, rename survivors and re-author every bbox, add geometry, export. The placeholder `Player` is marked `# PHASE 3: replace with wflevels/aquarium/clownfish.py`. |
 | `wflevels/aquarium/clownfish.py` | **The canonical clownfish**: its Blender mesh builder, part split, materials and scale constant, plus the idle-animation Forth. **Exists (merged 2026‑09‑30).** Written by the idle-animation spike (plan [2026-09-30-clownfish-idle-animation](2026-09-30-clownfish-idle-animation.md)), then imported by `blender_create_aquarium.py`. One definition, so the level cannot drift from the animated model. |
-| `wflevels/aquarium/aquarium_constants.py` | The table above as code: inches, `WORLD_SCALE`, derived metres. Imported by the build script **and** the regression test, so the docs, the level and the test cannot drift. |
-| `wflevels/aquarium/make_pane_texture.py` | Writes the pane's 16-bit BGR555 TGA (bit 15 set) deterministically. |
-| `wflevels/aquarium/aquarium.md` | Level README: build/run, controls, what is and is not modelled. |
-| `Taskfile.yml` | `aquarium-level` and `run-aquarium`, cloned from the condo entries, with `deps` on the tool build and the texture task so nothing needs a manual pre-step. |
-| `tests/test_aquarium_level.py` | Regression guard (see § Regression guard). |
+| `wflevels/aquarium/aquarium_constants.py` | **Exists (Phase 2).** The table above as code: inches, `WORLD_SCALE` (a plain constant now, no env override), derived metres, water line, sand top, interior extents, fog and camera-A values. Imported by the build script **and** the regression test, so the docs, the level and the test cannot drift. |
+| ~~`wflevels/aquarium/make_pane_texture.py`~~ | **Not built (Plan B):** there is no pane. Plan A would bring it back; the Phase 0 writer is `wflevels/aquarium_spike/make_pane_texture.py`. |
+| `wflevels/aquarium/aquarium.md` | **Exists (Phase 2).** Level README: build/run, controls, what is and is not modelled, Plan B. |
+| `wflevels/aquarium/run_aquarium_checks.py` | **Exists (Phase 2).** Steps 11 and 13: captures frame A and holds each direction into every wall over the debug bridge, reusing the swim spike's `Session`; flags a run contaminated by desktop key input. |
+| `Taskfile.yml` | **Exists (Phase 2).** `aquarium-level` (`deps: [tools-build]`; `sources`/`generates`, so a second run is a no-op) and `run-aquarium` (`deps: [ensure-build, aquarium-level]`), cloned from the condo entries. No texture task: Plan B has no textures. |
+| `tests/test_aquarium_level.py` | **Exists (Phase 2).** Regression guard (see § Regression guard). |
 | `wflevels/aquarium_swim_spike/` | **Exists (Phase 1).** Open box tank + placeholder `Physics` fish at any `WORLD_SCALE`, its `aquarium_constants.py` (the tank table as code: promote it to `wflevels/aquarium/` unchanged), and `run_swim_spike.py`, which drives the fish over the debug bridge with frame-exact held buttons and prints positions, clamps and wall gaps. Re-run it with the canonical fish for step 15. |
 | `wflevels/aquarium_spike/` | **Exists (Phase 0).** The translucency test card and `run_spike.py` (build, capture, bridge alpha diagnostic, pixel samples). Re-run it after any engine change to the shader or draw order. |
 
@@ -114,16 +117,16 @@ Coordinates (X right, Y depth, Z up, per the project convention). Origin is the 
 |---|---|---|---|
 | `Player` (invisible collision hull) | `Physics` | a copy of the clownfish body mesh, **not drawn** (`PLAYER_MESH` in `clownfish.py`) | Gravity 0, script-driven speeds, authored symmetric `wf_original_bbox` ±0.362 × ±0.125 × ±0.195 m; see § 4. **Nobody writes `ROTATION_C` on it** — the capsule never turns and the rig owns the visual heading |
 | `fish-body`, `fish-tail`, `fish-dorsal`, `fish-pectoral-l/-r` (exact names: `PART_NAMES` in `clownfish.py`) | anchored `platform`, Mass 0, Mesh | the five visible parts of the canonical clownfish | **Decided by the idle spike.** Posed every tick by the Director's `fish-rig-tick` (`write-actor-mailbox`: position, `ROTATION_A/B/C`, dorsal `Z_SCALE`). **Never statplats:** every statplat gets a Jolt body and pinned the Player. Runtime index = export-list position + 1. Mailboxes 600–627 belong to the fish |
-| `tank-shell` | `statplat`, Mesh | bottom, back wall and two end walls; open at the front and top | Trimesh body keeps the fish inside. Acrylic faces, flat pale cyan. **Phase 1:** one piece works *only because the `Player` is created first* — `JoltCharacterCreate` ignores any static body whose AABB already encloses the character (`jolt_backend.cc`, "zone body"), and a one-piece tank encloses the fish. Keep `Player` ahead of the tank in actor order, or build the tank from separate slabs (what the swim spike does) |
+| `tank-shell` | `statplat`, Mesh | bottom, back wall and two end walls; open at the front and top | Trimesh body keeps the fish inside. Acrylic faces, flat pale cyan. **Phase 1:** one piece works *only because the `Player` is created first* — `JoltCharacterCreate` ignores any static body whose AABB already encloses the character (`jolt_backend.cc`, "zone body"), and a one-piece tank encloses the fish. Keep `Player` ahead of the tank in actor order, or build the tank from separate slabs (what the swim spike does). **Phase 2:** one piece; `Player` is 8th, `tank-shell` 10th (asserted by the test). Each wall is three stacked boxes so its inner face is water-blue below the line, a light band at it, and dark above, with no coplanar overlay |
 | `tank-front-collider` | `statplat`, Mesh, **`Visibility Mailbox` 0** | a slab in the front-glass plane | **Plan B needs it:** with no front face the fish swims out of the tank. An invisible Mesh statplat still gets its trimesh (verified: 6 of 6 slabs `MESH_STATIC`) and stops the fish at the glass line |
-| `tank-front-pane` | `statplat`, Mesh | one quad, thin | **Translucent, textured.** No collision needed, but it gets one from E2; the shell's own front lip stops the fish first |
-| `tank-rim` | `statplat`, Mesh | top perimeter bevel | Reads as a tank edge even if the pane fails (Plan B) |
-| `sand`, `rock` | `statplat`, Mesh | flat-shaded low poly | Rock base at local z = 0 (mesh-origin rule) |
-| `anemone` | `statplat`, Mesh | base, column, tentacles | Static in v1, see § 5 |
+| ~~`tank-front-pane`~~ | — | — | **Not built (Plan B).** Would be translucent and textured; the engine drops texture alpha (Phase 0) |
+| `tank-rim` | `statplat`, Mesh | top perimeter ring, chamfered outer-top edge | Reads as a tank edge (Plan B). Overhangs the walls by 0.25 in each side so no face is coplanar with a wall (no z-fighting in frame A) |
+| `sand`, `rock` | `statplat`, Mesh | flat-shaded low poly | Rock base at local z = 0 (mesh-origin rule). Sand: 24 × 6 quads in three shades. Rock: a convex hull with a flat top for the anemone |
+| `anemone` | `statplat`, Mesh | base disc, faceted column, oral disc, 17 tentacles (two-tone strips + bulbs) | Static in v1, see § 5. Back set at y +0.36 m, front set at y −0.36 m: the gap clears the fish's capsule plus Jolt's predictive contact distance (at ±0.22 m the fish was deflected) |
 | `anemone-zone` | `target` | none | Invisible; carries the zone bbox (condo room-outline pattern) |
-| `water-surface` | `statplat`, Mesh | one quad at the water line | Translucent, prelit |
-| `room-backdrop`, `stand` | `statplat`, Mesh | dark quads | So the camera never sees the void |
-| `Director`, `camera`, `levelobj`, `matte`, `light`s, `room`, `camshot`s | scaffold classes | | One of each; **rename the survivors** so no snowgoons `player_33`/`target_14` name leaks into an object reference |
+| ~~`water-surface`~~ | — | — | **Not built (Plan B)**; the water line is an opaque band on the inner faces of the shell |
+| `room-backdrop`, `stand` | `statplat`, Mesh | a navy quad 4 m behind the tank; a dark-brown box under it | So the camera never sees the void |
+| `Director`, `camera`, `levelobj`, `matte`, `light`s, `room`, `camshot`s | scaffold classes | | One of each; **rename the survivors** so no snowgoons `player_33`/`target_14` name leaks into an object reference. **Phase 2:** `Director`, `Camera`, `LevelObj`, `Matte` (Model Type None), `Room`, `cs_front`, `LookAt`, `SunLight` + `AmbientLight`; every bbox re-authored (no snowgoons room or 2 m capsule survives) |
 
 ### 3. The acrylic — the fallback ladder
 
@@ -238,6 +241,12 @@ Every level needs a Directional **and** an Ambient light. Overhead directional, 
 `FoggingColor ≈ 0x0d5f7a`, start about 6 m, complete about 40 m at ×10 (both scale with `WORLD_SCALE`). Fog is by distance,
 not by medium, so it also tints the dark room slightly; that is accepted, and the room is dark enough not to care.
 `FoggingCompleteDistance` past 1000 m would disable fog, which is not what is wanted here.
+
+**Phase 2 values (tuned from captures):** fog `0x0d5f7a`, 6 → 40 m, unchanged from the plan. Directional
+(0.72, 0.74, 0.74) at 65° altitude from the camera side; cool Ambient (0.36, 0.43, 0.50). The light's aim is the
+**mirrored** one (`rotation_euler = (0, +65°, +90°)`): the doc's outward-wound recipe (`B = −alt`) left every face at
+exactly the ambient term in the first capture. Most of the water colour comes from the inner faces of the shell, not
+the fog; at 11 m the fog is about 15 %.
 
 ## Verification
 
@@ -632,13 +641,157 @@ Open for Phase 3 (neither blocks):
 
 **Phase 2–3 — level**
 
+Phase 2 was run 2026‑09‑30 on Linux in an isolated worktree, using the main checkout's `engine/wf_game` (built 2026‑09‑25) and this worktree's own freshly built Rust tools. The fish is the **placeholder** (the Phase 1 ellipsoid and tail, recentred) until Phase 3. Steps 12, 14 and 15 belong to Phase 3.
+
 9. `task aquarium-level` from a clean checkout. Expected: builds with no manual pre-step, and is a no-op on the second run.
+
+    ```
+    $ # cold tool build in this worktree (no target/ dirs before):
+    $ time task tools-build
+        Finished `release` profile [optimized] target(s) in 41.68s
+    real	1m31.333s
+    $ # clean state: every generated file removed, and the task checksum
+    $ rm -rf wflevels/aquarium/{Perm.*,Room0.*,*.iff,aquarium.iff.txt,aquarium.ini,aquarium.lev,aquarium.lev.bin,aquarium.lvl,asset.inc,pal*.tga,textile.log.htm} \
+             wflevels/aquarium.iff wflevels/aquarium-standalone.iff .task/checksum/aquarium-level*
+    $ ls wflevels/aquarium
+    aquarium-standalone.iff.txt  aquarium_constants.py  blender_create_aquarium.py  run_aquarium_checks.py
+    $ task aquarium-level 2>&1 | grep -v '^  '
+    task: Task "tools-build" is up to date
+    task: [aquarium-level] set -euo pipefail
+    [aquarium] scaffold survivors: ['Camera', 'Director', 'LevelObj', 'LookAt', 'Matte', 'Player', 'Room', 'SunLight', 'cs_front']
+    [aquarium] WORLD_SCALE=10.0 fish spawn (-1.6, 0.0, 2.4) V=3.0480 ZMAX=4.4069 XMAX=5.4610 inner x ±5.9690 y ±1.5240 sand 0.6350 water 4.8260
+    [aquarium] rock top z 1.185; anemone crown top z 2.358, span 1.904 m (7.5 in); zone ±2.20 m at (2.5, 0.0, 1.771)
+    [aquarium] fog 0x0d5f7a 6→40 m; camera (0.0, -11.0, 2.667) → (0.0, 0.0, 2.667)
+    [aquarium] actor order: ['Camera', 'Director', 'LevelObj', 'Matte', 'cs_front', 'LookAt', 'Room', 'Player', 'SunLight', 'tank-shell', 'tank-front-collider', 'tank-rim', 'sand', 'rock', 'anemone', 'anemone-zone', 'stand', 'room-backdrop', 'AmbientLight']
+    [aquarium] exporting wflevels/aquarium/aquarium.lev
+    Info: Exported 19 objects to …/wflevels/aquarium/aquarium.lev
+    [aquarium] done
+    task: [aquarium-level] bash wftools/wf_blender/build_level_binary.sh aquarium
+    [1/5] iffcomp-rs  aquarium.lev  →  aquarium.lev.bin
+    [2/5] levcomp-rs  aquarium.lev.bin  →  aquarium.lvl + asset.inc + aquarium.iff.txt + aquarium.ini
+    levcomp v0.1.0
+    [3/5] textile-rs  -ini=aquarium.ini  →  palN.tga / RoomN.{tga,ruv,cyc} / Perm.{tga,ruv,cyc}
+    [4/5] iffcomp-rs  aquarium.iff.txt  →  ../aquarium.iff
+    ✓ built …/wflevels/aquarium.iff (77824 bytes)
+    [5/5] iffcomp-rs  aquarium-standalone.iff.txt  →  ../aquarium-standalone.iff
+    ✓ built …/wflevels/aquarium-standalone.iff (81920 bytes)
+    $ task aquarium-level; echo "exit=$?"
+    task: Task "tools-build" is up to date
+    task: Task "aquarium-level" is up to date
+    exit=0
+    ```
+
+    **PASS.** From a clean state the level builds with one command (`deps: [tools-build]` covers the Rust tools, and the cold tool build above is part of the same chain). The second run is a no-op. `Player` is 8th in actor order and `tank-shell` 10th (the Phase 1 rule).
+
 10. `python3 -m pytest tests/test_aquarium_level.py`. Expected: pass (see § Regression guard).
+
+    ```
+    $ python3 -m pytest tests/test_aquarium_level.py -v --color=no -p no:cacheprovider
+    collecting ... collected 8 items
+
+    tests/test_aquarium_level.py::test_shell_bbox_is_48_by_13_by_21_inches PASSED [ 12%]
+    tests/test_aquarium_level.py::test_water_line_volume_is_45_2_gallons PASSED [ 25%]
+    tests/test_aquarium_level.py::test_exactly_one_player_anemone_and_zone PASSED [ 37%]
+    tests/test_aquarium_level.py::test_no_snowgoons_derived_names_remain PASSED [ 50%]
+    tests/test_aquarium_level.py::test_player_is_created_before_the_tank PASSED [ 62%]
+    tests/test_aquarium_level.py::test_player_bbox_is_authored_symmetric_and_not_thin PASSED [ 75%]
+    tests/test_aquarium_level.py::test_plan_b_nothing_translucent_front_collider_invisible PASSED [ 87%]
+    tests/test_aquarium_level.py::test_fog_is_the_water PASSED               [100%]
+
+    ============================== 8 passed in 0.25s ===============================
+    ```
+
+    **PASS.** It covers the regression guard as adjusted for Plan B (§ Regression guard): the pane-texture check is replaced by "nothing translucent, and the front collider is invisible", plus the Phase 1 ordering and bbox rules.
+
 11. `task run-aquarium`; capture frame A. Expected: the whole tank in frame, fish visible, no z-fighting on the acrylic rims, water colour in the range of mockup A.
+
+    ```
+    $ python3 wflevels/aquarium/run_aquarium_checks.py        # runs aquarium-standalone.iff under -rate20; bridge screenshot after 2 s
+    screenshot frame-a: /home/will/tmp/aquarium-phase2/phase2-frame-a.png
+    $ # pixels, frame A vs the mockup's panel A (docs/plans/2026-09-30-aquarium-level/gameplay-states.png)
+    water mid (320, 200) (24, 121, 165)      mockup water (380, 300) (43, 148, 172)   mockup water low (200, 420) (13, 80, 109)
+    sand top (200, 320) (205, 199, 154)      mockup sand (200, 445) (192, 174, 126)
+    stand (320, 420) (40, 34, 27)            mockup stand (380, 520) (32, 22, 15)
+    backdrop (320, 50) (12, 39, 55)          mockup room (380, 150) (24, 39, 53)
+    end wall (70, 250) (9, 59, 90)           fish (262, 243) (118, 72, 25)
+    ```
+
+    <img src="2026-09-30-aquarium-level/phase2-frame-a.png" width="640">
+
+    **PASS**, on the equivalent command rather than `task run-aquarium`: its `ensure-build` dep would rebuild the engine in this worktree, and a manual run is interactive. `run_aquarium_checks.py` loads the same `wflevels/aquarium-standalone.iff`. The whole tank is in frame, 85 % of the width, with the stand below and the room above. The fish is visible at its spawn. In 4× crops of both top rim corners, the bottom-front edge and the anemone there is no z-fighting: no face in the level is coplanar with another visible face (the rim overhangs the walls, the walls are stacked boxes, and the sand is inset 0.02 in). The water, (24, 121, 165), sits between the mockup's upper and lower water colours; sand, stand and room are each within about 25 per channel of the mockup. Tuning went three rounds: (1) the first capture was lit by ambient only, so the light aim was mirrored (§ 7); (2) the colours were warmed against the teal fog; (3) the water-line band went from 0.2 in to 0.4 in so it is about 3 px at 11 m.
+
+    The same run parks the fish inside the anemone's crown (next frame): the front tentacles overlap it by plain depth, which is the authoring rule of § 5, ahead of Phase 3's camshot B.
+
+    <img src="2026-09-30-aquarium-level/phase2-in-crown.png" width="640">
+
 12. Swim into the anemone zone; capture frame B. Expected: the close-up camshot engages, and the fish is partly overlapped by front tentacles.
 13. Hold each direction into every wall for 5 s. Expected: the fish never leaves the tank volume.
+
+    ```
+    $ python3 wflevels/aquarium/run_aquarium_checks.py
+    screenshot in-crown: /home/will/tmp/aquarium-phase2/phase2-in-crown.png
+    screenshot right-wall: /home/will/tmp/aquarium-phase2/phase2-right-wall.png
+    screenshot left-wall: /home/will/tmp/aquarium-phase2/phase2-left-wall.png
+    screenshot back-wall: /home/will/tmp/aquarium-phase2/phase2-back-wall.png
+    screenshot front-glass: /home/will/tmp/aquarium-phase2/phase2-front-glass.png
+    screenshot water-line: /home/will/tmp/aquarium-phase2/phase2-water-line.png
+    screenshot sand: /home/will/tmp/aquarium-phase2/phase2-sand.png
+    jolt: character 0 created at (-1.60, 0.00, 2.40) ctr=(0.00,0.00,0.18)
+    desktop (unmapped) key events in the engine log: 0; position before the first hold (-1.6, 0.0, 2.4) vs spawn (-1.6, 0.0, 2.4) (drift 0.000); un-commanded motion: none
+    run isolation: CLEAN
+    phase   btn      s              start x,y,z                end x,y,z
+    settle  -      2.0   -1.600  0.000  2.400   -1.600  0.000  2.400
+    crown   -      2.0    2.500  0.000  1.950    2.500  0.000  1.950
+    right   RIGHT  7.0    2.500  0.000  1.950    5.461  0.000  1.950
+    left    LEFT  10.0    5.461  0.000  1.950   -5.461  0.000  1.950
+    back    C      6.0   -5.461  0.000  1.950   -5.461  1.374  1.950
+    front   B      7.0   -5.461  1.374  1.950   -5.461 -1.374  1.950
+    up      UP     7.0   -5.461 -1.374  1.950   -5.461 -1.374  4.407
+    down    DOWN   7.0   -5.461 -1.374  4.407   -5.461 -1.374  0.635
+    end     -      1.0   -5.461 -1.374  0.635   -5.461 -1.374  0.635
+    fish box (local, .lev BOX3): x [-0.4445, 0.4445] y [-0.1300, 0.1300] z [0.0000, 0.3556]
+    origin extremes over the whole run: x [-5.4610, 5.4610]  y [-1.3740, 1.3740]  z [0.6350, 4.4069]
+    step 13: fish box right edge vs right wall inner face: 5.9055 vs 5.9690 (gap 0.0635) → PASS
+    step 13: fish box left edge vs left wall inner face: -5.9055 vs -5.9690 (gap 0.0635) → PASS
+    step 13: fish box back edge vs back wall inner face: 1.5040 vs 1.5240 (gap 0.0200) → PASS
+    step 13: fish box front edge vs front glass plane: -1.5040 vs -1.5240 (gap 0.0200) → PASS
+    step 13: fish feet vs sand top: 0.6350 vs 0.6350 (gap 0.0000) → PASS
+    step 13: fish top vs water line: 4.7625 vs 4.8260 (gap 0.0635) → PASS
+    step 13: PASS
+    ```
+
+    **PASS.** Each wall was held for at least 5 s after contact: RIGHT ≈ 6 s, LEFT ≈ 6 s, C ≈ 5.5 s, B ≈ 6 s, UP ≈ 6 s and DOWN ≈ 5.6 s, after crossings at 2.74 m/s. Over the whole run the fish's box never passes a wall's inner face, the sand or the water line. The limits it reaches: the end walls stop at the script's X clamp (the nose 0.0635 m = 0.25 in off the wall), the back wall and front collider stop the capsule by physics (0.020 m, Jolt's padding), the sand stops the feet exactly, and the top clamps 0.0635 m under the water line. Two more results:
+
+    - **The anemone split works physically.** Parked in the crown at (2.5, 0, 1.95) the fish is not pushed; it swims out through the crown and back at z 1.95 with y exactly 0.000. The first build, with the tentacle sets at y ±0.22 m, pushed a fish passing at z 2.4 0.27 m sideways and 0.6 m up: the gap must clear the capsule radius (0.13 m), the padding (0.02 m) and Jolt's 0.1 m predictive contact distance. It is ±0.36 m now.
+    - **Phase 1's wall push-off did not recur.** The B slide along the left end wall does not touch the wall, because the X clamp holds the capsule 0.38 m off it.
+
+    **One run was discarded, with a concrete cause.** In it the fish sat at x 0.868 before the first held button, 2.47 m of RIGHT the harness never sent. That engine log recorded X keyboard events (BackSpace, `c`, `a`, Tab, Alt_L as "unknown key"): the wf_game window is on the real desktop (there is no Xvfb on this host) and took keys typed while it had focus. The log names only *unmapped* keys, so a mapped arrow press leaves no line. The script therefore now fails any run with drift from spawn, motion in a no-button phase, or motion off the held axis (`run isolation`). The run above is `CLEAN`.
+
 14. Run on a phone-landscape build with the touch profile. Expected: swim and dart reachable with existing A/B + D-pad regions. **Unverified on hardware; report, do not claim.**
 15. Re-run Phase 1 steps 5–7 (hover, scripted speeds and clamps, heading) on the **canonical clownfish** from `clownfish.py`, idle animation running. Expected: same results as the Phase 1 placeholder; idle motion is net-zero (Player drift 0), every part stays attached to the body through turns and wall contact, and the Player's `ROTATION_C` is never written.
+
+#### Phase 2 verdict
+
+**Done: a static, correct scene at ×10, built by one task, guarded by a test, with no engine change.**
+
+| Step | Result |
+|---|---|
+| 9 build from clean, no-op rerun | PASS |
+| 10 regression guard (Plan B form) | PASS, 8 tests |
+| 11 frame A | PASS on the equivalent capture command; whole tank, fish visible, no z-fighting, water in the mockup's range |
+| 13 every wall held ≥ 5 s | PASS; the fish's box never leaves the tank; crown pass clean |
+
+Tuning values: camera A at (0, −11, 2.667) m looking at (0, 0, 2.667), the tank's centre, so the tank fills 85 % of a 640 px width. Fog `0x0d5f7a`, 6 → 40 m, as planned. Directional (0.72, 0.74, 0.74) at 65° from the camera side, with the mirrored aim. Ambient (0.36, 0.43, 0.50). Water faces (0.16, 0.68, 0.86); matte background `0x0a0f16`.
+
+Deviations from the plan, all deliberate:
+
+- **Water colour comes from the shell, not a film actor or the fog.** Each wall is three stacked boxes whose inner faces are water-blue, a 0.4 in water-line band, and dark air. The fog adds about 15 % at 11 m. There is no separate film quad, since it would be coplanar with the wall and z-fight.
+- **The placeholder fish is recentred** (X extent ±0.4445 m instead of the Phase 1 −0.559/+0.330). One symmetric X clamp, \|X\| ≤ 5.461 m, then serves both headings, so the fish does not snap when it turns at a wall. Its bbox is authored (0.889 × 0.26 × 0.356 m).
+- **The anemone is about 7.5 in across** (spec: about 7 in), so the bulbs read at camera A. Its trimesh collides, so the fish hosts only in the y ≈ 0 gap between the sets. Phase 3 should decide whether that is the wanted behaviour.
+- **Every scaffold bbox is re-authored.** `Room` gets its own box, the infrastructure actors get the explicit generic ±0.5 m box they already carried, and `Player` and `anemone-zone` get authored boxes.
+- **`task run-aquarium` exists, but no captured result came from it.** It depends on `ensure-build`, which would build the engine in the worktree. Captures came from `run_aquarium_checks.py` on the main checkout's `wf_game`.
+
+Open for Phase 3: the canonical clownfish replaces the placeholder at the `# PHASE 3` marker in `blender_create_aquarium.py`; camshot B and the Director switch read `anemone-zone`; re-run `run_aquarium_checks.py` for step 15.
 
 ## Regression guard
 
@@ -646,8 +799,15 @@ Open for Phase 3 (neither blocks):
 
 - the exported shell's bounding box is 48 × 13 × 21 in at the current `WORLD_SCALE`;
 - water-line volume computed from the constants is 45.2 gal ±1 % (so a stray edit to a dimension is caught);
-- the pane texture's texels have bit 15 set and the file is 16-bit (E8: a 32-bit RGBA save would silently turn every texel into a cut-out);
-- exactly one `Player`, one `anemone`, one `anemone-zone`; no snowgoons-derived actor names remain.
+- ~~the pane texture's texels have bit 15 set and the file is 16-bit (E8: a 32-bit RGBA save would silently turn every texel into a cut-out)~~ —
+  **dropped for Plan B** (there is no pane). Replaced by: no `tank-front-pane` or `water-surface` exists, and
+  `tank-front-collider` is invisible;
+- exactly one `Player`, one `anemone`, one `anemone-zone` (a `target`); no snowgoons-derived actor or mesh names remain;
+- added from Phase 1: `Player` precedes `tank-shell` in actor order, and its bbox is symmetric in X and Y and at least
+  0.25 m on every axis; the fog is `FOG_COLOR` (not snowgoons' grey) and completes before 1000 m.
+
+The test reads the committed `wflevels/aquarium/aquarium.lev`. After changing the build script, run
+`task aquarium-level` before the test.
 
 ## Risks and open questions
 
