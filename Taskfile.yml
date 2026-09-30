@@ -1044,6 +1044,32 @@ tasks:
     cmds:
       - python3 -m pytest tests/test_aquarium_idle.py -v
 
+  poster-clownfish-biomechanics:
+    desc: "Clownfish biomechanics poster, A3 (docs/plans/2026-09-30-clownfish-biomechanics-poster.md): data sheet + the aquarium constants → docs/reference/clownfish-biomechanics-poster/{data.json,poster.html,poster.pdf,poster.png}. A no-op when up to date. Needs google-chrome and pdftoppm."
+    cmds:
+      - python3 docs/reference/clownfish-biomechanics-poster/make_poster.py
+    sources:
+      - docs/reference/clownfish-biomechanics-poster/make_poster.py
+      - docs/reference/clownfish-biomechanics-poster/data.py
+      - wflevels/aquarium/aquarium_constants.py
+      - wflevels/aquarium/clownfish.py
+      - wflevels/aquarium/run_aquarium_checks.py
+    generates:
+      - docs/reference/clownfish-biomechanics-poster/data.json
+      - docs/reference/clownfish-biomechanics-poster/poster.html
+      - docs/reference/clownfish-biomechanics-poster/poster.pdf
+      - docs/reference/clownfish-biomechanics-poster/poster.png
+    status:
+      # the checksum on `sources` decides staleness; this only catches a deleted or empty output
+      - test -s docs/reference/clownfish-biomechanics-poster/poster.html
+      - test -s docs/reference/clownfish-biomechanics-poster/poster.pdf
+      - test -s docs/reference/clownfish-biomechanics-poster/poster.png
+
+  test-poster-clownfish-biomechanics:
+    desc: "Regression guard for the clownfish poster: chips vs the code's labels, values vs the constants, what the diagrams draw, type size, contrast, PDF page/fonts/links"
+    cmds:
+      - python3 -m pytest tests/test_poster_clownfish_biomechanics.py -v
+
   run-moon:
     desc: "Run wf_game on wflevels/moon_site01-standalone.iff (PGDA Site 01 Connecting Ridge — LOLA terrain + NAC texture at 1024², lunar gravity). WF_RECORD=1 records video. WF_FULLSCREEN=1 for fullscreen."
     deps: [ensure-build]

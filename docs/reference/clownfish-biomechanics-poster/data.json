@@ -1,0 +1,1077 @@
+{
+ "date": "2026-09-30",
+ "statuses": [
+  "verified",
+  "unverified",
+  "ours",
+  "other-species"
+ ],
+ "sources": {
+  "S1": {
+   "cite": "Knight 2014, JEB 217:2224, summarising Nudds, John, Keen & Shiels 2014, JEB 217:2244–2249",
+   "title": "Swimming fish stick to same Strouhal number",
+   "url": "https://journals.biologists.com/jeb/article/217/13/2224/12210/Swimming-fish-stick-to-same-Strouhal-number",
+   "opened": true,
+   "backs": "Strouhal window 0.2–0.4 in fish; trout 0.19–0.22"
+  },
+  "S2": {
+   "cite": "Nudds, John, Keen & Shiels 2014, JEB 217:2244–2249 (the primary paper behind S1; seen only through S1)",
+   "title": null,
+   "url": null,
+   "opened": false,
+   "backs": "the study S1 summarises"
+  },
+  "S3": {
+   "cite": "Wu, Yang & Zeng 2007, JEB 210(12):2181–2191",
+   "title": "Kinematics, hydrodynamics and energetic advantages of burst-and-coast swimming of koi carps",
+   "url": "https://journals.biologists.com/jeb/article/210/12/2181/16867/Kinematics-hydrodynamics-and-energetic-advantages",
+   "opened": true,
+   "backs": "burst-and-coast is a real gait (koi); burst drag ≈ 4 × coast drag; ≈ 45 % energy saved; no single burst duration"
+  },
+  "S4": {
+   "cite": "Marcoux & Korsmeyer 2019, JEB 222(4)",
+   "title": "Energetics and behavior of coral reef fishes during oscillatory swimming in a simulated wave surge",
+   "url": "https://journals.biologists.com/jeb/article/222/4/jeb191791/20856/Energetics-and-behavior-of-coral-reef-fishes",
+   "opened": true,
+   "backs": "A. ocellaris pectoral beat 2.4 → 4.6 /s, measured in an oscillating surge (0–29 cm/s), not steady swimming"
+  },
+  "S5": {
+   "cite": "Hale, Day, Thorsen & Westneat 2006, JEB 209(19):3708–3718",
+   "title": "Pectoral fin coordination and gait transitions in steadily swimming juvenile reef fishes",
+   "url": "https://journals.biologists.com/jeb/article/209/19/3708/16341/Pectoral-fin-coordination-and-gait-transitions-in",
+   "opened": true,
+   "backs": "damselfish, 12 species, no clownfish: gait switch at 1.87–4.95 BL/s (a hint only)"
+  },
+  "S6": {
+   "cite": "Li, Ashraf, François, Kolomenskiy, Lechenault, Godoy-Diana & Thiria 2021, Commun. Biol. 4:40",
+   "title": null,
+   "url": "https://arxiv.org/abs/2002.09176",
+   "opened": false,
+   "backs": "fish keep the cycle constant and change the burst share (as reported, not opened)"
+  },
+  "S7": {
+   "cite": "Domenici & Blake 1997, The kinematics and performance of fish fast-start swimming",
+   "title": null,
+   "url": "https://www.researchgate.net/publication/13904905_The_Kinematics_and_Performance_of_Fish_Fast-Start_Swimming",
+   "opened": false,
+   "backs": "turning angle, turning radius, C-start and S-start definitions"
+  },
+  "S8": {
+   "cite": "Tu & Terzopoulos 1994, Artificial Fishes: Physics, Locomotion, Perception, Behavior",
+   "title": null,
+   "url": "https://faculty.cc.gatech.edu/~turk/bio_sim/articles/fish_terzopoulos.pdf",
+   "opened": false,
+   "backs": "the layering idea only: motor (kinematic wave) under steering (behaviour)"
+  },
+  "S9": {
+   "cite": "A ≈ 0.2 L and λ ≈ L: widely cited; no primary source was identified or opened",
+   "title": null,
+   "url": null,
+   "opened": false,
+   "backs": "tail excursion and wavelength"
+  }
+ },
+ "rows": [
+  {
+   "id": "length",
+   "group": "Scale",
+   "quantity": "Body length L",
+   "status": "ours",
+   "sources": [
+    "game"
+   ],
+   "value": 3.5,
+   "unit": "in",
+   "disp": "3.5 in (8.9 cm)",
+   "symbol": "aquarium_constants.FISH_LEN",
+   "factor": 1.0,
+   "note": "an ocellaris as authored in the level; 0.889 m at ×10",
+   "poster_only": false,
+   "code_label": {
+    "labels": [],
+    "how": "none",
+    "at": "aquarium_constants.py:23"
+   }
+  },
+  {
+   "id": "world_scale",
+   "group": "Scale",
+   "quantity": "Level scale, space",
+   "status": "ours",
+   "sources": [
+    "game"
+   ],
+   "value": 10.0,
+   "unit": "×",
+   "disp": "×10",
+   "symbol": "aquarium_constants.WORLD_SCALE",
+   "factor": 1.0,
+   "note": "space ×10, time real",
+   "poster_only": false,
+   "code_label": {
+    "labels": [],
+    "how": "none",
+    "at": "aquarium_constants.py:16"
+   }
+  },
+  {
+   "id": "cruise",
+   "group": "Scale",
+   "quantity": "Cruise speed V",
+   "status": "ours",
+   "sources": [
+    "game"
+   ],
+   "value": 3.0479999999999996,
+   "unit": "m/s",
+   "disp": "3.048 m/s",
+   "symbol": "aquarium_constants.SWIM_SPEED",
+   "factor": 1.0,
+   "note": "= 3.43 BL/s; Phase 1: 12 in/s × scale",
+   "poster_only": false,
+   "code_label": {
+    "labels": [],
+    "how": "none",
+    "at": "aquarium_constants.py:83"
+   }
+  },
+  {
+   "id": "st_window",
+   "group": "Tail",
+   "quantity": "Strouhal, fish",
+   "status": "verified",
+   "sources": [
+    "S1"
+   ],
+   "value": [
+    0.2,
+    0.4
+   ],
+   "unit": "",
+   "disp": "0.2–0.4",
+   "symbol": "clownfish.TUNABLES:fish-strouhal",
+   "factor": null,
+   "note": "label reference only: the code comment on fish-strouhal labels this window verified",
+   "poster_only": false,
+   "code_label": {
+    "labels": [
+     "ours",
+     "verified"
+    ],
+    "how": "own",
+    "at": "clownfish.py:137"
+   }
+  },
+  {
+   "id": "st_trout",
+   "group": "Tail",
+   "quantity": "Strouhal, trout",
+   "status": "verified",
+   "sources": [
+    "S1"
+   ],
+   "value": [
+    0.19,
+    0.22
+   ],
+   "unit": "",
+   "disp": "0.19 → 0.22",
+   "symbol": null,
+   "factor": 1.0,
+   "note": "rainbow trout, rising with speed",
+   "poster_only": false,
+   "code_label": null
+  },
+  {
+   "id": "st_game",
+   "group": "Tail",
+   "quantity": "Strouhal, game",
+   "status": "ours",
+   "sources": [
+    "game"
+   ],
+   "value": 0.3,
+   "unit": "",
+   "disp": "0.3",
+   "symbol": "clownfish.TUNABLES:fish-strouhal",
+   "factor": 1.0,
+   "note": "0.3, the middle of the verified window",
+   "poster_only": false,
+   "code_label": {
+    "labels": [
+     "ours",
+     "verified"
+    ],
+    "how": "own",
+    "at": "clownfish.py:137"
+   }
+  },
+  {
+   "id": "a_over_l",
+   "group": "Tail",
+   "quantity": "Tail excursion A/L",
+   "status": "unverified",
+   "sources": [
+    "S9"
+   ],
+   "value": 0.20000000000000004,
+   "unit": "",
+   "disp": "0.2 peak to peak",
+   "symbol": "clownfish.TUNABLES:fish-tail-app",
+   "factor": 1.124859392575928,
+   "note": "A = 0.2 L is widely cited; the code labels it unverified",
+   "poster_only": false,
+   "code_label": {
+    "labels": [
+     "unverified"
+    ],
+    "how": "own",
+    "at": "clownfish.py:138"
+   }
+  },
+  {
+   "id": "wavelength",
+   "group": "Tail",
+   "quantity": "Wavelength λ/L",
+   "status": "unverified",
+   "sources": [
+    "S9"
+   ],
+   "value": 1.0,
+   "unit": "",
+   "disp": "≈ 1",
+   "symbol": null,
+   "factor": 1.0,
+   "note": "widely cited; the rig only swings a tail hinge and does not use it",
+   "poster_only": true,
+   "code_label": null
+  },
+  {
+   "id": "envelope",
+   "group": "Tail",
+   "quantity": "Envelope A(s)",
+   "status": "ours",
+   "sources": [
+    "game"
+   ],
+   "value": null,
+   "unit": "",
+   "disp": "0.1 + 0.9 s²",
+   "symbol": null,
+   "factor": 1.0,
+   "note": "poster illustration only: the rig has a tail hinge, not a wave; A(s) = (A/2)·(0.1 + 0.9 s²)",
+   "poster_only": true,
+   "code_label": null
+  },
+  {
+   "id": "f_cruise",
+   "group": "Tail",
+   "quantity": "Tail beat at V",
+   "status": "ours",
+   "sources": [
+    "game"
+   ],
+   "value": 5.1428571428571415,
+   "unit": "Hz",
+   "disp": "5.14 Hz",
+   "symbol": "clownfish.RigState.tail_hz",
+   "factor": null,
+   "note": "f = St·U/A at V, from the rig itself",
+   "poster_only": false,
+   "code_label": {
+    "labels": [
+     "ours",
+     "verified"
+    ],
+    "how": "own",
+    "at": "clownfish.py:137"
+   }
+  },
+  {
+   "id": "f_cap",
+   "group": "Tail",
+   "quantity": "Tail-beat cap",
+   "status": "ours",
+   "sources": [
+    "game"
+   ],
+   "value": 6.0,
+   "unit": "Hz",
+   "disp": "6 Hz",
+   "symbol": "clownfish.TUNABLES:fish-tail-hz-max",
+   "factor": 1.0,
+   "note": "kept under the Nyquist rate at 20 ticks/s",
+   "poster_only": false,
+   "code_label": {
+    "labels": [
+     "ours"
+    ],
+    "how": "own",
+    "at": "clownfish.py:140"
+   }
+  },
+  {
+   "id": "tick",
+   "group": "Tail",
+   "quantity": "Engine tick rate",
+   "status": "ours",
+   "sources": [
+    "game"
+   ],
+   "value": 20.0,
+   "unit": "ticks/s",
+   "disp": "20 ticks/s",
+   "symbol": "run_aquarium_checks.DT",
+   "factor": null,
+   "note": "-rate20; value = 1 / DT; the Nyquist rate is half of it",
+   "poster_only": false,
+   "code_label": null
+  },
+  {
+   "id": "st_dart",
+   "group": "Tail",
+   "quantity": "St in a dart",
+   "status": "ours",
+   "sources": [
+    "game"
+   ],
+   "value": 0.17500000000000004,
+   "unit": "",
+   "disp": "0.18",
+   "symbol": "clownfish.TUNABLES:fish-tail-hz-max",
+   "factor": null,
+   "note": "6 Hz × A / dart speed: below the fish window, knowingly",
+   "poster_only": false,
+   "code_label": {
+    "labels": [
+     "ours"
+    ],
+    "how": "own",
+    "at": "clownfish.py:140"
+   }
+  },
+  {
+   "id": "dart_speed",
+   "group": "Tail",
+   "quantity": "Dart speed",
+   "status": "ours",
+   "sources": [
+    "game"
+   ],
+   "value": 6.095999999999999,
+   "unit": "m/s",
+   "disp": "6.096 m/s",
+   "symbol": "aquarium_constants.DART_SPEED",
+   "factor": 1.0,
+   "note": "= 6.86 BL/s",
+   "poster_only": false,
+   "code_label": {
+    "labels": [],
+    "how": "none",
+    "at": "aquarium_constants.py:84"
+   }
+  },
+  {
+   "id": "cd_ratio",
+   "group": "Gait",
+   "quantity": "Drag burst : coast",
+   "status": "verified",
+   "sources": [
+    "S3"
+   ],
+   "value": 4.0,
+   "unit": "",
+   "disp": "≈ 4 : 1 (koi)",
+   "symbol": null,
+   "factor": 1.0,
+   "note": "Cd 0.242 against 0.060, koi carp",
+   "poster_only": false,
+   "code_label": null
+  },
+  {
+   "id": "energy",
+   "group": "Gait",
+   "quantity": "Energy saved (koi)",
+   "status": "verified",
+   "sources": [
+    "S3"
+   ],
+   "value": 45.0,
+   "unit": "%",
+   "disp": "≈ 45 %",
+   "symbol": null,
+   "factor": 1.0,
+   "note": "nearly 45 % against steady swimming, koi carp",
+   "poster_only": false,
+   "code_label": null
+  },
+  {
+   "id": "const_cycle",
+   "group": "Gait",
+   "quantity": "Constant cycle idea",
+   "status": "unverified",
+   "sources": [
+    "S6"
+   ],
+   "value": null,
+   "unit": "",
+   "disp": "qualitative",
+   "symbol": null,
+   "factor": 1.0,
+   "note": "cycle kept constant, burst share sets speed: as reported for Li et al. 2021; not opened",
+   "poster_only": false,
+   "code_label": null
+  },
+  {
+   "id": "cycle",
+   "group": "Gait",
+   "quantity": "Gait cycle",
+   "status": "ours",
+   "sources": [
+    "game"
+   ],
+   "value": 0.5,
+   "unit": "s",
+   "disp": "0.5 s",
+   "symbol": "aquarium_constants.GAIT_CYCLE",
+   "factor": 1.0,
+   "note": "the code comment says \"unverified; ours\"",
+   "poster_only": false,
+   "code_label": {
+    "labels": [
+     "ours",
+     "unverified"
+    ],
+    "how": "own",
+    "at": "aquarium_constants.py:102"
+   }
+  },
+  {
+   "id": "duty",
+   "group": "Gait",
+   "quantity": "Burst share",
+   "status": "ours",
+   "sources": [
+    "game"
+   ],
+   "value": 40.0,
+   "unit": "%",
+   "disp": "40 %",
+   "symbol": "aquarium_constants.GAIT_DUTY",
+   "factor": 100.0,
+   "note": "",
+   "poster_only": false,
+   "code_label": {
+    "labels": [
+     "ours"
+    ],
+    "how": "own",
+    "at": "aquarium_constants.py:103"
+   }
+  },
+  {
+   "id": "burst_v",
+   "group": "Gait",
+   "quantity": "Burst speed target",
+   "status": "ours",
+   "sources": [
+    "game"
+   ],
+   "value": 3.9898319999999994,
+   "unit": "m/s",
+   "disp": "3.99 m/s (1.309 V)",
+   "symbol": "aquarium_constants.BURST_SPEED",
+   "factor": 1.0,
+   "note": "solved so the cycle mean is V",
+   "poster_only": false,
+   "code_label": {
+    "labels": [
+     "ours"
+    ],
+    "how": "inherited L103",
+    "at": "aquarium_constants.py:104"
+   }
+  },
+  {
+   "id": "tau_a",
+   "group": "Gait",
+   "quantity": "Burst rise τ",
+   "status": "ours",
+   "sources": [
+    "game"
+   ],
+   "value": 0.1,
+   "unit": "s",
+   "disp": "0.1 s",
+   "symbol": "aquarium_constants.TAU_ACCEL",
+   "factor": 1.0,
+   "note": "",
+   "poster_only": false,
+   "code_label": {
+    "labels": [
+     "ours"
+    ],
+    "how": "own",
+    "at": "aquarium_constants.py:105"
+   }
+  },
+  {
+   "id": "tau_c",
+   "group": "Gait",
+   "quantity": "Coast decay τ",
+   "status": "ours",
+   "sources": [
+    "game"
+   ],
+   "value": 0.5,
+   "unit": "s",
+   "disp": "0.5 s",
+   "symbol": "aquarium_constants.TAU_COAST",
+   "factor": 1.0,
+   "note": "",
+   "poster_only": false,
+   "code_label": {
+    "labels": [
+     "ours"
+    ],
+    "how": "own",
+    "at": "aquarium_constants.py:106"
+   }
+  },
+  {
+   "id": "tau_g",
+   "group": "Gait",
+   "quantity": "Glide τ (released)",
+   "status": "ours",
+   "sources": [
+    "game"
+   ],
+   "value": 0.45,
+   "unit": "s",
+   "disp": "0.45 s",
+   "symbol": "aquarium_constants.TAU_GLIDE",
+   "factor": 1.0,
+   "note": "",
+   "poster_only": false,
+   "code_label": {
+    "labels": [
+     "ours"
+    ],
+    "how": "inherited L106",
+    "at": "aquarium_constants.py:107"
+   }
+  },
+  {
+   "id": "pec_lo",
+   "group": "Pectorals",
+   "quantity": "Pectoral beat, slow",
+   "status": "verified",
+   "sources": [
+    "S4"
+   ],
+   "value": 2.4,
+   "unit": "Hz",
+   "disp": "2.4 Hz",
+   "symbol": "clownfish.TUNABLES:fish-pec-idle-hz",
+   "factor": 1.0,
+   "note": "A. ocellaris, beats per second in an oscillating surge, not steady swimming",
+   "poster_only": false,
+   "code_label": {
+    "labels": [
+     "verified"
+    ],
+    "how": "own",
+    "at": "clownfish.py:150"
+   }
+  },
+  {
+   "id": "pec_hi",
+   "group": "Pectorals",
+   "quantity": "Pectoral beat, fast",
+   "status": "verified",
+   "sources": [
+    "S4"
+   ],
+   "value": 4.6,
+   "unit": "Hz",
+   "disp": "4.6 Hz",
+   "symbol": "clownfish.TUNABLES:fish-pec-hz-hi",
+   "factor": 1.0,
+   "note": "A. ocellaris, beats per second in an oscillating surge, not steady swimming",
+   "poster_only": false,
+   "code_label": {
+    "labels": [
+     "verified"
+    ],
+    "how": "own",
+    "at": "clownfish.py:151"
+   }
+  },
+  {
+   "id": "pec_vhi",
+   "group": "Pectorals",
+   "quantity": "Speed at fast beat",
+   "status": "ours",
+   "sources": [
+    "game"
+   ],
+   "value": 3.658,
+   "unit": "m/s",
+   "disp": "3.658 m/s (1.2 V)",
+   "symbol": "clownfish.TUNABLES:fish-pec-v-hi",
+   "factor": 1.0,
+   "note": "",
+   "poster_only": false,
+   "code_label": {
+    "labels": [
+     "ours"
+    ],
+    "how": "own",
+    "at": "clownfish.py:152"
+   }
+  },
+  {
+   "id": "pec_alt",
+   "group": "Pectorals",
+   "quantity": "Alternating below",
+   "status": "other-species",
+   "sources": [
+    "S5"
+   ],
+   "value": 0.914,
+   "unit": "m/s",
+   "disp": "0.914 m/s (0.3 V)",
+   "symbol": "clownfish.TUNABLES:fish-pec-sync-lo",
+   "factor": 1.0,
+   "note": "game threshold set from a damselfish hint, not measured in a clownfish",
+   "poster_only": false,
+   "code_label": {
+    "labels": [
+     "other-species"
+    ],
+    "how": "own",
+    "at": "clownfish.py:153"
+   }
+  },
+  {
+   "id": "pec_sync",
+   "group": "Pectorals",
+   "quantity": "Synchronous above",
+   "status": "other-species",
+   "sources": [
+    "S5"
+   ],
+   "value": 2.743,
+   "unit": "m/s",
+   "disp": "2.743 m/s (0.9 V)",
+   "symbol": "clownfish.TUNABLES:fish-pec-sync-hi",
+   "factor": 1.0,
+   "note": "game threshold set from a damselfish hint, not measured in a clownfish",
+   "poster_only": false,
+   "code_label": {
+    "labels": [
+     "other-species"
+    ],
+    "how": "own",
+    "at": "clownfish.py:154"
+   }
+  },
+  {
+   "id": "hale",
+   "group": "Pectorals",
+   "quantity": "Damselfish switch",
+   "status": "other-species",
+   "sources": [
+    "S5"
+   ],
+   "value": [
+    1.87,
+    4.95
+   ],
+   "unit": "BL/s",
+   "disp": "1.87–4.95 BL/s",
+   "symbol": null,
+   "factor": 1.0,
+   "note": "12 damselfish species, no clownfish among them",
+   "poster_only": false,
+   "code_label": null
+  },
+  {
+   "id": "yaw_wn",
+   "group": "Steering",
+   "quantity": "Yaw ω",
+   "status": "ours",
+   "sources": [
+    "game"
+   ],
+   "value": 8.0,
+   "unit": "rad/s",
+   "disp": "8 rad/s",
+   "symbol": "aquarium_constants.YAW_WN",
+   "factor": 1.0,
+   "note": "",
+   "poster_only": false,
+   "code_label": {
+    "labels": [
+     "ours"
+    ],
+    "how": "inherited L109",
+    "at": "aquarium_constants.py:110"
+   }
+  },
+  {
+   "id": "yaw_zeta",
+   "group": "Steering",
+   "quantity": "Yaw ζ",
+   "status": "ours",
+   "sources": [
+    "game"
+   ],
+   "value": 0.9,
+   "unit": "",
+   "disp": "0.9",
+   "symbol": "aquarium_constants.YAW_ZETA",
+   "factor": 1.0,
+   "note": "",
+   "poster_only": false,
+   "code_label": {
+    "labels": [
+     "ours"
+    ],
+    "how": "inherited L109",
+    "at": "aquarium_constants.py:110"
+   }
+  },
+  {
+   "id": "yaw_wmax",
+   "group": "Steering",
+   "quantity": "Yaw rate cap",
+   "status": "ours",
+   "sources": [
+    "game"
+   ],
+   "value": 1.25,
+   "unit": "rev/s",
+   "disp": "1.25 rev/s",
+   "symbol": "aquarium_constants.YAW_WMAX",
+   "factor": 1.0,
+   "note": "about 180° in 0.5 s",
+   "poster_only": false,
+   "code_label": {
+    "labels": [
+     "ours"
+    ],
+    "how": "inherited L109",
+    "at": "aquarium_constants.py:110"
+   }
+  },
+  {
+   "id": "pitch_wn",
+   "group": "Steering",
+   "quantity": "Pitch ω",
+   "status": "ours",
+   "sources": [
+    "game"
+   ],
+   "value": 5.0,
+   "unit": "rad/s",
+   "disp": "5 rad/s",
+   "symbol": "aquarium_constants.PITCH_WN",
+   "factor": 1.0,
+   "note": "",
+   "poster_only": false,
+   "code_label": {
+    "labels": [
+     "ours"
+    ],
+    "how": "inherited L109",
+    "at": "aquarium_constants.py:111"
+   }
+  },
+  {
+   "id": "pitch_zeta",
+   "group": "Steering",
+   "quantity": "Pitch ζ",
+   "status": "ours",
+   "sources": [
+    "game"
+   ],
+   "value": 0.8,
+   "unit": "",
+   "disp": "0.8",
+   "symbol": "aquarium_constants.PITCH_ZETA",
+   "factor": 1.0,
+   "note": "",
+   "poster_only": false,
+   "code_label": {
+    "labels": [
+     "ours"
+    ],
+    "how": "inherited L109",
+    "at": "aquarium_constants.py:111"
+   }
+  },
+  {
+   "id": "pitch_wmax",
+   "group": "Steering",
+   "quantity": "Pitch rate cap",
+   "status": "ours",
+   "sources": [
+    "game"
+   ],
+   "value": 0.4,
+   "unit": "rev/s",
+   "disp": "0.4 rev/s",
+   "symbol": "aquarium_constants.PITCH_WMAX",
+   "factor": 1.0,
+   "note": "144°/s",
+   "poster_only": false,
+   "code_label": {
+    "labels": [
+     "ours"
+    ],
+    "how": "inherited L109",
+    "at": "aquarium_constants.py:111"
+   }
+  },
+  {
+   "id": "pitch_max",
+   "group": "Steering",
+   "quantity": "Pitch limit",
+   "status": "ours",
+   "sources": [
+    "game"
+   ],
+   "value": 40.0,
+   "unit": "°",
+   "disp": "40 °",
+   "symbol": "aquarium_constants.PITCH_MAX",
+   "factor": 360.0,
+   "note": "Up or Down alone",
+   "poster_only": false,
+   "code_label": {
+    "labels": [
+     "ours"
+    ],
+    "how": "inherited L109",
+    "at": "aquarium_constants.py:112"
+   }
+  },
+  {
+   "id": "pitch_diag",
+   "group": "Steering",
+   "quantity": "Pitch limit, diag.",
+   "status": "ours",
+   "sources": [
+    "game"
+   ],
+   "value": 30.0,
+   "unit": "°",
+   "disp": "30 °",
+   "symbol": "aquarium_constants.PITCH_DIAG",
+   "factor": 360.0,
+   "note": "with a sideways key held too",
+   "poster_only": false,
+   "code_label": {
+    "labels": [
+     "ours"
+    ],
+    "how": "inherited L109",
+    "at": "aquarium_constants.py:113"
+   }
+  },
+  {
+   "id": "bank_max",
+   "group": "Steering",
+   "quantity": "Bank at full yaw",
+   "status": "ours",
+   "sources": [
+    "game"
+   ],
+   "value": 15.0,
+   "unit": "°",
+   "disp": "15 °",
+   "symbol": "aquarium_constants.BANK_MAX",
+   "factor": 360.0,
+   "note": "",
+   "poster_only": false,
+   "code_label": {
+    "labels": [
+     "ours"
+    ],
+    "how": "inherited L109",
+    "at": "aquarium_constants.py:114"
+   }
+  },
+  {
+   "id": "turn_dip",
+   "group": "Steering",
+   "quantity": "Burst dip in turns",
+   "status": "ours",
+   "sources": [
+    "game"
+   ],
+   "value": 25.0,
+   "unit": "%",
+   "disp": "up to 25 %",
+   "symbol": "aquarium_constants.TURN_DIP",
+   "factor": 100.0,
+   "note": "",
+   "poster_only": false,
+   "code_label": {
+    "labels": [
+     "ours"
+    ],
+    "how": "inherited L109",
+    "at": "aquarium_constants.py:116"
+   }
+  },
+  {
+   "id": "tau_wall",
+   "group": "Steering",
+   "quantity": "Wall easing time",
+   "status": "ours",
+   "sources": [
+    "game"
+   ],
+   "value": 0.25,
+   "unit": "s",
+   "disp": "0.25 s",
+   "symbol": "aquarium_constants.TAU_WALL",
+   "factor": 1.0,
+   "note": "",
+   "poster_only": false,
+   "code_label": {
+    "labels": [
+     "ours"
+    ],
+    "how": "inherited L109",
+    "at": "aquarium_constants.py:117"
+   }
+  },
+  {
+   "id": "uturn",
+   "group": "Steering",
+   "quantity": "U-turn radius R",
+   "status": "ours",
+   "sources": [
+    "game"
+   ],
+   "value": 0.38808341323527756,
+   "unit": "m",
+   "disp": "≈ 0.4 m (0.39)",
+   "symbol": "aquarium_constants.SWIM_SPEED / YAW_WMAX",
+   "factor": null,
+   "note": "a game measurement (aquarium plan, Phase 4), not biology; R = V / (2π·ω) = 0.39 m; no clownfish turn radius was found",
+   "poster_only": false,
+   "code_label": {
+    "labels": [],
+    "how": "none",
+    "at": "aquarium_constants.py:83"
+   }
+  },
+  {
+   "id": "bend",
+   "group": "Steering",
+   "quantity": "C-bend gain",
+   "status": "ours",
+   "sources": [
+    "game"
+   ],
+   "value": 0.05,
+   "unit": "s",
+   "disp": "0.05 s",
+   "symbol": "clownfish.TUNABLES:fish-bend",
+   "factor": 1.0,
+   "note": "tail yaw per unit of yaw rate",
+   "poster_only": false,
+   "code_label": {
+    "labels": [
+     "ours"
+    ],
+    "how": "own",
+    "at": "clownfish.py:142"
+   }
+  },
+  {
+   "id": "counter",
+   "group": "Steering",
+   "quantity": "Body recoil share",
+   "status": "ours",
+   "sources": [
+    "game"
+   ],
+   "value": 20.0,
+   "unit": "%",
+   "disp": "20 %",
+   "symbol": "clownfish.TUNABLES:fish-counter-yaw",
+   "factor": 100.0,
+   "note": "share of tail yaw fed back into the body heading",
+   "poster_only": false,
+   "code_label": {
+    "labels": [
+     "ours"
+    ],
+    "how": "inherited L142",
+    "at": "clownfish.py:143"
+   }
+  },
+  {
+   "id": "tail_env",
+   "group": "Steering",
+   "quantity": "Tail envelope time",
+   "status": "ours",
+   "sources": [
+    "game"
+   ],
+   "value": 0.06,
+   "unit": "s",
+   "disp": "0.06 s",
+   "symbol": "clownfish.TUNABLES:fish-tail-env-t",
+   "factor": 1.0,
+   "note": "",
+   "poster_only": false,
+   "code_label": {
+    "labels": [
+     "ours"
+    ],
+    "how": "own",
+    "at": "clownfish.py:141"
+   }
+  },
+  {
+   "id": "cstart",
+   "group": "Method",
+   "quantity": "C-start stages",
+   "status": "unverified",
+   "sources": [
+    "S7"
+   ],
+   "value": null,
+   "unit": "",
+   "disp": "definitions",
+   "symbol": null,
+   "factor": 1.0,
+   "note": "not opened; the plan called it verified, the brief does not",
+   "poster_only": false,
+   "code_label": null
+  },
+  {
+   "id": "layering",
+   "group": "Method",
+   "quantity": "Layering idea",
+   "status": "unverified",
+   "sources": [
+    "S8"
+   ],
+   "value": null,
+   "unit": "",
+   "disp": "idea only",
+   "symbol": null,
+   "factor": 1.0,
+   "note": "motor under steering; not opened; used for the idea, never for a number",
+   "poster_only": false,
+   "code_label": null
+  }
+ ]
+}
