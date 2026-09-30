@@ -32,10 +32,16 @@ HALNotifyResume(void)
     g_suspended.store(false, std::memory_order_release);
 }
 
+// Defined in hal/android/native_app_entry.cc: 1 while an EGL surface exists.
+extern "C" int WFAndroidHasWindow(void);
+
+// Suspended = paused by the OS, OR resumed but the window has not come back yet (Home then reopen delivers
+// APP_CMD_RESUME before APP_CMD_INIT_WINDOW; drawing with no surface aborts). The suspended loop keeps
+// pumping events (HALPumpSuspendedEvents), so INIT_WINDOW arrives and the game carries on.
 extern "C" WF_ANDROID_EXPORT int
 HALIsSuspended(void)
 {
-    return g_suspended.load(std::memory_order_acquire) ? 1 : 0;
+    return (g_suspended.load(std::memory_order_acquire) || !WFAndroidHasWindow()) ? 1 : 0;
 }
 
 // Defined in hal/android/native_app_entry.cc — ALooper_pollOnce(0, ...).

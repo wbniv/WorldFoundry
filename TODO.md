@@ -387,6 +387,7 @@ _Auto-added from plan "Out of scope"/"Deferred" sections at commit time. Triage 
 - [ ] **(triage)** Mapping remote keys to B/C/D, unless the decision in mockup 2 asks for it. — _from [2026-10-01-condo-chromecast.md](docs/plans/2026-10-01-condo-chromecast.md)_  <!-- fp:9a51dfc8f55b1684 -->
 - [ ] **(triage)** Optimising the frame rate by changing the level or the engine. — _from [2026-10-01-condo-chromecast.md](docs/plans/2026-10-01-condo-chromecast.md)_  <!-- fp:897fca84f38344bc -->
 - [ ] **(triage)** Play Store or any distribution beyond `adb` sideload. — _from [2026-10-01-condo-chromecast.md](docs/plans/2026-10-01-condo-chromecast.md)_  <!-- fp:e39824d2cde904ae -->
+- [ ] **(triage)** Changing the level. It is fine as shipped; the assertion seen first was missing engine flags on Android, not a level defect (Verification 11). — _from [2026-10-01-condo-chromecast.md](docs/plans/2026-10-01-condo-chromecast.md)_  <!-- fp:c9c621195603dfbe -->
 <!-- END auto-captured-deferrals -->
 
 - [x] Implemented Forth-only condo camera inspection controls; desktop/touch input regressions passed. [Plan and mockups](docs/plans/2026-09-25-condo-camera-controls.md)

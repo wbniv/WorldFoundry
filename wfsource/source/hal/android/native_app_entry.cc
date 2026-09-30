@@ -337,6 +337,15 @@ WFAndroidGetAssetManager()
     return gAssetMgr;
 }
 
+// True while an EGL surface exists (between APP_CMD_INIT_WINDOW and APP_CMD_TERM_WINDOW). HALIsSuspended
+// also waits on this: after Home and reopen, APP_CMD_RESUME arrives ~100 ms BEFORE the new window, and drawing
+// in that gap raised GL error 1286 and aborted (display.cc AssertGLOK, seen on the Chromecast HD).
+extern "C" WF_ANDROID_EXPORT int
+WFAndroidHasWindow()
+{
+    return gEglReady ? 1 : 0;
+}
+
 // Called from XEventLoop (display.cc PageFlip) once per frame. Non-blocking
 // drain of any queued commands + input events.
 extern "C" WF_ANDROID_EXPORT void

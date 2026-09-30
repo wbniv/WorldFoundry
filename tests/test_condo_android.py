@@ -96,3 +96,13 @@ def test_built_condo_apk_contents():
         assert z.read("assets/cd.iff") == CONDO_CD.read_bytes()
         assert {"lib/arm64-v8a/libwf_game.so", "lib/armeabi-v7a/libwf_game.so"} <= names
         assert {n for n in names if n.startswith("assets/")} == {"assets/cd.iff", "assets/wf_args.txt"}
+
+
+def test_suspended_until_the_window_returns():
+    """Home then reopen delivers APP_CMD_RESUME ~100 ms before APP_CMD_INIT_WINDOW; drawing in that gap aborted the app on
+    the Chromecast HD (GL error 1286 at display.cc:866). HALIsSuspended must also wait for the window."""
+    root = Path(__file__).resolve().parent.parent
+    life = (root / "wfsource/source/hal/android/lifecycle.cc").read_text()
+    entry = (root / "wfsource/source/hal/android/native_app_entry.cc").read_text()
+    assert "WFAndroidHasWindow" in life.split("HALIsSuspended(void)")[1].split("}")[0]
+    assert "WFAndroidHasWindow()" in entry and "gEglReady ? 1 : 0" in entry

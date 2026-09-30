@@ -34,6 +34,9 @@ Options:
   --seconds N    how long the app runs before the screenshot (default 20)
   --poke         after the first screenshot, send D-pad RIGHT (held 1.5 s),
                  then UP, and take screen-after-keys.png (information only)
+  --resume       after the screenshot (and --poke), press Home, reopen the app, and
+                 require it to be alive and drawing again (a FAIL if it aborts: the
+                 Chromecast HD did, before the window-not-back-yet fix)
   -h, --help     this help
 
 Environment:
@@ -65,6 +68,7 @@ BUILD=0
 APK=""
 SECONDS_TO_RUN=20
 POKE=0
+RESUME=0
 TARGET=""
 while (($#)); do
     case "$1" in
@@ -75,6 +79,7 @@ while (($#)); do
         --apk)      APK="${2:?--apk needs a path}"; shift 2 ;;
         --seconds)  SECONDS_TO_RUN="${2:?--seconds needs a number}"; shift 2 ;;
         --poke)     POKE=1; shift ;;
+        --resume)   RESUME=1; shift ;;
         -*)         echo "android-device-run: unknown option $1 (see --help)" >&2; exit 2 ;;
         *)          if [[ -n "$TARGET" ]]; then echo "android-device-run: one TARGET only" >&2; exit 2; fi
                     TARGET="$1"; shift ;;
@@ -296,6 +301,27 @@ if ((POKE)); then
     sleep 2
     "${A[@]}" exec-out screencap -p > "$OUTDIR/screen-after-keys.png" 2>/dev/null || true
     result INFO "screen-after-keys.png taken: compare the fish's position with screen.png"
+fi
+
+if ((RESUME)); then
+    say "resume: Home, then reopen"
+    "${A[@]}" shell input keyevent KEYCODE_HOME >/dev/null 2>&1 || true
+    sleep 3
+    "${A[@]}" shell am start -n "$ACTIVITY" >/dev/null 2>&1 || true
+    sleep 6
+    rpid="$("${A[@]}" shell pidof "$PKG" 2>/dev/null | tr -d '\r' || true)"
+    "${A[@]}" exec-out screencap -p > "$OUTDIR/screen-after-resume.png" 2>/dev/null || true
+    rcolours="$(python3 -W ignore - "$OUTDIR/screen-after-resume.png" <<'PY' 2>/dev/null || echo 0
+import sys
+from PIL import Image
+print(len(set(Image.open(sys.argv[1]).convert("RGB").resize((160, 90)).getdata())))
+PY
+)"
+    if [[ -n "$rpid" && "${rcolours:-0}" -ge 50 ]]; then result PASS "alive and drawing after Home + reopen (pid $rpid, $rcolours colours; screen-after-resume.png)"
+    else
+        rstate="gone"; [[ -n "$rpid" ]] && rstate="alive but blank"
+        result FAIL "after Home + reopen the app is $rstate (${rcolours:-0} colours): the resume path aborts; read wf.log's last lines"
+    fi
 fi
 
 printf '%s\n' "${RESULTS[@]}" > "$OUTDIR/summary.txt"
