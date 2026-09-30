@@ -835,13 +835,22 @@ Rotation == Track    → position offset, direction and up are all rotated by Tr
                        heading (C only) before TrackObject is added
 ```
 
+**Correction (2026‑09‑30, aquarium Phase 0): in bungee-cam levels the aim is different.**
+`BungeeCameraHandler::update` ([`movecam.cc`](../wfsource/source/game/movecam.cc) ≈ line 1020) re-aims after
+the spring step as `direction = (Target − Follow + TrackObject) − camera`, so `Track Object` *does* steer a bungee
+camera. Every shipped level with `'FLAG' 1l 1l` in its standalone wrapper (snowgoons, the moon, the condo, …) is in
+bungee mode. The formula block above is the normal-mode (`NormalCameraHandler`) behaviour. A camera meant to be
+parked on a fixed point in a bungee level needs `Follow = Target = Track Object` = the look point; with
+`Track Object = Player` it aims at the player (the aquarium test card, whose player sat behind the camera, rendered
+pure black until this was fixed — [plan](plans/2026-09-30-aquarium-level.md#phase-0-verdict)).
+
 So **`Fixed` does not park the camera** — it only means "don't turn with the tracked object's
 heading". The two rigs in use:
 
 | Rig | Toggles | Objects | Effect |
 |---|---|---|---|
 | Doll-house follow (condo `cs_dollhouse`) | `Relative` ×3, `Fixed` | `Follow = CamTarget` at the origin, `Target = LookAt` at (0, 0, 0.9), `Track Object = Player` | camera = player + camshot offset; aim = `LookAt − camshot` — a fixed world-axis offset that follows the player without spinning with the doom-stick heading |
-| Vista / parked (moon `cs_chase`, `cs_earth`) | `Absolute` ×3, `Fixed` | `Follow = Target = CamTarget` at the look point | camera at the camshot's own point, aimed at the look point; `Track Object` is irrelevant |
+| Vista / parked (moon `cs_chase`, `cs_earth`) | `Absolute` ×3, `Fixed` | `Follow = Target = CamTarget` at the look point | camera at the camshot's own point, aimed at the look point in normal mode; in bungee mode (the moon's wrapper) it aims at `Track Object` (`cs_chase` tracks `Player`) — see the correction above |
 | Third person that turns with the player | `Relative` ×3, `Track` | as doll-house | the offset swings behind the player as they turn |
 
 Rules that fall out of the formulas:
