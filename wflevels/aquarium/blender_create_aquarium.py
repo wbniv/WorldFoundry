@@ -73,8 +73,8 @@ TAG = '[aquarium]'
 COL = {
     'acrylic':      (0.62, 0.85, 0.90),     # outer faces of the shell: pale cyan
     'acrylic-edge': (0.82, 0.96, 1.00),     # the exposed front edges: reads as an acrylic edge
-    'water':        (0.16, 0.68, 0.86),     # inner faces below the water line (the back film)
-    'water-deep':   (0.10, 0.50, 0.68),     # end walls' inner faces: a shade darker than the back
+    # Phase 4: the water faces are a vertical gradient (WATER_TOP → WATER_BOTTOM, below) with
+    # light shafts on the back wall, not one flat colour; see § 3.
     'waterline':    (0.60, 0.90, 0.97),     # the opaque band at the water line
     'air':          (0.06, 0.13, 0.19),     # inner faces above the water line
     'rim':          (0.74, 0.92, 0.97),
@@ -82,7 +82,7 @@ COL = {
     'sand-1':       (0.92, 0.78, 0.54),
     'sand-2':       (0.86, 0.71, 0.47),
     'sand-3':       (0.96, 0.84, 0.61),
-    'sand-side':    (0.70, 0.56, 0.36),
+    'sand-side':    (0.84, 0.72, 0.48),     # Phase 4: at camera A's lower eye most of the sand seen is this face
     'rock-1':       (0.47, 0.46, 0.44),
     'rock-2':       (0.38, 0.37, 0.36),
     'rock-3':       (0.56, 0.54, 0.51),
@@ -90,22 +90,37 @@ COL = {
     'anem-column':  (0.62, 0.40, 0.26),
     'anem-column2': (0.72, 0.50, 0.33),
     'anem-disc':    (0.55, 0.20, 0.36),
-    'tent-low':     (0.72, 0.24, 0.48),
-    'tent-high':    (0.96, 0.54, 0.70),
-    'bulb':         (0.98, 0.62, 0.78),
-    'stand':        (0.26, 0.15, 0.09),
-    'stand-top':    (0.34, 0.21, 0.13),
+    'tent-low':     (0.62, 0.22, 0.38),     # tentacles darken toward the disc (mockup #9a4573 → #c2699b)
+    'tent-mid':     (0.72, 0.30, 0.47),
+    'tent-high':    (0.80, 0.40, 0.55),
+    'bulb':         (0.99, 0.66, 0.74),     # mockup #f3b2d2, with a lighter upper cap (#fde0ee)
+    'bulb-hi':      (1.00, 0.86, 0.88),
+    'stand':        (0.15, 0.09, 0.05),     # Phase 4: darker, the lower sun lights its front face fully
+    'stand-top':    (0.22, 0.14, 0.08),
     'backdrop':     (0.07, 0.10, 0.15),
 }                                           # the fish's own palette is clownfish.COLOURS
 WATERLINE_BAND = 0.4                        # in: the band's height, just under the water line (≈ 3 px at 11 m)
+# Water gradient (Phase 4, mockup A: lighter toward the surface, darker toward the sand) on the
+# back wall's and end walls' inner faces, and light shafts on the back wall: flat per-face colours
+# only (the engine has no translucency, plan § Phase 0). Tuned from captures (step 19).
+WATER_TOP, WATER_BOTTOM = (0.20, 0.62, 0.70), (0.05, 0.30, 0.38)   # back wall, faces the light
+END_TOP, END_BOTTOM = (0.16, 0.62, 0.78), (0.05, 0.34, 0.47)       # end walls: ambient only
+WATER_SLICES = 10                           # gradient steps between the sand and the water-line band
+SHAFTS = [(-4.2, 0.9, 0.6, 2.2), (-0.4, 0.9, 0.6, 2.2), (3.6, 0.7, 0.5, 1.8)]   # mockup A (×10 m):
+#   (x at the water line, width there, x shift at the sand, width at the sand)
+SHAFT_LIFT = (0.07, 0.08, 0.06)             # added to the slice colour at the top; fades to 30 % at the sand
 
 # ── Lights (docs/level-building.md § Lighting). Aim measured, not assumed: the doc's
 #    outward-wound recipe (B = −alt, C = −90°) left every face at exactly the ambient term in
 #    the first capture (sand rendered ambient × colour), so this level takes the mirrored aim,
 #    wf_light_aim-style (B = +alt, C = +90°): lit from above and from the camera side. ──
-SUN_ALT_DEG = 65.0
+# Phase 4: the sun came down from 65° to 40° and the ambient went up. At 65° a face toward the
+# camera (the fish's flanks, the back wall) got only cos 65° = 0.42 of the sun, so the #ff8a2a
+# flank rendered at ≈ 0.66 and read brown; at 40° it gets 0.77 and the flank ≈ 1.0, while the
+# sand (a top face, sin 40° = 0.64) comes down toward the mockup's sand.
+SUN_ALT_DEG = 40.0
 SUN_RGB = (0.72, 0.74, 0.74)
-AMBIENT_RGB = (0.36, 0.43, 0.50)            # cool fill
+AMBIENT_RGB = (0.45, 0.50, 0.55)            # cool fill
 
 KEEP_CLASSES = {'director', 'camera', 'levelobj', 'matte', 'light', 'room', 'camshot',
                 'target', 'player'}
@@ -125,6 +140,12 @@ def find_by_class(cn):
 
 def attach_schema(obj, oad):
     obj['wf_schema_path'] = os.path.join(OAD_DIR, oad + '.oad')
+
+
+def colour(name, rgb):
+    """Register a computed colour (gradient slices, shafts) as a key for mat()."""
+    COL[name] = tuple(max(0.0, min(1.0, c)) for c in rgb)
+    return name
 
 
 def mat(key):
@@ -163,14 +184,17 @@ class MeshBuilder:
 
     def box(self, x0, y0, z0, x1, y1, z1, keys):
         """Exterior box. `keys`: one colour key, or a dict by side
-        ('-z', '+z', '-y', '+x', '+y', '-x') with a 'default'."""
+        ('-z', '+z', '-y', '+x', '+y', '-x') with a 'default'. A side keyed None is left out
+        (the caller tessellates it itself, e.g. the back wall's shafts)."""
         if isinstance(keys, str):
             keys = {'default': keys}
         v = [(x0, y0, z0), (x1, y0, z0), (x1, y1, z0), (x0, y1, z0),
              (x0, y0, z1), (x1, y0, z1), (x1, y1, z1), (x0, y1, z1)]
         for side, f in (('-z', (0, 3, 2, 1)), ('+z', (4, 5, 6, 7)), ('-y', (0, 1, 5, 4)),
                         ('+x', (1, 2, 6, 5)), ('+y', (2, 3, 7, 6)), ('-x', (3, 0, 4, 7))):
-            self.face([v[i] for i in f], keys.get(side, keys['default']))
+            key = keys.get(side, keys['default'])
+            if key is not None:
+                self.face([v[i] for i in f], key)
 
     def closed_shell(self, faces, key):
         bmesh.ops.recalc_face_normals(self.bm, faces=faces)
@@ -291,20 +315,68 @@ assert abs(V - C.SWIM_SPEED) < 1e-9, 'the fish and the tank disagree on the swim
 #    face can carry water, water-line and air colours without coplanar overlays (no z-fight).
 # ═════════════════════════════════════════════════════════════════════════════
 HX, HY, IX, IY, W = C.HX, C.HY, C.IX, C.IY, C.WALL
-BANDS = ((W, C.WATER_Z - WATERLINE_BAND, 'water'),
-         (C.WATER_Z - WATERLINE_BAND, C.WATER_Z, 'waterline'),
-         (C.WATER_Z, C.EXT_Z, 'air'))
+# Phase 4: the water band is WATER_SLICES stacked boxes (plus one hidden behind the sand), each
+# inner face one step of a vertical gradient; the back wall's inner face in each slice is cut into
+# trapezoids along the light shafts' slanted edges. Everything stays in the wall's own inner-face
+# plane (no overlay quad, so nothing z-fights), and it is all part of the one tank-shell statplat:
+# no new actor, no new collision body.
+WL0 = C.WATER_Z - WATERLINE_BAND
+SLICE_Z = [W, C.SAND_TOP] + [C.SAND_TOP + (WL0 - C.SAND_TOP) * (k + 1) / WATER_SLICES for k in range(WATER_SLICES)]
+BANDS = [(za, zb, max(0.0, ((za + zb) / 2 - C.SAND_TOP) / (WL0 - C.SAND_TOP))) for za, zb in zip(SLICE_Z, SLICE_Z[1:])]
+BANDS += [(WL0, C.WATER_Z, 'waterline'), (C.WATER_Z, C.EXT_Z, 'air')]
+
+
+def lerp3(a, b, t):
+    return tuple(p + (q - p) * t for p, q in zip(a, b))
+
+
+def shaft_lines(z_m):
+    """x (m) of every shaft edge at height z (m), left to right: [l0, r0, l1, r1, ...]."""
+    u = (z_m - C.SAND_TOP_M) / (C.WATER_LINE_M - C.SAND_TOP_M)      # 1 at the water line, 0 at the sand
+    k = S / 10.0
+    out = []
+    for x_top, w_top, shift, w_bot in SHAFTS:
+        xl = (x_top + (1.0 - u) * shift) * k
+        out += [xl, xl + (w_top + (1.0 - u) * (w_bot - w_top)) * k]
+    return [max(-m(IX), min(m(IX), x)) for x in out]
+
+
+def back_face_with_shafts(builder, za, zb, base_rgb, t):
+    """The back wall's inner face (y = IY, facing −Y) between za and zb (inches): trapezoids between
+    the wall's ends and the shafts' edges, wound counter-clockwise seen from the camera."""
+    y = m(IY)
+    lo = [-m(IX)] + shaft_lines(m(za)) + [m(IX)]
+    hi = [-m(IX)] + shaft_lines(m(zb)) + [m(IX)]
+    shaft_rgb = tuple(c + d * (0.3 + 0.7 * t) for c, d in zip(base_rgb, SHAFT_LIFT))
+    base_key = colour(f'water-{t:.3f}', base_rgb)
+    shaft_key = colour(f'shaft-{t:.3f}', shaft_rgb)
+    for i in range(len(lo) - 1):
+        if lo[i + 1] - lo[i] < 1e-4 and hi[i + 1] - hi[i] < 1e-4:
+            continue
+        builder.face([(lo[i], y, m(za)), (lo[i + 1], y, m(za)), (hi[i + 1], y, m(zb)), (hi[i], y, m(zb))],
+                     shaft_key if i % 2 else base_key)
+
 
 tb = MeshBuilder('tank_shell')
 tb.box(m(-HX), m(-HY), 0.0, m(HX), m(HY), m(W), {'default': 'acrylic', '-y': 'acrylic-edge'})
 for z0, z1, inner in BANDS:
-    deep = 'water-deep' if inner == 'water' else inner
-    tb.box(m(-HX), m(IY), m(z0), m(HX), m(HY), m(z1),                       # back
-           {'default': 'acrylic', '-y': inner, '+z': 'acrylic-edge'})
+    if isinstance(inner, float):                                            # a water slice: gradient step
+        back_rgb, end_key = lerp3(WATER_BOTTOM, WATER_TOP, inner), colour(f'end-{inner:.3f}', lerp3(END_BOTTOM, END_TOP, inner))
+        tb.box(m(-HX), m(IY), m(z0), m(HX), m(HY), m(z1), {'default': 'acrylic', '-y': None, '+z': 'acrylic-edge'})
+        if z0 >= C.SAND_TOP:
+            back_face_with_shafts(tb, z0, z1, back_rgb, inner)
+        else:                                                               # behind the sand: hidden, plain
+            tb.face([(m(-IX), m(IY), m(z0)), (m(IX), m(IY), m(z0)), (m(IX), m(IY), m(z1)), (m(-IX), m(IY), m(z1))],
+                    colour('water-sand', back_rgb))
+        # (the strips |x| > IX of this box's −y side are shared with the end walls: interior, left out)
+    else:
+        end_key = inner
+        tb.box(m(-HX), m(IY), m(z0), m(HX), m(HY), m(z1),                   # back
+               {'default': 'acrylic', '-y': inner, '+z': 'acrylic-edge'})
     tb.box(m(-HX), m(-HY), m(z0), m(-IX), m(IY), m(z1),                     # left end
-           {'default': 'acrylic', '+x': deep, '-y': 'acrylic-edge', '+z': 'acrylic-edge'})
+           {'default': 'acrylic', '+x': end_key, '-y': 'acrylic-edge', '+z': 'acrylic-edge'})
     tb.box(m(IX), m(-HY), m(z0), m(HX), m(IY), m(z1),                       # right end
-           {'default': 'acrylic', '-x': deep, '-y': 'acrylic-edge', '+z': 'acrylic-edge'})
+           {'default': 'acrylic', '-x': end_key, '-y': 'acrylic-edge', '+z': 'acrylic-edge'})
 shell = statplat('tank-shell', tb.finish())
 
 # Plan B has no front face, so the fish would swim out: an invisible slab in the front-glass
@@ -391,24 +463,29 @@ rock_pos = (C.ANEMONE_X, C.ANEMONE_Y, C.SAND_TOP_M)
 statplat('rock', rk.finish(), location=rock_pos)
 
 # ═════════════════════════════════════════════════════════════════════════════
-# 6. Anemone (static bubble-tip, plan § 5): base disc, column, oral disc, 17 tentacles, each a
-#    two-tone tapered strip with a bulb tip. Tentacles are split into a BACK set (y > 0) and a
-#    FRONT set (y < 0) with a gap at y = 0, so a fish between them is overlapped by the front
-#    set by plain depth, no layering. Base at local z = 0; sits on the rock's flat top.
-#    Strips face the camera (−Y) and are wound counter-clockwise from there (backface cull).
-#    Phase 3: two actors. `anemone` (base, column, oral disc) is a statplat and solid;
-#    `anemone-tentacles` is a Mass-0 anchored platform with no Jolt body, so the fish can swim
-#    into the crown from any depth, as a clownfish nestles among the tentacles. With colliding
-#    tentacles the real hull (capsule radius 0.125 + 0.02 padding + Jolt's 0.1 m predictive
-#    contact) entered only within |y| < 0.035 m of the gap — a tap of Y input glides ≈ 1.4 m —
-#    and the bulbs, whose upper faces Jolt's walker counts as floor, stair-stepped it.
+# 6. Anemone (bubble-tip, plan § 5): pedal disc, column, flared oral disc, and 27 tentacles, each a
+#    three-segment tapered strip (darker toward the disc) with a bulb tip. Base at local z = 0; it
+#    sits on the rock's flat top. Phase 4: a large E. quadricolor, C.ANEMONE_SPAN (12 in) across
+#    the crown, with a taller column; still small at the base, so it does not block swimming.
+#    Tentacles are in a BACK row (y > 0) and a FRONT row (y < 0) with a gap at y = 0, so a fish
+#    between them is overlapped by the front row by plain depth, no layering. Strips face the
+#    camera (−Y) and are wound counter-clockwise from there (backface cull).
+#    `anemone` (pedal disc, column, oral disc) is a statplat and solid. The tentacles are SIX
+#    CLUMPS (row × left / centre / right, C.ANEMONE_CLUMPS), each a Mass-0 anchored platform with
+#    no Jolt body, so the fish nestles among them from any depth (Phase 3: with colliding tentacles
+#    the real hull entered only within |y| < 0.035 m of the gap, and the bulbs stair-stepped it).
+#    Each clump's origin is its pivot: the mean of its tentacles' bases, inside the oral disc's rim,
+#    so the Director's sway (aq-sway-tick: a rotation about that origin) swings it about its base
+#    and the bases stay hidden inside the rim (±5° moves a base ≤ 0.18 m from the pivot by ≤ 16 mm;
+#    the bases sit 20 mm under the rim's top and the rim is 40 mm deep).
 # ═════════════════════════════════════════════════════════════════════════════
-BASE_R, BASE_H = 0.042 * S, 0.006 * S
-COL_R0, COL_R1, COL_H = 0.034 * S, 0.027 * S, 0.042 * S
-TENT_Y = 0.036 * S                               # back set at +TENT_Y, front set at −TENT_Y
-BULB_R = 0.008 * S
+BASE_R, BASE_H = 0.040 * S, 0.006 * S            # pedal disc on the rock
+COL_R0, COL_R1, COL_H = 0.030 * S, 0.027 * S, 0.060 * S   # column: 0.6 m tall (Phase 3: 0.42)
+FLARE_H, RIM_H, DISC_R = 0.006 * S, 0.004 * S, 0.050 * S  # the oral disc flares out to a 0.5 m rim (1 m, ~4 in, across)
+TENT_Y = 0.040 * S                               # back row at +TENT_Y, front row at −TENT_Y
+TENT_BASE_X = 0.018 * S                          # bases spread |x| ≤ 0.18 m: inside the rim at |y| 0.4
+BULB_R = (0.0085 * S, 0.0100 * S)
 ab = MeshBuilder('anemone')
-tb_t = MeshBuilder('anemone_tentacles')
 
 
 def frustum(r0, r1, z0, z1, n, key, alt_key=None):
@@ -429,49 +506,79 @@ def frustum(r0, r1, z0, z1, n, key, alt_key=None):
 frustum(BASE_R, BASE_R * 0.9, 0.0, BASE_H, 12, 'anem-base')
 frustum(COL_R0, COL_R1, BASE_H, BASE_H + COL_H, 10, 'anem-column', 'anem-column2')
 top_z = BASE_H + COL_H
-frustum(COL_R1 * 1.05, COL_R1 * 0.8, top_z, top_z + 0.004 * S, 10, 'anem-disc')
+frustum(COL_R1, DISC_R, top_z, top_z + FLARE_H, 12, 'anem-column2')                    # the flare
+frustum(DISC_R, DISC_R * 0.97, top_z + FLARE_H, top_z + FLARE_H + RIM_H, 12, 'anem-disc')  # the rim
+DISC_TOP = top_z + FLARE_H + RIM_H
+TENT_BASE_Z = DISC_TOP - 0.002 * S                # 20 mm under the rim's top
+assert math.hypot(TENT_BASE_X, TENT_Y) < DISC_R * 0.97 - 0.004 * S, 'tentacle bases must be inside the rim'
 
 rnd = random.Random(17)
-TENTACLES = []                                   # (set, angle from vertical, deg; length)
-for k in range(9):
-    TENTACLES.append(('back', -62 + 124 * k / 8 + rnd.uniform(-4, 4), rnd.uniform(0.060, 0.075) * S))
-for k in range(8):
-    TENTACLES.append(('front', -56 + 112 * k / 7 + rnd.uniform(-4, 4), rnd.uniform(0.056, 0.072) * S))
-assert len(TENTACLES) == 17
+TENTACLES = []                                   # (row, angle from vertical, deg; length m)
+for k in range(15):
+    TENTACLES.append(('back', -80 + 160 * k / 14 + rnd.uniform(-3, 3), rnd.uniform(0.105, 0.125) * S))
+for k in range(12):
+    TENTACLES.append(('front', -76 + 152 * k / 11 + rnd.uniform(-3, 3), rnd.uniform(0.095, 0.115) * S))
 
 
-def tentacle(y, ang_deg, length):
-    """Two segments (lower dark, upper pink), bending outward, then a bulb."""
-    a0 = math.radians(ang_deg)
-    a1 = math.radians(ang_deg * 1.15)                          # the upper half leans out more
-    base = (COL_R1 * 0.85 * math.sin(a0), y, top_z)
-    mid = (base[0] + 0.5 * length * math.sin(a0), y, base[2] + 0.5 * length * math.cos(a0))
-    tip = (mid[0] + 0.5 * length * math.sin(a1), y, mid[2] + 0.5 * length * math.cos(a1))
-    widths = (0.0050 * S, 0.0040 * S, 0.0030 * S)
-    for (p, q, wp, wq, key) in ((base, mid, widths[0], widths[1], 'tent-low'),
-                                (mid, tip, widths[1], widths[2], 'tent-high')):
-        dx, dz = q[0] - p[0], q[2] - p[2]
-        ln = math.hypot(dx, dz)
-        px, pz = dz / ln, -dx / ln                             # in-plane perpendicular, "right" seen from −Y
-        tb_t.face([(p[0] - px * wp, y, p[2] - pz * wp), (p[0] + px * wp, y, p[2] + pz * wp),
-                   (q[0] + px * wq, y, q[2] + pz * wq), (q[0] - px * wq, y, q[2] - pz * wq)], key)
-    bulb = bmesh.ops.create_uvsphere(tb_t.bm, u_segments=8, v_segments=5, radius=BULB_R)
+def clump_side(ang_deg):
+    return 'l' if ang_deg < -27 else ('r' if ang_deg > 27 else 'c')
+
+
+def tentacle(builder, pivot, row, ang_deg, length, bulb_r):
+    """Three segments bending outward (darker toward the disc), then a bulb with a lighter cap.
+    Built in the clump's local frame (anemone-local minus `pivot`); returns the tip, anemone-local."""
+    y = TENT_Y if row == 'back' else -TENT_Y
+    a = [math.radians(ang_deg * f) for f in (1.0, 1.12, 1.25)]
+    pts = [(TENT_BASE_X * math.sin(a[0]), TENT_BASE_Z)]
+    for ak in a:
+        pts.append((pts[-1][0] + length / 3 * math.sin(ak), pts[-1][1] + length / 3 * math.cos(ak)))
+    widths = (0.0036 * S, 0.0030 * S, 0.0024 * S, 0.0019 * S)
+    for k, key in enumerate(('tent-low', 'tent-mid', 'tent-high')):
+        (px_, pz_), (qx_, qz_) = pts[k], pts[k + 1]
+        wp, wq = widths[k], widths[k + 1]
+        ln = math.hypot(qx_ - px_, qz_ - pz_)
+        nx, nz = (qz_ - pz_) / ln, -(qx_ - px_) / ln          # in-plane perpendicular, "right" seen from −Y
+        q = [(px_ - nx * wp, pz_ - nz * wp), (px_ + nx * wp, pz_ + nz * wp),
+             (qx_ + nx * wq, qz_ + nz * wq), (qx_ - nx * wq, qz_ - nz * wq)]
+        builder.face([(x - pivot[0], y - pivot[1], z - pivot[2]) for x, z in q], key)
+    tip = (pts[-1][0], y, pts[-1][1])
+    bulb = bmesh.ops.create_uvsphere(builder.bm, u_segments=8, v_segments=5, radius=bulb_r)
     for v in bulb['verts']:
-        v.co.x += tip[0]
-        v.co.y += y
-        v.co.z += tip[2]
-    tb_t.closed_shell(list({f for v in bulb['verts'] for f in v.link_faces}), 'bulb')
+        v.co.x += tip[0] - pivot[0]
+        v.co.y += tip[1] - pivot[1]
+        v.co.z += tip[2] - pivot[2]
+    faces = list({f for v in bulb['verts'] for f in v.link_faces})
+    builder.closed_shell(faces, 'bulb')
+    for f in faces:                              # the upper cap a shade lighter (mockup highlight)
+        f.normal_update()
+        if f.normal.z > 0.45:
+            f.material_index = builder.slot('bulb-hi')
     return tip
 
 
-tips = [tentacle(TENT_Y if s == 'back' else -TENT_Y, ang, ln) for s, ang, ln in TENTACLES]
 anemone_pos = (C.ANEMONE_X, C.ANEMONE_Y, C.SAND_TOP_M + ROCK_H)
 statplat('anemone', ab.finish(), location=anemone_pos)
-tent = statplat('anemone-tentacles', tb_t.finish(), location=anemone_pos)
-attach_schema(tent, 'platform')                  # anchored platform, Mass 0: drawn, no Jolt body
-ANEMONE_DISC_TOP = anemone_pos[2] + top_z + 0.004 * S
-crown_top = max(t[2] for t in tips)
-crown_span = max(t[0] for t in tips) - min(t[0] for t in tips) + 2 * BULB_R
+ANEMONE_DISC_TOP = anemone_pos[2] + DISC_TOP
+tips, bulb_rs, clump_objs, clump_pivots = [], [], {}, {}
+for row, side, *_ in C.ANEMONE_CLUMPS:
+    members = [(ang, ln) for r, ang, ln in TENTACLES if r == row and clump_side(ang) == side]
+    assert members, f'clump {row}-{side} is empty'
+    pivot = (sum(TENT_BASE_X * math.sin(math.radians(ang)) for ang, _ in members) / len(members),
+             TENT_Y if row == 'back' else -TENT_Y, TENT_BASE_Z)
+    name = C.clump_name(row, side)
+    cb = MeshBuilder(name.replace('-', '_'))
+    for ang, ln in members:
+        br = rnd.uniform(*BULB_R)
+        tips.append(tentacle(cb, pivot, row, ang, ln, br))
+        bulb_rs.append(br)
+    obj = statplat(name, cb.finish(), location=tuple(a + p for a, p in zip(anemone_pos, pivot)))
+    attach_schema(obj, 'platform')               # anchored platform, Mass 0: drawn, no Jolt body
+    clump_objs[name], clump_pivots[name] = obj, pivot
+assert len(tips) == len(TENTACLES) == 27, 'every tentacle belongs to exactly one clump'
+crown_top = max(t[2] + r for t, r in zip(tips, bulb_rs))
+crown_span = max(t[0] + r for t, r in zip(tips, bulb_rs)) - min(t[0] - r for t, r in zip(tips, bulb_rs))
+assert abs(crown_span - m(C.ANEMONE_SPAN)) < 0.05 * m(C.ANEMONE_SPAN), \
+    f'crown {crown_span:.3f} m vs ANEMONE_SPAN {m(C.ANEMONE_SPAN):.3f} m'
 
 # ═════════════════════════════════════════════════════════════════════════════
 # 7. anemone-zone: an invisible `target` that only carries the zone's bbox (condo room-outline
@@ -643,13 +750,25 @@ aq_consts = [
     ('aq-look-b-x', C.CAM_B_LOOK[0], ''),
     ('aq-look-b-z', C.CAM_B_LOOK[2], ''),
     ('aq-look-follow', C.CAM_B_LOOK_FOLLOW, ''),
-] + [(n, AQ_MB_BASE + i, 'mailbox') for i, n in enumerate(AQ_MAILBOXES)]
+] + [(n, AQ_MB_BASE + i, 'mailbox') for i, n in enumerate(AQ_MAILBOXES)] \
+  + [('aq-sway-b', C.SWAY_MB_BASE + len(C.ANEMONE_CLUMPS), 'mailbox: sway scratch (the B angle)')]
+# Anemone sway (Phase 4): one phase accumulator per clump in 720.., then the scratch cell above.
+assert C.SWAY_MB_BASE >= AQ_MB_BASE + 20 and len(C.ANEMONE_CLUMPS) + 1 <= 20
+SWAY = []                                        # (clump name, actor, amp_a rev, amp_b rev, phase rev, hz, mailbox)
+for k, (row, side, amp_b, amp_a, period, phase) in enumerate(C.ANEMONE_CLUMPS):
+    assert abs(period / 0.05 - round(period / 0.05)) < 1e-9, 'sway periods are whole 20 Hz ticks'
+    name = C.clump_name(row, side)
+    SWAY.append((name, idx[name], amp_a / 360.0, amp_b / 360.0, phase, 1.0 / period, C.SWAY_MB_BASE + k))
+sway_tick = (': aq-sway-tick   \\ generated: amp-a amp-b phase hz phase-mailbox actor, per clump\n'
+             + '\n'.join(f'  {fnum(aa)} {fnum(ab_)} {fnum(ph)} {fnum(hz)} {mb} {a} aq-sway-clump   \\ {n}'
+                         for n, a, aa, ab_, ph, hz, mb in SWAY) + '\n;\n')   # `;` on its own line: not in a comment
 aq_defs = ('\\ ---- generated by wflevels/aquarium/blender_create_aquarium.py ----\n'
            + '\n'.join(f': {n} {fnum(v)} ;' + (f'   \\ {note}' if note else '') for n, v, note in aq_consts)
-           + '\n' + open(SWIM_FTH).read())
+           + '\n' + open(SWIM_FTH).read() + sway_tick)
 player['wf_Script'] = FISH.player_script(part_idx, idx['Player'], defs=aq_defs, entry='aq-player-tick')
 director = bpy.data.objects['Director']
-director['wf_Script'] = FISH.director_script(part_idx, idx['Player'], defs=aq_defs, extra='aq-camera-tick\n')
+director['wf_Script'] = FISH.director_script(part_idx, idx['Player'], defs=aq_defs,
+                                             extra='aq-camera-tick\naq-sway-tick\n')
 
 print(f'{TAG} WORLD_SCALE={S} profile={PROFILE} fish {FISH.length_m:.3f} m spawn '
       f'{tuple(round(v, 3) for v in player.location)} V={V:.4f} dart {C.DART_SPEED:.3f} m/s × {C.DART_TIME:g} s '
@@ -661,6 +780,13 @@ print(f'{TAG} rock top z {anemone_pos[2]:.3f}; oral disc top z {ANEMONE_DISC_TOP
       f'{R + C.ANEMONE_ZONE_HYST:.2f}) at {tuple(round(v, 3) for v in zone.location)}')
 print(f'{TAG} fog 0x{C.FOG_COLOR:06x} {C.FOG_START:g}→{C.FOG_COMPLETE:g} m; camera A {C.CAM_A_POS} → {C.CAM_A_LOOK}; '
       f'camera B {C.CAM_B_POS} → {C.CAM_B_LOOK} (+{C.CAM_B_LOOK_FOLLOW:g} × fish offset)')
+for n, a, aa, ab_, ph, hz, mb in SWAY:
+    print(f'{TAG} sway {n}: actor {a}, B ±{ab_ * 360:.1f}°, A ±{aa * 360:.1f}°, period {1 / hz:.2f} s, '
+          f'phase {ph:.2f} rev, mailbox {mb}; pivot (anemone-local) {tuple(round(v, 3) for v in clump_pivots[n])}')
+tris = {o.name: sum(len(p.vertices) - 2 for p in o.data.polygons) for o in wf_objects
+        if o.data is not None and hasattr(o.data, 'polygons') and o.get('wf_Model Type') == 'Mesh'}
+print(f'{TAG} cost: {len(wf_objects)} actors, {len(tris)} mesh actors, {sum(tris.values())} triangles '
+      f'(anemone body {tris["anemone"]}, clumps {sum(tris[n] for n in clump_objs)}, tank-shell {tris["tank-shell"]})')
 for name in sorted(idx, key=idx.get):
     print(f'{TAG} actor {idx[name]:2d} = {name} ({get_class(bpy.data.objects[name])})')
 

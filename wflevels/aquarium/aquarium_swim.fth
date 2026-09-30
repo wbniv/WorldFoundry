@@ -10,6 +10,9 @@
 \ last `;` once and runs only the text after it every tick):
 \   aq-player-tick     the Physics Player's script. Replaces fish-swim-tick.
 \   aq-camera-tick     the Director's script, after fish-rig-tick.
+\   aq-sway-tick       the Director's script, after aq-camera-tick (Phase 4;
+\                      generated after this file, one aq-sway-clump per clump;
+\                      its mailboxes are 720..739).
 \
 \ Swim rules (aquarium plan Phase 1, measured): while a direction is held write
 \ +-fish-swim-speed to that axis; write nothing on release, so the air drag
@@ -122,3 +125,24 @@
   aq-in-b fish@ if aq-shot-b else aq-shot-a then INDEXOF_CAMSHOT write-mailbox
   aq-look-b-x INDEXOF_X_POS aq-look-axis
   aq-look-b-z INDEXOF_Z_POS aq-look-axis ;
+
+\ ---- Director: anemone sway (Phase 4) -----------------------------------
+\ Each tentacle clump is a Mass-0 anchored platform whose origin is its base on
+\ the oral disc; rotating it swings it about that base. Purely visual: it
+\ writes only the clumps' ROTATION_A/B/C, never a position, a speed or the
+\ Player. The generated aq-sway-tick calls aq-sway-clump once per clump with
+\ its amplitudes (rev), phase offset (rev), frequency (Hz), phase mailbox
+\ (720..) and actor index. Time is the rig's: a phase accumulator advanced by
+\ INDEXOF_DELTA_TIME (fish-dt), wrapped into [0,1), like fish-advance.
+\ ( offset hz phmb -- phase ) advance the accumulator; phase = accumulator + offset
+: aq-sway-phase dup >r fish@ swap fish-dt * + fish-wrap dup r> fish! + ;
+\ ( amp-a amp-b phase actor -- ) B = amp-b sin(phase) sways the clump in the
+\ X-Z plane; A = amp-a sin(phase + 1/4) leans it toward / away from the glass.
+\ A, then B, then C, every time: only the C write applies all three.
+: aq-sway-pose >r
+  dup fish-sin rot * aq-sway-b fish!
+  0.25 + fish-sin * INDEXOF_ROTATION_A r@ write-actor-mailbox
+  aq-sway-b fish@ INDEXOF_ROTATION_B r@ write-actor-mailbox
+  0 INDEXOF_ROTATION_C r> write-actor-mailbox ;
+\ ( amp-a amp-b offset hz phmb actor -- )
+: aq-sway-clump >r aq-sway-phase r> aq-sway-pose ;

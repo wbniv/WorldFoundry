@@ -32,7 +32,19 @@ Keyboard profile (default), one run:
   A taps cycle Swim → Depth → Swim (mailbox aq-mode), D-pad up/down move Z in Swim mode and Y
   in Depth mode, left/right move X in both, B taps dart, and C (keyboard depth) does nothing.
 
-Usage: python3 wflevels/aquarium/run_aquarium_checks.py [-h] [--profile keyboard|touch]
+--sway (step 16, Phase 4): 10 s with no input, every tick of each anemone clump's ROTATION_A/B/C
+  and position recorded: bounded by its amplitude, periodic (B(t) = B(t + period)), net zero over
+  a period, phases offset between clumps, the clumps' pivots never move, and the Player does not
+  drift. Two frame-A captures 1 s apart must differ inside the anemone's screen box (the fish,
+  which also idles, is outside it); then the Player is set down in the crown (a test teleport;
+  step 12 swims there with buttons) and two frame-B captures 1 s apart are taken.
+
+--cost [IFF ...] (step 18): wall time of `wf_game --frame-step-smoke` at 100 and 600 frames, vsync
+  off, three runs each, for this level and every IFF given (e.g. a saved Phase 3 build): median
+  ms per frame = (t600 − t100) / 500, and the actor count from --debug-print-actors.
+
+Usage: python3 wflevels/aquarium/run_aquarium_checks.py [-h] [--profile keyboard|touch] [--sway]
+       [--cost [IFF ...]] [--trace-sand]
 Needs: DISPLAY (wf_game opens a GL window) and wf_game: engine/wf_game, else the main
 checkout's (WF_GAME= overrides). Screenshots and logs go to $OUT (default ~/tmp/aquarium-phase3).
 """
@@ -102,6 +114,24 @@ def lev_consts():
     return {k: float(v) for k, v in re.findall(r": (aq-[a-z-]+) (-?[\d.]+) ;", lev)}
 
 
+def lev_actor(name):
+    """(position, bbox) of one actor, from the .lev (world position; bbox local to it)."""
+    num = r"(-?[\d.]+)\(1\.15\.16\)"
+    for block in open(LEVEL_LEV).read().split("\t{ 'OBJ' ")[1:]:
+        if re.search(r"\{ 'NAME' \"%s\" \}" % re.escape(name), block):
+            pos = re.search(r"\"Position\" \} \{ 'DATA' " + r"\s*".join([num] * 3), block)
+            box = re.search(r"Global Bounding Box\" \} \{ 'DATA' " + r"\s*".join([num] * 6), block)
+            return tuple(float(v) for v in pos.groups()), tuple(float(v) for v in box.groups())
+    raise KeyError(name)
+
+
+def host_point():
+    """Where the fish hosts: over the anemone at y 0, its capsule GROUND_CLEARANCE (plus 5 cm) over
+    the oral disc's top, so Jolt never treats it as standing on the anemone (Phase 3 verdict)."""
+    pos, box = lev_actor('anemone')
+    return (C.ANEMONE_X, 0.0, round(pos[2] + box[5] + PLAYER_BOX[5] + C.GROUND_CLEARANCE + 0.05, 3))
+
+
 class Game:
     """wf_game paused under the bridge, stepped per tick, every watched mailbox recorded per tick."""
 
@@ -119,7 +149,7 @@ class Game:
         self.c.send({'op': 'pause'})
         self.frames = []                          # [(t, {(idx, mb): value})], one per tick
         self.state = {}
-        self.clock_idx = 1                        # TIME watched on the lowest index → first in each batch
+        self.clock_idx = 1                        # TIME on actor 1 marks a new tick (see step())
         self.injected = 0
         self.inj_log = {}                         # t → value injected for that tick
         # The bridge also broadcasts while paused (a new injected joystick value shows up at
@@ -157,6 +187,19 @@ class Game:
         return self.frames[-1][0] if self.frames else 0.0
 
     def step(self, n=1):
+        """Advance n ticks, ONE engine tick per bridge step. The engine sends one batch per tick,
+        but in unordered_map order (debug_server.cc gWatches), not by actor index, so the clock
+        key is not first in it. Within a multi-tick step, keys sent before the clock were written
+        into the previous tick's frame, and at the step's end that showed as a repeated value then
+        a double step (Phase 3's "late tick"; Phase 4 found the cause on the sway trace). Stepped
+        one tick at a time, a key that arrives before the clock only updates `state`, which the new
+        frame copies, so every frame is exact."""
+        out = []
+        for _ in range(n):
+            out += self._step1()
+        return out
+
+    def _step1(self, n=1):
         t0, k0 = self.now(), len(self.frames)
         self.step_k0 = k0
         self.stepping = True
@@ -262,8 +305,20 @@ class Run:
                and int(s.get((self.dir, JOY_RAW))) != self.g.inj_log[round(t, 3)]]
         n = sum(1 for t, _ in self.g.frames if round(t, 3) in self.g.inj_log)
         print(f'joystick1_raw seen by the engine vs injected, {n} ticks: {len(bad)} mismatches {bad[:5]}')
-        print(f'run isolation: {"CLEAN" if not bad and n > 0 else "CONTAMINATED — rerun"}')
-        return not bad and n > 0
+        # The level runs ~1.6 s before the bridge connects and pauses it, and there is no start-
+        # paused switch; desktop keys typed into the game window then move the fish before the
+        # sticky injection masks the keyboard (Phase 4: a run began at x 1.769, spawn −1.6). So
+        # the Player must still be at its spawn on the first recorded tick.
+        first = next((f[1] for f in self.g.frames if (self.pl, X_POS) in f[1]), None)
+        p0 = tuple(first.get((self.pl, mb)) for mb in (X_POS, Y_POS, Z_POS)) if first else None
+        spawn_ok = p0 is not None and None not in p0 and math.dist(p0, C.FISH_SPAWN) < 1e-3
+        keys = sum(1 for l in open(self.g.log_path, errors='replace') if l.startswith('unknown key'))
+        print(f'Player at the first recorded tick {tuple(round(v, 4) for v in p0) if p0 else None} vs spawn '
+              f'{C.FISH_SPAWN} → {"at spawn" if spawn_ok else "MOVED before the harness took input"}; '
+              f'unmapped desktop key events in the engine log: {keys}')
+        clean = not bad and n > 0 and spawn_ok
+        print(f'run isolation: {"CLEAN" if clean else "CONTAMINATED — rerun"}')
+        return clean
 
     def attachment(self, frames):
         """Rigid offsets: |part − body| == |offset| every tick; body on the Player (+ bob)."""
@@ -379,9 +434,11 @@ def keyboard():
 
         # ── step 12: swim into the anemone's crown (held buttons only) ──
         zone_c = (k['aq-zone-x'], k['aq-zone-y'], k['aq-zone-z'])
-        # Host height: the capsule (half-height 0.195) 0.15 m over the oral disc (top z 1.705), so
-        # Jolt never treats the fish as standing on the anemone; the tentacles rise to z 2.44.
-        crown = (C.ANEMONE_X, 0.0, 2.1)
+        # Host height: the capsule (half-height 0.195) 0.15 m (+5 cm) over the oral disc's top, read
+        # from the .lev, so Jolt never treats the fish as standing on the anemone.
+        crown = host_point()
+        apos, abox = lev_actor('anemone')
+        print(f'step 12: host point {crown} (oral disc top z {apos[2] + abox[5]:.3f})')
         start12 = len(r.rows)
         r.phase('to-left', 'LEFT', 4.0, None)                   # far end, well outside the zone
         glide_k = 0.5                                            # a release glides 0.45 × the written 3.048 m/s ≈ 1.37 m
@@ -590,6 +647,170 @@ def touch():
           'phone hardware: not run')
 
 
+def clump_indices(r):
+    return {C.clump_name(row, side): r.idx[C.clump_name(row, side)] for row, side, *_ in C.ANEMONE_CLUMPS}
+
+
+def differing_pixels(a, b, box=None):
+    """Pixels whose max channel differs by > 8, optionally inside box = (x0, y0, x1, y1)."""
+    from PIL import Image
+    ia, ib = Image.open(a).convert('RGB'), Image.open(b).convert('RGB')
+    if box:
+        ia, ib = ia.crop(box), ib.crop(box)
+    pa, pb = ia.load(), ib.load()
+    return sum(1 for x in range(ia.size[0]) for y in range(ia.size[1])
+               if max(abs(p - q) for p, q in zip(pa[x, y], pb[x, y])) > 8)
+
+
+def screen_x(x, y, cam=C.CAM_A_POS, w=640):
+    """Screen column of world (x, y) seen by camshot A (level aim, fixed 60° vertical FOV, 4:3)."""
+    f = (480 / 2) / math.tan(math.radians(30))
+    return w / 2 + f * (x - cam[0]) / (y - cam[1])
+
+
+def clump_stats(fr, i, amp_b, amp_a, period):
+    """One clump's sway over recorded frames (angles in rev): bounded by its amplitudes and reaching
+    them, net zero over its first period, periodic (B(t) = B(t + period) on every pair of ticks; the
+    recording is exact since step() advances one tick at a time), its pivot never moves, C stays 0,
+    and its period measured from the upward zero crossings. Used by --sway and the pytest guard."""
+    bs = [wrap(f[1][(i, ROT_B)]) for f in fr]
+    as_ = [wrap(f[1][(i, ROT_A)]) for f in fr]
+    cs = [wrap(f[1][(i, ROT_C)]) for f in fr]
+    n = round(period / DT)
+    mean_b = sum(bs[:n]) / n
+    gaps = [abs(bs[k] - bs[k + n]) for k in range(len(bs) - n)]
+    around = lambda j: [round(bs[q] * 360, 3) for q in range(max(0, j - 2), min(len(bs), j + 3))]
+    outliers = [(round(fr[k][0], 2), round(fr[k + n][0], 2), around(k), around(k + n))
+                for k, gp in enumerate(gaps) if gp >= 0.05 * amp_b]
+    pivot = max(max(f[1][(i, mb)] for f in fr) - min(f[1][(i, mb)] for f in fr) for mb in (X_POS, Y_POS, Z_POS))
+    ups = [fr[k][0] + DT * (-bs[k]) / (bs[k + 1] - bs[k]) for k in range(len(bs) - 1) if bs[k] < 0 <= bs[k + 1]]
+    bounded = max(abs(v) for v in bs) <= amp_b * 1.01 + 1e-5 and max(abs(v) for v in as_) <= amp_a * 1.01 + 1e-5
+    full = max(bs) - min(bs) >= 1.9 * amp_b and max(as_) - min(as_) >= 1.9 * amp_a
+    c_max = max(abs(v) for v in cs)
+    return dict(b=(min(bs), max(bs)), a=(min(as_), max(as_)), mean_b=mean_b, pairs=len(gaps), outliers=outliers,
+                gap_median=sorted(gaps)[len(gaps) // 2], pivot=pivot, c_max=c_max,
+                period=(ups[-1] - ups[0]) / (len(ups) - 1) if len(ups) > 1 else float('nan'),
+                ok=bounded and full and abs(mean_b) < 0.05 * amp_b and not outliers and pivot < 1e-4 and c_max < 1e-4)
+
+
+def sway():
+    """Step 16: the anemone sway, 10 s traced per tick, with no input."""
+    r = Run()
+    g = r.g
+    clumps = clump_indices(r)
+    g.watch([(i, mb) for i in clumps.values() for mb in (ROT_A, ROT_B, ROT_C, X_POS, Y_POS, Z_POS)])
+    phase_mb = {C.clump_name(row, side): C.SWAY_MB_BASE + k for k, (row, side, *_) in enumerate(C.ANEMONE_CLUMPS)}
+    g.watch([(r.dir, mb) for mb in phase_mb.values()])            # the phase accumulators (global 720..)
+    table = {C.clump_name(row, side): (amp_b / 360, amp_a / 360, period, phase)
+             for row, side, amp_b, amp_a, period, phase in C.ANEMONE_CLUMPS}
+    ok = {}
+    try:
+        g.step(30)
+        print(f'screenshot sway-a0: {g.shot("phase4-sway-a0")}')
+        fr = g.step(20)
+        print(f'screenshot sway-a1 (1 s later): {g.shot("phase4-sway-a1")}')
+        fr += r.phase('sway', None, 9.0)
+        t0 = fr[0][0]
+        print(f'step 16: {len(fr)} ticks traced, t {t0:.2f} → {fr[-1][0]:.2f} s')
+        print(f"{'clump':22s} {'B min..max (deg)':>18s} {'amp':>5s} {'A min..max (deg)':>18s} {'mean B/period':>13s} "
+              f"{'|B(t)-B(t+T)| median (odd)':>26s} {'phase t0':>13s} {'pivot':>9s} {'C':>4s}")
+        good = True
+        starts, outliers, measured = {}, [], {}
+        for name, i in clumps.items():
+            amp_b, amp_a, period, phase = table[name]
+            s = clump_stats(fr, i, amp_b, amp_a, period)
+            outliers += [(name,) + o for o in s['outliers']]
+            measured[name] = s['period']
+            # the clump's own phase at t0: its accumulator plus its offset (a fraction of a turn)
+            starts[name] = (fr[0][1][(r.dir, phase_mb[name])] + phase) % 1.0
+            good &= s['ok']
+            print(f'{name:22s} {s["b"][0] * 360:+8.3f}..{s["b"][1] * 360:+7.3f} {amp_b * 360:5.1f} '
+                  f'{s["a"][0] * 360:+8.3f}..{s["a"][1] * 360:+7.3f} {s["mean_b"] * 360:+13.4f} '
+                  f'{s["gap_median"] * 360:7.4f} ({len(s["outliers"])}/{s["pairs"]}) {starts[name]:9.3f} rev '
+                  f'{s["pivot"] * 1000:7.3f}mm {s["c_max"]:4.2g} → {verdict(s["ok"])}')
+        for o in outliers:
+            print(f'step 16: periodicity outlier {o[0]}: B(t {o[1]}) vs B(t {o[2]}); B (deg) ±2 ticks around each: {o[3]} | {o[4]}')
+        # Not mechanical: each clump runs at its own period (measured from its upward zero
+        # crossings, interpolated) and they are all at least 0.15 s apart, so no two ever lock.
+        # A correlation over one 10 s window is only informative: close periods beat, and over
+        # some windows any two sines line up (checked offline for every period set in 3–5 s).
+        spread = sorted(starts.values())
+        traces = {n: [wrap(f[1][(i, ROT_B)]) for f in fr] for n, i in clumps.items()}
+        per_ok = all(abs(measured[n] - table[n][2]) < 0.02 * table[n][2] for n in measured)
+        ms = sorted(measured.values())
+        apart = min(b - a for a, b in zip(ms, ms[1:]))
+
+        def corr(a, b):
+            ma, mb_ = sum(a) / len(a), sum(b) / len(b)
+            num = sum((x - ma) * (y - mb_) for x, y in zip(a, b))
+            return num / math.sqrt(sum((x - ma) ** 2 for x in a) * sum((y - mb_) ** 2 for y in b))
+        names = list(traces)
+        worst = max(((corr(traces[a], traces[b]), a, b) for k, a in enumerate(names) for b in names[k + 1:]),
+                    key=lambda p: abs(p[0]))
+        offset_ok = per_ok and apart >= 0.15
+        print('step 16: measured periods (s): ' + ', '.join(f'{n.split("tent-")[1]} {measured[n]:.3f} '
+                                                          f'(authored {table[n][2]:.2f})' for n in names)
+              + f'; closest pair {apart:.3f} s apart → {verdict(offset_ok)}')
+        print(f'step 16: most correlated pair over this window (information): {worst[1]} / {worst[2]} r = {worst[0]:+.3f}')
+        drift = [max(f[1][(r.pl, mb)] for f in fr) - min(f[1][(r.pl, mb)] for f in fr) for mb in (X_POS, Y_POS, Z_POS)]
+        print(f'step 16: phases at t0 (rev, sorted): {[round(v, 3) for v in spread]}; periods '
+              f'{sorted({round(p[2], 2) for p in table.values()})} s')
+        print(f'step 16: Player drift while swaying x/y/z {drift[0]:.5f}/{drift[1]:.5f}/{drift[2]:.5f} m → '
+              f'{verdict(max(drift) < 1e-4)}')
+        # The anemone's screen box in frame A: the crown ±1.6 m about x 2.5 at the rows' depth. The
+        # idling fish (spawn x −1.6) is outside it, so a difference in there is the sway.
+        x0, x1 = int(screen_x(C.ANEMONE_X - 1.6, -0.4)), int(screen_x(C.ANEMONE_X + 1.6, -0.4)) + 1
+        fish_x1 = screen_x(C.FISH_SPAWN[0] + 0.53, 0.0)
+        diff_a = differing_pixels(os.path.join(OUT, 'phase4-sway-a0.png'), os.path.join(OUT, 'phase4-sway-a1.png'), (x0, 0, x1, 480))
+        print(f'step 16: frame A 1 s apart, pixels differing inside the anemone box x {x0}..{x1} '
+              f'(fish ends at x {fish_x1:.0f}): {diff_a} → {verdict(diff_a > 50 and fish_x1 < x0)}')
+        ok['16'] = good and offset_ok and max(drift) < 1e-4 and diff_a > 50 and fish_x1 < x0
+        # Frame B: set the Player down in the crown (test teleport), let camshot B settle.
+        host = host_point()
+        for mb, v in zip((X_POS, Y_POS, Z_POS), host):
+            g.c.set_mailbox(mb, v, idx=r.pl)
+        time.sleep(0.2)
+        g.step(80)
+        print(f'step 16: Player set down at {host}; CAMSHOT {g.v(r.dir, CAMSHOT):g} (cs_anemone = {r.idx["cs_anemone"]}); '
+              f'Player at {tuple(round(v, 3) for v in r.pos())}')
+        print(f'screenshot sway-b0: {g.shot("phase4-sway-b0")}')
+        g.step(20)
+        print(f'screenshot sway-b1 (1 s later): {g.shot("phase4-sway-b1")}')
+        diff_b = differing_pixels(os.path.join(OUT, 'phase4-sway-b0.png'), os.path.join(OUT, 'phase4-sway-b1.png'))
+        print(f'step 16: frame B 1 s apart, pixels differing (whole frame; the idling fish moves too): {diff_b}')
+        print(f'step 16: {verdict(ok["16"])}')
+    finally:
+        clean = r.isolation()
+        g.close()
+    for l in open(g.log_path, errors='replace').read().splitlines():
+        if re.search(r'zforth compile error|Assert|abort', l, re.I):
+            print(l)
+    print('SUMMARY ' + ' '.join(f'step {s}: {verdict(v) if clean else "INVALID (contaminated)"}' for s, v in ok.items()))
+
+
+def cost(extra_iffs):
+    """Step 18: frame cost from --frame-step-smoke wall time (100 vs 600 frames, vsync off)."""
+    env = dict(os.environ, LD_LIBRARY_PATH=LIBS, vblank_mode='0', __GL_SYNC_TO_VBLANK='0')
+
+    def run(iff, n):
+        t = time.monotonic()
+        p = subprocess.run([WF_GAME, f'--frame-step-smoke={n}', '--cycles=1', '--debug-print-actors', f'-L{iff}'],
+                           cwd=GAME_CWD, env=env, stdout=subprocess.PIPE, stderr=subprocess.STDOUT, timeout=600,
+                           preexec_fn=lambda: resource.setrlimit(resource.RLIMIT_CORE, (0, 0)))
+        out = p.stdout.decode(errors='replace')
+        return time.monotonic() - t, p.returncode, len(set(re.findall(r'actor idx=(\d+)', out)))
+    for iff in extra_iffs + [LEVEL_IFF]:
+        per, actors = [], None
+        for _ in range(3):
+            (t1, e1, a1), (t2, e2, a2) = run(iff, 100), run(iff, 600)
+            assert e1 == 0 and e2 == 0, f'{iff}: exit {e1}/{e2}'
+            per.append((t2 - t1) / 500 * 1000)
+            actors = a2
+        per.sort()
+        print(f'step 18: {os.path.relpath(iff, REPO) if iff.startswith(REPO) else iff}: {actors} actors; '
+              f'ms/frame over 3 runs {[round(v, 2) for v in per]} → median {per[1]:.2f} ms')
+
+
 def trace(seq):
     """--trace: print every tick of a short held-button sequence (Player position and speeds)."""
     global TRACE
@@ -612,5 +833,9 @@ if __name__ == '__main__':
     if '--trace-sand' in sys.argv:
         trace([('settle', None, 1.5), ('down', 'DOWN', 3.0), ('rest', None, 1.0), ('rise', 'UP', 0.2),
                ('settle', None, 1.0), ('down', 'DOWN', 1.0), ('right', 'RIGHT', 3.0), ('glide', None, 1.5)])
+    elif '--sway' in sys.argv:
+        sway()
+    elif '--cost' in sys.argv:
+        cost([os.path.abspath(a) for a in sys.argv[sys.argv.index('--cost') + 1:] if not a.startswith('-')])
     else:
         touch() if PROFILE == 'touch' else keyboard()

@@ -12,6 +12,7 @@ anemone zone and its hysteresis, the level's clamps from the fish's extents, and
 the scale and the fish's length. The runtime behaviour is wflevels/aquarium/run_aquarium_checks.py.
 """
 import importlib.util
+import math
 import os
 import re
 import sys
@@ -189,7 +190,8 @@ def test_no_placeholder_fish_remains(objs):
 def test_director_runs_the_rig_then_the_camera_with_the_right_indices(objs):
     names = [o['name'] for o in objs]
     script = by_name(objs, 'Director')['script']
-    assert script.rstrip().endswith('fish-rig-tick\naq-camera-tick'), 'rig first (after every actor), then cameras'
+    assert script.rstrip().endswith('fish-rig-tick\naq-camera-tick\naq-sway-tick'), \
+        'rig first (after every actor), then cameras, then the anemone sway'
     h = _header(script)
     for n in CF.PART_NAMES:
         assert h[f'fish-actor-{CF.ROLES[n]}'] == names.index(n) + 1, f'{n}: header index != export position + 1'
@@ -241,11 +243,102 @@ def test_clamps_come_from_the_fish_extents(objs):
     assert h['aq-zmin'] - FISH.collision_box()[5] - C.SAND_TOP_M == pytest.approx(C.GROUND_CLEARANCE, abs=1e-4)
 
 
-def test_anemone_body_is_solid_and_tentacles_are_not(objs):
+CLUMPS = [C.clump_name(row, side) for row, side, *_ in C.ANEMONE_CLUMPS]
+
+
+def _world_box(o):
+    """World-space bbox: the .lev box is local to the actor's position."""
+    return [p + b for p, b in zip(o['pos'] * 2, o['box'])]
+
+
+def test_anemone_body_is_solid_and_tentacles_are_six_non_colliding_clumps(objs):
     assert by_name(objs, 'anemone')['class'] == 'statplat'
-    t = by_name(objs, 'anemone-tentacles')
-    assert t['class'] == 'platform' and t['mass'] == 0.0 and t['visible'] == 1, \
-        'tentacles are drawn but have no Jolt body, so the fish can nestle among them from any depth'
+    assert not any(o['name'] == 'anemone-tentacles' for o in objs), 'Phase 4 split the tentacles into clumps'
+    assert len(CLUMPS) == 6 and len(set(CLUMPS)) == 6
+    for n in CLUMPS:
+        t = by_name(objs, n)
+        # Drawn, but no Jolt body (never a statplat) and out of WF actor collision (Mass 0), so the
+        # fish nestles among them from any depth and the sway can never push it.
+        assert t['class'] == 'platform', f'{n} is a {t["class"]}: every statplat gets a Jolt body'
+        assert t['mobility'] == 'Anchored' and t['mass'] == 0.0 and t['visible'] == 1, n
+        assert not t['script'], f'{n}: the Director sways the clumps; they carry no script'
+
+
+def test_clump_pivots_are_their_bases_on_the_oral_disc(objs):
+    # The sway rotates each clump about its origin, so the origin must be where its tentacles
+    # root: inside the oral disc's rim, with the mesh rising from local z ≈ 0.
+    a = by_name(objs, 'anemone')
+    disc_top = _world_box(a)[5]
+    for n in CLUMPS:
+        t = by_name(objs, n)
+        assert disc_top - 0.04 <= t['pos'][2] <= disc_top, f'{n}: pivot z {t["pos"][2]:.3f}, disc top {disc_top:.3f}'
+        assert abs(t['pos'][0] - C.ANEMONE_X) < 0.25 and abs(abs(t['pos'][1]) - 0.4) < 1e-3, n
+        # The roots are at local z 0; the outermost tentacles droop back to that height, so their
+        # bulbs (radius ≤ 0.10 m) hang just below it, and nothing lower.
+        assert -0.11 <= t['box'][2] <= 0.0, f'{n}: mesh bottom {t["box"][2]:.3f} m below its pivot'
+
+
+def test_anemone_crown_is_about_the_spec_width(objs):
+    lo = min(_world_box(by_name(objs, n))[0] for n in CLUMPS)
+    hi = max(_world_box(by_name(objs, n))[3] for n in CLUMPS)
+    span = C.m(C.ANEMONE_SPAN)
+    # at rest, bulbs included; ±5 % (the build asserts the same about its own tips)
+    assert hi - lo == pytest.approx(span, rel=0.05), f'crown {hi - lo:.3f} m, spec {C.ANEMONE_SPAN:g} in = {span:.3f} m'
+
+
+def test_no_statplat_inside_the_swim_volume_but_the_tank_itself(objs):
+    # Every statplat is a Jolt collision body. Inside the water only the tank and what the fish
+    # is meant to bump into may be one: nothing added for looks (tentacles, water gradient, shafts).
+    allowed = {'tank-shell', 'tank-front-collider', 'sand', 'rock', 'anemone'}
+    vol = (-C.INNER_X_M, -C.INNER_Y_M, C.SAND_TOP_M, C.INNER_X_M, C.INNER_Y_M, C.WATER_LINE_M)
+    inside = []
+    for o in objs:
+        if o['class'] != 'statplat' or o['box'] is None:
+            continue
+        b = _world_box(o)
+        if all(b[k] < vol[k + 3] and b[k + 3] > vol[k] for k in range(3)):
+            inside.append(o['name'])
+    assert set(inside) <= allowed, f'statplats inside the tank that should not be: {sorted(set(inside) - allowed)}'
+    assert {'tank-shell', 'rock', 'anemone'} <= set(inside)          # (the sand's top is the volume's floor)
+
+
+def test_sway_is_generated_for_every_clump_in_its_own_mailboxes(objs):
+    names = [o['name'] for o in objs]
+    script = by_name(objs, 'Director')['script']
+    calls = re.findall(r"^\s+(-?[\d.]+) (-?[\d.]+) (-?[\d.]+) (-?[\d.]+) (\d+) (\d+) aq-sway-clump\s+\\ (\S+)$",
+                       script, re.M)
+    assert [c[6] for c in calls] == CLUMPS, 'one aq-sway-clump call per clump, in table order'
+    for (amp_a, amp_b, phase, hz, mb, actor, name), (row, side, deg_b, deg_a, period, ph) in zip(calls, C.ANEMONE_CLUMPS):
+        assert int(actor) == names.index(name) + 1, f'{name}: sway actor index != export position + 1'
+        assert 720 <= int(mb) < 740, f'{name}: sway mailbox {mb} outside 720..739'
+        assert float(amp_b) == pytest.approx(deg_b / 360, abs=1e-6) and 0 < deg_b <= 6.0
+        assert float(amp_a) == pytest.approx(deg_a / 360, abs=1e-6) and 0 < deg_a <= 2.0
+        assert float(hz) == pytest.approx(1 / period, abs=1e-6) and 3.0 <= period <= 5.0
+        assert float(phase) == pytest.approx(ph, abs=1e-6)
+    assert len({int(c[4]) for c in calls}) == len(calls), 'each clump has its own phase mailbox'
+    periods = sorted(p for *_, p, _ in C.ANEMONE_CLUMPS)
+    assert min(b - a for a, b in zip(periods, periods[1:])) >= 0.25, 'periods apart, so no two clumps lock together'
+    assert _header(script)['aq-sway-b'] == 720 + len(CLUMPS)
+    # The sway writes only the clumps' rotations: never a position, a speed or the Player.
+    body = script[script.index(': aq-sway-pose'):script.index(': aq-sway-clump')]
+    assert re.findall(r'INDEXOF_\w+', body) == ['INDEXOF_ROTATION_A', 'INDEXOF_ROTATION_B', 'INDEXOF_ROTATION_C']
+
+
+def test_player_is_created_before_every_clump(objs):
+    names = [o['name'] for o in objs]
+    assert all(names.index('Player') < names.index(n) for n in CLUMPS)
+
+
+def test_camera_a_is_level_and_frames_the_tank(objs):
+    # Straight-on: the aim point is at the eye's height (bungee aim = Target − Follow + Track Object,
+    # all three LookAt), so the camera has no pitch.
+    a, look = by_name(objs, 'cs_front'), by_name(objs, 'LookAt')
+    assert a['pos'][2] == pytest.approx(look['pos'][2], abs=1e-3) and a['pos'][0] == pytest.approx(look['pos'][0])
+    for n in ('Follow', 'Target', 'Track Object'):
+        assert re.search(r"\"%s\" \} \{ 'STR' \"LookAt\"" % n, a['block']), f'cs_front {n} must be LookAt'
+    # The whole tank width at the front glass fits the 4:3 frame with a margin (60° vertical FOV).
+    half_w = (4 / 3) * math.tan(math.radians(30)) * (-C.EXT_Y_M / 2 - a['pos'][1])
+    assert 0.80 <= C.EXT_X_M / (2 * half_w) <= 0.90, 'the tank should span ~85 % of the frame width'
 
 
 def test_infrastructure_actors_never_collide(objs):
@@ -254,3 +347,40 @@ def test_infrastructure_actors_never_collide(objs):
     for n in ('Director', 'LevelObj', 'Matte', 'cs_front', 'cs_anemone', 'LookAt', 'LookB', 'anemone-zone',
               'SunLight', 'AmbientLight'):
         assert by_name(objs, n)['mass'] == 0.0, n
+
+
+# ── Phase 4 runtime: the sway, in the running level (needs a display and engine/wf_game) ──────
+requires_runtime = pytest.mark.skipif(
+    not os.environ.get('DISPLAY') or not os.path.exists(os.path.join(REPO, 'engine', 'wf_game')),
+    reason='needs a display (wf_game opens a GL window) and engine/wf_game')
+
+
+@requires_runtime
+def test_sway_is_bounded_periodic_net_zero_and_never_moves_the_player():
+    """The harness (run_aquarium_checks.py, step 16's machinery): paused, one tick per step, a sticky
+    injected joystick 0. Over one longest period plus 10 ticks, every clump's B/A stay within their
+    amplitudes and reach them, B is net zero over a period and B(t) = B(t + period), its pivot and C
+    never move, its measured period is the authored one; and the Player does not move at all."""
+    os.environ.setdefault('WF_BRIDGE_PORT', '7813')              # not the harness's default 7811
+    os.environ.setdefault('OUT', os.path.expanduser('~/tmp/aquarium-test'))
+    import run_aquarium_checks as R                            # noqa: E402  (LEVEL_DIR is on sys.path)
+    r = R.Run()
+    g = r.g
+    clumps = R.clump_indices(r)
+    g.watch([(i, mb) for i in clumps.values() for mb in (R.ROT_A, R.ROT_B, R.ROT_C, R.X_POS, R.Y_POS, R.Z_POS)])
+    try:
+        g.step(20)
+        fr = g.step(round(max(p for *_, p, _ in C.ANEMONE_CLUMPS) / R.DT) * 2 + 10)
+        report = []
+        for (row, side, deg_b, deg_a, period, _), (name, i) in zip(C.ANEMONE_CLUMPS, clumps.items()):
+            s = R.clump_stats(fr, i, deg_b / 360, deg_a / 360, period)
+            report.append((name, s['ok'], round(s['b'][0] * 360, 3), round(s['b'][1] * 360, 3),
+                           round(s['mean_b'] * 360, 4), s['outliers'][:2], round(s['period'], 3)))
+            assert s['ok'] and abs(s['period'] - period) < 0.02 * period, report[-1]
+        drift = [max(f[1][(r.pl, mb)] for f in fr) - min(f[1][(r.pl, mb)] for f in fr) for mb in (R.X_POS, R.Y_POS, R.Z_POS)]
+        print('\nSWAY', report, 'Player drift', drift)
+        assert max(drift) < 1e-4, f'the sway moved the Player: drift {drift}'
+    finally:
+        clean = r.isolation()
+        g.close()
+    assert clean, 'run contaminated by desktop input: rerun'

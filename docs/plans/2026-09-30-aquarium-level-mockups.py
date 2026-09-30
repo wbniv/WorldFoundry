@@ -23,6 +23,7 @@ TANK_W, TANK_D, TANK_H = 48 * IN, 13 * IN, 21 * IN     # exterior 12.192 x 3.302
 WALL = 0.5 * IN
 WATER_Z = 19 * IN
 SAND_Z = 2.5 * IN
+ANEMONE_SPAN_IN = 12.0      # across the crown (wflevels/aquarium/aquarium_constants.py ANEMONE_SPAN; Phase 4, was 7)
 
 CSS = """
 *{box-sizing:border-box}
@@ -132,6 +133,24 @@ def anemone(cx, cy, s, sway=0.0, layer="all", uid="a"):
     out.append('</g>')
     return "".join(out)
 
+def anemone_width_units(sway=0.0):
+    """Crown width of anemone() in its own drawing units (tentacle tips plus bulbs)."""
+    xs = []
+    for i in range(17):
+        ang = math.radians(-78 + 156 * i / 16) + 0.10 * math.sin(sway + i * 1.3)
+        ln = 78 + 26 * math.sin(i * 2.1 + 0.7) + (14 if 4 < i < 12 else 0)
+        tx = (i - 8) * 5.0 + math.sin(ang) * ln
+        xs += [tx - 7.4, tx + 7.4]
+    return max(xs) - min(xs)
+
+
+# Drawing scale (metres per unit) that makes the crown ANEMONE_SPAN_IN wide at ×10. Before Phase 4
+# the mockups drew it at 0.0165, about 4.4 m (17 in), far wider than the 7 in the table claimed.
+ANEM_S = ANEMONE_SPAN_IN * IN / anemone_width_units()
+ROCK_S = 0.0118             # rock() is 144 units wide → 1.7 m, the level's rock (was 0.0175, 2.5 m)
+ANEMONE_BASE_Y = -SAND_Z + 0.05 - 52 * ROCK_S   # the anemone stands on the rock's top (y = −z)
+
+
 def rock(cx, cy, s):
     p = [(-70,0),(-62,-26),(-38,-44),(-6,-52),(28,-46),(58,-28),(72,0)]
     fac = [([(-70,0),(-62,-26),(-30,-14),(-24,0)],"#6f6a63"),([(-62,-26),(-38,-44),(-6,-52),(-30,-14)],"#8a847b"),
@@ -166,15 +185,15 @@ def scene(uid, pane="haze", anemone_x=2.5, fish_pos=(-1.6, -2.4), fish_flip=Fals
     g.append(f'<polygon points="{-hw+WALL},{-SAND_Z} {-3},{-SAND_Z-0.06} {-2},{-WALL} {-hw+WALL},{-WALL}" fill="#c0ae7e"/>')
     g.append(f'<polygon points="{0.5},{-SAND_Z+0.02} {4},{-SAND_Z-0.08} {5},{-WALL} {1.2},{-WALL}" fill="#d8c79a"/>')
     # rock + anemone (+ fish)
-    rk_s = 0.0175
+    rk_s = ROCK_S
     g.append(rock(anemone_x, -SAND_Z + 0.05, rk_s))
-    ax, ay = anemone_x, -SAND_Z - 0.85
+    ax, ay = anemone_x, ANEMONE_BASE_Y
     if host:
-        g.append(anemone(ax, ay, 0.0165, sway, "back", uid + "a"))
+        g.append(anemone(ax, ay, ANEM_S, sway, "back", uid + "a"))
         g.append(fish(fish_pos[0], fish_pos[1], 0.0078, fish_flip, uid + "f", fish_tilt))
-        g.append(anemone(ax, ay, 0.0165, sway, "front", uid + "b"))
+        g.append(anemone(ax, ay, ANEM_S, sway, "front", uid + "b"))
     else:
-        g.append(anemone(ax, ay, 0.0165, sway, "all", uid + "a"))
+        g.append(anemone(ax, ay, ANEM_S, sway, "all", uid + "a"))
         g.append(fish(fish_pos[0], fish_pos[1], 0.0078, fish_flip, uid + "f", fish_tilt))
     # surface
     g.append(f'<polygon points="{-hw+WALL},{-WATER_Z} {-3.4},{-WATER_Z-0.04} {-1},{-WATER_Z} {1.6},{-WATER_Z-0.05} {4},{-WATER_Z} {hw-WALL},{-WATER_Z-0.03} '
@@ -247,8 +266,8 @@ def mock_dims():
     # anemone + fish scaled from the 10x level to px: 1 m = PX/0.254 px
     ppm = PX / IN
     ax = fx + W / 2 + 2.5 * ppm
-    s.append(rock(ax, sand_y + 3, 0.0175 * ppm))
-    s.append(anemone(ax, sand_y - 0.8 * ppm, 0.0165 * ppm, 0.5))
+    s.append(rock(ax, sand_y + 3, ROCK_S * ppm))
+    s.append(anemone(ax, sand_y + 3 - 52 * ROCK_S * ppm, ANEM_S * ppm, 0.5))
     s.append(fish(fx + W / 2 - 1.6 * ppm, sand_y - 1.9 * ppm, 0.0078 * ppm))
     s.append(dimline_h(fx, fx + W, fy - 14, "48 in · 121.9 cm"))
     s.append(dimline_v(fx - 26, fy, fy + H, "21 in<tspan x=\"%d\" dy=\"16\">53.3 cm</tspan>" % (fx - 34)))
@@ -278,7 +297,7 @@ def mock_dims():
     s.append(f'<text x="{tx}" y="{ty-38}" font-size="14" fill="#e8f1f8" font-weight="600">TOP (looking −Z) — camera side is the bottom edge</text>')
     s.append(acrylic_rect(tx, ty, W, 13 * PX))
     s.append(f'<rect x="{tx+t}" y="{ty+t}" width="{W-2*t}" height="{13*PX-2*t}" fill="#1a7f9a" fill-opacity=".35"/>')
-    s.append(f'<ellipse cx="{ax}" cy="{ty+6.5*PX}" rx="{0.9*ppm}" ry="{0.9*ppm}" fill="#b5558a" fill-opacity=".8" stroke="#f3b2d2"/>')
+    s.append(f'<ellipse cx="{ax}" cy="{ty+6.5*PX}" rx="{ANEMONE_SPAN_IN * IN / 2 * ppm}" ry="{0.9*ppm}" fill="#b5558a" fill-opacity=".8" stroke="#f3b2d2"/>')
     s.append(f'<text x="{ax}" y="{ty+6.5*PX+4}" text-anchor="middle" font-size="11" fill="#fff">anemone</text>')
     s.append(dimline_h(tx, tx + W, ty + 13 * PX + 62, "48 in · 121.9 cm"))
     s.append(dimline_v(tx - 22, ty, ty + 13 * PX, "13 in"))
@@ -296,7 +315,7 @@ def mock_dims():
 <tr><td>Operating fill</td><td>19 in → <b>45.2 gal · 171 L</b></td></tr>
 <tr><td>Level scale</td><td>1 in = 0.254 m<br><code>12.19 × 3.30 × 5.33 m</code></td></tr>
 <tr><td>Clownfish</td><td>3.5 in → 0.89 m</td></tr>
-<tr><td>Anemone</td><td>7 in wide → 1.8 m</td></tr>
+<tr><td>Anemone</td><td>12 in wide → 3.0 m</td></tr>
 </table></div>
 <div class="cap" style="position:absolute;left:1200px;top:150px;width:210px">
 <b>Why ×10.</b> The engine's camera, capsule, fog and speeds are tuned for a 1.7 m walker. A 9 cm fish at 1:1 would sit under
@@ -317,8 +336,8 @@ def mock_states():
                     fish_pos=(-1.6, -2.4)))
     s.append('<text x="303" y="395" text-anchor="middle" font-size="12" fill="#f0b35c">◀ ▶ ▲ ▼  swim</text>')
     # B host
-    s.append(screen(740, 100, 640, 480, "B", (2.5, 2.45, 118), label="close-up camshot (zone: 2.2 m of anemone)", pane="none",
-                    host=True, fish_pos=(2.6, -SAND_Z - 0.85 - 1.3), fish_tilt=-10, sway=0.6))
+    s.append(screen(740, 100, 640, 480, "B", (2.5, 2.0, 160), label="close-up camshot (zone: 2.2 m of anemone)", pane="none",
+                    host=True, fish_pos=(2.6, ANEMONE_BASE_Y - 0.9), fish_tilt=-10, sway=0.6))
     s.append('<rect x="880" y="112" width="180" height="24" rx="12" fill="#0a1016" fill-opacity=".8"/><text x="970" y="129" text-anchor="middle" font-size="13" fill="#f7d9e8" font-weight="600">nestled · tentacles sway</text>')
     s.append('<defs><marker id="ar" markerWidth="8" markerHeight="8" refX="6" refY="4" orient="auto"><path d="M0,0 L8,4 L0,8 z" fill="#f0b35c"/></marker></defs>')
     body = (f'<svg width="1440" height="843" viewBox="0 0 1440 843" style="position:absolute;top:57px;left:0" font-family="ui-sans-serif,system-ui,sans-serif">'
@@ -348,7 +367,7 @@ overlap it draw in front (front/back tentacle split is <em>mesh authoring</em>, 
 <svg width="640" height="120" viewBox="-6.6 -2.2 13.2 4.4" style="display:block">
 <rect x="-6.096" y="-1.651" width="12.192" height="3.302" fill="#0b3550" stroke="#cfeff6" stroke-width=".06"/>
 <circle cx="2.5" cy="0" r="2.2" fill="#b5558a" fill-opacity=".25" stroke="#f3b2d2" stroke-width=".05" stroke-dasharray=".2 .12"/>
-<circle cx="2.5" cy="0" r=".9" fill="#b5558a"/>
+<circle cx="2.5" cy="0" r="1.52" fill="#b5558a"/>
 <text x="2.5" y="1.05" text-anchor="middle" font-size=".42" fill="#fff">anemone zone → B</text>
 <text x="-3.2" y="-.3" text-anchor="middle" font-size=".42" fill="#9fd8e8">everywhere else → A</text>
 <circle cx="-1.6" cy=".2" r=".25" fill="#ff8a2a"/>

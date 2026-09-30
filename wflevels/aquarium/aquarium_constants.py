@@ -21,7 +21,8 @@ WALL = 0.5                                      # acrylic, every face
 SAND_TOP = 2.5                                  # sand top above the outer base (2 in deep)
 WATER_Z = 19.0                                  # water line above the outer base (2 in freeboard)
 FISH_LEN = 3.5                                  # ocellaris
-ANEMONE_SPAN = 7.0                              # bubble-tip, across the tentacle crown
+ANEMONE_SPAN = 12.0                             # bubble-tip, across the tentacle crown (Phase 4: a large
+                                                # E. quadricolor; was 7 in, which read stubby against the mockup)
 
 HX, HY = EXT_X / 2, EXT_Y / 2                   # 24, 6.5   exterior half-extents
 IX, IY = HX - WALL, HY - WALL                   # 23.5, 6.0 inner faces
@@ -60,14 +61,20 @@ FOG_START = 0.6 * WORLD_SCALE                           # 6 m at ×10
 FOG_COMPLETE = 4.0 * WORLD_SCALE                        # 40 m at ×10
 
 # ── Camshot A: locked, straight-on from outside the front, whole tank in frame ─
-CAM_A_POS = (0.0, -1.1 * WORLD_SCALE, EXT_Z_M / 2)      # y −11 m at ×10
-CAM_A_LOOK = (0.0, 0.0, EXT_Z_M / 2)                    # the tank's centre
+# Phase 2–3 had the eye at the tank's half height (2.667 m), aimed level: already straight-on
+# (every tank edge projects where a level camera puts it, to 1 px), but 2 m over the sand, so the
+# 3 m-deep sand floor showed as a band in perspective and read as "looking down". Phase 4 lowers
+# the eye and keeps the aim level (Target = Follow = Track Object = LookAt at the eye's height);
+# the fixed 60° FOV cannot be narrowed, so the distance stays and the tank still spans ~85 %.
+CAM_A_EYE_Z = 0.19 * WORLD_SCALE                        # 1.9 m at ×10: the lower third of the water
+CAM_A_POS = (0.0, -1.1 * WORLD_SCALE, CAM_A_EYE_Z)      # y −11 m at ×10
+CAM_A_LOOK = (0.0, 0.0, CAM_A_EYE_Z)                    # level aim: no pitch
 
 # ── Camshot B: the anemone close-up (Phase 3), outside the front glass like A. The
 #    Camera actor's bbox (CAMERA_HALF) must stay clear of every place the fish's box can
 #    reach, or the bungee camera "collides" with the Mass-1 Player and climbs.
-CAM_B_POS = (ANEMONE_X, -0.22 * WORLD_SCALE, 0.175 * WORLD_SCALE)   # tuned from captures (plan § Phase 3)
-CAM_B_LOOK = (ANEMONE_X, ANEMONE_Y, 0.162 * WORLD_SCALE)            # LookB's rest point (anemone column)
+CAM_B_POS = (ANEMONE_X, -0.25 * WORLD_SCALE, 0.20 * WORLD_SCALE)    # Phase 4: back 0.3 m for the 12 in crown
+CAM_B_LOOK = (ANEMONE_X, ANEMONE_Y, 0.20 * WORLD_SCALE)             # LookB's rest point: level aim at the crown
 CAM_B_LOOK_FOLLOW = 0.35                                # share of (fish − look) LookB leans toward the fish
 CAMERA_HALF = 0.02 * WORLD_SCALE                        # Camera actor bbox half-size (0.2 m at ×10)
 ANEMONE_ZONE_HYST = 0.03 * WORLD_SCALE                  # leave B only 0.3 m past the entry radius
@@ -82,6 +89,29 @@ CLAMP_MARGIN = m(0.25)                                  # keep the visible fish 
 # floor). The floor clamp keeps the capsule this far over the sand so the fish is never "standing".
 # Jolt's constants are absolute metres, so this does not scale with WORLD_SCALE.
 GROUND_CLEARANCE = 0.15
+
+# ── Anemone sway (Phase 4). The tentacles are six clumps (back/front row × left/centre/right),
+#    each an anchored Mass-0 platform whose origin is its base on the oral disc. The Director
+#    rotates each one about that base every tick: B (in the X–Z plane) = amp_b·sin φ and
+#    A (toward / away from the glass) = amp_a·sin(φ + ¼), with φ = t / period + phase. Purely
+#    visual: net zero over a period, bounded, no Jolt body. Periods are whole 20 Hz ticks and at
+#    least 0.25 s apart, so no two clumps ever lock together (with periods only 0.2 s apart two
+#    clumps swung in near-lockstep for most of a 10 s window, |r| 0.97, in the first run).
+#    (row, side, amp_b deg, amp_a deg, period s, phase rev)
+ANEMONE_CLUMPS = [
+    ('back', 'l', 5.0, 1.5, 3.30, 0.00),
+    ('back', 'c', 4.0, 1.2, 4.75, 0.37),
+    ('back', 'r', 5.0, 1.5, 4.30, 0.71),
+    ('front', 'l', 5.5, 1.5, 3.90, 0.18),
+    ('front', 'c', 4.5, 1.2, 3.55, 0.55),
+    ('front', 'r', 5.5, 1.5, 3.05, 0.89),
+]
+SWAY_MB_BASE = 720                                      # the sway's mailboxes: 720..739 (level 700..719, fish 600..639)
+
+
+def clump_name(row, side):
+    return f'anemone-tent-{row}-{side}'
+
 
 if __name__ == '__main__':
     print(f'WORLD_SCALE={WORLD_SCALE}: exterior {EXT_X_M:.3f} × {EXT_Y_M:.3f} × {EXT_Z_M:.3f} m, '
