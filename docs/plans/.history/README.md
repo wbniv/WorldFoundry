@@ -1,5 +1,6 @@
 | Date | Change |
 |------|--------|
+| [2026-09-30](https://github.com/wbniv/WorldFoundry/commit/f964a400) | Plan aquarium level (55 gal acrylic, clownfish, anemone) and correct condo alpha note |
 | [2026-09-25](https://github.com/wbniv/WorldFoundry/commit/ddef745d) | Correct Marble Madness terrain documentation and source attribution |
 | [2026-09-25](https://github.com/wbniv/WorldFoundry/commit/00978ee7) | Add condo walkthrough controls and shared Forth comment support |
 | [2026-09-21](https://github.com/wbniv/WorldFoundry/commit/b3fc2cea) | docs(plans): index the macOS close-paths plan |
@@ -30,6 +31,11 @@
 | [2026-06-26](https://github.com/wbniv/WorldFoundry/commit/16d72fa6) | docs: add plan index (docs/plans/README.md) |
 
 <!--history-meta v1
+f964a400	author	Will Norris
+f964a400	added	1
+f964a400	deleted	0
+f964a400	files	1
+f964a400	body	Plan + three 1440x900 mockups (tank dimensions, gameplay states, pane\nfallbacks / Phase 0 test card). Nothing is built; Phase 0 is a runtime spike\non translucent draw order.\n\nAlso corrects condo_639_640.md: "MATL has no alpha" is true for flat-colour\nmaterials, but textured materials support ~50% translucency via texel bit 15\n(pixelmap.cc:190 -> material.cc:124 -> GL_BLEND). Read from code, not yet run.\n\nCo-Authored-By: Claude Sonnet 5.5 <noreply@anthropic.com>\nClaude-Session: https://claude.ai/code/session_0148itHvh6GL5Qc7uwSjFC2n
 ddef745d	author	Will Norris
 ddef745d	added	3
 ddef745d	deleted	3

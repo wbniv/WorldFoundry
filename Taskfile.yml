@@ -908,6 +908,68 @@ tasks:
           -Lwflevels/condo_639_640-standalone.iff $FSFLAG $RECFLAG 2>&1 | tee "$LOG"
         [ -n "$RECOUT" ] && [ -f output.mp4 ] && mv output.mp4 "$RECOUT" && echo "Saved → $RECOUT"
 
+  aquarium-idle-level:
+    desc: "Clownfish idle-animation spike: the canonical aquarium clownfish (wflevels/aquarium/clownfish.py) → wflevels/aquarium_idle-standalone.iff. Needs the wf_blender add-on."
+    deps: [tools-build]
+    cmds:
+      - |
+        set -euo pipefail
+        blender --background --python-expr "import addon_utils; raise SystemExit(0 if addon_utils.enable('wf_blender', default_set=False, persistent=False) else 1)" >/dev/null 2>&1 \
+          || { echo "wf_blender add-on not installed — 'sudo apt install worldfoundry-blender-editor-exporter' (apt.worldfoundry.org) or 'task blender-install'" >&2; exit 1; }
+        blender --background --python-exit-code 1 \
+          --python wflevels/aquarium_idle/blender_create_aquarium_idle.py \
+          2>&1 | { grep -E '^\[aquarium_idle\]|^Info: Exported|Error|Traceback|Assert' || true; }
+        test -s wflevels/aquarium_idle/aquarium_idle.lev
+      - bash wftools/wf_blender/build_level_binary.sh aquarium_idle
+    sources:
+      - wflevels/aquarium_idle/blender_create_aquarium_idle.py
+      - wflevels/aquarium_idle/aquarium_idle-standalone.iff.txt
+      - wflevels/aquarium/clownfish.py
+      - wflevels/aquarium/clownfish_idle.fth
+    generates:
+      - wflevels/aquarium_idle-standalone.iff
+
+  aquarium-idle-probe-level:
+    desc: "ROTATION_* write probe for the aquarium plan (visible Physics fish, Director-rotated statplat, self-rotating anchored platform) → wflevels/aquarium_idle_probe-standalone.iff"
+    deps: [tools-build]
+    cmds:
+      - |
+        set -euo pipefail
+        IDLE_PROBE=1 blender --background --python-exit-code 1 \
+          --python wflevels/aquarium_idle/blender_create_aquarium_idle.py \
+          2>&1 | { grep -E '^\[aquarium_idle\]|^Info: Exported|Error|Traceback|Assert' || true; }
+        test -s wflevels/aquarium_idle_probe/aquarium_idle_probe.lev
+      - bash wftools/wf_blender/build_level_binary.sh aquarium_idle_probe
+    sources:
+      - wflevels/aquarium_idle/blender_create_aquarium_idle.py
+      - wflevels/aquarium_idle/aquarium_idle-standalone.iff.txt
+      - wflevels/aquarium/clownfish.py
+    generates:
+      - wflevels/aquarium_idle_probe-standalone.iff
+
+  run-aquarium-idle:
+    desc: "Run the clownfish idle spike: arrows swim, let go and it hovers. WF_RECORD=1 records video. WF_FULLSCREEN=1 for fullscreen."
+    deps: [ensure-build, aquarium-idle-level]
+    cmds:
+      - |
+        LOG=/tmp/wfgame_aquarium_idle.log
+        echo "Logging to $LOG"
+        RECFLAG=""; RECOUT=""; FSFLAG=""
+        if [ -n "${WF_RECORD:-}" ]; then
+          RECOUT="${WF_RECORD}"; [ "$RECOUT" = "1" ] && RECOUT="$(date +%Y%m%d_%H%M%S)_aquarium_idle.mp4"
+          RECFLAG="-record_video"; echo "Recording → $RECOUT"
+        fi
+        [ "${WF_FULLSCREEN:-}" = "1" ] && FSFLAG="-fullscreen"
+        LD_LIBRARY_PATH=engine/libs DISPLAY=${DISPLAY:-:0} engine/wf_game \
+          -Lwflevels/aquarium_idle-standalone.iff $FSFLAG $RECFLAG 2>&1 | tee "$LOG"
+        [ -n "$RECOUT" ] && [ -f output.mp4 ] && mv output.mp4 "$RECOUT" && echo "Saved → $RECOUT"
+
+  test-aquarium-idle:
+    desc: "Regression guard for the clownfish idle rig: static .lev checks, bridge trace, captures, ROTATION_* probe (needs a display)"
+    deps: [ensure-build, aquarium-idle-level, aquarium-idle-probe-level]
+    cmds:
+      - python3 -m pytest tests/test_aquarium_idle.py -v
+
   run-moon:
     desc: "Run wf_game on wflevels/moon_site01-standalone.iff (PGDA Site 01 Connecting Ridge — LOLA terrain + NAC texture at 1024², lunar gravity). WF_RECORD=1 records video. WF_FULLSCREEN=1 for fullscreen."
     deps: [ensure-build]
