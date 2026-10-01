@@ -710,6 +710,10 @@ static Display* gActiveDisplay = nullptr;
 
 Display* Display::GetActive() { return gActiveDisplay; }
 
+#if defined(__ANDROID__)
+#include <game/level_menu.h>
+extern "C" void WFAndroidDrawLevelMenu(const PhonepadRect* rects, int count, int w, int h);
+#endif
 #if defined(__LINUX__) && !defined(__ANDROID__) && !defined(__EMSCRIPTEN__)
 // The level menu's drawer on the Linux desktop (game/level_menu.h): solid
 // rectangles in pixels, origin top-left, colour 0xRRGGBBAA, over the frame
@@ -800,6 +804,8 @@ _memory(memory)
 	WFInitGL();
 #if defined(__LINUX__) && !defined(__ANDROID__) && !defined(__EMSCRIPTEN__)
     levelmenu::SetDrawer(&DrawLevelMenuRects);
+#elif defined(__ANDROID__)
+    levelmenu::SetDrawer(&WFAndroidDrawLevelMenu);   // gfx/gl/android_window.cc (GLES, the phone panel's path)
 #endif
 
     assert(orderTableSize > 0);

@@ -162,6 +162,18 @@ const char* PlatformHint();
 void RequestReturn();
 bool ConsumeReturnRequest();
 
+// True once a menu has been shown in this run (set by the engine); the Android key
+// handler then turns Back held 1 s into RequestReturn (a short Back still leaves the app).
+void SetMenuRunning(bool running);
+bool MenuRunning();
+
+// One line to the platform's log: stderr on the desktop, logcat (tag wf_game) on Android.
+void Log(const char* fmt, ...)
+#if defined(__GNUC__)
+    __attribute__((format(printf, 1, 2)))
+#endif
+    ;
+
 }  // namespace levelmenu
 
 #endif  // GAME_LEVEL_MENU_H

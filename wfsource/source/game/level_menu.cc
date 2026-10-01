@@ -11,7 +11,11 @@
 #include "level_menu.h"
 
 #include <atomic>
+#include <cstdarg>
 #include <cstdio>
+#if defined(__ANDROID__)
+#include <android/log.h>
+#endif
 #include <cstdlib>
 #include <cstring>
 
@@ -402,5 +406,23 @@ const char* PlatformHint()
 
 void RequestReturn() { gReturnRequested.store(true); }
 bool ConsumeReturnRequest() { return gReturnRequested.exchange(false); }
+
+namespace { std::atomic<bool> gMenuRunning{false}; }
+void SetMenuRunning(bool running) { gMenuRunning.store(running); }
+bool MenuRunning() { return gMenuRunning.load(); }
+
+void Log(const char* fmt, ...)
+{
+    char line[512];
+    va_list ap;
+    va_start(ap, fmt);
+    std::vsnprintf(line, sizeof(line), fmt, ap);
+    va_end(ap);
+#if defined(__ANDROID__)
+    __android_log_print(ANDROID_LOG_INFO, "wf_game", "level-menu: %s", line);
+#else
+    std::fprintf(stderr, "level-menu: %s\n", line);
+#endif
+}
 
 }  // namespace levelmenu

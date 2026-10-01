@@ -26,6 +26,7 @@
 
 #include <cstdio>
 #include <cstdlib>
+#include <cstring>
 #include <vector>
 
 namespace
@@ -51,6 +52,12 @@ bool   gHudEnabled = true;
 GLuint gPhoneVao   = 0;
 GLuint gPhoneVbo   = 0;
 GLsizei gPhoneVerts = 0;
+
+// The level menu (game/level_menu.h): the same, for WFAndroidDrawLevelMenu.
+GLuint gMenuVao = 0, gMenuVbo = 0;
+GLsizei gMenuVerts = 0;
+std::vector<PhonepadRect> gMenuLast;
+int gMenuW = 0, gMenuH = 0;
 
 #define WF_LOG_TAG "wf_game"
 #define WFLOG(fmt, ...) __android_log_print(ANDROID_LOG_INFO, WF_LOG_TAG, fmt, ##__VA_ARGS__)
@@ -159,6 +166,9 @@ WFAndroidEglInit(ANativeWindow* window)
             gPhoneVao   = 0;
             gPhoneVbo   = 0;
             gPhoneVerts = 0;
+            gMenuVao    = 0;
+            gMenuVbo    = 0;
+            gMenuLast.clear();
             eglDestroyContext(gEglDisplay, gEglContext);
             gEglContext = EGL_NO_CONTEXT;
             // Fall through to normal retry on next INIT_WINDOW.
@@ -444,6 +454,69 @@ WFAndroidDrawPhoneOverlay()
     glUseProgram(gHudProg);
     glBindVertexArray(gPhoneVao);
     glDrawArrays(GL_TRIANGLES, 0, gPhoneVerts);
+    glBindVertexArray(0);
+    glUseProgram(0);
+    if (!prevBlend) glDisable(GL_BLEND);
+    if ( prevDepth) glEnable(GL_DEPTH_TEST);
+    if ( prevCull)  glEnable(GL_CULL_FACE);
+}
+
+// The level menu (game/level_menu.h; docs/plans/2026-10-01-level-menu-selector.md):
+// called by WFGame::RunLevelMenu between RenderBegin and RenderEnd, with the menu's
+// rectangles for the w x h surface. Same HUD program as the phone panel; its own
+// VAO/VBO, re-uploaded only when the rectangles change.
+extern "C" void
+WFAndroidDrawLevelMenu(const PhonepadRect* rects, int n, int w, int h)
+{
+    if (w <= 0 || h <= 0 || n <= 0) return;
+    HudInit();
+    if (gHudProg == 0) return;
+    bool changed = gMenuVao == 0 || w != gMenuW || h != gMenuH || size_t(n) != gMenuLast.size()
+                   || std::memcmp(gMenuLast.data(), rects, size_t(n) * sizeof(PhonepadRect)) != 0;
+    if (gMenuVao == 0)
+    {
+        glGenVertexArrays(1, &gMenuVao);
+        glGenBuffers(1, &gMenuVbo);
+        glBindVertexArray(gMenuVao);
+        glBindBuffer(GL_ARRAY_BUFFER, gMenuVbo);
+        const GLsizei stride = sizeof(HudVert);
+        glEnableVertexAttribArray(0);
+        glVertexAttribPointer(0, 2, GL_FLOAT, GL_FALSE, stride, (void*)offsetof(HudVert, x));
+        glEnableVertexAttribArray(1);
+        glVertexAttribPointer(1, 4, GL_FLOAT, GL_FALSE, stride, (void*)offsetof(HudVert, r));
+        glBindVertexArray(0);
+    }
+    if (changed)
+    {
+        std::vector<HudVert> verts;
+        verts.reserve(size_t(n) * 6);
+        const float fw = float(w), fh = float(h);
+        for (int i = 0; i < n; ++i)
+        {
+            const PhonepadRect& r = rects[i];
+            PushHudRect(verts, r.x0, r.y0, r.x1, r.y1, fw, fh,
+                        float((r.rgba >> 24) & 255) / 255.0f, float((r.rgba >> 16) & 255) / 255.0f,
+                        float((r.rgba >> 8) & 255) / 255.0f, float(r.rgba & 255) / 255.0f);
+        }
+        glBindBuffer(GL_ARRAY_BUFFER, gMenuVbo);
+        glBufferData(GL_ARRAY_BUFFER, GLsizeiptr(verts.size() * sizeof(HudVert)), verts.data(), GL_STATIC_DRAW);
+        glBindBuffer(GL_ARRAY_BUFFER, 0);
+        gMenuVerts = GLsizei(verts.size());
+        gMenuLast.assign(rects, rects + n);
+        gMenuW = w;
+        gMenuH = h;
+    }
+    GLboolean prevBlend = glIsEnabled(GL_BLEND);
+    GLboolean prevDepth = glIsEnabled(GL_DEPTH_TEST);
+    GLboolean prevCull  = glIsEnabled(GL_CULL_FACE);
+    glViewport(0, 0, w, h);
+    glDisable(GL_DEPTH_TEST);
+    glDisable(GL_CULL_FACE);
+    glEnable(GL_BLEND);
+    glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
+    glUseProgram(gHudProg);
+    glBindVertexArray(gMenuVao);
+    glDrawArrays(GL_TRIANGLES, 0, gMenuVerts);
     glBindVertexArray(0);
     glUseProgram(0);
     if (!prevBlend) glDisable(GL_BLEND);

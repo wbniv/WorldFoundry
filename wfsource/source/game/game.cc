@@ -297,7 +297,7 @@ WFGame::RunGameScript()				// runs the whole game, returns when game (really) ov
 					break;
 			}
 			if (_levelMenuActive)
-				fprintf(stderr, "level-menu: level %d starts\n", int(_desiredLevelNum));
+				levelmenu::Log("level %d starts", int(_desiredLevelNum));
 #endif
 
 			assert(_desiredLevelNum >= 0);
@@ -775,7 +775,7 @@ WFGame::PollLevelMenu()
 	// a menu bundle runs; elsewhere the request is left alone.
 	if (_levelMenuActive && levelmenu::ConsumeReturnRequest())
 	{
-		fprintf(stderr, "level-menu: back to the menu\n");
+		levelmenu::Log("back to the menu");
 		_desiredLevelNum = levelmenu::kAskPlayer;
 		_bContinue = false;
 	}
@@ -802,7 +802,7 @@ WFGame::RunLevelMenu()
 	int levelCount = 0;
 	if (!ParseToc(sector.data(), sector.size(), &toc) || !FindMenu(toc, &menuEntry, &levelCount))
 	{
-		fprintf(stderr, "level-menu: no MENU chunk in cd.iff: starting level 0\n");
+		levelmenu::Log("no MENU chunk in cd.iff: starting level 0");
 		return 0;
 	}
 	const size_t sectors = (size_t(menuEntry.size) + DiskFileCD::_SECTOR_SIZE - 1) / DiskFileCD::_SECTOR_SIZE;
@@ -813,26 +813,27 @@ WFGame::RunLevelMenu()
 	std::string err;
 	if (!ParseMenu(chunk.data(), menuEntry.size, levelCount, &bundle, &err))
 	{
-		fprintf(stderr, "level-menu: bad MENU chunk (%s): starting level 0\n", err.c_str());
+		levelmenu::Log("bad MENU chunk (%s): starting level 0", err.c_str());
 		return 0;
 	}
 	const int autoLevel = AutoPick(bundle);
 	if (autoLevel >= 0)
 	{
-		fprintf(stderr, "level-menu: %zu entr%s, no menu: LEVEL_TO_RUN=%d\n",
+		levelmenu::Log("%zu entr%s, no menu: LEVEL_TO_RUN=%d",
 		        bundle.entries.size(), bundle.entries.size() == 1 ? "y" : "ies", autoLevel);
 		return autoLevel;
 	}
 	if (!Drawer())
 	{
-		fprintf(stderr, "level-menu: no menu drawer on this platform: LEVEL_TO_RUN=%d (%s)\n",
+		levelmenu::Log("no menu drawer on this platform: LEVEL_TO_RUN=%d (%s)",
 		        bundle.entries[0].level, bundle.entries[0].name.c_str());
 		return bundle.entries[0].level;
 	}
 
 	_levelMenuActive = true;
+	SetMenuRunning(true);
 	Menu menu(bundle, _levelMenuCursor, PlatformHint());
-	fprintf(stderr, "level-menu: showing %zu entries (\"%s\"), cursor on %d\n",
+	levelmenu::Log("showing %zu entries (\"%s\"), cursor on %d",
 	        bundle.entries.size(), bundle.title.c_str(), menu.Cursor());
 
 #if DESIGNER_CHEATS
@@ -853,6 +854,12 @@ WFGame::RunLevelMenu()
 	int lastCursor = menu.Cursor();
 	while (!HALWindowCloseRequested())
 	{
+		if (HALIsSuspended())			// Android onPause: no surface to draw into (as StepFrame)
+		{
+			HALPumpSuspendedEvents();
+			usleep(16000);
+			continue;
+		}
 		uint32_t buttons = 0;
 		ScriptFrame f;
 		if (Script().Next(&f))			// --menu-input: the script drives the menu
@@ -866,7 +873,7 @@ WFGame::RunLevelMenu()
 		if (menu.Cursor() != lastCursor)
 		{
 			lastCursor = menu.Cursor();
-			fprintf(stderr, "level-menu: cursor on %d (%s)\n", lastCursor, bundle.entries[size_t(lastCursor)].name.c_str());
+			levelmenu::Log("cursor on %d (%s)", lastCursor, bundle.entries[size_t(lastCursor)].name.c_str());
 		}
 		if (menu.Done())
 			break;
@@ -882,7 +889,7 @@ WFGame::RunLevelMenu()
 	ConsumeReturnRequest();			// a Backspace pressed while the menu was up is not for the next level
 	_levelMenuCursor = menu.Cursor();
 	const int level = menu.ChosenLevel();
-	fprintf(stderr, "level-menu: LEVEL_TO_RUN=%d (%s)\n", level, bundle.entries[size_t(menu.Cursor())].name.c_str());
+	levelmenu::Log("LEVEL_TO_RUN=%d (%s)", level, bundle.entries[size_t(menu.Cursor())].name.c_str());
 	return level;
 #else
 	return 0;

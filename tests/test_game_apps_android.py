@@ -126,16 +126,27 @@ FLAVORS = {
     "smb": (".smb", "WF SMB", ["cd.iff"]),                 # the label is a placeholder (the plan's Decisions)
     "qbert": (".qbert", "WF Q*bert", ["cd.iff"]),          # placeholder too
 }
+# What each app ships, where it differs from GAMES' plain bundle: the smb app ships the world-select bundle
+# (task build-cd-iff-smb-menu: the same four levels at the same TOC offsets, shell-menu.fth, a MENU chunk;
+# docs/plans/2026-10-01-level-menu-selector.md, Phase D).
+SHIPS = {"smb": "smb-menu-cd.iff"}
+
+
+def shipped(flavor):
+    return LEVELS / SHIPS.get(flavor, GAMES[flavor][0])
 
 
 @pytest.mark.parametrize("flavor", FLAVORS)
 def test_flavor_boots_its_own_game(flavor):
-    """assets/cd.iff is a symlink to this game's bundle, so TOC level 0 (what shell.fth boots) is the game's first level."""
+    """assets/cd.iff is a symlink to this game's bundle, so TOC level 0 (what shell.fth boots, or the first menu entry) is the
+    game's first level, and every level sits where the plain bundle has it (the LEVEL_TO_RUN chain, the audit above)."""
     link = SRC / flavor / "assets" / "cd.iff"
-    assert link.is_symlink() and link.resolve() == (LEVELS / GAMES[flavor][0]).resolve()
-    toc = read_game_toc(link.read_bytes())
+    assert link.is_symlink() and link.resolve() == shipped(flavor).resolve()
+    data = link.read_bytes()
+    toc, plain = read_game_toc(data), read_game_toc((LEVELS / GAMES[flavor][0]).read_bytes())
     first = standalone(GAMES[flavor][1][0]).read_bytes()
-    assert link.read_bytes()[toc[1][1]:toc[1][1] + toc[1][2]] == first
+    assert data[toc[1][1]:toc[1][1] + toc[1][2]] == first
+    assert toc[1:1 + len(GAMES[flavor][1])] == plain[1:], "the levels keep the plain bundle's TOC entries"
     assert sorted(p.name for p in (SRC / flavor / "assets").iterdir()) == FLAVORS[flavor][2]
 
 
@@ -189,7 +200,7 @@ def test_built_release_apk(flavor):
         pytest.skip(f"{p.relative_to(REPO)} not built (cd android && ./gradlew :app:assemble{flavor.title()}Release)")
     with zipfile.ZipFile(p) as z:
         names = set(z.namelist())
-        assert z.read("assets/cd.iff") == (LEVELS / GAMES[flavor][0]).read_bytes()
+        assert z.read("assets/cd.iff") == shipped(flavor).read_bytes()
         assert {"lib/arm64-v8a/libwf_game.so", "lib/armeabi-v7a/libwf_game.so"} <= names
         assert {n for n in names if n.startswith("assets/")} == {f"assets/{a}" for a in FLAVORS[flavor][2]}
 

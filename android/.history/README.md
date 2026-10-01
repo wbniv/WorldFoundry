@@ -1,5 +1,6 @@
 | Date | Change |
 |------|--------|
+| [2026-10-01](https://github.com/wbniv/WorldFoundry/commit/6db30e3f) | Docs: one Android app per game (README flavor table, porting status) |
 | [2026-10-01](https://github.com/wbniv/WorldFoundry/commit/55a66fb8) | Phone controller QR: the World Foundry logo in the middle (planet by default, or the whole logo), at ECC H |
 | [2026-10-01](https://github.com/wbniv/WorldFoundry/commit/2adf90a9) | Docs: the Chromecast OK button, the condo's A for doors and shade, the phone as a gamepad, and building without sudo |
 | [2026-09-30](https://github.com/wbniv/WorldFoundry/commit/747442a4) | WIP aquarium Android/Chromecast app: product flavors, aquarium-only cd.iff, device script |
@@ -10,6 +11,11 @@
 | [2026-04-17](https://github.com/wbniv/WorldFoundry/commit/3b24f001) | feat(android): Phase 3 step 3 — Gradle project + AndroidManifest |
 
 <!--history-meta v1
+6db30e3f	author	Will Norris
+6db30e3f	added	10
+6db30e3f	deleted	7
+6db30e3f	files	1
+6db30e3f	body	android/README.md lists the smb and qbert flavors and the per-game bundles\n(snowgoons now ships wflevels/snowgoons-cd.iff), the install-apk app list and\nwhich release builds need the soundfont. docs/porting-status.md: SMB,\nsnowgoons and Q*bert run as their own apps on the real Chromecast HD.\nPlan: docs/plans/2026-10-01-split-cd-iff-one-app-per-game.md\n\nCo-Authored-By: Claude Opus 5.5 <noreply@anthropic.com>\nClaude-Session: https://claude.ai/code/session_01DxMP4jUNjCjDz8E9DWzXcM
 55a66fb8	author	Will Norris
 55a66fb8	added	1
 55a66fb8	deleted	0
