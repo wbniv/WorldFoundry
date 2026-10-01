@@ -364,8 +364,12 @@ endif()
 # ─── Collect sources with skip filter ─────────────────────────────────────────
 # .mm is Objective-C++, only used by hal/ios/ today. Globbing it unconditionally
 # is safe — no other platform ships .mm sources.
+# CONFIGURE_DEPENDS: a plain GLOB runs only when CMake configures, so an existing
+# build directory (Gradle's android/app/.cxx, build/, build-editor/) never saw a .cc
+# added later and the link failed with undefined symbols (2026-10-02, level_menu.cc).
+# This re-runs the glob on every build and regenerates when the file list changes.
 foreach(dir ${WF_DIRS})
-    file(GLOB dir_srcs "${SRC}/${dir}/*.cc" "${SRC}/${dir}/*.mm")
+    file(GLOB dir_srcs CONFIGURE_DEPENDS "${SRC}/${dir}/*.cc" "${SRC}/${dir}/*.mm")
     foreach(src ${dir_srcs})
         file(RELATIVE_PATH rel ${SRC} ${src})
         set(_skip FALSE)

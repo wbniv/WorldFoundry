@@ -155,6 +155,7 @@
 
 ## Done
 
+- ✅ 2026-10-02 — [cmake-glob] CMake GLOB uses CONFIGURE_DEPENDS, so a new .cc builds in an old build directory. See [test](tests/test_cmake_glob_configure_depends.py).
 - ✅ 2026-10-01 — [level-menu] SMB world select at launch, in the engine; the smb app ships it (checked on the Chromecast HD). See [plan](docs/plans/2026-10-01-level-menu-selector.md).
 - ✅ 2026-10-01 — [split-cd-iff] Android: one app per game (smb, snowgoons, qbert), art and CI; device rerun pending. See [plan](docs/plans/2026-10-01-split-cd-iff-one-app-per-game.md).
 - ✅ 2026-10-01 — [android-size-trim-2] Release APKs 243 KB smaller each, 20 exports; report written. See [plan](docs/plans/2026-04-18-android-size-trim-iter-2.md).
@@ -329,7 +330,6 @@
 _Auto-added from plan "Out of scope"/"Deferred" sections at commit time. Triage each into M1/M2/etc. and delete it here — it will not come back._
 
 <!-- BEGIN auto-captured-deferrals (managed by audit-plan-deferrals.sh — triage these into the curated sections above; the fingerprint ledger means a deleted item is NOT re-added) -->
-- [ ] **(triage)** CMake: `file(GLOB … "*.cc")` in `CMakeLists.txt` has no `CONFIGURE_DEPENDS`, so a new source file in an existing directory is missed by an existing build directory until `CMakeLists.txt` is touched (hit 2026-10-02: the Android link failed with undefined `levelmenu::ParseToc` in a tree configured before `level_menu.cc` existed; a fresh worktree linked). Add `CONFIGURE_DEPENDS` or document the touch.
 - [ ] **(triage)** Template-name → constant authoring (investigation option 2) — separate follow-up when a — _from [2026-06-13-spawn-template-forth-primitive.md](docs/plans/2026-06-13-spawn-template-forth-primitive.md)_  <!-- fp:0b1c847938f2c12f -->
 - [ ] **(triage)** Approach A (pooled-generator fireball) — already shipped; this is the orthogonal Approach B. — _from [2026-06-13-spawn-template-forth-primitive.md](docs/plans/2026-06-13-spawn-template-forth-primitive.md)_  <!-- fp:19bd9323ca2fcfd2 -->
 - [ ] **(triage)** Arbitrary-velocity / concurrent-burst consumers — this primitive enables them; wiring a — _from [2026-06-13-spawn-template-forth-primitive.md](docs/plans/2026-06-13-spawn-template-forth-primitive.md)_  <!-- fp:539de80d8b7cf2f5 -->
