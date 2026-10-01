@@ -52,6 +52,13 @@ android {
             applicationIdSuffix = ".condo"      // org.worldfoundry.wf_game.condo
             versionNameSuffix   = "-condo"
         }
+        // docs/plans/2026-10-01-split-cd-iff-one-app-per-game.md: W1-1..W1-4,
+        // one game that chains (the flag/axe ActBoxes write TOC 1, 2, 3, 0).
+        create("smb") {
+            dimension = "game"
+            applicationIdSuffix = ".smb"        // org.worldfoundry.wf_game.smb
+            versionNameSuffix   = "-smb"
+        }
     }
 
     externalNativeBuild {
@@ -127,4 +134,5 @@ android {
     //     returns quietly when the soundfont asset is absent.
     //   condo: cd.iff → wflevels/condo-cd.iff (task build-cd-iff-condo; the
     //     condo_639_640 standalone level, docs/plans/2026-10-01-condo-chromecast.md).
+    //   smb: cd.iff → wflevels/smb-cd.iff (task build-cd-iff-smb). No MIDI or soundfont.
 }

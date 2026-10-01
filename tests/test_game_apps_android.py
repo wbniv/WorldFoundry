@@ -123,6 +123,7 @@ from test_aquarium_android import APP, DENSITIES, GRADLE, SRC  # noqa: E402
 # flavor -> (applicationId suffix or None for the original id, label, the assets it ships)
 FLAVORS = {
     "snowgoons": (None, "World Foundry", ["cd.iff", "florestan-subset.sf2", "level0.mid"]),
+    "smb": (".smb", "WF SMB", ["cd.iff"]),                 # the label is a placeholder (the plan's Decisions)
 }
 
 
@@ -151,3 +152,42 @@ def test_flavor_id_and_no_permission(flavor):
     assert "externalNativeBuild" not in body
     # No phone controller and no permission: only aquarium and condo have a flavor manifest (tests/test_phone_controller_android.py).
     assert not (SRC / flavor / "AndroidManifest.xml").exists()
+
+
+def test_flavor_list_is_complete():
+    """Every game in GAMES is an app, and FLAVORS describes exactly those (aquarium and condo have their own tests)."""
+    assert set(FLAVORS) == set(GAMES) & set(FLAVORS)
+    names = set(re.findall(r'create\("(\w+)"\)', GRADLE.read_text()))
+    assert set(FLAVORS) <= names, names
+
+
+@pytest.mark.parametrize("flavor", [f for f in FLAVORS if f != "snowgoons"])
+def test_new_flavor_art_and_label(flavor):
+    """Launcher icons and TV banner override main's with the same names and sizes; the label is the flavor's own."""
+    from PIL import Image
+    main, res = SRC / "main" / "res", SRC / flavor / "res"
+    assert Image.open(res / "drawable" / "tv_banner.png").size == Image.open(main / "drawable" / "tv_banner.png").size
+    for d in DENSITIES:
+        for name in ("ic_launcher.png", "ic_launcher_round.png", "ic_launcher_foreground.png"):
+            assert Image.open(res / f"mipmap-{d}" / name).size == Image.open(main / f"mipmap-{d}" / name).size, (d, name)
+    strings = (res / "values" / "strings.xml").read_text()
+    assert re.search(rf'name="app_name">{re.escape(FLAVORS[flavor][1])}<', strings)
+    assert 'name="log_viewer_label"' in strings
+    assert 'name="ic_launcher_background"' in (res / "values" / "colors.xml").read_text()
+    # The art is a real engine frame committed in art-src (scripts/gen-android-icons.py), not drawn.
+    gen = (REPO / "scripts" / "gen-android-icons.py").read_text()
+    art = re.search(rf'"{flavor}": dict\(icon=ART / "([^"]+)"', gen).group(1)
+    assert (APP / "art-src" / art).exists(), art
+
+
+@pytest.mark.parametrize("flavor", FLAVORS)
+def test_built_release_apk(flavor):
+    import zipfile
+    p = APP / "build" / "outputs" / "apk" / flavor / "release" / f"worldfoundry-{flavor}-release.apk"
+    if not p.exists():
+        pytest.skip(f"{p.relative_to(REPO)} not built (cd android && ./gradlew :app:assemble{flavor.title()}Release)")
+    with zipfile.ZipFile(p) as z:
+        names = set(z.namelist())
+        assert z.read("assets/cd.iff") == (LEVELS / GAMES[flavor][0]).read_bytes()
+        assert {"lib/arm64-v8a/libwf_game.so", "lib/armeabi-v7a/libwf_game.so"} <= names
+        assert {n for n in names if n.startswith("assets/")} == {f"assets/{a}" for a in FLAVORS[flavor][2]}
