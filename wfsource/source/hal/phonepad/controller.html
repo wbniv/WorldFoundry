@@ -1,0 +1,330 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,maximum-scale=1,user-scalable=no,viewport-fit=cover">
+<meta name="referrer" content="no-referrer">
+<title>World Foundry controller</title>
+<!--
+  The phone as a gamepad: served by the TV app (hal/phonepad/phonepad.cc) at /?k=<PIN>.
+  Plan: docs/plans/2026-09-30-aquarium-chromecast.md, Phase E, mockups 2 and 4.
+  One file, inline CSS and JS, no external references. The layout (which buttons, which
+  EJ_BUTTONF_* bits) comes from /layout.json, one per app. Protocol: "b:<hex mask>" on every
+  change and every 250 ms, "t:<ms>" once a second (the TV echoes it: round-trip time).
+  Keep-awake: the plain http page has no Wake Lock (secure contexts only), so a silent looping
+  video plays while connected; it was made with
+    ffmpeg -f lavfi -i color=black:s=16x16:r=1 -t 2 -c:v libx264 -pix_fmt yuv420p
+           -profile:v baseline -movflags +faststart -an blank.mp4
+-->
+<style>
+:root{--bg:#0d1117;--panel:#111826;--line:#3a4a63;--fg:#e6edf3;--dim:#8b98a9;--ok:#56d364;--warn:#ffb454;--bad:#ff7b72;--btn:#1d2a3f;--knob:#2f6fb3}
+*{box-sizing:border-box;-webkit-tap-highlight-color:transparent}
+html,body{margin:0;height:100%;overflow:hidden;background:var(--bg);color:var(--fg);
+  font:15px/1.35 system-ui,-apple-system,'Segoe UI',Roboto,sans-serif;touch-action:none;
+  user-select:none;-webkit-user-select:none;-webkit-touch-callout:none;overscroll-behavior:none}
+#bar{position:fixed;left:0;right:0;top:0;height:40px;display:flex;align-items:center;gap:14px;
+  padding:0 max(16px,env(safe-area-inset-right)) 0 max(16px,env(safe-area-inset-left));font-size:13px;color:var(--dim)}
+#status{display:flex;align-items:center;gap:6px;color:var(--warn)}
+#status .dot{width:9px;height:9px;border-radius:50%;background:currentColor}
+#status.ok{color:var(--ok)}#status.bad{color:var(--bad)}
+#title{color:var(--fg);font-weight:600}
+#spacer{flex:1}
+#rtt{min-width:5em;text-align:right}
+#buzz{background:var(--btn);color:var(--fg);border:1px solid var(--line);border-radius:6px;padding:3px 10px;font:inherit}
+#take{display:none;background:var(--ok);color:var(--bg);border:0;border-radius:6px;padding:4px 12px;font:inherit;font-weight:600}
+#pad{position:fixed;inset:40px 0 26px 0}
+.ctl{position:absolute;touch-action:none}
+.stick .ring{position:absolute;inset:0;border-radius:50%;border:2px solid var(--line);background:#0d1320}
+.stick .knob{position:absolute;left:50%;top:50%;width:40%;height:40%;margin:-20% 0 0 -20%;border-radius:50%;
+  background:var(--knob);box-shadow:0 0 0 2px #56a0e8 inset}
+.btn{border-radius:50%;background:var(--btn);border:2px solid var(--line);display:flex;align-items:center;
+  justify-content:center;text-align:center;color:#c9d4e3;font-size:13px;line-height:1.1;padding:4px}
+.btn b{display:block;font-size:20px}
+.btn.on{background:var(--ok);color:var(--bg);border-color:var(--ok)}
+body.off .ctl{opacity:.35}
+#foot{position:fixed;left:0;right:0;bottom:0;height:26px;display:flex;gap:16px;align-items:center;
+  padding:0 16px;font-size:12px;color:var(--dim)}
+#mask{font-family:ui-monospace,monospace;color:var(--ok)}
+#msg{position:fixed;inset:0;display:none;align-items:center;justify-content:center;text-align:center;
+  padding:24px;font-size:20px;background:var(--bg)}
+#msg.show{display:flex}
+#msg small{display:block;font-size:15px;color:var(--dim);margin-top:8px}
+#rotate{position:fixed;inset:0;display:none;align-items:center;justify-content:center;text-align:center;
+  padding:24px;font-size:20px;background:var(--bg);z-index:5}
+@media (orientation:portrait){#rotate{display:flex}}
+#keepawake{position:fixed;width:1px;height:1px;opacity:0;pointer-events:none;left:0;top:0}
+</style>
+</head>
+<body class="off">
+<div id="bar">
+  <span id="status"><span class="dot"></span><span id="stext">Connecting…</span></span>
+  <span id="title"></span>
+  <button id="take">Use this phone</button>
+  <span id="spacer"></span>
+  <span id="rtt"></span>
+  <button id="buzz" hidden>Buzz: on</button>
+  <span id="nobuzz" hidden>No haptics on this phone</span>
+</div>
+<div id="pad"></div>
+<div id="foot"><span>sent to the TV:</span><span id="mask">0x0000</span><span id="hint"></span></div>
+<div id="msg"></div>
+<div id="rotate">Turn your phone sideways to play.</div>
+<video id="keepawake" muted playsinline loop preload="auto"
+  src="data:video/mp4;base64,AAAAIGZ0eXBpc29tAAACAGlzb21pc28yYXZjMW1wNDEAAAMqbW9vdgAAAGxtdmhkAAAAAAAAAAAAAAAAAAAD6AAAB9AAAQAAAQAAAAAAAAAAAAAAAAEAAAAAAAAAAAAAAAAAAAABAAAAAAAAAAAAAAAAAABAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAgAAAlV0cmFrAAAAXHRraGQAAAADAAAAAAAAAAAAAAABAAAAAAAAB9AAAAAAAAAAAAAAAAAAAAAAAAEAAAAAAAAAAAAAAAAAAAABAAAAAAAAAAAAAAAAAABAAAAAABAAAAAQAAAAAAAkZWR0cwAAABxlbHN0AAAAAAAAAAEAAAfQAAAAAAABAAAAAAHNbWRpYQAAACBtZGhkAAAAAAAAAAAAAAAAAABAAAAAgABVxAAAAAAALWhkbHIAAAAAAAAAAHZpZGUAAAAAAAAAAAAAAABWaWRlb0hhbmRsZXIAAAABeG1pbmYAAAAUdm1oZAAAAAEAAAAAAAAAAAAAACRkaW5mAAAAHGRyZWYAAAAAAAAAAQAAAAx1cmwgAAAAAQAAAThzdGJsAAAAuHN0c2QAAAAAAAAAAQAAAKhhdmMxAAAAAAAAAAEAAAAAAAAAAAAAAAAAAAAAABAAEABIAAAASAAAAAAAAAABFUxhdmM2Mi4xMS4xMDAgbGlieDI2NAAAAAAAAAAAAAAAGP//AAAALmF2Y0MBQsAK/+EAFmdCwArZHsBEAAADAAQAAAMACDxImSABAAVoy4PLIAAAABBwYXNwAAAAAQAAAAEAAAAUYnRydAAAAAAAAAoIAAAAAAAAABhzdHRzAAAAAAAAAAEAAAACAABAAAAAABRzdHNzAAAAAAAAAAEAAAABAAAAHHN0c2MAAAAAAAAAAQAAAAEAAAACAAAAAQAAABxzdHN6AAAAAAAAAAAAAAACAAACeAAAAAoAAAAUc3RjbwAAAAAAAAABAAADWgAAAGF1ZHRhAAAAWW1ldGEAAAAAAAAAIWhkbHIAAAAAAAAAAG1kaXJhcHBsAAAAAAAAAAAAAAAALGlsc3QAAAAkqXRvbwAAABxkYXRhAAAAAQAAAABMYXZmNjIuMy4xMDAAAAAIZnJlZQAAAoptZGF0AAACYgYF//9e3EXpvebZSLeWLNgg2SPu73gyNjQgLSBjb3JlIDE2NSAtIEguMjY0L01QRUctNCBBVkMgY29kZWMgLSBDb3B5bGVmdCAyMDAzLTIwMjUgLSBodHRwOi8vd3d3LnZpZGVvbGFuLm9yZy94MjY0Lmh0bWwgLSBvcHRpb25zOiBjYWJhYz0wIHJlZj0zIGRlYmxvY2s9MTowOjAgYW5hbHlzZT0weDE6MHgxMTEgbWU9aGV4IHN1Ym1lPTcgcHN5PTEgcHN5X3JkPTEuMDA6MC4wMCBtaXhlZF9yZWY9MSBtZV9yYW5nZT0xNiBjaHJvbWFfbWU9MSB0cmVsbGlzPTEgOHg4ZGN0PTAgY3FtPTAgZGVhZHpvbmU9MjEsMTEgZmFzdF9wc2tpcD0xIGNocm9tYV9xcF9vZmZzZXQ9LTIgdGhyZWFkcz0xIGxvb2thaGVhZF90aHJlYWRzPTEgc2xpY2VkX3RocmVhZHM9MCBucj0wIGRlY2ltYXRlPTEgaW50ZXJsYWNlZD0wIGJsdXJheV9jb21wYXQ9MCBjb25zdHJhaW5lZF9pbnRyYT0wIGJmcmFtZXM9MCB3ZWlnaHRwPTAga2V5aW50PTI1MCBrZXlpbnRfbWluPTEgc2NlbmVjdXQ9NDAgaW50cmFfcmVmcmVzaD0wIHJjX2xvb2thaGVhZD00MCByYz1jcmYgbWJ0cmVlPTEgY3JmPTIzLjAgcWNvbXA9MC42MCBxcG1pbj0wIHFwbWF4PTY5IHFwc3RlcD00IGlwX3JhdGlvPTEuNDAgYXE9MToxLjAwAIAAAAAOZYiEBb///w9FAAFPf4AAAAAGQZo4CvqA"></video>
+<script>
+'use strict';
+(function () {
+  const $ = (id) => document.getElementById(id);
+  const K = new URLSearchParams(location.search).get('k') || '';
+  const HEARTBEAT_MS = 250, PING_MS = 1000, RETRY_MS = 1000, UNREACHABLE_MS = 5000;
+
+  let layout = null, ws = null, state = 'connecting', mask = 0, sentMask = -1;
+  let heartbeat = 0, pinger = 0, retryTimer = 0, lastOpen = Date.now(), wakeLock = null;
+  const held = new Map();          // bit -> Set(pointerId) for buttons
+  let stickBits = 0;
+  let buzzOn = true;
+  try { buzzOn = localStorage.getItem('wf-buzz') !== 'off'; } catch (e) { /* storage blocked */ }
+
+  // ---- status line --------------------------------------------------------------------
+  function setState(s, text, cls) {
+    state = s;
+    $('stext').textContent = text;
+    $('status').className = cls || '';
+    document.body.classList.toggle('off', s !== 'connected');
+    $('take').style.display = s === 'replaced' ? 'inline-block' : 'none';
+  }
+  function fatal(text, sub) {
+    $('msg').innerHTML = '';
+    const d = document.createElement('div');
+    d.textContent = text;
+    if (sub) { const s = document.createElement('small'); s.textContent = sub; d.appendChild(s); }
+    $('msg').appendChild(d);
+    $('msg').classList.add('show');
+  }
+
+  // ---- the mask -----------------------------------------------------------------------
+  function computeMask() {
+    let m = stickBits;
+    held.forEach((ids, bit) => { if (ids.size) m |= bit; });
+    return m & 0xffff;
+  }
+  function names(m) {
+    if (!layout) return '';
+    const out = [];
+    const s = layout.stick;
+    if (m & s.up) out.push('UP'); if (m & s.down) out.push('DOWN');
+    if (m & s.left) out.push('LEFT'); if (m & s.right) out.push('RIGHT');
+    for (const b of layout.buttons) if (m & b.bit) out.push(b.id);
+    return out.join(' + ');
+  }
+  function send(text) {
+    if (ws && ws.readyState === 1) { try { ws.send(text); return true; } catch (e) { /* closing */ } }
+    return false;
+  }
+  function update(force) {
+    mask = computeMask();
+    $('mask').textContent = '0x' + mask.toString(16).padStart(4, '0') + (mask ? '  ' + names(mask) : '');
+    if (state === 'connected' && (force || mask !== sentMask)) {
+      if (send('b:' + mask.toString(16))) sentMask = mask;
+    }
+  }
+  function releaseAll() {
+    held.forEach((ids) => ids.clear());
+    document.querySelectorAll('.btn.on').forEach((el) => el.classList.remove('on'));
+    stickBits = 0;
+    const knob = document.querySelector('.knob');
+    if (knob) knob.style.transform = '';
+    update(true);
+  }
+
+  // ---- haptics (local tick; Android Chrome has navigator.vibrate, iPhone Safari does not) --
+  const canBuzz = typeof navigator.vibrate === 'function';
+  function tick() { if (canBuzz && buzzOn) { try { navigator.vibrate(15); } catch (e) { /* ignore */ } } }
+  if (canBuzz) {
+    $('buzz').hidden = false;
+    $('buzz').textContent = 'Buzz: ' + (buzzOn ? 'on' : 'off');
+    $('buzz').addEventListener('click', () => {
+      buzzOn = !buzzOn;
+      $('buzz').textContent = 'Buzz: ' + (buzzOn ? 'on' : 'off');
+      try { localStorage.setItem('wf-buzz', buzzOn ? 'on' : 'off'); } catch (e) { /* storage blocked */ }
+    });
+  } else {
+    $('nobuzz').hidden = false;
+  }
+
+  // ---- keep the screen awake while connected ------------------------------------------
+  function keepAwake(on) {
+    const v = $('keepawake');
+    if (on) {
+      if ('wakeLock' in navigator && !wakeLock) {           // secure pages only (the later https page)
+        navigator.wakeLock.request('screen').then((l) => { wakeLock = l; }, () => {});
+      }
+      const p = v.play(); if (p && p.catch) p.catch(() => {});
+    } else {
+      v.pause();
+      if (wakeLock) { wakeLock.release().catch(() => {}); wakeLock = null; }
+    }
+  }
+
+  // ---- building the pad from the layout -----------------------------------------------
+  // Capture keeps a finger that slides off its control owning it until it lifts.
+  function capture(el, id) { try { el.setPointerCapture(id); } catch (e) { /* pointer already gone */ } }
+  function build() {
+    const pad = $('pad');
+    pad.innerHTML = '';
+    $('title').textContent = layout.title || '';
+    $('hint').textContent = layout.hint || '';
+    const W = pad.clientWidth, H = pad.clientHeight, unit = Math.min(W, H);
+
+    const st = document.createElement('div');
+    st.className = 'ctl stick';
+    const R = Math.round(unit * 0.36);
+    st.style.cssText = `width:${2 * R}px;height:${2 * R}px;left:${Math.round(W * 0.2 - R)}px;top:${Math.round(H * 0.58 - R)}px`;
+    st.innerHTML = '<div class="ring"></div><div class="knob"></div>';
+    pad.appendChild(st);
+    const knob = st.querySelector('.knob');
+    let stickId = null;
+    const thr = layout.threshold || 0.5, s = layout.stick;
+    function stickAt(e) {
+      const b = st.getBoundingClientRect();
+      let dx = (e.clientX - (b.left + b.width / 2)) / R, dy = (e.clientY - (b.top + b.height / 2)) / R;
+      const d = Math.hypot(dx, dy);
+      if (d > 1) { dx /= d; dy /= d; }
+      knob.style.transform = `translate(${dx * R * 0.6}px,${dy * R * 0.6}px)`;
+      // Per axis, the same rule as the engine's analog stick (native_app_entry.cc, kJoystickThreshold).
+      stickBits = (dx < -thr ? s.left : 0) | (dx > thr ? s.right : 0) | (dy < -thr ? s.up : 0) | (dy > thr ? s.down : 0);
+      update(false);
+    }
+    st.addEventListener('pointerdown', (e) => {
+      e.preventDefault(); keepAwake(state === 'connected');
+      stickId = e.pointerId; capture(st, e.pointerId); stickAt(e);
+    });
+    st.addEventListener('pointermove', (e) => { if (e.pointerId === stickId) stickAt(e); });
+    const stickEnd = (e) => {
+      if (e.pointerId !== stickId) return;
+      stickId = null; stickBits = 0; knob.style.transform = ''; update(false);
+    };
+    st.addEventListener('pointerup', stickEnd);
+    st.addEventListener('pointercancel', stickEnd);
+    st.addEventListener('lostpointercapture', stickEnd);
+
+    held.clear();
+    for (const b of layout.buttons) {
+      const el = document.createElement('div');
+      el.className = 'ctl btn';
+      el.dataset.bit = b.bit;
+      el.dataset.id = b.id;
+      const D = Math.round(unit * 0.26 * (b.size || 1));
+      el.style.cssText = `width:${D}px;height:${D}px;left:${Math.round(W * b.x - D / 2)}px;top:${Math.round(H * b.y - D / 2)}px`;
+      el.innerHTML = b.label === b.id ? `<b></b>` : `<span><b></b><span></span></span>`;
+      el.querySelector('b').textContent = b.id;
+      if (b.label !== b.id) el.querySelector('span span').textContent = b.label;
+      pad.appendChild(el);
+      const ids = new Set();
+      held.set(b.bit, ids);
+      el.addEventListener('pointerdown', (e) => {
+        e.preventDefault(); keepAwake(state === 'connected');
+        capture(el, e.pointerId); ids.add(e.pointerId); el.classList.add('on');
+        if (state === 'connected') tick();
+        update(false);
+      });
+      const up = (e) => {
+        if (!ids.delete(e.pointerId)) return;
+        if (!ids.size) el.classList.remove('on');
+        update(false);
+      };
+      el.addEventListener('pointerup', up);
+      el.addEventListener('pointercancel', up);
+      el.addEventListener('lostpointercapture', up);
+    }
+    update(true);
+  }
+
+  // ---- connection ---------------------------------------------------------------------
+  function scheduleRetry() {
+    clearTimeout(retryTimer);
+    retryTimer = setTimeout(start, RETRY_MS);
+  }
+  function stopTimers() { clearInterval(heartbeat); clearInterval(pinger); heartbeat = pinger = 0; }
+
+  function connect() {
+    if (ws) { try { ws.close(1000); } catch (e) { /* already closed */ } }
+    const sock = new WebSocket('ws://' + location.host + '/ws?k=' + encodeURIComponent(K));
+    ws = sock;
+    sock.onopen = () => {
+      if (ws !== sock) return;
+      lastOpen = Date.now();
+      setState('connected', 'Connected to the TV', 'ok');
+      sentMask = -1; update(true);
+      heartbeat = setInterval(() => update(true), HEARTBEAT_MS);
+      pinger = setInterval(() => send('t:' + Date.now()), PING_MS);
+      keepAwake(true);
+    };
+    sock.onmessage = (ev) => {
+      const t = String(ev.data);
+      if (t.startsWith('t:')) $('rtt').textContent = 'rtt ' + Math.max(0, Date.now() - Number(t.slice(2))) + ' ms';
+    };
+    sock.onclose = (ev) => {
+      if (ws !== sock) return;
+      ws = null; stopTimers(); keepAwake(false); $('rtt').textContent = '';
+      if (ev.code === 4001) { setState('replaced', 'Another phone took over', ''); return; }
+      if (document.hidden) { setState('paused', 'Paused', ''); return; }
+      lost();
+    };
+  }
+  function lost() {
+    if (Date.now() - lastOpen > UNREACHABLE_MS) setState('lost', 'Can’t reach the TV. Same Wi-Fi? Guest network?', 'bad');
+    else setState('lost', 'Reconnecting… buttons off', '');
+    scheduleRetry();
+  }
+
+  // Fetch the layout first, every time: it checks reachability and the PIN (a WebSocket that is
+  // refused cannot tell the page why), then open the socket.
+  function start() {
+    clearTimeout(retryTimer);
+    if (document.hidden || state === 'replaced' || state === 'wrongpin') return;
+    fetch('/layout.json?k=' + encodeURIComponent(K), { cache: 'no-store' }).then((r) => {
+      if (r.status === 403) {
+        state = 'wrongpin';
+        fatal('Wrong code. Scan the TV again.', 'The code changes every time the game starts.');
+        return null;
+      }
+      if (r.status === 429) { setState('lost', 'Too many wrong codes. Waiting…', 'bad'); scheduleRetry(); return null; }
+      if (!r.ok) throw new Error('HTTP ' + r.status);
+      return r.json();
+    }).then((l) => {
+      if (!l) return;
+      const first = !layout;
+      layout = l;
+      if (first) build();
+      connect();
+    }).catch(() => { lost(); });
+  }
+
+  $('take').addEventListener('click', () => { setState('connecting', 'Connecting…', ''); start(); });
+  document.addEventListener('visibilitychange', () => {
+    if (document.hidden) {
+      // A locked phone or a backgrounded tab must not leave a button held on the TV.
+      releaseAll();
+      if (ws) { const s = ws; ws = null; stopTimers(); try { s.close(1000); } catch (e) { /* closed */ } }
+      keepAwake(false);
+      if (state === 'connected' || state === 'lost' || state === 'connecting') setState('paused', 'Paused', '');
+    } else if (state === 'paused') {
+      setState('connecting', 'Connecting…', '');
+      start();
+    }
+  });
+  window.addEventListener('pagehide', releaseAll);
+  window.addEventListener('blur', releaseAll);
+  window.addEventListener('resize', () => { if (layout) { releaseAll(); build(); } });
+  document.addEventListener('contextmenu', (e) => e.preventDefault());
+
+  // For the headless tests (tests/test_phone_controller_page.py).
+  window.__wf = { mask: () => mask, state: () => state };
+
+  if (!/^[0-9]{6}$/.test(K)) { state = 'wrongpin'; fatal('Scan the code on the TV to play.', 'The address needs the PIN shown on the TV.'); }
+  else start();
+})();
+</script>
+</body>
+</html>

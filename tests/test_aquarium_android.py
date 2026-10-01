@@ -9,8 +9,9 @@ Everything here is static (no device, no display):
   * wflevels/aquarium-cd.iff (task build-cd-iff-aquarium) is a GAME bundle whose SHEL is
     wfsource/source/game/shell.fth and whose only level is today's wflevels/aquarium-standalone.iff,
     byte for byte, so a rebuilt level with a stale bundle fails here.
-  * each flavor's assets: the aquarium ships only its cd.iff (no level0.mid, so no Mario music
-    over the tank); snowgoons keeps the three pre-flavor symlinks; src/main/assets is gone.
+  * each flavor's assets: the aquarium ships its cd.iff (no level0.mid, so no Mario music over the
+    tank) plus the phone controller's page and layout (Phase E); snowgoons keeps the three
+    pre-flavor symlinks and no phone controller; src/main/assets is gone.
   * the flavors, ids and APK names in build.gradle.kts; the manifest keeps both launchers,
     the banner and the not-required TV / gamepad / touch features.
   * the aquarium's launcher art overrides main's with the same names and sizes.
@@ -88,10 +89,17 @@ def _link(p: Path) -> Path:
     return p.resolve()
 
 
-def test_aquarium_assets_are_only_its_cd_iff():
+PHONE_PAGE = REPO / "wfsource" / "source" / "hal" / "phonepad" / "controller.html"
+
+
+def test_aquarium_assets_are_its_cd_iff_and_the_phone_controller():
     assets = SRC / "aquarium" / "assets"
-    assert sorted(p.name for p in assets.iterdir()) == ["cd.iff"]
+    assert sorted(p.name for p in assets.iterdir()) == ["cd.iff", "controller.html", "layout.json"]
     assert _link(assets / "cd.iff") == AQ_CD.resolve()
+    # Phase E: the page is shared (a symlink, so main/assets stays empty and snowgoons does not get it);
+    # the layout is this app's own (tests/test_phone_controller_android.py checks its bits).
+    assert _link(assets / "controller.html") == PHONE_PAGE.resolve()
+    assert not (assets / "layout.json").is_symlink()
 
 
 def test_snowgoons_assets_unchanged_and_main_has_none():
@@ -215,7 +223,8 @@ def test_built_aquarium_apk_contents():
         names = set(z.namelist())
         assert z.read("assets/cd.iff") == AQ_CD.read_bytes()
         assert "lib/arm64-v8a/libwf_game.so" in names
-        assert not {n for n in names if n.startswith("assets/")} - {"assets/cd.iff"}
+        assert not {n for n in names if n.startswith("assets/")} - {"assets/cd.iff", "assets/controller.html",
+                                                                   "assets/layout.json"}
     with zipfile.ZipFile(_apk("snowgoons")) as z:
         assert z.read("assets/cd.iff") == (REPO / "wfsource" / "source" / "game" / "cd.iff").read_bytes()
 

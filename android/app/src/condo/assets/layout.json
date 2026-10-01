@@ -1,0 +1,14 @@
+{
+  "app": "condo",
+  "title": "WF Condo",
+  "threshold": 0.5,
+  "stick": {"up": 2048, "down": 4096, "right": 8192, "left": 16384},
+  "buttons": [
+    {"id": "A", "bit": 1, "label": "doors / shade", "x": 0.87, "y": 0.66, "size": 1.0},
+    {"id": "C", "bit": 4, "label": "teleport", "x": 0.87, "y": 0.30, "size": 1.0},
+    {"id": "D", "bit": 8, "label": "orbit (hold)", "x": 0.71, "y": 0.66, "size": 1.0},
+    {"id": "E", "bit": 16, "label": "zoom in", "x": 0.55, "y": 0.24, "size": 0.8},
+    {"id": "F", "bit": 32, "label": "zoom out", "x": 0.55, "y": 0.50, "size": 0.8}
+  ],
+  "hint": "Hold D and use the stick to orbit; D + A resets the view."
+}

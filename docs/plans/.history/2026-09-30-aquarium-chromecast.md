@@ -1,5 +1,6 @@
 | Date | Change |
 |------|--------|
+| [2026-10-01](https://github.com/wbniv/WorldFoundry/commit/8776018f) | Soundfont: a reproducible recipe (task soundfont) replaces the never-committed florestan-subset.sf2 |
 | [2026-10-01](https://github.com/wbniv/WorldFoundry/commit/15dd5ee6) | Aquarium-Chromecast plan: snowgoons is silent on Android (no soundfont, Q*bert sfx not found), so it is not the audio-route check; the display chain does advertise audio, the monitor just has no speakers |
 | [2026-10-01](https://github.com/wbniv/WorldFoundry/commit/b655fb35) | Aquarium-Chromecast plan, Phase D: the soundfont is gitignored and absent, so snowgoons' release build fails lint and no flavor can play MIDI music yet |
 | [2026-10-01](https://github.com/wbniv/WorldFoundry/commit/712ccf92) | Aquarium-Chromecast plan: tilt steering and haptics in Phase E; Phase D (audio) tied to the SFX plan |
@@ -7,6 +8,11 @@
 | [2026-10-01](https://github.com/wbniv/WorldFoundry/commit/c48d5a8b) | Write the missing aquarium-on-Chromecast plan (four docs linked to it): rebuilt from the commits and device-run evidence |
 
 <!--history-meta v1
+8776018f	author	Will Norris
+8776018f	added	1
+8776018f	deleted	0
+8776018f	files	1
+8776018f	body	The engine's soundfont was gitignored, undocumented and lost; the snowgoons symlink dangled and its release build failed lint. scripts/make-soundfont-subset.py\nbuilds it from FluidR3_GM (Frank Wen, MIT; the fluid-soundfont-gm package, pinned by SHA-256), keeping only the presets the MIDI files use: Acoustic Grand\nPiano for level0.mid, 7.6 MB from 145 MB, rendering identically to the full base in TinySoundFont. The MIT notice is embedded in the file and in\nengine/vendor/README.md. The output stays gitignored: MIT is not in wflevels/licence_policy.toml (only CC0), so accepting it and committing the file is the\nuser's call.\n\nVerified: assembleSnowgoonsRelease builds with the soundfont bundled; on the Chromecast HD the app logs 'soundfont loaded (florestan-subset.sf2, 7842132 B)'\nand 'playing level0.mid' and Android's audio service lists its AAudio stream as started. tests/test_soundfont_subset.py (2 passed).\n\nCo-Authored-By: Claude Sonnet 5.5 <noreply@anthropic.com>\nClaude-Session: https://claude.ai/code/session_01NNPhRbrqjqMDkScPvTE9yC
 15dd5ee6	author	Will Norris
 15dd5ee6	added	2
 15dd5ee6	deleted	2

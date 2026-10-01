@@ -44,8 +44,11 @@ def test_condo_cd_iff_is_shell_plus_the_current_level():
 
 def test_condo_assets():
     assets = SRC / "condo" / "assets"
-    assert sorted(p.name for p in assets.iterdir()) == ["cd.iff", "wf_args.txt"]
+    assert sorted(p.name for p in assets.iterdir()) == ["cd.iff", "controller.html", "layout.json", "wf_args.txt"]
     assert (assets / "cd.iff").is_symlink() and (assets / "cd.iff").resolve() == CONDO_CD.resolve()
+    # Phase E (docs/plans/2026-09-30-aquarium-chromecast.md): the shared phone page and this app's layout.
+    page = REPO / "wfsource" / "source" / "hal" / "phonepad" / "controller.html"
+    assert (assets / "controller.html").is_symlink() and (assets / "controller.html").resolve() == page.resolve()
 
 
 def test_condo_args_match_run_condo():
@@ -95,7 +98,8 @@ def test_built_condo_apk_contents():
         names = set(z.namelist())
         assert z.read("assets/cd.iff") == CONDO_CD.read_bytes()
         assert {"lib/arm64-v8a/libwf_game.so", "lib/armeabi-v7a/libwf_game.so"} <= names
-        assert {n for n in names if n.startswith("assets/")} == {"assets/cd.iff", "assets/wf_args.txt"}
+        assert {n for n in names if n.startswith("assets/")} == {"assets/cd.iff", "assets/wf_args.txt",
+                                                                 "assets/controller.html", "assets/layout.json"}
 
 
 def test_suspended_until_the_window_returns():

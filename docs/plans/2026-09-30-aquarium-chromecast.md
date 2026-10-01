@@ -12,7 +12,7 @@ rebuilt from the commits and the evidence folders under `~/tmp/android-device-ru
 - [x] Phase B: installs and runs on a real Chromecast HD; D-pad moves the fish
 - [x] Phase C: release frame rate (60 fps) and the faults the device exposed (32-bit ABI, pool alignment, TV sleep, resume)
 - [ ] Phase D: **audio**: the aquarium and condo apps bundle no music or soundfont, so they play nothing (the Android audio code itself is real, not a stub); not started
-- [ ] Phase E: **the phone as a gamepad**: a web controller served by the TV app over the local Wi-Fi, zero install, with stick, buttons, **tilt steering and haptics** (designed below, mockups 2 to 4; not started)
+- [ ] Phase E: **the phone as a gamepad**: a web controller served by the TV app over the local Wi-Fi, zero install, with stick, buttons, **tilt steering and haptics** (designed below, mockups 2 to 4; E1 done, see [Phase E progress](#phase-e-progress))
 - [ ] Phase F: a hardware gamepad (needs one paired to the Chromecast)
 
 ## Context
@@ -128,6 +128,28 @@ How it fits the existing code (read from `wfsource/source/hal/android/native_app
 
 **Sub-steps, in order:** E1 server, protocol, mask merge and the page, tested on Linux with a headless client (no device needed); E2 Android build, manifest, the TV overlay with the URL and PIN;
 E3 the QR code; E4 device run on the Chromecast with a real phone (the user's), aquarium and condo; E5 the failure states of mockup 4 (lost signal, wrong PIN, other network, second phone).
+
+### Phase E progress
+
+Implemented on 2026‑10‑01 (E1, E2, E3 and the headless half of E5). E0, E4 and the on-device half of E5 need the user's phone; E6 (tilt, https) and E7 (game-driven haptics) wait on the user's decisions (a self-signed certificate; the sound-slot table of the SFX plan).
+
+- [x] **E1** the server, the protocol and the page, tested on Linux with a headless client (verification 11 and the page half of 12)
+- [ ] **E2** Android wiring, `INTERNET`, the TV overlay with the URL and PIN
+- [ ] **E3** the QR code
+- [ ] **E4** device run with the user's phone: PENDING (needs the phone)
+- [ ] **E5** failure states: the headless half is in E1's tests (wrong PIN, second phone, lost signal, malformed and oversized frames, no stuck button after any of them); the device half is PENDING (needs the phone)
+- [ ] **E6** tilt, **E7** game-driven haptics: not started (decisions above)
+
+**How E1 is built** (decisions taken while implementing, inside the design above):
+
+- **Where:** [`wfsource/source/hal/phonepad/phonepad.{h,cc}`](../../wfsource/source/hal/phonepad/phonepad.h), portable POSIX C++ with no engine dependency. The same file links into the Android app and into a Linux test host ([`host/phonepad_host.cc`](../../wfsource/source/hal/phonepad/host/phonepad_host.cc)) that the tests build with AddressSanitizer and UBSan. The page is [`wfsource/source/hal/phonepad/controller.html`](../../wfsource/source/hal/phonepad/controller.html), symlinked into the aquarium and condo flavors as `assets/controller.html` (so `src/main/assets` stays empty and snowgoons ships no controller).
+- **Single-threaded and non-blocking, polled once per frame** from the game thread. Rejected: a network thread. It would save at most one frame (17 ms at 60 fps), because the engine samples input once per frame anyway, and it costs locks plus a thread whose life must follow pause and resume.
+- **The layout per app is a flavor asset:** `android/app/src/<flavor>/assets/layout.json` (aquarium: stick, A, B; condo: stick, A "doors / shade", C teleport, D orbit (hold), E zoom in, F zoom out, **no B**). The asset is the switch: an app without one (snowgoons) starts no server. Each button carries its engine bit (`EJ_BUTTONF_*`, so A = 1, C = 4, RIGHT = 0x2000), so the page needs no table of its own and a test checks every bit against `sjoystic.h`. Rejected: a build-time define per flavor (one native library serves every flavor, so a define would need a CMake run per flavor).
+- **Port 8765** (mockup 3's), then 8766 and up if it is taken.
+- **The PIN:** six digits from `/dev/urandom`, rejection-sampled so every PIN is equally likely. A bare address gets a small PIN form (mockup 3's "Enter PIN if asked"), a wrong PIN gets 403 and the form again. After 5 wrong PINs within one second every PIN check fails for the rest of that second (429), which caps guessing at about 5 per second: on average about 28 hours to cover half of a million PINs, for a PIN that changes every launch.
+- **LAN only:** the app binds to its own Wi-Fi address (found by a UDP `connect()` that sends nothing) and refuses to listen if that is not a private address; peers outside 10/8, 172.16/12, 192.168/16 and 169.254/16 are refused at `accept` (loopback is allowed for the Linux tests).
+- **Frames:** client frames must be masked, unfragmented text of at most 64 bytes (the longest legal one is `t:` and 15 digits); anything else closes the connection with RFC 6455's code (1002, 1003, 1007 or 1009) and releases every button at once. An unknown `x:` type is ignored but counts as a heartbeat, so E7 can add `h:` without breaking an older TV. The server sends close **4001** "replaced" and **4002** "timeout".
+- **The page** does not reconnect after 4001 (two tabs on one phone would otherwise take over from each other forever); it offers "Use this phone". It fetches `/layout.json` before every connection attempt, because a refused WebSocket cannot tell the page why: a 403 there means the code is from an earlier launch. It releases everything when it is hidden (a locked phone, another tab) or loses focus. The stick uses the engine's own threshold, 0.5 per axis (`kJoystickThreshold`), as item 3 says; mockup 2 first drew 0.4 (28 px of 70).
 
 **Rejected:**
 - **Google's TV remote protocol:** it is the same D-pad and OK as the physical remote, so it cannot reach B, C, D, E or F.
@@ -277,7 +299,15 @@ Numbered, runnable steps; each shows its raw output with PASS or FAIL. Times in 
     It now selects `^<package>/android\.app\.NativeActivity#[0-9]+$`, the layer that actually carries the app's buffers, which gives the 59.9 fps line in step 8. **PASS**
 
 11. The portable server and protocol, on this PC (Phase E1). `python3 -m pytest tests/test_phone_controller.py -q`: WebSocket handshake and framing, the mask-to-buttons mapping, the 1 s timeout releasing every button,
-    wrong PIN rejected, newest phone wins, plus the tilt quantiser (dead zone, hysteresis, neutral) and the `h:` message encoding. Expected: all pass. **PENDING (Phase E not started)**
+    wrong PIN rejected, newest phone wins, plus the tilt quantiser (dead zone, hysteresis, neutral) and the `h:` message encoding. Expected: all pass.
+
+    ```
+    $ python3 -m pytest tests/test_phone_controller.py tests/test_phone_controller_page.py tests/test_phone_controller_android.py -q   (2026-10-01 17:51 +07 = 10:51 UTC)
+    ...................................................................      [100%]
+    67 passed in 40.28s
+    ```
+
+    **PASS** for everything E1 owns: 51 protocol tests (handshake against RFC 6455's own key, the mask bits, the `t:` echo, the 1 s release measured at 0.95 to 1.4 s, the heartbeat holding a button for 2.5 s, newest phone wins with close 4001, 16 malformed or oversized frames each closing with its code and releasing, wrong PIN, rate limit, idle sockets, pause and resume), 11 page tests in headless Chromium and 5 layout checks. Each safety test was shown to fail with the release removed (17 failures, then 17 passes once restored). **PENDING (out of scope here):** the tilt quantiser and the `h:` encoding, which are E6 and E7.
 
 12. The page and a real engine on Linux. Run the engine with the phone controller enabled, open the page in headless Chrome (screenshot compared with mockup 2), then a headless client holds RIGHT for 1.5 s.
     Expected: the engine log's `ball pos` changes, and stops moving when the client disconnects. **PENDING**
