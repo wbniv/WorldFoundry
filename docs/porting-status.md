@@ -93,5 +93,6 @@ real-time play. The same level file and the same flags on every platform.
 
 ## Reproduce
 
+- Find the Chromecast when its DHCP address changes: `task find-chromecast` (walks the last octet up, then down, from the last known address and matches the Cast model; it found the HD at `192.168.4.38` after it left `.37`). adb over Wi-Fi then needs Wireless debugging switched on at the TV and the port it shows.
 - Drive Codemagic without an AI in the loop: `scripts/codemagic-queue.py --run macos-desktop-debug:2026-new-level`.
 - Budget: 500 free Mac-minutes a month on M2 machines, one build at a time.

@@ -586,6 +586,11 @@ tasks:
     cmds:
       - bash scripts/android-device-run.sh --app condo {{.CLI_ARGS}}
 
+  find-chromecast:
+    desc: "Find the Chromecast after its DHCP address changed (usage: task find-chromecast -- [--from <ip>] [--span N] [--model REGEX]): walks the last octet up, then down, from the last known address and asks each host's Cast descriptor for its model. adb over Wi-Fi then needs Wireless debugging switched on at the TV"
+    cmds:
+      - bash scripts/find-chromecast.sh {{.CLI_ARGS}}
+
 
   run:
     desc: "Run wf_game (cd.iff in cwd)"
