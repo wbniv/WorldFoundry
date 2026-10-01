@@ -93,6 +93,32 @@ And the frame budget, drawn to the measured number ([mockup](2026-10-01-swarming
 
 [![How the pieces connect](2026-10-01-swarming-poster/data-flow.png)](2026-10-01-swarming-poster/data-flow.html)
 
+## Mailboxes: where the state lives
+
+The engine's scripts keep state in **global user mailboxes** (2 to 1900, shared by every actor, per `clownfish.py`). `school.fth` needs **200**: 11 fish × 14 (800 to 953), 21 parameters (960 to 980) and 25 scratch cells (985 to 1009). They fit beside what the aquarium already owns, and the tests run at exactly these addresses (`forth_check.py`: `BASE` 800, `PAR` 960, `SCR` 985). The picture below is **drawn from a real run** (the school setting in the tank, tick 300): every cell is the value the Forth left in that mailbox.
+
+[![The mailbox map and a real run's values](2026-10-01-swarming-poster/mailboxes.png)](2026-10-01-swarming-poster/mailboxes.html)
+
+```mermaid
+flowchart LR
+    subgraph existing["owned today"]
+        A["600–638<br/>the player's fish rig"]
+        B["700–719 level<br/>720–739 sway<br/>740–759 camera"]
+    end
+    subgraph proposed["proposed"]
+        C["800–953<br/>11 fish × 14"]
+        D["960–980<br/>21 parameters"]
+        E["985–1009<br/>25 scratch"]
+        F["1100–1499<br/>ten followers' rig blocks<br/>(open, not built)"]
+    end
+    D --> |"read every tick"| C
+    E --> |"rewritten per follower"| C
+    C --> |"next state, then committed"| C
+    C --> F
+```
+
+**Open:** the ten followers need their own copy of the rig's 39 mailboxes (600 to 638 are one fish's). Either the rig takes a base address (a change in `clownfish_idle.fth`) or the followers get a smaller rig. This is not built and not measured, and the cost of the extra mailbox traffic is part of the in-engine timing (Phase 0 of the schooling plan).
+
 ## What the research and the measurements found
 
 Everything on the poster has a chip: **verified** (the source was opened and the number is on its page), **unverified** (a summary, or not opened), **ours** (our maths or measurement).

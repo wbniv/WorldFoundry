@@ -14,6 +14,8 @@
 \ fish-cos (clownfish_idle.fth), and the constants sch-base (mailbox of fish 0, field 0), sch-scr (25 scratch cells), sch-par (parameter cells), sch-n
 \ (fish incl. the leader). Plan: docs/plans/2026-10-01-aquarium-schooling.md and docs/plans/2026-10-01-swarming-poster.md.
 \
+\ Mailbox map (global user mailboxes are 2..1900, shared by every actor; the aquarium already uses 600..638 the player's fish, 700..719 the level,
+\ 720..739 the sway, 740..759 the camera): sch-base = 800 (11 fish x 14 = 800..953), sch-par = 960 (960..980), sch-scr = 985 (985..1009).
 \ State per fish (14 mailboxes): 0 x, 1 y, 2 z, 3 vx, 4 vy, 5 vz (a UNIT heading), 6-8 next position, 9-11 next heading, 12 startle timer.
 \ Parameter cells (sch-par + k): 0 rr, 1 dro, 2 dra, 3 cos(blind half-angle), 4 turn cos, 5 turn sin, 6 speed x dt, 7 leader weight, 8 wall zone,
 \ 9 startle time, 10 dt, 11-13 box low x y z, 14-16 box high x y z, 17 dro swarm, 18 dra swarm, 19 dro school, 20 dra school.

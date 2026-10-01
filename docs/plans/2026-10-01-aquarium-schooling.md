@@ -63,6 +63,8 @@ flowchart LR
     S -. "same source" .-> H
 ```
 
+**Mailboxes:** the core needs 200 global mailboxes (800 to 1009; the aquarium owns 600 to 759); the map, drawn from a real run, is in [the swarming poster plan](2026-10-01-swarming-poster.md#mailboxes-where-the-state-lives). The ten followers' *rig* mailboxes are an open item there.
+
 The mockups below were drawn with the first draft's hand-made rules (slot, align, orbit); they show the *shape* of the two modes and the edge cases, not these rules or these numbers.
 
 ## Design

@@ -14,7 +14,7 @@ sys.path.insert(0, str(Path(__file__).resolve().parent))
 import couzin
 import zfhost
 
-BASE, PAR, SCR = 1000, 100, 200
+BASE, PAR, SCR = 800, 960, 985                          # the proposed mailbox layout: see docs/plans/2026-10-01-swarming-poster.md "Mailboxes"
 STRIDE = 14
 SCHOOL_FTH = zfhost.ROOT / "wflevels/aquarium/school.fth"
 

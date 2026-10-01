@@ -167,11 +167,11 @@
   }
  ],
  "dictionary_bytes": 2179,
- "dictionary_after_load": 3461,
+ "dictionary_after_load": 3462,
  "dictionary_size": 65536,
- "source_lines": 119,
+ "source_lines": 121,
  "code_lines": 79,
- "source_bytes": 7455,
+ "source_bytes": 7740,
  "error": {
   "ticks": 60,
   "n": 11,
@@ -180,7 +180,7 @@
   "head_median": 0.0009830735638761412,
   "head_max": 0.0010040400477518887
  },
- "x86_ms": 7.0244,
+ "x86_ms": 8.6736,
  "device": {
   "ms": 6.2115,
   "runs": [
