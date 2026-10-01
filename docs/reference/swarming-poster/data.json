@@ -1,0 +1,200 @@
+[
+ {
+  "id": "n",
+  "quantity": "Fish in Fig. 3",
+  "value": "N = 100",
+  "status": "verified",
+  "sources": [
+   "S1"
+  ]
+ },
+ {
+  "id": "rr",
+  "quantity": "Repulsion zone r_r",
+  "value": "1 body length",
+  "status": "verified",
+  "sources": [
+   "S1"
+  ]
+ },
+ {
+  "id": "alpha",
+  "quantity": "Field of perception \u03b1",
+  "value": "270\u00b0 (blind 90\u00b0 behind)",
+  "status": "verified",
+  "sources": [
+   "S1"
+  ]
+ },
+ {
+  "id": "theta",
+  "quantity": "Turn rate \u03b8",
+  "value": "40\u00b0/s",
+  "status": "verified",
+  "sources": [
+   "S1"
+  ]
+ },
+ {
+  "id": "s",
+  "quantity": "Speed s",
+  "value": "3 BL/s",
+  "status": "verified",
+  "sources": [
+   "S1"
+  ]
+ },
+ {
+  "id": "sigma",
+  "quantity": "Error \u03c3",
+  "value": "0.05 rad",
+  "status": "verified",
+  "sources": [
+   "S1"
+  ]
+ },
+ {
+  "id": "reps",
+  "quantity": "Replicates in the paper",
+  "value": "30 per cell",
+  "status": "verified",
+  "sources": [
+   "S1"
+  ]
+ },
+ {
+  "id": "reps_us",
+  "quantity": "Replicates here",
+  "value": "3 per cell, 700 steps",
+  "status": "ours",
+  "sources": [
+   "S5"
+  ]
+ },
+ {
+  "id": "states",
+  "quantity": "Collective states",
+  "value": "swarm, torus, dynamic parallel, highly parallel",
+  "status": "verified",
+  "sources": [
+   "S1"
+  ]
+ },
+ {
+  "id": "hyst",
+  "quantity": "Hysteresis (collective memory)",
+  "value": "reported by the paper",
+  "status": "verified",
+  "sources": [
+   "S1"
+  ]
+ },
+ {
+  "id": "hyst_us",
+  "quantity": "Hysteresis in our sweep",
+  "value": "not reproduced (too coarse)",
+  "status": "ours",
+  "sources": [
+   "S5"
+  ]
+ },
+ {
+  "id": "lead",
+  "quantity": "Informed minority steers a group",
+  "value": "small fraction suffices",
+  "status": "unverified",
+  "sources": [
+   "S2"
+  ]
+ },
+ {
+  "id": "cont",
+  "quantity": "Shoal to school",
+  "value": "a continuum",
+  "status": "unverified",
+  "sources": [
+   "S3"
+  ]
+ },
+ {
+  "id": "clown",
+  "quantity": "Real ocellaris clownfish",
+  "value": "not schooling fish",
+  "status": "unverified",
+  "sources": [
+   "S4"
+  ]
+ },
+ {
+  "id": "wl",
+  "quantity": "Leader weight w",
+  "value": "1, 3, 6 tried; none tuned yet",
+  "status": "ours",
+  "sources": [
+   "S5"
+  ]
+ },
+ {
+  "id": "s_us",
+  "quantity": "Our speed and turn rate",
+  "value": "2 BL/s and 120\u00b0/s",
+  "status": "ours",
+  "sources": [
+   "S5"
+  ]
+ },
+ {
+  "id": "turn_paper",
+  "quantity": "A 90\u00b0 turn at the paper\u2019s s, \u03b8",
+  "value": "6.75 BL ahead, radius 4.3 BL",
+  "status": "ours",
+  "sources": [
+   "S5"
+  ]
+ },
+ {
+  "id": "turn_us",
+  "quantity": "A 90\u00b0 turn at ours",
+  "value": "1.50 BL ahead, radius 0.95 BL",
+  "status": "ours",
+  "sources": [
+   "S5"
+  ]
+ },
+ {
+  "id": "bytes",
+  "quantity": "school.fth in the dictionary",
+  "value": "2179 B of 65536",
+  "status": "ours",
+  "sources": [
+   "S5"
+  ]
+ },
+ {
+  "id": "lines",
+  "quantity": "school.fth source",
+  "value": "79 code lines, 119 with comments",
+  "status": "ours",
+  "sources": [
+   "S5"
+  ]
+ },
+ {
+  "id": "err",
+  "quantity": "Forth vs numpy, one tick",
+  "value": "position 3e-04, heading 1e-03",
+  "status": "ours",
+  "sources": [
+   "S5"
+  ]
+ },
+ {
+  "id": "dev",
+  "quantity": "One tick, 11 fish, on the Chromecast HD",
+  "value": "6.2 ms",
+  "status": "ours",
+  "sources": [
+   "S5"
+  ]
+ }
+]

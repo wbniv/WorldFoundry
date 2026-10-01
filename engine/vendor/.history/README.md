@@ -1,6 +1,5 @@
 | Date | Change |
 |------|--------|
-| [2026-10-01](https://github.com/wbniv/WorldFoundry/commit/8776018f) | Soundfont: a reproducible recipe (task soundfont) replaces the never-committed florestan-subset.sf2 |
 | [2026-04-17](https://github.com/wbniv/WorldFoundry/commit/e183d834) | feat(audio): Phase 2 — MIDI via TinySoundFont + MusicPlayer |
 | [2026-04-17](https://github.com/wbniv/WorldFoundry/commit/f4dc979b) | feat(audio): Phase 1 — vendor miniaudio, SoundDevice/SoundBuffer, startup beep |
 | [2026-04-16](https://github.com/wbniv/WorldFoundry/commit/4430ffa6) | chore: move engine + vendor to top-level engine/ directory |
@@ -13,11 +12,6 @@
 | [2026-04-14](https://github.com/wbniv/WorldFoundry/commit/8384f902) | JavaScript on the // sigil: QuickJS + JerryScript engines |
 
 <!--history-meta v1
-8776018f	author	Will Norris
-8776018f	added	4
-8776018f	deleted	1
-8776018f	files	1
-8776018f	body	The engine's soundfont was gitignored, undocumented and lost; the snowgoons symlink dangled and its release build failed lint. scripts/make-soundfont-subset.py\nbuilds it from FluidR3_GM (Frank Wen, MIT; the fluid-soundfont-gm package, pinned by SHA-256), keeping only the presets the MIDI files use: Acoustic Grand\nPiano for level0.mid, 7.6 MB from 145 MB, rendering identically to the full base in TinySoundFont. The MIT notice is embedded in the file and in\nengine/vendor/README.md. The output stays gitignored: MIT is not in wflevels/licence_policy.toml (only CC0), so accepting it and committing the file is the\nuser's call.\n\nVerified: assembleSnowgoonsRelease builds with the soundfont bundled; on the Chromecast HD the app logs 'soundfont loaded (florestan-subset.sf2, 7842132 B)'\nand 'playing level0.mid' and Android's audio service lists its AAudio stream as started. tests/test_soundfont_subset.py (2 passed).\n\nCo-Authored-By: Claude Sonnet 5.5 <noreply@anthropic.com>\nClaude-Session: https://claude.ai/code/session_01NNPhRbrqjqMDkScPvTE9yC
 e183d834	author	Will Norris
 e183d834	added	9
 e183d834	deleted	0

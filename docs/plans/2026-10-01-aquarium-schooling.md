@@ -22,7 +22,7 @@ From the user, 2026‑10‑01: "**add 10 new fish. they should 'school' and 'swa
 
 ## Research (done after the first draft; the mockup rules were my own design, not the literature's)
 
-The user asked whether swarming had been researched before anything was designed. It had not: the first draft's rules, speeds and the 0.8 and 0.5 polarisation targets came from general boids knowledge and were not sourced. What the literature says, checked against the sources (a full poster of it is planned: [the swarming poster plan](2026-10-01-swarming-poster.md)):
+The user asked whether swarming had been researched before anything was designed. It had not: the first draft's rules, speeds and the 0.8 and 0.5 polarisation targets came from general boids knowledge and were not sourced. What the literature says, checked against the sources (the poster is built: [the swarming poster plan](2026-10-01-swarming-poster.md)):
 
 | Finding | Source | What it changes here |
 |---|---|---|
@@ -35,6 +35,35 @@ The user asked whether swarming had been researched before anything was designed
 | **Real ocellaris clownfish are not schooling fish:** they are strongly site-attached to a host anemone, territorial, and live in small size-ranked groups round it (the search results said nothing of schooling) | [Ocellaris clownfish](https://en.wikipedia.org/wiki/Ocellaris_clownfish), [Florida Museum](https://www.floridamuseum.ufl.edu/discover-fish/species-profiles/clown-anemonefish/) | ten schooling clownfish is a **game mechanic, not biology**; the plan says so, and decision 1 (which fish) gets this evidence |
 
 Parameters verified from the paper (its Fig. 3, used for the swarming poster's figures too): N = 100, r_r = 1 unit, α = 270°, θ = 40° per second, s = 3 units per second, σ = 0.05 rad, 30 replicates per parameter pair; Δr_o and Δr_a each explored from 0 to 15. **Not yet checked:** how a model built for 100 individuals behaves with 10 followers and one leader (the paper explores N from 10 to 100, so 11 is at the edge), which is what the poster's own simulation and Phase 2 measure.
+
+### Evidence from the Forth core (2026‑10‑01)
+
+The rules above now **exist and run**: [`wflevels/aquarium/school.fth`](../../wflevels/aquarium/school.fth), tested against a numpy reference in the engine's own zForth, and printed on [the swarming poster](2026-10-01-swarming-poster.md). What it changes in this plan (all measured; the plan has the raw output):
+
+| Was assumed | Now measured | Consequence |
+|---|---|---|
+| "Forth may be too slow; a C++ fallback may be needed" | **2,179 bytes**; **6.2 ms for one 11-fish step on the Chromecast HD** (about 0.6 ms a follower), interpreter only | not too slow: round robin of two followers a frame costs about 1.2 ms. **Not yet measured inside the engine**, so the C++ question stays open until Phase 0 |
+| Speeds in metres at ×10, the tank 12.19 m wide | the tank's **inside is 13.4 × 3.4 × 4.7 body lengths**: only 3.4 deep | work in body lengths; the school lives in a slab |
+| The paper's turn rate (40°/s at 3 body lengths a second) | a 90° turn then needs 6.75 body lengths: fish leave the tank | **2 body lengths a second, 120°/s**, a 0.6 body-length wall zone (ours, not the paper's) |
+| The leader pulls the group | followers school with each other (p_group 0.82 to 0.87) but align with the leader only +0.12 to +0.18, at weight 1, 3 and 6 | the leader weight, and probably a longer-range leader term, **must be tuned in Phase 2**; in open space a group that loses the leader never regains it |
+| "Swarm" and "torus" settings give clean states | with 11 fish, swarm p_group 0.27 to 0.51, torus setting 0.58 to 0.64: not the paper's 100-fish states | the swarm test ("p low **and** m low") needs thresholds set from the engine's own runs |
+
+```mermaid
+flowchart LR
+    subgraph game["in the game (proposed)"]
+        P["player's fish"] --> L["leader"] --> S["school.fth: sch-tick<br/>every follower, Couzin zones"]
+        S --> M["follower mailboxes"] --> D["Director poses parts"]
+    end
+    subgraph evidence["measured now (docs/reference/swarming-poster)"]
+        C["couzin.py"] --> T["one-tick equivalence<br/>error 1e-03"]
+        H["engine's zForth, standalone"] --> T
+        H --> B["Chromecast: 6.2 ms / 11 fish"]
+        H --> K["tank runs: school p 0.82-0.87"]
+    end
+    S -. "same source" .-> H
+```
+
+The mockups below were drawn with the first draft's hand-made rules (slot, align, orbit); they show the *shape* of the two modes and the edge cases, not these rules or these numbers.
 
 ## Design
 

@@ -1,0 +1,193 @@
+{
+ "words": [
+  {
+   "name": "sch-stride",
+   "lines": 1,
+   "bytes": 16
+  },
+  {
+   "name": "sch-addr",
+   "lines": 1,
+   "bytes": 19
+  },
+  {
+   "name": "sch@",
+   "lines": 1,
+   "bytes": 12
+  },
+  {
+   "name": "sch!",
+   "lines": 1,
+   "bytes": 12
+  },
+  {
+   "name": "sc@",
+   "lines": 1,
+   "bytes": 12
+  },
+  {
+   "name": "sc!",
+   "lines": 1,
+   "bytes": 12
+  },
+  {
+   "name": "sc+!",
+   "lines": 1,
+   "bytes": 16
+  },
+  {
+   "name": "par@",
+   "lines": 1,
+   "bytes": 13
+  },
+  {
+   "name": "par!",
+   "lines": 1,
+   "bytes": 13
+  },
+  {
+   "name": "cur",
+   "lines": 1,
+   "bytes": 11
+  },
+  {
+   "name": "sch-sqrt",
+   "lines": 1,
+   "bytes": 93
+  },
+  {
+   "name": "vlen2",
+   "lines": 1,
+   "bytes": 33
+  },
+  {
+   "name": "vscale",
+   "lines": 1,
+   "bytes": 56
+  },
+  {
+   "name": "vnorm",
+   "lines": 1,
+   "bytes": 45
+  },
+  {
+   "name": "vzero",
+   "lines": 1,
+   "bytes": 32
+  },
+  {
+   "name": "acc+u",
+   "lines": 1,
+   "bytes": 46
+  },
+  {
+   "name": "acc+v",
+   "lines": 1,
+   "bytes": 58
+  },
+  {
+   "name": "weight",
+   "lines": 1,
+   "bytes": 31
+  },
+  {
+   "name": "heading-dot-u",
+   "lines": 1,
+   "bytes": 52
+  },
+  {
+   "name": "sch-pair",
+   "lines": 15,
+   "bytes": 240
+  },
+  {
+   "name": "sch-wall",
+   "lines": 3,
+   "bytes": 101
+  },
+  {
+   "name": "sch-walls",
+   "lines": 1,
+   "bytes": 25
+  },
+  {
+   "name": "sch-want",
+   "lines": 8,
+   "bytes": 201
+  },
+  {
+   "name": "sch-startle-away",
+   "lines": 2,
+   "bytes": 76
+  },
+  {
+   "name": "sch-startle?",
+   "lines": 1,
+   "bytes": 26
+  },
+  {
+   "name": "sch-startle-tick",
+   "lines": 1,
+   "bytes": 41
+  },
+  {
+   "name": "sch-startle-all",
+   "lines": 3,
+   "bytes": 123
+  },
+  {
+   "name": "sch-turn",
+   "lines": 12,
+   "bytes": 283
+  },
+  {
+   "name": "sch-follow",
+   "lines": 10,
+   "bytes": 211
+  },
+  {
+   "name": "sch-commit",
+   "lines": 1,
+   "bytes": 123
+  },
+  {
+   "name": "sch-set-dt",
+   "lines": 1,
+   "bytes": 46
+  },
+  {
+   "name": "sch-regime",
+   "lines": 1,
+   "bytes": 57
+  },
+  {
+   "name": "sch-tick",
+   "lines": 1,
+   "bytes": 44
+  }
+ ],
+ "dictionary_bytes": 2179,
+ "dictionary_after_load": 3461,
+ "dictionary_size": 65536,
+ "source_lines": 119,
+ "code_lines": 79,
+ "source_bytes": 7455,
+ "error": {
+  "ticks": 60,
+  "n": 11,
+  "pos_median": 0.00029493666180635536,
+  "pos_max": 0.0003018774649774514,
+  "head_median": 0.0009830735638761412,
+  "head_max": 0.0010040400477518887
+ },
+ "x86_ms": 7.0244,
+ "device": {
+  "ms": 6.2115,
+  "runs": [
+   6.2143,
+   6.2115,
+   6.1061
+  ],
+  "device": "Chromecast HD (armeabi-v7a)"
+ }
+}

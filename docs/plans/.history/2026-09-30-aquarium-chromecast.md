@@ -1,6 +1,5 @@
 | Date | Change |
 |------|--------|
-| [2026-10-01](https://github.com/wbniv/WorldFoundry/commit/6697f300) | Phone as a gamepad, E2: Android wiring, INTERNET for aquarium and condo, the TV overlay with URL and PIN |
 | [2026-10-01](https://github.com/wbniv/WorldFoundry/commit/3c51eafc) | Phone as a gamepad, E1: portable server, protocol and controller page, tested headless on Linux |
 | [2026-10-01](https://github.com/wbniv/WorldFoundry/commit/8776018f) | Soundfont: a reproducible recipe (task soundfont) replaces the never-committed florestan-subset.sf2 |
 | [2026-10-01](https://github.com/wbniv/WorldFoundry/commit/15dd5ee6) | Aquarium-Chromecast plan: snowgoons is silent on Android (no soundfont, Q*bert sfx not found), so it is not the audio-route check; the display chain does advertise audio, the monitor just has no speakers |
@@ -10,11 +9,6 @@
 | [2026-10-01](https://github.com/wbniv/WorldFoundry/commit/c48d5a8b) | Write the missing aquarium-on-Chromecast plan (four docs linked to it): rebuilt from the commits and device-run evidence |
 
 <!--history-meta v1
-6697f300	author	Will Norris
-6697f300	added	40
-6697f300	deleted	6
-6697f300	files	1
-6697f300	body	native_app_entry.cc: Emit() ORs a third source, gPhoneButtons, into _HALSetJoystickButtons; the\nphonepad server is polled once per frame from WFAndroidPumpEvents, started on APP_CMD_RESUME on\nthe Wi-Fi address (private addresses only; retried every 3 s without a network), stopped on\nAPP_CMD_PAUSE (releasing the phone's buttons), with one PIN per launch and one logcat line per\nphone-mask change. Back while the panel shows hides it; otherwise Back is unchanged.\n\nphonepad_overlay.{h,cc}: the panel / "Phone connected" (3 s) / "Phone lost" then panel after 5 s\nstates as solid rectangles, text from the vendored stb_easy_font; android_window.cc draws them after\nthe touch HUD (also on TV) from a buffer re-uploaded only on change. CMake builds hal/phonepad into\nthe Android library. src/{aquarium,condo}/AndroidManifest.xml add only INTERNET; main and snowgoons\nget no permission.\n\nTests: overlay states and geometry on a fake clock (renders to ~/tmp/phone-controller/), static\nchecks of the merge, lifecycle, Back, draw order, CMake, manifests and the built APKs. Verified on\nthe Chromecast HD: release condo app at 59.9 fps with the panel; a LAN client got the page, a 403 for a\nwrong PIN, the toast, a 4002 timeout and the panel back. Plan: verification 12 to 15, a Wi-Fi\npower-save latency finding.\n\nCo-Authored-By: Claude Opus 5.5 <noreply@anthropic.com>\nClaude-Session: https://claude.ai/code/session_01DxMP4jUNjCjDz8E9DWzXcM
 3c51eafc	author	Will Norris
 3c51eafc	added	32
 3c51eafc	deleted	2
