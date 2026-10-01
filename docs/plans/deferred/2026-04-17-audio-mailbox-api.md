@@ -1,7 +1,7 @@
 # Plan: Mailbox-wired audio API (music + SFX)
 
 **Date:** 2026-04-17
-**Status:** Deferred
+**Status:** Deferred (SFX half partly superseded 2026‑10‑01: `SfxLibrary` and the `EMAILBOX_SOUND` handler landed on 2026‑05‑16, so scripts in any engine can trigger a sound; what remains for sound effects is in [the SFX plan](../2026-10-01-sfx-without-lua.md). The music mailboxes below are still deferred.)
 
 ## Context
 
