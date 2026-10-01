@@ -1,8 +1,14 @@
 | Date | Change |
 |------|--------|
+| [2026-10-01](https://github.com/wbniv/WorldFoundry/commit/15452b11) | OK-button plan: the condo release builds for both ABIs against ~/android-sdk-local |
 | [2026-10-01](https://github.com/wbniv/WorldFoundry/commit/44319b44) | Chromecast remote: the OK button (DPAD_CENTER) is now button 1 / A |
 
 <!--history-meta v1
+15452b11	author	Will Norris
+15452b11	added	17
+15452b11	deleted	3
+15452b11	files	1
+15452b11	body	Co-Authored-By: Claude Sonnet 5.5 <noreply@anthropic.com>\nClaude-Session: https://claude.ai/code/session_01DxMP4jUNjCjDz8E9DWzXcM
 44319b44	author	Will Norris
 44319b44	added	79
 44319b44	deleted	0

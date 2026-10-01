@@ -277,6 +277,11 @@ int32_t HandleInputEvent(struct android_app* /*app*/, AInputEvent* event)
         const int32_t keyCode = AKeyEvent_getKeyCode(event);
         const int32_t action  = AKeyEvent_getAction(event);
         const uint32_t mask   = MapKeyCode(keyCode);
+        // One line per key edge (not per auto-repeat), so logcat shows whether a remote key
+        // arrived and what it mapped to: "key code=23 action=0 mask=0x...".
+        if (AKeyEvent_getRepeatCount(event) == 0)
+            WFLOG("key code=%d action=%d mask=0x%x%s", keyCode, action, mask,
+                  mask ? "" : " (unmapped, dropped)");
         if (mask == 0) return 0;
 
         if (action == AKEY_EVENT_ACTION_DOWN)      gGamepadButtons |=  mask;

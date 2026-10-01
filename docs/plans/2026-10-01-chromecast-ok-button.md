@@ -1,10 +1,10 @@
 # Chromecast remote: the OK button acts as button 1 / A
 
-Status: **Phase A done, build checked; the on-device steps (3 to 5) wait for the Chromecast's Wireless-debugging port** (2026‑10‑01). The rank below is a recommendation; ranking is set in `TODO.md` by a Fable session.
+Status: **done: the user confirmed the remote's OK works in snowgoons (2026‑10‑01).** Step 3 (the `adb` poke) was inconclusive and step 5 is not run; a key-event log line was added so logcat shows each key and its mask (2026‑10‑01). The rank below is a recommendation; ranking is set in `TODO.md` by a Fable session.
 
 - [x] Phase A: map the remote's OK key to `EJ_BUTTONF_A` in the Android input path, with the source test and the `--poke` OK press
 - [x] Phase B1: build both ABIs (step 2)
-- [ ] Phase B2: check on the real Chromecast HD (steps 3 to 5)
+- [x] Phase B2: checked on the real Chromecast HD by hand with the real remote (step 4); steps 3 and 5 below are not done
 
 ## Context
 
@@ -16,8 +16,7 @@ and drops the key. The map has the four `AKEYCODE_DPAD_*` directions and the gam
 Chromecast with Google TV remote's OK button sends `DPAD_CENTER` (it has no `BUTTON_A`), so it was never mapped. This also matches what the earlier Chromecast runs saw:
 the D-pad moved the fish and nothing else was reachable ([aquarium plan](2026-09-30-aquarium-chromecast.md), [condo plan](2026-10-01-condo-chromecast.md) mockup 2: "the remote has a D-pad and OK only").
 
-**"Button 1 / A".** `EJ_BUTTONF_A` is the engine's first button (`hal/sjoystic.h:121`), the one that `AKEYCODE_BUTTON_A` and the touch HUD's A already produce. In the condo A is
-hop; in the aquarium the level script decides. Mapping OK to the same bit means the engine, the level scripts and the touch overlay need no change.
+**"Button 1 / A".** `EJ_BUTTONF_A` is the engine's first button (`hal/sjoystic.h:121`), the one that `AKEYCODE_BUTTON_A` and the touch HUD's A already produce. In the condo A may do nothing (unverified); in the aquarium the level script decides. Mapping OK to the same bit means the engine, the level scripts and the touch overlay need no change.
 
 ## Approach
 
@@ -76,13 +75,14 @@ The mapping lives in an anonymous namespace in an NDK-only file, so it cannot be
    ```
 
    The build log has no line mentioning `native_app_entry.cc` (no warnings). **PASS** (condo flavor; the other flavors compile the same `libwf_game.so` source).
-3. OK reaches the engine on the Chromecast HD. Condo release build (A hops, so the effect is visible):
-   `task chromecast-condo -- <ip> --release --poke`, with the poke extended to send `adb shell input keyevent --longpress KEYCODE_DPAD_CENTER` and take
-   `screen-after-ok.png` (`--longpress`, as the existing D-pad poke does: a bare tap's DOWN and UP can land inside one 16.7 ms frame, and the engine polls the mask once per frame,
-   so a tap can be missed even though the real remote's press is far longer). Expected: the player is in the air, or has hopped, in `screen-after-ok.png` compared with the one before.
-   The `--poke` extension is written (the screenshot is taken 0.3 s into the press). **PENDING** (the APK is built; needs the device's Wireless-debugging port).
-4. Physical remote, by hand. Press OK on the real remote in the condo (hop) and in the aquarium. Expected: the condo hops; in the aquarium nothing visible unless its script reads A,
-   and **no change to D-pad behaviour**. Record what was seen.
+3. OK reaches the engine on the Chromecast HD, by `adb`. `task chromecast-condo -- <ip> --release --poke`, with the poke extended to send
+   `adb shell input keyevent --longpress KEYCODE_DPAD_CENTER` and take `screen-after-ok.png` (`--longpress`, as the existing D-pad poke does: a bare tap's DOWN and UP can land
+   inside one 16.7 ms frame, and the engine polls the mask once per frame). **INCONCLUSIVE, and the expectation in this plan's first draft was wrong:** it said the condo man
+   hops on A, which was never checked (the aquarium's level notes give `Jumping Acceleration` 0, and the user does not think he hops). The first run also showed the launcher
+   (the user's own remote presses sent the TV home, which paused the app), and the second run's idle screen changes as much as a key press does, so pixel counts show nothing.
+   **Use a game where A has a visible effect (snowgoons: Mario jumps), or the log line added below.**
+4. Physical remote, by hand, snowgoons release build installed with the fix. User, 2026‑10‑01: "button on remote works now".
+   **PASS** (the user's report, not a logged event; the first press in the aquarium and condo apps was not tried, and the condo's A may do nothing).
 5. The D-pad and gamepad keys are untouched. Re-run the existing `--poke` (D-pad RIGHT, then UP). Expected: the fish still moves.
 
 ## Rank (recommendation)

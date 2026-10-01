@@ -34,7 +34,7 @@ Options:
   --seconds N    how long the app runs before the screenshot (default 20)
   --poke         after the first screenshot, send D-pad RIGHT (held 1.5 s),
                  then UP, and take screen-after-keys.png; then press OK
-                 (DPAD_CENTER = button A, a hop in the condo) and take
+                 (DPAD_CENTER = button A; snowgoons jumps) and take
                  screen-after-ok.png (information only)
   --resume       after the screenshot (and --poke), press Home, reopen the app, and
                  require it to be alive and drawing again (a FAIL if it aborts: the
@@ -310,7 +310,7 @@ if ((POKE)); then
     "${A[@]}" shell 'input keyevent --longpress KEYCODE_DPAD_CENTER & sleep 0.3; screencap -p /sdcard/wf-ok.png; wait' >/dev/null 2>&1 || true
     "${A[@]}" pull /sdcard/wf-ok.png "$OUTDIR/screen-after-ok.png" >/dev/null 2>&1 || true
     "${A[@]}" shell rm -f /sdcard/wf-ok.png >/dev/null 2>&1 || true
-    result INFO "screen-after-ok.png taken: in the condo the player should be mid-hop"
+    result INFO "screen-after-ok.png taken: in snowgoons Mario should be mid-jump (look for "key code=23" in logcat-full.txt too)"
 fi
 
 if ((RESUME)); then
