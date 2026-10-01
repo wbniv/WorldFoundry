@@ -22,28 +22,31 @@ After it finishes, add the env-var lines it prints to `~/.bashrc` /
 ```
 task build-apk        # → android/app/build/outputs/apk/<app>/release/worldfoundry-<app>-release.apk
 task build-apk-debug  # → android/app/build/outputs/apk/<app>/debug/worldfoundry-<app>-debug.apk
-task install-apk      # APP=aquarium|snowgoons: install + start the release APK (scripts/android-device-run.sh)
+task install-apk      # APP=aquarium|snowgoons|condo|smb|qbert: install + start the release APK (scripts/android-device-run.sh)
 task chromecast-aquarium -- <ip>   # network ADB: install, launch, screenshot, logcat, frame pacing → ~/tmp
 adb logcat -s wf_game # stream engine logs
 ```
 
 Without sudo, the SDK + NDK in `~/android-sdk-local` also build it (`task build-apk` stops at its `android-sdk-install` step, which wants `sudo`):
-`cd android && ANDROID_HOME=~/android-sdk-local ./gradlew :app:assembleCondoRelease` (or `AquariumRelease`; the `snowgoons` release also needs the gitignored
-soundfont, or `-x lintVitalAnalyzeSnowgoonsRelease -x lintVitalReportSnowgoonsRelease -x lintVitalSnowgoonsRelease`).
+`cd android && ANDROID_HOME=~/android-sdk-local ./gradlew :app:assembleCondoRelease` (or `AquariumRelease`, `SmbRelease`, `QbertRelease`; the `snowgoons` release also needs the gitignored
+soundfont, `task soundfont`, or `-x lintVitalAnalyzeSnowgoonsRelease -x lintVitalReportSnowgoonsRelease -x lintVitalSnowgoonsRelease`; the other flavors ship no soundfont and need neither).
 
 **One app per game.** Gradle product flavors (`android/app/build.gradle.kts`) build the same
 `libwf_game.so` and Java glue into separate apps that install side by side
-(`docs/plans/2026-09-30-aquarium-chromecast.md`):
+(`docs/plans/2026-09-30-aquarium-chromecast.md`; one game per app since `docs/plans/2026-10-01-split-cd-iff-one-app-per-game.md`):
 
 | Flavor (`<app>`) | applicationId | Label / banner | `assets/cd.iff` |
 |---|---|---|---|
-| `snowgoons` | `org.worldfoundry.wf_game` | World Foundry (`src/main/res`) | `wfsource/source/game/cd.iff` (task `build-cd-iff`; boots TOC level 0), plus `level0.mid` + soundfont |
+| `snowgoons` | `org.worldfoundry.wf_game` | World Foundry (label `src/main/res`, art `src/snowgoons/res`) | `wflevels/snowgoons-cd.iff` (task `build-cd-iff-snowgoons`), plus `level0.mid` + soundfont |
 | `aquarium` | `org.worldfoundry.wf_game.aquarium` | WF Aquarium (`src/aquarium/res`) | `wflevels/aquarium-cd.iff` (task `build-cd-iff-aquarium`) |
 | `condo` | `org.worldfoundry.wf_game.condo` | WF Condo (`src/condo/res`) | `wflevels/condo-cd.iff` (task `build-cd-iff-condo`), plus `wf_args.txt` (the engine flags the level needs) |
+| `smb` | `org.worldfoundry.wf_game.smb` | WF SMB (`src/smb/res`; placeholder name) | `wflevels/smb-cd.iff` (task `build-cd-iff-smb`): W1‑1 to W1‑4, which chain |
+| `qbert` | `org.worldfoundry.wf_game.qbert` | WF Q\*bert (`src/qbert/res`; placeholder name) | `wflevels/qbert-cd.iff` (task `build-cd-iff-qbert`) |
 
 Each flavor's `cd.iff` is a symlink in `android/app/src/<app>/assets/`; the AAssetAccessor reads
-it directly from the APK at runtime. The aquarium's banner and icons come from
-`scripts/gen-aquarium-android-art.py`.
+it directly from the APK at runtime. Every app's banner and icons come from
+`scripts/gen-android-icons.py`. The desktop's multi-level `wfsource/source/game/cd.iff` (task `build-cd-iff`: SMB, snowgoons, Q\*bert,
+Astra Marble Madness) ships in no app; Astra Marble Madness has no app.
 
 Gradle calls the repo-root CMake (via `externalNativeBuild`) for arm64-v8a **and armeabi-v7a** (the Chromecast HD is 32-bit only)
 with `-DCMAKE_BUILD_TYPE=RelWithDebInfo` and packages the resulting

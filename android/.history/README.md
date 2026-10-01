@@ -1,5 +1,7 @@
 | Date | Change |
 |------|--------|
+| [2026-10-01](https://github.com/wbniv/WorldFoundry/commit/55a66fb8) | Phone controller QR: the World Foundry logo in the middle (planet by default, or the whole logo), at ECC H |
+| [2026-10-01](https://github.com/wbniv/WorldFoundry/commit/2adf90a9) | Docs: the Chromecast OK button, the condo's A for doors and shade, the phone as a gamepad, and building without sudo |
 | [2026-09-30](https://github.com/wbniv/WorldFoundry/commit/747442a4) | WIP aquarium Android/Chromecast app: product flavors, aquarium-only cd.iff, device script |
 | [2026-04-18](https://github.com/wbniv/WorldFoundry/commit/53fff413) | feat(android): launcher icons, APK rename, asset-pipeline remediation note |
 | [2026-04-18](https://github.com/wbniv/WorldFoundry/commit/732252cd) | docs(android): port closure audit — status table + summary paragraph |
@@ -8,6 +10,16 @@
 | [2026-04-17](https://github.com/wbniv/WorldFoundry/commit/3b24f001) | feat(android): Phase 3 step 3 — Gradle project + AndroidManifest |
 
 <!--history-meta v1
+55a66fb8	author	Will Norris
+55a66fb8	added	1
+55a66fb8	deleted	0
+55a66fb8	files	1
+55a66fb8	body	The code is now ECC H (version 4 for a typical URL) and a centred plate of whole modules carries the logo,\ndrawn as coloured rectangles like the rest of the overlay. Two grids from scripts/gen-qr-logo.py (task\ngen-qr-logo), generated into phonepad_logo.h from ../worldfoundry.org/src/assets/wflogo.png with its SHA-256:\n"full", the whole logo on a 9 x 11 plate (9.1 % of a 33-module code), and "planet", the picture with the\nWORLD and FOUNDRY strips cropped off (found from the pixels: the black bands), on 7 x 7 (4.5 %). wf_args.txt\n"qr_logo=planet|full|none" picks one (default planet), read by native_app_entry.cc and kept from the engine.\nThe plate is held to 10 % of the modules, never touches finder, timing, format or alignment modules, and is\nleft out on version 1 and on versions 7 and up. favicon.svg was not used: it has no text strips and no planet.\n\ntests/qr_decode.py gains Reed-Solomon correction and a per-block damage map. Tests: both logos, sampled from\nthe composited overlay, read back to the exact URL for four URLs, with only plate modules changed, every\nfunction module untouched and at most 3/4 of any block's budget used; a plate over 25 % of the code fails;\nplate geometry for versions 2 to 6; the header regenerates byte for byte (skips without the logo source).\nOn the Chromecast HD both decoded from real screenshots (planet: at most 4 of 8 codewords repaired per block;\nfull: 5 of 8); the planet build is left installed. Plan design item 4 and verification 22; mockup 3 redrawn.\n\nCo-Authored-By: Claude Opus 5.5 <noreply@anthropic.com>\nClaude-Session: https://claude.ai/code/session_01DxMP4jUNjCjDz8E9DWzXcM
+2adf90a9	author	Will Norris
+2adf90a9	added	18
+2adf90a9	deleted	3
+2adf90a9	files	1
+2adf90a9	body	android/README.md gains the condo flavor, both ABIs, the no-sudo build and a "Playing on a Chromecast" section;\ndocs/porting-status.md records the OK button, the phone controller (user-tested), the latency finding and what is still open.\n\nCo-Authored-By: Claude Sonnet 5.5 <noreply@anthropic.com>\nClaude-Session: https://claude.ai/code/session_01DxMP4jUNjCjDz8E9DWzXcM
 747442a4	author	Will Norris
 747442a4	added	19
 747442a4	deleted	5
