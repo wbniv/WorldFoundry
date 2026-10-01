@@ -550,27 +550,27 @@ tasks:
         echo "Gradle itself is via the repo-vendored android/gradlew wrapper — no system install needed."
 
   build-apk:
-    desc: "Assemble the Android APKs, one per app flavor (snowgoons, aquarium, condo) (release: -O3 + LTO + section GC; debug-keystore signed for sideload)"
+    desc: "Assemble the Android APKs, one per app flavor (snowgoons, aquarium, condo, smb, qbert) (release: -O3 + LTO + section GC; debug-keystore signed for sideload)"
     deps: [android-sdk-install]
     dir: android
     env:
       ANDROID_HOME: /usr/lib/android-sdk
     cmds:
       - ./gradlew assembleRelease
-      - echo "APKs → android/app/build/outputs/apk/{snowgoons,aquarium,condo}/release/worldfoundry-{snowgoons,aquarium,condo}-release.apk"
+      - echo "APKs → android/app/build/outputs/apk/{snowgoons,aquarium,condo,smb,qbert}/release/worldfoundry-{snowgoons,aquarium,condo,smb,qbert}-release.apk"
 
   build-apk-debug:
-    desc: "Assemble the Android APKs, one per app flavor (snowgoons, aquarium, condo) (debug: -O0 -g, for attaching ndk-gdb / lldb)"
+    desc: "Assemble the Android APKs, one per app flavor (snowgoons, aquarium, condo, smb, qbert) (debug: -O0 -g, for attaching ndk-gdb / lldb)"
     deps: [android-sdk-install]
     dir: android
     env:
       ANDROID_HOME: /usr/lib/android-sdk
     cmds:
       - ./gradlew assembleDebug
-      - echo "APKs → android/app/build/outputs/apk/{snowgoons,aquarium,condo}/debug/worldfoundry-{snowgoons,aquarium,condo}-debug.apk"
+      - echo "APKs → android/app/build/outputs/apk/{snowgoons,aquarium,condo,smb,qbert}/debug/worldfoundry-{snowgoons,aquarium,condo,smb,qbert}-debug.apk"
 
   install-apk:
-    desc: "Install + start one app's release APK on a device (APP=aquarium|snowgoons|condo, default aquarium; -- <ip> for network ADB), evidence → ~/tmp/android-device-run/ (scripts/android-device-run.sh)"
+    desc: "Install + start one app's release APK on a device (APP=aquarium|snowgoons|condo|smb|qbert, default aquarium; -- <ip> for network ADB), evidence → ~/tmp/android-device-run/ (scripts/android-device-run.sh)"
     vars:
       APP: '{{.APP | default "aquarium"}}'
     cmds:

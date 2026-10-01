@@ -136,7 +136,8 @@ def test_internet_only_for_the_phone_flavors():
     for app in ("aquarium", "condo"):
         perms = re.findall(r'<uses-permission android:name="([^"]+)"', (SRC / app / "AndroidManifest.xml").read_text())
         assert perms == ["android.permission.INTERNET"], (app, perms)
-    assert not (SRC / "snowgoons" / "AndroidManifest.xml").exists()
+    for app in ("snowgoons", "smb", "qbert"):   # docs/plans/2026-10-01-split-cd-iff-one-app-per-game.md
+        assert not (SRC / app / "AndroidManifest.xml").exists(), app
 
 
 @pytest.mark.parametrize("app", ["aquarium", "condo"])

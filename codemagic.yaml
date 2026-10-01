@@ -545,7 +545,8 @@ workflows:
 
     artifacts:
       # One APK per app flavor: apk/<flavor>/debug/worldfoundry-<flavor>-debug.apk
-      # (snowgoons, aquarium; docs/plans/2026-09-30-aquarium-chromecast.md).
+      # (snowgoons, aquarium, condo, smb, qbert: assembleDebug builds every flavor;
+      # docs/plans/2026-09-30-aquarium-chromecast.md, docs/plans/2026-10-01-split-cd-iff-one-app-per-game.md).
       - android/app/build/outputs/apk/*/debug/*.apk
       - gradle-build.log
 

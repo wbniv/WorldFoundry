@@ -192,3 +192,45 @@ def test_built_release_apk(flavor):
         assert z.read("assets/cd.iff") == (LEVELS / GAMES[flavor][0]).read_bytes()
         assert {"lib/arm64-v8a/libwf_game.so", "lib/armeabi-v7a/libwf_game.so"} <= names
         assert {n for n in names if n.startswith("assets/")} == {f"assets/{a}" for a in FLAVORS[flavor][2]}
+
+
+# ---- CI, tasks and the device script know every flavor ------------------------------------------------------------
+
+def test_ci_publishes_every_flavor():
+    """codemagic.yaml builds :app:assembleDebug (every flavor) and publishes apk/*/debug/*.apk; nothing filters a flavor out."""
+    text = (REPO / "codemagic.yaml").read_text()
+    wf = yaml.safe_load(text)["workflows"]["android-apk-debug"]
+    assert "android/app/build/outputs/apk/*/debug/*.apk" in wf["artifacts"]
+    builds = [s["script"] for s in wf["scripts"] if "gradlew" in s.get("script", "")]
+    assert builds and all(re.search(r"gradlew :app:assembleDebug\b", s) for s in builds), builds
+    assert not re.search(r"assemble(Snowgoons|Aquarium|Condo|Smb|Qbert)", text), "a per-flavor build would skip the others"
+    g = GRADLE.read_text()
+    assert "variantFilter" not in g and "beforeVariants" not in g and "ignore = true" not in g
+    for flavor in FLAVORS:
+        assert f'create("{flavor}")' in g
+
+
+def test_tasks_list_every_app():
+    tasks = yaml.safe_load((REPO / "Taskfile.yml").read_text())["tasks"]
+    for name in ("install-apk", "build-apk", "build-apk-debug"):
+        text = str(tasks[name])
+        for flavor in FLAVORS:
+            assert flavor in text, (name, flavor)
+
+
+def test_device_script_knows_every_app():
+    import subprocess
+    script = REPO / "scripts" / "android-device-run.sh"
+    body = script.read_text()
+    assert "smb)       PKG=org.worldfoundry.wf_game.smb ;;" in body
+    assert "qbert)     PKG=org.worldfoundry.wf_game.qbert ;;" in body
+    assert "snowgoons) PKG=org.worldfoundry.wf_game ;;" in body
+    h = subprocess.run(["bash", str(script), "-h"], capture_output=True, text=True, timeout=30)
+    assert h.returncode == 0 and "aquarium (default), snowgoons, condo, smb or qbert" in h.stdout
+    # An unknown --app fails before adb is touched; a known one gets past the app check (it then needs adb or a device).
+    bad = subprocess.run(["bash", str(script), "--app", "marble"], capture_output=True, text=True, timeout=30)
+    assert bad.returncode == 2 and "smb or qbert" in bad.stderr
+    for app in ("smb", "qbert"):
+        r = subprocess.run(["bash", str(script), "--app", app, "--apk", "/nonexistent.apk"], capture_output=True, text=True,
+                           timeout=60, env={"PATH": "/usr/bin:/bin", "HOME": "/nonexistent", "ADB": "/nonexistent/adb"})
+        assert "--app must be" not in r.stderr, (app, r.stderr)

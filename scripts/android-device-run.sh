@@ -25,7 +25,7 @@ TARGET  Chromecast / phone IP for network debugging (port 5555 is added when
         already lists.
 
 Options:
-  --app NAME     aquarium (default), snowgoons or condo
+  --app NAME     aquarium (default), snowgoons, condo, smb or qbert
   --release      install the release APK (-O3 + LTO, debug-keystore signed)
                  instead of the debug APK (-O0); the release APK is the one to
                  judge frame rate with
@@ -34,7 +34,7 @@ Options:
   --seconds N    how long the app runs before the screenshot (default 20)
   --poke         after the first screenshot, send D-pad RIGHT (held 1.5 s),
                  then UP, and take screen-after-keys.png; then press OK
-                 (DPAD_CENTER = button A; snowgoons jumps) and take
+                 (DPAD_CENTER = button A; in smb Mario jumps) and take
                  screen-after-ok.png (information only)
   --resume       after the screenshot (and --poke), press Home, reopen the app, and
                  require it to be alive and drawing again (a FAIL if it aborts: the
@@ -92,7 +92,9 @@ case "$APP" in
     aquarium)  PKG=org.worldfoundry.wf_game.aquarium ;;
     snowgoons) PKG=org.worldfoundry.wf_game ;;
     condo)     PKG=org.worldfoundry.wf_game.condo ;;
-    *) echo "android-device-run: --app must be aquarium, snowgoons or condo, not '$APP'" >&2; exit 2 ;;
+    smb)       PKG=org.worldfoundry.wf_game.smb ;;
+    qbert)     PKG=org.worldfoundry.wf_game.qbert ;;
+    *) echo "android-device-run: --app must be aquarium, snowgoons, condo, smb or qbert, not '$APP'" >&2; exit 2 ;;
 esac
 [[ "$SECONDS_TO_RUN" =~ ^[0-9]+$ ]] || { echo "android-device-run: --seconds wants a whole number" >&2; exit 2; }
 
@@ -310,7 +312,7 @@ if ((POKE)); then
     "${A[@]}" shell 'input keyevent --longpress KEYCODE_DPAD_CENTER & sleep 0.3; screencap -p /sdcard/wf-ok.png; wait' >/dev/null 2>&1 || true
     "${A[@]}" pull /sdcard/wf-ok.png "$OUTDIR/screen-after-ok.png" >/dev/null 2>&1 || true
     "${A[@]}" shell rm -f /sdcard/wf-ok.png >/dev/null 2>&1 || true
-    result INFO "screen-after-ok.png taken: in snowgoons Mario should be mid-jump (look for "key code=23" in logcat-full.txt too)"
+    result INFO "screen-after-ok.png taken: in smb Mario should be mid-jump (look for "key code=23" in logcat-full.txt too)"
 fi
 
 if ((RESUME)); then
