@@ -1,5 +1,5 @@
 """bench_cmds.py: print a zf_host command script that loads the engine's bootstrap, school.fth and a school-mode state of 11 fish, then times 200 sch-tick.
-Used by device_bench.sh (and by measure.py for the x86 figure). Usage: python3 bench_cmds.py [-h]
+Used by device_bench.sh. Usage: python3 bench_cmds.py [-h]
 """
 import math, sys
 from pathlib import Path

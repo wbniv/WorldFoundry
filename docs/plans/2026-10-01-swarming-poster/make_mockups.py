@@ -73,7 +73,6 @@ def frame_budget_page():
     s.append(f'<text x="30" y="570" font-size="16" font-weight="700">What was measured, and what was not</text>')
     notes = [f"Interpreter alone: {tick:.1f} ms for one 11-fish step (median of 3 runs of 200 ticks) on the Chromecast HD, with the engine’s zForth, float cells, mailboxes as a plain array.",
              f"In the engine (the bench level, the real Chromecast, release build): {mm['engine']['before']['director_ms'][0]:.0f} ms a tick at {mm['engine']['before']['fps']:.0f} fps as found; {mm['engine']['after']['director_ms'][0]:.1f} ms at {mm['engine']['after']['fps']:.1f} fps after fixing the mailbox path (the Director also poses the fish and the camera).",
-             f"On this PC the same step takes {m['x86_ms']:.1f} ms: the Chromecast is no slower than the desktop here because the interpreter, not the CPU, is the cost.",
              f"Size: {m['dictionary_bytes']} bytes of the 65,536-byte dictionary, {m['code_lines']} code lines."]
     for i, t in enumerate(notes):
         s.append(f'<text x="30" y="{600 + i * 26}" font-size="14" fill="{INK}">{t}</text>')

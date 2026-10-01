@@ -1,5 +1,6 @@
 | Date | Change |
 |------|--------|
+| [2026-10-01](https://github.com/wbniv/WorldFoundry/commit/0797aab2) | The school is the default aquarium level: it schools (p_group 0.77 swimming), the ten followers vary 60 to 93 % in size |
 | [2026-10-01](https://github.com/wbniv/WorldFoundry/commit/83099032) | TODO: Android size trim iter 2 done (243 KB per APK; the snowgoons sideload is left under Verify) |
 | [2026-10-01](https://github.com/wbniv/WorldFoundry/commit/ace2e0be) | Aquarium: ten more fish that school and swarm round the player's fish (AQUARIUM_SCHOOL_N=10), running on the Chromecast HD |
 | [2026-10-01](https://github.com/wbniv/WorldFoundry/commit/bec1d758) | Mailbox calls cost 4.2 us each on the Chromecast: three per-call debug streams moved to DBSTREAM5; opt-in --script-profile; a bench level |
@@ -9,6 +10,11 @@
 | [2026-10-01](https://github.com/wbniv/WorldFoundry/commit/50c932a2) | Plan: ten more aquarium fish that school and swarm around the player (Couzin zone model, player as leader), with rendered mockups |
 
 <!--history-meta v1
+0797aab2	author	Will Norris
+0797aab2	added	9
+0797aab2	deleted	8
+0797aab2	files	1
+0797aab2	body	Fix (the 'they don't interact' report): sd-setup never wrote the swarm and school zone widths, so every follower had no orientation or attraction zone. Measured on the real engine\n(scripts/analyse-aquarium-school.py): swimming p_group 0.24 -> 0.77, alignment with the leader +0.40; resting 0.31 to 0.39 (a swarm).\nAlso: each step uses the real time since that follower's last update (round robin, one or two a tick); a third of the followers are posed a frame (fish-dt scaled by the 1037 multiplier);\nsizes via a size mailbox in the rig block's 40th slot (fish-size scales the part offsets and the dorsal's Z); AQUARIUM_SCHOOL_N defaults to 10 so the tracked level, cd.iff and APK carry the school;\nthe wrapper's room/object memory 3 MB / 400 KB; the Taskfile level tasks now list school.fth and school_rig.fth as sources; level tests: 82 actors, the follower actor table, the mailbox blocks.\nThe idle-animation spike level is regenerated (the rig library changed). Cost probes: AQUARIUM_SCHOOL_IDLE=1|hide builds wflevels/aquarium_probe.\nMeasured: unprofiled release on the Chromecast HD 59.9 fps median, p90 33.4 ms; the profiler build itself runs at 30 fps and is not a frame-rate measurement.\n\nCo-Authored-By: Claude Sonnet 5.5 <noreply@anthropic.com>\nClaude-Session: https://claude.ai/code/session_01NNPhRbrqjqMDkScPvTE9yC
 83099032	author	Will Norris
 83099032	added	6
 83099032	deleted	0

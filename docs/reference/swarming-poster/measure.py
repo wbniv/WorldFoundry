@@ -3,7 +3,7 @@
   size    dictionary bytes after each definition (zForth's HERE), summed per word; source lines and bytes
   error   one-tick comparison with couzin.py (sigma = 0), 60 ticks, N = 11: forth_check.compare
   engine  the in-engine figures (from the bench APK on the device, entered by hand below in ENGINE) are kept from the previous file
-  timing  x86 here (zf_host `T`), and the Chromecast HD's figure if `--device-ms a b c` is given (from device_bench.sh); otherwise the previous
+  timing  the Chromecast HD's figure if `--device-ms a b c` is given (from device_bench.sh); otherwise the previous
           file's device figure is kept.
 Usage: python3 measure.py [--device-ms MS [MS ...]] [-h]
 """
@@ -37,15 +37,6 @@ def per_word():
     return [dict(name=n, lines=l, bytes=b) for n, l, b in words], total
 
 
-def x86_ms():
-    cmds = subprocess.run([sys.executable, str(HERE / "bench_cmds.py")], capture_output=True, text=True, check=True).stdout
-    runs = []
-    for _ in range(5):
-        out = subprocess.run([str(zfhost.BIN)], input=cmds, capture_output=True, text=True, check=True).stdout.strip().splitlines()[-1]
-        runs.append(float(out.split()[0]))
-    return float(np.median(runs))
-
-
 def main():
     ap = argparse.ArgumentParser(description=__doc__, formatter_class=argparse.RawDescriptionHelpFormatter)
     ap.add_argument("--device-ms", type=float, nargs="+")
@@ -61,7 +52,7 @@ def main():
     OUT.write_text(json.dumps(dict(
         words=words, dictionary_bytes=sum(w["bytes"] for w in words), dictionary_after_load=total, dictionary_size=65536, source_lines=len(text.splitlines()), code_lines=len(code_lines), source_bytes=len(text.encode()),
         error=dict(ticks=60, n=11, pos_median=float(np.median(ep)), pos_max=float(ep.max()), head_median=float(np.median(ev)), head_max=float(ev.max())),
-        x86_ms=x86_ms(), device=dev, engine=prev.get("engine")), indent=1))
+        device=dev, engine=prev.get("engine")), indent=1))
     print(OUT.read_text())
 
 main()

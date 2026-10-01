@@ -92,6 +92,9 @@ def rows():
             e = m["engine"]
             add("eng_before", "Director script per tick, in the engine, as found", f"{e['before']['director_ms'][0]:.0f} to {e['before']['director_ms'][1]:.0f} ms, {e['before']['mailbox_us']} µs a mailbox call, {e['before']['fps']:.0f} fps", "ours", [GAME])
             add("eng_after", "The same after the engine fix", f"{e['after']['director_ms'][0]:.1f} ms, {e['after']['mailbox_us']} µs a mailbox call, {e['after']['fps']:.1f} fps", "ours", [GAME])
+        if m.get("engine", {}).get("level"):
+            lv = m["engine"]["level"]
+            add("eng_level", "The aquarium level with ten followers, on the Chromecast", f"{lv['fps']:.1f} fps, p90 {lv['frame_p90_ms']:.1f} ms; Director {lv['director_ms']:.1f} ms a tick", "ours", [GAME])
         if m.get("device"):
             add("dev", "One tick, 11 fish, on the Chromecast HD", f"{m['device']['ms']:.1f} ms", "ours", [GAME])
     return R

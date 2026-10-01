@@ -200,6 +200,15 @@
   MB_X r@ + me sch@  MB_NVX r@ + me sch@ MB_STEP par@ * +
   MB_NX r> + me sch! ;
 
+\ the walls are also a hard limit: a follower that would leave the box is put back on its edge and its heading reflected inward (a fish at 2 body lengths a
+\ second cannot always turn within the wall zone, and one that left the tank was seen on the Chromecast)
+: clamp-axis ( a -- ) >r
+  MB_NX r@ + me sch@  r@ MB_LOX + par@  <
+  if r@ MB_LOX + par@ MB_NX r@ + me sch!  MB_NVX r@ + me sch@ 0 < if MB_NVX r@ + me sch@ negate MB_NVX r@ + me sch! then then
+  r@ MB_HIX + par@  MB_NX r@ + me sch@  <
+  if r@ MB_HIX + par@ MB_NX r@ + me sch!  MB_NVX r@ + me sch@ 0 > if MB_NVX r@ + me sch@ negate MB_NVX r@ + me sch! then then
+  r> drop ;
+: clamp-all 0 clamp-axis 1 clamp-axis 2 clamp-axis ;
 \ ( i -- ) one follower: scan the others, walls, startle, wanted direction, turn, move (into the next-state slots)
 : clear-sums
   MB_SUM_R vzero
@@ -223,7 +232,8 @@
   MB_WANT sc@ MB_NVX me sch!
   MB_WANT 1 + sc@ MB_NVY me sch!
   MB_WANT 2 + sc@ MB_NVZ me sch!
-  0 advance 1 advance 2 advance ;
+  0 advance 1 advance 2 advance
+  clamp-all ;
 \ the next state becomes the state, for every follower at once (the leader, fish 0, is written from outside)
 \ ( i -- ) one follower's next state becomes its state (the round robin commits as it goes)
 : sch-commit1 ( i -- ) MB_ME sc! 6 0 do MB_NX i + me sch@ MB_X i + me sch! loop ;

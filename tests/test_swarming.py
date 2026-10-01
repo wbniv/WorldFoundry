@@ -122,6 +122,21 @@ def test_a_startle_sends_the_near_followers_away_from_the_leader():
 
 
 @NEEDS_CC
+def test_a_follower_cannot_leave_the_box_and_its_heading_is_reflected():
+    p = dict(couzin.PAPER, sigma=0.0)
+    h = fc.make_host(); fc.load_school(h, 2)
+    fc.set_params(h, p, 5.0, 6.0, 1.0, wall=0.0, box=3.0)            # a 6 body length box and no wall zone: only the hard limit acts
+    fc.put(h, 0, [-2.9, 0, 0], [1, 0, 0])
+    fc.put(h, 1, [2.8, 0, 0], [1, 0, 0])                              # 0.2 from the +x face, swimming straight at it, 0.5 a step
+    for _ in range(6):
+        assert h.eval("sch-tick") == "ok"
+        pos, vel = fc.get(h, 2)
+        assert (np.abs(pos[1]) <= 3.0 + 1e-6).all(), pos[1]
+    assert vel[1][0] < 0.5, "the heading must have turned away from the wall"
+    h.close()
+
+
+@NEEDS_CC
 def test_the_startle_timer_counts_down_and_stops():
     p = dict(couzin.PAPER, sigma=0.0)
     h = fc.make_host(); fc.load_school(h, 3)

@@ -321,14 +321,29 @@
    "bytes": 46
   },
   {
+   "name": "clamp-axis",
+   "lines": 6,
+   "bytes": 189
+  },
+  {
+   "name": "clamp-all",
+   "lines": 1,
+   "bytes": 25
+  },
+  {
    "name": "clear-sums",
    "lines": 7,
    "bytes": 44
   },
   {
    "name": "sch-follow",
-   "lines": 16,
-   "bytes": 129
+   "lines": 17,
+   "bytes": 131
+  },
+  {
+   "name": "sch-commit1",
+   "lines": 1,
+   "bytes": 64
   },
   {
    "name": "sch-commit",
@@ -351,12 +366,12 @@
    "bytes": 44
   }
  ],
- "dictionary_bytes": 2936,
- "dictionary_after_load": 4219,
+ "dictionary_bytes": 3216,
+ "dictionary_after_load": 4499,
  "dictionary_size": 65536,
- "source_lines": 242,
- "code_lines": 193,
- "source_bytes": 10680,
+ "source_lines": 254,
+ "code_lines": 202,
+ "source_bytes": 11553,
  "error": {
   "ticks": 60,
   "n": 11,
@@ -365,13 +380,12 @@
   "head_median": 0.0009830735638761412,
   "head_max": 0.0010040400477518887
  },
- "x86_ms": 9.3043,
  "device": {
-  "ms": 6.9723,
+  "ms": 7.5482,
   "runs": [
-   6.9592,
-   6.9723,
-   6.98
+   7.5482,
+   7.706,
+   7.4631
   ],
   "device": "Chromecast HD (armeabi-v7a)"
  },
@@ -397,6 +411,15 @@
   },
   "calls_per_tick": 7754,
   "fix": "three DBSTREAM1 per-call debug streams in the mailbox path moved to DBSTREAM5",
-  "commit": "bec1d758"
+  "commit": "bec1d758",
+  "level": {
+   "device": "Chromecast HD, release APK, the aquarium level with the ten followers (docs/plans/2026-10-01-aquarium-schooling.md)",
+   "fps": 59.9,
+   "frame_p90_ms": 33.4,
+   "frame_worst_ms": 50.1,
+   "director_ms": 6.4,
+   "director_note": "profiler build (the profiler's own timer is included, and that build runs at 30 fps)",
+   "memory_mb": 40.7
+  }
  }
 }

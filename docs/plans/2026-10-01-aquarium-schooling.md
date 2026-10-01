@@ -42,7 +42,7 @@ The rules above now **exist and run**: [`wflevels/aquarium/school.fth`](../../wf
 
 | Was assumed | Now measured | Consequence |
 |---|---|---|
-| "Forth may be too slow; a C++ fallback may be needed" | **2,936 bytes**; **7.0 ms for one 11-fish step on the Chromecast HD** (about 0.7 ms a follower), interpreter only | not too slow: round robin of two followers a frame costs about 1.4 ms. **Not yet measured inside the engine**, so the C++ question stays open until Phase 0 |
+| "Forth may be too slow; a C++ fallback may be needed" | **3,216 bytes**; **7.5 ms for one 11-fish step on the Chromecast HD** (about 0.75 ms a follower), interpreter only | not too slow: round robin of two followers a frame costs about 1.4 ms. **Not yet measured inside the engine**, so the C++ question stays open until Phase 0 |
 | Speeds in metres at ×10, the tank 12.19 m wide | the tank's **inside is 13.4 × 3.4 × 4.7 body lengths**: only 3.4 deep | work in body lengths; the school lives in a slab |
 | The paper's turn rate (40°/s at 3 body lengths a second) | a 90° turn then needs 6.75 body lengths: fish leave the tank | **2 body lengths a second, 120°/s**, a 0.6 body-length wall zone (ours, not the paper's) |
 | The leader pulls the group | followers school with each other (p_group 0.82 to 0.87) but align with the leader only +0.12 to +0.18, at weight 1, 3 and 6 | the leader weight, and probably a longer-range leader term, **must be tuned in Phase 2**; in open space a group that loses the leader never regains it |
@@ -57,7 +57,7 @@ flowchart LR
     subgraph evidence["measured now (docs/reference/swarming-poster)"]
         C["couzin.py"] --> T["one-tick equivalence<br/>error 1e-03"]
         H["engine's zForth, standalone"] --> T
-        H --> B["Chromecast: 7.0 ms / 11 fish"]
+        H --> B["Chromecast: 7.5 ms / 11 fish"]
         H --> K["tank runs: school p 0.82-0.87"]
     end
     S -. "same source" .-> H

@@ -1,5 +1,6 @@
 | Date | Change |
 |------|--------|
+| [2026-10-01](https://github.com/wbniv/WorldFoundry/commit/9fa728a0) | Swarming poster and plan: the in-engine Chromecast result (39 to 43 ms a tick and 20 fps as found, 11.3 ms and 59.9 fps after the mailbox fix), and what the poster does not claim now |
 | [2026-10-01](https://github.com/wbniv/WorldFoundry/commit/bec1d758) | Mailbox calls cost 4.2 us each on the Chromecast: three per-call debug streams moved to DBSTREAM5; opt-in --script-profile; a bench level |
 | [2026-10-01](https://github.com/wbniv/WorldFoundry/commit/aa821f80) | school.fth: every mailbox slot has a name (MB_X, MB_VX, MB_DRO ...), long lines split into short helper words; the poster shows the named code in four columns |
 | [2026-10-01](https://github.com/wbniv/WorldFoundry/commit/f8dcca75) | Swarming poster: the Forth section is one column per rule word (width in proportion to its text), with its size and a one-line note; sources compacted so the page still fits |
@@ -8,6 +9,11 @@
 | [2026-10-01](https://github.com/wbniv/WorldFoundry/commit/2460bd2a) | Swarming: the Couzin zone model as a Forth core (school.fth, 2179 B, 6.2 ms/11 fish on the Chromecast), tested against numpy, and an A3 poster |
 
 <!--history-meta v1
+9fa728a0	author	Will Norris
+9fa728a0	added	1
+9fa728a0	deleted	1
+9fa728a0	files	1
+9fa728a0	body	Co-Authored-By: Claude Sonnet 5.5 <noreply@anthropic.com>\nClaude-Session: https://claude.ai/code/session_01NNPhRbrqjqMDkScPvTE9yC
 bec1d758	author	Will Norris
 bec1d758	added	16
 bec1d758	deleted	1

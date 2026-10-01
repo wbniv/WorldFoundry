@@ -352,10 +352,11 @@ def panel_f():
     ms = dev.get('ms', float('nan'))
     eng = m.get('engine') or {}
     ea, eb = eng.get('after', {}), eng.get('before', {})
-    big = [(f'{m["dictionary_bytes"]} B', f'of the {m["dictionary_size"] // 1024} KB dictionary ({100 * m["dictionary_bytes"] / m["dictionary_size"]:.1f} %): all {len(m["words"])} words, {m["code_lines"]} code lines'),
-           (f'{ms:.1f} → {ea.get("director_ms", [0])[0]:.1f} ms', f'one tick, 11 fish, Chromecast HD: the bare interpreter, then in the engine (with the camera and sway); {ea.get("fps", 0):.0f} fps'),
+    lv = eng.get('level', {})
+    big = [(f'{m["dictionary_bytes"]} B', f'of the {m["dictionary_size"] // 1024} KB dictionary ({100 * m["dictionary_bytes"] / m["dictionary_size"]:.1f} %): {len(m["words"])} words, {m["code_lines"]} code lines; {m["error"]["head_max"]:.0e} off couzin.py in one tick'),
+           (f'{ms:.1f} → {ea.get("director_ms", [0])[0]:.1f} ms', f'one tick, 11 fish, Chromecast HD: the bare interpreter, then in the engine (with the camera and sway)'),
            (f'{eb.get("mailbox_us", 0):g} → {ea.get("mailbox_us", 0):g} µs', f'per mailbox call: three debug streams the engine ran on every call, found by this timing; {eb.get("fps", 0):.0f} fps before'),
-           (f'{m["error"]["head_max"]:.0e}', 'largest heading error against couzin.py in one tick (the engine’s sine is 0.2 % off); position 3e‑04')]
+           (f'{lv.get("fps", 0):.1f} fps', f'the real level, ten followers, Chromecast HD: p90 {lv.get("frame_p90_ms", 0):.1f} ms, Director {lv.get("director_ms", 0):.1f} ms a tick')]
     bw = (W - 2 * pad - 3 * gap) / 4
     for i, (a_, b_) in enumerate(big):
         x = pad + i * (bw + gap)
