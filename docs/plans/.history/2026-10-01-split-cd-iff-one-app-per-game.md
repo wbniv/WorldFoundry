@@ -1,11 +1,17 @@
 | Date | Change |
 |------|--------|
+| [2026-10-02](https://github.com/wbniv/WorldFoundry/commit/2ad47077) | Stale Google TV tiles: the launcher's own cache, fixed by clearing its data (reboot and reinstall did not) |
 | [2026-10-01](https://github.com/wbniv/WorldFoundry/commit/6475a96c) | Plan: the device rerun with the final APKs, and the Snowgoons label and icon |
 | [2026-10-01](https://github.com/wbniv/WorldFoundry/commit/ccede076) | The snowgoons app is called Snowgoons |
 | [2026-10-01](https://github.com/wbniv/WorldFoundry/commit/c19865bb) | Plan: icons for every app, the snowgoons level banner, and the verification results |
 | [2026-10-01](https://github.com/wbniv/WorldFoundry/commit/fad9efcf) | Plan: split the multi-level cd.iff into one Android app per game (smb, snowgoons, qbert) |
 
 <!--history-meta v1
+2ad47077	author	Will Norris
+2ad47077	added	13
+2ad47077	deleted	1
+2ad47077	files	1
+2ad47077	body	Plan step 9 and porting-status record the result with a screenshot of the Apps row after\n`pm clear com.google.android.apps.tv.launcherx`; the TODO Verify bullet for it is removed.\n\nCo-Authored-By: Claude Sonnet 5.5 <noreply@anthropic.com>\nClaude-Session: https://claude.ai/code/session_01DxMP4jUNjCjDz8E9DWzXcM
 6475a96c	author	Will Norris
 6475a96c	added	47
 6475a96c	deleted	5

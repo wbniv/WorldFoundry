@@ -322,8 +322,11 @@ Numbered, runnable steps; each shows its raw output with PASS or FAIL, or says w
     straight into W1‑1: the level-menu work (`a40da0de`, [its plan](2026-10-01-level-menu-selector.md)) switched the smb app to the world-select bundle
     between the two runs. That is the intended new behaviour, not a fault of this split.
 
-    **The launcher (after Home).** This Google TV launcher shows **round icons, not banners**, in "Your apps"; the 16:9 banners are not visible anywhere on
-    the home screen, so the new snowgoons banner cannot be checked on this launcher. The tiles:
+    **The launcher (after Home).** The "Your apps" row shows **round icons**, not banners. **The 16:9 banners are visible, though: a long press on a tile (OK held) opens the app menu, which shows the banner** (the user's tip, 2026‑10‑02). All five, as installed on the Chromecast HD (the snowgoons banner is the snowy-yard screenshot with the logo, so **the new snowgoons banner is on the TV**):
+
+    <img src="2026-10-01-split-cd-iff-one-app-per-game/chromecast-banners-menu.png" width="700">
+
+    The row's tiles:
 
     <img src="2026-10-01-split-cd-iff-one-app-per-game/chromecast-rerun-apps-row.png" width="700">
 
