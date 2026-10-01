@@ -63,25 +63,22 @@ for i in range(7):                                                              
     ball((x, -0.36 + 0.05 * abs(x) * 0, 1.86 + 0.08 * (1 - (2 * t - 1) ** 2)), 0.032, COAL, 1)
 # coal buttons
 for z in (1.62, 1.40, 1.18): ball((0, -0.45, z), 0.04, COAL, 1)
-# three arms, ALL on the torso (the middle ball; nothing is attached to the head): left raised from the left shoulder, right raised
-# from the right shoulder, and a third from the centre of the upper chest between them, reaching up and toward the viewer in a
-# forked hand just below the scowl. (A third arm that rose behind the head read as hair on the head, so it is on the chest.)
-stick((-0.38, -0.02, 1.68), (-1.10, -0.10, 2.15), 0.05, WOOD); stick((-0.85, -0.08, 1.98), (-1.02, -0.10, 2.38), 0.03, WOOD)
-stick((0.38, -0.02, 1.68), (1.12, -0.10, 2.12), 0.05, WOOD);  stick((0.86, -0.08, 1.96), (1.06, -0.10, 2.36), 0.03, WOOD)
-import os
-ARM3 = os.environ.get("ARM3", "up-steep")
-if ARM3 == "up-right":           # from the chest centre, angled up and out to the right (toward the viewer a little), forked hand
-    stick((0.0, -0.40, 1.60), (0.62, -0.80, 2.02), 0.06, WOOD); stick((0.50, -0.72, 1.92), (0.46, -0.80, 2.28), 0.035, WOOD); stick((0.50, -0.72, 1.92), (0.80, -0.80, 2.22), 0.035, WOOD)
-elif ARM3 == "up-left":          # the mirror
-    stick((0.0, -0.40, 1.60), (-0.62, -0.80, 2.02), 0.06, WOOD); stick((-0.50, -0.72, 1.92), (-0.46, -0.80, 2.28), 0.035, WOOD); stick((-0.50, -0.72, 1.92), (-0.80, -0.80, 2.22), 0.035, WOOD)
-elif ARM3 == "up-steep":         # steeper, kept right of the face
-    stick((0.0, -0.40, 1.60), (0.46, -0.85, 2.18), 0.06, WOOD); stick((0.38, -0.78, 2.06), (0.30, -0.86, 2.46), 0.035, WOOD); stick((0.38, -0.78, 2.06), (0.66, -0.86, 2.38), 0.035, WOOD)
-elif ARM3 == "chest-forward":      # E: from the centre of the upper chest, straight out toward the viewer, a forked hand up
-    stick((0.0, -0.40, 1.60), (0.0, -1.05, 1.62), 0.06, WOOD); stick((0.0, -0.98, 1.62), (-0.14, -1.12, 1.90), 0.035, WOOD); stick((0.0, -0.98, 1.62), (0.14, -1.12, 1.90), 0.035, WOOD)
-elif ARM3 == "chest-right":      # A: from the chest centre, out to the right and forward, below the raised right arm
-    stick((0.0, -0.40, 1.58), (0.62, -0.78, 1.48), 0.06, WOOD); stick((0.50, -0.72, 1.49), (0.78, -0.80, 1.75), 0.035, WOOD)
-else:                            # C: a second arm on the left shoulder, out sideways below the raised one
-    stick((-0.42, -0.04, 1.52), (-1.20, -0.12, 1.50), 0.06, WOOD); stick((-0.95, -0.10, 1.51), (-1.28, -0.12, 1.78), 0.035, WOOD)
+# three arms, ALL on the torso (the middle ball; nothing on the head or the back), and every arm has a JOINT: an upper arm and a
+# forearm meeting at an elbow knob, then a forked hand. Left and right are raised from the shoulders; the third leaves the centre of
+# the upper chest between them, forward at the elbow, then steeply up (kept clear of the face).
+def arm(shoulder, elbow, hand, fork=(0.14, 0.34)):
+    stick(shoulder, elbow, 0.055, WOOD)                                   # upper arm
+    ball(elbow, 0.085, WOOD, 1)                                           # the joint
+    stick(elbow, hand, 0.045, WOOD)                                       # forearm
+    h, e = Vector(hand), Vector(elbow); d = (h - e).normalized()
+    side = Vector((0, -1, 0)).cross(d).normalized() if abs(d.y) < 0.9 else Vector((1, 0, 0))
+    for k in (-1, 1):                                                     # forked hand: two twigs off the end of the forearm
+        stick(h - d * 0.10, h + d * fork[1] + side * k * fork[0], 0.03, WOOD)
+
+
+arm((-0.38, -0.02, 1.68), (-0.88, -0.08, 1.60), (-1.16, -0.12, 2.18))
+arm((0.38, -0.02, 1.68), (0.88, -0.08, 1.60), (1.16, -0.12, 2.18))
+arm((0.0, -0.40, 1.60), (0.18, -0.72, 1.70), (0.60, -0.88, 2.20))
 # ground and sky
 bpy.ops.mesh.primitive_plane_add(size=40, location=(0, 0, 0)); g = bpy.context.object; flat(g, mat("ground", (0.78, 0.85, 0.95)))
 sc.world = bpy.data.worlds.new("w"); sc.world.use_nodes = True

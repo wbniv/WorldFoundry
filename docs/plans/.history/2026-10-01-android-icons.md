@@ -1,10 +1,16 @@
 | Date | Change |
 |------|--------|
+| [2026-10-01](https://github.com/wbniv/WorldFoundry/commit/5d8ea10a) | Icons: snowgoon third arm angled up from the chest centre; aquarium stalk water fill fixed and the fish raised in the icon |
 | [2026-10-01](https://github.com/wbniv/WorldFoundry/commit/735bc2b8) | Snowgoon: the third arm on the centre of the upper chest, between the two raised arms; source research recorded |
 | [2026-10-01](https://github.com/wbniv/WorldFoundry/commit/4a2dfa26) | Icons: three snowgoon arms from the upper torso (third centred), aquarium without the brown stalk, condo icon half and half at the front; plan and mockups updated |
 | [2026-10-01](https://github.com/wbniv/WorldFoundry/commit/019a88ed) | New launcher icons and TV banners for the three Android games, one layout, with the logo as a separate script |
 
 <!--history-meta v1
+5d8ea10a	author	Will Norris
+5d8ea10a	added	3
+5d8ea10a	deleted	3
+5d8ea10a	files	1
+5d8ea10a	body	Co-Authored-By: Claude Sonnet 5.5 <noreply@anthropic.com>\nClaude-Session: https://claude.ai/code/session_01NNPhRbrqjqMDkScPvTE9yC
 735bc2b8	author	Will Norris
 735bc2b8	added	1
 735bc2b8	deleted	1

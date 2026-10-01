@@ -16,7 +16,8 @@ Per game (a Gradle product flavor) it writes, under android/app/src/<flavor>/res
 
 The art, all committed so the output is deterministic (android/app/art-src/ unless noted):
   snowgoons  snowgoons-snowman-1920x1080.png     scripts/render-snowgoon.py (Blender): a menacing three-armed snowman
-  aquarium   aquarium-anemone-only-frame-b-1920x1080.png   scripts/derock-aquarium-frame.py: just the fish and the anemone
+  aquarium   aquarium-fish-high-anemone-only-580.png   scripts/capture-aquarium-fish-high.py + scripts/make-aquarium-icon-art.py: just the fish
+             (resting higher) and the anemone's crown
              + docs/plans/2026-09-30-aquarium-chromecast/frame-a-1920x1080.png for the banner (the whole tank)
   condo      condo-pullback-1920x1080.png        scripts/capture-condo-pullback.py: the camera pulled back and lowered
 
@@ -42,7 +43,7 @@ _spec.loader.exec_module(addlogo)
 GAMES = {
     "snowgoons": dict(icon=ART / "snowgoons-snowman-1920x1080.png", icon_crop=(420, 0, 1500, 1080),
                       banner=ART / "snowgoons-snowman-1920x1080.png", banner_crop=(0, 0, 1920, 1080), name="snowgoons"),
-    "aquarium": dict(icon=ART / "aquarium-anemone-only-frame-b-1920x1080.png", icon_crop=(470, 95, 1390, 1015),
+    "aquarium": dict(icon=ART / "aquarium-fish-high-anemone-only-580.png", icon_crop=(95, 115, 505, 525),
                      banner=REPO_ROOT / "docs/plans/2026-09-30-aquarium-chromecast/frame-a-1920x1080.png",
                      banner_crop=(280, 88, 1640, 853), name="aquarium"),
     "condo": dict(icon=ART / "condo-pullback-1920x1080.png", icon_crop=(1040, 160, 1920, 1040),
