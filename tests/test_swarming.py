@@ -195,16 +195,23 @@ def test_hrefs_are_exactly_the_data_sheet_urls(html_text):
     assert sorted(re.findall(r'<a href="([^"]+)"', html_text)) == sorted(s["url"] for s in D.SOURCES.values() if s["url"])
 
 
+def test_the_poster_prints_the_in_engine_numbers(html_text):
+    e = D.load("measured.json")["engine"]
+    t = html_text.replace("\u00a0", " ")
+    assert f'{e["before"]["mailbox_us"]:g} → {e["after"]["mailbox_us"]:g} µs' in t
+    assert f'{e["after"]["director_ms"][0]:.1f} ms' in t
+
+
 def test_the_poster_prints_the_measured_numbers(html_text):
     m = D.load("measured.json")
     t = html_text.replace(" ", " ")
     assert f'{m["dictionary_bytes"]} B' in t.replace(" ", " ")
-    assert f'{m["device"]["ms"]:.1f} ms' in t.replace(" ", " ")
+    assert f'{m["device"]["ms"]:.1f} → ' in t.replace("\u00a0", " ")
 
 
 def test_the_poster_says_what_it_does_not_claim(html_text):
     t = html_text.replace(" ", " ")
-    assert "Not claimed" in t and "hysteresis" in t and "not yet inside the engine" in t
+    assert "Not claimed" in t and "hysteresis" in t and "not wired in yet" in t
 
 
 def test_no_12_hour_clock(html_text):

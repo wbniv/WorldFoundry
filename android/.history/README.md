@@ -1,6 +1,5 @@
 | Date | Change |
 |------|--------|
-| [2026-10-01](https://github.com/wbniv/WorldFoundry/commit/2adf90a9) | Docs: the Chromecast OK button, the condo's A for doors and shade, the phone as a gamepad, and building without sudo |
 | [2026-09-30](https://github.com/wbniv/WorldFoundry/commit/747442a4) | WIP aquarium Android/Chromecast app: product flavors, aquarium-only cd.iff, device script |
 | [2026-04-18](https://github.com/wbniv/WorldFoundry/commit/53fff413) | feat(android): launcher icons, APK rename, asset-pipeline remediation note |
 | [2026-04-18](https://github.com/wbniv/WorldFoundry/commit/732252cd) | docs(android): port closure audit — status table + summary paragraph |
@@ -9,11 +8,6 @@
 | [2026-04-17](https://github.com/wbniv/WorldFoundry/commit/3b24f001) | feat(android): Phase 3 step 3 — Gradle project + AndroidManifest |
 
 <!--history-meta v1
-2adf90a9	author	Will Norris
-2adf90a9	added	18
-2adf90a9	deleted	3
-2adf90a9	files	1
-2adf90a9	body	android/README.md gains the condo flavor, both ABIs, the no-sudo build and a "Playing on a Chromecast" section;\ndocs/porting-status.md records the OK button, the phone controller (user-tested), the latency finding and what is still open.\n\nCo-Authored-By: Claude Sonnet 5.5 <noreply@anthropic.com>\nClaude-Session: https://claude.ai/code/session_01DxMP4jUNjCjDz8E9DWzXcM
 747442a4	author	Will Norris
 747442a4	added	19
 747442a4	deleted	5

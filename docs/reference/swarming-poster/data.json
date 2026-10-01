@@ -189,6 +189,24 @@
   ]
  },
  {
+  "id": "eng_before",
+  "quantity": "Director script per tick, in the engine, as found",
+  "value": "39 to 43 ms, 4.2 \u00b5s a mailbox call, 20 fps",
+  "status": "ours",
+  "sources": [
+   "S5"
+  ]
+ },
+ {
+  "id": "eng_after",
+  "quantity": "The same after the engine fix",
+  "value": "11.3 ms, 0.28 \u00b5s a mailbox call, 59.9 fps",
+  "status": "ours",
+  "sources": [
+   "S5"
+  ]
+ },
+ {
   "id": "dev",
   "quantity": "One tick, 11 fish, on the Chromecast HD",
   "value": "7.0 ms",

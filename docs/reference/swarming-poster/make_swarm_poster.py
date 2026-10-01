@@ -350,18 +350,20 @@ def panel_f():
     y0 = H_list + 10
     dev = m.get('device') or {}
     ms = dev.get('ms', float('nan'))
+    eng = m.get('engine') or {}
+    ea, eb = eng.get('after', {}), eng.get('before', {})
     big = [(f'{m["dictionary_bytes"]} B', f'of the {m["dictionary_size"] // 1024} KB dictionary ({100 * m["dictionary_bytes"] / m["dictionary_size"]:.1f} %): all {len(m["words"])} words, {m["code_lines"]} code lines'),
-           (f'{ms:.1f} ms', f'one tick, 11 fish, on the Chromecast HD (median of 3 runs); x86 here {m["x86_ms"]:.1f} ms'),
-           (f'{m["error"]["head_max"]:.0e}', 'largest heading error against couzin.py in one tick (the engine’s sine is 0.2 % off)'),
-           (f'~{ms / 10:.1f} ms', f'per follower per tick: spread over frames, the full 10 Hz step is about {ms:.0f} % of a core')]
+           (f'{ms:.1f} → {ea.get("director_ms", [0])[0]:.1f} ms', f'one tick, 11 fish, Chromecast HD: the bare interpreter, then in the engine (with the camera and sway); {ea.get("fps", 0):.0f} fps'),
+           (f'{eb.get("mailbox_us", 0):g} → {ea.get("mailbox_us", 0):g} µs', f'per mailbox call: three debug streams the engine ran on every call, found by this timing; {eb.get("fps", 0):.0f} fps before'),
+           (f'{m["error"]["head_max"]:.0e}', 'largest heading error against couzin.py in one tick (the engine’s sine is 0.2 % off); position 3e‑04')]
     bw = (W - 2 * pad - 3 * gap) / 4
     for i, (a_, b_) in enumerate(big):
         x = pad + i * (bw + gap)
         s.append(T(x, y0 + 20, a_, 22, 'start', ACC, 800))
         for k, wl in enumerate(textwrap.wrap(b_, int(bw / 5.9))[:3]):
             s.append(T(x, y0 + 36 + k * 12.5, wl, 11, 'start', INK))
-    H = int(y0 + 36 + 3 * 12.5 + 28)
-    c1, w1 = chip(12, H - 6, 'ours', 'the Forth, its size, error and timing are our measurements: the interpreter only, not yet inside the engine')
+    H = int(y0 + 36 + 3 * 12.5 + 22)
+    c1, w1 = chip(12, H - 6, 'ours', 'our measurements: the bare interpreter, and a bench level (the Director runs school.fth every tick) on the real Chromecast, release build')
     s.append(c1)
     return ''.join(s), W, H
 
@@ -438,7 +440,7 @@ def footer_html():
            f'<p>{FP.chip_html("verified")} the source was opened; the number is on its page<br>'
            f'{FP.chip_html("unverified")} from a summary, or not opened<br>'
            f'{FP.chip_html("ours")} our own choice, maths or measurement</p>'
-           f'<p class="sub">Not claimed: that real clownfish school (they do not), that our sweep shows the paper’s hysteresis (it is too coarse), or that the Forth was timed inside the engine. Data dated {D.DATA_DATE}.</p>')
+           f'<p class="sub">Not claimed: that real clownfish school (they do not), that our sweep shows the paper’s hysteresis (it is too coarse), or that the school is in the game: it is not wired in yet, only timed there. Data dated {D.DATA_DATE}.</p>')
     return ('<section class="panel foot" id="panel-src"><div class="bar"><b>Sources</b> · live links in the PDF; what could not be verified is marked</div>'
             f'<div class="cols">{"".join(f"<ul class=srcl>{c}</ul>" for c in cols)}<div class="how">{how}</div></div></section>')
 

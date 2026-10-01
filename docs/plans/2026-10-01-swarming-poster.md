@@ -32,7 +32,7 @@ Measured, not estimated ([`measured.json`](../reference/swarming-poster/measured
 
 **Named slots (the user's request).** Every number that used to be a bare index (`3 cur sch@`, `1 par@`, `19 sc!`) is now a name with an `MB_` prefix (`MB_VX me sch@`, `MB_DRO par@`, `MB_YOU sc!`), the long lines were split into short helper words, and the slots are documented once at the top of the file. The prefix stays because the dictionary is shared by every script in the level: a bare `X` or `ME` could silently shadow another script's word. It cost something, measured: the first version was 2,179 bytes and 6.2 ms a step; the named one is **2,936 bytes and 7.0 ms** (each name is a word call, not an inline literal), still equal to the numpy reference to the same 1e‑03. The poster's Forth panel shows the named code.
 
-**What was not measured:** the same code *inside the engine*. The 7.0 ms is the engine's own zForth interpreter (the same vendored source, the same float cells) driven by a standalone host with the mailboxes as a plain array; inside the game each mailbox access goes through the object manager, so expect more. That is Phase 0 of [the schooling plan](2026-10-01-aquarium-schooling.md), and the poster says so.
+**Inside the engine** it is a different story, and a more useful one: see [Phase E step 1](#phase-e-step-1-the-forth-inside-the-engine-on-the-chromecast). The 7.0 ms above is the engine's own zForth driven by a standalone host with the mailboxes as a plain array; in the game the same step took 39 to 43 ms until an engine bug was fixed, and takes 11.3 ms now (the Director also poses the fish and the camera).
 
 ## Diagrams
 

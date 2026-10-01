@@ -88,6 +88,10 @@ def rows():
         add("bytes", "school.fth in the dictionary", f"{sum(w['bytes'] for w in m['words'])} B of {m['dictionary_size']}", "ours", [GAME])
         add("lines", "school.fth source", f"{m['code_lines']} code lines, {m['source_lines']} with comments", "ours", [GAME])
         add("err", "Forth vs numpy, one tick", f"position {m['error']['pos_max']:.0e}, heading {m['error']['head_max']:.0e}", "ours", [GAME])
+        if m.get("engine"):
+            e = m["engine"]
+            add("eng_before", "Director script per tick, in the engine, as found", f"{e['before']['director_ms'][0]:.0f} to {e['before']['director_ms'][1]:.0f} ms, {e['before']['mailbox_us']} µs a mailbox call, {e['before']['fps']:.0f} fps", "ours", [GAME])
+            add("eng_after", "The same after the engine fix", f"{e['after']['director_ms'][0]:.1f} ms, {e['after']['mailbox_us']} µs a mailbox call, {e['after']['fps']:.1f} fps", "ours", [GAME])
         if m.get("device"):
             add("dev", "One tick, 11 fish, on the Chromecast HD", f"{m['device']['ms']:.1f} ms", "ours", [GAME])
     return R
