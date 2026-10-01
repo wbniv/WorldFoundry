@@ -1,12 +1,12 @@
 # Split the multi-level cd.iff into one Android app per game
 
-Status: **done except the device rerun** (2026‑10‑01 22:20 (+07) = 15:20 UTC). Three apps (smb, snowgoons, qbert) build for both ABIs and ran on the real Chromecast HD; the rerun with the final APKs and the TV-launcher look at the new snowgoons banner are PENDING (the user asked not to use the Chromecast while another agent records a video).
+Status: **done; one launcher display issue for the user** (2026‑10‑01 22:55 (+07) = 15:55 UTC). Three apps (smb, snowgoons, qbert) build for both ABIs and pass on the real Chromecast HD with the final APKs. The snowgoons app is now called Snowgoons; the installed APK is right, but the Google TV launcher still shows its cached old name and icon (step 9).
 
 - [x] Phase A: the audit of every level-index write, recorded below
 - [x] Phase B: one `cd.iff` per game, built by its own task, committed and pinned by a test
 - [x] Phase C: the apps: `snowgoons` boots snowgoons; new `smb` and `qbert` flavors with their own art
 - [x] Phase D: CI, the device script, tasks and docs know every flavor
-- [ ] Phase E: builds for both ABIs (done), then a smoke run of each new app on the real Chromecast HD (done once; the rerun with the final APKs is PENDING)
+- [x] Phase E: builds for both ABIs, then a smoke run of each new app on the real Chromecast HD (rerun with the final APKs: PASS)
 
 ## Request
 
@@ -302,9 +302,37 @@ Numbered, runnable steps; each shows its raw output with PASS or FAIL, or says w
 
     <img src="2026-10-01-split-cd-iff-one-app-per-game/chromecast-smb.png" width="300"> <img src="2026-10-01-split-cd-iff-one-app-per-game/chromecast-qbert.png" width="300"> <img src="2026-10-01-split-cd-iff-one-app-per-game/chromecast-snowgoons.png" width="300">
 
-    **PASS** for the three apps: SMB boots W1‑1 (Mario on the first ground strip, a ? block), Q\*bert the pyramid, snowgoons the snowy yard. **PENDING:** the
-    new snowgoons banner on the TV launcher, and a rerun with the final APKs: the user asked not to use the Chromecast (another agent is recording a video).
-    The TV was last left running the snowgoons app by this plan; the recording agent has had it since.
+    **PASS** for the three apps in that first run: SMB boots W1‑1 (Mario on the first ground strip, a ? block), Q\*bert the pyramid, snowgoons the snowy yard.
+
+    **Rerun with the final APKs**, 2026‑10‑01 22:47 to 22:48 (+07) = 15:47 to 15:48 UTC, after the user lifted the stop. Built from `ccede076` in a clean
+    worktree (`BUILD SUCCESSFUL in 4m 11s`; smb 2,329,205 B, qbert 2,538,016 B, snowgoons 9,530,858 B, both ABIs each), installed with `adb install -r`
+    by the same script (`--apk` pointing at those files). Keys sent: `KEYCODE_WAKEUP` before, `KEYCODE_HOME` after; nothing else.
+
+    ```
+    smb       PASS installed org.worldfoundry.wf_game.smb; launched (400 ms); alive after 8 s (pid 17307); no crash lines; EGL context up; 126 frames, median 16.7 ms (59.9 fps)
+    qbert     PASS installed org.worldfoundry.wf_game.qbert; launched (551 ms); alive after 8 s (pid 17486); no crash lines; EGL context up; 127 frames, median 16.7 ms (59.9 fps)
+    snowgoons PASS installed org.worldfoundry.wf_game; launched (492 ms); alive after 8 s (pid 17673); no crash lines; EGL context up; 126 frames, median 16.7 ms (59.9 fps)
+    evidence: ~/tmp/android-device-run/{smb-20261001T154723Z,qbert-20261001T154743Z,snowgoons-20261001T154809Z}/
+    after Home: topResumedActivity=… com.google.android.apps.tv.launcherx/.home.HomeActivity
+    ```
+
+    <img src="2026-10-01-split-cd-iff-one-app-per-game/chromecast-rerun-smb.png" width="300"> <img src="2026-10-01-split-cd-iff-one-app-per-game/chromecast-rerun-qbert.png" width="300"> <img src="2026-10-01-split-cd-iff-one-app-per-game/chromecast-rerun-snowgoons.png" width="300">
+
+    **PASS.** Q\*bert shows the pyramid, snowgoons the snowy yard. **SMB now opens on the "WF SMB / Choose a world" menu** (World 1‑1 highlighted), not
+    straight into W1‑1: the level-menu work (`a40da0de`, [its plan](2026-10-01-level-menu-selector.md)) switched the smb app to the world-select bundle
+    between the two runs. That is the intended new behaviour, not a fault of this split.
+
+    **The launcher (after Home).** This Google TV launcher shows **round icons, not banners**, in "Your apps"; the 16:9 banners are not visible anywhere on
+    the home screen, so the new snowgoons banner cannot be checked on this launcher. The tiles:
+
+    <img src="2026-10-01-split-cd-iff-one-app-per-game/chromecast-rerun-apps-row.png" width="700">
+
+    WF Q\*bert and WF SMB show their new icons. **The snowgoons tile still shows the old black "WORLD FOUNDRY" mark and the label "World Foundry"**, and
+    the WF Aquarium tile still shows its older icon (with the brown stalk the icons plan removed): the launcher keeps cached icons and labels. What the
+    TV has installed is the new build: `pm path` + `adb pull` of `org.worldfoundry.wf_game` is byte-identical to the built APK (`installed APK == built APK`,
+    `lastUpdateTime=2026-10-01 22:48:14`), whose badging says `label='Snowgoons'` and whose adaptive foreground and legacy icon are pixel-identical to the
+    snowman in `src/snowgoons/res` (step 11). **FAIL on the TV's display, PASS on what is installed.** `pm clear` was not used (it wipes data); a reboot
+    of the Chromecast, or an uninstall and reinstall (as the icons plan's step 6 did), is the user's call.
 
 10. The docs render: `task md -- android/README.md`, `task md -- docs/porting-status.md` and this plan.
 
@@ -315,6 +343,20 @@ Numbered, runnable steps; each shows its raw output with PASS or FAIL, or says w
     ```
 
     **PASS** (looked at: the flavor table, the new porting-status bullet, and this plan's Icons table with every image present).
+
+11. The snowgoons app is called Snowgoons, with the snowman icon (asked by the user after step 9's first run). `python3 -m pytest tests/test_game_apps_android.py -v -k "every_label or launcher_icons_are"`,
+    then `aapt2 dump badging` of the built snowgoons release APK, and its packed launcher icons compared with `src/snowgoons/res`.
+
+    ```
+    tests/test_game_apps_android.py::test_every_label PASSED
+    tests/test_game_apps_android.py::test_snowgoons_launcher_icons_are_its_own PASSED
+    package: name='org.worldfoundry.wf_game'   application: label='Snowgoons' icon='res/BW.xml' banner='res/gU.png'
+    res/as.png (mipmap/ic_launcher_foreground, xxxhdpi) == snowgoons res: True | == main: False
+    res/o-.png (mipmap/ic_launcher, xxxhdpi)            == snowgoons res: True | == main: False
+    ```
+
+    **PASS** in the APK. Every density of `ic_launcher`, `ic_launcher_round` and `ic_launcher_foreground` was already overridden by the snowman (nothing
+    fell back to main's old mark); only the label came from main, now overridden by `src/snowgoons/res/values/strings.xml`. On the TV: see step 9 (stale launcher cache).
 
 ## Cost
 

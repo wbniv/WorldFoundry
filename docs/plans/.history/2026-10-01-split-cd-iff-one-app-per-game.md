@@ -1,9 +1,15 @@
 | Date | Change |
 |------|--------|
+| [2026-10-01](https://github.com/wbniv/WorldFoundry/commit/ccede076) | The snowgoons app is called Snowgoons |
 | [2026-10-01](https://github.com/wbniv/WorldFoundry/commit/c19865bb) | Plan: icons for every app, the snowgoons level banner, and the verification results |
 | [2026-10-01](https://github.com/wbniv/WorldFoundry/commit/fad9efcf) | Plan: split the multi-level cd.iff into one Android app per game (smb, snowgoons, qbert) |
 
 <!--history-meta v1
+ccede076	author	Will Norris
+ccede076	added	3
+ccede076	deleted	3
+ccede076	files	1
+ccede076	body	Asked by the user. android/app/src/snowgoons/res/values/strings.xml overrides\nmain's "World Foundry" (log viewer: "Snowgoons Log"); the id stays\norg.worldfoundry.wf_game so installs upgrade in place, and the other labels are\nunchanged. Its launcher icons already override main's in every density and\nform (the snowman); a new test pins that, another pins every app's label.\nREADME, the split plan (Icons table, mockups) and a note in the icons plan\nfollow.\nPlan: docs/plans/2026-10-01-split-cd-iff-one-app-per-game.md\n\nCo-Authored-By: Claude Opus 5.5 <noreply@anthropic.com>\nClaude-Session: https://claude.ai/code/session_01DxMP4jUNjCjDz8E9DWzXcM
 c19865bb	author	Will Norris
 c19865bb	added	145
 c19865bb	deleted	6
