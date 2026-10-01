@@ -1,11 +1,17 @@
 | Date | Change |
 |------|--------|
+| [2026-10-01](https://github.com/wbniv/WorldFoundry/commit/a7414405) | Icons: elbow joints on every snowgoon arm; the aquarium fish rests higher relative to the anemone (a real engine capture) |
 | [2026-10-01](https://github.com/wbniv/WorldFoundry/commit/5d8ea10a) | Icons: snowgoon third arm angled up from the chest centre; aquarium stalk water fill fixed and the fish raised in the icon |
 | [2026-10-01](https://github.com/wbniv/WorldFoundry/commit/735bc2b8) | Snowgoon: the third arm on the centre of the upper chest, between the two raised arms; source research recorded |
 | [2026-10-01](https://github.com/wbniv/WorldFoundry/commit/4a2dfa26) | Icons: three snowgoon arms from the upper torso (third centred), aquarium without the brown stalk, condo icon half and half at the front; plan and mockups updated |
 | [2026-10-01](https://github.com/wbniv/WorldFoundry/commit/019a88ed) | New launcher icons and TV banners for the three Android games, one layout, with the logo as a separate script |
 
 <!--history-meta v1
+a7414405	author	Will Norris
+a7414405	added	5
+a7414405	deleted	4
+a7414405	files	1
+a7414405	body	The fish is steered 0.6 m above the crown's host point through the aquarium harness; the icon art cuts the frame under the crown and continues\nthe water, dropping the stalk, rock and sand. Replaces the failed crop and capture-editing attempts (derock-aquarium-frame.py removed).\n\nCo-Authored-By: Claude Sonnet 5.5 <noreply@anthropic.com>\nClaude-Session: https://claude.ai/code/session_01NNPhRbrqjqMDkScPvTE9yC
 5d8ea10a	author	Will Norris
 5d8ea10a	added	3
 5d8ea10a	deleted	3

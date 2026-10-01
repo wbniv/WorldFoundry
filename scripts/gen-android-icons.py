@@ -104,7 +104,7 @@ def build(game):
         d = res / f"mipmap-{density}"
         d.mkdir(parents=True, exist_ok=True)
         fg = art.resize((px, px), Image.LANCZOS).convert("RGBA")
-        addlogo.add_logo(fg, scale=0.17, safe_inset=SAFE).save(d / "ic_launcher_foreground.png", optimize=True)
+        addlogo.add_logo(fg, scale=0.17, safe_circle=LEGACY_INNER).save(d / "ic_launcher_foreground.png", optimize=True)
     side = art.size[0]
     m = round(side * (1 - LEGACY_INNER) / 2)
     inner = art.crop((m, m, side - m, side - m))

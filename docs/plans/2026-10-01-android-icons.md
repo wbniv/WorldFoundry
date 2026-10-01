@@ -109,9 +109,21 @@ Numbered, runnable steps; each shows its raw output with PASS or FAIL, or says w
 
 4. The mockups are rendered from the generated files and are the three pages above. **PASS** (`make_mockups.py`: icons 459 KB, banners 254 KB, layout 83 KB, each under the 512 KB limit).
 
-5. `./gradlew :app:assembleSnowgoonsDebug :app:assembleAquariumDebug :app:assembleCondoDebug`. Expected: BUILD SUCCESSFUL; each APK's resources carry the new icons. **PENDING**
+5. `./gradlew :app:assembleAquariumRelease :app:assembleCondoRelease :app:assembleSnowgoonsDebug`. Expected: BUILD SUCCESSFUL; each APK's resources carry the new icons.
 
-6. On the Chromecast: install the three apps and look at the apps row (a screenshot of the home screen). Expected: the three new tiles. **PENDING** (and the snowgoons release build is blocked by the missing soundfont, see the aquarium-Chromecast plan, Phase D; the debug build works)
+    ```
+    BUILD SUCCESSFUL in 16s
+    snowgoons (debug): the installed APK holds the new xhdpi foreground (byte-identical to android/app/src/snowgoons/res); aapt2 badging: icon='res/mipmap-anydpi-v26/ic_launcher.xml', banner='res/drawable/tv_banner.png'
+    aquarium and condo (release): the release build re-compresses images, so only the declared icon was checked: icon='res/BW.xml' (adaptive), banner present
+    ```
+
+    **PASS**
+
+6. On the Chromecast: install the three apps and look at the apps row (a screenshot of the home screen). Expected: the three new tiles.
+
+    Result (2026‑10‑01 ~17:00): all three installed (`adb install`: Success, after an uninstall so the TV drops its old tiles). The **Apps tab shows the new art**: the fish above the anemone crown, the condo half orange and half blue, and the three-armed snowman. The names are right (World Foundry, WF Aquarium, WF Condo). **But the logo is clipped by the circle on the TV.** First cause found and fixed in the generator: the adaptive foreground put the logo in the corner of the launcher's safe *square*, which a circular mask cuts off; `add-wf-logo.py --safe-circle 0.667` now keeps it inside the visible circle (the generated foreground has its far corner 61 px from the centre of a 216 px canvas, inside the 72 px circle). The newest build is installed (snowgoons verified byte-for-byte), but **the Google TV launcher is still drawing the previous generation of the icons** (the logo wedge is at the old position), so the final look is **PENDING** a launcher refresh. It refreshed once after an uninstall and reinstall and not the second time; a restart of the Chromecast is the next thing to try. The snowgoons *release* build is still blocked by the missing soundfont (see the aquarium-Chromecast plan, Phase D); the debug build is what is installed.
+
+    **PARTIAL**
 
 7. A phone or emulator launcher: the adaptive and round icons under a real mask. **PENDING**
 

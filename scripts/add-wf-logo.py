@@ -19,6 +19,8 @@ Options:
   --safe-inset F      keep the logo this fraction of each side away from the edge; adaptive-icon foregrounds need 1/6
                       so the launcher's mask does not cut it off (default 0)
   --circle            the image is a round icon: mask it to a circle and put the logo inside it, at 45 degrees
+  --safe-circle F     do not mask, but put the logo inside the circle of diameter F x the short side (an adaptive foreground: the launcher shows
+                      the inner 72 of 108 dp, which a round mask clips to a circle of 0.667, so a corner logo would be cut off)
   -h, --help
 """
 import argparse
@@ -60,7 +62,7 @@ def render_svg_rects(path, size):
     return im.resize((size, size), Image.LANCZOS)
 
 
-def add_logo(img, logo_svg=DEFAULT_LOGO, scale=0.26, margin=0.05, safe_inset=0.0, circle=False):
+def add_logo(img, logo_svg=DEFAULT_LOGO, scale=0.26, margin=0.05, safe_inset=0.0, circle=False, safe_circle=0.0):
     """Return img (RGBA) with the logo stamped bottom-right (and masked to a circle if circle=True)."""
     img = img.convert("RGBA")
     w, h = img.size
@@ -71,15 +73,16 @@ def add_logo(img, logo_svg=DEFAULT_LOGO, scale=0.26, margin=0.05, safe_inset=0.0
     framed = Image.new("RGBA", (side + 2 * border, side + 2 * border), (255, 255, 255, 255))
     framed.alpha_composite(logo, (border, border))
     fw = framed.size[0]
-    if circle:
-        r = short / 2
+    if circle or safe_circle:
+        r = short * (safe_circle or 1.0) / 2
         # the logo's own bottom-right corner must lie inside the circle: centre it on the 45 degree radius
         reach = (r - fw * math.sqrt(2) / 2) - short * margin * 0.5
         cx, cy = w / 2 + reach * math.cos(math.radians(45)), h / 2 + reach * math.sin(math.radians(45))
         pos = (round(cx - fw / 2), round(cy - fw / 2))
-        mask = Image.new("L", (w * 4, h * 4), 0)
-        ImageDraw.Draw(mask).ellipse((0, 0, w * 4 - 1, h * 4 - 1), fill=255)
-        img.putalpha(mask.resize((w, h), Image.LANCZOS))
+        if circle:
+            mask = Image.new("L", (w * 4, h * 4), 0)
+            ImageDraw.Draw(mask).ellipse((0, 0, w * 4 - 1, h * 4 - 1), fill=255)
+            img.putalpha(mask.resize((w, h), Image.LANCZOS))
     else:
         inset = round(short * max(margin, safe_inset))
         pos = (w - inset - fw, h - inset - fw)
@@ -96,13 +99,14 @@ def main():
     ap.add_argument("--margin", type=float, default=0.05)
     ap.add_argument("--safe-inset", type=float, default=0.0)
     ap.add_argument("--circle", action="store_true")
+    ap.add_argument("--safe-circle", type=float, default=0.0)
     a = ap.parse_args()
     if a.output and len(a.images) != 1:
         sys.exit("add-wf-logo: -o takes exactly one input image")
     if not pathlib.Path(a.logo).exists():
         sys.exit(f"add-wf-logo: logo not found: {a.logo} (the website repository is expected at ../worldfoundry.org)")
     for p in a.images:
-        out = add_logo(Image.open(p), a.logo, a.scale, a.margin, a.safe_inset, a.circle)
+        out = add_logo(Image.open(p), a.logo, a.scale, a.margin, a.safe_inset, a.circle, a.safe_circle)
         dest = a.output or p
         out.save(dest, optimize=True)
         print(f"wrote {dest} ({out.size[0]}x{out.size[1]})")

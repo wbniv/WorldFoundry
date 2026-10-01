@@ -59,8 +59,8 @@ for g, label in GAMES:
  <div class="row" style="margin-top:12px;align-items:center"><img src="{small}" style="width:48px;height:48px"><img src="{small}" style="width:96px;height:96px"><span class="sub">launcher sizes: 48 px and 96 px</span></div></div>""")
 icons = page("Mockup 1: the three new launcher icons, rendered from the real resources", "Same layout for every game: the game's art, plus the World Foundry logo bottom-right. Left of each set: the icon it replaces.", f'<div style="display:flex;gap:30px;padding:24px 34px">{"".join(cols)}</div>',
 """.col{width:430px}img.old,img.sqr,img.rnd{width:112px;height:112px;display:block;border-radius:14px}img.rnd{border-radius:0}img.old{opacity:.8;outline:1px dashed #3a4a63}
-.mask{width:104px;height:104px;overflow:hidden;background:#1a1a2e var(--fg) center/cover;position:relative}.circ{border-radius:50%}.squi{border-radius:30%}
-.safe{border-radius:0;outline:2px solid #56d364}.safe:after{content:'';position:absolute;inset:16.66%;outline:2px dashed #ffb454}""")
+.mask{width:104px;height:104px;overflow:hidden;background:#1a1a2e var(--fg) center/150%;position:relative}.circ{border-radius:50%}.squi{border-radius:30%}
+.safe{border-radius:0;outline:2px solid #56d364;background-size:cover}.safe:after{content:'';position:absolute;inset:16.66%;outline:2px dashed #ffb454}""")
 
 # 2. TV banners in a Google TV apps row + the focused tile ----------------------------------------------------------------------------
 ban = {g: now(g, "drawable/tv_banner.png", "JPEG") for g, _ in GAMES}
