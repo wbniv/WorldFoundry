@@ -87,7 +87,7 @@ Free minutes apply to **M2 machines only** (M4 is charged), so every workflow st
 - **Real iPhone or iPad hardware:** needs Apple signing and provisioning; TestFlight and the App Store as well. Only
   simulators here.
 - **Play Store submission** and any distribution beyond `adb` sideload.
-- **Sound** on any platform (silent stub; see the "Audio assets from IFF" item in `TODO.md`).
+- **Sound** on any platform (the audio device is real, `audio: miniaudio v0.11.25 ready` on the Chromecast HD, but the apps bundle no sounds or music and nobody has listened on a TV; see the "Audio assets from IFF" and "Sound effects without Lua" items in `TODO.md`).
 - **Steering the fish with only a TV remote** (a D-pad and OK, no B, C or A). The gamepad profile is the target.
 - **Changing `WORLD_SCALE`** or the engine's fixed limits (decided 2026‑09‑30).
 - **macOS close paths** (⌘Q, red button, Retina, `-fullscreen`): stay under the macOS Metal renderer item in `TODO.md`.

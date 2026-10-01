@@ -132,7 +132,7 @@ Each has standalone value on Linux; Android blocks on all four.
 
 - iOS (own plan, starts after this ships)
 - App Store / Play Store distribution
-- Audio (nothing to port — stubs are stubs)
+- Audio (nothing to port — stubs are stubs) **[Correction 2026‑10‑01: the stub was replaced by the shared miniaudio backend (`audio/linux`, `hal/android/audio.cc`); on the Chromecast HD the log reads `audio: miniaudio v0.11.25 ready`.]**
 - Haptics, gyro, camera, mic
 - Orientation / responsive layout (landscape-locked letterbox only)
 - Vulkan backend (GLES 3.0 is the v1 graphics path)

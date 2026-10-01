@@ -1,10 +1,16 @@
 | Date | Change |
 |------|--------|
+| [2026-10-01](https://github.com/wbniv/WorldFoundry/commit/25d29568) | Condo docs: say which texture needs the --vram flags (the 1024x1024 Perm.tga atlas: sky dome + OSM ground map), with the gdb backtrace |
 | [2026-10-01](https://github.com/wbniv/WorldFoundry/commit/e8a9ecdb) | Condo plan and porting status: CI green on the resume-fix commit (build 6abd6e96) |
 | [2026-10-01](https://github.com/wbniv/WorldFoundry/commit/79f0728f) | Android: stay suspended until the window returns (fixes Home-then-reopen abort); condo results |
 | [2026-10-01](https://github.com/wbniv/WorldFoundry/commit/3bb78cf2) | Plan the condo on the Chromecast HD, with mockups |
 
 <!--history-meta v1
+25d29568	author	Will Norris
+25d29568	added	2
+25d29568	deleted	2
+25d29568	files	1
+25d29568	body	Co-Authored-By: Claude Sonnet 5.5 <noreply@anthropic.com>\nClaude-Session: https://claude.ai/code/session_01NNPhRbrqjqMDkScPvTE9yC
 e8a9ecdb	author	Will Norris
 e8a9ecdb	added	3
 e8a9ecdb	deleted	1

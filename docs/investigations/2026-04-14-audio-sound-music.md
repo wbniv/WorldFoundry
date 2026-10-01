@@ -284,6 +284,7 @@ Goal: Audio works on Android and iOS. Mostly free — miniaudio already supports
    both music and SFX as mailbox writes on top of the current miniaudio
    backend — see the separate plan doc (linked from `wf-status.md` when
    written).
+   **Correction (2026‑10‑01): the SFX half of this is stale.** `SfxLibrary` landed on 2026‑05‑16, and `case EMAILBOX_SOUND:` (`actor.cc:1694`) plays slot *n* when a script in **any** engine writes it to mailbox 3017, so sound effects are scriptable from every engine, Forth-only mobile builds included. What is still Lua-only is music control (`play_music` and friends). The remaining gap for sound effects is that a level cannot carry its own sound files: [the SFX plan](../plans/2026-10-01-sfx-without-lua.md).
 1. **HRTF.** Binaural audio for headphone users. miniaudio supports via `ma_hrtf`, dataset is ~40 KB. Ship when a level wants it.
 2. **Reverb / occlusion.** Per-zone reverb presets, raycast-based occlusion against level geometry. Needs level-side authoring.
 3. **Voice chat.** Covered by the multiplayer plan (WebRTC); separate pipeline from this SFX/music plan. See [docs/investigations/2026-04-14-multiplayer-voice-mobile-input.md](2026-04-14-multiplayer-voice-mobile-input.md).

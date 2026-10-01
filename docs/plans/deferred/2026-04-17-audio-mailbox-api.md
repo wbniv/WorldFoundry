@@ -13,7 +13,7 @@ C closures registered in `engine/stubs/scripting_lua.cc`. The other seven
 scripting engines (Fennel, QuickJS, JerryScript, WAMR, Wren, zForth, and the
 five alternate Forth backends) cannot trigger any audio. And SFX are not
 scriptable at all — actors fire `_sfx[index]->play()` internally, but there
-is no mailbox or closure for scripts to play a sound.
+is no mailbox or closure for scripts to play a sound. **[Stale since 2026‑05‑16: `EMAILBOX_SOUND` (3017) is handled at `actor.cc:1694` and plays through `SfxLibrary::Play`; see the Status line.]**
 
 Mailboxes are the cross-engine scripting primitive: every engine can read
 and write them with a uniform pair of verbs. Wiring audio into the mailbox
@@ -35,7 +35,7 @@ Two encouraging findings survey the damage:
   `MAILBOXENTRY(MIDI, 1002)`, `(LOCAL_MIDI, 3003)`, `(SOUND, 3017)`,
   `(CD_TRACK, 3021)`. The names `EMAILBOX_SOUND`, `EMAILBOX_MIDI`, etc.
   already resolve. Nothing reads them today (only `EMAILBOX_CD_TRACK` has
-  a case, and it's an empty no-op at `actor.cc:1338`).
+  a case, and it's an empty no-op at `actor.cc:1338`). **[Stale: `EMAILBOX_SOUND` now has a case at `actor.cc:1694`.]**
 - The **OAD asset table fields still exist**:
   `wfsource/source/oas/levelobj.oas` declares `sfx0 … sfx127` with
   `TYPEENTRYFILENAME(..., "Windows Sound File (*.wav)\0*.wav\0")`. Levels
@@ -115,6 +115,8 @@ sugar.
 ## Phases
 
 ### Phase A — SFX slot loading and `EMAILBOX_SOUND`
+
+**Status (2026‑10‑01):** the `EMAILBOX_SOUND` handler is **done** (`actor.cc:1694`, 2026‑05‑16). Loading slots from the level's `sfx0` to `sfx127` fields is **not** done: a hardcoded list in `game.cc:345-351` stands in, and that work is now [Phase B of the SFX plan](../2026-10-01-sfx-without-lua.md).
 
 1. Add `SoundBuffer* _sfx[128]` back to `Level` in `level.hp`, with
    construction/destruction in `level.cc` mirroring the pre-`460a3fd`

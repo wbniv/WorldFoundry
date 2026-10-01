@@ -1,11 +1,17 @@
 | Date | Change |
 |------|--------|
+| [2026-10-01](https://github.com/wbniv/WorldFoundry/commit/5fcd0364) | Update the aquarium-platforms and Chromecast plans with today's results |
 | [2026-10-01](https://github.com/wbniv/WorldFoundry/commit/ffeecfa7) | iOS Phase 3: record status (implemented, CI-unverified) and the prepared simulator check |
 | [2026-10-01](https://github.com/wbniv/WorldFoundry/commit/1f284673) | docs: iOS Phase 2C-B done on simulator; aquarium-platforms step 3 PASS (builds 6abd4a70, 6abd4f31) |
 | [2026-09-30](https://github.com/wbniv/WorldFoundry/commit/c33c2851) | Record the aquarium's Metal parity result on macOS: PASS |
 | [2026-09-30](https://github.com/wbniv/WorldFoundry/commit/74a2529a) | Plan the aquarium on every platform: macOS and iOS Metal, Android, Chromecast |
 
 <!--history-meta v1
+5fcd0364	author	Will Norris
+5fcd0364	added	8
+5fcd0364	deleted	9
+5fcd0364	files	1
+5fcd0364	body	The aquarium runs on macOS (Metal, CI), in the iOS simulators and on a real Chromecast HD (32-bit). Tick phases A, B and E,\nrecord PASS/PARTIAL for verification steps 4, 7 and 8, and append the real-device result to the Chromecast plan.\n\nCo-Authored-By: Claude Sonnet 5.5 <noreply@anthropic.com>\nClaude-Session: https://claude.ai/code/session_01NNPhRbrqjqMDkScPvTE9yC
 ffeecfa7	author	Will Norris
 ffeecfa7	added	2
 ffeecfa7	deleted	1

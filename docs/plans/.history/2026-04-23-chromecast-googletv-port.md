@@ -1,11 +1,17 @@
 | Date | Change |
 |------|--------|
+| [2026-10-01](https://github.com/wbniv/WorldFoundry/commit/47be054a) | Chromecast HD runs the aquarium: fix 32-bit ARM pool alignment, check the APK's ABIs in the device script |
 | [2026-09-30](https://github.com/wbniv/WorldFoundry/commit/747442a4) | WIP aquarium Android/Chromecast app: product flavors, aquarium-only cd.iff, device script |
 | [2026-04-23](https://github.com/wbniv/WorldFoundry/commit/943a14e6) | chromecast: Phase 0 + Phase 1 — TV banner image + Codemagic Android workflow |
 | [2026-04-23](https://github.com/wbniv/WorldFoundry/commit/2a23a3bb) | android: Phase 1 — Codemagic android-apk-debug workflow |
 | [2026-04-23](https://github.com/wbniv/WorldFoundry/commit/bfbd45d7) | docs: add chromecast/Google TV port plan (party-games-platform branch) |
 
 <!--history-meta v1
+47be054a	author	Will Norris
+47be054a	added	1
+47be054a	deleted	1
+47be054a	files	1
+47be054a	body	First run of the engine on 32-bit ARM (the Chromecast HD, Amlogic S805X2, armeabi-v7a only). MemPoolConstruct asserted that the\nentry size is a multiple of WF_POINTER_ALIGN (8 on 32-bit ARM); sizeof(SMsg) is 20 there and the app aborted. Round the entry\nsize up instead (no-op on 64-bit); MemPoolAllocate compares the rounded size. The device script compared the device ABIs with a\nhard-coded arm64 check: compare with the APK's actual lib/<abi> instead. Record the real-device result and correct the plan\n(the HD model is 32-bit only) in docs/porting-status.md and the Chromecast plan.\n\nCo-Authored-By: Claude Sonnet 5.5 <noreply@anthropic.com>\nClaude-Session: https://claude.ai/code/session_01NNPhRbrqjqMDkScPvTE9yC
 747442a4	author	Will Norris
 747442a4	added	2
 747442a4	deleted	2

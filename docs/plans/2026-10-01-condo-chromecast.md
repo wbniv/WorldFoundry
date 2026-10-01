@@ -80,7 +80,7 @@ the reader know what a failure looks like. [Open the interactive mockup](2026-10
 
 - The condo on a phone, iPad, iPhone or Mac (the `_touch` profile exists for phones); a separate item.
 - Changing the level. It is fine as shipped; the assertion seen first was missing engine flags on Android, not a level defect (Verification 11).
-- Audio (silent stub on Android; the "Audio assets from IFF" item in `TODO.md`).
+- Audio (the engine's audio device is real on Android, but the condo bundles no sounds or music; see [Phase D of the aquarium plan](2026-09-30-aquarium-chromecast.md#phase-d-audio) and the "Audio assets from IFF" item in `TODO.md`).
 - Mapping remote keys to B/C/D, unless the decision in mockup 2 asks for it.
 - Optimising the frame rate by changing the level or the engine.
 - Play Store or any distribution beyond `adb` sideload.

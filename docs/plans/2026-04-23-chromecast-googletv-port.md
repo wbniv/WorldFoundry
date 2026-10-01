@@ -19,7 +19,7 @@ What the Android plan never did: **device verification** (Phase 3 Step 7 is ⬜ 
 APK. Additionally:
 - No TV **banner image** existed — Google TV launcher shows a blank tile without
   `android:banner` on `<application>`.
-- **Audio is silent stubs** — acceptable for v1;
+- **Audio is silent stubs** — acceptable for v1; **[Stale: Android has run the real miniaudio backend since April; the Chromecast HD's log reads `audio: miniaudio v0.11.25 ready`. What is true: the apps bundle no sounds or music and nobody has listened on a TV, see [Phase D of the aquarium plan](2026-09-30-aquarium-chromecast.md#phase-d-audio).]**
   [audio-assets-from-iff](2026-04-18-audio-assets-from-iff.md) is the follow-up.
 - **No CI for Android** — only iOS has a Codemagic workflow; Android builds are local-only.
 
@@ -33,7 +33,7 @@ Android CI), not new HAL code.
 | Build target | Same APK as phone/tablet (arm64-v8a, minSdk 21) |
 | Graphics | GLES 3.0 via EGL — unchanged from the Android port |
 | Input | Gamepad-only on TV; touch path unchanged for phone |
-| Audio | Silent stub for v1; `audio-assets-from-iff` is the Phase 4 unblock |
+| Audio | Silent stub for v1; (stale, see above; no sounds are bundled) `audio-assets-from-iff` is the Phase 4 unblock |
 | Distribution | ADB sideload for v1; Play Store submission is out of scope |
 
 ## Prerequisites
