@@ -8,10 +8,10 @@ camera half of 6). Drives the real wf_game over the debug bridge:
   * walking from the project room onto the balcony steps DOWN 6 cm (7 cm recess under 1 cm
     of artificial grass) and back UP again;
   * the pony wall (at both guides and mid-span) and the north jamb stop the player;
-  * B away from the opening does nothing; B within reach closes over ~2 s, the slats
+  * A away from the opening does nothing; A within reach closes over ~2 s, the slats
     and bar land on their baked (closed) positions, a second press mid-travel reverses
     without a snap, and a held press toggles once;
-  * B in the shade's reach moves only the shade, B in the glass doors' reach only the
+  * A in the shade's reach moves only the shade, A in the glass doors' reach only the
     doors (the two reach bands are disjoint in y), and the wall switch is there;
   * walking onto the patio and to 640's master window produces no camera cut: with
     CONDO_POV_TRIGGERS off (the default since 2026-09-30) cs_dollhouse is the only
@@ -47,7 +47,7 @@ CAMSHOT = 1921                        # INDEXOF_CAMSHOT (troubleshooting: 1921, 
 MB_DOOR_TARGET, MB_DOOR_CLOSEDNESS = 93, 94
 TIME = 1906                           # level clock (mailbox.inc) — the integrator runs on DELTA_TIME
 MB_REACH, MB_TARGET, MB_CLOSEDNESS = 62, 63, 64
-BUTTON_B = 1 << 1
+BUTTON_A = 1 << 0
 JOY_UP, JOY_DOWN = 1 << 11, 1 << 12
 UNIT_Z = 15.75
 SLAT_H = (2.05 - 1.072) / 8          # blender_create_condo.py § 7d
@@ -113,8 +113,8 @@ def move(cli, player, x, y, z=16.0, settle=0.6):
     time.sleep(settle)
 
 
-def press_b(cli):
-    cli.inject_input("joystick1_raw_justpressed", BUTTON_B, duration_frames=1)
+def press_a(cli):
+    cli.inject_input("joystick1_raw_justpressed", BUTTON_A, duration_frames=1)
     time.sleep(0.12)
 
 
@@ -196,21 +196,21 @@ try:
         p = hold(cli, player, JOY_UP, lambda _x, _y: False, timeout=2.5)
         check(f"{label} blocks", p[1] is not None and p[1] < -0.25, f"x={x}: {fmt(p)}")
 
-    # ── Verification 7: B within reach toggles, 2 s travel, reversal ───────────
+    # ── Verification 7: A within reach toggles, 2 s travel, reversal ───────────
     move(cli, player, 4.40, -3.20)
-    press_b(cli)
+    press_a(cli)
     time.sleep(0.25)
     check("press in the project room ignored", abs(value(cli, 1, MB_TARGET) or 0) < 1e-3,
           f"target={value(cli, 1, MB_TARGET)} reach={value(cli, 1, MB_REACH)}")
     move(cli, player, 4.10, -1.50, z=15.9)
-    press_b(cli)
+    press_a(cli)
     time.sleep(0.25)
     check("press on the balcony beyond reach ignored (y −1.50 < −1.00)", abs(value(cli, 1, MB_TARGET) or 0) < 1e-3,
           f"target={value(cli, 1, MB_TARGET)} reach={value(cli, 1, MB_REACH)}")
 
     move(cli, player, 4.10, -0.60, z=15.9)
     t0 = time.time()
-    press_b(cli)
+    press_a(cli)
     tgt = wait_value(cli, 1, MB_TARGET, lambda v: v > 0.5, timeout=1.0)
     lt0 = value(cli, 1, TIME)
     mid = wait_value(cli, 1, MB_CLOSEDNESS, lambda v: 0.2 <= v <= 0.8, timeout=3.0)
@@ -229,16 +229,16 @@ try:
     check("slats and bar land on their baked positions", s1 is not None and abs(s1 - UNIT_Z) < 2e-3
           and b1 is not None and abs(b1 - UNIT_Z) < 2e-3, f"slat0.z={s1} bar.z={b1} (want {UNIT_Z})")
 
-    press_b(cli)
+    press_a(cli)
     before = wait_value(cli, 1, MB_CLOSEDNESS, lambda v: 0.35 < v < 0.75, timeout=3.0)
-    press_b(cli)
+    press_a(cli)
     after = value(cli, 1, MB_CLOSEDNESS)
     final = wait_value(cli, 1, MB_CLOSEDNESS, lambda v: v > 0.995, timeout=4.0)
     check("mid-travel press reverses without a snap",
           before is not None and after is not None and abs(after - before) < 0.15 and final is not None and final > 0.995,
           f"before={before} after={after} final={final}")
 
-    cli.inject_input("joystick1_raw_justpressed", BUTTON_B, duration_frames=30)
+    cli.inject_input("joystick1_raw_justpressed", BUTTON_A, duration_frames=30)
     time.sleep(1.0)
     held_target = value(cli, 1, MB_TARGET)
     cli.inject_input("joystick1_raw_justpressed", 0, duration_frames=1)
@@ -249,7 +249,7 @@ try:
     check("reopens and parks the slats again", opened is not None and opened < 0.005
           and s2 is not None and abs(s2 - (UNIT_Z + PARK0)) < 2e-3, f"closedness={opened} slat0.z={s2}")
 
-    # ── One B press, one thing: the shade's and the doors' reach bands are disjoint ──
+    # ── One A press, one thing: the shade's and the doors' reach bands are disjoint ──
     def both():
         return (value(cli, 1, MB_TARGET), value(cli, 1, MB_DOOR_TARGET))
     for doors_state in ("open", "closed"):
@@ -260,31 +260,31 @@ try:
                                      ("between the bands (4.10, −1.02)", (4.10, -1.02), "nothing")):
             move(cli, player, x, y, z=15.9)
             before = both()
-            press_b(cli)
+            press_a(cli)
             time.sleep(0.3)
             after = both()
             flipped = {"shade": before[0] != after[0], "doors": before[1] != after[1]}
             want = {"shade": moves == "shade", "doors": moves == "doors"}
-            check(f"doors {doors_state}: B at {label} moves {moves} only", flipped == want,
+            check(f"doors {doors_state}: A at {label} moves {moves} only", flipped == want,
                   f"shade target {before[0]}→{after[0]}, door target {before[1]}→{after[1]}")
             if moves != "nothing":           # put it back and let it settle
-                press_b(cli)
+                press_a(cli)
                 mb = MB_CLOSEDNESS if moves == "shade" else MB_DOOR_CLOSEDNESS
                 tgt = value(cli, 1, MB_TARGET if moves == "shade" else MB_DOOR_TARGET)
                 wait_value(cli, 1, mb, lambda v: abs(v - (tgt or 0)) < 0.005, timeout=6.0)
         if doors_state == "open":            # close the glass doors for the second round
             move(cli, player, 7.25, -1.35, z=15.9)
-            press_b(cli)
+            press_a(cli)
             wait_value(cli, 1, MB_DOOR_CLOSEDNESS, lambda v: v > 0.995, timeout=6.0)
     move(cli, player, 7.25, -1.35, z=15.9)
-    press_b(cli)                             # leave the doors open again
+    press_a(cli)                             # leave the doors open again
     wait_value(cli, 1, MB_DOOR_CLOSEDNESS, lambda v: v < 0.005, timeout=6.0)
 
     # ── Verification 6: no automatic camera cut on the patio or at the master window ──
     for state, want in (("open", 0.0), ("closed", 1.0)):
         if abs((value(cli, 1, MB_TARGET) or 0) - want) > 0.5:
             move(cli, player, 4.10, -0.60, z=15.9)
-            press_b(cli)
+            press_a(cli)
             wait_value(cli, 1, MB_CLOSEDNESS, lambda v: abs(v - want) < 0.005, timeout=4.0)
         for label, (x, y) in (("patio zone entry", (4.10, -1.50)), ("patio", (4.10, -0.60))):
             move(cli, player, x, y, z=15.9, settle=0.0)

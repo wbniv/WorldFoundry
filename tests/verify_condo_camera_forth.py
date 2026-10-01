@@ -60,6 +60,12 @@ int main(int argc,char**argv){
  mb[115]=0;tick(.02,16);check(mb[115]>.097f && isfinite(mb[132]),"low authored angle safely enters manual mode");
  for(int i=0;i<10000;i++)tick(.02,8|8192);
  check(mb[114]>=0 && mb[114]<1 && isfinite(mb[132]),"long orbit stays finite and wraps");
+ /* A (bit 0) toggles the glass doors / balcony shade through the 119 pulse; B (bit 1) no longer does. */
+ eval("cc-reset");tick(.02,0);tick(.02,1);check(mb[119]==1,"A press pulses the door/shade mailbox 119");
+ tick(.02,1);check(mb[119]==0,"a held A pulses once");
+ tick(.02,0);tick(.02,2);check(mb[119]==0,"B no longer pulses 119");
+ tick(.02,0);tick(.02,8|1);check(mb[119]==0,"D+A (view reset) does not toggle doors");
+ tick(.02,0);tick(.02,1);check(((int)mb[118]&1)==0,"A is not forwarded to the player as a jump");
  return 0;
 }
 '''

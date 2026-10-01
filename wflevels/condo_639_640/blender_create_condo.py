@@ -1166,7 +1166,7 @@ else:
 # silently turn the glass into a pass-through surface. One is fixed in
 # the gather bay; the other two physically slide along X between the gather bay
 # and their closed bays. Forth checks reach against each moving glass panel
-# from either side. Pressing B (keyboard 2) within reach toggles the target;
+# from either side. Pressing A (Space / keyboard 1) within reach toggles the target;
 # merely approaching or leaving does nothing. The Director integrates a continuous 0..1
 # closedness mailbox toward that target and writes the panels'
 # `INDEXOF_X_POS` mailboxes. A second press in flight reverses smoothly.
@@ -1353,10 +1353,11 @@ if CONDO_DOORS:
 
     # Director clause, per tick:
     #   1. Forth updates mailbox 92 from proximity to the current panel bounds.
-    #      While in reach, a fresh B press toggles target mailbox 93.
+    #      While in reach, a fresh A press toggles target mailbox 93.
     #      Mailbox 91 latches that press until the just-pressed bit clears, preventing
     #      a long/synthetic input pulse from toggling on consecutive Director ticks.
-    #      B / keyboard 2 is deliberately separate from A / Space, the player's jump.
+    #      A / Space toggles (the controller no longer forwards A to the player as a jump, so the
+    #      condo has no hop); B is unused outside the touch profile and D+B+up/down zoom.
     #   2. Mailbox 94 is the current closedness. Integrating DELTA_TIME / 2 s toward
     #      the target gives constant-speed motion and lets a second press reverse a
     #      moving door without the deadline-based implementation's position snap.
@@ -1413,7 +1414,7 @@ if CONDO_DOORS:
           f"z 0.00…{WALL_H:.2f} at y {DOOR_Y:.2f}, tracks {DOOR_TRACK_D:.2f} m apart; "
           f"panel 0 has 33 cm black pull handles on both faces and keyed lock below; "
           f"interaction reach {DOOR_REACH:.2f} m from any panel, either side; "
-          f"B/keyboard-2 toggles while in mailbox zone {MB_DOOR_REACH}; "
+          f"A/Space toggles while in mailbox zone {MB_DOOR_REACH}; "
           f"mailboxes press-latch {MB_DOOR_PRESS_LATCH}, target {MB_DOOR_TARGET}, "
           f"closedness {MB_DOOR_CLOSEDNESS}")
 else:
@@ -1501,9 +1502,9 @@ SLAT_OVERLAP   = 0.002    # each slat runs this far past its nominal top and bot
 SOLAR_STRIP_L  = 1.00     # placeholder strip length, centred on the cassette's west face
 SOLAR_STRIP_H  = 0.06
 SHADE_TRAVEL_S = 2.0      # seconds for a full roll, like the doors
-SHADE_REACH    = 0.90     # B works within this far of the pony wall's inner face (and the opening's ends):
+SHADE_REACH    = 0.90     # A works within this far of the pony wall's inner face (and the opening's ends):
                           # player y ≥ −1.00. The § 7c door reach ends at y −1.04 (0.85 from the patio-side
-                          # track), so one B press can never reach both — asserted below.
+                          # track), so one A press can never reach both — asserted below.
 # Wall switch (Will, 2026-09-30): a visual cue on the south jamb's inner face beside the opening,
 # styled after the project-room door's former switch (dark plate, orange rocker; Mass 0). It sits
 # inside the reach band; the reach itself stays the Forth proximity test, like the doors'.
@@ -1917,7 +1918,7 @@ if CONDO_SHADE:
     assert abs(BAR_BOT + shade_park[-1] - (CASS_BOT + SLAT_PARK_EPS)) < 1e-9
 
     if CONDO_DOORS:
-        # One B press must never toggle both the doors and the shade: their reach bands
+        # One A press must never toggle both the doors and the shade: their reach bands
         # are disjoint in y (doors: |y − track| ≤ DOOR_REACH + GLASS_T/2 about y ≈ −2).
         _door_reach_ymax = DOOR_Y + (DOOR_PANELS - 1) / 2 * DOOR_TRACK_D + DOOR_REACH + GLASS_T / 2
         assert PONY_Y0 - SHADE_REACH > _door_reach_ymax, (PONY_Y0 - SHADE_REACH, _door_reach_ymax)
@@ -1969,7 +1970,7 @@ if CONDO_SHADE:
           f"to z {WALL_H:.2f}); north jamb x {OPEN_X1:.2f}…{POST_X0:.2f}; cassette {CASS_D * 100:.0f}×{CASS_H * 100:.0f} cm "
           f"(solar strip {SOLAR_STRIP_L:.2f} m on its west face); 2 guides; {SLAT_N} slats × {SLAT_H * 100:.2f} cm + bar, "
           f"all stowed in the cassette when raised; "
-          f"{SHADE_TRAVEL_S:.1f} s travel; B/keyboard-2 within {SHADE_REACH:.2f} m (player y ≥ {PONY_Y0 - SHADE_REACH:.2f}"
+          f"{SHADE_TRAVEL_S:.1f} s travel; A/Space within {SHADE_REACH:.2f} m (player y ≥ {PONY_Y0 - SHADE_REACH:.2f}"
           + (f"; door reach ends at y {_door_reach_ymax:.2f}" if CONDO_DOORS else "") +
           f"); wall switch on the south jamb at y {SWITCH_Y:.2f}, z {_sw_z:.2f}; mailboxes init {MB_SHADE_INIT}, "
           f"press-latch {MB_SHADE_PRESS_LATCH}, reach {MB_SHADE_REACH}, target {MB_SHADE_TARGET}, "

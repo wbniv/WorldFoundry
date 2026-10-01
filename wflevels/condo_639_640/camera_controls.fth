@@ -65,8 +65,9 @@
     then
   else
     0 125 write-mailbox
-    JOYSTICK_BUTTON_B cc-key JOYSTICK_BUTTON_B cc-was 0 = &
-    INDEXOF_HARDWARE_JOYSTICK1_RAW_JUSTPRESSED read-mailbox JOYSTICK_BUTTON_B & 0 <> | if
+    \ A (not B) toggles the glass doors and the balcony shade; D+A is the view reset above.
+    JOYSTICK_BUTTON_A cc-key JOYSTICK_BUTTON_A cc-was 0 = &
+    INDEXOF_HARDWARE_JOYSTICK1_RAW_JUSTPRESSED read-mailbox JOYSTICK_BUTTON_A & 0 <> | if
       1 119 write-mailbox then
   then
   125 read-mailbox 0 = if
@@ -114,8 +115,7 @@
   cc-touch if cc-touch-input else cc-desktop-input then
   cc-adjust cc-pose
   111 read-mailbox 30720 & 118 write-mailbox
-  cc-touch 0 = 135 read-mailbox 0 = & if
-    118 read-mailbox JOYSTICK_BUTTON_A cc-key if 1 else 0 then | 118 write-mailbox then
+  \ A is no longer forwarded to the player as a jump: it toggles doors / shade (119 above).
   135 read-mailbox 0 <> if 0 118 write-mailbox cc-stop then
   111 read-mailbox 121 write-mailbox ;
 

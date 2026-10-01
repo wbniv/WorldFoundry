@@ -85,6 +85,17 @@ The mapping lives in an anonymous namespace in an NDK-only file, so it cannot be
    **PASS** (the user's report, not a logged event; the first press in the aquarium and condo apps was not tried, and the condo's A may do nothing).
 5. The D-pad and gamepad keys are untouched. Re-run the existing `--poke` (D-pad RIGHT, then UP). Expected: the fish still moves.
 
+## Follow-up: in the condo, A (the remote's OK) toggles the glass doors and the balcony shade
+
+Decided 2026‑10‑01 (the user: "there's no hopping in the condo, button A should toggle the glass doors and the balcony shade instead of button B").
+The remote has only OK, which is now A, so the condo's door and shade control moved from B to A.
+
+- `wflevels/condo_639_640/camera_controls.fth`: in `cc-desktop-input` the door/shade pulse (mailbox 119) now fires on A, not B; D+A stays the view reset (the pulse is only in the D-not-held branch).
+  A is no longer forwarded to the player's locomotion input (mailbox 118), which was the "small hop" (`Jumping Acceleration` 5.0); otherwise every toggle would also jump. B does nothing on its own now.
+- Unchanged on purpose: the touch profile (A cycles Walk/Look/Zoom there, so tap B still toggles), and the tour-recording variant, which reads raw B.
+- Guard: `tests/verify_condo_camera_forth.py` has five new checks (A pulses 119; a held A pulses once; B does not; D+A does not; A is not forwarded as a jump), which fail on the old controller. The in-engine `verify_condo_door_button.py` and `verify_condo_balcony_shade.py` now inject A and were **not run** (they need the desktop engine and debug bridge).
+- Rebuilt: `task condo-level` (Blender; the `.lev` differs in the one script line), `task build-cd-iff-condo`, the condo release APK; installed on the Chromecast HD. **On-device check (A toggles, B does not): PENDING, the user's test.**
+
 ## Rank (recommendation)
 
 | Work | Tier | Why |
