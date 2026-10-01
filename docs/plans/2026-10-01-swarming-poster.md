@@ -6,6 +6,7 @@ Status: **built and verified** (2026‑10‑01); the numbers on it are measured,
 - [x] Phase B: the Forth core, `wflevels/aquarium/school.fth`, tested against the reference in the engine's own zForth
 - [x] Phase C: the zone-width sweep, the tank runs, the size, error and timing measurements
 - [x] Phase D: the poster (data sheet with chips, generator, A3 PDF/PNG), tests, Taskfile tasks
+- [x] Phase E step 1 (**the Forth timed inside the engine, on the Chromecast: done 2026‑10‑01, and it found an engine bug, below**)
 - [ ] Phase E (**the point of all of this**): wire `school.fth` into the aquarium level: ten more fish that school and swarm round the player's fish. The work is the [schooling plan](2026-10-01-aquarium-schooling.md)'s Phases 0 to 4; phases A to D above are the evidence and the tested core it is built on. In order: time the core inside the engine (Phase 0), make the fish rig per-fish and add the ten fish (Phase 1, which also settles the follower-rig mailboxes), connect the player's fish as the leader and the mode switch (Phase 2), tune the leader weight (Phase 2), then polish, tests and the Chromecast (Phases 3 and 4)
 
 ## Request
@@ -121,6 +122,20 @@ flowchart LR
 
 **Open:** the ten followers need their own copy of the rig's 39 mailboxes (600 to 638 are one fish's). Either the rig takes a base address (a change in `clownfish_idle.fth`) or the followers get a smaller rig. This is not built and not measured, and the cost of the extra mailbox traffic is part of the in-engine timing (Phase 0 of the schooling plan).
 
+## Phase E step 1: the Forth inside the engine, on the Chromecast
+
+A bench level (the level builder with `AQUARIUM_SCHOOL_BENCH=1`; git-ignored, `wflevels/aquarium_bench`) has the Director also run `school.fth` for 11 fish every tick. An opt-in `--script-profile` flag (engine, off by default) prints, every 5 s, the time each actor's script takes and the mean cost of a mailbox call. Built as a release APK in a throwaway worktree (armeabi‑v7a only) and run on the real Chromecast HD:
+
+| Build | Director script per tick | Mailbox call | Frames |
+|---|---|---|---|
+| bench, engine as it was | **39 to 43 ms** | **4.2 µs** | **20 fps** (median 50 ms) |
+| bench, after the fix below | **11.3 ms** (worst 20 ms) | **0.28 µs** (includes the profiler's own timer) | **59.9 fps**, p90 33.4 ms |
+| standalone interpreter, no engine (above) | 7.0 ms | a plain array | n/a |
+
+**The engine bug.** One step makes about 7,750 mailbox calls (counted: 6,046 reads, 1,708 writes). At 4.2 µs each that is 34 ms of the 39. The cause: three debug-stream statements in the mailbox read path, `cmailbox << … << std::endl` in `LevelMailboxes::ReadMailbox`, `GameMailboxes::ReadMailbox` (`wfsource/source/game/mailbox.cc`) and `WorldFoundryMailboxesManager::LookupMailboxes` (`level.cc`), were at level `DBSTREAM1`, and the CMake build defines `SW_DBSTREAM=1` for **every** configuration, Android release included. `dbstrm.hp` itself says DBSTREAM1 is "nothing in the game loop (startup and shutdown only)". Moving the three to `DBSTREAM5` compiles them out. It speeds up every script on every platform, not only this one. Regression guard: [`tests/test_mailbox_hot_path.py`](../../tests/test_mailbox_hot_path.py) fails if a streaming macro below level 5 returns to a mailbox read or write function.
+
+**What it leaves.** 11.3 ms of Director is still a lot of a 16.7 ms frame: the worst frames reach 33 ms. The plan's own answer applies: update **two followers a frame** (about 1.4 ms) instead of all ten in one frame. That is the next piece (Phase 1 to 2), and the in-engine number to beat.
+
 ## What the research and the measurements found
 
 Everything on the poster has a chip: **verified** (the source was opened and the number is on its page), **unverified** (a summary, or not opened), **ours** (our maths or measurement).
@@ -184,7 +199,7 @@ The steps are the spec; each shows its raw output.
     6.9800 ms
     ```
 
-    **PASS** for "the interpreter runs the core at about 7 ms for 11 fish". **Not verified: inside the engine** (Phase E, step 1).
+    **PASS** for "the interpreter runs the core at about 7 ms for 11 fish". Inside the engine, see the section above (Phase E step 1): 11.3 ms after the engine fix.
 
 4. The Forth in the tank's real box (mean of 3 seeds; `align` is the alignment of the followers' heading with the leader's).
 

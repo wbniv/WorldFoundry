@@ -318,7 +318,7 @@ WorldFoundryMailboxesManager::~WorldFoundryMailboxesManager()
 Mailboxes& 
 WorldFoundryMailboxesManager::LookupMailboxes(int objectIndex)
 {
-    DBSTREAM1(cmailbox << "wfmbm: index = " << objectIndex << std::endl; )
+    DBSTREAM5(cmailbox << "wfmbm: index = " << objectIndex << std::endl; )
     if(objectIndex)
     {
         BaseObject* obj = _objects[objectIndex];

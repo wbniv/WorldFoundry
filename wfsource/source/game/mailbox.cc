@@ -45,7 +45,7 @@ _level(level)
 Scalar
 LevelMailboxes::ReadMailbox(int32 mailbox) const
 {
-   DBSTREAM1(cmailbox << "LevelMailboxes::ReadMailbox: mailbox = " << mailbox << std::endl; )
+   DBSTREAM5(cmailbox << "LevelMailboxes::ReadMailbox: mailbox = " << mailbox << std::endl; )
 
    if(mailbox >= EMAILBOX_GLOBAL_SYSTEM_START && mailbox < EMAILBOX_GLOBAL_SYSTEM_MAX)
        return _level.ReadSystemMailbox(mailbox);
@@ -85,7 +85,7 @@ _game(game)
 Scalar
 GameMailboxes::ReadMailbox(int32 mailbox) const
 {
-   DBSTREAM1(cmailbox << "GameMailboxes::ReadMailbox: mailbox = " << mailbox << std::endl; )
+   DBSTREAM5(cmailbox << "GameMailboxes::ReadMailbox: mailbox = " << mailbox << std::endl; )
 
    if(mailbox >= EMAILBOX_PERSISTENT_SYSTEM_START && mailbox < EMAILBOX_PERSISTENT_SYSTEM_MAX)
        return _game.ReadSystemMailbox(mailbox);

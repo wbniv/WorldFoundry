@@ -9,6 +9,7 @@
  *   R <idx> [<count>]  print <count> mailboxes (default 1), space separated
  *   F <path>           evaluate a file line by line (stops at the first error); prints "ok" or "err <name> line <n>"
  *   S                  print the dictionary size used (zf_uservar HERE) so a script's footprint can be read
+ *   N                  print and reset the mailbox read and write counts (how many bridge calls a script makes)
  *   T <n> <forth>      evaluate <forth> n times and print the mean milliseconds per evaluation (for timing on a device, with no pipe in the way)
  */
 #include <stdio.h>
@@ -20,13 +21,14 @@
 
 #define NMAIL 8192
 static float g_mail[NMAIL];
+static long g_reads, g_writes;           /* mailbox calls, reported by N */
 
 zf_input_state zf_host_sys(zf_ctx *ctx, zf_syscall_id id, const char *last_word)
 {
     (void)last_word;
     switch ((int)id) {
-    case 128: { int i = (int)zf_pop(ctx); zf_push(ctx, (zf_cell)((i >= 0 && i < NMAIL) ? g_mail[i] : 0.0f)); break; }
-    case 129: { int i = (int)zf_pop(ctx); float v = (float)zf_pop(ctx); if (i >= 0 && i < NMAIL) g_mail[i] = v; break; }
+    case 128: { g_reads++; int i = (int)zf_pop(ctx); zf_push(ctx, (zf_cell)((i >= 0 && i < NMAIL) ? g_mail[i] : 0.0f)); break; }
+    case 129: { g_writes++; int i = (int)zf_pop(ctx); float v = (float)zf_pop(ctx); if (i >= 0 && i < NMAIL) g_mail[i] = v; break; }
     case ZF_SYSCALL_PRINT: { zf_cell v = zf_pop(ctx); printf(ZF_CELL_FMT " ", v); break; }
     case ZF_SYSCALL_EMIT: { putchar((char)zf_pop(ctx)); break; }
     default: break;
@@ -92,6 +94,7 @@ int main(int argc, char **argv)
             break;
         }
         case 'S': { zf_cell h = 0; zf_uservar_get(&ctx, ZF_USERVAR_HERE, &h); printf("%d\n", (int)h); break; }
+        case 'N': { printf("%ld reads %ld writes\n", g_reads, g_writes); g_reads = g_writes = 0; break; }
         case 'T': {
             int reps = atoi(arg); char *src = arg; while (*src && *src != ' ') src++;
             struct timespec a, b; clock_gettime(CLOCK_MONOTONIC, &a);

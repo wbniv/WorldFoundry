@@ -1,11 +1,17 @@
 | Date | Change |
 |------|--------|
+| [2026-10-01](https://github.com/wbniv/WorldFoundry/commit/aa821f80) | school.fth: every mailbox slot has a name (MB_X, MB_VX, MB_DRO ...), long lines split into short helper words; the poster shows the named code in four columns |
 | [2026-10-01](https://github.com/wbniv/WorldFoundry/commit/f8dcca75) | Swarming poster: the Forth section is one column per rule word (width in proportion to its text), with its size and a one-line note; sources compacted so the page still fits |
 | [2026-10-01](https://github.com/wbniv/WorldFoundry/commit/603e2e56) | Swarming plan: wiring school.fth into the level is Phase E, the point of the work, not out of scope |
 | [2026-10-01](https://github.com/wbniv/WorldFoundry/commit/61f6a8bd) | Swarming plan: a mailbox map drawn from a real run (800..1009 for school.fth), the layout the tests now use, and the open follower-rig item |
 | [2026-10-01](https://github.com/wbniv/WorldFoundry/commit/2460bd2a) | Swarming: the Couzin zone model as a Forth core (school.fth, 2179 B, 6.2 ms/11 fish on the Chromecast), tested against numpy, and an A3 poster |
 
 <!--history-meta v1
+aa821f80	author	Will Norris
+aa821f80	added	14
+aa821f80	deleted	12
+aa821f80	files	1
+aa821f80	body	2,936 B and 7.0 ms a step on the Chromecast (was 2,179 B and 6.2 ms): each name is a word call. Still equal to the numpy reference to 1e-03.\n\nCo-Authored-By: Claude Sonnet 5.5 <noreply@anthropic.com>\nClaude-Session: https://claude.ai/code/session_01NNPhRbrqjqMDkScPvTE9yC
 f8dcca75	author	Will Norris
 f8dcca75	added	1
 f8dcca75	deleted	1

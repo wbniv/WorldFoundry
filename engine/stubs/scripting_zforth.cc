@@ -54,6 +54,7 @@ extern "C" {
 #include <sys/stat.h>
 #include <cmath>      // atan2/cos/sin/sqrt for the FSN connector orientation
 #include <ctime>      // time() for FSN file color-by-age
+#include <chrono>     // the opt-in script profiler (--script-profile)
 
 #include "level.hp"   // theLevel global (extern Level* theLevel); pulls in Actor/PhysicalAttributes
 #include <math/euler.hp>     // Euler — connector orientation
@@ -65,6 +66,36 @@ extern "C" {
 static zf_ctx              g_ctx;
 static MailboxesManager*   g_mgr     = nullptr;
 static int                 g_curObj  = 0;
+
+// ---- Opt-in script profiler -------------------------------------------------
+// `--script-profile` (or WF_SCRIPT_PROFILE=1) times every RunScript call per actor and prints, every
+// 5 s, the five actors that took the most time: calls, mean and worst milliseconds per call. Off by
+// default: one untaken branch per script call. Used to cost a level's Forth on the real device
+// (docs/plans/2026-10-01-swarming-poster.md, Phase E step 1). Plain C++11, so it builds everywhere.
+static bool g_profOn = false;
+struct ProfAcc { double totalMs = 0, maxMs = 0; long calls = 0; };
+static std::unordered_map<int, ProfAcc> g_profAcc;
+static std::chrono::steady_clock::time_point g_profLast;
+static long   g_profMbCalls = 0;         // read-mailbox / write-mailbox calls, and the time spent inside them
+static double g_profMbMs    = 0;
+extern "C" void WFScriptProfileEnable() { g_profOn = true; g_profLast = std::chrono::steady_clock::now(); }
+static void ProfNote(int actor, double ms)
+{
+    ProfAcc& a = g_profAcc[actor];
+    a.totalMs += ms; a.calls++; if (ms > a.maxMs) a.maxMs = ms;
+    const auto now = std::chrono::steady_clock::now();
+    if (std::chrono::duration<double>(now - g_profLast).count() < 5.0) return;
+    std::vector<std::pair<int, ProfAcc>> v(g_profAcc.begin(), g_profAcc.end());
+    std::sort(v.begin(), v.end(), [](const std::pair<int, ProfAcc>& x, const std::pair<int, ProfAcc>& y) { return x.second.totalMs > y.second.totalMs; });
+    for (size_t i = 0; i < v.size() && i < 5; ++i)
+        fprintf(stderr, "script-profile: actor %d: %ld calls, mean %.3f ms, worst %.3f ms\n", v[i].first, v[i].second.calls,
+                v[i].second.totalMs / (double)v[i].second.calls, v[i].second.maxMs);
+    if (g_profMbCalls)
+        fprintf(stderr, "script-profile: mailbox bridge: %ld calls, mean %.3f us each (%.3f ms in 5 s)\n", g_profMbCalls,
+                g_profMbMs * 1000.0 / (double)g_profMbCalls, g_profMbMs);
+    g_profMbCalls = 0; g_profMbMs = 0;
+    g_profAcc.clear(); g_profLast = now;
+}
 
 // FSN filesystem syscalls (custom 3-7 / sys 131-135)
 struct CwdEntry { std::string name; bool is_dir; int64_t size; };
@@ -938,6 +969,7 @@ zf_input_state zf_host_sys(zf_ctx* ctx, zf_syscall_id id, const char* /*last_wor
             int custom = (int)id - (int)ZF_SYSCALL_USER;
             if (custom == 0) {
                 // read-mailbox ( idx -- val )
+                const auto t0 = g_profOn ? std::chrono::steady_clock::now() : std::chrono::steady_clock::time_point();
                 int idx = (int)zf_pop(ctx);
                 if (g_mgr) {
                     Mailboxes& mb = g_mgr->LookupMailboxes(g_curObj);
@@ -946,14 +978,17 @@ zf_input_state zf_host_sys(zf_ctx* ctx, zf_syscall_id id, const char* /*last_wor
                 } else {
                     zf_push(ctx, (zf_cell)0.0f);
                 }
+                if (g_profOn) { g_profMbCalls++; g_profMbMs += std::chrono::duration<double, std::milli>(std::chrono::steady_clock::now() - t0).count(); }
             } else if (custom == 1) {
                 // write-mailbox ( val idx -- )
+                const auto t0 = g_profOn ? std::chrono::steady_clock::now() : std::chrono::steady_clock::time_point();
                 int   idx = (int)zf_pop(ctx);
                 float val = (float)zf_pop(ctx);
                 if (g_mgr) {
                     Mailboxes& mb = g_mgr->LookupMailboxes(g_curObj);
                     mb.WriteMailbox(idx, Scalar::FromFloat(val));
                 }
+                if (g_profOn) { g_profMbCalls++; g_profMbMs += std::chrono::duration<double, std::milli>(std::chrono::steady_clock::now() - t0).count(); }
             } else if (custom == 2) {
                 // write-actor-mailbox ( val idx actor_idx -- )
                 // Writes mailbox `idx` on the actor identified by `actor_idx`,
@@ -1367,6 +1402,7 @@ void Init(MailboxesManager& mgr)
 {
     g_mgr    = &mgr;
     g_curObj = 0;
+    if (getenv("WF_SCRIPT_PROFILE")) WFScriptProfileEnable();
 
     zf_init(&g_ctx, 0 /* no trace */);
     zf_bootstrap(&g_ctx);
@@ -1644,7 +1680,10 @@ float RunScript(const char* src, int objectIndex)
         it = g_scriptCache.find(src);
     }
 
+    const auto profT0 = g_profOn ? std::chrono::steady_clock::now() : std::chrono::steady_clock::time_point();
     zf_result r = zf_eval(&g_ctx, it->second.c_str());
+    if (g_profOn)
+        ProfNote(objectIndex, std::chrono::duration<double, std::milli>(std::chrono::steady_clock::now() - profT0).count());
     if (r != ZF_OK) {
         fprintf(stderr, "zforth error %d calling %s\n", r, it->second.c_str());
         return 0.0f;

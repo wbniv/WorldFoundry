@@ -51,6 +51,8 @@ wflevels/*/*.lev.bin
 # aquarium touch profile (task aquarium-touch-level): regenerable; its directory ignores itself
 wflevels/aquarium_touch.iff
 wflevels/aquarium_touch-standalone.iff
+wflevels/aquarium_bench.iff
+wflevels/aquarium_bench-standalone.iff
 
 # pytest debug-bridge harness artifacts
 tests/.wf_game.log

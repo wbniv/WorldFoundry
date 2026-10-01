@@ -50,6 +50,7 @@
 
 int  gDebugPort = 7777;                 // default-on; --debug-port N overrides, --debug-port 0 disables
 char gDebugBind[256] = "127.0.0.1";    // bind address; set by --debug-bind ADDR
+extern "C" void WFScriptProfileEnable() __attribute__((weak));   // engine/stubs/scripting_zforth.cc; absent (null) in builds with another Forth or none
 int  gFrameStepSmokeCount = 0;          // >0 = run --frame-step-smoke=N path
 bool gWfmutSmoke          = false;      // true = run --wfmut-smoke path
 bool gMemoryTest          = false;      // true = run --memory-test and exit (no level, no window)
@@ -255,6 +256,11 @@ ParseCommandLine(int argc, char** argv)
 			gDebugBind[sizeof(gDebugBind)-1] = '\0';
 			++index;
 			DBSTREAM1( cprogress << "Debug bridge bind: " << gDebugBind << std::endl; )
+		}
+		else if ( strcmp( argv[index]+1, "-script-profile" ) == 0 )
+		{
+			if ( WFScriptProfileEnable ) WFScriptProfileEnable();
+			DBSTREAM1( cprogress << "Script profiler on" << std::endl; )
 		}
 		else if ( strncmp( argv[index]+1, "-frame-step-smoke=", 18 ) == 0 )
 		{
