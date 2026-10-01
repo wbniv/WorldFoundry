@@ -9,7 +9,7 @@
 - [wip T2] **iOS Phase 3+.** <!-- agent:a13fd904ea2308381 --> No matching phase-numbered iOS plan found (`docs/plans/2026-04-16-ios-port.md` has no "Phase 3"); needs scoping before dispatch. The Android launcher polish half of this line is done — see `## Done`.
 - [T3] **Android size trim iter 2 — miniaudio Vorbis trim + Windows-path deletion** (the `-fno-exceptions` / `-fvisibility=hidden` halves already shipped). [plan](docs/plans/2026-04-18-android-size-trim-iter-2.md)
 - [T3] **Audio assets from IFF** — bundle MIDI/SF2/WAV inside `cd.iff`; retire loose-file audio loaders. [plan](docs/plans/2026-04-18-audio-assets-from-iff.md)
-- [ ] **Chromecast remote: OK button → button 1 / A** — `MapKeyCode` has no `AKEYCODE_DPAD_CENTER`, so the remote's OK is dropped; map it to `EJ_BUTTONF_A`. [plan](docs/plans/2026-10-01-chromecast-ok-button.md)
+- [T4] **Phone as a gamepad for the Chromecast apps** — a web controller the TV app serves over the local Wi‑Fi (stick, buttons, tilt, haptics); the only way to reach the condo's teleport (C), orbit (D) and zoom (E/F) without a paired gamepad, since the remote has just the D-pad and OK. Designed with mockups, not started. T4: a first network surface plus the engine input merge, where a wrong turn is a security or stuck-button bug. [plan](docs/plans/2026-09-30-aquarium-chromecast.md) (Phase E)
 - [ ] **Split the multi-level `cd.iff` into one app per game** — the `snowgoons` flavor bundles `wfsource/source/game/cd.iff` (several levels); the aquarium and condo already ship one-level `cd.iff` files as separate apps. [plan](docs/plans/2026-10-01-android-icons.md#related-todo-items-asked-for-in-the-same-message)
 - [ ] **Implement a menu selector for the multi-level `cd.iff`** — pick a level at launch instead of booting level 0, as the alternative (or addition) to separate apps. [plan](docs/plans/2026-10-01-android-icons.md#related-todo-items-asked-for-in-the-same-message)
 - [T3] **Steam Phases 3+4** — SteamPipe depot + build script; store page on Steamworks. [plan](docs/plans/2026-04-17-steam.md)
@@ -140,6 +140,8 @@
 - Up-hop vs down-hop arc asymmetry — climbing leaps heavier, falling snappier; a qbert 3D-only embellishment. Hold until the arcade copy is complete.
 - Concurrency (the 1994 cooperative tasker is deleted) — if a use case arises, explore `std::thread` + work queue (background loading), C++20 coroutines (scripted AI), or a fiber library (closest to the original stackful model).
 - Foundry Linux Phase 0 — split `install.sh` into per-metapackage scripts. (Lives in the sibling `linuxfoundry.org` repo, out of this tree.) [plan](docs/plans/2026-05-17-per-metapackage-install-scripts.md)
+- Chromecast remote: map more keys (Back, Menu, long-press OK) to B/C/D. A (OK) already does the condo's doors and shade; teleport, orbit and zoom wait for the phone gamepad (Open). Revisit only if that slips. [plan](docs/plans/2026-10-01-chromecast-ok-button.md)
+- Android: map a keyboard's Enter (`KEYCODE_ENTER` / `KEYCODE_NUMPAD_ENTER`) to button A. Not what the Chromecast remote sends; one line in `MapKeyCode` when someone plugs a keyboard in. [plan](docs/plans/2026-10-01-chromecast-ok-button.md)
 
 ### Future evaluation
 
@@ -148,6 +150,7 @@
 
 ## Done
 
+- ✅ 2026-10-01 — [chromecast-ok-button] Remote OK = button A; condo A toggles doors + shade. See [plan](docs/plans/2026-10-01-chromecast-ok-button.md).
 - ✅ 2026-09-30 — [clownfish-poster] A3 biomechanics poster built (PDF, 35 tests); print unverified, S2/S9 URLs missing. See [plan](docs/plans/2026-09-30-clownfish-biomechanics-poster.md).
 
 - ✅ 2026-09-30 — [aquarium-level] Phases 0–4 merged (Plan B, ×10, steer-and-swim gait); phone run unverified. See [plan](docs/plans/2026-09-30-aquarium-level.md).
@@ -387,7 +390,6 @@ _Auto-added from plan "Out of scope"/"Deferred" sections at commit time. Triage 
 - [ ] **(triage)** The condo on a phone, iPad, iPhone or Mac (the `_touch` profile exists for phones); a separate item. — _from [2026-10-01-condo-chromecast.md](docs/plans/2026-10-01-condo-chromecast.md)_  <!-- fp:027e93b43a4db311 -->
 - [ ] **(triage)** **Fixing the condo's oversized texture.** It belongs to whoever owns the level; this plan reports the finding and checks the Android release build is not corrupted by it. — _from [2026-10-01-condo-chromecast.md](docs/plans/2026-10-01-condo-chromecast.md)_  <!-- fp:93b4ac73c4bb3f92 -->
 - [ ] **(triage)** Audio (silent stub on Android; the "Audio assets from IFF" item in `TODO.md`). — _from [2026-10-01-condo-chromecast.md](docs/plans/2026-10-01-condo-chromecast.md)_  <!-- fp:b10b3902a7a09e2d -->
-- [ ] **(triage)** Mapping remote keys to B/C/D, unless the decision in mockup 2 asks for it. — _from [2026-10-01-condo-chromecast.md](docs/plans/2026-10-01-condo-chromecast.md)_  <!-- fp:9a51dfc8f55b1684 -->
 - [ ] **(triage)** Optimising the frame rate by changing the level or the engine. — _from [2026-10-01-condo-chromecast.md](docs/plans/2026-10-01-condo-chromecast.md)_  <!-- fp:897fca84f38344bc -->
 - [ ] **(triage)** Play Store or any distribution beyond `adb` sideload. — _from [2026-10-01-condo-chromecast.md](docs/plans/2026-10-01-condo-chromecast.md)_  <!-- fp:e39824d2cde904ae -->
 - [ ] **(triage)** Audio (silent stub on Android; the "Audio assets from IFF" item in `TODO.md`). — _from [2026-09-30-aquarium-chromecast.md](docs/plans/2026-09-30-aquarium-chromecast.md)_  <!-- fp:193e0e951de7cd8d -->
