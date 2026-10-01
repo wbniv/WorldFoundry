@@ -1,7 +1,7 @@
    1.5 s to   10.5 s  REST - the fish idles, the ten swarm round it
-  10.5 s to   17.3 s  SWIM RIGHT - they school behind it
-  17.3 s to   24.3 s  REST - they gather round it again
-  24.3 s to   30.7 s  SWIM LEFT
-  30.7 s to   37.7 s  REST
-  37.7 s to   43.3 s  SWIM RIGHT, climbing
-  43.3 s to   48.3 s  REST
+  10.5 s to   17.2 s  SWIM RIGHT - they school behind it
+  17.2 s to   24.2 s  REST - they gather round it again
+  24.2 s to   30.2 s  SWIM LEFT
+  30.2 s to   37.2 s  REST
+  37.2 s to   42.9 s  SWIM RIGHT, climbing
+  42.9 s to   47.9 s  REST
