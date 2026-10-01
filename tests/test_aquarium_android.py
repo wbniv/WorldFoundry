@@ -241,7 +241,7 @@ def test_built_apks_badging():
     if not aapt:
         pytest.skip("no aapt")
     for flavor, pkg, label in (("aquarium", "org.worldfoundry.wf_game.aquarium", "WF Aquarium"),
-                               ("snowgoons", "org.worldfoundry.wf_game", "World Foundry")):
+                               ("snowgoons", "org.worldfoundry.wf_game", "Snowgoons")):
         out = subprocess.run([str(aapt), "dump", "badging", str(_apk(flavor))], capture_output=True,
                              text=True, check=True).stdout
         assert f"package: name='{pkg}'" in out

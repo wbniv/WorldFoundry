@@ -1,5 +1,6 @@
 | Date | Change |
 |------|--------|
+| [2026-10-01](https://github.com/wbniv/WorldFoundry/commit/a40da0de) | The smb app ships the world select: Android menu drawer, Back held 1 s returns to the menu |
 | [2026-10-01](https://github.com/wbniv/WorldFoundry/commit/6db30e3f) | Docs: one Android app per game (README flavor table, porting status) |
 | [2026-10-01](https://github.com/wbniv/WorldFoundry/commit/55a66fb8) | Phone controller QR: the World Foundry logo in the middle (planet by default, or the whole logo), at ECC H |
 | [2026-10-01](https://github.com/wbniv/WorldFoundry/commit/2adf90a9) | Docs: the Chromecast OK button, the condo's A for doors and shade, the phone as a gamepad, and building without sudo |
@@ -11,6 +12,11 @@
 | [2026-04-17](https://github.com/wbniv/WorldFoundry/commit/3b24f001) | feat(android): Phase 3 step 3 — Gradle project + AndroidManifest |
 
 <!--history-meta v1
+a40da0de	author	Will Norris
+a40da0de	added	1
+a40da0de	deleted	1
+a40da0de	files	1
+a40da0de	body	android/app/src/smb/assets/cd.iff now links wflevels/smb-menu-cd.iff (the four levels at\nsmb-cd.iff's TOC entries, so the flag/axe LEVEL_TO_RUN chain 1, 2, 3, 0 is unchanged, plus\nshell-menu.fth and the MENU chunk). gfx/gl/android_window.cc draws the menu's rectangles with\nthe phone panel's GLES path (HUD program, own VAO/VBO, re-uploaded on change, reset on\nEGL_CONTEXT_LOST); display.cc registers it on Android. In a menu bundle, Back held 1 s returns\nto the menu (decided from the event's down time, early on a repeat); a short Back still leaves\nthe app (ANativeActivity_finish). The menu loop waits while the app is suspended, as StepFrame\ndoes, and logs through levelmenu::Log (logcat tag wf_game on Android).\ntests/test_game_apps_android.py: the smb flavor ships the menu bundle and its levels keep the\nplain bundle's TOC entries; the built-APK check compares against the shipped bundle.\nPlan: docs/plans/2026-10-01-level-menu-selector.md (Phase D)\n\nCo-Authored-By: Claude Opus 5.5 <noreply@anthropic.com>\nClaude-Session: https://claude.ai/code/session_01DxMP4jUNjCjDz8E9DWzXcM
 6db30e3f	author	Will Norris
 6db30e3f	added	10
 6db30e3f	deleted	7

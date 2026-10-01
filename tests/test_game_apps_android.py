@@ -122,7 +122,7 @@ from test_aquarium_android import APP, DENSITIES, GRADLE, SRC  # noqa: E402
 
 # flavor -> (applicationId suffix or None for the original id, label, the assets it ships)
 FLAVORS = {
-    "snowgoons": (None, "World Foundry", ["cd.iff", "florestan-subset.sf2", "level0.mid"]),
+    "snowgoons": (None, "Snowgoons", ["cd.iff", "florestan-subset.sf2", "level0.mid"]),
     "smb": (".smb", "WF SMB", ["cd.iff"]),                 # the label is a placeholder (the plan's Decisions)
     "qbert": (".qbert", "WF Q*bert", ["cd.iff"]),          # placeholder too
 }
@@ -257,3 +257,26 @@ def test_snowgoons_banner_is_a_level_screenshot():
     assert Image.open(APP / "art-src" / src.group(2)).size == (1920, 1080)
     main = SRC / "main" / "res" / "drawable" / "tv_banner.png"
     assert Image.open(SRC / "snowgoons" / "res" / "drawable" / "tv_banner.png").size == Image.open(main).size
+
+
+def test_every_label():
+    """The user (2026-10-01): the snowgoons app is called "Snowgoons" (its id stays org.worldfoundry.wf_game); the others keep theirs."""
+    expected = {"snowgoons": "Snowgoons", "smb": "WF SMB", "qbert": "WF Q*bert", "aquarium": "WF Aquarium", "condo": "WF Condo"}
+    for flavor, label in expected.items():
+        strings = (SRC / flavor / "res" / "values" / "strings.xml").read_text()
+        assert re.search(rf'name="app_name">{re.escape(label)}<', strings), flavor
+    assert re.search(r'name="app_name">World Foundry<', (SRC / "main" / "res" / "values" / "strings.xml").read_text())
+
+
+def test_snowgoons_launcher_icons_are_its_own():
+    """Every density and both forms override main's old World Foundry mark, so no launcher icon falls back to it."""
+    from PIL import Image
+    main, sg = SRC / "main" / "res", SRC / "snowgoons" / "res"
+    for d in DENSITIES:
+        for name in ("ic_launcher.png", "ic_launcher_round.png", "ic_launcher_foreground.png"):
+            ours, theirs = sg / f"mipmap-{d}" / name, main / f"mipmap-{d}" / name
+            assert ours.exists(), ours
+            assert ours.read_bytes() != theirs.read_bytes(), ours
+            assert Image.open(ours).size == Image.open(theirs).size, ours
+    # The adaptive icon XML in main points at @mipmap/ic_launcher_foreground, which the flavor overrides above.
+    assert "@mipmap/ic_launcher_foreground" in (main / "mipmap-anydpi-v26" / "ic_launcher.xml").read_text()

@@ -31,7 +31,7 @@ copies their recipe.
 - **One app per game, three apps:** `smb` (the four W1 levels stay together: one game that chains), `snowgoons` and `qbert`.
 - **Astra Marble Madness gets no app.** It is a stated low priority (no accurate arcade conversions; archive rather than invest), so it stays only in
   the desktop `cd.iff`.
-- **`snowgoons` keeps `org.worldfoundry.wf_game`**, so existing installs upgrade in place, and keeps its label (World Foundry), `level0.mid` and soundfont.
+- **`snowgoons` keeps `org.worldfoundry.wf_game`**, so existing installs upgrade in place; its label was World Foundry and is **Snowgoons** since the user's request (2026‑10‑01 evening), and it keeps `level0.mid` and soundfont.
   It now boots snowgoons.
 - **New ids:** `org.worldfoundry.wf_game.smb` and `org.worldfoundry.wf_game.qbert`.
 - **Labels, placeholders:** "WF SMB" and "WF Q\*bert". The project does not own either name; the user picks the real ones later.
@@ -91,7 +91,7 @@ byte (as `tests/test_condo_android.py` does), so a rebuilt level with a stale bu
 
 | Flavor | applicationId | Label | `assets/` |
 |---|---|---|---|
-| `snowgoons` | `org.worldfoundry.wf_game` (unchanged) | World Foundry (unchanged) | `cd.iff` → `wflevels/snowgoons-cd.iff`; `level0.mid`, `florestan-subset.sf2` as before |
+| `snowgoons` | `org.worldfoundry.wf_game` (unchanged) | Snowgoons (was World Foundry) | `cd.iff` → `wflevels/snowgoons-cd.iff`; `level0.mid`, `florestan-subset.sf2` as before |
 | `smb` | `org.worldfoundry.wf_game.smb` | WF SMB (placeholder) | `cd.iff` → `wflevels/smb-cd.iff` |
 | `qbert` | `org.worldfoundry.wf_game.qbert` | WF Q\*bert (placeholder) | `cd.iff` → `wflevels/qbert-cd.iff` |
 
@@ -123,7 +123,7 @@ The legacy round icon is the legacy square under a circle, so it is not shown ag
 |---|---|---|---|---|---|
 | WF SMB (new) | <img src="2026-10-01-split-cd-iff-one-app-per-game/adaptive-smb.png" width="96"> | <img src="../../android/app/src/smb/res/mipmap-xxxhdpi/ic_launcher.png" width="96"> | <img src="../../android/app/src/smb/res/drawable/tv_banner.png" width="240"> | real frame (1) | name only |
 | WF Q\*bert (new) | <img src="2026-10-01-split-cd-iff-one-app-per-game/adaptive-qbert.png" width="96"> | <img src="../../android/app/src/qbert/res/mipmap-xxxhdpi/ic_launcher.png" width="96"> | <img src="../../android/app/src/qbert/res/drawable/tv_banner.png" width="240"> | real frame (2) | name only |
-| World Foundry (snowgoons) | <img src="2026-10-01-split-cd-iff-one-app-per-game/adaptive-snowgoons.png" width="96"> | <img src="../../android/app/src/snowgoons/res/mipmap-xxxhdpi/ic_launcher.png" width="96"> | <img src="../../android/app/src/snowgoons/res/drawable/tv_banner.png" width="240"> | icon: new render (3); banner: level screenshot (6) | no |
+| Snowgoons | <img src="2026-10-01-split-cd-iff-one-app-per-game/adaptive-snowgoons.png" width="96"> | <img src="../../android/app/src/snowgoons/res/mipmap-xxxhdpi/ic_launcher.png" width="96"> | <img src="../../android/app/src/snowgoons/res/drawable/tv_banner.png" width="240"> | icon: new render (3); banner: level screenshot (6) | no |
 | WF Aquarium | <img src="2026-10-01-split-cd-iff-one-app-per-game/adaptive-aquarium.png" width="96"> | <img src="../../android/app/src/aquarium/res/mipmap-xxxhdpi/ic_launcher.png" width="96"> | <img src="../../android/app/src/aquarium/res/drawable/tv_banner.png" width="240"> | engine capture (4) | no |
 | WF Condo | <img src="2026-10-01-split-cd-iff-one-app-per-game/adaptive-condo.png" width="96"> | <img src="../../android/app/src/condo/res/mipmap-xxxhdpi/ic_launcher.png" width="96"> | <img src="../../android/app/src/condo/res/drawable/tv_banner.png" width="240"> | engine capture (5) | no |
 

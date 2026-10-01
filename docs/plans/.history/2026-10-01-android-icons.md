@@ -1,5 +1,6 @@
 | Date | Change |
 |------|--------|
+| [2026-10-01](https://github.com/wbniv/WorldFoundry/commit/5b439e7f) | Icons: keep the adaptive logo inside the visible circle (add-wf-logo.py --safe-circle); verification results from the Chromecast |
 | [2026-10-01](https://github.com/wbniv/WorldFoundry/commit/a7414405) | Icons: elbow joints on every snowgoon arm; the aquarium fish rests higher relative to the anemone (a real engine capture) |
 | [2026-10-01](https://github.com/wbniv/WorldFoundry/commit/5d8ea10a) | Icons: snowgoon third arm angled up from the chest centre; aquarium stalk water fill fixed and the fish raised in the icon |
 | [2026-10-01](https://github.com/wbniv/WorldFoundry/commit/735bc2b8) | Snowgoon: the third arm on the centre of the upper chest, between the two raised arms; source research recorded |
@@ -7,6 +8,11 @@
 | [2026-10-01](https://github.com/wbniv/WorldFoundry/commit/019a88ed) | New launcher icons and TV banners for the three Android games, one layout, with the logo as a separate script |
 
 <!--history-meta v1
+5b439e7f	author	Will Norris
+5b439e7f	added	14
+5b439e7f	deleted	2
+5b439e7f	files	1
+5b439e7f	body	Co-Authored-By: Claude Sonnet 5.5 <noreply@anthropic.com>\nClaude-Session: https://claude.ai/code/session_01NNPhRbrqjqMDkScPvTE9yC
 a7414405	author	Will Norris
 a7414405	added	5
 a7414405	deleted	4
