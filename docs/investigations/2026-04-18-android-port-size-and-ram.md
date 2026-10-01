@@ -8,6 +8,8 @@
 
 **Toolchain:** NDK 26.2.11394342, arm64-v8a, clang.
 
+> **Follow-up (2026‑10‑01):** [Android size trim, iteration 2 — results](2026-10-01-android-size-trim-iter-2-results.md) re-measures all of this on today's source for both ABIs and all three app flavors. It also hides the static C++ runtime's exports, which `-fvisibility=hidden` alone had left exported: 2,061 → 20 dynamic symbols, −481 KiB on the arm64 `.so`. And it corrects one attribution below: **`MA_NO_VORBIS` saves 0 bytes.** miniaudio 0.11 compiles Vorbis only when `stb_vorbis` is included, so the miniaudio `.text` drop credited to it came from the visibility and exceptions flags.
+
 **Build-type flags as of this report:**
 - **Debug** — `-DCMAKE_BUILD_TYPE=Debug`; the engine target (`wf_game`) is compiled with `-O0 -g`. AGP strips debug symbols from the shipped `.so`.
 - **Release iter 1** — `-DCMAKE_BUILD_TYPE=Release`; engine target is `-O3 -flto=thin -ffunction-sections -fdata-sections -fno-unwind-tables -fno-asynchronous-unwind-tables`, linked with `-flto=thin -Wl,--gc-sections -Wl,--icf=safe`. Vendored Jolt and zForth inherit the same Release flags. miniaudio additionally has `MA_NO_MP3` and `MA_NO_GENERATION` on top of the pre-existing `MA_NO_ENCODING` + `MA_NO_FLAC`.
@@ -56,7 +58,7 @@ Symbol-level counts from `llvm-nm --print-size --size-sort --demangle`. "other" 
 **Why this breakdown.** The biggest iter-2 wins are:
 
 - **Jolt −403 KB.** Hidden visibility lets the linker inline + deduplicate Jolt's huge template instantiation tree (Jolt has 3,026 exported symbols at iter 1, 1,613 at iter 2 — nearly halved). `-fno-exceptions` also removes per-function unwind stubs throughout Jolt.
-- **miniaudio −153 KB.** `MA_NO_VORBIS` plus `--gc-sections` pruning of all the resource-manager code paths the Vorbis decoder was the only caller of. miniaudio went from 1,867 symbols at iter 1 → 1,306 → now 261 symbols in the subsystem tally (the rest folded into "other" via the ICF collapse above).
+- **miniaudio −153 KB.** (Correction, 2026‑10‑01: `MA_NO_VORBIS` contributes 0 bytes, because Vorbis is never compiled into miniaudio 0.11 without `stb_vorbis`; see the [iteration‑2 results](2026-10-01-android-size-trim-iter-2-results.md). The drop is hidden visibility, no exceptions and section GC.) As first written: `MA_NO_VORBIS` plus `--gc-sections` pruning of all the resource-manager code paths the Vorbis decoder was the only caller of. miniaudio went from 1,867 symbols at iter 1 → 1,306 → now 261 symbols in the subsystem tally (the rest folded into "other" via the ICF collapse above).
 - **TSF −23 KB.** Hidden visibility + LTO inlined almost everything into the single caller in `music.cc`.
 
 ## APK composition (release iter 2)

@@ -1,10 +1,16 @@
 | Date | Change |
 |------|--------|
+| [2026-10-01](https://github.com/wbniv/WorldFoundry/commit/b40acc9c) | SFX decoder init names the WAV format (size trim iter 2, item 3); plan state as found |
 | [2026-05-25](https://github.com/wbniv/WorldFoundry/commit/84418c7c) | docs(plans): Waves B–E of status sweep — stamp/accurate-ize the rest |
 | [2026-05-05](https://github.com/wbniv/WorldFoundry/commit/74008c54) | chore: accumulated session work — docs, qbert scripts, engine tweaks |
 | [2026-04-18](https://github.com/wbniv/WorldFoundry/commit/934583ee) | feat(android): release build with aggressive size trim — -O3 + LTO + GC + ICF + no-exceptions + hidden visibility |
 
 <!--history-meta v1
+b40acc9c	author	Will Norris
+b40acc9c	added	17
+b40acc9c	deleted	1
+b40acc9c	files	1
+b40acc9c	body	Both SoundBuffer::play() sites set encodingFormat = ma_encoding_format_wav, so\nminiaudio goes straight to dr_wav instead of probing every format. miniaudio\n0.11.25 has no public ma_decoder_init_wav_from_memory (the plan's spelling);\nthis is its replacement. Behaviour is unchanged on every platform: the MA_NO_*\nsubset already left WAV as the only stock decoder. Size effect: none\n(arm64 .so identical, armeabi-v7a +16 B), because MA_NO_VORBIS / FLAC / MP3\nhad already removed the other decoders in 934583ee.\n\ntests/test_android_size_trim.py: WAV-only miniaudio defines, the WAV decoder\nconfig at both sites, the Release -fno-exceptions / -fvisibility=hidden flags\non wfengine, wf_game and Jolt, no live try/throw in engine sources, and\n(tests/wav_decoder_init_test.cc) the two inits decode PCM and IMA ADPCM WAV\nto identical frames and both refuse Ogg Vorbis and junk.\n\nPlan: the stale status line and a "State as found" table — items 1, 2, 3\n(MA_NO_VORBIS) and 5 shipped in 934583ee on 2026-04-18.\n\nCo-Authored-By: Claude Opus 5.5 <noreply@anthropic.com>\nClaude-Session: https://claude.ai/code/session_01DxMP4jUNjCjDz8E9DWzXcM
 84418c7c	author	Will Norris
 84418c7c	added	1
 84418c7c	deleted	1
