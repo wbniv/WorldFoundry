@@ -1,9 +1,15 @@
 | Date | Change |
 |------|--------|
+| [2026-10-01](https://github.com/wbniv/WorldFoundry/commit/e8a9ecdb) | Condo plan and porting status: CI green on the resume-fix commit (build 6abd6e96) |
 | [2026-10-01](https://github.com/wbniv/WorldFoundry/commit/79f0728f) | Android: stay suspended until the window returns (fixes Home-then-reopen abort); condo results |
 | [2026-10-01](https://github.com/wbniv/WorldFoundry/commit/3bb78cf2) | Plan the condo on the Chromecast HD, with mockups |
 
 <!--history-meta v1
+e8a9ecdb	author	Will Norris
+e8a9ecdb	added	3
+e8a9ecdb	deleted	1
+e8a9ecdb	files	1
+e8a9ecdb	body	Co-Authored-By: Claude Sonnet 5.5 <noreply@anthropic.com>\nClaude-Session: https://claude.ai/code/session_01NNPhRbrqjqMDkScPvTE9yC
 79f0728f	author	Will Norris
 79f0728f	added	124
 79f0728f	deleted	20
