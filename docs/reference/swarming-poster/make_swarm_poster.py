@@ -458,7 +458,7 @@ PANELS = {
     'B': ('The model: three zones and a blind volume', panel_b),
     'C': ('The map: p_group over the two zone widths', panel_c),
     'D': ('The rule in eight lines, and the Forth word that does each', panel_d),
-    'F': ('The Forth core, school.fth: one column per rule word (the rest is in the file), and what it costs', panel_f),
+    'F': ('The Forth core, school.fth: the four rule words, and what they cost', panel_f),
     'G': ('The Forth, running in the tank: swarm, torus, school, and a startle', panel_g),
 }
 
