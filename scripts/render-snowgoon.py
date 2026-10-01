@@ -63,11 +63,19 @@ for i in range(7):                                                              
     ball((x, -0.36 + 0.05 * abs(x) * 0, 1.86 + 0.08 * (1 - (2 * t - 1) ** 2)), 0.032, COAL, 1)
 # coal buttons
 for z in (1.62, 1.40, 1.18): ball((0, -0.45, z), 0.04, COAL, 1)
-# three arms, all from the upper torso: left raised, right raised, and a third in the centre between them, rising from the
-# shoulders behind the head (so it never hides the scowl)
+# three arms, ALL on the torso (the middle ball; nothing is attached to the head): left raised from the left shoulder, right raised
+# from the right shoulder, and a third from the centre of the upper chest between them, reaching up and toward the viewer in a
+# forked hand just below the scowl. (A third arm that rose behind the head read as hair on the head, so it is on the chest.)
 stick((-0.38, -0.02, 1.68), (-1.10, -0.10, 2.15), 0.05, WOOD); stick((-0.85, -0.08, 1.98), (-1.02, -0.10, 2.38), 0.03, WOOD)
 stick((0.38, -0.02, 1.68), (1.12, -0.10, 2.12), 0.05, WOOD);  stick((0.86, -0.08, 1.96), (1.06, -0.10, 2.36), 0.03, WOOD)
-stick((0.0, 0.14, 1.72), (0.0, 0.10, 2.78), 0.05, WOOD); stick((0.0, 0.10, 2.40), (-0.22, 0.08, 2.74), 0.03, WOOD); stick((0.0, 0.10, 2.50), (0.22, 0.08, 2.82), 0.03, WOOD)
+import os
+ARM3 = os.environ.get("ARM3", "chest-forward")
+if ARM3 == "chest-forward":      # E: from the centre of the upper chest, straight out toward the viewer, a forked hand up
+    stick((0.0, -0.40, 1.60), (0.0, -1.05, 1.62), 0.06, WOOD); stick((0.0, -0.98, 1.62), (-0.14, -1.12, 1.90), 0.035, WOOD); stick((0.0, -0.98, 1.62), (0.14, -1.12, 1.90), 0.035, WOOD)
+elif ARM3 == "chest-right":      # A: from the chest centre, out to the right and forward, below the raised right arm
+    stick((0.0, -0.40, 1.58), (0.62, -0.78, 1.48), 0.06, WOOD); stick((0.50, -0.72, 1.49), (0.78, -0.80, 1.75), 0.035, WOOD)
+else:                            # C: a second arm on the left shoulder, out sideways below the raised one
+    stick((-0.42, -0.04, 1.52), (-1.20, -0.12, 1.50), 0.06, WOOD); stick((-0.95, -0.10, 1.51), (-1.28, -0.12, 1.78), 0.035, WOOD)
 # ground and sky
 bpy.ops.mesh.primitive_plane_add(size=40, location=(0, 0, 0)); g = bpy.context.object; flat(g, mat("ground", (0.78, 0.85, 0.95)))
 sc.world = bpy.data.worlds.new("w"); sc.world.use_nodes = True
