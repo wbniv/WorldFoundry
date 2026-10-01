@@ -46,7 +46,10 @@ as source and is linked in at build time.
 
 | File | Notes |
 |------|-------|
-| `wfsource/source/game/TimGM6mb.sf2` | Dev soundfont (GPL, 5.7 MB). Download via `apt-get download timgm6mb-soundfont && dpkg-deb -x *.deb . && mv usr/share/sounds/sf2/TimGM6mb.sf2 wfsource/source/game/`. Ship target will use a custom WF-subset SF2. |
+| `wfsource/source/game/florestan-subset.sf2` | The soundfont the engine loads (`audio/linux/music.cc`, `WF_MIDI_SOUNDFONT`). **Generated, gitignored:** `task soundfont` (`scripts/make-soundfont-subset.py`) builds it from **FluidR3_GM** (Frank Wen, **MIT licence**; the Ubuntu/Debian package `fluid-soundfont-gm`, pinned by SHA-256 in the script), keeping only the presets `level0.mid` uses (Acoustic Grand Piano): about 7.6 MB instead of 145 MB. The name is historical: an earlier file of this name was never committed, had no recorded recipe and no copy survives (see docs/plans/2026-09-30-aquarium-chromecast.md, Phase D). |
+| `wfsource/source/game/TimGM6mb.sf2` | Old dev soundfont, **GPL**, 5.7 MB: not shippable (the project's asset policy rejects GPL) and no longer needed. |
+
+**FluidR3_GM notice (MIT), which must accompany copies of the subset (it is also embedded in the generated file's INFO chunk):** Copyright (c) 2000-2002, 2008 Frank Wen. Permission is hereby granted, free of charge, to any person obtaining a copy of this software and associated documentation files (the "Software"), to deal in the Software without restriction, including without limitation the rights to use, copy, modify, merge, publish, distribute, sublicense, and/or sell copies of the Software, subject to the inclusion of this notice in all copies or substantial portions of the Software. THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND. *Open decision:* `wflevels/licence_policy.toml` accepts only CC0, so MIT needs an explicit policy entry (or a waiver) before the generated file is committed or shipped.
 
 ## Notes
 

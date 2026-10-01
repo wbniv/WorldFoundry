@@ -1,11 +1,17 @@
 | Date | Change |
 |------|--------|
+| [2026-10-01](https://github.com/wbniv/WorldFoundry/commit/15dd5ee6) | Aquarium-Chromecast plan: snowgoons is silent on Android (no soundfont, Q*bert sfx not found), so it is not the audio-route check; the display chain does advertise audio, the monitor just has no speakers |
 | [2026-10-01](https://github.com/wbniv/WorldFoundry/commit/b655fb35) | Aquarium-Chromecast plan, Phase D: the soundfont is gitignored and absent, so snowgoons' release build fails lint and no flavor can play MIDI music yet |
 | [2026-10-01](https://github.com/wbniv/WorldFoundry/commit/712ccf92) | Aquarium-Chromecast plan: tilt steering and haptics in Phase E; Phase D (audio) tied to the SFX plan |
 | [2026-10-01](https://github.com/wbniv/WorldFoundry/commit/f583faff) | Aquarium-Chromecast plan: add Phase D, the phone as a gamepad (web controller over the LAN), with mockups |
 | [2026-10-01](https://github.com/wbniv/WorldFoundry/commit/c48d5a8b) | Write the missing aquarium-on-Chromecast plan (four docs linked to it): rebuilt from the commits and device-run evidence |
 
 <!--history-meta v1
+15dd5ee6	author	Will Norris
+15dd5ee6	added	2
+15dd5ee6	deleted	2
+15dd5ee6	files	1
+15dd5ee6	body	Co-Authored-By: Claude Sonnet 5.5 <noreply@anthropic.com>\nClaude-Session: https://claude.ai/code/session_01NNPhRbrqjqMDkScPvTE9yC
 b655fb35	author	Will Norris
 b655fb35	added	1
 b655fb35	deleted	0
