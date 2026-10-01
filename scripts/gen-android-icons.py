@@ -45,7 +45,7 @@ GAMES = {
     "aquarium": dict(icon=ART / "aquarium-anemone-only-frame-b-1920x1080.png", icon_crop=(470, 40, 1390, 960),
                      banner=REPO_ROOT / "docs/plans/2026-09-30-aquarium-chromecast/frame-a-1920x1080.png",
                      banner_crop=(280, 88, 1640, 853), name="aquarium"),
-    "condo": dict(icon=ART / "condo-pullback-1920x1080.png", icon_crop=(640, 0, 1720, 1080),
+    "condo": dict(icon=ART / "condo-pullback-1920x1080.png", icon_crop=(1040, 160, 1920, 1040),
                   banner=ART / "condo-pullback-1920x1080.png", banner_crop=(0, 0, 1920, 1080), name="condo"),
 }
 

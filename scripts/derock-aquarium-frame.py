@@ -1,5 +1,5 @@
 #!/usr/bin/env python3
-"""derock-aquarium-frame.py: leave only the fish and the anemone in the aquarium's camshot B capture (no rock, no sand).
+"""derock-aquarium-frame.py: leave only the fish and the anemone in the aquarium's camshot B capture (no rock, no sand, no brown stalk).
 
 The aquarium icon is just the fish and the anemone (the user's words: "keep the same except remove the rock", then "just the fish and anemone"). The rock is a flat-shaded grey
 low-poly shape under the anemone's base ring. It is masked by colour (neutral grey; the sand is tan, the water teal, the
@@ -24,6 +24,7 @@ def main():
     ap = argparse.ArgumentParser(description=__doc__.split("\n\n")[0])
     ap.add_argument("src"); ap.add_argument("dst")
     ap.add_argument("--keep-sand", action="store_true", help="remove the rock only")
+    ap.add_argument("--keep-stalk", action="store_true", help="keep the brown stalk and base ring")
     a = ap.parse_args()
     im = np.array(Image.open(a.src).convert("RGB")).astype(int)
     x0, y0, x1, y1 = WINDOW
@@ -70,6 +71,31 @@ def main():
         sand = tan(out); sand[:horizon - 1] = False
         out[sand] = water
         print(f"sand floor from row {horizon} replaced with water colour {tuple(int(v) for v in water)}")
+    if not a.keep_stalk and not a.keep_sand:
+        # the brown "sleeve": the stalk column, its base ring and the dark disc under the crown (warm browns with g >= b; the
+        # magenta tentacles have g < b and the orange fish is far above this window)
+        wx0, wy0, wx1, wy1 = 700, 612, 1260, 1000
+        r, g, b = out[..., 0], out[..., 1], out[..., 2]
+        brown = (r - b > 22) & (g >= b) & (r < 215)
+        sm = np.zeros(brown.shape, bool); sm[wy0:wy1, wx0:wx1] = brown[wy0:wy1, wx0:wx1]
+        grown2 = sm.copy()
+        for dy in range(-3, 4):
+            for dx in range(-3, 4):
+                grown2 |= np.roll(np.roll(sm, dy, 0), dx, 1)
+        grown2[:wy0] = False; grown2[wy1:] = False
+        src = out.copy()
+        for y in range(wy0, wy1):
+            xs = np.flatnonzero(grown2[y])
+            if xs.size:
+                s0, e0 = xs[0], xs[-1] + 1                              # one span per row: the column is contiguous
+                n = e0 - s0
+                if s0 - n >= 0 and not grown2[y, s0 - n:s0].any():
+                    out[y, s0:e0] = src[y, s0 - n:s0]
+                elif e0 + n <= out.shape[1] and not grown2[y, e0:e0 + n].any():
+                    out[y, s0:e0] = src[y, e0:e0 + n]
+                else:
+                    out[y, s0:e0] = src[y, max(0, s0 - 1)]
+        print(f"brown stalk removed: {int(grown2.sum())} px")
     Image.fromarray(out.astype(np.uint8)).save(a.dst, optimize=True)
     print(f"wrote {a.dst}: repainted {int(grown.sum())} px")
 

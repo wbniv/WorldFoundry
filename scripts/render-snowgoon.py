@@ -6,7 +6,7 @@ Run with Blender in the background:   blender -b --python scripts/render-snowgoo
 "Snow goons" are the three-armed snowmen of the original level (Calvin and Hobbes' menacing snowmen are the
 inspiration). The repository has no snowman mesh (the level's actors are placeholder boxes), so this model is authored
 here from primitives: three stacked low-poly snow balls, coal eyes under angled brows, a carrot nose, a jagged coal
-scowl and **three** stick arms, one raised on each side and one low on the right. Original art; nothing is traced.
+scowl and **three** stick arms, one raised on each side and a third on the left shoulder, all from the upper torso. Original art; nothing is traced.
 """
 import math, sys
 
@@ -63,10 +63,11 @@ for i in range(7):                                                              
     ball((x, -0.36 + 0.05 * abs(x) * 0, 1.86 + 0.08 * (1 - (2 * t - 1) ** 2)), 0.032, COAL, 1)
 # coal buttons
 for z in (1.62, 1.40, 1.18): ball((0, -0.45, z), 0.04, COAL, 1)
-# three arms: left up, right up, and one from the chest reaching toward the viewer
-stick((-0.40, -0.02, 1.52), (-1.10, -0.10, 2.05), 0.05, WOOD); stick((-0.85, -0.08, 1.88), (-1.02, -0.10, 2.30), 0.03, WOOD)
-stick((0.40, -0.02, 1.52), (1.12, -0.10, 2.00), 0.05, WOOD);  stick((0.86, -0.08, 1.86), (1.06, -0.10, 2.28), 0.03, WOOD)
-stick((0.30, -0.10, 1.05), (1.15, -0.30, 0.95), 0.05, WOOD); stick((0.95, -0.25, 0.97), (1.30, -0.30, 1.25), 0.03, WOOD)   # the third arm, low on the right
+# three arms, all from the upper torso: left raised, right raised, and a third in the centre between them, rising from the
+# shoulders behind the head (so it never hides the scowl)
+stick((-0.38, -0.02, 1.68), (-1.10, -0.10, 2.15), 0.05, WOOD); stick((-0.85, -0.08, 1.98), (-1.02, -0.10, 2.38), 0.03, WOOD)
+stick((0.38, -0.02, 1.68), (1.12, -0.10, 2.12), 0.05, WOOD);  stick((0.86, -0.08, 1.96), (1.06, -0.10, 2.36), 0.03, WOOD)
+stick((0.0, 0.14, 1.72), (0.0, 0.10, 2.78), 0.05, WOOD); stick((0.0, 0.10, 2.40), (-0.22, 0.08, 2.74), 0.03, WOOD); stick((0.0, 0.10, 2.50), (0.22, 0.08, 2.82), 0.03, WOOD)
 # ground and sky
 bpy.ops.mesh.primitive_plane_add(size=40, location=(0, 0, 0)); g = bpy.context.object; flat(g, mat("ground", (0.78, 0.85, 0.95)))
 sc.world = bpy.data.worlds.new("w"); sc.world.use_nodes = True

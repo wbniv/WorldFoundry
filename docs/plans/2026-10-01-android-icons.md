@@ -12,8 +12,9 @@ Status: **art, scripts and resources generated; not yet built into an APK or see
 From the user, 2026‑10‑01:
 
 - **snowgoons:** "a snowgoon, obvs", and later: "these are 3-armed snowmen from calvin and hobbes (menacing, hence goons)", plus "i'm not sure there are any snowgoons actually in the level at the moment".
-- **aquarium:** "keep same except remove rock", then "i meant just the fish and anemone".
-- **condo:** "pull camera back more to show more".
+- **snowgoons, arms:** "3-armed snowgoons!!!", "all 3 arms should be in the upper torso area... cuz ARMS!", then "put it in the center, between the 2 regular arms".
+- **aquarium:** "keep same except remove rock", then "i meant just the fish and anemone", then "remove the brown sleeve from the icon".
+- **condo:** "pull camera back more to show more", then "for condo icon, show half and half at front of condos".
 - **Every World Foundry game on mobile:** "keep the same design layout for all: icon representing the game PLUS a world foundry logo in the bottom-right. use favicon from ../worldfoundry.org/".
 - **The logo as its own script:** "the worldfoundry logo should implemented as a separate script which can add the logo to any existing icon".
 - Plan with rendered mockups of all three new icons, opened in the browser.
@@ -39,9 +40,9 @@ The logo is the website's favicon, `../worldfoundry.org/public/favicon.svg` (a r
 
 | Game | Art | Made by | Notes |
 |---|---|---|---|
-| snowgoons | a menacing three-armed snowman, low-poly and flat-shaded | [`scripts/render-snowgoon.py`](../../scripts/render-snowgoon.py) (Blender, headless) | **The repository has no snowman mesh** (the level's actors are placeholder boxes), so this is **new original art** drawn from primitives: three snow balls, coal eyes under angled brows, a carrot nose, a jagged scowl, and three stick arms (one raised each side, one low on the right). Inspired by the menacing three-armed snowmen of the strip the user named; nothing is traced or copied |
-| aquarium | just the fish and the anemone | [`scripts/derock-aquarium-frame.py`](../../scripts/derock-aquarium-frame.py) on camshot B | removes the rock **and the sand**, painting the water behind. **This edits a capture, it does not re-render the level** (the rock is part of the level; rebuilding it was not worth it for an icon). The banner still shows the whole tank, rock included, because the request was about the icon |
-| condo | the doll-house with the camera pulled back and lowered | [`scripts/capture-condo-pullback.py`](../../scripts/capture-condo-pullback.py) (the engine, driven through the debug bridge) | holds the in-game zoom-farther and lower-angle buttons. **The game's own controls cap the camera** (about 12 m, 10.8 m high); the capture uses all of it, lowered so it also moves back horizontally. Going further needs a limit change in `wflevels/condo_639_640/camera_controls.fth` and a level rebuild: a decision for the user. A square icon cannot show a 16:9 view, so it mostly shows unit 639 with the edge of 640; the banner shows both |
+| snowgoons | a menacing three-armed snowman, low-poly and flat-shaded | [`scripts/render-snowgoon.py`](../../scripts/render-snowgoon.py) (Blender, headless) | **The repository has no snowman mesh** (the level's actors are placeholder boxes), so this is **new original art** drawn from primitives: three snow balls, coal eyes under angled brows, a carrot nose, a jagged scowl, and **three stick arms, all from the upper torso**: one raised each side and the third in the centre between them, rising from the shoulders behind the head so it never hides the scowl. (Two earlier placements were rejected: low on the right, where the logo covers it, and low on the left, which is not the torso.) Inspired by the menacing three-armed snowmen of the strip the user named; nothing is traced or copied |
+| aquarium | just the fish and the anemone's crown: no rock, no sand and **no brown stalk ("sleeve")** | [`scripts/derock-aquarium-frame.py`](../../scripts/derock-aquarium-frame.py) on camshot B | removes the rock, the sand, and the brown stalk with its base ring and the dark disc under the crown, painting the water behind (each removed span is repainted from clean water on the same row); the tentacles and the fish are untouched. **This edits a capture, it does not re-render the level** (the rock is part of the level; rebuilding it was not worth it for an icon). The banner still shows the whole tank, rock included, because the request was about the icon |
+| condo | the doll-house with the camera pulled back and lowered | [`scripts/capture-condo-pullback.py`](../../scripts/capture-condo-pullback.py) (the engine, driven through the debug bridge) | holds the in-game zoom-farther and lower-angle buttons. **The game's own controls cap the camera** (about 12 m, 10.8 m high); the capture uses all of it, lowered so it also moves back horizontally. Going further needs a limit change in `wflevels/condo_639_640/camera_controls.fth` and a level rebuild: a decision for the user. A square icon cannot show a 16:9 view, so **the icon is cropped on the front of the building, centred on the boundary between the two units: half 639 (orange) and half 640 (blue)**; the banner shows the whole view |
 
 The condo needs the six `--vram-*` flags on the desktop too (the capture script reads them from `android/app/src/condo/assets/wf_args.txt`).
 
@@ -103,7 +104,7 @@ Numbered, runnable steps; each shows its raw output with PASS or FAIL, or says w
 
     **PASS**
 
-3. The art itself (`Read` the images). Expected: a menacing snowman with three arms; the fish and anemone only, with no rock and no sand; the condo pulled back. **PASS** for all three; the condo's square icon shows mostly 639 (see the table).
+3. The art itself (`Read` the images). Expected: a menacing snowman with three arms; the fish and anemone only, with no rock and no sand; the condo pulled back. **PASS** for all three: the snowman has its third arm in the centre between the two raised arms, all from the upper torso; the aquarium shows only the crown and the fish, with no stalk; the condo icon is half orange and half blue at the front.
 
 4. The mockups are rendered from the generated files and are the three pages above. **PASS** (`make_mockups.py`: icons 459 KB, banners 254 KB, layout 83 KB, each under the 512 KB limit).
 
