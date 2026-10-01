@@ -66,7 +66,7 @@ for z in (1.62, 1.40, 1.18): ball((0, -0.45, z), 0.04, COAL, 1)
 # three arms, ALL on the torso (the middle ball; nothing on the head or the back), and every arm has a JOINT: an upper arm and a
 # forearm meeting at an elbow knob, then a forked hand. Left and right are raised from the shoulders; the third leaves the centre of
 # the upper chest between them, forward at the elbow, then steeply up (kept clear of the face).
-def arm(shoulder, elbow, hand, fork=(0.14, 0.34)):
+def arm(shoulder, elbow, hand, fork=(0.11, 0.24)):
     stick(shoulder, elbow, 0.055, WOOD)                                   # upper arm
     ball(elbow, 0.085, WOOD, 1)                                           # the joint
     stick(elbow, hand, 0.045, WOOD)                                       # forearm
@@ -76,9 +76,9 @@ def arm(shoulder, elbow, hand, fork=(0.14, 0.34)):
         stick(h - d * 0.10, h + d * fork[1] + side * k * fork[0], 0.03, WOOD)
 
 
-arm((-0.38, -0.02, 1.68), (-0.88, -0.08, 1.60), (-1.16, -0.12, 2.18))
-arm((0.38, -0.02, 1.68), (0.88, -0.08, 1.60), (1.16, -0.12, 2.18))
-arm((0.0, -0.40, 1.60), (0.18, -0.72, 1.70), (0.60, -0.88, 2.20))
+arm((-0.38, -0.02, 1.68), (-0.88, -0.08, 1.60), (-1.05, -0.10, 1.94))
+arm((0.38, -0.02, 1.68), (0.88, -0.08, 1.60), (1.05, -0.10, 1.94))
+arm((0.0, -0.40, 1.60), (0.18, -0.72, 1.70), (0.42, -0.81, 1.98))
 # ground and sky
 bpy.ops.mesh.primitive_plane_add(size=40, location=(0, 0, 0)); g = bpy.context.object; flat(g, mat("ground", (0.78, 0.85, 0.95)))
 sc.world = bpy.data.worlds.new("w"); sc.world.use_nodes = True
