@@ -52,7 +52,8 @@ def test_condo_assets():
 
 
 def test_condo_args_match_run_condo():
-    args = (SRC / "condo" / "assets" / "wf_args.txt").read_text().split()
+    # qr_logo=... is read by native_app_entry.cc for the phone controller's QR and never reaches the engine.
+    args = [a for a in (SRC / "condo" / "assets" / "wf_args.txt").read_text().split() if not a.startswith("qr_logo=")]
     run = str(yaml.safe_load((REPO / "Taskfile.yml").read_text())["tasks"]["run-condo"]["cmds"])
     assert args and all(a.startswith("--vram-") for a in args), args
     for a in args:

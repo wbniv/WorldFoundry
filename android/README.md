@@ -82,5 +82,6 @@ Plans: [the Chromecast plan](../docs/plans/2026-09-30-aquarium-chromecast.md) (P
   Join the **same Wi-Fi as the TV** (a guest network, the other band, mobile data or a VPN looks like a page that never loads), scan the QR, and the phone becomes the controller:
   aquarium = stick, A, B; condo = stick, doors/shade (A), teleport (C), orbit (hold D, then the stick), zoom in/out (E/F). Nothing is installed on the phone; the page is served by the TV app
   over the local network only, behind a fresh PIN each launch, and the TV releases every button if the phone stops sending for 1 s. The PIN changes every time the app starts.
+  The QR carries the World Foundry logo in the middle (the planet picture by default; `qr_logo=full` or `qr_logo=none` in `src/<flavor>/assets/wf_args.txt` for the whole logo or a plain code), and it still scans: the code is ECC H and the logo covers under 10 % of it.
 - **Logs.** `adb logcat -s wf_game` shows one line per remote key (`key code=23 …`), per accepted phone connection and per button change.
 - **Not built yet:** tilt steering (needs an https page and a certificate) and game-driven vibration; both are parked in `TODO.md`.

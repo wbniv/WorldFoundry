@@ -10,6 +10,7 @@
 
 #include "phonepad_overlay.h"
 #include "phonepad.h"
+#include "phonepad_logo.h"   // generated: scripts/gen-qr-logo.py
 
 #include <cmath>
 #include <cstdio>
@@ -109,6 +110,14 @@ struct Painter
 
 }  // namespace
 
+int ParseLogoMode(const char* s)
+{
+    if (std::strcmp(s, "planet") == 0) return kLogoPlanet;
+    if (std::strcmp(s, "full") == 0)   return kLogoFull;
+    if (std::strcmp(s, "none") == 0)   return kLogoNone;
+    return -1;
+}
+
 void Overlay::SetEndpoint(const std::string& url, const std::string& hostPort, const std::string& pin)
 {
     url_      = url;
@@ -166,12 +175,13 @@ bool Overlay::EncodeQr(const std::string& text, std::vector<uint8_t>* modules, i
 {
     modules->clear();
     *size = 0;
-    // Version 10 (57 x 57) at most holds 213 bytes at ECC M: far more than
-    // "http://255.255.255.255:65535/?k=123456". Static: ~1.8 KB, no heap.
+    // Version 10 (57 x 57) at ECC H holds 119 bytes: far more than
+    // "http://255.255.255.255:65535/?k=123456" (38). Static: ~1.8 KB, no heap.
     static uint8_t qr[qrcodegen_BUFFER_LEN_FOR_VERSION(10)];
     static uint8_t tmp[qrcodegen_BUFFER_LEN_FOR_VERSION(10)];
-    // ECC M (15% damage) like mockup 3; boostEcl raises it for free when the version allows.
-    if (!qrcodegen_encodeText(text.c_str(), tmp, qr, qrcodegen_Ecc_MEDIUM, 1, 10, qrcodegen_Mask_AUTO, true))
+    // ECC H (about 30 % of each block repairable), so the logo over the centre leaves most of the
+    // correction budget for a camera's own misreads. A typical URL is then version 4 (33 x 33).
+    if (!qrcodegen_encodeText(text.c_str(), tmp, qr, qrcodegen_Ecc_HIGH, 1, 10, qrcodegen_Mask_AUTO, true))
         return false;
     const int n = qrcodegen_getSize(qr);
     modules->resize(size_t(n) * size_t(n));
@@ -182,12 +192,41 @@ bool Overlay::EncodeQr(const std::string& text, std::vector<uint8_t>* modules, i
     return true;
 }
 
+bool Overlay::LogoPlate(int n, int mode, int* x0, int* y0, int* pw, int* ph)
+{
+    *x0 = *y0 = *pw = *ph = 0;
+    // Version 1 is too small (a centred plate would reach the format bits beside the finders) and
+    // cannot hold the URL at ECC H anyway; versions 7 and up have an alignment pattern in the very
+    // centre. The URL is version 4 or 5 in practice. tests/test_phone_qr.py checks versions 2 to 6.
+    if (mode == kLogoNone || n < 25 || n >= 45) return false;
+    auto oddBelow = [](float v) { int k = int(v); return (k % 2) ? k : k - 1; };
+    if (mode == kLogoPlanet)
+    {
+        *pw = *ph = oddBelow(0.22f * float(n));                 // 7 of 33: 4.5 % of the modules
+    }
+    else
+    {
+        // The whole logo is taller than wide: 9 x 11 of 33 (9.1 % of the modules), narrowed until
+        // the plate is at most 10 % of the code.
+        for (*pw = oddBelow(0.28f * float(n)); *pw >= 3; *pw -= 2)
+        {
+            const int hh = int(float(*pw) * float(logo::kFullH) / float(logo::kFullW) + 0.5f);
+            *ph = (hh % 2) ? hh : hh - 1;
+            if (10 * *pw * *ph <= n * n) break;
+        }
+    }
+    if (*pw < 3 || *ph < 3) return false;
+    *x0 = (n - *pw) / 2;                                         // n and the plate are odd: exactly centred
+    *y0 = (n - *ph) / 2;
+    return true;
+}
+
 bool Overlay::Build(int w, int h, int64_t nowMs, std::vector<PhonepadRect>* out)
 {
     const bool  panel = PanelVisible(nowMs);
     const char* toast = Toast(nowMs);
     char key[256];
-    std::snprintf(key, sizeof(key), "%dx%d p%d t%s %s", w, h, panel ? 1 : 0, toast, panel ? url_.c_str() : "");
+    std::snprintf(key, sizeof(key), "%dx%d p%d l%d t%s %s", w, h, panel ? 1 : 0, logo_, toast, panel ? url_.c_str() : "");
     if (lastKey_ == key) return false;
     lastKey_ = key;
     out->clear();
@@ -220,15 +259,41 @@ bool Overlay::Build(int w, int h, int64_t nowMs, std::vector<PhonepadRect>* out)
                 const float x0 = std::floor(132.0f * p.s) / p.s, y0 = std::floor(232.0f * p.s) / p.s;
                 const float side = m * float(n + 8);
                 p.Rect(x0, y0, x0 + side, y0 + side, 0xFFFFFFFFu);
+                // The logo plate: whole modules in the centre left white (the code's error correction
+                // stands in for them), with the logo inside a one-module white margin.
+                int lx = 0, ly = 0, lw = 0, lh = 0;
+                const bool logo = LogoPlate(n, logo_, &lx, &ly, &lw, &lh);
+                auto inPlate = [&](int r, int c) { return logo && r >= ly && r < ly + lh && c >= lx && c < lx + lw; };
                 for (int r = 0; r < n; ++r)
                     for (int c = 0; c < n;)
                     {
-                        if (!qr[size_t(r) * size_t(n) + size_t(c)]) { ++c; continue; }
+                        if (!qr[size_t(r) * size_t(n) + size_t(c)] || inPlate(r, c)) { ++c; continue; }
                         int e = c;
-                        while (e < n && qr[size_t(r) * size_t(n) + size_t(e)]) ++e;
+                        while (e < n && qr[size_t(r) * size_t(n) + size_t(e)] && !inPlate(r, e)) ++e;
                         p.Rect(x0 + (4 + c) * m, y0 + (4 + r) * m, x0 + (4 + e) * m, y0 + (5 + r) * m, 0x000000FFu);
                         c = e;
                     }
+                if (logo)
+                {
+                    const bool full = logo_ == kLogoFull;
+                    const int gw = full ? logo::kFullW : logo::kPlanetW, gh = full ? logo::kFullH : logo::kPlanetH;
+                    const uint8_t* cells = full ? logo::kFull : logo::kPlanet;
+                    const float aw = float(lw - 2) * m, ah = float(lh - 2) * m;     // inside the margin
+                    const float cell = std::fmin(aw / float(gw), ah / float(gh));
+                    const float gx = x0 + (4 + lx + 1) * m + (aw - cell * float(gw)) * 0.5f;
+                    const float gy = y0 + (4 + ly + 1) * m + (ah - cell * float(gh)) * 0.5f;
+                    for (int r = 0; r < gh; ++r)
+                        for (int c = 0; c < gw;)
+                        {
+                            const uint8_t k = cells[r * gw + c];
+                            int e = c;
+                            while (e < gw && cells[r * gw + e] == k) ++e;
+                            if (logo::kPalette[k] != 0xFFFFFFFFu)   // white is the plate already
+                                p.Rect(gx + float(c) * cell, gy + float(r) * cell, gx + float(e) * cell,
+                                       gy + float(r + 1) * cell, logo::kPalette[k]);
+                            c = e;
+                        }
+                }
                 tx = 132.0f + 600.0f + 64.0f;   // the code is at most 600 wide; text never moves with the snapping
             }
         }

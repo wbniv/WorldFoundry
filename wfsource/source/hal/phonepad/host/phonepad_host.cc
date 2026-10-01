@@ -24,6 +24,8 @@
 //   ov-rects <w> <h> <ms>      prints "RECTS <n> changed=0|1" then n lines
 //                              "R x0 y0 x1 y1 rrggbbaa"
 //   qr <text>                  prints "QR <size>" then size rows of 0/1
+//   ov-logo planet|full|none   the logo in the QR (as wf_args.txt qr_logo= sets it on Android)
+//   plate <n> planet|full|none prints "PLATE x y w h" (modules) or "PLATE none"
 //   quit
 //
 //   phonepad_host --pin 123456 --page controller.html --layout layout.json
@@ -181,6 +183,23 @@ int main(int argc, char** argv)
                     for (const PhonepadRect& r : rects)
                         std::printf("R %.2f %.2f %.2f %.2f %08x\n", r.x0, r.y0, r.x1, r.y1, unsigned(r.rgba));
                 }
+            }
+            else if (cmd.compare(0, 8, "ov-logo ") == 0)
+            {
+                const int mode = phonepad::ParseLogoMode(cmd.c_str() + 8);
+                if (mode >= 0) overlay.SetLogo(mode);
+                std::printf("LOGO %d\n", mode);
+            }
+            else if (cmd.compare(0, 6, "plate ") == 0)
+            {
+                int n = 0;
+                char mode[16] = "";
+                int x = 0, y = 0, w = 0, h = 0;
+                if (std::sscanf(cmd.c_str() + 6, "%d %15s", &n, mode) == 2
+                    && phonepad::Overlay::LogoPlate(n, phonepad::ParseLogoMode(mode), &x, &y, &w, &h))
+                    std::printf("PLATE %d %d %d %d\n", x, y, w, h);
+                else
+                    std::printf("PLATE none\n");
             }
             else if (cmd.compare(0, 3, "qr ") == 0)
             {

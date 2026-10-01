@@ -2,7 +2,7 @@
 """make_phone_mockups.py: build the three self-contained 1440x900 mockups for the "phone as a gamepad" phase of the
 aquarium-on-Chromecast plan, and their PNGs.
 
-Inline CSS/JS only; the QR code is a real QR (segno) of the example URL, inlined as SVG; the TV picture is the real Chromecast
+Inline CSS/JS only; the QR code is a real QR (segno) of the example URL, inlined as SVG with the World Foundry logo in the middle as the TV draws it (ECC H); the TV picture is the real Chromecast
 screenshot from docs/porting-status/, embedded as a data URI so each .html stays under 512 KB.
 Usage: python3 make_phone_mockups.py   (needs segno, Pillow and google-chrome)
 """
@@ -24,7 +24,36 @@ def data_uri(path, size, q=74):
 
 TV = data_uri(REPO / "docs/porting-status/chromecast-hd-aquarium.png", (960, 540))
 CONDO = data_uri(REPO / "docs/porting-status/chromecast-hd-condo.png", (960, 540))
-QR = segno.make(URL, error="m").svg_inline(scale=6, border=2, dark="#0d1117", light="#ffffff")
+def qr_with_logo(url):
+    """The code as the TV draws it (phonepad_overlay.cc): ECC H, a 4-module quiet zone, and the default "planet" logo
+    from the generated phonepad_logo.h on a white plate of whole modules (the largest odd side <= 0.22 n), centred."""
+    import re
+    m = [list(r) for r in segno.make_qr(url, error="h", boost_error=False, mode="byte").matrix]
+    n = len(m)
+    k = int(0.22 * n)
+    p = k if k % 2 else k - 1
+    lo = (n - p) // 2
+    hdr = (REPO / "wfsource/source/hal/phonepad/phonepad_logo.h").read_text()
+    pal = ["#" + c[:6] for c in re.findall(r"0x([0-9A-F]{8})u", hdr)]
+    gw, gh = map(int, re.search(r"kPlanetW = (\d+), kPlanetH = (\d+)", hdr).groups())
+    body = hdr[hdr.index("kPlanet[kPlanetW"):]
+    cells = [int(v) for v in re.findall(r"\d+", body[body.index("{") + 1:body.index("};")])]
+    out = [f'<svg viewBox="0 0 {n + 8} {n + 8}" xmlns="http://www.w3.org/2000/svg" shape-rendering="crispEdges">',
+           f'<rect width="{n + 8}" height="{n + 8}" fill="#fff"/>']
+    for r in range(n):
+        for c in range(n):
+            if m[r][c] and not (lo <= r < lo + p and lo <= c < lo + p):
+                out.append(f'<rect x="{c + 4}" y="{r + 4}" width="1" height="1" fill="#000"/>')
+    cell = (p - 2) / gw
+    for r in range(gh):
+        for c in range(gw):
+            col = pal[cells[r * gw + c]]
+            if col.upper() != "#FFFFFF":
+                out.append(f'<rect x="{4 + lo + 1 + c * cell:.3f}" y="{4 + lo + 1 + r * cell:.3f}" width="{cell:.3f}" height="{cell:.3f}" fill="{col}"/>')
+    return "".join(out) + "</svg>"
+
+
+QR = qr_with_logo(URL)
 
 CSS = """
 *{box-sizing:border-box}body{margin:0;width:1440px;height:900px;background:#0d1117;color:#e6edf3;font:16px/1.4 system-ui,'Noto Sans',sans-serif;overflow:hidden}

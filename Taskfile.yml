@@ -591,6 +591,11 @@ tasks:
     cmds:
       - python3 scripts/make-soundfont-subset.py {{.CLI_ARGS}}
 
+  gen-qr-logo:
+    desc: "Regenerate wfsource/source/hal/phonepad/phonepad_logo.h, the World Foundry logo grids (whole, and the planet picture without the WORLD/FOUNDRY strips) drawn in the middle of the phone-controller QR code, from ../worldfoundry.org/src/assets/wflogo.png (usage: task gen-qr-logo [-- --check])"
+    cmds:
+      - python3 scripts/gen-qr-logo.py {{.CLI_ARGS}}
+
   find-chromecast:
     desc: "Find the Chromecast after its DHCP address changed (usage: task find-chromecast -- [--from <ip>] [--span N] [--model REGEX]): walks the last octet up, then down, from the last known address and asks each host's Cast descriptor for its model. adb over Wi-Fi then needs Wireless debugging switched on at the TV"
     cmds:

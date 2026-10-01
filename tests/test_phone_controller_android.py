@@ -150,3 +150,16 @@ def test_built_release_apk_has_the_controller(app):
         assert z.read("assets/layout.json") == (SRC / app / "assets" / "layout.json").read_bytes()
         for abi in ("armeabi-v7a", "arm64-v8a"):
             assert b"phone controller: open" in z.read(f"lib/{abi}/libwf_game.so"), abi
+
+
+def test_qr_logo_switch_is_read_from_wf_args_and_kept_from_the_engine():
+    """wf_args.txt 'qr_logo=planet|full|none' picks the logo in the QR (default planet); the token never reaches
+    the engine's argv (docs/plans/2026-09-30-aquarium-chromecast.md, design item 4)."""
+    src = ENTRY.read_text()
+    loop = src[src.index('strtok(argBuf'):src.index("argv[argc] = nullptr;")]
+    assert loop.index('strncmp(tok, "qr_logo=", 8) == 0') < loop.index("continue;") < loop.index("argv[argc++] = tok;")
+    hdr = (REPO / "wfsource" / "source" / "hal" / "phonepad" / "phonepad_overlay.h").read_text()
+    assert "int         logo_       = kLogoPlanet;" in hdr
+    for app in ("aquarium", "condo"):
+        args = SRC / app / "assets" / "wf_args.txt"
+        assert not args.exists() or "qr_logo=" not in args.read_text(), "the default (planet) is committed"

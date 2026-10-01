@@ -574,7 +574,18 @@ android_main(struct android_app* app)
             AAsset_close(a);
             argBuf[n > 0 ? n : 0] = '\0';
             for (char* tok = strtok(argBuf, " \t\r\n"); tok && argc < 32; tok = strtok(nullptr, " \t\r\n"))
+            {
+                // "qr_logo=planet|full|none": what sits in the middle of the phone-controller QR code
+                // (default planet). Read here and not passed on: the engine never sees it.
+                if (std::strncmp(tok, "qr_logo=", 8) == 0)
+                {
+                    const int mode = phonepad::ParseLogoMode(tok + 8);
+                    if (mode >= 0) gPhoneOverlay.SetLogo(mode);
+                    WFLOG("android_main: %s%s", tok, mode >= 0 ? "" : " (unknown: use planet, full or none)");
+                    continue;
+                }
                 argv[argc++] = tok;
+            }
             WFLOG("android_main: wf_args.txt gave %d argument(s)", argc - 1);
         }
     }

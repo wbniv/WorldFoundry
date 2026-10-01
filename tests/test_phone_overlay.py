@@ -71,9 +71,10 @@ def test_scales_to_a_720p_surface(host):
     _, big = overlay_rects(host, 1920, 1080, 0)
     _, small = overlay_rects(host, 1280, 720, 0)
     assert len(small) == len(big)
-    # Everything scales by 2/3 except the QR code, whose modules snap to whole pixels (tests/test_phone_qr.py).
-    qr = {(0, 0, 0, 255), (255, 255, 255, 255)}
-    pairs = [(s, b) for s, b in zip(small, big) if b[4] not in qr]
+    # Everything scales by 2/3 except the QR code and its logo, which snap to whole pixels (tests/test_phone_qr.py).
+    sq = next(r for r in big if r[4] == (255, 255, 255, 255))
+    pairs = [(s, b) for s, b in zip(small, big)
+             if b[4] != (255, 255, 255, 255) and not (sq[0] <= b[0] < sq[2] and sq[1] <= b[1] < sq[3])]
     assert len(pairs) > 100
     assert all(abs(s[2] - b[2] * 2 / 3) < 0.05 and abs(s[3] - b[3] * 2 / 3) < 0.05 for s, b in pairs)
 

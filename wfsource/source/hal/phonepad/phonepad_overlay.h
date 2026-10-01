@@ -41,6 +41,10 @@ namespace phonepad
 {
 
 constexpr int kToastMs      = 3000;   // "Phone connected" / "Phone lost"
+
+// What sits in the middle of the QR code (wf_args.txt "qr_logo=planet|full|none", default planet).
+enum : int { kLogoNone = 0, kLogoPlanet = 1, kLogoFull = 2 };
+int ParseLogoMode(const char* s);   // "planet" / "full" / "none"; -1 if none of them
 constexpr int kPanelAfterMs = 5000;   // the panel returns this long after a drop
 
 class Overlay
@@ -52,6 +56,12 @@ public:
     void ClearEndpoint();
     // Server event bits (phonepad::kEv*).
     void OnEvents(uint32_t events, int64_t nowMs);
+    void SetLogo(int mode) { logo_ = mode; }
+    int  Logo() const { return logo_; }
+    // The plate (in modules, top-left and size) left white for the logo in an n x n code, or false
+    // when there is none (mode none, or a version with a centre alignment pattern).
+    static bool LogoPlate(int n, int mode, int* x0, int* y0, int* w, int* h);
+
     // Back pressed. True if it was consumed (the panel was showing and is now hidden).
     bool OnBack(int64_t nowMs);
 
@@ -77,6 +87,7 @@ private:
     uint32_t    toastRgba_  = 0;
     int64_t     lostAt_     = -1;      // -1: never lost (or a phone is back)
     std::string lastKey_;
+    int         logo_       = kLogoPlanet;
 };
 
 }  // namespace phonepad
