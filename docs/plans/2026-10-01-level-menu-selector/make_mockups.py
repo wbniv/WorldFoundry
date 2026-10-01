@@ -5,11 +5,11 @@ Writes six self-contained 1440x900 pages (inline CSS, no external references) be
 made by headless Chrome. Each page shows a 1280x720 TV (the Chromecast HD's surface) with the menu drawn on the 1920x1080
 design canvas that wfsource/source/game/level_menu.cc scales from:
 
-  default.html      launch: the first entry chosen
-  moved.html        the cursor moved down to Q*bert
-  scrolling.html    a 14-entry bundle: six rows show, arrows say more are above and below
-  long-name.html    a name longer than the row ends in "..."
-  remote-hint.html  the TV hint (D-pad and OK only) instead of the desktop one
+  default.html      SMB world select at launch (desktop): World 1-1 chosen
+  moved.html        SMB: the cursor moved down to World 1-3
+  scrolling.html    the desktop bundle (second use case): seven levels, six rows, an arrow says more are above
+  long-name.html    the desktop bundle with a name wider than the row: it ends in "..."
+  remote-hint.html  SMB on the Chromecast HD (TV hint: D-pad, OK, Back) beside the desktop hint
   one-level.html    a one-entry bundle starts at once; an empty manifest is refused by cdpack
 
 Usage: python3 make_mockups.py [-h] [--no-png]
@@ -24,9 +24,10 @@ HERE = Path(__file__).resolve().parent
 # The colours level_menu.cc uses (0xRRGGBB).
 BG, TITLE, SUB, TEXT, SEL_BAR, SEL_EDGE, SEL_TEXT = "#0E1726", "#FFB454", "#8FA3BF", "#C9D4E3", "#23406B", "#56D364", "#FFFFFF"
 
+SMB = ["World 1-1", "World 1-2", "World 1-3", "World 1-4"]
 SEVEN = ["SMB World 1-1", "SMB World 1-2", "SMB World 1-3", "SMB World 1-4", "Snowgoons", "Q*bert", "Astra Marble Madness"]
 DESKTOP_HINT = "Up/Down choose - Space starts - Backspace in a game comes back here"
-TV_HINT = "D-pad choose - OK starts"
+TV_HINT = "D-pad choose - OK starts - Hold Back in a game for this menu"
 ROWS, ROW_H, ROW_GAP, LIST_X0, LIST_X1, LIST_Y = 6, 92, 8, 360, 1560, 300
 MAX_CHARS = 34   # what fits the row at this font; the engine measures the real width
 
@@ -35,12 +36,12 @@ def clip(name):
     return name if len(name) <= MAX_CHARS else name[:MAX_CHARS - 3] + "..."
 
 
-def menu(names, cursor, hint, title="World Foundry"):
+def menu(names, cursor, hint, title="World Foundry", prompt="Choose a game"):
     """The menu on the 1920x1080 design canvas, as absolutely positioned boxes."""
     first = min(max(0, cursor - ROWS + 1), max(0, len(names) - ROWS))
     first = min(first, cursor)
     out = [f'<div class="t" style="top:66px;font-size:84px;color:{TITLE}">{html.escape(title)}</div>',
-           f'<div class="t" style="top:176px;font-size:40px;color:{SUB}">Choose a game</div>']
+           f'<div class="t" style="top:176px;font-size:40px;color:{SUB}">{html.escape(prompt)}</div>']
     for row, i in enumerate(range(first, min(len(names), first + ROWS))):
         y = LIST_Y + row * (ROW_H + ROW_GAP)
         if i == cursor:
@@ -107,20 +108,24 @@ def page(name, title, sub, body):
 
 def build():
     pages = []
-    pages.append(page("default", "Level menu: at launch", "Desktop, 7 levels, the first chosen.",
-                      f'<div class="stage">{tv(menu(SEVEN, 0, DESKTOP_HINT))}</div>'))
-    pages.append(page("moved", "Level menu: a selection moved", "Down pressed five times: Q*bert. A starts it once released.",
-                      f'<div class="stage">{tv(menu(SEVEN, 5, DESKTOP_HINT))}</div>'))
-    many = SEVEN + [f"Test level {n}" for n in range(8, 15)]
-    pages.append(page("scrolling", "Level menu: many entries", "14 entries, cursor on 9: six rows, arrows above and below.",
-                      f'<div class="stage">{tv(menu(many, 8, DESKTOP_HINT))}</div>'))
+    smb = dict(title="WF SMB", prompt="Choose a world")
+    pages.append(page("default", "SMB world select: at launch", "The smb menu bundle on the desktop: World 1-1 chosen.",
+                      f'<div class="stage">{tv(menu(SMB, 0, DESKTOP_HINT, **smb))}</div>'))
+    pages.append(page("moved", "SMB world select: a selection moved", "Down twice: World 1-3. A starts it once released; the chain then runs 1-4, 1-1...",
+                      f'<div class="stage">{tv(menu(SMB, 2, DESKTOP_HINT, **smb))}</div>'))
+    pages.append(page("scrolling", "Desktop bundle: scrolling", "Second use case: all seven levels, six rows; on Astra Marble Madness an arrow says more are above.",
+                      f'<div class="stage">{tv(menu(SEVEN, 6, DESKTOP_HINT))}</div>'))
     long_names = SEVEN[:4] + ["Snowgoons: the extended director's cut with all the bonus rooms", "Q*bert", "Astra Marble Madness"]
-    pages.append(page("long-name", "Level menu: a long name", "A name wider than the row is cut and ends in '...'; the row never overflows.",
+    pages.append(page("long-name", "Desktop bundle: a long name", "A name wider than the row is cut and ends in '...'; the row never overflows.",
                       f'<div class="stage">{tv(menu(long_names, 4, DESKTOP_HINT))}</div>'))
-    pages.append(page("remote-hint", "Level menu: the TV remote", "Chromecast HD at 720p: only the D-pad and OK are named (Phase E).",
-                      f'<div class="stage">{tv(menu(SEVEN, 1, TV_HINT))}</div>'))
+    pages.append(page("remote-hint", "SMB world select: the TV remote", "Left: the smb app on the Chromecast HD (Phase D). Right: the desktop hint.",
+                      f'<div class="stage small"><figure>{tv(menu(SMB, 1, TV_HINT, **smb))}'
+                      f'<figcaption><b>Chromecast remote:</b> D-pad up/down, OK (button A) starts, Back held 1 s in a level returns here; '
+                      f'a short Back still leaves the app.</figcaption></figure>'
+                      f'<figure>{tv(menu(SMB, 1, DESKTOP_HINT, **smb))}'
+                      f'<figcaption><b>Desktop keyboard:</b> arrows, Space (A) starts, Backspace in a level returns here.</figcaption></figure></div>'))
     one = (f'<div class="stage small">'
-           f'<figure>{tv(menu(["Aquarium"], 0, DESKTOP_HINT))}'
+           f'<figure>{tv(menu(["World 1-1"], 0, DESKTOP_HINT, title="WF SMB", prompt="Choose a world"))}'
            f'<figcaption><b>One entry: no menu is shown.</b> The engine starts the only game at once; this frame is never drawn. '
            f'Single-level bundles built without a manifest have no MENU chunk and boot level 0 exactly as today.</figcaption></figure>'
            f'<figure style="width:640px"><pre>$ cdpack shell-menu.fth --manifest empty.manifest -o out.iff\n'
