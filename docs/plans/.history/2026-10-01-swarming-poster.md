@@ -1,5 +1,6 @@
 | Date | Change |
 |------|--------|
+| [2026-10-02](https://github.com/wbniv/WorldFoundry/commit/0eb61f10) | Chromecast: the dart startle seen on the device; a new demo clip with a dart in it; the Chromecast timing at 3,324 B (7.3 ms) |
 | [2026-10-02](https://github.com/wbniv/WorldFoundry/commit/8b23b54d) | The dart startles the school: a fast start (heading flipped at once, 2.5x speed for 0.6 s) for every follower within 5 body lengths |
 | [2026-10-01](https://github.com/wbniv/WorldFoundry/commit/dd7b6e4a) | Swarming poster: audited against what is true now |
 | [2026-10-01](https://github.com/wbniv/WorldFoundry/commit/4a906de5) | A hard wall limit for the followers (one left the tank on the Chromecast), the poster with Chromecast-only numbers, and the schooling demo clip |
@@ -12,6 +13,11 @@
 | [2026-10-01](https://github.com/wbniv/WorldFoundry/commit/2460bd2a) | Swarming: the Couzin zone model as a Forth core (school.fth, 2179 B, 6.2 ms/11 fish on the Chromecast), tested against numpy, and an A3 poster |
 
 <!--history-meta v1
+0eb61f10	author	Will Norris
+0eb61f10	added	12
+0eb61f10	deleted	12
+0eb61f10	files	1
+0eb61f10	body	The Chromecast re-paired at 192.168.4.43 (DHCP moved it). Frames cut from the clip show the followers, clustered at the resting fish, spreading across the tank after the dart.\nscripts/record-aquarium-school-chromecast.py now presses A in the choreography.\n\nCo-Authored-By: Claude Sonnet 5.5 <noreply@anthropic.com>\nClaude-Session: https://claude.ai/code/session_01NNPhRbrqjqMDkScPvTE9yC
 8b23b54d	author	Will Norris
 8b23b54d	added	1
 8b23b54d	deleted	1

@@ -5,9 +5,9 @@
 
 Writes, into DIR (default: next to this script):
   data.json    the resolved data sheet
-  poster.html  self-contained: inline CSS and inline SVG, no external reference
-  poster.pdf   one A3 page, live links (headless Chrome from poster.html)
-  poster.png   150 dpi preview of the PDF (pdftoppm)
+  schooling-poster.html  self-contained: inline CSS and inline SVG, no external reference
+  schooling-poster.pdf   one A3 page, live links (headless Chrome from schooling-poster.html)
+  schooling-poster.png   150 dpi preview of the PDF (pdftoppm)
 
 Every figure is computed here: the four snapshots by couzin.py (cached in snapshots.json; --resim recomputes), the phase diagram from sweep.json,
 the tank panel from tank.json (the Forth core, run), the Forth listing and its size from wflevels/aquarium/school.fth and measured.json.
@@ -487,7 +487,7 @@ def build_html():
 def main(argv=None):
     ap = argparse.ArgumentParser(description=__doc__.split('\n\n')[0], formatter_class=argparse.RawDescriptionHelpFormatter, epilog=__doc__.split('\n\n', 1)[1])
     ap.add_argument('--out-dir', type=Path, default=HERE)
-    ap.add_argument('--html-only', action='store_true', help='write data.json and poster.html, skip Chrome and pdftoppm')
+    ap.add_argument('--html-only', action='store_true', help='write data.json and schooling-poster.html, skip Chrome and pdftoppm')
     ap.add_argument('--resim', action='store_true', help='recompute the four snapshots (about 20 s) instead of reading snapshots.json')
     args = ap.parse_args(argv)
     if args.resim:
@@ -496,14 +496,14 @@ def main(argv=None):
     out.mkdir(parents=True, exist_ok=True)
     rows = D.rows()
     (out / 'data.json').write_text(json.dumps(rows, indent=1), encoding='utf-8')
-    html_path = out / 'poster.html'
+    html_path = out / 'schooling-poster.html'
     html_path.write_text(build_html(), encoding='utf-8')
     print(f'wrote {html_path} ({html_path.stat().st_size // 1024} KB), {len(rows)} rows')
     if args.html_only:
         return 0
-    FP.render_pdf(html_path, out / 'poster.pdf')
-    FP.render_png(out / 'poster.pdf', out / 'poster.png')
-    print(f'wrote {out / "poster.pdf"}, {out / "poster.png"}')
+    FP.render_pdf(html_path, out / 'schooling-poster.pdf')
+    FP.render_png(out / 'schooling-poster.pdf', out / 'schooling-poster.png')
+    print(f'wrote {out / "schooling-poster.pdf"}, {out / "schooling-poster.png"}')
     return 0
 
 

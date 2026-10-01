@@ -50,7 +50,7 @@ flowchart LR
     H --> T
     T --> J["sweep.json · tank.json<br/>measured.json"]
     B["device_bench.sh<br/>Chromecast"] --> J
-    J --> G["make_swarm_poster.py"] --> O["poster.pdf / .png"]
+    J --> G["make_swarm_poster.py"] --> O["schooling-poster.pdf / .png"]
 ```
 
 The rule each follower runs, one tick (the words in `school.fth` are in the boxes):
@@ -221,10 +221,10 @@ The steps are the spec; each shows its raw output.
 5. The poster is one A3 page with embedded fonts.
 
     ```
-    $ pdfinfo docs/reference/swarming-poster/poster.pdf | grep -E "Pages|Page size"
+    $ pdfinfo docs/reference/swarming-poster/schooling-poster.pdf | grep -E "Pages|Page size"
     Pages:           1
     Page size:       841.92 x 1191.12 pts (A3)
-    $ pdffonts docs/reference/swarming-poster/poster.pdf | head -4
+    $ pdffonts docs/reference/swarming-poster/schooling-poster.pdf | head -4
     name                                 type              encoding         emb sub uni object ID
     AAAAAA+NotoSans-Bold                 CID TrueType      Identity-H       yes yes yes      4  0
     BAAAAA+NotoSans-Regular              CID TrueType      Identity-H       yes yes yes      5  0

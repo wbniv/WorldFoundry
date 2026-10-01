@@ -252,6 +252,6 @@ def test_page_fits(tmp_path):
 
 
 def test_committed_html_is_current(html_text):
-    committed = POSTER_DIR / "poster.html"
+    committed = POSTER_DIR / "schooling-poster.html"
     assert committed.exists(), "run: task poster-swarming"
     assert committed.read_text(encoding="utf-8") == html_text

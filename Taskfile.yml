@@ -1156,7 +1156,7 @@ tasks:
       - python3 -m pytest tests/test_poster_clownfish_biomechanics.py -v
 
   poster-swarming:
-    desc: "Swarming poster, A3 (docs/plans/2026-10-01-swarming-poster.md): sweep.json, tank.json, measured.json, school.fth and the Couzin snapshots → docs/reference/swarming-poster/{data.json,poster.html,poster.pdf,poster.png}. Recompute the inputs with `task swarming-measure`. Needs google-chrome and pdftoppm."
+    desc: "Swarming poster, A3 (docs/plans/2026-10-01-swarming-poster.md): sweep.json, tank.json, measured.json, school.fth and the Couzin snapshots → docs/reference/swarming-poster/{data.json,schooling-poster.html,schooling-poster.pdf,schooling-poster.png}. Recompute the inputs with `task swarming-measure`. Needs google-chrome and pdftoppm."
     cmds:
       - python3 docs/reference/swarming-poster/make_swarm_poster.py
     sources:
@@ -1168,13 +1168,13 @@ tasks:
       - docs/reference/swarming-poster/snapshots.json
       - wflevels/aquarium/school.fth
     generates:
-      - docs/reference/swarming-poster/poster.html
-      - docs/reference/swarming-poster/poster.pdf
-      - docs/reference/swarming-poster/poster.png
+      - docs/reference/swarming-poster/schooling-poster.html
+      - docs/reference/swarming-poster/schooling-poster.pdf
+      - docs/reference/swarming-poster/schooling-poster.png
     status:
-      - test -s docs/reference/swarming-poster/poster.html
-      - test -s docs/reference/swarming-poster/poster.pdf
-      - test -s docs/reference/swarming-poster/poster.png
+      - test -s docs/reference/swarming-poster/schooling-poster.html
+      - test -s docs/reference/swarming-poster/schooling-poster.pdf
+      - test -s docs/reference/swarming-poster/schooling-poster.png
 
   swarming-measure:
     desc: "Recompute the swarming poster's inputs: the zone-width sweep (about 6 min), the Forth tank runs (about 5 min) and the size/error/timing of school.fth (add the Chromecast figure with docs/reference/swarming-poster/device_bench.sh then `measure.py --device-ms ...`)"

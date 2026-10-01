@@ -1,7 +1,7 @@
 #!/usr/bin/env python3
 """make_mockups.py: the mockups for the swarming-poster plan, each a self-contained 1440x900 HTML (inline CSS/SVG) plus a same-name PNG (headless Chrome).
 
-  poster.html        the real poster (docs/reference/swarming-poster/poster.html) scaled into the canvas, with a guide to its panels
+  poster.html        the real poster (docs/reference/swarming-poster/schooling-poster.html) scaled into the canvas, with a guide to its panels
   frame-budget.html  what one Forth step costs in a 60 fps frame, all at once vs spread over frames (numbers from measured.json)
   mailboxes.html     the mailbox map: where school.fth's state lives, with the values of a real run (the Forth, in the tank, tick 300)
   data-flow.html     how the pieces connect: the Couzin reference, the Forth core, the engine, the poster's inputs
@@ -19,7 +19,7 @@ h1{{font-size:26px;margin:0}}.sub{{color:{MUTED}}}"""
 
 
 def poster_page():
-    doc = (REF / "poster.html").read_text(encoding="utf-8")
+    doc = (REF / "schooling-poster.html").read_text(encoding="utf-8")
     style = re.search(r"<style>(.*?)</style>", doc, re.S).group(1)
     body = re.search(r'<div class="page">(.*)</div><script>', doc, re.S).group(1)
     guide = [("A", "The four collective states, simulated: swarm, torus, dynamic parallel, highly parallel"),
@@ -94,7 +94,7 @@ def data_flow_page():
         "test": (495, 480, 300, 70, "forth_check.py, tests", "one-tick equivalence, tank runs", "#fff2d9", "#b26a00"),
         "dev": (40, 480, 260, 70, "device_bench.sh", "ms per tick on the Chromecast", "#fff2d9", "#b26a00"),
         "meas": (40, 640, 330, 70, "sweep.json · tank.json · measured.json", "the poster’s computed inputs", "#fff2d9", "#b26a00"),
-        "poster": (560, 640, 330, 70, "make_swarm_poster.py", "poster.html · .pdf · .png", "#fff2d9", "#b26a00"),
+        "poster": (560, 640, 330, 70, "make_swarm_poster.py", "schooling-poster.html · .pdf · .png", "#fff2d9", "#b26a00"),
     }
     arrows = [("player", "leader"), ("leader", "school"), ("school", "mail"), ("mail", "dir"), ("dir", "draw"), ("couzin", "test"), ("host", "test"), ("test", "meas"),
               ("dev", "meas"), ("meas", "poster"), ("school", "host")]
