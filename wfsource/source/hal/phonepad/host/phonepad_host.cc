@@ -17,6 +17,13 @@
 //   state                      prints "STATE mask=0x.. phone=0|1 running=0|1"
 //   pin                        prints "PIN <six fresh digits>"
 //   private <a.b.c.d>          prints "PRIVATE 0|1"
+//   ov-endpoint <url> <host:port> <pin>   the TV overlay (phonepad_overlay.h), on a
+//   ov-event connected|lost <ms>          fake clock so the tests control time:
+//   ov-back <ms>               prints "BACK 0|1" (consumed or not)
+//   ov-state <ms>              prints "OVSTATE panel=0|1 toast=<text>"
+//   ov-rects <w> <h> <ms>      prints "RECTS <n> changed=0|1" then n lines
+//                              "R x0 y0 x1 y1 rrggbbaa"
+//   qr <text>                  prints "QR <size>" then size rows of 0/1
 //   quit
 //
 //   phonepad_host --pin 123456 --page controller.html --layout layout.json
@@ -24,6 +31,7 @@
 //=============================================================================
 
 #include "../phonepad.h"
+#include "../phonepad_overlay.h"
 
 #include <arpa/inet.h>
 #include <poll.h>
@@ -36,6 +44,7 @@
 #include <fstream>
 #include <sstream>
 #include <string>
+#include <vector>
 
 namespace
 {
@@ -105,6 +114,8 @@ int main(int argc, char** argv)
 
     uint16_t last = 0;
     std::string line;
+    phonepad::Overlay overlay;
+    std::vector<PhonepadRect> rects;
     for (;;)
     {
         pollfd p = { STDIN_FILENO, POLLIN, 0 };
@@ -137,6 +148,51 @@ int main(int argc, char** argv)
                 in_addr ia;
                 const bool ok = inet_pton(AF_INET, cmd.c_str() + 8, &ia) == 1;
                 std::printf("PRIVATE %d\n", ok && phonepad::IsPrivateIPv4(ntohl(ia.s_addr)) ? 1 : 0);
+            }
+            else if (cmd.compare(0, 12, "ov-endpoint ") == 0)
+            {
+                char url[128], hp[64], pin[16];
+                if (std::sscanf(cmd.c_str() + 12, "%127s %63s %15s", url, hp, pin) == 3)
+                    overlay.SetEndpoint(url, hp, pin);
+            }
+            else if (cmd.compare(0, 9, "ov-event ") == 0)
+            {
+                char what[32];
+                long long t = 0;
+                if (std::sscanf(cmd.c_str() + 9, "%31s %lld", what, &t) == 2)
+                    overlay.OnEvents(std::strcmp(what, "connected") == 0 ? phonepad::kEvPhoneConnected
+                                     : std::strcmp(what, "lost") == 0 ? phonepad::kEvPhoneLost : 0u, t);
+            }
+            else if (cmd.compare(0, 8, "ov-back ") == 0)
+                std::printf("BACK %d\n", overlay.OnBack(std::atoll(cmd.c_str() + 8)) ? 1 : 0);
+            else if (cmd.compare(0, 9, "ov-state ") == 0)
+            {
+                const long long t = std::atoll(cmd.c_str() + 9);
+                std::printf("OVSTATE panel=%d toast=%s\n", overlay.PanelVisible(t) ? 1 : 0, overlay.Toast(t));
+            }
+            else if (cmd.compare(0, 9, "ov-rects ") == 0)
+            {
+                int w = 0, h = 0;
+                long long t = 0;
+                if (std::sscanf(cmd.c_str() + 9, "%d %d %lld", &w, &h, &t) == 3)
+                {
+                    const bool changed = overlay.Build(w, h, t, &rects);
+                    std::printf("RECTS %u changed=%d\n", unsigned(rects.size()), changed ? 1 : 0);
+                    for (const PhonepadRect& r : rects)
+                        std::printf("R %.2f %.2f %.2f %.2f %08x\n", r.x0, r.y0, r.x1, r.y1, unsigned(r.rgba));
+                }
+            }
+            else if (cmd.compare(0, 3, "qr ") == 0)
+            {
+                std::vector<uint8_t> m;
+                int n = 0;
+                if (!phonepad::Overlay::EncodeQr(cmd.substr(3), &m, &n)) n = 0;
+                std::printf("QR %d\n", n);
+                for (int r = 0; r < n; ++r)
+                {
+                    for (int c = 0; c < n; ++c) std::putchar(m[size_t(r) * size_t(n) + size_t(c)] ? '1' : '0');
+                    std::putchar('\n');
+                }
             }
             else
                 std::printf("UNKNOWN %s\n", cmd.c_str());

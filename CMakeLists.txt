@@ -819,8 +819,12 @@ endif()
 # § Engine linkability.
 set(WF_PLATFORM_SHELL_SOURCES)
 if(ANDROID)
+    # hal/phonepad: the phone as a gamepad (a LAN web controller; portable, also built by
+    # tests/phonepad_harness.py on Linux). docs/plans/2026-09-30-aquarium-chromecast.md, Phase E.
     list(APPEND WF_PLATFORM_SHELL_SOURCES
         ${SRC}/hal/android/native_app_entry.cc
+        ${SRC}/hal/phonepad/phonepad.cc
+        ${SRC}/hal/phonepad/phonepad_overlay.cc
         ${APP_GLUE_DIR}/android_native_app_glue.c)
 elseif(IOS)
     list(APPEND WF_PLATFORM_SHELL_SOURCES

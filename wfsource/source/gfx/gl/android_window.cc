@@ -22,6 +22,7 @@
 #include <android/native_window.h>
 
 #include <hal/android/wf_android_export.hp>
+#include <hal/phonepad/phonepad_overlay.h>
 
 #include <cstdio>
 #include <cstdlib>
@@ -44,6 +45,12 @@ GLuint gHudVao     = 0;
 GLuint gHudVbo     = 0;
 bool   gHudInited  = false;
 bool   gHudEnabled = true;
+
+// Phone-controller overlay (hal/phonepad/phonepad_overlay.h): its own VAO/VBO,
+// re-uploaded only when the overlay changes, drawn with the HUD's program.
+GLuint gPhoneVao   = 0;
+GLuint gPhoneVbo   = 0;
+GLsizei gPhoneVerts = 0;
 
 #define WF_LOG_TAG "wf_game"
 #define WFLOG(fmt, ...) __android_log_print(ANDROID_LOG_INFO, WF_LOG_TAG, fmt, ##__VA_ARGS__)
@@ -149,6 +156,9 @@ WFAndroidEglInit(ANativeWindow* window)
             gHudProg   = 0;
             gHudVao    = 0;
             gHudVbo    = 0;
+            gPhoneVao   = 0;
+            gPhoneVbo   = 0;
+            gPhoneVerts = 0;
             eglDestroyContext(gEglDisplay, gEglContext);
             gEglContext = EGL_NO_CONTEXT;
             // Fall through to normal retry on next INIT_WINDOW.
@@ -374,11 +384,79 @@ WFAndroidDrawHUD()
     if ( prevCull)  glEnable(GL_CULL_FACE);
 }
 
+// Defined in hal/android/native_app_entry.cc.
+extern "C" int WFAndroidPhoneOverlayRects(int w, int h, const PhonepadRect** rects, int* changed);
+
+// The phone-controller panel and toasts (Phase E of docs/plans/2026-09-30-aquarium-chromecast.md),
+// drawn over the game like the touch HUD but also on TV, where the HUD is off.
+extern "C" void
+WFAndroidDrawPhoneOverlay()
+{
+    const int w = _halWindowWidth;
+    const int h = _halWindowHeight;
+    if (w <= 0 || h <= 0) return;
+    const PhonepadRect* rects = nullptr;
+    int changed = 0;
+    const int n = WFAndroidPhoneOverlayRects(w, h, &rects, &changed);
+    if (n <= 0) { gPhoneVerts = 0; return; }
+
+    HudInit();
+    if (gHudProg == 0) return;
+    if (gPhoneVao == 0)
+    {
+        glGenVertexArrays(1, &gPhoneVao);
+        glGenBuffers(1, &gPhoneVbo);
+        glBindVertexArray(gPhoneVao);
+        glBindBuffer(GL_ARRAY_BUFFER, gPhoneVbo);
+        const GLsizei stride = sizeof(HudVert);
+        glEnableVertexAttribArray(0);
+        glVertexAttribPointer(0, 2, GL_FLOAT, GL_FALSE, stride, (void*)offsetof(HudVert, x));
+        glEnableVertexAttribArray(1);
+        glVertexAttribPointer(1, 4, GL_FLOAT, GL_FALSE, stride, (void*)offsetof(HudVert, r));
+        glBindVertexArray(0);
+        changed = 1;
+    }
+    if (changed || gPhoneVerts == 0)
+    {
+        std::vector<HudVert> verts;
+        verts.reserve(size_t(n) * 6);
+        const float fw = float(w), fh = float(h);
+        for (int i = 0; i < n; ++i)
+        {
+            const PhonepadRect& r = rects[i];
+            PushHudRect(verts, r.x0, r.y0, r.x1, r.y1, fw, fh,
+                        float((r.rgba >> 24) & 255) / 255.0f, float((r.rgba >> 16) & 255) / 255.0f,
+                        float((r.rgba >> 8) & 255) / 255.0f, float(r.rgba & 255) / 255.0f);
+        }
+        glBindBuffer(GL_ARRAY_BUFFER, gPhoneVbo);
+        glBufferData(GL_ARRAY_BUFFER, GLsizeiptr(verts.size() * sizeof(HudVert)), verts.data(), GL_STATIC_DRAW);
+        glBindBuffer(GL_ARRAY_BUFFER, 0);
+        gPhoneVerts = GLsizei(verts.size());
+    }
+
+    GLboolean prevBlend = glIsEnabled(GL_BLEND);
+    GLboolean prevDepth = glIsEnabled(GL_DEPTH_TEST);
+    GLboolean prevCull  = glIsEnabled(GL_CULL_FACE);
+    glDisable(GL_DEPTH_TEST);
+    glDisable(GL_CULL_FACE);
+    glEnable(GL_BLEND);
+    glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
+    glUseProgram(gHudProg);
+    glBindVertexArray(gPhoneVao);
+    glDrawArrays(GL_TRIANGLES, 0, gPhoneVerts);
+    glBindVertexArray(0);
+    glUseProgram(0);
+    if (!prevBlend) glDisable(GL_BLEND);
+    if ( prevDepth) glEnable(GL_DEPTH_TEST);
+    if ( prevCull)  glEnable(GL_CULL_FACE);
+}
+
 void AndroidSwapBuffers()
 {
     if (gEglDisplay != EGL_NO_DISPLAY && gEglSurface != EGL_NO_SURFACE)
     {
         WFAndroidDrawHUD();
+        WFAndroidDrawPhoneOverlay();
         eglSwapBuffers(gEglDisplay, gEglSurface);
     }
 }

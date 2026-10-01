@@ -221,3 +221,34 @@ class WS:
 def ws_accept(key: str) -> str:
     import hashlib
     return base64.b64encode(hashlib.sha1((key + "258EAFA5-E914-47DA-95CA-C5AB0DC85B11").encode()).digest()).decode()
+
+
+def overlay_rects(host: "Host", w: int, h: int, t: int):
+    """Ask the host's overlay for its rectangles: (changed, [(x0, y0, x1, y1, (r, g, b, a)), ...])."""
+    host.command(f"ov-rects {w} {h} {t}")
+    m = host.expect(r"^RECTS (\d+) changed=(\d)$")
+    rects = []
+    for _ in range(int(m.group(1))):
+        r = host.expect(r"^R (\S+) (\S+) (\S+) (\S+) ([0-9a-f]{8})$")
+        c = int(r.group(5), 16)
+        rects.append((*map(float, r.groups()[:4]), (c >> 24, (c >> 16) & 255, (c >> 8) & 255, c & 255)))
+    return m.group(2) == "1", rects
+
+
+def render_rects(rects, w: int, h: int, background: Path | None = None):
+    """Composite the overlay's rectangles the way the GL side does (source-over alpha), as a PIL image."""
+    from PIL import Image, ImageDraw
+    base = (Image.open(background).convert("RGBA").resize((w, h)) if background
+            else Image.new("RGBA", (w, h), (40, 60, 80, 255)))
+    draw = ImageDraw.Draw(base)
+    for x0, y0, x1, y1, rgba in rects:
+        box = (max(0, round(x0)), max(0, round(y0)), min(w, round(x1)), min(h, round(y1)))
+        if box[2] <= box[0] or box[3] <= box[1]:
+            continue
+        if rgba[3] == 255:
+            draw.rectangle([box[0], box[1], box[2] - 1, box[3] - 1], fill=rgba)
+        else:                                   # source-over, only over the rectangle itself
+            region = base.crop(box)
+            base.paste(Image.alpha_composite(region, Image.new("RGBA", region.size, rgba)), box)
+            draw = ImageDraw.Draw(base)
+    return base.convert("RGB")

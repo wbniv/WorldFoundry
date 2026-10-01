@@ -134,7 +134,7 @@ E3 the QR code; E4 device run on the Chromecast with a real phone (the user's), 
 Implemented on 2026‑10‑01 (E1, E2, E3 and the headless half of E5). E0, E4 and the on-device half of E5 need the user's phone; E6 (tilt, https) and E7 (game-driven haptics) wait on the user's decisions (a self-signed certificate; the sound-slot table of the SFX plan).
 
 - [x] **E1** the server, the protocol and the page, tested on Linux with a headless client (verification 11 and the page half of 12)
-- [ ] **E2** Android wiring, `INTERNET`, the TV overlay with the URL and PIN
+- [x] **E2** Android wiring, `INTERNET`, the TV overlay with the URL and PIN (verification 13; on the real Chromecast, below)
 - [ ] **E3** the QR code
 - [ ] **E4** device run with the user's phone: PENDING (needs the phone)
 - [ ] **E5** failure states: the headless half is in E1's tests (wrong PIN, second phone, lost signal, malformed and oversized frames, no stuck button after any of them); the device half is PENDING (needs the phone)
@@ -150,6 +150,16 @@ Implemented on 2026‑10‑01 (E1, E2, E3 and the headless half of E5). E0, E4 a
 - **LAN only:** the app binds to its own Wi-Fi address (found by a UDP `connect()` that sends nothing) and refuses to listen if that is not a private address; peers outside 10/8, 172.16/12, 192.168/16 and 169.254/16 are refused at `accept` (loopback is allowed for the Linux tests).
 - **Frames:** client frames must be masked, unfragmented text of at most 64 bytes (the longest legal one is `t:` and 15 digits); anything else closes the connection with RFC 6455's code (1002, 1003, 1007 or 1009) and releases every button at once. An unknown `x:` type is ignored but counts as a heartbeat, so E7 can add `h:` without breaking an older TV. The server sends close **4001** "replaced" and **4002** "timeout".
 - **The page** does not reconnect after 4001 (two tabs on one phone would otherwise take over from each other forever); it offers "Use this phone". It fetches `/layout.json` before every connection attempt, because a refused WebSocket cannot tell the page why: a 403 there means the code is from an earlier launch. It releases everything when it is hidden (a locked phone, another tab) or loses focus. The stick uses the engine's own threshold, 0.5 per axis (`kJoystickThreshold`), as item 3 says; mockup 2 first drew 0.4 (28 px of 70).
+
+**How E2 is built:**
+
+- **The input merge** is one line in [`native_app_entry.cc`](../../wfsource/source/hal/android/native_app_entry.cc): `Emit()` now sends `gGamepadButtons | gTouchButtons | gPhoneButtons`. The server is polled at the end of `WFAndroidPumpEvents` (once per frame), each change of the phone's mask is logged as one `phone mask=0x…` line beside the existing key-edge line, `APP_CMD_PAUSE` stops the server and releases the phone's buttons, `APP_CMD_RESUME` starts it again with the same PIN (one PIN per launch). With no Wi-Fi address yet it retries every 3 s while resumed.
+- **`INTERNET` only where it is used:** the aquarium and condo flavors each get a three-line `src/<flavor>/AndroidManifest.xml` with the one permission; `src/main` and snowgoons stay without any. (The aquarium test that said "the flavors share main's manifest" now checks that the flavor manifest adds only that permission.)
+- **The overlay** ([`phonepad_overlay.cc`](../../wfsource/source/hal/phonepad/phonepad_overlay.cc)) is portable logic plus geometry: it turns the state into solid rectangles, with text from the already-vendored public-domain `stb_easy_font` (the font `display.cc` uses), on a 1920×1080 canvas scaled to the surface. [`android_window.cc`](../../wfsource/source/gfx/gl/android_window.cc) draws them after the touch HUD with the HUD's shader, in its own buffer that is re-uploaded only when the overlay changes (the HUD is off on TV; the overlay is not). States: the panel while no phone is connected; "Phone connected" for 3 s; on a drop "Phone lost" at once and the panel again after 5 s; **Back** while the panel shows hides it for the session (mockup 3's "Press Back to hide this"; without it a remote-only player would look at the panel for ever), and Back keeps its system meaning otherwise.
+
+**On the real Chromecast HD (2026‑10‑01 18:03 +07 = 11:03 UTC; no phone, so the client was this PC on the same Wi-Fi):** the condo release build installed and ran at 59.9 fps with the panel drawn (evidence in `~/tmp/android-device-run/condo-20261001T110254Z/`, `screen.png`), logcat `phonepad: listening on 192.168.4.38:8765` and `phone controller: open http://192.168.4.38:8765/?k=800855 (PIN 800855)`. From the PC: `GET /` 200 (the PIN form), a wrong PIN 403 (logged `wrong PIN from 192.168.4.21`), the right PIN 200 with the page byte for byte, the WebSocket upgraded and the TV showed "Phone connected" (`screen-phone-connected.png`); after 1.6 s of silence the TV closed with 4002 "timeout" and logged `every button released`, and 5 s later the panel was back (`screen-after-drop.png`). The PC sent only the mask 0 and timestamps, so nothing in the game moved (no `phone mask=` line was logged).
+
+**Finding: the Chromecast's Wi-Fi power saving sets the latency, not the code.** Round trip of a `t:` frame from the PC, 60 samples each, by the gap between frames: 250 ms gap, median 156 ms; 100 ms, 102 ms; 50 ms, 27.5 ms; 20 ms, 21 ms (minimum 4 to 10 ms in every run). Plain `ping` shows the same (every 250 ms: average 120 ms to the Chromecast but 3 ms to the router; every 20 ms: 6 ms to the Chromecast), so it is the Chromecast's radio dozing between packets (the router holds its traffic until the next beacon), not the server or the PC. With the plan's 250 ms heartbeat, the first press after a pause can take well over the 100 ms target of step 14. Two fixes, both measured on the phone in E4 before choosing (**a decision for the user**, since each costs something): (a) the page sends a frame every 50 ms or less while connected, which keeps the radio awake (median about 25 ms here; a little phone battery and about 160 bytes per second), or (b) the app holds a low-latency `WifiLock` while a phone is connected (a JNI call and the `WAKE_LOCK` permission, so step 13's "nothing else new" would change). Nothing has been changed yet: the heartbeat is still 250 ms as designed. (Two earlier probe runs were timed out by the TV while `adb screencap` was pulling a 1920×1080 PNG over the same Wi-Fi; a third run with the same screenshot was not. The first had a cause in the probe itself, which blocked on the screenshot; for the second the evidence is missing: a packet capture on the Chromecast would show whether frames were delayed past 1 s.)
 
 **Rejected:**
 - **Google's TV remote protocol:** it is the same D-pad and OK as the physical remote, so it cannot reach B, C, D, E or F.
@@ -310,17 +320,41 @@ Numbered, runnable steps; each shows its raw output with PASS or FAIL. Times in 
     **PASS** for everything E1 owns: 51 protocol tests (handshake against RFC 6455's own key, the mask bits, the `t:` echo, the 1 s release measured at 0.95 to 1.4 s, the heartbeat holding a button for 2.5 s, newest phone wins with close 4001, 16 malformed or oversized frames each closing with its code and releasing, wrong PIN, rate limit, idle sockets, pause and resume), 11 page tests in headless Chromium and 5 layout checks. Each safety test was shown to fail with the release removed (17 failures, then 17 passes once restored). **PENDING (out of scope here):** the tilt quantiser and the `h:` encoding, which are E6 and E7.
 
 12. The page and a real engine on Linux. Run the engine with the phone controller enabled, open the page in headless Chrome (screenshot compared with mockup 2), then a headless client holds RIGHT for 1.5 s.
-    Expected: the engine log's `ball pos` changes, and stops moving when the client disconnects. **PENDING**
+    Expected: the engine log's `ball pos` changes, and stops moving when the client disconnects.
+
+    **Page half PASS, engine half PENDING.** The page runs in headless Chromium against the real server (`tests/test_phone_controller_page.py`, 11 tests: pointer and two-finger touch reach the mask, a held button survives 2.2 s on the heartbeat, closing the tab releases, takeover, wrong PIN, the TV going away and coming back); its screenshots are `~/tmp/phone-controller/condo.png` and `aquarium.png`, matching mockup 2's layout (stick left, buttons right, the mask line at the bottom). The engine half is not run: the Linux engine does not include the phone controller (only the Android glue polls it), and adding it to the Linux HAL is outside E1 to E3; the Android engine half is step 14.
 
 13. The Android build. `./gradlew :app:assembleAquariumRelease :app:assembleCondoRelease`. Expected: BUILD SUCCESSFUL for both ABIs; the APK has `assets/controller.html`; the merged manifest has
-    `android.permission.INTERNET` and nothing else new. **PENDING**
+    `android.permission.INTERNET` and nothing else new.
+
+    ```
+    $ cd android && ANDROID_HOME=/home/will/android-sdk-local ./gradlew :app:assembleAquariumRelease :app:assembleCondoRelease   (2026-10-01 18:00 +07)
+    BUILD SUCCESSFUL in 1m 28s
+    $ unzip -l .../aquarium/release/worldfoundry-aquarium-release.apk | grep -E "assets/|lib/"
+      2690640  lib/arm64-v8a/libwf_game.so
+      2201072  lib/armeabi-v7a/libwf_game.so
+       186368  assets/cd.iff
+        17389  assets/controller.html
+          376  assets/layout.json
+    (condo: the same plus assets/wf_args.txt; both .so files of both APKs contain "phone controller: open")
+    $ aapt dump permissions worldfoundry-aquarium-release.apk; ... condo ...; ... snowgoons ...
+    package: org.worldfoundry.wf_game.aquarium
+    uses-permission: name='android.permission.INTERNET'
+    package: org.worldfoundry.wf_game.condo
+    uses-permission: name='android.permission.INTERNET'
+    package: org.worldfoundry.wf_game
+    ```
+
+    **PASS** (snowgoons, built with the three lint tasks skipped for the missing soundfont, has no permission and no controller assets). `tests/test_phone_controller_android.py` checks the same APKs when they are present.
 
 14. On the Chromecast with a real phone (the user's): scan the QR on the TV, hold the stick. Expected: the TV shows the toast; the aquarium fish moves; in the condo the player moves, A hops, B toggles a glass door, C
     teleports; the median touch-to-frame latency is **under 100 ms** (the page timestamps each message; the engine logs the frame it took effect in). Evidence: screenshots of the TV and the phone, the latency
-    numbers. **PENDING**
+    numbers.
+
+    **PENDING** (needs the user's phone). Two notes for that run. The condo's controls changed on 2026‑10‑01 (commit `41742943`): **A** toggles the glass doors and the balcony shade, there is no hop, and B does nothing on its own, so read "A hops, B toggles a glass door" above as "A toggles a door or the shade". And the latency target is at risk from the Chromecast's Wi-Fi power saving (see "Finding" under Phase E progress): measure with the 250 ms heartbeat first, then decide between the two fixes.
 
 15. Failure states on the device. Lock the phone, turn its Wi-Fi off, join a guest network, use a wrong PIN, connect a second phone. Expected: mockup 4's behaviour for each, and **no stuck button after any of
-    them** (read the engine's button mask after each). **PENDING**
+    them** (read the engine's button mask after each). **PENDING** on the device (needs the user's phone). The headless half (wrong PIN, a second phone, lost signal, malformed and oversized frames, no stuck button after each) passes in step 11's tests, and the TV's timeout and the panel's return were seen on the Chromecast with this PC as the client (Phase E progress).
 
 16. Codemagic `android-apk-debug` on the merged branch; macOS and iOS workflows unaffected. Expected: green. **PENDING**
 
@@ -334,7 +368,7 @@ Numbered, runnable steps; each shows its raw output with PASS or FAIL. Times in 
 
 20. Tilt steering on the Chromecast (Phase E6). With tilt on, the aquarium fish steers left, right, up and down by tilting the phone; "Set neutral" re-zeros it; holding the phone still produces no steering; the stick and tilt together do not fight. Expected: no stuck direction after switching tilt off or locking the phone. Evidence: the TV's engine log with the tilt-driven `ball pos` changes and a short note of how it felt. **PENDING**
 
-21. Haptics (Phase E7). Android Chrome: a tick on every button press; in the condo, a door toggle (B) or a teleport (C) buzzes the phone through the sound slot's pattern. iPhone: the toggle is hidden and the page says why. Expected: the buzz matches the event within 100 ms. Evidence: the TV's `h:` log lines and a note of what was felt. **PENDING**
+21. Haptics (Phase E7). Android Chrome: a tick on every button press; in the condo, a door toggle (B) or a teleport (C) buzzes the phone through the sound slot's pattern. iPhone: the toggle is hidden and the page says why. Expected: the buzz matches the event within 100 ms. Evidence: the TV's `h:` log lines and a note of what was felt. **PENDING** (In the condo, read "a door toggle (B)" as A since commit `41742943`.)
 ## Result on a real Chromecast
 
 On a Chromecast HD (Amlogic S805X2, Android 14, 1920×1080, 32-bit only) the aquarium runs as its own app, installs in about a second, draws the full 16:9 tank, responds to the remote's D-pad,

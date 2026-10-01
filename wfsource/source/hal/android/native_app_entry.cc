@@ -34,14 +34,20 @@
 #include <sys/stat.h>
 #include <unistd.h>
 
+#include <time.h>
+
 #include <cstdio>
 #include <cstdlib>
 #include <cstring>
+#include <string>
+#include <vector>
 
 #include <hal/hal.h>
 #include <hal/lifecycle.h>
 #include <pigsys/pigsys.hp>
 #include <hal/android/wf_android_export.hp>
+#include <hal/phonepad/phonepad.h>
+#include <hal/phonepad/phonepad_overlay.h>
 
 extern "C" void _HALSetJoystickButtons(joystickButtonsF joystickButtons);
 
@@ -117,10 +123,11 @@ void OpenDiagnosticLog(struct android_app* app)
                         "diagnostic log: %s", logpath);
 }
 
-// Bitmask of WF buttons currently held — combined gamepad + touch states are
-// merged here and flushed to _HALSetJoystickButtons.
+// Bitmask of WF buttons currently held — combined gamepad + touch + phone
+// states are merged here and flushed to _HALSetJoystickButtons.
 joystickButtonsF    gGamepadButtons = 0;
 joystickButtonsF    gTouchButtons   = 0;
+joystickButtonsF    gPhoneButtons   = 0;   // the phone controller (hal/phonepad), below
 
 // True when running on Google TV / Android TV (leanback). On TV there's no
 // touchscreen worth hit-testing and the on-screen d-pad is suppressed.
@@ -132,7 +139,117 @@ constexpr uint32_t kActionBits = EJ_BUTTONF_A | EJ_BUTTONF_B;
 
 void Emit()
 {
-    _HALSetJoystickButtons(gGamepadButtons | gTouchButtons);
+    _HALSetJoystickButtons(gGamepadButtons | gTouchButtons | gPhoneButtons);
+}
+
+// ---- The phone as a gamepad (docs/plans/2026-09-30-aquarium-chromecast.md, Phase E) ----
+// An app that ships assets/layout.json (aquarium, condo; not snowgoons) serves
+// assets/controller.html on its Wi-Fi address while resumed. The phone's mask is
+// a third input source OR-ed in Emit(); the server releases it on every kind of
+// disconnect. Polled once per frame from WFAndroidPumpEvents on this thread.
+
+phonepad::Server    gPhone;
+phonepad::Overlay   gPhoneOverlay;
+bool                gPhoneEnabled   = false;   // assets/layout.json present
+bool                gPhoneResumed   = false;   // between APP_CMD_RESUME and APP_CMD_PAUSE
+std::string         gPhonePage, gPhoneLayout, gPhonePin;
+int64_t             gPhoneRetryMs   = 0;       // next attempt to find a LAN address
+std::vector<PhonepadRect> gPhoneRects;
+
+int64_t NowMs()
+{
+    timespec ts;
+    clock_gettime(CLOCK_MONOTONIC, &ts);
+    return int64_t(ts.tv_sec) * 1000 + ts.tv_nsec / 1000000;
+}
+
+void PhoneLog(const char* line) { WFLOG("%s", line); }
+
+bool ReadAsset(const char* name, std::string* out)
+{
+    if (!gAssetMgr) return false;
+    AAsset* a = AAssetManager_open(gAssetMgr, name, AASSET_MODE_BUFFER);
+    if (!a) return false;
+    const off_t len = AAsset_getLength(a);
+    const void* buf = AAsset_getBuffer(a);
+    if (buf && len > 0) out->assign(static_cast<const char*>(buf), size_t(len));
+    AAsset_close(a);
+    return buf && len > 0;
+}
+
+void PhoneInit()
+{
+    gPhoneEnabled = ReadAsset("layout.json", &gPhoneLayout) && ReadAsset("controller.html", &gPhonePage);
+    if (!gPhoneEnabled) { WFLOG("phone controller: off (no assets/layout.json)"); return; }
+    gPhonePin = phonepad::MakePin();          // one PIN per launch, kept across pause/resume
+    if (gPhonePin.empty()) { gPhoneEnabled = false; WFLOGE("phone controller: off (no random source)"); return; }
+    gPhone.SetLog(PhoneLog);
+}
+
+// Listen on the Wi-Fi address (never 0.0.0.0, never a public address).
+void PhoneStart()
+{
+    if (!gPhoneEnabled || gPhone.Running()) return;
+    gPhoneRetryMs = NowMs() + 3000;
+    uint32_t addr = 0;
+    if (!phonepad::DiscoverLanAddress(&addr))
+    {
+        WFLOG("phone controller: no network yet; retrying every 3 s");
+        return;
+    }
+    if (!phonepad::IsPrivateIPv4(addr) || (addr >> 24) == 127)
+    {
+        WFLOG("phone controller: %s is not a private LAN address; not listening",
+              phonepad::FormatIPv4(addr).c_str());
+        return;
+    }
+    phonepad::Config cfg;
+    cfg.bindAddr   = addr;
+    cfg.port       = phonepad::kDefaultPort;
+    cfg.pin        = gPhonePin;
+    cfg.pageHtml   = gPhonePage;
+    cfg.layoutJson = gPhoneLayout;
+    if (!gPhone.Start(cfg)) return;
+    const std::string url = phonepad::ControllerUrl(addr, gPhone.Port(), gPhonePin);
+    char hostPort[32];
+    std::snprintf(hostPort, sizeof(hostPort), "%s:%u", phonepad::FormatIPv4(addr).c_str(), unsigned(gPhone.Port()));
+    gPhoneOverlay.SetEndpoint(url, hostPort, gPhonePin);
+    WFLOG("phone controller: open %s (PIN %s)", url.c_str(), gPhonePin.c_str());
+}
+
+void PhoneStop()
+{
+    if (!gPhoneEnabled) return;
+    gPhone.Stop();
+    gPhone.TakeEvents();
+    gPhoneOverlay.ClearEndpoint();
+    if (gPhoneButtons)
+    {
+        WFLOG("phone mask=0x0 (paused: every phone button released)");
+        gPhoneButtons = 0;
+        Emit();
+    }
+}
+
+void PhonePoll()
+{
+    if (!gPhoneEnabled) return;
+    const int64_t now = NowMs();
+    if (!gPhone.Running())
+    {
+        if (gPhoneResumed && now >= gPhoneRetryMs) PhoneStart();
+        return;
+    }
+    const joystickButtonsF m = gPhone.Poll(now);
+    const uint32_t ev = gPhone.TakeEvents();
+    if (ev) gPhoneOverlay.OnEvents(ev, now);
+    if (m != gPhoneButtons)
+    {
+        // One line per change, like the key-edge line below, so logcat shows what the phone held.
+        WFLOG("phone mask=0x%x", unsigned(m));
+        gPhoneButtons = m;
+        Emit();
+    }
 }
 
 // Joystick axes trigger LEFT/RIGHT/UP/DOWN when past this threshold — matches
@@ -240,11 +357,15 @@ void HandleAppCmd(struct android_app* app, int32_t cmd)
         case APP_CMD_PAUSE:
             WFLOG("APP_CMD_PAUSE");
             HALNotifySuspend();
+            gPhoneResumed = false;
+            PhoneStop();            // listen only while resumed
             break;
 
         case APP_CMD_RESUME:
             WFLOG("APP_CMD_RESUME");
             HALNotifyResume();
+            gPhoneResumed = true;
+            PhoneStart();
             break;
 
         case APP_CMD_CONFIG_CHANGED:
@@ -279,6 +400,15 @@ int32_t HandleInputEvent(struct android_app* /*app*/, AInputEvent* event)
         const uint32_t mask   = MapKeyCode(keyCode);
         // One line per key edge (not per auto-repeat), so logcat shows whether a remote key
         // arrived and what it mapped to: "key code=23 action=0 mask=0x...".
+        // Back while the phone panel is showing hides the panel (mockup 3: "Press Back to hide
+        // this") instead of leaving the app; Back otherwise keeps its system meaning.
+        if (keyCode == AKEYCODE_BACK && gPhoneOverlay.PanelVisible(NowMs()))
+        {
+            if (action == AKEY_EVENT_ACTION_UP) gPhoneOverlay.OnBack(NowMs());
+            if (AKeyEvent_getRepeatCount(event) == 0)
+                WFLOG("key code=%d action=%d (Back: hides the phone panel)", keyCode, action);
+            return 1;
+        }
         if (AKeyEvent_getRepeatCount(event) == 0)
             WFLOG("key code=%d action=%d mask=0x%x%s", keyCode, action, mask,
                   mask ? "" : " (unmapped, dropped)");
@@ -367,6 +497,17 @@ WFAndroidPumpEvents()
         if (source) source->process(gApp, source);
         if (gApp->destroyRequested) { gExitLoop = true; break; }
     }
+    PhonePoll();
+}
+
+// The phone overlay's rectangles for a w x h surface, drawn by gfx/gl/android_window.cc after
+// the touch HUD. Returns the count; *changed is 1 when the list differs from the last call's.
+extern "C" WF_ANDROID_EXPORT int
+WFAndroidPhoneOverlayRects(int w, int h, const PhonepadRect** rects, int* changed)
+{
+    *changed = gPhoneOverlay.Build(w, h, NowMs(), &gPhoneRects) ? 1 : 0;
+    *rects   = gPhoneRects.data();
+    return int(gPhoneRects.size());
 }
 
 // Entry point — android_native_app_glue calls this on a dedicated thread
@@ -387,6 +528,7 @@ android_main(struct android_app* app)
     if (app->activity && app->activity->assetManager)
         gAssetMgr = app->activity->assetManager;
     WFLOG("android_main: assetMgr=%p", (void*)gAssetMgr);
+    PhoneInit();
 
     if (app->config)
     {

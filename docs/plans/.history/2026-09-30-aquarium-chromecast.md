@@ -1,5 +1,6 @@
 | Date | Change |
 |------|--------|
+| [2026-10-01](https://github.com/wbniv/WorldFoundry/commit/3c51eafc) | Phone as a gamepad, E1: portable server, protocol and controller page, tested headless on Linux |
 | [2026-10-01](https://github.com/wbniv/WorldFoundry/commit/8776018f) | Soundfont: a reproducible recipe (task soundfont) replaces the never-committed florestan-subset.sf2 |
 | [2026-10-01](https://github.com/wbniv/WorldFoundry/commit/15dd5ee6) | Aquarium-Chromecast plan: snowgoons is silent on Android (no soundfont, Q*bert sfx not found), so it is not the audio-route check; the display chain does advertise audio, the monitor just has no speakers |
 | [2026-10-01](https://github.com/wbniv/WorldFoundry/commit/b655fb35) | Aquarium-Chromecast plan, Phase D: the soundfont is gitignored and absent, so snowgoons' release build fails lint and no flavor can play MIDI music yet |
@@ -8,6 +9,11 @@
 | [2026-10-01](https://github.com/wbniv/WorldFoundry/commit/c48d5a8b) | Write the missing aquarium-on-Chromecast plan (four docs linked to it): rebuilt from the commits and device-run evidence |
 
 <!--history-meta v1
+3c51eafc	author	Will Norris
+3c51eafc	added	32
+3c51eafc	deleted	2
+3c51eafc	files	1
+3c51eafc	body	wfsource/source/hal/phonepad/phonepad.{h,cc}: a single-threaded, non-blocking HTTP + WebSocket\nserver polled once per frame. GET / (PIN form, or the page with the right ?k=), /layout.json and\n/ws, each behind a fresh six-digit PIN; phone frames "b:<hex>" (the 16-bit EJ_BUTTONF mask) and\n"t:<ms>" (echoed). Every button is released after 1 s of silence, on close, on a dropped\nconnection, when a newer phone takes over (close 4001), and on any malformed or oversized frame.\nWrong PINs are rate limited; non-private peers are refused.\n\ncontroller.html: one self-contained page (stick + buttons from the per-app layout.json, 250 ms\nheartbeat, local vibrate tick, silent-video keep-awake, rotate hint, mockup 4's states), symlinked\ninto the aquarium and condo flavors. Layouts: aquarium stick+A+B; condo stick+A (doors / shade)+C+D+E+F,\nno B (A toggles doors and shade since 41742943).\n\nTests: 51 protocol tests against an ASan/UBSan build of the same source with a raw WebSocket client,\n11 page tests in headless Chromium (pointer, two-finger touch, heartbeat, takeover, wrong PIN,\nreconnect), 5 layout checks against sjoystic.h. Flavor asset tests updated for the two new assets.\nPlan: docs/plans/2026-09-30-aquarium-chromecast.md (Phase E progress, verification 11)\n\nCo-Authored-By: Claude Opus 5.5 <noreply@anthropic.com>\nClaude-Session: https://claude.ai/code/session_01DxMP4jUNjCjDz8E9DWzXcM
 8776018f	author	Will Norris
 8776018f	added	1
 8776018f	deleted	0

@@ -134,7 +134,11 @@ def test_manifest_keeps_both_launchers_and_banner():
         assert s in m, s
     for feat in ("android.software.leanback", "android.hardware.touchscreen", "android.hardware.gamepad"):
         assert re.search(rf'android:name="{re.escape(feat)}" android:required="false"', m), feat
-    assert not (SRC / "aquarium" / "AndroidManifest.xml").exists(), "the flavors share main's manifest"
+    # The flavors share main's application and activities. Since Phase E the aquarium's own manifest
+    # adds exactly one thing, the INTERNET permission for the phone controller (snowgoons gets none).
+    aq = (SRC / "aquarium" / "AndroidManifest.xml").read_text()
+    assert "<application" not in aq and "<activity" not in aq, "the flavors share main's manifest"
+    assert re.findall(r"<uses-permission[^>]*>", aq) == ['<uses-permission android:name="android.permission.INTERNET" />']
 
 
 def test_aquarium_launcher_art_overrides_main():
