@@ -113,12 +113,16 @@ def test_a_startle_sends_the_near_followers_away_from_the_leader():
     for i, sp in enumerate(spots, start=1):
         sp = np.array(sp, float); fc.put(h, i, sp, np.array([-sp[1], sp[0], 0]) / 2)
     assert h.eval("4 sch-startle-all") == "ok"
-    assert all(h.read(fc.BASE + i * fc.STRIDE + 12) == pytest.approx(0.5) for i in range(1, 5))
-    for _ in range(5):                                              # the 0.5 s startle lasts five ticks
+    assert all(h.read(fc.BASE + i * fc.STRIDE + 12) == pytest.approx(0.6) for i in range(1, 5))
+    pos0, vel0 = fc.get(h, 5)
+    for i, sp in enumerate(spots, start=1):                          # a C-start: the heading flipped to straight away from the leader at once
+        away = np.array(sp, float) / np.linalg.norm(sp)
+        assert vel0[i] @ away == pytest.approx(1.0, abs=1e-3), (i, vel0[i])
+    for _ in range(6):                                              # the 0.6 s startle lasts six ticks
         assert h.eval("sch-tick") == "ok"
     pos, vel = fc.get(h, 5)
     h.close()
-    assert (np.linalg.norm(pos[1:], axis=1) > 2.3).all(), "the startled followers did not move away"
+    assert (np.linalg.norm(pos[1:], axis=1) > 3.2).all(), "the startled followers did not burst away (2.5 times the speed for 0.6 s)"
 
 
 @NEEDS_CC
@@ -144,8 +148,8 @@ def test_the_startle_timer_counts_down_and_stops():
     fc.put(h, 0, [0, 0, 0], [1, 0, 0]); fc.put(h, 1, [2, 0, 0], [1, 0, 0]); fc.put(h, 2, [30, 0, 0], [1, 0, 0])
     assert h.eval("4 sch-startle-all") == "ok"
     t = [h.read(fc.BASE + 14 + 12), h.read(fc.BASE + 28 + 12)]
-    assert t == [pytest.approx(0.5), 0.0], "only the follower inside the radius is startled"
-    for _ in range(7):
+    assert t == [pytest.approx(0.6), 0.0], "only the follower inside the radius is startled"
+    for _ in range(8):
         h.eval("sch-tick")
     assert h.read(fc.BASE + 14 + 12) == pytest.approx(0.0, abs=1e-6)
     h.close()
@@ -227,8 +231,8 @@ def test_the_poster_prints_the_measured_numbers(html_text):
 def test_the_poster_says_what_it_does_not_claim(html_text):
     t = html_text.replace(" ", " ")
     assert "Not claimed" in t and "hysteresis" in t
-    assert "the school is tuned" in t and "the dart does not startle it yet" in t, "the poster must say the school is in the game but untuned, and the dart is not wired"
-    assert "not wired in yet" not in t, "the school IS in the game now: that sentence went stale"
+    assert "the school is tuned" in t, "the poster must say the school is in the game but untuned"
+    assert "not wired in yet" not in t and "does not startle" not in t and "not called yet" not in t, "the school and the dart startle ARE in the game now: those sentences went stale"
 
 
 def test_no_12_hour_clock(html_text):

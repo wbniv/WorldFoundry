@@ -24,7 +24,7 @@ Measured, not estimated ([`measured.json`](../reference/swarming-poster/measured
 | What | Value |
 |---|---|
 | Source | 254 lines, 202 of them code (the rest is comments), about 11.5 KB |
-| In the zForth dictionary | **3,216 bytes** of the 65,536 available (4.9 %), 73 words (including the named slots) |
+| In the zForth dictionary | **3,324 bytes** of the 65,536 available (5.1 %), 76 words (including the named slots); the Chromecast timing below was taken at 3,216 bytes, before the dart's fast start |
 | Biggest words | `clamp-axis` 189 B, `sch-pair` 168 B, `sch-follow` 131 B, `sch-startle-all` 123 B, `sch-wall` 107 B |
 | One step, 11 fish (10 followers and the leader) | **7.5 ms on the Chromecast HD** (median of 3 runs of 200 ticks, with the TV in use; the poster prints only Chromecast timings) |
 | Per follower | about 0.75 ms |

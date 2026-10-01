@@ -48,7 +48,7 @@ def main():
     code_lines = [l for l in text.splitlines() if l.strip() and not l.lstrip().startswith("\\")]
     errs, _ = fc.compare(n=11, ticks=60)
     ep = np.array([e[0] for e in errs]); ev = np.array([e[1] for e in errs])
-    dev = dict(ms=float(np.median(a.device_ms)), runs=a.device_ms, device="Chromecast HD (armeabi-v7a)") if a.device_ms else prev.get("device")
+    dev = dict(ms=float(np.median(a.device_ms)), runs=a.device_ms, device="Chromecast HD (armeabi-v7a)", bytes_at_measure=sum(w["bytes"] for w in words)) if a.device_ms else prev.get("device")
     OUT.write_text(json.dumps(dict(
         words=words, dictionary_bytes=sum(w["bytes"] for w in words), dictionary_after_load=total, dictionary_size=65536, source_lines=len(text.splitlines()), code_lines=len(code_lines), source_bytes=len(text.encode()),
         error=dict(ticks=60, n=11, pos_median=float(np.median(ep)), pos_max=float(ep.max()), head_median=float(np.median(ev)), head_max=float(ev.max())),

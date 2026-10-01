@@ -246,7 +246,7 @@ RULE = [
     ('5', 'Turn toward d by at most θτ, move s τ', 'v ← rotate(v, d, θτ);  c ← c + s τ v', 'sch-turn, sch-follow', 'verified'),
     ('6', 'The leader counts w times in sums 3', 'Σ w_j v_j,  Σ w_j u_ij', 'sch-pair (weight)', 'ours'),
     ('7', 'Walls repel like a neighbour, and are a hard limit', 'within 0.6 BL: one more repulsion; past the box: put back, heading reflected', 'sch-wall, clamp-axis', 'ours'),
-    ('8', 'A dart startles the followers (not called yet)', 'swim away from the leader for 0.5 s', 'sch-startle-all', 'ours'),
+    ('8', 'A dart startles the followers nearby', 'heading flips away at once; 2.5 × speed for 0.6 s', 'sch-startle-all', 'ours'),
 ]
 
 
@@ -272,7 +272,7 @@ def panel_d():
         s.append(T(10, y, wl, 11, 'start', INK)); y += 13
     H = int(y + 12)
     c1, w1 = chip(10, H - 3, 'verified', 'rules 1–5 and the paper’s s, θ: Couzin 2002, eqns 1–3 and Fig. 3')
-    c2, w2 = chip(10 + w1 + 8, H - 3, 'ours', 'rules 6–8, our s, θ, the 0.6 BL wall zone, the 0.5 s startle')
+    c2, w2 = chip(10 + w1 + 8, H - 3, 'ours', 'rules 6–8, our s, θ, the 0.6 BL wall zone, the 0.6 s startle')
     s += [c1, c2]
     return ''.join(s), W, H + 4
 
@@ -353,7 +353,7 @@ def panel_f():
     eng = m.get('engine') or {}
     ea, eb = eng.get('after', {}), eng.get('before', {})
     lv = eng.get('level', {})
-    big = [(f'{m["dictionary_bytes"]:,} B', f'of the {m["dictionary_size"] // 1024} KB dictionary ({100 * m["dictionary_bytes"] / m["dictionary_size"]:.1f} %), {m["code_lines"]} code lines; {ms:.1f} ms a step on the Chromecast; {m["error"]["head_max"]:.0e} off couzin.py'),
+    big = [(f'{m["dictionary_bytes"]:,} B', f'of the {m["dictionary_size"] // 1024} KB dictionary ({100 * m["dictionary_bytes"] / m["dictionary_size"]:.1f} %), {m["code_lines"]} code lines; {ms:.1f} ms a step on the Chromecast (at {dev.get("bytes_at_measure", m["dictionary_bytes"]):,} B); {m["error"]["head_max"]:.0e} off couzin.py'),
            (f'{ea.get("standalone_ms", ms):.1f} → {ea.get("director_ms", [0])[0]:.1f} ms', f'one tick, 11 fish, Chromecast HD (an earlier 2,936 B version): the bare interpreter, then in the engine'),
            (f'{eb.get("mailbox_us", 0):g} → {ea.get("mailbox_us", 0):g} µs', f'per mailbox call: three debug streams the engine ran on every call, found by this timing; {eb.get("fps", 0):.0f} fps before'),
            (f'{lv.get("fps", 0):.1f} fps', f'the real level with ten followers, Chromecast HD, unprofiled; p90 {lv.get("frame_p90_ms", 0):.1f} ms, Director {lv.get("director_ms", 0):.1f} ms (profiled)')]
@@ -425,7 +425,7 @@ def panel_g():
     H = int(bz * sc + 20 + 4 * 13 + 40)
     bh = loadj('measured.json').get('engine', {}).get('behaviour')
     if bh:
-        s.append(T(8, H - 22, f'In the real level, on the engine (scripts/analyse-aquarium-school.py): resting p_group {bh["rest_p"]:.2f}, swimming {bh["swim_p"]:.2f} (it was {bh["before_fix_swim_p"]:.2f} before a setup bug was fixed), followers aligned with the leader {bh["swim_alignment"]:+.2f}.', 11, 'start', INK, 700))
+        s.append(T(8, H - 22, f'In the real level, on the engine: resting p_group {bh["rest_p"]:.2f}, swimming {bh["swim_p"]:.2f}, followers aligned with the leader {bh["swim_alignment"]:+.2f}; a dart: their distance to it {bh["dart_before"]:.2f} → {bh["dart_peak"]:.2f} BL in 1 s, back to {bh["dart_regrouped"]:.1f} in 4 s.', 11, 'start', INK, 700))
     c1, w1 = chip(8, H - 4, 'ours', 'the Forth core in the tank’s real box (w = 3, seed 1 drawn; the table is the mean of 3 seeds; “no” = a fish strayed more than 0.5 BL out)')
     s.append(c1)
     return ''.join(s), W, H
@@ -444,7 +444,7 @@ def footer_html():
            f'<p>{FP.chip_html("verified")} the source was opened; the number is on its page<br>'
            f'{FP.chip_html("unverified")} from a summary, or not opened<br>'
            f'{FP.chip_html("ours")} our own choice, maths or measurement</p>'
-           f'<p class="sub">Not claimed: that real clownfish school (they do not), that our sweep shows the paper’s hysteresis (it is too coarse), or that the school is tuned: it is in the game, but the lead is weak (alignment +0.40) and the dart does not startle it yet. Data dated {D.DATA_DATE}.</p>')
+           f'<p class="sub">Not claimed: that real clownfish school (they do not), that our sweep shows the paper’s hysteresis (it is too coarse), or that the school is tuned: it is in the game, but the lead is weak (alignment +0.40). Data dated {D.DATA_DATE}.</p>')
     return ('<section class="panel foot" id="panel-src"><div class="bar"><b>Sources</b> · live links in the PDF; what could not be verified is marked</div>'
             f'<div class="cols">{"".join(f"<ul class=srcl>{c}</ul>" for c in cols)}<div class="how">{how}</div></div></section>')
 

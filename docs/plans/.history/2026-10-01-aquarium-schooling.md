@@ -1,5 +1,6 @@
 | Date | Change |
 |------|--------|
+| [2026-10-01](https://github.com/wbniv/WorldFoundry/commit/4a906de5) | A hard wall limit for the followers (one left the tank on the Chromecast), the poster with Chromecast-only numbers, and the schooling demo clip |
 | [2026-10-01](https://github.com/wbniv/WorldFoundry/commit/0797aab2) | The school is the default aquarium level: it schools (p_group 0.77 swimming), the ten followers vary 60 to 93 % in size |
 | [2026-10-01](https://github.com/wbniv/WorldFoundry/commit/83099032) | TODO: Android size trim iter 2 done (243 KB per APK; the snowgoons sideload is left under Verify) |
 | [2026-10-01](https://github.com/wbniv/WorldFoundry/commit/ace2e0be) | Aquarium: ten more fish that school and swarm round the player's fish (AQUARIUM_SCHOOL_N=10), running on the Chromecast HD |
@@ -10,6 +11,11 @@
 | [2026-10-01](https://github.com/wbniv/WorldFoundry/commit/50c932a2) | Plan: ten more aquarium fish that school and swarm around the player (Couzin zone model, player as leader), with rendered mockups |
 
 <!--history-meta v1
+4a906de5	author	Will Norris
+4a906de5	added	2
+4a906de5	deleted	2
+4a906de5	files	1
+4a906de5	body	school.fth: a follower that would leave the box is put back on its edge and its heading reflected inward (test added); 3,216 B, 7.5 ms a step on the Chromecast.\nThe poster prints Chromecast timings only (no PC numbers), including the real level: 59.9 fps, p90 33.4 ms.\ntests/recordings/aquarium_school_demo.mp4: 51 s from the Chromecast's own screen (rest/swarm, swim right/school, rest, swim left, rest, swim and climb), captions burnt in;\nrecorded before the wall limit, so one frame shows a follower outside the glass. scripts/record-aquarium-school-chromecast.py records a new one when nobody is using the TV.\n\nCo-Authored-By: Claude Sonnet 5.5 <noreply@anthropic.com>\nClaude-Session: https://claude.ai/code/session_01NNPhRbrqjqMDkScPvTE9yC
 0797aab2	author	Will Norris
 0797aab2	added	9
 0797aab2	deleted	8

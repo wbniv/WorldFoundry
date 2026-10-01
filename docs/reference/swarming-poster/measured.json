@@ -61,6 +61,11 @@
    "bytes": 74
   },
   {
+   "name": "MB_KICK",
+   "lines": 1,
+   "bytes": 13
+  },
+  {
    "name": "MB_SUM_R",
    "lines": 1,
    "bytes": 42
@@ -282,8 +287,8 @@
   },
   {
    "name": "sch-startle-all",
-   "lines": 9,
-   "bytes": 123
+   "lines": 15,
+   "bytes": 171
   },
   {
    "name": "perp-axis",
@@ -316,9 +321,14 @@
    "bytes": 104
   },
   {
+   "name": "startle-gain",
+   "lines": 1,
+   "bytes": 44
+  },
+  {
    "name": "advance",
    "lines": 3,
-   "bytes": 46
+   "bytes": 49
   },
   {
    "name": "clamp-axis",
@@ -366,12 +376,12 @@
    "bytes": 44
   }
  ],
- "dictionary_bytes": 3216,
- "dictionary_after_load": 4499,
+ "dictionary_bytes": 3324,
+ "dictionary_after_load": 4607,
  "dictionary_size": 65536,
- "source_lines": 254,
- "code_lines": 202,
- "source_bytes": 11553,
+ "source_lines": 262,
+ "code_lines": 210,
+ "source_bytes": 12036,
  "error": {
   "ticks": 60,
   "n": 11,
@@ -387,7 +397,8 @@
    7.706,
    7.4631
   ],
-  "device": "Chromecast HD (armeabi-v7a)"
+  "device": "Chromecast HD (armeabi-v7a)",
+  "bytes_at_measure": 3216
  },
  "engine": {
   "device": "Chromecast HD, release APK, bench level (docs/plans/2026-10-01-swarming-poster.md, Phase E step 1)",
@@ -428,7 +439,11 @@
    "rest_p": 0.39,
    "swim_p": 0.77,
    "swim_alignment": 0.4,
-   "before_fix_swim_p": 0.24
+   "before_fix_swim_p": 0.24,
+   "dart_before": 1.55,
+   "dart_peak": 4.17,
+   "dart_regrouped": 2.4,
+   "dart_note": "scripts/analyse-aquarium-school.py --dart: tap A, mean distance of the ten followers to the leader"
   }
  }
 }

@@ -240,6 +240,14 @@ def test_the_school_mailboxes_do_not_overlap_what_the_level_and_the_player_own(o
     assert ': fish-off 1016 read-mailbox ;' in script and 'sd-actors' in script and ': sch-n %d ;' % (SCHOOL_N + 1) in script
 
 
+def test_the_dart_startles_the_school_in_the_built_director(objs):
+    script = by_name(objs, 'Director')['script']
+    assert ': sd-dart-check' in script and 'aq-dart-t read-mailbox 0 >' in script and '5 sch-startle-all' in script, 'the dart trigger'
+    assert 'sd-leader sd-mode-update sd-dart-check' in script, 'the Director must run the check every tick'
+    assert ': MB_KICK 21 ;' in script and 'startle-gain' in script and 'sch-startle-away' in script, 'the fast start'
+    assert ': aq-dart-t ' in script, 'the dart timer is a level mailbox the school reads'
+
+
 def test_camshots_a_and_b_sit_outside_the_tank_clear_of_the_fish(objs):
     names = [o['name'] for o in objs]
     for n in ('cs_front', 'cs_anemone'):

@@ -164,7 +164,7 @@
  {
   "id": "bytes",
   "quantity": "school.fth in the dictionary",
-  "value": "3216 B of 65536",
+  "value": "3324 B of 65536",
   "status": "ours",
   "sources": [
    "S5"
@@ -173,7 +173,7 @@
  {
   "id": "lines",
   "quantity": "school.fth source",
-  "value": "202 code lines, 254 with comments",
+  "value": "210 code lines, 262 with comments",
   "status": "ours",
   "sources": [
    "S5"

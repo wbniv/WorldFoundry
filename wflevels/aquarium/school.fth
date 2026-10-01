@@ -8,14 +8,14 @@
 \
 \ Ours, not from the paper: fish 0 is the LEADER (the player's fish, written from outside each tick); followers count it with weight MB_LEADW in
 \ the orientation and attraction sums. Tank walls repel like a neighbour (MB_WALL). A STARTLE (the leader's dart) sends followers near the leader
-\ straight away from it for MB_STARTLE_T seconds. The error term is left to the caller (a small per-fish wander written into the wanted direction).
+\ straight away from it for MB_STARTLE_T seconds, MB_KICK times faster, the heading flipped at once (a fast-start). The error term is left to the caller (a small per-fish wander written into the wanted direction).
 \
 \ Needs, in front of it (the level builder generates these; the tests supply them): read-mailbox write-mailbox, the fish trig words fish-sin and
-\ fish-cos (clownfish_idle.fth), and the constants sch-base (mailbox of fish 0, field 0), sch-scr (25 scratch cells), sch-par (21 parameter cells),
+\ fish-cos (clownfish_idle.fth), and the constants sch-base (mailbox of fish 0, field 0), sch-scr (25 scratch cells), sch-par (22 parameter cells),
 \ sch-n (fish incl. the leader). Plan: docs/plans/2026-10-01-aquarium-schooling.md and docs/plans/2026-10-01-swarming-poster.md.
 \
 \ Mailboxes. Global user mailboxes are 2..1900, shared by every actor; the aquarium already uses 600..638 the player's fish, 700..719 the level,
-\ 720..739 the sway, 740..759 the camera. This file: sch-base = 800 (11 fish x 14 = 800..953), sch-par = 960 (960..980), sch-scr = 985 (985..1009).
+\ 720..739 the sway, 740..759 the camera. This file: sch-base = 800 (11 fish x 14 = 800..953), sch-par = 960 (960..981), sch-scr = 985 (985..1009).
 \ Every MB_ name below is a SLOT inside one of those three blocks, not a mailbox number: fish f's MB_X is mailbox sch-base + 14 f + MB_X.
 
 \ ---- slots in a fish's 14 mailboxes (sch@ and sch!): a position, a unit heading, the next state of both, and the startle timer
@@ -25,7 +25,7 @@
 : MB_NVX 9 ; : MB_NVY 10 ; : MB_NVZ 11 ;    \ the next heading
 : MB_STARTLE 12 ;                           \ seconds of startle left; slot 13 is unused
 
-\ ---- slots in the 21 parameter cells (par@ and par!)
+\ ---- slots in the 22 parameter cells (par@ and par!)
 : MB_RR 0 ;         : MB_DRO 1 ;       : MB_DRA 2 ;
 : MB_COSB 3 ;                              \ cos of the blind volume's half-angle
 : MB_COST 4 ;       : MB_SINT 5 ;          \ cos and sin of the most a fish can turn in one tick
@@ -33,6 +33,7 @@
 : MB_LEADW 7 ;      : MB_WALL 8 ;      : MB_STARTLE_T 9 ;   : MB_DT 10 ;
 : MB_LOX 11 ;       : MB_HIX 14 ;          \ the tank box: low x y z, then high x y z
 : MB_DRO_SWARM 17 ; : MB_DRA_SWARM 18 ;  : MB_DRO_SCHOOL 19 ; : MB_DRA_SCHOOL 20 ;
+: MB_KICK 21 ;                                  \ a startled follower swims this many times faster
 
 \ ---- slots in the 25 scratch cells (sc@ and sc!); a vector is three cells in a row
 : MB_SUM_R 0 ;  : MB_SUM_O 3 ;  : MB_SUM_A 6 ;       \ the repulsion, orientation and attraction sums
@@ -163,7 +164,13 @@
     MB_Y i sch@ MB_Y 0 sch@ - dup * +
     MB_Z i sch@ MB_Z 0 sch@ - dup * +
     MB_R2 sc@ <
-    if MB_STARTLE_T par@ MB_STARTLE i sch! then
+    if
+      MB_STARTLE_T par@ MB_STARTLE i sch!
+      i MB_ME sc!  sch-startle-away                   \ a C-start: the heading flips at once, away from the leader
+      MB_WANT sc@ MB_VX i sch!
+      MB_WANT 1 + sc@ MB_VY i sch!
+      MB_WANT 2 + sc@ MB_VZ i sch!
+    then
   loop ;
 
 \ turn the heading toward the wanted direction by at most the turn angle; the new unit heading is left in MB_WANT
@@ -196,8 +203,9 @@
     MB_WANT vnorm drop
   then ;
 
+: startle-gain ( -- g ) MB_STARTLE me sch@ 0 > if MB_KICK par@ else 1 then ;
 : advance ( a -- ) >r
-  MB_X r@ + me sch@  MB_NVX r@ + me sch@ MB_STEP par@ * +
+  MB_X r@ + me sch@  MB_NVX r@ + me sch@ MB_STEP par@ * startle-gain * +
   MB_NX r> + me sch! ;
 
 \ the walls are also a hard limit: a follower that would leave the box is put back on its edge and its heading reflected inward (a fish at 2 body lengths a

@@ -36,10 +36,10 @@ def load_school(h, n):
     return h.size() - before
 
 
-def set_params(h, p, dro, dra, w_leader=1.0, wall=0.0, box=1000.0, startle=0.5):
+def set_params(h, p, dro, dra, w_leader=1.0, wall=0.0, box=1000.0, startle=0.6, kick=2.5):
     cos_blind = math.cos(math.radians(p["alpha"] / 2))
     vals = {0: p["rr"], 1: dro, 2: dra, 3: cos_blind, 7: w_leader, 8: wall, 9: startle,
-            11: -box, 12: -box, 13: -box, 14: box, 15: box, 16: box, 17: dro, 18: dra, 19: dro, 20: dra}
+            11: -box, 12: -box, 13: -box, 14: box, 15: box, 16: box, 17: dro, 18: dra, 19: dro, 20: dra, 21: kick}
     for k, v in vals.items():
         h.write(PAR + k, v)
     # sch-set-dt ( dt turn-deg-per-s speed -- )

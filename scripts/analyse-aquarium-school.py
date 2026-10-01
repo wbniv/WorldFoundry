@@ -14,7 +14,7 @@ from pathlib import Path
 REPO = Path(__file__).resolve().parent.parent
 ap = argparse.ArgumentParser(description=__doc__.split("\n\n")[0])
 ap.add_argument("--level", default=str(REPO / "wflevels" / "aquarium-standalone.iff")); ap.add_argument("--port", type=int, default=7818)
-ap.add_argument("--trace", action="store_true", help="print every sample"); ap.add_argument("--rest", type=int, default=400, help="ticks of rest"); ap.add_argument("--swim", type=int, default=600, help="ticks of swimming")
+ap.add_argument("--trace", action="store_true", help="print every sample"); ap.add_argument("--dart", action="store_true", help="instead: rest, tap A (the dart), and print the followers' distance to the leader every 0.5 s for 6 s"); ap.add_argument("--rest", type=int, default=400, help="ticks of rest"); ap.add_argument("--swim", type=int, default=600, help="ticks of swimming")
 args = ap.parse_args()
 
 work = Path(tempfile.mkdtemp(prefix="aqan-"))
@@ -90,6 +90,16 @@ def run(ticks, drive=None):
 
 try:
     g.step(60)
+    if args.dart:
+        run(args.rest)                                    # settle into a swarm round the resting fish
+        P, V = state(); before = metrics(P, V)["dl"]
+        print(f"before the dart: mean distance to the leader {before:.2f} BL", flush=True)
+        g.tap("A")
+        for k in range(12):
+            g.step(10)
+            P, V = state(); m = metrics(P, V)
+            print(f"  +{(k + 1) * 0.5:3.1f} s: mean distance to the leader {m['dl']:.2f} BL  nearest neighbour {m['nn']:.2f} BL", flush=True)
+        g.close(); sys.exit(0)
     measure(run(args.rest), "REST", args.rest)
     # SWIM: right for 6 s, then left for 6 s, repeating, held with the injected D-pad
     measure(run(args.swim, lambda t: g.inject(R.BTN["RIGHT"] if (t // 120) % 2 == 0 else R.BTN["LEFT"]) if t % 120 == 0 else None), "SWIM", args.swim)

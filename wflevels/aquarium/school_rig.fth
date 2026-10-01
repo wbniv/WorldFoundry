@@ -8,7 +8,7 @@
 \ Mailboxes this file owns (the aquarium also owns 600..638 the player's rig, 700..759 the level, sway and camera; school.fth 800..1009):
 \   1015 set-up done   1016 fish-off (the rig's per-fish offset)   1017..1021 the part actors of the follower being posed   1022 round-robin phase
 \   1023 swarm 0 .. school 1 blend   1024 mode   1025..1027 the leader's last position   1028..1030 its heading   1031 its speed
-\   1032..1034 the position the rig reads for a follower   1040..1089 the part actor table   1100..1499 the followers' rig blocks, 40 each at 1100 + 40 (k - 1).
+\   1032..1034 the position the rig reads for a follower   1039 the dart was on last tick   1040..1089 the part actor table   1100..1499 the followers' rig blocks, 40 each at 1100 + 40 (k - 1).
 \
 \ The followers are updated round robin, one or two a tick (two at 60 fps: every follower about every 0.08 s; slower frames update each one less often, never more followers a tick); each
 \ step uses the REAL time since that follower's last update, so the school runs at the same speed at any frame rate. Between updates the position is carried along the
@@ -82,7 +82,7 @@
 : sd-pos ( a centre -- world )                      \ the follower's rendered position on axis a, carried along its heading since its last update
   MB_PERP 1 + sc!  MB_PERP sc!
   MB_X MB_PERP sc@ + me sch@
-  MB_VX MB_PERP sc@ + me sch@ sd-speed * me sd-times + 1 - read-mailbox sd-clock read-mailbox swap - 0.5 min * +
+  MB_VX MB_PERP sc@ + me sch@ sd-speed startle-gain * * me sd-times + 1 - read-mailbox sd-clock read-mailbox swap - 0.5 min * +
   sd-bl * MB_PERP 1 + sc@ + ;
 : sd-place
   0 sd-cx sd-pos sd-px write-mailbox
@@ -141,10 +141,10 @@
   INDEXOF_Z_POS fish-actor-player read-actor-mailbox sd-cz sd-world>bl sd-prev 2 + write-mailbox
   1 sd-lhead write-mailbox ;
 : sd-setup
-  1 MB_RR par!  -0.7071 MB_COSB par!
+  1 MB_RR par!  -0.7071 MB_COSB par!  2.5 MB_KICK par!
   0 MB_DRO_SWARM par!  10 MB_DRA_SWARM par!  5 MB_DRO_SCHOOL par!  6 MB_DRA_SCHOOL par!     \ the two settings sch-regime blends
   0 sch-regime
-  3 MB_LEADW par!  0.6 MB_WALL par!  0.5 MB_STARTLE_T par!
+  3 MB_LEADW par!  0.6 MB_WALL par!  0.6 MB_STARTLE_T par!
   sd-hx negate MB_LOX par!  sd-hy negate MB_LOX 1 + par!  sd-hz negate MB_LOX 2 + par!
   sd-hx MB_HIX par!  sd-hy MB_HIX 1 + par!  sd-hz MB_HIX 2 + par!
   sd-prev-init
@@ -155,10 +155,18 @@
   0 sd-off write-mailbox
   1 sd-flag write-mailbox ;
 
+\ ---- the dart: when the player's fish starts one (aq-dart-t rises from 0), every follower within 5 body lengths is startled
+: sd-dart-prev 1039 ;
+: sd-dart-check
+  aq-dart-t read-mailbox 0 > if
+    sd-dart-prev read-mailbox 0 = if 5 sch-startle-all then
+    1 sd-dart-prev write-mailbox
+  else 0 sd-dart-prev write-mailbox then ;
+
 \ ---- the whole thing, once a tick
 : sd-tick
   sd-flag read-mailbox 0 = if sd-setup then
-  sd-leader sd-mode-update
+  sd-leader sd-mode-update sd-dart-check
   sd-clock read-mailbox fish-dt + sd-clock write-mailbox
   sd-round-robin
   sd-pose-all ;

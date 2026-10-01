@@ -1,5 +1,6 @@
 | Date | Change |
 |------|--------|
+| [2026-10-01](https://github.com/wbniv/WorldFoundry/commit/dd7b6e4a) | Swarming poster: audited against what is true now |
 | [2026-10-01](https://github.com/wbniv/WorldFoundry/commit/4a906de5) | A hard wall limit for the followers (one left the tank on the Chromecast), the poster with Chromecast-only numbers, and the schooling demo clip |
 | [2026-10-01](https://github.com/wbniv/WorldFoundry/commit/9fa728a0) | Swarming poster and plan: the in-engine Chromecast result (39 to 43 ms a tick and 20 fps as found, 11.3 ms and 59.9 fps after the mailbox fix), and what the poster does not claim now |
 | [2026-10-01](https://github.com/wbniv/WorldFoundry/commit/bec1d758) | Mailbox calls cost 4.2 us each on the Chromecast: three per-call debug streams moved to DBSTREAM5; opt-in --script-profile; a bench level |
@@ -10,6 +11,11 @@
 | [2026-10-01](https://github.com/wbniv/WorldFoundry/commit/2460bd2a) | Swarming: the Couzin zone model as a Forth core (school.fth, 2179 B, 6.2 ms/11 fish on the Chromecast), tested against numpy, and an A3 poster |
 
 <!--history-meta v1
+dd7b6e4a	author	Will Norris
+dd7b6e4a	added	13
+dd7b6e4a	deleted	13
+dd7b6e4a	files	1
+dd7b6e4a	body	The 'not claimed' note said the school was not in the game: it is, so it now says untuned and the dart is not wired; rule 8 says the startle is not called yet and rule 7 names the hard wall limit;\nthe engine timing pair is labelled as the earlier 2,936 B version; the real-level measurement (resting p_group 0.39, swimming 0.77, alignment +0.40) is printed; the tank figures are re-run with the\nwall limit (every run stays in the box); header and stat boxes shortened to fit; leader weight row says 3 in the game, untuned. Tests pin the wording.\n\nCo-Authored-By: Claude Sonnet 5.5 <noreply@anthropic.com>\nClaude-Session: https://claude.ai/code/session_01NNPhRbrqjqMDkScPvTE9yC
 4a906de5	author	Will Norris
 4a906de5	added	15
 4a906de5	deleted	15
