@@ -89,7 +89,7 @@
 - [T4] **Object-model / class taxonomy — collectibles shouldn't masquerade as coins.** Mushroom/FireFlower/Star are all authored as `gold` actors with `Gold Value = 0` + a pickup script (the only stock class with the right walk-through + floor-landing collision profile). Real fix: a base `Collectible` (collision profile + pluggable pickup effect + despawn/TTL + visual) that `Gold`/`Mushroom`/`Star`/`1-Up`/`FireFlower` specialise. Four clones now exist (the trigger has fired). Pairs with the dead-`Gold::Collision` cleanup. [plan](docs/plans/2026-05-26-smb-super-mushroom-powerup.md)
 
 - [T2] Investigate [Tripo3D studio](https://studio.tripo3d.ai/?from=landingpage_header&category=featured&model_type=all&recommended=recommended&use_case=all)
-
+- [ ] **Aquarium: ten more fish that school and swarm around the player's fish** — Couzin-model zones with the player as leader; Phase 0 measures the cost of ten fish in Forth on the Chromecast first. [plan](docs/plans/2026-10-01-aquarium-schooling.md)
 
 ## Watch
 
