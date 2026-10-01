@@ -391,6 +391,7 @@ _Auto-added from plan "Out of scope"/"Deferred" sections at commit time. Triage 
 - [ ] **(triage)** A gamepad profile beyond the existing key mapping, until a gamepad is paired (Phase D). — _from [2026-09-30-aquarium-chromecast.md](docs/plans/2026-09-30-aquarium-chromecast.md)_  <!-- fp:5b9b0a3297c3ca64 -->
 - [ ] **(triage)** Phone and tablet devices, iPhone and iPad (separate items in the porting status). — _from [2026-09-30-aquarium-chromecast.md](docs/plans/2026-09-30-aquarium-chromecast.md)_  <!-- fp:14cd3e413a3d1f4f -->
 - [ ] **(triage)** Play Store or any distribution beyond `adb` sideload. — _from [2026-09-30-aquarium-chromecast.md](docs/plans/2026-09-30-aquarium-chromecast.md)_  <!-- fp:73840a75a6fe293c -->
+- [ ] **(triage)** A hardware gamepad profile beyond the existing key mapping, until one is paired (Phase E). Two phones as two players, and any internet or cloud play. — _from [2026-09-30-aquarium-chromecast.md](docs/plans/2026-09-30-aquarium-chromecast.md)_  <!-- fp:275e6b24f9fa63d2 -->
 <!-- END auto-captured-deferrals -->
 
 - [x] Implemented Forth-only condo camera inspection controls; desktop/touch input regressions passed. [Plan and mockups](docs/plans/2026-09-25-condo-camera-controls.md)

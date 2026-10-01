@@ -1,6 +1,6 @@
 # The aquarium as its own app on a Chromecast with Google TV
 
-Status: **done on a real Chromecast HD** (2026‑10‑01). Written 2026‑10‑01 09:55 (+07) = 02:55 UTC, **after the fact**. The agent that was to write this
+Status: **done on a real Chromecast HD** (2026‑10‑01); **Phase D (the phone as a gamepad) is designed and next**. Written 2026‑10‑01 09:55 (+07) = 02:55 UTC, **after the fact**. The agent that was to write this
 plan alongside the Android work was stopped on 2026‑09‑30 (out of tokens) before it wrote the file, so four documents linked to a plan that did not exist
 ([the aquarium-on-every-platform plan](2026-09-30-aquarium-platforms.md), [the Chromecast plan](2026-04-23-chromecast-googletv-port.md),
 [the condo plan](2026-10-01-condo-chromecast.md) and a second copy of the Chromecast plan); my own earlier statement that results had been appended to it was wrong. Everything below is
@@ -9,7 +9,8 @@ rebuilt from the commits and the evidence folders under `~/tmp/android-device-ru
 - [x] Phase A: the aquarium as a separate Android app (Gradle flavor, `cd.iff`, art), builds for both ABIs
 - [x] Phase B: installs and runs on a real Chromecast HD; D-pad moves the fish
 - [x] Phase C: release frame rate (60 fps) and the faults the device exposed (32-bit ABI, pool alignment, TV sleep, resume)
-- [ ] Phase D: a gamepad (needs one paired to the Chromecast); audio (the Android build is a silent stub)
+- [ ] Phase D: **the phone as a gamepad**: a web controller served by the TV app over the local Wi-Fi, zero install (designed below, mockups 2 to 4; not started)
+- [ ] Phase E: a hardware gamepad (needs one paired to the Chromecast); audio (the Android build is a silent stub)
 
 ## Context
 
@@ -53,10 +54,74 @@ They are Linux renders, used only as art sources; they are **not** Chromecast sc
 There is no other visible surface: the app is the game, full screen. Its on-screen states (loading, running, slow, suspended, failed) were first drawn for the condo, in
 [its mockup 3](2026-10-01-condo-chromecast.md), and apply unchanged here.
 
+## Phase D: the phone as a gamepad
+
+**Why.** The Chromecast remote has a D-pad and OK only. The aquarium needs just the D-pad, but the condo needs doors (B), the 639⇄640 teleport (C), orbit (hold D) and zoom (E/F), which the
+remote cannot reach ([the condo plan](2026-10-01-condo-chromecast.md), mockup 2, and its Verification 9). A phone in the hand is the gamepad everyone already has, so Phase D replaces
+"buy and pair a Bluetooth gamepad" as the way to play those buttons.
+
+**Design, in one sentence:** the TV app serves a one-page web controller over the local Wi-Fi; the phone opens it by scanning a QR code on the TV (no app to install, works on any phone, iPhone
+included) and streams a button bitmask over a WebSocket; the engine ORs that mask into the input it already merges from the gamepad and the touch HUD.
+
+How it fits the existing code (read from `wfsource/source/hal/android/native_app_entry.cc`, not assumed): input is already one `joystickButtonsF` bitmask, merged in `Emit()` as
+`_HALSetJoystickButtons(gGamepadButtons | gTouchButtons)`, and the analog stick is already quantised to LEFT/RIGHT/UP/DOWN with a threshold. The phone adds a third source, `gPhoneButtons`, to that
+`|`. Nothing about the game, the level scripts or the engine's input model changes.
+
+1. **Protocol** (portable C++, so it builds and tests on Linux without a Chromecast): HTTP `GET /` serves the controller page, `GET /layout.json` the per-app layout, and `/ws` upgrades to a
+   WebSocket. The phone sends the 16-bit mask on every change and as a **250 ms heartbeat**; the TV **releases every button if no frame arrives for 1 s** (a locked phone or a dropped Wi-Fi must never
+   leave RIGHT stuck). Frames are tiny text (`b:01a0`), so a bug is readable in a log.
+2. **Pairing and safety:** the server listens only while the app is resumed and only on the Wi-Fi interface; every launch picks a fresh random PIN carried in the QR URL (`/?k=482913`), checked on the page
+   request and on the WebSocket; the newest phone wins. LAN only: no cloud, no relay, nothing reachable from the internet.
+3. **The page** (`assets/controller.html`, inline CSS and JS, one file in the APK): pointer events with multi-touch and pointer capture, a virtual stick (same threshold the engine uses) and buttons from
+   the layout (aquarium: stick, A, B; condo: stick, A hop, B doors, C teleport, D orbit-hold, E/F zoom), `touch-action: none`, a screen Wake Lock while connected, and a "rotate your phone" hint in portrait.
+4. **The TV overlay:** drawn by the engine like the touch HUD: URL, QR, PIN and "Waiting for a phone…" until a phone connects, then a 3 s "Phone connected" toast; the panel returns if the phone drops.
+   The QR is generated at run time (the URL holds the IP and a per-launch PIN, so it cannot be pre-rendered): a small vendored encoder (for example Nayuki's MIT-licensed QR Code generator).
+   **Step D1 ships the text URL and PIN first; the QR is D3**, so the feature is usable before the encoder lands.
+5. **Android plumbing:** the manifest has **no `INTERNET` permission today** (checked: `AndroidManifest.xml` has no `uses-permission`), and opening a listening socket needs it, so this phase adds
+   `android.permission.INTERNET`. It is the first network capability these apps have, which is why the PIN and the LAN-only rule above are not optional.
+
+**Sub-steps, in order:** D1 server, protocol, mask merge and the page, tested on Linux with a headless client (no device needed); D2 Android build, manifest, the TV overlay with the URL and PIN;
+D3 the QR code; D4 device run on the Chromecast with a real phone (the user's), aquarium and condo; D5 the failure states of mockup 4 (lost signal, wrong PIN, other network, second phone).
+
+**Rejected:**
+- **Google's TV remote protocol:** it is the same D-pad and OK as the physical remote, so it cannot reach B, C, D, E or F.
+- **The phone as a Bluetooth HID gamepad:** Android's `BluetoothHidDevice` needs a phone app per phone, and an iPhone cannot do it at all.
+- **Google Cast:** it needs a receiver app and Google registration for a game that is not a media stream.
+- **A native companion app:** every phone would have to install it first, which is one more manual step than scanning a code.
+- **Tilt steering and haptics:** possible later; the page can add them without protocol changes.
+
+**Risks, each with a verification step:**
+
+| Risk | Why | Step |
+|---|---|---|
+| Wi-Fi **AP isolation** or a guest network | the phone cannot reach the TV at all; common on home routers | 15 |
+| Latency over Wi-Fi | a laggy stick is worse than no stick; target median under 100 ms from touch to frame | 14 |
+| A stuck button | phone locks, Wi-Fi drops, tab is backgrounded | 15 |
+| A new network surface in a game app | anyone on the LAN could send buttons without the PIN | 15 |
+| The Chromecast's address changes | a bookmarked URL stops working; the QR is shown every launch | 13 |
+
+### Mockups for Phase D
+
+[![The phone controller](2026-09-30-aquarium-chromecast/phone-controller.png)](2026-09-30-aquarium-chromecast/phone-controller.html)
+
+**2. The phone as the controller (live: click and drag the controls).** Landscape page, layout per app; the line under the phones shows the exact button mask that would be sent.
+**Decision asked of you:** is the condo layout right (doors B, teleport C, orbit-hold D, zoom E/F), and is a plain digital stick (the engine's existing four directions) enough for v1?
+[Open the interactive mockup](2026-09-30-aquarium-chromecast/phone-controller.html).
+
+[![The TV, pairing the phone](2026-09-30-aquarium-chromecast/phone-pairing-tv.png)](2026-09-30-aquarium-chromecast/phone-pairing-tv.html)
+
+**3. The TV, pairing the phone.** The overlay with a real QR code (of an example URL), the address and the PIN, then the "Phone connected" toast over the condo. The pictures are the real Chromecast
+screenshots; the overlay is a drawing. [Open the interactive mockup](2026-09-30-aquarium-chromecast/phone-pairing-tv.html).
+
+[![The states](2026-09-30-aquarium-chromecast/phone-states.png)](2026-09-30-aquarium-chromecast/phone-states.html)
+
+**4. The states.** Connecting, connected, signal lost, wrong PIN, not on the same Wi-Fi, phone locks, a second phone, and remote plus phone together.
+[Open the interactive mockup](2026-09-30-aquarium-chromecast/phone-states.html). All three are regenerated by [`make_phone_mockups.py`](2026-09-30-aquarium-chromecast/make_phone_mockups.py).
+
 ## Out of scope
 
 - Audio (silent stub on Android; the "Audio assets from IFF" item in `TODO.md`).
-- A gamepad profile beyond the existing key mapping, until a gamepad is paired (Phase D).
+- A hardware gamepad profile beyond the existing key mapping, until one is paired (Phase E). Two phones as two players, and any internet or cloud play.
 - Phone and tablet devices, iPhone and iPad (separate items in the porting status).
 - Play Store or any distribution beyond `adb` sideload.
 
@@ -164,7 +229,25 @@ Numbered, runnable steps; each shows its raw output with PASS or FAIL. Times in 
 
     It now selects `^<package>/android\.app\.NativeActivity#[0-9]+$`, the layer that actually carries the app's buffers, which gives the 59.9 fps line in step 8. **PASS**
 
-11. A gamepad moves the fish; B/C buttons. **PENDING (no gamepad paired)**.
+11. The portable server and protocol, on this PC (Phase D1). `python3 -m pytest tests/test_phone_controller.py -q`: WebSocket handshake and framing, the mask-to-buttons mapping, the 1 s timeout releasing every button,
+    wrong PIN rejected, newest phone wins. Expected: all pass. **PENDING (Phase D not started)**
+
+12. The page and a real engine on Linux. Run the engine with the phone controller enabled, open the page in headless Chrome (screenshot compared with mockup 2), then a headless client holds RIGHT for 1.5 s.
+    Expected: the engine log's `ball pos` changes, and stops moving when the client disconnects. **PENDING**
+
+13. The Android build. `./gradlew :app:assembleAquariumRelease :app:assembleCondoRelease`. Expected: BUILD SUCCESSFUL for both ABIs; the APK has `assets/controller.html`; the merged manifest has
+    `android.permission.INTERNET` and nothing else new. **PENDING**
+
+14. On the Chromecast with a real phone (the user's): scan the QR on the TV, hold the stick. Expected: the TV shows the toast; the aquarium fish moves; in the condo the player moves, A hops, B toggles a glass door, C
+    teleports; the median touch-to-frame latency is **under 100 ms** (the page timestamps each message; the engine logs the frame it took effect in). Evidence: screenshots of the TV and the phone, the latency
+    numbers. **PENDING**
+
+15. Failure states on the device. Lock the phone, turn its Wi-Fi off, join a guest network, use a wrong PIN, connect a second phone. Expected: mockup 4's behaviour for each, and **no stuck button after any of
+    them** (read the engine's button mask after each). **PENDING**
+
+16. Codemagic `android-apk-debug` on the merged branch; macOS and iOS workflows unaffected. Expected: green. **PENDING**
+
+17. A hardware gamepad moves the fish; B/C buttons (Phase E). **PENDING (no gamepad paired)**.
 
 ## Result on a real Chromecast
 
@@ -183,3 +266,5 @@ None: local Gradle builds and device runs, plus the free Mac-minutes of the Code
 |---|---|---|
 | Flavors, `cd.iff` task, art script, device script | T4 | a new pattern (separate apps from one native library) and the first 32-bit run, with an unknown fault list |
 | Reading screenshots and numbers, the alignment decision | T5 | needed the whole session's judgement |
+| Phase D: protocol, server, input merge, TV overlay, manifest | T4 | cross-cutting (engine input path, a first network surface, Android permission) where a wrong turn is a security or stuck-input bug; recommended rank, to be set in `TODO.md` by a Fable session |
+| Phase D: the controller page and the QR vendoring | T2 | one self-contained file against the settled protocol, and a vendored library |

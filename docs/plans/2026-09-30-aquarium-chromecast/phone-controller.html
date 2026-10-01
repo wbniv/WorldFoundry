@@ -1,0 +1,41 @@
+<!doctype html><html lang="en"><head><meta charset="utf-8"><title>Mockup 2: the phone as the controller (live: click and drag)</title><style>
+*{box-sizing:border-box}body{margin:0;width:1440px;height:900px;background:#0d1117;color:#e6edf3;font:16px/1.4 system-ui,'Noto Sans',sans-serif;overflow:hidden}
+h1{margin:0;font-size:22px;font-weight:650}.top{padding:22px 34px 10px;border-bottom:1px solid #263041;display:flex;justify-content:space-between;align-items:baseline}
+.sub{color:#8b98a9;font-size:14px}.note{color:#ffb454;font-size:13px}.ok{color:#56d364}.bad{color:#ff7b72}.warn{color:#ffb454}
+.pill{display:inline-block;border:1px solid #3a4a63;border-radius:999px;padding:2px 12px;font-size:13px;color:#9fb3cc}
+
+.phone{width:640px;height:296px;background:#05080d;border:6px solid #2b3a52;border-radius:34px;position:relative;padding:8px}.screen{position:absolute;inset:8px;background:#111826;border-radius:26px;overflow:hidden;touch-action:none}
+.status{position:absolute;left:20px;top:10px;font-size:12px;color:#8b98a9}.dot{display:inline-block;width:9px;height:9px;border-radius:50%;background:#56d364;margin-right:4px}
+.stick{position:absolute;width:150px;height:150px;touch-action:none}.ring{position:absolute;inset:0;border-radius:50%;border:2px solid #3a4a63;background:#0d1320}.knob{position:absolute;left:45px;top:45px;width:60px;height:60px;border-radius:50%;background:#2f6fb3;box-shadow:0 0 0 2px #56a0e8 inset;transition:transform .04s}
+.btn{position:absolute;width:62px;height:62px;border-radius:50%;background:#1d2a3f;border:2px solid #3a4a63;display:flex;align-items:center;justify-content:center;font-size:12px;text-align:center;user-select:none;touch-action:none;color:#c9d4e3}
+.btn.small{width:52px;height:52px}.btn.on{background:#56d364;color:#0d1117;border-color:#56d364}
+.mask{margin-top:16px}code{background:#05080d;padding:3px 10px;border-radius:4px;color:#56d364;font-size:15px;display:inline-block;margin-top:4px}</style></head><body>
+<div class="top"><h1>Mockup 2: the phone as the controller (live: click and drag)</h1><div class="sub">Landscape phone page served by the Chromecast. Layout per app. Try the controls: the line below shows the button mask that would be sent.</div></div>
+<div style="padding:18px 34px"><div style="display:flex;gap:34px"><div><div class="sub" style="margin-bottom:6px">A. Aquarium: stick plus two buttons</div>
+ <div class="phone"><div class="screen"><div class="status"><span class="dot g"></span> Connected to the TV</div>
+  <div class="stick" style="left:34px;top:92px"><div class="ring"></div><div class="knob"></div></div><div class="btn " data-b="A" style="left:500px;top:120px">A</div><div class="btn " data-b="B" style="left:420px;top:160px">B</div></div></div>
+ <div class="note" style="margin-top:8px;max-width:600px">Steers the clownfish (A and B are free for later). The stick maps to the same four directions the D-pad does (threshold 28 px of 70), so it behaves exactly like the remote.</div></div><div><div class="sub" style="margin-bottom:6px">B. Condo: stick plus the buttons the remote cannot reach</div>
+ <div class="phone"><div class="screen"><div class="status"><span class="dot g"></span> Connected to the TV</div>
+  <div class="stick" style="left:34px;top:92px"><div class="ring"></div><div class="knob"></div></div><div class="btn " data-b="A" style="left:520px;top:150px">hop</div><div class="btn " data-b="B" style="left:440px;top:98px">doors</div><div class="btn " data-b="C" style="left:520px;top:46px">teleport</div><div class="btn hold" data-b="D" style="left:350px;top:150px">orbit (hold)</div><div class="btn small" data-b="E" style="left:262px;top:46px">zoom −</div><div class="btn small" data-b="F" style="left:262px;top:106px">zoom +</div></div></div>
+ <div class="note" style="margin-top:8px;max-width:600px">Doors (B), the 639⇄640 teleport (C), orbit (hold D with the stick) and zoom (E/F) are exactly what a TV remote cannot do. This closes the condo plan's gamepad question without buying a gamepad.</div></div></div>
+<div class="mask"><span class="sub">sent to the TV on every change (and every 250 ms as a heartbeat):</span><br><code id="mask"></code></div></div>
+<script>
+const state={};const out=document.getElementById('mask');
+const bits={LEFT:1,RIGHT:2,UP:4,DOWN:8,A:16,B:32,C:64,D:128,E:256,F:512};
+function render(){let m=0;for(const k in state)if(state[k])m|=bits[k];out.textContent='0x'+m.toString(16).padStart(4,'0')+'   '+(Object.keys(state).filter(k=>state[k]).join(' + ')||'(nothing held)');}
+document.querySelectorAll('[data-b]').forEach(el=>{
+  const k=el.dataset.b;
+  el.addEventListener('pointerdown',e=>{state[k]=true;el.classList.add('on');el.setPointerCapture(e.pointerId);render();});
+  const up=()=>{state[k]=false;el.classList.remove('on');render();};
+  el.addEventListener('pointerup',up);el.addEventListener('pointercancel',up);
+});
+document.querySelectorAll('.stick').forEach(st=>{
+  const knob=st.querySelector('.knob');
+  function set(dx,dy){const r=70,d=Math.hypot(dx,dy)||1,s=Math.min(1,r/d);knob.style.transform=`translate(${dx*s}px,${dy*s}px)`;
+    const t=28;state.LEFT=dx<-t;state.RIGHT=dx>t;state.UP=dy<-t;state.DOWN=dy>t;render();}
+  st.addEventListener('pointerdown',e=>{st.setPointerCapture(e.pointerId);const b=st.getBoundingClientRect();st._c=[b.left+b.width/2,b.top+b.height/2];set(e.clientX-st._c[0],e.clientY-st._c[1]);});
+  st.addEventListener('pointermove',e=>{if(st._c&&e.buttons)set(e.clientX-st._c[0],e.clientY-st._c[1]);});
+  const end=()=>{st._c=null;knob.style.transform='translate(0,0)';state.LEFT=state.RIGHT=state.UP=state.DOWN=false;render();};
+  st.addEventListener('pointerup',end);st.addEventListener('pointercancel',end);
+});render();
+</script></body></html>

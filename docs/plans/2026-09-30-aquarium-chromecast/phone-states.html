@@ -1,0 +1,20 @@
+<!doctype html><html lang="en"><head><meta charset="utf-8"><title>Mockup 4: the states, including the failures a living room produces</title><style>
+*{box-sizing:border-box}body{margin:0;width:1440px;height:900px;background:#0d1117;color:#e6edf3;font:16px/1.4 system-ui,'Noto Sans',sans-serif;overflow:hidden}
+h1{margin:0;font-size:22px;font-weight:650}.top{padding:22px 34px 10px;border-bottom:1px solid #263041;display:flex;justify-content:space-between;align-items:baseline}
+.sub{color:#8b98a9;font-size:14px}.note{color:#ffb454;font-size:13px}.ok{color:#56d364}.bad{color:#ff7b72}.warn{color:#ffb454}
+.pill{display:inline-block;border:1px solid #3a4a63;border-radius:999px;padding:2px 12px;font-size:13px;color:#9fb3cc}
+
+.grid{display:grid;grid-template-columns:repeat(4,1fr);gap:16px;padding:20px 34px}.c{background:#111826;border:1px solid #233048;border-radius:10px;padding:12px}
+.s{height:112px;background:#05080d;border:1px solid #2b3a52;border-radius:8px;display:flex;align-items:center;justify-content:center}h3{margin:10px 0 4px;font-size:16px}p{margin:0;font-size:13.5px;color:#b7c3d4}
+.ph2{font-size:15px;color:#c9d4e3;text-align:center;padding:0 10px}.ph2.g{color:#56d364}.ph2.w{color:#ffb454}.ph2.r{color:#ff7b72}small{color:#8b98a9;font-size:12px}.dot2{display:inline-block;width:9px;height:9px;border-radius:50%;background:#ffb454;margin-right:6px}</style></head><body>
+<div class="top"><h1>Mockup 4: the states, including the failures a living room produces</h1><div class="sub">Phone screens and the TV panel, each with what the user sees and what the code does.</div></div>
+<div class="grid">
+ <div class="c"><div class="s"><div class="ph2"><span class="dot2"></span> Connecting…</div></div><h3 class="">1 Connecting</h3><p>The page loaded; the WebSocket is opening. Buttons are shown but disabled.</p></div>
+ <div class="c"><div class="s"><div class="ph2 g">● Connected to the TV</div></div><h3 class="ok">2 Connected</h3><p>Buttons live. The mask is sent on every change and as a heartbeat every 250 ms.</p></div>
+ <div class="c"><div class="s"><div class="ph2 w">Reconnecting… <small>buttons off</small></div></div><h3 class="warn">3 Signal lost</h3><p>No reply for 1 s: buttons grey out and the phone retries every second. <b>The TV releases every button at once</b> (no stuck RIGHT).</p></div>
+ <div class="c"><div class="s"><div class="ph2 r">Wrong code. Scan the TV again.</div></div><h3 class="bad">4 Wrong PIN</h3><p>The PIN in the URL does not match this launch's: HTTP 403 and a plain message. No game input accepted.</p></div>
+ <div class="c"><div class="s"><div class="ph2 r">Can’t reach the TV.<br><small>Same Wi-Fi? Guest network?</small></div></div><h3 class="bad">5 Not on the same Wi-Fi</h3><p>Nothing answers within 5 s. The page says why: join the TV's network; a guest network or <i>AP isolation</i> blocks it.</p></div>
+ <div class="c"><div class="s"><div class="ph2 w">Screen kept awake</div></div><h3 class="warn">6 Phone locks or sleeps</h3><p>A screen Wake Lock is requested while connected. If the phone sleeps anyway, it is state 3 and the TV releases the buttons.</p></div>
+ <div class="c"><div class="s"><div class="ph2 w">Another phone took over</div></div><h3 class="warn">7 A second phone joins</h3><p>The newest connection wins; the first sees “Another phone took over”. Two players is a later feature.</p></div>
+ <div class="c"><div class="s"><div class="ph2 g">Remote + phone + gamepad</div></div><h3 class="ok">8 The remote at the same time</h3><p>Remote, a gamepad and the phone are OR-ed together, like the touch HUD and a gamepad already are. Any of them works.</p></div>
+</div></body></html>
