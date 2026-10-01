@@ -59,6 +59,11 @@ android {
             applicationIdSuffix = ".smb"        // org.worldfoundry.wf_game.smb
             versionNameSuffix   = "-smb"
         }
+        create("qbert") {
+            dimension = "game"
+            applicationIdSuffix = ".qbert"      // org.worldfoundry.wf_game.qbert
+            versionNameSuffix   = "-qbert"
+        }
     }
 
     externalNativeBuild {
@@ -135,4 +140,6 @@ android {
     //   condo: cd.iff → wflevels/condo-cd.iff (task build-cd-iff-condo; the
     //     condo_639_640 standalone level, docs/plans/2026-10-01-condo-chromecast.md).
     //   smb: cd.iff → wflevels/smb-cd.iff (task build-cd-iff-smb). No MIDI or soundfont.
+    //   qbert: cd.iff → wflevels/qbert-cd.iff (task build-cd-iff-qbert). Silent: the
+    //     engine loads Q*bert's SFX from desktop paths (game.cc), absent on Android.
 }

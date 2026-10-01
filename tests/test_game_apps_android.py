@@ -124,6 +124,7 @@ from test_aquarium_android import APP, DENSITIES, GRADLE, SRC  # noqa: E402
 FLAVORS = {
     "snowgoons": (None, "World Foundry", ["cd.iff", "florestan-subset.sf2", "level0.mid"]),
     "smb": (".smb", "WF SMB", ["cd.iff"]),                 # the label is a placeholder (the plan's Decisions)
+    "qbert": (".qbert", "WF Q*bert", ["cd.iff"]),          # placeholder too
 }
 
 
