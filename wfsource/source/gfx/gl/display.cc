@@ -710,6 +710,53 @@ static Display* gActiveDisplay = nullptr;
 
 Display* Display::GetActive() { return gActiveDisplay; }
 
+#if defined(__LINUX__) && !defined(__ANDROID__) && !defined(__EMSCRIPTEN__)
+// The level menu's drawer on the Linux desktop (game/level_menu.h): solid
+// rectangles in pixels, origin top-left, colour 0xRRGGBBAA, over the frame
+// RenderBegin just cleared. Same fixed-function GL as DrawHud. Registered in
+// the Display ctor; other platforms register their own or get no menu.
+// Plan: docs/plans/2026-10-01-level-menu-selector.md
+#include <game/level_menu.h>
+
+static void DrawLevelMenuRects(const PhonepadRect* rects, int count, int w, int h)
+{
+    glViewport(0, 0, w, h);
+    glUseProgram(0);
+    glMatrixMode(GL_PROJECTION);
+    glPushMatrix();
+    glLoadIdentity();
+    glOrtho(0, w, h, 0, -1, 1);
+    glMatrixMode(GL_MODELVIEW);
+    glPushMatrix();
+    glLoadIdentity();
+    glPushAttrib(GL_ENABLE_BIT | GL_COLOR_BUFFER_BIT | GL_CURRENT_BIT);
+    glDisable(GL_DEPTH_TEST);
+    glDisable(GL_TEXTURE_2D);
+    glDisable(GL_LIGHTING);
+    glDisable(GL_CULL_FACE);
+    glDisable(GL_FOG);
+    glEnable(GL_BLEND);
+    glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
+    glBegin(GL_QUADS);
+    for (int i = 0; i < count; ++i)
+    {
+        const PhonepadRect& r = rects[i];
+        glColor4ub(GLubyte(r.rgba >> 24), GLubyte(r.rgba >> 16), GLubyte(r.rgba >> 8), GLubyte(r.rgba));
+        glVertex2f(r.x0, r.y0);
+        glVertex2f(r.x1, r.y0);
+        glVertex2f(r.x1, r.y1);
+        glVertex2f(r.x0, r.y1);
+    }
+    glEnd();
+    glPopAttrib();
+    glMatrixMode(GL_PROJECTION);
+    glPopMatrix();
+    glMatrixMode(GL_MODELVIEW);
+    glPopMatrix();
+    AssertGLOK();
+}
+#endif
+
 void Display::SetLiveWindowSize(int w, int h)
 {
     if (w <= 0 || h <= 0) return;
@@ -751,6 +798,9 @@ _memory(memory)
     AssertGLOK();
 
 	WFInitGL();
+#if defined(__LINUX__) && !defined(__ANDROID__) && !defined(__EMSCRIPTEN__)
+    levelmenu::SetDrawer(&DrawLevelMenuRects);
+#endif
 
     assert(orderTableSize > 0);
 #if defined(USE_ORDER_TABLES)

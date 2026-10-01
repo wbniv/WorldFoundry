@@ -45,6 +45,7 @@
 #include <cpplib/libstrm.hp>
 
 #include "gamestrm.hp"
+#include "level_menu.h"
 
 //==============================================================================
 
@@ -289,6 +290,17 @@ ParseCommandLine(int argc, char** argv)
 			           "--capture-frame wants N=<path.png>, got: " << spec );
 			DBSTREAM1( cprogress << "Capture frame " << gCaptureFrame
 			                     << " -> " << gCapturePath << std::endl; )
+		}
+		else if ( strncmp( argv[index]+1, "-menu-input=", 12 ) == 0 )
+		{
+			// --menu-input=down,down,a,wait:90,back,quit: scripted input for the level
+			// menu and back/quit requests in levels (game/level_menu.h, the tests).
+			std::string err;
+			if ( !levelmenu::Script().Parse( argv[index] + 1 + 12, &err ) )
+			{
+				std::cerr << "wf_game: " << err << std::endl;
+				exit( 1 );
+			}
 		}
 		else if ( strcmp( argv[index]+1, "-windowed" ) == 0 )
 		{

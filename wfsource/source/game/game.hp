@@ -180,6 +180,13 @@ private:
 	bool			_bContinue;		// false short-circuits the level loop (PIGSUserAborted)
 	Scalar			_deltaTime;		// last frame's delta; fed back into next update()
 
+	// Level menu (game/level_menu.h; docs/plans/2026-10-01-level-menu-selector.md).
+	// A shell that writes LEVEL_TO_RUN = -1 gets the bundle's MENU chunk as a menu.
+	int RunLevelMenu();				// returns the chosen level (0 without a usable menu)
+	void PollLevelMenu();			// per level frame: --menu-input script, return requests
+	bool			_levelMenuActive = false;	// a menu was shown: Backspace etc. return to it
+	int				_levelMenuCursor = 0;		// where the cursor was; the menu comes back there
+
 public:
 //     class LevelActor : public Actor
 //     {

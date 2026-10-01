@@ -30,6 +30,7 @@
 #include <hal/lifecycle.h>
 #include <gfx/host_gl_context.h>
 #include <gfx/display.hp>
+#include <game/level_menu.h>   // levelmenu::RequestReturn (Backspace)
 
 // kts major kludge, both GL and WF should use namespaces
 #define Display XDisplay
@@ -370,6 +371,12 @@ void ProcessXEvents(XEvent event)
                 case(XK_KP_1):
                 case XK_exclam:
                     _joystickButtons |= EJ_BUTTONF_K;
+                    break;
+                case XK_BackSpace:
+                    // Back to the level menu, when a menu bundle runs (game/level_menu.h;
+                    // docs/plans/2026-10-01-level-menu-selector.md). Not a joystick bit, so
+                    // no game loses a button; ignored by bundles without a menu.
+                    levelmenu::RequestReturn();
                     break;
                 case XK_Escape:
                     // Same shutdown path as the WM-close button — set the

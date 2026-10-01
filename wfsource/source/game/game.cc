@@ -56,6 +56,7 @@
 #include "hscore.h"
 #include <cstring>
 #endif
+#include "level_menu.h"   // the level menu (docs/plans/2026-10-01-level-menu-selector.md)
 
 
 
@@ -283,6 +284,21 @@ WFGame::RunGameScript()				// runs the whole game, returns when game (really) ov
 
 			if(_overrideLevelNum != -1)
 				_desiredLevelNum = _overrideLevelNum;
+
+#if defined(DO_CD_IFF)
+			// shell-menu.fth (and a return request) write -1: "ask the player".
+			// Any negative value counts: a Forth -1 arrives as -2, because the
+			// float build's WholePart floors with int(s - 1.0) (math/scalar.hpi).
+			// Plain shell.fth never writes one, so other bundles never get here.
+			if (_desiredLevelNum < 0)
+			{
+				_desiredLevelNum = RunLevelMenu();
+				if (HALWindowCloseRequested())
+					break;
+			}
+			if (_levelMenuActive)
+				fprintf(stderr, "level-menu: level %d starts\n", int(_desiredLevelNum));
+#endif
 
 			assert(_desiredLevelNum >= 0);
 			assert(_desiredLevelNum < 9999);
@@ -732,12 +748,145 @@ WFGame::RunLevel(_DiskFile* levelFile)
 	while ( !LevelDone() && ContinueRequested() && !HALWindowCloseRequested() )
 	{
 		StepFrame(true);
+		PollLevelMenu();
 	}
 
 #pragma message ("KTS: write code to handle lives and restarting same level, etc.")
 	DBSTREAM1( std::cout << ", _bContinue = " << _bContinue << ", _curLevel->done() = " << _curLevel->done() << std::endl; )
 
 	UnloadLevel();
+}
+
+//==============================================================================
+// Level menu (game/level_menu.h; docs/plans/2026-10-01-level-menu-selector.md)
+
+void
+WFGame::PollLevelMenu()
+{
+	levelmenu::ScriptFrame f;
+	if (levelmenu::Script().Next(&f))		// wf_game --menu-input=...: back/quit at scripted frames
+	{
+		if (f.back) levelmenu::RequestReturn();
+		if (f.quit) HALRequestClose();
+	}
+	// Back to the menu: the same early exit as the "level aborted" cheat
+	// (_bContinue = false ends RunLevel), with LEVEL_TO_RUN = "ask the player",
+	// so the next pass of RunGameScript's loop shows the menu again. Only while
+	// a menu bundle runs; elsewhere the request is left alone.
+	if (_levelMenuActive && levelmenu::ConsumeReturnRequest())
+	{
+		fprintf(stderr, "level-menu: back to the menu\n");
+		_desiredLevelNum = levelmenu::kAskPlayer;
+		_bContinue = false;
+	}
+}
+
+//-----------------------------------------------------------------------------
+
+static_assert(levelmenu::kButtonA == EJ_BUTTONF_A && levelmenu::kButtonUp == EJ_BUTTONF_UP
+              && levelmenu::kButtonDown == EJ_BUTTONF_DOWN, "level_menu.h's button bits must be the engine's");
+
+int
+WFGame::RunLevelMenu()
+{
+#if defined(DO_CD_IFF)
+	using namespace levelmenu;
+	assert(ValidPtr(_gameFile));
+
+	// The TOC sector, read again here (DiskTOC keeps no tags), and the MENU chunk.
+	std::vector<uint8_t> sector(DiskFileCD::_SECTOR_SIZE);
+	_gameFile->SeekRandom(0);
+	_gameFile->ReadBytes(sector.data(), int32(sector.size()));
+	std::vector<TocEntry> toc;
+	TocEntry menuEntry{};
+	int levelCount = 0;
+	if (!ParseToc(sector.data(), sector.size(), &toc) || !FindMenu(toc, &menuEntry, &levelCount))
+	{
+		fprintf(stderr, "level-menu: no MENU chunk in cd.iff: starting level 0\n");
+		return 0;
+	}
+	const size_t sectors = (size_t(menuEntry.size) + DiskFileCD::_SECTOR_SIZE - 1) / DiskFileCD::_SECTOR_SIZE;
+	std::vector<uint8_t> chunk(sectors * DiskFileCD::_SECTOR_SIZE);
+	_gameFile->SeekRandom(int32(menuEntry.offset));
+	_gameFile->ReadBytes(chunk.data(), int32(chunk.size()));
+	Bundle bundle;
+	std::string err;
+	if (!ParseMenu(chunk.data(), menuEntry.size, levelCount, &bundle, &err))
+	{
+		fprintf(stderr, "level-menu: bad MENU chunk (%s): starting level 0\n", err.c_str());
+		return 0;
+	}
+	const int autoLevel = AutoPick(bundle);
+	if (autoLevel >= 0)
+	{
+		fprintf(stderr, "level-menu: %zu entr%s, no menu: LEVEL_TO_RUN=%d\n",
+		        bundle.entries.size(), bundle.entries.size() == 1 ? "y" : "ies", autoLevel);
+		return autoLevel;
+	}
+	if (!Drawer())
+	{
+		fprintf(stderr, "level-menu: no menu drawer on this platform: LEVEL_TO_RUN=%d (%s)\n",
+		        bundle.entries[0].level, bundle.entries[0].name.c_str());
+		return bundle.entries[0].level;
+	}
+
+	_levelMenuActive = true;
+	Menu menu(bundle, _levelMenuCursor, PlatformHint());
+	fprintf(stderr, "level-menu: showing %zu entries (\"%s\"), cursor on %d\n",
+	        bundle.entries.size(), bundle.title.c_str(), menu.Cursor());
+
+#if DESIGNER_CHEATS
+	{
+		// The arcade HUD (gfx/gl/display.cc PageFlip) draws while any of these is set;
+		// they still hold the last level's values when Backspace brought us back here.
+		extern int wf_hud_score, wf_hud_timer, wf_hud_lives, wf_hud_game_over;
+		extern int wf_hud_marble_state, wf_hud_entering_initials, wf_moon_overlay_enabled;
+		wf_hud_score = wf_hud_timer = wf_hud_lives = wf_hud_game_over = 0;
+		wf_hud_marble_state = wf_hud_entering_initials = wf_moon_overlay_enabled = 0;
+	}
+#endif
+
+	IJoystick stick = JoystickNew(EJW_JOYSTICK1);
+	std::vector<PhonepadRect> rects;
+	_display->ResetTime();
+	int64_t nowMs = 0;
+	int lastCursor = menu.Cursor();
+	while (!HALWindowCloseRequested())
+	{
+		uint32_t buttons = 0;
+		ScriptFrame f;
+		if (Script().Next(&f))			// --menu-input: the script drives the menu
+		{
+			buttons = f.buttons;
+			if (f.quit) HALRequestClose();
+		}
+		else
+			buttons = uint32_t(JoystickGetButtonsF(stick));
+		menu.Update(buttons, nowMs);
+		if (menu.Cursor() != lastCursor)
+		{
+			lastCursor = menu.Cursor();
+			fprintf(stderr, "level-menu: cursor on %d (%s)\n", lastCursor, bundle.entries[size_t(lastCursor)].name.c_str());
+		}
+		if (menu.Done())
+			break;
+		int w = 0, h = 0;
+		_display->GetSurfaceSize(w, h);
+		menu.Build(w, h, &rects);
+		_display->RenderBegin();
+		Drawer()(rects.data(), int(rects.size()), w, h);
+		_display->RenderEnd();
+		nowMs += int64_t(_display->PageFlip().AsFloat() * 1000.0f);	// also pumps the window's input
+	}
+	JoystickDelete(stick);
+	ConsumeReturnRequest();			// a Backspace pressed while the menu was up is not for the next level
+	_levelMenuCursor = menu.Cursor();
+	const int level = menu.ChosenLevel();
+	fprintf(stderr, "level-menu: LEVEL_TO_RUN=%d (%s)\n", level, bundle.entries[size_t(menu.Cursor())].name.c_str());
+	return level;
+#else
+	return 0;
+#endif
 }
 
 //==============================================================================
