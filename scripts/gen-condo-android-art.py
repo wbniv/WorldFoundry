@@ -54,6 +54,7 @@ def banner():
 
 
 def main():
+    sys.exit("superseded 2026-10-01 by scripts/gen-android-icons.py condo (one layout for every game, with the logo from scripts/add-wf-logo.py); running this would overwrite the new icons")
     argparse.ArgumentParser(description=__doc__.split("\n\n")[0],
                             formatter_class=argparse.RawDescriptionHelpFormatter).parse_args()
     if not FRAME.exists():
