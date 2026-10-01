@@ -1,6 +1,6 @@
 # A level menu for multi-level bundles (SMB world select first)
 
-Status: **desktop SMB menu built and tested; Android (Phase D) waits for the split and the Chromecast** (2026‑10‑01 23:10 (+07) = 16:10 UTC; accepted
+Status: **built: desktop and the `smb` app on the Chromecast HD; the remote's Back held waits for the user's check** (2026‑10‑01 22:55 (+07) = 15:55 UTC; accepted
 for SMB at 22:05, the user: "let's do it for smb"). TODO item: "Implement a menu selector for the multi-level `cd.iff`" (pick a level at launch instead of
 booting level 0, as the alternative or addition to separate apps). Each Verification step says PASS, FAIL or PENDING once run.
 
@@ -8,8 +8,8 @@ booting level 0, as the alternative or addition to separate apps). Each Verifica
 - [x] ~~Phase B: level names as data: `cdpack --manifest` writes a `MENU` chunk; bundles without a manifest stay byte for byte as they are~~ (`69f32d9d`)
 - [x] ~~Phase C: the SMB menu on the desktop: a portable menu module, the engine glue, the desktop drawer, `shell-menu.fth`, the opt-in task, tests with
   no device, Backspace back to the menu~~ (`69f32d9d`, `e6a275b8`)
-- [ ] Phase D (after the split has landed): the menu in the `smb` Android app: the Android drawer, Back held on the remote, the flavor's bundle, a
-  screenshot from the Chromecast HD
+- [x] ~~Phase D: the menu in the `smb` Android app: the Android drawer, Back held on the remote, the flavor's bundle, a screenshot from the
+  Chromecast HD~~ (`a40da0de`; on the TV: the menu, D-pad, OK and a level start; Back held is built but only the user can check it)
 - [ ] Later, one manifest away: the desktop bundle of all seven levels (shown in the mockups, not built now)
 
 ## Use cases
@@ -130,7 +130,9 @@ existing `ContinueRequested()` path (the one the designer "level aborted" cheat 
 from a HAL call, not from a joystick bit, so no game loses a button (holding B is how Mario runs):
 
 - Desktop: **Backspace** (unmapped today). Escape stays "quit".
-- Chromecast remote (Phase D): **Back held for 1 s**. A short Back keeps its meaning (leave the app).
+- Chromecast remote (Phase D): **Back held for 1 s**. A short Back keeps its meaning (leave the app). Built in `native_app_entry.cc`, active only once a
+  menu has been shown (`levelmenu::MenuRunning()`): the decision uses the key event's own down time on release, so it works whether or not the remote
+  sends key repeats, and a repeat past 1 s fires it early; a short press calls `ANativeActivity_finish`, which is what the system's Back does.
 - "When a game ends" is not generic: game over only reloads the same level today (`END_OF_LEVEL`), so returning to the menu on game over needs each
   level to say so. Follow-up, not in this design.
 
@@ -360,7 +362,29 @@ plus one sector). Phase D adds one APK rebuild of the `smb` flavor and a screens
 9. Phase D, on the Chromecast HD with the `smb` app: the menu appears at launch at 720p (screenshot by `adb`, no key events); the user checks the remote:
    D-pad moves, OK starts, holding Back in a level comes back, a short Back still leaves the app.
 
-   **PENDING**: Phase D is not built (Android drawer, Back held), and the Chromecast is reserved by another session until the user releases it.
+   Release APK built from a clean worktree of committed HEAD (`ccede076`, which contains `a40da0de`): `BUILD SUCCESSFUL in 8m 28s`; it ships
+   `assets/cd.iff` = `wflevels/smb-menu-cd.iff` byte for byte, both ABIs. One device block (keys allowed: WAKEUP, DPAD_DOWN, DPAD_CENTER; Home last):
+
+   ```
+   2026-10-01T15:50:44Z PASS  installed org.worldfoundry.wf_game.smb
+   2026-10-01T15:50:46Z PASS  launched (TotalTime: 449 ms)
+   2026-10-01T15:50:52Z PASS  process alive after 6 s (pid 18039)
+   2026-10-01T15:50:55Z INFO  frame pacing (...): 126 frames: min 16.7 ms, median 16.7 ms (59.9 fps), p90 16.7 ms, worst 16.7 ms
+   10-01 22:50:45.882 I wf_game : level-menu: showing 4 entries ("WF SMB"), cursor on 0
+   10-01 22:50:56.662 I wf_game : key code=20 action=0 mask=0x1000
+   10-01 22:50:56.665 I wf_game : level-menu: cursor on 1 (World 1-2)
+   10-01 22:50:59.248 I wf_game : key code=23 action=0 mask=0x1
+   10-01 22:50:59.281 I wf_game : key code=23 action=1 mask=0x1
+   10-01 22:50:59.283 I wf_game : level-menu: LEVEL_TO_RUN=1 (World 1-2)
+   10-01 22:50:59.283 I wf_game : level-menu: level 1 starts
+   ```
+
+   The menu at launch, after DPAD_DOWN, and World 1‑2 running 5 s after DPAD_CENTER (OK); the level started on OK's release, as designed:
+
+   <img src="2026-10-01-level-menu-selector/chromecast-smb-menu.png" width="700">
+
+   **PASS** for the menu, the D-pad, OK and the level start. **PENDING** for the user, by hand with the real remote: holding Back 1 s in a level
+   returns to the menu, and a short Back still leaves the app (no Back key events were allowed in this block).
 
 ## Notes from the test runs
 
@@ -369,6 +393,8 @@ plus one sector). Phase D adds one APK rebuild of the `smb` flavor and a screens
   (`audio: MusicPlayer — soundfont loaded (florestan-subset.sf2, 7842132 B)`, then `SUMMARY: AddressSanitizer: 15737640 byte(s) leaked`). That
   soundfont is gitignored and was generated in `wfsource/source/game/` at 17:11 today by the soundfont work; before it existed, `play()` returned
   early. The synth the player loads is never freed at exit.
+- `tests/test_game_apps_android.py::test_built_release_apk[smb]` fails in the shared tree until someone rebuilds the `smb` APK there: the APK under
+  `android/app/build/` is the split's, with `smb-cd.iff`; the menu APK was built in a separate worktree, as asked.
 - `tests/test_aquarium_android.py::test_built_aquarium_apk_contents` fails because the built APK's `cd.iff` is older than the working tree's
   `wflevels/aquarium-cd.iff`, which another session is changing. Not this change either.
 
