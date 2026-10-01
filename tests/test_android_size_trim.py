@@ -9,6 +9,13 @@ Static checks (no build needed):
     SoundBuffer::play() decoder inits name the WAV format instead of probing every format.
   * the Clang Release compile options of wfengine, wf_game and Jolt carry -fno-exceptions and
     -fvisibility=hidden, and no engine source compiled for Android has a live try/throw.
+  * every WF_ANDROID_EXPORT in the sources is in EXPORTS below, and the Android link hides the
+    static archives (C++ runtime, builtins, zForth) by name, never with ALL.
+
+With a built release APK's stripped libwf_game.so (cd android && ./gradlew :app:assembleCondoRelease):
+
+  * its defined dynamic symbols are exactly EXPORTS, android_main and ANativeActivity_onCreate
+    among them, for both ABIs; its NEEDED libraries are the expected system set.
 
     python3 -m pytest tests/test_android_size_trim.py -v
 """
@@ -140,3 +147,68 @@ def test_no_live_exception_code_in_android_sources():
     assert offenders == []
     fatal = (SRC / "pigsys" / "fatal.cc").read_text()
     assert "#if defined(__cpp_exceptions) || defined(__EXCEPTIONS)" in fatal
+
+
+# The defined dynamic symbols of the release libwf_game.so: nothing more, nothing less.
+# Only ANativeActivity_onCreate is looked up by name (the framework's NativeActivity dlsym()s it,
+# AndroidManifest android.app.lib_name=wf_game). android_main is called directly by
+# android_native_app_glue.c; the other 18 are the plan's WF_ANDROID_EXPORT HAL calls, kept
+# visible as the plan specifies (cheap: 20 symbols, ~0.5 KB of .dynsym).
+EXPORTS = {
+    "ANativeActivity_onCreate", "android_main",
+    "WFAndroidEglInit", "WFAndroidEglTerm", "WFAndroidSetHudEnabled",
+    "WFAndroidGetAssetManager", "WFAndroidHasWindow", "WFAndroidPumpEvents",
+    "WFAndroidPhoneOverlayRects", "HALCreateAAssetAccessor",
+    "HALNotifySuspend", "HALNotifyResume", "HALIsSuspended", "HALPumpSuspendedEvents",
+    "HALWindowCloseRequested", "HALCloseWindow", "HALRequestClose",
+    "SetHostGLContext", "GetHostGLContext", "ClearHostGLContext",
+}
+NEEDED = {"libEGL.so", "libGLESv3.so", "libandroid.so", "liblog.so", "libm.so", "libdl.so", "libc.so",
+          "libOpenSLES.so"}
+
+
+def test_source_exports_match_the_list():
+    marked = set()
+    for p in SRC.rglob("*.cc"):
+        marked |= set(re.findall(r"WF_ANDROID_EXPORT\s+[\w\s\*]*?\b(\w+)\s*\(", p.read_text(errors="replace")))
+    assert marked | {"ANativeActivity_onCreate"} == EXPORTS
+
+
+def test_android_link_hides_static_archives_by_name():
+    text = CMAKE.read_text()
+    excluded = set(re.findall(r"--exclude-libs,([\w.+-]+)", text))
+    assert {"libc++_static.a", "libc++abi.a", "libunwind.a", "libzforth.a",
+            "libclang_rt.builtins-aarch64-android.a", "libclang_rt.builtins-arm-android.a"} <= excluded
+    # ALL would also hide the WF_ANDROID_EXPORT functions that live in libwfengine.a.
+    assert "ALL" not in excluded and "libwfengine.a" not in excluded
+    assert "--export-dynamic-symbol=ANativeActivity_onCreate" in text
+
+
+def _ndk_tool(name: str) -> str | None:
+    for sdk in (Path.home() / "android-sdk-local", Path("/usr/lib/android-sdk")):
+        for tool in sorted(sdk.glob(f"ndk/*/toolchains/llvm/prebuilt/linux-x86_64/bin/{name}")):
+            return str(tool)
+    return shutil.which(name)
+
+
+def _built_release_libs() -> list[Path]:
+    base = REPO / "android" / "app" / "build" / "intermediates" / "stripped_native_libs"
+    return sorted(base.glob("*Release/*/out/lib/*/libwf_game.so"))
+
+
+@pytest.mark.parametrize("abi", ["arm64-v8a", "armeabi-v7a"])
+def test_built_release_so_exports_exactly_the_list(abi):
+    libs = [p for p in _built_release_libs() if p.parent.name == abi]
+    if not libs:
+        pytest.skip(f"no release libwf_game.so for {abi} (cd android && ./gradlew :app:assembleCondoRelease)")
+    nm, readelf = _ndk_tool("llvm-nm"), _ndk_tool("llvm-readelf")
+    if not nm or not readelf:
+        pytest.skip("llvm-nm / llvm-readelf not found (NDK or PATH)")
+    lib = max(libs, key=lambda p: p.stat().st_mtime)  # the newest release flavor build
+    out = subprocess.run([nm, "-D", "--defined-only", str(lib)], capture_output=True, text=True,
+                         check=True).stdout
+    exported = {line.split()[-1] for line in out.splitlines() if line.strip()}
+    assert "android_main" in exported and "ANativeActivity_onCreate" in exported
+    assert exported == EXPORTS, (sorted(exported - EXPORTS)[:20], sorted(EXPORTS - exported))
+    dyn = subprocess.run([readelf, "-d", str(lib)], capture_output=True, text=True, check=True).stdout
+    assert set(re.findall(r"\(NEEDED\)\s+Shared library: \[([^\]]+)\]", dyn)) == NEEDED

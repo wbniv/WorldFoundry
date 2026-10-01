@@ -906,6 +906,19 @@ if(ANDROID)
     # ANativeActivity_onCreate lives in android_native_app_glue.c and is the
     # Android loader's entry point. Without -u the linker garbage-collects it.
     target_link_options(wf_game PRIVATE -u ANativeActivity_onCreate)
+    # -fvisibility=hidden only covers code we compile with it. The archives
+    # linked in whole-sale still export every symbol: the static C++ runtime
+    # (libc++_static/libc++abi/libunwind, ~1,500 std:: symbols), the compiler
+    # builtins (__emutls_get_address) and zforth (C, built without the flag,
+    # 11 zf_* symbols). Nothing outside libwf_game.so links against any of
+    # them — the APK ships no other native library — so hide them all.
+    # Archives are named one by one, never ALL: libwfengine.a holds HAL
+    # functions marked WF_ANDROID_EXPORT that must stay exported.
+    # Plan: docs/plans/2026-04-18-android-size-trim-iter-2.md (item 2).
+    # tests/test_android_size_trim.py pins the resulting export set.
+    target_link_options(wf_game PRIVATE
+        "$<$<AND:$<CONFIG:Release>,$<CXX_COMPILER_ID:Clang>>:-Wl,--exclude-libs,libc++_static.a;-Wl,--exclude-libs,libc++abi.a;-Wl,--exclude-libs,libunwind.a;-Wl,--exclude-libs,libclang_rt.builtins-aarch64-android.a;-Wl,--exclude-libs,libclang_rt.builtins-arm-android.a;-Wl,--exclude-libs,libzforth.a>"
+    )
 elseif(IOS)
     # MACOSX_BUNDLE makes this an .app directory rather than a bare Mach-O.
     # Phase 1C fills in the Info.plist + launch screen via target properties.
