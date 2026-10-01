@@ -3,8 +3,8 @@
 Status: **proposed** (2026‑10‑01 17:55 (+07) = 10:55 UTC, revised 18:40 after the user asked "did you research swarming before implementing anything?": **the first draft had not**, see § Research); nothing is built. The mockups are of the *behaviour* (a simulation in the tank's real proportions); the engine implementation is Forth. Tier ranks below are recommendations; ranking is set in `TODO.md` by a Fable session.
 
 - [ ] Phase 0: measure first: ten **static** extra fish, what do they cost on Linux and on the Chromecast?
-- [ ] Phase 1: the fish rig made per-fish (today it is hard-wired to the one player), and ten more fish in the level
-- [ ] Phase 2: the behaviour: **school** and **swarm** around the player, with the switch between them
+- [x] Phase 1: the fish rig made per-fish, and ten more fish in the level (**done 2026‑10‑01**)
+- [~] Phase 2: the behaviour: **school** and **swarm** around the player, with the switch between them (**wired and running on the Chromecast 2026‑10‑01; untuned**)
 - [ ] Phase 3: polish: sizes and phases, anemone and camera, optional startle
 - [ ] Phase 4: tests, the Chromecast, the parity references
 
@@ -66,6 +66,20 @@ flowchart LR
 **Mailboxes:** the core needs 200 global mailboxes (800 to 1009; the aquarium owns 600 to 759); the map, drawn from a real run, is in [the swarming poster plan](2026-10-01-swarming-poster.md#mailboxes-where-the-state-lives). The ten followers' *rig* mailboxes are an open item there.
 
 The mockups below were drawn with the first draft's hand-made rules (slot, align, orbit); they show the *shape* of the two modes and the edge cases, not these rules or these numbers.
+
+### Built and running on the Chromecast (2026‑10‑01)
+
+`AQUARIUM_SCHOOL_N=10` builds the level with **ten more clownfish** (`wflevels/aquarium_school`, git-ignored): `school.fth` (the Couzin model) plus [`school_rig.fth`](../../wflevels/aquarium/school_rig.fth) (the glue). The rig is now per-fish (**Phase 1, done**): every rig mailbox goes through `fish-off`, so one rig poses the player (offset 0) and each follower (its own 40 mailboxes at `1100 + 40 (k - 1)`, its own five part actors). The followers share the player's five meshes, so they add 50 part actors and **no assets**. **Phase 2, the behaviour, is wired:** the player's fish is the leader, the mode (school above 1.0 body lengths a second, swarm below 0.45, blended) moves the zone width, and followers are updated **two a frame** (a full step every five frames) while all ten are posed every frame.
+
+| On the real Chromecast HD, release build | Result |
+|---|---|
+| Frame pacing with the school | **59.9 fps median**, p90 33.4 ms, worst 50 ms (the plain aquarium: p90 16.7) |
+| Director script per tick | **10.2 ms** (worst 12.7 ms): the player's rig, the camera, the sway, the school, ten rigs |
+| Mailbox bridge | 0.28 µs a call, about 300,000 calls a second |
+
+[![Eleven fish on the Chromecast: the real screenshot](2026-10-01-aquarium-schooling/chromecast-school.png)](2026-10-01-aquarium-schooling/chromecast-school.png)
+
+**Not done, plainly:** the followers **do not avoid the anemone** (one swims through the crown in the screenshot), the startle is not wired to the dart, all ten are the same size, the leader weight and thresholds are untuned (the tank runs showed a weak lead), camshot B's cone is not kept clear, and only some frames are smooth (p90 33 ms). It is **not the default aquarium app yet**: the school level is built separately and was installed from a throwaway worktree.
 
 ## Design
 

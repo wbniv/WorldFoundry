@@ -19,8 +19,10 @@
 \ so the idle motion cannot move the physics body.
 \ Plan: docs/plans/2026-09-30-clownfish-idle-animation.md
 
-: fish@ read-mailbox ;
-: fish! write-mailbox ;
+\ Every fish mailbox goes through fish-off (generated into the header: mailbox 1016, 0 for the player), so the same rig poses a
+\ follower whose 40 mailboxes sit at 600 + fish-off. The player's tick never sees anything else: the Director resets it to 0.
+: fish@ fish-off + read-mailbox ;
+: fish! fish-off + write-mailbox ;
 : fish-dt INDEXOF_DELTA_TIME read-mailbox ;
 : fish-wrap dup 0 < if 1 + then dup 1 >= if 1 - then ;
 \ Bhaskara sine, revolutions in (the condo's cc-sin): error under 0.2 %.
@@ -100,6 +102,18 @@
 : fish-flare@ fish-pec-flare fish-brake fish@ fish-pec-brake * +
   1 fish-ws@ - 1 fish-env@ - * 1 fish-brake fish@ - * fish-pec-fold * - ;
 
+\ ( -- z ) the body origin into fish-bx and fish-by, its height left on the stack: the player's actor, or for a follower the
+\ position its school code wrote to the globals 1032..1034.
+: fish-read-pos
+  fish-off 0 = if
+    INDEXOF_X_POS fish-actor-player read-actor-mailbox fish-bx fish!
+    INDEXOF_Y_POS fish-actor-player read-actor-mailbox fish-by fish!
+    INDEXOF_Z_POS fish-actor-player read-actor-mailbox
+  else
+    1032 read-mailbox fish-bx fish!
+    1033 read-mailbox fish-by fish!
+    1034 read-mailbox
+  then ;
 : fish-channels
   fish-ws@ fish-tail-idle-amp * fish-ph-tail fish@ fish-sin *
   fish-env@ fish-tail-swim-amp * fish-ph-swim fish@ fish-sin * +
@@ -114,9 +128,7 @@
   fish-body-c fish@ fish-sin fish-sc fish!  fish-body-c fish@ fish-cos fish-cc fish!
   fish-body-b fish@ fish-sin fish-sb fish!  fish-body-b fish@ fish-cos fish-cb fish!
   fish-roll fish@ fish-sin fish-sa fish!  fish-roll fish@ fish-cos fish-ca fish!
-  INDEXOF_X_POS fish-actor-player read-actor-mailbox fish-bx fish!
-  INDEXOF_Y_POS fish-actor-player read-actor-mailbox fish-by fish!
-  INDEXOF_Z_POS fish-actor-player read-actor-mailbox
+  fish-read-pos
   fish-ws@ fish-bob-amp * fish-ph-bob fish@ fish-sin * + fish-bz fish! ;
 
 \ ( ox oy oz -- ) body-local pivot -> world, into fish-ox/oy/oz.

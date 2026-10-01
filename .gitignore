@@ -53,6 +53,8 @@ wflevels/aquarium_touch.iff
 wflevels/aquarium_touch-standalone.iff
 wflevels/aquarium_bench.iff
 wflevels/aquarium_bench-standalone.iff
+wflevels/aquarium_school.iff
+wflevels/aquarium_school-standalone.iff
 
 # pytest debug-bridge harness artifacts
 tests/.wf_game.log

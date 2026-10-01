@@ -225,6 +225,8 @@
   MB_WANT 2 + sc@ MB_NVZ me sch!
   0 advance 1 advance 2 advance ;
 \ the next state becomes the state, for every follower at once (the leader, fish 0, is written from outside)
+\ ( i -- ) one follower's next state becomes its state (the round robin commits as it goes)
+: sch-commit1 ( i -- ) MB_ME sc! 6 0 do MB_NX i + me sch@ MB_X i + me sch! loop ;
 : sch-commit
   sch-n 1 do
     i MB_ME sc!
