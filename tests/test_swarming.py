@@ -220,13 +220,15 @@ def test_the_poster_prints_the_in_engine_numbers(html_text):
 def test_the_poster_prints_the_measured_numbers(html_text):
     m = D.load("measured.json")
     t = html_text.replace(" ", " ")
-    assert f'{m["dictionary_bytes"]} B' in t.replace(" ", " ")
-    assert f'{m["device"]["ms"]:.1f} → ' in t.replace("\u00a0", " ")
+    assert f'{m["dictionary_bytes"]:,} B' in t.replace(" ", " ")
+    assert f'{m["device"]["ms"]:.1f} ms a step on the Chromecast' in t.replace("\u00a0", " ")
 
 
 def test_the_poster_says_what_it_does_not_claim(html_text):
     t = html_text.replace(" ", " ")
-    assert "Not claimed" in t and "hysteresis" in t and "not wired in yet" in t
+    assert "Not claimed" in t and "hysteresis" in t
+    assert "the school is tuned" in t and "the dart does not startle it yet" in t, "the poster must say the school is in the game but untuned, and the dart is not wired"
+    assert "not wired in yet" not in t, "the school IS in the game now: that sentence went stale"
 
 
 def test_no_12_hour_clock(html_text):

@@ -128,7 +128,7 @@
  {
   "id": "wl",
   "quantity": "Leader weight w",
-  "value": "1, 3, 6 tried; none tuned yet",
+  "value": "3 in the game; 1, 3, 6 tried in the tank runs; not tuned",
   "status": "ours",
   "sources": [
    "S5"

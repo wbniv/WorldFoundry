@@ -87,7 +87,7 @@ def view_basis(pos, vel, name):
 
 def panel_a():
     snaps = snapshots()
-    W, H = CW, 150
+    W, H = CW, 142
     s = []
     cw = (W - 5 * 8) / 4
     for k, sn in enumerate(snaps):
@@ -98,9 +98,9 @@ def panel_a():
         P = np.stack([(pos - c) @ a, (pos - c) @ b], 1)
         V = np.stack([vel @ a, vel @ b], 1)
         ext = max(np.abs(P).max(), 4.0)
-        sc = min(cw, 82) / 2 / ext * 0.98
-        cx, cy = x0 + cw / 2, 54
-        s.append(f'<rect x="{x0:.1f}" y="8" width="{cw:.1f}" height="88" fill="#f6f9fb" stroke="{GRID}"/>')
+        sc = min(cw, 74) / 2 / ext * 0.98
+        cx, cy = x0 + cw / 2, 50
+        s.append(f'<rect x="{x0:.1f}" y="8" width="{cw:.1f}" height="80" fill="#f6f9fb" stroke="{GRID}"/>')
         depth = (pos - c) @ n
         order = np.argsort(depth)
         for i in order:                                         # far fish first, paler; near fish darker
@@ -114,9 +114,9 @@ def panel_a():
         s.append(f'<text></text>')
         s.append(T(x0 + 6, 24, f'{"ABCD"[k]} · {sn["name"]}', 12, 'start', INK, 700, bg='#f6f9fb'))
         s.append(T(x0 + cw - 6, 24, f'{"spin-axis view" if sn["name"] == "torus" else ("side view" if "parallel" in sn["name"] else "top view")}', 11, 'end', MUTED, 400, bg='#f6f9fb'))
-        s.append(T(x0 + 6, 110, f'Δr_o = {sn["dro"]}, Δr_a = {sn["dra"]}', 12, 'start', INK, 700))
-        s.append(T(x0 + 6, 124, f'p_group {sn["p"]:.2f} · m_group {sn["m"]:.2f}', 12, 'start', INK, 400))
-    c1, w1 = chip(8, 142, 'ours', f'N = 100 simulated here; the zone widths are ours, the paper prints none')
+        s.append(T(x0 + 6, 102, f'Δr_o = {sn["dro"]}, Δr_a = {sn["dra"]}', 12, 'start', INK, 700))
+        s.append(T(x0 + 6, 116, f'p_group {sn["p"]:.2f} · m_group {sn["m"]:.2f}', 12, 'start', INK, 400))
+    c1, w1 = chip(8, 134, 'ours', f'N = 100 simulated here; the zone widths are ours, the paper prints none')
     s.append(c1)
     return ''.join(s), W, H
 
@@ -245,8 +245,8 @@ RULE = [
     ('4', 'Nobody in any zone: keep the heading', 'd = v_i', 'sch-want', 'verified'),
     ('5', 'Turn toward d by at most θτ, move s τ', 'v ← rotate(v, d, θτ);  c ← c + s τ v', 'sch-turn, sch-follow', 'verified'),
     ('6', 'The leader counts w times in sums 3', 'Σ w_j v_j,  Σ w_j u_ij', 'sch-pair (weight)', 'ours'),
-    ('7', 'Walls repel like a neighbour', 'wall within 0.6 BL: one more repulsion', 'sch-wall', 'ours'),
-    ('8', 'A dart startles the followers nearby', 'swim away from the leader for 0.5 s', 'sch-startle-all', 'ours'),
+    ('7', 'Walls repel like a neighbour, and are a hard limit', 'within 0.6 BL: one more repulsion; past the box: put back, heading reflected', 'sch-wall, clamp-axis', 'ours'),
+    ('8', 'A dart startles the followers (not called yet)', 'swim away from the leader for 0.5 s', 'sch-startle-all', 'ours'),
 ]
 
 
@@ -264,15 +264,15 @@ def panel_d():
         s.append(T(32, y, what, 12, 'start', INK, 700))
         s.append(T(330, y, maths, 11, 'start', MUTED, 400, mono=True))
         s.append(T(W - 10, y, word, 11, 'end', FP.CHIP['ours'][0] if kind == 'ours' else '#1a5f74', 700))
-        y += 14.5
+        y += 14
     y += 6
-    note = (f'The paper’s random error (σ = 0.05 rad) is left out of the Forth: the caller adds it. Our units differ from the paper’s, on purpose: at its s = 3 BL/s and θ = 40°/s a 90° turn takes {pd:.2f} BL of swimming (radius {pr:.1f} BL), '
+    note = (f'The paper’s random error (σ = 0.05 rad) is left out of the Forth, and the game adds none. Our units differ from the paper’s, on purpose: at its s = 3 BL/s and θ = 40°/s a 90° turn takes {pd:.2f} BL of swimming (radius {pr:.1f} BL), '
             f'wider than the tank is deep ({by:.1f} BL), and the tank runs below could not keep the fish in. Ours: s = 2 BL/s, θ = 120°/s, {gd:.2f} BL, radius {gr:.2f} BL.')
     for wl in textwrap.wrap(note, 190):
         s.append(T(10, y, wl, 11, 'start', INK)); y += 13
     H = int(y + 12)
     c1, w1 = chip(10, H - 3, 'verified', 'rules 1–5 and the paper’s s, θ: Couzin 2002, eqns 1–3 and Fig. 3')
-    c2, w2 = chip(10 + w1 + 8, H - 3, 'ours', 'rules 6–8, our s, θ, the 0.6 BL wall, the 0.5 s startle')
+    c2, w2 = chip(10 + w1 + 8, H - 3, 'ours', 'rules 6–8, our s, θ, the 0.6 BL wall zone, the 0.5 s startle')
     s += [c1, c2]
     return ''.join(s), W, H + 4
 
@@ -353,17 +353,17 @@ def panel_f():
     eng = m.get('engine') or {}
     ea, eb = eng.get('after', {}), eng.get('before', {})
     lv = eng.get('level', {})
-    big = [(f'{m["dictionary_bytes"]} B', f'of the {m["dictionary_size"] // 1024} KB dictionary ({100 * m["dictionary_bytes"] / m["dictionary_size"]:.1f} %): {len(m["words"])} words, {m["code_lines"]} code lines; {m["error"]["head_max"]:.0e} off couzin.py in one tick'),
-           (f'{ms:.1f} → {ea.get("director_ms", [0])[0]:.1f} ms', f'one tick, 11 fish, Chromecast HD: the bare interpreter, then in the engine (with the camera and sway)'),
+    big = [(f'{m["dictionary_bytes"]:,} B', f'of the {m["dictionary_size"] // 1024} KB dictionary ({100 * m["dictionary_bytes"] / m["dictionary_size"]:.1f} %), {m["code_lines"]} code lines; {ms:.1f} ms a step on the Chromecast; {m["error"]["head_max"]:.0e} off couzin.py'),
+           (f'{ea.get("standalone_ms", ms):.1f} → {ea.get("director_ms", [0])[0]:.1f} ms', f'one tick, 11 fish, Chromecast HD (an earlier 2,936 B version): the bare interpreter, then in the engine'),
            (f'{eb.get("mailbox_us", 0):g} → {ea.get("mailbox_us", 0):g} µs', f'per mailbox call: three debug streams the engine ran on every call, found by this timing; {eb.get("fps", 0):.0f} fps before'),
-           (f'{lv.get("fps", 0):.1f} fps', f'the real level, ten followers, Chromecast HD: p90 {lv.get("frame_p90_ms", 0):.1f} ms, Director {lv.get("director_ms", 0):.1f} ms a tick')]
+           (f'{lv.get("fps", 0):.1f} fps', f'the real level with ten followers, Chromecast HD, unprofiled; p90 {lv.get("frame_p90_ms", 0):.1f} ms, Director {lv.get("director_ms", 0):.1f} ms (profiled)')]
     bw = (W - 2 * pad - 3 * gap) / 4
     for i, (a_, b_) in enumerate(big):
         x = pad + i * (bw + gap)
         s.append(T(x, y0 + 20, a_, 22, 'start', ACC, 800))
         for k, wl in enumerate(textwrap.wrap(b_, int(bw / 5.9))[:3]):
             s.append(T(x, y0 + 36 + k * 12.5, wl, 11, 'start', INK))
-    H = int(y0 + 36 + 3 * 12.5 + 22)
+    H = int(y0 + 36 + 3 * 12.5 + 17)
     c1, w1 = chip(12, H - 6, 'ours', 'our measurements: the bare interpreter, and a bench level (the Director runs school.fth every tick) on the real Chromecast, release build')
     s.append(c1)
     return ''.join(s), W, H
@@ -422,8 +422,11 @@ def panel_g():
     for i, (mode, col) in enumerate((('swarm', ORANGE), ('torus', PURPLE), ('school', ACC))):
         s.append(f'<rect x="{x0 + i * 62}" y="{ly - 9}" width="10" height="10" fill="{col}"/>'); s.append(T(x0 + i * 62 + 14, ly, mode, 11, 'start', INK))
     s.append(T(x0, ly + 13, f'−6 s to +12 s; top = {tmax:.0f} BL; one seed', 11, 'start', MUTED))
-    H = int(bz * sc + 20 + 4 * 13 + 22)
-    c1, w1 = chip(8, H - 6, 'ours', 'the Forth core in the tank’s real box (w = 3, seed 1 drawn; the table is the mean of 3 seeds; “no” = a fish strayed more than 0.5 BL out)')
+    H = int(bz * sc + 20 + 4 * 13 + 40)
+    bh = loadj('measured.json').get('engine', {}).get('behaviour')
+    if bh:
+        s.append(T(8, H - 22, f'In the real level, on the engine (scripts/analyse-aquarium-school.py): resting p_group {bh["rest_p"]:.2f}, swimming {bh["swim_p"]:.2f} (it was {bh["before_fix_swim_p"]:.2f} before a setup bug was fixed), followers aligned with the leader {bh["swim_alignment"]:+.2f}.', 11, 'start', INK, 700))
+    c1, w1 = chip(8, H - 4, 'ours', 'the Forth core in the tank’s real box (w = 3, seed 1 drawn; the table is the mean of 3 seeds; “no” = a fish strayed more than 0.5 BL out)')
     s.append(c1)
     return ''.join(s), W, H
 
@@ -441,7 +444,7 @@ def footer_html():
            f'<p>{FP.chip_html("verified")} the source was opened; the number is on its page<br>'
            f'{FP.chip_html("unverified")} from a summary, or not opened<br>'
            f'{FP.chip_html("ours")} our own choice, maths or measurement</p>'
-           f'<p class="sub">Not claimed: that real clownfish school (they do not), that our sweep shows the paper’s hysteresis (it is too coarse), or that the school is in the game: it is not wired in yet, only timed there. Data dated {D.DATA_DATE}.</p>')
+           f'<p class="sub">Not claimed: that real clownfish school (they do not), that our sweep shows the paper’s hysteresis (it is too coarse), or that the school is tuned: it is in the game, but the lead is weak (alignment +0.40) and the dart does not startle it yet. Data dated {D.DATA_DATE}.</p>')
     return ('<section class="panel foot" id="panel-src"><div class="bar"><b>Sources</b> · live links in the PDF; what could not be verified is marked</div>'
             f'<div class="cols">{"".join(f"<ul class=srcl>{c}</ul>" for c in cols)}<div class="how">{how}</div></div></section>')
 
@@ -466,8 +469,8 @@ def panel_html(letter):
 def header_html():
     return ('<header><div><h1>How a school swarms</h1><div class="sub">collective motion for the aquarium level’s ten followers · the Couzin zone model, '
             'measured against our own Forth implementation</div></div><div class="scale">Lengths are in <b>body lengths</b> (BL; a fish is 3.5 in). '
-            'The tank is 13.4 × 3.4 × 4.7 BL inside. A <b>school</b> is polarised (p_group near 1); a <b>swarm</b> is not (p near 0.1): '
-            'moving one zone width, Δr_o, switches between them.</div></header>')
+            'The tank is 13.4 × 3.4 × 4.7 BL inside. A <b>school</b> is polarised (p_group near 1), a <b>swarm</b> is not: '
+            'moving the zone width Δr_o switches between them.</div></header>')
 
 
 def build_html():
@@ -477,7 +480,7 @@ def build_html():
     body += [f'<div class="row">{panel_html("D")}</div>', f'<div class="row">{panel_html("F")}</div>', f'<div class="row">{panel_html("G")}</div>', footer_html()]
     doc = ('<!DOCTYPE html>\n<!-- Generated by make_swarm_poster.py from swarm_data.py, sweep.json, tank.json, measured.json and school.fth: edit those, not this file. -->\n'
            '<html lang="en"><head><meta charset="utf-8"><title>How a school swarms: collective-motion poster (A3)</title>'
-           f'<style>{FP.CSS.replace('height:76px','height:68px').replace('padding:10mm;','padding:7mm 10mm;') + 'ul.srcl{width:218px} .foot .cols{gap:10px} .how{min-width:330px}'}</style></head><body><div class="page">{"".join(body)}</div>{FP.FIT_SCRIPT}</body></html>\n')
+           f'<style>{FP.CSS.replace('height:76px','height:68px').replace('padding:10mm;','padding:6.6mm 10mm;') + 'ul.srcl{width:218px} .foot .cols{gap:10px} .how{min-width:330px}'}</style></head><body><div class="page">{"".join(body)}</div>{FP.FIT_SCRIPT}</body></html>\n')
     return FP.polish(doc)
 
 

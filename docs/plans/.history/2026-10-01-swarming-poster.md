@@ -1,5 +1,6 @@
 | Date | Change |
 |------|--------|
+| [2026-10-01](https://github.com/wbniv/WorldFoundry/commit/4a906de5) | A hard wall limit for the followers (one left the tank on the Chromecast), the poster with Chromecast-only numbers, and the schooling demo clip |
 | [2026-10-01](https://github.com/wbniv/WorldFoundry/commit/9fa728a0) | Swarming poster and plan: the in-engine Chromecast result (39 to 43 ms a tick and 20 fps as found, 11.3 ms and 59.9 fps after the mailbox fix), and what the poster does not claim now |
 | [2026-10-01](https://github.com/wbniv/WorldFoundry/commit/bec1d758) | Mailbox calls cost 4.2 us each on the Chromecast: three per-call debug streams moved to DBSTREAM5; opt-in --script-profile; a bench level |
 | [2026-10-01](https://github.com/wbniv/WorldFoundry/commit/aa821f80) | school.fth: every mailbox slot has a name (MB_X, MB_VX, MB_DRO ...), long lines split into short helper words; the poster shows the named code in four columns |
@@ -9,6 +10,11 @@
 | [2026-10-01](https://github.com/wbniv/WorldFoundry/commit/2460bd2a) | Swarming: the Couzin zone model as a Forth core (school.fth, 2179 B, 6.2 ms/11 fish on the Chromecast), tested against numpy, and an A3 poster |
 
 <!--history-meta v1
+4a906de5	author	Will Norris
+4a906de5	added	15
+4a906de5	deleted	15
+4a906de5	files	1
+4a906de5	body	school.fth: a follower that would leave the box is put back on its edge and its heading reflected inward (test added); 3,216 B, 7.5 ms a step on the Chromecast.\nThe poster prints Chromecast timings only (no PC numbers), including the real level: 59.9 fps, p90 33.4 ms.\ntests/recordings/aquarium_school_demo.mp4: 51 s from the Chromecast's own screen (rest/swarm, swim right/school, rest, swim left, rest, swim and climb), captions burnt in;\nrecorded before the wall limit, so one frame shows a follower outside the glass. scripts/record-aquarium-school-chromecast.py records a new one when nobody is using the TV.\n\nCo-Authored-By: Claude Sonnet 5.5 <noreply@anthropic.com>\nClaude-Session: https://claude.ai/code/session_01NNPhRbrqjqMDkScPvTE9yC
 9fa728a0	author	Will Norris
 9fa728a0	added	1
 9fa728a0	deleted	1

@@ -407,7 +407,9 @@
    ],
    "mailbox_us": 0.28,
    "fps": 59.9,
-   "frame_p90_ms": 33.4
+   "frame_p90_ms": 33.4,
+   "standalone_ms": 7.0,
+   "note": "measured with the 2,936 B version of school.fth (7.0 ms standalone) in the one-fish bench level, all 11 fish in one tick"
   },
   "calls_per_tick": 7754,
   "fix": "three DBSTREAM1 per-call debug streams in the mailbox path moved to DBSTREAM5",
@@ -420,6 +422,13 @@
    "director_ms": 6.4,
    "director_note": "profiler build (the profiler's own timer is included, and that build runs at 30 fps)",
    "memory_mb": 40.7
+  },
+  "behaviour": {
+   "source": "scripts/analyse-aquarium-school.py on the PC engine (the harness at 20 ticks a second), the default level",
+   "rest_p": 0.39,
+   "swim_p": 0.77,
+   "swim_alignment": 0.4,
+   "before_fix_swim_p": 0.24
   }
  }
 }

@@ -82,7 +82,7 @@ stateDiagram-v2
     Swarm --> School: leader cruising<br/>raise Δr_o (0 → 5)
     School --> Swarm: leader slow for 0.5 s<br/>lower Δr_o (5 → 0)
     Swarm: swarm setting Δr_o 0, Δr_a 10<br/>p_group about 0.3 to 0.5 in the tank
-    School: school setting Δr_o 5, Δr_a 6<br/>p_group about 0.82 to 0.87 in the tank
+    School: school setting Δr_o 5, Δr_a 6<br/>p_group about 0.78 to 0.86 in the tank
     note right of School
         Couzin 2002 also finds a torus
         (small Δr_o, large Δr_a) and hysteresis.
@@ -144,8 +144,8 @@ Everything on the poster has a chip: **verified** (the source was opened and the
 2. **Our sweep reproduces the paper's map in shape (ours).** Swarm at Δr_o ≈ 0, torus at Δr_o ≈ 1 with a large Δr_a, parallel groups above, fragmentation at small widths. It used 3 replicates and 700 steps per cell (the paper used 30), and the **same zones gave a torus in one seed and a parallel group in another** (Δr_o = 3, Δr_a = 10), which fits the paper's "sharp transitions" but means the poster's map has a `?` class.
 3. **Hysteresis was not reproduced (ours).** The paper reports it. Our two ladder sweeps (350 steps per rung, one run) were too coarse to show a loop, and the poster says so rather than claim it.
 4. **The paper's turning rate does not fit a tank (ours, measured).** At 3 body lengths a second and 40° a second, a 90° turn takes 6.75 body lengths and a 4.3 body-length radius; the real tank is **13.4 × 3.4 × 4.7 body lengths inside** (47 × 12 × 16.5 in at a 3.5 in fish), only 3.4 deep. In the tank runs the fish left the box. The settings used here are **2 body lengths a second and 120° a second** (radius 0.95), with a 0.6 body-length wall zone. These are ours, and the plan's earlier numbers (metres at ×10) are replaced by body lengths.
-5. **The followers school; the leader steers weakly (ours, measured).** In the tank, the school setting reaches p_group 0.82 to 0.87 and keeps 3.2 to 3.8 body lengths from the leader, but their heading **aligns with the leader's only +0.12 to +0.18** whatever the leader weight (1, 3 or 6). In open space, with the leader flying straight, followers that start far away **never rejoin** (the zones have a finite reach). Both say the leader term needs real tuning in Phase 2; none of it is tuned yet.
-6. **The "torus" and "swarm" settings do not give clean states with 11 fish (ours, measured).** The swarm setting gave p_group 0.27 to 0.51 (not about 0.1) and the torus setting 0.58 to 0.64 (not a low p_group): the paper's states are for 100 fish, and 11 is at the edge of its range. The poster labels the tank panels "settings", not states, for that reason. Several swarm and torus runs also strayed more than 0.5 body lengths outside the box (shown as "no" in the table).
+5. **The followers school; the leader steers weakly (ours, measured).** In the tank, the school setting reaches p_group 0.78 to 0.86 and keeps 3.1 to 3.8 body lengths from the leader, but with the leader circling their heading **aligns with the leader's only about 0 to +0.1** whatever the leader weight (1, 3 or 6); in the real level, with the leader swimming back and forth, the alignment is **+0.40**. In open space, with the leader flying straight, followers that start far away **never rejoin** (the zones have a finite reach). Both say the leader term needs real tuning in Phase 2; none of it is tuned yet.
+6. **The "torus" and "swarm" settings do not give clean states with 11 fish (ours, measured).** The swarm setting gave p_group 0.30 to 0.45 (not about 0.1) and the torus setting 0.57 to 0.59 (not a low p_group): the paper's states are for 100 fish, and 11 is at the edge of its range. The poster labels the tank panels "settings", not states, for that reason. Before the hard wall limit was added, several swarm and torus runs strayed more than 0.5 body lengths outside the box; with it, every run stays in (the table below).
 7. **A dart (startle) works, briefly (ours, measured; one seed).** Followers within 4 body lengths swim away for 0.5 s; the median distance to the leader rises from about 2.3 to about 5.7 body lengths within 3 s for the swarm and torus settings, and recovers within about 8 s. For the school setting the trace is too noisy to see it. A better metric is a Phase 2 task.
 8. **Real clownfish do not school (unverified, secondary sources).** Ten schooling clownfish is a game mechanic, as the schooling plan already says.
 
@@ -205,18 +205,18 @@ The steps are the spec; each shows its raw output.
 
     ```
     mode   w  dist(BL) align  p     in-box
-    swarm  1  2.7      +0.02  0.27  True
-    swarm  3  2.8      -0.12  0.40  False
-    swarm  6  2.5      +0.07  0.51  False
-    torus  1  3.4      -0.05  0.58  True
-    torus  3  2.3      +0.24  0.64  False
-    torus  6  2.3      +0.31  0.61  False
-    school 1  3.8      +0.12  0.87  True
-    school 3  3.5      +0.17  0.84  True
-    school 6  3.2      +0.18  0.82  True
+    swarm  1  2.9      -0.03  0.30  True
+    swarm  3  2.5      +0.03  0.41  True
+    swarm  6  2.3      +0.11  0.45  True
+    torus  1  2.8      +0.12  0.59  True
+    torus  3  2.3      +0.25  0.59  True
+    torus  6  2.1      +0.20  0.57  True
+    school 1  3.8      +0.03  0.86  True
+    school 3  3.8      -0.00  0.85  True
+    school 6  3.1      +0.09  0.78  True
     ```
 
-    **PARTIAL**: the school setting keeps fish in the box and polarised; the swarm and torus settings do not give clean states and sometimes leave the box (finding 6).
+    **PARTIAL**: with the hard wall limit every run stays in the box, and the school setting is polarised (p 0.78 to 0.86); the swarm and torus settings do not give clean states (finding 6), and the leader's pull is weak (finding 5).
 
 5. The poster is one A3 page with embedded fonts.
 

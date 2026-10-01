@@ -75,7 +75,7 @@ def rows():
     add("lead", "Informed minority steers a group", "small fraction suffices", "unverified", ["S2"])
     add("cont", "Shoal to school", "a continuum", "unverified", ["S3"])
     add("clown", "Real ocellaris clownfish", "not schooling fish", "unverified", ["S4"])
-    add("wl", "Leader weight w", "1, 3, 6 tried; none tuned yet", "ours", [GAME])
+    add("wl", "Leader weight w", "3 in the game; 1, 3, 6 tried in the tank runs; not tuned", "ours", [GAME])
     add("s_us", "Our speed and turn rate", "2 BL/s and 120°/s", "ours", [GAME])
     add("turn_paper", "A 90° turn at the paper’s s, θ", f"{pd:.2f} BL ahead, radius {pr:.1f} BL", "ours", [GAME])
     add("turn_us", "A 90° turn at ours", f"{gd:.2f} BL ahead, radius {gr:.2f} BL", "ours", [GAME])
