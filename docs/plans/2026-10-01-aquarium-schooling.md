@@ -79,6 +79,12 @@ The mockups below were drawn with the first draft's hand-made rules (slot, align
 
 [![Eleven fish on the Chromecast: the real screenshot](2026-10-01-aquarium-schooling/chromecast-school.png)](2026-10-01-aquarium-schooling/chromecast-school.png)
 
+**The user's review of the first Chromecast run (2026‑10‑01), and what the plan now says:**
+
+1. **"Do they actually school? They don't seem to interact."** Not demonstrated, so **not claimed**. The model passed its tests in the standalone interpreter and in the tank runs, but nobody had measured the *real level*: the followers' alignment, spacing and response to the leader on the engine. Two causes are already known and are being fixed: the game's logic rate fell to **30 ticks a second** (the Director script took 10.2 ms a tick, so the frame ran at 30 fps while the display still presented 60), and `school.fth` was told a step is 0.083 s when the real interval between a follower's updates was twice that, so the school ran at half speed. The measurement is `scripts/analyse-aquarium-school.py` (p_group, m_group, nearest-neighbour distance, alignment with the leader, school against swarm).
+2. **Sizes: the ten followers vary from 60 % to 93 % of the player's fish** (a fixed spread: 0.60, 0.64, …, 0.93, assigned in a scrambled order so neighbours differ). Done by scaling each follower's five part actors and their offsets.
+3. **The school becomes the default aquarium app: yes (decided by the user).** The level builder's `AQUARIUM_SCHOOL_N` defaults to 10 (0 turns it off); the tracked level, `cd.iff` and APK carry the school; the tests' object counts become 33 + 50 = 83.
+
 **Not done, plainly:** the followers **do not avoid the anemone** (one swims through the crown in the screenshot), the startle is not wired to the dart, all ten are the same size, the leader weight and thresholds are untuned (the tank runs showed a weak lead), camshot B's cone is not kept clear, and only some frames are smooth (p90 33 ms). It is **not the default aquarium app yet**: the school level is built separately and was installed from a throwaway worktree.
 
 ## Design
