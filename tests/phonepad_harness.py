@@ -32,8 +32,13 @@ A, B, C, D, E, F = 1, 2, 4, 8, 16, 32
 UP, DOWN, RIGHT, LEFT = 1 << 11, 1 << 12, 1 << 13, 1 << 14
 
 
+QRCODEGEN = REPO / "engine" / "vendor" / "qrcodegen-3c6d0b3c" / "qrcodegen.c"
+
+
 def host_sources() -> list[Path]:
-    return [PHONEPAD / "phonepad.cc", PHONEPAD / "host" / "phonepad_host.cc"] + sorted(PHONEPAD.glob("phonepad_*.cc"))
+    """Exactly what CMakeLists.txt adds to the Android library for the phone controller, plus the host's main."""
+    return ([PHONEPAD / "phonepad.cc", PHONEPAD / "host" / "phonepad_host.cc"] + sorted(PHONEPAD.glob("phonepad_*.cc"))
+            + [QRCODEGEN])
 
 
 def build_host(out_dir: Path, extra: list[Path] | None = None) -> Path:

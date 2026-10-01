@@ -23,6 +23,7 @@ as source and is linked in at build time.
 | `jolt-physics-5.5.0/` | 5.5.0 | MIT | https://github.com/jrouwe/JoltPhysics/releases/tag/v5.5.0 |
 | `miniaudio-0.11.25/` | 0.11.25 (2026-03-04) | MIT-0 / Public Domain | https://github.com/mackron/miniaudio |
 | `tsf/` | tsf v0.9 + tml v0.7 | Public Domain | https://github.com/schellingb/TinySoundFont |
+| `qrcodegen-3c6d0b3c/` | commit `3c6d0b3c` (2026-08-31), the C version only (`c/qrcodegen.{c,h}`) | MIT (`LICENSE`, copied from the upstream Readme) | https://github.com/nayuki/QR-Code-generator |
 
 ## Tarball SHA256
 
@@ -41,6 +42,7 @@ as source and is linked in at build time.
 - `miniaudio-0.11.25/miniaudio.h` — `ac7af4de748b7e26b777f37e01cee313a308a7296a3eb080e2906b320cc55c89` (fetched from mackron/miniaudio main 2026-04-17)
 - `tsf/tsf.h` — `70d55963c98f60ebb81518eaa1f25d46888d5180eb5f5289fd6b74ffc177d197` (fetched from schellingb/TinySoundFont main 2026-04-17)
 - `tsf/tml.h` — `93257db259e0efb2ea2037d7157841bec8cb4a2d7986286e43c8090705326546` (fetched from schellingb/TinySoundFont main 2026-04-17)
+- `qrcodegen-3c6d0b3c/qrcodegen.c` (commit `3c6d0b3cefb4e049dc337e82237c9644399716a8`) — `6a2b9cc65176f2345dde260c74b6d352627e8a0a6385d086ae0e9c5d0913c70c`; `qrcodegen.h` — `e82df4bff37d18b5863b9e7486fe6bda1b6cda8c3b9ecebfec473907265cb589` (unmodified; the TV overlay's QR code for the phone controller, docs/plans/2026-09-30-aquarium-chromecast.md Phase E3)
 
 ## Runtime assets (not committed)
 

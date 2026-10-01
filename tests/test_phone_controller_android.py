@@ -127,6 +127,7 @@ def test_cmake_builds_phonepad_into_the_android_library():
     block = cm[cm.index("list(APPEND WF_PLATFORM_SHELL_SOURCES\n        ${SRC}/hal/android/native_app_entry.cc"):]
     block = block[:block.index(")")]
     assert "${SRC}/hal/phonepad/phonepad.cc" in block and "${SRC}/hal/phonepad/phonepad_overlay.cc" in block
+    assert "${VENDOR}/qrcodegen-3c6d0b3c/qrcodegen.c" in block, "the overlay's QR encoder (E3)"
 
 
 def test_internet_only_for_the_phone_flavors():

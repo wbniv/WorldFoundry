@@ -825,6 +825,7 @@ if(ANDROID)
         ${SRC}/hal/android/native_app_entry.cc
         ${SRC}/hal/phonepad/phonepad.cc
         ${SRC}/hal/phonepad/phonepad_overlay.cc
+        ${VENDOR}/qrcodegen-3c6d0b3c/qrcodegen.c   # Nayuki, MIT: the overlay's QR code
         ${APP_GLUE_DIR}/android_native_app_glue.c)
 elseif(IOS)
     list(APPEND WF_PLATFORM_SHELL_SOURCES

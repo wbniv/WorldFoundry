@@ -11,8 +11,11 @@
 #include "phonepad_overlay.h"
 #include "phonepad.h"
 
+#include <cmath>
 #include <cstdio>
 #include <cstring>
+
+#include "../../../../engine/vendor/qrcodegen-3c6d0b3c/qrcodegen.h"   // Nayuki, MIT
 
 #if defined(__GNUC__)
 #pragma GCC diagnostic push
@@ -159,11 +162,24 @@ const char* Overlay::Toast(int64_t nowMs) const
     return (endpoint_ && nowMs < toastUntil_) ? toast_ : "";
 }
 
-bool Overlay::EncodeQr(const std::string& /*text*/, std::vector<uint8_t>* modules, int* size)
+bool Overlay::EncodeQr(const std::string& text, std::vector<uint8_t>* modules, int* size)
 {
     modules->clear();
     *size = 0;
-    return false;   // the QR code is step E3
+    // Version 10 (57 x 57) at most holds 213 bytes at ECC M: far more than
+    // "http://255.255.255.255:65535/?k=123456". Static: ~1.8 KB, no heap.
+    static uint8_t qr[qrcodegen_BUFFER_LEN_FOR_VERSION(10)];
+    static uint8_t tmp[qrcodegen_BUFFER_LEN_FOR_VERSION(10)];
+    // ECC M (15% damage) like mockup 3; boostEcl raises it for free when the version allows.
+    if (!qrcodegen_encodeText(text.c_str(), tmp, qr, qrcodegen_Ecc_MEDIUM, 1, 10, qrcodegen_Mask_AUTO, true))
+        return false;
+    const int n = qrcodegen_getSize(qr);
+    modules->resize(size_t(n) * size_t(n));
+    for (int y = 0; y < n; ++y)
+        for (int x = 0; x < n; ++x)
+            (*modules)[size_t(y) * size_t(n) + size_t(x)] = qrcodegen_getModule(qr, x, y) ? 1 : 0;
+    *size = n;
+    return true;
 }
 
 bool Overlay::Build(int w, int h, int64_t nowMs, std::vector<PhonepadRect>* out)
@@ -193,19 +209,28 @@ bool Overlay::Build(int w, int h, int64_t nowMs, std::vector<PhonepadRect>* out)
         float tx = 132;
         if (EncodeQr(url_, &qr, &n) && n > 0)
         {
-            // White square with a 4-module quiet zone; dark runs merged per row.
-            const float side = 560, m = side / float(n + 8), x0 = 132, y0 = 250;
-            p.Rect(x0, y0, x0 + side, y0 + side, 0xFFFFFFFFu);
-            for (int r = 0; r < n; ++r)
-                for (int c = 0; c < n;)
-                {
-                    if (!qr[size_t(r) * size_t(n) + size_t(c)]) { ++c; continue; }
-                    int e = c;
-                    while (e < n && qr[size_t(r) * size_t(n) + size_t(e)]) ++e;
-                    p.Rect(x0 + (4 + c) * m, y0 + (4 + r) * m, x0 + (4 + e) * m, y0 + (5 + r) * m, 0x0D1117FFu);
-                    c = e;
-                }
-            tx = 760;
+            // The full URL with this launch's PIN, black on white with a 4-module quiet zone, about
+            // 600 px tall at 1080p (16 px modules for a 29-module code) so it scans from a sofa.
+            // Modules are whole screen pixels and the square starts on a pixel, so every module
+            // edge is sharp; dark runs are merged per row.
+            const float mpx = std::floor(600.0f * p.s / float(n + 8));       // module size, pixels
+            if (mpx >= 2.0f)
+            {
+                const float m  = mpx / p.s;                                    // ... in canvas units
+                const float x0 = std::floor(132.0f * p.s) / p.s, y0 = std::floor(232.0f * p.s) / p.s;
+                const float side = m * float(n + 8);
+                p.Rect(x0, y0, x0 + side, y0 + side, 0xFFFFFFFFu);
+                for (int r = 0; r < n; ++r)
+                    for (int c = 0; c < n;)
+                    {
+                        if (!qr[size_t(r) * size_t(n) + size_t(c)]) { ++c; continue; }
+                        int e = c;
+                        while (e < n && qr[size_t(r) * size_t(n) + size_t(e)]) ++e;
+                        p.Rect(x0 + (4 + c) * m, y0 + (4 + r) * m, x0 + (4 + e) * m, y0 + (5 + r) * m, 0x000000FFu);
+                        c = e;
+                    }
+                tx = 132.0f + 600.0f + 64.0f;   // the code is at most 600 wide; text never moves with the snapping
+            }
         }
 
         const float ts = 4.0f;
