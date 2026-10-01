@@ -1,6 +1,8 @@
+**Sub-steps, in order:** **E0 the spike** (before building anything else): serve a tiny page over http and over https-with-a-self-signed-certificate from the Chromecast and open both on the user's phone (Android or iPhone, to be told), reading `isSecureContext`, whether orientation events fire, whether `navigator.vibrate` and the Wake Lock exist (step 19). It decides how tilt ships. E1 server, protocol, mask merge and the page, tested on Linux with a headless client (no device needed); E2 Android build, manifest, the TV overlay with the URL and PIN; E3 the QR code; E4 device run on the Chromecast with a real phone, aquarium and condo; E5 the failure states of mockup 4 (lost signal, wrong PIN, other network, second phone, tilt needs https, no haptics on iPhone); **E6 tilt** (the https listener and TLS, the quantiser, neutral calibration); **E7 haptics** (local ticks first, then the `h:` message on sound slots).
+
 # The aquarium as its own app on a Chromecast with Google TV
 
-Status: **done on a real Chromecast HD** (2026‑10‑01); **Phase D (the phone as a gamepad) is designed and next**. Written 2026‑10‑01 09:55 (+07) = 02:55 UTC, **after the fact**. The agent that was to write this
+Status: **done on a real Chromecast HD** (2026‑10‑01); **Phase D (audio) and Phase E (the phone as a gamepad, designed) are open**. Written 2026‑10‑01 09:55 (+07) = 02:55 UTC, **after the fact**. The agent that was to write this
 plan alongside the Android work was stopped on 2026‑09‑30 (out of tokens) before it wrote the file, so four documents linked to a plan that did not exist
 ([the aquarium-on-every-platform plan](2026-09-30-aquarium-platforms.md), [the Chromecast plan](2026-04-23-chromecast-googletv-port.md),
 [the condo plan](2026-10-01-condo-chromecast.md) and a second copy of the Chromecast plan); my own earlier statement that results had been appended to it was wrong. Everything below is
@@ -9,8 +11,9 @@ rebuilt from the commits and the evidence folders under `~/tmp/android-device-ru
 - [x] Phase A: the aquarium as a separate Android app (Gradle flavor, `cd.iff`, art), builds for both ABIs
 - [x] Phase B: installs and runs on a real Chromecast HD; D-pad moves the fish
 - [x] Phase C: release frame rate (60 fps) and the faults the device exposed (32-bit ABI, pool alignment, TV sleep, resume)
-- [ ] Phase D: **the phone as a gamepad**: a web controller served by the TV app over the local Wi-Fi, zero install (designed below, mockups 2 to 4; not started)
-- [ ] Phase E: a hardware gamepad (needs one paired to the Chromecast); audio (the Android build is a silent stub)
+- [ ] Phase D: **audio**: the aquarium and condo apps bundle no music or soundfont, so they play nothing (the Android audio code itself is real, not a stub); not started
+- [ ] Phase E: **the phone as a gamepad**: a web controller served by the TV app over the local Wi-Fi, zero install, with stick, buttons, **tilt steering and haptics** (designed below, mockups 2 to 4; not started)
+- [ ] Phase F: a hardware gamepad (needs one paired to the Chromecast)
 
 ## Context
 
@@ -54,10 +57,46 @@ They are Linux renders, used only as art sources; they are **not** Chromecast sc
 There is no other visible surface: the app is the game, full screen. Its on-screen states (loading, running, slow, suspended, failed) were first drawn for the condo, in
 [its mockup 3](2026-10-01-condo-chromecast.md), and apply unchanged here.
 
-## Phase D: the phone as a gamepad
+## Phase D: audio
+
+**Why.** The two Chromecast apps have no music to play (nobody has listened on the device, so "silent" is an inference from the bundle). That is a gap in what they ship, **not a stub in the code** (this plan used to say "silent stub", which was wrong):
+[`hal/android/audio.cc`](../../wfsource/source/hal/android/audio.cc) starts the same miniaudio `SoundDevice` and MIDI `MusicPlayer` as Linux, and the build compiles `audio/linux` for Android.
+What is missing is data. Only the `snowgoons` flavor bundles `level0.mid` and `florestan-subset.sf2` (`android/app/src/snowgoons/assets/`); the `aquarium` and `condo` flavors bundle only `cd.iff`, so the
+music player has nothing to load.
+
+**Known and unknown.**
+
+- Known: the code path exists; the missing music and soundfont files in the two flavors (checked in the source tree).
+- Not checked: that the TV outputs sound from the snowgoons build over HDMI (nobody has listened on the Chromecast), and what the engine does when a level's `.mid` is absent (read from `audio/linux/music.cc:171-198`, not yet seen on a device: it logs `audio: MusicPlayer — soundfont not found` or `MIDI not found` and returns false, with no crash).
+- Sound effects: the trigger is engine-neutral (a script writes mailbox 3017, `actor.cc:1694`), so Lua is not needed. The [iOS port plan](2026-04-21-ios-port-codemagic.md) said otherwise and was stale.
+  What a level cannot do is carry its own sounds; that is [its own plan](2026-10-01-sfx-without-lua.md). Only music control (`play_music` and friends) is still Lua-only.
+- The lasting fix is the "Audio assets from IFF" item in `TODO.md` ([plan](2026-04-18-audio-assets-from-iff.md): music and soundfont inside `cd.iff`); a stopgap is to bundle the loose files per flavor, as `snowgoons` does.
+
+There is no visible surface: the change is what the TV speakers do, so there are no mockups. Verification step 18 is its check.
+
+### How Phase D connects to the sound-effects plan
+
+[`2026-10-01-sfx-without-lua.md`](2026-10-01-sfx-without-lua.md) and this phase are the two halves of the "Audio assets from IFF" item, split by what the data is:
+
+| | This phase (music) | The SFX plan (sound effects) |
+|---|---|---|
+| What | the MIDI file and the soundfont (`level0.mid`, `florestan-subset.sf2`) | short `.wav` clips played by slot number |
+| How a script triggers it | the engine starts level music itself; `play_music` and friends stay Lua-only | any engine writes mailbox 3017 (already works, `actor.cc:1694`) |
+| What is missing | the aquarium and condo flavors bundle neither file | a level cannot carry its own sounds, so the seven loads in `game.cc:345-351` are hardcoded Q\*bert wavs |
+| Stopgap | copy the existing `snowgoons` loose-file pattern into the two flavors | none: straight into the IFF (the SFX plan rejects a manifest) |
+| Lasting home | music and soundfont inside `cd.iff` (the rest of Audio assets from IFF) | the per-level sound bank in the IFF (its Phase B) |
+
+Four consequences, decided here so the two plans do not collide:
+
+1. **Do one device listen, not two.** This plan's step 18 and the SFX plan's step 8 are the same session on the Chromecast. Run the cheap check first: install the `snowgoons` flavor, which already bundles music and soundfont, and **listen**. If the TV plays it, the audio route works and the remaining work is only data; if not, both plans are blocked on the route, not on data.
+2. **The display chain may not carry audio at all.** On 2026‑10‑01 the TV's EDID read as a DVI device (`Vendor: 0x0 (DVI device)`, EDID 1.3, product name corrupted, read over adb from `/sys/class/amhdmitx/amhdmitx0/edid`), and a DVI sink advertises no HDMI audio. Before blaming either plan, check that the Chromecast sees an HDMI audio output (`adb shell dumpsys audio`, look for the HDMI device) and listen with a known-good HDMI cable and port.
+3. **The stopgap must not become a second pipeline.** The SFX plan rejects a loose-file manifest because "Audio assets from IFF" exists to delete it. For music this phase copies only the files `snowgoons` already ships, by the same per-flavor symlinks, and adds no new loader or manifest; it is deleted when music moves into the IFF.
+4. **One list of events feeds both the speakers and the phone.** The SFX plan's Phase D (which sounds the aquarium and condo get; the user's call, and a licence decision) is the same list that haptics need (Phase E, design item 7): the condo's door, teleport and hop; the aquarium's turns. Author it once; a sound slot may carry an optional vibration pattern. Whether to attach haptic patterns to sound slots (no new mailbox, one script write) or to give haptics their own write-only mailbox is a decision for the user; **the recommendation is the slots**, because the SFX plan is already adding a positional mailbox and a second near-identical one is more surface for no gain. (If a separate haptic mailbox is wanted, `3023` is the SFX plan's, `3024` is taken by `INPUT`, so it would need a free number checked in `mailbox.inc`.)
+
+## Phase E: the phone as a gamepad
 
 **Why.** The Chromecast remote has a D-pad and OK only. The aquarium needs just the D-pad, but the condo needs doors (B), the 639⇄640 teleport (C), orbit (hold D) and zoom (E/F), which the
-remote cannot reach ([the condo plan](2026-10-01-condo-chromecast.md), mockup 2, and its Verification 9). A phone in the hand is the gamepad everyone already has, so Phase D replaces
+remote cannot reach ([the condo plan](2026-10-01-condo-chromecast.md), mockup 2, and its Verification 9). A phone in the hand is the gamepad everyone already has, so Phase E replaces
 "buy and pair a Bluetooth gamepad" as the way to play those buttons.
 
 **Design, in one sentence:** the TV app serves a one-page web controller over the local Wi-Fi; the phone opens it by scanning a QR code on the TV (no app to install, works on any phone, iPhone
@@ -69,26 +108,30 @@ How it fits the existing code (read from `wfsource/source/hal/android/native_app
 
 1. **Protocol** (portable C++, so it builds and tests on Linux without a Chromecast): HTTP `GET /` serves the controller page, `GET /layout.json` the per-app layout, and `/ws` upgrades to a
    WebSocket. The phone sends the 16-bit mask on every change and as a **250 ms heartbeat**; the TV **releases every button if no frame arrives for 1 s** (a locked phone or a dropped Wi-Fi must never
-   leave RIGHT stuck). Frames are tiny text (`b:01a0`), so a bug is readable in a log.
+   leave RIGHT stuck). Frames are tiny text, so a bug is readable in a log: phone to TV `b:01a0` (the mask) and `t:<ms>` (a timestamp the TV echoes, for the latency measurement); TV to phone `h:<ms,ms,…>` (a vibration pattern, for game-driven haptics, below).
 2. **Pairing and safety:** the server listens only while the app is resumed and only on the Wi-Fi interface; every launch picks a fresh random PIN carried in the QR URL (`/?k=482913`), checked on the page
    request and on the WebSocket; the newest phone wins. LAN only: no cloud, no relay, nothing reachable from the internet.
 3. **The page** (`assets/controller.html`, inline CSS and JS, one file in the APK): pointer events with multi-touch and pointer capture, a virtual stick (same threshold the engine uses) and buttons from
-   the layout (aquarium: stick, A, B; condo: stick, A hop, B doors, C teleport, D orbit-hold, E/F zoom), `touch-action: none`, a screen Wake Lock while connected, and a "rotate your phone" hint in portrait.
+   the layout (aquarium: stick, A, B; condo: stick, A hop, B doors, C teleport, D orbit-hold, E/F zoom), `touch-action: none`, a "rotate your phone" hint in portrait, and the screen kept awake while connected. **Correction:** this plan first said "a screen Wake Lock", but the Wake Lock API is secure-context only: Chrome on a plain `http://<LAN IP>` page shows `navigator.wakeLock` absent (measured, below). The plain page therefore needs the silent-looping-video trick and the https page can use the real API; both are checked on the phone in step 19.
 4. **The TV overlay:** drawn by the engine like the touch HUD: URL, QR, PIN and "Waiting for a phone…" until a phone connects, then a 3 s "Phone connected" toast; the panel returns if the phone drops.
    The QR is generated at run time (the URL holds the IP and a per-launch PIN, so it cannot be pre-rendered): a small vendored encoder (for example Nayuki's MIT-licensed QR Code generator).
-   **Step D1 ships the text URL and PIN first; the QR is D3**, so the feature is usable before the encoder lands.
+   **Step E1 ships the text URL and PIN first; the QR is E3**, so the feature is usable before the encoder lands.
 5. **Android plumbing:** the manifest has **no `INTERNET` permission today** (checked: `AndroidManifest.xml` has no `uses-permission`), and opening a listening socket needs it, so this phase adds
    `android.permission.INTERNET`. It is the first network capability these apps have, which is why the PIN and the LAN-only rule above are not optional.
+6. **Tilt steering** (included in this phase at the user's request). The page reads the phone's orientation (`deviceorientation`, mapped through `screen.orientation.angle`), measures it against a **neutral** set when tilt is switched on (and by a "Set neutral" button), and turns it into LEFT/RIGHT/UP/DOWN with a dead zone and hysteresis (on past 12°, off below 8°, as in mockup 2). It is the same
+   four-direction mask as the stick, so for tilt **no protocol change is needed** (my earlier line "tilt and haptics need no protocol change" was only true of this half). Proportional steering is out of scope: the engine's input is the digital `joystickButtonsF` mask (`hal/_input.h`), and its own analog stick is already quantised the same way.
+7. **Haptics** (also included). Two parts. **Local:** a short tick on every button press, done in the page with `navigator.vibrate`, no TV involvement and no protocol change. **Game-driven:** the TV tells the phone to buzz (a door toggles, a teleport, a hard landing) with `h:<pattern>`. **That is a protocol addition and an engine hook, which my earlier "without protocol changes" claim missed.** The hook should reuse the sound-effect trigger rather than add
+   a second one: a level script already plays sound slot *n* by writing mailbox 3017 (`actor.cc:1694`), so when slot *n* plays the engine can also send the phone pattern *n* (a small per-level table, default none). One script write then gives a sound on the TV and a buzz in the hand, and the event list is authored once ([the SFX plan](2026-10-01-sfx-without-lua.md), Phase D). Phone support: Android Chrome has `navigator.vibrate`; **iPhone Safari has no Vibration API** (documented, to be confirmed on the phone), so the toggle is hidden there and the page says so.
+8. **A secure context for tilt (the constraint that shapes the build).** Browsers expose motion sensors only to secure contexts. Measured with Chrome on this PC against a plain `http://192.168.4.21` page: `isSecureContext: false`, `DeviceOrientationEvent` and `DeviceMotionEvent` **undefined**, the Generic Sensor classes undefined, `navigator.wakeLock` **absent**, while `navigator.vibrate` and `WebSocket` are present. (A control run on a secure origin, to prove the gating rather than headless desktop having no sensors, did not complete here; iOS Safari additionally wants `DeviceMotionEvent.requestPermission()` from a user gesture. Both are checked in step 19.) So tilt cannot come from the plain http page that sticks and buttons use. The only zero-install route is **https from the TV with a self-signed certificate**: the page offers "Enable tilt", reloads over https from the TV (a second port), and the phone asks once whether to trust the certificate; the WebSocket on that page must then be `wss://` because browsers block `ws://` from an https page. That needs a small TLS library in the app (for example BearSSL, MIT, or mbedTLS) and a certificate shipped with the app, so **anyone on the same Wi-Fi who can read this repository holds the certificate's key**: acceptable for a game controller behind the PIN, and written down here so it is a choice, not a surprise. If step 19 shows the route does not work on the user's phone, tilt falls back to a native companion app (rejected above for the sticks and buttons, but the only way to read sensors without https), which is a decision for the user.
 
-**Sub-steps, in order:** D1 server, protocol, mask merge and the page, tested on Linux with a headless client (no device needed); D2 Android build, manifest, the TV overlay with the URL and PIN;
-D3 the QR code; D4 device run on the Chromecast with a real phone (the user's), aquarium and condo; D5 the failure states of mockup 4 (lost signal, wrong PIN, other network, second phone).
+**Sub-steps, in order:** E1 server, protocol, mask merge and the page, tested on Linux with a headless client (no device needed); E2 Android build, manifest, the TV overlay with the URL and PIN;
+E3 the QR code; E4 device run on the Chromecast with a real phone (the user's), aquarium and condo; E5 the failure states of mockup 4 (lost signal, wrong PIN, other network, second phone).
 
 **Rejected:**
 - **Google's TV remote protocol:** it is the same D-pad and OK as the physical remote, so it cannot reach B, C, D, E or F.
 - **The phone as a Bluetooth HID gamepad:** Android's `BluetoothHidDevice` needs a phone app per phone, and an iPhone cannot do it at all.
 - **Google Cast:** it needs a receiver app and Google registration for a game that is not a media stream.
 - **A native companion app:** every phone would have to install it first, which is one more manual step than scanning a code.
-- **Tilt steering and haptics:** possible later; the page can add them without protocol changes.
 
 **Risks, each with a verification step:**
 
@@ -99,13 +142,16 @@ D3 the QR code; D4 device run on the Chromecast with a real phone (the user's), 
 | A stuck button | phone locks, Wi-Fi drops, tab is backgrounded | 15 |
 | A new network surface in a game app | anyone on the LAN could send buttons without the PIN | 15 |
 | The Chromecast's address changes | a bookmarked URL stops working; the QR is shown every launch | 13 |
+| **Tilt and Wake Lock need a secure page** | measured: an http LAN page has no orientation events and no `wakeLock`; the https route needs TLS in the app and a certificate prompt | 19 |
+| Tilt feel | drift, a wrong neutral, or flicker at the threshold makes steering unusable; the dead zone, hysteresis and "Set neutral" are the controls | 20 |
+| Haptics are not on every phone | iPhone Safari has no Vibration API; buzzing needs a user gesture on Android | 21 |
 
-### Mockups for Phase D
+### Mockups for Phase E
 
 [![The phone controller](2026-09-30-aquarium-chromecast/phone-controller.png)](2026-09-30-aquarium-chromecast/phone-controller.html)
 
 **2. The phone as the controller (live: click and drag the controls).** Landscape page, layout per app; the line under the phones shows the exact button mask that would be sent.
-**Decision asked of you:** is the condo layout right (doors B, teleport C, orbit-hold D, zoom E/F), and is a plain digital stick (the engine's existing four directions) enough for v1?
+**Decided by the user on 2026‑10‑01 ("sure"):** the condo layout is right (doors B, teleport C, orbit-hold D, zoom E/F) and a plain digital stick (the engine's existing four directions) is enough for v1. The strip under the phones adds tilt (drag the sliders; the dead zone and hysteresis are live) and shows the haptic tick.
 [Open the interactive mockup](2026-09-30-aquarium-chromecast/phone-controller.html).
 
 [![The TV, pairing the phone](2026-09-30-aquarium-chromecast/phone-pairing-tv.png)](2026-09-30-aquarium-chromecast/phone-pairing-tv.html)
@@ -115,13 +161,12 @@ screenshots; the overlay is a drawing. [Open the interactive mockup](2026-09-30-
 
 [![The states](2026-09-30-aquarium-chromecast/phone-states.png)](2026-09-30-aquarium-chromecast/phone-states.html)
 
-**4. The states.** Connecting, connected, signal lost, wrong PIN, not on the same Wi-Fi, phone locks, a second phone, and remote plus phone together.
+**4. The states.** Connecting, connected, signal lost, wrong PIN, not on the same Wi-Fi, phone locks, a second phone, tilt needing a secure page, no haptics on an iPhone, and remote plus phone together.
 [Open the interactive mockup](2026-09-30-aquarium-chromecast/phone-states.html). All three are regenerated by [`make_phone_mockups.py`](2026-09-30-aquarium-chromecast/make_phone_mockups.py).
 
 ## Out of scope
 
-- Audio (silent stub on Android; the "Audio assets from IFF" item in `TODO.md`).
-- A hardware gamepad profile beyond the existing key mapping, until one is paired (Phase E). Two phones as two players, and any internet or cloud play.
+- A hardware gamepad profile beyond the existing key mapping, until one is paired (Phase F). Two phones as two players, and any internet or cloud play.
 - Phone and tablet devices, iPhone and iPad (separate items in the porting status).
 - Play Store or any distribution beyond `adb` sideload.
 
@@ -229,8 +274,8 @@ Numbered, runnable steps; each shows its raw output with PASS or FAIL. Times in 
 
     It now selects `^<package>/android\.app\.NativeActivity#[0-9]+$`, the layer that actually carries the app's buffers, which gives the 59.9 fps line in step 8. **PASS**
 
-11. The portable server and protocol, on this PC (Phase D1). `python3 -m pytest tests/test_phone_controller.py -q`: WebSocket handshake and framing, the mask-to-buttons mapping, the 1 s timeout releasing every button,
-    wrong PIN rejected, newest phone wins. Expected: all pass. **PENDING (Phase D not started)**
+11. The portable server and protocol, on this PC (Phase E1). `python3 -m pytest tests/test_phone_controller.py -q`: WebSocket handshake and framing, the mask-to-buttons mapping, the 1 s timeout releasing every button,
+    wrong PIN rejected, newest phone wins, plus the tilt quantiser (dead zone, hysteresis, neutral) and the `h:` message encoding. Expected: all pass. **PENDING (Phase E not started)**
 
 12. The page and a real engine on Linux. Run the engine with the phone controller enabled, open the page in headless Chrome (screenshot compared with mockup 2), then a headless client holds RIGHT for 1.5 s.
     Expected: the engine log's `ball pos` changes, and stops moving when the client disconnects. **PENDING**
@@ -247,8 +292,17 @@ Numbered, runnable steps; each shows its raw output with PASS or FAIL. Times in 
 
 16. Codemagic `android-apk-debug` on the merged branch; macOS and iOS workflows unaffected. Expected: green. **PENDING**
 
-17. A hardware gamepad moves the fish; B/C buttons (Phase E). **PENDING (no gamepad paired)**.
+17. A hardware gamepad moves the fish; B/C buttons (Phase F). **PENDING (no gamepad paired)**.
 
+18. Audio on the Chromecast (Phase D). Run the aquarium and the condo with the music and soundfont bundled. Expected: music is audible from the TV, and `adb logcat` shows no audio-device error from
+    the app. Evidence: the logcat excerpt and a note of what was heard. **PENDING (Phase D not started)**
+
+
+19. The E0 spike, on the user's phone (say which: Android or iPhone). Serve a one-page diagnostic from this PC or the Chromecast over http and over https with a self-signed certificate, and open each on the phone. It prints `isSecureContext`, whether `deviceorientation` events arrive (and a live reading), whether `DeviceMotionEvent.requestPermission` is needed, `'wakeLock' in navigator`, `typeof navigator.vibrate`, and whether a WebSocket opens (`ws://` from the http page, `wss://` from the https one). Expected: http: no tilt, no wakeLock, WebSocket and vibrate (Android) work; https after one certificate prompt: tilt and wakeLock work. Evidence: a screenshot of the diagnostic on the phone for each. The desktop-Chrome half is already measured (design item 8); the secure-origin control and everything on a phone are **PENDING**
+
+20. Tilt steering on the Chromecast (Phase E6). With tilt on, the aquarium fish steers left, right, up and down by tilting the phone; "Set neutral" re-zeros it; holding the phone still produces no steering; the stick and tilt together do not fight. Expected: no stuck direction after switching tilt off or locking the phone. Evidence: the TV's engine log with the tilt-driven `ball pos` changes and a short note of how it felt. **PENDING**
+
+21. Haptics (Phase E7). Android Chrome: a tick on every button press; in the condo, a door toggle (B) or a teleport (C) buzzes the phone through the sound slot's pattern. iPhone: the toggle is hidden and the page says why. Expected: the buzz matches the event within 100 ms. Evidence: the TV's `h:` log lines and a note of what was felt. **PENDING**
 ## Result on a real Chromecast
 
 On a Chromecast HD (Amlogic S805X2, Android 14, 1920×1080, 32-bit only) the aquarium runs as its own app, installs in about a second, draws the full 16:9 tank, responds to the remote's D-pad,
@@ -266,5 +320,7 @@ None: local Gradle builds and device runs, plus the free Mac-minutes of the Code
 |---|---|---|
 | Flavors, `cd.iff` task, art script, device script | T4 | a new pattern (separate apps from one native library) and the first 32-bit run, with an unknown fault list |
 | Reading screenshots and numbers, the alignment decision | T5 | needed the whole session's judgement |
-| Phase D: protocol, server, input merge, TV overlay, manifest | T4 | cross-cutting (engine input path, a first network surface, Android permission) where a wrong turn is a security or stuck-input bug; recommended rank, to be set in `TODO.md` by a Fable session |
-| Phase D: the controller page and the QR vendoring | T2 | one self-contained file against the settled protocol, and a vendored library |
+| Phase E: protocol, server, input merge, TV overlay, manifest | T4 | cross-cutting (engine input path, a first network surface, Android permission) where a wrong turn is a security or stuck-input bug; recommended rank, to be set in `TODO.md` by a Fable session |
+| Phase E: the controller page and the QR vendoring | T2 | one self-contained file against the settled protocol, and a vendored library |
+| Phase E: TLS and the https listener, tilt and haptics hooks (E6, E7) | T4 | a TLS library and certificate in a game app, and an engine hook shared with the sound path; a wrong turn is a security or input bug |
+| Phase E0: the spike on the user's phone | T5 | needs the user's phone and a judgement about the result |

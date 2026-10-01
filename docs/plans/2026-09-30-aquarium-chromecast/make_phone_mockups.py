@@ -67,24 +67,38 @@ table{border-collapse:collapse;font-size:14px;width:640px}th{text-align:left;col
 
 # 2. the phone controller (interactive) ----------------------------------------------------------------------------
 JS = """
-const state={};const out=document.getElementById('mask');
+const touch={}, tilt={LEFT:false,RIGHT:false,UP:false,DOWN:false}, out=document.getElementById('mask');
 const bits={LEFT:1,RIGHT:2,UP:4,DOWN:8,A:16,B:32,C:64,D:128,E:256,F:512};
-function render(){let m=0;for(const k in state)if(state[k])m|=bits[k];out.textContent='0x'+m.toString(16).padStart(4,'0')+'   '+(Object.keys(state).filter(k=>state[k]).join(' + ')||'(nothing held)');}
+const ON=12, OFF=8;                       // tilt dead zone in degrees: a direction turns on past 12 and off below 8 (hysteresis, no flicker)
+function quant(deg,neg,pos){ if(deg<=-ON) tilt[neg]=true; else if(deg>-OFF) tilt[neg]=false; if(deg>=ON) tilt[pos]=true; else if(deg<OFF) tilt[pos]=false; }
+function render(){let m=0,names=[];for(const k in touch)if(touch[k]){m|=bits[k];names.push(k);}
+  for(const k in tilt)if(tilt[k]){m|=bits[k];names.push(k+' (tilt)');}
+  out.textContent='0x'+m.toString(16).padStart(4,'0')+'   '+(names.join(' + ')||'(nothing held)');}
+function buzz(el){el.classList.remove('buzz');void el.offsetWidth;el.classList.add('buzz');document.getElementById('hap').textContent='vibrate(15 ms)';
+  clearTimeout(window._h);window._h=setTimeout(()=>document.getElementById('hap').textContent='',600);}
 document.querySelectorAll('[data-b]').forEach(el=>{
   const k=el.dataset.b;
-  el.addEventListener('pointerdown',e=>{state[k]=true;el.classList.add('on');el.setPointerCapture(e.pointerId);render();});
-  const up=()=>{state[k]=false;el.classList.remove('on');render();};
+  el.addEventListener('pointerdown',e=>{touch[k]=true;el.classList.add('on');el.setPointerCapture(e.pointerId);buzz(el.closest('.phone'));render();});
+  const up=()=>{touch[k]=false;el.classList.remove('on');render();};
   el.addEventListener('pointerup',up);el.addEventListener('pointercancel',up);
 });
 document.querySelectorAll('.stick').forEach(st=>{
   const knob=st.querySelector('.knob');
   function set(dx,dy){const r=70,d=Math.hypot(dx,dy)||1,s=Math.min(1,r/d);knob.style.transform=`translate(${dx*s}px,${dy*s}px)`;
-    const t=28;state.LEFT=dx<-t;state.RIGHT=dx>t;state.UP=dy<-t;state.DOWN=dy>t;render();}
+    const t=28;touch.LEFT=dx<-t;touch.RIGHT=dx>t;touch.UP=dy<-t;touch.DOWN=dy>t;render();}
   st.addEventListener('pointerdown',e=>{st.setPointerCapture(e.pointerId);const b=st.getBoundingClientRect();st._c=[b.left+b.width/2,b.top+b.height/2];set(e.clientX-st._c[0],e.clientY-st._c[1]);});
   st.addEventListener('pointermove',e=>{if(st._c&&e.buttons)set(e.clientX-st._c[0],e.clientY-st._c[1]);});
-  const end=()=>{st._c=null;knob.style.transform='translate(0,0)';state.LEFT=state.RIGHT=state.UP=state.DOWN=false;render();};
+  const end=()=>{st._c=null;knob.style.transform='translate(0,0)';touch.LEFT=touch.RIGHT=touch.UP=touch.DOWN=false;render();};
   st.addEventListener('pointerup',end);st.addEventListener('pointercancel',end);
-});render();
+});
+const tg=document.getElementById('tiltOn'),sx=document.getElementById('tx'),sy=document.getElementById('ty'),bub=document.getElementById('bubble');
+function tiltUpdate(){const on=tg.checked;const x=on?+sx.value:0,y=on?+sy.value:0;
+  if(on){quant(x,'LEFT','RIGHT');quant(y,'UP','DOWN');}else{for(const k in tilt)tilt[k]=false;}
+  document.getElementById('tdeg').textContent=on?('roll '+x+'°, pitch '+y+'°'):'off';
+  bub.style.transform=`translate(${x*1.6}px,${y*1.6}px)`;bub.style.opacity=on?1:.25;render();}
+[tg,sx,sy].forEach(e=>e.addEventListener('input',tiltUpdate));
+document.getElementById('neutral').addEventListener('click',()=>{sx.value=0;sy.value=0;tiltUpdate();});
+render();tiltUpdate();
 """
 
 
@@ -100,8 +114,13 @@ aq = phone("A. Aquarium: stick plus two buttons", [("A", "A", 500, 120, ""), ("B
 condo = phone("B. Condo: stick plus the buttons the remote cannot reach",
               [("A", "hop", 520, 150, ""), ("B", "doors", 440, 98, ""), ("C", "teleport", 520, 46, ""), ("D", "orbit (hold)", 350, 150, "hold"), ("E", "zoom −", 262, 46, "small"), ("F", "zoom +", 262, 106, "small")],
               "Doors (B), the 639⇄640 teleport (C), orbit (hold D with the stick) and zoom (E/F) are exactly what a TV remote cannot do. This closes the condo plan's gamepad question without buying a gamepad.")
-pad = page("Mockup 2: the phone as the controller (live: click and drag)", "Landscape phone page served by the Chromecast. Layout per app. Try the controls: the line below shows the button mask that would be sent.", f"""
+pad = page("Mockup 2: the phone as the controller (live: click, drag, tilt)", "Landscape phone page served by the Chromecast. Layout per app, plus tilt steering and haptics. The line at the bottom shows the button mask that would be sent.", f"""
 <div style="padding:18px 34px"><div style="display:flex;gap:34px">{aq}{condo}</div>
+<div class="tiltbar"><label class="sw"><input type="checkbox" id="tiltOn"> <b>Tilt steering</b></label>
+ <span class="sub">simulate the phone's tilt:</span> roll <input type="range" id="tx" min="-30" max="30" value="0"> pitch <input type="range" id="ty" min="-30" max="30" value="0">
+ <button id="neutral">Set neutral</button> <span class="lvl"><span class="lvlring"><span id="bubble"></span></span></span> <code id="tdeg">off</code>
+ <span class="sub" style="margin-left:14px">haptics:</span> <code id="hap" style="min-width:120px"></code></div>
+<div class="note" style="max-width:1300px;margin-top:6px">Tilt is quantised into the same four directions as the stick (dead zone: on past 12°, off below 8°), so the TV needs no new input type. Haptics here are a 15 ms tick on every button press, done in the page (Android Chrome only). Turn tilt on and drag the sliders; the mask below ORs the stick, the buttons and the tilt.</div>
 <div class="mask"><span class="sub">sent to the TV on every change (and every 250 ms as a heartbeat):</span><br><code id="mask"></code></div></div>
 <script>{JS}</script>""", """
 .phone{width:640px;height:296px;background:#05080d;border:6px solid #2b3a52;border-radius:34px;position:relative;padding:8px}.screen{position:absolute;inset:8px;background:#111826;border-radius:26px;overflow:hidden;touch-action:none}
@@ -109,7 +128,11 @@ pad = page("Mockup 2: the phone as the controller (live: click and drag)", "Land
 .stick{position:absolute;width:150px;height:150px;touch-action:none}.ring{position:absolute;inset:0;border-radius:50%;border:2px solid #3a4a63;background:#0d1320}.knob{position:absolute;left:45px;top:45px;width:60px;height:60px;border-radius:50%;background:#2f6fb3;box-shadow:0 0 0 2px #56a0e8 inset;transition:transform .04s}
 .btn{position:absolute;width:62px;height:62px;border-radius:50%;background:#1d2a3f;border:2px solid #3a4a63;display:flex;align-items:center;justify-content:center;font-size:12px;text-align:center;user-select:none;touch-action:none;color:#c9d4e3}
 .btn.small{width:52px;height:52px}.btn.on{background:#56d364;color:#0d1117;border-color:#56d364}
-.mask{margin-top:16px}code{background:#05080d;padding:3px 10px;border-radius:4px;color:#56d364;font-size:15px;display:inline-block;margin-top:4px}""")
+.buzz{animation:bz .18s}@keyframes bz{25%{transform:translate(-3px,1px)}50%{transform:translate(3px,-1px)}75%{transform:translate(-2px,0)}}
+.tiltbar{margin-top:14px;display:flex;align-items:center;gap:12px;flex-wrap:wrap;background:#111826;border:1px solid #233048;border-radius:10px;padding:10px 14px}
+.tiltbar input[type=range]{width:120px}.tiltbar button{background:#1d2a3f;color:#e6edf3;border:1px solid #3a4a63;border-radius:6px;padding:4px 10px}
+.lvl{display:inline-block}.lvlring{display:inline-block;width:56px;height:56px;border-radius:50%;border:2px solid #3a4a63;position:relative;vertical-align:middle;background:#0d1320}#bubble{position:absolute;left:21px;top:21px;width:10px;height:10px;border-radius:50%;background:#56d364;transition:transform .05s}
+.mask{margin-top:12px}code{background:#05080d;padding:3px 10px;border-radius:4px;color:#56d364;font-size:15px;display:inline-block;margin-top:4px}""")
 
 # 3. states -----------------------------------------------------------------------------------------------------------
 def card(title, cls, body, shot):
@@ -125,10 +148,12 @@ states = page("Mockup 4: the states, including the failures a living room produc
  {card("5 Not on the same Wi-Fi", "bad", "Nothing answers within 5 s. The page says why: join the TV's network; a guest network or <i>AP isolation</i> blocks it.", '<div class="ph2 r">Can’t reach the TV.<br><small>Same Wi-Fi? Guest network?</small></div>')}
  {card("6 Phone locks or sleeps", "warn", "A screen Wake Lock is requested while connected. If the phone sleeps anyway, it is state 3 and the TV releases the buttons.", '<div class="ph2 w">Screen kept awake</div>')}
  {card("7 A second phone joins", "warn", "The newest connection wins; the first sees “Another phone took over”. Two players is a later feature.", '<div class="ph2 w">Another phone took over</div>')}
- {card("8 The remote at the same time", "ok", "Remote, a gamepad and the phone are OR-ed together, like the touch HUD and a gamepad already are. Any of them works.", '<div class="ph2 g">Remote + phone + gamepad</div>')}
+ {card("8 Tilt needs a secure page", "warn", "Browsers expose tilt only to <b>https</b> pages. Tap “Enable tilt”: the page reloads over https from the TV and your browser asks once about the certificate. Sticks and buttons never need this.", '<div class="ph2 w">Enable tilt <small>(one-time certificate prompt)</small></div>')}
+ {card("9 No haptics on iPhone", "warn", "Safari has no vibration API. The toggle is hidden there and the page says so; Android Chrome buzzes. Game-driven buzzes (door, teleport) arrive from the TV as an <code>h:</code> message.", '<div class="ph2 w">Haptics: not on this phone</div>')}
+ {card("10 The remote at the same time", "ok", "Remote, a gamepad and the phone are OR-ed together, like the touch HUD and a gamepad already are. Any of them works.", '<div class="ph2 g">Remote + phone + gamepad</div>')}
 </div>""", """
-.grid{display:grid;grid-template-columns:repeat(4,1fr);gap:16px;padding:20px 34px}.c{background:#111826;border:1px solid #233048;border-radius:10px;padding:12px}
-.s{height:112px;background:#05080d;border:1px solid #2b3a52;border-radius:8px;display:flex;align-items:center;justify-content:center}h3{margin:10px 0 4px;font-size:16px}p{margin:0;font-size:13.5px;color:#b7c3d4}
+.grid{display:grid;grid-template-columns:repeat(5,1fr);gap:14px;padding:20px 34px}.c{background:#111826;border:1px solid #233048;border-radius:10px;padding:12px}
+.s{height:96px;background:#05080d;border:1px solid #2b3a52;border-radius:8px;display:flex;align-items:center;justify-content:center}h3{margin:10px 0 4px;font-size:16px}p{margin:0;font-size:13px;color:#b7c3d4}code{background:#05080d;padding:0 5px;border-radius:3px;color:#9fb3cc}
 .ph2{font-size:15px;color:#c9d4e3;text-align:center;padding:0 10px}.ph2.g{color:#56d364}.ph2.w{color:#ffb454}.ph2.r{color:#ff7b72}small{color:#8b98a9;font-size:12px}.dot2{display:inline-block;width:9px;height:9px;border-radius:50%;background:#ffb454;margin-right:6px}""")
 
 for name, html in (("phone-controller", pad), ("phone-pairing-tv", tv), ("phone-states", states)):
