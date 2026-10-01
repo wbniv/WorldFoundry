@@ -35,10 +35,12 @@ real-time play. The same level file and the same flags on every platform.
 | <img src="porting-status/ios-iphone-simulator.png" width="200"> | <img src="porting-status/ios-ipad-simulator.png" width="320"> |
 | **The game now draws.** The bundled level 0 (Super Mario Bros. 1‑1). The framing is not tuned for a portrait phone. | Same on the iPad. The banner at the top is a Simulator system notification. Both are simulators, not real devices. Earlier today both screenshots were a solid blue fill. |
 
-| Android and Chromecast: the app tile | What the TV will show (16:9) |
+| Android and Chromecast: the aquarium's app banner | The condo's app banner |
 |---|---|
-| <img src="porting-status/android-tv-banner.png" width="320"> | <img src="porting-status/aquarium-16x9-linux.png" width="420"> |
-| The aquarium's Google TV launcher banner. The APK builds; no device has run it yet. | A Linux render at 1920×1080 (the TV's shape); the level was tuned for 4:3, and the whole tank still fits. **Not a Chromecast screenshot.** |
+| <img src="porting-status/android-tv-banner.png" width="320"> | <img src="porting-status/android-tv-banner-condo.png" width="320"> |
+| The Google TV launcher banner of the aquarium app. | The same for the condo app, from a real capture of the level. |
+
+(What the apps look like *on* the Chromecast is the pair of real-device screenshots above. An earlier "what the TV will show" Linux render stood here before any device had run the apps; it is gone because it was not a Chromecast screenshot.)
 
 <!-- ios-aquarium-shots -->
 | iOS Metal, **aquarium** on iPhone 17 Pro | iOS Metal, **aquarium** on iPad Pro 13‑inch |
