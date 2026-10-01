@@ -149,6 +149,7 @@
 ### Future evaluation
 
 - **Post-v1: evaluate Qt as a replacement UI toolkit for the collaborative editor.** v1 ships on Dear ImGui. Once v1 is in real use, evaluate migrating to Qt (native widgets, `QOpenGLWidget` viewport, PySide). Trigger: v1 shipped + UX friction observed. No research before then. [investigation](docs/investigations/2026-05-18-collaborative-level-editor-design.md)
+- Phone gamepad latency, option (b): have the app hold a low-latency Wi-Fi lock (`WifiManager.WifiLock` in `WIFI_MODE_FULL_LOW_LATENCY`) while a phone is connected, instead of or on top of the page sending a frame every 50 ms. Measured 2026-10-01: the Chromecast's Wi-Fi power saving gives a 156 ms median round trip at 250 ms between frames and 21 to 28 ms at 20 to 50 ms, so frequent frames (option a, applied) fix it; the lock would also cut the phone's battery cost and help the TV side. Costs a JNI call and the `WAKE_LOCK` permission (and `ACCESS_WIFI_STATE`), which breaks the plan's "nothing else new" step 13. Revisit if 50 ms frames drain phones or latency is still felt. [plan](docs/plans/2026-09-30-aquarium-chromecast.md)
 
 
 ## Done
