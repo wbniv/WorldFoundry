@@ -40,13 +40,18 @@ sh(f"am force-stop {PKG}"); time.sleep(1)
 sh(f"am start -n {PKG}/android.app.NativeActivity"); time.sleep(9)
 sh("input keyevent KEYCODE_BACK", check=False); time.sleep(2)             # hide the phone-controller overlay
 sh("rm -f /sdcard/school.mp4")
-rec = subprocess.Popen(A + ["shell", "screenrecord --time-limit 52 --size 960x540 --bit-rate 6000000 /sdcard/school.mp4"])
+rec = subprocess.Popen(A + ["shell", "screenrecord --time-limit 50 --size 960x540 --bit-rate 6000000 /sdcard/school.mp4"])
 t0 = time.time(); time.sleep(1.5)
-plan = [("REST - the fish idles, the ten swarm round it", None, 9), ("SWIM RIGHT - they school behind it", "KEYCODE_DPAD_RIGHT", 6), ("REST - they gather round it again", None, 7),
-        ("SWIM LEFT", "KEYCODE_DPAD_LEFT", 6), ("REST", None, 7), ("SWIM RIGHT, climbing", "KEYCODE_DPAD_RIGHT", 5), ("REST", None, 5)]
+plan = [("REST - the fish idles, the ten swarm round it", None, 8), ("SWIM RIGHT - they school behind it", "KEYCODE_DPAD_RIGHT", 6), ("REST - they gather round it again", None, 6),
+        ("DART (A) - the school scatters, then regroups", "DART", 6), ("SWIM LEFT", "KEYCODE_DPAD_LEFT", 5), ("REST", None, 4), ("SWIM RIGHT, climbing", "KEYCODE_DPAD_RIGHT", 4), ("REST", None, 3)]
 for label, key, secs in plan:
     s = time.time() - t0
-    hold(key, secs) if key else time.sleep(secs)
+    if key == "DART":
+        sh("input keyevent --longpress KEYCODE_DPAD_CENTER", check=False); time.sleep(max(0, secs - 1))      # one A press: the dart
+    elif key:
+        hold(key, secs)
+    else:
+        time.sleep(secs)
     segments.append((s, time.time() - t0, label))
 rec.wait(timeout=30)
 work = Path(tempfile.mkdtemp(prefix="aqschool-rec-"))

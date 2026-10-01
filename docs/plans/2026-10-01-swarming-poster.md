@@ -24,15 +24,15 @@ Measured, not estimated ([`measured.json`](../reference/swarming-poster/measured
 | What | Value |
 |---|---|
 | Source | 254 lines, 202 of them code (the rest is comments), about 11.5 KB |
-| In the zForth dictionary | **3,324 bytes** of the 65,536 available (5.1 %), 76 words (including the named slots); the Chromecast timing below was taken at 3,216 bytes, before the dart's fast start |
+| In the zForth dictionary | **3,324 bytes** of the 65,536 available (5.1 %), 76 words (including the named slots)|
 | Biggest words | `clamp-axis` 189 B, `sch-pair` 168 B, `sch-follow` 131 B, `sch-startle-all` 123 B, `sch-wall` 107 B |
-| One step, 11 fish (10 followers and the leader) | **7.5 ms on the Chromecast HD** (median of 3 runs of 200 ticks, with the TV in use; the poster prints only Chromecast timings) |
-| Per follower | about 0.75 ms |
+| One step, 11 fish (10 followers and the leader) | **7.3 ms on the Chromecast HD** (median of 3 runs of 200 ticks; the poster prints only Chromecast timings) |
+| Per follower | about 0.73 ms |
 | Against the numpy reference, one tick | position error 3e‑04 body lengths, heading error 1e‑03 (the engine's sine is 0.2 % off) |
 
-**Named slots (the user's request).** Every number that used to be a bare index (`3 cur sch@`, `1 par@`, `19 sc!`) is now a name with an `MB_` prefix (`MB_VX me sch@`, `MB_DRO par@`, `MB_YOU sc!`), the long lines were split into short helper words, and the slots are documented once at the top of the file. The prefix stays because the dictionary is shared by every script in the level: a bare `X` or `ME` could silently shadow another script's word. It cost something, measured: the first version was 2,179 bytes and 6.2 ms a step; the named one with its hard wall limit is **3,216 bytes and 7.5 ms** (each name is a word call, not an inline literal), still equal to the numpy reference to the same 1e‑03. The poster's Forth panel shows the named code.
+**Named slots (the user's request).** Every number that used to be a bare index (`3 cur sch@`, `1 par@`, `19 sc!`) is now a name with an `MB_` prefix (`MB_VX me sch@`, `MB_DRO par@`, `MB_YOU sc!`), the long lines were split into short helper words, and the slots are documented once at the top of the file. The prefix stays because the dictionary is shared by every script in the level: a bare `X` or `ME` could silently shadow another script's word. It cost something, measured: the first version was 2,179 bytes and 6.2 ms a step; the named one with its hard wall limit is **3,324 bytes and 7.3 ms** (with the wall limit and the dart's fast start) (each name is a word call, not an inline literal), still equal to the numpy reference to the same 1e‑03. The poster's Forth panel shows the named code.
 
-**Inside the engine** it is a different story, and a more useful one: see [Phase E step 1](#phase-e-step-1-the-forth-inside-the-engine-on-the-chromecast). The 7.5 ms above is the engine's own zForth driven by a standalone host with the mailboxes as a plain array; in the game the same step took 39 to 43 ms until an engine bug was fixed, and takes 11.3 ms now (the Director also poses the fish and the camera).
+**Inside the engine** it is a different story, and a more useful one: see [Phase E step 1](#phase-e-step-1-the-forth-inside-the-engine-on-the-chromecast). The 7.3 ms above is the engine's own zForth driven by a standalone host with the mailboxes as a plain array; in the game the same step took 39 to 43 ms until an engine bug was fixed, and takes 11.3 ms now (the Director also poses the fish and the camera).
 
 ## Diagrams
 
@@ -130,7 +130,7 @@ A bench level (the level builder with `AQUARIUM_SCHOOL_BENCH=1`; git-ignored, `w
 |---|---|---|---|
 | bench, engine as it was | **39 to 43 ms** | **4.2 µs** | **20 fps** (median 50 ms) |
 | bench, after the fix below | **11.3 ms** (worst 20 ms) | **0.28 µs** (includes the profiler's own timer) | **59.9 fps**, p90 33.4 ms |
-| standalone interpreter, no engine (above) | 7.5 ms | a plain array | n/a |
+| standalone interpreter, no engine (above) | 7.3 ms | a plain array | n/a |
 
 **The engine bug.** One step makes about 7,750 mailbox calls (counted: 6,046 reads, 1,708 writes). At 4.2 µs each that is 34 ms of the 39. The cause: three debug-stream statements in the mailbox read path, `cmailbox << … << std::endl` in `LevelMailboxes::ReadMailbox`, `GameMailboxes::ReadMailbox` (`wfsource/source/game/mailbox.cc`) and `WorldFoundryMailboxesManager::LookupMailboxes` (`level.cc`), were at level `DBSTREAM1`, and the CMake build defines `SW_DBSTREAM=1` for **every** configuration, Android release included. `dbstrm.hp` itself says DBSTREAM1 is "nothing in the game loop (startup and shutdown only)". Moving the three to `DBSTREAM5` compiles them out. It speeds up every script on every platform, not only this one. Regression guard: [`tests/test_mailbox_hot_path.py`](../../tests/test_mailbox_hot_path.py) fails if a streaming macro below level 5 returns to a mailbox read or write function.
 
@@ -172,7 +172,7 @@ The steps are the spec; each shows its raw output.
 
     ```
     $ python3 docs/reference/swarming-poster/forth_check.py
-    school.fth compiled to 3216 bytes of dictionary
+    school.fth compiled to 3324 bytes of dictionary
     60 one-tick comparisons: position error median 2.9e-04 max 3.0e-04; heading error median 9.8e-04 max 1.0e-03
     ticks with heading error > 0.05: []
     ```
@@ -194,12 +194,12 @@ The steps are the spec; each shows its raw output.
     ```
     $ docs/reference/swarming-poster/device_bench.sh 192.168.4.38:41447
     device: Chromecast HD armeabi-v7a
-    7.5482 ms
-    7.7060 ms
-    7.4631 ms
+    7.3377 ms
+    7.5865 ms
+    7.2527 ms
     ```
 
-    **PASS** for "the interpreter runs the core at about 7.5 ms for 11 fish". Inside the engine, see the section above (Phase E step 1): 11.3 ms after the engine fix.
+    **PASS** for "the interpreter runs the core at about 7.3 ms for 11 fish". Inside the engine, see the section above (Phase E step 1): 11.3 ms after the engine fix.
 
 4. The Forth in the tank's real box (mean of 3 seeds; `align` is the alignment of the followers' heading with the leader's).
 
@@ -237,7 +237,7 @@ The steps are the spec; each shows its raw output.
 ## Out of scope
 
 - The poster's own wording is final; what is *not* here is the engine work, which is Phase E above and not a different project. Nothing in the engine has changed yet: `school.fth` is not loaded by the level.
-- A C++ fallback: the measured 7.5 ms (about 0.75 ms a follower, spread over frames) does not force one. The in-engine measurement can.
+- A C++ fallback: the measured 7.3 ms (about 0.73 ms a follower, spread over frames) does not force one. The in-engine measurement can.
 
 ## Cost
 

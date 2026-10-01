@@ -1,11 +1,11 @@
 # The dart startles the school
 
-Status: **implemented and verified on the PC engine (2026‑10‑02); not yet on the Chromecast** (the TV was not reachable from this PC when this was written).
+Status: **implemented and verified on the PC engine and on the Chromecast HD (2026‑10‑02).**
 
 - [x] Phase A: the trigger: the player's dart starts a startle in `school.fth`
 - [x] Phase B: a fast start that is visible: heading flips at once, 2.5 times the speed for 0.6 s
 - [x] Phase C: tests: the model in the standalone host, the level's Director, the real engine
-- [ ] Phase D: the Chromecast: install, look, a new demo clip
+- [x] Phase D: the Chromecast: installed, seen, a new demo clip with a dart in it
 - [x] Phase E: the poster says what is true
 
 ## Request
@@ -84,7 +84,16 @@ Numbered; each shows its raw output with PASS or FAIL.
 
     **PASS**: the school scatters (1.55 → 4.17 BL within a second) and gathers again by about 4 s.
 
-4. The Chromecast: the same on the device, by eye: a new demo clip with a dart in it. **PENDING** (the Chromecast was not reachable from this PC; the next step is to install the build and record: `scripts/record-aquarium-school-chromecast.py`, with a dart added).
+4. The Chromecast: install the release build (the default aquarium app, school included), press A with the school round the resting fish, and record the screen (`scripts/record-aquarium-school-chromecast.py`, which now includes a dart: [`tests/recordings/aquarium_school_demo.mp4`](../../tests/recordings/aquarium_school_demo.mp4), 43 s).
+
+    ```
+    $ scripts/android-device-run.sh --app aquarium --release --seconds 15 <serial>
+    PASS  installed org.worldfoundry.wf_game.aquarium ... frame pacing: median 16.7 ms (59.9 fps), p90 33.4 ms, worst 33.4 ms
+    ```
+
+    Frames cut from the clip, 21.5 s to 26.5 s (the dart is pressed at about 22 s): the followers, clustered at the resting fish, spread across the left half of the tank within about 2 s and are still spreading at 26 s.
+
+    **PASS** for "the dart visibly scatters the school on the real device". **Judged only from stills**: how it looks in motion, and how quickly it regroups on the device, were not timed there (the regroup time, about 4 s, is the PC engine's, step 3).
 
 5. The poster says the dart startles the school and carries the real-engine numbers. **PASS** (`task test-swarming`: the poster no longer says "not called yet", and prints the dart figures).
 

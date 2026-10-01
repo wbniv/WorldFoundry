@@ -391,14 +391,14 @@
   "head_max": 0.0010040400477518887
  },
  "device": {
-  "ms": 7.5482,
+  "ms": 7.3377,
   "runs": [
-   7.5482,
-   7.706,
-   7.4631
+   7.3377,
+   7.5865,
+   7.2527
   ],
   "device": "Chromecast HD (armeabi-v7a)",
-  "bytes_at_measure": 3216
+  "bytes_at_measure": 3324
  },
  "engine": {
   "device": "Chromecast HD, release APK, bench level (docs/plans/2026-10-01-swarming-poster.md, Phase E step 1)",
