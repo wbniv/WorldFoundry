@@ -144,7 +144,7 @@
 - Android: map a keyboard's Enter (`KEYCODE_ENTER` / `KEYCODE_NUMPAD_ENTER`) to button A. Not what the Chromecast remote sends; one line in `MapKeyCode` when someone plugs a keyboard in. [plan](docs/plans/2026-10-01-chromecast-ok-button.md)
 - Phone gamepad: tilt steering (E6). Needs a TLS library in the app and a self-signed certificate whose key ships in the repo; the user's call. [plan](docs/plans/2026-09-30-aquarium-chromecast.md)
 - Phone gamepad: game-driven haptics (E7). Rides on the sound-effects plan's sound slots, so it waits for that plan's Phase B. [plan](docs/plans/2026-09-30-aquarium-chromecast.md)
-- **Audio assets from IFF** — bundle MIDI/SF2/WAV inside `cd.iff`; retire loose-file audio loaders. **Parked 2026-10-01 by the user** (was T3); the Chromecast apps stay silent meanwhile, and the sound-effects item (Open, T4) does not depend on it. [plan](docs/plans/2026-04-18-audio-assets-from-iff.md)
+- [T3] **Audio assets from IFF** — bundle MIDI/SF2/WAV inside `cd.iff`; retire loose-file audio loaders. **Parked 2026-10-01 by the user**; the Chromecast apps stay silent meanwhile, and the sound-effects item (Open, T4) does not depend on it. Unparks when someone wants sound on the TV; re-check the tier then. [plan](docs/plans/2026-04-18-audio-assets-from-iff.md)
 
 ### Future evaluation
 
