@@ -1,5 +1,6 @@
 | Date | Change |
 |------|--------|
+| [2026-10-01](https://github.com/wbniv/WorldFoundry/commit/83099032) | TODO: Android size trim iter 2 done (243 KB per APK; the snowgoons sideload is left under Verify) |
 | [2026-10-01](https://github.com/wbniv/WorldFoundry/commit/ace2e0be) | Aquarium: ten more fish that school and swarm round the player's fish (AQUARIUM_SCHOOL_N=10), running on the Chromecast HD |
 | [2026-10-01](https://github.com/wbniv/WorldFoundry/commit/bec1d758) | Mailbox calls cost 4.2 us each on the Chromecast: three per-call debug streams moved to DBSTREAM5; opt-in --script-profile; a bench level |
 | [2026-10-01](https://github.com/wbniv/WorldFoundry/commit/aa821f80) | school.fth: every mailbox slot has a name (MB_X, MB_VX, MB_DRO ...), long lines split into short helper words; the poster shows the named code in four columns |
@@ -8,6 +9,11 @@
 | [2026-10-01](https://github.com/wbniv/WorldFoundry/commit/50c932a2) | Plan: ten more aquarium fish that school and swarm around the player (Couzin zone model, player as leader), with rendered mockups |
 
 <!--history-meta v1
+83099032	author	Will Norris
+83099032	added	6
+83099032	deleted	0
+83099032	files	1
+83099032	body	Co-Authored-By: Claude Sonnet 5.5 <noreply@anthropic.com>\nClaude-Session: https://claude.ai/code/session_01DxMP4jUNjCjDz8E9DWzXcM
 ace2e0be	author	Will Norris
 ace2e0be	added	16
 ace2e0be	deleted	2

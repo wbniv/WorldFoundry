@@ -899,6 +899,8 @@ tasks:
       - wflevels/aquarium/aquarium_swim.fth
       - wflevels/aquarium/clownfish.py
       - wflevels/aquarium/clownfish_idle.fth
+      - wflevels/aquarium/school.fth
+      - wflevels/aquarium/school_rig.fth
       - wflevels/aquarium/aquarium-standalone.iff.txt
       - wflevels/snowgoons-blender/snowgoons-blender.lev
     generates:
@@ -924,6 +926,8 @@ tasks:
       - wflevels/aquarium/aquarium_swim.fth
       - wflevels/aquarium/clownfish.py
       - wflevels/aquarium/clownfish_idle.fth
+      - wflevels/aquarium/school.fth
+      - wflevels/aquarium/school_rig.fth
       - wflevels/aquarium/aquarium-standalone.iff.txt
       - wflevels/snowgoons-blender/snowgoons-blender.lev
     generates:

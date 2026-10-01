@@ -190,11 +190,12 @@ def test_no_placeholder_fish_remains(objs):
 def test_director_runs_the_rig_then_the_camera_with_the_right_indices(objs):
     names = [o['name'] for o in objs]
     script = by_name(objs, 'Director')['script']
-    assert script.rstrip().endswith('fish-rig-tick\naq-camera-tick\naq-sway-tick'), \
-        'rig first (after every actor), then cameras, then the anemone sway'
+    assert script.rstrip().endswith('fish-rig-tick\naq-camera-tick\naq-sway-tick\nsd-tick'), \
+        'rig first (after every actor), then cameras, then the anemone sway, then the school'
     h = _header(script)
-    for n in CF.PART_NAMES:
-        assert h[f'fish-actor-{CF.ROLES[n]}'] == names.index(n) + 1, f'{n}: header index != export position + 1'
+    for n in CF.PART_NAMES:       # with followers the Director's actor words choose the player's actor when fish-off is 0
+        m = re.search(rf": fish-actor-{CF.ROLES[n]} fish-off 0 = if (\d+) else", script)
+        assert m and int(m.group(1)) == names.index(n) + 1, f'{n}: header index != export position + 1'
     assert h['fish-actor-player'] == names.index('Player') + 1
     assert h['aq-shot-a'] == names.index('cs_front') + 1
     assert h['aq-shot-b'] == names.index('cs_anemone') + 1
@@ -203,6 +204,40 @@ def test_director_runs_the_rig_then_the_camera_with_the_right_indices(objs):
                  'aq-vx', 'aq-vy', 'aq-vz')
     assert all(700 <= h[k] < 720 for k in mailboxes), 'the level mailboxes live in 700..719 (the fish owns 600..639)'
     assert h['aq-touch'] == 0, 'the committed level is the keyboard/gamepad profile'
+
+
+SCHOOL_N = 10
+
+
+def test_the_followers_are_fifty_more_part_actors_sharing_the_players_meshes(objs):
+    names = [o['name'] for o in objs]
+    assert len(objs) == 32 + 5 * SCHOOL_N, 'the one-fish level has 32 actors; each follower adds its five parts'
+    assert len(names) == len(set(names)), 'actor names are unique'
+    for k in range(1, SCHOOL_N + 1):
+        for n in CF.PART_NAMES:
+            mine, theirs = by_name(objs, f'{n}-{k}'), by_name(objs, n)
+            assert (mine['class'], mine['mesh'], mine['mobility'], mine['mass']) == (theirs['class'], theirs['mesh'], theirs['mobility'], theirs['mass']), \
+                f'{n}-{k} must be the same kind of actor on the same mesh as {n}'
+
+
+def test_the_director_writes_the_follower_actor_table_matching_the_export_positions(objs):
+    names = [o['name'] for o in objs]
+    script = by_name(objs, 'Director')['script']
+    for k in range(1, SCHOOL_N + 1):
+        for j, n in enumerate(CF.PART_NAMES):
+            line = f'{names.index(f"{n}-{k}") + 1} {1040 + 5 * (k - 1) + j} write-mailbox'
+            assert line in script, line
+
+
+def test_the_school_mailboxes_do_not_overlap_what_the_level_and_the_player_own(objs):
+    script = by_name(objs, 'Director')['script']
+    owned = {'player rig': (600, 639), 'level': (700, 719), 'sway': (720, 739), 'camera': (740, 759),
+             'school state': (800, 953), 'school params': (960, 980), 'school scratch': (985, 1009),
+             'school glue': (1015, 1038), 'actor table': (1040, 1089), 'last updates': (1090, 1099), 'follower rigs': (1100, 1499)}
+    spans = sorted(owned.values())
+    assert all(a[1] < b[0] for a, b in zip(spans, spans[1:])), 'the mailbox blocks must not overlap'
+    assert owned['follower rigs'][1] - owned['follower rigs'][0] + 1 == 40 * SCHOOL_N
+    assert ': fish-off 1016 read-mailbox ;' in script and 'sd-actors' in script and ': sch-n %d ;' % (SCHOOL_N + 1) in script
 
 
 def test_camshots_a_and_b_sit_outside_the_tank_clear_of_the_fish(objs):

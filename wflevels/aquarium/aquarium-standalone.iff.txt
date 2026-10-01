@@ -9,13 +9,14 @@
 // Run:
 //   task run-aquarium
 //
-// Pools are snowgoons-class (generous) — this level is tiny (a dozen objects), so these are far more than enough.
+// Pools are snowgoons-class (generous). With the ten followers (82 actors) the room and object memory are raised to 3 MB and 400 KB:
+// the one-fish level's 1 MB room heap ran out at 82 actors ("lmalloc ... out of memory, Named Room #0").
 { 'L4'
     { 'ALGN' .align( 2048 ) }
     { 'RAM'
-        'OBJD' 200000l
+        'OBJD' 400000l
         'PERM' 1000000l
-        'ROOM' 1000000l
+        'ROOM' 3000000l
         'FLAG' 1l 1l                    // doomstick, bungeecam (snowgoons defaults)
     }
     { 'ALGN' .align( 2048 ) }

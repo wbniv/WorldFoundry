@@ -23,7 +23,8 @@
 \ follower whose 40 mailboxes sit at 600 + fish-off. The player's tick never sees anything else: the Director resets it to 0.
 : fish@ fish-off + read-mailbox ;
 : fish! fish-off + write-mailbox ;
-: fish-dt INDEXOF_DELTA_TIME read-mailbox ;
+\ 1037 holds (frames since this fish was last posed) - 1, 0 for the player: a follower posed every other frame advances by two frames of time
+: fish-dt INDEXOF_DELTA_TIME read-mailbox 1037 read-mailbox 1 + * ;
 : fish-wrap dup 0 < if 1 + then dup 1 >= if 1 - then ;
 \ Bhaskara sine, revolutions in (the condo's cc-sin): error under 0.2 %.
 : fish-sin fish-wrap dup 0.5 > if 0.5 - -1 else 1 then >r
@@ -138,8 +139,9 @@
 : fish-sb@ fish-sb fish@ ;  : fish-cb@ fish-cb fish@ ;
 : fish-sc@ fish-sc fish@ ;  : fish-cc@ fish-cc fish@ ;
 : fish-ox@ fish-ox fish@ ;  : fish-oy@ fish-oy fish@ ;  : fish-oz@ fish-oz fish@ ;
+: fish-size 639 fish@ dup 0 = if drop 1 then ;   \ the 40th mailbox of a fish's block: 0 (never written, the player) means full size
 : fish-place
-  fish-oz fish! fish-oy fish! fish-ox fish!
+  fish-size * fish-oz fish! fish-size * fish-oy fish! fish-size * fish-ox fish!
   fish-ox@ fish-cb@ * fish-cc@ *
   fish-oy@ fish-sb@ fish-sa@ * fish-cc@ * fish-ca@ fish-sc@ * - * +
   fish-oz@ fish-sb@ fish-ca@ * fish-cc@ * fish-sa@ fish-sc@ * + * + fish-bx fish@ +
@@ -173,7 +175,7 @@
 : fish-pose-dorsal
   fish-off-dorsal-x fish-off-dorsal-y fish-off-dorsal-z fish-place fish-actor-dorsal fish-put
   fish-a@ fish-body-b fish@ fish-body-c fish@ fish-actor-dorsal fish-orient
-  fish-dorsal fish@ INDEXOF_Z_SCALE fish-actor-dorsal write-actor-mailbox ;
+  fish-dorsal fish@ fish-size * INDEXOF_Z_SCALE fish-actor-dorsal write-actor-mailbox ;
 \ The far fin's swing is its own channel (fish-pec-far): at low speed it lags
 \ half a beat (alternating, the old mirror image), at speed it beats in phase.
 : fish-pose-pecs

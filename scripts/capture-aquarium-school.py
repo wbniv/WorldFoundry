@@ -1,7 +1,7 @@
 #!/usr/bin/env python3
-"""capture-aquarium-school.py: screenshots of the aquarium WITH the ten followers (the level built by AQUARIUM_SCHOOL_N=10) on this PC.
+"""capture-aquarium-school.py: screenshots of the aquarium WITH the ten followers (the default level) on this PC.
 
-Drives the aquarium harness (wflevels/aquarium/run_aquarium_checks.py) against wflevels/aquarium_school-standalone.iff: lets the school settle
+Drives the aquarium harness (wflevels/aquarium/run_aquarium_checks.py) against wflevels/aquarium-standalone.iff: lets the school settle
 (they swarm round the resting player's fish), swims the player's fish across the tank (they school behind it), then rests it again.
 Writes OUTDIR/school-{rest,swim,rest2}.png, 1920x1080.
 
@@ -28,7 +28,7 @@ sys.path.insert(0, str(REPO / "wflevels" / "aquarium")); sys.path.insert(0, str(
 import run_aquarium_checks as R                      # noqa: E402
 import aquarium_constants as C                       # noqa: E402
 
-R.LEVEL_IFF = str(REPO / "wflevels" / "aquarium_school-standalone.iff")
+# the default level now carries the school (AQUARIUM_SCHOOL_N, default 10)
 r = R.Run(); g = r.g
 
 
