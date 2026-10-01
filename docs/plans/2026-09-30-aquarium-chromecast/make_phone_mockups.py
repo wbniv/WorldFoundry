@@ -54,7 +54,7 @@ tv = page("Mockup 3: the TV, pairing the phone", "Chromecast HD, 1920×1080 show
   <div class="note" style="margin-top:8px;max-width:640px">The toast fades after 3 s. If the phone drops, the panel in A returns after 5 s and every button is released at once, so nothing sticks.</div>
   <table style="margin-top:14px"><tr><th>Shown on the TV</th><th>When</th></tr>
    <tr><td>URL, QR, PIN, "Waiting"</td><td>no phone connected</td></tr><tr><td>"Phone connected" toast</td><td>a phone joins (the newest wins)</td></tr>
-   <tr><td>"Phone lost" + panel</td><td>no heartbeat for 1 s</td></tr><tr><td>nothing</td><td>a phone is connected</td></tr></table></div>
+   <tr><td>"Phone lost" toast, then the panel 5 s later</td><td>no frame for 1 s (every button released at once)</td></tr><tr><td>nothing</td><td>a phone is connected</td></tr></table></div>
 </div>""", """
 .tv{position:relative;width:640px;height:360px;background:#000;border:1px solid #2b3a52;overflow:hidden}.tv img{width:100%;display:block}.dim{position:absolute;inset:0;background:#000a}
 .panel{position:absolute;left:28px;top:30px;right:28px;bottom:30px;background:#111826ee;border:1px solid #3a4a63;border-radius:10px;padding:12px 16px}
@@ -68,7 +68,7 @@ table{border-collapse:collapse;font-size:14px;width:640px}th{text-align:left;col
 # 2. the phone controller (interactive) ----------------------------------------------------------------------------
 JS = """
 const touch={}, tilt={LEFT:false,RIGHT:false,UP:false,DOWN:false}, out=document.getElementById('mask');
-const bits={LEFT:1,RIGHT:2,UP:4,DOWN:8,A:16,B:32,C:64,D:128,E:256,F:512};
+const bits={A:1,B:2,C:4,D:8,E:16,F:32,UP:2048,DOWN:4096,RIGHT:8192,LEFT:16384};   // the engine's EJ_BUTTONF_* (hal/sjoystic.h), as the app's layout.json sends them
 const ON=12, OFF=8;                       // tilt dead zone in degrees: a direction turns on past 12 and off below 8 (hysteresis, no flicker)
 function quant(deg,neg,pos){ if(deg<=-ON) tilt[neg]=true; else if(deg>-OFF) tilt[neg]=false; if(deg>=ON) tilt[pos]=true; else if(deg<OFF) tilt[pos]=false; }
 function render(){let m=0,names=[];for(const k in touch)if(touch[k]){m|=bits[k];names.push(k);}
@@ -85,7 +85,7 @@ document.querySelectorAll('[data-b]').forEach(el=>{
 document.querySelectorAll('.stick').forEach(st=>{
   const knob=st.querySelector('.knob');
   function set(dx,dy){const r=70,d=Math.hypot(dx,dy)||1,s=Math.min(1,r/d);knob.style.transform=`translate(${dx*s}px,${dy*s}px)`;
-    const t=28;touch.LEFT=dx<-t;touch.RIGHT=dx>t;touch.UP=dy<-t;touch.DOWN=dy>t;render();}
+    const t=35;touch.LEFT=dx<-t;touch.RIGHT=dx>t;touch.UP=dy<-t;touch.DOWN=dy>t;render();}
   st.addEventListener('pointerdown',e=>{st.setPointerCapture(e.pointerId);const b=st.getBoundingClientRect();st._c=[b.left+b.width/2,b.top+b.height/2];set(e.clientX-st._c[0],e.clientY-st._c[1]);});
   st.addEventListener('pointermove',e=>{if(st._c&&e.buttons)set(e.clientX-st._c[0],e.clientY-st._c[1]);});
   const end=()=>{st._c=null;knob.style.transform='translate(0,0)';touch.LEFT=touch.RIGHT=touch.UP=touch.DOWN=false;render();};
@@ -110,10 +110,10 @@ def phone(name, buttons, note):
  <div class="note" style="margin-top:8px;max-width:600px">{note}</div></div>"""
 
 
-aq = phone("A. Aquarium: stick plus two buttons", [("A", "A", 500, 120, ""), ("B", "B", 420, 160, "")], "Steers the clownfish (A and B are free for later). The stick maps to the same four directions the D-pad does (threshold 28 px of 70), so it behaves exactly like the remote.")
+aq = phone("A. Aquarium: stick plus two buttons", [("A", "A", 500, 120, ""), ("B", "B", 420, 160, "")], "Steers the clownfish (A and B are free for later). The stick maps to the same four directions the D-pad does (threshold half the radius, 35 px of 70, the engine's own analog-stick threshold), so it behaves exactly like the remote.")
 condo = phone("B. Condo: stick plus the buttons the remote cannot reach",
-              [("A", "hop", 520, 150, ""), ("B", "doors", 440, 98, ""), ("C", "teleport", 520, 46, ""), ("D", "orbit (hold)", 350, 150, "hold"), ("E", "zoom −", 262, 46, "small"), ("F", "zoom +", 262, 106, "small")],
-              "Doors (B), the 639⇄640 teleport (C), orbit (hold D with the stick) and zoom (E/F) are exactly what a TV remote cannot do. This closes the condo plan's gamepad question without buying a gamepad.")
+              [("A", "doors / shade", 520, 150, ""), ("C", "teleport", 520, 46, ""), ("D", "orbit (hold)", 350, 150, "hold"), ("E", "zoom in", 262, 46, "small"), ("F", "zoom out", 262, 106, "small")],
+              "A toggles the glass doors and the balcony shade (since 2026‑10‑01 there is no hop, and B does nothing on its own, so there is no B button). The 639⇄640 teleport (C), orbit (hold D with the stick; D + A resets the view) and zoom (E in, F out) are what a TV remote cannot do. This closes the condo plan's gamepad question without buying a gamepad.")
 pad = page("Mockup 2: the phone as the controller (live: click, drag, tilt)", "Landscape phone page served by the Chromecast. Layout per app, plus tilt steering and haptics. The line at the bottom shows the button mask that would be sent.", f"""
 <div style="padding:18px 34px"><div style="display:flex;gap:34px">{aq}{condo}</div>
 <div class="tiltbar"><label class="sw"><input type="checkbox" id="tiltOn"> <b>Tilt steering</b></label>
@@ -146,7 +146,7 @@ states = page("Mockup 4: the states, including the failures a living room produc
  {card("3 Signal lost", "warn", "No reply for 1 s: buttons grey out and the phone retries every second. <b>The TV releases every button at once</b> (no stuck RIGHT).", '<div class="ph2 w">Reconnecting… <small>buttons off</small></div>')}
  {card("4 Wrong PIN", "bad", "The PIN in the URL does not match this launch's: HTTP 403 and a plain message. No game input accepted.", '<div class="ph2 r">Wrong code. Scan the TV again.</div>')}
  {card("5 Not on the same Wi-Fi", "bad", "Nothing answers within 5 s. The page says why: join the TV's network; a guest network or <i>AP isolation</i> blocks it.", '<div class="ph2 r">Can’t reach the TV.<br><small>Same Wi-Fi? Guest network?</small></div>')}
- {card("6 Phone locks or sleeps", "warn", "A screen Wake Lock is requested while connected. If the phone sleeps anyway, it is state 3 and the TV releases the buttons.", '<div class="ph2 w">Screen kept awake</div>')}
+ {card("6 Phone locks or sleeps", "warn", "The page keeps the screen awake while connected (a silent looping video: the Wake Lock API needs https). If the phone sleeps anyway, the page releases everything and it is state 3 on the TV.", '<div class="ph2 w">Screen kept awake</div>')}
  {card("7 A second phone joins", "warn", "The newest connection wins; the first sees “Another phone took over”. Two players is a later feature.", '<div class="ph2 w">Another phone took over</div>')}
  {card("8 Tilt needs a secure page", "warn", "Browsers expose tilt only to <b>https</b> pages. Tap “Enable tilt”: the page reloads over https from the TV and your browser asks once about the certificate. Sticks and buttons never need this.", '<div class="ph2 w">Enable tilt <small>(one-time certificate prompt)</small></div>')}
  {card("9 No haptics on iPhone", "warn", "Safari has no vibration API. The toggle is hidden there and the page says so; Android Chrome buzzes. Game-driven buzzes (door, teleport) arrive from the TV as an <code>h:</code> message.", '<div class="ph2 w">Haptics: not on this phone</div>')}
