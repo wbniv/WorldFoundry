@@ -99,7 +99,6 @@
 - **Android size trim: sideload the snowgoons release APK and play it** — plan step 5, the only check left; the condo release ran on the Chromecast HD and the three APKs and both ABIs build. [report](docs/investigations/2026-10-01-android-size-trim-iter-2-results.md)
 - **One app per game: rerun smb, qbert and snowgoons on the Chromecast with the final APKs** — and look at the snowgoons banner on the launcher; replace the placeholder labels "WF SMB" and "WF Q*bert". Waiting for the TV (another agent is recording). [plan](docs/plans/2026-10-01-split-cd-iff-one-app-per-game.md)
 - **SMB world select: hold Back on the real Chromecast remote** — Back held 1 s returns to the menu, a short Back leaves the app; plus the two by-hand desktop checks (`task run-smb-menu`). Plan steps 8 and 9, PENDING. [plan](docs/plans/2026-10-01-level-menu-selector.md)
-- **Chromecast Apps row shows stale tiles** — the Snowgoons app (label and snowman icon are correct in the installed APK) still reads "World Foundry" with the old logo, and WF Aquarium shows an older icon: the launcher caches them. A Chromecast reboot or an uninstall and reinstall should refresh them (the user's call; not done). [plan](docs/plans/2026-10-01-split-cd-iff-one-app-per-game.md)
 
 ### Monitor
 

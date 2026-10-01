@@ -1,10 +1,16 @@
 | Date | Change |
 |------|--------|
+| [2026-10-01](https://github.com/wbniv/WorldFoundry/commit/6475a96c) | Plan: the device rerun with the final APKs, and the Snowgoons label and icon |
 | [2026-10-01](https://github.com/wbniv/WorldFoundry/commit/ccede076) | The snowgoons app is called Snowgoons |
 | [2026-10-01](https://github.com/wbniv/WorldFoundry/commit/c19865bb) | Plan: icons for every app, the snowgoons level banner, and the verification results |
 | [2026-10-01](https://github.com/wbniv/WorldFoundry/commit/fad9efcf) | Plan: split the multi-level cd.iff into one Android app per game (smb, snowgoons, qbert) |
 
 <!--history-meta v1
+6475a96c	author	Will Norris
+6475a96c	added	47
+6475a96c	deleted	5
+6475a96c	files	1
+6475a96c	body	Verification 9: smb, qbert and snowgoons release APKs built from ccede076 PASS\non the Chromecast HD (alive, no crash lines, EGL up, 59.9 fps); smb now opens on\nthe world-select menu (a40da0de). The launcher shows round icons, not banners;\nthe snowgoons tile still shows the cached old "World Foundry" name and mark\nalthough the installed APK is byte-identical to the build (label Snowgoons,\nsnowman icons). Verification 11: the label and icon tests and the APK check.\nThe TV was left on the Google TV home screen.\n\nCo-Authored-By: Claude Opus 5.5 <noreply@anthropic.com>\nClaude-Session: https://claude.ai/code/session_01DxMP4jUNjCjDz8E9DWzXcM
 ccede076	author	Will Norris
 ccede076	added	3
 ccede076	deleted	3

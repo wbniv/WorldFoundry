@@ -98,6 +98,7 @@ real-time play. The same level file and the same flags on every platform.
 ## Reproduce
 
 - Build and install without `sudo`: `cd android && ANDROID_HOME=~/android-sdk-local ./gradlew :app:assembleCondoRelease`, then `ADB=~/android-sdk-local/platform-tools/adb bash scripts/android-device-run.sh --app condo --release <ip>:<port>` (`task build-apk` stops at its `sudo` SDK install). The TV's wireless-debugging port changes and only the TV shows it.
+- Stale app tiles on Google TV: the launcher caches each app's icon and name per package, and **neither a reboot nor an uninstall and reinstall refreshes them** (2026‑10‑02: the snowgoons, condo and aquarium tiles kept old art although the installed APKs were right). `adb shell pm clear com.google.android.apps.tv.launcherx` does; it resets the home layout (row order, cached icons and names), not any app's data. The adb address after a reboot is the `adb-<serial>._adb-tls-connect._tcp` entry in `adb devices`; the old wireless-debugging port is gone.
 - Find the Chromecast when its DHCP address changes: `task find-chromecast` (walks the last octet up, then down, from the last known address and matches the Cast model; it found the HD at `192.168.4.38` after it left `.37`). adb over Wi-Fi then needs Wireless debugging switched on at the TV and the port it shows.
 - Drive Codemagic without an AI in the loop: `scripts/codemagic-queue.py --run macos-desktop-debug:2026-new-level`.
 - Budget: 500 free Mac-minutes a month on M2 machines, one build at a time.

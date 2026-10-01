@@ -1,6 +1,6 @@
 # Split the multi-level cd.iff into one Android app per game
 
-Status: **done; one launcher display issue for the user** (2026‑10‑01 22:55 (+07) = 15:55 UTC). Three apps (smb, snowgoons, qbert) build for both ABIs and pass on the real Chromecast HD with the final APKs. The snowgoons app is now called Snowgoons; the installed APK is right, but the Google TV launcher still shows its cached old name and icon (step 9).
+Status: **done** (2026‑10‑01 22:55 (+07) = 15:55 UTC; the launcher display issue was resolved 2026‑10‑02, see step 9). Three apps (smb, snowgoons, qbert) build for both ABIs and pass on the real Chromecast HD with the final APKs. The snowgoons app is now called Snowgoons; the installed APK was right, and the Google TV launcher showed its cached old name and icon until the launcher's own data was cleared (step 9).
 
 - [x] Phase A: the audit of every level-index write, recorded below
 - [x] Phase B: one `cd.iff` per game, built by its own task, committed and pinned by a test
@@ -333,6 +333,18 @@ Numbered, runnable steps; each shows its raw output with PASS or FAIL, or says w
     `lastUpdateTime=2026-10-01 22:48:14`), whose badging says `label='Snowgoons'` and whose adaptive foreground and legacy icon are pixel-identical to the
     snowman in `src/snowgoons/res` (step 11). **FAIL on the TV's display, PASS on what is installed.** `pm clear` was not used (it wipes data); a reboot
     of the Chromecast, or an uninstall and reinstall (as the icons plan's step 6 did), is the user's call.
+
+    **Resolved 2026‑10‑02 (the launcher's data, not the apps).** A reboot of the Chromecast did not refresh the tiles. Neither did `pm uninstall` and `adb install` of the
+    three older apps (snowgoons, condo, aquarium: the APKs were pulled off the TV and put back unchanged, all `Success`): the tiles kept the old art, while the
+    two newest apps (qbert, smb) showed the new icons. The installed APKs carry the right art (the one 432 × 432 foreground in each is the snowman, the condo and
+    the aquarium, each with the logo inside the circle). The remaining cause was the Google TV launcher's own per-package cache. The user ran
+    `adb shell pm clear com.google.android.apps.tv.launcherx` (it resets the home layout: row order and cached icons and names; no app data), and after the launcher
+    rebuilt itself the Apps row shows the new art for all five apps:
+
+    <img src="2026-10-01-split-cd-iff-one-app-per-game/chromecast-apps-row-after-launcher-clear.png" width="700">
+
+    **PASS** on the TV's display (snowman, aquarium and condo icons with the logo; qbert and smb unchanged). The launcher also showed a Google "Personalized ads update" card
+    while it reloaded; that is a stock Google TV notice, not from these apps.
 
 10. The docs render: `task md -- android/README.md`, `task md -- docs/porting-status.md` and this plan.
 
