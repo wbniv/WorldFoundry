@@ -93,6 +93,7 @@ real-time play. The same level file and the same flags on every platform.
 
 ### Linux: the reference
 - Builds, runs and renders everything; the aquarium has 38 passing tests and a demo video (`tests/recordings/aquarium_phase4_motion_demo.mp4`). Its committed frames are the references the other platforms are compared against, and a test re-renders them so they cannot go stale.
+- **SMB world select (2026‑10‑01, desktop only).** An opt-in bundle, `wflevels/smb-menu-cd.iff` (`task build-cd-iff-smb-menu`; names from `wflevels/smb-menu.manifest`), opens on a menu of World 1‑1 to 1‑4: Up/Down choose, A (Space) starts, Backspace in a level returns to the menu; the flag/axe chain carries on from the chosen world. `task run-smb-menu` plays it, `task test-level-menu` runs its 30 tests (the real engine included). Android and the Chromecast remote (OK starts, Back held returns) are Phase D, not built; `build-cd-iff-smb` and the `smb` app are unchanged. "WF SMB" and the world names are placeholders. [Plan](plans/2026-10-01-level-menu-selector.md).
 
 ## Reproduce
 

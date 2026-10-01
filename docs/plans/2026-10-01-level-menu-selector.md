@@ -1,13 +1,13 @@
 # A level menu for multi-level bundles (SMB world select first)
 
-Status: **accepted for SMB, building** (2026‑10‑01 22:05 (+07) = 15:05 UTC; the user: "let's do it for smb"). TODO item: "Implement a menu selector for
-the multi-level `cd.iff`" (pick a level at launch instead of booting level 0, as the alternative or addition to separate apps). Each Verification step
-says PASS, FAIL or PENDING once run.
+Status: **desktop SMB menu built and tested; Android (Phase D) waits for the split and the Chromecast** (2026‑10‑01 23:10 (+07) = 16:10 UTC; accepted
+for SMB at 22:05, the user: "let's do it for smb"). TODO item: "Implement a menu selector for the multi-level `cd.iff`" (pick a level at launch instead of
+booting level 0, as the alternative or addition to separate apps). Each Verification step says PASS, FAIL or PENDING once run.
 
-- [ ] Phase A: this plan and its mockups
-- [ ] Phase B: level names as data: `cdpack --manifest` writes a `MENU` chunk; bundles without a manifest stay byte for byte as they are
-- [ ] Phase C: the SMB menu on the desktop: a portable menu module, the engine glue, the desktop drawer, `shell-menu.fth`, the opt-in task, tests with
-  no device, Backspace back to the menu
+- [x] ~~Phase A: this plan and its mockups~~ (`924e73a9`, `b754c2de`)
+- [x] ~~Phase B: level names as data: `cdpack --manifest` writes a `MENU` chunk; bundles without a manifest stay byte for byte as they are~~ (`69f32d9d`)
+- [x] ~~Phase C: the SMB menu on the desktop: a portable menu module, the engine glue, the desktop drawer, `shell-menu.fth`, the opt-in task, tests with
+  no device, Backspace back to the menu~~ (`69f32d9d`, `e6a275b8`)
 - [ ] Phase D (after the split has landed): the menu in the `smb` Android app: the Android drawer, Back held on the remote, the flavor's bundle, a
   screenshot from the Chromecast HD
 - [ ] Later, one manifest away: the desktop bundle of all seven levels (shown in the mockups, not built now)
@@ -88,6 +88,9 @@ changes. Its cost is a small hook in `game.cc` and one drawer per platform (desk
   little-endian, zero-padded to the next sector like a level. Names are printable ASCII (the font has nothing else), 1 to 60 characters; `cdpack` refuses
   anything else, an empty manifest, and a manifest given together with level paths.
 - The SMB manifest keeps `smb-cd.iff`'s TOC order, so the menu bundle's levels sit at the same indices.
+- **Found while building:** a Forth `-1` reaches the engine as **−2**. Forth cells are floats, and the float build's `Scalar::WholePart` floors with
+  `int(s - 1.0)` for negatives (`math/scalar.hpi`), so −1.0 becomes −2. The engine therefore treats any negative `LEVEL_TO_RUN` as "ask the player"
+  (the first run asserted `_desiredLevelNum >= 0` with the value −2).
 
 ### The shell: `shell-menu.fth`
 
@@ -224,21 +227,150 @@ plus one sector). Phase D adds one APK rebuild of the `smb` flavor and a screens
 1. Without `--manifest`, the new `cdpack` reproduces the tracked bundles byte for byte: `wfsource/source/game/cd.iff`, `wflevels/smb-cd.iff`,
    `wflevels/snowgoons-cd.iff`, `wflevels/qbert-cd.iff`, `wflevels/aquarium-cd.iff` and `wflevels/condo-cd.iff`.
    `python3 -m pytest tests/test_level_menu.py -v -k identical`.
+
+   ```
+   test_identical_without_manifest[wflevels/aquarium-cd.iff] PASSED [ 16%]
+   test_identical_without_manifest[wflevels/condo-cd.iff] PASSED [ 33%]
+   test_identical_without_manifest[wflevels/qbert-cd.iff] PASSED [ 50%]
+   test_identical_without_manifest[wflevels/smb-cd.iff] PASSED [ 66%]
+   test_identical_without_manifest[wflevels/snowgoons-cd.iff] PASSED [ 83%]
+   test_identical_without_manifest[wfsource/source/game/cd.iff] PASSED [100%]
+   ======================= 6 passed, 24 deselected in 1.44s =======================
+   ```
+
+   **PASS**
 2. `task build-cd-iff-smb-menu` reproduces the committed `wflevels/smb-menu-cd.iff`; its first five TOC entries' offsets and sizes and all level bytes
    equal `smb-cd.iff`'s, and its last TOC entry is `MENU` with "WF SMB", "Choose a world" and the four world names. `-k menu_bundle`.
+
+   ```
+   $ task build-cd-iff-smb-menu
+   cdpack: wrote 579584 bytes to wflevels/smb-menu-cd.iff
+     SHEL: 431 bytes (sector 1)
+     L0: 149504 bytes at sector 2 (smb_w1_1-standalone.iff)
+     L1: 163840 bytes at sector 75 (smb_w1_2-standalone.iff)
+     L2: 133120 bytes at sector 155 (smb_w1_3-standalone.iff)
+     L3: 126976 bytes at sector 220 (smb_w1_4-standalone.iff)
+     MENU: 104 bytes at sector 282 ("WF SMB", 4 entries)
+   $ git status --short wflevels/smb-menu-cd.iff        (no output: identical to the committed file)
+   test_menu_bundle_is_current_and_keeps_the_smb_indices PASSED [100%]
+   ======================= 1 passed, 29 deselected in 0.35s =======================
+   ```
+
+   **PASS**, with one correction to the wording: of the first five TOC entries, `SHEL`'s *size* differs by design (it is `shell-menu.fth`, 431 bytes,
+   not `shell.fth`); its offset and the four level entries' tags, offsets and sizes are equal, which is what the test checks.
 3. `cdpack` refuses bad manifests (no levels, non-ASCII name, name too long, missing level file, manifest plus level paths) with exit code 1. `-k refuses`.
+
+   ```
+   test_refuses_bad_manifests[no-levels] PASSED   [ 16%]
+   test_refuses_bad_manifests[non-ascii] PASSED   [ 33%]
+   test_refuses_bad_manifests[too-long] PASSED    [ 50%]
+   test_refuses_bad_manifests[missing-file] PASSED [ 66%]
+   test_refuses_bad_manifests[both] PASSED        [ 83%]
+   test_refuses_bad_manifests[keyword] PASSED     [100%]
+   ======================= 6 passed, 24 deselected in 0.51s =======================
+   ```
+
+   **PASS** (also an unknown keyword; `cdpack -h` exits 0, `test_help_exits_zero`).
 4. The menu module, in the host harness with ASan and UBSan, reads the real `smb-menu-cd.iff`, moves, clamps, repeats, scrolls, truncates, ignores a
    button held at entry, starts only after release, auto-starts a one-entry bundle, and finds no menu in `smb-cd.iff`. `-k host`.
+
+   ```
+   test_host_reads_the_real_bundle PASSED         [  7%]
+   test_host_finds_no_menu_in_plain_bundles[wflevels/smb-cd.iff] PASSED [ 15%]
+   test_host_finds_no_menu_in_plain_bundles[wfsource/source/game/cd.iff] PASSED [ 23%]
+   test_host_autopick_one_or_no_entry PASSED      [ 30%]
+   test_host_moves_and_clamps PASSED              [ 38%]
+   test_host_held_at_entry_is_ignored PASSED      [ 46%]
+   test_host_starts_only_after_release PASSED     [ 53%]
+   test_host_starts_anyway_if_a_button_sticks PASSED [ 61%]
+   test_host_held_direction_repeats_and_scrolls PASSED [ 69%]
+   test_host_scroll_window_and_arrows PASSED      [ 76%]
+   test_host_cuts_a_long_name PASSED              [ 84%]
+   test_host_geometry PASSED                      [ 92%]
+   test_host_renders_the_states PASSED            [100%]
+   ====================== 13 passed, 17 deselected in 20.87s ======================
+   ```
+
+   **PASS**. The real rectangles at 720p with the TV hint (the Phase D text), rendered by the test:
+
+   <img src="2026-10-01-level-menu-selector/host-tv-hint.png" width="700">
 5. The tests fail when the feature is broken: with the release wait removed from the menu module, step 4's release test fails; restored, it passes.
+
+   ```
+   broken (A sets Phase::Done at once):
+   E       assert [(1, 1), (1, 1), (1, 1)] == [(1, 0), (1, 0), (1, 1)]
+   E       assert [(1, 3), (1, 3), (1, 3)] == [(0, 3), (0, 3), (1, 3)]
+   FAILED test_level_menu.py::test_host_starts_only_after_release - assert [(1, ...
+   FAILED test_level_menu.py::test_host_starts_anyway_if_a_button_sticks - asser...
+   2 failed, 11 passed, 17 deselected in 13.28s
+   restored:
+   13 passed, 17 deselected in 12.55s
+   ```
+
+   **PASS**. The engine side had its own "before": the first engine run asserted `_desiredLevelNum >= 0` (the −2 above); the fix is the `< 0` test.
 6. The real engine on the desktop display: `wf_game --menu-input=down,down,a,...` on the SMB menu bundle shows four entries and starts World 1‑3
    (`LEVEL_TO_RUN=2`); the level's own chain still works (the debug bridge writes what the flagpole ActBox writes, 3 to `LEVEL_TO_RUN` and 1 to
    `END_OF_LEVEL`, and World 1‑4, level 3, starts); `back` returns to the menu with the cursor on World 1‑3; `up`, `a` starts World 1‑2; `quit` exits
    with code 0. A `--capture-frame` of the menu shows the highlight bar. `-k engine`.
+
+   ```
+   test_button_bits_match_the_engine PASSED       [ 50%]
+   test_engine_smb_menu_chain_and_return PASSED   [100%]
+   ====================== 2 passed, 28 deselected in 58.49s =======================
+   ```
+
+   The engine's lines in the same scenario, replayed by hand (`--menu-input=wait:10,down,down,a,wait:1500,back,wait:10,up,a,wait:30,quit`, the bridge
+   writing 5000 = 3 and 1905 = 1 once World 1‑3 runs), exit code 0:
+
+   ```
+   level-menu: showing 4 entries ("WF SMB"), cursor on 0
+   level-menu: cursor on 1 (World 1-2)
+   level-menu: cursor on 2 (World 1-3)
+   level-menu: LEVEL_TO_RUN=2 (World 1-3)
+   level-menu: level 2 starts
+   level-menu: level 3 starts
+   level-menu: back to the menu
+   level-menu: showing 4 entries ("WF SMB"), cursor on 2
+   level-menu: cursor on 1 (World 1-2)
+   level-menu: LEVEL_TO_RUN=1 (World 1-2)
+   level-menu: level 1 starts
+   rc 0
+   ```
+
+   **PASS**. The engine's own frame (`--capture-frame=4`, the 640×480 capture surface, the canvas centred):
+
+   <img src="2026-10-01-level-menu-selector/engine-menu.png" width="700">
 7. Nothing else moved: `Taskfile.yml` gains additions at the end only; `shell.fth`, `cd.iff`, `smb-cd.iff` and everything under `android/` are unchanged;
    `task build` succeeds.
+
+   ```
+   $ for c in 924e73a9 b754c2de 69f32d9d e6a275b8; do git show --name-only --format= $c | grep -E '<shell.fth|cd.iff|smb-cd.iff|android/|CI>'; done
+     (none of shell.fth, cd.iff, smb-cd.iff, android/, CI)        x 4
+   $ git show 69f32d9d -- Taskfile.yml | grep -E '^@@|^-'
+   --- a/Taskfile.yml
+   @@ -1492,3 +1492,28 @@ tasks:
+   $ task build   ->  build=0   (engine/wf_game rebuilt with the menu)
+   ```
+
+   **PASS**. The Android release flags also compile the changed files (`-fsyntax-only` with `android/app/.cxx/.../aquariumRelease` compile commands,
+   arm64‑v8a and armeabi‑v7a: `game.cc`, `main.cc`, `level_menu.cc`, `level_menu_host.cc`, `gfx/display.cc`, all rc 0); no APK was built.
 8. By hand on the desktop (`task run-smb-menu`): the arrows move, Space starts, Backspace in a game comes back. Screenshot in this plan.
+
+   **PENDING**: needs a person at the keyboard (the scripted run in step 6 covers the same paths except the X key events themselves).
 9. Phase D, on the Chromecast HD with the `smb` app: the menu appears at launch at 720p (screenshot by `adb`, no key events); the user checks the remote:
    D-pad moves, OK starts, holding Back in a level comes back, a short Back still leaves the app.
+
+   **PENDING**: Phase D is not built (Android drawer, Back held), and the Chromecast is reserved by another session until the user releases it.
+
+## Notes from the test runs
+
+- `tests/test_game_shutdown.py` fails at the moment in all three modes with an ASan leak report (15.7 MB in 5 allocations, `tsf_load_presets` via
+  `MusicPlayer::play`). Not this change: the same binary exits 0 from a directory without `florestan-subset.sf2` and leaks from one with it
+  (`audio: MusicPlayer — soundfont loaded (florestan-subset.sf2, 7842132 B)`, then `SUMMARY: AddressSanitizer: 15737640 byte(s) leaked`). That
+  soundfont is gitignored and was generated in `wfsource/source/game/` at 17:11 today by the soundfont work; before it existed, `play()` returned
+  early. The synth the player loads is never freed at exit.
+- `tests/test_aquarium_android.py::test_built_aquarium_apk_contents` fails because the built APK's `cd.iff` is older than the working tree's
+  `wflevels/aquarium-cd.iff`, which another session is changing. Not this change either.
 
 ## Delegation
 
