@@ -289,3 +289,18 @@ def test_pins_are_six_random_digits(host):
 def test_only_private_lan_peers(host, addr, private):
     host.command(f"private {addr}")
     assert host.expect(r"^PRIVATE (\d)$").group(1) == str(private)
+
+
+# ---- diagnosis: a connection that never completes a request still leaves a log line -----------------
+
+def test_accept_and_request_less_close_are_logged(host):
+    """2026-10-01: a phone on another network showed a page that never loaded and the TV logged nothing, because
+    only completed requests were logged. Every accepted connection, and one closed before a complete request,
+    now leaves a line, so the next tester can tell "never reached the TV" from "reached it and gave up"."""
+    s = socket.create_connection(("127.0.0.1", host.port))
+    port = s.getsockname()[1]
+    host.expect(rf"^LOG phonepad: connection from 127\.0\.0\.1:{port}$")
+    s.sendall(b"GET /?k=")                          # half a request, then the browser gives up
+    time.sleep(0.05)
+    s.close()
+    host.expect(rf"^LOG phonepad: 127\.0\.0\.1:{port} closed the connection before a complete request \(8 bytes received\)$")

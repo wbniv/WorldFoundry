@@ -397,7 +397,9 @@ uint16_t Server::Poll(int64_t nowMs)
         }
         else if (nowMs - c.openedMs > kHttpTimeoutMs)
         {
-            CloseConn(c, "no request within 5 s");
+            char why[96];
+            std::snprintf(why, sizeof(why), "no complete request within 5 s (%u bytes received)", unsigned(c.in.size()));
+            CloseConn(c, why);
         }
     }
 
@@ -453,6 +455,9 @@ void Server::Accept(int64_t nowMs)
         char pbuf[32];
         std::snprintf(pbuf, sizeof(pbuf), "%s:%u", FormatIPv4(pa).c_str(), unsigned(ntohs(peer.sin_port)));
         c.peer = pbuf;
+        // One line per connection, so a phone whose browser connects but never completes a
+        // request (or tries https:// on this port) still leaves a trace in the log.
+        Log("connection from %s", c.peer.c_str());
         conns_.push_back(std::move(c));
     }
 }
@@ -467,6 +472,9 @@ void Server::ReadConn(Conn& c, int64_t nowMs)
         {
             if (!c.closing && c.ws && c.fd == phoneFd_)
                 Log("phone %s disconnected: every button released", c.peer.c_str());
+            if (!c.closing && !c.ws)
+                Log("%s closed the connection before a complete request (%u bytes received%s)", c.peer.c_str(),
+                    unsigned(c.in.size()), c.in.empty() ? ": a browser preconnect, or it gave up" : "");
             CloseConn(c, nullptr);
             return;
         }
