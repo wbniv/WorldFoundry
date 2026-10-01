@@ -387,6 +387,10 @@ _Auto-added from plan "Out of scope"/"Deferred" sections at commit time. Triage 
 - [ ] **(triage)** Mapping remote keys to B/C/D, unless the decision in mockup 2 asks for it. — _from [2026-10-01-condo-chromecast.md](docs/plans/2026-10-01-condo-chromecast.md)_  <!-- fp:9a51dfc8f55b1684 -->
 - [ ] **(triage)** Optimising the frame rate by changing the level or the engine. — _from [2026-10-01-condo-chromecast.md](docs/plans/2026-10-01-condo-chromecast.md)_  <!-- fp:897fca84f38344bc -->
 - [ ] **(triage)** Play Store or any distribution beyond `adb` sideload. — _from [2026-10-01-condo-chromecast.md](docs/plans/2026-10-01-condo-chromecast.md)_  <!-- fp:e39824d2cde904ae -->
+- [ ] **(triage)** Audio (silent stub on Android; the "Audio assets from IFF" item in `TODO.md`). — _from [2026-09-30-aquarium-chromecast.md](docs/plans/2026-09-30-aquarium-chromecast.md)_  <!-- fp:193e0e951de7cd8d -->
+- [ ] **(triage)** A gamepad profile beyond the existing key mapping, until a gamepad is paired (Phase D). — _from [2026-09-30-aquarium-chromecast.md](docs/plans/2026-09-30-aquarium-chromecast.md)_  <!-- fp:5b9b0a3297c3ca64 -->
+- [ ] **(triage)** Phone and tablet devices, iPhone and iPad (separate items in the porting status). — _from [2026-09-30-aquarium-chromecast.md](docs/plans/2026-09-30-aquarium-chromecast.md)_  <!-- fp:14cd3e413a3d1f4f -->
+- [ ] **(triage)** Play Store or any distribution beyond `adb` sideload. — _from [2026-09-30-aquarium-chromecast.md](docs/plans/2026-09-30-aquarium-chromecast.md)_  <!-- fp:73840a75a6fe293c -->
 <!-- END auto-captured-deferrals -->
 
 - [x] Implemented Forth-only condo camera inspection controls; desktop/touch input regressions passed. [Plan and mockups](docs/plans/2026-09-25-condo-camera-controls.md)
