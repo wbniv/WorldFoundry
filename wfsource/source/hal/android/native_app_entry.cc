@@ -209,6 +209,7 @@ uint32_t MapKeyCode(int32_t code)
         case AKEYCODE_DPAD_UP:         return EJ_BUTTONF_UP;
         case AKEYCODE_DPAD_DOWN:       return EJ_BUTTONF_DOWN;
         case AKEYCODE_BUTTON_A:        return EJ_BUTTONF_A;
+        case AKEYCODE_DPAD_CENTER:     return EJ_BUTTONF_A;   // Chromecast / Google TV remote's OK
         case AKEYCODE_BUTTON_B:        return EJ_BUTTONF_B;
         case AKEYCODE_BUTTON_X:        return EJ_BUTTONF_C;
         case AKEYCODE_BUTTON_Y:        return EJ_BUTTONF_D;

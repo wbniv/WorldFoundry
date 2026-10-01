@@ -164,6 +164,29 @@ def test_no_task_points_at_pre_flavor_apk_paths():
     assert "build-cd-iff-aquarium" in str(tasks["aquarium-level"]["cmds"])
 
 
+# ---- the remote / gamepad key map -----------------------------------------------------------------------
+
+def _key_map() -> dict[str, str]:
+    """AKEYCODE_* -> EJ_BUTTONF_* from MapKeyCode() in the Android entry point."""
+    src = (REPO / "wfsource" / "source" / "hal" / "android" / "native_app_entry.cc").read_text()
+    body = re.search(r"uint32_t MapKeyCode\(int32_t code\)\s*\{(.*?)\n\}", src, re.S).group(1)
+    return dict(re.findall(r"case (AKEYCODE_\w+):\s*return (EJ_BUTTONF_\w+);", body))
+
+
+def test_remote_ok_is_button_a():
+    # The Chromecast / Google TV remote's OK sends DPAD_CENTER (it has no BUTTON_A); unmapped, the
+    # key was dropped. Plan: docs/plans/2026-10-01-chromecast-ok-button.md
+    keys = _key_map()
+    assert keys.get("AKEYCODE_DPAD_CENTER") == "EJ_BUTTONF_A"
+    assert keys.get("AKEYCODE_BUTTON_A") == "EJ_BUTTONF_A"
+
+
+def test_dpad_directions_stay_mapped():
+    keys = _key_map()
+    for d in ("LEFT", "RIGHT", "UP", "DOWN"):
+        assert keys.get(f"AKEYCODE_DPAD_{d}") == f"EJ_BUTTONF_{d}"
+
+
 # ---- the device hand-off script -------------------------------------------------------------------------
 
 def test_device_script_parses_and_helps():

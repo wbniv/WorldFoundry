@@ -33,7 +33,9 @@ Options:
   --apk PATH     install this APK instead of the Gradle output
   --seconds N    how long the app runs before the screenshot (default 20)
   --poke         after the first screenshot, send D-pad RIGHT (held 1.5 s),
-                 then UP, and take screen-after-keys.png (information only)
+                 then UP, and take screen-after-keys.png; then press OK
+                 (DPAD_CENTER = button A, a hop in the condo) and take
+                 screen-after-ok.png (information only)
   --resume       after the screenshot (and --poke), press Home, reopen the app, and
                  require it to be alive and drawing again (a FAIL if it aborts: the
                  Chromecast HD did, before the window-not-back-yet fix)
@@ -301,6 +303,14 @@ if ((POKE)); then
     sleep 2
     "${A[@]}" exec-out screencap -p > "$OUTDIR/screen-after-keys.png" 2>/dev/null || true
     result INFO "screen-after-keys.png taken: compare the fish's position with screen.png"
+
+    # OK is DPAD_CENTER = button A. --longpress: a bare tap's DOWN and UP can land inside one
+    # frame and the engine polls the button mask once per frame.
+    say "poke: OK (DPAD_CENTER = button A), then a screenshot 0.3 s into the press"
+    "${A[@]}" shell 'input keyevent --longpress KEYCODE_DPAD_CENTER & sleep 0.3; screencap -p /sdcard/wf-ok.png; wait' >/dev/null 2>&1 || true
+    "${A[@]}" pull /sdcard/wf-ok.png "$OUTDIR/screen-after-ok.png" >/dev/null 2>&1 || true
+    "${A[@]}" shell rm -f /sdcard/wf-ok.png >/dev/null 2>&1 || true
+    result INFO "screen-after-ok.png taken: in the condo the player should be mid-hop"
 fi
 
 if ((RESUME)); then
