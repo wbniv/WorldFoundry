@@ -321,13 +321,13 @@ def panel_f():
     bytes_of = {w['name']: (w['bytes'], w['lines']) for w in m['words']}
     W = CW
     pad, gap = 8, 8
-    COL_WEIGHT = {n: sum(len(l.strip()) + 6 for l in blocks[n]) for n in CORE}      # width in proportion to the text, so the four columns end at about the same height
+    COL_WEIGHT = {n: max(len(l.split('\\ ')[0].rstrip()) for l in blocks[n]) for n in CORE}      # width in proportion to the longest line, so little needs wrapping
     tot = sum(COL_WEIGHT.values())
     avail = W - 2 * pad - gap * (len(CORE) - 1)
     cols, x = [], pad
     for n in CORE:
         cwid = avail * COL_WEIGHT[n] / tot
-        chars = int((cwid - 14) / 6.62)
+        chars = int((cwid - 10) / 6.62)
         cols.append((n, x, cwid, wrap_code(blocks[n], chars)))
         x += cwid + gap
     lh = 12.2
@@ -348,29 +348,19 @@ def panel_f():
             if ln.strip():
                 s.append(T(x + 7, head + 8 + i * lh, ln, 11, 'start', INK, 400, mono=True, bg='#f6f9fb', extra='xml:space="preserve"'))
     y0 = H_list + 10
-    # bytes per word: top ten and the rest
-    words = sorted(m['words'], key=lambda w: -w['bytes'])
-    top10, rest = words[:5], words[5:]
-    items = [(w['name'], w['bytes']) for w in top10] + [(f'{len(rest)} other words', sum(w['bytes'] for w in rest))]
-    mx = max(b for _, b in items)
-    s.append(T(12, y0 + 12, f'Dictionary bytes per word (zForth HERE), {m["dictionary_bytes"]} B in all', 12, 'start', INK, 700))
-    for i, (n, b) in enumerate(items):
-        yy = y0 + 18 + i * 12
-        s.append(T(150, yy + 9, n, 11, 'end', INK, 400, mono=True))
-        s.append(f'<rect x="156" y="{yy}" width="{b / mx * 250:.1f}" height="10" fill="#2e6285"/>')
-        s.append(T(160 + b / mx * 250, yy + 9, f'{b}', 11, 'start', MUTED))
-    # the numbers
-    x1 = 520
     dev = m.get('device') or {}
-    big = [(f'{m["dictionary_bytes"]} B', f'of the {m["dictionary_size"] // 1024} KB dictionary ({100 * m["dictionary_bytes"] / m["dictionary_size"]:.1f} %); {m["code_lines"]} code lines'),
-           (f'{dev.get("ms", float("nan")):.1f} ms', f'one tick, 11 fish, on the Chromecast HD (median of 3 runs); x86 here {m["x86_ms"]:.1f} ms'),
+    ms = dev.get('ms', float('nan'))
+    big = [(f'{m["dictionary_bytes"]} B', f'of the {m["dictionary_size"] // 1024} KB dictionary ({100 * m["dictionary_bytes"] / m["dictionary_size"]:.1f} %): all {len(m["words"])} words, {m["code_lines"]} code lines'),
+           (f'{ms:.1f} ms', f'one tick, 11 fish, on the Chromecast HD (median of 3 runs); x86 here {m["x86_ms"]:.1f} ms'),
            (f'{m["error"]["head_max"]:.0e}', 'largest heading error against couzin.py in one tick (the engine’s sine is 0.2 % off)'),
-           ('~0.6 ms', 'per follower per tick: spread over frames, the full 10 Hz step is about 6 % of a core')]
+           (f'~{ms / 10:.1f} ms', f'per follower per tick: spread over frames, the full 10 Hz step is about {ms:.0f} % of a core')]
+    bw = (W - 2 * pad - 3 * gap) / 4
     for i, (a_, b_) in enumerate(big):
-        yy = y0 + 14 + i * 24
-        s.append(T(x1, yy + 14, a_, 20, 'start', ACC, 800))
-        s.append(T(x1 + 100, yy + 10, b_, 11, 'start', INK))
-    H = int(y0 + 18 + 6 * 12 + 34)
+        x = pad + i * (bw + gap)
+        s.append(T(x, y0 + 20, a_, 22, 'start', ACC, 800))
+        for k, wl in enumerate(textwrap.wrap(b_, int(bw / 5.9))[:3]):
+            s.append(T(x, y0 + 36 + k * 12.5, wl, 11, 'start', INK))
+    H = int(y0 + 36 + 3 * 12.5 + 28)
     c1, w1 = chip(12, H - 6, 'ours', 'the Forth, its size, error and timing are our measurements: the interpreter only, not yet inside the engine')
     s.append(c1)
     return ''.join(s), W, H

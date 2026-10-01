@@ -1,6 +1,96 @@
 {
  "words": [
   {
+   "name": "MB_X",
+   "lines": 1,
+   "bytes": 30
+  },
+  {
+   "name": "MB_VX",
+   "lines": 1,
+   "bytes": 33
+  },
+  {
+   "name": "MB_NX",
+   "lines": 1,
+   "bytes": 33
+  },
+  {
+   "name": "MB_NVX",
+   "lines": 1,
+   "bytes": 36
+  },
+  {
+   "name": "MB_STARTLE",
+   "lines": 1,
+   "bytes": 16
+  },
+  {
+   "name": "MB_RR",
+   "lines": 1,
+   "bytes": 35
+  },
+  {
+   "name": "MB_COSB",
+   "lines": 1,
+   "bytes": 13
+  },
+  {
+   "name": "MB_COST",
+   "lines": 1,
+   "bytes": 26
+  },
+  {
+   "name": "MB_STEP",
+   "lines": 1,
+   "bytes": 13
+  },
+  {
+   "name": "MB_LEADW",
+   "lines": 1,
+   "bytes": 56
+  },
+  {
+   "name": "MB_LOX",
+   "lines": 1,
+   "bytes": 24
+  },
+  {
+   "name": "MB_DRO_SWARM",
+   "lines": 1,
+   "bytes": 74
+  },
+  {
+   "name": "MB_SUM_R",
+   "lines": 1,
+   "bytes": 42
+  },
+  {
+   "name": "MB_N_R",
+   "lines": 1,
+   "bytes": 36
+  },
+  {
+   "name": "MB_WANT",
+   "lines": 1,
+   "bytes": 13
+  },
+  {
+   "name": "MB_ME",
+   "lines": 1,
+   "bytes": 23
+  },
+  {
+   "name": "MB_U",
+   "lines": 1,
+   "bytes": 10
+  },
+  {
+   "name": "MB_PERP",
+   "lines": 1,
+   "bytes": 37
+  },
+  {
    "name": "sch-stride",
    "lines": 1,
    "bytes": 16
@@ -46,13 +136,13 @@
    "bytes": 13
   },
   {
-   "name": "cur",
+   "name": "me",
    "lines": 1,
-   "bytes": 11
+   "bytes": 10
   },
   {
    "name": "sch-sqrt",
-   "lines": 1,
+   "lines": 5,
    "bytes": 93
   },
   {
@@ -62,12 +152,12 @@
   },
   {
    "name": "vscale",
-   "lines": 1,
+   "lines": 4,
    "bytes": 56
   },
   {
    "name": "vnorm",
-   "lines": 1,
+   "lines": 4,
    "bytes": 45
   },
   {
@@ -76,13 +166,28 @@
    "bytes": 32
   },
   {
-   "name": "acc+u",
+   "name": "vcopy",
    "lines": 1,
-   "bytes": 46
+   "bytes": 43
+  },
+  {
+   "name": "vadd",
+   "lines": 1,
+   "bytes": 42
+  },
+  {
+   "name": "heading>sc",
+   "lines": 4,
+   "bytes": 52
+  },
+  {
+   "name": "acc+u",
+   "lines": 4,
+   "bytes": 52
   },
   {
    "name": "acc+v",
-   "lines": 1,
+   "lines": 4,
    "bytes": 58
   },
   {
@@ -92,18 +197,53 @@
   },
   {
    "name": "heading-dot-u",
+   "lines": 4,
+   "bytes": 58
+  },
+  {
+   "name": "you-delta",
    "lines": 1,
-   "bytes": 52
+   "bytes": 30
+  },
+  {
+   "name": "reach2",
+   "lines": 1,
+   "bytes": 26
+  },
+  {
+   "name": "r-rep",
+   "lines": 1,
+   "bytes": 13
+  },
+  {
+   "name": "r-ori",
+   "lines": 1,
+   "bytes": 16
+  },
+  {
+   "name": "inside",
+   "lines": 1,
+   "bytes": 16
+  },
+  {
+   "name": "you-weight",
+   "lines": 1,
+   "bytes": 20
+  },
+  {
+   "name": "count+",
+   "lines": 1,
+   "bytes": 15
   },
   {
    "name": "sch-pair",
-   "lines": 15,
-   "bytes": 240
+   "lines": 24,
+   "bytes": 168
   },
   {
    "name": "sch-wall",
-   "lines": 3,
-   "bytes": 101
+   "lines": 6,
+   "bytes": 107
   },
   {
    "name": "sch-walls",
@@ -111,14 +251,24 @@
    "bytes": 25
   },
   {
+   "name": "seen?",
+   "lines": 1,
+   "bytes": 15
+  },
+  {
+   "name": "add-wanted",
+   "lines": 1,
+   "bytes": 22
+  },
+  {
    "name": "sch-want",
-   "lines": 8,
-   "bytes": 201
+   "lines": 11,
+   "bytes": 88
   },
   {
    "name": "sch-startle-away",
-   "lines": 2,
-   "bytes": 76
+   "lines": 5,
+   "bytes": 82
   },
   {
    "name": "sch-startle?",
@@ -132,23 +282,58 @@
   },
   {
    "name": "sch-startle-all",
-   "lines": 3,
+   "lines": 9,
    "bytes": 123
+  },
+  {
+   "name": "perp-axis",
+   "lines": 2,
+   "bytes": 42
+  },
+  {
+   "name": "turn-axis",
+   "lines": 4,
+   "bytes": 49
+  },
+  {
+   "name": "perp-all",
+   "lines": 1,
+   "bytes": 43
+  },
+  {
+   "name": "turn-all",
+   "lines": 1,
+   "bytes": 42
+  },
+  {
+   "name": "perp-fallback",
+   "lines": 8,
+   "bytes": 86
   },
   {
    "name": "sch-turn",
    "lines": 12,
-   "bytes": 283
+   "bytes": 104
+  },
+  {
+   "name": "advance",
+   "lines": 3,
+   "bytes": 46
+  },
+  {
+   "name": "clear-sums",
+   "lines": 7,
+   "bytes": 44
   },
   {
    "name": "sch-follow",
-   "lines": 10,
-   "bytes": 211
+   "lines": 16,
+   "bytes": 129
   },
   {
    "name": "sch-commit",
-   "lines": 1,
-   "bytes": 123
+   "lines": 5,
+   "bytes": 91
   },
   {
    "name": "sch-set-dt",
@@ -157,7 +342,7 @@
   },
   {
    "name": "sch-regime",
-   "lines": 1,
+   "lines": 3,
    "bytes": 57
   },
   {
@@ -166,12 +351,12 @@
    "bytes": 44
   }
  ],
- "dictionary_bytes": 2179,
- "dictionary_after_load": 3462,
+ "dictionary_bytes": 2936,
+ "dictionary_after_load": 4219,
  "dictionary_size": 65536,
- "source_lines": 121,
- "code_lines": 79,
- "source_bytes": 7740,
+ "source_lines": 242,
+ "code_lines": 193,
+ "source_bytes": 10680,
  "error": {
   "ticks": 60,
   "n": 11,
@@ -180,13 +365,13 @@
   "head_median": 0.0009830735638761412,
   "head_max": 0.0010040400477518887
  },
- "x86_ms": 8.438,
+ "x86_ms": 9.3043,
  "device": {
-  "ms": 6.2115,
+  "ms": 6.9723,
   "runs": [
-   6.2143,
-   6.2115,
-   6.1061
+   6.9592,
+   6.9723,
+   6.98
   ],
   "device": "Chromecast HD (armeabi-v7a)"
  }

@@ -22,14 +22,16 @@ Measured, not estimated ([`measured.json`](../reference/swarming-poster/measured
 
 | What | Value |
 |---|---|
-| Source | 119 lines, 79 of them code (the rest is comments), 7.3 KB |
-| In the zForth dictionary | **2,179 bytes** of the 65,536 available (3.3 %), 33 words |
-| Biggest words | `sch-turn` 283 B, `sch-pair` 240 B, `sch-follow` 211 B, `sch-want` 201 B |
-| One step, 11 fish (10 followers and the leader) | **6.2 ms on the Chromecast HD** (median of 3 runs of 200 ticks); 8.4 ms on this PC (5 to 8.5 ms across runs: it depends on what else the machine is doing) |
-| Per follower | about 0.6 ms |
+| Source | 242 lines, 193 of them code (the rest is comments), 10.7 KB |
+| In the zForth dictionary | **2,936 bytes** of the 65,536 available (4.5 %), 70 words (including the named slots) |
+| Biggest words | `sch-pair` 168 B, `sch-follow` 129 B, `sch-startle-all` 123 B, `sch-wall` 107 B, `sch-turn` 104 B |
+| One step, 11 fish (10 followers and the leader) | **7.0 ms on the Chromecast HD** (median of 3 runs of 200 ticks); 9.3 ms on this PC (5 to 10 ms across runs: it depends on what else the machine is doing) |
+| Per follower | about 0.7 ms |
 | Against the numpy reference, one tick | position error 3e‑04 body lengths, heading error 1e‑03 (the engine's sine is 0.2 % off) |
 
-**What was not measured:** the same code *inside the engine*. The 6.2 ms is the engine's own zForth interpreter (the same vendored source, the same float cells) driven by a standalone host with the mailboxes as a plain array; inside the game each mailbox access goes through the object manager, so expect more. That is Phase 0 of [the schooling plan](2026-10-01-aquarium-schooling.md), and the poster says so.
+**Named slots (the user's request).** Every number that used to be a bare index (`3 cur sch@`, `1 par@`, `19 sc!`) is now a name with an `MB_` prefix (`MB_VX me sch@`, `MB_DRO par@`, `MB_YOU sc!`), the long lines were split into short helper words, and the slots are documented once at the top of the file. The prefix stays because the dictionary is shared by every script in the level: a bare `X` or `ME` could silently shadow another script's word. It cost something, measured: the first version was 2,179 bytes and 6.2 ms a step; the named one is **2,936 bytes and 7.0 ms** (each name is a word call, not an inline literal), still equal to the numpy reference to the same 1e‑03. The poster's Forth panel shows the named code.
+
+**What was not measured:** the same code *inside the engine*. The 7.0 ms is the engine's own zForth interpreter (the same vendored source, the same float cells) driven by a standalone host with the mailboxes as a plain array; inside the game each mailbox access goes through the object manager, so expect more. That is Phase 0 of [the schooling plan](2026-10-01-aquarium-schooling.md), and the poster says so.
 
 ## Diagrams
 
@@ -155,7 +157,7 @@ The steps are the spec; each shows its raw output.
 
     ```
     $ python3 docs/reference/swarming-poster/forth_check.py
-    school.fth compiled to 2179 bytes of dictionary
+    school.fth compiled to 2936 bytes of dictionary
     60 one-tick comparisons: position error median 2.9e-04 max 3.0e-04; heading error median 9.8e-04 max 1.0e-03
     ticks with heading error > 0.05: []
     ```
@@ -177,12 +179,12 @@ The steps are the spec; each shows its raw output.
     ```
     $ docs/reference/swarming-poster/device_bench.sh 192.168.4.38:41447
     device: Chromecast HD armeabi-v7a
-    6.1023 ms
-    6.1285 ms
-    6.0588 ms
+    6.9592 ms
+    6.9723 ms
+    6.9800 ms
     ```
 
-    **PASS** for "the interpreter runs the core at about 6 ms for 11 fish". **Not verified: inside the engine** (Phase E, step 1).
+    **PASS** for "the interpreter runs the core at about 7 ms for 11 fish". **Not verified: inside the engine** (Phase E, step 1).
 
 4. The Forth in the tank's real box (mean of 3 seeds; `align` is the alignment of the followers' heading with the leader's).
 
@@ -220,7 +222,7 @@ The steps are the spec; each shows its raw output.
 ## Out of scope
 
 - The poster's own wording is final; what is *not* here is the engine work, which is Phase E above and not a different project. Nothing in the engine has changed yet: `school.fth` is not loaded by the level.
-- A C++ fallback: the measured 6.2 ms (about 0.6 ms a follower, spread over frames) does not force one. The in-engine measurement can.
+- A C++ fallback: the measured 7.0 ms (about 0.7 ms a follower, spread over frames) does not force one. The in-engine measurement can.
 
 ## Cost
 

@@ -130,11 +130,11 @@ def mailboxes_page():
     state = [[h.read(fc.BASE + i * fc.STRIDE + f) for f in range(14)] for i in range(n)]
     par = [h.read(fc.PAR + k) for k in range(21)]
     h.close()
-    FIELDS = ["x", "y", "z", "vx", "vy", "vz", "next x", "next y", "next z", "next vx", "next vy", "next vz", "startle s", "unused"]
-    PARAMS = ["r_r", "Δr_o (now)", "Δr_a (now)", "cos(blind half-angle)", "cos(turn)", "sin(turn)", "speed·dt", "leader weight w", "wall zone", "startle s",
-              "dt", "box low x", "box low y", "box low z", "box high x", "box high y", "box high z", "Δr_o swarm", "Δr_a swarm", "Δr_o school", "Δr_a school"]
-    SCR = ["Σ repulsion x", "y", "z", "Σ orientation x", "y", "z", "Σ attraction x", "y", "z", "n repel", "n orient", "n attract", "wanted x", "y", "z", "the follower i",
-           "r then u x", "y", "z", "the neighbour j", "perp x", "y", "z", "d", "startle r²"]
+    FIELDS = ["MB_X", "MB_Y", "MB_Z", "MB_VX", "MB_VY", "MB_VZ", "MB_NX", "MB_NY", "MB_NZ", "MB_NVX", "MB_NVY", "MB_NVZ", "MB_STARTLE", "unused"]
+    PARAMS = ["MB_RR  r_r", "MB_DRO  Δr_o now", "MB_DRA  Δr_a now", "MB_COSB  cos blind", "MB_COST  cos turn", "MB_SINT  sin turn", "MB_STEP  speed·dt", "MB_LEADW  leader w", "MB_WALL  wall zone", "MB_STARTLE_T  s",
+              "MB_DT  dt", "MB_LOX  box low x", "(MB_LOX+1)  low y", "(MB_LOX+2)  low z", "MB_HIX  box high x", "(MB_HIX+1)  high y", "(MB_HIX+2)  high z", "MB_DRO_SWARM", "MB_DRA_SWARM", "MB_DRO_SCHOOL", "MB_DRA_SCHOOL"]
+    SCR = ["MB_SUM_R", "+1", "+2", "MB_SUM_O", "+1", "+2", "MB_SUM_A", "+1", "+2", "MB_N_R", "MB_N_O", "MB_N_A", "MB_WANT", "+1", "+2", "MB_ME",
+           "MB_U", "+1", "+2", "MB_YOU", "MB_PERP", "+1", "+2", "MB_DIST", "MB_R2"]
     s = []
     # --- the address map (0..1900) ---
     X0, XW, MAXA = 40, 1360, 1900
@@ -154,7 +154,7 @@ def mailboxes_page():
     s.append(f'<text x="{X0}" y="194" font-size="13" fill="{MUTED}">Global user mailboxes are 2..1900 and shared by every actor (clownfish.py).. The proposed addresses are the ones the tests run at (forth_check.py: BASE 800, PAR 960, SCR 985).</text>')
     # --- the state grid ---
     gx, gy, cw, chh = 40, 258, 68, 22
-    s.append(f'<text x="{gx}" y="226" font-size="16" font-weight="700" fill="{INK}">School state: 11 fish × 14 mailboxes, mailbox = 800 + 14·fish + field (a real run: school setting, leader weight 3, tick 300)</text>')
+    s.append(f'<text x="{gx}" y="226" font-size="16" font-weight="700" fill="{INK}">School state: 11 fish × 14 slots (a real run: school setting, w = 3, tick 300)</text>')
     s.append(f'<text x="{gx}" y="{gy - 6}" font-size="12" fill="{MUTED}">fish</text>')
     cols = list(zip(*state))
     for f in range(14):
@@ -170,10 +170,10 @@ def mailboxes_page():
             fg = "#ffffff" if t > 0.62 and f != 13 else INK
             s.append(f'<rect x="{gx + 56 + f * cw}" y="{y}" width="{cw - 2}" height="{chh - 2}" fill="{col}"/><text x="{gx + 56 + f * cw + cw / 2 - 1:.0f}" y="{y + 16}" font-size="12" text-anchor="middle" fill="{fg}">{v:.2f}</text>')
     import textwrap
-    for k, ln in enumerate(textwrap.wrap("First mailbox of each row: 800 + 14·fish. Fields 0–2 position (body lengths), 3–5 a unit heading, 6–11 the next state (committed only after every follower has read the old one), 12 the startle timer, 13 unused. Each column is shaded from its own minimum to its maximum.", 150)):
+    for k, ln in enumerate(textwrap.wrap("The mailbox of a cell is 800 + 14·fish + its MB_ slot. Slots 0–2 position (body lengths), 3–5 a unit heading, 6–11 the next state (committed only after every follower has read the old one), 12 the startle timer, 13 unused. Each column is shaded from its own minimum to its maximum.", 150)):
         s.append(f'<text x="{gx}" y="{gy + n * chh + 16 + k * 15}" font-size="12" fill="{MUTED}">{ln}</text>')
     # --- params ---
-    px = 1150
+    px = 1130
     s.append(f'<text x="{px - 40}" y="226" font-size="16" font-weight="700" fill="{INK}">Parameters, 960..980</text>')
     for k in range(21):
         y = 240 + k * 17
@@ -186,7 +186,7 @@ def mailboxes_page():
         s.append(f'<rect x="{x}" y="{y}" width="100" height="38" fill="#f3f7fa" stroke="#9fb0bd"/><text x="{x + 4}" y="{y + 15}" font-size="12" fill="{MUTED}">{985 + k}</text><text x="{x + 4}" y="{y + 31}" font-size="12" fill="{INK}">{SCR[k]}</text>')
     # --- notes ---
     notes = ["Why a map: every actor and the Director share one number space, so a new script must say which numbers it owns. 200 mailboxes are needed here; the next free hundreds are 760..799 (kept spare) and 1010..1099.",
-             "Cost of using mailboxes: each read or write is one system call into the engine. The 6.2 ms per step on the Chromecast already counts them (as a plain array); in the engine each goes through the object manager, which Phase 0 measures.",
+             f"Cost of using mailboxes: each read or write is one system call into the engine. The {json.loads((REF / 'measured.json').read_text())['device']['ms']:.1f} ms per step on the Chromecast already counts them (as a plain array); in the engine each goes through the object manager, which Phase 0 measures.",
              "Open: the ten followers need their own copy of the rig’s 39 mailboxes (600..638 today are one fish’s). That means the rig must take a base address (a change in clownfish_idle.fth), or the followers are posed by a smaller rig."]
     for i, t in enumerate(notes):
         s.append(f'<text x="{gx}" y="{722 + i * 44}" font-size="13" fill="{INK}">{t[:165]}</text>' + (f'<text x="{gx}" y="{722 + i * 44 + 15}" font-size="13" fill="{INK}">{t[165:]}</text>' if len(t) > 165 else ""))

@@ -164,7 +164,7 @@
  {
   "id": "bytes",
   "quantity": "school.fth in the dictionary",
-  "value": "2179 B of 65536",
+  "value": "2936 B of 65536",
   "status": "ours",
   "sources": [
    "S5"
@@ -173,7 +173,7 @@
  {
   "id": "lines",
   "quantity": "school.fth source",
-  "value": "79 code lines, 121 with comments",
+  "value": "193 code lines, 242 with comments",
   "status": "ours",
   "sources": [
    "S5"
@@ -191,7 +191,7 @@
  {
   "id": "dev",
   "quantity": "One tick, 11 fish, on the Chromecast HD",
-  "value": "6.2 ms",
+  "value": "7.0 ms",
   "status": "ours",
   "sources": [
    "S5"
