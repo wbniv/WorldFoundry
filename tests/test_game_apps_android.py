@@ -234,3 +234,15 @@ def test_device_script_knows_every_app():
         r = subprocess.run(["bash", str(script), "--app", app, "--apk", "/nonexistent.apk"], capture_output=True, text=True,
                            timeout=60, env={"PATH": "/usr/bin:/bin", "HOME": "/nonexistent", "ADB": "/nonexistent/adb"})
         assert "--app must be" not in r.stderr, (app, r.stderr)
+
+
+def test_snowgoons_banner_is_a_level_screenshot():
+    """The user (2026-10-01): the snowgoons banner is a screenshot from the snowgoons level, regenerated from a committed frame."""
+    from PIL import Image
+    gen = (REPO / "scripts" / "gen-android-icons.py").read_text()
+    src = re.search(r'"snowgoons": dict\(icon=ART / "([^"]+)".*?banner=ART / "([^"]+)"', gen, re.S)
+    assert src.group(1) == "snowgoons-snowman-1920x1080.png", "the icon stays the snowman"
+    assert src.group(2) == "snowgoons-level-chromecast-1920x1080.png"
+    assert Image.open(APP / "art-src" / src.group(2)).size == (1920, 1080)
+    main = SRC / "main" / "res" / "drawable" / "tv_banner.png"
+    assert Image.open(SRC / "snowgoons" / "res" / "drawable" / "tv_banner.png").size == Image.open(main).size

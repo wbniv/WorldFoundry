@@ -15,7 +15,9 @@ Per game (a Gradle product flavor) it writes, under android/app/src/<flavor>/res
                                           launcher's safe zone (the inner 72 of 108 dp) so no mask can cut it off
 
 The art, all committed so the output is deterministic (android/app/art-src/ unless noted):
-  snowgoons  snowgoons-snowman-1920x1080.png     scripts/render-snowgoon.py (Blender): a menacing three-armed snowman
+  snowgoons  snowgoons-snowman-1920x1080.png     scripts/render-snowgoon.py (Blender): a menacing three-armed snowman (the icon)
+             + snowgoons-level-chromecast-1920x1080.png for the banner: the level itself, screenshotted on the Chromecast HD by
+               `scripts/android-device-run.sh --app snowgoons --release --seconds 8 <ip:port>` (adb screencap, no input)
   aquarium   aquarium-fish-high-anemone-only-580.png   scripts/capture-aquarium-fish-high.py + scripts/make-aquarium-icon-art.py: just the fish
              (resting higher) and the anemone's crown
              + docs/plans/2026-09-30-aquarium-chromecast/frame-a-1920x1080.png for the banner (the whole tank)
@@ -43,8 +45,11 @@ _spec.loader.exec_module(addlogo)
 
 # per game: icon art + square crop box, banner art + 16:9 crop box, the name shown on the banner
 GAMES = {
+    # The banner is a real frame of the snowgoons level (the user, 2026-10-01: "use a screenshot from the snowgoons level");
+    # the icon stays the snowman. Source: the snowgoons release app on the Chromecast HD, 8 s after launch, no input
+    # (docs/plans/2026-10-01-split-cd-iff-one-app-per-game.md, Icons).
     "snowgoons": dict(icon=ART / "snowgoons-snowman-1920x1080.png", icon_crop=(420, 0, 1500, 1080),
-                      banner=ART / "snowgoons-snowman-1920x1080.png", banner_crop=(0, 0, 1920, 1080), name="snowgoons"),
+                      banner=ART / "snowgoons-level-chromecast-1920x1080.png", banner_crop=(0, 0, 1920, 1080), name="snowgoons"),
     "aquarium": dict(icon=ART / "aquarium-fish-high-anemone-only-580.png", icon_crop=(95, 115, 505, 525),
                      banner=REPO_ROOT / "docs/plans/2026-09-30-aquarium-chromecast/frame-a-1920x1080.png",
                      banner_crop=(280, 88, 1640, 853), name="aquarium"),
