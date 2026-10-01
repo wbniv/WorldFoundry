@@ -6,7 +6,7 @@ Status: **built and verified** (2026‑10‑01); the numbers on it are measured,
 - [x] Phase B: the Forth core, `wflevels/aquarium/school.fth`, tested against the reference in the engine's own zForth
 - [x] Phase C: the zone-width sweep, the tank runs, the size, error and timing measurements
 - [x] Phase D: the poster (data sheet with chips, generator, A3 PDF/PNG), tests, Taskfile tasks
-- [ ] Phase E: the Forth timed **inside the engine** (needs the schooling plan's Phase 0); the leader weight tuned
+- [ ] Phase E (**the point of all of this**): wire `school.fth` into the aquarium level: ten more fish that school and swarm round the player's fish. The work is the [schooling plan](2026-10-01-aquarium-schooling.md)'s Phases 0 to 4; phases A to D above are the evidence and the tested core it is built on. In order: time the core inside the engine (Phase 0), make the fish rig per-fish and add the ten fish (Phase 1, which also settles the follower-rig mailboxes), connect the player's fish as the leader and the mode switch (Phase 2), tune the leader weight (Phase 2), then polish, tests and the Chromecast (Phases 3 and 4)
 
 ## Request
 
@@ -182,7 +182,7 @@ The steps are the spec; each shows its raw output.
     6.0588 ms
     ```
 
-    **PASS** for "the interpreter runs the core at about 6 ms for 11 fish". **Not verified: inside the engine** (Phase E).
+    **PASS** for "the interpreter runs the core at about 6 ms for 11 fish". **Not verified: inside the engine** (Phase E, step 1).
 
 4. The Forth in the tank's real box (mean of 3 seeds; `align` is the alignment of the followers' heading with the leader's).
 
@@ -219,7 +219,7 @@ The steps are the spec; each shows its raw output.
 
 ## Out of scope
 
-- Wiring `school.fth` into the aquarium level: that is [the schooling plan](2026-10-01-aquarium-schooling.md). This plan produced the evidence its Phase 0 asks for (size, cost, parameters, the tank's real depth).
+- The poster's own wording is final; what is *not* here is the engine work, which is Phase E above and not a different project. Nothing in the engine has changed yet: `school.fth` is not loaded by the level.
 - A C++ fallback: the measured 6.2 ms (about 0.6 ms a follower, spread over frames) does not force one. The in-engine measurement can.
 
 ## Cost
