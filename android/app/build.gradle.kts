@@ -37,8 +37,10 @@ android {
     productFlavors {
         create("snowgoons") {
             dimension = "game"
-            // The original app: keeps the pre-flavor applicationId, label,
-            // icon, banner (src/main/res) and the multi-level cd.iff.
+            // The original app: keeps the pre-flavor applicationId and label.
+            // Since docs/plans/2026-10-01-split-cd-iff-one-app-per-game.md it
+            // bundles the snowgoons-only cd.iff, so it boots snowgoons (the
+            // multi-level desktop cd.iff booted SMB W1-1, its TOC level 0).
         }
         create("aquarium") {
             dimension = "game"
@@ -115,7 +117,8 @@ android {
     // Asset pipeline (Phase 3 step 5): Gradle bundles src/<flavor>/assets/
     // into that flavor's APK (src/main/assets/ is empty). Every asset is a
     // symlink to a tracked file:
-    //   snowgoons: cd.iff → wfsource/source/game/cd.iff (task build-cd-iff),
+    //   snowgoons: cd.iff → wflevels/snowgoons-cd.iff (task build-cd-iff-snowgoons;
+    //     snowgoons is TOC level 0, so level0.mid now plays over it),
     //     plus level0.mid + florestan-subset.sf2 — the loose MIDI + soundfont
     //     are a dev shortcut; the real remediation is docs/plans/2026-04-18-
     //     audio-assets-from-iff.md (move audio inside cd.iff).

@@ -9,9 +9,9 @@ Everything here is static (no device, no display):
   * wflevels/aquarium-cd.iff (task build-cd-iff-aquarium) is a GAME bundle whose SHEL is
     wfsource/source/game/shell.fth and whose only level is today's wflevels/aquarium-standalone.iff,
     byte for byte, so a rebuilt level with a stale bundle fails here.
-  * each flavor's assets: the aquarium ships its cd.iff (no level0.mid, so no Mario music over the
-    tank) plus the phone controller's page and layout (Phase E); snowgoons keeps the three
-    pre-flavor symlinks and no phone controller; src/main/assets is gone.
+  * each flavor's assets: the aquarium ships its cd.iff (no level0.mid, so no music over the
+    tank) plus the phone controller's page and layout (Phase E); snowgoons ships its snowgoons-only
+    cd.iff, level0.mid and the soundfont and no phone controller; src/main/assets is gone.
   * the flavors, ids and APK names in build.gradle.kts; the manifest keeps both launchers,
     the banner and the not-required TV / gamepad / touch features.
   * the aquarium's launcher art overrides main's with the same names and sizes.
@@ -102,13 +102,15 @@ def test_aquarium_assets_are_its_cd_iff_and_the_phone_controller():
     assert not (assets / "layout.json").is_symlink()
 
 
-def test_snowgoons_assets_unchanged_and_main_has_none():
+def test_snowgoons_assets_and_main_has_none():
     assets = SRC / "snowgoons" / "assets"
     game = REPO / "wfsource" / "source" / "game"
     assert sorted(p.name for p in assets.iterdir()) == ["cd.iff", "florestan-subset.sf2", "level0.mid"]
-    for name in ("cd.iff", "florestan-subset.sf2", "level0.mid"):
+    for name in ("florestan-subset.sf2", "level0.mid"):
         assert os.readlink(assets / name) == f"../../../../../wfsource/source/game/{name}"
         assert (assets / name).resolve() == (game / name).resolve()
+    # The snowgoons-only bundle since docs/plans/2026-10-01-split-cd-iff-one-app-per-game.md (tests/test_game_apps_android.py).
+    assert os.readlink(assets / "cd.iff") == "../../../../../wflevels/snowgoons-cd.iff"
     assert not (SRC / "main" / "assets").exists(), "main assets would ship in every app"
 
 
@@ -230,7 +232,7 @@ def test_built_aquarium_apk_contents():
         assert not {n for n in names if n.startswith("assets/")} - {"assets/cd.iff", "assets/controller.html",
                                                                    "assets/layout.json"}
     with zipfile.ZipFile(_apk("snowgoons")) as z:
-        assert z.read("assets/cd.iff") == (REPO / "wfsource" / "source" / "game" / "cd.iff").read_bytes()
+        assert z.read("assets/cd.iff") == (REPO / "wflevels" / "snowgoons-cd.iff").read_bytes()
 
 
 def test_built_apks_badging():

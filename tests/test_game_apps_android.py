@@ -114,3 +114,40 @@ def test_desktop_cd_iff_unchanged():
         assert data[off:off + size] == standalone(level).read_bytes(), level
     cmds = str(yaml.safe_load((REPO / "Taskfile.yml").read_text())["tasks"]["build-cd-iff"]["cmds"])
     assert re.findall(r"wflevels/(\S+)-standalone\.iff", cmds) == order
+
+
+# ---- the apps ----------------------------------------------------------------------------------------------------
+
+from test_aquarium_android import APP, DENSITIES, GRADLE, SRC  # noqa: E402
+
+# flavor -> (applicationId suffix or None for the original id, label, the assets it ships)
+FLAVORS = {
+    "snowgoons": (None, "World Foundry", ["cd.iff", "florestan-subset.sf2", "level0.mid"]),
+}
+
+
+@pytest.mark.parametrize("flavor", FLAVORS)
+def test_flavor_boots_its_own_game(flavor):
+    """assets/cd.iff is a symlink to this game's bundle, so TOC level 0 (what shell.fth boots) is the game's first level."""
+    link = SRC / flavor / "assets" / "cd.iff"
+    assert link.is_symlink() and link.resolve() == (LEVELS / GAMES[flavor][0]).resolve()
+    toc = read_game_toc(link.read_bytes())
+    first = standalone(GAMES[flavor][1][0]).read_bytes()
+    assert link.read_bytes()[toc[1][1]:toc[1][1] + toc[1][2]] == first
+    assert sorted(p.name for p in (SRC / flavor / "assets").iterdir()) == FLAVORS[flavor][2]
+
+
+@pytest.mark.parametrize("flavor", FLAVORS)
+def test_flavor_id_and_no_permission(flavor):
+    g = GRADLE.read_text()
+    block = re.search(rf'create\("{flavor}"\) \{{(.*?)\n        \}}', g, re.S)
+    assert block, flavor
+    body = re.sub(r"//.*", "", block.group(1))
+    suffix = FLAVORS[flavor][0]
+    if suffix is None:
+        assert "applicationId" not in body, "snowgoons keeps org.worldfoundry.wf_game (installs upgrade in place)"
+    else:
+        assert f'applicationIdSuffix = "{suffix}"' in body
+    assert "externalNativeBuild" not in body
+    # No phone controller and no permission: only aquarium and condo have a flavor manifest (tests/test_phone_controller_android.py).
+    assert not (SRC / flavor / "AndroidManifest.xml").exists()
