@@ -1,10 +1,16 @@
 | Date | Change |
 |------|--------|
+| [2026-10-01](https://github.com/wbniv/WorldFoundry/commit/41742943) | Condo: A (the Chromecast remote's OK) toggles the glass doors and balcony shade, not B |
 | [2026-10-01](https://github.com/wbniv/WorldFoundry/commit/773f860b) | Chromecast OK button: confirmed on the remote in snowgoons; log each key and its mask |
 | [2026-10-01](https://github.com/wbniv/WorldFoundry/commit/15452b11) | OK-button plan: the condo release builds for both ABIs against ~/android-sdk-local |
 | [2026-10-01](https://github.com/wbniv/WorldFoundry/commit/44319b44) | Chromecast remote: the OK button (DPAD_CENTER) is now button 1 / A |
 
 <!--history-meta v1
+41742943	author	Will Norris
+41742943	added	11
+41742943	deleted	0
+41742943	files	1
+41742943	body	The remote has only OK, which maps to A. camera_controls.fth now fires the door/shade pulse\n(mailbox 119) on A in the D-not-held branch, so D+A stays the view reset, and no longer forwards\nA to the player as the small hop. B does nothing on its own. The touch profile and the tour\nvariant are unchanged. Adds five offline Forth-harness checks (fail on the old controller);\nthe in-engine door/shade verify scripts now inject A. Level, cd.iff regenerated.\nPlan: docs/plans/2026-10-01-chromecast-ok-button.md\n\nCo-Authored-By: Claude Sonnet 5.5 <noreply@anthropic.com>\nClaude-Session: https://claude.ai/code/session_01DxMP4jUNjCjDz8E9DWzXcM
 773f860b	author	Will Norris
 773f860b	added	11
 773f860b	deleted	11

@@ -94,7 +94,7 @@ The remote has only OK, which is now A, so the condo's door and shade control mo
   A is no longer forwarded to the player's locomotion input (mailbox 118), which was the "small hop" (`Jumping Acceleration` 5.0); otherwise every toggle would also jump. B does nothing on its own now.
 - Unchanged on purpose: the touch profile (A cycles Walk/Look/Zoom there, so tap B still toggles), and the tour-recording variant, which reads raw B.
 - Guard: `tests/verify_condo_camera_forth.py` has five new checks (A pulses 119; a held A pulses once; B does not; D+A does not; A is not forwarded as a jump), which fail on the old controller. The in-engine `verify_condo_door_button.py` and `verify_condo_balcony_shade.py` now inject A and were **not run** (they need the desktop engine and debug bridge).
-- Rebuilt: `task condo-level` (Blender; the `.lev` differs in the one script line), `task build-cd-iff-condo`, the condo release APK; installed on the Chromecast HD. **On-device check (A toggles, B does not): PENDING, the user's test.**
+- Rebuilt: `task condo-level` (Blender; the `.lev` differs in the one script line), `task build-cd-iff-condo`, the condo release APK; installed on the Chromecast HD. **On-device check, by hand with the real remote, 2026‑10‑01: PASS (the user: "a toggling totally works"; a report, not a logged event; B and no-hop were not separately reported).**
 
 ## Rank (recommendation)
 
