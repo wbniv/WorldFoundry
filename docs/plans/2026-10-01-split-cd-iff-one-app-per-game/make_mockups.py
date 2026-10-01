@@ -7,6 +7,7 @@ file, each with a same-name PNG made by headless Chrome:
 
   launcher.html   the launcher tiles of all five apps: a phone grid, the legacy square and round icons, a narrow phone
   banners.html    the TV banners in a Google TV apps row (the new SMB tile focused) and the two new banners at 420 px
+  adaptive-<app>.png   each app's adaptive icon as a launcher draws it, for the plan's Icons table
 
 Usage: python3 make_mockups.py [-h]
 """
@@ -49,6 +50,10 @@ def background(app):
 
 @functools.lru_cache(None)
 def adaptive(app, size=162):
+    return uri(adaptive_img(app, size))
+
+
+def adaptive_img(app, size):
     """The adaptive icon as a launcher draws it: background colour + foreground, under a circle mask (the visible 72 of 108 dp)."""
     fg = Image.open(res(app, "mipmap-xhdpi/ic_launcher_foreground.png")).convert("RGBA").resize((size, size), Image.LANCZOS)
     im = Image.new("RGBA", (size, size), background(app))
@@ -59,7 +64,7 @@ def adaptive(app, size=162):
     ImageDraw.Draw(mask).ellipse((0, 0, im.size[0] - 1, im.size[1] - 1), fill=255)
     out = Image.new("RGBA", im.size, (0, 0, 0, 0))
     out.paste(im, (0, 0), mask)
-    return uri(out)
+    return out
 
 
 CSS = """*{box-sizing:border-box}body{margin:0;width:1440px;height:900px;background:#0d1117;color:#e6edf3;font:16px/1.4 system-ui,'Noto Sans',sans-serif;overflow:hidden}
@@ -116,6 +121,8 @@ banners = page(
 
 def main():
     argparse.ArgumentParser(description=__doc__.split("\n\n")[0]).parse_args()
+    for a in APPS:
+        adaptive_img(a, 216).save(HERE / f"adaptive-{a}.png", optimize=True)
     for name, html in (("launcher", launcher), ("banners", banners)):
         f = HERE / f"{name}.html"
         f.write_text(html, encoding="utf-8")
