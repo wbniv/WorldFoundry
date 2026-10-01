@@ -69,8 +69,14 @@ for z in (1.62, 1.40, 1.18): ball((0, -0.45, z), 0.04, COAL, 1)
 stick((-0.38, -0.02, 1.68), (-1.10, -0.10, 2.15), 0.05, WOOD); stick((-0.85, -0.08, 1.98), (-1.02, -0.10, 2.38), 0.03, WOOD)
 stick((0.38, -0.02, 1.68), (1.12, -0.10, 2.12), 0.05, WOOD);  stick((0.86, -0.08, 1.96), (1.06, -0.10, 2.36), 0.03, WOOD)
 import os
-ARM3 = os.environ.get("ARM3", "chest-forward")
-if ARM3 == "chest-forward":      # E: from the centre of the upper chest, straight out toward the viewer, a forked hand up
+ARM3 = os.environ.get("ARM3", "up-steep")
+if ARM3 == "up-right":           # from the chest centre, angled up and out to the right (toward the viewer a little), forked hand
+    stick((0.0, -0.40, 1.60), (0.62, -0.80, 2.02), 0.06, WOOD); stick((0.50, -0.72, 1.92), (0.46, -0.80, 2.28), 0.035, WOOD); stick((0.50, -0.72, 1.92), (0.80, -0.80, 2.22), 0.035, WOOD)
+elif ARM3 == "up-left":          # the mirror
+    stick((0.0, -0.40, 1.60), (-0.62, -0.80, 2.02), 0.06, WOOD); stick((-0.50, -0.72, 1.92), (-0.46, -0.80, 2.28), 0.035, WOOD); stick((-0.50, -0.72, 1.92), (-0.80, -0.80, 2.22), 0.035, WOOD)
+elif ARM3 == "up-steep":         # steeper, kept right of the face
+    stick((0.0, -0.40, 1.60), (0.46, -0.85, 2.18), 0.06, WOOD); stick((0.38, -0.78, 2.06), (0.30, -0.86, 2.46), 0.035, WOOD); stick((0.38, -0.78, 2.06), (0.66, -0.86, 2.38), 0.035, WOOD)
+elif ARM3 == "chest-forward":      # E: from the centre of the upper chest, straight out toward the viewer, a forked hand up
     stick((0.0, -0.40, 1.60), (0.0, -1.05, 1.62), 0.06, WOOD); stick((0.0, -0.98, 1.62), (-0.14, -1.12, 1.90), 0.035, WOOD); stick((0.0, -0.98, 1.62), (0.14, -1.12, 1.90), 0.035, WOOD)
 elif ARM3 == "chest-right":      # A: from the chest centre, out to the right and forward, below the raised right arm
     stick((0.0, -0.40, 1.58), (0.62, -0.78, 1.48), 0.06, WOOD); stick((0.50, -0.72, 1.49), (0.78, -0.80, 1.75), 0.035, WOOD)

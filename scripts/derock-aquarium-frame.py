@@ -1,5 +1,5 @@
 #!/usr/bin/env python3
-"""derock-aquarium-frame.py: leave only the fish and the anemone in the aquarium's camshot B capture (no rock, no sand, no brown stalk).
+"""derock-aquarium-frame.py: leave only the fish and the anemone in the aquarium's camshot B capture (no rock, no sand, no brown stalk), with the fish lifted a little.
 
 The aquarium icon is just the fish and the anemone (the user's words: "keep the same except remove the rock", then "just the fish and anemone"). The rock is a flat-shaded grey
 low-poly shape under the anemone's base ring. It is masked by colour (neutral grey; the sand is tan, the water teal, the
@@ -25,6 +25,7 @@ def main():
     ap.add_argument("src"); ap.add_argument("dst")
     ap.add_argument("--keep-sand", action="store_true", help="remove the rock only")
     ap.add_argument("--keep-stalk", action="store_true", help="keep the brown stalk and base ring")
+    ap.add_argument("--fish-up", type=int, default=0, help="lift the fish this many pixels (0 = leave it)")
     a = ap.parse_args()
     im = np.array(Image.open(a.src).convert("RGB")).astype(int)
     x0, y0, x1, y1 = WINDOW
@@ -39,6 +40,41 @@ def main():
             grown |= np.roll(np.roll(mask, dy, 0), dx, 1)
     grown[:y0] = False; grown[y1:] = False; grown[:, :x0] = False; grown[:, x1:] = False
     out = im.copy()
+    if a.fish_up:
+        # the fish: orange body/fins, white bands, dark outline and grey belly, inside a box around it (the tentacles are pink-magenta,
+        # the water teal, so the colours do not clash). Lift it, repainting where it was from the same row beside it.
+        fx0, fy0, fx1, fy1 = 750, 330, 1110, 545
+        r, g, b = im[..., 0], im[..., 1], im[..., 2]
+        orange = (r > 190) & (g > 80) & (g < 185) & (b < 110)
+        white = (r > 225) & (g > 225) & (b > 225)
+        dark = (r < 45) & (g < 45) & (b < 55)
+        belly = (abs(r - g) < 14) & (abs(g - b) < 14) & (r > 110) & (r < 175)
+        fm = np.zeros(r.shape, bool); fm[fy0:fy1, fx0:fx1] = (orange | white | dark | belly)[fy0:fy1, fx0:fx1]
+        for _ in range(2):                                              # close pinholes and take the anti-aliased edge
+            fm |= np.roll(fm, 1, 0) & np.roll(fm, -1, 0) | np.roll(fm, 1, 1) & np.roll(fm, -1, 1)
+        fm2 = fm.copy()
+        for dy in range(-2, 3):
+            for dx in range(-2, 3):
+                fm2 |= np.roll(np.roll(fm, dy, 0), dx, 1)
+        fm2[:fy0] = False; fm2[fy1:] = False; fm2[:, :fx0] = False; fm2[:, fx1:] = False
+        fish = im.copy()
+        for y in range(fy0, fy1):
+            xs = np.flatnonzero(fm2[y])
+            if xs.size == 0:
+                continue
+            s0, e0 = xs[0], xs[-1] + 1; n = e0 - s0
+            if s0 - n >= 0 and not fm2[y, s0 - n:s0].any():
+                out[y, s0:e0] = im[y, s0 - n:s0]
+            elif e0 + n <= im.shape[1] and not fm2[y, e0:e0 + n].any():
+                out[y, s0:e0] = im[y, e0:e0 + n]
+            else:
+                out[y, s0:e0] = im[y, max(0, s0 - 1)]
+        up = a.fish_up
+        sel = fm2.copy(); sel[:up] = False
+        dst = np.zeros_like(sel); dst[:-up] = sel[up:]                  # destination rows: source row minus `up`
+        ys, xs = np.nonzero(dst)
+        out[ys, xs] = fish[ys + up, xs]
+        print(f"fish lifted {up} px ({int(fm2.sum())} px)")
     for y in range(y0, y1):
         xs = np.flatnonzero(grown[y])
         if xs.size == 0:
@@ -83,18 +119,12 @@ def main():
             for dx in range(-3, 4):
                 grown2 |= np.roll(np.roll(sm, dy, 0), dx, 1)
         grown2[:wy0] = False; grown2[wy1:] = False
-        src = out.copy()
+        # repaint with the water of the same row, sampled just left of the window (the rows are plain horizontal bands down here)
         for y in range(wy0, wy1):
             xs = np.flatnonzero(grown2[y])
             if xs.size:
-                s0, e0 = xs[0], xs[-1] + 1                              # one span per row: the column is contiguous
-                n = e0 - s0
-                if s0 - n >= 0 and not grown2[y, s0 - n:s0].any():
-                    out[y, s0:e0] = src[y, s0 - n:s0]
-                elif e0 + n <= out.shape[1] and not grown2[y, e0:e0 + n].any():
-                    out[y, s0:e0] = src[y, e0:e0 + n]
-                else:
-                    out[y, s0:e0] = src[y, max(0, s0 - 1)]
+                row = out[y, 640:700]
+                out[y, xs.min():xs.max() + 1] = np.median(row, axis=0).astype(out.dtype)
         print(f"brown stalk removed: {int(grown2.sum())} px")
     Image.fromarray(out.astype(np.uint8)).save(a.dst, optimize=True)
     print(f"wrote {a.dst}: repainted {int(grown.sum())} px")
