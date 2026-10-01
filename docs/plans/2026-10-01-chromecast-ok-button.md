@@ -1,9 +1,10 @@
 # Chromecast remote: the OK button acts as button 1 / A
 
-Status: **Phase A done; Phase B blocked on the Android SDK install and the device** (2026‑10‑01). The rank below is a recommendation; ranking is set in `TODO.md` by a Fable session.
+Status: **Phase A done, build checked; the on-device steps (3 to 5) wait for the Chromecast's Wireless-debugging port** (2026‑10‑01). The rank below is a recommendation; ranking is set in `TODO.md` by a Fable session.
 
 - [x] Phase A: map the remote's OK key to `EJ_BUTTONF_A` in the Android input path, with the source test and the `--poke` OK press
-- [ ] Phase B: build both ABIs (step 2), then check on the real Chromecast HD (steps 3 to 5)
+- [x] Phase B1: build both ABIs (step 2)
+- [ ] Phase B2: check on the real Chromecast HD (steps 3 to 5)
 
 ## Context
 
@@ -62,11 +63,24 @@ The mapping lives in an anonymous namespace in an NDK-only file, so it cannot be
 
    **PASS**
 2. Both ABIs still build. `task build-apk` (or the aquarium and condo flavors the Android CI builds). Expected: `armeabi-v7a` and `arm64-v8a` link, no new warnings in `native_app_entry.cc`.
+
+   `task build-apk` stops at `android-sdk-install` (it wants `sudo` to install into `/usr/lib/android-sdk`). The SDK that exists here is user-space, `~/android-sdk-local`
+   (the one `android/local.properties` names), so the build was run against it directly:
+
+   ```
+   $ cd android && ANDROID_HOME=$HOME/android-sdk-local ./gradlew :app:assembleCondoRelease
+   BUILD SUCCESSFUL in 2m 11s
+   $ unzip -l .../condo/release/worldfoundry-condo-release.apk | grep libwf_game.so
+   lib/arm64-v8a/libwf_game.so
+   lib/armeabi-v7a/libwf_game.so
+   ```
+
+   The build log has no line mentioning `native_app_entry.cc` (no warnings). **PASS** (condo flavor; the other flavors compile the same `libwf_game.so` source).
 3. OK reaches the engine on the Chromecast HD. Condo release build (A hops, so the effect is visible):
    `task chromecast-condo -- <ip> --release --poke`, with the poke extended to send `adb shell input keyevent --longpress KEYCODE_DPAD_CENTER` and take
    `screen-after-ok.png` (`--longpress`, as the existing D-pad poke does: a bare tap's DOWN and UP can land inside one 16.7 ms frame, and the engine polls the mask once per frame,
    so a tap can be missed even though the real remote's press is far longer). Expected: the player is in the air, or has hopped, in `screen-after-ok.png` compared with the one before.
-   The `--poke` extension is written (the screenshot is taken 0.3 s into the press). **PENDING** (needs the build in step 2 and the device's Wireless-debugging port).
+   The `--poke` extension is written (the screenshot is taken 0.3 s into the press). **PENDING** (the APK is built; needs the device's Wireless-debugging port).
 4. Physical remote, by hand. Press OK on the real remote in the condo (hop) and in the aquarium. Expected: the condo hops; in the aquarium nothing visible unless its script reads A,
    and **no change to D-pad behaviour**. Record what was seen.
 5. The D-pad and gamepad keys are untouched. Re-run the existing `--poke` (D-pad RIGHT, then UP). Expected: the fish still moves.
