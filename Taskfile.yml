@@ -792,6 +792,36 @@ tasks:
       - mkdir -p "$(dirname '{{.CD_OUT}}')"
       - wftools/cdpack-rs/target/release/cdpack wfsource/source/game/shell.fth wflevels/condo_639_640-standalone.iff -o '{{.CD_OUT}}'
 
+  # One cd.iff per game for the Android apps (docs/plans/2026-10-01-split-cd-iff-one-app-per-game.md); the desktop's
+  # multi-level build-cd-iff above is unchanged. Same recipe as build-cd-iff-condo. The tracked outputs are checked against
+  # today's standalone levels by tests/test_game_apps_android.py: rebuild whenever one of the levels changes.
+  build-cd-iff-smb:
+    desc: "Assemble the SMB cd.iff (TOC 0..3 = W1-1..W1-4, the same indices as the desktop bundle, so the flag/axe LEVEL_TO_RUN chain 1, 2, 3, 0 is unchanged) via cdpack-rs → wflevels/smb-cd.iff, or CD_OUT=<path>. The Android smb app bundles it"
+    vars:
+      CD_OUT: '{{.CD_OUT | default "wflevels/smb-cd.iff"}}'
+    cmds:
+      - cargo build --release --manifest-path wftools/cdpack-rs/Cargo.toml
+      - mkdir -p "$(dirname '{{.CD_OUT}}')"
+      - wftools/cdpack-rs/target/release/cdpack wfsource/source/game/shell.fth wflevels/smb_w1_1-standalone.iff wflevels/smb_w1_2-standalone.iff wflevels/smb_w1_3-standalone.iff wflevels/smb_w1_4-standalone.iff -o '{{.CD_OUT}}'
+
+  build-cd-iff-snowgoons:
+    desc: "Assemble the snowgoons-only cd.iff (TOC 0 = wflevels/snowgoons-standalone.iff, which writes no LEVEL_TO_RUN) via cdpack-rs → wflevels/snowgoons-cd.iff, or CD_OUT=<path>. The Android snowgoons app (org.worldfoundry.wf_game) bundles it"
+    vars:
+      CD_OUT: '{{.CD_OUT | default "wflevels/snowgoons-cd.iff"}}'
+    cmds:
+      - cargo build --release --manifest-path wftools/cdpack-rs/Cargo.toml
+      - mkdir -p "$(dirname '{{.CD_OUT}}')"
+      - wftools/cdpack-rs/target/release/cdpack wfsource/source/game/shell.fth wflevels/snowgoons-standalone.iff -o '{{.CD_OUT}}'
+
+  build-cd-iff-qbert:
+    desc: "Assemble the Q*bert-only cd.iff (TOC 0 = wflevels/qbert_practice-standalone.iff, which writes no LEVEL_TO_RUN) via cdpack-rs → wflevels/qbert-cd.iff, or CD_OUT=<path>. The Android qbert app bundles it"
+    vars:
+      CD_OUT: '{{.CD_OUT | default "wflevels/qbert-cd.iff"}}'
+    cmds:
+      - cargo build --release --manifest-path wftools/cdpack-rs/Cargo.toml
+      - mkdir -p "$(dirname '{{.CD_OUT}}')"
+      - wftools/cdpack-rs/target/release/cdpack wfsource/source/game/shell.fth wflevels/qbert_practice-standalone.iff -o '{{.CD_OUT}}'
+
   run-marble-3d-astra:
     desc: "Run Astra Marble Madness from cd.iff (level 6; arrows roll, Space restarts)"
     deps: [ensure-build]
