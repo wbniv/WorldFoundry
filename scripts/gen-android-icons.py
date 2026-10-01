@@ -20,9 +20,11 @@ The art, all committed so the output is deterministic (android/app/art-src/ unle
              (resting higher) and the anemone's crown
              + docs/plans/2026-09-30-aquarium-chromecast/frame-a-1920x1080.png for the banner (the whole tank)
   condo      condo-pullback-1920x1080.png        scripts/capture-condo-pullback.py: the camera pulled back and lowered
+  smb        smb-w1-1-super-mario-640.png        a copy of tests/screenshots/smb_mushroom_02_super.png (W1-1, the engine's test harness)
+  qbert      qbert-pyramid-640x480.png           a copy of docs/plans/2026-09-20-relight-swept-levels/qbert-after.png (an engine render)
 
 Usage:
-    scripts/gen-android-icons.py [GAME ...] [-h]        (GAME is snowgoons, aquarium or condo; default all three)
+    scripts/gen-android-icons.py [GAME ...] [-h]        (GAME is snowgoons, aquarium, condo, smb or qbert; default all)
 """
 import argparse
 import importlib.util
@@ -48,6 +50,13 @@ GAMES = {
                      banner_crop=(280, 88, 1640, 853), name="aquarium"),
     "condo": dict(icon=ART / "condo-pullback-1920x1080.png", icon_crop=(1040, 160, 1920, 1040),
                   banner=ART / "condo-pullback-1920x1080.png", banner_crop=(0, 0, 1920, 1080), name="condo"),
+    # docs/plans/2026-10-01-split-cd-iff-one-app-per-game.md: real engine frames, 640 px wide (so the big icons are upscaled).
+    # The icon crops keep Mario and the ? blocks (the pyramid and Q*bert) inside the middle two thirds, which is
+    # all the legacy icon and the launcher's mask show; the banner crops start below the score line.
+    "smb": dict(icon=ART / "smb-w1-1-super-mario-640.png", icon_crop=(210, 182, 540, 512),
+                banner=ART / "smb-w1-1-super-mario-640.png", banner_crop=(0, 200, 640, 560), name="smb"),
+    "qbert": dict(icon=ART / "qbert-pyramid-640x480.png", icon_crop=(90, 20, 550, 480),
+                  banner=ART / "qbert-pyramid-640x480.png", banner_crop=(0, 60, 640, 420), name="qbert"),
 }
 
 BANNER = (640, 360)
@@ -119,7 +128,7 @@ def build(game):
 
 def main():
     ap = argparse.ArgumentParser(description=__doc__.split("\n\n")[0], formatter_class=argparse.RawDescriptionHelpFormatter)
-    ap.add_argument("games", nargs="*", help="snowgoons, aquarium and/or condo (default: all)")
+    ap.add_argument("games", nargs="*", help="snowgoons, aquarium, condo, smb and/or qbert (default: all)")
     a = ap.parse_args()
     bad = [g for g in a.games if g not in GAMES]
     if bad:
