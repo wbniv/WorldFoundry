@@ -9,7 +9,6 @@
 - [wip T2] **iOS Phase 3+.** <!-- agent:a13fd904ea2308381 --> No matching phase-numbered iOS plan found (`docs/plans/2026-04-16-ios-port.md` has no "Phase 3"); needs scoping before dispatch. The Android launcher polish half of this line is done — see `## Done`.
 - [T3] **Android size trim iter 2 — miniaudio Vorbis trim + Windows-path deletion** (the `-fno-exceptions` / `-fvisibility=hidden` halves already shipped). [plan](docs/plans/2026-04-18-android-size-trim-iter-2.md)
 - [T3] **Audio assets from IFF** — bundle MIDI/SF2/WAV inside `cd.iff`; retire loose-file audio loaders. [plan](docs/plans/2026-04-18-audio-assets-from-iff.md)
-- [T4] **Phone as a gamepad for the Chromecast apps** — a web controller the TV app serves over the local Wi‑Fi (stick, buttons, tilt, haptics); the only way to reach the condo's teleport (C), orbit (D) and zoom (E/F) without a paired gamepad, since the remote has just the D-pad and OK. Designed with mockups, not started. T4: a first network surface plus the engine input merge, where a wrong turn is a security or stuck-button bug. [plan](docs/plans/2026-09-30-aquarium-chromecast.md) (Phase E)
 - [T3] **Split the multi-level `cd.iff` into one app per game** — the `snowgoons` flavor bundles `wfsource/source/game/cd.iff` (several levels); the aquarium and condo already ship one-level `cd.iff` files as separate apps. T3: the recipe exists twice over (aquarium, condo: flavor, one-level `cd.iff` task, art, test); multi-file, no new design. [plan](docs/plans/2026-10-01-android-icons.md#related-todo-items-asked-for-in-the-same-message)
 - [T4] **Implement a menu selector for the multi-level `cd.iff`** — pick a level at launch instead of booting level 0, as the alternative (or addition) to separate apps. T4: no design yet (what draws the menu, how the shell picks a TOC level, remote-only input); design plus engine work. [plan](docs/plans/2026-10-01-android-icons.md#related-todo-items-asked-for-in-the-same-message)
 - [T4] **Sound effects without Lua: a per-level sound bank** — the trigger (mailbox 3017) already works from any engine; a level cannot carry its own sounds, so the Chromecast apps have none. T4: Phase A is a spike into an unknown (how a `.wav` reaches a level IFF) and Phase B crosses `levcomp-rs`, `iffcomp-rs` and `Level`; later phases rank lower in the plan. [plan](docs/plans/2026-10-01-sfx-without-lua.md)
@@ -101,6 +100,7 @@
 - **Relay connect: live two-machine joiner over public `wss://`** — the code fix (host loopback connect + time-budget retry + `connect_retry.h`) landed and is unit-tested; steps 3–5 (a real two-machine joiner run) remain open. [plan](docs/plans/2026-06-01-relay-connect-localhost-and-resilient-retry.md)
 - **Live two-instance collab-undo GUI wiring** — the origin-gating property is covered deterministically by `test_undo_local_only_across_sync`; this is belt-and-suspenders confirmation of `DoUndo`/`DoRedo` + `CollabDrain` via two DISPLAY-bound windows + the relay. Trigger: a live editor session, or a suspected collab-undo regression. [plan](docs/plans/2026-05-22-yrs-upgrade-and-native-undo.md)
 - **wf-edit named tunnel — live verification** — needs a real Cloudflare account, can't be CI'd; checklist in the [plan](docs/plans/2026-05-30-quick-tunnel-named-tunnel.md).
+- **Phone gamepad: the on-phone checks nobody has run** — the aquarium layout, wrong PIN, a second phone, Wi-Fi off and a deliberate lock on a real phone, the latency numbers, an iPhone; plan steps 14 and 15, still PENDING. [plan](docs/plans/2026-09-30-aquarium-chromecast.md)
 
 ### Monitor
 
@@ -143,6 +143,8 @@
 - Foundry Linux Phase 0 — split `install.sh` into per-metapackage scripts. (Lives in the sibling `linuxfoundry.org` repo, out of this tree.) [plan](docs/plans/2026-05-17-per-metapackage-install-scripts.md)
 - Chromecast remote: map more keys (Back, Menu, long-press OK) to B/C/D. A (OK) already does the condo's doors and shade; teleport, orbit and zoom wait for the phone gamepad (Open). Revisit only if that slips. [plan](docs/plans/2026-10-01-chromecast-ok-button.md)
 - Android: map a keyboard's Enter (`KEYCODE_ENTER` / `KEYCODE_NUMPAD_ENTER`) to button A. Not what the Chromecast remote sends; one line in `MapKeyCode` when someone plugs a keyboard in. [plan](docs/plans/2026-10-01-chromecast-ok-button.md)
+- Phone gamepad: tilt steering (E6). Needs a TLS library in the app and a self-signed certificate whose key ships in the repo; the user's call. [plan](docs/plans/2026-09-30-aquarium-chromecast.md)
+- Phone gamepad: game-driven haptics (E7). Rides on the sound-effects plan's sound slots, so it waits for that plan's Phase B. [plan](docs/plans/2026-09-30-aquarium-chromecast.md)
 
 ### Future evaluation
 
@@ -151,6 +153,7 @@
 
 ## Done
 
+- ✅ 2026-10-01 — [phone-gamepad] Phone as a gamepad on the Chromecast apps: server, QR overlay, per-app layouts; user-tested on a real phone. See [plan](docs/plans/2026-09-30-aquarium-chromecast.md).
 - ✅ 2026-10-01 — [chromecast-ok-button] Remote OK = button A; condo A toggles doors + shade. See [plan](docs/plans/2026-10-01-chromecast-ok-button.md).
 - ✅ 2026-09-30 — [clownfish-poster] A3 biomechanics poster built (PDF, 35 tests); print unverified, S2/S9 URLs missing. See [plan](docs/plans/2026-09-30-clownfish-biomechanics-poster.md).
 
