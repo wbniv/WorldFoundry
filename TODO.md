@@ -170,6 +170,8 @@
 - [x] 2026-09-21 — [marble-astra-cd] Added Astra as bundled level 6, retained all six existing payloads, and verified the main-checkout Task launcher with a zero-fall playthrough. [Plan](docs/plans/2026-09-21-add-marble-astra-to-cd-iff.md).
 
 - ✅ 2026-09-30 — [clownfish-idle-animation] Canonical five-part clownfish: invisible Physics hull + Director-posed parts, Forth idle rig, no engine change. See [plan](docs/plans/2026-09-30-clownfish-idle-animation.md).
+- ✅ 2026-09-25 — [condo-camera-controls] Forth-only condo camera inspection controls; desktop and touch regressions pass. See [plan](docs/plans/2026-09-25-condo-camera-controls.md).
+- ✅ 2026-09-25 — [forth-comments] Shared Forth comments and comment/string-aware script splitting; condo workaround removed. See [plan](docs/plans/2026-09-25-forth-comments-and-script-loading.md).
 - ✅ 2026-09-21 — [backface-cull-default] Flipped `WF_CULL` ON by default (`WF_CULL=0` opts out) after a 20-level A/B sweep: 15 byte-identical, 5 within their known 93–167 px back-face-bleed residual; docs + `tests/test_backface_cull_invariant.py` guard. See [plan](docs/plans/2026-06-13-planetarium-dome-view-engine-wide-backface-culling.md).
 - ✅ 2026-09-21 — [android-launcher-polish] Adaptive-icon XML (`mipmap-anydpi-v26/ic_launcher{,_round}.xml`, `..._log{,_round}.xml`) over generated foreground/background drawables at all 5 densities, plus a distinct icon for `LogViewerActivity`; verified via XML validation, manifest↔resource cross-check, and rendered icon preview (no local Android SDK/device on this machine, so the plan's gradle-build + on-device verification steps are still outstanding). See [plan](docs/plans/2026-04-18-android-launcher-polish.md).
 - ✅ 2026-09-21 — [marble-madness-cull] Deduped floors/paths, relit from +52°, righted the inside-out ball; cull on == off. See [plan](docs/plans/2026-06-13-planetarium-dome-view-engine-wide-backface-culling.md).
@@ -409,11 +411,9 @@ _Auto-added from plan "Out of scope"/"Deferred" sections at commit time. Triage 
 - [ ] **(triage)** Hearing audio on iOS: it needs a real device with Apple signing. — _from [2026-10-01-sfx-without-lua.md](docs/plans/2026-10-01-sfx-without-lua.md)_  <!-- fp:5ef7e8c494a4dfe1 -->
 <!-- END auto-captured-deferrals -->
 
-- [x] Implemented Forth-only condo camera inspection controls; desktop/touch input regressions passed. [Plan and mockups](docs/plans/2026-09-25-condo-camera-controls.md)
 
 - [ ] Validate condo camera touch controls on physical Android phones/tablets and confirm iPhone/iPad host bindings. [Plan](docs/plans/2026-09-25-condo-camera-controls.md)
 
-- [x] Fixed shared Forth comments and comment/string-aware script splitting; removed the condo workaround and verified loading/reload. [Plan](docs/plans/2026-09-25-forth-comments-and-script-loading.md)
 
 - [ ] Redesign the shared Forth script loader around parser/compiler boundaries, including arbitrary defining/immediate-word layouts; separate from the focused comment fix. [Context](docs/plans/2026-09-25-forth-comments-and-script-loading.md)
 - [ ] Investigate transactional Forth hot-reload dictionary rollback and reclamation; preserving an actor entry alone does not undo changed definitions. [Context](docs/plans/2026-09-25-forth-comments-and-script-loading.md)
