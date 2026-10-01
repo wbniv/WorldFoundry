@@ -1492,3 +1492,28 @@ tasks:
       - cmake -S . -B cmake-build-asan -DCMAKE_BUILD_TYPE=Debug -DWF_ASAN=ON
       - cmake --build cmake-build-asan -j --target wf_game
       - cd wfsource/source/game && DISPLAY=:0 ASAN_OPTIONS=halt_on_error=1:detect_leaks=1 UBSAN_OPTIONS=halt_on_error=1 ../../../engine/wf_game -L../../../wflevels/smb_w1_1-standalone.iff --wfmut-smoke
+
+  # ─── Level menu (docs/plans/2026-10-01-level-menu-selector.md) ──────────────
+  build-cd-iff-smb-menu:
+    desc: "Assemble the SMB world-select bundle: shell-menu.fth + the four SMB levels at smb-cd.iff's TOC indices + a MENU chunk (names from wflevels/smb-menu.manifest) via cdpack-rs → wflevels/smb-menu-cd.iff, or CD_OUT=<path>. Opt-in; build-cd-iff-smb is unchanged"
+    vars:
+      CD_OUT: '{{.CD_OUT | default "wflevels/smb-menu-cd.iff"}}'
+    cmds:
+      - cargo build --release --manifest-path wftools/cdpack-rs/Cargo.toml
+      - mkdir -p "$(dirname '{{.CD_OUT}}')"
+      # The manifest lists the levels (paths relative to it) and their menu names; shell-menu.fth
+      # writes LEVEL_TO_RUN = -1 so the engine shows the menu (game/level_menu.cc).
+      - wftools/cdpack-rs/target/release/cdpack wfsource/source/game/shell-menu.fth --manifest wflevels/smb-menu.manifest -o '{{.CD_OUT}}'
+
+  run-smb-menu:
+    desc: "Run wf_game on the SMB world-select bundle (from build-smb-menu/, gitignored): Up/Down choose, Space starts, Backspace in a level returns to the menu"
+    deps: [ensure-build, build-cd-iff-smb-menu]
+    cmds:
+      - mkdir -p build-smb-menu
+      - cp wflevels/smb-menu-cd.iff build-smb-menu/cd.iff
+      - cd build-smb-menu && LD_LIBRARY_PATH=../engine/libs DISPLAY=${DISPLAY:-:0} ../engine/wf_game {{.CLI_ARGS}}
+
+  test-level-menu:
+    desc: "Level-menu tests: cdpack byte-identity and MENU chunk, the menu module under ASan/UBSan, scripted input, and the real engine on the desktop display (skipped without DISPLAY)"
+    cmds:
+      - python3 -m pytest tests/test_level_menu.py -v
