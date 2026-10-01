@@ -167,14 +167,41 @@ def test_silence_for_one_second_releases_every_button(host):
     assert host.state() == {"mask": 0, "phone": False, "running": True}
 
 
-def test_heartbeat_keeps_the_button_held(host):
+def test_50ms_keepalive_holds_the_button_without_flooding_the_log(host):
+    """The page sends its mask every 50 ms (controller.html KEEPALIVE_MS). 2.5 s of that: the button stays held,
+    the host sees ONE mask change (the engine glue logs per change, not per frame) and the server logs nothing."""
     ws = connect_phone(host)
     hold(host, ws, RIGHT)
-    for _ in range(10):                       # 2.5 s of 250 ms heartbeats
-        time.sleep(0.25)
+    n_log = len(host.log)
+    for _ in range(50):
+        time.sleep(0.05)
         ws.send_mask(RIGHT)
     assert host.state() == {"mask": RIGHT, "phone": True, "running": True}
-    assert not any(line.startswith("MASK 0x0000") for line in host.log)
+    after = host.log[n_log:]
+    assert not [line for line in after if line.startswith(("MASK", "LOG", "EVENT"))], after
+
+
+def test_a_burst_of_frames_cannot_overflow_anything(host):
+    """Two seconds' worth of 20 Hz frames, and 50 times that, sent back to back (a phone catching up after
+    a stall): no protocol error, no release, one mask change, and the connection still answers."""
+    ws = connect_phone(host)
+    ws.send_raw(b"".join(ws.frame(1, b"b:2000") for _ in range(2000)))
+    host.expect_mask(RIGHT)
+    ws.send_text("t:42")
+    assert ws.recv() == (1, b"t:42")
+    assert host.state() == {"mask": RIGHT, "phone": True, "running": True}
+    assert "EVENT lost" not in host.log and "EVENT wrongpin" not in host.log
+
+
+def test_frames_a_throttled_tab_sends_do_not_keep_a_button_held(host):
+    """A backgrounded tab's timers drop to about 1 Hz or stop (a locked phone). The page closes the socket on
+    'hidden' itself (test_phone_controller_page.py); if it cannot run at all, gaps over 1 s release here."""
+    ws = connect_phone(host)
+    hold(host, ws, RIGHT)
+    time.sleep(1.2)
+    ws.send_mask(RIGHT)
+    host.expect(r"^EVENT lost$", timeout=1)
+    host.expect_mask(0)
 
 
 def test_newest_phone_wins_and_the_first_is_told(host):

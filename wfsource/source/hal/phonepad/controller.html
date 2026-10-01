@@ -10,7 +10,11 @@
   Plan: docs/plans/2026-09-30-aquarium-chromecast.md, Phase E, mockups 2 and 4.
   One file, inline CSS and JS, no external references. The layout (which buttons, which
   EJ_BUTTONF_* bits) comes from /layout.json, one per app. Protocol: "b:<hex mask>" on every
-  change and every 250 ms, "t:<ms>" once a second (the TV echoes it: round-trip time).
+  change and every KEEPALIVE_MS (50 ms) while connected, "t:<ms>" once a second (the TV echoes
+  it: round-trip time). The steady 50 ms stream is not for safety (the TV releases after 1 s of
+  silence either way) but for latency: the Chromecast's Wi-Fi dozes between packets, which gave a
+  median round trip of 156 ms with 250 ms frames and 21 to 28 ms with 20 to 50 ms frames
+  (docs/plans/2026-09-30-aquarium-chromecast.md, Phase E progress).
   Keep-awake: the plain http page has no Wake Lock (secure contexts only), so a silent looping
   video plays while connected; it was made with
     ffmpeg -f lavfi -i color=black:s=16x16:r=1 -t 2 -c:v libx264 -pix_fmt yuv420p
@@ -76,7 +80,7 @@ body.off .ctl{opacity:.35}
 (function () {
   const $ = (id) => document.getElementById(id);
   const K = new URLSearchParams(location.search).get('k') || '';
-  const HEARTBEAT_MS = 250, PING_MS = 1000, RETRY_MS = 1000, UNREACHABLE_MS = 5000;
+  const KEEPALIVE_MS = 50, PING_MS = 1000, RETRY_MS = 1000, UNREACHABLE_MS = 5000;
 
   let layout = null, ws = null, state = 'connecting', mask = 0, sentMask = -1;
   let heartbeat = 0, pinger = 0, retryTimer = 0, lastOpen = Date.now(), wakeLock = null;
@@ -256,7 +260,7 @@ body.off .ctl{opacity:.35}
       lastOpen = Date.now();
       setState('connected', 'Connected to the TV', 'ok');
       sentMask = -1; update(true);
-      heartbeat = setInterval(() => update(true), HEARTBEAT_MS);
+      heartbeat = setInterval(() => update(true), KEEPALIVE_MS);   // a press still goes at once, from update(false)
       pinger = setInterval(() => send('t:' + Date.now()), PING_MS);
       keepAwake(true);
     };
@@ -320,7 +324,7 @@ body.off .ctl{opacity:.35}
   document.addEventListener('contextmenu', (e) => e.preventDefault());
 
   // For the headless tests (tests/test_phone_controller_page.py).
-  window.__wf = { mask: () => mask, state: () => state };
+  window.__wf = { mask: () => mask, state: () => state, keepaliveMs: KEEPALIVE_MS };
 
   if (!/^[0-9]{6}$/.test(K)) { state = 'wrongpin'; fatal('Scan the code on the TV to play.', 'The address needs the PIN shown on the TV.'); }
   else start();

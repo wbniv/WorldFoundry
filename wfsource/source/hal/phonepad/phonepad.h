@@ -24,7 +24,8 @@
 //   GET /layout.json?k= the per-app layout (this app's buttons and bits)
 //   GET /ws?k=          WebSocket upgrade (RFC 6455)
 //   phone -> TV  "b:<1-4 hex>"   the 16-bit EJ_BUTTONF_* mask, on every change
-//                                and as a 250 ms heartbeat
+//                                and every 50 ms while connected (a keep-alive that
+//                                stops the TV's Wi-Fi dozing; see controller.html)
 //                "t:<1-15 digits>" a page timestamp, echoed back unchanged
 //                "<a-z>:<printable>" any other type: ignored (forward
 //                                compatible), still counts as a heartbeat

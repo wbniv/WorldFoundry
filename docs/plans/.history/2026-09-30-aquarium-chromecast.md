@@ -1,5 +1,7 @@
 | Date | Change |
 |------|--------|
+| [2026-10-01](https://github.com/wbniv/WorldFoundry/commit/ec342020) | Phone controller: log every accepted connection and any closed before a request; record the first phone session |
+| [2026-10-01](https://github.com/wbniv/WorldFoundry/commit/9cfb58b5) | Aquarium-Chromecast plan and phone mockups: the condo's A is doors and shade, no B button; status of Phase E |
 | [2026-10-01](https://github.com/wbniv/WorldFoundry/commit/ab919ab8) | Phone as a gamepad, E3: the QR code on the TV overlay (vendored Nayuki qrcodegen, MIT) |
 | [2026-10-01](https://github.com/wbniv/WorldFoundry/commit/6697f300) | Phone as a gamepad, E2: Android wiring, INTERNET for aquarium and condo, the TV overlay with URL and PIN |
 | [2026-10-01](https://github.com/wbniv/WorldFoundry/commit/3c51eafc) | Phone as a gamepad, E1: portable server, protocol and controller page, tested headless on Linux |
@@ -11,6 +13,16 @@
 | [2026-10-01](https://github.com/wbniv/WorldFoundry/commit/c48d5a8b) | Write the missing aquarium-on-Chromecast plan (four docs linked to it): rebuilt from the commits and device-run evidence |
 
 <!--history-meta v1
+ec342020	author	Will Norris
+ec342020	added	20
+ec342020	deleted	3
+ec342020	files	1
+ec342020	body	The user's first scan showed a page that never loaded and the TV logged nothing, because only completed\nrequests were logged; the phone turned out to be on another network. phonepad.cc now logs "connection\nfrom <peer>" on accept, "<peer> closed the connection before a complete request (N bytes received)", and\nthe byte count on the 5 s request timeout, so "never reached the TV" is visible in logcat. Test included\n(fails on the previous phonepad.cc).\n\nPlan: a risk-table row for a phone on another network; verification 14 and 15 record the user's session\non the Chromecast HD (condo, PASS by hand report, backed by the TV's log: page served, A/C/D/E/F, the stick,\nD+stick orbit, two unexplained 1 s timeouts while idle that released and reconnected) and what was not\ntested (aquarium, latency, wrong PIN / second phone / Wi-Fi off on a real phone, a deliberate lock).\n\nCo-Authored-By: Claude Opus 5.5 <noreply@anthropic.com>\nClaude-Session: https://claude.ai/code/session_01DxMP4jUNjCjDz8E9DWzXcM
+9cfb58b5	author	Will Norris
+9cfb58b5	added	6
+9cfb58b5	deleted	9
+9cfb58b5	files	1
+9cfb58b5	body	Since 41742943 the condo's A toggles the glass doors and the balcony shade, there is no hop and B does\nnothing on its own. Design item 3 ("A hop, B doors"), the Why paragraph and the note on the user's layout\ndecision now say so; mockup 2 shows A "doors / shade", no B, E zoom in and F zoom out (as camera_controls.fth\nuses them), the engine's real EJ_BUTTONF bits in its mask line and the engine's stick threshold (0.5);\nmockup 3's table and mockup 4's keep-awake card match what was built. The newer Phase E sub-step list,\nwhich had landed above the title, replaces the older one. Mockups regenerated with make_phone_mockups.py.\n\nCo-Authored-By: Claude Opus 5.5 <noreply@anthropic.com>\nClaude-Session: https://claude.ai/code/session_01DxMP4jUNjCjDz8E9DWzXcM
 ab919ab8	author	Will Norris
 ab919ab8	added	5
 ab919ab8	deleted	1

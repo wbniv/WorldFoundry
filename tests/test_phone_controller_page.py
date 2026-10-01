@@ -155,6 +155,77 @@ def test_two_fingers_stick_and_button_together(browser, condo):
         ctx.close()
 
 
+SPY = """
+window.__sent = [];
+const _send = WebSocket.prototype.send;
+WebSocket.prototype.send = function (d) { window.__sent.push([performance.now(), String(d)]); return _send.call(this, d); };
+document.addEventListener('pointerdown', () => { window.__down = performance.now(); }, true);
+"""
+
+
+def test_keepalive_is_at_most_50ms_and_a_press_is_not_delayed_by_it(browser, condo):
+    src = PAGE.read_text()
+    ms = int(re.search(r"const KEEPALIVE_MS = (\d+)", src).group(1))
+    assert ms <= 50, "the TV's Wi-Fi dozes between frames: 250 ms frames gave a 156 ms median round trip"
+    ctx = browser.new_context(viewport=VIEW, has_touch=True, is_mobile=True)
+    ctx.add_init_script(SPY)
+    page = ctx.new_page()
+    try:
+        page.goto(f"http://127.0.0.1:{condo.port}/?k={PIN}")
+        wait_state(page, "connected")
+        assert page.evaluate("window.__wf.keepaliveMs") == ms
+        time.sleep(1.0)
+        t = page.evaluate("window.__sent.filter(f => f[1].startsWith('b:')).map(f => f[0])")
+        recent = [x for x in t if x > t[-1] - 1000]
+        assert len(recent) >= 15, f"{len(recent)} mask frames in the last second; expected about {1000 // ms}"
+        x, y, _ = centre(page, '.btn[data-id="A"]')
+        page.mouse.move(x, y)
+        page.mouse.down()
+        condo.expect_mask(A)
+        down, first = page.evaluate("[window.__down, window.__sent.find(f => f[1] === 'b:1' && f[0] >= window.__down)[0]]")
+        assert first - down < 10, f"the press went out {first - down:.1f} ms after the touch: it waited for the timer"
+        page.mouse.up()
+        condo.expect_mask(0)
+    finally:
+        ctx.close()
+
+
+def test_hidden_page_releases_at_once(browser, condo):
+    """A locked phone or another tab: the page releases and closes on 'visibilitychange' (hidden)."""
+    ctx, page = open_page(browser, condo)
+    try:
+        wait_state(page, "connected")
+        x, y, _ = centre(page, '.btn[data-id="A"]')
+        page.mouse.move(x, y)
+        page.mouse.down()
+        condo.expect_mask(A)
+        page.evaluate("Object.defineProperty(document, 'hidden', {get: () => true});"
+                      "document.dispatchEvent(new Event('visibilitychange'))")
+        condo.expect_mask(0, timeout=0.5)
+        wait_state(page, "paused")
+    finally:
+        ctx.close()
+
+
+def test_frozen_page_is_released_by_the_tv_timeout(browser, condo):
+    """If the phone stops the page's script outright (no timers, no visibilitychange), the TV's 1 s timeout releases.
+    Modelled by pausing the page in the debugger."""
+    ctx, page = open_page(browser, condo)
+    try:
+        wait_state(page, "connected")
+        x, y, _ = centre(page, '.btn[data-id="A"]')
+        page.mouse.move(x, y)
+        page.mouse.down()
+        condo.expect_mask(A)
+        cdp = ctx.new_cdp_session(page)                 # stop all script, as a locked phone does
+        cdp.send("Debugger.enable")
+        cdp.send("Debugger.pause")
+        condo.expect(r"^EVENT lost$", timeout=2.5)
+        assert condo.state()["mask"] == 0
+    finally:
+        ctx.close()
+
+
 def test_held_button_survives_past_the_timeout_thanks_to_the_heartbeat(browser, condo):
     ctx, page = open_page(browser, condo)
     try:
@@ -163,7 +234,7 @@ def test_held_button_survives_past_the_timeout_thanks_to_the_heartbeat(browser, 
         page.mouse.move(x, y)
         page.mouse.down()
         condo.expect_mask(A)
-        time.sleep(2.2)                               # > 2 x the TV's 1 s timeout; nothing changes on the page
+        time.sleep(2.2)                               # > 2 x the TV's 1 s timeout; only the 50 ms keep-alive flows
         assert condo.state() == {"mask": A, "phone": True, "running": True}
         assert re.match(r"rtt \d+ ms", page.locator("#rtt").inner_text())
         page.mouse.up()

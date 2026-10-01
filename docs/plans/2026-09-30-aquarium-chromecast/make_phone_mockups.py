@@ -121,7 +121,7 @@ pad = page("Mockup 2: the phone as the controller (live: click, drag, tilt)", "L
  <button id="neutral">Set neutral</button> <span class="lvl"><span class="lvlring"><span id="bubble"></span></span></span> <code id="tdeg">off</code>
  <span class="sub" style="margin-left:14px">haptics:</span> <code id="hap" style="min-width:120px"></code></div>
 <div class="note" style="max-width:1300px;margin-top:6px">Tilt is quantised into the same four directions as the stick (dead zone: on past 12°, off below 8°), so the TV needs no new input type. Haptics here are a 15 ms tick on every button press, done in the page (Android Chrome only). Turn tilt on and drag the sliders; the mask below ORs the stick, the buttons and the tilt.</div>
-<div class="mask"><span class="sub">sent to the TV on every change (and every 250 ms as a heartbeat):</span><br><code id="mask"></code></div></div>
+<div class="mask"><span class="sub">sent to the TV on every change (and every 50 ms while connected, which keeps the TV's Wi-Fi awake):</span><br><code id="mask"></code></div></div>
 <script>{JS}</script>""", """
 .phone{width:640px;height:296px;background:#05080d;border:6px solid #2b3a52;border-radius:34px;position:relative;padding:8px}.screen{position:absolute;inset:8px;background:#111826;border-radius:26px;overflow:hidden;touch-action:none}
 .status{position:absolute;left:20px;top:10px;font-size:12px;color:#8b98a9}.dot{display:inline-block;width:9px;height:9px;border-radius:50%;background:#56d364;margin-right:4px}
@@ -142,7 +142,7 @@ def card(title, cls, body, shot):
 states = page("Mockup 4: the states, including the failures a living room produces", "Phone screens and the TV panel, each with what the user sees and what the code does.", f"""
 <div class="grid">
  {card("1 Connecting", "", "The page loaded; the WebSocket is opening. Buttons are shown but disabled.", '<div class="ph2"><span class="dot2"></span> Connecting…</div>')}
- {card("2 Connected", "ok", "Buttons live. The mask is sent on every change and as a heartbeat every 250 ms.", '<div class="ph2 g">● Connected to the TV</div>')}
+ {card("2 Connected", "ok", "Buttons live. The mask is sent on every change and every 50 ms (the TV's Wi-Fi dozes between packets otherwise).", '<div class="ph2 g">● Connected to the TV</div>')}
  {card("3 Signal lost", "warn", "No reply for 1 s: buttons grey out and the phone retries every second. <b>The TV releases every button at once</b> (no stuck RIGHT).", '<div class="ph2 w">Reconnecting… <small>buttons off</small></div>')}
  {card("4 Wrong PIN", "bad", "The PIN in the URL does not match this launch's: HTTP 403 and a plain message. No game input accepted.", '<div class="ph2 r">Wrong code. Scan the TV again.</div>')}
  {card("5 Not on the same Wi-Fi", "bad", "Nothing answers within 5 s. The page says why: join the TV's network; a guest network or <i>AP isolation</i> blocks it.", '<div class="ph2 r">Can’t reach the TV.<br><small>Same Wi-Fi? Guest network?</small></div>')}
