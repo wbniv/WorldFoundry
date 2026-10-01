@@ -29,11 +29,13 @@ SMemPool*
 MemPoolConstruct(size_t size,int entries,Memory& memory)
 {
 	assert(size);
-	// Every entry must start WF_POINTER_ALIGN-aligned. Callers pass sizeof(T); on 64-bit hosts that is already
-	// a multiple of 8, but on 32-bit ARM (WF_POINTER_ALIGN is 8 there) sizeof(SMsg) etc. are 20 bytes, which
-	// tripped the old "must be a multiple" assertion and aborted the Android armeabi-v7a build on the Chromecast HD.
-	// Round the entry size up instead: _size (and so the stride) is the rounded size, MemPoolAllocate rounds too.
-	size = ALIGN_POW2(size, WF_POINTER_ALIGN);
+	// Every entry must be able to hold (and be aligned for) a free-list node, so the stride is a multiple of a pointer's
+	// alignment: 4 on 32-bit ARM, 8 on 64-bit hosts. Callers pass sizeof(T), and sizeof(SMsg) is 20 on 32-bit ARM, which the
+	// old "must be a multiple of WF_POINTER_ALIGN (8 there)" assertion rejected and aborted the Android armeabi-v7a build on
+	// the Chromecast HD. WF_POINTER_ALIGN is 8 on 32-bit ARM for heap allocators that may hand out int64/double, but a pool only
+	// stores what its callers put in it: each call site static_asserts alignof(T) <= alignof(void*), so 4 is enough there.
+	// Round the entry size up (a no-op on 64-bit, where every size was already a multiple of 8): _size is the rounded size.
+	size = ALIGN_POW2(size, alignof(_MemPoolFreeEntry));
 	assert(entries);
 	assert(size >= sizeof(_MemPoolFreeEntry));				// make sure our free entry struct will fit
 
@@ -93,7 +95,7 @@ MemPoolAllocate(SMemPool* memPool, size_t size)
 	(void)size;
 //	printf("mempool = %x\n",memPool);
 	VALIDATEMEMPOOL(memPool);			// input validation
-	assert(ALIGN_POW2(size, WF_POINTER_ALIGN) == memPool->_size);	// _size is the rounded entry size
+	assert(ALIGN_POW2(size, alignof(_MemPoolFreeEntry)) == memPool->_size);	// _size is the rounded entry size
 	AssertMsg( memPool->_currentEntries < memPool->_maxEntries,"memPool->_currentEntries=" << memPool->_currentEntries << " memPool->_maxEntries=" << memPool->_maxEntries );
 
 #if MEMPOOL_REALTRACKING

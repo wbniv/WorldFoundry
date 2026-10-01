@@ -87,6 +87,9 @@ const PixelMap* wf_moon_ground_atlas()
 
 //==============================================================================
 
+// The message-port pool packs SMsg entries at a pointer-aligned stride (4 on 32-bit ARM): SMsg must not need more (no int64/double).
+static_assert( alignof( SMsg ) <= alignof( void* ), "SMsg needs more than pointer alignment: the mem pool stride is pointer-aligned" );
+
 WFGame::WFGame( const int nStartingLevel )
 	:
 	// Memory pool for allocating MsgPort messages

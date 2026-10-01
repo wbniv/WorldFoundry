@@ -359,6 +359,10 @@ PublicMessagePortFind(char* name)
 //=============================================================================
 // message system construct/destruct: this is needed for the memory pool tracking
 
+// The pools pack entries at a pointer-aligned stride (4 on 32-bit ARM, see mempool.cc): neither type may need more (no int64/double).
+static_assert(alignof(SMessage) <= alignof(void*), "SMessage needs more than pointer alignment");
+static_assert(alignof(SMessagePort) <= alignof(void*), "SMessagePort needs more than pointer alignment");
+
 void
 _MessageSystemConstruct(int maxMessages,int maxPorts)
 {
