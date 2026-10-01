@@ -1,8 +1,22 @@
 # Plan — Android size trim, iteration 2
 
 **Date:** 2026-04-18
-**Status:** OPEN — neural-forth size gating wired; the `-fno-exceptions` / `-fvisibility=hidden` / Vorbis-trim build changes not yet applied.
+**Status:** IN PROGRESS (2026‑10‑01) — items 1, 2, 3 (`MA_NO_VORBIS`) and 5 shipped on 2026‑04‑18 in `934583ee`; this pass lands the last piece of item 3 (WAV-only decoder init), hides the static C++ runtime's exports, and re-measures. Device smoke test pending.
 **Follow-up to:** [Android port size/RAM report](../investigations/2026-04-18-android-port-size-and-ram.md)
+
+## State as found (2026‑10‑01)
+
+The old status line said none of the build changes were applied; `TODO.md` said the `-fno-exceptions` / `-fvisibility=hidden` halves had shipped. The code says most of the plan had shipped, all in one commit, `934583ee` "feat(android): release build with aggressive size trim" (2026‑04‑18), found with `git log -S`:
+
+| Item | State as found | Evidence |
+|---|---|---|
+| 1. `-fno-exceptions` | **Shipped** in `934583ee` (with `-fno-unwind-tables -fno-asynchronous-unwind-tables`); carried into the `wfengine` target by `d865c405` (the engine library split) | `CMakeLists.txt`: the Clang Release options of `wfengine`, `wf_game` and `Jolt` |
+| 2. `-fvisibility=hidden` + exports | **Shipped** in `934583ee`: `wf_android_export.hp`, `-Wl,--export-dynamic-symbol=ANativeActivity_onCreate`. Annotated functions have since grown from 11 to 18 (lifecycle and phone-overlay HAL calls) | 20 defined dynamic symbols of ours, but **2,061** in all: the static C++ runtime (≈2,020) and zForth (11) still exported |
+| 3. `MA_NO_VORBIS` | **Shipped** in `934583ee` | `miniaudio_impl.cc` |
+| 3. format-specific decoder init | **Not done**: `buffer.cc` still used the generic `ma_decoder_init_memory` with a default config at both sites | `buffer.cc:75`, `:105` |
+| 5. delete `NO_CONSOLE` Windows branch | **Shipped** in `934583ee` | no `NO_CONSOLE` / `WRLExporter` / `windows.h` left in `wfsource/source` |
+
+The [size report](../investigations/2026-04-18-android-port-size-and-ram.md) had already been updated with an iteration‑2 column at the time; only this plan's header was stale.
 
 ## Context
 
@@ -63,6 +77,8 @@ Iteration 2 lands: exceptions off, hidden visibility by default, tighter miniaud
   if (ma_decoder_init_wav_from_memory(data, len, nullptr, &dec) != MA_SUCCESS) { ... }
   ```
   (The config arg goes away; WAV init doesn't take one.)
+
+  **As landed (2026‑10‑01):** miniaudio 0.11.25 has no public `ma_decoder_init_wav_from_memory` (only a `static …__internal` one), so both sites keep `ma_decoder_init_memory` with a config whose `encodingFormat = ma_encoding_format_wav` (`make_wav_decoder_config()` in `buffer.cc`). That is the 0.11 spelling of the same thing: dr_wav first, no trial-and-error. `tests/wav_decoder_init_test.cc` proves it decodes PCM and IMA ADPCM WAV to the same frames as the generic init and refuses Ogg Vorbis and junk either way.
 
 **Expected delta:** ~100–150 KB `.text` (Vorbis decoder is one of the larger ma_* families remaining).
 

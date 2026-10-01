@@ -32,6 +32,15 @@ static void on_sound_end(void* /*userData*/, ma_sound* pSound)
 	        std::memory_order_release, std::memory_order_relaxed));
 }
 
+// Every SFX is a WAV (linear PCM or IMA ADPCM): name the format so the
+// decoder init dispatches to dr_wav directly.
+static ma_decoder_config make_wav_decoder_config()
+{
+	ma_decoder_config dcfg = ma_decoder_config_init_default();
+	dcfg.encodingFormat = ma_encoding_format_wav;
+	return dcfg;
+}
+
 // Called from SoundDevice::tick() on the main thread.
 void DrainDoneSounds()
 {
@@ -68,10 +77,12 @@ void SoundBuffer::play() const
 	PlayInstance* inst = new PlayInstance();
 
 	// SFX format commitment: WAV (linear PCM or IMA ADPCM). With MA_NO_FLAC /
-	// MA_NO_MP3 / MA_NO_VORBIS defined in miniaudio_impl.cc, the generic
-	// format-dispatch init only has the WAV path available — the Vorbis /
-	// FLAC / MP3 decoders don't link in.
-	ma_decoder_config dcfg = ma_decoder_config_init_default();
+	// MA_NO_MP3 / MA_NO_VORBIS defined in miniaudio_impl.cc, WAV is the only
+	// stock decoder compiled in. encodingFormat = wav makes the init go
+	// straight to dr_wav instead of trial-and-error over the format list
+	// (miniaudio 0.11 has no public ma_decoder_init_wav_from_memory; this is
+	// its replacement). Same result for every input as the generic init.
+	ma_decoder_config dcfg = make_wav_decoder_config();
 	if (ma_decoder_init_memory(_impl->data, _impl->len, &dcfg, &inst->dec) != MA_SUCCESS) {
 		fprintf(stderr, "audio: SoundBuffer::play() — decoder init failed\n");
 		delete inst;
@@ -101,7 +112,7 @@ void SoundBuffer::play(float x, float y, float z) const
 
 	PlayInstance* inst = new PlayInstance();
 
-	ma_decoder_config dcfg = ma_decoder_config_init_default();
+	ma_decoder_config dcfg = make_wav_decoder_config();
 	if (ma_decoder_init_memory(_impl->data, _impl->len, &dcfg, &inst->dec) != MA_SUCCESS) {
 		delete inst;
 		return;
