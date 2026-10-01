@@ -1,9 +1,15 @@
 | Date | Change |
 |------|--------|
+| [2026-10-01](https://github.com/wbniv/WorldFoundry/commit/712ccf92) | Aquarium-Chromecast plan: tilt steering and haptics in Phase E; Phase D (audio) tied to the SFX plan |
 | [2026-10-01](https://github.com/wbniv/WorldFoundry/commit/f583faff) | Aquarium-Chromecast plan: add Phase D, the phone as a gamepad (web controller over the LAN), with mockups |
 | [2026-10-01](https://github.com/wbniv/WorldFoundry/commit/c48d5a8b) | Write the missing aquarium-on-Chromecast plan (four docs linked to it): rebuilt from the commits and device-run evidence |
 
 <!--history-meta v1
+712ccf92	author	Will Norris
+712ccf92	added	77
+712ccf92	deleted	21
+712ccf92	files	1
+712ccf92	body	Phase E (the phone as a gamepad) now includes tilt steering and haptics, with what was found rather than\nassumed: on a plain http://<LAN IP> page Chrome has no orientation events and no navigator.wakeLock\n(measured), so tilt needs https from the TV with a self-signed certificate (TLS in the app, a one-time prompt\non the phone) and the plan gets an E0 spike on the user's phone. Corrects two earlier claims of mine: the Wake\nLock needs a secure context, and haptics are not "without protocol changes" (game-driven buzzes need a TV to\nphone message). Condo layout and the digital stick approved by the user. New steps 19 to 21, risks, mockups\n(live tilt strip, haptic indicator, two new state cards).\n\nPhase D (audio) is connected to docs/plans/2026-10-01-sfx-without-lua.md: music here and sound effects there are\nthe two halves of "Audio assets from IFF"; one device listen, with the snowgoons flavor as the free audio-route\ncheck first; the display chain's DVI-identified EDID as a risk; no second loose-file pipeline; one event list for\nspeakers and phone (haptic patterns on sound slots recommended).\n\nNOTE: this commit includes the Phase D (audio) section that another session left uncommitted in this file; my\ntext builds on its Phase D/E renumbering, so the hunks cannot be separated.\n\nCo-Authored-By: Claude Sonnet 5.5 <noreply@anthropic.com>\nClaude-Session: https://claude.ai/code/session_01NNPhRbrqjqMDkScPvTE9yC
 f583faff	author	Will Norris
 f583faff	added	89
 f583faff	deleted	4
