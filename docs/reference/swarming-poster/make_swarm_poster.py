@@ -123,10 +123,10 @@ def panel_a():
 
 # ── B: the zones ─────────────────────────────────────────────────────────────
 def panel_b():
-    W, H = HALF, 204
-    cx, cy = 100, 96
+    W, H = HALF, 190
+    cx, cy = 100, 88
     ro = [1, 6, 12]                                              # r_r, r_r + Δr_o, r_r + Δr_o + Δr_a for the school setting (1, 5, 6)
-    sc = 7.0
+    sc = 6.4
     s = []
     # attraction ring, orientation ring, repulsion ring, blind wedge
     cols = [('#e8f0f6', '#7d9fb5'), ('#d3e4ef', '#5c86a0'), ('#b9d3e4', '#2e6285')]
@@ -161,8 +161,8 @@ def panel_b():
         s.append(T(lx + 18, y + 14, f'{val} {what}', 11, 'start', MUTED, 400))
         y += 32
     s.append(T(lx, y + 2, 'Drawn at the school setting: Δr_o = 5, Δr_a = 6', 11, 'start', INK, 400))
-    c1, w1 = chip(10, 198, 'verified', 'zones, α, r_r: Couzin 2002')
-    c2, w2 = chip(10 + w1 + 8, 198, 'ours', 'widths drawn')
+    c1, w1 = chip(10, 184, 'verified', 'zones, α, r_r: Couzin 2002')
+    c2, w2 = chip(10 + w1 + 8, 184, 'ours', 'widths drawn')
     s += [c1, c2]
     return ''.join(s), W, H
 
@@ -193,10 +193,10 @@ def ramp(v):
 
 def panel_c():
     sw = loadj('sweep.json')
-    W, H = HALF, 204
+    W, H = HALF, 190
     G = sw['grid']
     cells = {(c['dro'], c['dra']): c for c in sw['cells']}
-    x0, y0, cs = 40, 6, 14.6
+    x0, y0, cs = 40, 4, 13.8
     s = []
     for j, dra in enumerate(G):
         for i, dro in enumerate(G):
@@ -232,7 +232,7 @@ def panel_c():
         s.append(T(lx, 74 + k * 15, ch, 11, 'start', INK, 700)); s.append(T(lx + 16, 74 + k * 15, what, 11, 'start', INK))
     s.append(f'<circle cx="{lx + 5}" cy="{74 + 6 * 15 + 1}" r="6" fill="none" stroke="#ffb000" stroke-width="2.4"/>')
     s.append(T(lx + 16, 74 + 6 * 15 + 4, 'our swarm, torus, school', 11, 'start', INK))
-    c1, w1 = chip(10, 198, 'ours', f'N = 100, {sw["reps"]} replicates, {sw["steps"]} steps (paper: 30)')
+    c1, w1 = chip(10, 184, 'ours', f'N = 100, {sw["reps"]} replicates, {sw["steps"]} steps (paper: 30)')
     s.append(c1)
     return ''.join(s), W, H
 
@@ -307,23 +307,46 @@ def wrap_code(lines, width=52):
     return res
 
 
+WORD_NOTE = {
+    'sch-pair': 'one neighbour: blind volume, then repulsion, orientation or attraction',
+    'sch-want': 'the wanted direction from the three sums, or the old heading',
+    'sch-turn': 'turn toward it by at most θτ, keep the heading unit length',
+    'sch-follow': 'one follower, start to finish: scan, walls, startle, turn, move',
+}
+
+
 def panel_f():
     m = loadj('measured.json')
     blocks = forth_blocks()
-    code = []
-    for name in CORE:
-        code += wrap_code(blocks[name])
-    per_col = math.ceil(len(code) / 3)
-    lh = 12.4
-    colw = (CW - 20) / 3
+    bytes_of = {w['name']: (w['bytes'], w['lines']) for w in m['words']}
     W = CW
-    top = 8
-    H_list = top + per_col * lh + 6
-    s = [f'<rect x="4" y="2" width="{W - 8}" height="{H_list:.1f}" fill="#f6f9fb" stroke="{GRID}"/>']
-    for k in range(3):
-        for i, ln in enumerate(code[k * per_col:(k + 1) * per_col]):
+    pad, gap = 8, 8
+    COL_WEIGHT = {n: sum(len(l.strip()) + 6 for l in blocks[n]) for n in CORE}      # width in proportion to the text, so the four columns end at about the same height
+    tot = sum(COL_WEIGHT.values())
+    avail = W - 2 * pad - gap * (len(CORE) - 1)
+    cols, x = [], pad
+    for n in CORE:
+        cwid = avail * COL_WEIGHT[n] / tot
+        chars = int((cwid - 14) / 6.62)
+        cols.append((n, x, cwid, wrap_code(blocks[n], chars)))
+        x += cwid + gap
+    lh = 12.2
+    head = 52
+    nlines = max(len(c[3]) for c in cols)
+    H_list = head + nlines * lh + 10
+    top = 6
+    s = []
+    for n, x, cwid, code in cols:
+        s.append(f'<rect x="{x:.1f}" y="2" width="{cwid:.1f}" height="{H_list:.1f}" fill="#f6f9fb" stroke="{GRID}"/>')
+        s.append(f'<rect x="{x:.1f}" y="2" width="{cwid:.1f}" height="21" fill="{ACC}"/>')
+        s.append(T(x + 7, 17, n, 13, 'start', WHITE, 700, mono=True, bg=ACC))
+        b_, l_ = bytes_of[n]
+        s.append(T(x + cwid - 7, 17, f'{b_} B · {l_} lines', 11, 'end', WHITE, 700, bg=ACC))
+        for k, wl in enumerate(textwrap.wrap(WORD_NOTE[n], int((cwid - 14) / 5.9))[:2]):
+            s.append(T(x + 7, 37 + k * 12, wl, 11, 'start', MUTED, 400, bg='#f6f9fb'))
+        for i, ln in enumerate(code):
             if ln.strip():
-                s.append(T(12 + k * colw, top + 10 + i * lh, ln, 11, 'start', INK, 400, mono=True, bg='#f6f9fb', extra='xml:space="preserve"'))
+                s.append(T(x + 7, head + 8 + i * lh, ln, 11, 'start', INK, 400, mono=True, bg='#f6f9fb', extra='xml:space="preserve"'))
     y0 = H_list + 10
     # bytes per word: top ten and the rest
     words = sorted(m['words'], key=lambda w: -w['bytes'])
@@ -340,7 +363,7 @@ def panel_f():
     x1 = 520
     dev = m.get('device') or {}
     big = [(f'{m["dictionary_bytes"]} B', f'of the {m["dictionary_size"] // 1024} KB dictionary ({100 * m["dictionary_bytes"] / m["dictionary_size"]:.1f} %); {m["code_lines"]} code lines'),
-           (f'{dev.get("ms", float("nan")):.1f} ms', f'one tick, 11 fish, on the Chromecast HD (median of 3 runs of 200); x86 here: {m["x86_ms"]:.1f} ms'),
+           (f'{dev.get("ms", float("nan")):.1f} ms', f'one tick, 11 fish, on the Chromecast HD (median of 3 runs); x86 here {m["x86_ms"]:.1f} ms'),
            (f'{m["error"]["head_max"]:.0e}', 'largest heading error against couzin.py in one tick (the engine’s sine is 0.2 % off)'),
            ('~0.6 ms', 'per follower per tick: spread over frames, the full 10 Hz step is about 6 % of a core')]
     for i, (a_, b_) in enumerate(big):
@@ -418,7 +441,7 @@ def footer_html():
         v = D.SOURCES[k]
         head = f'<a href="{FP.html.escape(v["url"])}">{esc(v["short"])}</a>' if v['url'] else esc(v['short'])
         tag = FP.chip_html('verified' if v['opened'] else 'unverified') if k != 'S5' else FP.chip_html('ours')
-        return f'<li><b>{k}</b> {head} {tag}<br><span class="sub">{esc(v["backs"])}</span></li>'
+        return f'<li><b>{k}</b> {head}<br>{tag} <span class="sub">{esc(v["backs"])}</span></li>'
     keys = list(D.SOURCES)
     cols = [''.join(item(k) for k in keys[i:i + 2]) for i in (0, 2, 4)]
     how = ('<p><b>How to read the chips</b></p>'
@@ -435,7 +458,7 @@ PANELS = {
     'B': ('The model: three zones and a blind volume', panel_b),
     'C': ('The map: p_group over the two zone widths', panel_c),
     'D': ('The rule in eight lines, and the Forth word that does each', panel_d),
-    'F': ('The Forth core, school.fth: the four rule words in full (the rest is in the file), and what it costs', panel_f),
+    'F': ('The Forth core, school.fth: one column per rule word (the rest is in the file), and what it costs', panel_f),
     'G': ('The Forth, running in the tank: swarm, torus, school, and a startle', panel_g),
 }
 
@@ -461,7 +484,7 @@ def build_html():
     body += [f'<div class="row">{panel_html("D")}</div>', f'<div class="row">{panel_html("F")}</div>', f'<div class="row">{panel_html("G")}</div>', footer_html()]
     doc = ('<!DOCTYPE html>\n<!-- Generated by make_swarm_poster.py from swarm_data.py, sweep.json, tank.json, measured.json and school.fth: edit those, not this file. -->\n'
            '<html lang="en"><head><meta charset="utf-8"><title>How a school swarms: collective-motion poster (A3)</title>'
-           f'<style>{FP.CSS.replace('height:76px','height:68px')}</style></head><body><div class="page">{"".join(body)}</div>{FP.FIT_SCRIPT}</body></html>\n')
+           f'<style>{FP.CSS.replace('height:76px','height:68px').replace('padding:10mm;','padding:7mm 10mm;') + 'ul.srcl{width:218px} .foot .cols{gap:10px} .how{min-width:330px}'}</style></head><body><div class="page">{"".join(body)}</div>{FP.FIT_SCRIPT}</body></html>\n')
     return FP.polish(doc)
 
 

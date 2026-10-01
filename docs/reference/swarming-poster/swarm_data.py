@@ -18,16 +18,16 @@ DATA_DATE = "2026-10-01"
 STATUS_TEXT = {"verified": "verified", "unverified": "unverified", "ours": "ours", "other-species": "other species"}
 
 SOURCES = {
-    "S1": dict(short="Couzin et al. 2002, J. Theor. Biol. 218:1–11", url="https://jmvidal.cse.sc.edu/library/couzin02a.pdf", opened=True,
-               backs="zone model, four states, p_group, m_group, Fig. 3 (PDF read)"),
-    "S2": dict(short="Couzin et al. 2005, Nature 433:513–516", url="https://www.nature.com/articles/nature03236", opened=False,
-               backs="informed minority guides a group (summary only)"),
+    "S1": dict(short="Couzin et al. 2002, J. Theor. Biol.", url="https://jmvidal.cse.sc.edu/library/couzin02a.pdf", opened=True,
+               backs="zone model, states, metrics, Fig. 3"),
+    "S2": dict(short="Couzin et al. 2005, Nature", url="https://www.nature.com/articles/nature03236", opened=False,
+               backs="informed minority guides a group"),
     "S3": dict(short="Pitcher 1983, via Wikipedia", url="https://en.wikipedia.org/wiki/Shoaling_and_schooling", opened=False,
-               backs="shoal to school is a continuum (secondary sources)"),
+               backs="shoal to school: a continuum"),
     "S4": dict(short="Ocellaris clownfish (Florida Museum)", url="https://www.floridamuseum.ufl.edu/discover-fish/species-profiles/clown-anemonefish/", opened=False,
-               backs="site-attached, territorial: not schooling fish"),
+               backs="site-attached: not schooling fish"),
     "S5": dict(short="the aquarium level and this repository", url=None, opened=True,
-               backs="tank and fish sizes, zForth, our own runs"),
+               backs="tank, fish, zForth, our runs"),
 }
 GAME = "S5"
 

@@ -25,7 +25,7 @@ Measured, not estimated ([`measured.json`](../reference/swarming-poster/measured
 | Source | 119 lines, 79 of them code (the rest is comments), 7.3 KB |
 | In the zForth dictionary | **2,179 bytes** of the 65,536 available (3.3 %), 33 words |
 | Biggest words | `sch-turn` 283 B, `sch-pair` 240 B, `sch-follow` 211 B, `sch-want` 201 B |
-| One step, 11 fish (10 followers and the leader) | **6.2 ms on the Chromecast HD** (median of 3 runs of 200 ticks); 7.0 ms on this PC |
+| One step, 11 fish (10 followers and the leader) | **6.2 ms on the Chromecast HD** (median of 3 runs of 200 ticks); 8.4 ms on this PC (5 to 8.5 ms across runs: it depends on what else the machine is doing) |
 | Per follower | about 0.6 ms |
 | Against the numpy reference, one tick | position error 3e‑04 body lengths, heading error 1e‑03 (the engine's sine is 0.2 % off) |
 
