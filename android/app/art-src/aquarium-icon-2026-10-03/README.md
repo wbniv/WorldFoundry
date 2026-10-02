@@ -35,3 +35,11 @@ Will then requested more space between the betta's nose and the badge. The final
 Clearance edit prompt:
 
 Edit target: this Aquarium icon source. Change only the lower-left betta's position, preserving its size, identity, colors and flowing fins. Translate the betta LEFT by about 6% of the image width and UP by about 4% of the image height. Its nose should end around x47% of image width, leaving a generous visible gap from the World Foundry badge that will occupy x59%-73%, y61%-77%. Keep its entire tail and fins inside the central circular safe region (center 50%,50%, radius 30%). Preserve all other fish, plants, rocks, water and light exactly. No logos, text, border or padding.
+
+## Lower the betta · version 5
+
+Will found the betta too close to the clownfish after the clearance adjustment. The current generator uses `artwork-betta-lowered.png`, lowering that fish while keeping the horizontal badge clearance. Final imagegen source: `exec-e9b335be-0299-4454-965f-fba6d74b07ac.png`; the original remains in the imagegen output directory.
+
+Lowering edit prompt:
+
+Edit the supplied Aquarium icon illustration. Move ONLY the teal/red betta fish DOWN by 7% of the full image height. Keep its exact current horizontal position, size, orientation, colors and fin shape. Its uppermost fin should be approximately at y55% and its lowest fin at y74% of the square; create clear breathing room between it and the clownfish above. Keep the betta entirely visible inside Android's central circular mask: circle centered at x50%, y50% with radius33% of the image width. Do not move it to the right: retain the broad horizontal gap from the existing badge area at lower right. Preserve the clownfish, tiger barb, plants, water, rocks, lighting and overall illustration exactly. Do not add logos, text, borders or padding.

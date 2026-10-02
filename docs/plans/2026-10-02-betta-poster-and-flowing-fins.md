@@ -297,3 +297,12 @@ Version code 4 / version name 0.4 release builds succeed for all five flavors. T
 Will then requested additional clearance at the betta's nose. Move that fish farther left and slightly up, retaining its size and the complete fins within the circular mask. The stamped icon now has a broad gap between the nose and the badge. The final source and edit prompt are retained with the earlier versions.
 
 [Final version 4 launcher screenshot](2026-10-02-betta-poster-and-flowing-fins/device/aquarium-icon-v4-launcher.png) verifies the visible artwork rather than only the installed APK.
+
+
+### Lowered betta · version 5
+
+Lower the betta roughly seven percent of the full source height, preserving its horizontal distance from the badge. This creates clear water between it and the clownfish. The shared generator uses `artwork-betta-lowered.png`; earlier compositions and all edit prompts remain available for reference. Square, round and adaptive previews retain the full fish and badge.
+
+Aquarium version code 5 / version name 0.5 builds successfully and its launcher-resource check passes. The release APK is installed, and [the actual Google TV screenshot](2026-10-02-betta-poster-and-flowing-fins/device/aquarium-icon-v5-launcher.png) confirms the lower betta and preserved app order. The native libraries and game bundle are byte-identical to version 4.
+
+[Updated Aquarium APK](https://github.com/wbniv/WorldFoundry/releases/tag/android-2026-10-03-icon-v5). The other games remain available in the version 4 release.
