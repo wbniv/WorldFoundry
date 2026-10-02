@@ -939,6 +939,22 @@ tasks:
       - wflevels/aquarium-standalone.iff
       - wflevels/aquarium-cd.iff
 
+  aquarium-arowana-level:
+    desc: "Build Asian Arowana in a broad bare tank"
+    deps: [tools-build]
+    cmds:
+      - bash wflevels/aquarium_arowana/build.sh
+    sources:
+      - wflevels/aquarium_arowana/build.sh
+      - wflevels/aquarium_arowana/*.py
+      - wflevels/aquarium_tanks/*.py
+      - wflevels/aquarium_tanks/arowana_motion.fth
+      - wflevels/aquarium/aquarium_swim.fth
+      - wflevels/aquarium/clownfish_idle.fth
+      - wflevels/aquarium/clownfish.py
+    generates:
+      - wflevels/aquarium_arowana-standalone.iff
+
   aquarium-touch-level:
     desc: "Aquarium, touch profile (phone landscape: D-pad + A/B; A cycles Swim → Depth mode, B darts) → wflevels/aquarium_touch-standalone.iff (git-ignored, regenerable). Run: LD_LIBRARY_PATH=engine/libs engine/wf_game -Lwflevels/aquarium_touch-standalone.iff"
     deps: [tools-build]

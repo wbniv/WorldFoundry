@@ -184,6 +184,36 @@ RenderActor3D::RenderActor3D(Memory& memory, binistream& input,int32 userData, c
 
 //=============================================================================
 
+void RenderActor3D::SetSwimDeformation(float phase, float amplitude, float bend,
+    float finPhase, float finAmplitude, float minX, float maxX)
+{
+    if (!std::isfinite(phase) || !std::isfinite(amplitude) || !std::isfinite(bend) ||
+        !std::isfinite(finPhase) || !std::isfinite(finAmplitude) ||
+        !std::isfinite(minX) || !std::isfinite(maxX) || maxX-minX<.001f) return;
+    Vertex3D* vertices=_object.GetWrittableVertexList();
+    const int count=_object.GetVertexCount();
+    if (!vertices || count<=0) return;
+    if (_swimWeights.empty()) {
+        _swimMinX=minX; _swimMaxX=maxX; _swimWeights.reserve(count);
+        for(int i=0;i<count;i++) {
+            const Vertex3D& v=vertices[i];
+            _swimWeights.push_back(wf_render::SwimWaveWeight::make(v.position.X().AsFloat(),
+                v.position.Y().AsFloat(),minX,maxX,v.u.AsFloat(),v.v.AsFloat()));
+        }
+    }
+    // Reference span is model metadata, not an animation channel.
+    if (minX!=_swimMinX || maxX!=_swimMaxX) return;
+    const float angle=std::fmod(phase,1.f)*6.283185307f;
+    const float finAngle=std::fmod(finPhase,1.f)*6.283185307f;
+    const float sine=std::sin(angle),cosine=std::cos(angle);
+    const float finSine=std::sin(finAngle),finCosine=std::cos(finAngle);
+    amplitude=std::max(0.f,std::min(.12f*(maxX-minX),amplitude));
+    bend=std::max(-.4f,std::min(.4f,bend));
+    finAmplitude=std::max(0.f,std::min(.15f,finAmplitude));
+    for(int i=0;i<count;i++) vertices[i].position.SetY(Scalar(_swimWeights[i].deform(
+        sine,cosine,amplitude,bend,finSine,finCosine,finAmplitude)));
+}
+
 RenderActor3D::~RenderActor3D()
 {
 }

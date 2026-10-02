@@ -1,0 +1,22 @@
+[
+  {
+    "file": "fanghong-asian-arowana.jpg",
+    "author": "Fanghong",
+    "date": "2006-03-05",
+    "source": "https://commons.wikimedia.org/wiki/File:Honglongyu3.jpg",
+    "changes": "Display resizing and cropping black margins through CSS; original file retained",
+    "license": "CC BY-SA 3.0",
+    "license_url": "https://creativecommons.org/licenses/by-sa/3.0/",
+    "sha256": "fed568cef327e8cbe0d320fff0058db7f9c8844b552f652387fa888e58173463"
+  },
+  {
+    "file": "scoute-dich-asian-arowana.jpg",
+    "author": "Scoute-dich / Baumann Productions",
+    "date": "2009-10-24",
+    "source": "https://commons.wikimedia.org/wiki/File:Asiatische_Gabelbart_(Scleropages_formosus).jpg",
+    "changes": "Display resizing only; original file retained",
+    "license": "CC BY-SA 3.0",
+    "license_url": "https://creativecommons.org/licenses/by-sa/3.0/",
+    "sha256": "edf74e7b2b1ceb1efbcd59322486abee5bce07f7b989820535d232caf0e68120"
+  }
+]

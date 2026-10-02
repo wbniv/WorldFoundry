@@ -56,6 +56,7 @@ extern "C" {
 #include <ctime>      // time() for FSN file color-by-age
 #include <chrono>     // the opt-in script profiler (--script-profile)
 
+#include <renderassets/rendacto.hp>
 #include "level.hp"   // theLevel global (extern Level* theLevel); pulls in Actor/PhysicalAttributes
 #include <math/euler.hp>     // Euler — connector orientation
 #include <math/angle.hp>
@@ -1258,6 +1259,19 @@ zf_input_state zf_host_sys(zf_ctx* ctx, zf_syscall_id id, const char* /*last_wor
             } else if (custom == 40) {
                 // tm-count ( -- n )
                 zf_push(ctx, (zf_cell)(float)(int)g_tm_cells.size());
+            } else if (custom == 45) {
+                // swim-deform ( phase amplitude bend fin-phase fin-amplitude min-x max-x actor -- )
+                const int actor=(int)zf_pop(ctx);
+                const float maxX=(float)zf_pop(ctx),minX=(float)zf_pop(ctx);
+                const float finAmplitude=(float)zf_pop(ctx),finPhase=(float)zf_pop(ctx);
+                const float bend=(float)zf_pop(ctx),amplitude=(float)zf_pop(ctx),phase=(float)zf_pop(ctx);
+                if(theLevel && actor>0 && actor<theLevel->GetMaxObjectIndex()) {
+                    BaseObject* object=theLevel->GetObject(actor);
+                    if(object && IsActor(object)) {
+                        static_cast<Actor*>(object)->GetRenderActor().SetSwimDeformation(
+                            phase,amplitude,bend,finPhase,finAmplitude,minX,maxX);
+                    }
+                }
             } else if (custom == 72) {
                 /* Neural-forth dispatch gate: syscall 200 = ZF_SYSCALL_USER + 72.
                  * Pops word-id from stack and routes to nf_dispatch().
@@ -1426,6 +1440,9 @@ void Init(MailboxesManager& mgr)
     r = zf_eval(&g_ctx, ": read-actor-mailbox 152 sys ;");   // custom 24 (3-23 taken)
     if (r != ZF_OK)
         fprintf(stderr, "zforth: init failed (read-actor-mailbox): %d\n", r);
+
+    r = zf_eval(&g_ctx, ": swim-deform 173 sys ;");
+    if (r != ZF_OK) fprintf(stderr, "zforth: swim bridge init failed: %d\n", r);
 
     // FSN filesystem bridge words (custom 3-7 / sys 131-135)
     r = zf_eval(&g_ctx, ": cwd-scan      131 sys ;");
