@@ -1,0 +1,93 @@
+{
+  "apk_sha256": "d7e7ba2f7888d10f1ead9ee5e9eda7bfca243c0c8486e985c735c692afa485a8",
+  "menu": {
+    "version": 1,
+    "levels": 7,
+    "title": "WF Aquarium",
+    "prompt": "Choose a tank",
+    "entries": [
+      [
+        0,
+        "Clownfish & Tiger Barbs"
+      ],
+      [
+        1,
+        "Blue Shrimp"
+      ],
+      [
+        2,
+        "Calm Betta"
+      ],
+      [
+        3,
+        "Jellyfish"
+      ],
+      [
+        4,
+        "Lionfish"
+      ],
+      [
+        5,
+        "Planted Tank"
+      ],
+      [
+        6,
+        "Asian Arowana"
+      ]
+    ]
+  },
+  "native_libraries": {
+    "lib/arm64-v8a/libwf_game.so": "da8598ff0fa7d4578f8fe0226a70a028eb2790b447a283bc6376a31ffd43e17a",
+    "lib/armeabi-v7a/libwf_game.so": "8e3f84b81ea488a025ecd71a238f2b957293d345a68fbe31e8d6a0974a8a1b7f"
+  },
+  "bundle_sha256": "6cf9c5d7bf31f2fd44dde2be96b5d2d7b7f8a7da785738dd7590f752228c161b",
+  "betta_level_sha256": "4d813d1f797fba0c2ffec694ce5c3840a7f76ff6bb00cbc2f303f710a752288f",
+  "actors": 32,
+  "meshes": {
+    "body": {
+      "vertices": 852,
+      "triangles": 1180,
+      "bytes": 31240
+    },
+    "tail": {
+      "vertices": 450,
+      "triangles": 896,
+      "bytes": 21960
+    },
+    "dorsal": {
+      "vertices": 272,
+      "triangles": 540,
+      "bytes": 14312
+    },
+    "anal": {
+      "vertices": 304,
+      "triangles": 604,
+      "bytes": 15592
+    },
+    "near_pectoral": {
+      "vertices": 108,
+      "triangles": 212,
+      "bytes": 6696
+    },
+    "far_pectoral": {
+      "vertices": 108,
+      "triangles": 212,
+      "bytes": 6696
+    },
+    "near_pelvic": {
+      "vertices": 110,
+      "triangles": 216,
+      "bytes": 8360
+    },
+    "far_pelvic": {
+      "vertices": 110,
+      "triangles": 216,
+      "bytes": 8360
+    }
+  },
+  "triangles": 4076,
+  "baseline_actors": 28,
+  "baseline_triangles": 400,
+  "profiling_flags": false,
+  "note": "Final build refresh changes only the pairing overlay help to match Back navigation; profiling APK hashes are retained with the measurement receipts."
+}

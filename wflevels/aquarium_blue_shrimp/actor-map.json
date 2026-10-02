@@ -1,0 +1,577 @@
+{
+  "indices": {
+    "Room": 1,
+    "SunLight": 2,
+    "Camera": 3,
+    "Director": 4,
+    "LevelObj": 5,
+    "Matte": 6,
+    "cs_wide": 7,
+    "LookAt": 8,
+    "Player": 9,
+    "shrimp-00-body": 10,
+    "shrimp-00-tail": 11,
+    "shrimp-00-legs-near": 12,
+    "shrimp-00-legs-far": 13,
+    "shrimp-00-antennae": 14,
+    "shrimp-01-body": 15,
+    "shrimp-01-tail": 16,
+    "shrimp-01-legs-near": 17,
+    "shrimp-01-legs-far": 18,
+    "shrimp-01-antennae": 19,
+    "shrimp-02-body": 20,
+    "shrimp-02-tail": 21,
+    "shrimp-02-legs-near": 22,
+    "shrimp-02-legs-far": 23,
+    "shrimp-02-antennae": 24,
+    "shrimp-03-body": 25,
+    "shrimp-03-tail": 26,
+    "shrimp-03-legs-near": 27,
+    "shrimp-03-legs-far": 28,
+    "shrimp-03-antennae": 29,
+    "shrimp-04-body": 30,
+    "shrimp-04-tail": 31,
+    "shrimp-04-legs-near": 32,
+    "shrimp-04-legs-far": 33,
+    "shrimp-04-antennae": 34,
+    "shrimp-05-body": 35,
+    "shrimp-05-tail": 36,
+    "shrimp-05-legs-near": 37,
+    "shrimp-05-legs-far": 38,
+    "shrimp-05-antennae": 39,
+    "shrimp-06-body": 40,
+    "shrimp-06-tail": 41,
+    "shrimp-06-legs-near": 42,
+    "shrimp-06-legs-far": 43,
+    "shrimp-06-antennae": 44,
+    "shrimp-07-body": 45,
+    "shrimp-07-tail": 46,
+    "shrimp-07-legs-near": 47,
+    "shrimp-07-legs-far": 48,
+    "shrimp-07-antennae": 49,
+    "shrimp-08-body": 50,
+    "shrimp-08-tail": 51,
+    "shrimp-08-legs-near": 52,
+    "shrimp-08-legs-far": 53,
+    "shrimp-08-antennae": 54,
+    "shrimp-09-body": 55,
+    "shrimp-09-tail": 56,
+    "shrimp-09-legs-near": 57,
+    "shrimp-09-legs-far": 58,
+    "shrimp-09-antennae": 59,
+    "shrimp-10-body": 60,
+    "shrimp-10-tail": 61,
+    "shrimp-10-legs-near": 62,
+    "shrimp-10-legs-far": 63,
+    "shrimp-10-antennae": 64,
+    "shrimp-11-body": 65,
+    "shrimp-11-tail": 66,
+    "shrimp-11-legs-near": 67,
+    "shrimp-11-legs-far": 68,
+    "shrimp-11-antennae": 69,
+    "shrimp-12-body": 70,
+    "shrimp-12-tail": 71,
+    "shrimp-12-legs-near": 72,
+    "shrimp-12-legs-far": 73,
+    "shrimp-12-antennae": 74,
+    "shrimp-13-body": 75,
+    "shrimp-13-tail": 76,
+    "shrimp-13-legs-near": 77,
+    "shrimp-13-legs-far": 78,
+    "shrimp-13-antennae": 79,
+    "shrimp-14-body": 80,
+    "shrimp-14-tail": 81,
+    "shrimp-14-legs-near": 82,
+    "shrimp-14-legs-far": 83,
+    "shrimp-14-antennae": 84,
+    "shrimp-15-body": 85,
+    "shrimp-15-tail": 86,
+    "shrimp-15-legs-near": 87,
+    "shrimp-15-legs-far": 88,
+    "shrimp-15-antennae": 89,
+    "shrimp-16-body": 90,
+    "shrimp-16-tail": 91,
+    "shrimp-16-legs-near": 92,
+    "shrimp-16-legs-far": 93,
+    "shrimp-16-antennae": 94,
+    "shrimp-17-body": 95,
+    "shrimp-17-tail": 96,
+    "shrimp-17-legs-near": 97,
+    "shrimp-17-legs-far": 98,
+    "shrimp-17-antennae": 99,
+    "shrimp-18-body": 100,
+    "shrimp-18-tail": 101,
+    "shrimp-18-legs-near": 102,
+    "shrimp-18-legs-far": 103,
+    "shrimp-18-antennae": 104,
+    "shrimp-19-body": 105,
+    "shrimp-19-tail": 106,
+    "shrimp-19-legs-near": 107,
+    "shrimp-19-legs-far": 108,
+    "shrimp-19-antennae": 109,
+    "shrimp-20-body": 110,
+    "shrimp-20-tail": 111,
+    "shrimp-20-legs-near": 112,
+    "shrimp-20-legs-far": 113,
+    "shrimp-20-antennae": 114,
+    "shrimp-21-body": 115,
+    "shrimp-21-tail": 116,
+    "shrimp-21-legs-near": 117,
+    "shrimp-21-legs-far": 118,
+    "shrimp-21-antennae": 119,
+    "shrimp-22-body": 120,
+    "shrimp-22-tail": 121,
+    "shrimp-22-legs-near": 122,
+    "shrimp-22-legs-far": 123,
+    "shrimp-22-antennae": 124,
+    "shrimp-23-body": 125,
+    "shrimp-23-tail": 126,
+    "shrimp-23-legs-near": 127,
+    "shrimp-23-legs-far": 128,
+    "shrimp-23-antennae": 129,
+    "tank-base": 130,
+    "water-back-0": 131,
+    "water-back-1": 132,
+    "water-back-2": 133,
+    "water-back-3": 134,
+    "water-back-4": 135,
+    "water-back-5": 136,
+    "water-back-6": 137,
+    "water-back-7": 138,
+    "water-back-8": 139,
+    "water-back-9": 140,
+    "water-back-10": 141,
+    "water-back-11": 142,
+    "back-air": 143,
+    "tank-end--1": 144,
+    "tank-end-1": 145,
+    "front-collider": 146,
+    "tank-rim": 147,
+    "sand": 148,
+    "rock-0": 149,
+    "rock-1": 150,
+    "rock-2": 151,
+    "branching-wood": 152,
+    "plants": 153,
+    "moss-patches": 154,
+    "stand": 155,
+    "room-backdrop": 156,
+    "AmbientLight": 157,
+    "LookClose": 158,
+    "cs_grazing": 159
+  },
+  "count": 24,
+  "profile": "keyboard",
+  "rows": [
+    {
+      "home": [
+        -4.5,
+        -0.87,
+        0.635
+      ],
+      "excursion": [
+        0.25,
+        0,
+        0
+      ],
+      "period": 12,
+      "phase": 0.0,
+      "size": 0.7,
+      "yaw": 0
+    },
+    {
+      "home": [
+        -2.75,
+        -0.87,
+        0.635
+      ],
+      "excursion": [
+        0.25,
+        0,
+        0
+      ],
+      "period": 19,
+      "phase": 0.173,
+      "size": 0.85,
+      "yaw": 0
+    },
+    {
+      "home": [
+        -1.0,
+        -0.87,
+        0.635
+      ],
+      "excursion": [
+        0.25,
+        0,
+        0
+      ],
+      "period": 13,
+      "phase": 0.346,
+      "size": 0.75,
+      "yaw": 0
+    },
+    {
+      "home": [
+        0.75,
+        -0.87,
+        0.635
+      ],
+      "excursion": [
+        0.25,
+        0,
+        0
+      ],
+      "period": 20,
+      "phase": 0.5189999999999999,
+      "size": 0.8999999999999999,
+      "yaw": 0
+    },
+    {
+      "home": [
+        2.5,
+        -0.87,
+        0.635
+      ],
+      "excursion": [
+        0.25,
+        0,
+        0
+      ],
+      "period": 14,
+      "phase": 0.692,
+      "size": 0.7999999999999999,
+      "yaw": 0
+    },
+    {
+      "home": [
+        4.25,
+        -0.87,
+        0.635
+      ],
+      "excursion": [
+        0.25,
+        0,
+        0
+      ],
+      "period": 21,
+      "phase": 0.865,
+      "size": 0.7,
+      "yaw": 0
+    },
+    {
+      "home": [
+        -4.8,
+        0.0,
+        0.635
+      ],
+      "excursion": [
+        0.15,
+        0,
+        0
+      ],
+      "period": 15,
+      "phase": 0.03799999999999981,
+      "size": 0.85,
+      "yaw": 0
+    },
+    {
+      "home": [
+        -3.75,
+        0.0,
+        0.635
+      ],
+      "excursion": [
+        -0.15,
+        0,
+        0
+      ],
+      "period": 22,
+      "phase": 0.21099999999999985,
+      "size": 0.75,
+      "yaw": 0.5
+    },
+    {
+      "home": [
+        -1.0,
+        0.0,
+        0.635
+      ],
+      "excursion": [
+        0.25,
+        0,
+        0
+      ],
+      "period": 16,
+      "phase": 0.3839999999999999,
+      "size": 0.8999999999999999,
+      "yaw": 0
+    },
+    {
+      "home": [
+        0.75,
+        0.0,
+        0.635
+      ],
+      "excursion": [
+        0.25,
+        0,
+        0
+      ],
+      "period": 23,
+      "phase": 0.5569999999999999,
+      "size": 0.7999999999999999,
+      "yaw": 0
+    },
+    {
+      "home": [
+        2.5,
+        0.0,
+        0.635
+      ],
+      "excursion": [
+        0.25,
+        0,
+        0
+      ],
+      "period": 17,
+      "phase": 0.73,
+      "size": 0.7,
+      "yaw": 0
+    },
+    {
+      "home": [
+        5.05,
+        0.0,
+        0.635
+      ],
+      "excursion": [
+        -0.1,
+        0,
+        0
+      ],
+      "period": 24,
+      "phase": 0.9029999999999998,
+      "size": 0.85,
+      "yaw": 0.5
+    },
+    {
+      "home": [
+        -4.8,
+        0.87,
+        0.635
+      ],
+      "excursion": [
+        0.15,
+        0,
+        0
+      ],
+      "period": 18,
+      "phase": 0.07599999999999962,
+      "size": 0.75,
+      "yaw": 0
+    },
+    {
+      "home": [
+        -3.75,
+        0.87,
+        0.635
+      ],
+      "excursion": [
+        -0.15,
+        0,
+        0
+      ],
+      "period": 12,
+      "phase": 0.24899999999999967,
+      "size": 0.8999999999999999,
+      "yaw": 0.5
+    },
+    {
+      "home": [
+        -1.0,
+        0.87,
+        0.635
+      ],
+      "excursion": [
+        0.25,
+        0,
+        0
+      ],
+      "period": 19,
+      "phase": 0.4219999999999997,
+      "size": 0.7999999999999999,
+      "yaw": 0
+    },
+    {
+      "home": [
+        0.75,
+        0.87,
+        0.635
+      ],
+      "excursion": [
+        0.25,
+        0,
+        0
+      ],
+      "period": 13,
+      "phase": 0.5949999999999998,
+      "size": 0.7,
+      "yaw": 0
+    },
+    {
+      "home": [
+        2.5,
+        0.87,
+        0.635
+      ],
+      "excursion": [
+        0.25,
+        0,
+        0
+      ],
+      "period": 20,
+      "phase": 0.7679999999999998,
+      "size": 0.85,
+      "yaw": 0
+    },
+    {
+      "home": [
+        5.05,
+        0.87,
+        0.635
+      ],
+      "excursion": [
+        -0.1,
+        0,
+        0
+      ],
+      "period": 14,
+      "phase": 0.9409999999999998,
+      "size": 0.75,
+      "yaw": 0.5
+    },
+    {
+      "home": [
+        -2.65,
+        0.3,
+        1.4849999999999999
+      ],
+      "excursion": [
+        0.1,
+        0,
+        0
+      ],
+      "period": 19,
+      "phase": 0.1,
+      "size": 0.76,
+      "yaw": 0
+    },
+    {
+      "home": [
+        3.95,
+        0.55,
+        1.255
+      ],
+      "excursion": [
+        0.15,
+        0,
+        0
+      ],
+      "period": 21,
+      "phase": 0.4,
+      "size": 0.8,
+      "yaw": 0.5
+    },
+    {
+      "home": [
+        0.65,
+        0.72,
+        1.66
+      ],
+      "excursion": [
+        0.16,
+        0.005,
+        0.086
+      ],
+      "period": 16,
+      "phase": 0.7,
+      "size": 0.72,
+      "yaw": 0
+    },
+    {
+      "home": [
+        -0.8,
+        -0.25,
+        2.1
+      ],
+      "excursion": [
+        0.7,
+        0.12,
+        0.65
+      ],
+      "period": 18,
+      "phase": 0.5,
+      "size": 0.85,
+      "yaw": 0
+    },
+    {
+      "home": [
+        2.4,
+        0.35,
+        2.8
+      ],
+      "excursion": [
+        0.7,
+        -0.1,
+        0.7
+      ],
+      "period": 24,
+      "phase": 0.1,
+      "size": 0.82,
+      "yaw": 0.5
+    }
+  ],
+  "mailboxes": {
+    "clock": 600,
+    "init": 601,
+    "slot": 602,
+    "x": 603,
+    "y": 604,
+    "z": 605,
+    "yaw": 606,
+    "pitch": 607,
+    "phase": 608,
+    "activity": 609,
+    "scale": 610,
+    "sy": 611,
+    "cy": 612,
+    "actor": 613,
+    "ox": 614,
+    "oy": 615,
+    "oz": 616,
+    "dt": 617,
+    "head": 618,
+    "speed": 619,
+    "vx": 620,
+    "vy": 621,
+    "vz": 622,
+    "prev": 623,
+    "dart": 624,
+    "dx": 625,
+    "dy": 626,
+    "dz": 627,
+    "mode": 628,
+    "camera": 629,
+    "u": 630,
+    "travel": 631,
+    "state": 632,
+    "parity": 633,
+    "target": 634,
+    "support": 635,
+    "escape": 636,
+    "elapsed": 637,
+    "cooldown": 638,
+    "gait-phase": 639
+  }
+}

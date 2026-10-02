@@ -1,0 +1,63 @@
+{
+  "triangles": 4076,
+  "groups": {
+    "body": 1180,
+    "tail": 896,
+    "dorsal": 540,
+    "anal": 604,
+    "near_pectoral": 212,
+    "far_pectoral": 212,
+    "near_pelvic": 216,
+    "far_pelvic": 216
+  },
+  "phase": 0.21,
+  "pectoral_phase": 0.39,
+  "spread": 0.72,
+  "motion_by_group": [
+    null,
+    [
+      0.21,
+      0.065,
+      0,
+      0.72
+    ],
+    [
+      0.39,
+      0.035,
+      0,
+      0.762
+    ],
+    [
+      0.6,
+      0.04,
+      0,
+      0.79
+    ],
+    [
+      0.39,
+      0.028,
+      0,
+      0.85
+    ],
+    [
+      0.89,
+      0.028,
+      0,
+      0.85
+    ],
+    [
+      0.5,
+      0.038,
+      0,
+      1
+    ],
+    [
+      0.77,
+      0.038,
+      0,
+      1
+    ]
+  ],
+  "geometry_source": "wflevels/aquarium_betta/detailed_model.py",
+  "note": "Same runtime geometry and native fin formula; smooth studio lighting, fully opaque surfaces."
+}

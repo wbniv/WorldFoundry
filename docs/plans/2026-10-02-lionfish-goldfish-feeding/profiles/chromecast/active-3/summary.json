@@ -1,0 +1,55 @@
+{
+  "runs": [
+    {
+      "frames": 343,
+      "FPS": 29.96998961293809,
+      "p50_ms": 33.366721,
+      "p95_ms": 33.367128,
+      "p99_ms": 33.367249
+    },
+    {
+      "frames": 348,
+      "FPS": 29.96998923091477,
+      "p50_ms": 33.366714,
+      "p95_ms": 33.36716,
+      "p99_ms": 33.367304
+    },
+    {
+      "frames": 350,
+      "FPS": 29.96998961084316,
+      "p50_ms": 33.36672,
+      "p95_ms": 33.367127,
+      "p99_ms": 33.367298
+    }
+  ],
+  "median": {
+    "frames": 348,
+    "FPS": 29.96998961084316,
+    "p50_ms": 33.36672,
+    "p95_ms": 33.367128,
+    "p99_ms": 33.367298
+  },
+  "CPU_ms": {
+    "update": 3.6326,
+    "actors": 1.7406499999999998,
+    "director": 1.8214,
+    "render": 3.6512000000000002,
+    "school": 1.52545,
+    "pose": 0.46140000000000003,
+    "animation": 0.020700000000000003,
+    "total": 7.283799999999999
+  },
+  "counts": {
+    "level-objects": 41.0,
+    "render-actors": 28.0,
+    "draws": 27.0,
+    "triangles": 1120.4664999999998,
+    "actor-mailbox-writes": 126.0,
+    "fish-deformations": 3.0
+  },
+  "PSS_MiB": 45.1220703125,
+  "actors": 41,
+  "level_sha256": "33a677f1a1d1712070f824ec17ba2a3929756ab4daf1e4fa571e5594c37d0f4f",
+  "apk_sha256": "d604cd8c8c5f5dceca2ed5587b3c4ed4adb7506003c407573d31cac5002bbc27",
+  "note": "Same release native libraries and six-tank selector. 30 s warmup once per variant; three consecutive 12 s runs, no opt-in profiling. Separate 12 s CPU probe uses final two complete windows. Initial population fixed at 0/1/3, auto-capture disabled only in isolated profile variants; natural pursuit remains active."
+}

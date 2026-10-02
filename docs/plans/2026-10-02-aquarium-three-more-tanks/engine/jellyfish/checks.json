@@ -1,0 +1,49 @@
+{
+  "level": "aquarium_jellyfish",
+  "animals": 6,
+  "actors": 41,
+  "profile": "keyboard",
+  "animated_mailboxes_changed": 78,
+  "bell_z_scales": [
+    1.07481,
+    0.619489,
+    0.75692,
+    0.899191,
+    0.96203,
+    0.556099
+  ],
+  "wall_right": [
+    4.7,
+    0.0,
+    3.025
+  ],
+  "wall_left": [
+    -4.7,
+    0.0,
+    3.025
+  ],
+  "wall_up": [
+    0.032467,
+    0.0,
+    4.194981
+  ],
+  "wall_down": [
+    0.0,
+    0.0,
+    1.855051
+  ],
+  "wall_away": [
+    0.0,
+    0.55,
+    3.057467
+  ],
+  "wall_toward": [
+    0.0,
+    -0.55,
+    3.025
+  ],
+  "action_velocity": 0.488304,
+  "status": "PASS",
+  "desktop_debug_ms_per_frame_estimate": 26.09461549000116,
+  "cost_note": "Two-point local debug wall-time estimate without vsync; not release/device frame distributions."
+}

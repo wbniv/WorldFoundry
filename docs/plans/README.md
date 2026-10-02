@@ -371,3 +371,19 @@ rows on commit.*
   [exporter-face-hand](2026-09-19-exporter-face-hand.md).
 
 - Added the completed Android badge/lifecycle rollout row on 2026-10-02.
+
+| [Aquarium levels: menu selector and Blue Shrimp](2026-10-02-aquarium-levels-blue-shrimp.md) | Plan two selectable aquarium tanks using the existing SMB menu, with a planted blue shrimp colony, articulated animation, adapted controls and desktop/Chromecast verification. | Uncommitted | Feature |
+
+| [Aquarium: 29 tiger barbs, one actor each](2026-10-02-aquarium-tiger-barbs.md) | Implemented 29 single-actor tiger barbs, tighter schooling and motion-gated startle; quad/animated mesh profiles against one and eleven clownfish, with phase 3 planned. | Uncommitted | Feature |
+
+| [Aquarium: Betta, Jellyfish, Lionfish and Planted Tank](2026-10-02-aquarium-three-more-tanks.md) | Four new standalone tanks, including a very slow sea urchin in Planted Tank; single six-tank Android menu and Chromecast receipts. | Uncommitted | Feature |
+
+| [Aquarium five-tank selector](2026-10-02-aquarium-five-tank-selector.md) | Superseded by the single six-tank menu including Planted Tank; retained historical five-tank receipts. | Uncommitted | Feature |
+
+| [Lionfish tank: goldfish, chasing and feeding](2026-10-02-lionfish-goldfish-feeding.md) | Plan an animated single-mesh goldfish, A + DOWN release capped at three live prey, resident pursuit and proximity + A player eating. | Uncommitted | Feature |
+
+| [Betta poster and flowing fins](2026-10-02-betta-poster-and-flowing-fins.md) | Primary-source research, A3 history/habitat/location-map poster with rendered fish, and a detailed opaque flowing-fin upgrade for the Calm Betta. | Uncommitted | Feature |
+
+| [Aquarium movement and controls: all six players](2026-10-02-aquarium-movement-and-controls.md) | Species-specific movement, single-button Chromecast chords, separate jelly pulse/drift controls, motion diagrams and verification for all six tanks. | Uncommitted | Feature |
+
+| [Asian Arowana — bare tank and A3 poster](2026-10-02-asian-arowana.md) | Plan a single Asian arowana in an empty tank with clownfish swimming controls; include mockups, diagrams and a sourced A3 poster. | Uncommitted | Feature |

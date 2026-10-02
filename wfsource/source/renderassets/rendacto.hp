@@ -35,7 +35,9 @@
 //============================================================================
 
 #include <vector>
+#include <renderassets/fish_deform.h>
 #include <renderassets/swim_deform.h>
+#include <renderassets/fin_deform.h>
 #include <pigsys/pigsys.hp>
 #include <iff/iffread.hp>
 #include <memory/memory.hp>
@@ -69,7 +71,9 @@ public:
 	// it and applies as a column-scale on the world matrix in Render().
 	// (qbert stretch-and-squash, 2026-05-10.)
 	virtual void SetActorScale(const Vector3& /*scale*/) {}
+	virtual void SetFishDeformation(float /*phase*/, float /*amplitude*/) {}
 	virtual void SetSwimDeformation(float /*phase*/, float /*amplitude*/, float /*bend*/, float /*finPhase*/, float /*finAmplitude*/, float /*minX*/, float /*maxX*/) {}
+	virtual void SetFinDeformation(float /*phase*/, float /*amplitude*/, float /*sweep*/, float /*spread*/) {}
 	void Validate() const;
 #if DO_VALIDATION
 	virtual void _Validate() const = 0;
@@ -109,7 +113,9 @@ public:
 	virtual bool GetHandle(const HandleID thisHandle, Vector3& position) const;
 	virtual void SetMaterialColor(int materialIdx, const Color& color) { _object.SetMaterialColor(materialIdx, color); }
 	virtual void SetActorScale(const Vector3& scale) { _scale = scale; }
+	virtual void SetFishDeformation(float phase, float amplitude);
 	virtual void SetSwimDeformation(float phase, float amplitude, float bend, float finPhase, float finAmplitude, float minX, float maxX);
+	virtual void SetFinDeformation(float phase, float amplitude, float sweep, float spread);
 #if DO_VALIDATION
 	virtual void _Validate() const;
 #endif
@@ -117,8 +123,11 @@ protected:
 	RenderActor3D(Memory& memory, int vertexCount,Vertex3D* vertexList,int faceCount, TriFace* faceList, Material*  materials);
 	RenderObject3D _object;
 	Vector3 _scale = Vector3::one;
+	std::vector<wf_render::FishWaveWeight> _fishWeights;
+	float _fishLength = 0;
 	std::vector<wf_render::SwimWaveWeight> _swimWeights;
 	float _swimMinX = 0, _swimMaxX = 0;
+	std::vector<wf_render::FinWaveWeight> _finWeights;
 private:
 };
 

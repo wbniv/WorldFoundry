@@ -414,6 +414,7 @@ _Auto-added from plan "Out of scope"/"Deferred" sections at commit time. Triage 
 - [ ] **(triage)** Volume, pitch, looping and stopping a sound that is playing; HRTF, reverb, occlusion. — _from [2026-10-01-sfx-without-lua.md](docs/plans/2026-10-01-sfx-without-lua.md)_  <!-- fp:62b0882077b4ce77 -->
 - [ ] **(triage)** Moving the music and the soundfont into the IFF (the rest of Audio assets from IFF). — _from [2026-10-01-sfx-without-lua.md](docs/plans/2026-10-01-sfx-without-lua.md)_  <!-- fp:c2d44d2330c74a2d -->
 - [ ] **(triage)** Hearing audio on iOS: it needs a real device with Apple signing. — _from [2026-10-01-sfx-without-lua.md](docs/plans/2026-10-01-sfx-without-lua.md)_  <!-- fp:5ef7e8c494a4dfe1 -->
+- [x] **(triage)** Android/Chromecast selector and Back navigation implemented. A short Back returns to the selector; selector Back exits. Verified all seven Aquarium tanks and four SMB levels on 2026-10-02. — _from [2026-10-01-level-menu-selector.md](docs/plans/2026-10-01-level-menu-selector.md)_  <!-- fp:7801cf815465446c -->
 <!-- END auto-captured-deferrals -->
 
 

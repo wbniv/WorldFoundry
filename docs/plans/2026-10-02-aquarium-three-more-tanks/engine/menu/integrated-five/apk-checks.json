@@ -1,0 +1,12 @@
+{
+  "status": "PASS",
+  "apk": "android/app/build/outputs/apk/aquarium/release/worldfoundry-aquarium-release.apk",
+  "apk_sha256": "6236ade65122ff712556be9a183ca83f1240bf9d85549830eb6f1bcc6de352b0",
+  "bundle_sha256": "14c22db4e687eb32a1d7eb93ed449ba436970debd17ac23ebdf3ab984172d131",
+  "bundle_bytes": 849920,
+  "abis": [
+    "armeabi-v7a",
+    "arm64-v8a"
+  ],
+  "profile_args": false
+}

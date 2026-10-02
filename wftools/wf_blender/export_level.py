@@ -547,6 +547,9 @@ def _write_mesh_iff(blobj, filepath: str) -> bool:
                 g = int(bc[1] * 255) & 0xFF
                 b = int(bc[2] * 255) & 0xFF
                 color = (r << 16) | (g << 8) | b
+        if mat.get('wf_double_sided', False): flags |= 8
+        if mat.get('wf_prelit', False): flags |= 4
+        if mat.get('wf_alpha_cutout', False): flags |= 16
         return flags, color, tex
 
     mats = blobj.data.materials if blobj.data and blobj.data.materials else []

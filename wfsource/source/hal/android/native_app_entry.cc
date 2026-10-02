@@ -46,7 +46,7 @@
 #include <hal/lifecycle.h>
 #include <pigsys/pigsys.hp>
 #include <hal/android/wf_android_export.hp>
-#include <game/level_menu.h>   // Back held: levelmenu::RequestReturn
+#include <game/level_menu.h>   // Back: selected level -> selector -> exit
 #include <hal/phonepad/phonepad.h>
 #include <hal/phonepad/phonepad_overlay.h>
 
@@ -401,37 +401,32 @@ int32_t HandleInputEvent(struct android_app* /*app*/, AInputEvent* event)
         const uint32_t mask   = MapKeyCode(keyCode);
         // One line per key edge (not per auto-repeat), so logcat shows whether a remote key
         // arrived and what it mapped to: "key code=23 action=0 mask=0x...".
-        // Back while the phone panel is showing hides the panel (mockup 3: "Press Back to hide
-        // this") instead of leaving the app; Back otherwise keeps its system meaning.
+        // A selector bundle owns Back navigation, including while the phone panel is up.
+        // Act once on release: key repeats and press duration do not change its meaning.
+        if (keyCode == AKEYCODE_BACK && levelmenu::MenuRunning())
+        {
+            if (action == AKEY_EVENT_ACTION_UP)
+            {
+                gPhoneOverlay.OnBack(NowMs());
+                if (levelmenu::SelectorVisible())
+                {
+                    WFLOG("Back on selector: leaving the app");
+                    ANativeActivity_finish(gApp->activity);
+                }
+                else
+                {
+                    WFLOG("Back in level: returning to selector");
+                    levelmenu::RequestReturn();
+                }
+            }
+            return 1;
+        }
+        // In standalone apps Back first hides the phone panel, then keeps its system meaning.
         if (keyCode == AKEYCODE_BACK && gPhoneOverlay.PanelVisible(NowMs()))
         {
             if (action == AKEY_EVENT_ACTION_UP) gPhoneOverlay.OnBack(NowMs());
             if (AKeyEvent_getRepeatCount(event) == 0)
                 WFLOG("key code=%d action=%d (Back: hides the phone panel)", keyCode, action);
-            return 1;
-        }
-        // Back in a level-menu bundle (game/level_menu.h): held 1 s, back to the menu; a short
-        // Back still leaves the app, as the system would. Decided on release from the event's
-        // own down time, so it works whether or not the remote sends key repeats; a repeat past
-        // 1 s fires it early. docs/plans/2026-10-01-level-menu-selector.md, Phase D.
-        if (keyCode == AKEYCODE_BACK && levelmenu::MenuRunning())
-        {
-            static bool sFired = false;
-            const int64_t heldMs = (AKeyEvent_getEventTime(event) - AKeyEvent_getDownTime(event)) / 1000000;
-            if (action == AKEY_EVENT_ACTION_DOWN && AKeyEvent_getRepeatCount(event) == 0)
-                sFired = false;
-            const bool held = heldMs >= 1000;
-            if (!sFired && held && (action == AKEY_EVENT_ACTION_DOWN || action == AKEY_EVENT_ACTION_UP))
-            {
-                sFired = true;
-                levelmenu::RequestReturn();
-                WFLOG("key code=%d held %lld ms: back to the level menu", keyCode, (long long)heldMs);
-            }
-            else if (action == AKEY_EVENT_ACTION_UP && !sFired)
-            {
-                WFLOG("key code=%d short Back (%lld ms): leaving the app", keyCode, (long long)heldMs);
-                ANativeActivity_finish(gApp->activity);
-            }
             return 1;
         }
         if (AKeyEvent_getRepeatCount(event) == 0)

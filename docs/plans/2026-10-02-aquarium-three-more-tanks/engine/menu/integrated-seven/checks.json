@@ -1,0 +1,81 @@
+{
+  "status": "PASS",
+  "started_indices": [
+    6,
+    5,
+    2,
+    3,
+    4,
+    0,
+    1,
+    6
+  ],
+  "entries": [
+    [
+      0,
+      "Clownfish & Tiger Barbs"
+    ],
+    [
+      1,
+      "Blue Shrimp"
+    ],
+    [
+      2,
+      "Calm Betta"
+    ],
+    [
+      3,
+      "Jellyfish"
+    ],
+    [
+      4,
+      "Lionfish"
+    ],
+    [
+      5,
+      "Planted Tank"
+    ],
+    [
+      6,
+      "Asian Arowana"
+    ]
+  ],
+  "sources": [
+    {
+      "level": "aquarium",
+      "title": "Clownfish & Tiger Barbs",
+      "sha256": "04f5cc0723d1527280aa854c9c59d4a6c7a7536d9a739a0773c68342867f9081"
+    },
+    {
+      "level": "aquarium_blue_shrimp",
+      "title": "Blue Shrimp",
+      "sha256": "01a45751f3efdb539b6c00d8b0a3588c6c9bf111e915ced3f4fa0c53e4d9e848"
+    },
+    {
+      "level": "aquarium_betta",
+      "title": "Calm Betta",
+      "sha256": "4d813d1f797fba0c2ffec694ce5c3840a7f76ff6bb00cbc2f303f710a752288f"
+    },
+    {
+      "level": "aquarium_jellyfish",
+      "title": "Jellyfish",
+      "sha256": "c4c553b7fae8b5a71349babd8e462e8074ef2e07d65df8d6589c52c17894ba82"
+    },
+    {
+      "level": "aquarium_lionfish",
+      "title": "Lionfish",
+      "sha256": "2e3c43f465665302b7aa79e41970e6352574a1ef5332f20c3b33f7a71da2ab38"
+    },
+    {
+      "level": "aquarium_plants",
+      "title": "Planted Tank",
+      "sha256": "fd63550a5078b4776a9ba129af586ba099a89258b16640fbff14bf55646ee38f"
+    },
+    {
+      "level": "aquarium_arowana",
+      "title": "Asian Arowana",
+      "sha256": "2827429ad491f986862ec1fabe1128cbcc6fcc1cb72e6c8d6fcd7154649e6828"
+    }
+  ],
+  "note": "Integrated seven-tank Android bundle exercised in the desktop engine."
+}

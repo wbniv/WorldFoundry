@@ -32,18 +32,33 @@ pub fn br_colour_rgb_555(r: u8, g: u8, b: u8) -> u16 {
     (bb << 10) | (gg << 5) | rr
 }
 
-/// RGBA_555: converts 8-bit RGBA to BGR555.
-/// alpha=0 if pixel should be fully transparent (bit 15 set only if a<85).
+/// Standard RGBA input to the engine's RGB555/PSX-alpha representation.
+/// Zero means transparent; bit 15 marks partial opacity (or solid black).
+/// The native TGA fast path already uses red in the high five bits.
 #[inline]
 pub fn rgba_555(r: u8, g: u8, b: u8, a: u8) -> u16 {
-    if a > 170 {
+    if a < 85 {
         return 0;
     }
     let rr = (r as u16) >> 3;
     let gg = (g as u16) >> 3;
     let bb = (b as u16) >> 3;
-    let alpha: u16 = if (a as u16) < 85 { 1 } else { 0 };
-    (alpha << 15) | (bb << 10) | (gg << 5) | rr
+    let rgb = (rr << 10) | (gg << 5) | bb;
+    if a < 170 || rgb == 0 { rgb | TRANSLUCENT_BIT } else { rgb }
+}
+
+#[cfg(test)]
+mod rgba_tests {
+    use super::*;
+    #[test]
+    fn standard_rgba_preserves_opaque_colours_and_transparent_silhouettes() {
+        assert_eq!(rgba_555(255, 0, 0, 255), 31 << 10);
+        assert_eq!(rgba_555(0, 255, 0, 255), 31 << 5);
+        assert_eq!(rgba_555(0, 0, 255, 255), 31);
+        assert_eq!(rgba_555(255, 0, 0, 0), 0);
+        assert_eq!(rgba_555(0, 0, 0, 255), 0x8000);
+        assert_eq!(rgba_555(255, 0, 0, 128), (31 << 10) | 0x8000);
+    }
 }
 
 // ─── ColourCycle ─────────────────────────────────────────────────────────────

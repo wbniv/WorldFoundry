@@ -1,3 +1,4 @@
+#include "runtime_profile.hp"
 //==============================================================================
 // level.cc:
 // Copyright ( c ) 1994,1995,1996,1997,1998,1999,2000,2001,2002,2003 World Foundry Group.  
@@ -811,6 +812,9 @@ public:
 void
 Level::update(Scalar deltaTime)
 {
+    wf_profile::begin_frame();
+    wf_profile::count(0,_levelData->objectCount-1);
+    wf_profile::Scope updateProfile(wf_profile::Update);
 	Validate();
 	DBSTREAM2( cflow <<"Level::update:" << std::endl; )
 
@@ -958,6 +962,7 @@ Level::update(Scalar deltaTime)
 
 	DBSTREAM2( cflow << "Level::StartFrame:" << std::endl; )
 	Validate();
+	{ wf_profile::Scope actorsProfile(wf_profile::Actors);
 	for_each(GetActiveRooms().GetObjectIter(ROOM_OBJECT_LIST_UPDATE),ActorStartFrame());
 	DBSTREAM2( cflow << "Level::StartFrame: done" << std::endl; )
 
@@ -975,6 +980,7 @@ Level::update(Scalar deltaTime)
 	Validate();
 	DBSTREAM3 (cflow << "Level::UpdateActors:" << std::endl; )
     UpdatePhysics(GetActiveRooms().GetObjectIter(ROOM_OBJECT_LIST_UPDATE), LevelClock());
+    }
 
 	DBSTREAM2( cflow << "Level::update: room contents" << std::endl; )
 	Validate();
@@ -984,6 +990,7 @@ Level::update(Scalar deltaTime)
 	if ( _director )
 	{
 		DBSTREAM2( cflow << "Level::update: update director" << std::endl; )
+		wf_profile::Scope directorProfile(wf_profile::Director);
 		_director->predictPosition(LevelClock());
 		_director->update();
 	}
@@ -1137,6 +1144,7 @@ AdjustCameraParameters(Vector3& position,Euler& rotation)
 void
 Level::RenderScene()
 {
+    wf_profile::begin(wf_profile::Render);
 	DBSTREAM1( cdebug << "Level::RenderScene" << std::endl; )
 	Validate();
 	_theActiveRooms->Validate();
@@ -1229,6 +1237,7 @@ Level::RenderScene()
 
 			if ( actor && actor->isVisible() )
 			{
+                wf_profile::count(1);
 #if defined(USE_TEST_CAMERA)
 				actor->GetRenderActor().Render(testCamera,*actor);
 #else
@@ -1241,6 +1250,8 @@ Level::RenderScene()
 		++roomIter;
 	}
 	_viewPort.Render();
+	wf_profile::end(wf_profile::Render);
+	wf_profile::end_frame();
 	Validate();
 }
 

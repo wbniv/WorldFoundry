@@ -311,7 +311,7 @@ bool Overlay::Build(int w, int h, int64_t nowMs, std::vector<PhonepadRect>* out)
         p.Text(x, 530, ts, kText, " if asked");
         p.Rect(tx, 640, tx + 18, 658, kWarn);
         p.Text(tx + 34, 634, ts, kWarn, "Waiting for a phone...");
-        p.Text(132, 930, 3.0f, kFoot, "The remote still works. Press Back to hide this.");
+        p.Text(132, 930, 3.0f, kFoot, "The remote still works. Use Back to go back.");
     }
 
     if (*toast)

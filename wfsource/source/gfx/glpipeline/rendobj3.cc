@@ -77,6 +77,7 @@ RenderObject3D::Render(ViewPort& vp,const Matrix34& position)
 		globalRendererVariables.currentRenderMaterial = &_materialList[globalRendererVariables.currentRenderFace->materialIndex];
 		assert( globalRendererVariables.currentRenderMaterial );
 		globalRendererVariables.currentRenderMaterial->Validate();
+		RendererBackendGet().SetAlphaCutout(globalRendererVariables.currentRenderMaterial->IsAlphaCutout());
 		renderer = globalRendererVariables.currentRenderMaterial->Get3DRenderer();
 		int currentMaterial = globalRendererVariables.currentRenderFace->materialIndex;
 

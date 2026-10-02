@@ -155,12 +155,14 @@
   0 sd-off write-mailbox
   1 sd-flag write-mailbox ;
 
-\ ---- the dart: when the player's fish starts one (aq-dart-t rises from 0), every follower within 5 body lengths is startled
+\ ---- the dart: startle nearby followers only after a real fast movement,
+\ measured from the player's post-physics displacement. Normal burst <5 BL/s.
 : sd-dart-prev 1039 ;
 : sd-dart-check
   aq-dart-t read-mailbox 0 > if
-    sd-dart-prev read-mailbox 0 = if 5 sch-startle-all then
-    1 sd-dart-prev write-mailbox
+    sd-dart-prev read-mailbox 0 = sd-lspeed read-mailbox 5 > & if
+      5 sch-startle-all 1 sd-dart-prev write-mailbox
+    then
   else 0 sd-dart-prev write-mailbox then ;
 
 \ ---- the whole thing, once a tick

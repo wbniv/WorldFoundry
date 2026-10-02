@@ -1,0 +1,106 @@
+{
+  "baseline": {
+    "level_sha256": "ffbc7258c0a6e028bbecd0c06bcbe8d00ee82c058035a3e815e55d029902ea4e",
+    "wall_ms_per_frame_runs": [
+      11.733364167972468,
+      9.325916645990219,
+      9.223875430063345
+    ],
+    "wall_ms_per_frame_median": 9.325916645990219,
+    "CPU_ms_per_frame": {
+      "update": 1.6605284386617098,
+      "actors": 0.9865195167286245,
+      "director": 0.524253159851301,
+      "render": 6.871960223048327,
+      "school": 0.0,
+      "pose": 0.0,
+      "animation": 0.0
+    },
+    "counters": {
+      "actor-slots": 234.0,
+      "render-actors": 21.0,
+      "draws": 20.0,
+      "triangles": 939.6515260223049,
+      "actor-mailbox-writes": 72.0
+    },
+    "note": "Desktop ASAN debug engine, vsync off, fixed 60Hz simulation; 3 subtraction runs (600\u2212100 frames), separate 1200-frame CPU probe. Auto-capture disabled only in isolated fixed-population copies."
+  },
+  "active-0": {
+    "level_sha256": "b50c9874818708b570f6cc75f0750fee5124839464b0aa67b05b5394d00dbb3c",
+    "wall_ms_per_frame_runs": [
+      9.927429811970796,
+      10.02493625797797,
+      9.023567441967316
+    ],
+    "wall_ms_per_frame_median": 9.927429811970796,
+    "CPU_ms_per_frame": {
+      "update": 1.8153983410138248,
+      "actors": 1.0411742857142854,
+      "director": 0.615918064516129,
+      "render": 6.774291612903227,
+      "school": 0.0,
+      "pose": 0.0,
+      "animation": 0.0
+    },
+    "counters": {
+      "actor-slots": 237.0,
+      "render-actors": 21.0,
+      "draws": 20.0,
+      "triangles": 937.7254460829494,
+      "actor-mailbox-writes": 72.0
+    },
+    "note": "Desktop ASAN debug engine, vsync off, fixed 60Hz simulation; 3 subtraction runs (600\u2212100 frames), separate 1200-frame CPU probe. Auto-capture disabled only in isolated fixed-population copies."
+  },
+  "active-1": {
+    "level_sha256": "60c57e83a8bd0e4dcb19e108997967a5e5635fad8911a826c47b8d733aa60c6f",
+    "wall_ms_per_frame_runs": [
+      9.924217020045035,
+      9.722861132002436,
+      9.626634923974052
+    ],
+    "wall_ms_per_frame_median": 9.722861132002436,
+    "CPU_ms_per_frame": {
+      "update": 2.0777301119023397,
+      "actors": 1.0707400813835197,
+      "director": 0.8412829094608342,
+      "render": 7.437303865717192,
+      "school": 0.0,
+      "pose": 0.0,
+      "animation": 0.018951373346897255
+    },
+    "counters": {
+      "actor-slots": 237.0,
+      "render-actors": 22.0,
+      "draws": 21.0,
+      "triangles": 990.940995930824,
+      "actor-mailbox-writes": 78.0
+    },
+    "note": "Desktop ASAN debug engine, vsync off, fixed 60Hz simulation; 3 subtraction runs (600\u2212100 frames), separate 1200-frame CPU probe. Auto-capture disabled only in isolated fixed-population copies."
+  },
+  "active-3": {
+    "level_sha256": "abd5d5905f3e3e31d05b1a8092be08876156af233f95d1dfd6c243ffad0249d3",
+    "wall_ms_per_frame_runs": [
+      11.429410076001659,
+      14.482421387976501,
+      11.13007836806355
+    ],
+    "wall_ms_per_frame_median": 11.429410076001659,
+    "CPU_ms_per_frame": {
+      "update": 2.3983131242741,
+      "actors": 1.0574498257839722,
+      "director": 1.1775239256678283,
+      "render": 8.433680603948895,
+      "school": 0.0,
+      "pose": 0.0,
+      "animation": 0.04692137049941929
+    },
+    "counters": {
+      "actor-slots": 237.0,
+      "render-actors": 24.0,
+      "draws": 23.0,
+      "triangles": 1096.9057282229965,
+      "actor-mailbox-writes": 90.0
+    },
+    "note": "Desktop ASAN debug engine, vsync off, fixed 60Hz simulation; 3 subtraction runs (600\u2212100 frames), separate 1200-frame CPU probe. Auto-capture disabled only in isolated fixed-population copies."
+  }
+}

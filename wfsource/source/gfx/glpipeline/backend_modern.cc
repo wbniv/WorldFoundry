@@ -1,3 +1,4 @@
+#include <game/runtime_profile.hp>
 //=============================================================================
 // gfx/glpipeline/backend_modern.cc: VBO + shader backend for renderer seam
 // Copyright ( c ) 2026 World Foundry Group
@@ -107,6 +108,7 @@ static const char* kFS =
     "out vec4 frag;\n"
     "uniform sampler2D u_tex;\n"
     "uniform int u_use_tex;\n"
+    "uniform int u_alpha_cutout;\n"
     "uniform int u_fog;\n"
     "uniform vec3 u_fog_color;\n"
     "void main()\n"
@@ -114,7 +116,9 @@ static const char* kFS =
     "    vec4 c = vec4(v_color * v_lit, 1.0);\n"
     "    if (u_use_tex != 0) {\n"
     "        float is_white = step(0.99, min(v_color.r, min(v_color.g, v_color.b)));\n"
-    "        c = vec4(mix(v_color, texture(u_tex, v_uv).rgb, is_white) * v_lit, 1.0);\n"
+    "        vec4 texel = texture(u_tex, v_uv);\n"
+    "        if (u_alpha_cutout != 0 && is_white > 0.5 && texel.a < 0.5) discard;\n"
+    "        c = vec4(mix(v_color, texel.rgb, is_white) * v_lit, 1.0);\n"
     "    }\n"
     "    if (u_fog != 0) c.rgb = mix(u_fog_color, c.rgb, v_fog_factor);\n"
     "    frag = c;\n"
@@ -339,6 +343,13 @@ public:
         _fogEnd   = end;
     }
 
+    void SetAlphaCutout(bool enabled) override
+    {
+        if (_alphaCutout == enabled) return;
+        Flush();
+        _alphaCutout = enabled;
+    }
+
     void SetFogEnabled(bool enabled) override
     {
         Flush();
@@ -545,6 +556,7 @@ private:
     GLint  _uMv         = -1;
     GLint  _uTex        = -1;
     GLint  _uUseTex     = -1;
+    GLint  _uAlphaCutout = -1;
     GLint  _uLighting   = -1;
     GLint  _uAmbient    = -1;
     GLint  _uLightDir   = -1;
@@ -564,6 +576,7 @@ private:
     float _lightDir  [RB_MAX_LIGHTS][3];
     float _lightColor[RB_MAX_LIGHTS][3];
 
+    bool _alphaCutout = false;
     bool  _fogEnabled = false;
     float _fogColor[3] = { 0.0f, 0.0f, 0.0f };
     float _fogStart = 1.0f;
@@ -590,6 +603,7 @@ private:
         _uMv         = glGetUniformLocation(_prog, "u_mv");
         _uTex        = glGetUniformLocation(_prog, "u_tex");
         _uUseTex     = glGetUniformLocation(_prog, "u_use_tex");
+        _uAlphaCutout = glGetUniformLocation(_prog, "u_alpha_cutout");
         _uLighting   = glGetUniformLocation(_prog, "u_lighting");
         _uAmbient    = glGetUniformLocation(_prog, "u_ambient");
         _uLightDir   = glGetUniformLocation(_prog, "u_light_dir");
@@ -674,6 +688,7 @@ private:
             _curTexture->SetGLTexture();
             glUniform1i(_uTex, 0);
             glUniform1i(_uUseTex, 1);
+            glUniform1i(_uAlphaCutout, _alphaCutout ? 1 : 0);
         }
         else
         {
@@ -686,6 +701,8 @@ private:
                      GLsizeiptr(_cpu.size() * sizeof(Vert)),
                      _cpu.data(),
                      GL_STREAM_DRAW);
+        wf_profile::count(2);
+        wf_profile::count(3,_cpu.size()/3);
         glDrawArrays(GL_TRIANGLES, 0, GLsizei(_cpu.size()));
 
         glBindVertexArray(0);

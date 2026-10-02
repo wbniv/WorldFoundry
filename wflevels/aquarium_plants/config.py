@@ -1,0 +1,12 @@
+KIND='plants'
+TITLE='Planted Tank'
+COUNT=1
+ANIMAL='sea_urchin'
+SPAWN=(0,-.85,.865)
+BOTTOM=.865
+TOP=.865
+SPEED=.0125
+CLOSE_LOOK=(0,-.85,1.35)
+CLOSE_CAMERA=(0,-5.2,2.0)
+RESIDENTS=[]
+ROCKS=[]

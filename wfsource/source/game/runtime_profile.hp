@@ -1,0 +1,59 @@
+#ifndef WF_RUNTIME_PROFILE_HP
+#define WF_RUNTIME_PROFILE_HP
+// Opt-in main-thread CPU section profiling. Presentation is measured separately
+// by SurfaceFlinger; this uses thread CPU time so EGL waits are not CPU work.
+#include <array>
+#include <algorithm>
+#include <chrono>
+#include <cstdio>
+#include <ctime>
+#include <vector>
+namespace wf_profile {
+enum Section { Update, Actors, Director, Render, School, Pose, Animation, Total, Count };
+struct State {
+    bool enabled = false;
+    std::array<double,Count> frame{};
+    std::array<double,Count> started{};
+    std::vector<std::array<double,Count>> frames;
+    std::array<unsigned long,6> counters{};
+    std::array<unsigned long,6> totals{};
+    std::chrono::steady_clock::time_point last;
+};
+inline State& state() { static State s; return s; }
+inline double cpu_ms() {
+#if defined(CLOCK_THREAD_CPUTIME_ID)
+    timespec t{}; clock_gettime(CLOCK_THREAD_CPUTIME_ID,&t);
+    return t.tv_sec*1000.0+t.tv_nsec/1000000.0;
+#else
+    return std::clock()*1000.0/CLOCKS_PER_SEC;
+#endif
+}
+inline void enable() { state().enabled=true; state().last=std::chrono::steady_clock::now(); }
+inline void begin_frame() { if(state().enabled) { state().frame.fill(0); state().counters.fill(0); } }
+inline void count(int k,unsigned long n=1) { if(state().enabled && k>=0 && k<6) state().counters[k]+=n; }
+inline void begin(int k) { if(state().enabled && k>=0 && k<Count) state().started[k]=cpu_ms(); }
+inline void end(int k) { if(state().enabled && k>=0 && k<Count) state().frame[k]+=cpu_ms()-state().started[k]; }
+struct Scope { int k; explicit Scope(int section):k(section){begin(k);} ~Scope(){end(k);} };
+inline void end_frame() {
+    State& s=state(); if(!s.enabled) return;
+    s.frame[Total]=s.frame[Update]+s.frame[Render];
+    s.frames.push_back(s.frame);
+    for(int k=0;k<6;k++) s.totals[k]+=s.counters[k];
+    auto now=std::chrono::steady_clock::now();
+    if(std::chrono::duration<double>(now-s.last).count()<5) return;
+    fprintf(stderr,"frame-window: start-ns=%lld end-ns=%lld\n",
+        (long long)std::chrono::duration_cast<std::chrono::nanoseconds>(s.last.time_since_epoch()).count(),
+        (long long)std::chrono::duration_cast<std::chrono::nanoseconds>(now.time_since_epoch()).count());
+    const char* names[]={"update","actors","director","render","school","pose","animation","total"};
+    for(int k=0;k<Count;k++) {
+        std::vector<double> values; double sum=0;
+        for(const auto& f:s.frames){ values.push_back(f[k]); sum+=f[k]; }
+        std::sort(values.begin(),values.end());
+        fprintf(stderr,"frame-profile: %s frames=%zu mean=%.4f p50=%.4f p95=%.4f max=%.4f cpu-ms\n",names[k],values.size(),sum/values.size(),values[values.size()/2],values[(values.size()-1)*95/100],values.back());
+    }
+    const char* counterNames[]={"level-objects","render-actors","draws","triangles","actor-mailbox-writes","fish-deformations"};
+    for(int k=0;k<6;k++) fprintf(stderr,"frame-count: %s frames=%zu mean=%.3f\n",counterNames[k],s.frames.size(),double(s.totals[k])/s.frames.size());
+    s.totals.fill(0); s.frames.clear(); s.last=now;
+}
+}
+#endif

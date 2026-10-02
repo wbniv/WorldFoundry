@@ -1,8 +1,6 @@
 # A level menu for multi-level bundles (SMB world select first)
 
-Status: **built: desktop and the `smb` app on the Chromecast HD; the remote's Back held waits for the user's check** (2026‑10‑01 22:55 (+07) = 15:55 UTC; accepted
-for SMB at 22:05, the user: "let's do it for smb"). TODO item: "Implement a menu selector for the multi-level `cd.iff`" (pick a level at launch instead of
-booting level 0, as the alternative or addition to separate apps). Each Verification step says PASS, FAIL or PENDING once run.
+Status: **built; Back navigation revised on 2026-10-02 at Will's request.** A normal Back press in a selected level returns to the selector. Back on the selector exits the app. The former hold-for-one-second rule is superseded. Native handler and release-device checks pass for all seven Aquarium tanks and all four SMB selections; evidence is recorded in the [betta upgrade plan](2026-10-02-betta-poster-and-flowing-fins.md). Earlier results below are historical.
 
 - [x] ~~Phase A: this plan and its mockups~~ (`924e73a9`, `b754c2de`)
 - [x] ~~Phase B: level names as data: `cdpack --manifest` writes a `MENU` chunk; bundles without a manifest stay byte for byte as they are~~ (`69f32d9d`)

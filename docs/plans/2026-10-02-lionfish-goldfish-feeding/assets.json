@@ -1,0 +1,23 @@
+{
+  "goldfish": {
+    "vertices": 80,
+    "triangles": 110,
+    "bytes": 3096,
+    "materials": 1
+  },
+  "upper_mouth": {
+    "vertices": 47,
+    "triangles": 90,
+    "bytes": 2672,
+    "materials": 3
+  },
+  "lower_mouth": {
+    "vertices": 47,
+    "triangles": 90,
+    "bytes": 2672,
+    "materials": 3
+  },
+  "actor_count": 41,
+  "goldfish_length": 0.47,
+  "lionfish_length": 1.53
+}

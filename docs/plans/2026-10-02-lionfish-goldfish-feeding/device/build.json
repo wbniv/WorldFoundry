@@ -1,0 +1,43 @@
+{
+  "apk": "/home/will/WorldFoundry-wbniv/android/app/build/outputs/apk/aquarium/release/worldfoundry-aquarium-release.apk",
+  "apk_sha256": "0c88d2a41167ecd1bf6b7e62ed19e1429cbe382ce74445bdc5e92bd225c4aad3",
+  "bundle_sha256": "420e092e63bd1834164081b2de9db5758b9027a26c52a4d041bdc53720216f4a",
+  "lionfish_sha256": "6bbbb2aff36c806727e57db24b9cc1133293e67c1d6f24d6f370a9a6f8ca2511",
+  "menu": {
+    "version": 1,
+    "levels": 6,
+    "title": "WF Aquarium",
+    "prompt": "Choose a tank",
+    "entries": [
+      [
+        0,
+        "Clownfish & Tiger Barbs"
+      ],
+      [
+        1,
+        "Blue Shrimp"
+      ],
+      [
+        2,
+        "Calm Betta"
+      ],
+      [
+        3,
+        "Jellyfish"
+      ],
+      [
+        4,
+        "Lionfish"
+      ],
+      [
+        5,
+        "Planted Tank"
+      ]
+    ]
+  },
+  "profiling_arguments": false,
+  "abis": [
+    "armeabi-v7a",
+    "arm64-v8a"
+  ]
+}

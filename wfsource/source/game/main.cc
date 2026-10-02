@@ -38,6 +38,7 @@
 
 
 #include "level.hp"
+#include "runtime_profile.hp"
 #include <cstdlib>
 
 
@@ -257,6 +258,10 @@ ParseCommandLine(int argc, char** argv)
 			gDebugBind[sizeof(gDebugBind)-1] = '\0';
 			++index;
 			DBSTREAM1( cprogress << "Debug bridge bind: " << gDebugBind << std::endl; )
+		}
+		else if ( strcmp( argv[index]+1, "-frame-profile" ) == 0 )
+		{
+			wf_profile::enable();
 		}
 		else if ( strcmp( argv[index]+1, "-script-profile" ) == 0 )
 		{

@@ -1,0 +1,55 @@
+{
+  "runs": [
+    {
+      "frames": 344,
+      "FPS": 29.969989269840383,
+      "p50_ms": 33.366717,
+      "p95_ms": 33.367329,
+      "p99_ms": 33.367428
+    },
+    {
+      "frames": 348,
+      "FPS": 29.969990139439197,
+      "p50_ms": 33.366709,
+      "p95_ms": 33.367342,
+      "p99_ms": 33.367478
+    },
+    {
+      "frames": 349,
+      "FPS": 29.969990023654987,
+      "p50_ms": 33.366722,
+      "p95_ms": 33.367326,
+      "p99_ms": 33.367519
+    }
+  ],
+  "median": {
+    "frames": 348,
+    "FPS": 29.969990023654987,
+    "p50_ms": 33.366717,
+    "p95_ms": 33.367329,
+    "p99_ms": 33.367478
+  },
+  "CPU_ms": {
+    "update": 1.8057,
+    "actors": 1.4977500000000001,
+    "director": 0.2372,
+    "render": 2.607,
+    "school": 0.0,
+    "pose": 0.0,
+    "animation": 0.0,
+    "total": 4.41265
+  },
+  "counts": {
+    "level-objects": 28.0,
+    "render-actors": 15.0,
+    "draws": 14.0,
+    "triangles": 1082.692,
+    "actor-mailbox-writes": 36.0,
+    "fish-deformations": 0.0
+  },
+  "PSS_MiB": 39.287109375,
+  "actors": 28,
+  "level_sha256": "7edf2c09d917d1bb174ace5506e19d8d92a6f2422e03370658feb1e268781206",
+  "apk_sha256": "5697e17d65f55bceebedada56ec81b8c9ce9d10109511df2040795d31658a93c",
+  "note": "Same release native libraries and current selector; stationary betta camera. 30 s warmup once per variant; three consecutive 12 s runs without CPU profiling. Separate 12 s CPU probe uses final two complete windows. Static omits native fin deformation only; script pose/motion still runs."
+}

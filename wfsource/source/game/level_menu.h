@@ -162,10 +162,12 @@ const char* PlatformHint();
 void RequestReturn();
 bool ConsumeReturnRequest();
 
-// True once a menu has been shown in this run (set by the engine); the Android key
-// handler then turns Back held 1 s into RequestReturn (a short Back still leaves the app).
+// True once a selector has been shown in this run. Back returns from a selected
+// level; Back while the selector itself is visible exits the app.
 void SetMenuRunning(bool running);
 bool MenuRunning();
+void SetSelectorVisible(bool visible);
+bool SelectorVisible();
 
 // One line to the platform's log: stderr on the desktop, logcat (tag wf_game) on Android.
 void Log(const char* fmt, ...)

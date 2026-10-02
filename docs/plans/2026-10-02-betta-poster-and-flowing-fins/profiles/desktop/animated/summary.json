@@ -1,0 +1,29 @@
+{
+  "level_sha256": "4d813d1f797fba0c2ffec694ce5c3840a7f76ff6bb00cbc2f303f710a752288f",
+  "wall_ms_per_frame_runs": [
+    20.462893254007213,
+    20.460717162000947,
+    20.446877680020407
+  ],
+  "wall_ms_per_frame_median": 20.460717162000947,
+  "CPU_ms_per_frame": {
+    "update": 2.4139682085786376,
+    "actors": 0.9868372582001682,
+    "director": 1.281285534062237,
+    "render": 17.843614970563497,
+    "school": 0.0,
+    "pose": 0.03752472666105971,
+    "animation": 0.714874684608915,
+    "total": 20.257583179142138
+  },
+  "counters": {
+    "level-objects": 32.0,
+    "render-actors": 19.0,
+    "draws": 18.0,
+    "triangles": 2879.4905180824226,
+    "actor-mailbox-writes": 72.0,
+    "fish-deformations": 7.0
+  },
+  "exported_actors": 32,
+  "note": "Same desktop ASAN engine, vsync off, fixed 60 Hz simulation; three subtraction runs (600\u2212100 frames), separate 1200-frame CPU probe. Static omits only native fin deformation; new pose/motion scripts still run. CPU child sections overlap; total = update + render."
+}

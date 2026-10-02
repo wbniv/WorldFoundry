@@ -1,0 +1,54 @@
+{
+  "status": "PASS",
+  "apk_sha256": "755f3a1590a3bb7dfb7a061979e704c491f8c45ac5beca6e0ce8510f15c34771",
+  "entries": [
+    {
+      "index": 0,
+      "title": "Clownfish & Tiger Barbs",
+      "pid": "5597",
+      "screenshot": "tank-0.png"
+    },
+    {
+      "index": 1,
+      "title": "Blue Shrimp",
+      "pid": "5697",
+      "screenshot": "tank-1.png"
+    },
+    {
+      "index": 2,
+      "title": "Calm Betta",
+      "pid": "5785",
+      "screenshot": "tank-2.png"
+    },
+    {
+      "index": 3,
+      "title": "Jellyfish",
+      "pid": "5875",
+      "screenshot": "tank-3.png"
+    },
+    {
+      "index": 4,
+      "title": "Lionfish",
+      "pid": "5970",
+      "screenshot": "tank-4.png"
+    },
+    {
+      "index": 5,
+      "title": "Planted Tank",
+      "pid": "6072",
+      "screenshot": "tank-5.png"
+    }
+  ],
+  "resume": "alive and captured",
+  "note": "Sequential ADB cold launches and OK selections; screenshots require visual inspection. Physical remote held Back is not established by this injector. Desktop selection/return verified separately.",
+  "visually_inspected": [
+    "selector.png",
+    "tank-0.png",
+    "tank-1.png",
+    "tank-2.png",
+    "tank-3.png",
+    "tank-4.png",
+    "tank-5.png",
+    "planted-resumed.png"
+  ]
+}

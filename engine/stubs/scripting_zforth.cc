@@ -56,6 +56,7 @@ extern "C" {
 #include <ctime>      // time() for FSN file color-by-age
 #include <chrono>     // the opt-in script profiler (--script-profile)
 
+#include <game/runtime_profile.hp>
 #include <renderassets/rendacto.hp>
 #include "level.hp"   // theLevel global (extern Level* theLevel); pulls in Actor/PhysicalAttributes
 #include <math/euler.hp>     // Euler — connector orientation
@@ -992,6 +993,7 @@ zf_input_state zf_host_sys(zf_ctx* ctx, zf_syscall_id id, const char* /*last_wor
                 if (g_profOn) { g_profMbCalls++; g_profMbMs += std::chrono::duration<double, std::milli>(std::chrono::steady_clock::now() - t0).count(); }
             } else if (custom == 2) {
                 // write-actor-mailbox ( val idx actor_idx -- )
+                wf_profile::count(4);
                 // Writes mailbox `idx` on the actor identified by `actor_idx`,
                 // not the currently-running actor. Needed for the qbert
                 // director to set per-cube material color overrides
@@ -1259,6 +1261,32 @@ zf_input_state zf_host_sys(zf_ctx* ctx, zf_syscall_id id, const char* /*last_wor
             } else if (custom == 40) {
                 // tm-count ( -- n )
                 zf_push(ctx, (zf_cell)(float)(int)g_tm_cells.size());
+            } else if (custom == 41 || custom == 42) {
+                int section=(int)zf_pop(ctx);
+                if(custom==41) wf_profile::begin(section); else wf_profile::end(section);
+            } else if (custom == 43) {
+                int actor=(int)zf_pop(ctx);
+                float amplitude=(float)zf_pop(ctx), phase=(float)zf_pop(ctx);
+                if(theLevel && actor>0 && actor<theLevel->GetMaxObjectIndex()) {
+                    BaseObject* object=theLevel->GetObject(actor);
+                    if(object && IsActor(object)) {
+                        wf_profile::Scope animationProfile(wf_profile::Animation);
+                        wf_profile::count(5);
+                        static_cast<Actor*>(object)->GetRenderActor().SetFishDeformation(phase,amplitude);
+                    }
+                }
+            } else if (custom == 44) {
+                // fin-deform ( phase amplitude sweep spread actor -- ): solid UV-weighted membrane.
+                const int actor=(int)zf_pop(ctx);
+                const float spread=(float)zf_pop(ctx),sweep=(float)zf_pop(ctx),amplitude=(float)zf_pop(ctx),phase=(float)zf_pop(ctx);
+                if(theLevel && actor>0 && actor<theLevel->GetMaxObjectIndex()) {
+                    BaseObject* object=theLevel->GetObject(actor);
+                    if(object && IsActor(object)) {
+                        wf_profile::Scope animationProfile(wf_profile::Animation);
+                        wf_profile::count(5);
+                        static_cast<Actor*>(object)->GetRenderActor().SetFinDeformation(phase,amplitude,sweep,spread);
+                    }
+                }
             } else if (custom == 45) {
                 // swim-deform ( phase amplitude bend fin-phase fin-amplitude min-x max-x actor -- )
                 const int actor=(int)zf_pop(ctx);
@@ -1268,6 +1296,8 @@ zf_input_state zf_host_sys(zf_ctx* ctx, zf_syscall_id id, const char* /*last_wor
                 if(theLevel && actor>0 && actor<theLevel->GetMaxObjectIndex()) {
                     BaseObject* object=theLevel->GetObject(actor);
                     if(object && IsActor(object)) {
+                        wf_profile::Scope animationProfile(wf_profile::Animation);
+                        wf_profile::count(5);
                         static_cast<Actor*>(object)->GetRenderActor().SetSwimDeformation(
                             phase,amplitude,bend,finPhase,finAmplitude,minX,maxX);
                     }
@@ -1441,8 +1471,8 @@ void Init(MailboxesManager& mgr)
     if (r != ZF_OK)
         fprintf(stderr, "zforth: init failed (read-actor-mailbox): %d\n", r);
 
-    r = zf_eval(&g_ctx, ": swim-deform 173 sys ;");
-    if (r != ZF_OK) fprintf(stderr, "zforth: swim bridge init failed: %d\n", r);
+    r = zf_eval(&g_ctx, ": profile-begin 169 sys ; : profile-end 170 sys ; : fish-deform 171 sys ; : fin-deform 172 sys ; : swim-deform 173 sys ;");
+    if (r != ZF_OK) fprintf(stderr, "zforth: profiling/fish bridge init failed: %d\n", r);
 
     // FSN filesystem bridge words (custom 3-7 / sys 131-135)
     r = zf_eval(&g_ctx, ": cwd-scan      131 sys ;");

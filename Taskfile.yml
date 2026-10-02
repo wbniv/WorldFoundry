@@ -551,7 +551,7 @@ tasks:
 
   build-apk:
     desc: "Assemble the Android APKs, one per app flavor (snowgoons, aquarium, condo, smb, qbert) (release: -O3 + LTO + section GC; debug-keystore signed for sideload)"
-    deps: [android-sdk-install]
+    deps: [android-sdk-install, build-cd-iff-aquarium-menu]
     dir: android
     env:
       ANDROID_HOME: /usr/lib/android-sdk
@@ -561,7 +561,7 @@ tasks:
 
   build-apk-debug:
     desc: "Assemble the Android APKs, one per app flavor (snowgoons, aquarium, condo, smb, qbert) (debug: -O0 -g, for attaching ndk-gdb / lldb)"
-    deps: [android-sdk-install]
+    deps: [android-sdk-install, build-cd-iff-aquarium-menu]
     dir: android
     env:
       ANDROID_HOME: /usr/lib/android-sdk
@@ -768,7 +768,7 @@ tasks:
           -o wfsource/source/game/cd.iff
 
   build-cd-iff-aquarium:
-    desc: "Assemble the aquarium-only cd.iff (shell.fth boots TOC level 0 = wflevels/aquarium-standalone.iff; no -L needed) via cdpack-rs → wflevels/aquarium-cd.iff, or CD_OUT=<path>. The Android aquarium app bundles it; the macOS/iOS aquarium apps reuse it (docs/plans/2026-09-30-aquarium-chromecast.md § Reuse)"
+    desc: "Assemble the aquarium-only cd.iff (shell.fth boots TOC level 0 = wflevels/aquarium-standalone.iff; no -L needed) via cdpack-rs → wflevels/aquarium-cd.iff, or CD_OUT=<path>. Direct benchmarks and the macOS/iOS aquarium apps reuse it; Android uses build-cd-iff-aquarium-menu instead (docs/plans/2026-09-30-aquarium-chromecast.md § Reuse)"
     vars:
       # Not OUT: run_aquarium_checks.py takes OUT= for its screenshot dir, and Task reads env vars.
       CD_OUT: '{{.CD_OUT | default "wflevels/aquarium-cd.iff"}}'
@@ -780,6 +780,12 @@ tasks:
       # tests/test_aquarium_android.py, so rebuild it (task aquarium-level does) whenever the level changes.
       - mkdir -p "$(dirname '{{.CD_OUT}}')"
       - wftools/cdpack-rs/target/release/cdpack wfsource/source/game/shell.fth wflevels/aquarium-standalone.iff -o '{{.CD_OUT}}'
+
+  build-cd-iff-aquarium-menu:
+    desc: "Package the seven Aquarium tanks with the selector for Android (standalone/Apple bundle remains aquarium-cd.iff)"
+    deps: [tools-build, aquarium-level, aquarium-blue-shrimp-level, aquarium-betta-level, aquarium-jellyfish-level, aquarium-lionfish-level, aquarium-plants-level, aquarium-arowana-level]
+    cmds:
+      - wftools/cdpack-rs/target/release/cdpack wfsource/source/game/shell-menu.fth --manifest wflevels/aquarium-menu.manifest -o wflevels/aquarium-menu-cd.iff
 
   build-cd-iff-condo:
     desc: "Assemble the condo-only cd.iff (shell.fth boots TOC level 0 = wflevels/condo_639_640-standalone.iff) via cdpack-rs → wflevels/condo-cd.iff, or CD_OUT=<path>. The Android condo app bundles it (docs/plans/2026-10-01-condo-chromecast.md)"
@@ -931,6 +937,9 @@ tasks:
       - wflevels/aquarium/clownfish_idle.fth
       - wflevels/aquarium/school.fth
       - wflevels/aquarium/school_rig.fth
+      - wflevels/aquarium/barb_school_rig.fth
+      - wflevels/aquarium/tiger_barb.py
+      - wflevels/aquarium/art/tiger-barb-source.png
       - wflevels/aquarium/aquarium-standalone.iff.txt
       - wflevels/snowgoons-blender/snowgoons-blender.lev
     generates:
@@ -938,6 +947,75 @@ tasks:
       - wflevels/aquarium.iff
       - wflevels/aquarium-standalone.iff
       - wflevels/aquarium-cd.iff
+
+  aquarium-blue-shrimp-level:
+    desc: "Build the independent blue-shrimp Aquarium tank"
+    deps: [tools-build]
+    cmds:
+      - bash wflevels/aquarium_blue_shrimp/build.sh
+    sources:
+      - wflevels/aquarium_blue_shrimp/build.sh
+      - wflevels/aquarium_blue_shrimp/*.py
+      - wflevels/aquarium_blue_shrimp/*.fth
+      - wflevels/aquarium_tanks/*.py
+      - wflevels/aquarium_tanks/*.fth
+    generates:
+      - wflevels/aquarium_blue_shrimp-standalone.iff
+
+  aquarium-betta-level:
+    desc: "Build the independent betta Aquarium tank"
+    deps: [tools-build]
+    cmds:
+      - bash wflevels/aquarium_betta/build.sh
+    sources:
+      - wflevels/aquarium_betta/build.sh
+      - wflevels/aquarium_betta/*.py
+      - wflevels/aquarium_betta/*.fth
+      - wflevels/aquarium_tanks/*.py
+      - wflevels/aquarium_tanks/*.fth
+    generates:
+      - wflevels/aquarium_betta-standalone.iff
+
+  aquarium-jellyfish-level:
+    desc: "Build the independent jellyfish Aquarium tank"
+    deps: [tools-build]
+    cmds:
+      - bash wflevels/aquarium_jellyfish/build.sh
+    sources:
+      - wflevels/aquarium_jellyfish/build.sh
+      - wflevels/aquarium_jellyfish/*.py
+      - wflevels/aquarium_jellyfish/*.fth
+      - wflevels/aquarium_tanks/*.py
+      - wflevels/aquarium_tanks/*.fth
+    generates:
+      - wflevels/aquarium_jellyfish-standalone.iff
+
+  aquarium-lionfish-level:
+    desc: "Build the independent lionfish Aquarium tank"
+    deps: [tools-build]
+    cmds:
+      - bash wflevels/aquarium_lionfish/build.sh
+    sources:
+      - wflevels/aquarium_lionfish/build.sh
+      - wflevels/aquarium_lionfish/*.py
+      - wflevels/aquarium_lionfish/*.fth
+      - wflevels/aquarium_tanks/*.py
+      - wflevels/aquarium_tanks/*.fth
+    generates:
+      - wflevels/aquarium_lionfish-standalone.iff
+
+  aquarium-plants-level:
+    desc: "Build the animal-free planted Aquarium tank"
+    deps: [tools-build]
+    cmds:
+      - bash wflevels/aquarium_plants/build.sh
+    sources:
+      - wflevels/aquarium_plants/build.sh
+      - wflevels/aquarium_plants/*.py
+      - wflevels/aquarium_tanks/*.py
+      - wflevels/aquarium_tanks/*.fth
+    generates:
+      - wflevels/aquarium_plants-standalone.iff
 
   aquarium-arowana-level:
     desc: "Build Asian Arowana in a broad bare tank"
@@ -974,6 +1052,9 @@ tasks:
       - wflevels/aquarium/clownfish_idle.fth
       - wflevels/aquarium/school.fth
       - wflevels/aquarium/school_rig.fth
+      - wflevels/aquarium/barb_school_rig.fth
+      - wflevels/aquarium/tiger_barb.py
+      - wflevels/aquarium/art/tiger-barb-source.png
       - wflevels/aquarium/aquarium-standalone.iff.txt
       - wflevels/snowgoons-blender/snowgoons-blender.lev
     generates:

@@ -1,0 +1,11 @@
+{
+  "result": "PASS",
+  "fish": 29,
+  "simulation_Hz": 20,
+  "measured_frames": 160,
+  "max_step_world_m": 0.08890166050755177,
+  "p95_step_world_m": 0.088901,
+  "max_yaw_step_revolutions": 0.025010000000000088,
+  "normal_step_limit_world_m": 0.0889,
+  "scope": "stationary-player schooling; includes sparse behavior updates and walls"
+}

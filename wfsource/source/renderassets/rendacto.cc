@@ -32,6 +32,7 @@
 #include <asset/assslot.hp>
 #include <oas/matte.ht>
 #include <cpplib/libstrm.hp>
+#include <map>
 
 #include "rendacto.hp"
 #include <renderassets/box_color.h>
@@ -182,8 +183,6 @@ RenderActor3D::RenderActor3D(Memory& memory, binistream& input,int32 userData, c
 {
 }
 
-//=============================================================================
-
 void RenderActor3D::SetSwimDeformation(float phase, float amplitude, float bend,
     float finPhase, float finAmplitude, float minX, float maxX)
 {
@@ -192,7 +191,7 @@ void RenderActor3D::SetSwimDeformation(float phase, float amplitude, float bend,
         !std::isfinite(minX) || !std::isfinite(maxX) || maxX-minX<.001f) return;
     Vertex3D* vertices=_object.GetWrittableVertexList();
     const int count=_object.GetVertexCount();
-    if (!vertices || count<=0) return;
+    if (!vertices || count<=0 || !_fishWeights.empty() || !_finWeights.empty()) return;
     if (_swimWeights.empty()) {
         _swimMinX=minX; _swimMaxX=maxX; _swimWeights.reserve(count);
         for(int i=0;i<count;i++) {
@@ -214,8 +213,65 @@ void RenderActor3D::SetSwimDeformation(float phase, float amplitude, float bend,
         sine,cosine,amplitude,bend,finSine,finCosine,finAmplitude)));
 }
 
+void RenderActor3D::SetFishDeformation(float phase, float amplitude)
+{
+    if (!std::isfinite(phase) || !std::isfinite(amplitude)) return;
+    Vertex3D* vertices=_object.GetWrittableVertexList();
+    const int count=_object.GetVertexCount();
+    if (!vertices || count<=0 || !_finWeights.empty() || !_swimWeights.empty()) return;
+    if (_fishWeights.empty()) {
+        float minX=vertices[0].position.X().AsFloat(),maxX=minX;
+        for(int i=1;i<count;i++){ float x=vertices[i].position.X().AsFloat(); minX=std::min(minX,x); maxX=std::max(maxX,x); }
+        _fishLength=maxX-minX; _fishWeights.reserve(count);
+        for(int i=0;i<count;i++) _fishWeights.push_back(wf_render::FishWaveWeight::make(vertices[i].position.X().AsFloat(),vertices[i].position.Y().AsFloat(),minX,maxX));
+    }
+    const float angle=phase*6.283185307f,sine=std::sin(angle),cosine=std::cos(angle);
+    amplitude=std::max(0.f,std::min(.12f,amplitude))*_fishLength;
+    for(int i=0;i<count;i++) vertices[i].position.SetY(Scalar(_fishWeights[i].deform(sine,cosine,amplitude)));
+}
+
+//=============================================================================
+
 RenderActor3D::~RenderActor3D()
 {
+}
+
+void RenderActor3D::SetFinDeformation(float phase, float amplitude, float sweep, float spread)
+{
+    if (!std::isfinite(phase) || !std::isfinite(amplitude) || !std::isfinite(sweep) || !std::isfinite(spread)) return;
+    Vertex3D* vertices=_object.GetWrittableVertexList();
+    const int count=_object.GetVertexCount();
+    if (!vertices || count<=0 || !_fishWeights.empty() || !_swimWeights.empty()) return;
+    if (_finWeights.empty()) {
+        std::map<int,std::pair<float,float>> roots;
+        // Root rows are authored explicitly, including every across-fin coordinate.
+        // This one-time scan is shared by all rendering backends.
+        for(int i=0;i<count;i++) {
+            if(vertices[i].v.AsFloat()<=.00001f)
+                roots[int(std::lround(vertices[i].u.AsFloat()*65536.f))]=
+                    {vertices[i].position.X().AsFloat(),vertices[i].position.Z().AsFloat()};
+        }
+        _finWeights.reserve(count);
+        for(int i=0;i<count;i++) {
+            const Vertex3D& v=vertices[i];
+            _finWeights.push_back(wf_render::FinWaveWeight::make(v.position.X().AsFloat(),
+                v.position.Y().AsFloat(),v.position.Z().AsFloat(),v.u.AsFloat(),v.v.AsFloat()));
+            const auto root=roots.find(int(std::lround(v.u.AsFloat()*65536.f)));
+            if(root!=roots.end()) {
+                _finWeights.back().rootX=root->second.first;_finWeights.back().rootZ=root->second.second;
+            }
+        }
+    }
+    const float angle=std::fmod(phase,1.f)*6.283185307f;
+    const float sine=std::sin(angle),cosine=std::cos(angle);
+    amplitude=std::max(0.f,std::min(.25f,amplitude));
+    sweep=std::max(-.15f,std::min(.15f,sweep));
+    spread=std::max(.55f,std::min(1.1f,spread));
+    for(int i=0;i<count;i++) {
+        vertices[i].position.SetX(Scalar(_finWeights[i].sweptX(sweep,spread)));
+        vertices[i].position.SetY(Scalar(_finWeights[i].bentY(sine,cosine,amplitude)));
+        vertices[i].position.SetZ(Scalar(_finWeights[i].bentZ(sine,cosine,amplitude,spread)));
+    }
 }
 
 //=============================================================================

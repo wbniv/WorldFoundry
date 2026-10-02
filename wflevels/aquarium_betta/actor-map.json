@@ -1,0 +1,160 @@
+{
+  "level": "aquarium_betta",
+  "title": "Calm Betta",
+  "kind": "betta",
+  "count": 1,
+  "profile": "keyboard",
+  "indices": {
+    "Room": 1,
+    "SunLight": 2,
+    "Camera": 3,
+    "Director": 4,
+    "LevelObj": 5,
+    "Matte": 6,
+    "cs_wide": 7,
+    "LookAt": 8,
+    "Player": 9,
+    "animal-00-body": 10,
+    "animal-00-tail": 11,
+    "animal-00-dorsal": 12,
+    "animal-00-anal": 13,
+    "animal-00-near_pectoral": 14,
+    "animal-00-far_pectoral": 15,
+    "animal-00-near_pelvic": 16,
+    "animal-00-far_pelvic": 17,
+    "tank-base": 18,
+    "water-back": 19,
+    "back-air": 20,
+    "tank-end--1": 21,
+    "tank-end-1": 22,
+    "front-collider": 23,
+    "rim": 24,
+    "floor": 25,
+    "broad-leaf-plants": 26,
+    "siam-pavilion": 27,
+    "stand": 28,
+    "room-backdrop": 29,
+    "AmbientLight": 30,
+    "LookClose": 31,
+    "cs_close": 32
+  },
+  "mailboxes": {
+    "init": 600,
+    "phase": 601,
+    "heading": 602,
+    "prev": 603,
+    "mode": 604,
+    "dart": 605,
+    "cooldown": 606,
+    "dx": 607,
+    "dy": 608,
+    "dz": 609,
+    "vx": 610,
+    "vy": 611,
+    "vz": 612,
+    "target": 613,
+    "x": 614,
+    "y": 615,
+    "z": 616,
+    "yaw": 617,
+    "scale": 618,
+    "sy": 619,
+    "cy": 620,
+    "actor": 621,
+    "ox": 622,
+    "oy": 623,
+    "oz": 624,
+    "camera": 625,
+    "clock": 626,
+    "pulse": 627
+  },
+  "parts": [
+    "body",
+    "tail",
+    "dorsal",
+    "anal",
+    "near_pectoral",
+    "far_pectoral",
+    "near_pelvic",
+    "far_pelvic"
+  ],
+  "offsets": [
+    [
+      0,
+      0,
+      0
+    ],
+    [
+      0,
+      0,
+      0
+    ],
+    [
+      0,
+      0,
+      0
+    ],
+    [
+      0,
+      0,
+      0
+    ],
+    [
+      0,
+      0,
+      0
+    ],
+    [
+      0,
+      0,
+      0
+    ],
+    [
+      0,
+      0,
+      0
+    ],
+    [
+      0,
+      0,
+      0
+    ]
+  ],
+  "animal": "betta",
+  "spawn": [
+    0,
+    -0.2,
+    2.5
+  ],
+  "bottom": 1.36,
+  "top": 4.08,
+  "limits": [
+    4.7,
+    0.27
+  ],
+  "rows": [],
+  "betta_fins": {
+    "groups": 8,
+    "actor_lookup": [
+      650,
+      657
+    ],
+    "motion_mailboxes": [
+      660,
+      666
+    ],
+    "weights": "solid UV.x across fin; UV.y root-to-tip",
+    "physics_bodies_added": 0,
+    "triangles": {
+      "body": 1180,
+      "tail": 896,
+      "dorsal": 540,
+      "anal": 604,
+      "near_pectoral": 212,
+      "far_pectoral": 212,
+      "near_pelvic": 216,
+      "far_pelvic": 216
+    }
+  },
+  "feeding": null
+}

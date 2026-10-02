@@ -398,18 +398,20 @@ DrawFn Drawer() { return gDrawer; }
 const char* PlatformHint()
 {
 #if defined(__ANDROID__)
-    return "D-pad choose - OK starts - Hold Back in a game for this menu";
+    return "D-pad choose - OK starts - Back returns here; Back here exits";
 #else
-    return "Up/Down choose - Space starts - Backspace in a game comes back here";
+    return "Up/Down choose - Space starts - Backspace returns here; here exits";
 #endif
 }
 
 void RequestReturn() { gReturnRequested.store(true); }
 bool ConsumeReturnRequest() { return gReturnRequested.exchange(false); }
 
-namespace { std::atomic<bool> gMenuRunning{false}; }
+namespace { std::atomic<bool> gMenuRunning{false},gSelectorVisible{false}; }
 void SetMenuRunning(bool running) { gMenuRunning.store(running); }
 bool MenuRunning() { return gMenuRunning.load(); }
+void SetSelectorVisible(bool visible) { gSelectorVisible.store(visible); }
+bool SelectorVisible() { return gSelectorVisible.load(); }
 
 void Log(const char* fmt, ...)
 {

@@ -832,6 +832,7 @@ WFGame::RunLevelMenu()
 
 	_levelMenuActive = true;
 	SetMenuRunning(true);
+	SetSelectorVisible(true);
 	Menu menu(bundle, _levelMenuCursor, PlatformHint());
 	levelmenu::Log("showing %zu entries (\"%s\"), cursor on %d",
 	        bundle.entries.size(), bundle.title.c_str(), menu.Cursor());
@@ -865,10 +866,11 @@ WFGame::RunLevelMenu()
 		if (Script().Next(&f))			// --menu-input: the script drives the menu
 		{
 			buttons = f.buttons;
-			if (f.quit) HALRequestClose();
+			if (f.quit || f.back) HALRequestClose();
 		}
 		else
 			buttons = uint32_t(JoystickGetButtonsF(stick));
+		if (ConsumeReturnRequest()) HALRequestClose();
 		menu.Update(buttons, nowMs);
 		if (menu.Cursor() != lastCursor)
 		{
@@ -886,6 +888,7 @@ WFGame::RunLevelMenu()
 		nowMs += int64_t(_display->PageFlip().AsFloat() * 1000.0f);	// also pumps the window's input
 	}
 	JoystickDelete(stick);
+	SetSelectorVisible(false);
 	ConsumeReturnRequest();			// a Backspace pressed while the menu was up is not for the next level
 	_levelMenuCursor = menu.Cursor();
 	const int level = menu.ChosenLevel();

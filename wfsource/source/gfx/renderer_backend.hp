@@ -83,6 +83,9 @@ public:
     // re-enable without re-specifying the camera's fog setup).
     virtual void SetFogEnabled(bool enabled) = 0;
 
+    // Opt-in texture alpha testing; existing materials remain opaque.
+    virtual void SetAlphaCutout(bool /*enabled*/) {}
+
     // Triangle submission (see top of file). `nx/ny/nz` is the object-space
     // face normal — the modern backend replicates it into all three verts.
     // `cullExempt` skips backface culling for this triangle (DOUBLE_SIDED

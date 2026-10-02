@@ -1,0 +1,71 @@
+{
+  "status": "PASS",
+  "started_indices": [
+    5,
+    2,
+    3,
+    4,
+    0,
+    1,
+    5
+  ],
+  "entries": [
+    [
+      0,
+      "Original Aquarium"
+    ],
+    [
+      1,
+      "Blue Shrimp"
+    ],
+    [
+      2,
+      "Calm Betta"
+    ],
+    [
+      3,
+      "Jellyfish"
+    ],
+    [
+      4,
+      "Lionfish"
+    ],
+    [
+      5,
+      "Planted Tank"
+    ]
+  ],
+  "sources": [
+    {
+      "level": "aquarium",
+      "title": "Original Aquarium",
+      "sha256": "04f5cc0723d1527280aa854c9c59d4a6c7a7536d9a739a0773c68342867f9081"
+    },
+    {
+      "level": "aquarium_blue_shrimp",
+      "title": "Blue Shrimp",
+      "sha256": "01a45751f3efdb539b6c00d8b0a3588c6c9bf111e915ced3f4fa0c53e4d9e848"
+    },
+    {
+      "level": "aquarium_betta",
+      "title": "Calm Betta",
+      "sha256": "7edf2c09d917d1bb174ace5506e19d8d92a6f2422e03370658feb1e268781206"
+    },
+    {
+      "level": "aquarium_jellyfish",
+      "title": "Jellyfish",
+      "sha256": "550db6620e6c88d54e157febb8bd9b1dc67c0abf264b7bd3976d01e3245758c6"
+    },
+    {
+      "level": "aquarium_lionfish",
+      "title": "Lionfish",
+      "sha256": "ffbc7258c0a6e028bbecd0c06bcbe8d00ee82c058035a3e815e55d029902ea4e"
+    },
+    {
+      "level": "aquarium_plants",
+      "title": "Planted Tank",
+      "sha256": "da7ed480d9f10a99527ca6510b373bfa9791f24c1ce7b9b62027de8f9e996e90"
+    }
+  ],
+  "note": "Isolated desktop snapshot; active Aquarium app bundle and device left alone."
+}

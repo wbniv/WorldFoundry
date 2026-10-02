@@ -1,0 +1,32 @@
+{
+  "betta_animated_pixels": 2711,
+  "betta_home_resume": "PASS",
+  "aquarium": {
+    "status": "PASS",
+    "short_back_returns": [
+      2,
+      4,
+      6,
+      5,
+      0,
+      1,
+      3
+    ],
+    "selector_back_exits": true,
+    "apk_sha256": "88ef8209dbe76d5fdf9e36953dd269da06e14b3352f19d77119f274ed2959824"
+  },
+  "smb": {
+    "status": "PASS",
+    "short_back_returns": [
+      0,
+      1,
+      2,
+      3
+    ],
+    "selector_back_exits": true,
+    "apk_sha256": "45a61122e69ac14b37848aaa0c8faa2a80795ef4bebbad550fa3da278a40d005"
+  },
+  "status": "PASS",
+  "serial": "adb-2628105GN0GT7C-wwfiSB._adb-tls-connect._tcp",
+  "note": "Actual release apps, Android Back down/up injection; no long press. All current Aquarium and SMB selections return to their selector; selector Back exits."
+}

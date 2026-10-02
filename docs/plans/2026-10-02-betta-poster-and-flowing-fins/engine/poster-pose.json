@@ -1,0 +1,13 @@
+{
+  "status": "PASS",
+  "mailboxes": {
+    "660": 0.0,
+    "661": 0.0,
+    "662": 0.0,
+    "663": 0.210004,
+    "664": 0.390015,
+    "665": 0.0,
+    "666": 0.72
+  },
+  "note": "Debug-authored zero-drive pose matching studio settings to fixed-point precision. Actual native fin deformation; camera and lighting differ."
+}

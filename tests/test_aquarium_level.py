@@ -28,6 +28,7 @@ _spec = importlib.util.spec_from_file_location('aquarium_constants',
 C = importlib.util.module_from_spec(_spec)
 _spec.loader.exec_module(C)
 sys.path.insert(0, LEVEL_DIR)
+import tiger_barb as TB
 import clownfish as CF                                             # noqa: E402
 
 FISH = CF.Clownfish()
@@ -194,8 +195,7 @@ def test_director_runs_the_rig_then_the_camera_with_the_right_indices(objs):
         'rig first (after every actor), then cameras, then the anemone sway, then the school'
     h = _header(script)
     for n in CF.PART_NAMES:       # with followers the Director's actor words choose the player's actor when fish-off is 0
-        m = re.search(rf": fish-actor-{CF.ROLES[n]} fish-off 0 = if (\d+) else", script)
-        assert m and int(m.group(1)) == names.index(n) + 1, f'{n}: header index != export position + 1'
+        assert h['fish-actor-'+CF.ROLES[n]] == names.index(n)+1
     assert h['fish-actor-player'] == names.index('Player') + 1
     assert h['aq-shot-a'] == names.index('cs_front') + 1
     assert h['aq-shot-b'] == names.index('cs_anemone') + 1
@@ -206,38 +206,43 @@ def test_director_runs_the_rig_then_the_camera_with_the_right_indices(objs):
     assert h['aq-touch'] == 0, 'the committed level is the keyboard/gamepad profile'
 
 
-SCHOOL_N = 10
+SCHOOL_N = 29
 
 
-def test_the_followers_are_fifty_more_part_actors_sharing_the_players_meshes(objs):
+def test_each_barb_is_one_mass_zero_scriptless_mesh_actor(objs):
     names = [o['name'] for o in objs]
-    assert len(objs) == 32 + 5 * SCHOOL_N, 'the one-fish level has 32 actors; each follower adds its five parts'
-    assert len(names) == len(set(names)), 'actor names are unique'
-    for k in range(1, SCHOOL_N + 1):
-        for n in CF.PART_NAMES:
-            mine, theirs = by_name(objs, f'{n}-{k}'), by_name(objs, n)
-            assert (mine['class'], mine['mesh'], mine['mobility'], mine['mass']) == (theirs['class'], theirs['mesh'], theirs['mobility'], theirs['mass']), \
-                f'{n}-{k} must be the same kind of actor on the same mesh as {n}'
+    assert len(objs) == 32 + SCHOOL_N
+    assert len(names) == len(set(names))
+    followers=[by_name(objs,f'tiger-barb-{k}') for k in range(1,SCHOOL_N+1)]
+    assert len({o['mesh'] for o in followers}) == 1
+    assert followers[0]['mesh'] in ('tiger_barb_quad.iff','tiger_barb_mesh.iff')
+    for fish in followers:
+        assert fish['class']=='platform' and fish['mass']==0
+        assert not fish['script']
+        assert fish['mobility']==by_name(objs,'clownfish-body')['mobility']
+    assert not any(re.match(r'clownfish-.*-\d+$',n) for n in names)
 
 
-def test_the_director_writes_the_follower_actor_table_matching_the_export_positions(objs):
-    names = [o['name'] for o in objs]
-    script = by_name(objs, 'Director')['script']
-    for k in range(1, SCHOOL_N + 1):
-        for j, n in enumerate(CF.PART_NAMES):
-            line = f'{names.index(f"{n}-{k}") + 1} {1040 + 5 * (k - 1) + j} write-mailbox'
-            assert line in script, line
+def test_the_director_barb_indices_match_export_positions(objs):
+    names=[o['name'] for o in objs]
+    script=by_name(objs,'Director')['script']
+    for k in range(1,SCHOOL_N+1):
+        assert f'{names.index(f"tiger-barb-{k}")+1} {1300+k-1} write-mailbox' in script
 
 
-def test_the_school_mailboxes_do_not_overlap_what_the_level_and_the_player_own(objs):
-    script = by_name(objs, 'Director')['script']
-    owned = {'player rig': (600, 639), 'level': (700, 719), 'sway': (720, 739), 'camera': (740, 759),
-             'school state': (800, 953), 'school params': (960, 980), 'school scratch': (985, 1009),
-             'school glue': (1015, 1038), 'actor table': (1040, 1089), 'last updates': (1090, 1099), 'follower rigs': (1100, 1499)}
-    spans = sorted(owned.values())
-    assert all(a[1] < b[0] for a, b in zip(spans, spans[1:])), 'the mailbox blocks must not overlap'
-    assert owned['follower rigs'][1] - owned['follower rigs'][0] + 1 == 40 * SCHOOL_N
-    assert ': fish-off 1016 read-mailbox ;' in script and 'sd-actors' in script and ': sch-n %d ;' % (SCHOOL_N + 1) in script
+def test_the_school_and_retained_player_do_not_share_mailboxes(objs):
+    script=by_name(objs,'Director')['script']
+    spans=sorted([(600,639),(700,719),(720,739),(740,759)]+list(TB.RANGES.values()))
+    assert all(a[1]<b[0] for a,b in zip(spans,spans[1:]))
+    assert TB.RANGES['state'][1]-TB.RANGES['state'][0]+1 == 14*(SCHOOL_N+1)
+    assert ': sch-n 30 ;' in script
+    assert ': sd-ptr 1268 ;' in script and 'sch-n 1 - mod' in script
+    for name in ('Director','Player'):
+        fish_script=by_name(objs,name)['script']
+        assert ': fish-off 0 ;' in fish_script
+        assert '1037 read-mailbox' not in fish_script
+    for name,base in [('sch-base',800),('sch-par',1220),('sch-scr',1242)]:
+        assert f': {name} {base} ;' in script
 
 
 def test_the_dart_startles_the_school_in_the_built_director(objs):

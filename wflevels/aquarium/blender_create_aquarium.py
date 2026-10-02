@@ -1,5 +1,5 @@
 #!/usr/bin/env python3
-"""blender_create_aquarium.py — the aquarium level: 55 gal acrylic tank, sand, rock, anemone, clownfish.
+"""blender_create_aquarium.py — 55 gal aquarium, player clownfish and a tiger-barb school.
 
 Plan: docs/plans/2026-09-30-aquarium-level.md (Phase 2: the scene; Phase 3: fish, controls, cameras).
 Constants: aquarium_constants.py (the plan's tank table as code; WORLD_SCALE = 10).
@@ -26,8 +26,8 @@ Builds, headless, in the shape of wflevels/aquarium_swim_spike/blender_create_sw
     (the anemone close-up, aimed at `LookB`, which the Director leans toward the fish), switched
     by the Director on the Player's distance from the anemone zone's centre, with hysteresis.
 
-Plan B: nothing is translucent (the engine drops texture alpha, plan § Phase 0 verdict).
-The water is the fog plus the water-coloured inner faces of the back and end walls.
+The water uses fog and opaque water-coloured tank faces. Tiger-barb silhouettes use
+opt-in alpha cutout in the modern GL/GLES renderer (tiger-barb plan, 2026-10-02).
 
 Profiles (build time, like the condo's CONDO_CAMERA_PROFILE): AQUARIUM_PROFILE=keyboard (default:
 arrows, B/C held for depth, A darts) → wflevels/aquarium/aquarium.lev; AQUARIUM_PROFILE=touch (a
@@ -51,6 +51,7 @@ SCRIPT_DIR    = os.path.dirname(os.path.abspath(__file__))
 sys.path.insert(0, SCRIPT_DIR)
 import aquarium_constants as C                                     # noqa: E402
 import clownfish as CF                                             # noqa: E402  the canonical fish
+import tiger_barb as TB
 
 REPO          = os.path.normpath(os.path.join(SCRIPT_DIR, '..', '..'))
 SNOWGOONS_LEV = os.path.join(REPO, 'wflevels', 'snowgoons-blender', 'snowgoons-blender.lev')
@@ -62,9 +63,16 @@ assert PROFILE in ('keyboard', 'touch'), f'AQUARIUM_PROFILE={PROFILE!r}: keyboar
 # (docs/plans/2026-10-01-swarming-poster.md, Phase E step 1). Git-ignored, regenerable.
 SCHOOL_BENCH  = os.environ.get('AQUARIUM_SCHOOL_BENCH') == '1'
 # AQUARIUM_SCHOOL_N: how many more fish school and swarm round the player's fish (school.fth + school_rig.fth,
-# docs/plans/2026-10-01-aquarium-schooling.md). Default 10; 0 builds the one-fish level.
-SCHOOL_N      = int(os.environ.get('AQUARIUM_SCHOOL_N', '10') or 0)
-assert 0 <= SCHOOL_N <= 10, 'AQUARIUM_SCHOOL_N: 0..10 (the follower mailbox blocks and the round robin are sized for 10)'
+# docs/plans/2026-10-01-aquarium-schooling.md). Default 29 barbs (10 for the clownfish baseline); 0 builds one fish.
+FOLLOWER_ASSET = os.environ.get('AQUARIUM_FOLLOWER_ASSET', 'barb_mesh')
+assert FOLLOWER_ASSET in ('clownfish', 'barb_quad', 'barb_mesh')
+BARBS = FOLLOWER_ASSET != 'clownfish'
+SCHOOL_N = int(os.environ.get('AQUARIUM_SCHOOL_N', '29' if BARBS else '10') or 0)
+assert 0 <= SCHOOL_N <= (29 if BARBS else 10), 'follower count exceeds allocated mailbox blocks'
+BARB_UPDATES = int(os.environ.get('AQUARIUM_BARB_UPDATES', '5'))
+assert 1 <= BARB_UPDATES <= 29
+BARB_ANIMATE = FOLLOWER_ASSET == 'barb_mesh' and os.environ.get('AQUARIUM_BARB_ANIMATE', '1') != '0'
+BARB_FROZEN = os.environ.get('AQUARIUM_BARB_FROZEN') == '1'
 if SCHOOL_BENCH:
     SCHOOL_N = 0                                 # the bench level is the one-fish level plus the invisible Forth
 SCHOOL_IDLE   = os.environ.get('AQUARIUM_SCHOOL_IDLE') in ('1', 'hide')     # a cost probe: the followers exist (82 actors) but nothing moves them
@@ -311,8 +319,36 @@ for name, mesh, off in FISH.parts():
 # The followers (AQUARIUM_SCHOOL_N): the same five parts per fish, named clownfish-<part>-<k>, k = 1..N. They sit in the
 # actor list before the tank like the player's, the Director poses them every tick (school_rig.fth).
 follower_objs = {}                               # k -> {part name: object}
+barb_mesh = None
+if BARBS and SCHOOL_N:
+    # Canonical art remains unmodified. This is pipeline encoding/resampling,
+    # including the atlas's black colour key; it is not a new art treatment.
+    from PIL import Image
+    os.makedirs(OUT_DIR, exist_ok=True)
+    src = os.path.join(SCRIPT_DIR, 'art/tiger-barb-source.png')
+    image = Image.open(src).convert('RGBA').resize((256, 128), Image.Resampling.LANCZOS)
+    pixels = image.load()
+    for y in range(image.height):
+        for x in range(image.width):
+            r, g, b, a = pixels[x, y]
+            # Transparent colour key must not turn dark opaque stripes into holes.
+            pixels[x, y] = (0, 0, 0, 0) if a < 128 else (r, g, b, 255)
+    texture = os.path.join(OUT_DIR, 'tiger_barb.tga')
+    image.save(texture)
+    barb_mesh = TB.blender_mesh(bpy, FOLLOWER_ASSET == 'barb_quad', texture)
 for k in range(1, SCHOOL_N + 1):
     follower_objs[k] = {}
+    if BARBS:
+        obj = bpy.data.objects.new(f'tiger-barb-{k}', barb_mesh)
+        obj.location = C.FISH_SPAWN
+        scene.collection.objects.link(obj)
+        CF.apply_part_actor_fields(obj)
+        obj['wf_Mesh Name'] = barb_mesh.name + '.iff'
+        obj['wf_original_mesh_name'] = barb_mesh.name + '.iff'
+        if os.environ.get('AQUARIUM_SCHOOL_IDLE') == 'hide':
+            obj['wf_Visibility Mailbox'] = 0
+        follower_objs[k]['barb'] = obj
+        continue
     for (name, mesh, off), shared in zip(FISH.parts(), part_objs):     # the same five meshes as the player's parts: no new assets, so no new room memory
         assert shared.name == name
         obj = bpy.data.objects.new(f'{name}-{k}', shared.data)
@@ -851,10 +887,20 @@ if SCHOOL_N:            # the followers: school.fth's model, school_rig.fth's gl
               f': sd-hx {fnum(hx)} ; : sd-hy {fnum(hy)} ; : sd-hz {fnum(hz)} ;\n'
               ': sd-actors   \\ the 50 follower part actors, k = 1..N, in clownfish.PART_NAMES order\n'
               + ''.join(f'  {int(idx[follower_objs[k][nm].name])} {1040 + 5 * (k - 1) + j} write-mailbox\n'
-                        for k in range(1, SCHOOL_N + 1) for j, nm in enumerate(CF.PART_NAMES))
+                        for k in range(1, SCHOOL_N + 1) for j, nm in enumerate(CF.PART_NAMES) if not BARBS)
               + ';\n')
-    dir_defs = (aq_defs + sd_gen + open(os.path.join(SCRIPT_DIR, 'school.fth')).read()
-                + open(os.path.join(SCRIPT_DIR, 'school_rig.fth')).read())
+    if BARBS:
+        sd_gen = TB.forth_constants(SCHOOL_N, [idx[follower_objs[k]['barb'].name] for k in range(1, SCHOOL_N + 1)],
+                                    updates=BARB_UPDATES, animate=BARB_ANIMATE, frozen=BARB_FROZEN)
+        sd_gen += (f': sd-cx 0 ; : sd-cy 0 ; : sd-cz {fnum((C.WATER_LINE_M + C.SAND_TOP_M) / 2)} ; : sd-bl {fnum(BLm)} ;\n'
+                   f': sd-hx {fnum(hx)} ; : sd-hy {fnum(hy)} ; : sd-hz {fnum(hz)} ;\n')
+    rig = open(os.path.join(SCRIPT_DIR, 'barb_school_rig.fth' if BARBS else 'school_rig.fth')).read()
+    if not BARBS:
+        rig = rig.replace('  sd-round-robin\n  sd-pose-all ;', '  4 profile-begin sd-round-robin 4 profile-end\n  5 profile-begin sd-pose-all 5 profile-end ;')
+    school_core = open(os.path.join(SCRIPT_DIR, 'school.fth')).read()
+    if BARBS:
+        school_core = school_core.replace(': r-rep MB_RR par@ ;', ': r-rep MB_YOU sc@ 0 = if 0.9 else MB_RR par@ then ;')
+    dir_defs = aq_defs + sd_gen + school_core + rig
     dir_extra += '' if SCHOOL_IDLE else 'sd-tick\n'
 if SCHOOL_BENCH:        # the Forth core, with its mailbox blocks, and one call per tick; see docs/plans/2026-10-01-swarming-poster.md
     SB_PRE = ': sch-base 800 ; : sch-par 960 ; : sch-scr 985 ; : sch-n 11 ;\n'
@@ -878,7 +924,15 @@ if SCHOOL_BENCH:        # the Forth core, with its mailbox blocks, and one call 
 '''
     dir_defs = aq_defs + SB_PRE + open(os.path.join(SCRIPT_DIR, 'school.fth')).read() + SB_INIT
     dir_extra += 'sb-init\nsch-tick\n'
-director['wf_Script'] = FISH.director_script(part_idx, idx['Player'], defs=dir_defs, extra=dir_extra, followers=bool(SCHOOL_N))
+director['wf_Script'] = FISH.director_script(part_idx, idx['Player'], defs=dir_defs, extra=dir_extra, followers=bool(SCHOOL_N) and not BARBS)
+if BARBS:
+    # The retained player rig normally consults follower-offset/frame-stride
+    # cells 1016/1037. Those addresses now belong to the 30-fish school state;
+    # this player's one rig always has offset zero and runs every frame.
+    for obj in (player, director):
+        obj['wf_Script'] = obj['wf_Script'].replace(': fish-off 1016 read-mailbox ;', ': fish-off 0 ;').replace(
+            ': fish-dt INDEXOF_DELTA_TIME read-mailbox 1037 read-mailbox 1 + * ;',
+            ': fish-dt INDEXOF_DELTA_TIME read-mailbox ;')
 
 print(f'{TAG} WORLD_SCALE={S} profile={PROFILE} fish {FISH.length_m:.3f} m spawn '
       f'{tuple(round(v, 3) for v in player.location)} V={V:.4f} dart {C.DART_SPEED:.3f} m/s × {C.DART_TIME:g} s '
