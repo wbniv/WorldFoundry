@@ -1,5 +1,6 @@
 | Date | Change |
 |------|--------|
+| [2026-10-01](https://github.com/wbniv/WorldFoundry/commit/ccede076) | The snowgoons app is called Snowgoons |
 | [2026-10-01](https://github.com/wbniv/WorldFoundry/commit/a40da0de) | The smb app ships the world select: Android menu drawer, Back held 1 s returns to the menu |
 | [2026-10-01](https://github.com/wbniv/WorldFoundry/commit/6db30e3f) | Docs: one Android app per game (README flavor table, porting status) |
 | [2026-10-01](https://github.com/wbniv/WorldFoundry/commit/55a66fb8) | Phone controller QR: the World Foundry logo in the middle (planet by default, or the whole logo), at ECC H |
@@ -12,6 +13,11 @@
 | [2026-04-17](https://github.com/wbniv/WorldFoundry/commit/3b24f001) | feat(android): Phase 3 step 3 — Gradle project + AndroidManifest |
 
 <!--history-meta v1
+ccede076	author	Will Norris
+ccede076	added	1
+ccede076	deleted	1
+ccede076	files	1
+ccede076	body	Asked by the user. android/app/src/snowgoons/res/values/strings.xml overrides\nmain's "World Foundry" (log viewer: "Snowgoons Log"); the id stays\norg.worldfoundry.wf_game so installs upgrade in place, and the other labels are\nunchanged. Its launcher icons already override main's in every density and\nform (the snowman); a new test pins that, another pins every app's label.\nREADME, the split plan (Icons table, mockups) and a note in the icons plan\nfollow.\nPlan: docs/plans/2026-10-01-split-cd-iff-one-app-per-game.md\n\nCo-Authored-By: Claude Opus 5.5 <noreply@anthropic.com>\nClaude-Session: https://claude.ai/code/session_01DxMP4jUNjCjDz8E9DWzXcM
 a40da0de	author	Will Norris
 a40da0de	added	1
 a40da0de	deleted	1

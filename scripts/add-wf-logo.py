@@ -1,10 +1,9 @@
 #!/usr/bin/env python3
 """add-wf-logo.py: stamp the World Foundry logo in the bottom-right corner of any existing icon or banner.
 
-The logo is the favicon of the World Foundry website (../worldfoundry.org/public/favicon.svg: a red square with a
-dark square inside). The same layout is used for every World Foundry game on mobile and Chromecast: the game's art
-fills the icon and the logo sits bottom-right. This script is the only place that knows the logo, so it can be run on
-any PNG, whatever made it, and is used by scripts/gen-android-icons.py for every launcher icon and TV banner.
+The approved badge is the graphic panel of the repository's wflogo.png, retaining its grey globes and white
+background, with no outer border or side padding. See docs/reference/android-brand-badge.md. This shared script
+stamps every game's launcher icons and TV banners, and can also stamp any existing PNG.
 
 Usage:
   scripts/add-wf-logo.py ICON.png                    # write ICON.png in place
@@ -12,9 +11,8 @@ Usage:
   scripts/add-wf-logo.py a.png b.png c.png           # several, each in place
 
 Options:
-  --logo SVG          the logo (default ../worldfoundry.org/public/favicon.svg next to this repository); only <rect>
-                      shapes are supported, which is all the favicon has
-  --scale F           logo side as a fraction of the shorter image side (default 0.26)
+  --logo PNG          an already cropped graphic (default wflogo.png is cropped automatically)
+  --scale F           logo longer side as a fraction of the shorter image side (default 0.26)
   --margin F          gap to the edges, as a fraction of the shorter side (default 0.05)
   --safe-inset F      keep the logo this fraction of each side away from the edge; adaptive-icon foregrounds need 1/6
                       so the launcher's mask does not cut it off (default 0)
@@ -26,67 +24,47 @@ Options:
 import argparse
 import math
 import pathlib
-import re
 import sys
 
-from PIL import Image, ImageDraw
+from PIL import Image, ImageDraw, ImageOps
 
 REPO_ROOT = pathlib.Path(__file__).resolve().parent.parent
-DEFAULT_LOGO = REPO_ROOT.parent / "worldfoundry.org" / "public" / "favicon.svg"
+DEFAULT_LOGO = REPO_ROOT / "wflogo.png"
+LOGO_CROP = (4, 25, 82, 129)  # interior: no lettering or black frame borders
 
 
-def _attrs(tag):
-    return dict(re.findall(r'([\w-]+)="([^"]*)"', tag))
+def render_logo(path, size):
+    """Resize the rectangular graphic without padding, borders, or distortion."""
+    path = pathlib.Path(path)
+    with Image.open(path) as source:
+        logo = source.convert("RGBA")
+    if path.resolve() == DEFAULT_LOGO.resolve():
+        logo = logo.crop(LOGO_CROP)
+    return ImageOps.contain(logo, (size, size), Image.LANCZOS)
 
 
-def render_svg_rects(path, size):
-    """Rasterise an SVG made only of <rect> elements (the favicon) at size x size, with transparency."""
-    text = pathlib.Path(path).read_text()
-    vb = [float(v) for v in re.search(r'viewBox="([^"]+)"', text).group(1).replace(",", " ").split()]
-    ss = 4                                                    # supersample, then reduce: smooth edges without a dependency
-    im = Image.new("RGBA", (size * ss, size * ss), (0, 0, 0, 0))
-    d = ImageDraw.Draw(im)
-    rects = re.findall(r"<rect\b[^>]*>", text)
-    if not rects or re.search(r"<(path|circle|ellipse|polygon|polyline|line|text|image|use|g)\b", text):
-        sys.exit(f"add-wf-logo: {path} has shapes other than <rect>; only rect-only logos are supported")
-    for tag in rects:
-        a = _attrs(tag)
-        x, y = float(a.get("x", 0)), float(a.get("y", 0))
-        w, h = float(a["width"]), float(a["height"])
-        fill = a.get("fill", "#000000").lstrip("#")
-        if len(fill) == 3:
-            fill = "".join(c * 2 for c in fill)
-        col = tuple(int(fill[i:i + 2], 16) for i in (0, 2, 4)) + (255,)
-        sx, sy = size * ss / vb[2], size * ss / vb[3]
-        d.rectangle(((x - vb[0]) * sx, (y - vb[1]) * sy, (x - vb[0] + w) * sx - 1, (y - vb[1] + h) * sy - 1), fill=col)
-    return im.resize((size, size), Image.LANCZOS)
-
-
-def add_logo(img, logo_svg=DEFAULT_LOGO, scale=0.26, margin=0.05, safe_inset=0.0, circle=False, safe_circle=0.0):
+def add_logo(img, logo_path=DEFAULT_LOGO, scale=0.26, margin=0.05, safe_inset=0.0, circle=False, safe_circle=0.0):
     """Return img (RGBA) with the logo stamped bottom-right (and masked to a circle if circle=True)."""
     img = img.convert("RGBA")
     w, h = img.size
     short = min(w, h)
     side = max(8, round(short * scale))
-    logo = render_svg_rects(logo_svg, side)
-    border = max(1, round(side * 0.07))                       # a thin white keyline so the mark reads on any art
-    framed = Image.new("RGBA", (side + 2 * border, side + 2 * border), (255, 255, 255, 255))
-    framed.alpha_composite(logo, (border, border))
-    fw = framed.size[0]
+    logo = render_logo(logo_path, side)
+    fw, fh = logo.size
     if circle or safe_circle:
         r = short * (safe_circle or 1.0) / 2
         # the logo's own bottom-right corner must lie inside the circle: centre it on the 45 degree radius
-        reach = (r - fw * math.sqrt(2) / 2) - short * margin * 0.5
+        reach = (r - math.hypot(fw, fh) / 2) - short * margin * 0.5
         cx, cy = w / 2 + reach * math.cos(math.radians(45)), h / 2 + reach * math.sin(math.radians(45))
-        pos = (round(cx - fw / 2), round(cy - fw / 2))
+        pos = (round(cx - fw / 2), round(cy - fh / 2))
         if circle:
             mask = Image.new("L", (w * 4, h * 4), 0)
             ImageDraw.Draw(mask).ellipse((0, 0, w * 4 - 1, h * 4 - 1), fill=255)
             img.putalpha(mask.resize((w, h), Image.LANCZOS))
     else:
         inset = round(short * max(margin, safe_inset))
-        pos = (w - inset - fw, h - inset - fw)
-    img.alpha_composite(framed, pos)
+        pos = (w - inset - fw, h - inset - fh)
+    img.alpha_composite(logo, pos)
     return img
 
 
@@ -104,7 +82,7 @@ def main():
     if a.output and len(a.images) != 1:
         sys.exit("add-wf-logo: -o takes exactly one input image")
     if not pathlib.Path(a.logo).exists():
-        sys.exit(f"add-wf-logo: logo not found: {a.logo} (the website repository is expected at ../worldfoundry.org)")
+        sys.exit(f"add-wf-logo: logo not found: {a.logo}")
     for p in a.images:
         out = add_logo(Image.open(p), a.logo, a.scale, a.margin, a.safe_inset, a.circle, a.safe_circle)
         dest = a.output or p

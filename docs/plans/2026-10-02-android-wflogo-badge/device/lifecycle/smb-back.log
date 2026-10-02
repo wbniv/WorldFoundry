@@ -1,0 +1,34 @@
+--------- beginning of main
+10-02 15:18:19.895 17136 17172 I wf_game : diagnostic log: /storage/emulated/0/Android/data/org.worldfoundry.wf_game.smb/files/wf.log
+10-02 15:18:19.895 17136 17172 I wf_game : android_main: enter
+10-02 15:18:19.895 17136 17172 I wf_game : android_main: assetMgr=0xee08c400
+10-02 15:18:19.895 17136 17172 I wf_game : phone controller: off (no assets/layout.json)
+10-02 15:18:19.895 17136 17172 I wf_game : android_main: uiMode=4 (tv=1)
+10-02 15:18:19.895 17136 17172 I wf_game : android_main: waiting for APP_CMD_INIT_WINDOW
+10-02 15:18:19.902 17136 17172 I wf_game : APP_CMD_RESUME
+10-02 15:18:19.952 17136 17172 I wf_game : APP_CMD_INIT_WINDOW
+10-02 15:18:20.016 17136 17172 I wf_game : EGL surface ready: 1920x1080 (context reused)
+10-02 15:18:20.016 17136 17172 I wf_game : android_main: EGL ready, entering HALStart
+10-02 15:18:20.389 17136 17172 I wf_game : level-menu: showing 4 entries ("WF SMB"), cursor on 0
+10-02 15:18:25.920 17136 17172 I wf_game : key code=23 action=0 mask=0x1
+10-02 15:18:25.952 17136 17172 I wf_game : key code=23 action=1 mask=0x1
+10-02 15:18:25.954 17136 17172 I wf_game : level-menu: LEVEL_TO_RUN=0 (World 1-1)
+10-02 15:18:25.954 17136 17172 I wf_game : level-menu: level 0 starts
+10-02 15:18:30.664 17136 17172 I wf_game : APP_CMD_PAUSE
+10-02 15:18:30.667 17136 17172 I wf_game : APP_CMD_RESUME
+10-02 15:18:34.993 17136 17172 I wf_game : APP_CMD_PAUSE
+10-02 15:18:35.553 17136 17172 I wf_game : APP_CMD_TERM_WINDOW
+10-02 15:18:36.110 17136 17172 I wf_game : APP_CMD_RESUME
+10-02 15:18:36.127 17136 17172 I wf_game : APP_CMD_INIT_WINDOW
+10-02 15:18:36.127 17136 17172 I wf_game : EGL surface ready: 1920x1080 (context reused)
+10-02 15:18:41.983 17136 17172 I wf_game : APP_CMD_PAUSE
+10-02 15:18:42.559 17136 17172 I wf_game : APP_CMD_TERM_WINDOW
+10-02 15:18:43.283 17136 17172 I wf_game : APP_CMD_RESUME
+10-02 15:18:43.301 17136 17172 I wf_game : APP_CMD_INIT_WINDOW
+10-02 15:18:43.302 17136 17172 I wf_game : EGL surface ready: 1920x1080 (context reused)
+10-02 15:18:49.424 17136 17172 I wf_game : key code=4 short Back (0 ms): leaving the app
+10-02 15:18:49.443 17136 17172 I wf_game : APP_CMD_PAUSE
+10-02 15:18:50.044 17136 17172 I wf_game : APP_CMD_TERM_WINDOW
+10-02 15:18:50.094 17136 17172 I wf_game : APP_CMD_DESTROY
+10-02 15:18:50.266 17136 17172 I wf_game : android_main: HALStart returned, tearing down EGL
+10-02 15:18:50.266 17136 17172 I wf_game : android_main: exit

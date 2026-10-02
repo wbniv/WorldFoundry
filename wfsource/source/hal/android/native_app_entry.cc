@@ -507,6 +507,21 @@ WFAndroidHasWindow()
     return gEglReady ? 1 : 0;
 }
 
+// The shared level and menu loops must finish when NativeActivity is destroyed.
+// Otherwise its old game thread survives and competes with a reopened activity
+// for the process-global engine and EGL context (EGL_BAD_ACCESS).
+extern "C" WF_ANDROID_EXPORT int
+WFAndroidCloseRequested()
+{
+    return gExitLoop ? 1 : 0;
+}
+
+extern "C" WF_ANDROID_EXPORT void
+WFAndroidRequestClose()
+{
+    gExitLoop = true;
+}
+
 // Called from XEventLoop (display.cc PageFlip) once per frame. Non-blocking
 // drain of any queued commands + input events.
 extern "C" WF_ANDROID_EXPORT void
@@ -624,6 +639,13 @@ android_main(struct android_app* app)
 
     // HALStart returns when the game exits (PIGSMain's loop terminates).
     WFLOG("android_main: HALStart returned, tearing down EGL");
+    PhoneStop();
     WFAndroidEglTerm();
     WFLOG("android_main: exit");
+    // The legacy engine and renderer have process-lifetime globals. Home keeps
+    // this activity alive (singleTask); Back finishes it. Start the next game
+    // activity in a fresh process rather than running HALStart a second time
+    // against the previous engine's globals and preserved EGL context.
+    std::fflush(nullptr);
+    _exit(EXIT_SUCCESS);
 }

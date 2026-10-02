@@ -1,5 +1,7 @@
 # New launcher icons and TV banners for the mobile and Chromecast games
 
+The favicon badge choice below is superseded by the user-approved [wflogo badge standard](../reference/android-brand-badge.md) and [2026-10-02 rollout](2026-10-02-android-wflogo-badge.md).
+
 Status: **art, scripts and resources generated; not yet built into an APK or seen on the Chromecast** (2026‑10‑01 12:10 (+07) = 05:10 UTC). Every Verification step says which.
 
 - [x] Phase A: the art: a snowgoon, the aquarium's fish and anemone, a pulled-back condo

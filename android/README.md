@@ -45,7 +45,7 @@ soundfont, `task soundfont`, or `-x lintVitalAnalyzeSnowgoonsRelease -x lintVita
 
 Each flavor's `cd.iff` is a symlink in `android/app/src/<app>/assets/`; the AAssetAccessor reads
 it directly from the APK at runtime. Every app's banner and icons come from
-`scripts/gen-android-icons.py`. The desktop's multi-level `wfsource/source/game/cd.iff` (task `build-cd-iff`: SMB, snowgoons, Q\*bert,
+`scripts/gen-android-icons.py`, using the [approved badge standard](../docs/reference/android-brand-badge.md). The desktop's multi-level `wfsource/source/game/cd.iff` (task `build-cd-iff`: SMB, snowgoons, Q\*bert,
 Astra Marble Madness) ships in no app; Astra Marble Madness has no app.
 
 Gradle calls the repo-root CMake (via `externalNativeBuild`) for arm64-v8a **and armeabi-v7a** (the Chromecast HD is 32-bit only)
@@ -88,3 +88,7 @@ Plans: [the Chromecast plan](../docs/plans/2026-09-30-aquarium-chromecast.md) (P
   The QR carries the World Foundry logo in the middle (the planet picture by default; `qr_logo=full` or `qr_logo=none` in `src/<flavor>/assets/wf_args.txt` for the whole logo or a plain code), and it still scans: the code is ECC H and the logo covers under 10 % of it.
 - **Logs.** `adb logcat -s wf_game` shows one line per remote key (`key code=23 …`), per accepted phone connection and per button change.
 - **Not built yet:** tilt steering (needs an https page and a certificate) and game-driven vibration; both are parked in `TODO.md`.
+
+## Activity lifecycle
+
+The game's NativeActivity uses `singleTask`: opening its launcher tile again resumes the existing game thread. Home preserves the engine and EGL context. Back destroys the activity, signals the shared level/menu loops to stop, and exits the game process after engine teardown so reopening starts with fresh globals. See the [2026-10-02 lifecycle verification](../docs/plans/2026-10-02-android-wflogo-badge.md).

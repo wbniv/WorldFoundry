@@ -1,0 +1,43 @@
+--------- beginning of main
+10-02 15:15:08.019 16046 16088 I wf_game : diagnostic log: /storage/emulated/0/Android/data/org.worldfoundry.wf_game.aquarium/files/wf.log
+10-02 15:15:08.019 16046 16088 I wf_game : android_main: enter
+10-02 15:15:08.019 16046 16088 I wf_game : android_main: assetMgr=0xee08c600
+10-02 15:15:08.020 16046 16088 I wf_game : android_main: uiMode=4 (tv=1)
+10-02 15:15:08.020 16046 16088 I wf_game : android_main: waiting for APP_CMD_INIT_WINDOW
+10-02 15:15:08.036 16046 16088 I wf_game : APP_CMD_RESUME
+10-02 15:15:08.038 16046 16088 I wf_game : phonepad: listening on 192.168.4.43:8765
+10-02 15:15:08.038 16046 16088 I wf_game : phone controller: open http://192.168.4.43:8765/?k=664502 (PIN 664502)
+10-02 15:15:08.085 16046 16088 I wf_game : APP_CMD_INIT_WINDOW
+10-02 15:15:08.171 16046 16088 I wf_game : EGL surface ready: 1920x1080 (context reused)
+10-02 15:15:08.171 16046 16088 I wf_game : android_main: EGL ready, entering HALStart
+10-02 15:15:12.516 16046 16088 I wf_game : key code=4 action=0 (Back: hides the phone panel)
+10-02 15:15:12.583 16046 16088 I wf_game : key code=4 action=1 (Back: hides the phone panel)
+10-02 15:15:15.363 16046 16088 I wf_game : APP_CMD_PAUSE
+10-02 15:15:15.363 16046 16088 I wf_game : phonepad: stopped
+10-02 15:15:15.367 16046 16088 I wf_game : APP_CMD_RESUME
+10-02 15:15:15.368 16046 16088 I wf_game : phonepad: listening on 192.168.4.43:8765
+10-02 15:15:15.368 16046 16088 I wf_game : phone controller: open http://192.168.4.43:8765/?k=664502 (PIN 664502)
+10-02 15:15:19.707 16046 16088 I wf_game : APP_CMD_PAUSE
+10-02 15:15:19.707 16046 16088 I wf_game : phonepad: stopped
+10-02 15:15:20.288 16046 16088 I wf_game : APP_CMD_TERM_WINDOW
+10-02 15:15:21.032 16046 16088 I wf_game : APP_CMD_RESUME
+10-02 15:15:21.034 16046 16088 I wf_game : phonepad: listening on 192.168.4.43:8765
+10-02 15:15:21.034 16046 16088 I wf_game : phone controller: open http://192.168.4.43:8765/?k=664502 (PIN 664502)
+10-02 15:15:21.050 16046 16088 I wf_game : APP_CMD_INIT_WINDOW
+10-02 15:15:21.051 16046 16088 I wf_game : EGL surface ready: 1920x1080 (context reused)
+10-02 15:15:27.081 16046 16088 I wf_game : APP_CMD_PAUSE
+10-02 15:15:27.081 16046 16088 I wf_game : phonepad: stopped
+10-02 15:15:27.666 16046 16088 I wf_game : APP_CMD_TERM_WINDOW
+10-02 15:15:28.403 16046 16088 I wf_game : APP_CMD_RESUME
+10-02 15:15:28.405 16046 16088 I wf_game : phonepad: listening on 192.168.4.43:8765
+10-02 15:15:28.406 16046 16088 I wf_game : phone controller: open http://192.168.4.43:8765/?k=664502 (PIN 664502)
+10-02 15:15:28.423 16046 16088 I wf_game : APP_CMD_INIT_WINDOW
+10-02 15:15:28.423 16046 16088 I wf_game : EGL surface ready: 1920x1080 (context reused)
+10-02 15:15:34.732 16046 16088 I wf_game : key code=4 action=0 mask=0x0 (unmapped, dropped)
+10-02 15:15:34.752 16046 16088 I wf_game : key code=4 action=1 mask=0x0 (unmapped, dropped)
+10-02 15:15:34.772 16046 16088 I wf_game : APP_CMD_PAUSE
+10-02 15:15:34.772 16046 16088 I wf_game : phonepad: stopped
+10-02 15:15:35.372 16046 16088 I wf_game : APP_CMD_TERM_WINDOW
+10-02 15:15:35.427 16046 16088 I wf_game : APP_CMD_DESTROY
+10-02 15:15:35.575 16046 16088 I wf_game : android_main: HALStart returned, tearing down EGL
+10-02 15:15:35.575 16046 16088 I wf_game : android_main: exit

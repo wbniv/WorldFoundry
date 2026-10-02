@@ -48,13 +48,13 @@ void HALPumpSuspendedEvents(void);
 // True after the user has clicked the window manager's close button (X).
 // Set from inside the X event handler; the main game loop polls it and
 // exits cleanly via the normal shutdown path. On platforms with no
-// window-close concept (Android), always returns false.
+// window-close button, Android returns true when NativeActivity is destroyed.
 int  HALWindowCloseRequested(void);   // 0 = not requested, nonzero = close requested
 
 // Host-driven close. Editor (or other embedder) calls this when its widget
 // is going away so the engine's next HALWindowCloseRequested() poll returns
 // nonzero and the normal shutdown path runs. Standalone wf_game uses the
-// X11 WM_DELETE_WINDOW handler instead; this is a no-op on mobile.
+// X11 WM_DELETE_WINDOW handler instead; Android also accepts this close request.
 void HALRequestClose(void);
 
 // Destroy the platform window immediately so it disappears before destructor

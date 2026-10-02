@@ -1,0 +1,57 @@
+[
+  {
+    "game": "snowgoons",
+    "package": "org.worldfoundry.wf_game",
+    "apk": "/home/will/WorldFoundry-wbniv/android/app/build/outputs/apk/snowgoons/release/worldfoundry-snowgoons-release.apk",
+    "sha256": "618bbe69793fc777ae42d392e78238dff9af71088f7285f3f67ef9249a532ad5",
+    "resource_images_verified": 16,
+    "uninstall": "Success",
+    "install": "Performing Streamed Install\nSuccess",
+    "installed_sha256": "618bbe69793fc777ae42d392e78238dff9af71088f7285f3f67ef9249a532ad5",
+    "launch": "Starting: Intent { cmp=org.worldfoundry.wf_game/android.app.NativeActivity }\nStatus: ok\nLaunchState: COLD\nActivity: org.worldfoundry.wf_game/android.app.NativeActivity\nTotalTime: 631\nWaitTime: 656\nComplete"
+  },
+  {
+    "game": "aquarium",
+    "package": "org.worldfoundry.wf_game.aquarium",
+    "apk": "/home/will/WorldFoundry-wbniv/android/app/build/outputs/apk/aquarium/release/worldfoundry-aquarium-release.apk",
+    "sha256": "3fc784a4b9cb039612fe96044b0cb1d81635b132348192aeaab891ac20c7ef89",
+    "resource_images_verified": 16,
+    "uninstall": "Success",
+    "install": "Performing Streamed Install\nSuccess",
+    "installed_sha256": "3fc784a4b9cb039612fe96044b0cb1d81635b132348192aeaab891ac20c7ef89",
+    "launch": "Starting: Intent { cmp=org.worldfoundry.wf_game.aquarium/android.app.NativeActivity }\nStatus: ok\nLaunchState: COLD\nActivity: org.worldfoundry.wf_game.aquarium/android.app.NativeActivity\nTotalTime: 503\nWaitTime: 541\nComplete"
+  },
+  {
+    "game": "condo",
+    "package": "org.worldfoundry.wf_game.condo",
+    "apk": "/home/will/WorldFoundry-wbniv/android/app/build/outputs/apk/condo/release/worldfoundry-condo-release.apk",
+    "sha256": "1e4c6b4cc38b94d5aa24eb4b7c5aae713ba4a4502ae850ae171ed88ef2fad454",
+    "resource_images_verified": 16,
+    "uninstall": "Success",
+    "install": "Performing Streamed Install\nSuccess",
+    "installed_sha256": "1e4c6b4cc38b94d5aa24eb4b7c5aae713ba4a4502ae850ae171ed88ef2fad454",
+    "launch": "Starting: Intent { cmp=org.worldfoundry.wf_game.condo/android.app.NativeActivity }\nStatus: ok\nLaunchState: COLD\nActivity: org.worldfoundry.wf_game.condo/android.app.NativeActivity\nTotalTime: 537\nWaitTime: 736\nComplete"
+  },
+  {
+    "game": "smb",
+    "package": "org.worldfoundry.wf_game.smb",
+    "apk": "/home/will/WorldFoundry-wbniv/android/app/build/outputs/apk/smb/release/worldfoundry-smb-release.apk",
+    "sha256": "9f214e9ba7472ceef64bcd448ccf9a7c33ccd525fb16634b968455631ed7a23b",
+    "resource_images_verified": 16,
+    "uninstall": "Success",
+    "install": "Performing Streamed Install\nSuccess",
+    "installed_sha256": "9f214e9ba7472ceef64bcd448ccf9a7c33ccd525fb16634b968455631ed7a23b",
+    "launch": "Starting: Intent { cmp=org.worldfoundry.wf_game.smb/android.app.NativeActivity }\nStatus: ok\nLaunchState: COLD\nActivity: org.worldfoundry.wf_game.smb/android.app.NativeActivity\nTotalTime: 500\nWaitTime: 530\nComplete"
+  },
+  {
+    "game": "qbert",
+    "package": "org.worldfoundry.wf_game.qbert",
+    "apk": "/home/will/WorldFoundry-wbniv/android/app/build/outputs/apk/qbert/release/worldfoundry-qbert-release.apk",
+    "sha256": "8b337639024c8ad1a92c84c77a7f7bcf4cef81d80a1e56764aecbf16606cf286",
+    "resource_images_verified": 16,
+    "uninstall": "Success",
+    "install": "Performing Streamed Install\nSuccess",
+    "installed_sha256": "8b337639024c8ad1a92c84c77a7f7bcf4cef81d80a1e56764aecbf16606cf286",
+    "launch": "Starting: Intent { cmp=org.worldfoundry.wf_game.qbert/android.app.NativeActivity }\nStatus: ok\nLaunchState: COLD\nActivity: org.worldfoundry.wf_game.qbert/android.app.NativeActivity\nTotalTime: 472\nWaitTime: 492\nComplete"
+  }
+]

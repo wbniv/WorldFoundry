@@ -1,0 +1,73 @@
+from pathlib import Path
+import subprocess,time,io,json,sys
+from PIL import Image,ImageOps,ImageDraw
+ROOT=Path('/home/will/WorldFoundry-wbniv')
+OUT=ROOT/'docs/plans/2026-10-02-android-wflogo-badge/device/lifecycle';OUT.mkdir(exist_ok=True)
+A=['/home/will/android-sdk-local/platform-tools/adb','-s','adb-2628105GN0GT7C-wwfiSB._adb-tls-connect._tcp']
+def adb(*args,check=True):
+ r=subprocess.run(A+list(args),capture_output=True,check=check,timeout=40);return r.stdout
+ALL_GAMES=('aquarium','snowgoons','condo','smb','qbert')
+GAMES=tuple(sys.argv[1:]) or ALL_GAMES
+def pkg(game):return 'org.worldfoundry.wf_game'+('' if game=='snowgoons' else '.'+game)
+def pid(p):return adb('shell','pidof',p,check=False).decode().strip()
+def start(p):
+ out=adb('shell','am','start','-W','-a','android.intent.action.MAIN','-c','android.intent.category.LEANBACK_LAUNCHER','-n',p+'/android.app.NativeActivity').decode()
+ assert 'Status: ok' in out,out
+ time.sleep(4)
+def capture(game,stage):
+ if stage in ('cold','back-reopen') and (ROOT/f'android/app/src/{game}/assets/layout.json').exists():
+  adb('shell','input','keyevent','KEYCODE_BACK');time.sleep(1)
+ data=adb('exec-out','screencap','-p');(OUT/f'{game}-{stage}.png').write_bytes(data)
+ im=Image.open(io.BytesIO(data)).convert('RGB');colors=im.getcolors(im.width*im.height)
+ assert colors and len(colors)>2 and max(n for n,c in colors)<im.width*im.height*.99,f'{game} {stage} blank frame'
+ resumed=adb('shell','dumpsys','activity','activities').decode()
+ assert any(pkg(game)+'/android.app.NativeActivity' in line for line in resumed.splitlines() if 'ResumedActivity' in line or 'topResumedActivity' in line),game+' not foreground'
+ return len(colors)
+results=json.loads((OUT/'results.json').read_text()) if (OUT/'results.json').exists() else []
+results=[r for r in results if r['game'] not in GAMES]
+for game in GAMES:
+ adb('shell','am','force-stop',pkg(game))
+for game in GAMES:
+ p=pkg(game);apk=ROOT/f'android/app/build/outputs/apk/{game}/release/worldfoundry-{game}-release.apk'
+ print(game+': updating fixed release',flush=True)
+ assert 'Success' in adb('install','-r',str(apk)).decode()
+ start(p);first=pid(p);assert first
+ rec={'game':game,'cold_pid':first,'cold_colors':capture(game,'cold')}
+ if game=='smb':
+  adb('shell','input','keyevent','KEYCODE_DPAD_CENTER');time.sleep(3)
+  rec['level_colors']=capture(game,'level')
+ # Repeat the launch while running; singleTask must reuse the same activity.
+ start(p);assert pid(p)==first
+ for n in range(2):
+  adb('shell','input','keyevent','KEYCODE_HOME');time.sleep(1)
+  start(p);assert pid(p)==first
+  rec[f'resume{n}_colors']=capture(game,f'resume{n}')
+ logs=adb('logcat','-d','--pid',first,'-s','wf_game','AndroidRuntime','DEBUG').decode()
+ (OUT/f'{game}-before-back.log').write_text(logs)
+ assert logs.count('android_main: enter')==1,game+' duplicate engine thread'
+ assert 'eglMakeCurrent failed' not in logs,game+' EGL failure'
+ # Back can first hide the phone panel; another Back finishes the activity.
+ for n in range(3):
+  adb('shell','input','keyevent','KEYCODE_BACK');time.sleep(2)
+  if not pid(p):break
+ assert not pid(p),game+' remained alive after Back'
+ closed=adb('logcat','-d','--pid',first,'-s','wf_game','AndroidRuntime','DEBUG').decode()
+ (OUT/f'{game}-back.log').write_text(closed)
+ assert 'HALStart returned, tearing down EGL' in closed,game+' did not unwind cleanly'
+ assert 'crashed: signal' not in closed,game+' crash on teardown'
+ start(p);second=pid(p);assert second and second!=first
+ rec['reopen_pid']=second;rec['reopen_colors']=capture(game,'back-reopen')
+ logs=adb('logcat','-d','--pid',second,'-s','wf_game','AndroidRuntime','DEBUG').decode()
+ (OUT/f'{game}-reopen.log').write_text(logs)
+ assert 'eglMakeCurrent failed' not in logs
+ print(game+': PASS cold, repeated launch, Home/reopen twice, Back/clean shutdown/reopen',flush=True)
+ results.append(rec);(OUT/'results.json').write_text(json.dumps(results,indent=2)+'\n')
+ adb('shell','am','force-stop',p)
+adb('shell','input','keyevent','KEYCODE_HOME')
+preview=Image.new('RGB',(1000,680),'#eee');d=ImageDraw.Draw(preview)
+for i,game in enumerate(ALL_GAMES):
+ d.text((i*200+5,8),game,fill='black')
+ for j,stage in enumerate(('cold','resume0','resume1','back-reopen')):
+  image=Image.open(OUT/f'{game}-{stage}.png').convert('RGB');image.thumbnail((196,110));preview.paste(image,(i*200+2,j*160+35));d.text((i*200+5,j*160+148),stage,fill='black')
+preview.save(OUT/'all-apps-lifecycle.png')
+print('PASS all five apps and all lifecycle scenarios',flush=True)

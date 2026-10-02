@@ -57,13 +57,13 @@ HALPumpSuspendedEvents(void)
     WFAndroidPumpEvents();
 }
 
-// Android has no window-close button — onDestroy / back-button paths use
-// the lifecycle callbacks instead. Stub returns 0 so the shared main loop
-// condition compiles on every platform.
+// NativeActivity destruction must unwind the shared level/menu loops.
+extern "C" int WFAndroidCloseRequested(void);
+extern "C" void WFAndroidRequestClose(void);
 extern "C" WF_ANDROID_EXPORT int
 HALWindowCloseRequested(void)
 {
-    return 0;
+    return WFAndroidCloseRequested();
 }
 
 // No native window to tear down from the app side on Android.
@@ -96,4 +96,5 @@ ClearHostGLContext(void)
 extern "C" WF_ANDROID_EXPORT void
 HALRequestClose(void)
 {
+    WFAndroidRequestClose();
 }

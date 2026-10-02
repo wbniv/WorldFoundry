@@ -1,0 +1,23 @@
+--------- beginning of main
+10-02 15:19:01.919 17431 17476 I wf_game : diagnostic log: /storage/emulated/0/Android/data/org.worldfoundry.wf_game.qbert/files/wf.log
+10-02 15:19:01.919 17431 17476 I wf_game : android_main: enter
+10-02 15:19:01.919 17431 17476 I wf_game : android_main: assetMgr=0xee08c600
+10-02 15:19:01.919 17431 17476 I wf_game : phone controller: off (no assets/layout.json)
+10-02 15:19:01.919 17431 17476 I wf_game : android_main: uiMode=4 (tv=1)
+10-02 15:19:01.919 17431 17476 I wf_game : android_main: waiting for APP_CMD_INIT_WINDOW
+10-02 15:19:01.926 17431 17476 I wf_game : APP_CMD_RESUME
+10-02 15:19:01.968 17431 17476 I wf_game : APP_CMD_INIT_WINDOW
+10-02 15:19:02.028 17431 17476 I wf_game : EGL surface ready: 1920x1080 (context reused)
+10-02 15:19:02.028 17431 17476 I wf_game : android_main: EGL ready, entering HALStart
+10-02 15:19:07.927 17431 17476 I wf_game : APP_CMD_PAUSE
+10-02 15:19:07.928 17431 17476 I wf_game : APP_CMD_RESUME
+10-02 15:19:12.281 17431 17476 I wf_game : APP_CMD_PAUSE
+10-02 15:19:12.837 17431 17476 I wf_game : APP_CMD_TERM_WINDOW
+10-02 15:19:13.398 17431 17476 I wf_game : APP_CMD_RESUME
+10-02 15:19:13.414 17431 17476 I wf_game : APP_CMD_INIT_WINDOW
+10-02 15:19:13.416 17431 17476 I wf_game : EGL surface ready: 1920x1080 (context reused)
+10-02 15:19:19.212 17431 17476 I wf_game : APP_CMD_PAUSE
+10-02 15:19:19.834 17431 17476 I wf_game : APP_CMD_TERM_WINDOW
+10-02 15:19:20.372 17431 17476 I wf_game : APP_CMD_RESUME
+10-02 15:19:20.389 17431 17476 I wf_game : APP_CMD_INIT_WINDOW
+10-02 15:19:20.389 17431 17476 I wf_game : EGL surface ready: 1920x1080 (context reused)

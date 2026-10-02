@@ -1,7 +1,7 @@
 #!/usr/bin/env python3
 """gen-android-icons.py: build every World Foundry game's Android launcher icons and TV banner, in one layout.
 
-The layout is the same for every game on mobile and Chromecast (docs/plans/2026-10-01-android-icons.md):
+The layout is the same for every game on mobile and Chromecast (docs/reference/android-brand-badge.md):
 the game's art fills the icon, and the World Foundry logo sits bottom-right. The logo is stamped by the separate
 scripts/add-wf-logo.py, which works on any image; this script only prepares the art and calls it.
 
@@ -20,7 +20,7 @@ The art, all committed so the output is deterministic (android/app/art-src/ unle
                `scripts/android-device-run.sh --app snowgoons --release --seconds 8 <ip:port>` (adb screencap, no input)
   aquarium   aquarium-fish-high-anemone-only-580.png   scripts/capture-aquarium-fish-high.py + scripts/make-aquarium-icon-art.py: just the fish
              (resting higher) and the anemone's crown
-             + docs/plans/2026-09-30-aquarium-chromecast/frame-a-1920x1080.png for the banner (the whole tank)
+             + aquarium-school-chromecast-1920x1080.png for the banner (the whole fish school; real Chromecast capture)
   condo      condo-pullback-1920x1080.png        scripts/capture-condo-pullback.py: the camera pulled back and lowered
   smb        smb-w1-1-super-mario-640.png        a copy of tests/screenshots/smb_mushroom_02_super.png (W1-1, the engine's test harness)
   qbert      qbert-pyramid-640x480.png           a copy of docs/plans/2026-09-20-relight-swept-levels/qbert-after.png (an engine render)
@@ -51,7 +51,7 @@ GAMES = {
     "snowgoons": dict(icon=ART / "snowgoons-snowman-1920x1080.png", icon_crop=(420, 0, 1500, 1080),
                       banner=ART / "snowgoons-level-chromecast-1920x1080.png", banner_crop=(0, 0, 1920, 1080), name="snowgoons"),
     "aquarium": dict(icon=ART / "aquarium-fish-high-anemone-only-580.png", icon_crop=(95, 115, 505, 525),
-                     banner=REPO_ROOT / "docs/plans/2026-09-30-aquarium-chromecast/frame-a-1920x1080.png",
+                     banner=ART / "aquarium-school-chromecast-1920x1080.png",
                      banner_crop=(280, 88, 1640, 853), name="aquarium"),
     "condo": dict(icon=ART / "condo-pullback-1920x1080.png", icon_crop=(1040, 160, 1920, 1040),
                   banner=ART / "condo-pullback-1920x1080.png", banner_crop=(0, 0, 1920, 1080), name="condo"),

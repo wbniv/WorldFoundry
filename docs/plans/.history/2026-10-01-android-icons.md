@@ -1,5 +1,6 @@
 | Date | Change |
 |------|--------|
+| [2026-10-01](https://github.com/wbniv/WorldFoundry/commit/ccede076) | The snowgoons app is called Snowgoons |
 | [2026-10-01](https://github.com/wbniv/WorldFoundry/commit/5b439e7f) | Icons: keep the adaptive logo inside the visible circle (add-wf-logo.py --safe-circle); verification results from the Chromecast |
 | [2026-10-01](https://github.com/wbniv/WorldFoundry/commit/a7414405) | Icons: elbow joints on every snowgoon arm; the aquarium fish rests higher relative to the anemone (a real engine capture) |
 | [2026-10-01](https://github.com/wbniv/WorldFoundry/commit/5d8ea10a) | Icons: snowgoon third arm angled up from the chest centre; aquarium stalk water fill fixed and the fish raised in the icon |
@@ -8,6 +9,11 @@
 | [2026-10-01](https://github.com/wbniv/WorldFoundry/commit/019a88ed) | New launcher icons and TV banners for the three Android games, one layout, with the logo as a separate script |
 
 <!--history-meta v1
+ccede076	author	Will Norris
+ccede076	added	1
+ccede076	deleted	1
+ccede076	files	1
+ccede076	body	Asked by the user. android/app/src/snowgoons/res/values/strings.xml overrides\nmain's "World Foundry" (log viewer: "Snowgoons Log"); the id stays\norg.worldfoundry.wf_game so installs upgrade in place, and the other labels are\nunchanged. Its launcher icons already override main's in every density and\nform (the snowman); a new test pins that, another pins every app's label.\nREADME, the split plan (Icons table, mockups) and a note in the icons plan\nfollow.\nPlan: docs/plans/2026-10-01-split-cd-iff-one-app-per-game.md\n\nCo-Authored-By: Claude Opus 5.5 <noreply@anthropic.com>\nClaude-Session: https://claude.ai/code/session_01DxMP4jUNjCjDz8E9DWzXcM
 5b439e7f	author	Will Norris
 5b439e7f	added	14
 5b439e7f	deleted	2
