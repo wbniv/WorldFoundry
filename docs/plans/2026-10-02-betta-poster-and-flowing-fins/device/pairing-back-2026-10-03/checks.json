@@ -1,0 +1,25 @@
+{
+  "aquarium_pairing_back_reveals_selector": "PASS",
+  "aquarium_pairing_back_preserves_level": "PASS",
+  "aquarium": {
+    "status": "PASS",
+    "short_back_returns": [
+      2
+    ],
+    "selector_back_exits": true,
+    "apk_sha256": "7fde2c7528500e7d9cea7bd410e3e80bc4b6c0080e71d5a28f59c5d546854384"
+  },
+  "smb_pairing_panel": "Not provided by this flavor",
+  "smb": {
+    "status": "PASS",
+    "short_back_returns": [
+      0
+    ],
+    "selector_back_exits": true,
+    "apk_sha256": "624f86a788d29e79b0ab63bb84e44f152e808888c436a0d533da6727aa6ada22"
+  },
+  "status": "PASS",
+  "serial": "adb-2628105GN0GT7C-wwfiSB._adb-tls-connect._tcp",
+  "pairing_focused": true,
+  "note": "Actual release apps, Android Back down/up injection; no long press. Aquarium Back first hides the pairing panel and preserves the selector; SMB supplies no phone panel. With it hidden, the tested Aquarium and SMB selections return to their selector; selector Back exits."
+}

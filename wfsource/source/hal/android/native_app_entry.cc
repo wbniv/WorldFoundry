@@ -401,13 +401,20 @@ int32_t HandleInputEvent(struct android_app* /*app*/, AInputEvent* event)
         const uint32_t mask   = MapKeyCode(keyCode);
         // One line per key edge (not per auto-repeat), so logcat shows whether a remote key
         // arrived and what it mapped to: "key code=23 action=0 mask=0x...".
-        // A selector bundle owns Back navigation, including while the phone panel is up.
-        // Act once on release: key repeats and press duration do not change its meaning.
+        // Back dismisses the visible phone panel before navigating the game.
+        // Consume the entire press, including repeats, and hide once on release.
+        if (keyCode == AKEYCODE_BACK && gPhoneOverlay.PanelVisible(NowMs()))
+        {
+            if (action == AKEY_EVENT_ACTION_UP) gPhoneOverlay.OnBack(NowMs());
+            if (AKeyEvent_getRepeatCount(event) == 0)
+                WFLOG("key code=%d action=%d (Back: hides the phone panel)", keyCode, action);
+            return 1;
+        }
+        // With no panel, Back returns from a level; on its selector Back exits.
         if (keyCode == AKEYCODE_BACK && levelmenu::MenuRunning())
         {
             if (action == AKEY_EVENT_ACTION_UP)
             {
-                gPhoneOverlay.OnBack(NowMs());
                 if (levelmenu::SelectorVisible())
                 {
                     WFLOG("Back on selector: leaving the app");
@@ -421,14 +428,7 @@ int32_t HandleInputEvent(struct android_app* /*app*/, AInputEvent* event)
             }
             return 1;
         }
-        // In standalone apps Back first hides the phone panel, then keeps its system meaning.
-        if (keyCode == AKEYCODE_BACK && gPhoneOverlay.PanelVisible(NowMs()))
-        {
-            if (action == AKEY_EVENT_ACTION_UP) gPhoneOverlay.OnBack(NowMs());
-            if (AKeyEvent_getRepeatCount(event) == 0)
-                WFLOG("key code=%d action=%d (Back: hides the phone panel)", keyCode, action);
-            return 1;
-        }
+        // Standalone apps keep Back's system meaning once the panel is hidden.
         if (AKeyEvent_getRepeatCount(event) == 0)
             WFLOG("key code=%d action=%d mask=0x%x%s", keyCode, action, mask,
                   mask ? "" : " (unmapped, dropped)");

@@ -18,8 +18,8 @@ The art, all committed so the output is deterministic (android/app/art-src/ unle
   snowgoons  snowgoons-snowman-1920x1080.png     scripts/render-snowgoon.py (Blender): a menacing three-armed snowman (the icon)
              + snowgoons-level-chromecast-1920x1080.png for the banner: the level itself, screenshotted on the Chromecast HD by
                `scripts/android-device-run.sh --app snowgoons --release --seconds 8 <ip:port>` (adb screencap, no input)
-  aquarium   aquarium-fish-high-anemone-only-580.png   scripts/capture-aquarium-fish-high.py + scripts/make-aquarium-icon-art.py: just the fish
-             (resting higher) and the anemone's crown
+  aquarium   aquarium-icon-2026-10-03/artwork.png   generated promotional illustration: clownfish, tiger barb and betta
+             (source and prompts retained beside the artwork)
              + aquarium-school-chromecast-1920x1080.png for the banner (the whole fish school; real Chromecast capture)
   condo      condo-pullback-1920x1080.png        scripts/capture-condo-pullback.py: the camera pulled back and lowered
   smb        smb-w1-1-super-mario-640.png        a copy of tests/screenshots/smb_mushroom_02_super.png (W1-1, the engine's test harness)
@@ -50,7 +50,7 @@ GAMES = {
     # (docs/plans/2026-10-01-split-cd-iff-one-app-per-game.md, Icons).
     "snowgoons": dict(icon=ART / "snowgoons-snowman-1920x1080.png", icon_crop=(420, 0, 1500, 1080),
                       banner=ART / "snowgoons-level-chromecast-1920x1080.png", banner_crop=(0, 0, 1920, 1080), name="snowgoons"),
-    "aquarium": dict(icon=ART / "aquarium-fish-high-anemone-only-580.png", icon_crop=(95, 115, 505, 525),
+    "aquarium": dict(icon=ART / "aquarium-icon-2026-10-03/artwork.png", icon_crop=(0, 0, 1254, 1254),
                      banner=ART / "aquarium-school-chromecast-1920x1080.png",
                      banner_crop=(280, 88, 1640, 853), name="aquarium"),
     "condo": dict(icon=ART / "condo-pullback-1920x1080.png", icon_crop=(1040, 160, 1920, 1040),

@@ -10,6 +10,7 @@
 
 #include "phonepad_overlay.h"
 #include "phonepad.h"
+#include "../remote_back_arrow.h"
 #include "phonepad_logo.h"   // generated: scripts/gen-qr-logo.py
 
 #include <cmath>
@@ -73,6 +74,13 @@ struct Painter
     // font pixel. Returns the x where the next text would start.
     float Text(float x, float y, float scale, uint32_t rgba, const char* text)
     {
+        const char* arrow = std::strstr(text, remoteui::kBackArrow);
+        if (arrow) {
+            const std::string prefix(text, size_t(arrow - text));
+            x = Text(x, y, scale, rgba, prefix.c_str());
+            remoteui::BackArrow(*this, x, y, scale, rgba);
+            return Text(x + remoteui::kBackArrowAdvance * scale, y, scale, rgba, arrow + 3);
+        }
         char clean[160];
         size_t n = 0;
         for (const char* p = text; *p && n + 1 < sizeof(clean); ++p)
@@ -98,6 +106,11 @@ struct Painter
     }
     static float Width(const char* text, float scale)
     {
+        const char* arrow = std::strstr(text, remoteui::kBackArrow);
+        if (arrow) {
+            const std::string prefix(text, size_t(arrow - text));
+            return Width(prefix.c_str(), scale) + remoteui::kBackArrowAdvance * scale + Width(arrow + 3, scale);
+        }
         char clean[160];
         size_t n = 0;
         for (const char* p = text; *p && n + 1 < sizeof(clean); ++p)
@@ -311,7 +324,7 @@ bool Overlay::Build(int w, int h, int64_t nowMs, std::vector<PhonepadRect>* out)
         p.Text(x, 530, ts, kText, " if asked");
         p.Rect(tx, 640, tx + 18, 658, kWarn);
         p.Text(tx + 34, 634, ts, kWarn, "Waiting for a phone...");
-        p.Text(132, 930, 3.0f, kFoot, "The remote still works. Use Back to go back.");
+        p.Text(132, 930, 3.0f, kFoot, "The remote still works. Press ← to hide this.");
     }
 
     if (*toast)

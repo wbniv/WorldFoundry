@@ -181,7 +181,7 @@ The existing movement bindings remain; the action burst is reduced to 1.15 units
 
 ## Back navigation
 
-A short Back press in a selected level returns to its selector. Back on the selector exits the app. This applies to both Aquarium and SMB, including when the phone-controller pairing panel is visible. Android consumes key-down/repeats and performs exactly one action on key-up. Desktop Backspace has the same level/menu behavior. The former held-Back rule is superseded.
+**2026-10-03 correction:** Back first dismisses the visible phone-controller pairing panel, revealing the selector or preserving the selected level underneath. With the panel hidden, a short Back press in a selected level returns to its selector, and Back on the selector exits the app. This applies to both Aquarium and SMB. Android consumes key-down/repeats and performs exactly one action on key-up. Desktop Backspace has the same level/menu behavior. The former held-Back rule is superseded.
 
 The focused native-handler test covers level return, selector exit, repeats and standalone fallthrough. Device selection, Home/resume, fin animation and installed APK checks are recorded in [the device receipt](2026-10-02-betta-poster-and-flowing-fins/device/checks.json) after completion.
 
@@ -244,3 +244,36 @@ The device harness uses a 120 ms menu press with an unmapped Shift companion bec
 The final APK was rebuilt after profiling solely to correct the pairing-overlay Back help text. Measurement receipts retain their APK hashes; the fin geometry, deformation and navigation paths are unchanged by that help-text refresh.
 
 [Final installed hashes](2026-10-02-betta-poster-and-flowing-fins/device/installed.json) confirm both text-refreshed releases. The full selection/Back/resume receipt retains its pre-refresh hashes. A subsequent full-run attempt did not establish an initial live PID; it is not reported as a pass. The final installation check reads hashes and captures the current view without injecting input or interrupting play.
+
+
+## Pairing panel Back correction · 2026-10-03
+
+Will reported that Back on cold startup exited to Google TV rather than closing the phone pairing panel and revealing the selector beneath it. The menu navigation branch ran before the overlay dismissal branch. Restore overlay priority for both selector bundles and standalone apps: consume the press and dismiss on release, without issuing a menu-return or activity-finish request. The pairing footer uses “Press ← to hide this.” after the remote-symbol sweep below.
+
+- [x] Native handler regression covers a visible panel above the selector, a visible panel during a level, unobstructed level return, unobstructed selector exit, repeated key-down and standalone fallthrough.
+- [x] 17 handler/phone-controller tests pass.
+- [x] Build and verify refreshed Aquarium and SMB releases on Chromecast: Aquarium cold-start panel dismissal preserves the selector; dismissal during a level preserves that level. Subsequent level/selector navigation passes in both apps. SMB supplies no phone panel.
+
+The earlier device receipts remain historical. The new [pairing-panel device receipt](2026-10-02-betta-poster-and-flowing-fins/device/pairing-back-2026-10-03/checks.json) and before/after screenshots are recorded separately. The previously published `android-2026-10-03` APKs predate this correction.
+
+
+## New Aquarium launcher icon · 2026-10-03
+
+Replace the single clownfish/anemone launcher art with a full-bleed underwater illustration showing a clownfish, tiger barb and flowing-finned betta. The generated artwork represents the multi-tank pack; it is promotional art rather than an engine capture. Android square, round and adaptive variants retain the approved set D World Foundry badge, stamped from the cropped `wflogo.png` graphic.
+
+![New Aquarium icon](../../android/app/src/aquarium/res/mipmap-xxxhdpi/ic_launcher.png)
+
+![Round Aquarium icon](../../android/app/src/aquarium/res/mipmap-xxxhdpi/ic_launcher_round.png)
+
+[Source artwork and generation prompts](../../android/app/art-src/aquarium-icon-2026-10-03/README.md) are committed for reproducibility. Run `python3 scripts/gen-android-icons.py aquarium` to recreate the fifteen launcher resources. The existing fish-school TV banner is unchanged.
+
+
+## Remote back-arrow directions · 2026-10-03
+
+Use the standard left arrow (←) in TV directions wherever the physical remote Back button is referenced. The shared phone-controller panel uses “Press ← to hide this.” Both Aquarium and SMB selectors use “← returns here; ← here exits”. These shared paths cover every selection and every game flavor; the source sweep found no other on-screen remote Back wording in the level assets. Desktop Backspace directions retain their keyboard key name.
+
+The rectangle-based UI font only supports ASCII. Render the arrow explicitly with a shared small rectangle glyph and include its advance in text measurement, so it appears as an arrow rather than replacement question marks and the selector hint remains centered. Rebuild all five release flavors.
+
+All five arrow-labelled release APKs build successfully with both ARM ABIs and committed bundles. 129 focused tests pass, with one skipped. Final Chromecast screenshots show the arrow in the Aquarium panel and both selectors; the focused device receipt checks the installed Aquarium and SMB APK hashes.
+
+Updated APKs: [Android prerelease with the Back fix, arrow directions and new Aquarium icon](https://github.com/wbniv/WorldFoundry/releases/tag/android-2026-10-03-pairing-fix).

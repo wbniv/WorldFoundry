@@ -1,3 +1,4 @@
+#include "../hal/remote_back_arrow.h"
 //=============================================================================
 // game/level_menu.cc: the level menu of multi-level bundles (portable)
 // Copyright ( c ) 2026 World Foundry Group
@@ -67,6 +68,10 @@ float gTextBuf[16384];
 
 float TextWidth(const std::string& text, float scale)
 {
+    const auto arrow = text.find(remoteui::kBackArrow);
+    if (arrow != std::string::npos)
+        return TextWidth(text.substr(0, arrow), scale) + remoteui::kBackArrowAdvance * scale
+             + TextWidth(text.substr(arrow + 3), scale);
     stb_easy_font_spacing(-0.5f);   // as the phone panel: the 1-pixel gap looks loose scaled up
     return float(stb_easy_font_width(const_cast<char*>(text.c_str()))) * scale;
 }
@@ -84,6 +89,15 @@ struct Painter
     // ASCII text with its top-left at (x, y), `scale` canvas units per font pixel.
     void Text(float x, float y, float scale, uint32_t rgba, const std::string& text)
     {
+        const auto arrow = text.find(remoteui::kBackArrow);
+        if (arrow != std::string::npos) {
+            const auto prefix = text.substr(0, arrow);
+            Text(x, y, scale, rgba, prefix);
+            x += TextWidth(prefix, scale);
+            remoteui::BackArrow(*this, x, y, scale, rgba);
+            Text(x + remoteui::kBackArrowAdvance * scale, y, scale, rgba, text.substr(arrow + 3));
+            return;
+        }
         stb_easy_font_spacing(-0.5f);
         const int quads = stb_easy_font_print(0.0f, 0.0f, const_cast<char*>(text.c_str()), nullptr, gTextBuf, int(sizeof(gTextBuf)));
         for (int q = 0; q < quads; ++q)
@@ -398,7 +412,7 @@ DrawFn Drawer() { return gDrawer; }
 const char* PlatformHint()
 {
 #if defined(__ANDROID__)
-    return "D-pad choose - OK starts - Back returns here; Back here exits";
+    return "D-pad choose - OK starts - ← returns here; ← here exits";
 #else
     return "Up/Down choose - Space starts - Backspace returns here; here exits";
 #endif

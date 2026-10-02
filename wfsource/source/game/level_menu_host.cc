@@ -99,7 +99,7 @@ int main()
             int cursor = 0;
             std::string tv;
             in >> cursor >> tv;
-            menu.reset(new Menu(bundle, cursor, tv == "tv" ? "D-pad choose - OK starts - Back returns here; Back here exits"
+            menu.reset(new Menu(bundle, cursor, tv == "tv" ? "D-pad choose - OK starts - ← returns here; ← here exits"
                                                            : "Up/Down choose - Space starts - Backspace returns here; here exits"));
             State(*menu);
         }

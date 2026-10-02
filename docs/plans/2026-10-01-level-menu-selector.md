@@ -1,6 +1,6 @@
 # A level menu for multi-level bundles (SMB world select first)
 
-Status: **built; Back navigation revised on 2026-10-02 at Will's request.** A normal Back press in a selected level returns to the selector. Back on the selector exits the app. The former hold-for-one-second rule is superseded. Native handler and release-device checks pass for all seven Aquarium tanks and all four SMB selections; evidence is recorded in the [betta upgrade plan](2026-10-02-betta-poster-and-flowing-fins.md). Earlier results below are historical.
+Status: **built; Back navigation revised on 2026-10-02 at Will's request.** Back first dismisses a visible phone pairing panel (corrected 2026-10-03). With the panel hidden, a normal Back press in a selected level returns to the selector; Back on the selector exits the app. The former hold-for-one-second rule is superseded. Native handler and release-device checks pass for all seven Aquarium tanks and all four SMB selections; evidence is recorded in the [betta upgrade plan](2026-10-02-betta-poster-and-flowing-fins.md). Earlier results below are historical.
 
 - [x] ~~Phase A: this plan and its mockups~~ (`924e73a9`, `b754c2de`)
 - [x] ~~Phase B: level names as data: `cdpack --manifest` writes a `MENU` chunk; bundles without a manifest stay byte for byte as they are~~ (`69f32d9d`)

@@ -9,7 +9,7 @@
 // touch HUD's shader). Mockup 3 of docs/plans/2026-09-30-aquarium-chromecast.md:
 //
 //   no phone yet       the panel: title, QR code, the address, the PIN,
-//                      "Waiting for a phone..." and "Press Back to hide this"
+//                      "Waiting for a phone..." and "Press ← to hide this"
 //   a phone connects   the panel goes; a "Phone connected" toast for 3 s
 //   the phone drops    a "Phone lost" toast at once; the panel again after 5 s
 //                      if no phone has come back (buttons were already
