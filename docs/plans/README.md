@@ -348,6 +348,7 @@ rows on commit.*
 | [Aquarium level — 55 gal acrylic tank, clownfish, anemone](2026-09-30-aquarium-level.md) | Plan for a swimmable aquarium level: acrylic tank at exact 55 gal dimensions, translucent-pane spike, gravity-free clownfish, anemone; three mockups. | Uncommitted | Feature |
 | [Clownfish idle animation — the canonical aquarium clownfish, a five-part rig driven from Forth](2026-09-30-clownfish-idle-animation.md) | Canonical aquarium clownfish (wflevels/aquarium/clownfish.py) as an invisible Physics hull plus five Director-posed platform parts; idle bob/sway/tail/fins/dorsal; ROTATION_* probe; spike level, engine captures, regression test. | Uncommitted | Feature |
 | [Clownfish biomechanics poster (A3)](2026-09-30-clownfish-biomechanics-poster.md) | Plan for an A3 poster of the fish-swimming research behind the aquarium rig: seven computed diagrams, a sourced parameter table with verified/unverified/ours chips, two mockups. | Uncommitted | Docs |
+| [Android wflogo badge rollout and lifecycle fix](2026-10-02-android-wflogo-badge.md) | Apply the approved cropped wflogo badge to all five Android apps, update the aquarium school banner, and fix NativeActivity black screens with verified Chromecast reopening checks. | [`1bfe10f5`](https://github.com/wbniv/WorldFoundry/commit/1bfe10f5) | Platform |
 
 ---
 
@@ -368,3 +369,5 @@ rows on commit.*
   [condo-master-window-pov](2026-09-19-condo-master-window-pov.md),
   [condo-site-surroundings](2026-09-19-condo-site-surroundings.md) and
   [exporter-face-hand](2026-09-19-exporter-face-hand.md).
+
+- Added the completed Android badge/lifecycle rollout row on 2026-10-02.

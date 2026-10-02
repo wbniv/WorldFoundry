@@ -99,7 +99,7 @@ Requested after the badge rollout: replace the aquarium's single-fish banner wit
 
 Build and device update: **PASS**. Release build successful in 3 seconds, including lint; 12 aquarium source/resource checks passed (2 stale debug-APK checks deselected). The packed banner is pixel-identical to the new generated PNG. `adb install -r` returned **Success** and the installed APK is byte-identical to the new build. SHA-256: `240d9b259115cff7605b31990865d080c61c718e5d6c4588466f5a3811d2813c`.
 
-## Follow-up: black screen on reopening apps
+## Black-screen diagnosis and completed fix
 
 The user reported black screens after the rollout. Initial `am start -W` success was insufficient to establish rendering or safe reopening. Logs show repeated `android_main: enter` on different threads within the same process followed by `eglMakeCurrent failed: 0x3002` (EGL_BAD_ACCESS), and a Q*bert input ANR. `APP_CMD_DESTROY` set `gExitLoop`, but Android's `HALWindowCloseRequested()` always returned zero, so the previous engine never unwound. A subsequent NativeActivity could compete for process-global EGL/engine state.
 

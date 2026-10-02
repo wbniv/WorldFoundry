@@ -1,5 +1,6 @@
 | Date | Change |
 |------|--------|
+| [2026-09-30](https://github.com/wbniv/WorldFoundry/commit/f54741bc) | Plan clownfish biomechanics poster (A3) with computed-diagram mockups |
 | [2026-09-30](https://github.com/wbniv/WorldFoundry/commit/2b64afc1) | Add canonical aquarium clownfish with a Forth-driven idle rig |
 | [2026-09-30](https://github.com/wbniv/WorldFoundry/commit/f964a400) | Plan aquarium level (55 gal acrylic, clownfish, anemone) and correct condo alpha note |
 | [2026-09-25](https://github.com/wbniv/WorldFoundry/commit/ddef745d) | Correct Marble Madness terrain documentation and source attribution |
@@ -32,6 +33,11 @@
 | [2026-06-26](https://github.com/wbniv/WorldFoundry/commit/16d72fa6) | docs: add plan index (docs/plans/README.md) |
 
 <!--history-meta v1
+f54741bc	author	Will Norris
+f54741bc	added	1
+f54741bc	deleted	0
+f54741bc	files	1
+f54741bc	body	Plan + two mockups (whole-page layout, diagrams A/B/C at print scale) and the\ngenerator that computes their curves. Every number carries a verified /\nunverified / ours status; sources were opened and three earlier mis-attributions\n(Rohr & Fish is cetaceans; Wu, Yang & Zeng 2007; burst duration) are corrected.\nNothing is built; build waits for aquarium Phase 4 so the poster reads its\nconstants from clownfish.py.\n\nCo-Authored-By: Claude Sonnet 5.5 <noreply@anthropic.com>\nClaude-Session: https://claude.ai/code/session_0148itHvh6GL5Qc7uwSjFC2n
 2b64afc1	author	Will Norris
 2b64afc1	added	1
 2b64afc1	deleted	0
