@@ -277,3 +277,23 @@ The rectangle-based UI font only supports ASCII. Render the arrow explicitly wit
 All five arrow-labelled release APKs build successfully with both ARM ABIs and committed bundles. 129 focused tests pass, with one skipped. Final Chromecast screenshots show the arrow in the Aquarium panel and both selectors; the focused device receipt checks the installed Aquarium and SMB APK hashes.
 
 Updated APKs: [Android prerelease with the Back fix, arrow directions and new Aquarium icon](https://github.com/wbniv/WorldFoundry/releases/tag/android-2026-10-03-pairing-fix).
+
+
+### Google TV icon follow-up
+
+The installed APK checksum and its adaptive foreground pixels match the new artwork, but Google's actual launcher app row still displayed the previous clownfish/anemone image. A launcher restart and Aquarium uninstall/reinstall with retained app data did not refresh it. The cache-only package-manager command stalled and was cancelled; no launcher data reset was performed. Reinstall moved Aquarium to the end of the app row, so its original position must be restored.
+
+All prior APKs used version code 1 / version name 0.1. Version code 2 / version name 0.2 builds are ready for all five flavors; their native libraries and bundled game assets are byte-identical to the preceding release, and signatures verify. Version 2 was installed and the actual launcher app row refreshed to the new artwork; Will confirmed it. This establishes the observed refresh after a version increment, rather than assuming a successful APK installation proves visible icon refresh.
+
+
+### Betta and plant swap · versions 3–4
+
+Will observed the badge hiding much of the betta. Swap the betta to lower-left and plants to lower-right, then reduce the betta slightly to retain its whole tail inside the circular mask. The badge now overlays foliage and water. Preserve the original artwork and edit prompts beside the final `artwork-betta-clear.png` source. Regenerate all fifteen Aquarium launcher resources; the TV banner stays unchanged.
+
+Version code 4 / version name 0.4 release builds succeed for all five flavors. The Aquarium launcher-resource test passes, and the revised Aquarium APK is installed. [Actual Google TV screenshot](2026-10-02-betta-poster-and-flowing-fins/device/aquarium-icon-v3-launcher.png) confirms the betta is visible beside the badge. Native libraries and game assets are unchanged. Aquarium’s original third position beside Snowgoons is restored. The final launcher screenshot confirms the greater nose clearance and the restored app order.
+
+[Version 4 APKs](https://github.com/wbniv/WorldFoundry/releases/tag/android-2026-10-03-icon-v4) supersede the version 1 pairing-fix downloads.
+
+Will then requested additional clearance at the betta's nose. Move that fish farther left and slightly up, retaining its size and the complete fins within the circular mask. The stamped icon now has a broad gap between the nose and the badge. The final source and edit prompt are retained with the earlier versions.
+
+[Final version 4 launcher screenshot](2026-10-02-betta-poster-and-flowing-fins/device/aquarium-icon-v4-launcher.png) verifies the visible artwork rather than only the installed APK.

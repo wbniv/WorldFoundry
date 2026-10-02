@@ -1,8 +1,13 @@
 | Date | Change |
 |------|--------|
+| [2026-10-03](https://github.com/wbniv/WorldFoundry/commit/a05b76db) | Fix pairing Back priority, show remote arrows, refresh Aquarium icon |
 | [2026-10-02](https://github.com/wbniv/WorldFoundry/commit/9cef6dde) | Integrate aquarium tanks, feeding, and flowing betta fins |
 
 <!--history-meta v1
+a05b76db	author	Will Norris
+a05b76db	added	34
+a05b76db	deleted	1
+a05b76db	files	1
 9cef6dde	author	Will Norris
 9cef6dde	added	246
 9cef6dde	deleted	0

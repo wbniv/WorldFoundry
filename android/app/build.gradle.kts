@@ -15,8 +15,8 @@ android {
         applicationId = "org.worldfoundry.wf_game"
         minSdk        = 21
         targetSdk     = 34
-        versionCode   = 1
-        versionName   = "0.1"
+        versionCode   = 4
+        versionName   = "0.4"
 
         ndk {
             // arm64 for phones and the Chromecast 4K, armeabi-v7a for the Chromecast HD: its SoC

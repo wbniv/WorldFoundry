@@ -27,3 +27,6 @@ scripts/gen-android-icons.py  # regenerate all Android games from clean art
 For round and adaptive assets, the entire rectangular badge must stay inside the visible circle. Keep the shared generator's scale and placement parameters for future games. Inspect both square and circular previews before shipping; use fresh APKs and verify the installed resources, since Google TV caches tile art.
 
 This standard supersedes the favicon choice in the [2026-10-01 icons plan](../plans/2026-10-01-android-icons.md).
+
+
+For an artwork release, increment Android `versionCode` and update `versionName`; each successive published APK must have a higher version code ([Android versioning guidance](https://developer.android.com/studio/publish/versioning)). Verify the icon visible in Google TV's actual app row after installing, as well as the PNGs inside the APK. An installed-APK checksum alone does not establish that the launcher is displaying the new artwork. Preserve launcher settings and app data during refresh attempts.

@@ -14,4 +14,24 @@ Edit prompt:
 
 Preserve this exact underwater illustration, fish identities, colors and relative layout. Reframe it as a square Android adaptive icon: zoom out so all three fish together fit entirely within the central 60% of both width and height (roughly x20%-80%, y20%-80%). Extend the surrounding deep turquoise water and soft plants naturally to fill the square, without any frame, padding bands, borders, text or logo. Keep lower-right outer corner dark water for an existing badge. The entire clownfish tail and entire betta tail must fit within the central safe region.
 
-Final source: `exec-742d75ff-968b-4aea-be5f-d68fd98dada7.png`, copied to `artwork.png`. Initial source: `exec-0b645c5b-b276-4fac-b557-b6ed336998dd.png`.
+Original source: `exec-742d75ff-968b-4aea-be5f-d68fd98dada7.png`, copied to `artwork.png`. Initial source: `exec-0b645c5b-b276-4fac-b557-b6ed336998dd.png`.
+
+## Badge clearance correction
+
+Will requested swapping the plant and betta because the badge covered the fish. The mask-fit iteration uses `artwork-betta-left-safe.png`; the earlier composition is retained for reference. The betta faces right at lower-left and the plants occupy lower-right. A second edit makes the entire tail fit the circular mask.
+
+Swap edit prompt:
+
+Edit target: the supplied Aquarium launcher illustration. Make only this composition change: swap the lower-left green aquatic plant cluster and the lower-right teal betta with red-violet flowing fins. The betta must be in the lower LEFT of the central safe circle, facing right toward the center, with its entire body and flowing tail visible. The plant cluster must be in the lower RIGHT, taking the betta's former position. Preserve the clownfish at upper left, tiger barb at upper right, underwater background, colors, lighting and illustration style. Keep all fish fully inside the central 60% of the square for Android circular masks. Reserve the lower-right badge area (roughly x60%-78%, y60%-80% of the whole image) for green foliage and water only: no fish body or fins there. Full bleed square, no frame, no added text, no logo; the existing World Foundry badge will be stamped separately.
+
+Mask fit edit prompt:
+
+Edit this image. Preserve every other element exactly. Only adjust the lower-left betta: reduce its size by about 20% and move it slightly upward and right so its entire flowing tail and fins fit inside the circle centered at (50%,50%) with radius 30% of the image width. Betta should occupy approximately x25%-52%, y47%-70% of this square. Keep it facing right. Preserve the green plants in the lower-right, clownfish upper-left, tiger barb upper-right, water, lighting, illustration style. No text, logos, borders or padding. This is an Android launcher icon source and every fish must survive a circular mask of the central two-thirds; lower-right will contain a badge.
+
+First mask-fit imagegen source: `exec-40a810eb-4448-4f9d-9a27-c1e9b95db96c.png`. Intermediate swap source: `exec-214cd62f-a25d-4349-8abe-f60a402d61fa.png`, retained as `artwork-betta-left.png`. Both originals remain in the imagegen output directory.
+
+Will then requested more space between the betta's nose and the badge. The final generator source is `artwork-betta-clear.png` (`exec-4bc0c4f1-f893-4f5c-b0ac-f542059e0f27.png`), moving the betta left and up while retaining its fins inside the round mask.
+
+Clearance edit prompt:
+
+Edit target: this Aquarium icon source. Change only the lower-left betta's position, preserving its size, identity, colors and flowing fins. Translate the betta LEFT by about 6% of the image width and UP by about 4% of the image height. Its nose should end around x47% of image width, leaving a generous visible gap from the World Foundry badge that will occupy x59%-73%, y61%-77%. Keep its entire tail and fins inside the central circular safe region (center 50%,50%, radius 30%). Preserve all other fish, plants, rocks, water and light exactly. No logos, text, border or padding.
