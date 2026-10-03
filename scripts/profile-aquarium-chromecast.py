@@ -83,18 +83,20 @@ for run in range(1,args.runs+1):
     trace=[('swarm',None),('school-right','KEYCODE_DPAD_RIGHT'),('dart','KEYCODE_DPAD_CENTER'),
            ('turn-left','KEYCODE_DPAD_LEFT'),('close-up-right','KEYCODE_DPAD_RIGHT')]
     if args.scenario=='swarm': trace=trace[:1]
-    for name,key in trace:
-        start=time.monotonic()-t0
-        deadline=time.monotonic()+12
-        if key == 'KEYCODE_DPAD_CENTER': sh('input keyevent --longpress '+key)
-        while time.monotonic()<deadline:
-            if key and key != 'KEYCODE_DPAD_CENTER': sh('input keyevent --longpress '+key)
-            else: time.sleep(min(.25,max(0,deadline-time.monotonic())))
-        segments.append({'name':name,'start':start,'end':time.monotonic()-t0})
-        require_foreground()
-        (work/f'{name}.png').write_bytes(adb('exec-out','screencap','-p',binary=True))
-        print(f'run {run}: captured {name}',flush=True)
-    stop.set(); thread.join()
+    try:
+        for name,key in trace:
+            start=time.monotonic()-t0
+            deadline=time.monotonic()+12
+            if key == 'KEYCODE_DPAD_CENTER': sh('input keyevent --longpress '+key)
+            while time.monotonic()<deadline:
+                if key and key != 'KEYCODE_DPAD_CENTER': sh('input keyevent --longpress '+key)
+                else: time.sleep(min(.25,max(0,deadline-time.monotonic())))
+            segments.append({'name':name,'start':start,'end':time.monotonic()-t0})
+            require_foreground()
+            (work/f'{name}.png').write_bytes(adb('exec-out','screencap','-p',binary=True))
+            print(f'run {run}: captured {name}',flush=True)
+    finally:
+        stop.set(); thread.join()
     (work/'samples.json').write_text(json.dumps(samples))
     (work/'segments.json').write_text(json.dumps(segments,indent=2))
     (work/'meminfo.txt').write_text(sh('dumpsys meminfo '+PKG))
