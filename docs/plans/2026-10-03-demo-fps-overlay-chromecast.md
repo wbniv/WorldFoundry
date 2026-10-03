@@ -224,7 +224,8 @@ flush pending scene/translucent work, and preserve scene transform/state.
 - [x] Number-only layout checks pass at 320×240, 1080p, and 4K.
 - [x] All five release APK flavors build for both Android ABIs.
 - [x] Will notified before starting the Chromecast rollout.
-- [ ] Chromecast installation, per-demo captures, and resume checks.
+- [x] Chromecast installation, all eight tank/four world captures, and per-app resume checks.
+  See the [deployment receipt](2026-10-03-demo-fps-overlay-chromecast/deployment.md).
 - [ ] Browser runtime and Apple build/capture verification.
 
 The APKs use a snapshot of the current workspace's demo bundles, including its
@@ -237,3 +238,8 @@ The first Chromecast capture showed excess space below the digits. The plate
 now follows the actual glyph bounds with half the original padding. Layout
 checks assert equal padding on all four sides for every tested size/value.
 All five release APKs were rebuilt with this correction.
+
+The corrected background was visually verified on Chromecast in all five apps,
+including every selector entry. Will was notified when Chromecast work finished.
+All nine native checks passed again (12.00 s); WebGL compilation and browser
+FPS/reset/resume checks passed. Apple CI is running against `606cc488`.
