@@ -671,7 +671,7 @@ workflows:
           # array cookie is 16 bytes here vs 8 on x86_64). Fails loudly and
           # early rather than as a cookie assert 30 frames in.
           "$WF_GAME" --memory-test 2>&1 | tee "$CM_BUILD_DIR/macos-smoke.log"
-          # --no-fps --capture-frame=N counts frames that reached the BACKEND, not engine
+          # --capture-frame=N counts frames that reached the BACKEND, not engine
           # steps: Phase 1 measured 29 rendered frames for 30 steps (the render
           # block is gated on camera()->ValidView()). So capture at 20, safely
           # inside the range and late enough for the scene to have settled —

@@ -51,3 +51,18 @@ Not covered by this receipt: pairing a physical phone, playing through SMB
 flag/axe transitions, a controlled overlay-on/off performance comparison,
 or physical Apple devices. Selector level loads and per-app Home/reopen
 were exercised. SurfaceFlinger pacing does not equal the engine mailbox.
+
+## Other renderer checks
+
+Nine focused native CTests passed after the padding correction (12.00 s).
+The browser runtime check passed with real window hide/show and restored FPS
+samples. Its capture shows the compact number-only plate.
+iOS simulator CI passed at `606cc488` (build `6ac0f8e919b21eeb2e6508bc`);
+the retained iPhone screenshot includes the counter alongside the touch controls.
+Apple evidence is retained under `/tmp/fps-overlay-evidence/ios/` and `macos/`.
+The macOS capture changes only `(591,452)–(621,466)` on a 640×480 surface,
+with 103 white glyph pixels. The clean capture matches the Linux reference
+within the existing 3-channel-value tolerance.
+
+Final macOS run `6ac0fbb262a19ecd81c28673` on `5777274a` passed the
+number-only A/B capture gate and the Linux-reference comparison in CI.
