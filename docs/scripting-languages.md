@@ -1,5 +1,28 @@
 # Scripting languages in WF
 
+## Diagnostic frame rate
+
+`INDEXOF_FRAMERATE` (global system mailbox **1903**) is read-only diagnostic
+telemetry for tester overlays, developer tools, and performance reports. It
+returns fractional FPS from the latest completed real frame interval using a
+monotonic clock, including pacing and time between host-driven steps. There is
+no smoothing or simulation cap: a 500 ms interval reports 2 FPS and a 2 s
+interval reports 0.5 FPS. Never use this value for gameplay mechanics; use the
+simulation clock and `INDEXOF_DELTA_TIME` for gameplay timing.
+
+In zForth: `INDEXOF_FRAMERATE read-mailbox`. In Lua:
+`read_mailbox(INDEXOF_FRAMERATE)`. The predefined constant uses the existing
+mailbox constant registration shared by scripting backends.
+
+Scripts see the previous completed frame's value throughout their current
+update. Reads return zero before the first valid sample and after level or
+application lifecycle resets. Active stalls are measured in full; background
+suspension is excluded. This is engine cadence rather than a count of confirmed
+screen presentations. A separate smoothed mailbox is deferred to Phase 2 of
+the [implementation plan](plans/2026-10-03-engine-framerate-system-mailbox.md).
+
+## Scripting backends
+
 The engine supports several scripting languages. **A build chooses any
 subset** — Lua-only, JS-only, Lua + Fennel, QuickJS + WAMR, etc. No
 language is mandatory; the scriptless build (no engines compiled in) is

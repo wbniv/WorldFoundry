@@ -1130,6 +1130,25 @@ if(NOT ANDROID AND NOT IOS AND NOT APPLE AND NOT EMSCRIPTEN)
     # external-host path stays clean and are labelled `gl` so headless CI
     # can exclude them via `ctest -LE gl`.
     enable_testing()
+    add_executable(frame_rate_test tests/frame_rate_test.cc
+        ${SRC}/hal/linux/lifecycle.cc)
+    target_include_directories(frame_rate_test PRIVATE ${SRC})
+    add_test(NAME frame_rate_sampler COMMAND frame_rate_test)
+    if(WF_DEBUG_BRIDGE AND WF_FORTH_ENGINE STREQUAL "zforth")
+        find_package(Python3 COMPONENTS Interpreter)
+        if(Python3_Interpreter_FOUND)
+            add_test(NAME frame_rate_mailbox
+                COMMAND ${Python3_EXECUTABLE}
+                    ${CMAKE_SOURCE_DIR}/tests/frame_rate_integration.py
+                    $<TARGET_FILE:wf_game>)
+            add_test(NAME frame_rate_mailbox_fixed_sim
+                COMMAND ${Python3_EXECUTABLE}
+                    ${CMAKE_SOURCE_DIR}/tests/frame_rate_integration.py
+                    $<TARGET_FILE:wf_game> -rate10)
+            set_tests_properties(frame_rate_mailbox frame_rate_mailbox_fixed_sim PROPERTIES
+                LABELS "gl" ENVIRONMENT "DISPLAY=:0" TIMEOUT 60)
+        endif()
+    endif()
     set(WF_TEST_LEVEL
         ${CMAKE_SOURCE_DIR}/wflevels/qbert_practice/qbert_practice-standalone.iff)
     set(WF_TEST_SNOW_LEVEL

@@ -129,14 +129,16 @@ InitWindow( int /*xPos*/, int /*yPos*/, int /*xSize*/, int /*ySize*/ )
     // context (-sUSE_GLFW=3) before engine init — adopt it instead of creating a
     // second context on the same #canvas. There is only one canvas, and ImGui is
     // already bound to the GLFW context; a second context would split rendering.
-    // The host (GLFW/ImGui) owns input + canvas sizing, so skip the key/visibility
-    // callbacks and the canvas resize here (mirrors mesa.cc's host-owned mode).
+    // The host (GLFW/ImGui) owns input + canvas sizing, so skip key callbacks
+    // and canvas resize. Visibility still drives HAL lifecycle and FPS resets.
     // Standalone wf_game has no GLFW context current → get_current_context()==0 →
     // the normal create path below runs unchanged.
     EMSCRIPTEN_WEBGL_CONTEXT_HANDLE existing = emscripten_webgl_get_current_context();
     if (existing > 0)
     {
         _webglContext = existing;
+        emscripten_set_visibilitychange_callback(nullptr, EM_FALSE,
+                                                 VisibilityCallback);
         return true;
     }
 

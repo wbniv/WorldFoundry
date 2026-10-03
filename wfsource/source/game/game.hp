@@ -40,6 +40,7 @@
 #include <gfx/vmem.hp>
 #include <gfx/viewport.hp>
 #include "actor.hp"
+#include "frame_rate.h"
 
 class Level;
 class GameMailboxes;
@@ -85,6 +86,10 @@ public:
 	// on top of the engine draw) still gets an honest deltaTime.
 	// out_dt, if non-null, receives the deltaTime for this frame.
 	FrameResult StepFrame(bool do_swap = true, Scalar* out_dt = nullptr);
+
+	// Raw FPS from the latest completed real frame interval (mailbox 1903).
+	// Read-only diagnostic telemetry; never use this for gameplay timing.
+	Scalar DiagnosticFrameRate() const;
 
 	// Smoke entry-point for the frame-step API. Demonstrates the
 	// "external host drives the engine" path by calling LoadLevel +
@@ -179,6 +184,7 @@ private:
 	GameMailboxes*	_gameMailboxes;
 	bool			_bContinue;		// false short-circuits the level loop (PIGSUserAborted)
 	Scalar			_deltaTime;		// last frame's delta; fed back into next update()
+	FrameRateSampler _frameRate;
 
 	// Level menu (game/level_menu.h; docs/plans/2026-10-01-level-menu-selector.md).
 	// A shell that writes LEVEL_TO_RUN = -1 gets the bundle's MENU chunk as a menu.

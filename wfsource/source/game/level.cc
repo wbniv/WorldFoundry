@@ -1547,6 +1547,9 @@ Level::ReadSystemMailbox( int boxnum ) const
         case EMAILBOX_DELTA_TIME:
             return LevelClock().Delta();
 
+        case EMAILBOX_FRAMERATE:
+            return _game.DiagnosticFrameRate();
+
     case EMAILBOX_HARDWARE_JOYSTICK1:
     case EMAILBOX_HARDWARE_JOYSTICK1_RAW:
     case EMAILBOX_HARDWARE_JOYSTICK1_RAW_JUSTPRESSED:
@@ -1863,4 +1866,3 @@ ObjectIsInWhichRoom( int32 idxObject, const _LevelOnDisk* _levelData )
 }
 
 //==============================================================================
-

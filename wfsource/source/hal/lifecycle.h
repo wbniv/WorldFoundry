@@ -39,6 +39,11 @@ void HALNotifySuspend(void);
 void HALNotifyResume(void);
 int  HALIsSuspended(void);   // 0 = running, nonzero = suspended
 
+// Changes on every suspend/resume notification, even if no engine step ran
+// while suspended. Diagnostic timers use this to discard background gaps.
+// Thread-safe; callers compare generations for equality rather than ordering.
+unsigned int HALLifecycleGeneration(void);
+
 // Pump platform lifecycle/input events while the game loop is suspended.
 // Android: drains the ALooper so APP_CMD_RESUME actually reaches us.
 // Linux: no-op (no suspend path). Call this from the suspend wait loop —

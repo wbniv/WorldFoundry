@@ -31,6 +31,8 @@
 #include "game.hp"
 #include <hal/lifecycle.h>
 #include <unistd.h>
+#include <algorithm>
+#include <limits>
 #if defined(__EMSCRIPTEN__)
 #  include <emscripten.h>
 #endif
@@ -334,6 +336,7 @@ WFGame::RunGameScript()				// runs the whole game, returns when game (really) ov
 void
 WFGame::LoadLevel(_DiskFile* levelFile)
 {
+    _frameRate.Reset();
     DBSTREAM3( cprogress << "WFGame::LoadLevel (sizeof level = " << sizeof(Level) << std::endl; )
     assert(!_curLevel);
     assert(!_gameMailboxes);
@@ -381,6 +384,7 @@ WFGame::LoadLevel(_DiskFile* levelFile)
 void
 WFGame::UnloadLevel()
 {
+	_frameRate.Reset();
 	DBSTREAM3( cprogress << "WFGame::UnloadLevel" << std::endl; )
 	assert(_curLevel);
 	assert(_gameMailboxes);
@@ -434,6 +438,7 @@ WFGame::SmokeRunFrameStep(int frames, int cycles)
 		df->SeekRandom(DiskFileCD::_SECTOR_SIZE);
 
 		LoadLevel(df);
+		assert(_curLevel->GetMailboxes().ReadMailbox(EMAILBOX_FRAMERATE) == Scalar::zero);
 		DBSTREAM1(cprogress << "SmokeRunFrameStep: LoadLevel done, stepping " << frames << " frames" << std::endl;)
 
 		for (int i = 0; i < frames && !HALWindowCloseRequested() && ContinueRequested(); ++i) {
@@ -446,6 +451,7 @@ WFGame::SmokeRunFrameStep(int frames, int cycles)
 		}
 
 		UnloadLevel();
+		assert(DiagnosticFrameRate() == Scalar::zero);
 	}
 
 	MEMORY_DELETE(HALLmalloc, df, _DiskFile);
@@ -549,6 +555,21 @@ WFGame::RunEditor()
 
 //-----------------------------------------------------------------------------
 
+Scalar
+WFGame::DiagnosticFrameRate() const
+{
+	if (HALIsSuspended())
+		return Scalar::zero;
+	double fps = _frameRate.Read(HALLifecycleGeneration());
+#if defined(SCALAR_TYPE_FIXED)
+	// Signed 16.16 representation. Saturate only at its numeric limit.
+	fps = std::min(fps, 32767.0 + 65535.0 / 65536.0);
+#elif defined(SCALAR_TYPE_FLOAT)
+	fps = std::min(fps, double(std::numeric_limits<float>::max()));
+#endif
+	return Scalar::FromDouble(fps);
+}
+
 WFGame::FrameResult
 WFGame::StepFrame(bool do_swap, Scalar* out_dt)
 {
@@ -563,6 +584,7 @@ WFGame::StepFrame(bool do_swap, Scalar* out_dt)
 
 	if ( HALIsSuspended() )
 	{
+		_frameRate.Reset();
 		// Platform has backgrounded us (Android onPause). Skip render +
 		// PageFlip to avoid touching a torn-down GL context; pump platform
 		// events so APP_CMD_RESUME actually reaches HALNotifyResume and
@@ -574,6 +596,7 @@ WFGame::StepFrame(bool do_swap, Scalar* out_dt)
 		return FrameResult::Suspended;
 	}
 
+	_frameRate.BeginFrame(FrameRateSampler::Clock::now(), HALLifecycleGeneration());
 	RestApi_DrainQueue();
 	DebugServer_DrainQueue(*_curLevel);
 	assert(HALScratchLmalloc.Empty());
@@ -718,6 +741,10 @@ WFGame::StepFrame(bool do_swap, Scalar* out_dt)
 		}
 #endif
 	_deltaTime = do_swap ? _display->PageFlip() : _display->MeasureDelta();
+	if (HALIsSuspended())
+		_frameRate.Reset();
+	else
+		_frameRate.EndFrame(FrameRateSampler::Clock::now(), HALLifecycleGeneration());
 
 	// Host stalls (editor paused on a modal, breakpoint hit, GL hiccup)
 	// would otherwise hand the next StepFrame a multi-second deltaTime.

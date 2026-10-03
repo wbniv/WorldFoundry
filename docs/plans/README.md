@@ -373,6 +373,7 @@ rows on commit.*
   [exporter-face-hand](2026-09-19-exporter-face-hand.md).
 
 - Added the completed Android badge/lifecycle rollout row on 2026-10-02.
+- Added the merged diagnostic FPS mailbox plan on 2026-10-03.
 
 | [Aquarium: 29 tiger barbs, one actor each](2026-10-02-aquarium-tiger-barbs.md) | Implemented 29 single-actor tiger barbs, tighter schooling and motion-gated startle; quad/animated mesh profiles against one and eleven clownfish, with phase 3 planned. | Uncommitted | Feature |
 | [Condo shade and glass: translucency](2026-10-02-condo-translucency.md) | Investigate material opacity, shared transparent ordering, shade-strip seams and glass rendering; includes appearance mockups and a plan awaiting approval. | Uncommitted | Investigation |
@@ -384,3 +385,4 @@ rows on commit.*
 | [Betta poster and flowing fins](2026-10-02-betta-poster-and-flowing-fins.md) | Primary-source research, A3 history/habitat/location-map poster with rendered fish, and a detailed opaque flowing-fin upgrade for the Calm Betta. | Uncommitted | Feature |
 | [Aquarium movement and controls: all seven players](2026-10-02-aquarium-movement-and-controls.md) | Species movement implemented and deployed; 81 tests and six Chromecast movement checks pass. Physical remote and phone integration pending. | Uncommitted | Feature |
 | [Asian Arowana — bare tank and A3 poster](2026-10-02-asian-arowana.md) | Plan a single Asian arowana in an empty tank with clownfish swimming controls; include mockups, diagrams and a sourced A3 poster. | Uncommitted | Feature |
+| [Engine frame rate through a global system mailbox](2026-10-03-engine-framerate-system-mailbox.md) | Phase 1 raw diagnostic FPS mailbox 1903 merged into 2026-new-level, with Linux/Android validation and a deferred separate smoothed mailbox. | [`402d0f2f`](https://github.com/wbniv/WorldFoundry/commit/402d0f2f) | Feature |
