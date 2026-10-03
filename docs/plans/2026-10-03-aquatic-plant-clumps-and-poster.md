@@ -1,10 +1,54 @@
 # Aquarium: clumped plant growth, gentle water motion and an A3 poster
 
-**Status:** researched plan and poster draft; the revised growth layout and sway are not implemented. This supersedes the row-based composition in the [first dense planting pass](2026-10-03-aquarium-dense-planted-tank.md), while retaining its geometry and profiling evidence as a reference.
+**Status:** researched plant-level implementation plan with completed A3 portrait poster. Runtime colony generation, revised plant forms and sway are not implemented. This supersedes the row-based composition in the [first dense planting pass](2026-10-03-aquarium-dense-planted-tank.md), while retaining its geometry and profiling evidence as a reference.
 
-Replace obvious rows with **connected, irregular patches of growth**. Keep the tank mostly full: overlapping clumps should cover roughly 75–85% of the submerged interior in the whole-tank view, with local gaps and a small, winding substrate route for the sea urchin. Add subtle, coherent water-driven bending with anchored roots. Make an **A3 portrait poster**, split into saltwater on the left and freshwater on the right; reserve the **bottom 25% of the page** for diagrams and explanations of clumping and branching.
+Replace obvious rows with **connected, irregular patches of growth**. Grow toward a mostly-full mature tank: overlapping clumps should eventually cover roughly 75–85% of the submerged interior in the whole-tank view, with local gaps and a small, winding substrate route for the sea urchin. Add subtle, coherent water-driven bending with anchored roots. Make an **A3 portrait poster**, split into saltwater on the left and freshwater on the right; reserve the **bottom 25% of the page** for diagrams and explanations of clumping and branching.
 
-## Poster draft and review
+## Plant-level behavior
+
+**Every time the player selects Planted Tank, start a new seeded ecosystem and let the player watch it grow.** Begin with 12–18 small young founder colonies. Runners extend, daughter shoots emerge, leaves unfurl, stems elongate and side branches/whorls appear; the scene gradually becomes the mostly-full mature tank. Returning to the selector and selecting it again starts different founders and growth choices. Changing camera keeps the current ecosystem; pause freezes growth and sway, and resume continues without a large catch-up jump. The eight-tank selector, sea urchin and existing controls remain the content baseline.
+
+Growth is visibly accelerated and authored, not presented as real biological time. Initial tuning target: clearly noticeable development within 5–10 seconds, several expanding colonies by 30 seconds, and a mostly-full canopy around 90–180 seconds. These are adjustable design targets awaiting visual review and device measurements. Mature growth slows or stops at bounded density; indefinite turnover is deferred. Keep the urchin route usable at every stage.
+
+Use a fresh engine-owned seed per entry and log/display it. Allow player seed entry and expose a developer fixed-seed override for reproducible captures, regression checks and matched profiling. Same seed, settings and generator version must reproduce positions, lineage, shapes and colours. Independent random streams for growth choices, morphology and sway prevent a new leaf rule from unexpectedly relocating every colony. A fresh seed changes the scene while bounded density and spacing rules keep every result usable.
+
+![Runtime generation and ownership](2026-10-03-aquatic-plant-clumps-and-poster/runtime-generation-diagram.svg)
+
+![Young colonies growing into a mature canopy](2026-10-03-aquatic-plant-clumps-and-poster/growth-stages-mockup.svg)
+
+![Three different seeded tank compositions](2026-10-03-aquatic-plant-clumps-and-poster/seed-variation-mockups.svg)
+
+These are design diagrams and mockups, not engine captures or claims that runtime mesh construction already exists. New runtime interfaces must be implemented and measured. Visible runtime growth is required, alongside gentle sway. Continued mature-tank turnover is a possible later phase.
+
+## Player seed and growth-speed controls
+
+Show **`Seed: 713`** (the actual current value) at the **bottom left** of the planted-level view, inside the TV safe area. Use readable high-contrast text with a restrained dark backing; reserve the bottom-right area for the existing WF badge/FPS. Keep the seed visible while plants grow, after switching cameras and when reopening a replay. The number stays constant during one ecosystem's lifetime.
+
+Players can enter a seed and **regenerate the level**:
+
+- **TV remote / gamepad in the level:** hold **A / the remote centre button** for about one second to open the seed editor. A short press retains its existing camera action; distinguish tap versus hold and never perform the camera action after a recognized hold. Show the concise `Hold A: change seed` hint beside the seed. This is proposed input work to implement and check on Chromecast, including key-repeat/release behavior.
+- **Selector:** with Planted Tank highlighted, **→** opens the same seed editor before entering. Normal selection starts a fresh random ecosystem. Seed-entry regeneration selects Planted Tank with the submitted seed; other level controls remain unchanged.
+- **Phone controller:** provide a `Seed…` action opening the same editor; allow phone numeric text input as an additional convenience. The TV numeric keypad is sufficient without a phone or hardware keyboard.
+
+The settings panel has a seed field, an on-screen keypad with digits, backspace and clear, a **Growth speed** slider, **Regenerate**, **New random seed**, and cancel. Direction arrows move focus; A selects a key or action; **↶** cancels. Pause growth, sway and the urchin while editing. Cancel resumes the same tank at the same growth time, without a new seed or resource replacement. Keep current seed visible/pre-filled; entering a new value replaces it through normal editing.
+
+Accept decimal unsigned seeds **0–4,294,967,295**, at most ten digits; zero is valid. Reject empty, non-integer and out-of-range input with a short inline explanation, preserving the current tank. Normalize leading zeros after successful submission. Handle the seed as an exact native integer: do not silently round it through a single float-valued Forth cell. Pass deterministic PRNG state to Forth in an exact supported representation, or keep PRNG state native with explicit bounded-number operations.
+
+**Regenerate** resets the growth clock, safely releases/replaces level-owned growth and mesh buffers, and starts young founders from the submitted seed. Re-entering the same seed replays the same growth choices at the same simulation time, rather than restoring the previous plant ages. **New random seed** chooses and displays a fresh seed and starts a new ecosystem immediately. Log seed, generator version and growth settings for reproduction. Repeated regeneration must not leak buffers or disturb the other aquarium levels.
+
+### Growth-speed slider
+
+Default **1×**: author the mature canopy to appear around **90–180 seconds**, with a visible change in 5–10 seconds. Add selectable **Paused, 0.25×, 0.5×, 1×, 2×, 4× and 8×** positions, initially proposed pending runtime profiling. At 0.25× the target becomes approximately 6–12 minutes; at 2×, 45–90 seconds; at 8×, roughly 11–23 seconds, **if the measured update budget can sustain that rate**. Do not promise unsupported maximum rates: measure them and revise the offered range if necessary.
+
+When the slider is focused, ←/→ decreases/increases the rate; touch dragging chooses a position. Show the selected multiplier beside the track. Changing speed preserves seed, plants, current growth time and growth history. Keep it as a session setting for subsequent regenerations/selections. Cancelling the settings panel discards unsubmitted seed/speed edits. **Regenerate** commits both settings and restarts from young founders; add an **Apply speed** action that commits only speed and resumes the existing ecosystem. A displayed **Paused** growth setting stops growth but leaves gentle water sway and urchin controls active after closing the panel; opening the modal panel still pauses the whole tank.
+
+The slider scales only the fixed-step **growth clock**, not water motion, player movement, camera response or render frame rate. Derive development from accumulated growth time; use seeded fixed-step events so different rates reach the same botanical state at the same growth time. Root-pinned sway uses its own real-time clock. High speeds must respect bounded dirty-group construction/upload budgets and avoid bursts of mesh replacements; measure worst-frame pacing while dragging/changing speed and during rapid growth. Profiles specify seed, multiplier, growth time and young/intermediate/mature snapshot explicitly.
+
+![Seed display and numeric editor mockup](2026-10-03-aquatic-plant-clumps-and-poster/seed-editor-mockup.svg)
+
+![Seed validation and regeneration flow](2026-10-03-aquatic-plant-clumps-and-poster/seed-regeneration-diagram.svg)
+
+## Poster and research reference
 
 [Open the A3 PDF](2026-10-03-aquatic-plant-clumps-and-poster/aquatic-plants-a3.pdf) · [Vector SVG](2026-10-03-aquatic-plant-clumps-and-poster/aquatic-plants-a3.svg) · [Browser review](2026-10-03-aquatic-plant-clumps-and-poster/index.html).
 
@@ -36,9 +80,21 @@ The tiger-barb panel emphasizes **Sumatran freshwater**, rather than claiming Th
 
 ![Root networks and patch boundaries](2026-10-03-aquatic-plant-clumps-and-poster/clumping-diagram.svg)
 
-Start from around **12–18 founder patches**, with irregular sizes and outlines. Allocate most plants to a few substantial colonies and fewer to small satellite patches. Grow daughter plants from existing parent nodes using species-specific step lengths and correlated heading changes; avoid random jitter of the old rows. Stop or divert growth at tank margins, the crawl route and excessive local crowding. For a fast first version, use clustered sampling around founders plus a spacing test; retain parent/child edges so the layout can later use true rhizome/stolon walks.
+On each entry, start from around **12–18 founder patches**, with irregular sizes and outlines. Allocate most plants to a few substantial colonies and fewer to small satellite patches. Grow daughter plants from existing parent nodes using species-specific step lengths and correlated heading changes; avoid random jitter of the old rows. Stop or divert growth at tank margins, the crawl route and excessive local crowding. Use bounded parent-to-daughter rhizome/stolon walks in the first version, with minimum spacing and local crowding checks. Independent random dots around founders are useful for a prototype mockup but are not the final growth model.
 
 Correlate species, age, height and colour within each patch, then vary them among individuals. Younger daughters tend to occupy expanding edges in the simplified authored model. Blend adjoining patches and create local pockets rather than dividing the scene into eight rectangular botanical zones. **Render chunks are independent of biological clumps:** partition the finished geometry for mesh limits, but do not let chunk boundaries determine planting positions.
+
+### Plant palette and growth rules
+
+Use the freshwater side of the poster as **shape and architecture references** for the current authored plant tank. This does not assert an exact biotope or change the existing sea urchin. Keep marine examples in the poster as a distinct future palette; do not put temperate Fucus into a supposed tropical freshwater habitat.
+
+| Form | Colony model | Mesh silhouette | Variation and crowding |
+|---|---|---|---|
+| Crypt-like broad rosette | Short connected runner steps produce compact daughter groups | Curved oval/cordate leaves emerge radially from each base; varied petiole lengths | Mixed young/small and mature/broad rosettes; taper density near patch edges |
+| Vallisneria-like ribbon tuft | Longer stolon steps with occasional side daughters spread through neighbouring space | Long flexible ribbons, varied width, bend and tip height | Clustered bases, individually curved blades; avoid parallel equal-height fences |
+| Limnophila-like fine stem | Local stem colonies with variable internodes and bounded side branches | Feathery submerged whorls around nodes, rather than identical paired leaves | Vary whorl count, orientation, branch length and age; retain gaps between stems |
+
+Begin around the existing 384 rooted shoots, but distribute them unevenly between 12–18 colonies. Colony quotas, footprint, species mix and age distribution vary per seed; global shoot/leaf/vertex limits stay bounded. These quotas and 75–85% coverage are authoring targets, not measured botanical population ratios. Grow most tall foliage through the back and middle depth, mixed broad colonies in front/middle, and low daughter growth around edges. Preserve a winding substrate route and local pockets for the urchin instead of one bare straight strip. Nearby colonies can interlock; avoid both rectangular botanical partitions and evenly spaced decorative islands.
 
 For branch structure, use bounded tip growth: extend a parent axis; optionally fork or form a side shoot; reduce daughter segment length/radius gradually; vary branching angles and node spacing; terminate below the minimum useful segment size. Keep leaf arrangement appropriate to the chosen form—basal rosette, ribbon tuft, paired leaves, or whorls. Preserve the curved leaf meshes from the dense pass where they fit the selected form.
 
@@ -65,23 +121,39 @@ The simple arithmetic fits Forth well:
 
 The examples use cycles/turns where appropriate. `.08` turns is a schematic branching parameter, not a measured universal angle. `cluster-j` needs independent uniform inputs supplied by a deterministic generator; it creates a centre-heavy triangular distribution but is not by itself a full clumping model. `leaf-turn` describes a radial rosette before authored angular/length variation. `ease` is a simple stable interpolation rule, not a physical spring. The poster prints the smallest helpers; the accompanying Forth file contains comments and numeric checks.
 
-Generate the growth network and meshes at build time. At runtime, let Forth compute shared phase, amplitude and a handful of coefficients for the mesh chunks. Prefer a small native deformation operation over interpreting a loop across ~38,000 vertices in Forth. Inspect the existing fin/fish deformation paths for reusable rest-vertex storage and packed weights; **there is currently no verified plant-sway syscall to print as working code**. Do not rotate an entire merged chunk around the world origin, lift roots or allocate a controller for each plant. Smooth whole-mesh deformation should leave collisions and the urchin controller unchanged.
+Initialize founder colonies on entry, then advance the growth network and geometry **at runtime while the level is active**. Forth supplies the species growth policy and advances bounded growth steps; native code owns graph/vertex buffers and performs bounded incremental mesh construction. During play, Forth computes shared phase, amplitude and a handful of coefficients for the mesh chunks. Prefer a small native deformation operation over interpreting a loop across ~38,000 vertices in Forth. Inspect the existing fin/fish deformation paths for reusable rest-vertex storage and packed weights; **there is currently no verified plant-sway syscall to print as working code**. Do not rotate an entire merged chunk around the world origin, lift roots or allocate a controller for each plant. Smooth whole-mesh deformation should leave collisions and the urchin controller unchanged.
 
-## Implementation and evidence
+## Runtime implementation and profiling phases
 
-1. Finish and archive the current baseline/density/detailed profiling, clearly labelling its row-based layout. Preserve the 384-plant, 66,048-triangle reference and valid native/device captures.
-2. Implement clumped placement and form-specific branching, static first. Keep approximately the existing population/geometry budget so layout cost can be separated from a new detail increase. Review both cameras; verify local gaps, true irregular clump boundaries and anchored bases.
-3. Add low-amplitude root-pinned sway with a shared water field. Compare static clumps against swaying clumps on Chromecast, with identical native libraries, plant locations, cameras and input traces. Record actor/script time, deformation time, render time, presented pacing, memory and deltas against the archived dense reference.
-4. Verify the sea urchin remains controllable and locally visible, selector/back behaviour still works, and the other seven tank payloads are unchanged. Restore the normal menu APK after profiling. Regenerate the poster only when corrections or better verified botanical references justify it.
+**Measured reference:** the static dense trial is complete. Its matched Chromecast runs produced 39.87 FPS for the 57-plant baseline, 29.94 FPS for 384 plants with simple closed leaves, and 20.21 FPS for 384 detailed plants / 66,048 triangles. Render CPU time rose 3.70 → 18.16 → 42.88 ms while actor CPU stayed near 1.3 ms. These are render-path CPU measurements, not GPU timings. [Full comparison and receipts](2026-10-03-aquarium-dense-planted-tank.md), [machine-readable data](2026-10-03-aquarium-dense-planted-tank/performance.json).
 
-| Version | Layout | Motion | Measurement role |
+1. **Seeded growth graph and static controls:** add a level-entry seed and bounded growth service, with Forth policy and native graph/mesh storage. Support a developer fast-forward/freeze control to compare a mature generated layout against the fixed row-based reference. Match counts, mesh grouping and native binaries. Capture young, intermediate and mature states across at least three seeds; measure entry-to-playable latency separately.
+2. **Botanical forms and geometry efficiency:** replace generic paired stems with whorls, introduce ribbon tufts and age variation, and tune branch/leaf silhouettes. Preserve the mostly-full tank rather than reducing plant density to regain FPS. Compare curved leaf section counts, hidden/redundant faces and branch detail at matched seeds. The 66k-triangle reference is a comparison point, not proof it is a good final budget. Test an intermediate geometry budget as well, and show the visual tradeoff before selecting it.
+3. **Watch colonies grow:** advance a deterministic fixed-step growth clock. Spread daughters from existing parents with species-specific spacers and branching rules. Animate young leaves/stems from small forms to mature rest shapes smoothly; do not pop full-sized plants into view or rebuild every group each frame. Batch topology changes only for dirty groups, with a measured per-update budget and fair scheduling. Compare frozen versus growing young/intermediate/mature states at identical seed, topology and camera. Record update spikes and worst-frame pacing, not only average FPS.
+4. **Gentle shared water:** add native root-pinned vertex bending to the same generated meshes. Forth controls shared phase and coefficients; avoid per-vertex interpreted loops and per-plant actors. Compare static versus sway at identical seed and geometry. Use the same startup seed for normal and instrumented builds.
+5. **Player seed editing:** add bottom-left display, tap/hold input handling, selector entry, numeric editor, growth-speed slider and exact integer validation. Verify same-seed replay, new random seed, cancelling without changing the tank, zero/max/invalid inputs, phone/remote navigation, apply-speed versus regenerate, and deterministic growth across speed settings.
+6. **Repeated-entry stability and variation:** repeatedly enter/leave the level, checking new seeds, allocator ownership, peak memory, return-to-selector behavior and regeneration latency. Confirm all other seven level payloads are unaffected. Restore the normal eight-tank release after profiling and verify its installed hash. Continue to test growth through the mature cap, then freeze topology cleanly. Continuous mature turnover is a later option; visible growth from founders is part of this plan.
+
+### Runtime ownership and bounded work
+
+Use a few level-owned mesh groups (initially eight), never one actor per rooted shoot. Retain rest positions, per-vertex local base/height weights and per-group bounds. The existing static exporter and fish-deformation path are useful references; runtime plant mesh creation and swapping are **new engine work**, not existing verified APIs. Keep render buffers/material references alive until replacement is safe, clear them on level exit, and never mutate shared meshes belonging to other tanks.
+
+Bound founders, daughter attempts, shoot count, branch depth, leaves and total vertices. Stop or divert crowded growth instead of running an unbounded rejection loop. Validate index bounds, winding, triangle area, tank/water bounds and rooted bases before publishing each changed group. Check the existing mesh/index limit and split groups before exceeding it. Keep the last valid group until a complete validated replacement is ready; reject invalid growth additions cleanly. Seeded failure must be reproducible; do not turn a generation failure into a black screen.
+
+The current detailed level uses a 24 MB room pool and one room slot. Runtime graph storage, rest vertices, deformation weights and temporary construction buffers add peak memory; measure those explicitly and reuse scratch buffers where practical. Bound generation batches so loading and ongoing controls remain responsive. Preallocate bounded capacity where useful, and update only changed groups. Smooth growth of existing vertices should use native local growth weights/rest geometry; topology additions and sway share the same root/base ownership contract. Apply sway after growth deformation so young and mature plants both keep their roots fixed. Keep the whole-tank growth clock independent of render frame rate. Profile Forth policy, graph construction, leaf/branch meshing, upload/publication, actor updates, deformation and render work independently. Do not claim a loading-time target until device measurements exist.
+
+| Phase | Layout / geometry | Motion | Required comparison |
 |---|---|---|---|
-| Original sparse tank | 57 plants / three groups | Static | Historical baseline |
-| First dense detailed pass | 384 plants / eight groups / 66,048 triangles | Static | Row-based cost reference |
-| Clumped growth | Founder colonies + connected daughters | Static | Isolate layout/branching change |
-| Clumps + gentle water | Same colonies and meshes | Root-pinned shared sway | Isolate motion cost |
+| Archived sparse / dense simple / dense detailed | Fixed row-based assets | Static | Completed 39.87 / 29.94 / 20.21 FPS references |
+| Seeded colonies | Fresh founders; frozen mature control | Static | Startup, memory and mature layout delta versus fixed assets |
+| Revised botanical forms | Same chosen seeds; variable detail budgets | Static | Silhouettes/coverage plus layout, geometry and rendering deltas |
+| Visible growth | Young → spreading → mature; fixed seed/time snapshots | Smooth unfurling plus topology additions | Frozen vs growing CPU/pacing and allocation spikes at each stage |
+| Shared gentle water | Same growing colonies and meshes | Root-pinned sway | Incremental native deformation and pacing cost |
+| Repeat selections | New seeds; released/recreated level buffers | Same | Variation, bounded generation, no memory growth or leaked resources |
 
-Acceptance: no obvious repeated rows, a tank mostly filled by overlapping colonies, readable botanical forms, subtle coherent bending with completely fixed roots, usable wide/close views, and measured rather than guessed performance. The A3 PDF must be one page at the correct dimensions, with the requested left/right division and bottom-quarter pattern band, readable text and source links.
+For each steady-state phase, use three repeated release runs with identical native binaries, seeded layout, camera positions and input trace: wide idle, close idle and close crawl. Record presented FPS/p95 pacing, actor/director time, construction/deformation/render CPU, memory, triangles/groups and absolute/percentage deltas. Report startup costs separately so they cannot be hidden inside a steady-state average. For growing captures, also match growth clock, node count and topology state; compare pauses at fixed young/intermediate/mature snapshots and active growth over the same interval. Use multiple seeds to report cost spread and worst observed composition, then replay the same seeds for comparisons.
+
+Acceptance: bottom-left seed display and player-entered regeneration work on the remote; the same seed reproduces the growth sequence; each selection starts a different young ecosystem that visibly grows into a mostly-full tank; fixed-seed replay is reproducible; colonies have connected growth and irregular outlines; ribbon, rosette and whorled forms remain readable; tall foliage varies in height and age; roots remain fixed under slow coherent sway; the urchin has a usable local route; repeated level entry frees resources; and measured loading/rendering/motion costs are recorded. The A3 portrait PDF remains one page at 297 × 420 mm with its bottom-quarter pattern band and checked Forth examples.
 
 ## Poster bibliography
 
