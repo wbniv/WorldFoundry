@@ -23,8 +23,10 @@ def body_uv(x,z):
     # Follow the flank centre from peduncle to snout; avoid the fin cutout gaps.
     return .03+.91*(x/LENGTH_M+.5), .51-.06*(x/LENGTH_M+.28)/.78+.45*z/LENGTH_M
 
-def geometry(quad=False):
+def geometry(quad=False, refined=False):
     """Return metre-space vertices and polygons; fins stay in the same mesh."""
+    if refined and not quad:
+        return refined_geometry()
     if quad:
         # Texture silhouette occupies about 94% of its width; retain the texture's
         # aspect and account for that margin in the physical card dimensions.
@@ -61,9 +63,83 @@ def geometry(quad=False):
         fin([(.24,side*.07,-.05),(.13,side*.085,-.10),(.025,side*.19,-.145)],[(0,1,2)])
     return [(x*LENGTH_M,y*LENGTH_M,z*LENGTH_M) for x,y,z in verts], faces
 
-def blender_mesh(bpy, quad, texture):
-    name='tiger_barb_quad' if quad else 'tiger_barb_mesh'
-    verts,faces=geometry(quad)
+# Phase 3: nine anatomical sections, still eight vertices around each section.
+# (X, half-width, half-height, vertical centre, atlas bottom, atlas top).
+# The body atlas coordinates stop short of fin roots and transparent edges.
+REFINED_SECTIONS = (
+    (-.28,.018,.037,0,.450,.570),
+    (-.19,.052,.095,0,.450,.570),
+    (-.08,.085,.155,0,.315,.656),
+    (.06,.100,.180,0,.225,.755),
+    (.19,.088,.168,.015,.225,.736),
+    (.30,.062,.132,0,.285,.655),
+    (.39,.040,.085,-.010,.355,.570),
+    (.46,.024,.044,-.015,.421,.499),
+    (.50,.018,.022,-.018,.450,.480),
+)
+REFINED_BODY_VERTEX_COUNT = len(REFINED_SECTIONS)*8+2
+# Dedicated atlas islands for caudal/dorsal/anal/paired pectoral fins.
+# They share the body's texture/material, but do not sample its flank stripes.
+REFINED_FIN_UVS = (
+    (.236,.435),(.236,.580),(.033,.758),(.100,.635),
+    (.140,.490),(.100,.355),(.050,.280),
+    (.395,.680),(.635,.755),(.448,.945),(.435,.850),(.389,.673),
+    (.300,.397),(.423,.287),(.371,.225),(.330,.335),
+    (.778,.353),(.730,.307),(.634,.391),(.680,.391),
+    (.778,.353),(.730,.307),(.634,.391),(.680,.391),
+)
+
+def refined_body_uv(x,z):
+    """Map body rings onto the actual flank rather than compressing its height."""
+    x/=LENGTH_M; z/=LENGTH_M
+    for left,right in zip(REFINED_SECTIONS,REFINED_SECTIONS[1:]):
+        if x <= right[0]:
+            t=max(0,min(1,(x-left[0])/(right[0]-left[0])))
+            values=[a+(b-a)*t for a,b in zip(left,right)]
+            break
+    else:
+        values=REFINED_SECTIONS[-1]
+    _,_,height,centre,bottom,top=values
+    v=(bottom+top)/2+(z-centre)/height*(top-bottom)/2
+    return min(.9512,.03+.94*(x+.5)),v
+
+def refined_geometry():
+    """Closed tapered body, forked caudal fin and swept paired fins, one mesh."""
+    verts=[]; faces=[]
+    for x,ry,rz,zc,_,_ in REFINED_SECTIONS:
+        for j in range(8):
+            a=2*math.pi*j/8
+            verts.append((x,ry*math.sin(a),zc+rz*math.cos(a)))
+    for i in range(len(REFINED_SECTIONS)-1):
+        for j in range(8):
+            faces.append(((i+1)*8+j,(i+1)*8+(j+1)%8,i*8+(j+1)%8,i*8+j))
+    for ring,reverse in ((0,False),(len(REFINED_SECTIONS)-1,True)):
+        centre=len(verts)
+        verts.append((REFINED_SECTIONS[ring][0],0,REFINED_SECTIONS[ring][3]))
+        for j in range(8):
+            p=(centre,ring*8+j,ring*8+(j+1)%8)
+            faces.append(tuple(reversed(p)) if reverse else p)
+    def fin(points,polygons):
+        start=len(verts); verts.extend(points)
+        for p in polygons:
+            face=tuple(start+j for j in p)
+            faces.extend((face,tuple(reversed(face))))
+    # Extra points shape the lobes and preserve a genuine open fork at the tip.
+    fin([(-.28,0,-.035),(-.28,0,.035),(-.50,0,.185),
+         (-.445,0,.095),(-.395,0,0),(-.445,0,-.095),(-.50,0,-.185)],
+        [(0,1,4),(1,2,3),(1,3,4),(0,4,5),(0,5,6)])
+    fin([(-.13,0,.151),(.19,0,.183),(-.015,0,.345),(-.10,0,.30),(-.17,0,.175)],
+        [(0,1,2),(0,2,3),(0,3,4)])
+    fin([(-.20,0,-.09),(-.065,0,-.16),(-.155,0,-.275),(-.235,0,-.14)],
+        [(0,1,2),(0,2,3)])
+    for side in (-1,1):
+        fin([(.28,side*.058,-.055),(.18,side*.085,-.105),
+             (.05,side*.18,-.135),(.12,side*.13,-.085)],[(0,1,2),(0,2,3)])
+    return [(x*LENGTH_M,y*LENGTH_M,z*LENGTH_M) for x,y,z in verts],faces
+
+def blender_mesh(bpy, quad, texture, refined=False):
+    name='tiger_barb_quad' if quad else ('tiger_barb_refined' if refined else 'tiger_barb_mesh')
+    verts,faces=geometry(quad,refined)
     me=bpy.data.meshes.new(name)
     me.from_pydata(verts,[],faces); me.update()
     mat=bpy.data.materials.new('tiger-barb-textured')
@@ -90,10 +166,13 @@ def blender_mesh(bpy, quad, texture):
                 u=.03+.94*(x/LENGTH_M+.5)
                 v=.50+1.30*z/LENGTH_M
                 v=max(.04,min(.96,v))
-                if me.loops[loop].vertex_index < BODY_VERTEX_COUNT:
+                body_count=REFINED_BODY_VERTEX_COUNT if refined else BODY_VERTEX_COUNT
+                if me.loops[loop].vertex_index < body_count:
                     # Keep the closed body inside opaque flank texels. Only fins
                     # sample the cutout silhouette; the nose cap must stay solid.
-                    u,v=body_uv(x,z)
+                    u,v=(refined_body_uv if refined else body_uv)(x,z)
+                elif refined:
+                    u,v=REFINED_FIN_UVS[me.loops[loop].vertex_index-body_count]
             uv.data[loop].uv=(u,v)
     return me
 

@@ -374,7 +374,7 @@ rows on commit.*
 
 - Added the completed Android badge/lifecycle rollout row on 2026-10-02.
 
-| [Aquarium: 29 tiger barbs, one actor each](2026-10-02-aquarium-tiger-barbs.md) | Implemented 29 single-actor tiger barbs, tighter schooling and motion-gated startle; quad/animated mesh profiles against one and eleven clownfish, with phase 3 planned. | Uncommitted | Feature |
+| [Aquarium: 29 tiger barbs, one actor each](2026-10-02-aquarium-tiger-barbs.md) | All three tiger-barb phases implemented; refined one-mesh fish, fresh baseline/static/animated comparisons and deltas, isolated phase 3 worktree and verified Chromecast installation. | Uncommitted | Feature |
 | [Condo shade and glass: translucency](2026-10-02-condo-translucency.md) | Investigate material opacity, shared transparent ordering, shade-strip seams and glass rendering; includes appearance mockups and a plan awaiting approval. | Uncommitted | Investigation |
 | [Aquarium: Betta, Jellyfish, Lionfish and Planted Tank](2026-10-02-aquarium-three-more-tanks.md) | Four new standalone tanks, including a very slow sea urchin in Planted Tank; single six-tank Android menu and Chromecast receipts. | Uncommitted | Feature |
 | [Moon-jelly swimming poster — A3](2026-10-02-jellyfish-biomechanics-poster.md) | Primary-source motion research and an A3 portrait layout mockup; final poster awaits review and approval. | Uncommitted | Docs |

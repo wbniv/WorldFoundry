@@ -4,6 +4,7 @@ import itertools
 import math
 import subprocess
 import sys
+import pytest
 
 
 def test_wave_preserves_head_and_rest_pose_without_accumulation(tmp_path):
@@ -36,11 +37,12 @@ int main() {
     subprocess.run([str(binary)], check=True)
 
 
-def test_exported_mesh_has_no_polygons_below_engine_normalisation_limit():
+@pytest.mark.parametrize("refined", [False, True])
+def test_exported_mesh_has_no_polygons_below_engine_normalisation_limit(refined):
     root = Path(__file__).resolve().parents[1]
     sys.path.insert(0, str(root / 'wflevels/aquarium'))
     import tiger_barb
-    vertices, faces = tiger_barb.geometry()
+    vertices, faces = tiger_barb.geometry(refined=refined)
     # Quantise as the level exporter does, and cover both possible quad diagonals.
     vertices = [tuple(round(x*65536)/65536 for x in p) for p in vertices]
     for face in faces:
@@ -51,33 +53,36 @@ def test_exported_mesh_has_no_polygons_below_engine_normalisation_limit():
             assert math.sqrt(sum(x*x for x in cross)) > 4/65536
 
 
-def test_body_uvs_keep_the_mesh_closed_in_the_cutout_texture():
+@pytest.mark.parametrize("refined", [False, True])
+@pytest.mark.parametrize("resolution", [None, (256,128)])
+def test_body_uvs_keep_the_mesh_closed_in_the_cutout_texture(refined, resolution):
     from PIL import Image
     root = Path(__file__).resolve().parents[1]
     sys.path.insert(0, str(root / 'wflevels/aquarium'))
     import tiger_barb as tb
     im = Image.open(root / 'wflevels/aquarium/art/tiger-barb-source.png')
-    vertices, faces = tb.geometry()
+    if resolution: im=im.resize(resolution,Image.Resampling.LANCZOS)
+    vertices, faces = tb.geometry(refined=refined)
     for face in faces:
-        if max(face) >= tb.BODY_VERTEX_COUNT:
+        if max(face) >= (tb.REFINED_BODY_VERTEX_COUNT if refined else tb.BODY_VERTEX_COUNT):
             continue
         for tri in itertools.combinations(face, 3):
             for a in range(9):
                 for b in range(9-a):
                     weights = (a/8, b/8, (8-a-b)/8)
-                    x = sum(vertices[i][0]*w for i,w in zip(tri,weights))
-                    z = sum(vertices[i][2]*w for i,w in zip(tri,weights))
-                    u,v=tb.body_uv(x,z)
+                    uvs=[(tb.refined_body_uv if refined else tb.body_uv)(vertices[i][0],vertices[i][2]) for i in tri]
+                    u,v=[sum(uv[j]*w for uv,w in zip(uvs,weights)) for j in range(2)]
                     assert im.getpixel((int(u*im.width),int((1-v)*im.height)))[3] >= 128, (u,v,tri,weights)
 
 
-def test_body_faces_point_outward_and_each_fin_has_two_sides():
+@pytest.mark.parametrize("refined", [False, True])
+def test_body_faces_point_outward_and_each_fin_has_two_sides(refined):
     root = Path(__file__).resolve().parents[1]
     sys.path.insert(0, str(root / 'wflevels/aquarium'))
     import tiger_barb as tb
-    vertices, faces = tb.geometry()
+    vertices, faces = tb.geometry(refined=refined)
     for face in faces:
-        if max(face) >= tb.BODY_VERTEX_COUNT:
+        if max(face) >= (tb.REFINED_BODY_VERTEX_COUNT if refined else tb.BODY_VERTEX_COUNT):
             assert tuple(reversed(face)) in faces
             continue
         a,b,c = [vertices[i] for i in face[:3]]
@@ -88,3 +93,15 @@ def test_body_faces_point_outward_and_each_fin_has_two_sides():
             assert normal[0]*centre[0] > 0
         else:
             assert normal[1]*centre[1]+normal[2]*centre[2] > 0
+
+
+def test_refined_asset_keeps_full_length_and_a_bounded_single_mesh():
+    root = Path(__file__).resolve().parents[1]
+    sys.path.insert(0, str(root / 'wflevels/aquarium'))
+    import tiger_barb as tb
+    vertices, faces = tb.geometry(refined=True)
+    assert max(p[0] for p in vertices)-min(p[0] for p in vertices) == pytest.approx(tb.LENGTH_M)
+    assert len(vertices) == 98
+    assert sum(len(face)-2 for face in faces) == 172
+    assert len(tb.REFINED_FIN_UVS)==len(vertices)-tb.REFINED_BODY_VERTEX_COUNT
+    assert tb.REFINED_BODY_VERTEX_COUNT == 74

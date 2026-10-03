@@ -29,7 +29,7 @@
 		$3000003l { 'STR' "clownfish_dorsal.iff" }  // IFF RM0 000:003
 		$3000004l { 'STR' "clownfish_pec_near.iff" }  // IFF RM0 000:004
 		$3000005l { 'STR' "clownfish_pec_far.iff" }  // IFF RM0 000:005
-		$3000006l { 'STR' "tiger_barb_mesh.iff" }  // IFF RM0 000:006
+		$3000006l { 'STR' "tiger_barb_refined.iff" }  // IFF RM0 000:006
 		$3000007l { 'STR' "tank_shell.iff" }  // IFF RM0 000:007
 		$3000008l { 'STR' "tank_front_collider.iff" }  // IFF RM0 000:008
 		$3000009l { 'STR' "tank_rim.iff" }  // IFF RM0 000:009
@@ -66,7 +66,7 @@
 		{ 'ASS' $3000003l [ "clownfish_dorsal.iff" ] }  // IFF RM0 000:003
 		{ 'ASS' $3000004l [ "clownfish_pec_near.iff" ] }  // IFF RM0 000:004
 		{ 'ASS' $3000005l [ "clownfish_pec_far.iff" ] }  // IFF RM0 000:005
-		{ 'ASS' $3000006l [ "tiger_barb_mesh.iff" ] }  // IFF RM0 000:006
+		{ 'ASS' $3000006l [ "tiger_barb_refined.iff" ] }  // IFF RM0 000:006
 		{ 'ASS' $3000007l [ "tank_shell.iff" ] }  // IFF RM0 000:007
 		{ 'ASS' $3000008l [ "tank_front_collider.iff" ] }  // IFF RM0 000:008
 		{ 'ASS' $3000009l [ "tank_rim.iff" ] }  // IFF RM0 000:009

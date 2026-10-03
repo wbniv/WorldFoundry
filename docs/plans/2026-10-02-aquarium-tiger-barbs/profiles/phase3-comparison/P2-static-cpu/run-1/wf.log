@@ -1,0 +1,1675 @@
+ (log → /storage/emulated/0/Android/data/org.worldfoundry.wf_game.aquarium/files/wf.log) ===
+[100447.211326] (f_game.aquarium) Successfully parsed 1 environment variable(s) from /vendor/etc/mali_platform.config.
+Could not open module param file '/sys/module/mali_kbase/parameters/large_page_conf'
+[100447.225689] (f_game.aquarium) Successfully parsed 1 environment variable(s) from /vendor/etc/mali_platform.config.
+audio: miniaudio v0.11.25 ready
+wf_game v0.4.1, Built:Oct  1 2026,02:27:16 by kts
+--frame-profile
+argc = 2, commandIndex = 2
+Level=-1
+cerror:
+cwarn:
+cstats:
+wf_game Ver 0.4.1, Built:Oct  1 2026,02:27:16 by kts
+DBSTREAMS jolt: RegisterDefaultAllocator
+jolt: Factory
+jolt: RegisterTypes
+jolt: RunSelftest
+jolt: selftest ok (sphere fell to z=5.098)
+jolt: backend init
+jolt: backend ready (gravity -Z)
+jolt: init complete
+LMalloc of 76 not 8-byte aligned, rounding up
+Opening cd.iff
+LMalloc of 114 not 8-byte aligned, rounding up
+zforth: INDEXOF_CAMSHOT = 1921 (expect 1921)
+zforth: INDEXOF_CAMSHOT = 1921 (expect 1921)
+LMalloc of 412 not 8-byte aligned, rounding up
+LMalloc of 7620 not 8-byte aligned, rounding up
+LMalloc of 20 not 8-byte aligned, rounding up
+LMalloc of 20 not 8-byte aligned, rounding up
+LMalloc of 44 not 8-byte aligned, rounding up
+LMalloc of 44 not 8-byte aligned, rounding up
+LMalloc of 44 not 8-byte aligned, rounding up
+LMalloc of 44 not 8-byte aligned, rounding up
+LMalloc of 44 not 8-byte aligned, rounding up
+LMalloc of 44 not 8-byte aligned, rounding up
+LMalloc of 44 not 8-byte aligned, rounding up
+LMalloc of 44 not 8-byte aligned, rounding up
+LMalloc of 44 not 8-byte aligned, rounding up
+LMalloc of 44 not 8-byte aligned, rounding up
+LMalloc of 44 not 8-byte aligned, rounding up
+LMalloc of 44 not 8-byte aligned, rounding up
+LMalloc of 44 not 8-byte aligned, rounding up
+LMalloc of 44 not 8-byte aligned, rounding up
+LMalloc of 44 not 8-byte aligned, rounding up
+LMalloc of 44 not 8-byte aligned, rounding up
+LMalloc of 44 not 8-byte aligned, rounding up
+LMalloc of 44 not 8-byte aligned, rounding up
+LMalloc of 44 not 8-byte aligned, rounding up
+LMalloc of 44 not 8-byte aligned, rounding up
+LMalloc of 44 not 8-byte aligned, rounding up
+LMalloc of 44 not 8-byte aligned, rounding up
+Level::Level: leveldata= 0xe0a17b08, object count  = 62
+ASS closed without all data read (bytesLeft = 4118)
+ASS closed without all data read (bytesLeft = 150)
+ASS closed without all data read (bytesLeft = 16)
+ASS closed without all data read (bytesLeft = 16)
+ASS closed without all data read (bytesLeft = 8732)
+DMalloc of 84 not 8-byte aligned, rounding up
+LMalloc of 76 not 8-byte aligned, rounding up
+PixelMap::Load: this = 0xe0020780
+PixelMap::Load: this = 0xe00207b0
+LMalloc of 28 not 8-byte aligned, rounding up
+LMalloc of 28 not 8-byte aligned, rounding up
+LMalloc of 28 not 8-byte aligned, rounding up
+LMalloc of 28 not 8-byte aligned, rounding up
+[Actor] idx=1 class=13 commonOff=87960 NumberOfLocalMailboxes=0
+DMalloc of 84 not 8-byte aligned, rounding up
+this = 0xe0023a88,setting _memory to 0xe00237f8
+DMalloc of 52 not 8-byte aligned, rounding up
+DMalloc of 252 not 8-byte aligned, rounding up
+[Actor] idx=2 class=20 commonOff=88276 NumberOfLocalMailboxes=0
+DMalloc of 84 not 8-byte aligned, rounding up
+DMalloc of 228 not 8-byte aligned, rounding up
+[Actor] idx=4 class=11 commonOff=87960 NumberOfLocalMailboxes=0
+DMalloc of 84 not 8-byte aligned, rounding up
+[Actor] idx=5 class=16 commonOff=87960 NumberOfLocalMailboxes=0
+DMalloc of 84 not 8-byte aligned, rounding up
+[Actor] idx=6 class=3 commonOff=87960 NumberOfLocalMailboxes=0
+DMalloc of 84 not 8-byte aligned, rounding up
+[Actor] idx=8 class=22 commonOff=89172 NumberOfLocalMailboxes=6
+DMalloc of 84 not 8-byte aligned, rounding up
+jolt: character 0 created at (-1.60, 0.00, 2.40) ctr=(0.00,0.00,0.00)
+DMalloc of 228 not 8-byte aligned, rounding up
+[Actor] idx=9 class=23 commonOff=87960 NumberOfLocalMailboxes=0
+DMalloc of 84 not 8-byte aligned, rounding up
+[Actor] idx=10 class=7 commonOff=89744 NumberOfLocalMailboxes=0
+DMalloc of 84 not 8-byte aligned, rounding up
+[Actor] idx=11 class=7 commonOff=89944 NumberOfLocalMailboxes=0
+DMalloc of 84 not 8-byte aligned, rounding up
+[Actor] idx=12 class=7 commonOff=89988 NumberOfLocalMailboxes=0
+DMalloc of 84 not 8-byte aligned, rounding up
+[Actor] idx=13 class=7 commonOff=90032 NumberOfLocalMailboxes=0
+DMalloc of 84 not 8-byte aligned, rounding up
+[Actor] idx=14 class=7 commonOff=90032 NumberOfLocalMailboxes=0
+DMalloc of 84 not 8-byte aligned, rounding up
+[Actor] idx=15 class=7 commonOff=90076 NumberOfLocalMailboxes=0
+DMalloc of 84 not 8-byte aligned, rounding up
+[Actor] idx=16 class=7 commonOff=90076 NumberOfLocalMailboxes=0
+DMalloc of 84 not 8-byte aligned, rounding up
+[Actor] idx=17 class=7 commonOff=90076 NumberOfLocalMailboxes=0
+DMalloc of 84 not 8-byte aligned, rounding up
+[Actor] idx=18 class=7 commonOff=90076 NumberOfLocalMailboxes=0
+DMalloc of 84 not 8-byte aligned, rounding up
+[Actor] idx=19 class=7 commonOff=90076 NumberOfLocalMailboxes=0
+DMalloc of 84 not 8-byte aligned, rounding up
+[Actor] idx=20 class=7 commonOff=90076 NumberOfLocalMailboxes=0
+DMalloc of 84 not 8-byte aligned, rounding up
+[Actor] idx=21 class=7 commonOff=90076 NumberOfLocalMailboxes=0
+DMalloc of 84 not 8-byte aligned, rounding up
+[Actor] idx=22 class=7 commonOff=90076 NumberOfLocalMailboxes=0
+DMalloc of 84 not 8-byte aligned, rounding up
+[Actor] idx=23 class=7 commonOff=90076 NumberOfLocalMailboxes=0
+DMalloc of 84 not 8-byte aligned, rounding up
+[Actor] idx=24 class=7 commonOff=90076 NumberOfLocalMailboxes=0
+DMalloc of 84 not 8-byte aligned, rounding up
+[Actor] idx=25 class=7 commonOff=90076 NumberOfLocalMailboxes=0
+DMalloc of 84 not 8-byte aligned, rounding up
+[Actor] idx=26 class=7 commonOff=90076 NumberOfLocalMailboxes=0
+DMalloc of 84 not 8-byte aligned, rounding up
+[Actor] idx=27 class=7 commonOff=90076 NumberOfLocalMailboxes=0
+DMalloc of 84 not 8-byte aligned, rounding up
+[Actor] idx=28 class=7 commonOff=90076 NumberOfLocalMailboxes=0
+DMalloc of 84 not 8-byte aligned, rounding up
+[Actor] idx=29 class=7 commonOff=90076 NumberOfLocalMailboxes=0
+DMalloc of 84 not 8-byte aligned, rounding up
+[Actor] idx=30 class=7 commonOff=90076 NumberOfLocalMailboxes=0
+DMalloc of 84 not 8-byte aligned, rounding up
+[Actor] idx=31 class=7 commonOff=90076 NumberOfLocalMailboxes=0
+DMalloc of 84 not 8-byte aligned, rounding up
+[Actor] idx=32 class=7 commonOff=90076 NumberOfLocalMailboxes=0
+DMalloc of 84 not 8-byte aligned, rounding up
+[Actor] idx=33 class=7 commonOff=90076 NumberOfLocalMailboxes=0
+DMalloc of 84 not 8-byte aligned, rounding up
+[Actor] idx=34 class=7 commonOff=90076 NumberOfLocalMailboxes=0
+DMalloc of 84 not 8-byte aligned, rounding up
+[Actor] idx=35 class=7 commonOff=90076 NumberOfLocalMailboxes=0
+DMalloc of 84 not 8-byte aligned, rounding up
+[Actor] idx=36 class=7 commonOff=90076 NumberOfLocalMailboxes=0
+DMalloc of 84 not 8-byte aligned, rounding up
+[Actor] idx=37 class=7 commonOff=90076 NumberOfLocalMailboxes=0
+DMalloc of 84 not 8-byte aligned, rounding up
+[Actor] idx=38 class=7 commonOff=90076 NumberOfLocalMailboxes=0
+DMalloc of 84 not 8-byte aligned, rounding up
+[Actor] idx=39 class=7 commonOff=90076 NumberOfLocalMailboxes=0
+DMalloc of 84 not 8-byte aligned, rounding up
+[Actor] idx=40 class=7 commonOff=90076 NumberOfLocalMailboxes=0
+DMalloc of 84 not 8-byte aligned, rounding up
+[Actor] idx=41 class=7 commonOff=90076 NumberOfLocalMailboxes=0
+DMalloc of 84 not 8-byte aligned, rounding up
+[Actor] idx=42 class=7 commonOff=90076 NumberOfLocalMailboxes=0
+DMalloc of 84 not 8-byte aligned, rounding up
+[Actor] idx=43 class=7 commonOff=90076 NumberOfLocalMailboxes=0
+DMalloc of 84 not 8-byte aligned, rounding up
+[Actor] idx=44 class=5 commonOff=90228 NumberOfLocalMailboxes=0
+jolt: body STATIC pos=(0.00,0.00,2.67) half=(6.10,1.65,2.67) id=8388608
+[Actor] idx=45 class=5 commonOff=87960 NumberOfLocalMailboxes=0
+jolt: body STATIC pos=(0.00,-1.65,2.73) half=(5.97,0.12,2.60) id=8388609
+[Actor] idx=46 class=5 commonOff=90272 NumberOfLocalMailboxes=0
+jolt: body STATIC pos=(0.00,0.00,5.27) half=(6.16,1.71,0.12) id=8388610
+[Actor] idx=47 class=5 commonOff=90316 NumberOfLocalMailboxes=0
+jolt: body STATIC pos=(0.00,0.00,0.38) half=(5.96,1.52,0.25) id=8388611
+[Actor] idx=48 class=5 commonOff=90360 NumberOfLocalMailboxes=0
+jolt: body STATIC pos=(2.48,-0.02,0.91) half=(0.76,0.56,0.27) id=8388612
+[Actor] idx=49 class=5 commonOff=90404 NumberOfLocalMailboxes=0
+jolt: body STATIC pos=(2.50,0.00,1.56) half=(0.50,0.50,0.38) id=8388613
+[Actor] idx=50 class=7 commonOff=90448 NumberOfLocalMailboxes=0
+DMalloc of 84 not 8-byte aligned, rounding up
+[Actor] idx=51 class=7 commonOff=90448 NumberOfLocalMailboxes=0
+DMalloc of 84 not 8-byte aligned, rounding up
+[Actor] idx=52 class=7 commonOff=90448 NumberOfLocalMailboxes=0
+DMalloc of 84 not 8-byte aligned, rounding up
+[Actor] idx=53 class=7 commonOff=90492 NumberOfLocalMailboxes=0
+DMalloc of 84 not 8-byte aligned, rounding up
+[Actor] idx=54 class=7 commonOff=90492 NumberOfLocalMailboxes=0
+DMalloc of 84 not 8-byte aligned, rounding up
+[Actor] idx=55 class=7 commonOff=90492 NumberOfLocalMailboxes=0
+DMalloc of 84 not 8-byte aligned, rounding up
+[Actor] idx=56 class=3 commonOff=87960 NumberOfLocalMailboxes=0
+DMalloc of 84 not 8-byte aligned, rounding up
+[Actor] idx=57 class=5 commonOff=87960 NumberOfLocalMailboxes=0
+jolt: body STATIC pos=(0.00,0.00,-4.50) half=(6.30,1.85,4.50) id=8388614
+[Actor] idx=58 class=5 commonOff=90536 NumberOfLocalMailboxes=0
+jolt: body STATIC pos=(0.00,3.88,3.50) half=(20.00,0.12,12.50) id=8388615
+DMalloc of 228 not 8-byte aligned, rounding up
+[Actor] idx=59 class=23 commonOff=87960 NumberOfLocalMailboxes=0
+DMalloc of 84 not 8-byte aligned, rounding up
+[Actor] idx=60 class=7 commonOff=87960 NumberOfLocalMailboxes=0
+DMalloc of 84 not 8-byte aligned, rounding up
+[Actor] idx=61 class=16 commonOff=87960 NumberOfLocalMailboxes=0
+DMalloc of 84 not 8-byte aligned, rounding up
+LMalloc of 20 not 8-byte aligned, rounding up
+LMalloc of 212 not 8-byte aligned, rounding up
+DMalloc of 122 not 8-byte aligned, rounding up
+DMalloc of 404 not 8-byte aligned, rounding up
+DMalloc of 502 not 8-byte aligned, rounding up
+DMalloc of 404 not 8-byte aligned, rounding up
+Walking from 0
+0->0
+0->0
+LMalloc of 20 not 8-byte aligned, rounding up
+LMalloc of 20 not 8-byte aligned, rounding up
+ASS closed without all data read (bytesLeft = 4118)
+ASS closed without all data read (bytesLeft = 65558)
+ASS closed without all data read (bytesLeft = 64)
+ASS closed without all data read (bytesLeft = 16)
+ASS closed without all data read (bytesLeft = 8732)
+ASS closed without all data read (bytesLeft = 1732)
+ASS closed without all data read (bytesLeft = 1572)
+ASS closed without all data read (bytesLeft = 1252)
+ASS closed without all data read (bytesLeft = 1252)
+ASS closed without all data read (bytesLeft = 3148)
+ASS closed without all data read (bytesLeft = 19380)
+ASS closed without all data read (bytesLeft = 588)
+ASS closed without all data read (bytesLeft = 1364)
+ASS closed without all data read (bytesLeft = 10012)
+ASS closed without all data read (bytesLeft = 1716)
+ASS closed without all data read (bytesLeft = 4308)
+ASS closed without all data read (bytesLeft = 4668)
+ASS closed without all data read (bytesLeft = 5772)
+ASS closed without all data read (bytesLeft = 4668)
+ASS closed without all data read (bytesLeft = 4668)
+ASS closed without all data read (bytesLeft = 3564)
+ASS closed without all data read (bytesLeft = 4668)
+ASS closed without all data read (bytesLeft = 852)
+ASS closed without all data read (bytesLeft = 412)
+DMalloc of 84 not 8-byte aligned, rounding up
+PixelMap::Load: this = 0xe00207e0
+PixelMap::Load: this = 0xe0020810
+LMalloc of 76 not 8-byte aligned, rounding up
+LMalloc of 28 not 8-byte aligned, rounding up
+LMalloc of 76 not 8-byte aligned, rounding up
+LMalloc of 28 not 8-byte aligned, rounding up
+LMalloc of 244 not 8-byte aligned, rounding up
+LMalloc of 44 not 8-byte aligned, rounding up
+LMalloc of 44 not 8-byte aligned, rounding up
+LMalloc of 44 not 8-byte aligned, rounding up
+LMalloc of 6236 not 8-byte aligned, rounding up
+RenderActor3DAnimates constructed with no animations!
+LMalloc of 244 not 8-byte aligned, rounding up
+LMalloc of 44 not 8-byte aligned, rounding up
+LMalloc of 44 not 8-byte aligned, rounding up
+LMalloc of 44 not 8-byte aligned, rounding up
+LMalloc of 6236 not 8-byte aligned, rounding up
+RenderActor3DAnimates constructed with no animations!
+LMalloc of 244 not 8-byte aligned, rounding up
+LMalloc of 44 not 8-byte aligned, rounding up
+LMalloc of 44 not 8-byte aligned, rounding up
+LMalloc of 44 not 8-byte aligned, rounding up
+LMalloc of 1156 not 8-byte aligned, rounding up
+RenderActor3DAnimates constructed with no animations!
+LMalloc of 244 not 8-byte aligned, rounding up
+LMalloc of 44 not 8-byte aligned, rounding up
+LMalloc of 44 not 8-byte aligned, rounding up
+LMalloc of 44 not 8-byte aligned, rounding up
+LMalloc of 996 not 8-byte aligned, rounding up
+RenderActor3DAnimates constructed with no animations!
+LMalloc of 244 not 8-byte aligned, rounding up
+LMalloc of 44 not 8-byte aligned, rounding up
+LMalloc of 44 not 8-byte aligned, rounding up
+LMalloc of 44 not 8-byte aligned, rounding up
+LMalloc of 676 not 8-byte aligned, rounding up
+RenderActor3DAnimates constructed with no animations!
+LMalloc of 244 not 8-byte aligned, rounding up
+LMalloc of 44 not 8-byte aligned, rounding up
+LMalloc of 44 not 8-byte aligned, rounding up
+LMalloc of 44 not 8-byte aligned, rounding up
+LMalloc of 676 not 8-byte aligned, rounding up
+RenderActor3DAnimates constructed with no animations!
+LMalloc of 244 not 8-byte aligned, rounding up
+LMalloc of 44 not 8-byte aligned, rounding up
+LMalloc of 44 not 8-byte aligned, rounding up
+material: texture="tiger_barb.tga"  bTranslucent=0  bitdepth=15  flags_in=0x16
+LMalloc of 44 not 8-byte aligned, rounding up
+LMalloc of 2596 not 8-byte aligned, rounding up
+RenderActor3DAnimates constructed with no animations!
+LMalloc of 244 not 8-byte aligned, rounding up
+LMalloc of 44 not 8-byte aligned, rounding up
+LMalloc of 44 not 8-byte aligned, rounding up
+material: texture="tiger_barb.tga"  bTranslucent=0  bitdepth=15  flags_in=0x16
+LMalloc of 44 not 8-byte aligned, rounding up
+LMalloc of 2596 not 8-byte aligned, rounding up
+RenderActor3DAnimates constructed with no animations!
+LMalloc of 244 not 8-byte aligned, rounding up
+LMalloc of 44 not 8-byte aligned, rounding up
+LMalloc of 44 not 8-byte aligned, rounding up
+material: texture="tiger_barb.tga"  bTranslucent=0  bitdepth=15  flags_in=0x16
+LMalloc of 44 not 8-byte aligned, rounding up
+LMalloc of 2596 not 8-byte aligned, rounding up
+RenderActor3DAnimates constructed with no animations!
+LMalloc of 244 not 8-byte aligned, rounding up
+LMalloc of 44 not 8-byte aligned, rounding up
+LMalloc of 44 not 8-byte aligned, rounding up
+material: texture="tiger_barb.tga"  bTranslucent=0  bitdepth=15  flags_in=0x16
+LMalloc of 44 not 8-byte aligned, rounding up
+LMalloc of 2596 not 8-byte aligned, rounding up
+RenderActor3DAnimates constructed with no animations!
+LMalloc of 244 not 8-byte aligned, rounding up
+LMalloc of 44 not 8-byte aligned, rounding up
+LMalloc of 44 not 8-byte aligned, rounding up
+material: texture="tiger_barb.tga"  bTranslucent=0  bitdepth=15  flags_in=0x16
+LMalloc of 44 not 8-byte aligned, rounding up
+LMalloc of 2596 not 8-byte aligned, rounding up
+RenderActor3DAnimates constructed with no animations!
+LMalloc of 244 not 8-byte aligned, rounding up
+LMalloc of 44 not 8-byte aligned, rounding up
+LMalloc of 44 not 8-byte aligned, rounding up
+material: texture="tiger_barb.tga"  bTranslucent=0  bitdepth=15  flags_in=0x16
+LMalloc of 44 not 8-byte aligned, rounding up
+LMalloc of 2596 not 8-byte aligned, rounding up
+RenderActor3DAnimates constructed with no animations!
+LMalloc of 244 not 8-byte aligned, rounding up
+LMalloc of 44 not 8-byte aligned, rounding up
+LMalloc of 44 not 8-byte aligned, rounding up
+material: texture="tiger_barb.tga"  bTranslucent=0  bitdepth=15  flags_in=0x16
+LMalloc of 44 not 8-byte aligned, rounding up
+LMalloc of 2596 not 8-byte aligned, rounding up
+RenderActor3DAnimates constructed with no animations!
+LMalloc of 244 not 8-byte aligned, rounding up
+LMalloc of 44 not 8-byte aligned, rounding up
+LMalloc of 44 not 8-byte aligned, rounding up
+material: texture="tiger_barb.tga"  bTranslucent=0  bitdepth=15  flags_in=0x16
+LMalloc of 44 not 8-byte aligned, rounding up
+LMalloc of 2596 not 8-byte aligned, rounding up
+RenderActor3DAnimates constructed with no animations!
+LMalloc of 244 not 8-byte aligned, rounding up
+LMalloc of 44 not 8-byte aligned, rounding up
+LMalloc of 44 not 8-byte aligned, rounding up
+material: texture="tiger_barb.tga"  bTranslucent=0  bitdepth=15  flags_in=0x16
+LMalloc of 44 not 8-byte aligned, rounding up
+LMalloc of 2596 not 8-byte aligned, rounding up
+RenderActor3DAnimates constructed with no animations!
+LMalloc of 244 not 8-byte aligned, rounding up
+LMalloc of 44 not 8-byte aligned, rounding up
+LMalloc of 44 not 8-byte aligned, rounding up
+material: texture="tiger_barb.tga"  bTranslucent=0  bitdepth=15  flags_in=0x16
+LMalloc of 44 not 8-byte aligned, rounding up
+LMalloc of 2596 not 8-byte aligned, rounding up
+RenderActor3DAnimates constructed with no animations!
+LMalloc of 244 not 8-byte aligned, rounding up
+LMalloc of 44 not 8-byte aligned, rounding up
+LMalloc of 44 not 8-byte aligned, rounding up
+material: texture="tiger_barb.tga"  bTranslucent=0  bitdepth=15  flags_in=0x16
+LMalloc of 44 not 8-byte aligned, rounding up
+LMalloc of 2596 not 8-byte aligned, rounding up
+RenderActor3DAnimates constructed with no animations!
+LMalloc of 244 not 8-byte aligned, rounding up
+LMalloc of 44 not 8-byte aligned, rounding up
+LMalloc of 44 not 8-byte aligned, rounding up
+material: texture="tiger_barb.tga"  bTranslucent=0  bitdepth=15  flags_in=0x16
+LMalloc of 44 not 8-byte aligned, rounding up
+LMalloc of 2596 not 8-byte aligned, rounding up
+RenderActor3DAnimates constructed with no animations!
+LMalloc of 244 not 8-byte aligned, rounding up
+LMalloc of 44 not 8-byte aligned, rounding up
+LMalloc of 44 not 8-byte aligned, rounding up
+material: texture="tiger_barb.tga"  bTranslucent=0  bitdepth=15  flags_in=0x16
+LMalloc of 44 not 8-byte aligned, rounding up
+LMalloc of 2596 not 8-byte aligned, rounding up
+RenderActor3DAnimates constructed with no animations!
+LMalloc of 244 not 8-byte aligned, rounding up
+LMalloc of 44 not 8-byte aligned, rounding up
+LMalloc of 44 not 8-byte aligned, rounding up
+material: texture="tiger_barb.tga"  bTranslucent=0  bitdepth=15  flags_in=0x16
+LMalloc of 44 not 8-byte aligned, rounding up
+LMalloc of 2596 not 8-byte aligned, rounding up
+RenderActor3DAnimates constructed with no animations!
+LMalloc of 244 not 8-byte aligned, rounding up
+LMalloc of 44 not 8-byte aligned, rounding up
+LMalloc of 44 not 8-byte aligned, rounding up
+material: texture="tiger_barb.tga"  bTranslucent=0  bitdepth=15  flags_in=0x16
+LMalloc of 44 not 8-byte aligned, rounding up
+LMalloc of 2596 not 8-byte aligned, rounding up
+RenderActor3DAnimates constructed with no animations!
+LMalloc of 244 not 8-byte aligned, rounding up
+LMalloc of 44 not 8-byte aligned, rounding up
+LMalloc of 44 not 8-byte aligned, rounding up
+material: texture="tiger_barb.tga"  bTranslucent=0  bitdepth=15  flags_in=0x16
+LMalloc of 44 not 8-byte aligned, rounding up
+LMalloc of 2596 not 8-byte aligned, rounding up
+RenderActor3DAnimates constructed with no animations!
+LMalloc of 244 not 8-byte aligned, rounding up
+LMalloc of 44 not 8-byte aligned, rounding up
+LMalloc of 44 not 8-byte aligned, rounding up
+material: texture="tiger_barb.tga"  bTranslucent=0  bitdepth=15  flags_in=0x16
+LMalloc of 44 not 8-byte aligned, rounding up
+LMalloc of 2596 not 8-byte aligned, rounding up
+RenderActor3DAnimates constructed with no animations!
+LMalloc of 244 not 8-byte aligned, rounding up
+LMalloc of 44 not 8-byte aligned, rounding up
+LMalloc of 44 not 8-byte aligned, rounding up
+material: texture="tiger_barb.tga"  bTranslucent=0  bitdepth=15  flags_in=0x16
+LMalloc of 44 not 8-byte aligned, rounding up
+LMalloc of 2596 not 8-byte aligned, rounding up
+RenderActor3DAnimates constructed with no animations!
+LMalloc of 244 not 8-byte aligned, rounding up
+LMalloc of 44 not 8-byte aligned, rounding up
+LMalloc of 44 not 8-byte aligned, rounding up
+material: texture="tiger_barb.tga"  bTranslucent=0  bitdepth=15  flags_in=0x16
+LMalloc of 44 not 8-byte aligned, rounding up
+LMalloc of 2596 not 8-byte aligned, rounding up
+RenderActor3DAnimates constructed with no animations!
+LMalloc of 244 not 8-byte aligned, rounding up
+LMalloc of 44 not 8-byte aligned, rounding up
+LMalloc of 44 not 8-byte aligned, rounding up
+material: texture="tiger_barb.tga"  bTranslucent=0  bitdepth=15  flags_in=0x16
+LMalloc of 44 not 8-byte aligned, rounding up
+LMalloc of 2596 not 8-byte aligned, rounding up
+RenderActor3DAnimates constructed with no animations!
+LMalloc of 244 not 8-byte aligned, rounding up
+LMalloc of 44 not 8-byte aligned, rounding up
+LMalloc of 44 not 8-byte aligned, rounding up
+material: texture="tiger_barb.tga"  bTranslucent=0  bitdepth=15  flags_in=0x16
+LMalloc of 44 not 8-byte aligned, rounding up
+LMalloc of 2596 not 8-byte aligned, rounding up
+RenderActor3DAnimates constructed with no animations!
+LMalloc of 244 not 8-byte aligned, rounding up
+LMalloc of 44 not 8-byte aligned, rounding up
+LMalloc of 44 not 8-byte aligned, rounding up
+material: texture="tiger_barb.tga"  bTranslucent=0  bitdepth=15  flags_in=0x16
+LMalloc of 44 not 8-byte aligned, rounding up
+LMalloc of 2596 not 8-byte aligned, rounding up
+RenderActor3DAnimates constructed with no animations!
+LMalloc of 244 not 8-byte aligned, rounding up
+LMalloc of 44 not 8-byte aligned, rounding up
+LMalloc of 44 not 8-byte aligned, rounding up
+material: texture="tiger_barb.tga"  bTranslucent=0  bitdepth=15  flags_in=0x16
+LMalloc of 44 not 8-byte aligned, rounding up
+LMalloc of 2596 not 8-byte aligned, rounding up
+RenderActor3DAnimates constructed with no animations!
+LMalloc of 244 not 8-byte aligned, rounding up
+LMalloc of 44 not 8-byte aligned, rounding up
+LMalloc of 44 not 8-byte aligned, rounding up
+material: texture="tiger_barb.tga"  bTranslucent=0  bitdepth=15  flags_in=0x16
+LMalloc of 44 not 8-byte aligned, rounding up
+LMalloc of 2596 not 8-byte aligned, rounding up
+RenderActor3DAnimates constructed with no animations!
+LMalloc of 244 not 8-byte aligned, rounding up
+LMalloc of 44 not 8-byte aligned, rounding up
+LMalloc of 44 not 8-byte aligned, rounding up
+material: texture="tiger_barb.tga"  bTranslucent=0  bitdepth=15  flags_in=0x16
+LMalloc of 44 not 8-byte aligned, rounding up
+LMalloc of 2596 not 8-byte aligned, rounding up
+RenderActor3DAnimates constructed with no animations!
+LMalloc of 244 not 8-byte aligned, rounding up
+LMalloc of 44 not 8-byte aligned, rounding up
+LMalloc of 44 not 8-byte aligned, rounding up
+material: texture="tiger_barb.tga"  bTranslucent=0  bitdepth=15  flags_in=0x16
+LMalloc of 44 not 8-byte aligned, rounding up
+LMalloc of 2596 not 8-byte aligned, rounding up
+RenderActor3DAnimates constructed with no animations!
+LMalloc of 244 not 8-byte aligned, rounding up
+LMalloc of 44 not 8-byte aligned, rounding up
+LMalloc of 44 not 8-byte aligned, rounding up
+material: texture="tiger_barb.tga"  bTranslucent=0  bitdepth=15  flags_in=0x16
+LMalloc of 44 not 8-byte aligned, rounding up
+LMalloc of 2596 not 8-byte aligned, rounding up
+RenderActor3DAnimates constructed with no animations!
+LMalloc of 244 not 8-byte aligned, rounding up
+LMalloc of 44 not 8-byte aligned, rounding up
+LMalloc of 44 not 8-byte aligned, rounding up
+material: texture="tiger_barb.tga"  bTranslucent=0  bitdepth=15  flags_in=0x16
+LMalloc of 44 not 8-byte aligned, rounding up
+LMalloc of 2596 not 8-byte aligned, rounding up
+RenderActor3DAnimates constructed with no animations!
+LMalloc of 244 not 8-byte aligned, rounding up
+LMalloc of 44 not 8-byte aligned, rounding up
+LMalloc of 44 not 8-byte aligned, rounding up
+material: texture="tiger_barb.tga"  bTranslucent=0  bitdepth=15  flags_in=0x16
+LMalloc of 44 not 8-byte aligned, rounding up
+LMalloc of 2596 not 8-byte aligned, rounding up
+RenderActor3DAnimates constructed with no animations!
+LMalloc of 244 not 8-byte aligned, rounding up
+LMalloc of 44 not 8-byte aligned, rounding up
+LMalloc of 44 not 8-byte aligned, rounding up
+LMalloc of 44 not 8-byte aligned, rounding up
+LMalloc of 12036 not 8-byte aligned, rounding up
+RenderActor3DAnimates constructed with no animations!
+LMalloc of 44 not 8-byte aligned, rounding up
+LMalloc of 44 not 8-byte aligned, rounding up
+MATL closed without all data read (bytesLeft = 9504)
+LMalloc of 44 not 8-byte aligned, rounding up
+jolt: mesh actor_pos=(0.000,0.000,0.000)
+jolt: mesh v0 local=(-6.096,-1.651,0.000) world=(-6.096,-1.651,0.000)
+jolt: mesh v1 local=(-6.096,-1.651,0.127) world=(-6.096,-1.651,0.127)
+jolt: mesh v2 local=(-6.096,-1.651,0.635) world=(-6.096,-1.651,0.635)
+jolt: mesh v3 local=(-6.096,-1.651,1.044) world=(-6.096,-1.651,1.044)
+jolt: mesh v4 local=(-6.096,-1.651,1.453) world=(-6.096,-1.651,1.453)
+jolt: mesh v5 local=(-6.096,-1.651,1.862) world=(-6.096,-1.651,1.862)
+jolt: mesh v6 local=(-6.096,-1.651,2.271) world=(-6.096,-1.651,2.271)
+jolt: mesh v7 local=(-6.096,-1.651,2.680) world=(-6.096,-1.651,2.680)
+jolt: mesh v8 local=(-6.096,-1.651,3.089) world=(-6.096,-1.651,3.089)
+jolt: mesh v9 local=(-6.096,-1.651,3.498) world=(-6.096,-1.651,3.498)
+jolt: mesh v10 local=(-6.096,-1.651,3.907) world=(-6.096,-1.651,3.907)
+jolt: mesh v11 local=(-6.096,-1.651,4.315) world=(-6.096,-1.651,4.315)
+jolt: mesh v12 local=(-6.096,-1.651,4.724) world=(-6.096,-1.651,4.724)
+jolt: mesh v13 local=(-6.096,-1.651,4.826) world=(-6.096,-1.651,4.826)
+jolt: mesh v14 local=(-6.096,-1.651,5.334) world=(-6.096,-1.651,5.334)
+jolt: mesh v15 local=(-6.096,1.524,0.127) world=(-6.096,1.524,0.127)
+jolt: mesh v16 local=(-6.096,1.524,0.635) world=(-6.096,1.524,0.635)
+jolt: mesh v17 local=(-6.096,1.524,1.044) world=(-6.096,1.524,1.044)
+jolt: mesh v18 local=(-6.096,1.524,1.453) world=(-6.096,1.524,1.453)
+jolt: mesh v19 local=(-6.096,1.524,1.862) world=(-6.096,1.524,1.862)
+jolt: mesh v20 local=(-6.096,1.524,2.271) world=(-6.096,1.524,2.271)
+jolt: mesh v21 local=(-6.096,1.524,2.680) world=(-6.096,1.524,2.680)
+jolt: mesh v22 local=(-6.096,1.524,3.089) world=(-6.096,1.524,3.089)
+jolt: mesh v23 local=(-6.096,1.524,3.498) world=(-6.096,1.524,3.498)
+jolt: mesh v24 local=(-6.096,1.524,3.907) world=(-6.096,1.524,3.907)
+jolt: mesh v25 local=(-6.096,1.524,4.315) world=(-6.096,1.524,4.315)
+jolt: mesh v26 local=(-6.096,1.524,4.724) world=(-6.096,1.524,4.724)
+jolt: mesh v27 local=(-6.096,1.524,4.826) world=(-6.096,1.524,4.826)
+jolt: mesh v28 local=(-6.096,1.524,5.334) world=(-6.096,1.524,5.334)
+jolt: mesh v29 local=(-6.096,1.651,0.000) world=(-6.096,1.651,0.000)
+jolt: mesh v30 local=(-6.096,1.651,0.127) world=(-6.096,1.651,0.127)
+jolt: mesh v31 local=(-6.096,1.651,0.635) world=(-6.096,1.651,0.635)
+jolt: mesh v32 local=(-6.096,1.651,1.044) world=(-6.096,1.651,1.044)
+jolt: mesh v33 local=(-6.096,1.651,1.453) world=(-6.096,1.651,1.453)
+jolt: mesh v34 local=(-6.096,1.651,1.862) world=(-6.096,1.651,1.862)
+jolt: mesh v35 local=(-6.096,1.651,2.271) world=(-6.096,1.651,2.271)
+jolt: mesh v36 local=(-6.096,1.651,2.680) world=(-6.096,1.651,2.680)
+jolt: mesh v37 local=(-6.096,1.651,3.089) world=(-6.096,1.651,3.089)
+jolt: mesh v38 local=(-6.096,1.651,3.498) world=(-6.096,1.651,3.498)
+jolt: mesh v39 local=(-6.096,1.651,3.907) world=(-6.096,1.651,3.907)
+jolt: mesh v40 local=(-6.096,1.651,4.315) world=(-6.096,1.651,4.315)
+jolt: mesh v41 local=(-6.096,1.651,4.724) world=(-6.096,1.651,4.724)
+jolt: mesh v42 local=(-6.096,1.651,4.826) world=(-6.096,1.651,4.826)
+jolt: mesh v43 local=(-6.096,1.651,5.334) world=(-6.096,1.651,5.334)
+jolt: mesh v44 local=(-5.969,-1.651,0.127) world=(-5.969,-1.651,0.127)
+jolt: mesh v45 local=(-5.969,-1.651,0.635) world=(-5.969,-1.651,0.635)
+jolt: mesh v46 local=(-5.969,-1.651,1.044) world=(-5.969,-1.651,1.044)
+jolt: mesh v47 local=(-5.969,-1.651,1.453) world=(-5.969,-1.651,1.453)
+jolt: mesh v48 local=(-5.969,-1.651,1.862) world=(-5.969,-1.651,1.862)
+jolt: mesh v49 local=(-5.969,-1.651,2.271) world=(-5.969,-1.651,2.271)
+jolt: mesh v50 local=(-5.969,-1.651,2.680) world=(-5.969,-1.651,2.680)
+jolt: mesh v51 local=(-5.969,-1.651,3.089) world=(-5.969,-1.651,3.089)
+jolt: mesh v52 local=(-5.969,-1.651,3.498) world=(-5.969,-1.651,3.498)
+jolt: mesh v53 local=(-5.969,-1.651,3.907) world=(-5.969,-1.651,3.907)
+jolt: mesh v54 local=(-5.969,-1.651,4.315) world=(-5.969,-1.651,4.315)
+jolt: mesh v55 local=(-5.969,-1.651,4.724) world=(-5.969,-1.651,4.724)
+jolt: mesh v56 local=(-5.969,-1.651,4.826) world=(-5.969,-1.651,4.826)
+jolt: mesh v57 local=(-5.969,-1.651,5.334) world=(-5.969,-1.651,5.334)
+jolt: mesh v58 local=(-5.969,1.524,0.127) world=(-5.969,1.524,0.127)
+jolt: mesh v59 local=(-5.969,1.524,0.635) world=(-5.969,1.524,0.635)
+jolt: mesh v60 local=(-5.969,1.524,1.044) world=(-5.969,1.524,1.044)
+jolt: mesh v61 local=(-5.969,1.524,1.453) world=(-5.969,1.524,1.453)
+jolt: mesh v62 local=(-5.969,1.524,1.862) world=(-5.969,1.524,1.862)
+jolt: mesh v63 local=(-5.969,1.524,2.271) world=(-5.969,1.524,2.271)
+jolt: mesh v64 local=(-5.969,1.524,2.680) world=(-5.969,1.524,2.680)
+jolt: mesh v65 local=(-5.969,1.524,3.089) world=(-5.969,1.524,3.089)
+jolt: mesh v66 local=(-5.969,1.524,3.498) world=(-5.969,1.524,3.498)
+jolt: mesh v67 local=(-5.969,1.524,3.907) world=(-5.969,1.524,3.907)
+jolt: mesh v68 local=(-5.969,1.524,4.315) world=(-5.969,1.524,4.315)
+jolt: mesh v69 local=(-5.969,1.524,4.724) world=(-5.969,1.524,4.724)
+jolt: mesh v70 local=(-5.969,1.524,4.826) world=(-5.969,1.524,4.826)
+jolt: mesh v71 local=(-5.969,1.524,5.334) world=(-5.969,1.524,5.334)
+jolt: mesh v72 local=(-4.185,1.524,4.724) world=(-4.185,1.524,4.724)
+jolt: mesh v73 local=(-4.127,1.524,4.315) world=(-4.127,1.524,4.315)
+jolt: mesh v74 local=(-4.068,1.524,3.907) world=(-4.068,1.524,3.907)
+jolt: mesh v75 local=(-4.010,1.524,3.498) world=(-4.010,1.524,3.498)
+jolt: mesh v76 local=(-3.951,1.524,3.089) world=(-3.951,1.524,3.089)
+jolt: mesh v77 local=(-3.893,1.524,2.680) world=(-3.893,1.524,2.680)
+jolt: mesh v78 local=(-3.834,1.524,2.271) world=(-3.834,1.524,2.271)
+jolt: mesh v79 local=(-3.776,1.524,1.862) world=(-3.776,1.524,1.862)
+jolt: mesh v80 local=(-3.717,1.524,1.453) world=(-3.717,1.524,1.453)
+jolt: mesh v81 local=(-3.659,1.524,1.044) world=(-3.659,1.524,1.044)
+jolt: mesh v82 local=(-3.600,1.524,0.635) world=(-3.600,1.524,0.635)
+jolt: mesh v83 local=(-3.254,1.524,4.724) world=(-3.254,1.524,4.724)
+jolt: mesh v84 local=(-3.069,1.524,4.315) world=(-3.069,1.524,4.315)
+jolt: mesh v85 local=(-2.883,1.524,3.907) world=(-2.883,1.524,3.907)
+jolt: mesh v86 local=(-2.698,1.524,3.498) world=(-2.698,1.524,3.498)
+jolt: mesh v87 local=(-2.512,1.524,3.089) world=(-2.512,1.524,3.089)
+jolt: mesh v88 local=(-2.327,1.524,2.680) world=(-2.327,1.524,2.680)
+jolt: mesh v89 local=(-2.142,1.524,2.271) world=(-2.142,1.524,2.271)
+jolt: mesh v90 local=(-1.956,1.524,1.862) world=(-1.956,1.524,1.862)
+jolt: mesh v91 local=(-1.771,1.524,1.453) world=(-1.771,1.524,1.453)
+jolt: mesh v92 local=(-1.585,1.524,1.044) world=(-1.585,1.524,1.044)
+jolt: mesh v93 local=(-1.400,1.524,0.635) world=(-1.400,1.524,0.635)
+jolt: mesh v94 local=(-0.385,1.524,4.724) world=(-0.385,1.524,4.724)
+jolt: mesh v95 local=(-0.327,1.524,4.315) world=(-0.327,1.524,4.315)
+jolt: mesh v96 local=(-0.268,1.524,3.907) world=(-0.268,1.524,3.907)
+jolt: mesh v97 local=(-0.210,1.524,3.498) world=(-0.210,1.524,3.498)
+jolt: mesh v98 local=(-0.151,1.524,3.089) world=(-0.151,1.524,3.089)
+jolt: mesh v99 local=(-0.093,1.524,2.680) world=(-0.093,1.524,2.680)
+jolt: mesh v100 local=(-0.034,1.524,2.271) world=(-0.034,1.524,2.271)
+jolt: mesh v101 local=(0.024,1.524,1.862) world=(0.024,1.524,1.862)
+jolt: mesh v102 local=(0.083,1.524,1.453) world=(0.083,1.524,1.453)
+jolt: mesh v103 local=(0.141,1.524,1.044) world=(0.141,1.524,1.044)
+jolt: mesh v104 local=(0.200,1.524,0.635) world=(0.200,1.524,0.635)
+jolt: mesh v105 local=(0.546,1.524,4.724) world=(0.546,1.524,4.724)
+jolt: mesh v106 local=(0.731,1.524,4.315) world=(0.731,1.524,4.315)
+jolt: mesh v107 local=(0.917,1.524,3.907) world=(0.917,1.524,3.907)
+jolt: mesh v108 local=(1.102,1.524,3.498) world=(1.102,1.524,3.498)
+jolt: mesh v109 local=(1.288,1.524,3.089) world=(1.288,1.524,3.089)
+jolt: mesh v110 local=(1.473,1.524,2.680) world=(1.473,1.524,2.680)
+jolt: mesh v111 local=(1.658,1.524,2.271) world=(1.658,1.524,2.271)
+jolt: mesh v112 local=(1.844,1.524,1.862) world=(1.844,1.524,1.862)
+jolt: mesh v113 local=(2.029,1.524,1.453) world=(2.029,1.524,1.453)
+jolt: mesh v114 local=(2.215,1.524,1.044) world=(2.215,1.524,1.044)
+jolt: mesh v115 local=(2.400,1.524,0.635) world=(2.400,1.524,0.635)
+jolt: mesh v116 local=(3.612,1.524,4.724) world=(3.612,1.524,4.724)
+jolt: mesh v117 local=(3.661,1.524,4.315) world=(3.661,1.524,4.315)
+jolt: mesh v118 local=(3.710,1.524,3.907) world=(3.710,1.524,3.907)
+jolt: mesh v119 local=(3.758,1.524,3.498) world=(3.758,1.524,3.498)
+jolt: mesh v120 local=(3.807,1.524,3.089) world=(3.807,1.524,3.089)
+jolt: mesh v121 local=(3.856,1.524,2.680) world=(3.856,1.524,2.680)
+jolt: mesh v122 local=(3.905,1.524,2.271) world=(3.905,1.524,2.271)
+jolt: mesh v123 local=(3.954,1.524,1.862) world=(3.954,1.524,1.862)
+jolt: mesh v124 local=(4.002,1.524,1.453) world=(4.002,1.524,1.453)
+jolt: mesh v125 local=(4.051,1.524,1.044) world=(4.051,1.524,1.044)
+jolt: mesh v126 local=(4.100,1.524,0.635) world=(4.100,1.524,0.635)
+jolt: mesh v127 local=(4.339,1.524,4.724) world=(4.339,1.524,4.724)
+jolt: mesh v128 local=(4.495,1.524,4.315) world=(4.495,1.524,4.315)
+jolt: mesh v129 local=(4.651,1.524,3.907) world=(4.651,1.524,3.907)
+jolt: mesh v130 local=(4.807,1.524,3.498) world=(4.807,1.524,3.498)
+jolt: mesh v131 local=(4.963,1.524,3.089) world=(4.963,1.524,3.089)
+jolt: mesh v132 local=(5.119,1.524,2.680) world=(5.119,1.524,2.680)
+jolt: mesh v133 local=(5.276,1.524,2.271) world=(5.276,1.524,2.271)
+jolt: mesh v134 local=(5.432,1.524,1.862) world=(5.432,1.524,1.862)
+jolt: mesh v135 local=(5.588,1.524,1.453) world=(5.588,1.524,1.453)
+jolt: mesh v136 local=(5.744,1.524,1.044) world=(5.744,1.524,1.044)
+jolt: mesh v137 local=(5.900,1.524,0.635) world=(5.900,1.524,0.635)
+jolt: mesh v138 local=(5.969,-1.651,0.127) world=(5.969,-1.651,0.127)
+jolt: mesh v139 local=(5.969,-1.651,0.635) world=(5.969,-1.651,0.635)
+jolt: mesh v140 local=(5.969,-1.651,1.044) world=(5.969,-1.651,1.044)
+jolt: mesh v141 local=(5.969,-1.651,1.453) world=(5.969,-1.651,1.453)
+jolt: mesh v142 local=(5.969,-1.651,1.862) world=(5.969,-1.651,1.862)
+jolt: mesh v143 local=(5.969,-1.651,2.271) world=(5.969,-1.651,2.271)
+jolt: mesh v144 local=(5.969,-1.651,2.680) world=(5.969,-1.651,2.680)
+jolt: mesh v145 local=(5.969,-1.651,3.089) world=(5.969,-1.651,3.089)
+jolt: mesh v146 local=(5.969,-1.651,3.498) world=(5.969,-1.651,3.498)
+jolt: mesh v147 local=(5.969,-1.651,3.907) world=(5.969,-1.651,3.907)
+jolt: mesh v148 local=(5.969,-1.651,4.315) world=(5.969,-1.651,4.315)
+jolt: mesh v149 local=(5.969,-1.651,4.724) world=(5.969,-1.651,4.724)
+jolt: mesh v150 local=(5.969,-1.651,4.826) world=(5.969,-1.651,4.826)
+jolt: mesh v151 local=(5.969,-1.651,5.334) world=(5.969,-1.651,5.334)
+jolt: mesh v152 local=(5.969,1.524,0.127) world=(5.969,1.524,0.127)
+jolt: mesh v153 local=(5.969,1.524,0.635) world=(5.969,1.524,0.635)
+jolt: mesh v154 local=(5.969,1.524,1.044) world=(5.969,1.524,1.044)
+jolt: mesh v155 local=(5.969,1.524,1.453) world=(5.969,1.524,1.453)
+jolt: mesh v156 local=(5.969,1.524,1.862) world=(5.969,1.524,1.862)
+jolt: mesh v157 local=(5.969,1.524,2.271) world=(5.969,1.524,2.271)
+jolt: mesh v158 local=(5.969,1.524,2.680) world=(5.969,1.524,2.680)
+jolt: mesh v159 local=(5.969,1.524,3.089) world=(5.969,1.524,3.089)
+jolt: mesh v160 local=(5.969,1.524,3.498) world=(5.969,1.524,3.498)
+jolt: mesh v161 local=(5.969,1.524,3.907) world=(5.969,1.524,3.907)
+jolt: mesh v162 local=(5.969,1.524,4.315) world=(5.969,1.524,4.315)
+jolt: mesh v163 local=(5.969,1.524,4.724) world=(5.969,1.524,4.724)
+jolt: mesh v164 local=(5.969,1.524,4.826) world=(5.969,1.524,4.826)
+jolt: mesh v165 local=(5.969,1.524,5.334) world=(5.969,1.524,5.334)
+jolt: mesh v166 local=(6.096,-1.651,0.000) world=(6.096,-1.651,0.000)
+jolt: mesh v167 local=(6.096,-1.651,0.127) world=(6.096,-1.651,0.127)
+jolt: mesh v168 local=(6.096,-1.651,0.635) world=(6.096,-1.651,0.635)
+jolt: mesh v169 local=(6.096,-1.651,1.044) world=(6.096,-1.651,1.044)
+jolt: mesh v170 local=(6.096,-1.651,1.453) world=(6.096,-1.651,1.453)
+jolt: mesh v171 local=(6.096,-1.651,1.862) world=(6.096,-1.651,1.862)
+jolt: mesh v172 local=(6.096,-1.651,2.271) world=(6.096,-1.651,2.271)
+jolt: mesh v173 local=(6.096,-1.651,2.680) world=(6.096,-1.651,2.680)
+jolt: mesh v174 local=(6.096,-1.651,3.089) world=(6.096,-1.651,3.089)
+jolt: mesh v175 local=(6.096,-1.651,3.498) world=(6.096,-1.651,3.498)
+jolt: mesh v176 local=(6.096,-1.651,3.907) world=(6.096,-1.651,3.907)
+jolt: mesh v177 local=(6.096,-1.651,4.315) world=(6.096,-1.651,4.315)
+jolt: mesh v178 local=(6.096,-1.651,4.724) world=(6.096,-1.651,4.724)
+jolt: mesh v179 local=(6.096,-1.651,4.826) world=(6.096,-1.651,4.826)
+jolt: mesh v180 local=(6.096,-1.651,5.334) world=(6.096,-1.651,5.334)
+jolt: mesh v181 local=(6.096,1.524,0.127) world=(6.096,1.524,0.127)
+jolt: mesh v182 local=(6.096,1.524,0.635) world=(6.096,1.524,0.635)
+jolt: mesh v183 local=(6.096,1.524,1.044) world=(6.096,1.524,1.044)
+jolt: mesh v184 local=(6.096,1.524,1.453) world=(6.096,1.524,1.453)
+jolt: mesh v185 local=(6.096,1.524,1.862) world=(6.096,1.524,1.862)
+jolt: mesh v186 local=(6.096,1.524,2.271) world=(6.096,1.524,2.271)
+jolt: mesh v187 local=(6.096,1.524,2.680) world=(6.096,1.524,2.680)
+jolt: mesh v188 local=(6.096,1.524,3.089) world=(6.096,1.524,3.089)
+jolt: mesh v189 local=(6.096,1.524,3.498) world=(6.096,1.524,3.498)
+jolt: mesh v190 local=(6.096,1.524,3.907) world=(6.096,1.524,3.907)
+jolt: mesh v191 local=(6.096,1.524,4.315) world=(6.096,1.524,4.315)
+jolt: mesh v192 local=(6.096,1.524,4.724) world=(6.096,1.524,4.724)
+jolt: mesh v193 local=(6.096,1.524,4.826) world=(6.096,1.524,4.826)
+jolt: mesh v194 local=(6.096,1.524,5.334) world=(6.096,1.524,5.334)
+jolt: mesh v195 local=(6.096,1.651,0.000) world=(6.096,1.651,0.000)
+jolt: mesh v196 local=(6.096,1.651,0.127) world=(6.096,1.651,0.127)
+jolt: mesh v197 local=(6.096,1.651,0.635) world=(6.096,1.651,0.635)
+jolt: mesh v198 local=(6.096,1.651,1.044) world=(6.096,1.651,1.044)
+jolt: mesh v199 local=(6.096,1.651,1.453) world=(6.096,1.651,1.453)
+jolt: mesh v200 local=(6.096,1.651,1.862) world=(6.096,1.651,1.862)
+jolt: mesh v201 local=(6.096,1.651,2.271) world=(6.096,1.651,2.271)
+jolt: mesh v202 local=(6.096,1.651,2.680) world=(6.096,1.651,2.680)
+jolt: mesh v203 local=(6.096,1.651,3.089) world=(6.096,1.651,3.089)
+jolt: mesh v204 local=(6.096,1.651,3.498) world=(6.096,1.651,3.498)
+jolt: mesh v205 local=(6.096,1.651,3.907) world=(6.096,1.651,3.907)
+jolt: mesh v206 local=(6.096,1.651,4.315) world=(6.096,1.651,4.315)
+jolt: mesh v207 local=(6.096,1.651,4.724) world=(6.096,1.651,4.724)
+jolt: mesh v208 local=(6.096,1.651,4.826) world=(6.096,1.651,4.826)
+jolt: mesh v209 local=(6.096,1.651,5.334) world=(6.096,1.651,5.334)
+jolt: body MESH_STATIC verts=210 faces=600 id=16777216
+LMalloc of 244 not 8-byte aligned, rounding up
+LMalloc of 44 not 8-byte aligned, rounding up
+LMalloc of 44 not 8-byte aligned, rounding up
+LMalloc of 44 not 8-byte aligned, rounding up
+LMalloc of 276 not 8-byte aligned, rounding up
+RenderActor3DAnimates constructed with no animations!
+LMalloc of 44 not 8-byte aligned, rounding up
+LMalloc of 44 not 8-byte aligned, rounding up
+MATL closed without all data read (bytesLeft = 264)
+LMalloc of 44 not 8-byte aligned, rounding up
+jolt: mesh actor_pos=(0.000,0.000,0.000)
+jolt: mesh v0 local=(-5.969,-1.651,0.127) world=(-5.969,-1.651,0.127)
+jolt: mesh v1 local=(-5.969,-1.651,5.334) world=(-5.969,-1.651,5.334)
+jolt: mesh v2 local=(-5.969,-1.524,0.127) world=(-5.969,-1.524,0.127)
+jolt: mesh v3 local=(-5.969,-1.524,5.334) world=(-5.969,-1.524,5.334)
+jolt: mesh v4 local=(5.969,-1.651,0.127) world=(5.969,-1.651,0.127)
+jolt: mesh v5 local=(5.969,-1.651,5.334) world=(5.969,-1.651,5.334)
+jolt: mesh v6 local=(5.969,-1.524,0.127) world=(5.969,-1.524,0.127)
+jolt: mesh v7 local=(5.969,-1.524,5.334) world=(5.969,-1.524,5.334)
+jolt: body MESH_STATIC verts=8 faces=12 id=16777217
+LMalloc of 244 not 8-byte aligned, rounding up
+LMalloc of 44 not 8-byte aligned, rounding up
+LMalloc of 44 not 8-byte aligned, rounding up
+LMalloc of 44 not 8-byte aligned, rounding up
+LMalloc of 836 not 8-byte aligned, rounding up
+RenderActor3DAnimates constructed with no animations!
+LMalloc of 44 not 8-byte aligned, rounding up
+LMalloc of 44 not 8-byte aligned, rounding up
+MATL closed without all data read (bytesLeft = 528)
+LMalloc of 44 not 8-byte aligned, rounding up
+jolt: mesh actor_pos=(0.000,0.000,0.000)
+jolt: mesh v0 local=(-6.160,-1.714,5.207) world=(-6.160,-1.714,5.207)
+jolt: mesh v1 local=(-6.160,-1.714,5.334) world=(-6.160,-1.714,5.334)
+jolt: mesh v2 local=(-6.160,1.714,5.207) world=(-6.160,1.714,5.207)
+jolt: mesh v3 local=(-6.160,1.714,5.334) world=(-6.160,1.714,5.334)
+jolt: mesh v4 local=(-6.096,-1.651,5.397) world=(-6.096,-1.651,5.397)
+jolt: mesh v5 local=(-6.096,1.651,5.397) world=(-6.096,1.651,5.397)
+jolt: mesh v6 local=(-5.905,-1.460,5.207) world=(-5.905,-1.460,5.207)
+jolt: mesh v7 local=(-5.905,-1.460,5.397) world=(-5.905,-1.460,5.397)
+jolt: mesh v8 local=(-5.905,1.460,5.207) world=(-5.905,1.460,5.207)
+jolt: mesh v9 local=(-5.905,1.460,5.397) world=(-5.905,1.460,5.397)
+jolt: mesh v10 local=(5.905,-1.460,5.207) world=(5.905,-1.460,5.207)
+jolt: mesh v11 local=(5.905,-1.460,5.397) world=(5.905,-1.460,5.397)
+jolt: mesh v12 local=(5.905,1.460,5.207) world=(5.905,1.460,5.207)
+jolt: mesh v13 local=(5.905,1.460,5.397) world=(5.905,1.460,5.397)
+jolt: mesh v14 local=(6.096,-1.651,5.397) world=(6.096,-1.651,5.397)
+jolt: mesh v15 local=(6.096,1.651,5.397) world=(6.096,1.651,5.397)
+jolt: mesh v16 local=(6.160,-1.714,5.207) world=(6.160,-1.714,5.207)
+jolt: mesh v17 local=(6.160,-1.714,5.334) world=(6.160,-1.714,5.334)
+jolt: mesh v18 local=(6.160,1.714,5.207) world=(6.160,1.714,5.207)
+jolt: mesh v19 local=(6.160,1.714,5.334) world=(6.160,1.714,5.334)
+jolt: body MESH_STATIC verts=20 faces=40 id=16777218
+LMalloc of 244 not 8-byte aligned, rounding up
+LMalloc of 44 not 8-byte aligned, rounding up
+LMalloc of 44 not 8-byte aligned, rounding up
+LMalloc of 44 not 8-byte aligned, rounding up
+LMalloc of 8236 not 8-byte aligned, rounding up
+RenderActor3DAnimates constructed with no animations!
+LMalloc of 44 not 8-byte aligned, rounding up
+LMalloc of 44 not 8-byte aligned, rounding up
+MATL closed without all data read (bytesLeft = 1056)
+LMalloc of 44 not 8-byte aligned, rounding up
+jolt: mesh actor_pos=(0.000,0.000,0.000)
+jolt: mesh v0 local=(-5.964,-1.519,0.132) world=(-5.964,-1.519,0.132)
+jolt: mesh v1 local=(-5.964,-1.519,0.635) world=(-5.964,-1.519,0.635)
+jolt: mesh v2 local=(-5.964,-1.013,0.132) world=(-5.964,-1.013,0.132)
+jolt: mesh v3 local=(-5.964,-1.013,0.635) world=(-5.964,-1.013,0.635)
+jolt: mesh v4 local=(-5.964,-0.506,0.132) world=(-5.964,-0.506,0.132)
+jolt: mesh v5 local=(-5.964,-0.506,0.635) world=(-5.964,-0.506,0.635)
+jolt: mesh v6 local=(-5.964,0.000,0.132) world=(-5.964,0.000,0.132)
+jolt: mesh v7 local=(-5.964,0.000,0.635) world=(-5.964,0.000,0.635)
+jolt: mesh v8 local=(-5.964,0.506,0.132) world=(-5.964,0.506,0.132)
+jolt: mesh v9 local=(-5.964,0.506,0.635) world=(-5.964,0.506,0.635)
+jolt: mesh v10 local=(-5.964,1.013,0.132) world=(-5.964,1.013,0.132)
+jolt: mesh v11 local=(-5.964,1.013,0.635) world=(-5.964,1.013,0.635)
+jolt: mesh v12 local=(-5.964,1.519,0.132) world=(-5.964,1.519,0.132)
+jolt: mesh v13 local=(-5.964,1.519,0.635) world=(-5.964,1.519,0.635)
+jolt: mesh v14 local=(-5.467,-1.519,0.132) world=(-5.467,-1.519,0.132)
+jolt: mesh v15 local=(-5.467,-1.519,0.635) world=(-5.467,-1.519,0.635)
+jolt: mesh v16 local=(-5.467,-1.013,0.635) world=(-5.467,-1.013,0.635)
+jolt: mesh v17 local=(-5.467,-0.506,0.635) world=(-5.467,-0.506,0.635)
+jolt: mesh v18 local=(-5.467,0.000,0.635) world=(-5.467,0.000,0.635)
+jolt: mesh v19 local=(-5.467,0.506,0.635) world=(-5.467,0.506,0.635)
+jolt: mesh v20 local=(-5.467,1.013,0.635) world=(-5.467,1.013,0.635)
+jolt: mesh v21 local=(-5.467,1.519,0.132) world=(-5.467,1.519,0.132)
+jolt: mesh v22 local=(-5.467,1.519,0.635) world=(-5.467,1.519,0.635)
+jolt: mesh v23 local=(-4.970,-1.519,0.132) world=(-4.970,-1.519,0.132)
+jolt: mesh v24 local=(-4.970,-1.519,0.635) world=(-4.970,-1.519,0.635)
+jolt: mesh v25 local=(-4.970,-1.013,0.635) world=(-4.970,-1.013,0.635)
+jolt: mesh v26 local=(-4.970,-0.506,0.635) world=(-4.970,-0.506,0.635)
+jolt: mesh v27 local=(-4.970,0.000,0.635) world=(-4.970,0.000,0.635)
+jolt: mesh v28 local=(-4.970,0.506,0.635) world=(-4.970,0.506,0.635)
+jolt: mesh v29 local=(-4.970,1.013,0.635) world=(-4.970,1.013,0.635)
+jolt: mesh v30 local=(-4.970,1.519,0.132) world=(-4.970,1.519,0.132)
+jolt: mesh v31 local=(-4.970,1.519,0.635) world=(-4.970,1.519,0.635)
+jolt: mesh v32 local=(-4.473,-1.519,0.132) world=(-4.473,-1.519,0.132)
+jolt: mesh v33 local=(-4.473,-1.519,0.635) world=(-4.473,-1.519,0.635)
+jolt: mesh v34 local=(-4.473,-1.013,0.635) world=(-4.473,-1.013,0.635)
+jolt: mesh v35 local=(-4.473,-0.506,0.635) world=(-4.473,-0.506,0.635)
+jolt: mesh v36 local=(-4.473,0.000,0.635) world=(-4.473,0.000,0.635)
+jolt: mesh v37 local=(-4.473,0.506,0.635) world=(-4.473,0.506,0.635)
+jolt: mesh v38 local=(-4.473,1.013,0.635) world=(-4.473,1.013,0.635)
+jolt: mesh v39 local=(-4.473,1.519,0.132) world=(-4.473,1.519,0.132)
+jolt: mesh v40 local=(-4.473,1.519,0.635) world=(-4.473,1.519,0.635)
+jolt: mesh v41 local=(-3.976,-1.519,0.132) world=(-3.976,-1.519,0.132)
+jolt: mesh v42 local=(-3.976,-1.519,0.635) world=(-3.976,-1.519,0.635)
+jolt: mesh v43 local=(-3.976,-1.013,0.635) world=(-3.976,-1.013,0.635)
+jolt: mesh v44 local=(-3.976,-0.506,0.635) world=(-3.976,-0.506,0.635)
+jolt: mesh v45 local=(-3.976,0.000,0.635) world=(-3.976,0.000,0.635)
+jolt: mesh v46 local=(-3.976,0.506,0.635) world=(-3.976,0.506,0.635)
+jolt: mesh v47 local=(-3.976,1.013,0.635) world=(-3.976,1.013,0.635)
+jolt: mesh v48 local=(-3.976,1.519,0.132) world=(-3.976,1.519,0.132)
+jolt: mesh v49 local=(-3.976,1.519,0.635) world=(-3.976,1.519,0.635)
+jolt: mesh v50 local=(-3.479,-1.519,0.132) world=(-3.479,-1.519,0.132)
+jolt: mesh v51 local=(-3.479,-1.519,0.635) world=(-3.479,-1.519,0.635)
+jolt: mesh v52 local=(-3.479,-1.013,0.635) world=(-3.479,-1.013,0.635)
+jolt: mesh v53 local=(-3.479,-0.506,0.635) world=(-3.479,-0.506,0.635)
+jolt: mesh v54 local=(-3.479,0.000,0.635) world=(-3.479,0.000,0.635)
+jolt: mesh v55 local=(-3.479,0.506,0.635) world=(-3.479,0.506,0.635)
+jolt: mesh v56 local=(-3.479,1.013,0.635) world=(-3.479,1.013,0.635)
+jolt: mesh v57 local=(-3.479,1.519,0.132) world=(-3.479,1.519,0.132)
+jolt: mesh v58 local=(-3.479,1.519,0.635) world=(-3.479,1.519,0.635)
+jolt: mesh v59 local=(-2.982,-1.519,0.132) world=(-2.982,-1.519,0.132)
+jolt: mesh v60 local=(-2.982,-1.519,0.635) world=(-2.982,-1.519,0.635)
+jolt: mesh v61 local=(-2.982,-1.013,0.635) world=(-2.982,-1.013,0.635)
+jolt: mesh v62 local=(-2.982,-0.506,0.635) world=(-2.982,-0.506,0.635)
+jolt: mesh v63 local=(-2.982,0.000,0.635) world=(-2.982,0.000,0.635)
+jolt: mesh v64 local=(-2.982,0.506,0.635) world=(-2.982,0.506,0.635)
+jolt: mesh v65 local=(-2.982,1.013,0.635) world=(-2.982,1.013,0.635)
+jolt: mesh v66 local=(-2.982,1.519,0.132) world=(-2.982,1.519,0.132)
+jolt: mesh v67 local=(-2.982,1.519,0.635) world=(-2.982,1.519,0.635)
+jolt: mesh v68 local=(-2.485,-1.519,0.132) world=(-2.485,-1.519,0.132)
+jolt: mesh v69 local=(-2.485,-1.519,0.635) world=(-2.485,-1.519,0.635)
+jolt: mesh v70 local=(-2.485,-1.013,0.635) world=(-2.485,-1.013,0.635)
+jolt: mesh v71 local=(-2.485,-0.506,0.635) world=(-2.485,-0.506,0.635)
+jolt: mesh v72 local=(-2.485,0.000,0.635) world=(-2.485,0.000,0.635)
+jolt: mesh v73 local=(-2.485,0.506,0.635) world=(-2.485,0.506,0.635)
+jolt: mesh v74 local=(-2.485,1.013,0.635) world=(-2.485,1.013,0.635)
+jolt: mesh v75 local=(-2.485,1.519,0.132) world=(-2.485,1.519,0.132)
+jolt: mesh v76 local=(-2.485,1.519,0.635) world=(-2.485,1.519,0.635)
+jolt: mesh v77 local=(-1.988,-1.519,0.132) world=(-1.988,-1.519,0.132)
+jolt: mesh v78 local=(-1.988,-1.519,0.635) world=(-1.988,-1.519,0.635)
+jolt: mesh v79 local=(-1.988,-1.013,0.635) world=(-1.988,-1.013,0.635)
+jolt: mesh v80 local=(-1.988,-0.506,0.635) world=(-1.988,-0.506,0.635)
+jolt: mesh v81 local=(-1.988,0.000,0.635) world=(-1.988,0.000,0.635)
+jolt: mesh v82 local=(-1.988,0.506,0.635) world=(-1.988,0.506,0.635)
+jolt: mesh v83 local=(-1.988,1.013,0.635) world=(-1.988,1.013,0.635)
+jolt: mesh v84 local=(-1.988,1.519,0.132) world=(-1.988,1.519,0.132)
+jolt: mesh v85 local=(-1.988,1.519,0.635) world=(-1.988,1.519,0.635)
+jolt: mesh v86 local=(-1.491,-1.519,0.132) world=(-1.491,-1.519,0.132)
+jolt: mesh v87 local=(-1.491,-1.519,0.635) world=(-1.491,-1.519,0.635)
+jolt: mesh v88 local=(-1.491,-1.013,0.635) world=(-1.491,-1.013,0.635)
+jolt: mesh v89 local=(-1.491,-0.506,0.635) world=(-1.491,-0.506,0.635)
+jolt: mesh v90 local=(-1.491,0.000,0.635) world=(-1.491,0.000,0.635)
+jolt: mesh v91 local=(-1.491,0.506,0.635) world=(-1.491,0.506,0.635)
+jolt: mesh v92 local=(-1.491,1.013,0.635) world=(-1.491,1.013,0.635)
+jolt: mesh v93 local=(-1.491,1.519,0.132) world=(-1.491,1.519,0.132)
+jolt: mesh v94 local=(-1.491,1.519,0.635) world=(-1.491,1.519,0.635)
+jolt: mesh v95 local=(-0.994,-1.519,0.132) world=(-0.994,-1.519,0.132)
+jolt: mesh v96 local=(-0.994,-1.519,0.635) world=(-0.994,-1.519,0.635)
+jolt: mesh v97 local=(-0.994,-1.013,0.635) world=(-0.994,-1.013,0.635)
+jolt: mesh v98 local=(-0.994,-0.506,0.635) world=(-0.994,-0.506,0.635)
+jolt: mesh v99 local=(-0.994,0.000,0.635) world=(-0.994,0.000,0.635)
+jolt: mesh v100 local=(-0.994,0.506,0.635) world=(-0.994,0.506,0.635)
+jolt: mesh v101 local=(-0.994,1.013,0.635) world=(-0.994,1.013,0.635)
+jolt: mesh v102 local=(-0.994,1.519,0.132) world=(-0.994,1.519,0.132)
+jolt: mesh v103 local=(-0.994,1.519,0.635) world=(-0.994,1.519,0.635)
+jolt: mesh v104 local=(-0.497,-1.519,0.132) world=(-0.497,-1.519,0.132)
+jolt: mesh v105 local=(-0.497,-1.519,0.635) world=(-0.497,-1.519,0.635)
+jolt: mesh v106 local=(-0.497,-1.013,0.635) world=(-0.497,-1.013,0.635)
+jolt: mesh v107 local=(-0.497,-0.506,0.635) world=(-0.497,-0.506,0.635)
+jolt: mesh v108 local=(-0.497,0.000,0.635) world=(-0.497,0.000,0.635)
+jolt: mesh v109 local=(-0.497,0.506,0.635) world=(-0.497,0.506,0.635)
+jolt: mesh v110 local=(-0.497,1.013,0.635) world=(-0.497,1.013,0.635)
+jolt: mesh v111 local=(-0.497,1.519,0.132) world=(-0.497,1.519,0.132)
+jolt: mesh v112 local=(-0.497,1.519,0.635) world=(-0.497,1.519,0.635)
+jolt: mesh v113 local=(0.000,-1.519,0.132) world=(0.000,-1.519,0.132)
+jolt: mesh v114 local=(0.000,-1.519,0.635) world=(0.000,-1.519,0.635)
+jolt: mesh v115 local=(0.000,-1.013,0.635) world=(0.000,-1.013,0.635)
+jolt: mesh v116 local=(0.000,-0.506,0.635) world=(0.000,-0.506,0.635)
+jolt: mesh v117 local=(0.000,0.000,0.635) world=(0.000,0.000,0.635)
+jolt: mesh v118 local=(0.000,0.506,0.635) world=(0.000,0.506,0.635)
+jolt: mesh v119 local=(0.000,1.013,0.635) world=(0.000,1.013,0.635)
+jolt: mesh v120 local=(0.000,1.519,0.132) world=(0.000,1.519,0.132)
+jolt: mesh v121 local=(0.000,1.519,0.635) world=(0.000,1.519,0.635)
+jolt: mesh v122 local=(0.497,-1.519,0.132) world=(0.497,-1.519,0.132)
+jolt: mesh v123 local=(0.497,-1.519,0.635) world=(0.497,-1.519,0.635)
+jolt: mesh v124 local=(0.497,-1.013,0.635) world=(0.497,-1.013,0.635)
+jolt: mesh v125 local=(0.497,-0.506,0.635) world=(0.497,-0.506,0.635)
+jolt: mesh v126 local=(0.497,0.000,0.635) world=(0.497,0.000,0.635)
+jolt: mesh v127 local=(0.497,0.506,0.635) world=(0.497,0.506,0.635)
+jolt: mesh v128 local=(0.497,1.013,0.635) world=(0.497,1.013,0.635)
+jolt: mesh v129 local=(0.497,1.519,0.132) world=(0.497,1.519,0.132)
+jolt: mesh v130 local=(0.497,1.519,0.635) world=(0.497,1.519,0.635)
+jolt: mesh v131 local=(0.994,-1.519,0.132) world=(0.994,-1.519,0.132)
+jolt: mesh v132 local=(0.994,-1.519,0.635) world=(0.994,-1.519,0.635)
+jolt: mesh v133 local=(0.994,-1.013,0.635) world=(0.994,-1.013,0.635)
+jolt: mesh v134 local=(0.994,-0.506,0.635) world=(0.994,-0.506,0.635)
+jolt: mesh v135 local=(0.994,0.000,0.635) world=(0.994,0.000,0.635)
+jolt: mesh v136 local=(0.994,0.506,0.635) world=(0.994,0.506,0.635)
+jolt: mesh v137 local=(0.994,1.013,0.635) world=(0.994,1.013,0.635)
+jolt: mesh v138 local=(0.994,1.519,0.132) world=(0.994,1.519,0.132)
+jolt: mesh v139 local=(0.994,1.519,0.635) world=(0.994,1.519,0.635)
+jolt: mesh v140 local=(1.491,-1.519,0.132) world=(1.491,-1.519,0.132)
+jolt: mesh v141 local=(1.491,-1.519,0.635) world=(1.491,-1.519,0.635)
+jolt: mesh v142 local=(1.491,-1.013,0.635) world=(1.491,-1.013,0.635)
+jolt: mesh v143 local=(1.491,-0.506,0.635) world=(1.491,-0.506,0.635)
+jolt: mesh v144 local=(1.491,0.000,0.635) world=(1.491,0.000,0.635)
+jolt: mesh v145 local=(1.491,0.506,0.635) world=(1.491,0.506,0.635)
+jolt: mesh v146 local=(1.491,1.013,0.635) world=(1.491,1.013,0.635)
+jolt: mesh v147 local=(1.491,1.519,0.132) world=(1.491,1.519,0.132)
+jolt: mesh v148 local=(1.491,1.519,0.635) world=(1.491,1.519,0.635)
+jolt: mesh v149 local=(1.988,-1.519,0.132) world=(1.988,-1.519,0.132)
+jolt: mesh v150 local=(1.988,-1.519,0.635) world=(1.988,-1.519,0.635)
+jolt: mesh v151 local=(1.988,-1.013,0.635) world=(1.988,-1.013,0.635)
+jolt: mesh v152 local=(1.988,-0.506,0.635) world=(1.988,-0.506,0.635)
+jolt: mesh v153 local=(1.988,0.000,0.635) world=(1.988,0.000,0.635)
+jolt: mesh v154 local=(1.988,0.506,0.635) world=(1.988,0.506,0.635)
+jolt: mesh v155 local=(1.988,1.013,0.635) world=(1.988,1.013,0.635)
+jolt: mesh v156 local=(1.988,1.519,0.132) world=(1.988,1.519,0.132)
+jolt: mesh v157 local=(1.988,1.519,0.635) world=(1.988,1.519,0.635)
+jolt: mesh v158 local=(2.485,-1.519,0.132) world=(2.485,-1.519,0.132)
+jolt: mesh v159 local=(2.485,-1.519,0.635) world=(2.485,-1.519,0.635)
+jolt: mesh v160 local=(2.485,-1.013,0.635) world=(2.485,-1.013,0.635)
+jolt: mesh v161 local=(2.485,-0.506,0.635) world=(2.485,-0.506,0.635)
+jolt: mesh v162 local=(2.485,0.000,0.635) world=(2.485,0.000,0.635)
+jolt: mesh v163 local=(2.485,0.506,0.635) world=(2.485,0.506,0.635)
+jolt: mesh v164 local=(2.485,1.013,0.635) world=(2.485,1.013,0.635)
+jolt: mesh v165 local=(2.485,1.519,0.132) world=(2.485,1.519,0.132)
+jolt: mesh v166 local=(2.485,1.519,0.635) world=(2.485,1.519,0.635)
+jolt: mesh v167 local=(2.982,-1.519,0.132) world=(2.982,-1.519,0.132)
+jolt: mesh v168 local=(2.982,-1.519,0.635) world=(2.982,-1.519,0.635)
+jolt: mesh v169 local=(2.982,-1.013,0.635) world=(2.982,-1.013,0.635)
+jolt: mesh v170 local=(2.982,-0.506,0.635) world=(2.982,-0.506,0.635)
+jolt: mesh v171 local=(2.982,0.000,0.635) world=(2.982,0.000,0.635)
+jolt: mesh v172 local=(2.982,0.506,0.635) world=(2.982,0.506,0.635)
+jolt: mesh v173 local=(2.982,1.013,0.635) world=(2.982,1.013,0.635)
+jolt: mesh v174 local=(2.982,1.519,0.132) world=(2.982,1.519,0.132)
+jolt: mesh v175 local=(2.982,1.519,0.635) world=(2.982,1.519,0.635)
+jolt: mesh v176 local=(3.479,-1.519,0.132) world=(3.479,-1.519,0.132)
+jolt: mesh v177 local=(3.479,-1.519,0.635) world=(3.479,-1.519,0.635)
+jolt: mesh v178 local=(3.479,-1.013,0.635) world=(3.479,-1.013,0.635)
+jolt: mesh v179 local=(3.479,-0.506,0.635) world=(3.479,-0.506,0.635)
+jolt: mesh v180 local=(3.479,0.000,0.635) world=(3.479,0.000,0.635)
+jolt: mesh v181 local=(3.479,0.506,0.635) world=(3.479,0.506,0.635)
+jolt: mesh v182 local=(3.479,1.013,0.635) world=(3.479,1.013,0.635)
+jolt: mesh v183 local=(3.479,1.519,0.132) world=(3.479,1.519,0.132)
+jolt: mesh v184 local=(3.479,1.519,0.635) world=(3.479,1.519,0.635)
+jolt: mesh v185 local=(3.976,-1.519,0.132) world=(3.976,-1.519,0.132)
+jolt: mesh v186 local=(3.976,-1.519,0.635) world=(3.976,-1.519,0.635)
+jolt: mesh v187 local=(3.976,-1.013,0.635) world=(3.976,-1.013,0.635)
+jolt: mesh v188 local=(3.976,-0.506,0.635) world=(3.976,-0.506,0.635)
+jolt: mesh v189 local=(3.976,0.000,0.635) world=(3.976,0.000,0.635)
+jolt: mesh v190 local=(3.976,0.506,0.635) world=(3.976,0.506,0.635)
+jolt: mesh v191 local=(3.976,1.013,0.635) world=(3.976,1.013,0.635)
+jolt: mesh v192 local=(3.976,1.519,0.132) world=(3.976,1.519,0.132)
+jolt: mesh v193 local=(3.976,1.519,0.635) world=(3.976,1.519,0.635)
+jolt: mesh v194 local=(4.473,-1.519,0.132) world=(4.473,-1.519,0.132)
+jolt: mesh v195 local=(4.473,-1.519,0.635) world=(4.473,-1.519,0.635)
+jolt: mesh v196 local=(4.473,-1.013,0.635) world=(4.473,-1.013,0.635)
+jolt: mesh v197 local=(4.473,-0.506,0.635) world=(4.473,-0.506,0.635)
+jolt: mesh v198 local=(4.473,0.000,0.635) world=(4.473,0.000,0.635)
+jolt: mesh v199 local=(4.473,0.506,0.635) world=(4.473,0.506,0.635)
+jolt: mesh v200 local=(4.473,1.013,0.635) world=(4.473,1.013,0.635)
+jolt: mesh v201 local=(4.473,1.519,0.132) world=(4.473,1.519,0.132)
+jolt: mesh v202 local=(4.473,1.519,0.635) world=(4.473,1.519,0.635)
+jolt: mesh v203 local=(4.970,-1.519,0.132) world=(4.970,-1.519,0.132)
+jolt: mesh v204 local=(4.970,-1.519,0.635) world=(4.970,-1.519,0.635)
+jolt: mesh v205 local=(4.970,-1.013,0.635) world=(4.970,-1.013,0.635)
+jolt: mesh v206 local=(4.970,-0.506,0.635) world=(4.970,-0.506,0.635)
+jolt: mesh v207 local=(4.970,0.000,0.635) world=(4.970,0.000,0.635)
+jolt: mesh v208 local=(4.970,0.506,0.635) world=(4.970,0.506,0.635)
+jolt: mesh v209 local=(4.970,1.013,0.635) world=(4.970,1.013,0.635)
+jolt: mesh v210 local=(4.970,1.519,0.132) world=(4.970,1.519,0.132)
+jolt: mesh v211 local=(4.970,1.519,0.635) world=(4.970,1.519,0.635)
+jolt: mesh v212 local=(5.467,-1.519,0.132) world=(5.467,-1.519,0.132)
+jolt: mesh v213 local=(5.467,-1.519,0.635) world=(5.467,-1.519,0.635)
+jolt: mesh v214 local=(5.467,-1.013,0.635) world=(5.467,-1.013,0.635)
+jolt: mesh v215 local=(5.467,-0.506,0.635) world=(5.467,-0.506,0.635)
+jolt: mesh v216 local=(5.467,0.000,0.635) world=(5.467,0.000,0.635)
+jolt: mesh v217 local=(5.467,0.506,0.635) world=(5.467,0.506,0.635)
+jolt: mesh v218 local=(5.467,1.013,0.635) world=(5.467,1.013,0.635)
+jolt: mesh v219 local=(5.467,1.519,0.132) world=(5.467,1.519,0.132)
+jolt: mesh v220 local=(5.467,1.519,0.635) world=(5.467,1.519,0.635)
+jolt: mesh v221 local=(5.964,-1.519,0.132) world=(5.964,-1.519,0.132)
+jolt: mesh v222 local=(5.964,-1.519,0.635) world=(5.964,-1.519,0.635)
+jolt: mesh v223 local=(5.964,-1.013,0.132) world=(5.964,-1.013,0.132)
+jolt: mesh v224 local=(5.964,-1.013,0.635) world=(5.964,-1.013,0.635)
+jolt: mesh v225 local=(5.964,-0.506,0.132) world=(5.964,-0.506,0.132)
+jolt: mesh v226 local=(5.964,-0.506,0.635) world=(5.964,-0.506,0.635)
+jolt: mesh v227 local=(5.964,0.000,0.132) world=(5.964,0.000,0.132)
+jolt: mesh v228 local=(5.964,0.000,0.635) world=(5.964,0.000,0.635)
+jolt: mesh v229 local=(5.964,0.506,0.132) world=(5.964,0.506,0.132)
+jolt: mesh v230 local=(5.964,0.506,0.635) world=(5.964,0.506,0.635)
+jolt: mesh v231 local=(5.964,1.013,0.132) world=(5.964,1.013,0.132)
+jolt: mesh v232 local=(5.964,1.013,0.635) world=(5.964,1.013,0.635)
+jolt: mesh v233 local=(5.964,1.519,0.132) world=(5.964,1.519,0.132)
+jolt: mesh v234 local=(5.964,1.519,0.635) world=(5.964,1.519,0.635)
+jolt: body MESH_STATIC verts=235 faces=410 id=16777219
+LMalloc of 244 not 8-byte aligned, rounding up
+LMalloc of 44 not 8-byte aligned, rounding up
+LMalloc of 44 not 8-byte aligned, rounding up
+LMalloc of 44 not 8-byte aligned, rounding up
+LMalloc of 876 not 8-byte aligned, rounding up
+RenderActor3DAnimates constructed with no animations!
+LMalloc of 44 not 8-byte aligned, rounding up
+LMalloc of 44 not 8-byte aligned, rounding up
+MATL closed without all data read (bytesLeft = 792)
+LMalloc of 44 not 8-byte aligned, rounding up
+jolt: mesh actor_pos=(2.500,0.000,0.635)
+jolt: mesh v0 local=(-0.773,-0.173,0.000) world=(1.727,-0.173,0.635)
+jolt: mesh v1 local=(-0.772,0.204,0.000) world=(1.728,0.204,0.635)
+jolt: mesh v2 local=(-0.650,-0.154,0.341) world=(1.850,-0.154,0.976)
+jolt: mesh v3 local=(-0.587,0.263,0.256) world=(1.913,0.263,0.891)
+jolt: mesh v4 local=(-0.435,-0.099,0.550) world=(2.065,-0.099,1.185)
+jolt: mesh v5 local=(-0.372,-0.568,0.000) world=(2.128,-0.568,0.635)
+jolt: mesh v6 local=(-0.354,0.491,0.000) world=(2.146,0.491,0.635)
+jolt: mesh v7 local=(-0.318,0.270,0.550) world=(2.182,0.270,1.185)
+jolt: mesh v8 local=(-0.274,-0.476,0.291) world=(2.226,-0.476,0.926)
+jolt: mesh v9 local=(-0.235,0.488,0.323) world=(2.265,0.488,0.958)
+jolt: mesh v10 local=(-0.116,-0.369,0.550) world=(2.384,-0.369,1.185)
+jolt: mesh v11 local=(0.040,-0.580,0.000) world=(2.540,-0.580,0.635)
+jolt: mesh v12 local=(0.116,0.369,0.550) world=(2.616,0.369,1.185)
+jolt: mesh v13 local=(0.231,0.532,0.000) world=(2.731,0.532,0.635)
+jolt: mesh v14 local=(0.244,0.485,0.335) world=(2.744,0.485,0.970)
+jolt: mesh v15 local=(0.277,-0.475,0.310) world=(2.777,-0.475,0.945)
+jolt: mesh v16 local=(0.318,-0.270,0.550) world=(2.818,-0.270,1.185)
+jolt: mesh v17 local=(0.435,0.099,0.550) world=(2.935,0.099,1.185)
+jolt: mesh v18 local=(0.515,-0.417,0.000) world=(3.015,-0.417,0.635)
+jolt: mesh v19 local=(0.599,0.246,0.272) world=(3.099,0.246,0.907)
+jolt: mesh v20 local=(0.611,-0.229,0.357) world=(3.111,-0.229,0.992)
+jolt: mesh v21 local=(0.662,0.322,0.000) world=(3.162,0.322,0.635)
+jolt: mesh v22 local=(0.741,-0.030,0.000) world=(3.241,-0.030,0.635)
+jolt: body MESH_STATIC verts=23 faces=42 id=16777220
+LMalloc of 244 not 8-byte aligned, rounding up
+LMalloc of 44 not 8-byte aligned, rounding up
+LMalloc of 44 not 8-byte aligned, rounding up
+LMalloc of 44 not 8-byte aligned, rounding up
+LMalloc of 3396 not 8-byte aligned, rounding up
+RenderActor3DAnimates constructed with no animations!
+LMalloc of 44 not 8-byte aligned, rounding up
+LMalloc of 44 not 8-byte aligned, rounding up
+MATL closed without all data read (bytesLeft = 1056)
+LMalloc of 44 not 8-byte aligned, rounding up
+jolt: mesh actor_pos=(2.500,0.000,1.185)
+jolt: mesh v0 local=(-0.500,0.000,0.720) world=(2.000,0.000,1.905)
+jolt: mesh v1 local=(-0.485,0.000,0.760) world=(2.015,0.000,1.945)
+jolt: mesh v2 local=(-0.433,-0.250,0.720) world=(2.067,-0.250,1.905)
+jolt: mesh v3 local=(-0.433,0.250,0.720) world=(2.067,0.250,1.905)
+jolt: mesh v4 local=(-0.420,-0.242,0.760) world=(2.080,-0.242,1.945)
+jolt: mesh v5 local=(-0.420,0.242,0.760) world=(2.080,0.242,1.945)
+jolt: mesh v6 local=(-0.400,0.000,0.000) world=(2.100,0.000,1.185)
+jolt: mesh v7 local=(-0.360,0.000,0.060) world=(2.140,0.000,1.245)
+jolt: mesh v8 local=(-0.346,-0.200,0.000) world=(2.154,-0.200,1.185)
+jolt: mesh v9 local=(-0.346,0.200,0.000) world=(2.154,0.200,1.185)
+jolt: mesh v10 local=(-0.312,-0.180,0.060) world=(2.188,-0.180,1.245)
+jolt: mesh v11 local=(-0.312,0.180,0.060) world=(2.188,0.180,1.245)
+jolt: mesh v12 local=(-0.285,-0.093,0.060) world=(2.215,-0.093,1.245)
+jolt: mesh v13 local=(-0.285,0.093,0.060) world=(2.215,0.093,1.245)
+jolt: mesh v14 local=(-0.270,0.000,0.660) world=(2.230,0.000,1.845)
+jolt: mesh v15 local=(-0.257,-0.083,0.660) world=(2.243,-0.083,1.845)
+jolt: mesh v16 local=(-0.257,0.083,0.660) world=(2.243,0.083,1.845)
+jolt: mesh v17 local=(-0.250,-0.433,0.720) world=(2.250,-0.433,1.905)
+jolt: mesh v18 local=(-0.250,0.433,0.720) world=(2.250,0.433,1.905)
+jolt: mesh v19 local=(-0.242,-0.420,0.760) world=(2.258,-0.420,1.945)
+jolt: mesh v20 local=(-0.242,0.420,0.760) world=(2.258,0.420,1.945)
+jolt: mesh v21 local=(-0.234,-0.135,0.660) world=(2.266,-0.135,1.845)
+jolt: mesh v22 local=(-0.234,0.135,0.660) world=(2.266,0.135,1.845)
+jolt: mesh v23 local=(-0.200,-0.346,0.000) world=(2.300,-0.346,1.185)
+jolt: mesh v24 local=(-0.200,0.346,0.000) world=(2.300,0.346,1.185)
+jolt: mesh v25 local=(-0.180,-0.312,0.060) world=(2.320,-0.312,1.245)
+jolt: mesh v26 local=(-0.180,0.312,0.060) world=(2.320,0.312,1.245)
+jolt: mesh v27 local=(-0.176,-0.243,0.060) world=(2.324,-0.243,1.245)
+jolt: mesh v28 local=(-0.176,0.243,0.060) world=(2.324,0.243,1.245)
+jolt: mesh v29 local=(-0.159,-0.218,0.660) world=(2.341,-0.218,1.845)
+jolt: mesh v30 local=(-0.159,0.218,0.660) world=(2.341,0.218,1.845)
+jolt: mesh v31 local=(-0.135,-0.234,0.660) world=(2.365,-0.234,1.845)
+jolt: mesh v32 local=(-0.135,0.234,0.660) world=(2.365,0.234,1.845)
+jolt: mesh v33 local=(0.000,-0.500,0.720) world=(2.500,-0.500,1.905)
+jolt: mesh v34 local=(0.000,-0.485,0.760) world=(2.500,-0.485,1.945)
+jolt: mesh v35 local=(0.000,-0.400,0.000) world=(2.500,-0.400,1.185)
+jolt: mesh v36 local=(0.000,-0.360,0.060) world=(2.500,-0.360,1.245)
+jolt: mesh v37 local=(0.000,-0.300,0.060) world=(2.500,-0.300,1.245)
+jolt: mesh v38 local=(0.000,-0.270,0.660) world=(2.500,-0.270,1.845)
+jolt: mesh v39 local=(0.000,0.270,0.660) world=(2.500,0.270,1.845)
+jolt: mesh v40 local=(0.000,0.300,0.060) world=(2.500,0.300,1.245)
+jolt: mesh v41 local=(0.000,0.360,0.060) world=(2.500,0.360,1.245)
+jolt: mesh v42 local=(0.000,0.400,0.000) world=(2.500,0.400,1.185)
+jolt: mesh v43 local=(0.000,0.485,0.760) world=(2.500,0.485,1.945)
+jolt: mesh v44 local=(0.000,0.500,0.720) world=(2.500,0.500,1.905)
+jolt: mesh v45 local=(0.135,-0.234,0.660) world=(2.635,-0.234,1.845)
+jolt: mesh v46 local=(0.135,0.234,0.660) world=(2.635,0.234,1.845)
+jolt: mesh v47 local=(0.159,-0.218,0.660) world=(2.659,-0.218,1.845)
+jolt: mesh v48 local=(0.159,0.218,0.660) world=(2.659,0.218,1.845)
+jolt: mesh v49 local=(0.176,-0.243,0.060) world=(2.676,-0.243,1.245)
+jolt: mesh v50 local=(0.176,0.243,0.060) world=(2.676,0.243,1.245)
+jolt: mesh v51 local=(0.180,-0.312,0.060) world=(2.680,-0.312,1.245)
+jolt: mesh v52 local=(0.180,0.312,0.060) world=(2.680,0.312,1.245)
+jolt: mesh v53 local=(0.200,-0.346,0.000) world=(2.700,-0.346,1.185)
+jolt: mesh v54 local=(0.200,0.346,0.000) world=(2.700,0.346,1.185)
+jolt: mesh v55 local=(0.234,-0.135,0.660) world=(2.734,-0.135,1.845)
+jolt: mesh v56 local=(0.234,0.135,0.660) world=(2.734,0.135,1.845)
+jolt: mesh v57 local=(0.242,-0.420,0.760) world=(2.742,-0.420,1.945)
+jolt: mesh v58 local=(0.242,0.420,0.760) world=(2.742,0.420,1.945)
+jolt: mesh v59 local=(0.250,-0.433,0.720) world=(2.750,-0.433,1.905)
+jolt: mesh v60 local=(0.250,0.433,0.720) world=(2.750,0.433,1.905)
+jolt: mesh v61 local=(0.257,-0.083,0.660) world=(2.757,-0.083,1.845)
+jolt: mesh v62 local=(0.257,0.083,0.660) world=(2.757,0.083,1.845)
+jolt: mesh v63 local=(0.270,0.000,0.660) world=(2.770,0.000,1.845)
+jolt: mesh v64 local=(0.285,-0.093,0.060) world=(2.785,-0.093,1.245)
+jolt: mesh v65 local=(0.285,0.093,0.060) world=(2.785,0.093,1.245)
+jolt: mesh v66 local=(0.312,-0.180,0.060) world=(2.812,-0.180,1.245)
+jolt: mesh v67 local=(0.312,0.180,0.060) world=(2.812,0.180,1.245)
+jolt: mesh v68 local=(0.346,-0.200,0.000) world=(2.846,-0.200,1.185)
+jolt: mesh v69 local=(0.346,0.200,0.000) world=(2.846,0.200,1.185)
+jolt: mesh v70 local=(0.360,0.000,0.060) world=(2.860,0.000,1.245)
+jolt: mesh v71 local=(0.400,0.000,0.000) world=(2.900,0.000,1.185)
+jolt: mesh v72 local=(0.420,-0.242,0.760) world=(2.920,-0.242,1.945)
+jolt: mesh v73 local=(0.420,0.242,0.760) world=(2.920,0.242,1.945)
+jolt: mesh v74 local=(0.433,-0.250,0.720) world=(2.933,-0.250,1.905)
+jolt: mesh v75 local=(0.433,0.250,0.720) world=(2.933,0.250,1.905)
+jolt: mesh v76 local=(0.485,0.000,0.760) world=(2.985,0.000,1.945)
+jolt: mesh v77 local=(0.500,0.000,0.720) world=(3.000,0.000,1.905)
+jolt: body MESH_STATIC verts=78 faces=168 id=16777221
+LMalloc of 244 not 8-byte aligned, rounding up
+LMalloc of 44 not 8-byte aligned, rounding up
+LMalloc of 44 not 8-byte aligned, rounding up
+LMalloc of 44 not 8-byte aligned, rounding up
+LMalloc of 2556 not 8-byte aligned, rounding up
+RenderActor3DAnimates constructed with no animations!
+LMalloc of 244 not 8-byte aligned, rounding up
+LMalloc of 44 not 8-byte aligned, rounding up
+LMalloc of 44 not 8-byte aligned, rounding up
+LMalloc of 44 not 8-byte aligned, rounding up
+LMalloc of 3396 not 8-byte aligned, rounding up
+RenderActor3DAnimates constructed with no animations!
+LMalloc of 244 not 8-byte aligned, rounding up
+LMalloc of 44 not 8-byte aligned, rounding up
+LMalloc of 44 not 8-byte aligned, rounding up
+LMalloc of 44 not 8-byte aligned, rounding up
+LMalloc of 2556 not 8-byte aligned, rounding up
+RenderActor3DAnimates constructed with no animations!
+LMalloc of 244 not 8-byte aligned, rounding up
+LMalloc of 44 not 8-byte aligned, rounding up
+LMalloc of 44 not 8-byte aligned, rounding up
+LMalloc of 44 not 8-byte aligned, rounding up
+LMalloc of 2556 not 8-byte aligned, rounding up
+RenderActor3DAnimates constructed with no animations!
+LMalloc of 244 not 8-byte aligned, rounding up
+LMalloc of 44 not 8-byte aligned, rounding up
+LMalloc of 44 not 8-byte aligned, rounding up
+LMalloc of 44 not 8-byte aligned, rounding up
+LMalloc of 1716 not 8-byte aligned, rounding up
+RenderActor3DAnimates constructed with no animations!
+LMalloc of 244 not 8-byte aligned, rounding up
+LMalloc of 44 not 8-byte aligned, rounding up
+LMalloc of 44 not 8-byte aligned, rounding up
+LMalloc of 44 not 8-byte aligned, rounding up
+LMalloc of 2556 not 8-byte aligned, rounding up
+RenderActor3DAnimates constructed with no animations!
+LMalloc of 244 not 8-byte aligned, rounding up
+LMalloc of 44 not 8-byte aligned, rounding up
+LMalloc of 44 not 8-byte aligned, rounding up
+LMalloc of 44 not 8-byte aligned, rounding up
+LMalloc of 276 not 8-byte aligned, rounding up
+RenderActor3DAnimates constructed with no animations!
+LMalloc of 44 not 8-byte aligned, rounding up
+LMalloc of 44 not 8-byte aligned, rounding up
+MATL closed without all data read (bytesLeft = 528)
+LMalloc of 44 not 8-byte aligned, rounding up
+jolt: mesh actor_pos=(0.000,0.000,0.000)
+jolt: mesh v0 local=(-6.296,-1.851,-9.000) world=(-6.296,-1.851,-9.000)
+jolt: mesh v1 local=(-6.296,-1.851,-0.010) world=(-6.296,-1.851,-0.010)
+jolt: mesh v2 local=(-6.296,1.851,-9.000) world=(-6.296,1.851,-9.000)
+jolt: mesh v3 local=(-6.296,1.851,-0.010) world=(-6.296,1.851,-0.010)
+jolt: mesh v4 local=(6.296,-1.851,-9.000) world=(6.296,-1.851,-9.000)
+jolt: mesh v5 local=(6.296,-1.851,-0.010) world=(6.296,-1.851,-0.010)
+jolt: mesh v6 local=(6.296,1.851,-9.000) world=(6.296,1.851,-9.000)
+jolt: mesh v7 local=(6.296,1.851,-0.010) world=(6.296,1.851,-0.010)
+jolt: body MESH_STATIC verts=8 faces=12 id=16777222
+LMalloc of 244 not 8-byte aligned, rounding up
+LMalloc of 44 not 8-byte aligned, rounding up
+LMalloc of 44 not 8-byte aligned, rounding up
+LMalloc of 44 not 8-byte aligned, rounding up
+LMalloc of 76 not 8-byte aligned, rounding up
+RenderActor3DAnimates constructed with no animations!
+LMalloc of 44 not 8-byte aligned, rounding up
+LMalloc of 44 not 8-byte aligned, rounding up
+MATL closed without all data read (bytesLeft = 264)
+LMalloc of 44 not 8-byte aligned, rounding up
+jolt: mesh actor_pos=(0.000,0.000,0.000)
+jolt: mesh v0 local=(-20.000,4.000,-9.000) world=(-20.000,4.000,-9.000)
+jolt: mesh v1 local=(-20.000,4.000,16.000) world=(-20.000,4.000,16.000)
+jolt: mesh v2 local=(20.000,4.000,-9.000) world=(20.000,4.000,-9.000)
+jolt: mesh v3 local=(20.000,4.000,16.000) world=(20.000,4.000,16.000)
+jolt: body MESH_STATIC verts=4 faces=2 id=16777223
+zforth: INDEXOF_CAMSHOT = 1921 (expect 1921)
+zforth: INDEXOF_CAMSHOT = 1921 (expect 1921)
+jolt: OptimizeBroadPhase done (8 static bodies)
+audio: MusicPlayer — soundfont not found: florestan-subset.sf2
+audio: sfx[0] not found: wflevels/qbert_practice/sfx/qbert_hop.wav
+audio: sfx[1] not found: wflevels/qbert_practice/sfx/qbert_land.wav
+audio: sfx[2] not found: wflevels/qbert_practice/sfx/qbert_fall.wav
+audio: sfx[3] not found: wflevels/qbert_practice/sfx/qbert_swear.wav
+audio: sfx[4] not found: wflevels/qbert_practice/sfx/qbert_round_clear.wav
+audio: sfx[5] not found: wflevels/qbert_practice/sfx/qbert_kill.wav
+audio: sfx[6] not found: wflevels/qbert_practice/sfx/qbert_disc.wav
+DMalloc of 36 not 8-byte aligned, rounding up
+delta too large: 0.3236694336
+timeofday:1790997289:768557
+lasttimeofday: 1790997289:444875
+deltatime:0:323682
+delta: 0.3236694336
+ball pos: (-1.600, 0.000, 2.400)
+ball pos: (-1.600, 0.000, 2.400)
+ball pos: (-1.600, 0.000, 2.400)
+ball pos: (-1.600, 0.000, 2.400)
+frame-window: start-ns=100447285532645 end-ns=100452319486189
+frame-profile: update frames=141 mean=14.9321 p50=14.6878 p95=16.2184 max=23.4821 cpu-ms
+frame-profile: actors frames=141 mean=2.0180 p50=1.9885 p95=2.1854 max=3.4008 cpu-ms
+frame-profile: director frames=141 mean=12.8485 p50=12.6559 p95=13.7416 max=21.1065 cpu-ms
+frame-profile: render frames=141 mean=7.1670 p50=7.0117 p95=7.6977 max=15.8452 cpu-ms
+frame-profile: school frames=141 mean=10.0696 p50=9.9043 p95=10.8305 max=15.2238 cpu-ms
+frame-profile: pose frames=141 mean=2.2190 p50=2.1902 p95=2.3181 max=4.4882 cpu-ms
+frame-profile: animation frames=141 mean=0.0000 p50=0.0000 p95=0.0000 max=0.0000 cpu-ms
+frame-profile: total frames=141 mean=22.0990 p50=21.7631 p95=23.9128 max=33.4965 cpu-ms
+frame-count: level-objects frames=141 mean=61.000
+frame-count: render-actors frames=141 mean=47.000
+frame-count: draws frames=141 mean=46.000
+frame-count: triangles frames=141 mean=3285.844
+frame-count: actor-mailbox-writes frames=141 mean=225.000
+frame-count: fish-deformations frames=141 mean=0.000
+ball pos: (-1.600, 0.000, 2.400)
+ball pos: (-1.600, 0.000, 2.400)
+ball pos: (-1.600, 0.000, 2.400)
+ball pos: (-1.600, 0.000, 2.400)
+ball pos: (-1.600, 0.000, 2.400)
+ball pos: (-1.600, 0.000, 2.400)
+frame-window: start-ns=100452319486189 end-ns=100457338799858
+frame-profile: update frames=158 mean=14.9984 p50=14.8586 p95=15.3485 max=21.8594 cpu-ms
+frame-profile: actors frames=158 mean=2.0035 p50=1.9802 p95=2.1402 max=3.3227 cpu-ms
+frame-profile: director frames=158 mean=12.9294 p50=12.8354 p95=13.2002 max=19.6807 cpu-ms
+frame-profile: render frames=158 mean=7.1952 p50=7.0167 p95=8.1910 max=13.1565 cpu-ms
+frame-profile: school frames=158 mean=10.1514 p50=10.0700 p95=10.4176 max=16.8650 cpu-ms
+frame-profile: pose frames=158 mean=2.2231 p50=2.1983 p95=2.3141 max=3.2040 cpu-ms
+frame-profile: animation frames=158 mean=0.0000 p50=0.0000 p95=0.0000 max=0.0000 cpu-ms
+frame-profile: total frames=158 mean=22.1936 p50=21.9585 p95=23.7573 max=29.6394 cpu-ms
+frame-count: level-objects frames=158 mean=61.000
+frame-count: render-actors frames=158 mean=47.000
+frame-count: draws frames=158 mean=46.000
+frame-count: triangles frames=158 mean=3283.658
+frame-count: actor-mailbox-writes frames=158 mean=225.000
+frame-count: fish-deformations frames=158 mean=0.000
+ball pos: (-1.600, 0.000, 2.400)
+ball pos: (-1.600, 0.000, 2.400)
+ball pos: (-1.600, 0.000, 2.400)
+ball pos: (-1.600, 0.000, 2.400)
+ball pos: (-1.600, 0.000, 2.400)
+ball pos: (-1.600, 0.000, 2.400)
+frame-window: start-ns=100457338799858 end-ns=100462352282777
+frame-profile: update frames=190 mean=15.0675 p50=14.8284 p95=17.0844 max=19.8447 cpu-ms
+frame-profile: actors frames=190 mean=2.0137 p50=1.9341 p95=2.7313 max=4.7955 cpu-ms
+frame-profile: director frames=190 mean=12.9876 p50=12.8327 p95=14.2320 max=17.8152 cpu-ms
+frame-profile: render frames=190 mean=7.1324 p50=6.7964 p95=9.6768 max=12.3437 cpu-ms
+frame-profile: school frames=190 mean=10.2057 p50=10.0752 p95=11.1628 max=15.0134 cpu-ms
+frame-profile: pose frames=190 mean=2.2207 p50=2.2030 p95=2.2877 max=2.8803 cpu-ms
+frame-profile: animation frames=190 mean=0.0000 p50=0.0000 p95=0.0000 max=0.0000 cpu-ms
+frame-profile: total frames=190 mean=22.1999 p50=21.6989 p95=25.8515 max=27.9805 cpu-ms
+frame-count: level-objects frames=190 mean=61.000
+frame-count: render-actors frames=190 mean=47.000
+frame-count: draws frames=190 mean=46.000
+frame-count: triangles frames=190 mean=3281.895
+frame-count: actor-mailbox-writes frames=190 mean=225.000
+frame-count: fish-deformations frames=190 mean=0.000
+ball pos: (-1.600, 0.000, 2.400)
+ball pos: (-1.600, 0.000, 2.400)
+ball pos: (-1.600, 0.000, 2.400)
+ball pos: (-1.600, 0.000, 2.400)
+ball pos: (-1.600, 0.000, 2.400)
+ball pos: (-1.600, 0.000, 2.400)
+frame-window: start-ns=100462352282777 end-ns=100467362453655
+frame-profile: update frames=195 mean=15.0394 p50=14.8367 p95=15.8820 max=22.1487 cpu-ms
+frame-profile: actors frames=195 mean=1.9920 p50=1.9393 p95=2.1325 max=5.1419 cpu-ms
+frame-profile: director frames=195 mean=12.9821 p50=12.8457 p95=13.5850 max=20.1886 cpu-ms
+frame-profile: render frames=195 mean=6.8959 p50=6.7719 p95=7.5897 max=10.0086 cpu-ms
+frame-profile: school frames=195 mean=10.1983 p50=10.0862 p95=10.5561 max=17.4288 cpu-ms
+frame-profile: pose frames=195 mean=2.2215 p50=2.2089 p95=2.2706 max=3.3245 cpu-ms
+frame-profile: animation frames=195 mean=0.0000 p50=0.0000 p95=0.0000 max=0.0000 cpu-ms
+frame-profile: total frames=195 mean=21.9353 p50=21.6433 p95=23.2933 max=29.1894 cpu-ms
+frame-count: level-objects frames=195 mean=61.000
+frame-count: render-actors frames=195 mean=47.000
+frame-count: draws frames=195 mean=46.000
+frame-count: triangles frames=195 mean=3283.723
+frame-count: actor-mailbox-writes frames=195 mean=225.000
+frame-count: fish-deformations frames=195 mean=0.000
+ball pos: (-1.600, 0.000, 2.400)
+ball pos: (-1.600, 0.000, 2.400)
+ball pos: (-1.600, 0.000, 2.400)
+ball pos: (-1.600, 0.000, 2.400)
+ball pos: (-1.600, 0.000, 2.400)
+ball pos: (-1.600, 0.000, 2.400)
+ball pos: (-1.600, 0.000, 2.400)
+frame-window: start-ns=100467362453655 end-ns=100472371055865
+frame-profile: update frames=192 mean=15.0815 p50=14.8247 p95=17.5550 max=20.6785 cpu-ms
+frame-profile: actors frames=192 mean=2.0093 p50=1.9315 p95=2.2078 max=5.2844 cpu-ms
+frame-profile: director frames=192 mean=13.0061 p50=12.8331 p95=14.1875 max=18.5827 cpu-ms
+frame-profile: render frames=192 mean=7.1115 p50=6.8152 p95=9.7196 max=13.8042 cpu-ms
+frame-profile: school frames=192 mean=10.1985 p50=10.0732 p95=11.1560 max=15.2070 cpu-ms
+frame-profile: pose frames=192 mean=2.2484 p50=2.2036 p95=2.2970 max=5.5988 cpu-ms
+frame-profile: animation frames=192 mean=0.0000 p50=0.0000 p95=0.0000 max=0.0000 cpu-ms
+frame-profile: total frames=192 mean=22.1930 p50=21.6725 p95=25.4747 max=28.3248 cpu-ms
+frame-count: level-objects frames=192 mean=61.000
+frame-count: render-actors frames=192 mean=47.000
+frame-count: draws frames=192 mean=46.000
+frame-count: triangles frames=192 mean=3282.708
+frame-count: actor-mailbox-writes frames=192 mean=225.000
+frame-count: fish-deformations frames=192 mean=0.000
+ball pos: (-1.600, 0.000, 2.400)
+ball pos: (-1.600, 0.000, 2.400)
+ball pos: (-1.600, 0.000, 2.400)
+ball pos: (-1.600, 0.000, 2.400)
+ball pos: (-1.600, 0.000, 2.400)
+ball pos: (-1.600, 0.000, 2.400)
+frame-window: start-ns=100472371055865 end-ns=100477378153784
+frame-profile: update frames=196 mean=14.9595 p50=14.8273 p95=16.3456 max=18.8006 cpu-ms
+frame-profile: actors frames=196 mean=1.9833 p50=1.9353 p95=2.0998 max=3.5073 cpu-ms
+frame-profile: director frames=196 mean=12.9097 p50=12.8345 p95=13.5382 max=16.4263 cpu-ms
+frame-profile: render frames=196 mean=6.9305 p50=6.8268 p95=7.6613 max=8.6307 cpu-ms
+frame-profile: school frames=196 mean=10.1313 p50=10.0679 p95=10.5739 max=13.3657 cpu-ms
+frame-profile: pose frames=196 mean=2.2180 p50=2.2085 p95=2.2672 max=2.8413 cpu-ms
+frame-profile: animation frames=196 mean=0.0000 p50=0.0000 p95=0.0000 max=0.0000 cpu-ms
+frame-profile: total frames=196 mean=21.8900 p50=21.6720 p95=23.2041 max=26.1845 cpu-ms
+frame-count: level-objects frames=196 mean=61.000
+frame-count: render-actors frames=196 mean=47.000
+frame-count: draws frames=196 mean=46.000
+frame-count: triangles frames=196 mean=3285.189
+frame-count: actor-mailbox-writes frames=196 mean=225.000
+frame-count: fish-deformations frames=196 mean=0.000
+ball pos: (-1.600, 0.000, 2.400)
+ball pos: (-1.600, 0.000, 2.400)
+ball pos: (-1.600, 0.000, 2.400)
+ball pos: (-1.600, 0.000, 2.400)
+ball pos: (-1.600, 0.000, 2.400)
+ball pos: (-1.600, 0.000, 2.400)
+ball pos: (-1.600, 0.000, 2.400)
+frame-window: start-ns=100477378153784 end-ns=100482390648912
+frame-profile: update frames=192 mean=15.0321 p50=14.8013 p95=17.2163 max=21.8282 cpu-ms
+frame-profile: actors frames=192 mean=2.0056 p50=1.9249 p95=2.1988 max=4.9710 cpu-ms
+frame-profile: director frames=192 mean=12.9608 p50=12.8213 p95=13.7921 max=19.9217 cpu-ms
+frame-profile: render frames=192 mean=7.1070 p50=6.8113 p95=9.8571 max=12.9330 cpu-ms
+frame-profile: school frames=192 mean=10.1698 p50=10.0658 p95=10.6539 max=17.1239 cpu-ms
+frame-profile: pose frames=192 mean=2.2322 p50=2.2067 p95=2.2846 max=3.8426 cpu-ms
+frame-profile: animation frames=192 mean=0.0000 p50=0.0000 p95=0.0000 max=0.0000 cpu-ms
+frame-profile: total frames=192 mean=22.1391 p50=21.6398 p95=25.4040 max=28.8274 cpu-ms
+frame-count: level-objects frames=192 mean=61.000
+frame-count: render-actors frames=192 mean=47.000
+frame-count: draws frames=192 mean=46.000
+frame-count: triangles frames=192 mean=3280.917
+frame-count: actor-mailbox-writes frames=192 mean=225.000
+frame-count: fish-deformations frames=192 mean=0.000
+ball pos: (-1.600, 0.000, 2.400)
+ball pos: (-1.600, 0.000, 2.400)
+ball pos: (-1.600, 0.000, 2.400)
+ball pos: (-1.600, 0.000, 2.400)
+ball pos: (-1.600, 0.000, 2.400)
+ball pos: (-1.600, 0.000, 2.400)
+frame-window: start-ns=100482390648912 end-ns=100487414191248
+frame-profile: update frames=195 mean=15.0110 p50=14.8231 p95=16.6320 max=21.0643 cpu-ms
+frame-profile: actors frames=195 mean=1.9901 p50=1.9239 p95=2.5075 max=4.8188 cpu-ms
+frame-profile: director frames=195 mean=12.9546 p50=12.8245 p95=13.9952 max=17.7861 cpu-ms
+frame-profile: render frames=195 mean=7.0448 p50=6.8035 p95=8.1993 max=13.9072 cpu-ms
+frame-profile: school frames=195 mean=10.1707 p50=10.0785 p95=10.8899 max=14.2475 cpu-ms
+frame-profile: pose frames=195 mean=2.2261 p50=2.2012 p95=2.2704 max=3.6565 cpu-ms
+frame-profile: animation frames=195 mean=0.0000 p50=0.0000 p95=0.0000 max=0.0000 cpu-ms
+frame-profile: total frames=195 mean=22.0558 p50=21.6762 p95=25.0472 max=28.7233 cpu-ms
+frame-count: level-objects frames=195 mean=61.000
+frame-count: render-actors frames=195 mean=47.000
+frame-count: draws frames=195 mean=46.000
+frame-count: triangles frames=195 mean=3283.046
+frame-count: actor-mailbox-writes frames=195 mean=225.000
+frame-count: fish-deformations frames=195 mean=0.000
+ball pos: (-1.600, 0.000, 2.400)
+ball pos: (-1.600, 0.000, 2.400)
+ball pos: (-1.600, 0.000, 2.400)
+ball pos: (-1.600, 0.000, 2.400)
+ball pos: (-1.600, 0.000, 2.400)
+ball pos: (-1.600, 0.000, 2.400)
+ball pos: (-1.600, 0.000, 2.400)
+frame-window: start-ns=100487414191248 end-ns=100492416706292
+frame-profile: update frames=191 mean=15.0815 p50=14.8053 p95=17.5728 max=20.9003 cpu-ms
+frame-profile: actors frames=191 mean=1.9724 p50=1.9131 p95=2.1718 max=5.0018 cpu-ms
+frame-profile: director frames=191 mean=13.0442 p50=12.8329 p95=15.2438 max=18.0224 cpu-ms
+frame-profile: render frames=191 mean=7.1081 p50=6.8639 p95=8.5328 max=13.9626 cpu-ms
+frame-profile: school frames=191 mean=10.2307 p50=10.0743 p95=11.6551 max=14.3785 cpu-ms
+frame-profile: pose frames=191 mean=2.2577 p50=2.2126 p95=2.3048 max=4.2020 cpu-ms
+frame-profile: animation frames=191 mean=0.0000 p50=0.0000 p95=0.0000 max=0.0000 cpu-ms
+frame-profile: total frames=191 mean=22.1897 p50=21.6936 p95=25.6098 max=28.7019 cpu-ms
+frame-count: level-objects frames=191 mean=61.000
+frame-count: render-actors frames=191 mean=47.000
+frame-count: draws frames=191 mean=46.000
+frame-count: triangles frames=191 mean=3282.466
+frame-count: actor-mailbox-writes frames=191 mean=225.000
+frame-count: fish-deformations frames=191 mean=0.000
+ball pos: (-1.600, 0.000, 2.400)
+ball pos: (-1.600, 0.000, 2.400)
+ball pos: (-1.600, 0.000, 2.400)
+ball pos: (-1.600, 0.000, 2.400)
+ball pos: (-1.600, 0.000, 2.400)
+ball pos: (-1.600, 0.000, 2.400)
+frame-window: start-ns=100492416706292 end-ns=100497421432752
+frame-profile: update frames=195 mean=14.8858 p50=14.8015 p95=15.1964 max=19.0013 cpu-ms
+frame-profile: actors frames=195 mean=1.9539 p50=1.9142 p95=2.1036 max=3.3907 cpu-ms
+frame-profile: director frames=195 mean=12.8665 p50=12.8122 p95=13.0999 max=15.5542 cpu-ms
+frame-profile: render frames=195 mean=7.0731 p50=6.8493 p95=8.1046 max=12.2211 cpu-ms
+frame-profile: school frames=195 mean=10.0938 p50=10.0529 p95=10.3029 max=12.4384 cpu-ms
+frame-profile: pose frames=195 mean=2.2242 p50=2.2063 p95=2.2595 max=3.9265 cpu-ms
+frame-profile: animation frames=195 mean=0.0000 p50=0.0000 p95=0.0000 max=0.0000 cpu-ms
+frame-profile: total frames=195 mean=21.9588 p50=21.6534 p95=24.6874 max=26.7705 cpu-ms
+frame-count: level-objects frames=195 mean=61.000
+frame-count: render-actors frames=195 mean=47.000
+frame-count: draws frames=195 mean=46.000
+frame-count: triangles frames=195 mean=3282.790
+frame-count: actor-mailbox-writes frames=195 mean=225.000
+frame-count: fish-deformations frames=195 mean=0.000
+ball pos: (-1.600, 0.000, 2.400)
+ball pos: (-1.600, 0.000, 2.400)
+ball pos: (-1.600, 0.000, 2.400)
+ball pos: (-1.600, 0.000, 2.400)
+ball pos: (-1.600, 0.000, 2.400)
+ball pos: (-1.600, 0.000, 2.400)
+frame-window: start-ns=100497421432752 end-ns=100502428452380
+frame-profile: update frames=187 mean=15.0259 p50=14.8632 p95=15.9301 max=21.4524 cpu-ms
+frame-profile: actors frames=187 mean=1.9609 p50=1.9303 p95=2.1336 max=3.3545 cpu-ms
+frame-profile: director frames=187 mean=12.9996 p50=12.8558 p95=13.5830 max=19.5294 cpu-ms
+frame-profile: render frames=187 mean=7.1720 p50=6.9455 p95=8.5126 max=12.8080 cpu-ms
+frame-profile: school frames=187 mean=10.1866 p50=10.0716 p95=10.4502 max=16.7342 cpu-ms
+frame-profile: pose frames=187 mean=2.2585 p50=2.2130 p95=2.2960 max=6.0960 cpu-ms
+frame-profile: animation frames=187 mean=0.0000 p50=0.0000 p95=0.0000 max=0.0000 cpu-ms
+frame-profile: total frames=187 mean=22.1979 p50=21.8278 p95=25.4313 max=28.6182 cpu-ms
+frame-count: level-objects frames=187 mean=61.000
+frame-count: render-actors frames=187 mean=47.000
+frame-count: draws frames=187 mean=46.000
+frame-count: triangles frames=187 mean=3279.455
+frame-count: actor-mailbox-writes frames=187 mean=225.000
+frame-count: fish-deformations frames=187 mean=0.000
+ball pos: (-0.306, 0.000, 2.400)
+ball pos: (1.851, 0.000, 2.400)
+ball pos: (4.462, 0.000, 2.400)
+ball pos: (5.516, 0.000, 2.400)
+ball pos: (5.543, 0.000, 2.400)
+ball pos: (5.544, 0.000, 2.400)
+frame-window: start-ns=100502428452380 end-ns=100507449657590
+frame-profile: update frames=177 mean=14.9519 p50=14.7933 p95=16.5528 max=20.9655 cpu-ms
+frame-profile: actors frames=177 mean=2.0351 p50=1.9700 p95=2.3070 max=5.1783 cpu-ms
+frame-profile: director frames=177 mean=12.8510 p50=12.7342 p95=14.0538 max=16.9240 cpu-ms
+frame-profile: render frames=177 mean=7.1480 p50=6.8997 p95=8.9945 max=12.2165 cpu-ms
+frame-profile: school frames=177 mean=10.0460 p50=9.9499 p95=10.7060 max=13.4623 cpu-ms
+frame-profile: pose frames=177 mean=2.2316 p50=2.2038 p95=2.2828 max=4.5536 cpu-ms
+frame-profile: animation frames=177 mean=0.0000 p50=0.0000 p95=0.0000 max=0.0000 cpu-ms
+frame-profile: total frames=177 mean=22.1000 p50=21.7924 p95=24.6306 max=27.7214 cpu-ms
+frame-count: level-objects frames=177 mean=61.000
+frame-count: render-actors frames=177 mean=47.000
+frame-count: draws frames=177 mean=46.000
+frame-count: triangles frames=177 mean=3281.729
+frame-count: actor-mailbox-writes frames=177 mean=225.000
+frame-count: fish-deformations frames=177 mean=0.000
+ball pos: (5.544, 0.000, 2.400)
+ball pos: (5.544, 0.000, 2.400)
+ball pos: (5.544, 0.000, 2.400)
+ball pos: (5.544, 0.000, 2.400)
+ball pos: (5.544, 0.000, 2.400)
+ball pos: (5.544, 0.000, 2.400)
+ball pos: (5.544, 0.000, 2.400)
+frame-window: start-ns=100507449657590 end-ns=100512466828718
+frame-profile: update frames=191 mean=14.9511 p50=14.7950 p95=15.8771 max=18.3380 cpu-ms
+frame-profile: actors frames=191 mean=2.0119 p50=1.9534 p95=2.3408 max=3.5643 cpu-ms
+frame-profile: director frames=191 mean=12.8731 p50=12.8013 p95=13.4027 max=15.3223 cpu-ms
+frame-profile: render frames=191 mean=7.1033 p50=6.9190 p95=8.3238 max=11.1267 cpu-ms
+frame-profile: school frames=191 mean=10.0979 p50=10.0427 p95=10.4942 max=12.3604 cpu-ms
+frame-profile: pose frames=191 mean=2.2167 p50=2.2043 p95=2.2877 max=2.4912 cpu-ms
+frame-profile: animation frames=191 mean=0.0000 p50=0.0000 p95=0.0000 max=0.0000 cpu-ms
+frame-profile: total frames=191 mean=22.0544 p50=21.7883 p95=23.9809 max=26.1916 cpu-ms
+frame-count: level-objects frames=191 mean=61.000
+frame-count: render-actors frames=191 mean=47.000
+frame-count: draws frames=191 mean=46.000
+frame-count: triangles frames=191 mean=3289.890
+frame-count: actor-mailbox-writes frames=191 mean=225.000
+frame-count: fish-deformations frames=191 mean=0.000
+ball pos: (5.544, 0.000, 2.400)
+ball pos: (5.544, 0.000, 2.400)
+ball pos: (5.544, 0.000, 2.400)
+ball pos: (5.544, 0.000, 2.400)
+ball pos: (5.544, 0.000, 2.400)
+ball pos: (5.544, 0.000, 2.400)
+frame-window: start-ns=100512466828718 end-ns=100517486433137
+frame-profile: update frames=187 mean=14.9824 p50=14.8955 p95=15.8794 max=18.6663 cpu-ms
+frame-profile: actors frames=187 mean=2.0029 p50=1.9607 p95=2.2217 max=3.7121 cpu-ms
+frame-profile: director frames=187 mean=12.9126 p50=12.8652 p95=13.3045 max=15.9420 cpu-ms
+frame-profile: render frames=187 mean=7.1661 p50=6.9464 p95=8.3999 max=14.9411 cpu-ms
+frame-profile: school frames=187 mean=10.1213 p50=10.0958 p95=10.5075 max=12.8064 cpu-ms
+frame-profile: pose frames=187 mean=2.2349 p50=2.2090 p95=2.2969 max=3.3404 cpu-ms
+frame-profile: animation frames=187 mean=0.0000 p50=0.0000 p95=0.0000 max=0.0000 cpu-ms
+frame-profile: total frames=187 mean=22.1485 p50=21.8470 p95=23.9592 max=31.3232 cpu-ms
+frame-count: level-objects frames=187 mean=61.000
+frame-count: render-actors frames=187 mean=47.000
+frame-count: draws frames=187 mean=46.000
+frame-count: triangles frames=187 mean=3292.342
+frame-count: actor-mailbox-writes frames=187 mean=225.000
+frame-count: fish-deformations frames=187 mean=0.000
+ball pos: (5.544, 0.000, 2.400)
+ball pos: (5.544, 0.000, 2.400)
+ball pos: (5.544, 0.000, 2.400)
+ball pos: (5.544, 0.000, 2.400)
+ball pos: (5.544, 0.000, 2.400)
+ball pos: (5.544, 0.000, 2.400)
+frame-window: start-ns=100517486433137 end-ns=100522500121139
+frame-profile: update frames=195 mean=14.8805 p50=14.8228 p95=15.1597 max=17.7091 cpu-ms
+frame-profile: actors frames=195 mean=1.9486 p50=1.9218 p95=2.0881 max=3.3763 cpu-ms
+frame-profile: director frames=195 mean=12.8675 p50=12.8281 p95=13.0724 max=15.3679 cpu-ms
+frame-profile: render frames=195 mean=7.0365 p50=6.8806 p95=7.6906 max=13.2014 cpu-ms
+frame-profile: school frames=195 mean=10.0988 p50=10.0746 p95=10.3168 max=11.8539 cpu-ms
+frame-profile: pose frames=195 mean=2.2228 p50=2.2060 p95=2.2788 max=3.3865 cpu-ms
+frame-profile: animation frames=195 mean=0.0000 p50=0.0000 p95=0.0000 max=0.0000 cpu-ms
+frame-profile: total frames=195 mean=21.9170 p50=21.7090 p95=23.0350 max=28.0197 cpu-ms
+frame-count: level-objects frames=195 mean=61.000
+frame-count: render-actors frames=195 mean=47.000
+frame-count: draws frames=195 mean=46.000
+frame-count: triangles frames=195 mean=3289.949
+frame-count: actor-mailbox-writes frames=195 mean=225.000
+frame-count: fish-deformations frames=195 mean=0.000
+ball pos: (5.544, 0.000, 2.400)
+ball pos: (5.544, 0.000, 2.400)
+ball pos: (5.544, 0.000, 2.400)
+ball pos: (5.544, 0.000, 2.400)
+ball pos: (5.544, 0.000, 2.400)
+ball pos: (5.544, 0.000, 2.400)
+ball pos: (5.544, 0.000, 2.400)
+frame-window: start-ns=100522500121139 end-ns=100527512215392
+frame-profile: update frames=193 mean=14.9998 p50=14.8349 p95=16.0933 max=19.7129 cpu-ms
+frame-profile: actors frames=193 mean=1.9725 p50=1.9385 p95=2.0995 max=3.5565 cpu-ms
+frame-profile: director frames=193 mean=12.9617 p50=12.8197 p95=13.5713 max=17.7644 cpu-ms
+frame-profile: render frames=193 mean=7.0885 p50=6.8990 p95=8.0654 max=11.3069 cpu-ms
+frame-profile: school frames=193 mean=10.1921 p50=10.0791 p95=10.5042 max=15.0191 cpu-ms
+frame-profile: pose frames=193 mean=2.2182 p50=2.2065 p95=2.2950 max=2.7210 cpu-ms
+frame-profile: animation frames=193 mean=0.0000 p50=0.0000 p95=0.0000 max=0.0000 cpu-ms
+frame-profile: total frames=193 mean=22.0882 p50=21.7225 p95=24.5435 max=30.9123 cpu-ms
+frame-count: level-objects frames=193 mean=61.000
+frame-count: render-actors frames=193 mean=47.000
+frame-count: draws frames=193 mean=46.000
+frame-count: triangles frames=193 mean=3293.477
+frame-count: actor-mailbox-writes frames=193 mean=225.000
+frame-count: fish-deformations frames=193 mean=0.000
+ball pos: (5.544, 0.000, 2.400)
+ball pos: (5.544, 0.000, 2.400)
+ball pos: (5.247, -0.286, 2.400)
+ball pos: (3.114, -0.397, 2.400)
+ball pos: (0.277, -0.399, 2.400)
+frame-window: start-ns=100527512215392 end-ns=100532520520852
+frame-profile: update frames=172 mean=15.4215 p50=15.1366 p95=17.9088 max=23.2484 cpu-ms
+frame-profile: actors frames=172 mean=2.0370 p50=1.9760 p95=2.2773 max=3.4923 cpu-ms
+frame-profile: director frames=172 mean=13.3176 p50=13.0617 p95=15.0585 max=21.2601 cpu-ms
+frame-profile: render frames=172 mean=7.1241 p50=6.9542 p95=7.9254 max=11.2124 cpu-ms
+frame-profile: school frames=172 mean=10.4910 p50=10.2870 p95=12.0405 max=18.5170 cpu-ms
+frame-profile: pose frames=172 mean=2.2449 p50=2.2115 p95=2.3078 max=3.3587 cpu-ms
+frame-profile: animation frames=172 mean=0.0000 p50=0.0000 p95=0.0000 max=0.0000 cpu-ms
+frame-profile: total frames=172 mean=22.5456 p50=22.1240 p95=25.1327 max=31.0880 cpu-ms
+frame-count: level-objects frames=172 mean=61.000
+frame-count: render-actors frames=172 mean=47.000
+frame-count: draws frames=172 mean=46.000
+frame-count: triangles frames=172 mean=3278.052
+frame-count: actor-mailbox-writes frames=172 mean=225.000
+frame-count: fish-deformations frames=172 mean=0.000
+ball pos: (-1.959, -0.399, 2.400)
+ball pos: (-3.794, -0.399, 2.400)
+ball pos: (-5.432, -0.399, 2.400)
+ball pos: (-5.540, -0.399, 2.400)
+ball pos: (-5.544, -0.399, 2.400)
+ball pos: (-5.544, -0.399, 2.400)
+ball pos: (-5.544, -0.399, 2.400)
+frame-window: start-ns=100532520520852 end-ns=100537525752897
+frame-profile: update frames=186 mean=15.1599 p50=14.9436 p95=17.2993 max=22.9883 cpu-ms
+frame-profile: actors frames=186 mean=2.0130 p50=1.9680 p95=2.2368 max=3.3887 cpu-ms
+frame-profile: director frames=186 mean=13.0803 p50=12.9119 p95=14.8183 max=20.4749 cpu-ms
+frame-profile: render frames=186 mean=7.1915 p50=6.8724 p95=8.4684 max=12.6727 cpu-ms
+frame-profile: school frames=186 mean=10.2598 p50=10.0991 p95=11.4813 max=16.8630 cpu-ms
+frame-profile: pose frames=186 mean=2.2434 p50=2.2127 p95=2.3165 max=3.9550 cpu-ms
+frame-profile: animation frames=186 mean=0.0000 p50=0.0000 p95=0.0000 max=0.0000 cpu-ms
+frame-profile: total frames=186 mean=22.3513 p50=21.9200 p95=25.2378 max=29.7070 cpu-ms
+frame-count: level-objects frames=186 mean=61.000
+frame-count: render-actors frames=186 mean=47.000
+frame-count: draws frames=186 mean=46.000
+frame-count: triangles frames=186 mean=3290.376
+frame-count: actor-mailbox-writes frames=186 mean=225.000
+frame-count: fish-deformations frames=186 mean=0.000
+ball pos: (-5.544, -0.399, 2.400)
+ball pos: (-5.544, -0.399, 2.400)
+ball pos: (-5.544, -0.399, 2.400)
+ball pos: (-5.544, -0.399, 2.400)
+ball pos: (-5.544, -0.399, 2.400)
+ball pos: (-5.544, -0.399, 2.400)
+frame-window: start-ns=100537525752897 end-ns=100542546211774
+frame-profile: update frames=187 mean=15.0445 p50=14.8570 p95=16.5958 max=20.0202 cpu-ms
+frame-profile: actors frames=187 mean=1.9842 p50=1.9494 p95=2.1726 max=3.3146 cpu-ms
+frame-profile: director frames=187 mean=12.9948 p50=12.8331 p95=13.6938 max=17.9927 cpu-ms
+frame-profile: render frames=187 mean=7.2276 p50=6.9695 p95=8.5037 max=12.9865 cpu-ms
+frame-profile: school frames=187 mean=10.1621 p50=10.0760 p95=10.7177 max=14.0062 cpu-ms
+frame-profile: pose frames=187 mean=2.2763 p50=2.2118 p95=2.3275 max=6.0582 cpu-ms
+frame-profile: animation frames=187 mean=0.0000 p50=0.0000 p95=0.0000 max=0.0000 cpu-ms
+frame-profile: total frames=187 mean=22.2721 p50=21.9014 p95=25.2875 max=27.9443 cpu-ms
+frame-count: level-objects frames=187 mean=61.000
+frame-count: render-actors frames=187 mean=47.000
+frame-count: draws frames=187 mean=46.000
+frame-count: triangles frames=187 mean=3290.572
+frame-count: actor-mailbox-writes frames=187 mean=225.000
+frame-count: fish-deformations frames=187 mean=0.000
+ball pos: (-5.544, -0.399, 2.400)
+ball pos: (-5.140, -0.042, 2.400)
+ball pos: (-3.306, 0.092, 2.400)
+ball pos: (-1.164, 0.096, 2.400)
+ball pos: (0.849, 0.096, 2.400)
+ball pos: (3.083, 0.096, 2.400)
+frame-window: start-ns=100542546211774 end-ns=100547563304943
+frame-profile: update frames=180 mean=15.2473 p50=15.1060 p95=16.5585 max=18.7361 cpu-ms
+frame-profile: actors frames=180 mean=1.9986 p50=1.9616 p95=2.1443 max=3.3141 cpu-ms
+frame-profile: director frames=180 mean=13.1830 p50=13.0787 p95=13.6517 max=16.7509 cpu-ms
+frame-profile: render frames=180 mean=7.0610 p50=6.9239 p95=7.8865 max=10.4617 cpu-ms
+frame-profile: school frames=180 mean=10.3745 p50=10.2804 p95=10.6542 max=13.7131 cpu-ms
+frame-profile: pose frames=180 mean=2.2407 p50=2.2113 p95=2.3321 max=3.3814 cpu-ms
+frame-profile: animation frames=180 mean=0.0000 p50=0.0000 p95=0.0000 max=0.0000 cpu-ms
+frame-profile: total frames=180 mean=22.3084 p50=22.0034 p95=24.8782 max=25.7077 cpu-ms
+frame-count: level-objects frames=180 mean=61.000
+frame-count: render-actors frames=180 mean=47.000
+frame-count: draws frames=180 mean=46.000
+frame-count: triangles frames=180 mean=3281.006
+frame-count: actor-mailbox-writes frames=180 mean=225.000
+frame-count: fish-deformations frames=180 mean=0.000
+ball pos: (5.237, 0.096, 2.400)
+ball pos: (5.535, 0.096, 2.400)
+ball pos: (5.543, 0.096, 2.400)
+ball pos: (5.544, 0.096, 2.400)
+ball pos: (5.544, 0.096, 2.400)
+ball pos: (5.544, 0.096, 2.400)
+frame-window: start-ns=100547563304943 end-ns=100552586188654
+frame-profile: update frames=183 mean=15.0530 p50=14.8564 p95=16.5526 max=19.4296 cpu-ms
+frame-profile: actors frames=183 mean=2.0133 p50=1.9609 p95=2.1436 max=3.3309 cpu-ms
+frame-profile: director frames=183 mean=12.9733 p50=12.8174 p95=13.5968 max=17.4356 cpu-ms
+frame-profile: render frames=183 mean=7.2197 p50=6.9016 p95=8.9680 max=13.5665 cpu-ms
+frame-profile: school frames=183 mean=10.1808 p50=10.0623 p95=10.7291 max=14.7082 cpu-ms
+frame-profile: pose frames=183 mean=2.2287 p50=2.2007 p95=2.3124 max=4.0114 cpu-ms
+frame-profile: animation frames=183 mean=0.0000 p50=0.0000 p95=0.0000 max=0.0000 cpu-ms
+frame-profile: total frames=183 mean=22.2727 p50=21.8002 p95=25.2095 max=29.6645 cpu-ms
+frame-count: level-objects frames=183 mean=61.000
+frame-count: render-actors frames=183 mean=47.000
+frame-count: draws frames=183 mean=46.000
+frame-count: triangles frames=183 mean=3287.224
+frame-count: actor-mailbox-writes frames=183 mean=225.000
+frame-count: fish-deformations frames=183 mean=0.000
+ball pos: (5.544, 0.096, 2.400)
+ball pos: (5.544, 0.096, 2.400)
+ball pos: (5.544, 0.096, 2.400)
+ball pos: (5.544, 0.096, 2.400)
+ball pos: (5.544, 0.096, 2.400)
+ball pos: (5.544, 0.096, 2.400)
+frame-window: start-ns=100552586188654 end-ns=100557588310823
+frame-profile: update frames=185 mean=15.0108 p50=14.8466 p95=16.1187 max=20.0110 cpu-ms
+frame-profile: actors frames=185 mean=2.0333 p50=1.9582 p95=2.2096 max=5.3015 cpu-ms
+frame-profile: director frames=185 mean=12.9087 p50=12.8179 p95=13.5259 max=15.8181 cpu-ms
+frame-profile: render frames=185 mean=7.3026 p50=7.0631 p95=8.5139 max=13.4057 cpu-ms
+frame-profile: school frames=185 mean=10.0971 p50=10.0555 p95=10.3368 max=12.6256 cpu-ms
+frame-profile: pose frames=185 mean=2.2449 p50=2.2112 p95=2.2926 max=4.1227 cpu-ms
+frame-profile: animation frames=185 mean=0.0000 p50=0.0000 p95=0.0000 max=0.0000 cpu-ms
+frame-profile: total frames=185 mean=22.3133 p50=21.9857 p95=25.1415 max=28.0643 cpu-ms
+frame-count: level-objects frames=185 mean=61.000
+frame-count: render-actors frames=185 mean=47.000
+frame-count: draws frames=185 mean=46.000
+frame-count: triangles frames=185 mean=3292.481
+frame-count: actor-mailbox-writes frames=185 mean=225.000
+frame-count: fish-deformations frames=185 mean=0.000
+ball pos: (5.544, 0.096, 2.400)
+ball pos: (5.544, 0.096, 2.400)
+ball pos: (5.544, 0.096, 2.400)

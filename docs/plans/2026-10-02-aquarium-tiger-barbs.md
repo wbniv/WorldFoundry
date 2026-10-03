@@ -1,6 +1,6 @@
 # Aquarium: 29 tiger barbs, one actor each
 
-**Status:** phases 1 and 2 implemented and profiled. Final normal release installed on the local Chromecast HD; exit/relaunch and Home/resume verified. Phase 3 remains planned work only.
+**Status:** all three phases implemented and profiled. Phase 3 is complete in the `aquarium/tiger-barbs-phase3` worktree and its normal seven-tank APK is installed on the Chromecast HD. Selector return, clean relaunch and Home/resume are verified. Main-checkout integration remains separate.
 
 Replace the ten follower clownfish with **29 tiger barbs**, retaining the player's clownfish: **30 fish instead of 11**. First measure the population using one textured, two-sided quad per barb. Then replace each quad with one actual fish mesh, including swimming animation within that same mesh. Plan a third pass for improved meshes, with another profile before adopting them.
 
@@ -224,3 +224,90 @@ Yaw and pitch now ease from the existing actor rotation every frame, taking the 
 - [x] Included and installed in the [five-tank selector release](2026-10-02-aquarium-five-tank-selector.md), with exact final standalone payload verified. APK SHA-256: `6236ade65122ff712556be9a183ca83f1240bf9d85549830eb6f1bcc6de352b0`. See that plan for device control checks and their limits.
 
 An intermediate continuity/easing release was installed and captured with the full warmup/input protocol: [one-run measurement](2026-10-02-aquarium-tiger-barbs/profiles/P2-smooth/analysis.json), **37.26 FPS**, p95 **50.05 ms**, versus the preceding P2 median **38.71 FPS** (−1.45 FPS). It includes additional prediction/bounds work and actor rotation reads. This is one exploratory run and predates the final hard turn-rate cap; it does not replace the three-run phase table or establish the final cap cost. Motion correctness was evaluated separately through actual per-frame positions, rather than inferred from FPS.
+
+
+## Phase 3 — refined single-mesh barbs (2026-10-03)
+
+Implementation lives on `aquarium/tiger-barbs-phase3` in `.claude/worktrees/tiger-barbs-phase3`, based on `10310efe`. The normal builder selects `barb_refined`; explicit `barb_mesh` preserves phase 2 for repeatable comparisons. The refined asset has nine body sections, a tapered snout, narrower peduncle, shaped tail lobes with an open fork, and swept paired fins. Body UVs map the flank’s full usable height, including the eye and gill area, instead of vertically stretching a narrow texture strip. Dedicated fin UV islands sample the caudal, dorsal, anal and pectoral artwork on that same texture. The body stays within opaque texels; fins retain cutout alpha and reversed faces in the same mesh.
+
+The asset contains **98 source vertices and 172 triangles**, versus phase 2’s **76 vertices and 128 triangles**: +22 vertices and +44 triangles per barb. There is still **one actor, one mesh and one material per barb**, 29 followers and 61 total level actors. Nominal total length remains 4.5–6.0 cm; the refined geometry’s nose-to-tail bounds equal its configured length. Schooling, movement continuity, turn limits, startle rules, five behavior updates per frame and the existing rear-body travelling wave are shared unchanged between P2 and P3. No distance-detail mechanism is added without evidence that it is necessary.
+
+### Close asset previews
+
+These Blender renders use the exported UVs and production 256×128 texture, with no subdivision or smoothing. They show the rest pose, not a new illustration or an actual engine capture. The script is [render-comparison.py](2026-10-02-aquarium-tiger-barbs/phase3/render-comparison.py).
+
+| Phase 2 | Phase 3 |
+|---|---|
+| ![Phase 2 close asset preview](2026-10-02-aquarium-tiger-barbs/phase3/P2-close.png) | ![Phase 3 close asset preview](2026-10-02-aquarium-tiger-barbs/phase3/P3-close.png) |
+
+### Fresh comparison protocol
+
+Re-run B1, B11, P1, P2 static, P2 animated, P3 static and P3 animated against identical native libraries from the backed-up installed Aquarium APK. For each variant: three uninstrumented presentation runs plus a separate instrumented CPU/memory run; each uses 30 seconds of warmup and the same five 12-second input scenarios. Retain raw timestamps, input boundaries, thermal receipts, memory, scoped counters, screenshots and APK/config hashes under [profiles/phase3-comparison](2026-10-02-aquarium-tiger-barbs/profiles/phase3-comparison/). CPU measurements are nested; report total Update + Render separately rather than adding nested actor/school/pose scopes.
+
+Asset-only benchmark packaging uses `scripts/build-aquarium-variant.py --base-apk /tmp/aquarium-before-phase3.apk`; every comparison reuses the same native libraries, app resources and signing identity. Diagnostic APKs contain only their selected tank. The final normal APK must contain all seven selector tanks and no profiling argument. Keep the main checkout unchanged.
+
+The first three shape-prototype captures used a nose that was 2% short. They are retained separately as `profiles/P3-shape-prototype` and excluded from the final comparison table. The final mesh restores the exact nose-to-tail length, uses dedicated fin UV islands, and is rebuilt before its measured captures. A failed B1 launch that left Aquarium is retained as `profiles/B1-interrupted-excluded` and contributes no measurements; subsequent captures assert that Aquarium remains the foreground activity.
+
+### Verification and adoption
+
+Geometry checks cover exported fixed-point minimum triangle area, body-face winding, two-sided fins, interpolated UV alpha at source and production texture resolutions, and the full-length bounds. The final asset, actual-engine schooling/movement and APK regression suite is recorded below. All matching profiles and the normal selector installation are complete. See [integration notes](2026-10-02-aquarium-tiger-barbs/phase3/integration.md) for the concurrent main-checkout species movement work; regenerate combined bundles rather than replacing its other tank assets.
+
+
+### Fresh phase 3 measurements
+
+These results use the final full-length mesh and dedicated fin UVs, not the shape prototype. Three presentation runs and one separate instrumented trace per variant completed on the Chromecast HD at 1920×1080. All use identical native libraries and the fixed warmup/input protocol above; all captured thermal status values are zero. This fresh set supersedes the earlier table for comparisons against phase 3, because the earlier profiles predate the continuity/turn fixes and current device conditions.
+
+| Variant | Actor ms | School ms | Pose ms | Animation ms | Render ms | Total CPU ms | Present p50 / p95 / p99 ms | FPS | Missed refresh % | PSS MiB | Draws / triangles |
+| --- | --- | --- | --- | --- | --- | --- | --- | --- | --- | --- | --- |
+| B1 | 1.592 | 0.000 | 0.000 | 0.000 | 2.407 | 4.755 | 16.683 / 33.367 / 33.367 | 56.14 | 6.69 | 29.35 | 17 / 1444 |
+| B11 | 2.599 | 1.761 | 2.014 | 0.000 | 6.438 | 13.617 | 16.683 / 33.367 / 33.367 | 51.11 | 16.85 | 31.44 | 67 / 3826 |
+| P1 | 2.021 | 10.345 | 2.247 | 0.000 | 3.321 | 18.567 | 16.683 / 33.367 / 50.050 | 43.30 | 35.72 | 28.70 | 46 / 1502 |
+| P2-static | 1.992 | 10.139 | 2.226 | 0.000 | 7.121 | 22.103 | 33.367 / 50.050 / 50.050 | 37.29 | 52.88 | 29.46 | 46 / 3288 |
+| P2-animated | 2.020 | 10.248 | 2.723 | 0.126 | 7.186 | 22.801 | 33.367 / 50.050 / 50.050 | 36.78 | 54.88 | 31.24 | 46 / 3286 |
+| P3-static | 2.013 | 10.125 | 2.248 | 0.000 | 8.535 | 23.539 | 33.367 / 50.050 / 50.050 | 35.52 | 59.19 | 29.79 | 46 / 3922 |
+| P3-animated | 2.014 | 10.174 | 2.739 | 0.142 | 8.469 | 24.015 | 33.367 / 50.050 / 50.050 | 34.97 | 63.07 | 29.83 | 46 / 3924 |
+
+Actor/school/pose/animation scopes are nested, and **Total CPU = Update + Render**. The animation column is the native vertex-deformation scope, already included in pose. CPU and memory are measured in a separate instrumented trace; FPS/percentiles are medians from three uninstrumented runs. The CSV/JSON preserve scenario breakdowns, run FPS ranges, object counters, resource sizes and deltas.
+
+| Final animated P3 delta against | Actor ms | School ms | Render ms | Total CPU ms | FPS | Missed refresh percentage points |
+|---|---:|---:|---:|---:|---:|---:|
+| B1 | +0.423 | +10.174 | +6.061 | +19.260 | -21.162 | +56.383 |
+| B11 | -0.585 | +8.412 | +2.031 | +10.398 | -16.140 | +46.220 |
+| P1 | -0.007 | -0.171 | +5.148 | +5.447 | -8.325 | +27.347 |
+| P2-animated | -0.006 | -0.074 | +1.283 | +1.213 | -1.803 | +8.188 |
+
+**P3 animated versus P2 animated:** +1.213 ms total CPU (+5.32%), chiefly +1.283 ms rendering (+17.85%); native animation +0.016 ms, with actor and school differences small enough to treat as trace variation. Presented FPS drops 1.80 (−4.90%); p95 and p99 remain approximately 50.05 ms, while missed refresh rises 8.19 percentage points. Draws remain 46. The static comparison independently shows +1.414 ms rendering and +1.436 ms total CPU. The refinement has a measurable rendering cost; reducing fish actor count does not remove geometry-processing cost. These are CPU rendering scopes, not isolated GPU timings.
+
+The body/fin/UV improvement is adopted as the normal worktree build at that documented cost. It keeps one actor/mesh/material per barb, without a new detail-level system or reduced school update budget. `barb_mesh` remains the explicit P2 comparison/revert switch. Schooling still accounts for roughly 10.17 ms within animated P3’s Update scope; optimising it would be separate work.
+
+### Memory and resource comparison
+
+| Animated build | Total PSS MiB | Native heap KiB | Graphics KiB | Source/exported vertices | Mesh triangles | Mesh file bytes | Level CD bytes |
+|---|---:|---:|---:|---:|---:|---:|---:|
+| P2-animated | 31.24 | 5832 | 6044 | 76 / 76 | 128 | 3144 | 280576 |
+| P3-animated | 29.83 | 5996 | 6108 | 98 / 98 | 172 | 4024 | 280576 |
+
+The apparent total-PSS decrease is **not an asset memory saving**: the Android `System` PSS category is about 1.42 MiB lower in the later P3 trace. P3’s measured native heap rises 164 KiB and Graphics rises 64 KiB versus animated P2. Static P3 adds 136 KiB native heap and 128 KiB Graphics versus static P2. The shared mesh grows 880 bytes; sector padding leaves the level CD at the same byte size. All variants retain eight static collision bodies; P1/P2/P3 retain 61 level actors and 47 rendering actors.
+
+- [Interactive close-preview and scenario comparison](2026-10-02-aquarium-tiger-barbs/phase3/comparison.html), with its embedded final table.
+- [Comparison JSON with absolute and percentage deltas](2026-10-02-aquarium-tiger-barbs/phase3/comparison.json), [CSV](2026-10-02-aquarium-tiger-barbs/phase3/comparison.csv), [reproducible summary script](2026-10-02-aquarium-tiger-barbs/phase3/summarise-comparison.py).
+- [Mesh/material metrics](2026-10-02-aquarium-tiger-barbs/phase3/mesh-metrics.json), [variant APK/resource hashes](2026-10-02-aquarium-tiger-barbs/phase3/builds/artifact-hashes.json), [exact source hashes](2026-10-02-aquarium-tiger-barbs/phase3/source-files.json).
+
+![Final animated phase 3 on the Chromecast](2026-10-02-aquarium-tiger-barbs/profiles/phase3-comparison/P3-animated/run-1/swarm.png)
+
+A single uninstrumented late P2 control after the full suite measured **36.84 FPS**, versus the earlier three-run P2 median **36.78 FPS** (within 0.3%). It is a drift check, not an additional P3 result or replacement for the three-run medians. [Late control receipt](2026-10-02-aquarium-tiger-barbs/profiles/phase3-comparison/P2-animated-late-control/analysis.json).
+
+
+### Final normal installation
+
+The installed seven-tank APK preserves both native ABIs, current launcher resources and phone controls from the backed-up app; only `assets/cd.iff` changes. It contains no profiling arguments. All seven standalone tank payloads are present, with the refined barbs in the first tank. [Final APK receipt](2026-10-02-aquarium-tiger-barbs/phase3/final-apk.json), [device lifecycle and installed hash receipt](2026-10-02-aquarium-tiger-barbs/phase3/device/lifecycle.json).
+
+APK SHA-256: `ca149e8e024396570999006b220246ce14ed31fb8af6dcefe6bbde8084a210e9` (3,619,526 bytes), exactly matching the APK pulled back from the installed package. Test key events dismiss the phone overlay, open the first tank and return to the selector. Home/resume keeps PID 21554; force-stop/relaunch starts PID 21755 and renders the refined tank. The selector, returned selector and relaunched tank screenshots were visually reviewed. These are injected-key checks, not a new physical-remote test of all seven tanks.
+
+![Normal installed phase 3 after relaunch](2026-10-02-aquarium-tiger-barbs/phase3/device/relaunched-tank.png)
+
+![Return from the phase 3 tank to the selector](2026-10-02-aquarium-tiger-barbs/phase3/device/returned-selector.png)
+
+Final verification: **64 checks passed; two debug-APK-only checks skipped** because this worktree has no separate debug APK. The normal release APK checks passed. Coverage includes fixed-point geometry/UV alpha, native deformation, actor/mailbox counts, continuous movement and bounded turns, actual-engine player/scenery behavior, and seven-tank APK contents. [Verification receipt](2026-10-02-aquarium-tiger-barbs/phase3/verification.json), [pytest output](2026-10-02-aquarium-tiger-barbs/phase3/verification.txt).
+
+The complete measured set contains 21 primary presentation captures, seven separate CPU/memory captures and one late presentation control. Prototype and interrupted captures remain explicitly excluded. The source worktree is ready for review and integration; it has not been merged into the concurrently edited main checkout.

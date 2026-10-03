@@ -215,7 +215,7 @@ def test_each_barb_is_one_mass_zero_scriptless_mesh_actor(objs):
     assert len(names) == len(set(names))
     followers=[by_name(objs,f'tiger-barb-{k}') for k in range(1,SCHOOL_N+1)]
     assert len({o['mesh'] for o in followers}) == 1
-    assert followers[0]['mesh'] in ('tiger_barb_quad.iff','tiger_barb_mesh.iff')
+    assert followers[0]['mesh'] in ('tiger_barb_quad.iff','tiger_barb_mesh.iff','tiger_barb_refined.iff')
     for fish in followers:
         assert fish['class']=='platform' and fish['mass']==0
         assert not fish['script']
