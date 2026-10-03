@@ -65,3 +65,10 @@ s.text(30,299,'Cancel / ↶: resume the existing tank unchanged. Invalid input: 
 s.text(30,355,'Same seed + generator version + settings → same colony growth at the same simulation time.',21)
 s.text(30,410,'New random seed: choose a fresh seed, reset growth time, release old buffers safely, start again.',20)
 s.save('seed-regeneration-diagram.svg')
+
+# Complete phone settings; TV is a status mirror when the phone is connected.
+s=art.SVG(520,950);s.rect(0,0,520,950,'#eef2e7');s.rect(22,22,476,906,'#faf9f0',24);s.text(47,77,'Plant settings',29,weight='bold');s.text(47,117,'Connected to your aquarium',18,'#53715c');s.text(47,165,'Seed',22,weight='bold');s.rect(47,184,426,62,'#dce7cc',8);s.text(64,225,'713',28);s.text(47,277,'Tap to enter with the numeric keyboard',17);s.text(47,333,'Growth speed',22,weight='bold');s.text(388,333,'1×',22,weight='bold');s.path('M60 368 H454',stroke='#71896a',sw=7);s.circle(215,368,12,'#426954');s.text(47,406,'Paused  0.25×  0.5×  1×  2×  4×  8×',15);s.text(47,456,'Growth age: 24 s · expanding colonies',18);s.text(47,489,'The tank is paused while you edit.',18)
+for y,label,color,ink in [(530,'Apply speed','#d3dfc8','#233f32'),(607,'Regenerate with this seed','#537c5f','#faf9f0'),(684,'New random seed','#d3dfc8','#233f32'),(761,'Cancel','#e6e7db','#233f32')]:
+ s.rect(47,y,426,60,color,10);s.text(65,y+38,label,21,ink,weight='bold')
+s.lines(47,864,'Applying speed keeps your plants. Regenerate starts young colonies again.',42,17,spacing=23)
+s.save('phone-settings-mockup.svg')
