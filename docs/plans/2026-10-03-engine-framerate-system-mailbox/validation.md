@@ -178,3 +178,12 @@ matches the engine. It closes its browser and local HTTP server afterward.
   and adopted host WebGL context.
 
 Concise retained results are in [runtime-checks.txt](runtime-checks.txt).
+
+## Integrated result
+
+The verified feature was merged with the newer aquarium work at `cd36444d` as
+[`2639369a`](https://github.com/wbniv/WorldFoundry/commit/2639369a). The integrated
+tree builds on Linux and both Android ABIs. All 8 selected native checks and
+2 mailbox hot-path pytest checks pass again. The Apple workflow links above
+record their exact tested revisions (`330f70de` for macOS, `be82cf5e` for iOS);
+the final integration rerun was native/build validation and did not use Chromecast.

@@ -2,6 +2,7 @@
 
 **Status:** Phase 1 implemented and validated on Linux, Android, iOS, macOS, and browser/WASM, including the browser editor. Optional backend failures are recorded below. Phase 2 remains deferred.
 **Implementation / merge commit:** [`402d0f2f`](https://github.com/wbniv/WorldFoundry/commit/402d0f2f) (fast-forward merge; pushed to `origin/2026-new-level`).
+**Verification merge:** [`2639369a`](https://github.com/wbniv/WorldFoundry/commit/2639369a), integrating the completed checks with the newer aquarium changes on `2026-new-level`.
 **Date:** 2026-10-03
 **Testing coordination:** Notify Will before any further Chromecast testing. The initial standalone sampler ran before this preference was received. The later game/lifecycle check was announced in advance and is complete; its separate test app was removed.
 **Request:** Have the engine calculate the true measured frame rate on every supported platform and expose it through a predefined global system mailbox for testers and developers. This is diagnostic telemetry and must never drive gameplay mechanics. Games may read it to display an FPS overlay or report performance.
@@ -165,6 +166,8 @@ See [validation commands and evidence](2026-10-03-engine-framerate-system-mailbo
 - [x] Push `feature/engine-framerate-mailbox` to origin.
 - [x] Fast-forward merge into `2026-new-level` and push the result to origin on 2026-10-03.
 - [x] Preserve the original checkout's unrelated uncommitted edits; integration used `/tmp/WorldFoundry-framerate-merge`.
+- [x] Complete platform checks and merge their test infrastructure and contained build fixes with the latest `2026-new-level` (`cd36444d`) as `2639369a`.
+- [x] Rebuild the integrated Linux engine and both Android ABIs; all 8 selected native tests and 2 mailbox hot-path checks pass on the merged result.
 
 Verification used `/tmp/WorldFoundry-framerate` on `verify/engine-framerate-mailbox`. Platform checks are complete for the configurations in the validation record. Remaining work is the optional backend defects listed above and deferred Phase 2. Physical iOS devices and Android arm64 runtime were not exercised; iOS simulator and Chromecast runtime evidence are recorded explicitly. Notify Will before any new Chromecast testing.
 
