@@ -18,7 +18,7 @@
  JOYSTICK_BUTTON_C aq-held JOYSTICK_BUTTON_B aq-held - dup 0 <> if aq-dy fish! else drop then
  0 aq-dart-req fish!
  JOYSTICK_BUTTON_A aq-edge if
-  aq-prev fish@ JOYSTICK_BUTTON_UP & 0 <> if ar-toggle
+  JOYSTICK_BUTTON_UP aq-held if ar-toggle
   else 1 aq-dart-req fish! then
  then ;
 : ar-input
@@ -60,8 +60,9 @@
   ar-error fish@ ar-turn-side fish@ * 0 < if ar-error fish@ ar-turn-side fish@ + ar-error fish! then
   ar-error fish@ abs .35 < if 0 ar-turn-side fish! then
  then
- aq-any? ar-error fish@ abs .18 > & aq-speed fish@ .5 < & if 1 ar-turn fish! then
- ar-error fish@ abs .10 < aq-any? 0 = | if 0 ar-turn fish! then
+ aq-any? ar-error fish@ abs .18 >
+ aq-blocked? ar-error fish@ abs .005 > & | & if 1 ar-turn fish! then
+ ar-error fish@ abs .005 < aq-any? 0 = | if 0 ar-turn fish! then
  ar-room
  ar-room-mb fish@ ar-length < aq-dart-t fish@ 0 > | if ar-radius-wall else ar-radius-cruise then ar-radius fish! ;
 : ar-gait
@@ -69,13 +70,12 @@
  aq-dart-t fish@ 0 > if
   aq-dart-v aq-tau-dart aq-ease 3 ar-state fish!
  else aq-drive? if
-  ar-error fish@ abs .25 > if
-   .35 aq-tau-a aq-ease 1 aq-brake fish! 2 ar-state fish!
-  else ar-turn fish@ if
-   0 aq-tau-glide aq-ease 1 aq-brake fish! 2 ar-state fish!
+  ar-turn fish@ if
+   ar-turn-speed .18 aq-ease 1 aq-brake fish! 2 ar-state fish!
   else
-   aq-v aq-tau-a aq-ease 1 ar-state fish!
-  then then
+   aq-v 1 ar-error fish@ abs .18 / fish-clamp01 .35 * - *
+   aq-tau-a aq-ease 1 ar-state fish!
+  then
  else
   0 aq-tau-glide aq-ease aq-speed fish@ aq-v / fish-clamp01 aq-brake fish!
  then then
@@ -83,7 +83,10 @@
  aq-speed fish@ .005 < if 0 aq-speed fish! then
  aq-drive? aq-was-moving fish! ;
 : ar-steer-yaw
- ar-turn fish@ if ar-pivot-rate else
+ ar-turn fish@ if
+  ar-pivot-rate aq-speed fish@ aq-v / fish-clamp01
+  ar-pivot-rate aq-v ar-radius-cruise / 6.2831853 / - * -
+ else
   aq-speed fish@ ar-radius fish@ / 6.2831853 / aq-yaw-wmax min
  then ar-yaw-cap fish!
  ar-error fish@ aq-yaw-wn dup * *
@@ -94,7 +97,7 @@
  aq-yaw-w fish@ aq-bank * negate aq-bank-max fish-clampabs
  aq-roll fish@ - fish-dt .35 / fish-clamp01 * aq-roll fish@ + aq-roll fish! ;
 : ar-bend-tick
- ar-turn fish@ if ar-error fish@ -.7 * else aq-yaw-w fish@ -2 * then
+ aq-yaw-w fish@ -1.8 *
  .35 fish-clampabs ar-bend fish@ - fish-dt .25 / fish-clamp01 * ar-bend fish@ + ar-bend fish! ;
 : ar-caps
  \ Ray distance / (lookahead + glide time) anticipates stopping before the swept envelope.

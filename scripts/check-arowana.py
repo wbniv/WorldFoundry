@@ -83,12 +83,15 @@ try:
  for name,bits in [('right',8192),('left',16384),('up',2048),('down',4096),('away',4),('toward',2)]:
   reset();trace(name,bits,360);shot(name)
  reset();trace('build-drive',8192,60)
+ reverse_start=value(player,1906);first_reverse=None;aligned_reverse=None
  client.inject_input('joystick1_raw',16384,-1)
- for frame in range(40):
-  step(10);audit('reverse-turn')
+ for frame in range(100 if a.video else 40):
+  step(1 if a.video else 10);audit('reverse-turn')
+  if first_reverse is None and value(player,3018)<-.5:first_reverse=value(player,1906)-reverse_start
+  if aligned_reverse is None and abs(abs(state('aq-yaw'))-.5)<.02:aligned_reverse=value(player,1906)-reverse_start
   if a.video:shot(f'reverse-{frame:03d}')
-  if frame in (5,20,35):shot(f'reverse-turn-{frame:02d}')
- assert pos()[0]<0,'reversal never recovered forward swimming'
+  if frame in ((10,40,70) if a.video else (5,20,35)):shot(f'reverse-turn-{frame:02d}')
+ assert state('aq-fx')<-.9 and state('aq-speed')>1,'reversal never recovered forward swimming'
  trace('release',0,120);assert state('aq-speed')<.02
  reset((15.4,10.4,6),.125);trace('corner-recovery',16386,500);shot('corner-recovery')
  assert pos()[0]<13 and pos()[1]<8,'corner recovery failed'
@@ -101,10 +104,14 @@ try:
   assert state('aq-mode')==1 and state('ar-neutral')==1 and state('aq-dart-t')==0
   trace('chord-held-direction',8192,5);assert state('aq-dx')==0
   trace('chord-neutral',0,1);trace('depth-mode',2048,1);assert state('aq-dy')==1
+ if mapping['profile']=='remote':
+  reset();trace('simultaneous-mode',2049,1)
+  assert state('aq-mode')==1 and state('aq-dart-t')==0
  reset();client.set_mailbox(3009,8,player);step(30);audit('wide');shot('whole-tank-oblique')
  if a.video:
-  subprocess.run(['ffmpeg','-y','-framerate','2','-i',str(OUT/'reverse-%03d.png'),'-c:v','libx264','-pix_fmt','yuv420p',str(OUT/'reverse-turn.mp4')],check=True,stdout=subprocess.DEVNULL,stderr=subprocess.DEVNULL)
+  subprocess.run(['ffmpeg','-y','-framerate','20','-i',str(OUT/'reverse-%03d.png'),'-c:v','libx264','-pix_fmt','yuv420p',str(OUT/'reverse-turn.mp4')],check=True,stdout=subprocess.DEVNULL,stderr=subprocess.DEVNULL)
  result=dict(status='PASS',profile=mapping['profile'],samples=samples,
+  response=dict(first_reverse_seconds=first_reverse,near_alignment_seconds=aligned_reverse),
   note='Actual desktop engine: full conservative deformed-envelope bounds, root pose, curvature, reversal, corner recovery, six inputs, burst recovery, release and remote chord. Video is fixed simulation time, not a presented-frame performance measurement. Physical remote/Chromecast validation remains pending.')
  (OUT/'checks.json').write_text(json.dumps(result,indent=2)+'\n')
  print(json.dumps(dict(status='PASS',profile=mapping['profile'],samples=len(samples),minimum_clearance=min(s['minimum_clearance'] for s in samples)),indent=2))

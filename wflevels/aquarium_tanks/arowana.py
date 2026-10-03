@@ -100,7 +100,7 @@ def scripts(indices, parts, offsets, profile, config):
     header='\\ Asian arowana, x10 scale. Game motion tuning.\n: fish-off 0 ;\n'
     tuning={'fish-bob-amp':.018,'fish-tail-idle-amp':.012,'fish-tail-idle-hz':.7,
             'fish-tail-app':1.0,'fish-tail-swim-amp':.038,'fish-tail-hz-max':3,
-            'fish-counter-yaw':0,'fish-pec-idle-hz':.8,'fish-pec-hz-hi':1.8,
+            'fish-counter-yaw':0,'fish-pec-idle-hz':.65,'fish-pec-hz-hi':1.2,
             'fish-pec-v-hi':3,'fish-pec-sync-lo':.5,'fish-pec-sync-hi':2,
             'fish-pec-idle-amp':.025,'fish-pec-swim-amp':.025,'fish-pec-brake':.045,
             'fish-sway-yaw':.003,'fish-sway-pitch':.002}
@@ -118,10 +118,10 @@ def scripts(indices, parts, offsets, profile, config):
         'aq-ix':config.DIMENSIONS_M[0]*config.WORLD_SCALE/2-.23,'aq-iy':config.DIMENSIONS_M[1]*config.WORLD_SCALE/2-.23,'aq-zlo':config.BOTTOM,'aq-zhi':config.TOP,'aq-zmin':.7,
         # Conservative envelope includes bob, scales, all fins and animated barbels.
         'aq-box-cx':0,'aq-box-cz':0,'aq-box-hx':3.70,'aq-box-hy':1.50,'aq-box-hz':1.19,
-        'aq-v':2,'aq-burst-v':2.6,'aq-cycle':1.3,'aq-duty':.55,'aq-tau-a':.35,
-        'aq-tau-c':1,'aq-tau-glide':.65,'aq-tau-dart':.18,'aq-dart-v':4,'aq-dart-time':.30,
-        'aq-yaw-wn':3,'aq-yaw-zeta':1,'aq-yaw-wmax':.23,'aq-pitch-wn':2,'aq-pitch-zeta':1,
-        'aq-pitch-wmax':.04,'aq-pitch-max':1/12,'aq-pitch-diag':1/18,'aq-bank':.35,
+        'aq-v':2.8,'aq-burst-v':2.6,'aq-cycle':1.3,'aq-duty':.55,'aq-tau-a':.22,
+        'aq-tau-c':1,'aq-tau-glide':.45,'aq-tau-dart':.18,'aq-dart-v':4,'aq-dart-time':.30,
+        'aq-yaw-wn':6,'aq-yaw-zeta':1,'aq-yaw-wmax':.23,'aq-pitch-wn':4,'aq-pitch-zeta':1,
+        'aq-pitch-wmax':.08,'aq-pitch-max':1/12,'aq-pitch-diag':1/18,'aq-bank':.35,
         'aq-bank-max':8/360,'aq-turn-dip':.55,'aq-tau-wall':1.0,'aq-flatten-d':1,
         'aq-zone-x':0,'aq-zone-y':0,'aq-zone-z':config.CLOSE_LOOK[2],'aq-zone-in':4,'aq-zone-out':5,
         'aq-shot-a':indices['cs_wide'],'aq-shot-b':indices['cs_close'],'aq-look-b':indices['LookClose'],
@@ -130,7 +130,7 @@ def scripts(indices, parts, offsets, profile, config):
               'cam-x','cam-z','cam-init','target-last','turn-side','yaw-old']
     values.update({'ar-'+n:760+j for j,n in enumerate(ar_state)})
     values.update({'ar-length':6.5,'ar-radius-cruise':6.5*.75,'ar-radius-wall':6.5*1.25,
-        'ar-recovery':1.2,'ar-pivot-rate':.035,
+        'ar-recovery':1.2,'ar-pivot-rate':.18,'ar-turn-speed':.9,
         'ar-inner-x':values['aq-ix'],'ar-inner-y':values['aq-iy'],
         'ar-bottom':config.BOTTOM,'ar-top':config.TOP,'ar-sweep-xy':4.25,'ar-sweep-z':3.30})
     for n,v in values.items():header+=word(n,v)

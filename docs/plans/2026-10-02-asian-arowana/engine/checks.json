@@ -5,11 +5,11 @@
     {
       "trace": "right",
       "position": [
-        1.332073,
+        2.187546,
         0.0,
         6.0
       ],
-      "speed": 1.908358,
+      "speed": 2.783868,
       "yaw": 0.0,
       "pitch": 0.0,
       "yaw_rate": 0.0,
@@ -21,11 +21,11 @@
     {
       "trace": "right",
       "position": [
-        3.301473,
+        4.984025,
         0.0,
         6.0
       ],
-      "speed": 1.995801,
+      "speed": 2.799907,
       "yaw": 0.0,
       "pitch": 0.0,
       "yaw_rate": 0.0,
@@ -37,11 +37,11 @@
     {
       "trace": "right",
       "position": [
-        5.300078,
+        7.784016,
         0.0,
         6.0
       ],
-      "speed": 1.999807,
+      "speed": 2.799999,
       "yaw": 0.0,
       "pitch": 0.0,
       "yaw_rate": 0.0,
@@ -53,27 +53,11 @@
     {
       "trace": "right",
       "position": [
-        7.300022,
+        10.584023,
         0.0,
         6.0
       ],
-      "speed": 1.999991,
-      "yaw": 0.0,
-      "pitch": 0.0,
-      "yaw_rate": 0.0,
-      "radius": 4.875,
-      "low_speed_turn": 0.0,
-      "minimum_clearance": 4.609999999999999,
-      "bend": 0.0
-    },
-    {
-      "trace": "right",
-      "position": [
-        9.300028,
-        0.0,
-        6.0
-      ],
-      "speed": 2.0,
+      "speed": 2.799999,
       "yaw": 0.0,
       "pitch": 0.0,
       "yaw_rate": 0.0,
@@ -85,193 +69,177 @@
     {
       "trace": "right",
       "position": [
-        11.300035,
+        13.324116,
         0.0,
         6.0
       ],
-      "speed": 2.0,
+      "speed": 2.195885,
       "yaw": 0.0,
       "pitch": 0.0,
       "yaw_rate": 0.0,
       "radius": 8.125,
       "low_speed_turn": 0.0,
-      "minimum_clearance": 4.609999999999999,
+      "minimum_clearance": 2.848884000000001,
       "bend": 0.0
     },
     {
       "trace": "right",
       "position": [
-        13.300043,
+        14.73281,
         0.0,
         6.0
       ],
-      "speed": 2.0,
+      "speed": 0.78719,
       "yaw": 0.0,
       "pitch": 0.0,
       "yaw_rate": 0.0,
       "radius": 8.125,
       "low_speed_turn": 0.0,
-      "minimum_clearance": 2.8729570000000004,
+      "minimum_clearance": 1.4401900000000003,
       "bend": 0.0
     },
     {
       "trace": "right",
       "position": [
-        14.717232,
+        15.237804,
         0.0,
         6.0
       ],
-      "speed": 0.802769,
+      "speed": 0.282196,
       "yaw": 0.0,
       "pitch": 0.0,
       "yaw_rate": 0.0,
       "radius": 8.125,
       "low_speed_turn": 0.0,
-      "minimum_clearance": 1.4557680000000017,
+      "minimum_clearance": 0.9351960000000004,
       "bend": 0.0
     },
     {
       "trace": "right",
       "position": [
-        15.23222,
+        15.418838,
         0.0,
         6.0
       ],
-      "speed": 0.287781,
+      "speed": 0.101163,
       "yaw": 0.0,
       "pitch": 0.0,
       "yaw_rate": 0.0,
       "radius": 8.125,
       "low_speed_turn": 0.0,
-      "minimum_clearance": 0.9407800000000011,
+      "minimum_clearance": 0.7541620000000018,
       "bend": 0.0
     },
     {
       "trace": "right",
       "position": [
-        15.416836,
+        15.483736,
         0.0,
         6.0
       ],
-      "speed": 0.103165,
+      "speed": 0.036264,
       "yaw": 0.0,
       "pitch": 0.0,
       "yaw_rate": 0.0,
       "radius": 8.125,
       "low_speed_turn": 0.0,
-      "minimum_clearance": 0.756164000000001,
+      "minimum_clearance": 0.6892640000000005,
       "bend": 0.0
     },
     {
       "trace": "right",
       "position": [
-        15.483018,
+        15.507,
         0.0,
         6.0
       ],
-      "speed": 0.036983,
+      "speed": 0.013,
       "yaw": 0.0,
       "pitch": 0.0,
       "yaw_rate": 0.0,
       "radius": 8.125,
       "low_speed_turn": 0.0,
-      "minimum_clearance": 0.6899820000000014,
+      "minimum_clearance": 0.6660000000000013,
       "bend": 0.0
     },
     {
       "trace": "right",
       "position": [
-        15.506742,
+        15.51534,
         0.0,
         6.0
       ],
-      "speed": 0.013259,
+      "speed": 0.004661,
       "yaw": 0.0,
       "pitch": 0.0,
       "yaw_rate": 0.0,
       "radius": 8.125,
       "low_speed_turn": 0.0,
-      "minimum_clearance": 0.6662580000000018,
+      "minimum_clearance": 0.6576600000000008,
       "bend": 0.0
     },
     {
       "trace": "right",
       "position": [
-        15.515246,
+        15.51833,
         0.0,
         6.0
       ],
-      "speed": 0.004754,
+      "speed": 0.001671,
       "yaw": 0.0,
       "pitch": 0.0,
       "yaw_rate": 0.0,
       "radius": 8.125,
       "low_speed_turn": 0.0,
-      "minimum_clearance": 0.6577540000000015,
+      "minimum_clearance": 0.6546700000000003,
       "bend": 0.0
     },
     {
       "trace": "right",
       "position": [
-        15.518296,
+        15.519403,
         0.0,
         6.0
       ],
-      "speed": 0.001704,
+      "speed": 0.000598,
       "yaw": 0.0,
       "pitch": 0.0,
       "yaw_rate": 0.0,
       "radius": 8.125,
       "low_speed_turn": 0.0,
-      "minimum_clearance": 0.6547040000000015,
+      "minimum_clearance": 0.6535970000000004,
       "bend": 0.0
     },
     {
       "trace": "right",
       "position": [
-        15.519389,
+        15.519786,
         0.0,
         6.0
       ],
-      "speed": 0.000611,
+      "speed": 0.000215,
       "yaw": 0.0,
       "pitch": 0.0,
       "yaw_rate": 0.0,
       "radius": 8.125,
       "low_speed_turn": 0.0,
-      "minimum_clearance": 0.6536110000000006,
+      "minimum_clearance": 0.6532140000000011,
       "bend": 0.0
     },
     {
       "trace": "right",
       "position": [
-        15.51978,
+        15.519922,
         0.0,
         6.0
       ],
-      "speed": 0.00022,
+      "speed": 7.8e-05,
       "yaw": 0.0,
       "pitch": 0.0,
       "yaw_rate": 0.0,
       "radius": 8.125,
       "low_speed_turn": 0.0,
-      "minimum_clearance": 0.6532200000000001,
-      "bend": 0.0
-    },
-    {
-      "trace": "right",
-      "position": [
-        15.519921,
-        0.0,
-        6.0
-      ],
-      "speed": 7.9e-05,
-      "yaw": 0.0,
-      "pitch": 0.0,
-      "yaw_rate": 0.0,
-      "radius": 8.125,
-      "low_speed_turn": 0.0,
-      "minimum_clearance": 0.6530790000000009,
+      "minimum_clearance": 0.6530780000000016,
       "bend": 0.0
     },
     {
@@ -291,2541 +259,3325 @@
       "bend": 0.0
     },
     {
-      "trace": "left",
+      "trace": "right",
       "position": [
-        0.230806,
-        0.030269,
+        15.519991,
+        0.0,
         6.0
       ],
-      "speed": 0.333962,
-      "yaw": 0.034999,
+      "speed": 1e-05,
+      "yaw": 0.0,
       "pitch": 0.0,
-      "yaw_rate": 0.035,
-      "radius": 4.875,
-      "low_speed_turn": 1.0,
-      "minimum_clearance": 4.503016892397327,
-      "bend": -0.327519
+      "yaw_rate": 0.0,
+      "radius": 8.125,
+      "low_speed_turn": 0.0,
+      "minimum_clearance": 0.6530090000000017,
+      "bend": 0.0
+    },
+    {
+      "trace": "right",
+      "position": [
+        15.519991,
+        0.0,
+        6.0
+      ],
+      "speed": 1e-05,
+      "yaw": 0.0,
+      "pitch": 0.0,
+      "yaw_rate": 0.0,
+      "radius": 8.125,
+      "low_speed_turn": 0.0,
+      "minimum_clearance": 0.6530090000000017,
+      "bend": 0.0
     },
     {
       "trace": "left",
       "position": [
-        0.556529,
-        0.140557,
+        0.611555,
+        0.371989,
         6.0
       ],
-      "speed": 0.349265,
-      "yaw": 0.069999,
+      "speed": 0.898658,
+      "yaw": 0.155219,
       "pitch": 0.0,
-      "yaw_rate": 0.035,
+      "yaw_rate": 0.151568,
       "radius": 4.875,
       "low_speed_turn": 1.0,
-      "minimum_clearance": 4.498289475831571,
-      "bend": -0.307078
+      "minimum_clearance": 4.421243158319415,
+      "bend": -0.270556
     },
     {
       "trace": "left",
       "position": [
-        0.854721,
-        0.321262,
+        0.735251,
+        1.228945,
         6.0
       ],
-      "speed": 0.349966,
-      "yaw": 0.104998,
+      "speed": 0.899998,
+      "yaw": 0.306748,
       "pitch": 0.0,
-      "yaw_rate": 0.035,
+      "yaw_rate": 0.151525,
       "radius": 4.875,
       "low_speed_turn": 1.0,
-      "minimum_clearance": 4.498157143174219,
-      "bend": -0.282626
+      "minimum_clearance": 4.413121754035863,
+      "bend": -0.272722
     },
     {
       "trace": "left",
       "position": [
-        1.106454,
-        0.562549,
+        0.108983,
+        1.82665,
         6.0
       ],
-      "speed": 0.349998,
-      "yaw": 0.139998,
+      "speed": 0.9,
+      "yaw": 0.458162,
       "pitch": 0.0,
-      "yaw_rate": 0.035,
+      "yaw_rate": 0.14936,
       "radius": 4.875,
       "low_speed_turn": 1.0,
-      "minimum_clearance": 4.498157143174219,
-      "bend": -0.258127
+      "minimum_clearance": 4.412740267537231,
+      "bend": -0.271966
     },
     {
       "trace": "left",
       "position": [
-        1.299701,
-        0.85299,
+        -1.177666,
+        1.899747,
         6.0
       ],
-      "speed": 0.35,
-      "yaw": 0.174997,
+      "speed": 2.549454,
+      "yaw": 0.499064,
       "pitch": 0.0,
-      "yaw_rate": 0.035,
-      "radius": 4.875,
-      "low_speed_turn": 1.0,
-      "minimum_clearance": 4.498157143174219,
-      "bend": -0.233627
-    },
-    {
-      "trace": "left",
-      "position": [
-        1.425318,
-        1.178794,
-        6.0
-      ],
-      "speed": 0.35,
-      "yaw": 0.209997,
-      "pitch": 0.0,
-      "yaw_rate": 0.035,
-      "radius": 4.875,
-      "low_speed_turn": 1.0,
-      "minimum_clearance": 4.498157143174219,
-      "bend": -0.209127
-    },
-    {
-      "trace": "left",
-      "position": [
-        1.476926,
-        1.524268,
-        6.0
-      ],
-      "speed": 0.35,
-      "yaw": 0.244996,
-      "pitch": 0.0,
-      "yaw_rate": 0.035,
-      "radius": 4.875,
-      "low_speed_turn": 1.0,
-      "minimum_clearance": 4.498157143174219,
-      "bend": -0.184628
-    },
-    {
-      "trace": "left",
-      "position": [
-        1.466224,
-        1.745271,
-        6.0
-      ],
-      "speed": 0.089768,
-      "yaw": 0.279996,
-      "pitch": 0.0,
-      "yaw_rate": 0.035,
-      "radius": 4.875,
-      "low_speed_turn": 1.0,
-      "minimum_clearance": 4.498157143174219,
-      "bend": -0.160128
-    },
-    {
-      "trace": "left",
-      "position": [
-        1.453987,
-        1.790126,
-        6.0
-      ],
-      "speed": 0.018109,
-      "yaw": 0.314995,
-      "pitch": 0.0,
-      "yaw_rate": 0.035,
-      "radius": 4.875,
-      "low_speed_turn": 1.0,
-      "minimum_clearance": 4.498157143174219,
-      "bend": -0.135628
-    },
-    {
-      "trace": "left",
-      "position": [
-        1.44998,
-        1.797886,
-        6.0
-      ],
-      "speed": 0.0,
-      "yaw": 0.349994,
-      "pitch": 0.0,
-      "yaw_rate": 0.035,
-      "radius": 4.875,
-      "low_speed_turn": 1.0,
-      "minimum_clearance": 4.498157143174219,
-      "bend": -0.111129
-    },
-    {
-      "trace": "left",
-      "position": [
-        1.44998,
-        1.797886,
-        6.0
-      ],
-      "speed": 0.0,
-      "yaw": 0.384993,
-      "pitch": 0.0,
-      "yaw_rate": 0.035,
-      "radius": 4.875,
-      "low_speed_turn": 1.0,
-      "minimum_clearance": 4.498157143174219,
-      "bend": -0.08663
-    },
-    {
-      "trace": "left",
-      "position": [
-        1.004068,
-        2.079735,
-        6.0
-      ],
-      "speed": 1.633033,
-      "yaw": 0.42066,
-      "pitch": 0.0,
-      "yaw_rate": 0.053314,
+      "yaw_rate": 0.003959,
       "radius": 4.875,
       "low_speed_turn": 0.0,
-      "minimum_clearance": 4.4799630855334405,
-      "bend": -0.087636
+      "minimum_clearance": 4.553223385459002,
+      "bend": -0.02445
     },
     {
       "trace": "left",
       "position": [
-        -0.769305,
-        2.660444,
+        -3.921463,
+        1.904234,
         6.0
       ],
-      "speed": 1.983184,
-      "yaw": 0.478785,
+      "speed": 2.79821,
+      "yaw": 0.49998,
       "pitch": 0.0,
-      "yaw_rate": 0.04346,
+      "yaw_rate": 8.5e-05,
       "radius": 4.875,
       "low_speed_turn": 0.0,
-      "minimum_clearance": 4.440103407577797,
-      "bend": -0.106103
+      "minimum_clearance": 4.6061209830433425,
+      "bend": -0.000746
     },
     {
       "trace": "left",
       "position": [
-        -2.75889,
-        2.780565,
+        -6.721,
+        1.904335,
         6.0
       ],
-      "speed": 1.999229,
-      "yaw": 0.497383,
-      "pitch": 0.0,
-      "yaw_rate": 0.005917,
-      "radius": 4.875,
-      "low_speed_turn": 0.0,
-      "minimum_clearance": 4.56622883048064,
-      "bend": -0.020386
-    },
-    {
-      "trace": "left",
-      "position": [
-        -4.758532,
-        2.795082,
-        6.0
-      ],
-      "speed": 1.999965,
-      "yaw": 0.499695,
-      "pitch": 0.0,
-      "yaw_rate": 0.000693,
-      "radius": 4.875,
-      "low_speed_turn": 0.0,
-      "minimum_clearance": 4.603536284021457,
-      "bend": -0.002522
-    },
-    {
-      "trace": "left",
-      "position": [
-        -6.758489,
-        2.796772,
-        6.0
-      ],
-      "speed": 1.999998,
-      "yaw": 0.499965,
-      "pitch": 0.0,
-      "yaw_rate": 8e-05,
-      "radius": 4.875,
-      "low_speed_turn": 0.0,
-      "minimum_clearance": 4.609133119292362,
-      "bend": -0.000295
-    },
-    {
-      "trace": "left",
-      "position": [
-        -8.758458,
-        2.796968,
-        6.0
-      ],
-      "speed": 2.0,
-      "yaw": 0.499996,
-      "pitch": 0.0,
-      "yaw_rate": 9e-06,
-      "radius": 4.875,
-      "low_speed_turn": 0.0,
-      "minimum_clearance": 4.609858633615971,
-      "bend": -3.4e-05
-    },
-    {
-      "trace": "left",
-      "position": [
-        -10.758428,
-        2.79699,
-        6.0
-      ],
-      "speed": 2.0,
+      "speed": 2.799982,
       "yaw": 0.5,
       "pitch": 0.0,
-      "yaw_rate": 1e-06,
-      "radius": 8.125,
-      "low_speed_turn": 0.0,
-      "minimum_clearance": 4.609858633615971,
-      "bend": -4e-06
-    },
-    {
-      "trace": "up",
-      "position": [
-        1.316885,
-        0.0,
-        6.183372
-      ],
-      "speed": 1.908353,
-      "yaw": 0.0,
-      "pitch": 0.038324,
-      "yaw_rate": 0.0,
-      "radius": 4.875,
-      "low_speed_turn": 0.0,
-      "minimum_clearance": 3.7784737250110227,
-      "bend": 0.0
-    },
-    {
-      "trace": "up",
-      "position": [
-        3.163185,
-        0.0,
-        6.85716
-      ],
-      "speed": 1.9958,
-      "yaw": 0.0,
-      "pitch": 0.06998,
-      "yaw_rate": 0.0,
-      "radius": 4.875,
-      "low_speed_turn": 0.0,
-      "minimum_clearance": 2.490855245546096,
-      "bend": 0.0
-    },
-    {
-      "trace": "up",
-      "position": [
-        4.834335,
-        0.0,
-        7.715548
-      ],
-      "speed": 1.364736,
-      "yaw": 0.0,
-      "pitch": 0.076241,
-      "yaw_rate": 0.0,
-      "radius": 4.875,
-      "low_speed_turn": 0.0,
-      "minimum_clearance": 1.5228591798294149,
-      "bend": 0.0
-    },
-    {
-      "trace": "up",
-      "position": [
-        5.750792,
-        0.0,
-        8.117661
-      ],
-      "speed": 0.752401,
-      "yaw": 0.0,
-      "pitch": 0.048158,
-      "yaw_rate": 0.0,
-      "radius": 4.875,
-      "low_speed_turn": 0.0,
-      "minimum_clearance": 1.6435615143709938,
-      "bend": 0.0
-    },
-    {
-      "trace": "up",
-      "position": [
-        6.192591,
-        0.0,
-        8.226189
-      ],
-      "speed": 0.182857,
-      "yaw": 0.0,
-      "pitch": 0.023299,
-      "yaw_rate": 0.0,
-      "radius": 4.875,
-      "low_speed_turn": 0.0,
-      "minimum_clearance": 2.0567999600858586,
-      "bend": 0.0
-    },
-    {
-      "trace": "up",
-      "position": [
-        6.286779,
-        0.0,
-        8.237535
-      ],
-      "speed": 0.036888,
-      "yaw": 0.0,
-      "pitch": 0.01311,
-      "yaw_rate": 0.0,
-      "radius": 4.875,
-      "low_speed_turn": 0.0,
-      "minimum_clearance": 2.271772819952142,
-      "bend": 0.0
-    },
-    {
-      "trace": "up",
-      "position": [
-        6.305867,
-        0.0,
-        8.238971
-      ],
-      "speed": 0.007441,
-      "yaw": 0.0,
-      "pitch": 0.01019,
-      "yaw_rate": 0.0,
-      "radius": 4.875,
-      "low_speed_turn": 0.0,
-      "minimum_clearance": 2.3366659575740165,
-      "bend": 0.0
-    },
-    {
-      "trace": "up",
-      "position": [
-        6.307458,
-        0.0,
-        8.239073
-      ],
-      "speed": 0.0,
-      "yaw": 0.0,
-      "pitch": 0.00946,
-      "yaw_rate": 0.0,
-      "radius": 4.875,
-      "low_speed_turn": 0.0,
-      "minimum_clearance": 2.3532339314258293,
-      "bend": 0.0
-    },
-    {
-      "trace": "up",
-      "position": [
-        6.307458,
-        0.0,
-        8.239073
-      ],
-      "speed": 0.0,
-      "yaw": 0.0,
-      "pitch": 0.009292,
-      "yaw_rate": 0.0,
-      "radius": 4.875,
-      "low_speed_turn": 0.0,
-      "minimum_clearance": 2.357036054524268,
-      "bend": 0.0
-    },
-    {
-      "trace": "up",
-      "position": [
-        6.307458,
-        0.0,
-        8.239073
-      ],
-      "speed": 0.0,
-      "yaw": 0.0,
-      "pitch": 0.009254,
-      "yaw_rate": 0.0,
-      "radius": 4.875,
-      "low_speed_turn": 0.0,
-      "minimum_clearance": 2.357742008073374,
-      "bend": 0.0
-    },
-    {
-      "trace": "up",
-      "position": [
-        6.307458,
-        0.0,
-        8.239073
-      ],
-      "speed": 0.0,
-      "yaw": 0.0,
-      "pitch": 0.009246,
-      "yaw_rate": 0.0,
-      "radius": 4.875,
-      "low_speed_turn": 0.0,
-      "minimum_clearance": 2.3580836176134685,
-      "bend": 0.0
-    },
-    {
-      "trace": "up",
-      "position": [
-        6.307458,
-        0.0,
-        8.239073
-      ],
-      "speed": 0.0,
-      "yaw": 0.0,
-      "pitch": 0.009244,
-      "yaw_rate": 0.0,
-      "radius": 4.875,
-      "low_speed_turn": 0.0,
-      "minimum_clearance": 2.3580836176134685,
-      "bend": 0.0
-    },
-    {
-      "trace": "up",
-      "position": [
-        6.307458,
-        0.0,
-        8.239073
-      ],
-      "speed": 0.0,
-      "yaw": 0.0,
-      "pitch": 0.009244,
-      "yaw_rate": 0.0,
-      "radius": 4.875,
-      "low_speed_turn": 0.0,
-      "minimum_clearance": 2.3580836176134685,
-      "bend": 0.0
-    },
-    {
-      "trace": "up",
-      "position": [
-        6.307458,
-        0.0,
-        8.239073
-      ],
-      "speed": 0.0,
-      "yaw": 0.0,
-      "pitch": 0.009244,
-      "yaw_rate": 0.0,
-      "radius": 4.875,
-      "low_speed_turn": 0.0,
-      "minimum_clearance": 2.3580836176134685,
-      "bend": 0.0
-    },
-    {
-      "trace": "up",
-      "position": [
-        6.307458,
-        0.0,
-        8.239073
-      ],
-      "speed": 0.0,
-      "yaw": 0.0,
-      "pitch": 0.009244,
-      "yaw_rate": 0.0,
-      "radius": 4.875,
-      "low_speed_turn": 0.0,
-      "minimum_clearance": 2.3580836176134685,
-      "bend": 0.0
-    },
-    {
-      "trace": "up",
-      "position": [
-        6.307458,
-        0.0,
-        8.239073
-      ],
-      "speed": 0.0,
-      "yaw": 0.0,
-      "pitch": 0.009244,
-      "yaw_rate": 0.0,
-      "radius": 4.875,
-      "low_speed_turn": 0.0,
-      "minimum_clearance": 2.3580836176134685,
-      "bend": 0.0
-    },
-    {
-      "trace": "up",
-      "position": [
-        6.307458,
-        0.0,
-        8.239073
-      ],
-      "speed": 0.0,
-      "yaw": 0.0,
-      "pitch": 0.009244,
-      "yaw_rate": 0.0,
-      "radius": 4.875,
-      "low_speed_turn": 0.0,
-      "minimum_clearance": 2.3580836176134685,
-      "bend": 0.0
-    },
-    {
-      "trace": "up",
-      "position": [
-        6.307458,
-        0.0,
-        8.239073
-      ],
-      "speed": 0.0,
-      "yaw": 0.0,
-      "pitch": 0.009244,
-      "yaw_rate": 0.0,
-      "radius": 4.875,
-      "low_speed_turn": 0.0,
-      "minimum_clearance": 2.3580836176134685,
-      "bend": 0.0
-    },
-    {
-      "trace": "down",
-      "position": [
-        1.316885,
-        0.0,
-        5.816628
-      ],
-      "speed": 1.908353,
-      "yaw": 0.0,
-      "pitch": -0.038324,
-      "yaw_rate": 0.0,
-      "radius": 4.875,
-      "low_speed_turn": 0.0,
-      "minimum_clearance": 3.57878563622334,
-      "bend": 0.0
-    },
-    {
-      "trace": "down",
-      "position": [
-        3.163185,
-        0.0,
-        5.14284
-      ],
-      "speed": 1.9958,
-      "yaw": 0.0,
-      "pitch": -0.06998,
-      "yaw_rate": 0.0,
-      "radius": 4.875,
-      "low_speed_turn": 0.0,
-      "minimum_clearance": 2.2911230450523346,
-      "bend": 0.0
-    },
-    {
-      "trace": "down",
-      "position": [
-        4.834335,
-        0.0,
-        4.284452
-      ],
-      "speed": 1.364737,
-      "yaw": 0.0,
-      "pitch": -0.076241,
-      "yaw_rate": 0.0,
-      "radius": 4.875,
-      "low_speed_turn": 0.0,
-      "minimum_clearance": 1.3231169508133043,
-      "bend": 0.0
-    },
-    {
-      "trace": "down",
-      "position": [
-        5.750792,
-        0.0,
-        3.882337
-      ],
-      "speed": 0.752398,
-      "yaw": 0.0,
-      "pitch": -0.048158,
-      "yaw_rate": 0.0,
-      "radius": 4.875,
-      "low_speed_turn": 0.0,
-      "minimum_clearance": 1.443858959096835,
-      "bend": 0.0
-    },
-    {
-      "trace": "down",
-      "position": [
-        6.192588,
-        0.0,
-        3.773811
-      ],
-      "speed": 0.182857,
-      "yaw": 0.0,
-      "pitch": -0.023299,
-      "yaw_rate": 0.0,
-      "radius": 4.875,
-      "low_speed_turn": 0.0,
-      "minimum_clearance": 1.857128593556527,
-      "bend": 0.0
-    },
-    {
-      "trace": "down",
-      "position": [
-        6.286776,
-        0.0,
-        3.762464
-      ],
-      "speed": 0.036888,
-      "yaw": 0.0,
-      "pitch": -0.01311,
-      "yaw_rate": 0.0,
-      "radius": 4.875,
-      "low_speed_turn": 0.0,
-      "minimum_clearance": 2.0721326753528744,
-      "bend": 0.0
-    },
-    {
-      "trace": "down",
-      "position": [
-        6.305863,
-        0.0,
-        3.761026
-      ],
-      "speed": 0.007441,
-      "yaw": 0.0,
-      "pitch": -0.01019,
-      "yaw_rate": 0.0,
-      "radius": 4.875,
-      "low_speed_turn": 0.0,
-      "minimum_clearance": 2.1370037877695705,
-      "bend": 0.0
-    },
-    {
-      "trace": "down",
-      "position": [
-        6.307456,
-        0.0,
-        3.760924
-      ],
-      "speed": 0.0,
-      "yaw": 0.0,
-      "pitch": -0.00946,
-      "yaw_rate": 0.0,
-      "radius": 4.875,
-      "low_speed_turn": 0.0,
-      "minimum_clearance": 2.153572376196935,
-      "bend": 0.0
-    },
-    {
-      "trace": "down",
-      "position": [
-        6.307456,
-        0.0,
-        3.760924
-      ],
-      "speed": 0.0,
-      "yaw": 0.0,
-      "pitch": -0.009292,
-      "yaw_rate": 0.0,
-      "radius": 4.875,
-      "low_speed_turn": 0.0,
-      "minimum_clearance": 2.157397410997269,
-      "bend": 0.0
-    },
-    {
-      "trace": "down",
-      "position": [
-        6.307456,
-        0.0,
-        3.760924
-      ],
-      "speed": 0.0,
-      "yaw": 0.0,
-      "pitch": -0.009254,
-      "yaw_rate": 0.0,
-      "radius": 4.875,
-      "low_speed_turn": 0.0,
-      "minimum_clearance": 2.158080617613469,
-      "bend": 0.0
-    },
-    {
-      "trace": "down",
-      "position": [
-        6.307456,
-        0.0,
-        3.760924
-      ],
-      "speed": 0.0,
-      "yaw": 0.0,
-      "pitch": -0.009246,
-      "yaw_rate": 0.0,
-      "radius": 4.875,
-      "low_speed_turn": 0.0,
-      "minimum_clearance": 2.1584222396145236,
-      "bend": 0.0
-    },
-    {
-      "trace": "down",
-      "position": [
-        6.307456,
-        0.0,
-        3.760924
-      ],
-      "speed": 0.0,
-      "yaw": 0.0,
-      "pitch": -0.009244,
-      "yaw_rate": 0.0,
-      "radius": 4.875,
-      "low_speed_turn": 0.0,
-      "minimum_clearance": 2.1584222396145236,
-      "bend": 0.0
-    },
-    {
-      "trace": "down",
-      "position": [
-        6.307456,
-        0.0,
-        3.760924
-      ],
-      "speed": 0.0,
-      "yaw": 0.0,
-      "pitch": -0.009244,
-      "yaw_rate": 0.0,
-      "radius": 4.875,
-      "low_speed_turn": 0.0,
-      "minimum_clearance": 2.1584222396145236,
-      "bend": 0.0
-    },
-    {
-      "trace": "down",
-      "position": [
-        6.307456,
-        0.0,
-        3.760924
-      ],
-      "speed": 0.0,
-      "yaw": 0.0,
-      "pitch": -0.009244,
-      "yaw_rate": 0.0,
-      "radius": 4.875,
-      "low_speed_turn": 0.0,
-      "minimum_clearance": 2.1584222396145236,
-      "bend": 0.0
-    },
-    {
-      "trace": "down",
-      "position": [
-        6.307456,
-        0.0,
-        3.760924
-      ],
-      "speed": 0.0,
-      "yaw": 0.0,
-      "pitch": -0.009244,
-      "yaw_rate": 0.0,
-      "radius": 4.875,
-      "low_speed_turn": 0.0,
-      "minimum_clearance": 2.1584222396145236,
-      "bend": 0.0
-    },
-    {
-      "trace": "down",
-      "position": [
-        6.307456,
-        0.0,
-        3.760924
-      ],
-      "speed": 0.0,
-      "yaw": 0.0,
-      "pitch": -0.009244,
-      "yaw_rate": 0.0,
-      "radius": 4.875,
-      "low_speed_turn": 0.0,
-      "minimum_clearance": 2.1584222396145236,
-      "bend": 0.0
-    },
-    {
-      "trace": "down",
-      "position": [
-        6.307456,
-        0.0,
-        3.760924
-      ],
-      "speed": 0.0,
-      "yaw": 0.0,
-      "pitch": -0.009244,
-      "yaw_rate": 0.0,
-      "radius": 4.875,
-      "low_speed_turn": 0.0,
-      "minimum_clearance": 2.1584222396145236,
-      "bend": 0.0
-    },
-    {
-      "trace": "down",
-      "position": [
-        6.307456,
-        0.0,
-        3.760924
-      ],
-      "speed": 0.0,
-      "yaw": 0.0,
-      "pitch": -0.009244,
-      "yaw_rate": 0.0,
-      "radius": 4.875,
-      "low_speed_turn": 0.0,
-      "minimum_clearance": 2.1584222396145236,
-      "bend": 0.0
-    },
-    {
-      "trace": "away",
-      "position": [
-        0.0,
-        0.0,
-        6.0
-      ],
-      "speed": 0.0,
-      "yaw": 0.035,
-      "pitch": 0.0,
-      "yaw_rate": 0.035,
-      "radius": 4.875,
-      "low_speed_turn": 1.0,
-      "minimum_clearance": 4.503016892397327,
-      "bend": -0.154537
-    },
-    {
-      "trace": "away",
-      "position": [
-        0.0,
-        0.0,
-        6.0
-      ],
-      "speed": 0.0,
-      "yaw": 0.07,
-      "pitch": 0.0,
-      "yaw_rate": 0.035,
-      "radius": 4.875,
-      "low_speed_turn": 1.0,
-      "minimum_clearance": 4.498289475831571,
-      "bend": -0.132101
-    },
-    {
-      "trace": "away",
-      "position": [
-        0.0,
-        0.0,
-        6.0
-      ],
-      "speed": 0.0,
-      "yaw": 0.105,
-      "pitch": 0.0,
-      "yaw_rate": 0.035,
-      "radius": 4.875,
-      "low_speed_turn": 1.0,
-      "minimum_clearance": 4.498157143174219,
-      "bend": -0.107625
-    },
-    {
-      "trace": "away",
-      "position": [
-        0.0,
-        0.0,
-        6.0
-      ],
-      "speed": 0.0,
-      "yaw": 0.14,
-      "pitch": 0.0,
-      "yaw_rate": 0.035,
-      "radius": 4.875,
-      "low_speed_turn": 1.0,
-      "minimum_clearance": 4.498157143174219,
-      "bend": -0.083125
-    },
-    {
-      "trace": "away",
-      "position": [
-        0.399692,
-        0.668896,
-        6.0
-      ],
-      "speed": 1.768913,
-      "yaw": 0.178881,
-      "pitch": 0.0,
-      "yaw_rate": 0.05775,
-      "radius": 4.875,
-      "low_speed_turn": 0.0,
-      "minimum_clearance": 4.462389313829985,
-      "bend": -0.100142
-    },
-    {
-      "trace": "away",
-      "position": [
-        0.902539,
-        2.513745,
-        6.0
-      ],
-      "speed": 1.989411,
-      "yaw": 0.234164,
-      "pitch": 0.0,
-      "yaw_rate": 0.033698,
-      "radius": 4.875,
-      "low_speed_turn": 0.0,
-      "minimum_clearance": 4.459233752107703,
-      "bend": -0.090104
-    },
-    {
-      "trace": "away",
-      "position": [
-        0.991515,
-        4.50771,
-        6.0
-      ],
-      "speed": 1.999515,
-      "yaw": 0.248087,
-      "pitch": 0.0,
-      "yaw_rate": 0.004333,
-      "radius": 8.125,
-      "low_speed_turn": 0.0,
-      "minimum_clearance": 4.576368852287499,
-      "bend": -0.015168
-    },
-    {
-      "trace": "away",
-      "position": [
-        1.002124,
-        6.507632,
-        6.0
-      ],
-      "speed": 1.999978,
-      "yaw": 0.249777,
-      "pitch": 0.0,
-      "yaw_rate": 0.000506,
-      "radius": 8.125,
-      "low_speed_turn": 0.0,
-      "minimum_clearance": 4.605255886590968,
-      "bend": -0.001845
-    },
-    {
-      "trace": "away",
-      "position": [
-        1.003358,
-        8.507746,
-        6.0
-      ],
-      "speed": 1.999999,
-      "yaw": 0.249974,
-      "pitch": 0.0,
-      "yaw_rate": 5.9e-05,
-      "radius": 8.125,
-      "low_speed_turn": 0.0,
-      "minimum_clearance": 2.664961791421813,
-      "bend": -0.000215
-    },
-    {
-      "trace": "away",
-      "position": [
-        1.003466,
-        9.798452,
-        6.0
-      ],
-      "speed": 0.721548,
-      "yaw": 0.249997,
-      "pitch": 0.0,
-      "yaw_rate": 7e-06,
-      "radius": 8.125,
-      "low_speed_turn": 0.0,
-      "minimum_clearance": 1.3744066341939707,
-      "bend": -2.5e-05
-    },
-    {
-      "trace": "away",
-      "position": [
-        1.003471,
-        10.261352,
-        6.0
-      ],
-      "speed": 0.258649,
-      "yaw": 0.25,
-      "pitch": 0.0,
-      "yaw_rate": 1e-06,
-      "radius": 8.125,
-      "low_speed_turn": 0.0,
-      "minimum_clearance": 0.9115066341939695,
-      "bend": -3e-06
-    },
-    {
-      "trace": "away",
-      "position": [
-        1.003471,
-        10.427284,
-        6.0
-      ],
-      "speed": 0.092716,
-      "yaw": 0.25,
-      "pitch": 0.0,
-      "yaw_rate": 0.0,
-      "radius": 8.125,
-      "low_speed_turn": 0.0,
-      "minimum_clearance": 0.7455746341939697,
-      "bend": -0.0
-    },
-    {
-      "trace": "away",
-      "position": [
-        1.003471,
-        10.486765,
-        6.0
-      ],
-      "speed": 0.033236,
-      "yaw": 0.25,
-      "pitch": 0.0,
-      "yaw_rate": 0.0,
-      "radius": 8.125,
-      "low_speed_turn": 0.0,
-      "minimum_clearance": 0.6860936341939698,
-      "bend": -0.0
-    },
-    {
-      "trace": "away",
-      "position": [
-        1.003471,
-        10.508087,
-        6.0
-      ],
-      "speed": 0.011913,
-      "yaw": 0.25,
-      "pitch": 0.0,
-      "yaw_rate": 0.0,
-      "radius": 8.125,
-      "low_speed_turn": 0.0,
-      "minimum_clearance": 0.6647716341939702,
-      "bend": -0.0
-    },
-    {
-      "trace": "away",
-      "position": [
-        1.003471,
-        10.515731,
-        6.0
-      ],
-      "speed": 0.00427,
-      "yaw": 0.25,
-      "pitch": 0.0,
-      "yaw_rate": 0.0,
-      "radius": 8.125,
-      "low_speed_turn": 0.0,
-      "minimum_clearance": 0.6571276341939694,
-      "bend": -0.0
-    },
-    {
-      "trace": "away",
-      "position": [
-        1.003471,
-        10.518471,
-        6.0
-      ],
-      "speed": 0.00153,
-      "yaw": 0.25,
-      "pitch": 0.0,
-      "yaw_rate": 0.0,
-      "radius": 8.125,
-      "low_speed_turn": 0.0,
-      "minimum_clearance": 0.6543876341939701,
-      "bend": -0.0
-    },
-    {
-      "trace": "away",
-      "position": [
-        1.003471,
-        10.519451,
-        6.0
-      ],
-      "speed": 0.000549,
-      "yaw": 0.25,
-      "pitch": 0.0,
-      "yaw_rate": 0.0,
-      "radius": 8.125,
-      "low_speed_turn": 0.0,
-      "minimum_clearance": 0.6534076341939699,
-      "bend": -0.0
-    },
-    {
-      "trace": "away",
-      "position": [
-        1.003471,
-        10.519803,
-        6.0
-      ],
-      "speed": 0.000197,
-      "yaw": 0.25,
-      "pitch": 0.0,
-      "yaw_rate": 0.0,
-      "radius": 8.125,
-      "low_speed_turn": 0.0,
-      "minimum_clearance": 0.6530556341939704,
-      "bend": -0.0
-    },
-    {
-      "trace": "toward",
-      "position": [
-        0.0,
-        0.0,
-        6.0
-      ],
-      "speed": 0.0,
-      "yaw": -0.035,
-      "pitch": 0.0,
-      "yaw_rate": -0.035,
-      "radius": 4.875,
-      "low_speed_turn": 1.0,
-      "minimum_clearance": 4.503149648248357,
-      "bend": 0.154537
-    },
-    {
-      "trace": "toward",
-      "position": [
-        0.0,
-        0.0,
-        6.0
-      ],
-      "speed": 0.0,
-      "yaw": -0.07,
-      "pitch": 0.0,
-      "yaw_rate": -0.035,
-      "radius": 4.875,
-      "low_speed_turn": 1.0,
-      "minimum_clearance": 4.498430643410641,
-      "bend": 0.132101
-    },
-    {
-      "trace": "toward",
-      "position": [
-        0.0,
-        0.0,
-        6.0
-      ],
-      "speed": 0.0,
-      "yaw": -0.105,
-      "pitch": 0.0,
-      "yaw_rate": -0.035,
-      "radius": 4.875,
-      "low_speed_turn": 1.0,
-      "minimum_clearance": 4.498289475831571,
-      "bend": 0.107625
-    },
-    {
-      "trace": "toward",
-      "position": [
-        0.0,
-        0.0,
-        6.0
-      ],
-      "speed": 0.0,
-      "yaw": -0.14,
-      "pitch": 0.0,
-      "yaw_rate": -0.035,
-      "radius": 4.875,
-      "low_speed_turn": 1.0,
-      "minimum_clearance": 4.498289475831571,
-      "bend": 0.083125
-    },
-    {
-      "trace": "toward",
-      "position": [
-        0.399692,
-        -0.668896,
-        6.0
-      ],
-      "speed": 1.768913,
-      "yaw": -0.178881,
-      "pitch": 0.0,
-      "yaw_rate": -0.05775,
-      "radius": 4.875,
-      "low_speed_turn": 0.0,
-      "minimum_clearance": 4.4625184391478605,
-      "bend": 0.100142
-    },
-    {
-      "trace": "toward",
-      "position": [
-        0.902539,
-        -2.513745,
-        6.0
-      ],
-      "speed": 1.989411,
-      "yaw": -0.234164,
-      "pitch": 0.0,
-      "yaw_rate": -0.033698,
-      "radius": 4.875,
-      "low_speed_turn": 0.0,
-      "minimum_clearance": 4.4593711757713255,
-      "bend": 0.090104
-    },
-    {
-      "trace": "toward",
-      "position": [
-        0.991515,
-        -4.50771,
-        6.0
-      ],
-      "speed": 1.999515,
-      "yaw": -0.248087,
-      "pitch": 0.0,
-      "yaw_rate": -0.004333,
-      "radius": 8.125,
-      "low_speed_turn": 0.0,
-      "minimum_clearance": 4.5765076558356705,
-      "bend": 0.015168
-    },
-    {
-      "trace": "toward",
-      "position": [
-        1.002124,
-        -6.507632,
-        6.0
-      ],
-      "speed": 1.999978,
-      "yaw": -0.249777,
-      "pitch": 0.0,
-      "yaw_rate": -0.000506,
-      "radius": 8.125,
-      "low_speed_turn": 0.0,
-      "minimum_clearance": 4.60540630947873,
-      "bend": 0.001845
-    },
-    {
-      "trace": "toward",
-      "position": [
-        1.003357,
-        -8.507746,
-        6.0
-      ],
-      "speed": 1.999999,
-      "yaw": -0.249974,
-      "pitch": 0.0,
-      "yaw_rate": -5.9e-05,
-      "radius": 8.125,
-      "low_speed_turn": 0.0,
-      "minimum_clearance": 2.665112601788,
-      "bend": 0.000215
-    },
-    {
-      "trace": "toward",
-      "position": [
-        1.003466,
-        -9.798452,
-        6.0
-      ],
-      "speed": 0.721548,
-      "yaw": -0.249997,
-      "pitch": 0.0,
-      "yaw_rate": -7e-06,
-      "radius": 8.125,
-      "low_speed_turn": 0.0,
-      "minimum_clearance": 1.3745479999999994,
-      "bend": 2.5e-05
-    },
-    {
-      "trace": "toward",
-      "position": [
-        1.00347,
-        -10.261352,
-        6.0
-      ],
-      "speed": 0.258649,
-      "yaw": -0.25,
-      "pitch": 0.0,
-      "yaw_rate": -1e-06,
-      "radius": 8.125,
-      "low_speed_turn": 0.0,
-      "minimum_clearance": 0.9116479999999982,
-      "bend": 3e-06
-    },
-    {
-      "trace": "toward",
-      "position": [
-        1.00347,
-        -10.427284,
-        6.0
-      ],
-      "speed": 0.092716,
-      "yaw": -0.25,
-      "pitch": 0.0,
-      "yaw_rate": -0.0,
-      "radius": 8.125,
-      "low_speed_turn": 0.0,
-      "minimum_clearance": 0.7457159999999985,
-      "bend": 0.0
-    },
-    {
-      "trace": "toward",
-      "position": [
-        1.00347,
-        -10.486765,
-        6.0
-      ],
-      "speed": 0.033236,
-      "yaw": -0.25,
-      "pitch": 0.0,
-      "yaw_rate": -0.0,
-      "radius": 8.125,
-      "low_speed_turn": 0.0,
-      "minimum_clearance": 0.6862349999999986,
-      "bend": 0.0
-    },
-    {
-      "trace": "toward",
-      "position": [
-        1.00347,
-        -10.508087,
-        6.0
-      ],
-      "speed": 0.011913,
-      "yaw": -0.25,
-      "pitch": 0.0,
-      "yaw_rate": -0.0,
-      "radius": 8.125,
-      "low_speed_turn": 0.0,
-      "minimum_clearance": 0.664912999999999,
-      "bend": 0.0
-    },
-    {
-      "trace": "toward",
-      "position": [
-        1.00347,
-        -10.515731,
-        6.0
-      ],
-      "speed": 0.00427,
-      "yaw": -0.25,
-      "pitch": 0.0,
-      "yaw_rate": -0.0,
-      "radius": 8.125,
-      "low_speed_turn": 0.0,
-      "minimum_clearance": 0.6572689999999981,
-      "bend": 0.0
-    },
-    {
-      "trace": "toward",
-      "position": [
-        1.00347,
-        -10.518471,
-        6.0
-      ],
-      "speed": 0.00153,
-      "yaw": -0.25,
-      "pitch": 0.0,
-      "yaw_rate": -0.0,
-      "radius": 8.125,
-      "low_speed_turn": 0.0,
-      "minimum_clearance": 0.6545289999999988,
-      "bend": 0.0
-    },
-    {
-      "trace": "toward",
-      "position": [
-        1.00347,
-        -10.519451,
-        6.0
-      ],
-      "speed": 0.000549,
-      "yaw": -0.25,
-      "pitch": 0.0,
-      "yaw_rate": -0.0,
-      "radius": 8.125,
-      "low_speed_turn": 0.0,
-      "minimum_clearance": 0.6535489999999986,
-      "bend": 0.0
-    },
-    {
-      "trace": "toward",
-      "position": [
-        1.00347,
-        -10.519803,
-        6.0
-      ],
-      "speed": 0.000197,
-      "yaw": -0.25,
-      "pitch": 0.0,
-      "yaw_rate": -0.0,
-      "radius": 8.125,
-      "low_speed_turn": 0.0,
-      "minimum_clearance": 0.6531969999999991,
-      "bend": 0.0
-    },
-    {
-      "trace": "build-drive",
-      "position": [
-        1.332156,
-        0.0,
-        6.0
-      ],
-      "speed": 1.908358,
-      "yaw": 0.0,
-      "pitch": 0.0,
-      "yaw_rate": 0.0,
-      "radius": 4.875,
-      "low_speed_turn": 0.0,
-      "minimum_clearance": 4.609999999999999,
-      "bend": 0.0
-    },
-    {
-      "trace": "build-drive",
-      "position": [
-        3.301671,
-        0.0,
-        6.0
-      ],
-      "speed": 1.995801,
-      "yaw": 0.0,
-      "pitch": 0.0,
-      "yaw_rate": 0.0,
-      "radius": 4.875,
-      "low_speed_turn": 0.0,
-      "minimum_clearance": 4.609999999999999,
-      "bend": 0.0
-    },
-    {
-      "trace": "build-drive",
-      "position": [
-        5.300391,
-        0.0,
-        6.0
-      ],
-      "speed": 1.999807,
-      "yaw": 0.0,
-      "pitch": 0.0,
-      "yaw_rate": 0.0,
-      "radius": 4.875,
-      "low_speed_turn": 0.0,
-      "minimum_clearance": 4.609999999999999,
-      "bend": 0.0
-    },
-    {
-      "trace": "reverse-turn",
-      "position": [
-        5.92804,
-        0.032535,
-        6.0
-      ],
-      "speed": 0.703155,
-      "yaw": 0.018413,
-      "pitch": 0.0,
-      "yaw_rate": 0.022956,
-      "radius": 4.875,
-      "low_speed_turn": 0.0,
-      "minimum_clearance": 4.527924406694885,
-      "bend": -0.054876
-    },
-    {
-      "trace": "reverse-turn",
-      "position": [
-        6.197357,
-        0.071549,
-        6.0
-      ],
-      "speed": 0.425596,
-      "yaw": 0.030928,
-      "pitch": 0.0,
-      "yaw_rate": 0.035,
-      "radius": 4.875,
-      "low_speed_turn": 1.0,
-      "minimum_clearance": 4.521759050903454,
-      "bend": -0.212075
-    },
-    {
-      "trace": "reverse-turn",
-      "position": [
-        6.387275,
-        0.118827,
-        6.0
-      ],
-      "speed": 0.366182,
-      "yaw": 0.048428,
-      "pitch": 0.0,
-      "yaw_rate": 0.035,
-      "radius": 4.875,
-      "low_speed_turn": 1.0,
-      "minimum_clearance": 4.503149648248355,
-      "bend": -0.309083
-    },
-    {
-      "trace": "reverse-turn",
-      "position": [
-        6.555439,
-        0.18111,
-        6.0
-      ],
-      "speed": 0.353464,
-      "yaw": 0.065928,
-      "pitch": 0.0,
-      "yaw_rate": 0.035,
-      "radius": 4.875,
-      "low_speed_turn": 1.0,
-      "minimum_clearance": 4.499233784136707,
-      "bend": -0.308564
-    },
-    {
-      "trace": "reverse-turn",
-      "position": [
-        6.71257,
-        0.259835,
-        6.0
-      ],
-      "speed": 0.350741,
-      "yaw": 0.083428,
-      "pitch": 0.0,
-      "yaw_rate": 0.035,
-      "radius": 4.875,
-      "low_speed_turn": 1.0,
-      "minimum_clearance": 4.498289475831571,
-      "bend": -0.297574
-    },
-    {
-      "trace": "reverse-turn",
-      "position": [
-        6.859444,
-        0.354823,
-        6.0
-      ],
-      "speed": 0.350159,
-      "yaw": 0.100928,
-      "pitch": 0.0,
-      "yaw_rate": 0.035,
-      "radius": 4.875,
-      "low_speed_turn": 1.0,
-      "minimum_clearance": 4.498157143174219,
-      "bend": -0.285459
-    },
-    {
-      "trace": "reverse-turn",
-      "position": [
-        6.99486,
-        0.465179,
-        6.0
-      ],
-      "speed": 0.350034,
-      "yaw": 0.118428,
-      "pitch": 0.0,
-      "yaw_rate": 0.035,
-      "radius": 4.875,
-      "low_speed_turn": 1.0,
-      "minimum_clearance": 4.498157143174219,
-      "bend": -0.273224
-    },
-    {
-      "trace": "reverse-turn",
-      "position": [
-        7.11733,
-        0.589668,
-        6.0
-      ],
-      "speed": 0.350007,
-      "yaw": 0.135928,
-      "pitch": 0.0,
-      "yaw_rate": 0.035,
-      "radius": 4.875,
-      "low_speed_turn": 1.0,
-      "minimum_clearance": 4.498157143174219,
-      "bend": -0.260975
-    },
-    {
-      "trace": "reverse-turn",
-      "position": [
-        7.225437,
-        0.726842,
-        6.0
-      ],
-      "speed": 0.350002,
-      "yaw": 0.153428,
-      "pitch": 0.0,
-      "yaw_rate": 0.035,
-      "radius": 4.875,
-      "low_speed_turn": 1.0,
-      "minimum_clearance": 4.498157143174219,
-      "bend": -0.248725
-    },
-    {
-      "trace": "reverse-turn",
-      "position": [
-        7.317916,
-        0.875084,
-        6.0
-      ],
-      "speed": 0.35,
-      "yaw": 0.170928,
-      "pitch": 0.0,
-      "yaw_rate": 0.035,
-      "radius": 4.875,
-      "low_speed_turn": 1.0,
-      "minimum_clearance": 4.498157143174219,
-      "bend": -0.236475
-    },
-    {
-      "trace": "reverse-turn",
-      "position": [
-        7.393673,
-        1.032626,
-        6.0
-      ],
-      "speed": 0.35,
-      "yaw": 0.188428,
-      "pitch": 0.0,
-      "yaw_rate": 0.035,
-      "radius": 4.875,
-      "low_speed_turn": 1.0,
-      "minimum_clearance": 4.498157143174219,
-      "bend": -0.224225
-    },
-    {
-      "trace": "reverse-turn",
-      "position": [
-        7.451786,
-        1.197577,
-        6.0
-      ],
-      "speed": 0.35,
-      "yaw": 0.205928,
-      "pitch": 0.0,
-      "yaw_rate": 0.035,
-      "radius": 4.875,
-      "low_speed_turn": 1.0,
-      "minimum_clearance": 4.498157143174219,
-      "bend": -0.211975
-    },
-    {
-      "trace": "reverse-turn",
-      "position": [
-        7.491503,
-        1.36794,
-        6.0
-      ],
-      "speed": 0.35,
-      "yaw": 0.223428,
-      "pitch": 0.0,
-      "yaw_rate": 0.035,
-      "radius": 4.875,
-      "low_speed_turn": 1.0,
-      "minimum_clearance": 4.498157143174219,
-      "bend": -0.199725
-    },
-    {
-      "trace": "reverse-turn",
-      "position": [
-        7.512241,
-        1.541641,
-        6.0
-      ],
-      "speed": 0.35,
-      "yaw": 0.240928,
-      "pitch": 0.0,
-      "yaw_rate": 0.035,
-      "radius": 4.875,
-      "low_speed_turn": 1.0,
-      "minimum_clearance": 4.498157143174219,
-      "bend": -0.187475
-    },
-    {
-      "trace": "reverse-turn",
-      "position": [
-        7.513845,
-        1.708892,
-        6.0
-      ],
-      "speed": 0.254109,
-      "yaw": 0.258428,
-      "pitch": 0.0,
-      "yaw_rate": 0.035,
-      "radius": 4.875,
-      "low_speed_turn": 1.0,
-      "minimum_clearance": 4.498157143174219,
-      "bend": -0.175225
-    },
-    {
-      "trace": "reverse-turn",
-      "position": [
-        7.505086,
-        1.799422,
-        6.0
-      ],
-      "speed": 0.11413,
-      "yaw": 0.275928,
-      "pitch": 0.0,
-      "yaw_rate": 0.035,
-      "radius": 4.875,
-      "low_speed_turn": 1.0,
-      "minimum_clearance": 4.498157143174219,
-      "bend": -0.162975
-    },
-    {
-      "trace": "reverse-turn",
-      "position": [
-        7.496697,
-        1.839402,
-        6.0
-      ],
-      "speed": 0.05126,
-      "yaw": 0.293428,
-      "pitch": 0.0,
-      "yaw_rate": 0.035,
-      "radius": 4.875,
-      "low_speed_turn": 1.0,
-      "minimum_clearance": 4.498157143174219,
-      "bend": -0.150725
-    },
-    {
-      "trace": "reverse-turn",
-      "position": [
-        7.490986,
-        1.856835,
-        6.0
-      ],
-      "speed": 0.023023,
-      "yaw": 0.310928,
-      "pitch": 0.0,
-      "yaw_rate": 0.035,
-      "radius": 4.875,
-      "low_speed_turn": 1.0,
-      "minimum_clearance": 4.498157143174219,
-      "bend": -0.138475
-    },
-    {
-      "trace": "reverse-turn",
-      "position": [
-        7.487582,
-        1.864334,
-        6.0
-      ],
-      "speed": 0.01034,
-      "yaw": 0.328428,
-      "pitch": 0.0,
-      "yaw_rate": 0.035,
-      "radius": 4.875,
-      "low_speed_turn": 1.0,
-      "minimum_clearance": 4.498157143174219,
-      "bend": -0.126225
-    },
-    {
-      "trace": "reverse-turn",
-      "position": [
-        7.485696,
-        1.867513,
-        6.0
-      ],
-      "speed": 0.0,
-      "yaw": 0.345928,
-      "pitch": 0.0,
-      "yaw_rate": 0.035,
-      "radius": 4.875,
-      "low_speed_turn": 1.0,
-      "minimum_clearance": 4.498157143174219,
-      "bend": -0.113975
-    },
-    {
-      "trace": "reverse-turn",
-      "position": [
-        7.485696,
-        1.867513,
-        6.0
-      ],
-      "speed": 0.0,
-      "yaw": 0.363428,
-      "pitch": 0.0,
-      "yaw_rate": 0.035,
-      "radius": 4.875,
-      "low_speed_turn": 1.0,
-      "minimum_clearance": 4.498157143174219,
-      "bend": -0.101725
-    },
-    {
-      "trace": "reverse-turn",
-      "position": [
-        7.485696,
-        1.867513,
-        6.0
-      ],
-      "speed": 0.0,
-      "yaw": 0.380928,
-      "pitch": 0.0,
-      "yaw_rate": 0.035,
-      "radius": 4.875,
-      "low_speed_turn": 1.0,
-      "minimum_clearance": 4.498157143174219,
-      "bend": -0.089475
-    },
-    {
-      "trace": "reverse-turn",
-      "position": [
-        7.485696,
-        1.867513,
-        6.0
-      ],
-      "speed": 0.0,
-      "yaw": 0.398428,
-      "pitch": 0.0,
-      "yaw_rate": 0.035,
-      "radius": 4.875,
-      "low_speed_turn": 1.0,
-      "minimum_clearance": 4.498157143174219,
-      "bend": -0.077225
-    },
-    {
-      "trace": "reverse-turn",
-      "position": [
-        7.173379,
-        2.07374,
-        6.0
-      ],
-      "speed": 1.500531,
-      "yaw": 0.414864,
-      "pitch": 0.0,
-      "yaw_rate": 0.048988,
-      "radius": 4.875,
-      "low_speed_turn": 0.0,
-      "minimum_clearance": 4.492653575540471,
-      "bend": -0.078006
-    },
-    {
-      "trace": "reverse-turn",
-      "position": [
-        6.399576,
-        2.45117,
-        6.0
-      ],
-      "speed": 1.893085,
-      "yaw": 0.443666,
-      "pitch": 0.0,
-      "yaw_rate": 0.061804,
-      "radius": 4.875,
-      "low_speed_turn": 0.0,
-      "minimum_clearance": 4.439976378893851,
-      "bend": -0.114505
-    },
-    {
-      "trace": "reverse-turn",
-      "position": [
-        5.464685,
-        2.706436,
-        6.0
-      ],
-      "speed": 1.977114,
-      "yaw": 0.473818,
-      "pitch": 0.0,
-      "yaw_rate": 0.051301,
-      "radius": 4.875,
-      "low_speed_turn": 0.0,
-      "minimum_clearance": 4.429550830251397,
-      "bend": -0.115811
-    },
-    {
-      "trace": "reverse-turn",
-      "position": [
-        4.477473,
-        2.816447,
-        6.0
-      ],
-      "speed": 1.995101,
-      "yaw": 0.490452,
-      "pitch": 0.0,
-      "yaw_rate": 0.021026,
-      "radius": 4.875,
-      "low_speed_turn": 0.0,
-      "minimum_clearance": 4.496006156757275,
-      "bend": -0.062977
-    },
-    {
-      "trace": "reverse-turn",
-      "position": [
-        3.4796,
-        2.856037,
-        6.0
-      ],
-      "speed": 1.998951,
-      "yaw": 0.496695,
-      "pitch": 0.0,
-      "yaw_rate": 0.007458,
-      "radius": 4.875,
-      "low_speed_turn": 0.0,
-      "minimum_clearance": 4.557126556255924,
-      "bend": -0.025308
-    },
-    {
-      "trace": "reverse-turn",
-      "position": [
-        2.479928,
-        2.869707,
-        6.0
-      ],
-      "speed": 1.999775,
-      "yaw": 0.49887,
-      "pitch": 0.0,
-      "yaw_rate": 0.002565,
-      "radius": 4.875,
-      "low_speed_turn": 0.0,
-      "minimum_clearance": 4.588690248859832,
-      "bend": -0.009146
-    },
-    {
-      "trace": "reverse-turn",
-      "position": [
-        1.47994,
-        2.87438,
-        6.0
-      ],
-      "speed": 1.999952,
-      "yaw": 0.499615,
-      "pitch": 0.0,
-      "yaw_rate": 0.000876,
-      "radius": 4.875,
-      "low_speed_turn": 0.0,
-      "minimum_clearance": 4.601968409587745,
-      "bend": -0.003181
-    },
-    {
-      "trace": "reverse-turn",
-      "position": [
-        0.479894,
-        2.875973,
-        6.0
-      ],
-      "speed": 1.99999,
-      "yaw": 0.499869,
-      "pitch": 0.0,
-      "yaw_rate": 0.000299,
-      "radius": 4.875,
-      "low_speed_turn": 0.0,
-      "minimum_clearance": 4.607127629606234,
-      "bend": -0.001092
-    },
-    {
-      "trace": "reverse-turn",
-      "position": [
-        -0.520164,
-        2.876517,
-        6.0
-      ],
-      "speed": 1.999998,
-      "yaw": 0.499955,
-      "pitch": 0.0,
-      "yaw_rate": 0.000102,
-      "radius": 4.875,
-      "low_speed_turn": 0.0,
-      "minimum_clearance": 4.608991817767255,
-      "bend": -0.000373
-    },
-    {
-      "trace": "reverse-turn",
-      "position": [
-        -1.520225,
-        2.876702,
-        6.0
-      ],
-      "speed": 2.0,
-      "yaw": 0.499985,
-      "pitch": 0.0,
-      "yaw_rate": 3.5e-05,
-      "radius": 4.875,
-      "low_speed_turn": 0.0,
-      "minimum_clearance": 4.609566509923957,
-      "bend": -0.000127
-    },
-    {
-      "trace": "reverse-turn",
-      "position": [
-        -2.520286,
-        2.876765,
-        6.0
-      ],
-      "speed": 2.0,
-      "yaw": 0.499995,
-      "pitch": 0.0,
-      "yaw_rate": 1.2e-05,
-      "radius": 4.875,
-      "low_speed_turn": 0.0,
-      "minimum_clearance": 4.609858633615971,
-      "bend": -4.3e-05
-    },
-    {
-      "trace": "reverse-turn",
-      "position": [
-        -3.520347,
-        2.876786,
-        6.0
-      ],
-      "speed": 2.0,
-      "yaw": 0.499998,
-      "pitch": 0.0,
-      "yaw_rate": 4e-06,
-      "radius": 4.875,
-      "low_speed_turn": 0.0,
-      "minimum_clearance": 4.609858633615971,
-      "bend": -1.5e-05
-    },
-    {
-      "trace": "reverse-turn",
-      "position": [
-        -4.520408,
-        2.876793,
-        6.0
-      ],
-      "speed": 2.0,
-      "yaw": 0.499999,
-      "pitch": 0.0,
-      "yaw_rate": 1e-06,
+      "yaw_rate": 2e-06,
       "radius": 4.875,
       "low_speed_turn": 0.0,
-      "minimum_clearance": 4.609858633615971,
-      "bend": -5e-06
+      "minimum_clearance": 4.609707854458625,
+      "bend": -1.9e-05
     },
     {
-      "trace": "reverse-turn",
+      "trace": "left",
       "position": [
-        -5.520469,
-        2.876796,
+        -9.520949,
+        1.904337,
         6.0
       ],
-      "speed": 2.0,
+      "speed": 2.799999,
       "yaw": 0.5,
       "pitch": 0.0,
       "yaw_rate": 0.0,
-      "radius": 4.875,
-      "low_speed_turn": 0.0,
-      "minimum_clearance": 4.609858633615971,
-      "bend": -2e-06
-    },
-    {
-      "trace": "reverse-turn",
-      "position": [
-        -6.52053,
-        2.876796,
-        6.0
-      ],
-      "speed": 2.0,
-      "yaw": 0.5,
-      "pitch": 0.0,
-      "yaw_rate": 0.0,
-      "radius": 4.875,
+      "radius": 8.125,
       "low_speed_turn": 0.0,
       "minimum_clearance": 4.609858633615971,
       "bend": -1e-06
     },
     {
-      "trace": "reverse-turn",
+      "trace": "left",
       "position": [
-        -7.520591,
-        2.876796,
+        -12.320899,
+        1.904337,
         6.0
       ],
-      "speed": 2.0,
+      "speed": 2.799999,
       "yaw": 0.5,
       "pitch": 0.0,
+      "yaw_rate": 0.0,
+      "radius": 8.125,
+      "low_speed_turn": 0.0,
+      "minimum_clearance": 3.8519596341939706,
+      "bend": -0.0
+    },
+    {
+      "trace": "left",
+      "position": [
+        -14.357985,
+        1.904337,
+        6.0
+      ],
+      "speed": 1.162016,
+      "yaw": 0.5,
+      "pitch": 0.0,
+      "yaw_rate": 0.0,
+      "radius": 8.125,
+      "low_speed_turn": 0.0,
+      "minimum_clearance": 1.814873634193972,
+      "bend": -0.0
+    },
+    {
+      "trace": "left",
+      "position": [
+        -15.103428,
+        1.904337,
+        6.0
+      ],
+      "speed": 0.416573,
+      "yaw": 0.5,
+      "pitch": 0.0,
+      "yaw_rate": 0.0,
+      "radius": 8.125,
+      "low_speed_turn": 0.0,
+      "minimum_clearance": 1.069430634193972,
+      "bend": -0.0
+    },
+    {
+      "trace": "left",
+      "position": [
+        -15.370664,
+        1.904337,
+        6.0
+      ],
+      "speed": 0.149337,
+      "yaw": 0.5,
+      "pitch": 0.0,
+      "yaw_rate": 0.0,
+      "radius": 8.125,
+      "low_speed_turn": 0.0,
+      "minimum_clearance": 0.8021946341939716,
+      "bend": -0.0
+    },
+    {
+      "trace": "left",
+      "position": [
+        -15.466464,
+        1.904337,
+        6.0
+      ],
+      "speed": 0.053536,
+      "yaw": 0.5,
+      "pitch": 0.0,
+      "yaw_rate": 0.0,
+      "radius": 8.125,
+      "low_speed_turn": 0.0,
+      "minimum_clearance": 0.7063946341939711,
+      "bend": -0.0
+    },
+    {
+      "trace": "left",
+      "position": [
+        -15.500809,
+        1.904337,
+        6.0
+      ],
+      "speed": 0.019192,
+      "yaw": 0.5,
+      "pitch": 0.0,
+      "yaw_rate": 0.0,
+      "radius": 8.125,
+      "low_speed_turn": 0.0,
+      "minimum_clearance": 0.672049634193971,
+      "bend": -0.0
+    },
+    {
+      "trace": "left",
+      "position": [
+        -15.513122,
+        1.904337,
+        6.0
+      ],
+      "speed": 0.006879,
+      "yaw": 0.5,
+      "pitch": 0.0,
+      "yaw_rate": 0.0,
+      "radius": 8.125,
+      "low_speed_turn": 0.0,
+      "minimum_clearance": 0.6597366341939721,
+      "bend": -0.0
+    },
+    {
+      "trace": "left",
+      "position": [
+        -15.517534,
+        1.904337,
+        6.0
+      ],
+      "speed": 0.002466,
+      "yaw": 0.5,
+      "pitch": 0.0,
+      "yaw_rate": 0.0,
+      "radius": 8.125,
+      "low_speed_turn": 0.0,
+      "minimum_clearance": 0.6553246341939718,
+      "bend": -0.0
+    },
+    {
+      "trace": "left",
+      "position": [
+        -15.519115,
+        1.904337,
+        6.0
+      ],
+      "speed": 0.000885,
+      "yaw": 0.5,
+      "pitch": 0.0,
+      "yaw_rate": 0.0,
+      "radius": 8.125,
+      "low_speed_turn": 0.0,
+      "minimum_clearance": 0.653743634193972,
+      "bend": -0.0
+    },
+    {
+      "trace": "left",
+      "position": [
+        -15.519682,
+        1.904337,
+        6.0
+      ],
+      "speed": 0.000319,
+      "yaw": 0.5,
+      "pitch": 0.0,
+      "yaw_rate": 0.0,
+      "radius": 8.125,
+      "low_speed_turn": 0.0,
+      "minimum_clearance": 0.6531766341939718,
+      "bend": -0.0
+    },
+    {
+      "trace": "left",
+      "position": [
+        -15.519886,
+        1.904337,
+        6.0
+      ],
+      "speed": 0.000114,
+      "yaw": 0.5,
+      "pitch": 0.0,
+      "yaw_rate": 0.0,
+      "radius": 8.125,
+      "low_speed_turn": 0.0,
+      "minimum_clearance": 0.6529726341939717,
+      "bend": -0.0
+    },
+    {
+      "trace": "up",
+      "position": [
+        2.092785,
+        0.0,
+        6.582997
+      ],
+      "speed": 2.783867,
+      "yaw": 0.0,
+      "pitch": 0.070132,
       "yaw_rate": 0.0,
       "radius": 4.875,
       "low_speed_turn": 0.0,
-      "minimum_clearance": 4.609858633615971,
-      "bend": -0.0
+      "minimum_clearance": 2.762288036554125,
+      "bend": 0.0
     },
     {
-      "trace": "reverse-turn",
+      "trace": "up",
       "position": [
-        -8.520652,
-        2.876796,
-        6.0
+        4.141559,
+        0.0,
+        7.66651
       ],
-      "speed": 2.0,
-      "yaw": 0.5,
-      "pitch": 0.0,
+      "speed": 1.477015,
+      "yaw": 0.0,
+      "pitch": 0.074869,
       "yaw_rate": 0.0,
       "radius": 4.875,
       "low_speed_turn": 0.0,
-      "minimum_clearance": 4.609858633615971,
-      "bend": -0.0
+      "minimum_clearance": 1.5955931628128903,
+      "bend": 0.0
     },
     {
-      "trace": "release",
+      "trace": "up",
       "position": [
-        -9.558472,
-        2.876796,
-        6.0
+        5.30233,
+        0.0,
+        8.095892
       ],
-      "speed": 0.403448,
-      "yaw": 0.5,
-      "pitch": 0.0,
+      "speed": 1.111361,
+      "yaw": 0.0,
+      "pitch": 0.034831,
       "yaw_rate": 0.0,
-      "radius": 8.125,
+      "radius": 4.875,
       "low_speed_turn": 0.0,
-      "minimum_clearance": 4.586129102366374,
-      "bend": -0.0
+      "minimum_clearance": 1.9390914277793523,
+      "bend": 0.0
     },
     {
-      "trace": "release",
+      "trace": "up",
       "position": [
-        -9.767825,
-        2.876796,
-        6.0
+        5.930993,
+        0.0,
+        8.202868
       ],
-      "speed": 0.081385,
-      "yaw": 0.5,
-      "pitch": 0.0,
+      "speed": 0.16607,
+      "yaw": 0.0,
+      "pitch": 0.015377,
       "yaw_rate": 0.0,
-      "radius": 8.125,
+      "radius": 4.875,
       "low_speed_turn": 0.0,
-      "minimum_clearance": 4.5619300479791045,
-      "bend": -0.0
+      "minimum_clearance": 2.255666896028642,
+      "bend": 0.0
     },
     {
-      "trace": "release",
+      "trace": "up",
       "position": [
-        -9.810056,
-        2.876796,
-        6.0
+        5.998374,
+        0.0,
+        8.208843
       ],
-      "speed": 0.016417,
-      "yaw": 0.5,
-      "pitch": 0.0,
+      "speed": 0.015749,
+      "yaw": 0.0,
+      "pitch": 0.012096,
       "yaw_rate": 0.0,
-      "radius": 8.125,
+      "radius": 4.875,
       "low_speed_turn": 0.0,
-      "minimum_clearance": 4.6209654428110305,
-      "bend": -0.0
+      "minimum_clearance": 2.3235671657747043,
+      "bend": 0.0
     },
     {
-      "trace": "release",
+      "trace": "up",
       "position": [
-        -9.817517,
-        2.876796,
-        6.0
+        6.003265,
+        0.0,
+        8.209217
       ],
       "speed": 0.0,
-      "yaw": 0.5,
-      "pitch": 0.0,
+      "yaw": 0.0,
+      "pitch": 0.011759,
       "yaw_rate": 0.0,
-      "radius": 8.125,
+      "radius": 4.875,
       "low_speed_turn": 0.0,
-      "minimum_clearance": 4.548057127231283,
-      "bend": -0.0
+      "minimum_clearance": 2.330771675514805,
+      "bend": 0.0
     },
     {
-      "trace": "release",
+      "trace": "up",
       "position": [
-        -9.817517,
-        2.876796,
-        6.0
+        6.003265,
+        0.0,
+        8.209217
       ],
       "speed": 0.0,
-      "yaw": 0.5,
-      "pitch": 0.0,
+      "yaw": 0.0,
+      "pitch": 0.011734,
       "yaw_rate": 0.0,
-      "radius": 8.125,
+      "radius": 4.875,
       "low_speed_turn": 0.0,
-      "minimum_clearance": 4.59647773301553,
-      "bend": -0.0
+      "minimum_clearance": 2.3314732979451858,
+      "bend": 0.0
     },
     {
-      "trace": "release",
+      "trace": "up",
       "position": [
-        -9.817517,
-        2.876796,
-        6.0
+        6.003265,
+        0.0,
+        8.209217
       ],
       "speed": 0.0,
-      "yaw": 0.5,
-      "pitch": 0.0,
+      "yaw": 0.0,
+      "pitch": 0.011732,
       "yaw_rate": 0.0,
-      "radius": 8.125,
+      "radius": 4.875,
       "low_speed_turn": 0.0,
-      "minimum_clearance": 4.581672671230422,
-      "bend": -0.0
+      "minimum_clearance": 2.3314732979451858,
+      "bend": 0.0
     },
     {
-      "trace": "corner-recovery",
+      "trace": "up",
       "position": [
-        15.458524,
-        10.471524,
-        6.0
-      ],
-      "speed": 0.057499,
-      "yaw": 0.16,
-      "pitch": 0.0,
-      "yaw_rate": 0.035,
-      "radius": 8.125,
-      "low_speed_turn": 1.0,
-      "minimum_clearance": 0.429098769847851,
-      "bend": -0.327519
-    },
-    {
-      "trace": "corner-recovery",
-      "position": [
-        15.4748,
-        10.502625,
-        6.0
-      ],
-      "speed": 0.018481,
-      "yaw": 0.195,
-      "pitch": 0.0,
-      "yaw_rate": 0.035,
-      "radius": 8.125,
-      "low_speed_turn": 1.0,
-      "minimum_clearance": 0.35153346872396884,
-      "bend": -0.307077
-    },
-    {
-      "trace": "corner-recovery",
-      "position": [
-        15.47779,
-        10.513771,
-        6.0
-      ],
-      "speed": 0.00628,
-      "yaw": 0.23,
-      "pitch": 0.0,
-      "yaw_rate": 0.035,
-      "radius": 8.125,
-      "low_speed_turn": 1.0,
-      "minimum_clearance": 0.48946257721610875,
-      "bend": -0.282624
-    },
-    {
-      "trace": "corner-recovery",
-      "position": [
-        15.477951,
-        10.517768,
-        6.0
-      ],
-      "speed": 0.00224,
-      "yaw": 0.265,
-      "pitch": 0.0,
-      "yaw_rate": 0.035,
-      "radius": 8.125,
-      "low_speed_turn": 1.0,
-      "minimum_clearance": 0.5223028669185794,
-      "bend": -0.258125
-    },
-    {
-      "trace": "corner-recovery",
-      "position": [
-        15.477687,
-        10.519197,
-        6.0
-      ],
-      "speed": 0.000842,
-      "yaw": 0.3,
-      "pitch": 0.0,
-      "yaw_rate": 0.035,
-      "radius": 8.125,
-      "low_speed_turn": 1.0,
-      "minimum_clearance": 0.34448621065740337,
-      "bend": -0.233625
-    },
-    {
-      "trace": "corner-recovery",
-      "position": [
-        15.477468,
-        10.519711,
-        6.0
-      ],
-      "speed": 0.000334,
-      "yaw": 0.335,
-      "pitch": 0.0,
-      "yaw_rate": 0.035,
-      "radius": 8.125,
-      "low_speed_turn": 1.0,
-      "minimum_clearance": 0.36062381398659005,
-      "bend": -0.209125
-    },
-    {
-      "trace": "corner-recovery",
-      "position": [
-        15.477336,
-        10.519897,
-        6.0
-      ],
-      "speed": 0.000141,
-      "yaw": 0.37,
-      "pitch": 0.0,
-      "yaw_rate": 0.035,
-      "radius": 8.125,
-      "low_speed_turn": 1.0,
-      "minimum_clearance": 0.5694435101120101,
-      "bend": -0.184625
-    },
-    {
-      "trace": "corner-recovery",
-      "position": [
-        15.477317,
-        10.519916,
-        6.0
+        6.003265,
+        0.0,
+        8.209217
       ],
       "speed": 0.0,
-      "yaw": 0.405,
-      "pitch": 0.0,
-      "yaw_rate": 0.035,
-      "radius": 8.125,
-      "low_speed_turn": 1.0,
-      "minimum_clearance": 0.44341731998068745,
-      "bend": -0.160125
+      "yaw": 0.0,
+      "pitch": 0.011732,
+      "yaw_rate": 0.0,
+      "radius": 4.875,
+      "low_speed_turn": 0.0,
+      "minimum_clearance": 2.3314732979451858,
+      "bend": 0.0
     },
     {
-      "trace": "corner-recovery",
+      "trace": "up",
       "position": [
-        15.477317,
-        10.519916,
-        6.0
+        6.003265,
+        0.0,
+        8.209217
       ],
       "speed": 0.0,
-      "yaw": 0.44,
-      "pitch": 0.0,
-      "yaw_rate": 0.035,
-      "radius": 8.125,
-      "low_speed_turn": 1.0,
-      "minimum_clearance": 0.3712569116785538,
-      "bend": -0.135625
+      "yaw": 0.0,
+      "pitch": 0.011732,
+      "yaw_rate": 0.0,
+      "radius": 4.875,
+      "low_speed_turn": 0.0,
+      "minimum_clearance": 2.3314732979451858,
+      "bend": 0.0
     },
     {
-      "trace": "corner-recovery",
+      "trace": "up",
       "position": [
-        15.477317,
-        10.519916,
-        6.0
+        6.003265,
+        0.0,
+        8.209217
       ],
       "speed": 0.0,
-      "yaw": 0.475,
-      "pitch": 0.0,
-      "yaw_rate": 0.035,
-      "radius": 8.125,
-      "low_speed_turn": 1.0,
-      "minimum_clearance": 0.4929059209440898,
-      "bend": -0.111125
+      "yaw": 0.0,
+      "pitch": 0.011732,
+      "yaw_rate": 0.0,
+      "radius": 4.875,
+      "low_speed_turn": 0.0,
+      "minimum_clearance": 2.3314732979451858,
+      "bend": 0.0
     },
     {
-      "trace": "corner-recovery",
+      "trace": "up",
       "position": [
-        15.477317,
-        10.519916,
-        6.0
+        6.003265,
+        0.0,
+        8.209217
       ],
       "speed": 0.0,
-      "yaw": -0.490001,
+      "yaw": 0.0,
+      "pitch": 0.011732,
+      "yaw_rate": 0.0,
+      "radius": 4.875,
+      "low_speed_turn": 0.0,
+      "minimum_clearance": 2.3314732979451858,
+      "bend": 0.0
+    },
+    {
+      "trace": "up",
+      "position": [
+        6.003265,
+        0.0,
+        8.209217
+      ],
+      "speed": 0.0,
+      "yaw": 0.0,
+      "pitch": 0.011732,
+      "yaw_rate": 0.0,
+      "radius": 4.875,
+      "low_speed_turn": 0.0,
+      "minimum_clearance": 2.3314732979451858,
+      "bend": 0.0
+    },
+    {
+      "trace": "up",
+      "position": [
+        6.003265,
+        0.0,
+        8.209217
+      ],
+      "speed": 0.0,
+      "yaw": 0.0,
+      "pitch": 0.011732,
+      "yaw_rate": 0.0,
+      "radius": 4.875,
+      "low_speed_turn": 0.0,
+      "minimum_clearance": 2.3314732979451858,
+      "bend": 0.0
+    },
+    {
+      "trace": "up",
+      "position": [
+        6.003265,
+        0.0,
+        8.209217
+      ],
+      "speed": 0.0,
+      "yaw": 0.0,
+      "pitch": 0.011732,
+      "yaw_rate": 0.0,
+      "radius": 4.875,
+      "low_speed_turn": 0.0,
+      "minimum_clearance": 2.3314732979451858,
+      "bend": 0.0
+    },
+    {
+      "trace": "up",
+      "position": [
+        6.003265,
+        0.0,
+        8.209217
+      ],
+      "speed": 0.0,
+      "yaw": 0.0,
+      "pitch": 0.011732,
+      "yaw_rate": 0.0,
+      "radius": 4.875,
+      "low_speed_turn": 0.0,
+      "minimum_clearance": 2.3314732979451858,
+      "bend": 0.0
+    },
+    {
+      "trace": "up",
+      "position": [
+        6.003265,
+        0.0,
+        8.209217
+      ],
+      "speed": 0.0,
+      "yaw": 0.0,
+      "pitch": 0.011732,
+      "yaw_rate": 0.0,
+      "radius": 4.875,
+      "low_speed_turn": 0.0,
+      "minimum_clearance": 2.3314732979451858,
+      "bend": 0.0
+    },
+    {
+      "trace": "up",
+      "position": [
+        6.003265,
+        0.0,
+        8.209217
+      ],
+      "speed": 0.0,
+      "yaw": 0.0,
+      "pitch": 0.011732,
+      "yaw_rate": 0.0,
+      "radius": 4.875,
+      "low_speed_turn": 0.0,
+      "minimum_clearance": 2.3314732979451858,
+      "bend": 0.0
+    },
+    {
+      "trace": "down",
+      "position": [
+        2.092785,
+        0.0,
+        5.417003
+      ],
+      "speed": 2.783867,
+      "yaw": 0.0,
+      "pitch": -0.070132,
+      "yaw_rate": 0.0,
+      "radius": 4.875,
+      "low_speed_turn": 0.0,
+      "minimum_clearance": 2.562573433783934,
+      "bend": 0.0
+    },
+    {
+      "trace": "down",
+      "position": [
+        4.14156,
+        0.0,
+        4.33349
+      ],
+      "speed": 1.477015,
+      "yaw": 0.0,
+      "pitch": -0.074869,
+      "yaw_rate": 0.0,
+      "radius": 4.875,
+      "low_speed_turn": 0.0,
+      "minimum_clearance": 1.395853169407463,
+      "bend": 0.0
+    },
+    {
+      "trace": "down",
+      "position": [
+        5.30233,
+        0.0,
+        3.904109
+      ],
+      "speed": 1.111365,
+      "yaw": 0.0,
+      "pitch": -0.034831,
+      "yaw_rate": 0.0,
+      "radius": 4.875,
+      "low_speed_turn": 0.0,
+      "minimum_clearance": 1.7394084802412504,
+      "bend": 0.0
+    },
+    {
+      "trace": "down",
+      "position": [
+        5.930995,
+        0.0,
+        3.797132
+      ],
+      "speed": 0.16607,
+      "yaw": 0.0,
+      "pitch": -0.015377,
+      "yaw_rate": 0.0,
+      "radius": 4.875,
+      "low_speed_turn": 0.0,
+      "minimum_clearance": 2.0560031705167146,
+      "bend": 0.0
+    },
+    {
+      "trace": "down",
+      "position": [
+        5.998376,
+        0.0,
+        3.791157
+      ],
+      "speed": 0.015749,
+      "yaw": 0.0,
+      "pitch": -0.012096,
+      "yaw_rate": 0.0,
+      "radius": 4.875,
+      "low_speed_turn": 0.0,
+      "minimum_clearance": 2.1239063632302395,
+      "bend": 0.0
+    },
+    {
+      "trace": "down",
+      "position": [
+        6.003267,
+        0.0,
+        3.790783
+      ],
+      "speed": 0.0,
+      "yaw": 0.0,
+      "pitch": -0.011759,
+      "yaw_rate": 0.0,
+      "radius": 4.875,
+      "low_speed_turn": 0.0,
+      "minimum_clearance": 2.1311337963058175,
+      "bend": 0.0
+    },
+    {
+      "trace": "down",
+      "position": [
+        6.003267,
+        0.0,
+        3.790783
+      ],
+      "speed": 0.0,
+      "yaw": 0.0,
+      "pitch": -0.011734,
+      "yaw_rate": 0.0,
+      "radius": 4.875,
+      "low_speed_turn": 0.0,
+      "minimum_clearance": 2.131812812547086,
+      "bend": 0.0
+    },
+    {
+      "trace": "down",
+      "position": [
+        6.003267,
+        0.0,
+        3.790783
+      ],
+      "speed": 0.0,
+      "yaw": 0.0,
+      "pitch": -0.011732,
+      "yaw_rate": 0.0,
+      "radius": 4.875,
+      "low_speed_turn": 0.0,
+      "minimum_clearance": 2.131812812547086,
+      "bend": 0.0
+    },
+    {
+      "trace": "down",
+      "position": [
+        6.003267,
+        0.0,
+        3.790783
+      ],
+      "speed": 0.0,
+      "yaw": 0.0,
+      "pitch": -0.011732,
+      "yaw_rate": 0.0,
+      "radius": 4.875,
+      "low_speed_turn": 0.0,
+      "minimum_clearance": 2.131812812547086,
+      "bend": 0.0
+    },
+    {
+      "trace": "down",
+      "position": [
+        6.003267,
+        0.0,
+        3.790783
+      ],
+      "speed": 0.0,
+      "yaw": 0.0,
+      "pitch": -0.011732,
+      "yaw_rate": 0.0,
+      "radius": 4.875,
+      "low_speed_turn": 0.0,
+      "minimum_clearance": 2.131812812547086,
+      "bend": 0.0
+    },
+    {
+      "trace": "down",
+      "position": [
+        6.003267,
+        0.0,
+        3.790783
+      ],
+      "speed": 0.0,
+      "yaw": 0.0,
+      "pitch": -0.011732,
+      "yaw_rate": 0.0,
+      "radius": 4.875,
+      "low_speed_turn": 0.0,
+      "minimum_clearance": 2.131812812547086,
+      "bend": 0.0
+    },
+    {
+      "trace": "down",
+      "position": [
+        6.003267,
+        0.0,
+        3.790783
+      ],
+      "speed": 0.0,
+      "yaw": 0.0,
+      "pitch": -0.011732,
+      "yaw_rate": 0.0,
+      "radius": 4.875,
+      "low_speed_turn": 0.0,
+      "minimum_clearance": 2.131812812547086,
+      "bend": 0.0
+    },
+    {
+      "trace": "down",
+      "position": [
+        6.003267,
+        0.0,
+        3.790783
+      ],
+      "speed": 0.0,
+      "yaw": 0.0,
+      "pitch": -0.011732,
+      "yaw_rate": 0.0,
+      "radius": 4.875,
+      "low_speed_turn": 0.0,
+      "minimum_clearance": 2.131812812547086,
+      "bend": 0.0
+    },
+    {
+      "trace": "down",
+      "position": [
+        6.003267,
+        0.0,
+        3.790783
+      ],
+      "speed": 0.0,
+      "yaw": 0.0,
+      "pitch": -0.011732,
+      "yaw_rate": 0.0,
+      "radius": 4.875,
+      "low_speed_turn": 0.0,
+      "minimum_clearance": 2.131812812547086,
+      "bend": 0.0
+    },
+    {
+      "trace": "down",
+      "position": [
+        6.003267,
+        0.0,
+        3.790783
+      ],
+      "speed": 0.0,
+      "yaw": 0.0,
+      "pitch": -0.011732,
+      "yaw_rate": 0.0,
+      "radius": 4.875,
+      "low_speed_turn": 0.0,
+      "minimum_clearance": 2.131812812547086,
+      "bend": 0.0
+    },
+    {
+      "trace": "down",
+      "position": [
+        6.003267,
+        0.0,
+        3.790783
+      ],
+      "speed": 0.0,
+      "yaw": 0.0,
+      "pitch": -0.011732,
+      "yaw_rate": 0.0,
+      "radius": 4.875,
+      "low_speed_turn": 0.0,
+      "minimum_clearance": 2.131812812547086,
+      "bend": 0.0
+    },
+    {
+      "trace": "down",
+      "position": [
+        6.003267,
+        0.0,
+        3.790783
+      ],
+      "speed": 0.0,
+      "yaw": 0.0,
+      "pitch": -0.011732,
+      "yaw_rate": 0.0,
+      "radius": 4.875,
+      "low_speed_turn": 0.0,
+      "minimum_clearance": 2.131812812547086,
+      "bend": 0.0
+    },
+    {
+      "trace": "down",
+      "position": [
+        6.003267,
+        0.0,
+        3.790783
+      ],
+      "speed": 0.0,
+      "yaw": 0.0,
+      "pitch": -0.011732,
+      "yaw_rate": 0.0,
+      "radius": 4.875,
+      "low_speed_turn": 0.0,
+      "minimum_clearance": 2.131812812547086,
+      "bend": 0.0
+    },
+    {
+      "trace": "away",
+      "position": [
+        0.611601,
+        0.372023,
+        6.0
+      ],
+      "speed": 0.898658,
+      "yaw": 0.155222,
       "pitch": 0.0,
-      "yaw_rate": 0.035,
-      "radius": 8.125,
+      "yaw_rate": 0.151568,
+      "radius": 4.875,
       "low_speed_turn": 1.0,
-      "minimum_clearance": 0.6033728700202494,
-      "bend": -0.086625
+      "minimum_clearance": 4.421243158319415,
+      "bend": -0.270557
     },
     {
-      "trace": "corner-recovery",
+      "trace": "away",
       "position": [
-        14.95941,
-        10.415101,
+        0.812821,
+        1.233484,
         6.0
       ],
-      "speed": 1.633043,
-      "yaw": -0.4623,
+      "speed": 1.32644,
+      "yaw": 0.246414,
       "pitch": 0.0,
-      "yaw_rate": 0.031989,
-      "radius": 8.125,
+      "yaw_rate": 0.015173,
+      "radius": 4.875,
       "low_speed_turn": 0.0,
-      "minimum_clearance": 0.9489369004425847,
-      "bend": -0.05518
+      "minimum_clearance": 4.488361637630824,
+      "bend": -0.07317
     },
     {
-      "trace": "corner-recovery",
+      "trace": "away",
       "position": [
-        13.199691,
-        9.773909,
+        0.826111,
+        3.706069,
         6.0
       ],
-      "speed": 1.983186,
-      "yaw": -0.425181,
+      "speed": 2.790181,
+      "yaw": 0.249923,
       "pitch": 0.0,
-      "yaw_rate": 0.038847,
-      "radius": 8.125,
+      "yaw_rate": 0.000327,
+      "radius": 4.875,
       "low_speed_turn": 0.0,
-      "minimum_clearance": 2.002587662002097,
-      "bend": -0.076607
+      "minimum_clearance": 4.599670622054989,
+      "bend": -0.00262
     },
     {
-      "trace": "corner-recovery",
+      "trace": "away",
       "position": [
-        11.544044,
-        8.67478,
+        0.826498,
+        6.503981,
         6.0
       ],
-      "speed": 1.99923,
-      "yaw": -0.388181,
+      "speed": 2.799915,
+      "yaw": 0.249998,
       "pitch": 0.0,
-      "yaw_rate": 0.026949,
-      "radius": 8.125,
-      "low_speed_turn": 0.0,
-      "minimum_clearance": 2.5973082452512526,
-      "bend": -0.066145
-    },
-    {
-      "trace": "corner-recovery",
-      "position": [
-        10.081465,
-        7.316529,
-        6.0
-      ],
-      "speed": 1.999965,
-      "yaw": -0.376628,
-      "pitch": 0.0,
-      "yaw_rate": 0.00368,
-      "radius": 8.125,
-      "low_speed_turn": 0.0,
-      "minimum_clearance": 3.8802038319408103,
-      "bend": -0.012676
-    },
-    {
-      "trace": "corner-recovery",
-      "position": [
-        8.663386,
-        5.910959,
-        6.0
-      ],
-      "speed": 1.999998,
-      "yaw": -0.37519,
-      "pitch": 0.0,
-      "yaw_rate": 0.000431,
-      "radius": 8.125,
-      "low_speed_turn": 0.0,
-      "minimum_clearance": 4.605979907482076,
-      "bend": -0.001568
-    },
-    {
-      "trace": "corner-recovery",
-      "position": [
-        7.250807,
-        4.499836,
-        6.0
-      ],
-      "speed": 2.0,
-      "yaw": -0.375022,
-      "pitch": 0.0,
-      "yaw_rate": 5e-05,
+      "yaw_rate": 7e-06,
       "radius": 8.125,
       "low_speed_turn": 0.0,
       "minimum_clearance": 4.609425175963486,
-      "bend": -0.000183
+      "bend": -6.8e-05
     },
     {
-      "trace": "corner-recovery",
+      "trace": "away",
       "position": [
-        5.838872,
-        3.08807,
+        0.826506,
+        8.952466,
         6.0
       ],
-      "speed": 2.0,
-      "yaw": -0.375003,
+      "speed": 1.567534,
+      "yaw": 0.25,
       "pitch": 0.0,
-      "yaw_rate": 6e-06,
-      "radius": 4.875,
+      "yaw_rate": 0.0,
+      "radius": 8.125,
       "low_speed_turn": 0.0,
-      "minimum_clearance": 4.609858633615971,
-      "bend": -2.1e-05
-    },
-    {
-      "trace": "corner-recovery",
-      "position": [
-        4.427011,
-        1.676229,
-        6.0
-      ],
-      "speed": 2.0,
-      "yaw": -0.375,
-      "pitch": 0.0,
-      "yaw_rate": 1e-06,
-      "radius": 4.875,
-      "low_speed_turn": 0.0,
-      "minimum_clearance": 4.609858633615971,
+      "minimum_clearance": 2.2203926341939706,
       "bend": -2e-06
     },
     {
-      "trace": "corner-recovery",
+      "trace": "away",
       "position": [
-        3.01516,
-        0.26438,
+        0.826506,
+        9.958097,
         6.0
       ],
-      "speed": 2.0,
+      "speed": 0.561903,
+      "yaw": 0.25,
+      "pitch": 0.0,
+      "yaw_rate": 0.0,
+      "radius": 8.125,
+      "low_speed_turn": 0.0,
+      "minimum_clearance": 1.2147616341939695,
+      "bend": -0.0
+    },
+    {
+      "trace": "away",
+      "position": [
+        0.826506,
+        10.31858,
+        6.0
+      ],
+      "speed": 0.201421,
+      "yaw": 0.25,
+      "pitch": 0.0,
+      "yaw_rate": 0.0,
+      "radius": 8.125,
+      "low_speed_turn": 0.0,
+      "minimum_clearance": 0.8542786341939692,
+      "bend": -0.0
+    },
+    {
+      "trace": "away",
+      "position": [
+        0.826506,
+        10.447799,
+        6.0
+      ],
+      "speed": 0.072202,
+      "yaw": 0.25,
+      "pitch": 0.0,
+      "yaw_rate": 0.0,
+      "radius": 8.125,
+      "low_speed_turn": 0.0,
+      "minimum_clearance": 0.7250596341939701,
+      "bend": -0.0
+    },
+    {
+      "trace": "away",
+      "position": [
+        0.826506,
+        10.49412,
+        6.0
+      ],
+      "speed": 0.025881,
+      "yaw": 0.25,
+      "pitch": 0.0,
+      "yaw_rate": 0.0,
+      "radius": 8.125,
+      "low_speed_turn": 0.0,
+      "minimum_clearance": 0.6787386341939694,
+      "bend": -0.0
+    },
+    {
+      "trace": "away",
+      "position": [
+        0.826506,
+        10.510723,
+        6.0
+      ],
+      "speed": 0.009277,
+      "yaw": 0.25,
+      "pitch": 0.0,
+      "yaw_rate": 0.0,
+      "radius": 8.125,
+      "low_speed_turn": 0.0,
+      "minimum_clearance": 0.6621356341939695,
+      "bend": -0.0
+    },
+    {
+      "trace": "away",
+      "position": [
+        0.826506,
+        10.516675,
+        6.0
+      ],
+      "speed": 0.003325,
+      "yaw": 0.25,
+      "pitch": 0.0,
+      "yaw_rate": 0.0,
+      "radius": 8.125,
+      "low_speed_turn": 0.0,
+      "minimum_clearance": 0.6561836341939706,
+      "bend": -0.0
+    },
+    {
+      "trace": "away",
+      "position": [
+        0.826506,
+        10.518809,
+        6.0
+      ],
+      "speed": 0.001191,
+      "yaw": 0.25,
+      "pitch": 0.0,
+      "yaw_rate": 0.0,
+      "radius": 8.125,
+      "low_speed_turn": 0.0,
+      "minimum_clearance": 0.6540496341939708,
+      "bend": -0.0
+    },
+    {
+      "trace": "away",
+      "position": [
+        0.826506,
+        10.519574,
+        6.0
+      ],
+      "speed": 0.000426,
+      "yaw": 0.25,
+      "pitch": 0.0,
+      "yaw_rate": 0.0,
+      "radius": 8.125,
+      "low_speed_turn": 0.0,
+      "minimum_clearance": 0.6532846341939695,
+      "bend": -0.0
+    },
+    {
+      "trace": "away",
+      "position": [
+        0.826506,
+        10.519847,
+        6.0
+      ],
+      "speed": 0.000154,
+      "yaw": 0.25,
+      "pitch": 0.0,
+      "yaw_rate": 0.0,
+      "radius": 8.125,
+      "low_speed_turn": 0.0,
+      "minimum_clearance": 0.6530116341939696,
+      "bend": -0.0
+    },
+    {
+      "trace": "away",
+      "position": [
+        0.826506,
+        10.519946,
+        6.0
+      ],
+      "speed": 5.4e-05,
+      "yaw": 0.25,
+      "pitch": 0.0,
+      "yaw_rate": 0.0,
+      "radius": 8.125,
+      "low_speed_turn": 0.0,
+      "minimum_clearance": 0.6529126341939708,
+      "bend": -0.0
+    },
+    {
+      "trace": "away",
+      "position": [
+        0.826506,
+        10.51998,
+        6.0
+      ],
+      "speed": 2e-05,
+      "yaw": 0.25,
+      "pitch": 0.0,
+      "yaw_rate": 0.0,
+      "radius": 8.125,
+      "low_speed_turn": 0.0,
+      "minimum_clearance": 0.6528786341939696,
+      "bend": -0.0
+    },
+    {
+      "trace": "away",
+      "position": [
+        0.826506,
+        10.519992,
+        6.0
+      ],
+      "speed": 9e-06,
+      "yaw": 0.25,
+      "pitch": 0.0,
+      "yaw_rate": 0.0,
+      "radius": 8.125,
+      "low_speed_turn": 0.0,
+      "minimum_clearance": 0.6528666341939697,
+      "bend": -0.0
+    },
+    {
+      "trace": "away",
+      "position": [
+        0.826506,
+        10.519992,
+        6.0
+      ],
+      "speed": 9e-06,
+      "yaw": 0.25,
+      "pitch": 0.0,
+      "yaw_rate": 0.0,
+      "radius": 8.125,
+      "low_speed_turn": 0.0,
+      "minimum_clearance": 0.6528666341939697,
+      "bend": -0.0
+    },
+    {
+      "trace": "toward",
+      "position": [
+        0.611601,
+        -0.372023,
+        6.0
+      ],
+      "speed": 0.898658,
+      "yaw": -0.155222,
+      "pitch": 0.0,
+      "yaw_rate": -0.151568,
+      "radius": 4.875,
+      "low_speed_turn": 1.0,
+      "minimum_clearance": 4.421376728895647,
+      "bend": 0.270557
+    },
+    {
+      "trace": "toward",
+      "position": [
+        0.812821,
+        -1.233484,
+        6.0
+      ],
+      "speed": 1.32644,
+      "yaw": -0.246414,
+      "pitch": 0.0,
+      "yaw_rate": -0.015173,
+      "radius": 4.875,
+      "low_speed_turn": 0.0,
+      "minimum_clearance": 4.48850187341678,
+      "bend": 0.07317
+    },
+    {
+      "trace": "toward",
+      "position": [
+        0.826111,
+        -3.706069,
+        6.0
+      ],
+      "speed": 2.790181,
+      "yaw": -0.249923,
+      "pitch": 0.0,
+      "yaw_rate": -0.000327,
+      "radius": 4.875,
+      "low_speed_turn": 0.0,
+      "minimum_clearance": 4.599820594894785,
+      "bend": 0.00262
+    },
+    {
+      "trace": "toward",
+      "position": [
+        0.826498,
+        -6.503981,
+        6.0
+      ],
+      "speed": 2.799915,
+      "yaw": -0.249998,
+      "pitch": 0.0,
+      "yaw_rate": -7e-06,
+      "radius": 8.125,
+      "low_speed_turn": 0.0,
+      "minimum_clearance": 4.609566509923957,
+      "bend": 6.8e-05
+    },
+    {
+      "trace": "toward",
+      "position": [
+        0.826507,
+        -8.952466,
+        6.0
+      ],
+      "speed": 1.567534,
+      "yaw": -0.25,
+      "pitch": 0.0,
+      "yaw_rate": -0.0,
+      "radius": 8.125,
+      "low_speed_turn": 0.0,
+      "minimum_clearance": 2.2205339999999993,
+      "bend": 2e-06
+    },
+    {
+      "trace": "toward",
+      "position": [
+        0.826507,
+        -9.958097,
+        6.0
+      ],
+      "speed": 0.561903,
+      "yaw": -0.25,
+      "pitch": 0.0,
+      "yaw_rate": -0.0,
+      "radius": 8.125,
+      "low_speed_turn": 0.0,
+      "minimum_clearance": 1.2149029999999983,
+      "bend": 0.0
+    },
+    {
+      "trace": "toward",
+      "position": [
+        0.826507,
+        -10.31858,
+        6.0
+      ],
+      "speed": 0.201421,
+      "yaw": -0.25,
+      "pitch": 0.0,
+      "yaw_rate": -0.0,
+      "radius": 8.125,
+      "low_speed_turn": 0.0,
+      "minimum_clearance": 0.854419999999998,
+      "bend": 0.0
+    },
+    {
+      "trace": "toward",
+      "position": [
+        0.826507,
+        -10.447799,
+        6.0
+      ],
+      "speed": 0.072202,
+      "yaw": -0.25,
+      "pitch": 0.0,
+      "yaw_rate": -0.0,
+      "radius": 8.125,
+      "low_speed_turn": 0.0,
+      "minimum_clearance": 0.7252009999999989,
+      "bend": 0.0
+    },
+    {
+      "trace": "toward",
+      "position": [
+        0.826507,
+        -10.49412,
+        6.0
+      ],
+      "speed": 0.025881,
+      "yaw": -0.25,
+      "pitch": 0.0,
+      "yaw_rate": -0.0,
+      "radius": 8.125,
+      "low_speed_turn": 0.0,
+      "minimum_clearance": 0.6788799999999982,
+      "bend": 0.0
+    },
+    {
+      "trace": "toward",
+      "position": [
+        0.826507,
+        -10.510723,
+        6.0
+      ],
+      "speed": 0.009277,
+      "yaw": -0.25,
+      "pitch": 0.0,
+      "yaw_rate": -0.0,
+      "radius": 8.125,
+      "low_speed_turn": 0.0,
+      "minimum_clearance": 0.6622769999999982,
+      "bend": 0.0
+    },
+    {
+      "trace": "toward",
+      "position": [
+        0.826507,
+        -10.516675,
+        6.0
+      ],
+      "speed": 0.003325,
+      "yaw": -0.25,
+      "pitch": 0.0,
+      "yaw_rate": -0.0,
+      "radius": 8.125,
+      "low_speed_turn": 0.0,
+      "minimum_clearance": 0.6563249999999994,
+      "bend": 0.0
+    },
+    {
+      "trace": "toward",
+      "position": [
+        0.826507,
+        -10.518809,
+        6.0
+      ],
+      "speed": 0.001191,
+      "yaw": -0.25,
+      "pitch": 0.0,
+      "yaw_rate": -0.0,
+      "radius": 8.125,
+      "low_speed_turn": 0.0,
+      "minimum_clearance": 0.6541909999999995,
+      "bend": 0.0
+    },
+    {
+      "trace": "toward",
+      "position": [
+        0.826507,
+        -10.519574,
+        6.0
+      ],
+      "speed": 0.000426,
+      "yaw": -0.25,
+      "pitch": 0.0,
+      "yaw_rate": -0.0,
+      "radius": 8.125,
+      "low_speed_turn": 0.0,
+      "minimum_clearance": 0.6534259999999983,
+      "bend": 0.0
+    },
+    {
+      "trace": "toward",
+      "position": [
+        0.826507,
+        -10.519847,
+        6.0
+      ],
+      "speed": 0.000154,
+      "yaw": -0.25,
+      "pitch": 0.0,
+      "yaw_rate": -0.0,
+      "radius": 8.125,
+      "low_speed_turn": 0.0,
+      "minimum_clearance": 0.6531529999999983,
+      "bend": 0.0
+    },
+    {
+      "trace": "toward",
+      "position": [
+        0.826507,
+        -10.519946,
+        6.0
+      ],
+      "speed": 5.4e-05,
+      "yaw": -0.25,
+      "pitch": 0.0,
+      "yaw_rate": -0.0,
+      "radius": 8.125,
+      "low_speed_turn": 0.0,
+      "minimum_clearance": 0.6530539999999996,
+      "bend": 0.0
+    },
+    {
+      "trace": "toward",
+      "position": [
+        0.826507,
+        -10.51998,
+        6.0
+      ],
+      "speed": 2e-05,
+      "yaw": -0.25,
+      "pitch": 0.0,
+      "yaw_rate": -0.0,
+      "radius": 8.125,
+      "low_speed_turn": 0.0,
+      "minimum_clearance": 0.6530199999999984,
+      "bend": 0.0
+    },
+    {
+      "trace": "toward",
+      "position": [
+        0.826507,
+        -10.519992,
+        6.0
+      ],
+      "speed": 9e-06,
+      "yaw": -0.25,
+      "pitch": 0.0,
+      "yaw_rate": -0.0,
+      "radius": 8.125,
+      "low_speed_turn": 0.0,
+      "minimum_clearance": 0.6530079999999985,
+      "bend": 0.0
+    },
+    {
+      "trace": "toward",
+      "position": [
+        0.826507,
+        -10.519992,
+        6.0
+      ],
+      "speed": 9e-06,
+      "yaw": -0.25,
+      "pitch": 0.0,
+      "yaw_rate": -0.0,
+      "radius": 8.125,
+      "low_speed_turn": 0.0,
+      "minimum_clearance": 0.6530079999999985,
+      "bend": 0.0
+    },
+    {
+      "trace": "build-drive",
+      "position": [
+        2.187682,
+        0.0,
+        6.0
+      ],
+      "speed": 2.783868,
+      "yaw": 0.0,
+      "pitch": 0.0,
+      "yaw_rate": 0.0,
+      "radius": 4.875,
+      "low_speed_turn": 0.0,
+      "minimum_clearance": 4.609999999999999,
+      "bend": 0.0
+    },
+    {
+      "trace": "build-drive",
+      "position": [
+        4.984324,
+        0.0,
+        6.0
+      ],
+      "speed": 2.799907,
+      "yaw": 0.0,
+      "pitch": 0.0,
+      "yaw_rate": 0.0,
+      "radius": 4.875,
+      "low_speed_turn": 0.0,
+      "minimum_clearance": 4.609999999999999,
+      "bend": 0.0
+    },
+    {
+      "trace": "build-drive",
+      "position": [
+        7.784475,
+        0.0,
+        6.0
+      ],
+      "speed": 2.799999,
+      "yaw": 0.0,
+      "pitch": 0.0,
+      "yaw_rate": 0.0,
+      "radius": 4.875,
+      "low_speed_turn": 0.0,
+      "minimum_clearance": 4.609999999999999,
+      "bend": 0.0
+    },
+    {
+      "trace": "reverse-turn",
+      "position": [
+        7.924484,
+        0.0,
+        6.0
+      ],
+      "speed": 2.272222,
+      "yaw": 0.005406,
+      "pitch": 0.0,
+      "yaw_rate": 0.10811,
+      "radius": 4.875,
+      "low_speed_turn": 1.0,
+      "minimum_clearance": 4.580185269467603,
+      "bend": -0.03892
+    },
+    {
+      "trace": "reverse-turn",
+      "position": [
+        8.038035,
+        0.003922,
+        6.0
+      ],
+      "speed": 1.891049,
+      "yaw": 0.011414,
+      "pitch": 0.0,
+      "yaw_rate": 0.12017,
+      "radius": 4.875,
+      "low_speed_turn": 1.0,
+      "minimum_clearance": 4.555178421281026,
+      "bend": -0.074397
+    },
+    {
+      "trace": "reverse-turn",
+      "position": [
+        8.132347,
+        0.010794,
+        6.0
+      ],
+      "speed": 1.615758,
+      "yaw": 0.017858,
+      "pitch": 0.0,
+      "yaw_rate": 0.12888,
+      "radius": 4.875,
+      "low_speed_turn": 1.0,
+      "minimum_clearance": 4.5339690547123865,
+      "bend": -0.105914
+    },
+    {
+      "trace": "reverse-turn",
+      "position": [
+        8.212626,
+        0.01995,
+        6.0
+      ],
+      "speed": 1.416936,
+      "yaw": 0.024617,
+      "pitch": 0.0,
+      "yaw_rate": 0.13517,
+      "radius": 4.875,
+      "low_speed_turn": 1.0,
+      "minimum_clearance": 4.5160279895899755,
+      "bend": -0.133393
+    },
+    {
+      "trace": "reverse-turn",
+      "position": [
+        8.28262,
+        0.030976,
+        6.0
+      ],
+      "speed": 1.273343,
+      "yaw": 0.031602,
+      "pitch": 0.0,
+      "yaw_rate": 0.139713,
+      "radius": 4.875,
+      "low_speed_turn": 1.0,
+      "minimum_clearance": 4.5008501784938435,
+      "bend": -0.157011
+    },
+    {
+      "trace": "reverse-turn",
+      "position": [
+        8.345025,
+        0.04364,
+        6.0
+      ],
+      "speed": 1.169636,
+      "yaw": 0.038752,
+      "pitch": 0.0,
+      "yaw_rate": 0.142994,
+      "radius": 4.875,
+      "low_speed_turn": 1.0,
+      "minimum_clearance": 4.487967295557398,
+      "bend": -0.177087
+    },
+    {
+      "trace": "reverse-turn",
+      "position": [
+        8.401764,
+        0.057832,
+        6.0
+      ],
+      "speed": 1.094737,
+      "yaw": 0.04602,
+      "pitch": 0.0,
+      "yaw_rate": 0.145364,
+      "radius": 4.875,
+      "low_speed_turn": 1.0,
+      "minimum_clearance": 4.476907543450299,
+      "bend": -0.194
+    },
+    {
+      "trace": "reverse-turn",
+      "position": [
+        8.454205,
+        0.07352,
+        6.0
+      ],
+      "speed": 1.040644,
+      "yaw": 0.053374,
+      "pitch": 0.0,
+      "yaw_rate": 0.147076,
+      "radius": 4.875,
+      "low_speed_turn": 1.0,
+      "minimum_clearance": 4.4675203846438265,
+      "bend": -0.208148
+    },
+    {
+      "trace": "reverse-turn",
+      "position": [
+        8.503308,
+        0.090708,
+        6.0
+      ],
+      "speed": 1.001576,
+      "yaw": 0.060789,
+      "pitch": 0.0,
+      "yaw_rate": 0.148312,
+      "radius": 4.875,
+      "low_speed_turn": 1.0,
+      "minimum_clearance": 4.4596288816584,
+      "bend": -0.21991
+    },
+    {
+      "trace": "reverse-turn",
+      "position": [
+        8.549743,
+        0.109423,
+        6.0
+      ],
+      "speed": 0.97336,
+      "yaw": 0.06825,
+      "pitch": 0.0,
+      "yaw_rate": 0.149204,
+      "radius": 4.875,
+      "low_speed_turn": 1.0,
+      "minimum_clearance": 4.452832892726597,
+      "bend": -0.229642
+    },
+    {
+      "trace": "reverse-turn",
+      "position": [
+        8.593963,
+        0.129692,
+        6.0
+      ],
+      "speed": 0.952983,
+      "yaw": 0.075742,
+      "pitch": 0.0,
+      "yaw_rate": 0.149849,
+      "radius": 4.875,
+      "low_speed_turn": 1.0,
+      "minimum_clearance": 4.446972352561736,
+      "bend": -0.237659
+    },
+    {
+      "trace": "reverse-turn",
+      "position": [
+        8.63627,
+        0.151538,
+        6.0
+      ],
+      "speed": 0.938265,
+      "yaw": 0.083258,
+      "pitch": 0.0,
+      "yaw_rate": 0.150315,
+      "radius": 4.875,
+      "low_speed_turn": 1.0,
+      "minimum_clearance": 4.442044211381397,
+      "bend": -0.24424
+    },
+    {
+      "trace": "reverse-turn",
+      "position": [
+        8.676857,
+        0.174977,
+        6.0
+      ],
+      "speed": 0.927636,
+      "yaw": 0.09079,
+      "pitch": 0.0,
+      "yaw_rate": 0.150651,
+      "radius": 4.875,
+      "low_speed_turn": 1.0,
+      "minimum_clearance": 4.437784923053829,
+      "bend": -0.249627
+    },
+    {
+      "trace": "reverse-turn",
+      "position": [
+        8.715838,
+        0.200012,
+        6.0
+      ],
+      "speed": 0.919959,
+      "yaw": 0.098335,
+      "pitch": 0.0,
+      "yaw_rate": 0.150894,
+      "radius": 4.875,
+      "low_speed_turn": 1.0,
+      "minimum_clearance": 4.4341714302337945,
+      "bend": -0.254023
+    },
+    {
+      "trace": "reverse-turn",
+      "position": [
+        8.753274,
+        0.226633,
+        6.0
+      ],
+      "speed": 0.914415,
+      "yaw": 0.105889,
+      "pitch": 0.0,
+      "yaw_rate": 0.151069,
+      "radius": 4.875,
+      "low_speed_turn": 1.0,
+      "minimum_clearance": 4.431089221097507,
+      "bend": -0.257603
+    },
+    {
+      "trace": "reverse-turn",
+      "position": [
+        8.789185,
+        0.254822,
+        6.0
+      ],
+      "speed": 0.910411,
+      "yaw": 0.113448,
+      "pitch": 0.0,
+      "yaw_rate": 0.151196,
+      "radius": 4.875,
+      "low_speed_turn": 1.0,
+      "minimum_clearance": 4.428526242817807,
+      "bend": -0.260513
+    },
+    {
+      "trace": "reverse-turn",
+      "position": [
+        8.823564,
+        0.284546,
+        6.0
+      ],
+      "speed": 0.907519,
+      "yaw": 0.121013,
+      "pitch": 0.0,
+      "yaw_rate": 0.151287,
+      "radius": 4.875,
+      "low_speed_turn": 1.0,
+      "minimum_clearance": 4.426219678450023,
+      "bend": -0.262874
+    },
+    {
+      "trace": "reverse-turn",
+      "position": [
+        8.856387,
+        0.315767,
+        6.0
+      ],
+      "speed": 0.90543,
+      "yaw": 0.12858,
+      "pitch": 0.0,
+      "yaw_rate": 0.151354,
+      "radius": 4.875,
+      "low_speed_turn": 1.0,
+      "minimum_clearance": 4.424302068875784,
+      "bend": -0.264787
+    },
+    {
+      "trace": "reverse-turn",
+      "position": [
+        8.88762,
+        0.348436,
+        6.0
+      ],
+      "speed": 0.903922,
+      "yaw": 0.13615,
+      "pitch": 0.0,
+      "yaw_rate": 0.151401,
+      "radius": 4.875,
+      "low_speed_turn": 1.0,
+      "minimum_clearance": 4.4226463440884825,
+      "bend": -0.266334
+    },
+    {
+      "trace": "reverse-turn",
+      "position": [
+        8.917218,
+        0.382495,
+        6.0
+      ],
+      "speed": 0.902833,
+      "yaw": 0.143722,
+      "pitch": 0.0,
+      "yaw_rate": 0.151436,
+      "radius": 4.875,
+      "low_speed_turn": 1.0,
+      "minimum_clearance": 4.421243158319415,
+      "bend": -0.267584
+    },
+    {
+      "trace": "reverse-turn",
+      "position": [
+        8.945136,
+        0.417882,
+        6.0
+      ],
+      "speed": 0.902046,
+      "yaw": 0.151295,
+      "pitch": 0.0,
+      "yaw_rate": 0.151461,
+      "radius": 4.875,
+      "low_speed_turn": 1.0,
+      "minimum_clearance": 4.4199749330126865,
+      "bend": -0.268593
+    },
+    {
+      "trace": "reverse-turn",
+      "position": [
+        8.971324,
+        0.454528,
+        6.0
+      ],
+      "speed": 0.901477,
+      "yaw": 0.158869,
+      "pitch": 0.0,
+      "yaw_rate": 0.151479,
+      "radius": 4.875,
+      "low_speed_turn": 1.0,
+      "minimum_clearance": 4.418957925876075,
+      "bend": -0.269407
+    },
+    {
+      "trace": "reverse-turn",
+      "position": [
+        8.995733,
+        0.492358,
+        6.0
+      ],
+      "speed": 0.901067,
+      "yaw": 0.166444,
+      "pitch": 0.0,
+      "yaw_rate": 0.151492,
+      "radius": 4.875,
+      "low_speed_turn": 1.0,
+      "minimum_clearance": 4.418066628548733,
+      "bend": -0.270062
+    },
+    {
+      "trace": "reverse-turn",
+      "position": [
+        9.018315,
+        0.531294,
+        6.0
+      ],
+      "speed": 0.900771,
+      "yaw": 0.174019,
+      "pitch": 0.0,
+      "yaw_rate": 0.151501,
+      "radius": 4.875,
+      "low_speed_turn": 1.0,
+      "minimum_clearance": 4.417300778840378,
+      "bend": -0.27059
+    },
+    {
+      "trace": "reverse-turn",
+      "position": [
+        9.039024,
+        0.571252,
+        6.0
+      ],
+      "speed": 0.900557,
+      "yaw": 0.181594,
+      "pitch": 0.0,
+      "yaw_rate": 0.151508,
+      "radius": 8.125,
+      "low_speed_turn": 1.0,
+      "minimum_clearance": 4.416668468856442,
+      "bend": -0.271015
+    },
+    {
+      "trace": "reverse-turn",
+      "position": [
+        9.057817,
+        0.612146,
+        6.0
+      ],
+      "speed": 0.900402,
+      "yaw": 0.18917,
+      "pitch": 0.0,
+      "yaw_rate": 0.151513,
+      "radius": 8.125,
+      "low_speed_turn": 1.0,
+      "minimum_clearance": 4.4161611850839435,
+      "bend": -0.271356
+    },
+    {
+      "trace": "reverse-turn",
+      "position": [
+        9.074651,
+        0.653885,
+        6.0
+      ],
+      "speed": 0.90029,
+      "yaw": 0.196746,
+      "pitch": 0.0,
+      "yaw_rate": 0.151516,
+      "radius": 8.125,
+      "low_speed_turn": 1.0,
+      "minimum_clearance": 4.415654104596244,
+      "bend": -0.271631
+    },
+    {
+      "trace": "reverse-turn",
+      "position": [
+        9.089489,
+        0.696378,
+        6.0
+      ],
+      "speed": 0.90021,
+      "yaw": 0.204322,
+      "pitch": 0.0,
+      "yaw_rate": 0.151519,
+      "radius": 8.125,
+      "low_speed_turn": 1.0,
+      "minimum_clearance": 4.415271850525754,
+      "bend": -0.271851
+    },
+    {
+      "trace": "reverse-turn",
+      "position": [
+        9.102297,
+        0.739528,
+        6.0
+      ],
+      "speed": 0.900151,
+      "yaw": 0.211898,
+      "pitch": 0.0,
+      "yaw_rate": 0.151521,
+      "radius": 8.125,
+      "low_speed_turn": 1.0,
+      "minimum_clearance": 4.414889712130376,
+      "bend": -0.272029
+    },
+    {
+      "trace": "reverse-turn",
+      "position": [
+        9.113042,
+        0.783239,
+        6.0
+      ],
+      "speed": 0.900109,
+      "yaw": 0.219474,
+      "pitch": 0.0,
+      "yaw_rate": 0.151522,
+      "radius": 8.125,
+      "low_speed_turn": 1.0,
+      "minimum_clearance": 4.414515993052511,
+      "bend": -0.272171
+    },
+    {
+      "trace": "reverse-turn",
+      "position": [
+        9.121696,
+        0.827411,
+        6.0
+      ],
+      "speed": 0.900079,
+      "yaw": 0.22705,
+      "pitch": 0.0,
+      "yaw_rate": 0.151523,
+      "radius": 8.125,
+      "low_speed_turn": 1.0,
+      "minimum_clearance": 4.414258606563133,
+      "bend": -0.272285
+    },
+    {
+      "trace": "reverse-turn",
+      "position": [
+        9.128232,
+        0.871945,
+        6.0
+      ],
+      "speed": 0.900057,
+      "yaw": 0.234626,
+      "pitch": 0.0,
+      "yaw_rate": 0.151524,
+      "radius": 8.125,
+      "low_speed_turn": 1.0,
+      "minimum_clearance": 4.4141340835867044,
+      "bend": -0.272376
+    },
+    {
+      "trace": "reverse-turn",
+      "position": [
+        9.132629,
+        0.916738,
+        6.0
+      ],
+      "speed": 0.900041,
+      "yaw": 0.242202,
+      "pitch": 0.0,
+      "yaw_rate": 0.151524,
+      "radius": 8.125,
+      "low_speed_turn": 1.0,
+      "minimum_clearance": 4.413876775112838,
+      "bend": -0.27245
+    },
+    {
+      "trace": "reverse-turn",
+      "position": [
+        9.134868,
+        0.961688,
+        6.0
+      ],
+      "speed": 0.90003,
+      "yaw": 0.249778,
+      "pitch": 0.0,
+      "yaw_rate": 0.151524,
+      "radius": 8.125,
+      "low_speed_turn": 1.0,
+      "minimum_clearance": 4.41375228989105,
+      "bend": -0.272508
+    },
+    {
+      "trace": "reverse-turn",
+      "position": [
+        9.134932,
+        1.006692,
+        6.0
+      ],
+      "speed": 0.900021,
+      "yaw": 0.257355,
+      "pitch": 0.0,
+      "yaw_rate": 0.151525,
+      "radius": 8.125,
+      "low_speed_turn": 1.0,
+      "minimum_clearance": 4.4136278169828085,
+      "bend": -0.272556
+    },
+    {
+      "trace": "reverse-turn",
+      "position": [
+        9.13282,
+        1.051648,
+        6.0
+      ],
+      "speed": 0.900015,
+      "yaw": 0.264931,
+      "pitch": 0.0,
+      "yaw_rate": 0.151525,
+      "radius": 8.125,
+      "low_speed_turn": 1.0,
+      "minimum_clearance": 4.413495059454192,
+      "bend": -0.272593
+    },
+    {
+      "trace": "reverse-turn",
+      "position": [
+        9.12855,
+        1.096451,
+        6.0
+      ],
+      "speed": 0.900011,
+      "yaw": 0.272507,
+      "pitch": 0.0,
+      "yaw_rate": 0.151525,
+      "radius": 8.125,
+      "low_speed_turn": 1.0,
+      "minimum_clearance": 4.413370611997445,
+      "bend": -0.272624
+    },
+    {
+      "trace": "reverse-turn",
+      "position": [
+        9.122138,
+        1.140999,
+        6.0
+      ],
+      "speed": 0.900008,
+      "yaw": 0.280083,
+      "pitch": 0.0,
+      "yaw_rate": 0.151525,
+      "radius": 8.125,
+      "low_speed_turn": 1.0,
+      "minimum_clearance": 4.413246176857633,
+      "bend": -0.272648
+    },
+    {
+      "trace": "reverse-turn",
+      "position": [
+        9.113609,
+        1.18519,
+        6.0
+      ],
+      "speed": 0.900006,
+      "yaw": 0.28766,
+      "pitch": 0.0,
+      "yaw_rate": 0.151525,
+      "radius": 8.125,
+      "low_speed_turn": 1.0,
+      "minimum_clearance": 4.413246176857633,
+      "bend": -0.272667
+    },
+    {
+      "trace": "reverse-turn",
+      "position": [
+        9.102988,
+        1.228924,
+        6.0
+      ],
+      "speed": 0.900004,
+      "yaw": 0.295236,
+      "pitch": 0.0,
+      "yaw_rate": 0.151525,
+      "radius": 8.125,
+      "low_speed_turn": 1.0,
+      "minimum_clearance": 4.413121754035863,
+      "bend": -0.272683
+    },
+    {
+      "trace": "reverse-turn",
+      "position": [
+        9.090303,
+        1.2721,
+        6.0
+      ],
+      "speed": 0.900003,
+      "yaw": 0.302812,
+      "pitch": 0.0,
+      "yaw_rate": 0.151525,
+      "radius": 8.125,
+      "low_speed_turn": 1.0,
+      "minimum_clearance": 4.413121754035863,
+      "bend": -0.272695
+    },
+    {
+      "trace": "reverse-turn",
+      "position": [
+        9.075587,
+        1.31462,
+        6.0
+      ],
+      "speed": 0.900002,
+      "yaw": 0.310388,
+      "pitch": 0.0,
+      "yaw_rate": 0.151525,
+      "radius": 8.125,
+      "low_speed_turn": 1.0,
+      "minimum_clearance": 4.412989049937771,
+      "bend": -0.272705
+    },
+    {
+      "trace": "reverse-turn",
+      "position": [
+        9.058875,
+        1.356388,
+        6.0
+      ],
+      "speed": 0.900002,
+      "yaw": 0.317965,
+      "pitch": 0.0,
+      "yaw_rate": 0.151525,
+      "radius": 8.125,
+      "low_speed_turn": 1.0,
+      "minimum_clearance": 4.412989049937771,
+      "bend": -0.272713
+    },
+    {
+      "trace": "reverse-turn",
+      "position": [
+        9.040207,
+        1.397309,
+        6.0
+      ],
+      "speed": 0.900001,
+      "yaw": 0.325541,
+      "pitch": 0.0,
+      "yaw_rate": 0.151525,
+      "radius": 8.125,
+      "low_speed_turn": 1.0,
+      "minimum_clearance": 4.412989049937771,
+      "bend": -0.27272
+    },
+    {
+      "trace": "reverse-turn",
+      "position": [
+        9.019625,
+        1.43729,
+        6.0
+      ],
+      "speed": 0.900001,
+      "yaw": 0.333117,
+      "pitch": 0.0,
+      "yaw_rate": 0.151525,
+      "radius": 4.875,
+      "low_speed_turn": 1.0,
+      "minimum_clearance": 4.412989049937771,
+      "bend": -0.272725
+    },
+    {
+      "trace": "reverse-turn",
+      "position": [
+        8.997176,
+        1.476242,
+        6.0
+      ],
+      "speed": 0.900001,
+      "yaw": 0.340693,
+      "pitch": 0.0,
+      "yaw_rate": 0.151525,
+      "radius": 4.875,
+      "low_speed_turn": 1.0,
+      "minimum_clearance": 4.412864652576786,
+      "bend": -0.272729
+    },
+    {
+      "trace": "reverse-turn",
+      "position": [
+        8.972911,
+        1.514078,
+        6.0
+      ],
+      "speed": 0.9,
+      "yaw": 0.34827,
+      "pitch": 0.0,
+      "yaw_rate": 0.151525,
+      "radius": 4.875,
+      "low_speed_turn": 1.0,
+      "minimum_clearance": 4.412864652576786,
+      "bend": -0.272732
+    },
+    {
+      "trace": "reverse-turn",
+      "position": [
+        8.946882,
+        1.550712,
+        6.0
+      ],
+      "speed": 0.9,
+      "yaw": 0.355846,
+      "pitch": 0.0,
+      "yaw_rate": 0.151525,
+      "radius": 4.875,
+      "low_speed_turn": 1.0,
+      "minimum_clearance": 4.412864652576786,
+      "bend": -0.272735
+    },
+    {
+      "trace": "reverse-turn",
+      "position": [
+        8.919147,
+        1.586063,
+        6.0
+      ],
+      "speed": 0.9,
+      "yaw": 0.363422,
+      "pitch": 0.0,
+      "yaw_rate": 0.151525,
+      "radius": 4.875,
+      "low_speed_turn": 1.0,
+      "minimum_clearance": 4.412864652576786,
+      "bend": -0.272737
+    },
+    {
+      "trace": "reverse-turn",
+      "position": [
+        8.889769,
+        1.620054,
+        6.0
+      ],
+      "speed": 0.9,
+      "yaw": 0.370998,
+      "pitch": 0.0,
+      "yaw_rate": 0.151525,
+      "radius": 4.875,
+      "low_speed_turn": 1.0,
+      "minimum_clearance": 4.412864652576786,
+      "bend": -0.272739
+    },
+    {
+      "trace": "reverse-turn",
+      "position": [
+        8.858809,
+        1.652608,
+        6.0
+      ],
+      "speed": 0.9,
+      "yaw": 0.378575,
+      "pitch": 0.0,
+      "yaw_rate": 0.151525,
+      "radius": 4.875,
+      "low_speed_turn": 1.0,
+      "minimum_clearance": 4.412864652576786,
+      "bend": -0.27274
+    },
+    {
+      "trace": "reverse-turn",
+      "position": [
+        8.826338,
+        1.683655,
+        6.0
+      ],
+      "speed": 0.9,
+      "yaw": 0.386151,
+      "pitch": 0.0,
+      "yaw_rate": 0.151525,
+      "radius": 4.875,
+      "low_speed_turn": 1.0,
+      "minimum_clearance": 4.412864652576786,
+      "bend": -0.272741
+    },
+    {
+      "trace": "reverse-turn",
+      "position": [
+        8.792426,
+        1.713125,
+        6.0
+      ],
+      "speed": 0.9,
+      "yaw": 0.393727,
+      "pitch": 0.0,
+      "yaw_rate": 0.151525,
+      "radius": 4.875,
+      "low_speed_turn": 1.0,
+      "minimum_clearance": 4.412864652576786,
+      "bend": -0.272742
+    },
+    {
+      "trace": "reverse-turn",
+      "position": [
+        8.757149,
+        1.740954,
+        6.0
+      ],
+      "speed": 0.9,
+      "yaw": 0.401303,
+      "pitch": 0.0,
+      "yaw_rate": 0.151525,
+      "radius": 4.875,
+      "low_speed_turn": 1.0,
+      "minimum_clearance": 4.412864652576786,
+      "bend": -0.272743
+    },
+    {
+      "trace": "reverse-turn",
+      "position": [
+        8.720585,
+        1.76708,
+        6.0
+      ],
+      "speed": 0.9,
+      "yaw": 0.40888,
+      "pitch": 0.0,
+      "yaw_rate": 0.151525,
+      "radius": 4.875,
+      "low_speed_turn": 1.0,
+      "minimum_clearance": 4.412740267537231,
+      "bend": -0.272743
+    },
+    {
+      "trace": "reverse-turn",
+      "position": [
+        8.682815,
+        1.791447,
+        6.0
+      ],
+      "speed": 0.9,
+      "yaw": 0.416456,
+      "pitch": 0.0,
+      "yaw_rate": 0.151525,
+      "radius": 4.875,
+      "low_speed_turn": 1.0,
+      "minimum_clearance": 4.412740267537231,
+      "bend": -0.272744
+    },
+    {
+      "trace": "reverse-turn",
+      "position": [
+        8.643923,
+        1.813999,
+        6.0
+      ],
+      "speed": 0.9,
+      "yaw": 0.424032,
+      "pitch": 0.0,
+      "yaw_rate": 0.151525,
+      "radius": 4.875,
+      "low_speed_turn": 1.0,
+      "minimum_clearance": 4.412740267537231,
+      "bend": -0.272744
+    },
+    {
+      "trace": "reverse-turn",
+      "position": [
+        8.603997,
+        1.834688,
+        6.0
+      ],
+      "speed": 0.9,
+      "yaw": 0.431609,
+      "pitch": 0.0,
+      "yaw_rate": 0.151525,
+      "radius": 4.875,
+      "low_speed_turn": 1.0,
+      "minimum_clearance": 4.412740267537231,
+      "bend": -0.272744
+    },
+    {
+      "trace": "reverse-turn",
+      "position": [
+        8.563128,
+        1.853465,
+        6.0
+      ],
+      "speed": 0.9,
+      "yaw": 0.439185,
+      "pitch": 0.0,
+      "yaw_rate": 0.151525,
+      "radius": 4.875,
+      "low_speed_turn": 1.0,
+      "minimum_clearance": 4.412740267537231,
+      "bend": -0.272745
+    },
+    {
+      "trace": "reverse-turn",
+      "position": [
+        8.521405,
+        1.870288,
+        6.0
+      ],
+      "speed": 0.9,
+      "yaw": 0.446761,
+      "pitch": 0.0,
+      "yaw_rate": 0.151525,
+      "radius": 4.875,
+      "low_speed_turn": 1.0,
+      "minimum_clearance": 4.412740267537231,
+      "bend": -0.272745
+    },
+    {
+      "trace": "reverse-turn",
+      "position": [
+        8.478925,
+        1.885118,
+        6.0
+      ],
+      "speed": 0.9,
+      "yaw": 0.454337,
+      "pitch": 0.0,
+      "yaw_rate": 0.151525,
+      "radius": 4.875,
+      "low_speed_turn": 1.0,
+      "minimum_clearance": 4.412740267537231,
+      "bend": -0.272745
+    },
+    {
+      "trace": "reverse-turn",
+      "position": [
+        8.435783,
+        1.897918,
+        6.0
+      ],
+      "speed": 0.9,
+      "yaw": 0.461477,
+      "pitch": 0.0,
+      "yaw_rate": 0.142803,
+      "radius": 4.875,
+      "low_speed_turn": 1.0,
+      "minimum_clearance": 4.412740267537231,
+      "bend": -0.269605
+    },
+    {
+      "trace": "reverse-turn",
+      "position": [
+        8.392108,
+        1.908776,
+        6.0
+      ],
+      "speed": 0.9,
+      "yaw": 0.467801,
+      "pitch": 0.0,
+      "yaw_rate": 0.126462,
+      "radius": 4.875,
+      "low_speed_turn": 1.0,
+      "minimum_clearance": 4.412740267537231,
+      "bend": -0.26121
+    },
+    {
+      "trace": "reverse-turn",
+      "position": [
+        8.348035,
+        1.917892,
+        6.0
+      ],
+      "speed": 0.9,
+      "yaw": 0.473228,
+      "pitch": 0.0,
+      "yaw_rate": 0.108544,
+      "radius": 4.875,
+      "low_speed_turn": 1.0,
+      "minimum_clearance": 4.412740267537231,
+      "bend": -0.248044
+    },
+    {
+      "trace": "reverse-turn",
+      "position": [
+        8.303676,
+        1.925499,
+        6.0
+      ],
+      "speed": 0.9,
+      "yaw": 0.477808,
+      "pitch": 0.0,
+      "yaw_rate": 0.091608,
+      "radius": 4.875,
+      "low_speed_turn": 1.0,
+      "minimum_clearance": 4.412740267537231,
+      "bend": -0.231414
+    },
+    {
+      "trace": "reverse-turn",
+      "position": [
+        8.259115,
+        1.931821,
+        6.0
+      ],
+      "speed": 0.9,
+      "yaw": 0.481638,
+      "pitch": 0.0,
+      "yaw_rate": 0.076588,
+      "radius": 4.875,
+      "low_speed_turn": 1.0,
+      "minimum_clearance": 4.412740267537231,
+      "bend": -0.212703
+    },
+    {
+      "trace": "reverse-turn",
+      "position": [
+        8.214416,
+        1.937064,
+        6.0
+      ],
+      "speed": 0.9,
+      "yaw": 0.484822,
+      "pitch": 0.0,
+      "yaw_rate": 0.063688,
+      "radius": 4.875,
+      "low_speed_turn": 1.0,
+      "minimum_clearance": 4.412740267537231,
+      "bend": -0.19309
+    },
+    {
+      "trace": "reverse-turn",
+      "position": [
+        8.16962,
+        1.941405,
+        6.0
+      ],
+      "speed": 0.9,
+      "yaw": 0.487462,
+      "pitch": 0.0,
+      "yaw_rate": 0.052796,
+      "radius": 4.875,
+      "low_speed_turn": 1.0,
+      "minimum_clearance": 4.417175955839223,
+      "bend": -0.173478
+    },
+    {
+      "trace": "reverse-turn",
+      "position": [
+        8.124758,
+        1.944996,
+        6.0
+      ],
+      "speed": 0.9,
+      "yaw": 0.489646,
+      "pitch": 0.0,
+      "yaw_rate": 0.043687,
+      "radius": 4.875,
+      "low_speed_turn": 1.0,
+      "minimum_clearance": 4.4248209660149165,
+      "bend": -0.15451
+    },
+    {
+      "trace": "reverse-turn",
+      "position": [
+        8.079851,
+        1.947965,
+        6.0
+      ],
+      "speed": 0.9,
+      "yaw": 0.491452,
+      "pitch": 0.0,
+      "yaw_rate": 0.036112,
+      "radius": 4.875,
+      "low_speed_turn": 1.0,
+      "minimum_clearance": 4.43455932299921,
+      "bend": -0.136608
+    },
+    {
+      "trace": "reverse-turn",
+      "position": [
+        8.034914,
+        1.950418,
+        6.0
+      ],
+      "speed": 0.9,
+      "yaw": 0.492943,
+      "pitch": 0.0,
+      "yaw_rate": 0.029832,
+      "radius": 4.875,
+      "low_speed_turn": 1.0,
+      "minimum_clearance": 4.445670595385557,
+      "bend": -0.120026
+    },
+    {
+      "trace": "reverse-turn",
+      "position": [
+        7.989956,
+        1.952444,
+        6.0
+      ],
+      "speed": 0.9,
+      "yaw": 0.494175,
+      "pitch": 0.0,
+      "yaw_rate": 0.024635,
+      "radius": 4.875,
+      "low_speed_turn": 1.0,
+      "minimum_clearance": 4.457534256109179,
+      "bend": -0.10489
+    },
+    {
+      "trace": "reverse-turn",
+      "position": [
+        7.944983,
+        1.954118,
+        6.0
+      ],
+      "speed": 0.9,
+      "yaw": 0.495192,
+      "pitch": 0.0,
+      "yaw_rate": 0.020339,
+      "radius": 4.875,
+      "low_speed_turn": 1.0,
+      "minimum_clearance": 4.469500167154749,
+      "bend": -0.091234
+    },
+    {
+      "trace": "reverse-turn",
+      "position": [
+        7.900002,
+        1.9555,
+        6.0
+      ],
+      "speed": 1.325869,
+      "yaw": 0.496031,
+      "pitch": 0.0,
+      "yaw_rate": 0.01679,
+      "radius": 4.875,
+      "low_speed_turn": 0.0,
+      "minimum_clearance": 4.481558693168088,
+      "bend": -0.079031
+    },
+    {
+      "trace": "reverse-turn",
+      "position": [
+        7.833725,
+        1.957181,
+        6.0
+      ],
+      "speed": 1.655988,
+      "yaw": 0.496724,
+      "pitch": 0.0,
+      "yaw_rate": 0.013859,
+      "radius": 4.875,
+      "low_speed_turn": 0.0,
+      "minimum_clearance": 4.493189837278643,
+      "bend": -0.068214
+    },
+    {
+      "trace": "reverse-turn",
+      "position": [
+        7.750938,
+        1.958914,
+        6.0
+      ],
+      "speed": 1.911937,
+      "yaw": 0.497296,
+      "pitch": 0.0,
+      "yaw_rate": 0.01144,
+      "radius": 4.875,
+      "low_speed_turn": 0.0,
+      "minimum_clearance": 4.504229823590894,
+      "bend": -0.05869
+    },
+    {
+      "trace": "reverse-turn",
+      "position": [
+        7.65535,
+        1.960567,
+        6.0
+      ],
+      "speed": 2.110425,
+      "yaw": 0.497769,
+      "pitch": 0.0,
+      "yaw_rate": 0.009442,
+      "radius": 4.875,
+      "low_speed_turn": 0.0,
+      "minimum_clearance": 4.514672037442326,
+      "bend": -0.050351
+    },
+    {
+      "trace": "reverse-turn",
+      "position": [
+        7.549832,
+        1.962072,
+        6.0
+      ],
+      "speed": 2.264385,
+      "yaw": 0.498158,
+      "pitch": 0.0,
+      "yaw_rate": 0.007794,
+      "radius": 4.875,
+      "low_speed_turn": 0.0,
+      "minimum_clearance": 4.524493284695028,
+      "bend": -0.043087
+    },
+    {
+      "trace": "reverse-turn",
+      "position": [
+        7.436614,
+        1.963406,
+        6.0
+      ],
+      "speed": 2.383837,
+      "yaw": 0.49848,
+      "pitch": 0.0,
+      "yaw_rate": 0.006433,
+      "radius": 4.875,
+      "low_speed_turn": 0.0,
+      "minimum_clearance": 4.533553947817568,
+      "bend": -0.036785
+    },
+    {
+      "trace": "reverse-turn",
+      "position": [
+        7.31742,
+        1.964565,
+        6.0
+      ],
+      "speed": 2.476538,
+      "yaw": 0.498745,
+      "pitch": 0.0,
+      "yaw_rate": 0.005309,
+      "radius": 4.875,
+      "low_speed_turn": 0.0,
+      "minimum_clearance": 4.5418398658090195,
+      "bend": -0.031339
+    },
+    {
+      "trace": "reverse-turn",
+      "position": [
+        7.19359,
+        1.965559,
+        6.0
+      ],
+      "speed": 2.5485,
+      "yaw": 0.498964,
+      "pitch": 0.0,
+      "yaw_rate": 0.004382,
+      "radius": 4.875,
+      "low_speed_turn": 0.0,
+      "minimum_clearance": 4.5494658350960755,
+      "bend": -0.026649
+    },
+    {
+      "trace": "reverse-turn",
+      "position": [
+        7.06616,
+        1.966403,
+        6.0
+      ],
+      "speed": 2.604377,
+      "yaw": 0.499145,
+      "pitch": 0.0,
+      "yaw_rate": 0.003617,
+      "radius": 4.875,
+      "low_speed_turn": 0.0,
+      "minimum_clearance": 4.556293981886857,
+      "bend": -0.022621
+    },
+    {
+      "trace": "reverse-turn",
+      "position": [
+        6.935935,
+        1.967115,
+        6.0
+      ],
+      "speed": 2.647779,
+      "yaw": 0.499295,
+      "pitch": 0.0,
+      "yaw_rate": 0.002985,
+      "radius": 4.875,
+      "low_speed_turn": 0.0,
+      "minimum_clearance": 4.562442610628873,
+      "bend": -0.019172
+    },
+    {
+      "trace": "reverse-turn",
+      "position": [
+        6.80354,
+        1.967713,
+        6.0
+      ],
+      "speed": 2.681502,
+      "yaw": 0.499418,
+      "pitch": 0.0,
+      "yaw_rate": 0.002464,
+      "radius": 4.875,
+      "low_speed_turn": 0.0,
+      "minimum_clearance": 4.568060574132913,
+      "bend": -0.016224
+    },
+    {
+      "trace": "reverse-turn",
+      "position": [
+        6.669457,
+        1.968212,
+        6.0
+      ],
+      "speed": 2.707713,
+      "yaw": 0.499519,
+      "pitch": 0.0,
+      "yaw_rate": 0.002034,
+      "radius": 4.875,
+      "low_speed_turn": 0.0,
+      "minimum_clearance": 4.572985416801114,
+      "bend": -0.013712
+    },
+    {
+      "trace": "reverse-turn",
+      "position": [
+        6.534064,
+        1.968629,
+        6.0
+      ],
+      "speed": 2.728092,
+      "yaw": 0.499603,
+      "pitch": 0.0,
+      "yaw_rate": 0.001679,
+      "radius": 4.875,
+      "low_speed_turn": 0.0,
+      "minimum_clearance": 4.5774981030036574,
+      "bend": -0.011574
+    },
+    {
+      "trace": "reverse-turn",
+      "position": [
+        6.397652,
+        1.968975,
+        6.0
+      ],
+      "speed": 2.743944,
+      "yaw": 0.499673,
+      "pitch": 0.0,
+      "yaw_rate": 0.001385,
+      "radius": 4.875,
+      "low_speed_turn": 0.0,
+      "minimum_clearance": 4.581456133064659,
+      "bend": -0.009758
+    },
+    {
+      "trace": "reverse-turn",
+      "position": [
+        6.260447,
+        1.969262,
+        6.0
+      ],
+      "speed": 2.756279,
+      "yaw": 0.49973,
+      "pitch": 0.0,
+      "yaw_rate": 0.001144,
+      "radius": 4.875,
+      "low_speed_turn": 0.0,
+      "minimum_clearance": 4.5850044746841645,
+      "bend": -0.008218
+    },
+    {
+      "trace": "reverse-turn",
+      "position": [
+        6.122624,
+        1.969501,
+        6.0
+      ],
+      "speed": 2.765881,
+      "yaw": 0.499777,
+      "pitch": 0.0,
+      "yaw_rate": 0.000944,
+      "radius": 4.875,
+      "low_speed_turn": 0.0,
+      "minimum_clearance": 4.5879822958567065,
+      "bend": -0.006914
+    },
+    {
+      "trace": "reverse-turn",
+      "position": [
+        5.984322,
+        1.969698,
+        6.0
+      ],
+      "speed": 2.77336,
+      "yaw": 0.499816,
+      "pitch": 0.0,
+      "yaw_rate": 0.000779,
+      "radius": 4.875,
+      "low_speed_turn": 0.0,
+      "minimum_clearance": 4.590825092399609,
+      "bend": -0.005812
+    },
+    {
+      "trace": "reverse-turn",
+      "position": [
+        5.845646,
+        1.969862,
+        6.0
+      ],
+      "speed": 2.779186,
+      "yaw": 0.499848,
+      "pitch": 0.0,
+      "yaw_rate": 0.000643,
+      "radius": 4.875,
+      "low_speed_turn": 0.0,
+      "minimum_clearance": 4.593251966581274,
+      "bend": -0.004881
+    },
+    {
+      "trace": "reverse-turn",
+      "position": [
+        5.706678,
+        1.969997,
+        6.0
+      ],
+      "speed": 2.783729,
+      "yaw": 0.499875,
+      "pitch": 0.0,
+      "yaw_rate": 0.000531,
+      "radius": 4.875,
+      "low_speed_turn": 0.0,
+      "minimum_clearance": 4.595392150315817,
+      "bend": -0.004096
+    },
+    {
+      "trace": "reverse-turn",
+      "position": [
+        5.567483,
+        1.970108,
+        6.0
+      ],
+      "speed": 2.787272,
+      "yaw": 0.499896,
+      "pitch": 0.0,
+      "yaw_rate": 0.000438,
+      "radius": 4.875,
+      "low_speed_turn": 0.0,
+      "minimum_clearance": 4.597244625351095,
+      "bend": -0.003434
+    },
+    {
+      "trace": "reverse-turn",
+      "position": [
+        5.428112,
+        1.970201,
+        6.0
+      ],
+      "speed": 2.790036,
+      "yaw": 0.499915,
+      "pitch": 0.0,
+      "yaw_rate": 0.000362,
+      "radius": 4.875,
+      "low_speed_turn": 0.0,
+      "minimum_clearance": 4.598817882277801,
+      "bend": -0.002878
+    },
+    {
+      "trace": "reverse-turn",
+      "position": [
+        5.288601,
+        1.970277,
+        6.0
+      ],
+      "speed": 2.792195,
+      "yaw": 0.49993,
+      "pitch": 0.0,
+      "yaw_rate": 0.000298,
+      "radius": 4.875,
+      "low_speed_turn": 0.0,
+      "minimum_clearance": 4.600242458532475,
+      "bend": -0.002409
+    },
+    {
+      "trace": "reverse-turn",
+      "position": [
+        5.148983,
+        1.97034,
+        6.0
+      ],
+      "speed": 2.793882,
+      "yaw": 0.499942,
+      "pitch": 0.0,
+      "yaw_rate": 0.000246,
+      "radius": 4.875,
+      "low_speed_turn": 0.0,
+      "minimum_clearance": 4.601536771615049,
+      "bend": -0.002016
+    },
+    {
+      "trace": "reverse-turn",
+      "position": [
+        5.00928,
+        1.970392,
+        6.0
+      ],
+      "speed": 2.7952,
+      "yaw": 0.499952,
+      "pitch": 0.0,
+      "yaw_rate": 0.000203,
+      "radius": 4.875,
+      "low_speed_turn": 0.0,
+      "minimum_clearance": 4.602681769835005,
+      "bend": -0.001686
+    },
+    {
+      "trace": "reverse-turn",
+      "position": [
+        4.869512,
+        1.970435,
+        6.0
+      ],
+      "speed": 2.796232,
+      "yaw": 0.49996,
+      "pitch": 0.0,
+      "yaw_rate": 0.000168,
+      "radius": 4.875,
+      "low_speed_turn": 0.0,
+      "minimum_clearance": 4.603686568714681,
+      "bend": -0.001409
+    },
+    {
+      "trace": "reverse-turn",
+      "position": [
+        4.729692,
+        1.97047,
+        6.0
+      ],
+      "speed": 2.797039,
+      "yaw": 0.499967,
+      "pitch": 0.0,
+      "yaw_rate": 0.000138,
+      "radius": 4.875,
+      "low_speed_turn": 0.0,
+      "minimum_clearance": 4.6044005860926145,
+      "bend": -0.001177
+    },
+    {
+      "trace": "reverse-turn",
+      "position": [
+        4.589831,
+        1.9705,
+        6.0
+      ],
+      "speed": 2.797671,
+      "yaw": 0.499973,
+      "pitch": 0.0,
+      "yaw_rate": 0.000114,
+      "radius": 4.875,
+      "low_speed_turn": 0.0,
+      "minimum_clearance": 4.605114876099898,
+      "bend": -0.000983
+    },
+    {
+      "trace": "release",
+      "position": [
+        3.450197,
+        1.970674,
+        6.0
+      ],
+      "speed": 0.265305,
+      "yaw": 0.499977,
+      "pitch": 0.0,
+      "yaw_rate": 0.0,
+      "radius": 4.875,
+      "low_speed_turn": 0.0,
+      "minimum_clearance": 4.583619923822223,
+      "bend": -1.2e-05
+    },
+    {
+      "trace": "release",
+      "position": [
+        3.342124,
+        1.97069,
+        6.0
+      ],
+      "speed": 0.025159,
+      "yaw": 0.499977,
+      "pitch": 0.0,
+      "yaw_rate": 0.0,
+      "radius": 4.875,
+      "low_speed_turn": 0.0,
+      "minimum_clearance": 4.5776643685957605,
+      "bend": -0.0
+    },
+    {
+      "trace": "release",
+      "position": [
+        3.332978,
+        1.970692,
+        6.0
+      ],
+      "speed": 0.0,
+      "yaw": 0.499977,
+      "pitch": 0.0,
+      "yaw_rate": 0.0,
+      "radius": 4.875,
+      "low_speed_turn": 0.0,
+      "minimum_clearance": 4.569918312287619,
+      "bend": -0.0
+    },
+    {
+      "trace": "release",
+      "position": [
+        3.332978,
+        1.970692,
+        6.0
+      ],
+      "speed": 0.0,
+      "yaw": 0.499977,
+      "pitch": 0.0,
+      "yaw_rate": 0.0,
+      "radius": 4.875,
+      "low_speed_turn": 0.0,
+      "minimum_clearance": 4.592278126783048,
+      "bend": -0.0
+    },
+    {
+      "trace": "release",
+      "position": [
+        3.332978,
+        1.970692,
+        6.0
+      ],
+      "speed": 0.0,
+      "yaw": 0.499977,
+      "pitch": 0.0,
+      "yaw_rate": 0.0,
+      "radius": 4.875,
+      "low_speed_turn": 0.0,
+      "minimum_clearance": 4.566085414966833,
+      "bend": -0.0
+    },
+    {
+      "trace": "release",
+      "position": [
+        3.332978,
+        1.970692,
+        6.0
+      ],
+      "speed": 0.0,
+      "yaw": 0.499977,
+      "pitch": 0.0,
+      "yaw_rate": 0.0,
+      "radius": 4.875,
+      "low_speed_turn": 0.0,
+      "minimum_clearance": 4.574174821904938,
+      "bend": -0.0
+    },
+    {
+      "trace": "corner-recovery",
+      "position": [
+        15.426758,
+        10.474629,
+        6.0
+      ],
+      "speed": 0.047126,
+      "yaw": 0.302234,
+      "pitch": 0.0,
+      "yaw_rate": 0.178509,
+      "radius": 8.125,
+      "low_speed_turn": 1.0,
+      "minimum_clearance": 0.3656803013819232,
+      "bend": -0.316991
+    },
+    {
+      "trace": "corner-recovery",
+      "position": [
+        15.391431,
+        10.50233,
+        6.0
+      ],
+      "speed": 0.099349,
+      "yaw": 0.480644,
+      "pitch": 0.0,
+      "yaw_rate": 0.176857,
+      "radius": 8.125,
+      "low_speed_turn": 1.0,
+      "minimum_clearance": 0.6085748740459205,
+      "bend": -0.320184
+    },
+    {
+      "trace": "corner-recovery",
+      "position": [
+        14.765295,
+        10.21736,
+        6.0
+      ],
+      "speed": 0.898132,
+      "yaw": -0.386136,
+      "pitch": 0.0,
+      "yaw_rate": 0.046963,
+      "radius": 8.125,
+      "low_speed_turn": 1.0,
+      "minimum_clearance": 0.9875900495342376,
+      "bend": -0.163376
+    },
+    {
+      "trace": "corner-recovery",
+      "position": [
+        13.400165,
+        8.886527,
+        6.0
+      ],
+      "speed": 2.756719,
+      "yaw": -0.37524,
+      "pitch": 0.0,
+      "yaw_rate": 0.001015,
+      "radius": 8.125,
+      "low_speed_turn": 0.0,
+      "minimum_clearance": 2.2990239620736563,
+      "bend": -0.007405
+    },
+    {
+      "trace": "corner-recovery",
+      "position": [
+        11.429674,
+        6.91769,
+        6.0
+      ],
+      "speed": 2.799662,
+      "yaw": -0.375005,
+      "pitch": 0.0,
+      "yaw_rate": 2.2e-05,
+      "radius": 8.125,
+      "low_speed_turn": 0.0,
+      "minimum_clearance": 4.277692867641223,
+      "bend": -0.000204
+    },
+    {
+      "trace": "corner-recovery",
+      "position": [
+        9.453122,
+        4.941175,
+        6.0
+      ],
+      "speed": 2.799996,
+      "yaw": -0.375,
+      "pitch": 0.0,
+      "yaw_rate": 1e-06,
+      "radius": 8.125,
+      "low_speed_turn": 0.0,
+      "minimum_clearance": 4.609858633615971,
+      "bend": -5e-06
+    },
+    {
+      "trace": "corner-recovery",
+      "position": [
+        7.476534,
+        2.964586,
+        6.0
+      ],
+      "speed": 2.799999,
       "yaw": -0.375,
       "pitch": 0.0,
       "yaw_rate": 0.0,
@@ -2837,11 +3589,11 @@
     {
       "trace": "corner-recovery",
       "position": [
-        1.603307,
-        -1.14747,
+        5.499939,
+        0.987996,
         6.0
       ],
-      "speed": 2.0,
+      "speed": 2.799999,
       "yaw": -0.375,
       "pitch": 0.0,
       "yaw_rate": 0.0,
@@ -2853,11 +3605,11 @@
     {
       "trace": "corner-recovery",
       "position": [
-        0.191455,
-        -2.559319,
+        3.523345,
+        -0.988594,
         6.0
       ],
-      "speed": 2.0,
+      "speed": 2.799999,
       "yaw": -0.375,
       "pitch": 0.0,
       "yaw_rate": 0.0,
@@ -2869,11 +3621,11 @@
     {
       "trace": "corner-recovery",
       "position": [
-        -1.220397,
-        -3.971168,
+        1.546755,
+        -2.965184,
         6.0
       ],
-      "speed": 2.0,
+      "speed": 2.799999,
       "yaw": -0.375,
       "pitch": 0.0,
       "yaw_rate": 0.0,
@@ -2885,11 +3637,11 @@
     {
       "trace": "corner-recovery",
       "position": [
-        -2.63225,
-        -5.383016,
+        -0.429836,
+        -4.941772,
         6.0
       ],
-      "speed": 2.0,
+      "speed": 2.799999,
       "yaw": -0.375,
       "pitch": 0.0,
       "yaw_rate": 0.0,
@@ -2901,27 +3653,235 @@
     {
       "trace": "corner-recovery",
       "position": [
-        -4.044103,
-        -6.794864,
+        -2.406426,
+        -6.918357,
         6.0
       ],
-      "speed": 2.0,
+      "speed": 2.799999,
       "yaw": -0.375,
       "pitch": 0.0,
       "yaw_rate": 0.0,
       "radius": 8.125,
       "low_speed_turn": 0.0,
-      "minimum_clearance": 4.401248061074076,
+      "minimum_clearance": 4.277755061074075,
+      "bend": -0.0
+    },
+    {
+      "trace": "corner-recovery",
+      "position": [
+        -4.360604,
+        -8.872532,
+        6.0
+      ],
+      "speed": 2.333915,
+      "yaw": -0.375,
+      "pitch": 0.0,
+      "yaw_rate": 0.0,
+      "radius": 8.125,
+      "low_speed_turn": 0.0,
+      "minimum_clearance": 2.323580061074075,
+      "bend": -0.0
+    },
+    {
+      "trace": "corner-recovery",
+      "position": [
+        -5.417517,
+        -9.929443,
+        6.0
+      ],
+      "speed": 0.836623,
+      "yaw": -0.375,
+      "pitch": 0.0,
+      "yaw_rate": 0.0,
+      "radius": 8.125,
+      "low_speed_turn": 0.0,
+      "minimum_clearance": 1.2666690610740754,
+      "bend": -0.0
+    },
+    {
+      "trace": "corner-recovery",
+      "position": [
+        -5.79638,
+        -10.308309,
+        6.0
+      ],
+      "speed": 0.299897,
+      "yaw": -0.375,
+      "pitch": 0.0,
+      "yaw_rate": 0.0,
+      "radius": 8.125,
+      "low_speed_turn": 0.0,
+      "minimum_clearance": 0.887803061074075,
+      "bend": -0.0
+    },
+    {
+      "trace": "corner-recovery",
+      "position": [
+        -5.932188,
+        -10.444118,
+        6.0
+      ],
+      "speed": 0.107501,
+      "yaw": -0.375,
+      "pitch": 0.0,
+      "yaw_rate": 0.0,
+      "radius": 8.125,
+      "low_speed_turn": 0.0,
+      "minimum_clearance": 0.751994061074075,
+      "bend": -0.0
+    },
+    {
+      "trace": "corner-recovery",
+      "position": [
+        -5.980869,
+        -10.492799,
+        6.0
+      ],
+      "speed": 0.038536,
+      "yaw": -0.375,
+      "pitch": 0.0,
+      "yaw_rate": 0.0,
+      "radius": 8.125,
+      "low_speed_turn": 0.0,
+      "minimum_clearance": 0.7033130610740748,
+      "bend": -0.0
+    },
+    {
+      "trace": "corner-recovery",
+      "position": [
+        -5.998319,
+        -10.510249,
+        6.0
+      ],
+      "speed": 0.013814,
+      "yaw": -0.375,
+      "pitch": 0.0,
+      "yaw_rate": 0.0,
+      "radius": 8.125,
+      "low_speed_turn": 0.0,
+      "minimum_clearance": 0.6858630610740746,
+      "bend": -0.0
+    },
+    {
+      "trace": "corner-recovery",
+      "position": [
+        -6.004576,
+        -10.516504,
+        6.0
+      ],
+      "speed": 0.004953,
+      "yaw": -0.375,
+      "pitch": 0.0,
+      "yaw_rate": 0.0,
+      "radius": 8.125,
+      "low_speed_turn": 0.0,
+      "minimum_clearance": 0.6796080610740751,
+      "bend": -0.0
+    },
+    {
+      "trace": "corner-recovery",
+      "position": [
+        -6.006819,
+        -10.518747,
+        6.0
+      ],
+      "speed": 0.001775,
+      "yaw": -0.375,
+      "pitch": 0.0,
+      "yaw_rate": 0.0,
+      "radius": 8.125,
+      "low_speed_turn": 0.0,
+      "minimum_clearance": 0.6773650610740751,
+      "bend": -0.0
+    },
+    {
+      "trace": "corner-recovery",
+      "position": [
+        -6.007625,
+        -10.519551,
+        6.0
+      ],
+      "speed": 0.000636,
+      "yaw": -0.375,
+      "pitch": 0.0,
+      "yaw_rate": 0.0,
+      "radius": 8.125,
+      "low_speed_turn": 0.0,
+      "minimum_clearance": 0.6765610610740747,
+      "bend": -0.0
+    },
+    {
+      "trace": "corner-recovery",
+      "position": [
+        -6.007914,
+        -10.519839,
+        6.0
+      ],
+      "speed": 0.000228,
+      "yaw": -0.375,
+      "pitch": 0.0,
+      "yaw_rate": 0.0,
+      "radius": 8.125,
+      "low_speed_turn": 0.0,
+      "minimum_clearance": 0.6762730610740753,
+      "bend": -0.0
+    },
+    {
+      "trace": "corner-recovery",
+      "position": [
+        -6.008018,
+        -10.519943,
+        6.0
+      ],
+      "speed": 8.1e-05,
+      "yaw": -0.375,
+      "pitch": 0.0,
+      "yaw_rate": 0.0,
+      "radius": 8.125,
+      "low_speed_turn": 0.0,
+      "minimum_clearance": 0.6761690610740749,
+      "bend": -0.0
+    },
+    {
+      "trace": "corner-recovery",
+      "position": [
+        -6.008054,
+        -10.519979,
+        6.0
+      ],
+      "speed": 3e-05,
+      "yaw": -0.375,
+      "pitch": 0.0,
+      "yaw_rate": 0.0,
+      "radius": 8.125,
+      "low_speed_turn": 0.0,
+      "minimum_clearance": 0.6761330610740752,
+      "bend": -0.0
+    },
+    {
+      "trace": "corner-recovery",
+      "position": [
+        -6.008068,
+        -10.519992,
+        6.0
+      ],
+      "speed": 1.2e-05,
+      "yaw": -0.375,
+      "pitch": 0.0,
+      "yaw_rate": 0.0,
+      "radius": 8.125,
+      "low_speed_turn": 0.0,
+      "minimum_clearance": 0.6761200610740743,
       "bend": -0.0
     },
     {
       "trace": "burst-held",
       "position": [
-        2.535441,
+        2.741682,
         0.0,
         6.0
       ],
-      "speed": 2.214337,
+      "speed": 2.827668,
       "yaw": 0.0,
       "pitch": 0.0,
       "yaw_rate": 0.0,
@@ -2933,11 +3893,11 @@
     {
       "trace": "burst-held",
       "position": [
-        4.607148,
+        5.547904,
         0.0,
         6.0
       ],
-      "speed": 2.009821,
+      "speed": 2.800159,
       "yaw": 0.0,
       "pitch": 0.0,
       "yaw_rate": 0.0,
@@ -2949,11 +3909,11 @@
     {
       "trace": "burst-held",
       "position": [
-        6.61055,
+        8.348111,
         0.0,
         6.0
       ],
-      "speed": 2.00045,
+      "speed": 2.800001,
       "yaw": 0.0,
       "pitch": 0.0,
       "yaw_rate": 0.0,
@@ -2965,15 +3925,15 @@
     {
       "trace": "burst-held",
       "position": [
-        8.610822,
+        11.14829,
         0.0,
         6.0
       ],
-      "speed": 2.000021,
+      "speed": 2.8,
       "yaw": 0.0,
       "pitch": 0.0,
       "yaw_rate": 0.0,
-      "radius": 4.875,
+      "radius": 8.125,
       "low_speed_turn": 0.0,
       "minimum_clearance": 4.609999999999999,
       "bend": 0.0
@@ -2981,15 +3941,15 @@
     {
       "trace": "burst-release",
       "position": [
-        8.710829,
+        11.288299,
         0.0,
         6.0
       ],
-      "speed": 2.000018,
+      "speed": 2.8,
       "yaw": 0.0,
       "pitch": 0.0,
       "yaw_rate": 0.0,
-      "radius": 4.875,
+      "radius": 8.125,
       "low_speed_turn": 0.0,
       "minimum_clearance": 4.609999999999999,
       "bend": 0.0
@@ -2997,11 +3957,11 @@
     {
       "trace": "burst-again",
       "position": [
-        8.810836,
+        11.428308,
         0.0,
         6.0
       ],
-      "speed": 2.555568,
+      "speed": 3.133334,
       "yaw": 0.0,
       "pitch": 0.0,
       "yaw_rate": 0.0,
@@ -3017,78 +3977,94 @@
         0.0,
         6.0
       ],
-      "speed": 0.285714,
+      "speed": 0.636364,
       "yaw": 0.0,
-      "pitch": 0.000833,
+      "pitch": 0.003333,
       "yaw_rate": 0.0,
       "radius": 4.875,
       "low_speed_turn": 0.0,
-      "minimum_clearance": 4.5905117330155285,
+      "minimum_clearance": 4.532573955435713,
       "bend": 0.0
     },
     {
       "trace": "chord-mode",
       "position": [
-        0.014286,
+        0.031813,
         0.0,
-        6.000076
+        6.000678
       ],
-      "speed": 0.263736,
+      "speed": 0.565657,
       "yaw": 0.0,
-      "pitch": 0.001492,
+      "pitch": 0.0052,
       "yaw_rate": 0.0,
       "radius": 4.875,
       "low_speed_turn": 0.0,
-      "minimum_clearance": 4.575373571168134,
+      "minimum_clearance": 4.490377152255408,
       "bend": 0.0
     },
     {
       "trace": "chord-held-direction",
       "position": [
-        0.070825,
+        0.145029,
         0.0,
-        6.000885
+        6.004998
       ],
-      "speed": 0.17675,
+      "speed": 0.313899,
       "yaw": 0.0,
-      "pitch": 0.003017,
+      "pitch": 0.00562,
       "yaw_rate": 0.0,
       "radius": 4.875,
       "low_speed_turn": 0.0,
-      "minimum_clearance": 4.540872027436938,
+      "minimum_clearance": 4.48488473389825,
       "bend": 0.0
     },
     {
       "trace": "chord-neutral",
       "position": [
-        0.079661,
+        0.160715,
         0.0,
-        6.001055
+        6.005561
       ],
-      "speed": 0.163154,
+      "speed": 0.279022,
       "yaw": 0.0,
-      "pitch": 0.003094,
+      "pitch": 0.005143,
       "yaw_rate": 0.0,
       "radius": 4.875,
       "low_speed_turn": 0.0,
-      "minimum_clearance": 4.539822917434618,
+      "minimum_clearance": 4.4968536978827185,
       "bend": 0.0
     },
     {
       "trace": "depth-mode",
       "position": [
-        0.087818,
+        0.17466,
         0.0,
-        6.001216
+        6.00602
       ],
-      "speed": 0.150604,
-      "yaw": 0.00175,
-      "pitch": 0.003125,
-      "yaw_rate": 0.035,
+      "speed": 0.451515,
+      "yaw": 0.008286,
+      "pitch": 0.004651,
+      "yaw_rate": 0.165715,
       "radius": 4.875,
       "low_speed_turn": 1.0,
-      "minimum_clearance": 4.522266810743341,
-      "bend": -0.035
+      "minimum_clearance": 4.478546983245968,
+      "bend": -0.059657
+    },
+    {
+      "trace": "simultaneous-mode",
+      "position": [
+        0.0,
+        0.0,
+        6.0
+      ],
+      "speed": 0.0,
+      "yaw": 0.0,
+      "pitch": 0.0,
+      "yaw_rate": 0.0,
+      "radius": 4.875,
+      "low_speed_turn": 0.0,
+      "minimum_clearance": 4.609999999999999,
+      "bend": 0.0
     },
     {
       "trace": "wide",
@@ -3107,5 +4083,9 @@
       "bend": 0.0
     }
   ],
+  "response": {
+    "first_reverse_seconds": 2.3501440000000002,
+    "near_alignment_seconds": 3.3002019999999987
+  },
   "note": "Actual desktop engine: full conservative deformed-envelope bounds, root pose, curvature, reversal, corner recovery, six inputs, burst recovery, release and remote chord. Video is fixed simulation time, not a presented-frame performance measurement. Physical remote/Chromecast validation remains pending."
 }

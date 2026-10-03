@@ -119,4 +119,36 @@ def test_touch_mode_and_desktop_depth_parity(vm):
 def test_bounded_slow_frames_and_corner_burst(vm):
     rows=vm('reset 1 15.45 10.45 8.25 .125\nstep 100 22529 .15\nstep 300 16386 .05\n')
     assert_safe(rows)
-    assert abs(rows[-1]['x'])<14 and abs(rows[-1]['y'])<9
+    # Recover within five seconds; sustained input can later reach the opposite wall.
+    assert abs(rows[199]['x'])<14 and abs(rows[199]['y'])<9
+
+
+def test_direction_changes_respond_within_playable_time(vm):
+    for rate in (20, 30, 60):
+        dt=1/rate
+        rows=vm(f'reset 1 0 0 6 0\nstep {rate} 8192 {dt}\nstep {rate*5} 16384 {dt}\nstep {rate*2} 0 {dt}\n')
+        assert_safe(rows)
+        reverse=rows[rate:rate*6]
+        first_left=next(i*dt for i,r in enumerate(reverse) if r['vx']<-.5)
+        aligned=next(i*dt for i,r in enumerate(reverse) if abs(abs(r['yaw'])-.5)<.02)
+        assert first_left<3, (rate,first_left)
+        assert aligned<4.5, (rate,aligned)
+        assert rows[rate//5]['vx']>1, 'direction press feels unresponsive'
+        assert rows[-1]['speed']<.04, 'release glides too long'
+
+
+def test_simultaneous_remote_mode_chord_and_action_first(vm):
+    simultaneous=vm('reset 1 0 0 6 0\nstep 1 2049 .05\nstep 4 2049 .05\nstep 1 0 .05\nstep 1 2048 .05\n','remote')
+    assert simultaneous[0]['mode']==1
+    assert all(r['dart']==0 for r in simultaneous)
+    assert simultaneous[-1]['dy']==1
+    action_first=vm('reset 1 0 0 6 0\nstep 1 1 .05\nstep 1 2049 .05\n','remote')
+    assert all(r['mode']==0 for r in action_first)
+    assert action_first[0]['dart']>.25
+
+
+def test_small_inward_heading_change_cannot_freeze_at_a_wall(vm):
+    rows=vm('reset 1 15.48 10.519 6 .448\nstep 100 16386 .05\n')
+    assert_safe(rows)
+    assert rows[79]['x']<14 and rows[79]['y']<9
+    assert rows[79]['speed']>1
