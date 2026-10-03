@@ -1,6 +1,6 @@
 # Aquarium movement and controls: all seven players
 
-Date: 2026-10-02. Status: **new implementation plan and motion concepts ready for review; Arowana motion is implemented and verified on desktop; other species and device acceptance remain tracked below.**
+Date: 2026-10-02. Status: **species controllers implemented, native motion review captured, 81 regression tests pass, and the release APK is rebuilt. Physical remote and phone acceptance remain tracked below.**
 
 Will wants betta and lionfish to move at least as convincingly as the clownfish, and jellyfish to have completely different movement and controls. This plan covers **every player/tank**, including the long-bodied Asian Arowana, Blue Shrimp and the very slow sea urchin in **Planted Tank**. Each animal gets its own locomotion states, animation response and action semantics. The Chromecast baseline is **D-pad plus one action button, OK**; no tank may depend on an extra action button to expose its movement or feeding controls.
 
@@ -8,12 +8,12 @@ Will wants betta and lionfish to move at least as convincingly as the clownfish,
 - [x] Identify the fish sliding problem and distinguish jellyfish propulsion from fish swimming.
 - [x] Specify movement, controls, residents, cameras and verification for each tank.
 - [x] Include motion diagrams, control mockups and an interactive jelly pulse schematic.
-- [ ] Implement and capture betta/lionfish steer-and-swim motion against the clownfish baseline.
-- [ ] Build the separate jelly pulse, drift, tilt and trailing-appendage controller.
-- [ ] Complete shrimp gait transitions and urchin contact motion.
+- [x] Implement and capture betta/lionfish steer-and-swim motion; preserve the unchanged clownfish baseline.
+- [x] Build the separate jelly pulse, drift, tilt and trailing-appendage controller.
+- [x] Complete shrimp gait transitions and urchin contact motion.
 - [x] Complete Arowana length-dependent curvature, swept clearance and posterior fin attachments; capture its broad-tank motion.
 - [ ] Verify phone, desktop/gamepad and physical TV controls for all seven tanks.
-- [ ] Integrate the verified standalones into the existing seven-tank menu and deploy once device testing is clear.
+- [x] Integrate the verified standalones into the existing seven-tank menu and deploy the movement build; injected device checks pass.
 
 ## Review visuals
 
@@ -34,6 +34,10 @@ Betta and player lionfish use [`aquarium_tanks/controller.fth`](../../wflevels/a
 Jellyfish still pass through that shared controller: a fish-style action becomes an upward velocity target and the bell is posed by a continuous sinusoid. [`jellyfish/motion.py`](../../wflevels/aquarium_jellyfish/motion.py) and [`jelly_motion.fth`](../../wflevels/aquarium_tanks/jelly_motion.fth) contain draft contraction/recovery ideas, but the inspected generator does not wire them into a separate propulsion/control system. Treat them as starting material, not completed jelly mechanics.
 
 Blue Shrimp already has grazing routes, support-height handling and a backward escape, but its player still uses independent axis velocities and a largely constant leg clock. Planted Tank correctly fixes the urchin to the substrate at **0.0125 world units/s**; it has no visible tube-foot/contact gait, and Up/Down in the current Side mode has no movement effect. Its controls should describe the available crawl axes directly.
+
+## Turn presentation (user update, 2026-10-03)
+
+When either turning arc is valid, show the head toward the front glass/camera during the turn. Prefer the camera-facing arc for near reversals rather than routinely showing the back of the animal. Explicit depth input still determines the requested heading. Keep a chosen reversal arc stable until alignment, retain wall clearance, and apply the presentation rule to residents as well as players. This is a visual/gameplay choice.
 
 ## The seven movement contracts
 
@@ -203,3 +207,20 @@ Use meaningful regressions for trajectory/facing, pulse scheduling, support cont
 The final review set should show **hover/rest, movement, reversal, climb/settle, action, release, wall approach and recovery for each player**, plus resident behavior where present. Link the clips, source/standalone/APK hashes, input receipts and timing results here when implementation is complete.
 
 Related: [Asian Arowana](2026-10-02-asian-arowana.md), [six-tank implementation and deployment](2026-10-02-aquarium-three-more-tanks.md), [Blue Shrimp](2026-10-02-aquarium-levels-blue-shrimp.md), [betta mesh and rendered poster](2026-10-02-betta-poster-and-flowing-fins.md), [jelly motion research](2026-10-02-jellyfish-biomechanics-poster.md), [lionfish feeding](2026-10-02-lionfish-goldfish-feeding.md).
+
+
+## Species movement implementation (2026-10-03)
+
+Betta and Lionfish now use `aquarium_tanks/fish_motion.fth`: input selects heading/elevation, forward drive brakes for a reversal, and yaw continues turning at a wall. Full root pitch/bank transforms move the anatomical attachment offsets together. Near reversals choose a stable camera-facing arc when it has clearance. Betta keeps its eight detailed opaque groups, weighted fin deformation and pavilion. Lionfish keeps feeding reservations, detection, suction and capture timing; player/resident mouth and sight use elevation, and the resident swims forward in its pitched frame. The camera-facing arc also applies to Arowana, retaining its swept envelope and responsive wall recovery.
+
+Jellyfish use their own stroke, tilt and water-relative drag controller. Quick contraction, recovery and open-bell coast determine both thrust and geometry. The cached native `jelly-deform` primitive (174) gives apex, bell margin and trailing tissue different weights. Player and residents share integrated propulsion/current; resident home coordinates only initialize state. Slow frames use up to four integration steps; suspended time is discarded. Holding OK requests complete strokes with an open interval; Down suppresses the next automatic stroke and lets settling act.
+
+Shrimp now orient before walking, swim with a gentle clearance-limited pitch, and settle onto reachable supports. Walking legs advance with measured displacement and stop at rest; free-water activity has its own cadence, and antenna motion remains independent. The backward escape curls only the player’s abdomen, with cooldown and boundary clipping. The 24-animal routes and staggered colony updates remain, with resident headings derived from route displacement. The urchin uses Left/Right and Up/Down directly on the substrate, normalizes diagonal speed to 0.0125, and has eight short contact feet whose cycle follows displacement. OK changes its view without accelerating it.
+
+The changed standalone builds default to the single-button remote profile, retaining optional compile-time touch adapters and desktop depth shortcuts. Up+OK changes the swim plane with neutral rearming; Lionfish Down+OK releases prey. App-wide phone layouts, runtime input-source selection and physical remote repeat/chord validation remain the separate controls integration work.
+
+[Native engine motion review](2026-10-02-aquarium-movement-and-controls/engine/index.html) includes six species clips, fixed-step input/position traces and the 60-second urchin crawl. The urchin’s native diagonal trace covers 0.747 world units in approximately 60 seconds, consistent with its 0.0125 speed. [Package verification](2026-10-02-aquarium-movement-and-controls/engine/package-checks.json) checks the APK’s embedded bundle against the canonical seven-entry bundle, verifies the jelly primitive in both native ABIs, and confirms the Clownfish/Tiger Barbs standalone is byte-identical to the original.
+
+Validation: **81 passed** across actual exported-Forth movement tests, Betta fin/deformation checks, full pitched/banked rig reserves, feeding behavior (including the pitched mouth), shrimp/planted geometry, Arowana response and seven-tank packaging. The desktop engine and both Android release ABIs build successfully. APK SHA-256: `b67c628ce9a3ce888ba536bfdf1e3e3b1ee67258e6b63a6c87547c0f889ba56f`.
+
+[Chromecast movement checks](2026-10-02-aquarium-movement-and-controls/device/checks.json): all six updated menu entries launch and move without native script errors. Timed Android input verifies ordinary movement and fish reversal requests; the Lionfish release chord also runs. The installed APK matches the verified package hash. Physical remote chord/repeat behavior is still pending; injected events do not establish it.

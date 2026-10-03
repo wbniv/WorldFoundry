@@ -50,12 +50,17 @@
  aq-lox fish@ aq-hix fish@ INDEXOF_X_POS read-mailbox ar-room-axis
  aq-loy fish@ aq-hiy fish@ INDEXOF_Y_POS read-mailbox ar-room-axis min
  0 max ar-room-mb fish! ;
+: ar-present-side
+ \ Prefer the front-facing arc when it has room for the full long-body sweep.
+ INDEXOF_Y_POS read-mailbox aq-loy fish@ - ar-length > if
+  aq-yaw fish@ fish-cos 0 >= if -1 else 1 then
+ else aq-centre-side then ;
 : ar-targets
  aq-targets
  aq-yaw-t fish@ ar-target-last fish@ - aq-wrap-h abs .001 > if 0 ar-turn-side fish! then
  aq-yaw-t fish@ ar-target-last fish!
  aq-yaw-t fish@ aq-yaw fish@ - aq-wrap-h ar-error fish!
- ar-error fish@ abs .40 > ar-turn-side fish@ 0 = & if aq-centre-side ar-turn-side fish! then
+ ar-error fish@ abs .40 > ar-turn-side fish@ 0 = & if ar-present-side ar-turn-side fish! then
  ar-turn-side fish@ 0 <> if
   ar-error fish@ ar-turn-side fish@ * 0 < if ar-error fish@ ar-turn-side fish@ + ar-error fish! then
   ar-error fish@ abs .35 < if 0 ar-turn-side fish! then

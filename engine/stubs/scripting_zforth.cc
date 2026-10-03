@@ -1302,6 +1302,19 @@ zf_input_state zf_host_sys(zf_ctx* ctx, zf_syscall_id id, const char* /*last_wor
                             phase,amplitude,bend,finPhase,finAmplitude,minX,maxX);
                     }
                 }
+            } else if (custom == 46) {
+                // jelly-deform ( contraction phase pitch-lag roll-lag actor -- )
+                const int actor=(int)zf_pop(ctx);
+                const float rollLag=(float)zf_pop(ctx),pitchLag=(float)zf_pop(ctx);
+                const float phase=(float)zf_pop(ctx),contraction=(float)zf_pop(ctx);
+                if(theLevel && actor>0 && actor<theLevel->GetMaxObjectIndex()) {
+                    BaseObject* object=theLevel->GetObject(actor);
+                    if(object && IsActor(object)) {
+                        wf_profile::Scope animationProfile(wf_profile::Animation);
+                        wf_profile::count(5);
+                        static_cast<Actor*>(object)->GetRenderActor().SetJellyDeformation(contraction,phase,pitchLag,rollLag);
+                    }
+                }
             } else if (custom == 72) {
                 /* Neural-forth dispatch gate: syscall 200 = ZF_SYSCALL_USER + 72.
                  * Pops word-id from stack and routes to nf_dispatch().
@@ -1471,7 +1484,7 @@ void Init(MailboxesManager& mgr)
     if (r != ZF_OK)
         fprintf(stderr, "zforth: init failed (read-actor-mailbox): %d\n", r);
 
-    r = zf_eval(&g_ctx, ": profile-begin 169 sys ; : profile-end 170 sys ; : fish-deform 171 sys ; : fin-deform 172 sys ; : swim-deform 173 sys ;");
+    r = zf_eval(&g_ctx, ": profile-begin 169 sys ; : profile-end 170 sys ; : fish-deform 171 sys ; : fin-deform 172 sys ; : swim-deform 173 sys ; : jelly-deform 174 sys ;");
     if (r != ZF_OK) fprintf(stderr, "zforth: profiling/fish bridge init failed: %d\n", r);
 
     // FSN filesystem bridge words (custom 3-7 / sys 131-135)

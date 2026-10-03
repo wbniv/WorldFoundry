@@ -79,7 +79,8 @@ def test_authored_lanes_have_spacing_and_varied_states():
 
 def test_mailboxes_and_build_count_limits():
     assert len(C.MAILBOX)==len(set(C.MAILBOX.values()))
-    assert max(C.MAILBOX.values())<650
+    assert max(C.MAILBOX.values())<700
+    assert not set(C.MAILBOX.values()) & set(range(650,655))
     assert C.TABLE+23*C.STRIDE<1400
     assert 1400+23<1900
     assert len(C.residents(0))==0 and len(C.residents())==23

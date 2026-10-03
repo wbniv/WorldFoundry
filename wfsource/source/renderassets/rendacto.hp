@@ -38,6 +38,7 @@
 #include <renderassets/fish_deform.h>
 #include <renderassets/swim_deform.h>
 #include <renderassets/fin_deform.h>
+#include <renderassets/jelly_deform.h>
 #include <pigsys/pigsys.hp>
 #include <iff/iffread.hp>
 #include <memory/memory.hp>
@@ -71,6 +72,7 @@ public:
 	// it and applies as a column-scale on the world matrix in Render().
 	// (qbert stretch-and-squash, 2026-05-10.)
 	virtual void SetActorScale(const Vector3& /*scale*/) {}
+	virtual void SetJellyDeformation(float /*contraction*/, float /*phase*/, float /*pitchLag*/, float /*rollLag*/) {}
 	virtual void SetFishDeformation(float /*phase*/, float /*amplitude*/) {}
 	virtual void SetSwimDeformation(float /*phase*/, float /*amplitude*/, float /*bend*/, float /*finPhase*/, float /*finAmplitude*/, float /*minX*/, float /*maxX*/) {}
 	virtual void SetFinDeformation(float /*phase*/, float /*amplitude*/, float /*sweep*/, float /*spread*/) {}
@@ -113,6 +115,7 @@ public:
 	virtual bool GetHandle(const HandleID thisHandle, Vector3& position) const;
 	virtual void SetMaterialColor(int materialIdx, const Color& color) { _object.SetMaterialColor(materialIdx, color); }
 	virtual void SetActorScale(const Vector3& scale) { _scale = scale; }
+	virtual void SetJellyDeformation(float contraction, float phase, float pitchLag, float rollLag);
 	virtual void SetFishDeformation(float phase, float amplitude);
 	virtual void SetSwimDeformation(float phase, float amplitude, float bend, float finPhase, float finAmplitude, float minX, float maxX);
 	virtual void SetFinDeformation(float phase, float amplitude, float sweep, float spread);
@@ -128,6 +131,7 @@ protected:
 	std::vector<wf_render::SwimWaveWeight> _swimWeights;
 	float _swimMinX = 0, _swimMaxX = 0;
 	std::vector<wf_render::FinWaveWeight> _finWeights;
+	std::vector<wf_render::JellyWeight> _jellyWeights;
 private:
 };
 

@@ -295,7 +295,7 @@ header += ': sh-pose-parts\n'
 for j, (part, off) in enumerate(zip(PARTS,OFFSETS)):
     a = 'sh-walk' if part=='legs-near' else 'sh-walk negate' if part=='legs-far' else '0'
     b = 'sh-tail-bend' if part=='tail' else '0'
-    yaw = 'sh-yaw sh@ sh-phase sh@ sh-sin .012 * +' if part=='antennae' else 'sh-yaw sh@'
+    yaw = 'sh-yaw sh@ sh-antenna-phase sh@ sh-sin .012 * +' if part=='antennae' else 'sh-yaw sh@'
     header += '  '+' '.join(number(v) for v in off)+f' {a} {b} {yaw} sh-actor-{part} sh-part\n'
 header += ';\n'
 setup = ': sh-setup\n'

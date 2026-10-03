@@ -19,3 +19,11 @@ def urchin():
             ring=[tuple(base[j]+.017*(u[j]*math.cos(math.tau*k/4)+v[j]*math.sin(math.tau*k/4)) for j in range(3)) for k in range(4)]
             for k in range(4):m.face([ring[k],ring[(k+1)%4],tip],'urchin_tip' if (i+row)%4==0 else 'urchin_spine')
     return m
+
+
+def tube_foot():
+    """One short underside tube foot; the pad rests at local z=-.23."""
+    m=Mesh('urchin_tube_foot')
+    m.swept_tube([(0,0,-.15),(0,0,-.195),(0,0,-.22)],.018,'urchin_tip',6)
+    m.ellipsoid((0,0,-.219),(.035,.028,.011),'urchin_tip',6,3)
+    return m

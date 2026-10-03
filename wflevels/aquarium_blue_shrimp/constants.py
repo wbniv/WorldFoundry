@@ -24,7 +24,10 @@ MAILBOX = {'clock': 600, 'init': 601, 'slot': 602, 'x': 603, 'y': 604, 'z': 605,
            'prev': 623, 'dart': 624, 'dx': 625, 'dy': 626, 'dz': 627, 'mode': 628,
            'camera': 629, 'u': 630, 'travel': 631, 'state': 632, 'parity': 633,
            'target': 634, 'support': 635, 'escape': 636, 'elapsed': 637,
-           'cooldown': 638, 'gait-phase': 639}
+           'cooldown': 638, 'gait-phase': 639,
+           'last-x':680,'last-y':681,'last-z':682,'pose-init':683,
+           'player-pitch':684,'neutral':685,'drive':686,'flip':687,
+           'cp':688,'sp':689,'local-x':690,'motion':691,'contact':692,'antenna-phase':693}
 TABLE = 800
 STRIDE = 18
 # Per resident: five actor indices, home xyz, excursion xyz, period, phase,

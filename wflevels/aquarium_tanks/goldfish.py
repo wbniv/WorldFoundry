@@ -60,7 +60,7 @@ def constants(indices, initial=0, autoeat=True):
             'gf-capture-time':.10,
             'gf-rx':1100,'gf-ry':1101,'gf-rz':1102,'gf-ryaw':1103,'gf-rv':1104,
             'gf-rphase':1105,'gf-idle-x':1106,'gf-idle-z':1107,
-            'gf-rstate':1108,'gf-rlook':1109,
+            'gf-rstate':1108,'gf-rlook':1109,'gf-rpitch':1110,'gf-rroll':1111,'gf-mouth-pitch':979,
             'gf-initial':initial,'gf-autoeat':int(autoeat),'gf-resident':int('animal-01-body' in indices)}
     text=''.join(f': {k} {v} ;\n' for k,v in values.items())
     text+=': gf-actor gf-i read-mailbox 0 = if '+str(indices['goldfish-0'])+' else gf-i read-mailbox 1 = if '+str(indices['goldfish-1'])+' else '+str(indices['goldfish-2'])+' then then ;\n'

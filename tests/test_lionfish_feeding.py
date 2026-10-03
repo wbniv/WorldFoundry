@@ -273,3 +273,15 @@ def test_articulated_mouth_geometry_and_complete_bounds():
                 assert abs(wx)+4.7<6.096-.127
                 assert abs(y)+.27<1.651-.127
                 assert wz+1.30>.635 and wz+3.75<4.826
+
+
+def test_pitched_mouth_and_sight_follow_forward_axis(tank):
+    h=tank
+    evaluate(h,'gf-release-one 0 gf-i tk! .083333333 tk-pitch tk!')
+    # A prey ahead of the raised mouth is edible; a prey at the old level mouth is not.
+    evaluate(h,'.5715768 2 gf! 0 3 gf! 2.83 4 gf! gf-player-mouth')
+    assert h.read(943)==pytest.approx(2.78,abs=.002)
+    evaluate(h,'gf-edible gf-see tk!')
+    assert h.read(964)==1
+    evaluate(h,'.65 2 gf! 0 3 gf! 2.5 4 gf! gf-player-mouth gf-edible gf-see tk!')
+    assert h.read(964)==0

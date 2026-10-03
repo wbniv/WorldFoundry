@@ -1,0 +1,487 @@
+
+=== wf_game android_main (log → /storage/emulated/0/Android/data/org.worldfoundry.wf_game.aquarium/files/wf.log) ===
+[98588.349995] (f_game.aquarium) Successfully parsed 1 environment variable(s) from /vendor/etc/mali_platform.config.
+Could not open module param file '/sys/module/mali_kbase/parameters/large_page_conf'
+[98588.364534] (f_game.aquarium) Successfully parsed 1 environment variable(s) from /vendor/etc/mali_platform.config.
+audio: miniaudio v0.11.25 ready
+wf_game v0.4.1, Built:Oct  1 2026,02:27:16 by kts
+argc = 1, commandIndex = 1
+Level=-1
+cerror:
+cwarn:
+cstats:
+wf_game Ver 0.4.1, Built:Oct  1 2026,02:27:16 by kts
+DBSTREAMS jolt: RegisterDefaultAllocator
+jolt: Factory
+jolt: RegisterTypes
+jolt: RunSelftest
+jolt: selftest ok (sphere fell to z=5.098)
+jolt: backend init
+jolt: backend ready (gravity -Z)
+jolt: init complete
+LMalloc of 76 not 8-byte aligned, rounding up
+Opening cd.iff
+LMalloc of 447 not 8-byte aligned, rounding up
+zforth: INDEXOF_CAMSHOT = 1921 (expect 1921)
+zforth: INDEXOF_CAMSHOT = 1921 (expect 1921)
+LMalloc of 20 not 8-byte aligned, rounding up
+LMalloc of 412 not 8-byte aligned, rounding up
+LMalloc of 7620 not 8-byte aligned, rounding up
+LMalloc of 20 not 8-byte aligned, rounding up
+LMalloc of 20 not 8-byte aligned, rounding up
+LMalloc of 44 not 8-byte aligned, rounding up
+LMalloc of 44 not 8-byte aligned, rounding up
+LMalloc of 44 not 8-byte aligned, rounding up
+LMalloc of 44 not 8-byte aligned, rounding up
+LMalloc of 44 not 8-byte aligned, rounding up
+LMalloc of 44 not 8-byte aligned, rounding up
+LMalloc of 44 not 8-byte aligned, rounding up
+LMalloc of 44 not 8-byte aligned, rounding up
+LMalloc of 44 not 8-byte aligned, rounding up
+LMalloc of 44 not 8-byte aligned, rounding up
+LMalloc of 44 not 8-byte aligned, rounding up
+LMalloc of 44 not 8-byte aligned, rounding up
+LMalloc of 44 not 8-byte aligned, rounding up
+LMalloc of 44 not 8-byte aligned, rounding up
+LMalloc of 44 not 8-byte aligned, rounding up
+LMalloc of 44 not 8-byte aligned, rounding up
+LMalloc of 44 not 8-byte aligned, rounding up
+LMalloc of 44 not 8-byte aligned, rounding up
+LMalloc of 44 not 8-byte aligned, rounding up
+LMalloc of 44 not 8-byte aligned, rounding up
+LMalloc of 44 not 8-byte aligned, rounding up
+LMalloc of 44 not 8-byte aligned, rounding up
+Level::Level: leveldata= 0xe1349988, object count  = 33
+ASS closed without all data read (bytesLeft = 4118)
+ASS closed without all data read (bytesLeft = 150)
+ASS closed without all data read (bytesLeft = 16)
+ASS closed without all data read (bytesLeft = 16)
+ASS closed without all data read (bytesLeft = 126220)
+DMalloc of 84 not 8-byte aligned, rounding up
+LMalloc of 76 not 8-byte aligned, rounding up
+PixelMap::Load: this = 0xe002a880
+PixelMap::Load: this = 0xe002a8b0
+LMalloc of 28 not 8-byte aligned, rounding up
+LMalloc of 28 not 8-byte aligned, rounding up
+LMalloc of 28 not 8-byte aligned, rounding up
+LMalloc of 28 not 8-byte aligned, rounding up
+LMalloc of 948 not 8-byte aligned, rounding up
+LMalloc of 148 not 8-byte aligned, rounding up
+LMalloc of 68 not 8-byte aligned, rounding up
+LMalloc of 100 not 8-byte aligned, rounding up
+DMalloc of 228 not 8-byte aligned, rounding up
+[Actor] idx=2 class=23 commonOff=22276 NumberOfLocalMailboxes=0
+DMalloc of 84 not 8-byte aligned, rounding up
+[Actor] idx=3 class=13 commonOff=22276 NumberOfLocalMailboxes=0
+DMalloc of 84 not 8-byte aligned, rounding up
+this = 0xe002de58,setting _memory to 0xe002da78
+DMalloc of 52 not 8-byte aligned, rounding up
+DMalloc of 252 not 8-byte aligned, rounding up
+[Actor] idx=4 class=20 commonOff=22988 NumberOfLocalMailboxes=0
+DMalloc of 84 not 8-byte aligned, rounding up
+DMalloc of 228 not 8-byte aligned, rounding up
+[Actor] idx=6 class=11 commonOff=22276 NumberOfLocalMailboxes=0
+DMalloc of 84 not 8-byte aligned, rounding up
+[Actor] idx=7 class=16 commonOff=22276 NumberOfLocalMailboxes=0
+DMalloc of 84 not 8-byte aligned, rounding up
+[Actor] idx=8 class=3 commonOff=22276 NumberOfLocalMailboxes=0
+DMalloc of 84 not 8-byte aligned, rounding up
+[Actor] idx=9 class=22 commonOff=23728 NumberOfLocalMailboxes=6
+DMalloc of 84 not 8-byte aligned, rounding up
+jolt: character 0 created at (0.00, 0.00, 6.00) ctr=(0.00,0.00,0.00)
+[Actor] idx=10 class=7 commonOff=24036 NumberOfLocalMailboxes=0
+DMalloc of 84 not 8-byte aligned, rounding up
+[Actor] idx=11 class=7 commonOff=24236 NumberOfLocalMailboxes=0
+DMalloc of 84 not 8-byte aligned, rounding up
+[Actor] idx=12 class=7 commonOff=24280 NumberOfLocalMailboxes=0
+DMalloc of 84 not 8-byte aligned, rounding up
+[Actor] idx=13 class=7 commonOff=24324 NumberOfLocalMailboxes=0
+DMalloc of 84 not 8-byte aligned, rounding up
+[Actor] idx=14 class=7 commonOff=22276 NumberOfLocalMailboxes=0
+DMalloc of 84 not 8-byte aligned, rounding up
+[Actor] idx=15 class=7 commonOff=22276 NumberOfLocalMailboxes=0
+DMalloc of 84 not 8-byte aligned, rounding up
+[Actor] idx=16 class=7 commonOff=22276 NumberOfLocalMailboxes=0
+DMalloc of 84 not 8-byte aligned, rounding up
+[Actor] idx=17 class=7 commonOff=22276 NumberOfLocalMailboxes=0
+DMalloc of 84 not 8-byte aligned, rounding up
+[Actor] idx=18 class=7 commonOff=24368 NumberOfLocalMailboxes=0
+DMalloc of 84 not 8-byte aligned, rounding up
+[Actor] idx=19 class=7 commonOff=24412 NumberOfLocalMailboxes=0
+DMalloc of 84 not 8-byte aligned, rounding up
+[Actor] idx=20 class=5 commonOff=22276 NumberOfLocalMailboxes=0
+jolt: body STATIC pos=(0.00,0.00,0.00) half=(20.00,15.00,0.12) id=8388608
+[Actor] idx=21 class=5 commonOff=22276 NumberOfLocalMailboxes=0
+jolt: body STATIC pos=(0.00,14.88,6.10) half=(19.87,0.12,5.90) id=8388609
+[Actor] idx=22 class=5 commonOff=24564 NumberOfLocalMailboxes=0
+jolt: body STATIC pos=(0.00,14.88,11.88) half=(20.00,0.12,0.12) id=8388610
+[Actor] idx=23 class=5 commonOff=22276 NumberOfLocalMailboxes=0
+jolt: body STATIC pos=(-20.00,0.00,6.00) half=(0.12,15.00,6.00) id=8388611
+[Actor] idx=24 class=5 commonOff=22276 NumberOfLocalMailboxes=0
+jolt: body STATIC pos=(19.88,0.00,6.00) half=(0.12,15.00,6.00) id=8388612
+[Actor] idx=25 class=5 commonOff=22276 NumberOfLocalMailboxes=0
+jolt: body STATIC pos=(0.00,-15.12,6.00) half=(20.00,0.12,6.00) id=8388613
+[Actor] idx=26 class=7 commonOff=22276 NumberOfLocalMailboxes=0
+DMalloc of 84 not 8-byte aligned, rounding up
+[Actor] idx=27 class=5 commonOff=22276 NumberOfLocalMailboxes=0
+jolt: body STATIC pos=(0.00,0.00,0.07) half=(19.87,14.87,0.12) id=8388614
+[Actor] idx=28 class=5 commonOff=22276 NumberOfLocalMailboxes=0
+jolt: body STATIC pos=(0.00,0.00,-1.26) half=(20.15,15.15,1.24) id=8388615
+[Actor] idx=29 class=5 commonOff=22276 NumberOfLocalMailboxes=0
+jolt: body STATIC pos=(0.00,15.97,7.50) half=(30.00,0.12,12.50) id=8388616
+DMalloc of 228 not 8-byte aligned, rounding up
+[Actor] idx=30 class=23 commonOff=22276 NumberOfLocalMailboxes=0
+DMalloc of 84 not 8-byte aligned, rounding up
+[Actor] idx=31 class=3 commonOff=22276 NumberOfLocalMailboxes=0
+DMalloc of 84 not 8-byte aligned, rounding up
+[Actor] idx=32 class=16 commonOff=22276 NumberOfLocalMailboxes=0
+DMalloc of 84 not 8-byte aligned, rounding up
+LMalloc of 20 not 8-byte aligned, rounding up
+LMalloc of 212 not 8-byte aligned, rounding up
+DMalloc of 404 not 8-byte aligned, rounding up
+DMalloc of 446 not 8-byte aligned, rounding up
+DMalloc of 454 not 8-byte aligned, rounding up
+DMalloc of 404 not 8-byte aligned, rounding up
+Walking from 0
+0->0
+0->0
+LMalloc of 20 not 8-byte aligned, rounding up
+LMalloc of 20 not 8-byte aligned, rounding up
+ASS closed without all data read (bytesLeft = 4118)
+ASS closed without all data read (bytesLeft = 150)
+ASS closed without all data read (bytesLeft = 16)
+ASS closed without all data read (bytesLeft = 16)
+ASS closed without all data read (bytesLeft = 126220)
+ASS closed without all data read (bytesLeft = 6420)
+ASS closed without all data read (bytesLeft = 5828)
+ASS closed without all data read (bytesLeft = 5828)
+ASS closed without all data read (bytesLeft = 2708)
+ASS closed without all data read (bytesLeft = 2708)
+ASS closed without all data read (bytesLeft = 2708)
+ASS closed without all data read (bytesLeft = 2708)
+ASS closed without all data read (bytesLeft = 1388)
+ASS closed without all data read (bytesLeft = 1388)
+ASS closed without all data read (bytesLeft = 588)
+ASS closed without all data read (bytesLeft = 4692)
+ASS closed without all data read (bytesLeft = 428)
+ASS closed without all data read (bytesLeft = 588)
+ASS closed without all data read (bytesLeft = 588)
+ASS closed without all data read (bytesLeft = 588)
+ASS closed without all data read (bytesLeft = 1260)
+ASS closed without all data read (bytesLeft = 588)
+ASS closed without all data read (bytesLeft = 588)
+ASS closed without all data read (bytesLeft = 588)
+DMalloc of 84 not 8-byte aligned, rounding up
+PixelMap::Load: this = 0xe002a8e0
+PixelMap::Load: this = 0xe002a910
+LMalloc of 28 not 8-byte aligned, rounding up
+LMalloc of 28 not 8-byte aligned, rounding up
+LMalloc of 28 not 8-byte aligned, rounding up
+LMalloc of 28 not 8-byte aligned, rounding up
+LMalloc of 244 not 8-byte aligned, rounding up
+LMalloc of 44 not 8-byte aligned, rounding up
+LMalloc of 44 not 8-byte aligned, rounding up
+LMalloc of 44 not 8-byte aligned, rounding up
+LMalloc of 100036 not 8-byte aligned, rounding up
+RenderActor3DAnimates constructed with no animations!
+LMalloc of 244 not 8-byte aligned, rounding up
+LMalloc of 44 not 8-byte aligned, rounding up
+LMalloc of 44 not 8-byte aligned, rounding up
+LMalloc of 44 not 8-byte aligned, rounding up
+LMalloc of 100036 not 8-byte aligned, rounding up
+RenderActor3DAnimates constructed with no animations!
+LMalloc of 244 not 8-byte aligned, rounding up
+LMalloc of 44 not 8-byte aligned, rounding up
+LMalloc of 44 not 8-byte aligned, rounding up
+LMalloc of 44 not 8-byte aligned, rounding up
+LMalloc of 5796 not 8-byte aligned, rounding up
+RenderActor3DAnimates constructed with no animations!
+LMalloc of 244 not 8-byte aligned, rounding up
+LMalloc of 44 not 8-byte aligned, rounding up
+LMalloc of 44 not 8-byte aligned, rounding up
+LMalloc of 44 not 8-byte aligned, rounding up
+LMalloc of 4436 not 8-byte aligned, rounding up
+RenderActor3DAnimates constructed with no animations!
+LMalloc of 244 not 8-byte aligned, rounding up
+LMalloc of 44 not 8-byte aligned, rounding up
+LMalloc of 44 not 8-byte aligned, rounding up
+LMalloc of 44 not 8-byte aligned, rounding up
+LMalloc of 4436 not 8-byte aligned, rounding up
+RenderActor3DAnimates constructed with no animations!
+LMalloc of 244 not 8-byte aligned, rounding up
+LMalloc of 44 not 8-byte aligned, rounding up
+LMalloc of 44 not 8-byte aligned, rounding up
+LMalloc of 44 not 8-byte aligned, rounding up
+LMalloc of 1796 not 8-byte aligned, rounding up
+RenderActor3DAnimates constructed with no animations!
+LMalloc of 244 not 8-byte aligned, rounding up
+LMalloc of 44 not 8-byte aligned, rounding up
+LMalloc of 44 not 8-byte aligned, rounding up
+LMalloc of 44 not 8-byte aligned, rounding up
+LMalloc of 1796 not 8-byte aligned, rounding up
+RenderActor3DAnimates constructed with no animations!
+LMalloc of 244 not 8-byte aligned, rounding up
+LMalloc of 44 not 8-byte aligned, rounding up
+LMalloc of 44 not 8-byte aligned, rounding up
+LMalloc of 44 not 8-byte aligned, rounding up
+LMalloc of 1796 not 8-byte aligned, rounding up
+RenderActor3DAnimates constructed with no animations!
+LMalloc of 244 not 8-byte aligned, rounding up
+LMalloc of 44 not 8-byte aligned, rounding up
+LMalloc of 44 not 8-byte aligned, rounding up
+LMalloc of 44 not 8-byte aligned, rounding up
+LMalloc of 1796 not 8-byte aligned, rounding up
+RenderActor3DAnimates constructed with no animations!
+LMalloc of 244 not 8-byte aligned, rounding up
+LMalloc of 44 not 8-byte aligned, rounding up
+LMalloc of 44 not 8-byte aligned, rounding up
+LMalloc of 44 not 8-byte aligned, rounding up
+LMalloc of 1076 not 8-byte aligned, rounding up
+RenderActor3DAnimates constructed with no animations!
+LMalloc of 244 not 8-byte aligned, rounding up
+LMalloc of 44 not 8-byte aligned, rounding up
+LMalloc of 44 not 8-byte aligned, rounding up
+LMalloc of 44 not 8-byte aligned, rounding up
+LMalloc of 1076 not 8-byte aligned, rounding up
+RenderActor3DAnimates constructed with no animations!
+LMalloc of 244 not 8-byte aligned, rounding up
+LMalloc of 44 not 8-byte aligned, rounding up
+LMalloc of 44 not 8-byte aligned, rounding up
+LMalloc of 44 not 8-byte aligned, rounding up
+LMalloc of 276 not 8-byte aligned, rounding up
+RenderActor3DAnimates constructed with no animations!
+LMalloc of 44 not 8-byte aligned, rounding up
+LMalloc of 44 not 8-byte aligned, rounding up
+MATL closed without all data read (bytesLeft = 264)
+LMalloc of 44 not 8-byte aligned, rounding up
+jolt: mesh actor_pos=(0.000,0.000,0.000)
+jolt: mesh v0 local=(-20.000,-15.000,0.000) world=(-20.000,-15.000,0.000)
+jolt: mesh v1 local=(-20.000,-15.000,0.127) world=(-20.000,-15.000,0.127)
+jolt: mesh v2 local=(-20.000,15.000,0.000) world=(-20.000,15.000,0.000)
+jolt: mesh v3 local=(-20.000,15.000,0.127) world=(-20.000,15.000,0.127)
+jolt: mesh v4 local=(20.000,-15.000,0.000) world=(20.000,-15.000,0.000)
+jolt: mesh v5 local=(20.000,-15.000,0.127) world=(20.000,-15.000,0.127)
+jolt: mesh v6 local=(20.000,15.000,0.000) world=(20.000,15.000,0.000)
+jolt: mesh v7 local=(20.000,15.000,0.127) world=(20.000,15.000,0.127)
+jolt: body MESH_STATIC verts=8 faces=12 id=16777216
+LMalloc of 244 not 8-byte aligned, rounding up
+LMalloc of 44 not 8-byte aligned, rounding up
+LMalloc of 44 not 8-byte aligned, rounding up
+LMalloc of 44 not 8-byte aligned, rounding up
+LMalloc of 2436 not 8-byte aligned, rounding up
+RenderActor3DAnimates constructed with no animations!
+LMalloc of 44 not 8-byte aligned, rounding up
+LMalloc of 44 not 8-byte aligned, rounding up
+MATL closed without all data read (bytesLeft = 2640)
+LMalloc of 44 not 8-byte aligned, rounding up
+jolt: mesh actor_pos=(0.000,0.000,0.000)
+jolt: mesh v0 local=(-19.873,14.873,0.200) world=(-19.873,14.873,0.200)
+jolt: mesh v1 local=(-19.873,14.873,1.380) world=(-19.873,14.873,1.380)
+jolt: mesh v2 local=(-19.873,14.873,2.560) world=(-19.873,14.873,2.560)
+jolt: mesh v3 local=(-19.873,14.873,3.740) world=(-19.873,14.873,3.740)
+jolt: mesh v4 local=(-19.873,14.873,4.920) world=(-19.873,14.873,4.920)
+jolt: mesh v5 local=(-19.873,14.873,6.100) world=(-19.873,14.873,6.100)
+jolt: mesh v6 local=(-19.873,14.873,7.280) world=(-19.873,14.873,7.280)
+jolt: mesh v7 local=(-19.873,14.873,8.460) world=(-19.873,14.873,8.460)
+jolt: mesh v8 local=(-19.873,14.873,9.640) world=(-19.873,14.873,9.640)
+jolt: mesh v9 local=(-19.873,14.873,10.820) world=(-19.873,14.873,10.820)
+jolt: mesh v10 local=(-19.873,14.873,12.000) world=(-19.873,14.873,12.000)
+jolt: mesh v11 local=(-19.873,15.000,0.200) world=(-19.873,15.000,0.200)
+jolt: mesh v12 local=(-19.873,15.000,1.380) world=(-19.873,15.000,1.380)
+jolt: mesh v13 local=(-19.873,15.000,2.560) world=(-19.873,15.000,2.560)
+jolt: mesh v14 local=(-19.873,15.000,3.740) world=(-19.873,15.000,3.740)
+jolt: mesh v15 local=(-19.873,15.000,4.920) world=(-19.873,15.000,4.920)
+jolt: mesh v16 local=(-19.873,15.000,6.100) world=(-19.873,15.000,6.100)
+jolt: mesh v17 local=(-19.873,15.000,7.280) world=(-19.873,15.000,7.280)
+jolt: mesh v18 local=(-19.873,15.000,8.460) world=(-19.873,15.000,8.460)
+jolt: mesh v19 local=(-19.873,15.000,9.640) world=(-19.873,15.000,9.640)
+jolt: mesh v20 local=(-19.873,15.000,10.820) world=(-19.873,15.000,10.820)
+jolt: mesh v21 local=(-19.873,15.000,12.000) world=(-19.873,15.000,12.000)
+jolt: mesh v22 local=(19.873,14.873,0.200) world=(19.873,14.873,0.200)
+jolt: mesh v23 local=(19.873,14.873,1.380) world=(19.873,14.873,1.380)
+jolt: mesh v24 local=(19.873,14.873,2.560) world=(19.873,14.873,2.560)
+jolt: mesh v25 local=(19.873,14.873,3.740) world=(19.873,14.873,3.740)
+jolt: mesh v26 local=(19.873,14.873,4.920) world=(19.873,14.873,4.920)
+jolt: mesh v27 local=(19.873,14.873,6.100) world=(19.873,14.873,6.100)
+jolt: mesh v28 local=(19.873,14.873,7.280) world=(19.873,14.873,7.280)
+jolt: mesh v29 local=(19.873,14.873,8.460) world=(19.873,14.873,8.460)
+jolt: mesh v30 local=(19.873,14.873,9.640) world=(19.873,14.873,9.640)
+jolt: mesh v31 local=(19.873,14.873,10.820) world=(19.873,14.873,10.820)
+jolt: mesh v32 local=(19.873,14.873,12.000) world=(19.873,14.873,12.000)
+jolt: mesh v33 local=(19.873,15.000,0.200) world=(19.873,15.000,0.200)
+jolt: mesh v34 local=(19.873,15.000,1.380) world=(19.873,15.000,1.380)
+jolt: mesh v35 local=(19.873,15.000,2.560) world=(19.873,15.000,2.560)
+jolt: mesh v36 local=(19.873,15.000,3.740) world=(19.873,15.000,3.740)
+jolt: mesh v37 local=(19.873,15.000,4.920) world=(19.873,15.000,4.920)
+jolt: mesh v38 local=(19.873,15.000,6.100) world=(19.873,15.000,6.100)
+jolt: mesh v39 local=(19.873,15.000,7.280) world=(19.873,15.000,7.280)
+jolt: mesh v40 local=(19.873,15.000,8.460) world=(19.873,15.000,8.460)
+jolt: mesh v41 local=(19.873,15.000,9.640) world=(19.873,15.000,9.640)
+jolt: mesh v42 local=(19.873,15.000,10.820) world=(19.873,15.000,10.820)
+jolt: mesh v43 local=(19.873,15.000,12.000) world=(19.873,15.000,12.000)
+jolt: body MESH_STATIC verts=44 faces=120 id=16777217
+LMalloc of 244 not 8-byte aligned, rounding up
+LMalloc of 44 not 8-byte aligned, rounding up
+LMalloc of 44 not 8-byte aligned, rounding up
+LMalloc of 44 not 8-byte aligned, rounding up
+LMalloc of 116 not 8-byte aligned, rounding up
+RenderActor3DAnimates constructed with no animations!
+LMalloc of 44 not 8-byte aligned, rounding up
+LMalloc of 44 not 8-byte aligned, rounding up
+MATL closed without all data read (bytesLeft = 264)
+LMalloc of 44 not 8-byte aligned, rounding up
+jolt: mesh actor_pos=(0.000,0.000,0.000)
+jolt: mesh v0 local=(-20.000,14.873,12.000) world=(-20.000,14.873,12.000)
+jolt: mesh v1 local=(-20.000,15.000,12.000) world=(-20.000,15.000,12.000)
+jolt: mesh v2 local=(20.000,14.873,12.000) world=(20.000,14.873,12.000)
+jolt: mesh v3 local=(20.000,15.000,12.000) world=(20.000,15.000,12.000)
+jolt: body MESH_STATIC verts=4 faces=4 id=16777218
+LMalloc of 244 not 8-byte aligned, rounding up
+LMalloc of 44 not 8-byte aligned, rounding up
+LMalloc of 44 not 8-byte aligned, rounding up
+LMalloc of 44 not 8-byte aligned, rounding up
+LMalloc of 276 not 8-byte aligned, rounding up
+RenderActor3DAnimates constructed with no animations!
+LMalloc of 44 not 8-byte aligned, rounding up
+LMalloc of 44 not 8-byte aligned, rounding up
+MATL closed without all data read (bytesLeft = 264)
+LMalloc of 44 not 8-byte aligned, rounding up
+jolt: mesh actor_pos=(0.000,0.000,0.000)
+jolt: mesh v0 local=(-20.000,-15.000,0.000) world=(-20.000,-15.000,0.000)
+jolt: mesh v1 local=(-20.000,-15.000,12.000) world=(-20.000,-15.000,12.000)
+jolt: mesh v2 local=(-20.000,15.000,0.000) world=(-20.000,15.000,0.000)
+jolt: mesh v3 local=(-20.000,15.000,12.000) world=(-20.000,15.000,12.000)
+jolt: mesh v4 local=(-19.873,-15.000,0.000) world=(-19.873,-15.000,0.000)
+jolt: mesh v5 local=(-19.873,-15.000,12.000) world=(-19.873,-15.000,12.000)
+jolt: mesh v6 local=(-19.873,15.000,0.000) world=(-19.873,15.000,0.000)
+jolt: mesh v7 local=(-19.873,15.000,12.000) world=(-19.873,15.000,12.000)
+jolt: body MESH_STATIC verts=8 faces=12 id=16777219
+LMalloc of 244 not 8-byte aligned, rounding up
+LMalloc of 44 not 8-byte aligned, rounding up
+LMalloc of 44 not 8-byte aligned, rounding up
+LMalloc of 44 not 8-byte aligned, rounding up
+LMalloc of 276 not 8-byte aligned, rounding up
+RenderActor3DAnimates constructed with no animations!
+LMalloc of 44 not 8-byte aligned, rounding up
+LMalloc of 44 not 8-byte aligned, rounding up
+MATL closed without all data read (bytesLeft = 264)
+LMalloc of 44 not 8-byte aligned, rounding up
+jolt: mesh actor_pos=(0.000,0.000,0.000)
+jolt: mesh v0 local=(19.873,-15.000,0.000) world=(19.873,-15.000,0.000)
+jolt: mesh v1 local=(19.873,-15.000,12.000) world=(19.873,-15.000,12.000)
+jolt: mesh v2 local=(19.873,15.000,0.000) world=(19.873,15.000,0.000)
+jolt: mesh v3 local=(19.873,15.000,12.000) world=(19.873,15.000,12.000)
+jolt: mesh v4 local=(20.000,-15.000,0.000) world=(20.000,-15.000,0.000)
+jolt: mesh v5 local=(20.000,-15.000,12.000) world=(20.000,-15.000,12.000)
+jolt: mesh v6 local=(20.000,15.000,0.000) world=(20.000,15.000,0.000)
+jolt: mesh v7 local=(20.000,15.000,12.000) world=(20.000,15.000,12.000)
+jolt: body MESH_STATIC verts=8 faces=12 id=16777220
+LMalloc of 244 not 8-byte aligned, rounding up
+LMalloc of 44 not 8-byte aligned, rounding up
+LMalloc of 44 not 8-byte aligned, rounding up
+LMalloc of 44 not 8-byte aligned, rounding up
+LMalloc of 276 not 8-byte aligned, rounding up
+RenderActor3DAnimates constructed with no animations!
+LMalloc of 44 not 8-byte aligned, rounding up
+LMalloc of 44 not 8-byte aligned, rounding up
+MATL closed without all data read (bytesLeft = 264)
+LMalloc of 44 not 8-byte aligned, rounding up
+jolt: mesh actor_pos=(0.000,0.000,0.000)
+jolt: mesh v0 local=(-20.000,-15.127,0.000) world=(-20.000,-15.127,0.000)
+jolt: mesh v1 local=(-20.000,-15.127,12.000) world=(-20.000,-15.127,12.000)
+jolt: mesh v2 local=(-20.000,-15.000,0.000) world=(-20.000,-15.000,0.000)
+jolt: mesh v3 local=(-20.000,-15.000,12.000) world=(-20.000,-15.000,12.000)
+jolt: mesh v4 local=(20.000,-15.127,0.000) world=(20.000,-15.127,0.000)
+jolt: mesh v5 local=(20.000,-15.127,12.000) world=(20.000,-15.127,12.000)
+jolt: mesh v6 local=(20.000,-15.000,0.000) world=(20.000,-15.000,0.000)
+jolt: mesh v7 local=(20.000,-15.000,12.000) world=(20.000,-15.000,12.000)
+jolt: body MESH_STATIC verts=8 faces=12 id=16777221
+LMalloc of 244 not 8-byte aligned, rounding up
+LMalloc of 44 not 8-byte aligned, rounding up
+LMalloc of 44 not 8-byte aligned, rounding up
+LMalloc of 44 not 8-byte aligned, rounding up
+LMalloc of 996 not 8-byte aligned, rounding up
+RenderActor3DAnimates constructed with no animations!
+LMalloc of 244 not 8-byte aligned, rounding up
+LMalloc of 44 not 8-byte aligned, rounding up
+LMalloc of 44 not 8-byte aligned, rounding up
+LMalloc of 44 not 8-byte aligned, rounding up
+LMalloc of 276 not 8-byte aligned, rounding up
+RenderActor3DAnimates constructed with no animations!
+LMalloc of 44 not 8-byte aligned, rounding up
+LMalloc of 44 not 8-byte aligned, rounding up
+MATL closed without all data read (bytesLeft = 264)
+LMalloc of 44 not 8-byte aligned, rounding up
+jolt: mesh actor_pos=(0.000,0.000,0.000)
+jolt: mesh v0 local=(-19.873,-14.873,0.127) world=(-19.873,-14.873,0.127)
+jolt: mesh v1 local=(-19.873,-14.873,0.200) world=(-19.873,-14.873,0.200)
+jolt: mesh v2 local=(-19.873,14.873,0.127) world=(-19.873,14.873,0.127)
+jolt: mesh v3 local=(-19.873,14.873,0.200) world=(-19.873,14.873,0.200)
+jolt: mesh v4 local=(19.873,-14.873,0.127) world=(19.873,-14.873,0.127)
+jolt: mesh v5 local=(19.873,-14.873,0.200) world=(19.873,-14.873,0.200)
+jolt: mesh v6 local=(19.873,14.873,0.127) world=(19.873,14.873,0.127)
+jolt: mesh v7 local=(19.873,14.873,0.200) world=(19.873,14.873,0.200)
+jolt: body MESH_STATIC verts=8 faces=12 id=16777222
+LMalloc of 244 not 8-byte aligned, rounding up
+LMalloc of 44 not 8-byte aligned, rounding up
+LMalloc of 44 not 8-byte aligned, rounding up
+LMalloc of 44 not 8-byte aligned, rounding up
+LMalloc of 276 not 8-byte aligned, rounding up
+RenderActor3DAnimates constructed with no animations!
+LMalloc of 44 not 8-byte aligned, rounding up
+LMalloc of 44 not 8-byte aligned, rounding up
+MATL closed without all data read (bytesLeft = 264)
+LMalloc of 44 not 8-byte aligned, rounding up
+jolt: mesh actor_pos=(0.000,0.000,0.000)
+jolt: mesh v0 local=(-20.150,-15.150,-2.500) world=(-20.150,-15.150,-2.500)
+jolt: mesh v1 local=(-20.150,-15.150,-0.025) world=(-20.150,-15.150,-0.025)
+jolt: mesh v2 local=(-20.150,15.150,-2.500) world=(-20.150,15.150,-2.500)
+jolt: mesh v3 local=(-20.150,15.150,-0.025) world=(-20.150,15.150,-0.025)
+jolt: mesh v4 local=(20.150,-15.150,-2.500) world=(20.150,-15.150,-2.500)
+jolt: mesh v5 local=(20.150,-15.150,-0.025) world=(20.150,-15.150,-0.025)
+jolt: mesh v6 local=(20.150,15.150,-2.500) world=(20.150,15.150,-2.500)
+jolt: mesh v7 local=(20.150,15.150,-0.025) world=(20.150,15.150,-0.025)
+jolt: body MESH_STATIC verts=8 faces=12 id=16777223
+LMalloc of 244 not 8-byte aligned, rounding up
+LMalloc of 44 not 8-byte aligned, rounding up
+LMalloc of 44 not 8-byte aligned, rounding up
+LMalloc of 44 not 8-byte aligned, rounding up
+LMalloc of 276 not 8-byte aligned, rounding up
+RenderActor3DAnimates constructed with no animations!
+LMalloc of 44 not 8-byte aligned, rounding up
+LMalloc of 44 not 8-byte aligned, rounding up
+MATL closed without all data read (bytesLeft = 264)
+LMalloc of 44 not 8-byte aligned, rounding up
+jolt: mesh actor_pos=(0.000,0.000,0.000)
+jolt: mesh v0 local=(-30.000,16.000,-5.000) world=(-30.000,16.000,-5.000)
+jolt: mesh v1 local=(-30.000,16.000,20.000) world=(-30.000,16.000,20.000)
+jolt: mesh v2 local=(-30.000,16.100,-5.000) world=(-30.000,16.100,-5.000)
+jolt: mesh v3 local=(-30.000,16.100,20.000) world=(-30.000,16.100,20.000)
+jolt: mesh v4 local=(30.000,16.000,-5.000) world=(30.000,16.000,-5.000)
+jolt: mesh v5 local=(30.000,16.000,20.000) world=(30.000,16.000,20.000)
+jolt: mesh v6 local=(30.000,16.100,-5.000) world=(30.000,16.100,-5.000)
+jolt: mesh v7 local=(30.000,16.100,20.000) world=(30.000,16.100,20.000)
+jolt: body MESH_STATIC verts=8 faces=12 id=16777224
+zforth: INDEXOF_CAMSHOT = 1921 (expect 1921)
+zforth: INDEXOF_CAMSHOT = 1921 (expect 1921)
+jolt: OptimizeBroadPhase done (9 static bodies)
+audio: MusicPlayer — soundfont not found: florestan-subset.sf2
+audio: sfx[0] not found: wflevels/qbert_practice/sfx/qbert_hop.wav
+audio: sfx[1] not found: wflevels/qbert_practice/sfx/qbert_land.wav
+audio: sfx[2] not found: wflevels/qbert_practice/sfx/qbert_fall.wav
+audio: sfx[3] not found: wflevels/qbert_practice/sfx/qbert_swear.wav
+audio: sfx[4] not found: wflevels/qbert_practice/sfx/qbert_round_clear.wav
+audio: sfx[5] not found: wflevels/qbert_practice/sfx/qbert_kill.wav
+audio: sfx[6] not found: wflevels/qbert_practice/sfx/qbert_disc.wav
+DMalloc of 36 not 8-byte aligned, rounding up
+ball pos: (0.000, 0.000, 6.000)
+ball pos: (0.000, 0.000, 6.000)
+ball pos: (0.837, 0.000, 6.000)
+ball pos: (3.599, 0.000, 6.000)
+ball pos: (6.392, 0.000, 6.000)
+ball pos: (9.196, 0.000, 6.000)
+ball pos: (10.330, 0.000, 6.000)
+ball pos: (10.925, 0.271, 6.000)
+ball pos: (11.171, 1.093, 6.000)
+ball pos: (10.640, 1.780, 6.000)
+ball pos: (9.838, 1.896, 6.000)

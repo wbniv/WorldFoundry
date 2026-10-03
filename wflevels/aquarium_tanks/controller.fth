@@ -13,57 +13,53 @@
     over 0 < if .5 swap - then rot 0 < if negate then nip then ;
 : tk-held INDEXOF_HARDWARE_JOYSTICK1_RAW tk@ & 0 <> if 1 else 0 then ;
 : tk-edge dup tk-held swap tk-prev tk@ & 0 <> if drop 0 then ;
-: tk-dt@ INDEXOF_DELTA_TIME tk@ .1 min ;
+: tk-dt@ INDEXOF_DELTA_TIME tk@ dup .2 > if drop 0 else 0 max .05 min then ;
 : tk-v ( target mb -- ) >r r@ tk@ - tk-dt@ 5 * 1 min * r@ tk@ + r> tk! ;
 : tk-bounds ( lo hi mb -- ) >r r@ tk@ min max r> tk! ;
+\ One-button TV: Up+OK changes plane; OK-first remains Action.
+: tk-toggle 1 tk-mode tk@ - tk-mode tk! 1 tk-neutral tk! ;
 : tk-input
+  0 tk-action tk!
   JOYSTICK_BUTTON_RIGHT tk-held JOYSTICK_BUTTON_LEFT tk-held - tk-dx tk!
   JOYSTICK_BUTTON_UP tk-held JOYSTICK_BUTTON_DOWN tk-held -
   tk-touch if
-    JOYSTICK_BUTTON_A tk-edge if 1 tk-mode tk@ - tk-mode tk! then
+    JOYSTICK_BUTTON_A tk-edge if tk-toggle then
     tk-mode tk@ if tk-dy tk! 0 tk-dz tk! else tk-dz tk! 0 tk-dy tk! then
-    JOYSTICK_BUTTON_B tk-edge
+    JOYSTICK_BUTTON_B tk-edge tk-action tk!
   else
-    tk-dz tk! JOYSTICK_BUTTON_C tk-held JOYSTICK_BUTTON_B tk-held - tk-dy tk!
-    JOYSTICK_BUTTON_A tk-edge
+    tk-mode tk@ if tk-dy tk! 0 tk-dz tk! else tk-dz tk! 0 tk-dy tk! then
+    JOYSTICK_BUTTON_C tk-held JOYSTICK_BUTTON_B tk-held - dup 0 <> if tk-dy tk! else drop then
+    JOYSTICK_BUTTON_A tk-edge if
+      JOYSTICK_BUTTON_UP tk-held if tk-toggle else 1 tk-action tk! then
+    then
   then
-  if tk-cooldown tk@ 0 <= if .3 tk-dart tk! 1 tk-cooldown tk! then then
+  INDEXOF_DELTA_TIME tk@ .2 > if 1 tk-neutral tk! 0 tk-dart tk! 0 tk-drive tk! then
+  tk-neutral tk@ if
+    0 tk-dx tk! 0 tk-dy tk! 0 tk-dz tk! 0 tk-action tk!
+    INDEXOF_HARDWARE_JOYSTICK1_RAW tk@ 30727 & 0 = if 0 tk-neutral tk! then
+  then
+  tk-action tk@ if tk-cooldown tk@ 0 <= if .3 tk-dart tk! 1 tk-cooldown tk! then then
   INDEXOF_HARDWARE_JOYSTICK1_RAW tk@ tk-prev tk!
   tk-dart tk@ tk-dt@ - 0 max tk-dart tk!
   tk-cooldown tk@ tk-dt@ - 0 max tk-cooldown tk! ;
-: tk-player-tick
-  0 INDEXOF_INPUT tk!
-  tk-input
-  tk-dx tk@ tk-dy tk@ abs + 0 <> if
-    tk-dy tk@ tk-dx tk@ tk-atan2 tk-target tk!
-    tk-target tk@ tk-heading tk@ - tk-wrap tk-dt@ .65 * dup >r negate max r> min
-    tk-heading tk@ + tk-frac tk-heading tk!
-  then
-  tk-dx tk@ tk-speed * tk-vx tk-v tk-dy tk@ tk-speed * tk-vy tk-v
-  tk-dz tk@ tk-speed * tk-vz tk-v
-  tk-dart tk@ 0 > if
-    tk-jelly if 1.25 tk-vz tk-v else
-      tk-heading tk@ tk-cos 1.9 * tk-vx tk-v
-      tk-heading tk@ tk-sin 1.9 * tk-vy tk-v
-    then
-  then
-  tk-limit-x negate tk-limit-x INDEXOF_X_POS tk-bounds
-  tk-limit-y negate tk-limit-y INDEXOF_Y_POS tk-bounds
-  tk-bottom tk-top INDEXOF_Z_POS tk-bounds
-  INDEXOF_X_POS tk@ abs tk-limit-x .01 - >= INDEXOF_X_POS tk@ tk-vx tk@ * 0 > & if 0 tk-vx tk! then
-  INDEXOF_Y_POS tk@ abs tk-limit-y .01 - >= INDEXOF_Y_POS tk@ tk-vy tk@ * 0 > & if 0 tk-vy tk! then
-  INDEXOF_Z_POS tk@ tk-bottom .01 + <= tk-vz tk@ 0 < & if 0 tk-vz tk! then
-  INDEXOF_Z_POS tk@ tk-top .01 - >= tk-vz tk@ 0 > & if 0 tk-vz tk! then
-  tk-vx tk@ INDEXOF_XSPEED tk! tk-vy tk@ INDEXOF_YSPEED tk! tk-vz tk@ INDEXOF_ZSPEED tk! ;
-
-: tk-place ( ox oy oz actor -- ) tk-actor tk! tk-oz tk! tk-oy tk! tk-ox tk!
-  tk-ox tk@ tk-cy tk@ * tk-oy tk@ tk-sy tk@ * - tk-scale tk@ * tk-x tk@ +
+\ SPECIES_CONTROLLER
+\ Root matrix Rz(yaw) Ry(-elevation) Rx(bank), shared by every attachment.
+: tk-root
+  tk-pose-pitch tk@ tk-cos tk-cp tk! tk-pose-pitch tk@ tk-sin tk-sp tk!
+  tk-pose-roll tk@ tk-cos tk-cr tk! tk-pose-roll tk@ tk-sin tk-sr tk! ;
+: tk-place ( ox oy oz actor -- ) tk-actor tk! tk-oz tk! tk-oy tk! dup tk-local-x tk! tk-ox tk!
+  tk-oy tk@ tk-cr tk@ * tk-oz tk@ tk-sr tk@ * - tk-lateral tk!
+  tk-oy tk@ tk-sr tk@ * tk-oz tk@ tk-cr tk@ * + tk-vertical tk!
+  tk-ox tk@ tk-cp tk@ * tk-vertical tk@ tk-sp tk@ * - tk-ox tk!
+  tk-ox tk@ tk-cy tk@ * tk-lateral tk@ tk-sy tk@ * - tk-scale tk@ * tk-x tk@ +
   INDEXOF_X_POS tk-actor tk@ write-actor-mailbox
-  tk-ox tk@ tk-sy tk@ * tk-oy tk@ tk-cy tk@ * + tk-scale tk@ * tk-y tk@ +
+  tk-ox tk@ tk-sy tk@ * tk-lateral tk@ tk-cy tk@ * + tk-scale tk@ * tk-y tk@ +
   INDEXOF_Y_POS tk-actor tk@ write-actor-mailbox
-  tk-oz tk@ tk-scale tk@ * tk-z tk@ + INDEXOF_Z_POS tk-actor tk@ write-actor-mailbox ;
-: tk-orient ( a b c actor -- ) >r rot INDEXOF_ROTATION_A r@ write-actor-mailbox
-  swap INDEXOF_ROTATION_B r@ write-actor-mailbox INDEXOF_ROTATION_C r> write-actor-mailbox ;
+  \ Re-read original x: tk-ox above is the projected horizontal component.
+  tk-local-x tk@ tk-sp tk@ * tk-vertical tk@ tk-cp tk@ * + tk-scale tk@ * tk-z tk@ +
+  INDEXOF_Z_POS tk-actor tk@ write-actor-mailbox ;
+: tk-orient ( a b c actor -- ) >r rot tk-pose-roll tk@ + INDEXOF_ROTATION_A r@ write-actor-mailbox
+  swap tk-pose-pitch tk@ - INDEXOF_ROTATION_B r@ write-actor-mailbox INDEXOF_ROTATION_C r> write-actor-mailbox ;
 : tk-part ( ox oy oz a b c actor -- ) dup >r tk-orient r> tk-place ;
 : tk-gait tk-phase tk@ tk-sin ;
 : tk-camera-tick

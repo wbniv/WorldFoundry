@@ -17,7 +17,7 @@
   gf-mouth-yaw tk@ gf-log-num 10 gf-log-char ;
 : gf-clamp01 0 max 1 min ;
 : gf-ease dup >r - tk-dt@ 4 * gf-clamp01 * r> + ;
-: gf-turn dup >r - tk-wrap tk-dt@ .5 * dup negate >r min r> max r> + tk-wrap ;
+: gf-turn dup >r - tk-wrap dup abs .45 > if r@ tk-cos 0 >= if abs negate else abs then then tk-dt@ .5 * dup negate >r min r> max r> + tk-wrap ;
 : gf-hide
   0 0 gf! 0 10 gf! 0 11 gf! 0 15 gf!
   gf-target tk@ gf-i tk@ = if -1 gf-target tk! then ;
@@ -50,19 +50,20 @@
   gf-ray-clear tk@ ;
 : gf-edible
   gf-distance .0625 <
-  2 gf@ gf-mouth-x tk@ - gf-mouth-yaw tk@ tk-cos *
-  3 gf@ gf-mouth-y tk@ - gf-mouth-yaw tk@ tk-sin * + -.07 >= &
+  2 gf@ gf-mouth-x tk@ - gf-mouth-yaw tk@ tk-cos gf-mouth-pitch tk@ tk-cos * *
+  3 gf@ gf-mouth-y tk@ - gf-mouth-yaw tk@ tk-sin gf-mouth-pitch tk@ tk-cos * * +
+  4 gf@ gf-mouth-z tk@ - gf-mouth-pitch tk@ tk-sin * + -.07 >= &
   gf-clear-ray & ;
 : gf-player-mouth
-  tk-heading tk@ gf-mouth-yaw tk! 1 gf-mouth-scale tk!
-  INDEXOF_X_POS tk-player read-actor-mailbox tk-heading tk@ tk-cos .56 * + gf-mouth-x tk!
-  INDEXOF_Y_POS tk-player read-actor-mailbox tk-heading tk@ tk-sin .56 * + gf-mouth-y tk!
-  INDEXOF_Z_POS tk-player read-actor-mailbox gf-mouth-z tk! ;
+  tk-heading tk@ gf-mouth-yaw tk! tk-pitch tk@ gf-mouth-pitch tk! 1 gf-mouth-scale tk!
+  INDEXOF_X_POS tk-player read-actor-mailbox tk-heading tk@ tk-cos tk-pitch tk@ tk-cos * .56 * + gf-mouth-x tk!
+  INDEXOF_Y_POS tk-player read-actor-mailbox tk-heading tk@ tk-sin tk-pitch tk@ tk-cos * .56 * + gf-mouth-y tk!
+  INDEXOF_Z_POS tk-player read-actor-mailbox tk-pitch tk@ tk-sin .56 * + gf-mouth-z tk! ;
 : gf-resident-mouth
-  gf-ryaw tk@ gf-mouth-yaw tk! .75 gf-mouth-scale tk!
-  gf-rx tk@ gf-ryaw tk@ tk-cos .42 * + gf-mouth-x tk!
-  gf-ry tk@ gf-ryaw tk@ tk-sin .42 * + gf-mouth-y tk!
-  gf-rz tk@ gf-mouth-z tk! ;
+  gf-ryaw tk@ gf-mouth-yaw tk! gf-rpitch tk@ gf-mouth-pitch tk! .75 gf-mouth-scale tk!
+  gf-rx tk@ gf-ryaw tk@ tk-cos gf-rpitch tk@ tk-cos * .42 * + gf-mouth-x tk!
+  gf-ry tk@ gf-ryaw tk@ tk-sin gf-rpitch tk@ tk-cos * .42 * + gf-mouth-y tk!
+  gf-rz tk@ gf-rpitch tk@ tk-sin .42 * + gf-mouth-z tk! ;
 : gf-consume
   gf-hide gf-count tk@ 1 - 0 max gf-count tk!
   gf-owner tk@ 1 = if
@@ -143,27 +144,39 @@
       gf-count tk@ 1 + gf-count tk! 1 gf-event
     then
   then ;
-\ Override shared input only for the lionfish. C switches touch Swim/Depth mode.
+\ Feeding retains ownership of reservations/capture; movement only receives requests.
 : tk-input
+  0 tk-action tk!
   JOYSTICK_BUTTON_RIGHT tk-held JOYSTICK_BUTTON_LEFT tk-held - tk-dx tk!
   JOYSTICK_BUTTON_UP tk-held JOYSTICK_BUTTON_DOWN tk-held -
+  tk-mode tk@ if tk-dy tk! 0 tk-dz tk! else tk-dz tk! 0 tk-dy tk! then
   tk-touch if
-    JOYSTICK_BUTTON_C tk-edge if 1 tk-mode tk@ - tk-mode tk! then
-    tk-mode tk@ if tk-dy tk! 0 tk-dz tk! else tk-dz tk! 0 tk-dy tk! then
-  else tk-dz tk! JOYSTICK_BUTTON_C tk-held JOYSTICK_BUTTON_B tk-held - tk-dy tk! then
-  JOYSTICK_BUTTON_A tk-held JOYSTICK_BUTTON_DOWN tk-held & if 0 tk-dz tk! 0 tk-dy tk! then
+    JOYSTICK_BUTTON_C tk-edge if tk-toggle then
+  else
+    JOYSTICK_BUTTON_C tk-held JOYSTICK_BUTTON_B tk-held - dup 0 <> if tk-dy tk! else drop then
+  then
   JOYSTICK_BUTTON_A tk-edge if
-    JOYSTICK_BUTTON_DOWN tk-held if 1 gf-release tk! else 1 gf-eat tk! then
+    JOYSTICK_BUTTON_UP tk-held if tk-toggle else
+      tk-neutral tk@ 0 = if
+        JOYSTICK_BUTTON_DOWN tk-held if 1 gf-release tk! else 1 gf-eat tk! then
+      then
+    then
+  then
+  JOYSTICK_BUTTON_A tk-held JOYSTICK_BUTTON_DOWN tk-held & if 0 tk-dz tk! 0 tk-dy tk! then
+  INDEXOF_DELTA_TIME tk@ .2 > if 1 tk-neutral tk! 0 tk-drive tk! 0 tk-dart tk! 0 gf-release tk! 0 gf-eat tk! then
+  tk-neutral tk@ if
+    0 tk-dx tk! 0 tk-dy tk! 0 tk-dz tk!
+    INDEXOF_HARDWARE_JOYSTICK1_RAW tk@ 30727 & 0 = if 0 tk-neutral tk! then
   then
   INDEXOF_HARDWARE_JOYSTICK1_RAW tk@ tk-prev tk!
   tk-dart tk@ tk-dt@ - 0 max tk-dart tk!
   tk-cooldown tk@ tk-dt@ - 0 max tk-cooldown tk! ;
 
-
 : gf-visible
   gf-distance gf-d tk!
-  2 gf@ gf-mouth-x tk@ - gf-mouth-yaw tk@ tk-cos *
-  3 gf@ gf-mouth-y tk@ - gf-mouth-yaw tk@ tk-sin * + gf-dot tk!
+  2 gf@ gf-mouth-x tk@ - gf-mouth-yaw tk@ tk-cos gf-mouth-pitch tk@ tk-cos * *
+  3 gf@ gf-mouth-y tk@ - gf-mouth-yaw tk@ tk-sin gf-mouth-pitch tk@ tk-cos * * +
+  4 gf@ gf-mouth-z tk@ - gf-mouth-pitch tk@ tk-sin * + gf-dot tk!
   gf-d tk@ gf-sight-range2 <
   gf-dot tk@ -.12 >= gf-d tk@ gf-immediate-range2 < | & gf-clear-ray & ;
 : gf-acquire
@@ -208,17 +221,34 @@
     INDEXOF_Y_POS tk-player read-actor-mailbox 0 >= if -.45 else .45 then
     gf-ry tk@ - gf-dy tk!
   then
+  gf-ryaw tk@ tk-steer tk!
   0 gs@ 0 < if gf-dy tk@ gf-dx tk@ tk-atan2 gf-ryaw tk@ gf-turn gf-ryaw tk! then
+  gf-ryaw tk@ tk-steer tk@ - tk-wrap tk-dt@ .001 max / -.04 * -.012 max .012 min
+  gf-rroll tk@ gf-ease gf-rroll tk!
+  \ Pitch is part of propulsion and the mouth frame, not an independent Z pull.
+  gf-b tk@ gf-rz tk@ - gf-dx tk@ abs gf-dy tk@ abs + .001 max tk-atan2
+  -.0833333 max .0833333 min gf-rpitch tk@ gf-ease gf-rpitch tk!
+  gf-dy tk@ gf-dx tk@ tk-atan2 gf-ryaw tk@ - tk-wrap abs .125 > if
+    gf-speed tk@ .18 * gf-speed tk!
+  then
   gf-speed tk@ gf-rv tk@ gf-ease gf-rv tk!
-  gf-rx tk@ gf-ryaw tk@ tk-cos gf-rv tk@ * tk-dt@ * + -4.3 max 4.3 min gf-rx tk!
-  gf-ry tk@ gf-ryaw tk@ tk-sin gf-rv tk@ * tk-dt@ * + -.45 max .45 min gf-ry tk!
-  gf-b tk@ gf-rz tk@ - -.6 max .6 min tk-dt@ * gf-rz tk@ + 2.05 max 3.6 min gf-rz tk!
-  gf-rphase tk@ tk-dt@ 1.1 * + tk-frac gf-rphase tk!
+  gf-ryaw tk@ tk-cos gf-rpitch tk@ tk-cos * tk-fx tk!
+  gf-ryaw tk@ tk-sin gf-rpitch tk@ tk-cos * tk-fy tk!
+  gf-rpitch tk@ tk-sin tk-fz tk!
+  tk-fx tk@ -4.3 4.3 gf-rx tk@ tk-axis-cap
+  tk-fy tk@ -.45 .45 gf-ry tk@ tk-axis-cap min
+  tk-fz tk@ 2.05 3.6 gf-rz tk@ tk-axis-cap min gf-rv tk@ min gf-rv tk!
+  gf-rx tk@ tk-fx tk@ gf-rv tk@ * tk-dt@ * + gf-rx tk!
+  gf-ry tk@ tk-fy tk@ gf-rv tk@ * tk-dt@ * + gf-ry tk!
+  gf-rz tk@ tk-fz tk@ gf-rv tk@ * tk-dt@ * + gf-rz tk!
+  gf-rphase tk@ tk-dt@ gf-rv tk@ 1.2 * .35 + * + tk-frac gf-rphase tk!
   gf-autoeat gf-target tk@ 0 >= & 0 gs@ 0 < & if
     gf-resident-mouth gf-target tk@ gf-i tk! gf-live if gf-edible if gf-strike-start then then
   then
   gf-strike-tick
   gf-rx tk@ tk-x tk! gf-ry tk@ tk-y tk! gf-rz tk@ tk-z tk!
+  gf-rv tk@ .70 / 1 min tk-pose-drive tk!
+  gf-rpitch tk@ tk-pose-pitch tk! gf-rroll tk@ tk-pose-roll tk!
   gf-ryaw tk@ tk-yaw tk! .75 tk-scale tk! gf-rphase tk@ tk-phase tk!
   gf-bite-resident tk@ gf-bite tk! tk-pose ;
 \ Threat requires a visible silhouette and measured closing motion, not button state.

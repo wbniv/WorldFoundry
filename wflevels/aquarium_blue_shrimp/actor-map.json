@@ -572,6 +572,20 @@
     "escape": 636,
     "elapsed": 637,
     "cooldown": 638,
-    "gait-phase": 639
+    "gait-phase": 639,
+    "last-x": 680,
+    "last-y": 681,
+    "last-z": 682,
+    "pose-init": 683,
+    "player-pitch": 684,
+    "neutral": 685,
+    "drive": 686,
+    "flip": 687,
+    "cp": 688,
+    "sp": 689,
+    "local-x": 690,
+    "motion": 691,
+    "contact": 692,
+    "antenna-phase": 693
   }
 }

@@ -1,0 +1,18 @@
+{
+  "apk_sha256": "b67c628ce9a3ce888ba536bfdf1e3e3b1ee67258e6b63a6c87547c0f889ba56f",
+  "bundle_sha256": "936be2436ecbc637accece1923863c5de687813d39821bd26abe9ce85d1fe58d",
+  "apk_assets_match": true,
+  "jelly_primitive_in_both_abis": true,
+  "clownfish_and_barbs_unchanged": true,
+  "standalones": {
+    "aquarium_bench-standalone.iff": "047cddeda75788d947bb9f69e02c431f093b318c5f538ae3e6767381d6ea6cea",
+    "aquarium_arowana-standalone.iff": "f116a9604b00c7c6edf2fe4dd3e68127d5662e57df28dc66483467a4e868b350",
+    "aquarium-standalone.iff": "04f5cc0723d1527280aa854c9c59d4a6c7a7536d9a739a0773c68342867f9081",
+    "aquarium_lionfish-standalone.iff": "71fe1b40cd92190b5e54f97a1222506ccabd76322b4cad7217edd0746f0760f9",
+    "aquarium_jellyfish-standalone.iff": "fcbf6802b30a7ab661d7cc97c95e620b2b69d15fd1a430c37689cc8c06eb2888",
+    "aquarium_blue_shrimp-standalone.iff": "79df6b0921dc574e7ccc05198de3704961715f069bf75461bd909e4ea2b5c581",
+    "aquarium_idle-standalone.iff": "24e8d6a261bd8130d5e6e0302ec03a2acaa2d4268f6e9882885b1118404d56ab",
+    "aquarium_betta-standalone.iff": "64ea80d81089f4174630b4647a7cdafb8497ee7222bad1ceaf26d901f0840a85",
+    "aquarium_plants-standalone.iff": "b569b06569e446cb98089c3b437b0908e2a787aea6bc1dc160d3e4fc4d9d91d8"
+  }
+}

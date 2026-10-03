@@ -2,5 +2,6 @@
 set -euo pipefail
 TANK_ROOT="$(cd "$(dirname "$0")/../.." && pwd)"
 cd "$TANK_ROOT"
+export TANK_PROFILE="${TANK_PROFILE:-remote}"
 blender --background --python-exit-code 1 --python wflevels/aquarium_tanks/generate.py -- aquarium_plants
 bash wftools/wf_blender/build_level_binary.sh aquarium_plants

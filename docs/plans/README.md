@@ -382,5 +382,5 @@ rows on commit.*
 | [Lionfish tank: goldfish, chasing and feeding](2026-10-02-lionfish-goldfish-feeding.md) | Plan an animated single-mesh goldfish, A + DOWN release capped at three live prey, resident pursuit and proximity + A player eating. | Uncommitted | Feature |
 
 | [Betta poster and flowing fins](2026-10-02-betta-poster-and-flowing-fins.md) | Primary-source research, A3 history/habitat/location-map poster with rendered fish, and a detailed opaque flowing-fin upgrade for the Calm Betta. | Uncommitted | Feature |
-| [Aquarium movement and controls: all six players](2026-10-02-aquarium-movement-and-controls.md) | Species-specific movement, single-button Chromecast chords, separate jelly pulse/drift controls, motion diagrams and verification for all six tanks. | Uncommitted | Feature |
+| [Aquarium movement and controls: all seven players](2026-10-02-aquarium-movement-and-controls.md) | Species movement implemented and deployed; 81 tests and six Chromecast movement checks pass. Physical remote and phone integration pending. | Uncommitted | Feature |
 | [Asian Arowana — bare tank and A3 poster](2026-10-02-asian-arowana.md) | Plan a single Asian arowana in an empty tank with clownfish swimming controls; include mockups, diagrams and a sourced A3 poster. | Uncommitted | Feature |

@@ -3,7 +3,7 @@
   "title": "Jellyfish",
   "kind": "jellyfish",
   "count": 6,
-  "profile": "keyboard",
+  "profile": "remote",
   "indices": {
     "Room": 1,
     "SunLight": 2,
@@ -87,17 +87,72 @@
       0
     ]
   ],
+  "movement": {
+    "states": {
+      "pitch": 700,
+      "roll": 701,
+      "pose-pitch": 702,
+      "pose-roll": 703,
+      "drive": 704,
+      "pitch-target": 705,
+      "error": 706,
+      "steer": 707,
+      "fx": 708,
+      "fy": 709,
+      "fz": 710,
+      "cp": 711,
+      "sp": 712,
+      "cr": 713,
+      "sr": 714,
+      "lateral": 715,
+      "vertical": 716,
+      "cap": 717,
+      "neutral": 718,
+      "action": 719,
+      "local-x": 720,
+      "cap-pos": 721,
+      "cap-hi": 722,
+      "cap-lo": 723,
+      "cap-facing": 724,
+      "turn-side": 725,
+      "last-target": 726,
+      "pose-drive": 727
+    },
+    "kind": "pulse-and-drift",
+    "jelly_states": {
+      "phase": 730,
+      "period": 731,
+      "player-phase": 732,
+      "pending": 733,
+      "held": 734,
+      "current-x": 735,
+      "current-y": 736,
+      "thrust": 737,
+      "base": 738,
+      "lag-pitch": 739,
+      "lag-roll": 740,
+      "contraction": 741,
+      "player-vx": 742,
+      "player-vy": 743,
+      "player-vz": 744,
+      "player-lag-pitch": 745,
+      "player-lag-roll": 746,
+      "dt": 747,
+      "steps": 748,
+      "suppress": 749
+    }
+  },
   "animal": "jellyfish",
   "spawn": [
     0,
-    -0.4,
+    -0.25,
     2.6
   ],
   "bottom": 1.85,
-  "top": 4.2,
+  "top": 3.65,
   "limits": [
     4.7,
-    0.55
+    0.34
   ],
   "rows": [
     [
@@ -114,7 +169,7 @@
     ],
     [
       -2.0,
-      0.35,
+      0.2,
       2.1,
       0.3,
       0.08,
@@ -126,7 +181,7 @@
     ],
     [
       1.8,
-      0.4,
+      0.2,
       3.5,
       0.3,
       0.08,
@@ -150,8 +205,8 @@
     ],
     [
       3.5,
-      0.65,
-      3.85,
+      0.25,
+      3.55,
       0.22,
       0.06,
       0.24,

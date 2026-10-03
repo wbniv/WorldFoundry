@@ -14,8 +14,9 @@ COMMON=Path(__file__).resolve().parent
 REPO=COMMON.parent.parent
 sys.path.insert(0,str(COMMON))
 from mesh import Mesh
+import species
 from models import COLORS as ANIMAL_COLORS, models
-from urchin import COLORS as URCHIN_COLORS, urchin
+from urchin import COLORS as URCHIN_COLORS, urchin, tube_foot
 from planting import COLORS as PLANT_COLORS, planting
 from temple import COLORS as TEMPLE_COLORS, pavilion
 LEVEL=sys.argv[sys.argv.index('--')+1]
@@ -34,7 +35,7 @@ if BETTA_FINS:
     sys.path.insert(0,str(HERE))
     from detailed_model import COLORS as BETTA_COLORS, detailed_models
 HX,HY,HEIGHT,WALL,SAND,WATER=6.096,1.651,5.334,.127,.635,4.826
-LIMIT_X,LIMIT_Y=4.70,(.88 if C.KIND=='plants' else .55 if C.KIND=='jellyfish' else .27)
+LIMIT_X,LIMIT_Y=4.70,(.88 if C.KIND=='plants' else .34 if C.KIND=='jellyfish' else .27)
 OAD=REPO/'wftools/wf_oad/tests/fixtures'
 COLORS=dict(ANIMAL_COLORS,sand=(.75,.70,.55),frame=(.30,.55,.63),rim=(.53,.74,.79),
             rock=(.25,.29,.29),rock_hi=(.38,.43,.40),leaf=(.18,.39,.24),
@@ -178,6 +179,15 @@ for k in range(0 if C.KIND=='plants' else COUNT):
         group.append(obj)
     parts.append(group)
 
+urchin_feet=[]
+if C.KIND=='plants':
+    foot_data=blender_mesh(tube_foot())
+    for k in range(8):
+        angle=math.tau*k/8
+        offset=(.25*math.cos(angle),.25*math.sin(angle))
+        obj=actor(f'urchin-foot-{k}',foot_data,(C.SPAWN[0]+offset[0],C.SPAWN[1]+offset[1],C.SPAWN[2]),mesh_name='urchin_tube_foot')
+        urchin_feet.append((obj,offset))
+
 if FEEDING:
     import goldfish
     prey_mesh=goldfish.blender_mesh(bpy,HERE)
@@ -278,7 +288,8 @@ for n,v in mailboxes.items():header+=word(n,v)
 for n,v in {'player':indices['Player'],'touch':int(PROFILE=='touch'),'jelly':int(C.KIND=='jellyfish'),
             'limit-x':LIMIT_X,'limit-y':LIMIT_Y,'bottom':C.BOTTOM,'top':C.TOP,'speed':C.SPEED,
             'focus-z':C.CLOSE_LOOK[2],'cam-close':indices['cs_close'],'cam-wide':indices['cs_wide']}.items():header+=word(n,v)
-core=(COMMON/'controller.fth').read_text()
+if C.KIND!='plants':header+=species.header(C.KIND)
+core=(COMMON/'controller.fth').read_text().replace('\\ SPECIES_CONTROLLER',species.controller(C.KIND))
 if BETTA_FINS:
     header+=': bf-drive 660 ; : bf-turn 661 ; : bf-last-yaw 662 ; : bf-swim-phase 663 ; : bf-pect-phase 664 ; : bf-sweep 665 ; : bf-spread 666 ;\n'
     core=core.replace('1.9 *','1.15 *')
@@ -297,7 +308,7 @@ if FEEDING:
     input_word=re.search(r': tk-input\b.*?;',feeding,re.S).group()
     core=re.sub(r': tk-input\b.*?;',lambda m:input_word,core,flags=re.S)
     feeding=feeding.replace(input_word,'')
-pose=': tk-pose\n tk-yaw tk@ tk-sin tk-sy tk! tk-yaw tk@ tk-cos tk-cy tk!\n'
+pose=': tk-pose\n tk-yaw tk@ tk-sin tk-sy tk! tk-yaw tk@ tk-cos tk-cy tk! tk-root\n'
 if FEEDING:pose=pose.replace(': tk-pose\n',': tk-pose\n 5 profile-begin\n')
 for j,(m,off) in enumerate(zip(meshes,offsets)):
     # Actor lookup in 650..653, assigned for each animal before posing.
@@ -307,11 +318,11 @@ for j,(m,off) in enumerate(zip(meshes,offsets)):
         if j==2:a='tk-gait .018 *'
         if j==3:a='tk-gait .018 * negate'
     elif C.KIND=='lionfish':
-        if j==1:c+=' tk-gait .020 * +'
-        if j in (2,3):a='tk-gait .018 *'+(' negate' if j==3 else '')
+        if j==1:c+=' tk-gait tk-pose-drive tk@ .016 * .004 + * +'
+        if j in (2,3):a='tk-gait tk-pose-drive tk@ .012 * .008 + *'+(' negate' if j==3 else '')
         if FEEDING and j in (4,5):
             b='gf-bite tk@ '+('-.025' if j==4 else '.09')+' *'
-    elif not BETTA_FINS:
+    elif C.KIND!='jellyfish' and not BETTA_FINS:
         if j==1:a='tk-phase tk@ .12 - tk-sin .018 *';b='tk-phase tk@ .17 - tk-cos .012 *'
         if j==2:a='tk-gait .008 *'
     position=' '.join(num(v) for v in off)
@@ -319,11 +330,10 @@ for j,(m,off) in enumerate(zip(meshes,offsets)):
     pose+=' '+position+f' {a} {b} {c} {650+j} tk@ tk-part\n'
     for axis in 'XYZ':
         expr='tk-scale tk@'
-        if C.KIND=='jellyfish' and j==0:
-            expr+=' tk-gait .10 * .90 + *' if axis!='Z' else ' tk-gait .23 * 1 + *'
-        elif j==0 and C.KIND=='lionfish' and axis=='Y':
+        if j==0 and C.KIND=='lionfish' and axis=='Y':
             expr+=' tk-gait .022 * 1 + *'
         pose+=f' {expr} INDEXOF_{axis}_SCALE {650+j} tk@ write-actor-mailbox\n'
+if C.KIND=='jellyfish':pose+=' j-rig\n'
 pose+=(' 5 profile-end\n' if FEEDING else '')+';\n'
 if BETTA_FINS:
     fin_motion=(HERE/'fin_motion.fth').read_text()
@@ -332,6 +342,10 @@ if BETTA_FINS:
 setup=': tk-setup\n'
 for k,row in enumerate(ROWS):
     for j,v in enumerate(row):setup+=f' {num(v)} {800+k*12+j} tk!\n'
+if C.KIND=='jellyfish':
+    for k,row in enumerate(ROWS):
+        values=(*row[:2],min(row[2],C.TOP),row[7],4+k*.35,0,0,0,row[8],0,0)
+        for j,v in enumerate(values):setup+=f' {num(v)} {1200+k*16+j} tk!\n'
 setup+=';\n'
 tick=': tk-director-tick\n tk-init tk@ 0 = if tk-setup '+('gf-setup ' if FEEDING else '')+'1 tk-init tk! then\n'
 # Bounded route phases, no growing clock or per-frame wrap loops over elapsed hours.
@@ -340,27 +354,40 @@ for k,row in enumerate(ROWS):
     if FEEDING:
         for j,obj in enumerate(parts[k+1]):tick+=f' {indices[obj.name]} {650+j} tk!\n'
         continue
-    tick+=f' {base+7} tk@ tk-dt@ {base+6} tk@ / + tk-frac dup {base+7} tk! tk-phase tk!\n'
     if C.KIND=='jellyfish':
-        for axis,j in zip('xyz',range(3)):
-            phase='tk-phase tk@' + (' .25 +' if j==1 else ' .13 +' if j==2 else '')
-            tick+=f' {base+j} tk@ {base+3+j} tk@ {phase} tk-sin * + tk-{axis} tk!\n'
+        tick+=f' {1200+k*16} j-base tk! j-resident\n'
     else:
+        tick+=f' {base+7} tk@ tk-dt@ {base+6} tk@ / + tk-frac dup {base+7} tk! tk-phase tk!\n'
         tick+=f' {base} tk@ {base+3} tk@ tk-phase tk@ tk-sin * + tk-x tk!\n {base+1} tk@ tk-y tk!\n {base+2} tk@ tk-phase tk@ tk-sin .10 * + tk-z tk!\n'
-    tick+=f' {base+8} tk@ tk-scale tk! {base+9} tk@ tk-yaw tk!\n'
+    if C.KIND!='jellyfish':tick+=f' {base+8} tk@ tk-scale tk! {base+9} tk@ tk-yaw tk!\n'
     for j,obj in enumerate(parts[k+1]):tick+=f' {indices[obj.name]} {650+j} tk!\n'
     tick+=' tk-pose\n'
+    if C.KIND=='jellyfish':tick+=' j-lag-pitch tk@ 9 j-store j-lag-roll tk@ 10 j-store\n'
 if FEEDING:tick+=' gf-tick gf-bite-player tk@ gf-bite tk!\n'
-tick+=' INDEXOF_X_POS tk-player read-actor-mailbox tk-x tk!\n INDEXOF_Y_POS tk-player read-actor-mailbox tk-y tk!\n INDEXOF_Z_POS tk-player read-actor-mailbox tk-z tk!\n tk-heading tk@ tk-yaw tk! 1 tk-scale tk!\n'
-tick+=' tk-pulse tk@ tk-dt@ '+('.65' if C.KIND=='jellyfish' else '1.1')+' * + tk-frac dup tk-pulse tk! tk-phase tk!\n'
+tick+=' INDEXOF_X_POS tk-player read-actor-mailbox tk-x tk!\n INDEXOF_Y_POS tk-player read-actor-mailbox tk-y tk!\n INDEXOF_Z_POS tk-player read-actor-mailbox tk-z tk!\n tk-heading tk@ tk-yaw tk! tk-pitch tk@ tk-pose-pitch tk! tk-roll tk@ tk-pose-roll tk! tk-drive tk@ tk-speed / 1 min tk-pose-drive tk! 1 tk-scale tk!\n'
+tick+=' tk-pulse tk@ tk-dt@ '+('.65' if C.KIND=='jellyfish' else 'tk-drive tk@ tk-speed / 1.2 * .35 +')+' * + tk-frac dup tk-pulse tk! tk-phase tk!\n'
+if C.KIND=='jellyfish':
+    tick+=' j-player-phase tk@ j-phase tk! j-player-vx tk@ tk-vx tk! j-player-vy tk@ tk-vy tk! j-player-vz tk@ tk-vz tk! j-player-lag-pitch tk@ j-lag-pitch tk! j-player-lag-roll tk@ j-lag-roll tk!\n'
 for j,obj in enumerate(parts[0] if parts else []):tick+=f' {indices[obj.name]} {650+j} tk!\n'
-tick+=' tk-pose tk-camera-tick ;\n'
+tick+=' tk-pose tk-camera-tick '+('j-lag-pitch tk@ j-player-lag-pitch tk! j-lag-roll tk@ j-player-lag-roll tk! ' if C.KIND=='jellyfish' else '')+';\n'
 if C.KIND=='plants':
     header+=word('look-close',indices['LookClose'])
     plant_core=(COMMON/'plants_controller.fth').read_text()
     core=plant_core
     pose=setup=''
-    tick=': tk-director-tick tk-camera-tick ;\n'
+    header+=': uf-phase 740 ; : uf-init 741 ; : uf-last-x 742 ; : uf-last-y 743 ; : uf-dx 744 ; : uf-dy 745 ; : uf-u 746 ;\n'
+    tick=": tk-director-tick\n tk-camera-tick\n INDEXOF_X_POS tk-player read-actor-mailbox tk-x tk! INDEXOF_Y_POS tk-player read-actor-mailbox tk-y tk!\n"
+    tick+=' uf-init tk@ 0 = if tk-x tk@ uf-last-x tk! tk-y tk@ uf-last-y tk! 1 uf-init tk! then\n'
+    tick+=' tk-x tk@ uf-last-x tk@ - uf-dx tk! tk-y tk@ uf-last-y tk@ - uf-dy tk!\n'
+    tick+=' uf-phase tk@ uf-dx tk@ abs uf-dy tk@ abs + .06 / + dup 1 >= if 1 - then uf-phase tk!\n'
+    for k,(obj,offset) in enumerate(urchin_feet):
+        # Alternating contact/swing groups, advancing only with displacement.
+        tick+=f' uf-phase tk@ {num((k%2)*.5)} + dup 1 >= if 1 - then uf-u tk!\n'
+        for axis,n in [('X',0),('Y',1)]:
+            tick+=f' tk-{axis.lower()} tk@ {num(offset[n])} + uf-u tk@ .5 - .035 * {num(math.cos(math.tau*k/8) if n==0 else math.sin(math.tau*k/8))} * + INDEXOF_{axis}_POS {indices[obj.name]} write-actor-mailbox\n'
+        tick+=f' {num(C.BOTTOM)} uf-u tk@ .5 > if uf-u tk@ .5 - 2 * dup 1 swap - * .048 * + then INDEXOF_Z_POS {indices[obj.name]} write-actor-mailbox\n'
+    tick+=' tk-x tk@ uf-last-x tk! tk-y tk@ uf-last-y tk! ;\n'
+
 player['wf_Script']=header+core+'\ntk-player-tick\n'
 bpy.data.objects['Director']['wf_Script']=header+core+pose+setup+feeding+tick+'\ntk-director-tick\n'
 if C.KIND=='arowana':
@@ -368,6 +395,7 @@ if C.KIND=='arowana':
     mailboxes={n:v for n,v in ar_values.items() if 700<=v<800}
 (HERE/'actor-map.json').write_text(json.dumps(dict(level=LEVEL,title=C.TITLE,kind=C.KIND,count=COUNT,
     profile=PROFILE,indices=indices,mailboxes=mailboxes,parts=[m.name for m in meshes],offsets=offsets,
+    movement=({'states':species.STATES,'kind':'pulse-and-drift' if C.KIND=='jellyfish' else 'steer-and-swim', 'jelly_states':species.JELLY if C.KIND=='jellyfish' else None} if C.KIND in ('betta','lionfish','jellyfish') else None),
     animal=('sea_urchin' if C.KIND=='plants' else C.KIND),spawn=C.SPAWN,bottom=C.BOTTOM,top=C.TOP,limits=[LIMIT_X,LIMIT_Y],rows=ROWS,
     betta_fins=({'groups':8,'actor_lookup':[650,657],'motion_mailboxes':[660,666],
                  'weights':'solid UV.x across fin; UV.y root-to-tip','physics_bodies_added':0,

@@ -3,7 +3,7 @@
   "title": "Calm Betta",
   "kind": "betta",
   "count": 1,
-  "profile": "keyboard",
+  "profile": "remote",
   "indices": {
     "Room": 1,
     "SunLight": 2,
@@ -120,14 +120,48 @@
       0
     ]
   ],
+  "movement": {
+    "states": {
+      "pitch": 700,
+      "roll": 701,
+      "pose-pitch": 702,
+      "pose-roll": 703,
+      "drive": 704,
+      "pitch-target": 705,
+      "error": 706,
+      "steer": 707,
+      "fx": 708,
+      "fy": 709,
+      "fz": 710,
+      "cp": 711,
+      "sp": 712,
+      "cr": 713,
+      "sr": 714,
+      "lateral": 715,
+      "vertical": 716,
+      "cap": 717,
+      "neutral": 718,
+      "action": 719,
+      "local-x": 720,
+      "cap-pos": 721,
+      "cap-hi": 722,
+      "cap-lo": 723,
+      "cap-facing": 724,
+      "turn-side": 725,
+      "last-target": 726,
+      "pose-drive": 727
+    },
+    "kind": "steer-and-swim",
+    "jelly_states": null
+  },
   "animal": "betta",
   "spawn": [
     0,
     -0.2,
     2.5
   ],
-  "bottom": 1.36,
-  "top": 4.08,
+  "bottom": 1.56,
+  "top": 3.9,
   "limits": [
     4.7,
     0.27
