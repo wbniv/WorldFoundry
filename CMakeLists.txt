@@ -1188,6 +1188,11 @@ if(NOT ANDROID AND NOT IOS AND NOT APPLE AND NOT EMSCRIPTEN)
     add_test(NAME wf_host_gl_e2e_cycle2
         COMMAND $<TARGET_FILE:wf_host_gl_e2e_test> --frames=30 --cycles=2 --level=${WF_TEST_LEVEL}
         WORKING_DIRECTORY ${WF_TEST_RUN_DIR})
+    add_test(NAME frame_rate_host_no_swap
+        COMMAND $<TARGET_FILE:wf_host_gl_e2e_test> --frames=60 --cycles=2 --level=${WF_TEST_LEVEL}
+            --frame-rate-checks --frame-step-no-swap
+        WORKING_DIRECTORY ${WF_TEST_RUN_DIR})
+    set_tests_properties(frame_rate_host_no_swap PROPERTIES LABELS "gl" ENVIRONMENT "DISPLAY=:0")
     add_test(NAME wf_host_gl_e2e_snow_cycle1
         COMMAND $<TARGET_FILE:wf_host_gl_e2e_test> --frames=30 --cycles=1 --level=${WF_TEST_SNOW_LEVEL}
         WORKING_DIRECTORY ${WF_TEST_RUN_DIR})

@@ -150,7 +150,8 @@ The implementation uses [`FrameRateSampler`](../../wfsource/source/game/frame_ra
 - [ ] Full Android game mailbox/background-resume integration remains pending.
 - [ ] iOS and macOS Apple-toolchain builds and runtime checks remain pending; this Linux environment has no Apple SDK.
 - [ ] Browser/WASM build, visibility/resume runtime check, and hosted editor check remain pending; an Emscripten toolchain is not installed here.
-- [ ] Direct runtime verification of `StepFrame(false)` and the other optional scripting backends remains pending. The host-context smoke uses `StepFrame(true)`; injected-timestamp tests verify host-gap accounting independently.
+- [x] Direct hosted `StepFrame(false)` runtime verification passes over two load/unload cycles, including a 20 ms host gap. Opt-in probes confirm Lua, zForth, and PILOT reads agree with the cached raw value.
+- [ ] Remaining optional scripting backends are being checked with `--frame-rate-checks`; the diagnostic probe temporarily uses and restores global user mailbox 1899.
 - [ ] Phase 2 smoothed mailbox remains deferred.
 
 See [validation commands and evidence](2026-10-03-engine-framerate-system-mailbox/validation.md). On current float-based targets FPS retains fractional values; for historical signed 16.16 configurations, conversion saturates at approximately 32768 FPS and values below one fractional unit round toward zero. These are representation limits, not performance clamps.

@@ -59,6 +59,7 @@
 #include <cstring>
 #endif
 #include "level_menu.h"   // the level menu (docs/plans/2026-10-01-level-menu-selector.md)
+#include "frame_rate_checks.hp"
 
 
 
@@ -442,8 +443,14 @@ WFGame::SmokeRunFrameStep(int frames, int cycles)
 		DBSTREAM1(cprogress << "SmokeRunFrameStep: LoadLevel done, stepping " << frames << " frames" << std::endl;)
 
 		for (int i = 0; i < frames && !HALWindowCloseRequested() && ContinueRequested(); ++i) {
+			// An external host may spend time presenting/doing other work between
+			// calls. The raw sample must include that gap even without PageFlip.
+			if (gFrameRateChecks && gFrameStepNoSwap && i > 0) usleep(20000);
 			Scalar dt;
-			FrameResult r = StepFrame(true, &dt);
+			FrameResult r = StepFrame(!gFrameStepNoSwap, &dt);
+			if (gFrameRateChecks && gFrameStepNoSwap && i > 1) {
+				AssertMsg(DiagnosticFrameRate().AsFloat() <= 50.1f, "FPS must include the host's 20 ms gap");
+			}
 			if (r == FrameResult::Done) {
 				DBSTREAM1(cprogress << "SmokeRunFrameStep: level done at frame " << i << std::endl;)
 				break;
@@ -597,6 +604,7 @@ WFGame::StepFrame(bool do_swap, Scalar* out_dt)
 	}
 
 	_frameRate.BeginFrame(FrameRateSampler::Clock::now(), HALLifecycleGeneration());
+	CheckFrameRateMailbox(*_curLevel, DiagnosticFrameRate(), HALLifecycleGeneration());
 	RestApi_DrainQueue();
 	DebugServer_DrainQueue(*_curLevel);
 	assert(HALScratchLmalloc.Empty());

@@ -305,7 +305,7 @@ workflows:
             xcrun simctl install "$udid" "$APP" && install=yes
             if [ "$install" = yes ]; then
               echo "--- launch ---"
-              if launch_out=$(xcrun simctl launch --terminate-running-process \
+              if launch_out=$(SIMCTL_CHILD_WF_FRAME_RATE_CHECKS=1 xcrun simctl launch --terminate-running-process \
                     --stdout="$out" --stderr="$err" "$udid" "$BUNDLE_ID"); then
                 launch=yes
                 pid=$(echo "$launch_out" | awk '{print $NF}')
@@ -316,6 +316,12 @@ workflows:
               # 20 s: HALStart, cd.iff load, steady-state frames, and well past
               # the ~11 s at which the simulator CoreAudio RPC used to abort.
               sleep 20
+              # Exercise real UIKit background/resume, retaining this process.
+              xcrun simctl launch "$udid" com.apple.Preferences
+              sleep 2
+              xcrun simctl launch "$udid" "$BUNDLE_ID"
+              sleep 3
+              python3 "$CM_BUILD_DIR/tests/check_frame_rate_log.py" "$out" --resume
               # Simulator apps are host processes, so ps sees the launched pid.
               if ps -p "$pid" > /dev/null 2>&1; then alive=yes; fi
               echo "--- screenshot ---"
@@ -673,6 +679,17 @@ workflows:
             --capture-frame=20="$CM_BUILD_DIR/macos-frame20.png" \
             2>&1 | tee -a "$CM_BUILD_DIR/macos-smoke.log"
 
+      - name: Verify raw FPS through script mailboxes and unswapped frame steps
+        script: |
+          set -euo pipefail
+          WF_GAME="$CM_BUILD_DIR/engine/wf_game.app/Contents/MacOS/wf_game"
+          LEVEL="$CM_BUILD_DIR/wflevels/snowgoons-blender/snowgoons-standalone.iff"
+          cd wfsource/source/game
+          "$WF_GAME" --frame-step-smoke=60 --cycles=2 --frame-rate-checks \
+            --frame-step-no-swap -L"$LEVEL" -rate20 \
+            2>&1 | tee "$CM_BUILD_DIR/macos-framerate.log"
+          python3 "$CM_BUILD_DIR/tests/check_frame_rate_log.py" "$CM_BUILD_DIR/macos-framerate.log"
+
       - name: Compare deterministic capture with Linux reference
         script: |
           set -euo pipefail
@@ -824,6 +841,7 @@ workflows:
       - macos-configure.log
       - macos-build.log
       - macos-smoke.log
+      - macos-framerate.log
       - macos-comparison.log
       # Phase 2's deliverable: a real Metal frame rendered with no window. This
       # is what turns macos-desktop-debug from a build gate into a visual gate.
