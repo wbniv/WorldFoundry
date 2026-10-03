@@ -191,7 +191,8 @@ and confirm the counter persists on the actual game views.
 - [x] Counter is visible and legible at the bottom right of every demo view;
   no important existing HUD/control element is obscured.
 - [x] Each aquarium tank and SMB world has a retained in-game screenshot.
-- [ ] Play through SMB flag/axe transitions to check overlay persistence/reset.
+- [x] Exercise all four actual flag/axe transitions on desktop GL; the counter resets and recovers.
+  Manual Chromecast traversal remains distinct from the four already captured device worlds.
 - [x] All five apps recover in the same process after Home/background and reopening.
   The sampler reset contract passes local/browser checks.
 - [x] Remote D-pad/OK selects each tank and world.
@@ -201,8 +202,8 @@ and confirm the counter persists on the actual game views.
 - [ ] Confirm screenshot values are plausible against engine diagnostic
   samples. SurfaceFlinger pacing is additional evidence, not an identical
   measurement of engine cadence.
-- [ ] Check the overlay's cost against an otherwise equivalent run with it
-  disabled, using existing cadence captures; investigate a repeatable loss.
+- [x] Compare overlay on/off on Chromecast: six alternating trials, unchanged
+  median/p90 presentation interval; average difference 0.010%, within trial variation.
 - [x] Stop test sessions, leave the requested updated apps installed, and
   notify Will that Chromecast deployment/testing is complete.
 
@@ -260,3 +261,13 @@ iOS simulator CI passed on `606cc488` (build
 Final macOS CI passed the build, raw mailbox integration, overlay A/B capture,
 Linux reference comparison, and windowed rendering gates. The checker fixes
 change test tooling only; all installed Chromecast APKs contain `606cc488`.
+
+## Remaining-check results
+
+[Verification receipt](2026-10-03-demo-fps-overlay-chromecast/remaining-checks/verification.md):
+all four desktop flag/axe transitions and 91 controller tests pass; the live
+browser-to-Chromecast controller path delivers A/C/D/E/F without hiding the
+counter. The six-run device comparison found no material presentation loss.
+All saved APKs were restored and Will notified when Chromecast testing finished.
+A physical handset and legacy desktop arcade/game-over HUD modes remain untested.
+The existing desktop debug-listener reconnect race is recorded separately.
