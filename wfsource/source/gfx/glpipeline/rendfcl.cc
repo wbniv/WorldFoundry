@@ -54,6 +54,7 @@ RenderObject3D::RenderPoly3DFlatColorLit(Primitive* primitive)
     }
 
     const Vector3_PS& n = globalRendererVariables.currentRenderFace->normal;
+    RendererBackendGet().SetOpacity(globalRendererVariables.currentRenderMaterial->GetOpacity());
     RendererBackendGet().DrawTriangle(v[0], v[1], v[2],
                                       n.X().AsFloat(),
                                       n.Y().AsFloat(),

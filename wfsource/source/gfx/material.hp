@@ -93,6 +93,8 @@ public:
 	Material(Color color, int materialType,const Texture& texture, const PixelMap* texturePixelMap);
 	Material(const _MaterialOnDisk& mod,const Texture& texture, const PixelMap* texturePixelMap);
 	const Color& GetColor() const;
+    float GetOpacity() const { return _opacity; }
+    void SetOpacity(float opacity) { assert(opacity >= 0.0f && opacity <= 1.0f); _opacity = opacity; }
 	const Color& SetColor(const Color& color);
 
 	inline int32 GetMaterialFlags() const;
@@ -164,6 +166,7 @@ private:
 	int _materialFlags;
 	Texture _texture;
     const PixelMap* _texturePixelMap;
+    float _opacity = 1.0f;
 };
 
 //============================================================================

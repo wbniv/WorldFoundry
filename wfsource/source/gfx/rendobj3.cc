@@ -215,6 +215,22 @@ RenderObject3D::RenderObject3D(Memory& memory, binistream& input,int32 userData,
 				assert(chunkIter->BytesLeft() == 0);
 				break;
 			}
+            case IFFTAG('O','P','A','C'):
+            {
+                uint32 version, count;
+                assert(materials != NULL);
+                chunkIter->ReadBytes(&version, sizeof(version));
+                chunkIter->ReadBytes(&count, sizeof(count));
+                assert(version == 1 && count == uint32(materialCount));
+                assert(chunkIter->BytesLeft() == count * sizeof(uint32));
+                for (uint32 index = 0; index < count; ++index) {
+                    uint32 opacity;
+                    chunkIter->ReadBytes(&opacity, sizeof(opacity));
+                    assert(opacity <= 65536);
+                    materials[index].SetOpacity(float(opacity) / 65536.0f);
+                }
+                break;
+            }
 			case IFFTAG('F','A','C','E'):
 			{
 				assert(ValidPtr(vertexList));  			// need vertex list so we can calc normals

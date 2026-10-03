@@ -59,6 +59,7 @@ RenderObject3D::RenderPoly3DFlatColorPreLit(Primitive* primitive)
     // final. Without the flag the face's color would depend on its winding,
     // since the normal is derived from winding in rendobj3.cc's load path.
     const Vector3_PS& n = globalRendererVariables.currentRenderFace->normal;
+    RendererBackendGet().SetOpacity(globalRendererVariables.currentRenderMaterial->GetOpacity());
     RendererBackendGet().DrawTriangle(v[0], v[1], v[2],
                                       n.X().AsFloat(),
                                       n.Y().AsFloat(),

@@ -389,6 +389,18 @@ def _load_mesh_iff(filepath: str):
         tex = matl_data[base+8:base+264].split(b'\x00')[0].decode('ascii', errors='replace')
         materials.append({'flags': flags, 'color': color, 'tex': tex})
 
+    if 'OPAC' in chunks:
+        payload = chunks['OPAC']
+        if len(payload) < 8:
+            raise ValueError('Invalid OPAC material metadata header')
+        version, count = struct.unpack_from('<II', payload)
+        if version != 1 or count != n_mats or len(payload) != 8 + 4 * count:
+            raise ValueError('Invalid OPAC material metadata')
+        for i, material in enumerate(materials):
+            value = struct.unpack_from('<I', payload, 8 + 4 * i)[0]
+            if value > 65536:
+                raise ValueError('OPAC opacity outside 0..1')
+            material['opacity'] = value / 65536
     return verts, faces, uvs, face_mat_idxs, materials
 
 
@@ -402,6 +414,11 @@ def _make_blender_material(name: str, mat_info: dict, tex_path: str | None):
     g = ((mat_info['color'] >>  8) & 0xFF) / 255.0
     b = ( mat_info['color']        & 0xFF) / 255.0
     bsdf.inputs['Base Color'].default_value = (r, g, b, 1.0)
+    opacity = mat_info.get('opacity', 1.0)
+    if opacity < 1.0:
+        mat['wf_opacity'] = opacity
+        bsdf.inputs['Alpha'].default_value = opacity
+        mat.surface_render_method = 'DITHERED'
 
     if tex_path:
         img = bpy.data.images.get(os.path.basename(tex_path))
@@ -554,18 +571,30 @@ def _write_mesh_iff(blobj, filepath: str) -> bool:
 
     mats = blobj.data.materials if blobj.data and blobj.data.materials else []
     matl = b''
+    opacities = []
     if mats:
         for mat in mats:
             mat_flags, mat_color, mat_tex = _extract_mat_info(mat)
+            opacity = float(mat.get('wf_opacity', 1.0)) if mat else 1.0
+            if not 0.0 <= opacity <= 1.0:
+                raise ValueError(f'Material opacity outside 0..1: {opacity}')
+            opacities.append(round(opacity * 65536))
             tex_bytes = mat_tex.encode('ascii', errors='replace')[:255].ljust(256, b'\x00')
             matl += struct.pack('<iI', mat_flags, mat_color) + tex_bytes
     else:
         matl = struct.pack('<iI', 0, 0x00FFFFFF) + b'\x00' * 256
 
+    # OPAC v1: uint32 version, uint32 count, then uint32 16.16 opacity
+    # per MATL slot. Legacy MATL remains 264 bytes; absent OPAC is opaque.
+    opac = b''
+    if any(a < 65536 for a in opacities):
+        payload = struct.pack('<II', 1, len(opacities))
+        payload += struct.pack('<' + 'I' * len(opacities), *opacities)
+        opac = _write_iff_chunk('OPAC', payload)
     # Assemble MODL
     inner = (
         _write_iff_chunk('VRTX', bytes(vrtx)) +
-        _write_iff_chunk('MATL', matl) +
+        _write_iff_chunk('MATL', matl) + opac +
         _write_iff_chunk('FACE', bytes(face_data))
     )
     modl = _write_iff_chunk('MODL', inner)

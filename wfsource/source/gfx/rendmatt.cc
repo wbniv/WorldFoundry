@@ -219,6 +219,7 @@ ScrollingMatte::Render(ViewPort&
 
             // Unlit matte: normal unused, but set facing camera. cullExempt=true —
             // the background quad must never be backface-culled.
+            RendererBackendGet().SetOpacity(1.0f);
             RendererBackendGet().DrawTriangle(tl, bl, br, 0.0f, 0.0f, 1.0f, texturePixelMap, true);
             RendererBackendGet().DrawTriangle(tl, br, tr, 0.0f, 0.0f, 1.0f, texturePixelMap, true);
 #endif
