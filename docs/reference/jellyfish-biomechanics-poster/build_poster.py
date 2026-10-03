@@ -16,12 +16,15 @@ assert 'dup .20 <' in motion and 'dup .50 <' in motion
 assert 'if 3.2 else 4 then j-period' in motion
 assert '1.f-.18f*contraction*margin' in deform
 assert '.28f*contraction*z*margin' in deform
+device_frame=HERE/'chromecast/run-1/jellyfish-idle.png'
+game_frame='chromecast/run-1/jellyfish-idle.png' if device_frame.is_file() else 'engine/close-up.png'
+game_label='CHROMECAST HD · actual GLES capture' if device_frame.is_file() else 'IN GAME · actual OpenGL capture'
 settings={'opacity':JELLY_OPACITY,'cycle_fractions':[.2,.3,.5],
           'player_period_s':4,'up_period_s':3.2,'resident_period_s':[4,5.4],
           'margin_radial_coefficient':.18,'weighted_height_coefficient':.28,
           'evidence':'GAME: adopted art/animation settings, not biological measurements',
           'blender':'Blender 5.0.1; Cycles 48 samples; exported bell.iff and arms.iff',
-          'game':'Desktop OpenGL engine, aquarium_jellyfish-standalone.iff; six jellies'}
+          'game':game_label+'; aquarium_jellyfish-standalone.iff; six jellies'}
 (HERE/'data.json').write_text(json.dumps(settings,indent=2)+'\n')
 html=(SOURCE/'layout.html').read_text()
 html=html.replace('A3 Moon-jelly poster · review mockup','A3 Moon-jelly biomechanics and translucent model')
@@ -42,7 +45,7 @@ figure{margin:0;background:#eaf0ef;border-radius:6px;padding:10px}figure img{wid
 '''
 html=html.replace('</style>',css+'</style>')
 op=JELLY_OPACITY
-band=f'''<div class="renderings"><figure><img src="jellyfish-blender.png" alt="Blender render: checkerboard visible through bell"><figcaption><b>BLENDER · exported model</b><br>Bell {op['jelly']:.0%} opacity · margin/arms {op['edge']:.0%} · fringe {op['trail']:.0%} · internal motifs {op['motif']:.0%}.</figcaption></figure><figure><img src="engine/close-up.png" alt="Actual desktop game capture: six translucent jellies"><figcaption><b>IN GAME · actual OpenGL capture</b><br>Six translucent jellies, native bell deformation and trailing appendages. Alpha compositing; no refraction.</figcaption></figure></div>'''
+band=f'''<div class="renderings"><figure><img src="jellyfish-blender.png" alt="Blender render: checkerboard visible through bell"><figcaption><b>BLENDER · exported model</b><br>Bell {op['jelly']:.0%} opacity · margin/arms {op['edge']:.0%} · fringe {op['trail']:.0%} · internal motifs {op['motif']:.0%}.</figcaption></figure><figure><img src="{game_frame}" alt="Actual game capture: six translucent jellies"><figcaption><b>{game_label}</b><br>Six translucent jellies, native bell deformation and trailing appendages. Alpha compositing; no refraction.</figcaption></figure></div>'''
 html=html.replace('</header><div class="grid">','</header>'+band+'<div class="grid">')
 # Keep editable source artwork, while embedding all images in the print source.
 for path in SOURCE.glob('*.svg'):

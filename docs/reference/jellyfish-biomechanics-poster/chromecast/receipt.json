@@ -1,0 +1,9 @@
+{
+  "apk": "/tmp/WorldFoundry-translucency-push/android/app/build/outputs/apk/aquarium/release/worldfoundry-aquarium-release.apk",
+  "apk_sha256": "de95d99a5220a97687a98ab35f2337cdb75b72e636db6d0eec7e7d486060d3ea",
+  "protocol": "15.0 s warmup; 12 s jellyfish idle trace; 1 run(s); SurfaceFlinger sampled every 0.75 s",
+  "serial": "",
+  "menu_index": 3,
+  "device": "Chromecast HD\n14\nPhysical size: 1920x1080\n",
+  "revision": "2597330516d76c148a950c084e1ec427537f07cf"
+}

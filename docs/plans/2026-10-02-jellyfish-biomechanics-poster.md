@@ -1,6 +1,6 @@
 # Moon-jelly swimming poster — A3
 
-Date: 2026-10-02. Status: **updated A3 poster complete; all six jellyfish use translucent materials.**
+Date: 2026-10-02. Status: **updated A3 poster complete; all six translucent jellyfish verified on desktop and Chromecast HD.**
 
 Will requested jellyfish-motion research and an A3 poster, then specified that this plan should be saved in `docs/plans/` and opened in the browser for review and approval. Prepare an illustrated explanation of moon-jelly swimming, with the same clear evidence labels used in the clownfish biomechanics poster. The biological story dominates; a small panel connects it to the Aquarium animation.
 
@@ -16,13 +16,13 @@ Will requested jellyfish-motion research and an A3 poster, then specified that t
 
 [Open the updated poster](../reference/jellyfish-biomechanics-poster/poster.html) · [one-page A3 PDF](../reference/jellyfish-biomechanics-poster/poster.pdf) · [PNG preview](../reference/jellyfish-biomechanics-poster/poster.png).
 
-Added two real renderings: Blender 5.0.1/Cycles (48 samples) imports the exported bell and arms, while the desktop OpenGL capture shows the actual six-jelly tank. The original six biology diagrams and research boundaries remain. The print source embeds every image and needs no network assets.
+Added two real renderings: Blender 5.0.1/Cycles (48 samples) imports the exported bell and arms, while the updated game panel shows the actual six-jelly tank on Chromecast HD/GLES. The earlier desktop OpenGL capture is retained in the evidence folder. The original six biology diagrams and research boundaries remain. The print source embeds every image and needs no network assets.
 
 **GAME material settings:** bell 22% opacity; bell margin and oral arms 32%; marginal tentacles 12%; internal motifs 72%. These are art choices, not tissue measurements. Materials export through the existing OPAC metadata and shared translucent compositor; this change needs no further renderer API or shader changes. Binary comparison confirms that every existing model chunk is unchanged; only OPAC is added. Existing controllers, native weighted bell deformation and appendage lag remain intact. The menu bundle's jellyfish entry is replaced at the same byte length, preserving its other tank entries. This uses alpha compositing, without refraction or a fluid simulation.
 
 The local generator checks adopted cycle/deformation constants and writes [data.json](../reference/jellyfish-biomechanics-poster/data.json). Pulse timing is 20% contract, 30% recover, 50% coast; player 4 s (3.2 s with UP); residents 4–5.4 s. The height coefficient is weighted by the margin, with the apex pinned: it is not a uniform 28% height increase.
 
-**Validation:** native motion/compositor and exported material tests pass (19 tests). [Engine capture checks](../reference/jellyfish-biomechanics-poster/engine/checks.json) confirm six animals, both camera views, initialized controller, and a full native contraction range of 0–1. The older generic tank checker expects changing actor Z scale; that assertion is obsolete since the pulse deforms mesh vertices. A focused capture checks native contraction state instead, and the existing native geometry tests validate apex/margin/rest behavior. The final PDF has one A3 page (841.92 × 1191.12 pt); its raster was visually inspected. A physical print remains unchecked. The poster renderings are desktop evidence. Chromecast build and verification were subsequently authorized and are being recorded separately below.
+**Validation:** native motion/compositor and exported material tests pass (19 tests). [Engine capture checks](../reference/jellyfish-biomechanics-poster/engine/checks.json) confirm six animals, both camera views, initialized controller, and a full native contraction range of 0–1. The older generic tank checker expects changing actor Z scale; that assertion is obsolete since the pulse deforms mesh vertices. A focused capture checks native contraction state instead, and the existing native geometry tests validate apex/margin/rest behavior. The final PDF has one A3 page (841.92 × 1191.12 pt); its raster was visually inspected. A physical print remains unchecked. The final poster includes Blender and Chromecast renderings; the desktop capture and native deformation checks remain separate evidence.
 
 ## Browser review
 
@@ -89,7 +89,11 @@ Related: [three new tanks and runtime evidence](2026-10-02-aquarium-three-more-t
 
 ## Chromecast follow-up
 
-- [ ] Build an Aquarium release APK from the clean checkout with the jellyfish update.
-- [ ] Install and select the jellyfish tank on Chromecast HD.
-- [ ] Inspect translucency and pulsing, and capture presented-frame timestamps.
-- [ ] Record device results and push the focused commits.
+- [x] Build an Aquarium release APK from the clean checkout with the jellyfish update.
+- [x] Install and select the jellyfish tank on Chromecast HD.
+- [x] Inspect translucency and pulsing, and capture presented-frame timestamps.
+- [x] Record device results and push the focused commits.
+
+The installed APK is built from [25973305](https://github.com/wbniv/WorldFoundry/commit/2597330516d76c148a950c084e1ec427537f07cf), atop the already pushed renderer/FPS integration. APK SHA-256: `de95d99a5220a97687a98ab35f2337cdb75b72e636db6d0eec7e7d486060d3ea`. The 15 s warmup / 12 s idle trace records **29.97 FPS**, 383 intervals, median/p95 **33.367 ms**, on Chromecast HD / Android 14. The short trace is not an opaque-baseline comparison or thermal soak. A separate 6.67 s pulse recording was visually inspected; recording is excluded from the performance trace. All six animals remain visible, with translucent overlapping arms and independent pulsing. The app is left running in Jellyfish.
+
+[Device validation and raw evidence](../reference/jellyfish-biomechanics-poster/chromecast/validation.md) · [pulse video](../reference/jellyfish-biomechanics-poster/chromecast/pulse.mp4). The updated poster's game panel now uses the actual Chromecast capture.
