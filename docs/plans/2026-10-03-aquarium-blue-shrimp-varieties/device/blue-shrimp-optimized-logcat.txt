@@ -1,0 +1,88 @@
+--------- beginning of main
+10-03 17:48:32.623 11998 12019 I wf_game : diagnostic log: /storage/emulated/0/Android/data/org.worldfoundry.wf_game.aquarium/files/wf.log
+10-03 17:48:32.623 11998 12019 I wf_game : android_main: enter
+10-03 17:48:32.623 11998 12019 I wf_game : android_main: assetMgr=0xee08c600
+10-03 17:48:32.624 11998 12019 I wf_game : android_main: uiMode=4 (tv=1)
+10-03 17:48:32.624 11998 12019 I wf_game : android_main: waiting for APP_CMD_INIT_WINDOW
+10-03 17:48:32.629 11998 12019 I wf_game : APP_CMD_RESUME
+10-03 17:48:32.631 11998 12019 I wf_game : phonepad: listening on 192.168.4.43:8765
+10-03 17:48:32.631 11998 12019 I wf_game : phone controller: open http://192.168.4.43:8765/?k=278515 (PIN 278515)
+10-03 17:48:32.685 11998 12019 I wf_game : APP_CMD_INIT_WINDOW
+10-03 17:48:32.742 11998 12019 I wf_game : EGL surface ready: 1920x1080 (context reused)
+10-03 17:48:32.742 11998 12019 I wf_game : android_main: EGL ready, entering HALStart
+10-03 17:48:32.802 11998 12019 I wf_game : level-menu: showing 8 entries ("WF Aquarium"), cursor on 0
+10-03 17:49:09.566 11998 12019 I wf_game : key code=4 action=0 (Back: hides the phone panel)
+10-03 17:49:09.582 11998 12019 I wf_game : key code=4 action=1 (Back: hides the phone panel)
+10-03 17:49:10.755 11998 12019 I wf_game : key code=20 action=0 mask=0x1000
+10-03 17:49:10.757 11998 12019 I wf_game : level-menu: cursor on 1 (Blue Shrimp)
+10-03 17:49:10.999 11998 12019 I wf_game : key code=20 action=1 mask=0x1000
+10-03 17:49:11.315 11998 12019 I wf_game : key code=23 action=0 mask=0x1
+10-03 17:49:11.402 11998 12019 I wf_game : key code=23 action=1 mask=0x1
+10-03 17:49:11.403 11998 12019 I wf_game : level-menu: LEVEL_TO_RUN=1 (Blue Shrimp)
+10-03 17:49:11.403 11998 12019 I wf_game : level-menu: level 1 starts
+10-03 17:49:14.048 11998 12019 I wf_game : key code=21 action=0 mask=0x4000
+10-03 17:49:14.529 11998 12019 I wf_game : key code=21 action=1 mask=0x4000
+10-03 17:49:14.809 11998 12019 I wf_game : key code=22 action=0 mask=0x2000
+10-03 17:49:15.047 11998 12019 I wf_game : key code=22 action=1 mask=0x2000
+10-03 17:49:15.247 11998 12019 I wf_game : key code=22 action=0 mask=0x2000
+10-03 17:49:15.368 11998 12019 I wf_game : key code=22 action=1 mask=0x2000
+10-03 17:49:15.629 11998 12019 I wf_game : key code=22 action=0 mask=0x2000
+10-03 17:49:15.868 11998 12019 I wf_game : key code=22 action=1 mask=0x2000
+10-03 17:49:16.224 11998 12019 I wf_game : key code=23 action=0 mask=0x1
+10-03 17:49:16.424 11998 12019 I wf_game : key code=23 action=1 mask=0x1
+10-03 17:49:16.703 11998 12019 I wf_game : key code=22 action=0 mask=0x2000
+10-03 17:49:17.025 11998 12019 I wf_game : key code=22 action=1 mask=0x2000
+10-03 17:49:17.200 11998 12019 I wf_game : key code=22 action=0 mask=0x2000
+10-03 17:49:17.786 11998 12019 I wf_game : key code=22 action=1 mask=0x2000
+10-03 17:49:18.031 11998 12019 I wf_game : key code=22 action=0 mask=0x2000
+10-03 17:49:18.320 11998 12019 I wf_game : key code=22 action=1 mask=0x2000
+10-03 17:49:18.572 11998 12019 I wf_game : key code=21 action=0 mask=0x4000
+10-03 17:49:18.893 11998 12019 I wf_game : key code=21 action=1 mask=0x4000
+10-03 17:49:19.292 11998 12019 I wf_game : key code=22 action=0 mask=0x2000
+10-03 17:49:19.671 11998 12019 I wf_game : key code=22 action=1 mask=0x2000
+10-03 17:49:19.875 11998 12019 I wf_game : key code=22 action=0 mask=0x2000
+10-03 17:49:20.117 11998 12019 I wf_game : key code=22 action=1 mask=0x2000
+10-03 17:49:20.242 11998 12019 I wf_game : key code=22 action=0 mask=0x2000
+10-03 17:49:20.445 11998 12019 I wf_game : key code=22 action=1 mask=0x2000
+10-03 17:49:20.682 11998 12019 I wf_game : key code=21 action=0 mask=0x4000
+10-03 17:49:20.842 11998 12019 I wf_game : key code=21 action=1 mask=0x4000
+10-03 17:49:21.874 11998 12019 I wf_game : key code=22 action=0 mask=0x2000
+10-03 17:49:22.034 11998 12019 I wf_game : key code=22 action=1 mask=0x2000
+10-03 17:49:22.394 11998 12019 I wf_game : key code=23 action=0 mask=0x1
+10-03 17:49:22.635 11998 12019 I wf_game : key code=23 action=1 mask=0x1
+10-03 17:49:23.403 11998 12019 I wf_game : key code=23 action=0 mask=0x1
+10-03 17:49:23.606 11998 12019 I wf_game : key code=23 action=1 mask=0x1
+10-03 17:49:24.266 11998 12019 I wf_game : key code=22 action=0 mask=0x2000
+10-03 17:49:24.387 11998 12019 I wf_game : key code=22 action=1 mask=0x2000
+10-03 17:49:24.865 11998 12019 I wf_game : key code=21 action=0 mask=0x4000
+10-03 17:49:25.142 11998 12019 I wf_game : key code=21 action=1 mask=0x4000
+10-03 17:49:25.501 11998 12019 I wf_game : key code=22 action=0 mask=0x2000
+10-03 17:49:25.581 11998 12019 I wf_game : key code=22 action=1 mask=0x2000
+10-03 17:49:25.897 11998 12019 I wf_game : key code=23 action=0 mask=0x1
+10-03 17:49:26.100 11998 12019 I wf_game : key code=23 action=1 mask=0x1
+10-03 17:49:27.095 11998 12019 I wf_game : key code=22 action=0 mask=0x2000
+10-03 17:49:27.431 11998 12019 I wf_game : key code=22 action=1 mask=0x2000
+10-03 17:49:27.881 11998 12019 I wf_game : key code=21 action=0 mask=0x4000
+10-03 17:49:28.053 11998 12019 I wf_game : key code=21 action=1 mask=0x4000
+10-03 17:49:28.525 11998 12019 I wf_game : key code=23 action=0 mask=0x1
+10-03 17:49:28.654 11998 12019 I wf_game : key code=23 action=1 mask=0x1
+10-03 17:49:51.258 11998 12019 I wf_game : Back in level: returning to selector
+10-03 17:49:51.260 11998 12019 I wf_game : level-menu: back to the menu
+10-03 17:49:51.317 11998 12019 I wf_game : level-menu: showing 8 entries ("WF Aquarium"), cursor on 1
+10-03 17:49:51.389 11998 12019 I wf_game : key code=20 action=0 mask=0x1000
+10-03 17:49:51.391 11998 12019 I wf_game : level-menu: cursor on 2 (Calm Betta)
+10-03 17:49:51.421 11998 12019 I wf_game : key code=20 action=1 mask=0x1000
+10-03 17:49:51.738 11998 12019 I wf_game : key code=23 action=0 mask=0x1
+10-03 17:49:51.773 11998 12019 I wf_game : key code=23 action=1 mask=0x1
+10-03 17:49:51.775 11998 12019 I wf_game : level-menu: LEVEL_TO_RUN=2 (Calm Betta)
+10-03 17:49:51.775 11998 12019 I wf_game : level-menu: level 2 starts
+10-03 17:51:34.547 11998 12019 I wf_game : Back in level: returning to selector
+10-03 17:51:34.548 11998 12019 I wf_game : level-menu: back to the menu
+10-03 17:51:34.658 11998 12019 I wf_game : level-menu: showing 8 entries ("WF Aquarium"), cursor on 2
+10-03 17:51:34.743 11998 12019 I wf_game : key code=19 action=0 mask=0x800
+10-03 17:51:34.744 11998 12019 I wf_game : level-menu: cursor on 1 (Blue Shrimp)
+10-03 17:51:34.759 11998 12019 I wf_game : key code=19 action=1 mask=0x800
+10-03 17:51:34.908 11998 12019 I wf_game : key code=23 action=0 mask=0x1
+10-03 17:51:34.944 11998 12019 I wf_game : key code=23 action=1 mask=0x1
+10-03 17:51:34.945 11998 12019 I wf_game : level-menu: LEVEL_TO_RUN=1 (Blue Shrimp)
+10-03 17:51:34.945 11998 12019 I wf_game : level-menu: level 1 starts

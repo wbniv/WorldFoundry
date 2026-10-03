@@ -1,0 +1,6 @@
+BlenderMCP addon registered
+PASS: five Jelly opacity round trips, legacy opaque default, four malformed metadata cases
+BlenderMCP addon unregistered
+Blender 5.0.1
+
+Blender quit
