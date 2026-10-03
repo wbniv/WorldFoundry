@@ -1,0 +1,26 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="1000" height="330" viewBox="0 0 1000 330" role="img" aria-labelledby="title desc">
+  <title id="title">Bottom-right FPS overlay mockup</title>
+  <desc id="desc">Two illustrative demo screens show the same bottom-right counter at 59.8 FPS and 2.0 FPS after a completed active hitch.</desc>
+  <rect width="1000" height="330" fill="#f3f5f7"/>
+  <g font-family="sans-serif" fill="#17212b">
+    <text x="24" y="30" font-size="18">Steady cadence</text>
+    <text x="524" y="30" font-size="18">Completed active hitch</text>
+  </g>
+  <g fill="#183b4a" stroke="#305868" stroke-width="2">
+    <rect x="24" y="46" width="452" height="254" rx="8"/>
+    <rect x="524" y="46" width="452" height="254" rx="8"/>
+  </g>
+  <g fill="#668b75" opacity=".7">
+    <path d="M26 224 L100 160 L190 218 L290 130 L474 215 V298 H26Z"/>
+    <path d="M526 224 L600 160 L690 218 L790 130 L974 215 V298 H526Z"/>
+  </g>
+  <g fill="#101820" fill-opacity=".85">
+    <rect x="390" y="258" width="72" height="30" rx="4"/>
+    <rect x="890" y="258" width="72" height="30" rx="4"/>
+  </g>
+  <g font-family="monospace" font-size="18" fill="white" text-anchor="end">
+    <text x="452" y="279">59.8</text>
+    <text x="952" y="279">2.0</text>
+  </g>
+  <text x="24" y="324" font-family="sans-serif" font-size="13" fill="#475569">Illustrative placement and values; raw mailbox 1903, no smoothing.</text>
+</svg>

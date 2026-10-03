@@ -634,6 +634,13 @@ WFGame::StepFrame(bool do_swap, Scalar* out_dt)
 		_display->RenderBegin();
 		_curLevel->RenderScene();
 		RestApi_RenderBoxes();
+		if (fpscounter::enabled)
+		{
+			int w = 0, h = 0;
+			_display->GetSurfaceSize(w, h);
+			const int count = _fpsOverlay.Build(_curLevel->GetMailboxes().ReadMailbox(EMAILBOX_FRAMERATE), w, h);
+			RendererBackendGet().DrawOverlay(_fpsOverlay.Rects(), count, w, h);
+		}
 		_display->RenderEnd();
 	}
 #if DO_ASSERTIONS

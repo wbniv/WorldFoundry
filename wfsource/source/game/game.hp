@@ -41,6 +41,7 @@
 #include <gfx/viewport.hp>
 #include "actor.hp"
 #include "frame_rate.h"
+#include "fps_overlay.hp"
 
 class Level;
 class GameMailboxes;
@@ -185,6 +186,7 @@ private:
 	bool			_bContinue;		// false short-circuits the level loop (PIGSUserAborted)
 	Scalar			_deltaTime;		// last frame's delta; fed back into next update()
 	FrameRateSampler _frameRate;
+	fpscounter::Overlay _fpsOverlay;
 
 	// Level menu (game/level_menu.h; docs/plans/2026-10-01-level-menu-selector.md).
 	// A shell that writes LEVEL_TO_RUN = -1 gets the bundle's MENU chunk as a menu.

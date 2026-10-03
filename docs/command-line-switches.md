@@ -15,6 +15,7 @@ wf_game {switches} [level#]
 | `-L<path>` | always | Override level file path |
 | `-zb` | always | Z-buffered rendering |
 | `-zs` | always | Z-sorted rendering |
+| `--no-fps` | always | Hide the default bottom-right frame-rate number (one decimal place) |
 | `-rateN` | always | Simulate fixed frame rate of N Hz |
 | `-nologo` | always | Skip company logo screens |
 | `-sound` | debug | Enable sound |

@@ -43,6 +43,7 @@
 #import <QuartzCore/CAMetalLayer.h>
 
 #include <gfx/renderer_backend.hp>
+#include <hal/phonepad/phonepad_overlay.h>
 #include <gfx/pixelmap.hp>
 #include <gfx/metal/metal_offscreen.h>
 #include <math/matrix34.hp>
@@ -430,6 +431,48 @@ public:
         ++_trianglesThisFrame;
     }
 
+    void DrawOverlay(const PhonepadRect* rects, int count, int width, int height) override
+    {
+        if (width <= 0 || height <= 0 || count <= 0) return;
+        Flush();
+        float projection[16], modelview[16];
+        std::memcpy(projection, _proj, sizeof(_proj));
+        std::memcpy(modelview, _mv, sizeof(_mv));
+        const bool lighting = _lightingEnabled, fog = _fogEnabled;
+        const float opacity = _opacity;
+        Mat4Identity(_proj);
+        Mat4Identity(_mv);
+        _mvpDirty = true;
+        _lightingEnabled = _fogEnabled = false;
+        _overlay = true;
+        for (int i = 0; i < count; ++i)
+        {
+            const PhonepadRect& r = rects[i];
+            SetOpacity(float(r.rgba & 255) / 255.0f);
+            const float red = float((r.rgba >> 24) & 255) / 255.0f;
+            const float green = float((r.rgba >> 16) & 255) / 255.0f;
+            const float blue = float((r.rgba >> 8) & 255) / 255.0f;
+            const float left = 2.0f * r.x0 / width - 1.0f;
+            const float right = 2.0f * r.x1 / width - 1.0f;
+            const float top = 1.0f - 2.0f * r.y0 / height;
+            const float bottom = 1.0f - 2.0f * r.y1 / height;
+            const RBVertex a{left, top, 0, red, green, blue, 0, 0};
+            const RBVertex b{right, top, 0, red, green, blue, 0, 0};
+            const RBVertex c{right, bottom, 0, red, green, blue, 0, 0};
+            const RBVertex d{left, bottom, 0, red, green, blue, 0, 0};
+            DrawTriangle(a, b, c, 0, 0, 1, NULL, true, true);
+            DrawTriangle(a, c, d, 0, 0, 1, NULL, true, true);
+        }
+        Flush();
+        std::memcpy(_proj, projection, sizeof(_proj));
+        std::memcpy(_mv, modelview, sizeof(_mv));
+        _mvpDirty = true;
+        _lightingEnabled = lighting;
+        _fogEnabled = fog;
+        _opacity = opacity;
+        _overlay = false;
+    }
+
     void EndFrame() override
     {
         Flush();
@@ -520,6 +563,8 @@ private:
     id<MTLRenderPipelineState> _pipeline        = nil;
     id<MTLRenderPipelineState> _blendPipeline = nil;
     id<MTLDepthStencilState> _blendDepth = nil;
+    id<MTLDepthStencilState> _overlayDepth = nil;
+    bool _overlay = false;
     float _opacity = 1.0f;
     id<MTLDepthStencilState>   _depthState      = nil;
     id<MTLRenderCommandEncoder> _encoder        = nil;
@@ -643,6 +688,8 @@ private:
         _depthState = [_device newDepthStencilStateWithDescriptor:dsd];
         dsd.depthWriteEnabled = NO;
         _blendDepth = [_device newDepthStencilStateWithDescriptor:dsd];
+        dsd.depthCompareFunction = MTLCompareFunctionAlways;
+        _overlayDepth = [_device newDepthStencilStateWithDescriptor:dsd];
 
         // Repeat + linear, matching the GL backend's GFX_ZBUFFER policy that
         // CreateTexture in backend_modern.cc applies via glTexParameteri.
@@ -765,7 +812,7 @@ private:
 
         [_encoder setRenderPipelineState:(_opacity < 1.0f ? _blendPipeline : _pipeline)];
         if (_depthState)
-            [_encoder setDepthStencilState:(_opacity < 1.0f ? _blendDepth : _depthState)];
+            [_encoder setDepthStencilState:(_overlay ? _overlayDepth : (_opacity < 1.0f ? _blendDepth : _depthState))];
         // One batch = one texture (DrawTriangle flushes on a texture change),
         // so a single bind per flush is correct.
         // Always bind something at texture(0) — see _whiteTexture in LazyInit.

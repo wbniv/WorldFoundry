@@ -29,6 +29,7 @@
 #endif
 
 #include <gfx/renderer_backend.hp>
+#include <hal/phonepad/phonepad_overlay.h>
 #include <cstdint>   // uintptr_t for the RBTextureHandle cast
 #include <gfx/pixelmap.hp>
 #include <math/matrix34.hp>
@@ -442,6 +443,73 @@ public:
         _cpu.push_back(tri[0]);
         _cpu.push_back(tri[1]);
         _cpu.push_back(tri[2]);
+    }
+
+    void DrawOverlay(const PhonepadRect* rects, int count, int width, int height) override
+    {
+        if (width <= 0 || height <= 0 || count <= 0) return;
+        Flush();
+        float projection[16], modelview[16];
+        std::memcpy(projection, _proj, sizeof(_proj));
+        std::memcpy(modelview, _mv, sizeof(_mv));
+        const bool lighting = _lightingEnabled, fog = _fogEnabled;
+        const float opacity = _opacity;
+        Mat4Identity(_proj);
+        Mat4Identity(_mv);
+        _mvpDirty = true;
+        _lightingEnabled = _fogEnabled = false;
+        GLint viewport[4], program, vao, buffer, srcRGB, dstRGB, srcAlpha, dstAlpha;
+        GLboolean depthMask;
+        glGetIntegerv(GL_VIEWPORT, viewport);
+        glGetIntegerv(GL_CURRENT_PROGRAM, &program);
+        glGetIntegerv(GL_VERTEX_ARRAY_BINDING, &vao);
+        glGetIntegerv(GL_ARRAY_BUFFER_BINDING, &buffer);
+        glGetIntegerv(GL_BLEND_SRC_RGB, &srcRGB);
+        glGetIntegerv(GL_BLEND_DST_RGB, &dstRGB);
+        glGetIntegerv(GL_BLEND_SRC_ALPHA, &srcAlpha);
+        glGetIntegerv(GL_BLEND_DST_ALPHA, &dstAlpha);
+        glGetBooleanv(GL_DEPTH_WRITEMASK, &depthMask);
+        const GLboolean depth = glIsEnabled(GL_DEPTH_TEST), blend = glIsEnabled(GL_BLEND);
+        const GLboolean cull = glIsEnabled(GL_CULL_FACE), scissor = glIsEnabled(GL_SCISSOR_TEST);
+        glViewport(0, 0, width, height);
+        glDisable(GL_DEPTH_TEST);
+        glDisable(GL_CULL_FACE);
+        glDisable(GL_SCISSOR_TEST);
+        for (int i = 0; i < count; ++i)
+        {
+            const PhonepadRect& r = rects[i];
+            SetOpacity(float(r.rgba & 255) / 255.0f);
+            const float red = float((r.rgba >> 24) & 255) / 255.0f;
+            const float green = float((r.rgba >> 16) & 255) / 255.0f;
+            const float blue = float((r.rgba >> 8) & 255) / 255.0f;
+            const float left = 2.0f * r.x0 / width - 1.0f;
+            const float right = 2.0f * r.x1 / width - 1.0f;
+            const float top = 1.0f - 2.0f * r.y0 / height;
+            const float bottom = 1.0f - 2.0f * r.y1 / height;
+            const RBVertex a{left, top, 0, red, green, blue, 0, 0};
+            const RBVertex b{right, top, 0, red, green, blue, 0, 0};
+            const RBVertex c{right, bottom, 0, red, green, blue, 0, 0};
+            const RBVertex d{left, bottom, 0, red, green, blue, 0, 0};
+            DrawTriangle(a, b, c, 0, 0, 1, NULL, true, true);
+            DrawTriangle(a, c, d, 0, 0, 1, NULL, true, true);
+        }
+        Flush();
+        std::memcpy(_proj, projection, sizeof(_proj));
+        std::memcpy(_mv, modelview, sizeof(_mv));
+        _mvpDirty = true;
+        _lightingEnabled = lighting;
+        _fogEnabled = fog;
+        _opacity = opacity;
+        glViewport(viewport[0], viewport[1], viewport[2], viewport[3]);
+        glUseProgram(program);
+        glBindVertexArray(vao);
+        glBindBuffer(GL_ARRAY_BUFFER, buffer);
+        glDepthMask(depthMask);
+        glBlendFuncSeparate(srcRGB, dstRGB, srcAlpha, dstAlpha);
+        if (depth) glEnable(GL_DEPTH_TEST);
+        if (cull) glEnable(GL_CULL_FACE);
+        if (scissor) glEnable(GL_SCISSOR_TEST);
+        if (blend) glEnable(GL_BLEND); else glDisable(GL_BLEND);
     }
 
     void EndFrame() override
