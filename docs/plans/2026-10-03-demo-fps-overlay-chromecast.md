@@ -270,4 +270,6 @@ browser-to-Chromecast controller path delivers A/C/D/E/F without hiding the
 counter. The six-run device comparison found no material presentation loss.
 All saved APKs were restored and Will notified when Chromecast testing finished.
 A physical handset and legacy desktop arcade/game-over HUD modes remain untested.
-The existing desktop debug-listener reconnect race is recorded separately.
+The desktop debug-listener reconnect race is now fixed; the regression check
+passes eight continuous flag/axe transitions in one process across two full laps.
+See the [listener correction](2026-06-02-debug-bridge-listener-teardown-deassert.md#reconnect-correction-2026-10-03).

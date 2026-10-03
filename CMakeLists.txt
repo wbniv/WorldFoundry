@@ -1137,6 +1137,13 @@ if(NOT ANDROID AND NOT IOS AND NOT APPLE AND NOT EMSCRIPTEN)
     # external-host path stays clean and are labelled `gl` so headless CI
     # can exclude them via `ctest -LE gl`.
     enable_testing()
+    if(WF_DEBUG_BRIDGE)
+        add_executable(debug_listener_reconnect_test tests/debug_listener_reconnect_test.cc)
+        target_link_libraries(debug_listener_reconnect_test PRIVATE wfengine)
+        target_compile_options(debug_listener_reconnect_test PRIVATE -fno-rtti)
+        add_test(NAME debug_listener_reconnect COMMAND debug_listener_reconnect_test)
+        set_tests_properties(debug_listener_reconnect PROPERTIES TIMEOUT 30)
+    endif()
     add_executable(frame_rate_test tests/frame_rate_test.cc
         ${SRC}/hal/linux/lifecycle.cc)
     target_include_directories(frame_rate_test PRIVATE ${SRC})
@@ -1169,6 +1176,12 @@ if(NOT ANDROID AND NOT IOS AND NOT APPLE AND NOT EMSCRIPTEN)
                 COMMAND ${Python3_EXECUTABLE}
                     ${CMAKE_SOURCE_DIR}/tests/frame_rate_integration.py
                     $<TARGET_FILE:wf_game> -rate10)
+            add_test(NAME debug_listener_smb_transitions
+                COMMAND ${Python3_EXECUTABLE}
+                    ${CMAKE_SOURCE_DIR}/tests/debug_listener_smb_transitions.py
+                    $<TARGET_FILE:wf_game>)
+            set_tests_properties(debug_listener_smb_transitions PROPERTIES
+                LABELS "gl" ENVIRONMENT "DISPLAY=:0" TIMEOUT 120)
             set_tests_properties(frame_rate_mailbox frame_rate_mailbox_fixed_sim PROPERTIES
                 LABELS "gl" ENVIRONMENT "DISPLAY=:0" TIMEOUT 60)
         endif()

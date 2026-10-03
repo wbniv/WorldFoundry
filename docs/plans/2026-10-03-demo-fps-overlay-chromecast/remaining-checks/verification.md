@@ -50,8 +50,12 @@ Earlier device captures already cover the four SMB game views.
 An existing desktop debug-server reconnect race interrupted the initial
 continuous harness: a detached old client closes a reused file descriptor
 after level teardown, producing `accept() failed: Bad file descriptor`.
-Each transition was therefore checked from a fresh process. This listener
-issue remains separate from the FPS overlay and is not fixed by this change.
+Each transition was therefore checked from a fresh process in the original run.
+The subsequent [listener teardown correction](../../2026-06-02-debug-bridge-listener-teardown-deassert.md#reconnect-correction-2026-10-03)
+fixes that race. Its regression run completed eight continuous transitions (two
+full laps) in one desktop engine process, with FPS reset and mailbox traffic
+resuming after every reconnect. The listener fix is separate from the overlay;
+it does not change the Chromecast performance evidence above.
 
 ## Controller delivery and overlay placement
 

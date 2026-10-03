@@ -9,6 +9,7 @@
 #include <pigsys/pigsys.hp>     // sys_atexit
 
 #include <atomic>
+#include <condition_variable>
 #include <cstdio>
 #include <cstdlib>     // std::strtod — exception-safe under wfengine's -fno-exceptions
 #include <cstring>
@@ -294,26 +295,26 @@ static std::vector<int>          gClients;
 
 static int               gServerFd = -1;
 static std::atomic<bool> gRunning  { false };
-static std::thread       gListenerThread;
+// Protected by gQueueMutex. Threads stay detached so exit(-1) cannot
+// destroy a joinable static thread and hide the engine's assertion.
+static unsigned          gWorkers = 0;
+static std::condition_variable gWorkersDone;
 
 //=============================================================================
 // Send a line to all connected clients. Must hold gQueueMutex.
 
 static void send_all_locked(const std::string& line)
 {
-    std::vector<int> dead;
     for (int fd : gClients) {
+        // The reader owns close(). Wake it without releasing its descriptor
+        // for reuse while it might still be reading or replying.
         if (::write(fd, line.c_str(), line.size()) < 0)
-            dead.push_back(fd);
-    }
-    for (int fd : dead) {
-        ::close(fd);
-        gClients.erase(std::find(gClients.begin(), gClients.end(), fd));
+            ::shutdown(fd, SHUT_RDWR);
     }
 }
 
 //=============================================================================
-// Per-client reader (runs on listener thread, detached).
+// Per-client reader (each runs on its own detached thread).
 
 static void handle_client(int fd)
 {
@@ -495,77 +496,84 @@ static void handle_client(int fd)
         if (it != gClients.end()) gClients.erase(it);
         PendingUpdate disc;
         disc.kind = PendingUpdate::CLIENT_DISCONNECT;
-        gQueue.push(disc);
+        if (gRunning) gQueue.push(disc);
+        std::fprintf(stderr, "[debug] client disconnected fd=%d\n", fd);
+        --gWorkers;
+        gWorkersDone.notify_all();
     }
-    std::fprintf(stderr, "[debug] client disconnected fd=%d\n", fd);
 }
 
 //=============================================================================
 // Listener thread
 
-static void listener_loop(int port)
+static void listener_loop(int fd)
 {
-    gServerFd = ::socket(AF_INET, SOCK_STREAM, 0);
-    if (gServerFd < 0) {
-        std::fprintf(stderr, "[debug] socket() failed: %s\n", strerror(errno));
-        return;
-    }
-    int opt = 1;
-    ::setsockopt(gServerFd, SOL_SOCKET, SO_REUSEADDR, &opt, sizeof(opt));
-
-    struct sockaddr_in addr {};
-    addr.sin_family = AF_INET;
-    addr.sin_port   = htons((uint16_t)port);
-    if (gDebugBind[0] == '\0' || strcmp(gDebugBind, "0.0.0.0") == 0)
-        addr.sin_addr.s_addr = INADDR_ANY;
-    else
-        inet_pton(AF_INET, gDebugBind, &addr.sin_addr);
-
-    if (::bind(gServerFd, (struct sockaddr*)&addr, sizeof(addr)) < 0) {
-        std::fprintf(stderr, "[debug] bind(:%d) failed: %s\n", port, strerror(errno));
-        ::close(gServerFd); gServerFd = -1; return;
-    }
-    ::listen(gServerFd, 4);
-    std::fprintf(stderr, "[debug] listening on :%d\n", port);
-
     while (gRunning) {
         struct sockaddr_in client_addr {};
         socklen_t len = sizeof(client_addr);
-        int cfd = ::accept(gServerFd, (struct sockaddr*)&client_addr, &len);
+        int cfd = ::accept(fd, (struct sockaddr*)&client_addr, &len);
         if (cfd < 0) {
             if (gRunning)
                 std::fprintf(stderr, "[debug] accept() failed: %s\n", strerror(errno));
             break;
         }
+        std::lock_guard<std::mutex> lk(gQueueMutex);
+        // Stop may have begun while accept was returning. Do not launch a
+        // reader that Stop could miss when shutting down blocked reads.
+        if (!gRunning) {
+            ::close(cfd);
+            break;
+        }
         char ip[INET_ADDRSTRLEN];
         inet_ntop(AF_INET, &client_addr.sin_addr, ip, sizeof(ip));
         std::fprintf(stderr, "[debug] client connected fd=%d from %s\n", cfd, ip);
-        {
-            std::lock_guard<std::mutex> lk(gQueueMutex);
-            gClients.push_back(cfd);
-        }
+        gClients.push_back(cfd);
+        ++gWorkers;
         std::thread(handle_client, cfd).detach();
     }
+    std::lock_guard<std::mutex> lk(gQueueMutex);
+    ::close(fd);
+    gServerFd = -1;
+    --gWorkers;
+    gWorkersDone.notify_all();
 }
 
 //=============================================================================
-// Public API
+// Public API (Start/Stop run on the game thread)
 
 void DebugServer_Start(int port)
 {
-    if (port <= 0) return;
-    gRunning = true;
-    gListenerThread = std::thread(listener_loop, port);
-    // Detach immediately. On the exit(-1) path (e.g. an engine AssertMsg), the
-    // C++ runtime runs static destructors during __run_exit_handlers BEFORE our
-    // sys_atexit DebugServer_Stop gets a chance to join — and destroying a still
-    // *joinable* std::thread calls std::terminate(), which masks the real assert
-    // with a bogus "terminate called without an active exception" and
-    // std::thread::~thread() at the top of the stack. Detaching makes the static
-    // destructor a no-op; clean shutdown still stops the loop via gRunning=false
-    // + closing gServerFd in DebugServer_Stop. (handle_client threads are
-    // detached for the same reason at the accept site.)
-    gListenerThread.detach();
+    if (port <= 0 || gRunning) return;
+    // Create and publish the socket before launching the listener, so even an
+    // immediate Stop can wake it. Only the listener closes this descriptor.
+    const int fd = ::socket(AF_INET, SOCK_STREAM, 0);
+    if (fd < 0) {
+        std::fprintf(stderr, "[debug] socket() failed: %s\n", strerror(errno));
+        return;
+    }
+    int opt = 1;
+    ::setsockopt(fd, SOL_SOCKET, SO_REUSEADDR, &opt, sizeof(opt));
+    struct sockaddr_in addr {};
+    addr.sin_family = AF_INET;
+    addr.sin_port = htons((uint16_t)port);
+    if (gDebugBind[0] == '\0' || strcmp(gDebugBind, "0.0.0.0") == 0)
+        addr.sin_addr.s_addr = INADDR_ANY;
+    else
+        inet_pton(AF_INET, gDebugBind, &addr.sin_addr);
+    if (::bind(fd, (struct sockaddr*)&addr, sizeof(addr)) < 0 ||
+        ::listen(fd, 4) < 0) {
+        std::fprintf(stderr, "[debug] bind/listen(:%d) failed: %s\n", port, strerror(errno));
+        ::close(fd);
+        return;
+    }
+    {
+        std::lock_guard<std::mutex> lk(gQueueMutex);
+        gServerFd = fd;
+        gRunning = true;
+        ++gWorkers;
+    }
+    std::fprintf(stderr, "[debug] listening on :%d\n", port);
+    std::thread(listener_loop, fd).detach();
 
     static bool atexitRegistered = false;
     if (!atexitRegistered) {
@@ -576,21 +584,20 @@ void DebugServer_Start(int port)
 
 void DebugServer_Stop()
 {
-    if (!gRunning) return;
-    gRunning = false;
-    if (gServerFd >= 0) {
-        ::shutdown(gServerFd, SHUT_RDWR);  // unblocks accept() in listener thread
-        ::close(gServerFd);
-        gServerFd = -1;
-    }
     {
-        std::lock_guard<std::mutex> lk(gQueueMutex);
-        for (int fd : gClients) ::close(fd);
-        gClients.clear();
+        std::unique_lock<std::mutex> lk(gQueueMutex);
+        if (!gRunning) return;
+        gRunning = false;
+        if (gServerFd >= 0) ::shutdown(gServerFd, SHUT_RDWR);
+        for (int fd : gClients) ::shutdown(fd, SHUT_RDWR);
+        // Wait releases the mutex, letting each owner close its own socket.
+        // A new level cannot reuse descriptors or state until all workers exit.
+        gWorkersDone.wait(lk, [] { return gWorkers == 0; });
+        std::queue<PendingUpdate> empty;
+        gQueue.swap(empty);
     }
-    // gListenerThread was detached in DebugServer_Start (see the rationale
-    // there) — no join. Closing gServerFd above unblocked its accept(); the
-    // detached thread exits on its own.
+    gPaused = false;
+    gStepN = 0;
     gOriginals.clear();
     gChangeStack.clear();
     gPropOriginals.clear();

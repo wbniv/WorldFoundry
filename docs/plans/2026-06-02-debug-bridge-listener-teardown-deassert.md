@@ -53,16 +53,15 @@ This is the same pattern the `handle_client` worker threads already use
 - `DebugServer_Stop` (`:574`): drop the now-dead `if (joinable) join()` — clean
   shutdown still stops the loop via `gRunning=false` + `shutdown`/`close` of
   `gServerFd` (which unblocks the listener's `accept()`); the detached thread
-  exits on its own. No new race: `listener_loop` only touches `gRunning` and
-  `gClients` (the latter under `gQueueMutex`, which `DebugServer_Stop` also
-  holds); it never touches the `gOriginals`/`gChangeStack`/… state that Stop
-  clears.
+  exits on its own. **The original race assessment was incomplete:** socket
+  ownership and restart ordering also matter; see the 2026-10-03 correction below.
 
 Correct by construction (C++ standard: a detached `std::thread`'s destructor is
 a no-op; a joinable one's calls `std::terminate`). The only behaviour change on
 the clean path is that `DebugServer_Stop` no longer *waits* for the listener to
-finish — fine for a debug stub, and `SO_REUSEADDR` is already set so a later
-re-`Start` on the same port can't be blocked by a lingering bind.
+finish. This proved unsafe for level reloads: `SO_REUSEADDR` does not protect
+against double-close or old workers accessing a restarted server. The correction
+below retains detached threads while restoring a completion barrier.
 
 ## Verification
 
@@ -91,3 +90,42 @@ Two offenders, both fixed: `debug_server.cc` `gListenerThread` and
 in the first rebuild — `rm`'d the `.o` to force it). Grep confirmed these are the
 only two `static std::thread`/`.join()` in the `wf_game-dev` binary, and the
 clean `exit=255` confirms no third offender. Regression-guarded by the test above.
+
+
+## Reconnect correction (2026-10-03)
+
+Continuous SMB testing exposed `accept() failed: Bad file descriptor` after a
+level reload. Stop and each detached client reader both closed the same client
+socket. A delayed reader could close a descriptor that had already been reused
+for the next listener. The old listener also shared the restarted server's
+running flag and descriptor without a completion barrier.
+
+The bridge now gives each worker sole ownership of its socket's `close()`.
+Stop calls `shutdown()` to wake blocked operations, then waits on a condition
+variable until every listener/client worker has finished its shared-state work
+and closed its socket. Worker accounting, client registration and teardown use
+`gQueueMutex`; an accept that returns during teardown cannot register an
+untracked client. Startup creates/binds/listens synchronously so an immediate
+Stop always knows which socket to shut down. Failed broadcasts shut down the
+reader's socket rather than closing it themselves.
+
+Threads remain detached, preserving the original assertion fix. Pending commands,
+pause and step state are discarded at teardown so they cannot affect the next
+level. Start/Stop retain their game-thread lifecycle contract.
+
+Regression checks use the production bridge:
+
+- `debug_listener_reconnect`: 200 rapid restart cycles with ping replies,
+  held/incomplete clients, pause cleanup, repeated Stop and bind-failure recovery.
+- `debug_listener_smb_transitions`: eight flag/axe transitions (two full laps)
+  in one engine process, reconnecting after every world and checking FPS reset
+  and resumed mailbox traffic. No end-state mailboxes are written.
+- Existing FPS mailbox checks, including fixed simulation time, exercise queue
+  processing, live watches, pause/resume and the read-only mailbox assertion.
+- `tests/test_assert_no_terminate_mask.py` rerun against the rebuilt desktop
+  engine: the real assertion remains visible without `terminate called`.
+
+These checks passed on Linux desktop GL. The SMB and socket checks are registered
+with CTest. The debug bridge is disabled on Chromecast, so this correction does
+not need device testing or a semaphore-service lease. The concurrent coordinator
+implementation is untouched.
