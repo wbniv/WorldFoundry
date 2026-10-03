@@ -1,4 +1,4 @@
-"""Opaque volumetric animal models. +X is the fish head; jelly bells face +Z."""
+"""Volumetric animal models. +X is the fish head; jelly bells face +Z."""
 import math
 from mesh import Mesh
 
@@ -7,6 +7,10 @@ COLORS = dict(body=(.12,.40,.56), hi=(.27,.65,.72), tail=(.65,.20,.37), fin=(.43
               brown=(.40,.12,.12), patch=(.62,.41,.29), pale=(.75,.58,.40),
               dark=(.25,.19,.16), jelly=(.65,.81,.86), edge=(.84,.92,.93),
               motif=(.70,.39,.59), trail=(.49,.68,.77))
+
+# Art settings for the existing moon-jelly model, not measured biology.
+# Scoped to the jellyfish generator; other tanks keep opaque materials.
+JELLY_OPACITY = dict(jelly=.22, edge=.32, trail=.12, motif=.72)
 
 
 def membrane(name, outline, key, thickness=.028):

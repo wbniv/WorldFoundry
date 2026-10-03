@@ -15,7 +15,7 @@ REPO=COMMON.parent.parent
 sys.path.insert(0,str(COMMON))
 from mesh import Mesh
 import species
-from models import COLORS as ANIMAL_COLORS, models
+from models import COLORS as ANIMAL_COLORS, JELLY_OPACITY, models
 from urchin import COLORS as URCHIN_COLORS, urchin, tube_foot
 from planting import COLORS as PLANT_COLORS, planting
 from temple import COLORS as TEMPLE_COLORS, pavilion
@@ -61,6 +61,11 @@ def material(key):
         rgb = (*COLORS[key], 1)
         mt.node_tree.nodes.get('Principled BSDF').inputs['Base Color'].default_value = rgb
         mt.diffuse_color = rgb
+        if C.KIND == 'jellyfish' and key in JELLY_OPACITY:
+            opacity = JELLY_OPACITY[key]
+            mt['wf_opacity'] = opacity
+            mt.node_tree.nodes.get('Principled BSDF').inputs['Alpha'].default_value = opacity
+            mt.surface_render_method = 'DITHERED'
         if key.startswith(('betta_mem','betta_ray','betta_margin')):mt['wf_prelit']=True
         MATERIALS[key] = mt
     return MATERIALS[key]

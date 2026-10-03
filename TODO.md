@@ -447,6 +447,10 @@ _Auto-added from plan "Out of scope"/"Deferred" sections at commit time. Triage 
 - [verify] **2026-10-02-betta-poster-and-flowing-fins** — Verification section present but no PASS recorded — run + record the steps. _from [2026-10-02-betta-poster-and-flowing-fins.md](docs/plans/2026-10-02-betta-poster-and-flowing-fins.md)_  <!-- fp:f5d99afd08288b5e -->
 - [verify] **2026-10-02-lionfish-goldfish-feeding** — Verification section present but no PASS recorded — run + record the steps. _from [2026-10-02-lionfish-goldfish-feeding.md](docs/plans/2026-10-02-lionfish-goldfish-feeding.md)_  <!-- fp:1024886c70076479 -->
 - [verify] **2026-10-02-condo-translucency** — Verification section present but no PASS recorded — run + record the steps. _from [2026-10-02-condo-translucency.md](docs/plans/2026-10-02-condo-translucency.md)_  <!-- fp:d725d98b6cf82765 -->
+- [ ] **(triage)** [ ] Build an Aquarium release APK from the clean checkout with the jellyfish update. — _from [2026-10-02-jellyfish-biomechanics-poster.md](docs/plans/2026-10-02-jellyfish-biomechanics-poster.md)_  <!-- fp:06888d93f5f05438 -->
+- [ ] **(triage)** [ ] Install and select the jellyfish tank on Chromecast HD. — _from [2026-10-02-jellyfish-biomechanics-poster.md](docs/plans/2026-10-02-jellyfish-biomechanics-poster.md)_  <!-- fp:c89b7517c2e51961 -->
+- [ ] **(triage)** [ ] Inspect translucency and pulsing, and capture presented-frame timestamps. — _from [2026-10-02-jellyfish-biomechanics-poster.md](docs/plans/2026-10-02-jellyfish-biomechanics-poster.md)_  <!-- fp:918548c5600abae9 -->
+- [ ] **(triage)** [ ] Record device results and push the focused commits. — _from [2026-10-02-jellyfish-biomechanics-poster.md](docs/plans/2026-10-02-jellyfish-biomechanics-poster.md)_  <!-- fp:bc8f562a7d50c362 -->
 <!-- END auto-captured-deferrals -->
 
 

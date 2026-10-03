@@ -1,16 +1,28 @@
 # Moon-jelly swimming poster — A3
 
-Date: 2026-10-02. Status: **plan and layout mockup ready for Will's review; final poster awaits approval.**
+Date: 2026-10-02. Status: **updated A3 poster complete; all six jellyfish use translucent materials.**
 
 Will requested jellyfish-motion research and an A3 poster, then specified that this plan should be saved in `docs/plans/` and opened in the browser for review and approval. Prepare an illustrated explanation of moon-jelly swimming, with the same clear evidence labels used in the clownfish biomechanics poster. The biological story dominates; a small panel connects it to the Aquarium animation.
 
 - [x] Read primary research on propulsion, bell-margin flexibility, natural pulse variation and turning.
 - [x] Define content, source boundaries, A3 layout and production checks.
 - [x] Build a full-page layout mockup with original diagrams and an illustrative computed pulse curve.
-- [ ] Obtain Will's approval of the poster plan/layout.
-- [ ] Build the final data sheet, vector artwork, one-page A3 PDF and PNG preview.
-- [ ] Check source/parameter consistency, PDF dimensions, links, text size and clipping.
+- [x] Will authorized the poster update and translucent jellyfish on 2026-10-03.
+- [x] Build the final data sheet, vector artwork, one-page A3 PDF and PNG preview, including actual Blender and game renderings.
+- [x] Check source/parameter consistency, PDF dimensions, links, text size and clipping.
 - [ ] Inspect a physical A3 print if one is available.
+
+## Completed update — 2026-10-03
+
+[Open the updated poster](../reference/jellyfish-biomechanics-poster/poster.html) · [one-page A3 PDF](../reference/jellyfish-biomechanics-poster/poster.pdf) · [PNG preview](../reference/jellyfish-biomechanics-poster/poster.png).
+
+Added two real renderings: Blender 5.0.1/Cycles (48 samples) imports the exported bell and arms, while the desktop OpenGL capture shows the actual six-jelly tank. The original six biology diagrams and research boundaries remain. The print source embeds every image and needs no network assets.
+
+**GAME material settings:** bell 22% opacity; bell margin and oral arms 32%; marginal tentacles 12%; internal motifs 72%. These are art choices, not tissue measurements. Materials export through the existing OPAC metadata and shared translucent compositor; this change needs no further renderer API or shader changes. Binary comparison confirms that every existing model chunk is unchanged; only OPAC is added. Existing controllers, native weighted bell deformation and appendage lag remain intact. The menu bundle's jellyfish entry is replaced at the same byte length, preserving its other tank entries. This uses alpha compositing, without refraction or a fluid simulation.
+
+The local generator checks adopted cycle/deformation constants and writes [data.json](../reference/jellyfish-biomechanics-poster/data.json). Pulse timing is 20% contract, 30% recover, 50% coast; player 4 s (3.2 s with UP); residents 4–5.4 s. The height coefficient is weighted by the margin, with the apex pinned: it is not a uniform 28% height increase.
+
+**Validation:** native motion/compositor and exported material tests pass (19 tests). [Engine capture checks](../reference/jellyfish-biomechanics-poster/engine/checks.json) confirm six animals, both camera views, initialized controller, and a full native contraction range of 0–1. The older generic tank checker expects changing actor Z scale; that assertion is obsolete since the pulse deforms mesh vertices. A focused capture checks native contraction state instead, and the existing native geometry tests validate apex/margin/rest behavior. The final PDF has one A3 page (841.92 × 1191.12 pt); its raster was visually inspected. A physical print remains unchecked. The poster renderings are desktop evidence. Chromecast build and verification were subsequently authorized and are being recorded separately below.
 
 ## Browser review
 
@@ -65,12 +77,19 @@ A3 portrait: 297 × 420 mm, one page, 10–12 mm safe margins, white/light paper
 
 Provide a self-contained HTML print source and a PDF with embedded fonts, selectable text/vector diagrams and working bibliography links. A3 PDF size should be approximately 841.89 × 1190.55 pt (allow small browser rounding), with exactly one page. PNG preview: 150 dpi for review; optionally export a 300 dpi print raster when requested. No remote fonts or assets should be required after generation.
 
-The poster work owns these new document directories and a focused test file if needed. It does not change shared `Taskfile.yml`, the active first Aquarium tank, app bundle or device. A standalone generator is enough while concurrent work continues.
+The initial poster scope used a standalone generator. Will subsequently authorized translucent jellyfish, then the Android build, Chromecast verification and commit/push. The jellyfish bundle update preserves other tank entries; unrelated shared-workspace changes remain outside these commits.
 
 ## Review and completion checks
 
 Before final delivery, verify the page count/dimensions with `pdfinfo`; render the PDF to PNG and inspect the entire page plus diagram/table/footer details. Check clipping, overlap, label contrast, small text, italics, embedded fonts and link targets. Confirm every study value against its source/context and every GAME value against the adopted constants. Confirm the contraction curve wraps continuously, separates the three phases, and never labels its chosen timing as experimental data.
 
-Will's requested approval applies to **the final poster build**. This turn prepares the plan and review mockup only; no final poster PDF is produced before that approval. Jellyfish tank tuning is separately authorized and can use the research without waiting for poster approval.
+The original draft awaited review. Will's 2026-10-03 instruction to update the poster with renderings and make the jellyfish translucent authorizes this completed update.
 
 Related: [three new tanks and runtime evidence](2026-10-02-aquarium-three-more-tanks.md), [clownfish biomechanics poster](2026-09-30-clownfish-biomechanics-poster.md).
+
+## Chromecast follow-up
+
+- [ ] Build an Aquarium release APK from the clean checkout with the jellyfish update.
+- [ ] Install and select the jellyfish tank on Chromecast HD.
+- [ ] Inspect translucency and pulsing, and capture presented-frame timestamps.
+- [ ] Record device results and push the focused commits.

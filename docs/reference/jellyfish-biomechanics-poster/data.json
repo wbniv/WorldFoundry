@@ -1,0 +1,24 @@
+{
+  "opacity": {
+    "jelly": 0.22,
+    "edge": 0.32,
+    "trail": 0.12,
+    "motif": 0.72
+  },
+  "cycle_fractions": [
+    0.2,
+    0.3,
+    0.5
+  ],
+  "player_period_s": 4,
+  "up_period_s": 3.2,
+  "resident_period_s": [
+    4,
+    5.4
+  ],
+  "margin_radial_coefficient": 0.18,
+  "weighted_height_coefficient": 0.28,
+  "evidence": "GAME: adopted art/animation settings, not biological measurements",
+  "blender": "Blender 5.0.1; Cycles 48 samples; exported bell.iff and arms.iff",
+  "game": "Desktop OpenGL engine, aquarium_jellyfish-standalone.iff; six jellies"
+}
