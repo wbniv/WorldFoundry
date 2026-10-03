@@ -24,19 +24,23 @@ Materials can now opt into continuous opacity. In the test tank, the Jelly shell
 
 ### Implementation commits
 
-These are actual local commits, in implementation order; the PR itself is simulated. Inspect them with `git show <hash>`.
+These are actual local commits, in implementation order; the PR itself is simulated. Each commit link opens its full diff locally, without requiring an unpublished GitHub URL. You can also inspect them with `git show <hash>`.
 
 | Commit | Subject | Review scope |
 |---|---|---|
-| `92e8cc0a` | Add explicit material opacity with compatible OPAC model metadata | Blender export/import, optional binary metadata, runtime material opacity and all eight triangle submission variants |
-| `1bdde381` | Composite translucent triangles across actors with per-vertex opacity | Shared compositor, camera completion hook, GL/GLES shader/state, Metal shader/pipelines and batching |
-| `3c0b4ac3` | Verify translucent ordering state lifetime and opacity round trips | Recording-backend compositor tests and Blender round-trip/malformed metadata checks |
+| [92e8cc0a](2026-10-02-condo-translucency/commits/92e8cc0a.html) | Add explicit material opacity with compatible OPAC model metadata | Blender export/import, optional binary metadata, runtime material opacity and all eight triangle submission variants |
+| [1bdde381](2026-10-02-condo-translucency/commits/1bdde381.html) | Composite translucent triangles across actors with per-vertex opacity | Shared compositor, camera completion hook, GL/GLES shader/state, Metal shader/pipelines and batching |
+| [3c0b4ac3](2026-10-02-condo-translucency/commits/3c0b4ac3.html) | Verify translucent ordering state lifetime and opacity round trips | Recording-backend compositor tests and Blender round-trip/malformed metadata checks |
 
-The separate shrimp content commit `1aef7152` contains the second texture, deterministic half-colony assignment and regenerated assets. Those content choices consume the engine API; they are not part of the engine's material format or sorting policy.
+The separate shrimp content commit [1aef7152](2026-10-02-condo-translucency/commits/1aef7152.html) contains the second texture, deterministic half-colony assignment and regenerated assets. Those content choices consume the engine API; they are not part of the engine's material format or sorting policy.
 
 ![Mixed opaque and translucent shrimp running on Chromecast HD](2026-10-03-aquarium-blue-shrimp-varieties/device/blue-shrimp-optimized.png)
 
 ### Authoring and model compatibility
+
+**Why material opacity rather than an alpha texture?** A texture's alpha channel can supply per-pixel opacity, but it cannot replace the renderer's blending, depth-write policy or cross-actor sorting. Those mechanisms are needed with either source of alpha. This rollout uses material opacity because the existing packer stores a legacy one-bit translucency marker and the runtime reconstructs only fully transparent, half-transparent or opaque texels, with a special opaque-black case. It cannot retain the Jelly's 0.28/0.18 values as ordinary image alpha. The existing flat-colour materials also need an opacity source for future glass/shade work.
+
+Continuous RGBA textures would be a useful extension for varying shell transparency, markings or gradients: preserve alpha through packing/upload, explicitly opt the material into blending, and use texture alpha multiplied by material opacity in the shader. That would reuse this compositor and depth policy. The present implementation does **not** yet support that continuous texture-alpha contract; the new shrimp atlas is RGB plus material opacity.
 
 [Blender export/import](../../wftools/wf_blender/export_level.py) reads the explicit custom material property `wf_opacity`, defaulting to 1.0. It validates the 0–1 range and serializes opacity as fixed-point metadata. Import restores that property and Principled Alpha, selecting Blender's dithered surface rendering for translucent materials. Transmission is not interpreted as opacity.
 

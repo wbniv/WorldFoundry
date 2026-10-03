@@ -75,6 +75,10 @@ Today `task build-cd-iff-aquarium` packages one standalone level with `shell.fth
 
 The aquarium uses opaque geometry and fog to suggest water. Follow that established rendering approach. New level scripts use zForth; models and level data come through the Blender/level compiler pipeline.
 
+## 2026-10-03 — both blue varieties in the same tank (implemented)
+
+Will requested Blue Jelly and Blue Dream together: a light translucent blue variant and a darker densely blue variant. The original opaque/cobalt treatment below describes the existing implementation. The implemented mixed-colony appearance, mockups, rig/material diagram, A3 poster and verification evidence live in the [shrimp content plan](2026-10-03-aquarium-blue-shrimp-varieties.md). It depends on the separate [engine translucency plan](2026-10-02-condo-translucency.md). The count remains 24 total (12 of each, player included), in the same tank. The second texture uses the existing model, shared engine translucency is implemented, and desktop checks and Chromecast installation are complete.
+
 ## Blue Shrimp scene
 
 **Proposed defaults:** a stylized freshwater planted tank, 24 shrimp total including one controllable shrimp, with varied size, blue shade and animation phase. These are art and tuning choices, not a claim of biological simulation. Count is configurable at build time so device measurements can determine the shipping budget.

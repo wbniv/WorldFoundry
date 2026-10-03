@@ -1,4 +1,4 @@
-<!doctype html><html lang="en"><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><title>Engine translucency — implementation report and simulated PR</title><style>body{margin:0;background:#f1f5f9;color:#1b2d3b;font:16px/1.6 system-ui,sans-serif}main{max-width:1160px;margin:28px auto;padding:36px 44px;background:white;border-radius:12px}h1{font-size:30px;line-height:1.2}h2{margin-top:38px;border-bottom:1px solid #dae3eb;padding-bottom:7px}h3{margin-top:28px}img{display:block;max-width:100%;height:auto;margin:22px auto}table{width:100%;border-collapse:collapse;font-size:14px;line-height:1.5}th,td{padding:12px;border:1px solid #dbe3eb;text-align:left;vertical-align:top}th{background:#eaf1f7}code{background:#eef3f7;padding:2px 4px;border-radius:3px;font-size:.87em;overflow-wrap:anywhere}a{color:#125e9b}input{margin-right:8px}nav{background:#eef4f7;padding:12px 18px;border-radius:6px}nav a{margin-right:18px}@media(max-width:800px){main{padding:20px;margin:0}table{font-size:12px}td,th{padding:7px}}</style><main><nav><a href="#simulated-pr-explicit-material-translucency-across-actors">Implementation / simulated PR</a><a href="2026-10-03-aquarium-blue-shrimp-varieties.html">Shrimp results</a><a href="../reference/blue-shrimp-poster/poster.html">A3 poster</a></nav><h1 id="engine-translucency-support-materials-compositing-and-backends">Engine translucency support: materials, compositing and backends</h1>
+<!doctype html><html lang="en"><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><title>Engine translucency — implementation report and simulated PR</title><style>body{margin:0;background:#f1f5f9;color:#1b2d3b;font:16px/1.6 system-ui,sans-serif}main{max-width:1160px;margin:28px auto;padding:36px 44px;background:white;border-radius:12px}h1{font-size:30px;line-height:1.2}h2{margin-top:38px;border-bottom:1px solid #dae3eb;padding-bottom:7px}h3{margin-top:28px}img{display:block;max-width:100%;height:auto;margin:22px auto}table{width:100%;border-collapse:collapse;font-size:14px;line-height:1.5}th,td{padding:12px;border:1px solid #dbe3eb;text-align:left;vertical-align:top}th{background:#eaf1f7}code{background:#eef3f7;padding:2px 4px;border-radius:3px;font-size:.87em;overflow-wrap:anywhere}a{color:#125e9b}input{margin-right:8px}nav{background:#eef4f7;padding:12px 18px;border-radius:6px}nav a{margin-right:18px}@media(max-width:800px){main{padding:20px;margin:0}table{font-size:12px}td,th{padding:7px}}a[href*="/commits/"]{white-space:nowrap;overflow-wrap:normal;word-break:normal;font-family:monospace}td:has(a[href*="/commits/"]){min-width:9ch}</style><main><nav><a href="#simulated-pr-explicit-material-translucency-across-actors">Implementation / simulated PR</a><a href="2026-10-03-aquarium-blue-shrimp-varieties.html">Shrimp results</a><a href="../reference/blue-shrimp-poster/poster.html">A3 poster</a></nav><h1 id="engine-translucency-support-materials-compositing-and-backends">Engine translucency support: materials, compositing and backends</h1>
 <p><strong>Date:</strong> 2026-10-02; implementation/writeup 2026-10-03. <strong>Status:</strong> engine support implemented and exercised with the mixed shrimp tank on desktop GL and Chromecast GLES. Metal changes await Apple validation; WebGL runtime validation remains open. Condo material/geometry changes remain separately pending. Planning SVGs are labelled separately from actual game captures.</p>
 <p>The engine work is shared by the condo shade/glass and the separately planned shrimp materials. Material authoring/serialization, render-state transport, sorted compositing and backend parity belong here. Shrimp content and its A3 poster are in the <a href="2026-10-03-aquarium-blue-shrimp-varieties.md">mixed shrimp tank plan</a>. Shrimp display support is authorized; condo material/geometry changes await approval.</p>
 <h2 id="shrimp-implementation-learnings-2026-10-03">Shrimp implementation learnings — 2026-10-03</h2>
@@ -15,7 +15,7 @@
 <p>The renderer previously wrote alpha 1.0 for both flat and textured materials. Although texture uploads sometimes enabled GL blending, materials had no continuous opacity path and all faces wrote depth. Giving a pale shrimp a different RGB texture therefore still produced a solid animal. Simply enabling blending would also leave it dependent on actor submission order: scenery submitted after a shell could paint over it, and overlapping shells could blend in the wrong order.</p>
 <p>Materials can now opt into continuous opacity. In the test tank, the Jelly shell contributes at 0.28 and its legs/antennae at 0.18, while eyes remain opaque. All opaque world geometry establishes the depth buffer first. Translucent triangles from every actor then composite from far to near, depth-tested against that opaque scene. The shared sorter makes this ordering independent of which actor was visited first.</p>
 <h3 id="implementation-commits">Implementation commits</h3>
-<p>These are actual local commits, in implementation order; the PR itself is simulated. Inspect them with <code>git show &lt;hash&gt;</code>.</p>
+<p>These are actual local commits, in implementation order; the PR itself is simulated. Each commit link opens its full diff locally, without requiring an unpublished GitHub URL. You can also inspect them with <code>git show &lt;hash&gt;</code>.</p>
 <table>
 <thead>
 <tr>
@@ -26,25 +26,27 @@
 </thead>
 <tbody>
 <tr>
-<td><code>92e8cc0a</code></td>
+<td><a href="2026-10-02-condo-translucency/commits/92e8cc0a.html">92e8cc0a</a></td>
 <td>Add explicit material opacity with compatible OPAC model metadata</td>
 <td>Blender export/import, optional binary metadata, runtime material opacity and all eight triangle submission variants</td>
 </tr>
 <tr>
-<td><code>1bdde381</code></td>
+<td><a href="2026-10-02-condo-translucency/commits/1bdde381.html">1bdde381</a></td>
 <td>Composite translucent triangles across actors with per-vertex opacity</td>
 <td>Shared compositor, camera completion hook, GL/GLES shader/state, Metal shader/pipelines and batching</td>
 </tr>
 <tr>
-<td><code>3c0b4ac3</code></td>
+<td><a href="2026-10-02-condo-translucency/commits/3c0b4ac3.html">3c0b4ac3</a></td>
 <td>Verify translucent ordering state lifetime and opacity round trips</td>
 <td>Recording-backend compositor tests and Blender round-trip/malformed metadata checks</td>
 </tr>
 </tbody>
 </table>
-<p>The separate shrimp content commit <code>1aef7152</code> contains the second texture, deterministic half-colony assignment and regenerated assets. Those content choices consume the engine API; they are not part of the engine's material format or sorting policy.</p>
+<p>The separate shrimp content commit <a href="2026-10-02-condo-translucency/commits/1aef7152.html">1aef7152</a> contains the second texture, deterministic half-colony assignment and regenerated assets. Those content choices consume the engine API; they are not part of the engine's material format or sorting policy.</p>
 <p><img alt="Mixed opaque and translucent shrimp running on Chromecast HD" src="2026-10-03-aquarium-blue-shrimp-varieties/device/blue-shrimp-optimized.png" /></p>
 <h3 id="authoring-and-model-compatibility">Authoring and model compatibility</h3>
+<p><strong>Why material opacity rather than an alpha texture?</strong> A texture's alpha channel can supply per-pixel opacity, but it cannot replace the renderer's blending, depth-write policy or cross-actor sorting. Those mechanisms are needed with either source of alpha. This rollout uses material opacity because the existing packer stores a legacy one-bit translucency marker and the runtime reconstructs only fully transparent, half-transparent or opaque texels, with a special opaque-black case. It cannot retain the Jelly's 0.28/0.18 values as ordinary image alpha. The existing flat-colour materials also need an opacity source for future glass/shade work.</p>
+<p>Continuous RGBA textures would be a useful extension for varying shell transparency, markings or gradients: preserve alpha through packing/upload, explicitly opt the material into blending, and use texture alpha multiplied by material opacity in the shader. That would reuse this compositor and depth policy. The present implementation does <strong>not</strong> yet support that continuous texture-alpha contract; the new shrimp atlas is RGB plus material opacity.</p>
 <p><a href="../../wftools/wf_blender/export_level.py">Blender export/import</a> reads the explicit custom material property <code>wf_opacity</code>, defaulting to 1.0. It validates the 0–1 range and serializes opacity as fixed-point metadata. Import restores that property and Principled Alpha, selecting Blender's dithered surface rendering for translucent materials. Transmission is not interpreted as opacity.</p>
 <p>The existing MATL record remains <strong>264 bytes</strong>. A separate, optional OPAC chunk follows MATL:</p>
 <table>

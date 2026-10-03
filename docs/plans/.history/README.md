@@ -1,5 +1,6 @@
 | Date | Change |
 |------|--------|
+| [2026-10-03](https://github.com/wbniv/WorldFoundry/commit/cd36444d) | Record schooling cache frame gains and remaining device validation |
 | [2026-10-03](https://github.com/wbniv/WorldFoundry/commit/f6248fff) | Implement species swimming, pitched rigs and jelly deformation |
 | [2026-10-03](https://github.com/wbniv/WorldFoundry/commit/24fdef05) | Refine phase 3 tiger barb mesh and profile Chromecast costs |
 | [2026-10-03](https://github.com/wbniv/WorldFoundry/commit/cf6b653f) | Update FPS mailbox plan after merge into 2026-new-level |
@@ -39,6 +40,10 @@
 | [2026-06-26](https://github.com/wbniv/WorldFoundry/commit/16d72fa6) | docs: add plan index (docs/plans/README.md) |
 
 <!--history-meta v1
+cd36444d	author	Will Norris
+cd36444d	added	1
+cd36444d	deleted	1
+cd36444d	files	1
 f6248fff	author	Will Norris
 f6248fff	added	1
 f6248fff	deleted	1

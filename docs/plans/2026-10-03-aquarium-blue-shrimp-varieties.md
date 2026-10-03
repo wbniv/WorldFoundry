@@ -107,7 +107,7 @@ Implementation learnings: the original shrimp use flat palette colours rather th
 
 ## Implementation results — 2026-10-03
 
-Content commit `1aef7152` adds the RGB Jelly atlas, shared-model UV/material variant, deterministic 12/12 assignment and regenerated standalone assets. The original appearance remains on odd-numbered shrimp; the Jelly player and even-numbered shrimp use the second appearance. Five-part geometry, rig and controller are retained.
+Content commit [1aef7152](2026-10-02-condo-translucency/commits/1aef7152.html) adds the RGB Jelly atlas, shared-model UV/material variant, deterministic 12/12 assignment and regenerated standalone assets. The original appearance remains on odd-numbered shrimp; the Jelly player and even-numbered shrimp use the second appearance. Five-part geometry, rig and controller are retained.
 
 [Desktop checks](2026-10-03-aquarium-blue-shrimp-varieties/engine/checks.json) pass for colony animation, both cameras, six directional boundaries and backward tail flick. Ten content/compositor tests pass, and all five Jelly parts preserve opacity through a Blender import/export round trip. [Motion recording](2026-10-03-aquarium-blue-shrimp-varieties/engine/shrimp-motion.mp4) and [Chromecast capture](2026-10-03-aquarium-blue-shrimp-varieties/device/blue-shrimp-optimized.png) show the running mixed tank.
 
