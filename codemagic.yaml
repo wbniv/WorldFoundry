@@ -682,7 +682,7 @@ workflows:
           # a Linux capture — which is what plan steps 9 and 10 need. Verified
           # locally: two -rate20 runs produce byte-identical PNGs.
           "$WF_GAME" --frame-step-smoke=30 --cycles=1 -L"$LEVEL" -rate20 \
-            --capture-frame=20="$CM_BUILD_DIR/macos-frame20.png" \
+            --no-fps --capture-frame=20="$CM_BUILD_DIR/macos-frame20.png" \
             2>&1 | tee -a "$CM_BUILD_DIR/macos-smoke.log"
 
       - name: Verify raw FPS through script mailboxes and unswapped frame steps
@@ -695,6 +695,18 @@ workflows:
             --frame-step-no-swap -L"$LEVEL" -rate20 \
             2>&1 | tee "$CM_BUILD_DIR/macos-framerate.log"
           python3 "$CM_BUILD_DIR/tests/check_frame_rate_log.py" "$CM_BUILD_DIR/macos-framerate.log"
+
+      - name: Verify number-only FPS overlay capture
+        script: |
+          set -euo pipefail
+          WF_GAME="$CM_BUILD_DIR/engine/wf_game.app/Contents/MacOS/wf_game"
+          LEVEL="$CM_BUILD_DIR/wflevels/snowgoons-blender/snowgoons-standalone.iff"
+          cd wfsource/source/game
+          "$WF_GAME" --frame-step-smoke=30 --cycles=1 -L"$LEVEL" -rate20 \
+            --capture-frame=20="$CM_BUILD_DIR/macos-fps-overlay.png" \
+            2>&1 | tee "$CM_BUILD_DIR/macos-fps-overlay.log"
+          python3 "$CM_BUILD_DIR/tests/check_fps_overlay_capture.py" \
+            "$CM_BUILD_DIR/macos-frame20.png" "$CM_BUILD_DIR/macos-fps-overlay.png"
 
       - name: Compare deterministic capture with Linux reference
         script: |
@@ -721,7 +733,7 @@ workflows:
           LEVEL="$CM_BUILD_DIR/wflevels/aquarium-standalone.iff"
           cd wfsource/source/game
           "$WF_GAME" --frame-step-smoke=30 --cycles=1 -L"$LEVEL" -rate20 \
-            --capture-frame=20="$CM_BUILD_DIR/macos-aquarium-frame20.png" \
+            --no-fps --capture-frame=20="$CM_BUILD_DIR/macos-aquarium-frame20.png" \
             2>&1 | tee "$CM_BUILD_DIR/macos-aquarium.log" || true
           cd "$CM_BUILD_DIR"
 
@@ -770,11 +782,11 @@ workflows:
           cd wfsource/source/game
           for N in 100 200; do
             "$WF_GAME" --frame-step-smoke=$((N + 10)) --cycles=1 -L"$LEVEL" -rate20 \
-              --capture-frame=$N="$CM_BUILD_DIR/macos-aquarium-frame$N.png" \
+              --no-fps --capture-frame=$N="$CM_BUILD_DIR/macos-aquarium-frame$N.png" \
               2>&1 | tee "$CM_BUILD_DIR/macos-aquarium-frame$N.log" || true
           done
           "$WF_GAME" --windowed --frame-step-smoke=30 --cycles=1 -L"$LEVEL" -rate20 \
-            --capture-frame=20="$CM_BUILD_DIR/macos-aquarium-windowed.png" \
+            --no-fps --capture-frame=20="$CM_BUILD_DIR/macos-aquarium-windowed.png" \
             2>&1 | tee "$CM_BUILD_DIR/macos-aquarium-windowed.log" || true
           echo "AQUARIUM SHOTS: $(ls "$CM_BUILD_DIR"/macos-aquarium-frame*.png "$CM_BUILD_DIR"/macos-aquarium-windowed.png 2>/dev/null | wc -l) png file(s) written"
 
@@ -796,7 +808,7 @@ workflows:
           LEVEL="$CM_BUILD_DIR/wflevels/snowgoons-blender/snowgoons-standalone.iff"
           cd wfsource/source/game
           "$WF_GAME" --windowed --frame-step-smoke=30 --cycles=1 -L"$LEVEL" -rate20 \
-            --capture-frame=20="$CM_BUILD_DIR/macos-frame20-windowed.png" \
+            --no-fps --capture-frame=20="$CM_BUILD_DIR/macos-frame20-windowed.png" \
             2>&1 | tee "$CM_BUILD_DIR/macos-windowed.log" || true
           # TODO.md:7 — -width/-height must actually reach the window, not just
           # compile. Second short run at a non-default size; the window line
@@ -851,6 +863,8 @@ workflows:
       - macos-comparison.log
       # Phase 2's deliverable: a real Metal frame rendered with no window. This
       # is what turns macos-desktop-debug from a build gate into a visual gate.
+      - macos-fps-overlay.png
+      - macos-fps-overlay.log
       - macos-frame20.png
       # Aquarium Metal-vs-GL parity (informational; plan step 21).
       - macos-aquarium-frame20.png

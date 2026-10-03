@@ -26,7 +26,7 @@ struct ProbeMailboxes : Mailboxes, MailboxesManager {
         return *this;
     }
     Scalar ReadMailbox(int32 index) const override {
-        if (index == EMAILBOX_FRAMERATE) return Scalar::FromDouble(sampler.Read(0));
+        if (index == EMAILBOX_FRAMERATE) return sampler.Read(0);
         if (index == 1899) return scratch;
         std::abort();
     }

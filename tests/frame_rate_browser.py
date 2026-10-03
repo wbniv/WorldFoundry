@@ -49,7 +49,8 @@ def await_sample(page, predicate):
     assert predicate(samples()), "missing FPS sample; see runtime.log"
 
 try:
-    with sync_playwright() as pw, tempfile.TemporaryDirectory(prefix="wf-fps-chrome-") as profile:
+    # Chrome child processes can finish writing after the main process exits.
+    with sync_playwright() as pw, tempfile.TemporaryDirectory(prefix="wf-fps-chrome-", ignore_cleanup_errors=True) as profile:
         chrome = subprocess.Popen([a.chrome, "--no-sandbox", "--remote-debugging-port=0",
             "--user-data-dir=" + profile, "about:blank"],
             stdout=subprocess.DEVNULL, stderr=subprocess.DEVNULL)

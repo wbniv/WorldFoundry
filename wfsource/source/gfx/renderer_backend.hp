@@ -17,6 +17,7 @@
 
 class Matrix34;
 class PixelMap;
+struct PhonepadRect;
 
 struct RBVertex
 {
@@ -119,6 +120,11 @@ public:
     // the swap-buffers. Legacy fixed-function backend is a no-op; modern
     // VBO backend uses this to drain its accumulated vertex buffer.
     virtual void EndFrame() = 0;
+
+    // Surface-pixel rectangles over the scene, before frame finalization.
+    // Headless backends have nothing to draw. GPU backends preserve scene state.
+    virtual void DrawOverlay(const PhonepadRect* /*rects*/, int /*count*/,
+                             int /*width*/, int /*height*/) {}
 
     // ---- textures (D4/O3 of docs/plans/2026-09-20-macos-metal-renderer.md) --
     //

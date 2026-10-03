@@ -152,6 +152,7 @@ usage( int argc, char* argv[] )
    (void) argv;
 	std::cout << "Usage : " << __GAME__ << " {switches} <level #>" << std::endl;
 	std::cout << "Switches:" << std::endl;
+	std::cout << "\t--no-fps\tHide the default bottom-right frame-rate counter" << std::endl;
 	std::cout << "\t-p<stream initial><stream output>, where:" << std::endl;
 	std::cout << "\t\t<stream initial> can be any of:" << std::endl;
 	std::cout << "\t\t\tw=warnings (defaults to standard err)" << std::endl;
@@ -260,6 +261,10 @@ ParseCommandLine(int argc, char** argv)
 			gDebugBind[sizeof(gDebugBind)-1] = '\0';
 			++index;
 			DBSTREAM1( cprogress << "Debug bridge bind: " << gDebugBind << std::endl; )
+		}
+		else if ( strcmp( argv[index]+1, "-no-fps" ) == 0 )
+		{
+			fpscounter::enabled = false;
 		}
 		else if ( strcmp( argv[index]+1, "-frame-profile" ) == 0 )
 		{

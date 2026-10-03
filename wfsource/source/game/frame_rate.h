@@ -1,5 +1,6 @@
 #pragma once
 
+#include <math/scalar.hp>
 #include <chrono>
 
 // Diagnostic cadence only. Simulation clamps/overrides never enter this sampler.
@@ -14,7 +15,7 @@ public:
     void Reset()
     {
         _hasBaseline = false;
-        _fps = 0.0;
+        _fps = Scalar(0, 0);
     }
 
     void BeginFrame(TimePoint now, unsigned int lifecycleGeneration)
@@ -37,20 +38,20 @@ public:
             Reset();
             return;
         }
-        const double seconds = std::chrono::duration<double>(now - _last).count();
-        _fps = 1.0 / seconds;
+        const Scalar seconds = Scalar::FromFloat(std::chrono::duration<float>(now - _last).count());
+        _fps = Scalar(1, 0) / seconds;
         _last = now;
     }
 
-    double Read(unsigned int lifecycleGeneration) const
+    Scalar Read(unsigned int lifecycleGeneration) const
     {
         // Also handles suspend/resume between steps, when no suspended step ran.
-        return _generation == lifecycleGeneration ? _fps : 0.0;
+        return _generation == lifecycleGeneration ? _fps : Scalar(0, 0);
     }
 
 private:
     TimePoint _last{};
     unsigned int _generation = 0;
     bool _hasBaseline = false;
-    double _fps = 0.0;
+    Scalar _fps{0, 0};
 };

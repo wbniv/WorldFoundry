@@ -1,0 +1,51 @@
+//=============================================================================
+// fps_overlay.hp: shared diagnostic frame-rate overlay
+// Copyright (c) 2026 World Foundry Group
+// Part of the World Foundry 3D video game engine/production environment
+// for more information about World Foundry, see www.worldfoundry.org
+//=============================================================================
+// This program is free software; you can redistribute it and/or
+// modify it under the terms of the GNU General Public License
+// Version 2 as published by the Free Software Foundation.
+//
+// This program is distributed in the hope that it will be useful,
+// but WITHOUT ANY WARRANTY; without even the implied warranty of
+// MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the
+// GNU General Public License for more details.
+//
+// You should have received a copy of the GNU General Public License
+// along with this program; if not, write to the Free Software
+// Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA.
+//=============================================================================
+// Description: Cached number-only overlay of raw mailbox frame rate.
+// Original Author: World Foundry Group
+//=============================================================================
+
+#ifndef _FPS_OVERLAY_HP
+#define _FPS_OVERLAY_HP
+
+#include <math/scalar.hp>
+#include <hal/phonepad/phonepad_overlay.h>
+
+namespace fpscounter
+{
+extern bool enabled;
+
+// Cached text geometry in surface pixels, independent of the game HUD.
+class Overlay
+{
+public:
+	int Build(Scalar fps, int width, int height);
+	const PhonepadRect* Rects() const { Validate(); return _rects; }
+	void Validate() const;
+	const char* Text() const { Validate(); return _text; }
+private:
+	char _text[32] = "";
+	int _width = 0, _height = 0;
+	enum { MAX_QUADS = 128 };
+	PhonepadRect _rects[MAX_QUADS + 1];
+	int _count = 0;
+};
+}
+
+#endif // _FPS_OVERLAY_HP

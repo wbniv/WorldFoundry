@@ -166,6 +166,8 @@ public:
         t.order=_count++; t.cullExempt=exempt; t.prelit=prelit;
     }
     void FlushTranslucency() override { Drain(); }
+    void DrawOverlay(const PhonepadRect* rects, int count, int w, int h) override
+    { Drain(); _backend.DrawOverlay(rects, count, w, h); }
     void EndFrame() override { Drain(); _backend.EndFrame(); }
     RBTextureHandle CreateTexture(int w,int h,RBTextureFormat f,const void* p) override
     { return _backend.CreateTexture(w,h,f,p); }

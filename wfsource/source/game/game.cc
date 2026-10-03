@@ -32,7 +32,6 @@
 #include <hal/lifecycle.h>
 #include <unistd.h>
 #include <algorithm>
-#include <limits>
 #if defined(__EMSCRIPTEN__)
 #  include <emscripten.h>
 #endif
@@ -567,14 +566,7 @@ WFGame::DiagnosticFrameRate() const
 {
 	if (HALIsSuspended())
 		return Scalar::zero;
-	double fps = _frameRate.Read(HALLifecycleGeneration());
-#if defined(SCALAR_TYPE_FIXED)
-	// Signed 16.16 representation. Saturate only at its numeric limit.
-	fps = std::min(fps, 32767.0 + 65535.0 / 65536.0);
-#elif defined(SCALAR_TYPE_FLOAT)
-	fps = std::min(fps, double(std::numeric_limits<float>::max()));
-#endif
-	return Scalar::FromDouble(fps);
+	return _frameRate.Read(HALLifecycleGeneration());
 }
 
 WFGame::FrameResult
@@ -642,6 +634,13 @@ WFGame::StepFrame(bool do_swap, Scalar* out_dt)
 		_display->RenderBegin();
 		_curLevel->RenderScene();
 		RestApi_RenderBoxes();
+		if (fpscounter::enabled)
+		{
+			int w = 0, h = 0;
+			_display->GetSurfaceSize(w, h);
+			const int count = _fpsOverlay.Build(_curLevel->GetMailboxes().ReadMailbox(EMAILBOX_FRAMERATE), w, h);
+			RendererBackendGet().DrawOverlay(_fpsOverlay.Rects(), count, w, h);
+		}
 		_display->RenderEnd();
 	}
 #if DO_ASSERTIONS
