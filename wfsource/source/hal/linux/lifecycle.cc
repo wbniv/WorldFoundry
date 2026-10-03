@@ -31,18 +31,27 @@
 
 namespace {
 std::atomic<bool> g_suspended{false};
+std::atomic<unsigned int> g_lifecycleGeneration{0};
 }
 
 extern "C" void
 HALNotifySuspend(void)
 {
+    g_lifecycleGeneration.fetch_add(1, std::memory_order_acq_rel);
     g_suspended.store(true, std::memory_order_release);
 }
 
 extern "C" void
 HALNotifyResume(void)
 {
+    g_lifecycleGeneration.fetch_add(1, std::memory_order_acq_rel);
     g_suspended.store(false, std::memory_order_release);
+}
+
+extern "C" unsigned int
+HALLifecycleGeneration(void)
+{
+    return g_lifecycleGeneration.load(std::memory_order_acquire);
 }
 
 extern "C" int

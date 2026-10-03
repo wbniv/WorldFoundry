@@ -146,7 +146,7 @@ Comment("=====================================================================")
 
 	MAILBOXENTRY( GLOBAL_SYSTEM_START,1901)
 	MAILBOXENTRY( MIDI,1902)
-	MAILBOXENTRY( FRAMERATE,1903)
+	MAILBOXENTRY( FRAMERATE,1903)	Comment("Read-only diagnostic FPS: reciprocal of latest actual monotonic frame interval; no smoothing or simulation caps. Zero before first sample or after lifecycle reset. Never use for gameplay timing.")
 	MAILBOXENTRY( CAMROLL,1904)
 	MAILBOXENTRY( END_OF_LEVEL,1905)
 	MAILBOXENTRY(TIME,1906)
