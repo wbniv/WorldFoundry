@@ -13,9 +13,11 @@ inline void CheckFrameRateMailbox(Level& level, Scalar value, unsigned generatio
 {
     if (!gFrameRateChecks) return;
     static unsigned frames = 0;
+    static bool previousWasZero = true;
     ++frames;
     // Probe every first/baseline frame and periodically during normal play.
-    if (value != Scalar::zero && frames % 30 != 0) return;
+    if (value != Scalar::zero && !previousWasZero && frames % 30 != 0) return;
+    previousWasZero = value == Scalar::zero;
     struct Probe { const char* name; const char* source; int language; bool integer; };
     static const Probe probes[] = {
 #ifdef WF_ENABLE_LUA
