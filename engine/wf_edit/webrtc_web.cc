@@ -439,6 +439,10 @@ size_t WebrtcSession::ConnectedPeerCount() {
     return static_cast<size_t>(wfwebrtc_connected_count());
 }
 
+// RTCP feedback and decoder recovery belong to RTCPeerConnection on web.
+// The shared editor loop also calls these native-pipeline hooks.
+void WebrtcSession::SendPli(const std::string&) {}
+
 // ── VoiceChat (thin shim — browser captures/encodes/transports/decodes/plays) ──
 VoiceChat::VoiceChat() = default;
 VoiceChat::~VoiceChat() = default;
@@ -464,6 +468,7 @@ void VideoChat::OnRemoteVP8Frame(const std::string&, const uint8_t*, int, bool) 
 void VideoChat::SetCameraEnabled(bool on) { cam_enabled_.store(on); wfwebrtc_set_cam(on ? 1 : 0); }
 void VideoChat::SyncPeers(const std::vector<PeerInfo>&) {}
 void VideoChat::UploadFrames() {}                    // Phase 3: drives the <video> overlay layout
+std::vector<std::string> VideoChat::TakePliRequests(double) { return {}; }
 unsigned int VideoChat::PeerTexture(const std::string&) { return 0; }   // overlay approach → no GL texture
 
 } // namespace wfedit

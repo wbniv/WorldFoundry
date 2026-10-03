@@ -204,9 +204,11 @@ float RunScript(const char* src, int objectIndex)
 
     // -----------------------------------------------------------------------
     // 1. Compile module
-    wasm_byte_vec_t bytes;
+    wasm_byte_vec_t bytes{};
     bytes.size = wasm_bytes.size();
     bytes.data = reinterpret_cast<wasm_byte_t*>(wasm_bytes.data());
+    bytes.num_elems = bytes.size;
+    bytes.size_of_elem = sizeof(wasm_byte_t);
 
     wasm_module_t* module = wasm_module_new(g_store, &bytes);
     if (!module) {
@@ -247,7 +249,7 @@ float RunScript(const char* src, int objectIndex)
     wasm_functype_t* read_actor_ft = wasm_functype_new(&ram_params, &ram_results);
 
     // Build externs in import order.
-    size_t n = import_types.size;
+    size_t n = import_types.num_elems;
     std::vector<wasm_extern_t*> extern_ptrs(n, nullptr);
     // Keep ownership of created objects to free them later.
     std::vector<wasm_func_t*>   owned_funcs;
@@ -262,6 +264,10 @@ float RunScript(const char* src, int objectIndex)
 
         std::string mod_str(mod->data,   mod->size);
         std::string nm_str (name->data,  name->size);
+        // WAMR 2.2's wasm_module_imports uses the _nt name helper, whose
+        // vector size includes a trailing NUL. Compare the actual names.
+        if (!mod_str.empty() && mod_str.back() == '\0') mod_str.pop_back();
+        if (!nm_str.empty() && nm_str.back() == '\0') nm_str.pop_back();
 
         if (mod_str == "env") {
             // Host functions: read_mailbox and write_mailbox
@@ -325,9 +331,13 @@ float RunScript(const char* src, int objectIndex)
     if (ok) {
         // -----------------------------------------------------------------------
         // 3. Instantiate
-        wasm_extern_vec_t imports;
+        // WAMR extends C-API vectors with an element count and stride. This
+        // is a borrowed view; leaving num_elems uninitialized corrupts linking.
+        wasm_extern_vec_t imports{};
         imports.size = n;
         imports.data = extern_ptrs.data();
+        imports.num_elems = n;
+        imports.size_of_elem = sizeof(wasm_extern_t*);
 
         wasm_trap_t* trap = nullptr;
         wasm_instance_t* instance = wasm_instance_new(g_store, module, &imports, &trap);
@@ -349,7 +359,7 @@ float RunScript(const char* src, int objectIndex)
             wasm_instance_exports(instance, &exports);
 
             wasm_func_t* main_fn = nullptr;
-            for (size_t i = 0; i < exports.size; ++i) {
+            for (size_t i = 0; i < exports.num_elems; ++i) {
                 // The module must export a function named "main".
                 // We look at type: exports order matches the wasm export section.
                 if (wasm_extern_kind(exports.data[i]) == WASM_EXTERN_FUNC) {

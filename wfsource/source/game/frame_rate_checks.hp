@@ -1,0 +1,72 @@
+// Opt-in runtime verification. Uses global user mailbox 1899 as scratch.
+// Enable with --frame-rate-checks or WF_FRAME_RATE_CHECKS=1; no gameplay use.
+#ifndef WF_FRAME_RATE_CHECKS_HP
+#define WF_FRAME_RATE_CHECKS_HP
+#include <cstdio>
+#include <cstdlib>
+#include <cmath>
+
+extern bool gFrameRateChecks;
+extern bool gFrameStepNoSwap;
+
+inline void CheckFrameRateMailbox(Level& level, Scalar value, unsigned generation)
+{
+    if (!gFrameRateChecks) return;
+    static unsigned frames = 0;
+    static bool previousWasZero = true;
+    ++frames;
+    // Probe every first/baseline frame and periodically during normal play.
+    if (value != Scalar::zero && !previousWasZero && frames % 30 != 0) return;
+    previousWasZero = value == Scalar::zero;
+    struct Probe { const char* name; const char* source; int language; bool integer; };
+    static const Probe probes[] = {
+#ifdef WF_ENABLE_LUA
+        {"lua", "write_mailbox(1899, read_mailbox(INDEXOF_FRAMERATE))", 0, false},
+#endif
+#ifdef WF_ENABLE_FENNEL
+        {"fennel", "; fps probe\n(write_mailbox 1899 (read_mailbox INDEXOF_FRAMERATE))", 1, false},
+#endif
+#ifdef WF_ENABLE_WREN
+        {"wren", "//wren\nEnv.write_mailbox(1899, Env.read_mailbox(INDEXOF_FRAMERATE))", 2, false},
+#endif
+#if defined(WF_FORTH_ENGINE_ZFORTH)
+        {"zforth", "\\ fps probe\nINDEXOF_FRAMERATE read-mailbox 1899 write-mailbox\n", 3, false},
+#elif defined(WF_FORTH_ENGINE_FICL) || defined(WF_FORTH_ENGINE_ATLAST) || defined(WF_FORTH_ENGINE_EMBED) || defined(WF_FORTH_ENGINE_LIBFORTH) || defined(WF_FORTH_ENGINE_PFORTH)
+        {"forth-integer", "\\ fps probe\nINDEXOF_FRAMERATE read-mailbox 1899 write-mailbox\n", 3, true},
+#endif
+#ifdef WF_WITH_JS
+        {"javascript", "// fps probe\nwrite_mailbox(1899, read_mailbox(INDEXOF_FRAMERATE));", 4, false},
+#endif
+#ifdef WF_WASM_ENGINE_WAMR
+        // Compiled from tests/fixtures/frame_rate_mailbox.wat with wasm-as.
+        {"wamr", "#b64\nAGFzbQEAAAABDgNgAX8BfWACf30AYAAAAkQDA2VudgxyZWFkX21haWxib3gAAANlbnYNd3JpdGVfbWFpbGJveAABBmNvbnN0cxFJTkRFWE9GX0ZSQU1FUkFURQN/AAMCAQIHCAEEbWFpbgACCg0BCwBB6w4jABAAEAEL", 5, false},
+#endif
+#ifdef WF_PILOT_ENGINE_BUILTIN
+        // PILOT retains its program counter; loop so every invocation reads
+        // again, yielding at the interpreter's existing instruction budget.
+        {"pilot", "R:pilot\n*fps\nC:mb(1899)=mb(INDEXOF_FRAMERATE)\nJ:*fps\n", 6, false},
+#endif
+        {nullptr, nullptr, 0, false}
+    };
+    Mailboxes& mailboxes = level.GetMailboxes();
+    const Scalar saved = mailboxes.ReadMailbox(1899);
+    const double raw = value.AsFloat();
+    for (const Probe& probe : probes) {
+        if (!probe.name) break;
+        mailboxes.WriteMailbox(1899, Scalar::FromFloat(-30000));
+        level.EvalScript(probe.source, 0, probe.language);
+        const double actual = mailboxes.ReadMailbox(1899).AsFloat();
+        // Lifecycle callbacks may invalidate the cached sample during a probe.
+        if (generation != HALLifecycleGeneration() || HALIsSuspended()) break;
+        const double expected = probe.integer ? std::trunc(raw) : raw;
+        if (std::fabs(actual - expected) > 0.001 || !std::isfinite(actual)) {
+            std::fprintf(stderr, "FPS CHECK FAIL backend=%s raw=%.6f script=%.6f generation=%u\n", probe.name, raw, actual, generation);
+            std::fflush(stderr);
+            std::abort();
+        }
+        std::printf("FPS CHECK PASS backend=%s raw=%.6f script=%.6f generation=%u\n", probe.name, raw, actual, generation);
+    }
+    mailboxes.WriteMailbox(1899, saved);
+    std::fflush(stdout);
+}
+#endif
