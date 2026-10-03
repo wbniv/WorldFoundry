@@ -46,14 +46,16 @@ s=art.SVG(1200,800);s.rect(0,0,1200,800,'#0c2229');s.text(30,42,'Seed display an
 s.rect(35,75,1130,660,'#174a4c');s.rect(35,645,1130,90,'#b7a987')
 for i in range(12):art.tuft(s,65+i*95,655,140+70*math.sin(i*.9),'#71954c',5)
 s.rect(58,666,430,46,'#102b2a',8);s.text(73,696,'Seed: 713   •   Hold A: change seed',20,'#f5f0df')
-s.rect(295,145,620,550,'#f2f1df',16);s.text(330,188,'Plant seed & growth speed',28,weight='bold');s.text(330,227,'Enter a seed to replay its growth pattern.',20)
-s.rect(330,250,545,52,'#dce7cc',8);s.text(350,284,'713',27,weight='bold')
-for i,label in enumerate(['1','2','3','4','5','6','7','8','9','0','⌫','Clear']):
- x=330+(i%6)*91;y=322+(i//6)*63;s.rect(x,y,80,50,'#c6d6ba' if i else '#a2c5a5',7);s.text(x+16,y+33,label,22)
-s.text(330,465,'Growth speed: 1×',20,weight='bold');s.path('M340 491 H854',stroke='#71896a',sw=6);s.circle(560,491,10,'#426954');s.text(330,518,'Paused  0.25×  0.5×  1×  2×  4×  8×',16)
-s.rect(330,536,255,48,'#537c5f',8);s.text(348,568,'Regenerate',22,'#f4f3df','bold');s.rect(601,536,274,48,'#d9dfcd',8);s.text(620,568,'New random seed',20)
-s.rect(330,598,545,42,'#d9dfcd',8);s.text(349,626,'Apply speed — keep current plants',19)
-s.text(330,665,'← ↑ ↓ → select   A confirm   ↶ cancel',18);
+s.rect(145,110,910,620,'#f2f1df',16);s.text(182,158,'Plant seed & growth speed',29,weight='bold');s.text(182,196,'Enter seed with the 10-key keypad or phone.',20)
+s.rect(182,218,830,52,'#dce7cc',8);s.text(203,253,'713',27,weight='bold')
+for i,label in enumerate(['1','2','3','4','5','6','7','8','9','⌫','0','Clear']):
+ x=182+(i%3)*116;y=297+(i//3)*73;s.rect(x,y,102,61,'#c6d6ba' if i else '#a2c5a5',7);s.text(x+30,y+40,label,23)
+s.text(580,316,'Or type it on your phone',21,weight='bold');s.text(580,348,'Numeric keyboard → same seed field',18)
+s.text(580,395,'Growth speed: 1×',21,weight='bold');s.path('M590 422 H990',stroke='#71896a',sw=6);s.circle(755,422,10,'#426954');s.text(580,449,'Paused  0.25×  0.5×  1×  2×  4×  8×',15)
+s.rect(580,475,432,50,'#537c5f',8);s.text(605,508,'Regenerate',22,'#f4f3df','bold')
+s.rect(580,541,432,48,'#d9dfcd',8);s.text(605,573,'New random seed',21)
+s.rect(182,615,830,43,'#d9dfcd',8);s.text(203,644,'Apply speed — keep current plants',20)
+s.text(182,696,'← ↑ ↓ → keypad focus   A select   ↶ cancel',19)
 s.text(35,777,'Concept: seed is always at bottom left; editor is also available from the selector.',20,'#dfead6');s.save('seed-editor-mockup.svg')
 s=art.SVG(1200,460);s.rect(0,0,1200,460,'#f4f3e9');s.text(30,43,'Seed entry → validation → reproducible regeneration',29,weight='bold')
 for x,title,body in [(30,'Open editor','Pause growth; keep current tank.'),(420,'Enter decimal seed','0–4294967295; validate first.'),(810,'Regenerate','Fresh young colonies; same rules.')]:

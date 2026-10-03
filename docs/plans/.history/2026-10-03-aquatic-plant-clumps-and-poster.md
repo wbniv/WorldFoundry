@@ -1,8 +1,13 @@
 | Date | Change |
 |------|--------|
+| [2026-10-03](https://github.com/wbniv/WorldFoundry/commit/a0c9c44a) | Plan visible seeded plant growth with regeneration and speed controls |
 | [2026-10-03](https://github.com/wbniv/WorldFoundry/commit/55d87fb3) | Split tiger-barb tank and add profiled dense planting with A3 growth poster |
 
 <!--history-meta v1
+a0c9c44a	author	Will Norris
+a0c9c44a	added	88
+a0c9c44a	deleted	16
+a0c9c44a	files	1
 55d87fb3	author	Will Norris
 55d87fb3	added	96
 55d87fb3	deleted	0
