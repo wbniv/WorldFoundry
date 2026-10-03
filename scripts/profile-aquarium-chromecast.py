@@ -31,6 +31,12 @@ def adb(*words, binary=False):
 def sh(command):
     return adb('shell', command)
 
+def require_foreground():
+    activity=sh('dumpsys activity activities')
+    resumed=[line for line in activity.splitlines() if 'topResumedActivity=' in line or 'mResumedActivity:' in line]
+    if not any(PKG+'/' in line for line in resumed):
+        raise RuntimeError('Aquarium left the foreground; exclude this interrupted run: '+repr(resumed))
+
 def pct(values, p):
     s=sorted(values)
     return s[min(len(s)-1, int((len(s)-1)*p))] if s else None
@@ -52,8 +58,11 @@ for run in range(1,args.runs+1):
     sh(f'am start -n {PKG}/android.app.NativeActivity')
     time.sleep(9)
     sh('input keyevent KEYCODE_BACK')  # hides the controller panel on its first opening
+    require_foreground()
+    (work/'launch.png').write_bytes(adb('exec-out','screencap','-p',binary=True))
     print(f'run {run}: warming {args.warmup}s',flush=True)
     time.sleep(args.warmup)
+    require_foreground()
     layers=sh('dumpsys SurfaceFlinger --list').splitlines()
     candidates=[s for s in layers if PKG in s and ('SurfaceView' in s or s.startswith(PKG+'/'))]
     if not candidates: raise RuntimeError('No aquarium SurfaceView layer: '+repr(layers))
@@ -82,6 +91,7 @@ for run in range(1,args.runs+1):
             if key and key != 'KEYCODE_DPAD_CENTER': sh('input keyevent --longpress '+key)
             else: time.sleep(min(.25,max(0,deadline-time.monotonic())))
         segments.append({'name':name,'start':start,'end':time.monotonic()-t0})
+        require_foreground()
         (work/f'{name}.png').write_bytes(adb('exec-out','screencap','-p',binary=True))
         print(f'run {run}: captured {name}',flush=True)
     stop.set(); thread.join()

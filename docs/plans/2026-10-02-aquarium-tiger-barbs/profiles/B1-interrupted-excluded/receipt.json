@@ -1,0 +1,8 @@
+{
+  "apk": "/tmp/aquarium-phase3-variants/B1.apk",
+  "apk_sha256": "de1acaa38929ece72549f6369de7586455a5a06641ea8bfbbc1e5a6273dcea03",
+  "protocol": "30 s warmup; 60 s fixed trace (five 12 s segments); 3 run(s); SurfaceFlinger sampled every 0.75 s",
+  "serial": "adb-2628105GN0GT7C-wwfiSB._adb-tls-connect._tcp",
+  "device": "Chromecast HD\n14\nPhysical size: 1920x1080\n",
+  "revision": "10310efe14afdb1acbee687988ee76fcd62ca14f"
+}

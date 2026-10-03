@@ -1,0 +1,8 @@
+{
+  "apk": "/tmp/aquarium-phase3-variants/B11-cpu.apk",
+  "apk_sha256": "e726e71d8ea1814b7ad116082d41022cec0795f0ac653b00b057eaf97827a8a4",
+  "protocol": "30 s warmup; 60 s fixed trace (five 12 s segments); 1 run(s); SurfaceFlinger sampled every 0.75 s",
+  "serial": "adb-2628105GN0GT7C-wwfiSB._adb-tls-connect._tcp",
+  "device": "Chromecast HD\n14\nPhysical size: 1920x1080\n",
+  "revision": "10310efe14afdb1acbee687988ee76fcd62ca14f"
+}

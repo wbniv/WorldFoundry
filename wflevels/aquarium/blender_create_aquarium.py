@@ -64,14 +64,14 @@ assert PROFILE in ('keyboard', 'touch'), f'AQUARIUM_PROFILE={PROFILE!r}: keyboar
 SCHOOL_BENCH  = os.environ.get('AQUARIUM_SCHOOL_BENCH') == '1'
 # AQUARIUM_SCHOOL_N: how many more fish school and swarm round the player's fish (school.fth + school_rig.fth,
 # docs/plans/2026-10-01-aquarium-schooling.md). Default 29 barbs (10 for the clownfish baseline); 0 builds one fish.
-FOLLOWER_ASSET = os.environ.get('AQUARIUM_FOLLOWER_ASSET', 'barb_mesh')
-assert FOLLOWER_ASSET in ('clownfish', 'barb_quad', 'barb_mesh')
+FOLLOWER_ASSET = os.environ.get('AQUARIUM_FOLLOWER_ASSET', 'barb_refined')
+assert FOLLOWER_ASSET in ('clownfish', 'barb_quad', 'barb_mesh', 'barb_refined')
 BARBS = FOLLOWER_ASSET != 'clownfish'
 SCHOOL_N = int(os.environ.get('AQUARIUM_SCHOOL_N', '29' if BARBS else '10') or 0)
 assert 0 <= SCHOOL_N <= (29 if BARBS else 10), 'follower count exceeds allocated mailbox blocks'
 BARB_UPDATES = int(os.environ.get('AQUARIUM_BARB_UPDATES', '5'))
 assert 1 <= BARB_UPDATES <= 29
-BARB_ANIMATE = FOLLOWER_ASSET == 'barb_mesh' and os.environ.get('AQUARIUM_BARB_ANIMATE', '1') != '0'
+BARB_ANIMATE = FOLLOWER_ASSET in ('barb_mesh', 'barb_refined') and os.environ.get('AQUARIUM_BARB_ANIMATE', '1') != '0'
 BARB_FROZEN = os.environ.get('AQUARIUM_BARB_FROZEN') == '1'
 if SCHOOL_BENCH:
     SCHOOL_N = 0                                 # the bench level is the one-fish level plus the invisible Forth
@@ -335,7 +335,7 @@ if BARBS and SCHOOL_N:
             pixels[x, y] = (0, 0, 0, 0) if a < 128 else (r, g, b, 255)
     texture = os.path.join(OUT_DIR, 'tiger_barb.tga')
     image.save(texture)
-    barb_mesh = TB.blender_mesh(bpy, FOLLOWER_ASSET == 'barb_quad', texture)
+    barb_mesh = TB.blender_mesh(bpy, FOLLOWER_ASSET == 'barb_quad', texture, refined=FOLLOWER_ASSET == 'barb_refined')
 for k in range(1, SCHOOL_N + 1):
     follower_objs[k] = {}
     if BARBS:

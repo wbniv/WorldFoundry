@@ -1,0 +1,12 @@
+{
+  "command": "OUT=/tmp/aquarium-phase3-final-verification pytest -q tests/test_aquarium_level.py tests/test_fish_deform.py tests/test_aquarium_barb_motion.py tests/test_aquarium_android.py",
+  "passed": 64,
+  "skipped": 2,
+  "skip_reason": "Debug-APK-only checks: no separate debug APK built in this worktree. Normal release APK checks passed.",
+  "presented_capture_runs": 22,
+  "instrumented_capture_runs": 7,
+  "thermal_status_values": [
+    0
+  ],
+  "installed_apk_sha256": "ca149e8e024396570999006b220246ce14ed31fb8af6dcefe6bbde8084a210e9"
+}

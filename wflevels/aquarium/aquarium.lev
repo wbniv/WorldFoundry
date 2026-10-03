@@ -1068,20 +1068,20 @@
 		} }
 		{ 'EULR' { 'NAME' "Orientation" } { 'DATA' 0.0000000000000000(1.15.16) -0.0000000000000000(1.15.16) 0.0000000000000000(1.15.16)  //a,b,c
 		} }
-		{ 'BOX3' { 'NAME' "Global Bounding Box" } { 'DATA' -0.2624999880790710(1.15.16) -0.0997499972581863(1.15.16) -0.1417499929666519(1.15.16) 0.2624999880790710(1.15.16) 0.0997499972581863(1.15.16) 0.1784999966621399(1.15.16)  //min(x,y,z)-max(x,y,z)
+		{ 'BOX3' { 'NAME' "Global Bounding Box" } { 'DATA' -0.2624999880790710(1.15.16) -0.0944999977946281(1.15.16) -0.1443749964237213(1.15.16) 0.2624999880790710(1.15.16) 0.0944999977946281(1.15.16) 0.1811250001192093(1.15.16)  //min(x,y,z)-max(x,y,z)
 		} }
 		{ 'STR' { 'NAME' "Class Name" } { 'DATA' "platform" } }
-		{ 'FILE' { 'NAME' "Mesh Name" } { 'STR' "tiger_barb_mesh.iff" } }
+		{ 'FILE' { 'NAME' "Mesh Name" } { 'STR' "tiger_barb_refined.iff" } }
 		{ 'I32'  { 'NAME' "Model Type" } { 'DATA' 1l } { 'STR' "Mesh" } }
 		{ 'I32' { 'NAME' "Mobility" } { 'STR' "Anchored" } }
 		{ 'FX32' { 'NAME' "Mass" } { 'DATA' 0.0000000000000000(1.15.16) } { 'STR' "0.0" } }
-		{ 'FILE' { 'NAME' "Mesh Name" } { 'STR' "tiger_barb_mesh.iff" } }
+		{ 'FILE' { 'NAME' "Mesh Name" } { 'STR' "tiger_barb_refined.iff" } }
 		{ 'I32' { 'NAME' "Model Type" } { 'STR' "Mesh" } }
 		{ 'I32' { 'NAME' "Visibility Mailbox" } { 'DATA' 1l } { 'STR' "1" } }
-		{ 'FX32' { 'NAME' "slopeA" } { 'DATA' -0.0162651643921167(1.15.16) } { 'STR' "-0.016265" } }
+		{ 'FX32' { 'NAME' "slopeA" } { 'DATA' 0.0254782921876068(1.15.16) } { 'STR' "0.025478" } }
 		{ 'FX32' { 'NAME' "slopeB" } { 'DATA' 0.0000000000000000(1.15.16) } { 'STR' "0.000000" } }
-		{ 'FX32' { 'NAME' "slopeC" } { 'DATA' 0.0000000000000000(1.15.16) } { 'STR' "0.000000" } }
-		{ 'FX32' { 'NAME' "slopeD" } { 'DATA' 0.0260242634151785(1.15.16) } { 'STR' "0.026024" } }
+		{ 'FX32' { 'NAME' "slopeC" } { 'DATA' -0.0025003240616233(1.15.16) } { 'STR' "-0.002500" } }
+		{ 'FX32' { 'NAME' "slopeD" } { 'DATA' -0.0467660460939662(1.15.16) } { 'STR' "-0.046766" } }
 	}
 	{ 'OBJ' 
 		{ 'NAME' "tiger-barb-2" }
@@ -1089,20 +1089,20 @@
 		} }
 		{ 'EULR' { 'NAME' "Orientation" } { 'DATA' 0.0000000000000000(1.15.16) -0.0000000000000000(1.15.16) 0.0000000000000000(1.15.16)  //a,b,c
 		} }
-		{ 'BOX3' { 'NAME' "Global Bounding Box" } { 'DATA' -0.2624999880790710(1.15.16) -0.0997499972581863(1.15.16) -0.1417499929666519(1.15.16) 0.2624999880790710(1.15.16) 0.0997499972581863(1.15.16) 0.1784999966621399(1.15.16)  //min(x,y,z)-max(x,y,z)
+		{ 'BOX3' { 'NAME' "Global Bounding Box" } { 'DATA' -0.2624999880790710(1.15.16) -0.0944999977946281(1.15.16) -0.1443749964237213(1.15.16) 0.2624999880790710(1.15.16) 0.0944999977946281(1.15.16) 0.1811250001192093(1.15.16)  //min(x,y,z)-max(x,y,z)
 		} }
 		{ 'STR' { 'NAME' "Class Name" } { 'DATA' "platform" } }
-		{ 'FILE' { 'NAME' "Mesh Name" } { 'STR' "tiger_barb_mesh.iff" } }
+		{ 'FILE' { 'NAME' "Mesh Name" } { 'STR' "tiger_barb_refined.iff" } }
 		{ 'I32'  { 'NAME' "Model Type" } { 'DATA' 1l } { 'STR' "Mesh" } }
 		{ 'I32' { 'NAME' "Mobility" } { 'STR' "Anchored" } }
 		{ 'FX32' { 'NAME' "Mass" } { 'DATA' 0.0000000000000000(1.15.16) } { 'STR' "0.0" } }
-		{ 'FILE' { 'NAME' "Mesh Name" } { 'STR' "tiger_barb_mesh.iff" } }
+		{ 'FILE' { 'NAME' "Mesh Name" } { 'STR' "tiger_barb_refined.iff" } }
 		{ 'I32' { 'NAME' "Model Type" } { 'STR' "Mesh" } }
 		{ 'I32' { 'NAME' "Visibility Mailbox" } { 'DATA' 1l } { 'STR' "1" } }
-		{ 'FX32' { 'NAME' "slopeA" } { 'DATA' -0.0162651643921167(1.15.16) } { 'STR' "-0.016265" } }
+		{ 'FX32' { 'NAME' "slopeA" } { 'DATA' 0.0254782921876068(1.15.16) } { 'STR' "0.025478" } }
 		{ 'FX32' { 'NAME' "slopeB" } { 'DATA' 0.0000000000000000(1.15.16) } { 'STR' "0.000000" } }
-		{ 'FX32' { 'NAME' "slopeC" } { 'DATA' 0.0000000000000000(1.15.16) } { 'STR' "0.000000" } }
-		{ 'FX32' { 'NAME' "slopeD" } { 'DATA' 0.0260242634151785(1.15.16) } { 'STR' "0.026024" } }
+		{ 'FX32' { 'NAME' "slopeC" } { 'DATA' -0.0025003240616233(1.15.16) } { 'STR' "-0.002500" } }
+		{ 'FX32' { 'NAME' "slopeD" } { 'DATA' -0.0467660460939662(1.15.16) } { 'STR' "-0.046766" } }
 	}
 	{ 'OBJ' 
 		{ 'NAME' "tiger-barb-3" }
@@ -1110,20 +1110,20 @@
 		} }
 		{ 'EULR' { 'NAME' "Orientation" } { 'DATA' 0.0000000000000000(1.15.16) -0.0000000000000000(1.15.16) 0.0000000000000000(1.15.16)  //a,b,c
 		} }
-		{ 'BOX3' { 'NAME' "Global Bounding Box" } { 'DATA' -0.2624999880790710(1.15.16) -0.0997499972581863(1.15.16) -0.1417499929666519(1.15.16) 0.2624999880790710(1.15.16) 0.0997499972581863(1.15.16) 0.1784999966621399(1.15.16)  //min(x,y,z)-max(x,y,z)
+		{ 'BOX3' { 'NAME' "Global Bounding Box" } { 'DATA' -0.2624999880790710(1.15.16) -0.0944999977946281(1.15.16) -0.1443749964237213(1.15.16) 0.2624999880790710(1.15.16) 0.0944999977946281(1.15.16) 0.1811250001192093(1.15.16)  //min(x,y,z)-max(x,y,z)
 		} }
 		{ 'STR' { 'NAME' "Class Name" } { 'DATA' "platform" } }
-		{ 'FILE' { 'NAME' "Mesh Name" } { 'STR' "tiger_barb_mesh.iff" } }
+		{ 'FILE' { 'NAME' "Mesh Name" } { 'STR' "tiger_barb_refined.iff" } }
 		{ 'I32'  { 'NAME' "Model Type" } { 'DATA' 1l } { 'STR' "Mesh" } }
 		{ 'I32' { 'NAME' "Mobility" } { 'STR' "Anchored" } }
 		{ 'FX32' { 'NAME' "Mass" } { 'DATA' 0.0000000000000000(1.15.16) } { 'STR' "0.0" } }
-		{ 'FILE' { 'NAME' "Mesh Name" } { 'STR' "tiger_barb_mesh.iff" } }
+		{ 'FILE' { 'NAME' "Mesh Name" } { 'STR' "tiger_barb_refined.iff" } }
 		{ 'I32' { 'NAME' "Model Type" } { 'STR' "Mesh" } }
 		{ 'I32' { 'NAME' "Visibility Mailbox" } { 'DATA' 1l } { 'STR' "1" } }
-		{ 'FX32' { 'NAME' "slopeA" } { 'DATA' -0.0162651643921167(1.15.16) } { 'STR' "-0.016265" } }
+		{ 'FX32' { 'NAME' "slopeA" } { 'DATA' 0.0254782921876068(1.15.16) } { 'STR' "0.025478" } }
 		{ 'FX32' { 'NAME' "slopeB" } { 'DATA' 0.0000000000000000(1.15.16) } { 'STR' "0.000000" } }
-		{ 'FX32' { 'NAME' "slopeC" } { 'DATA' 0.0000000000000000(1.15.16) } { 'STR' "0.000000" } }
-		{ 'FX32' { 'NAME' "slopeD" } { 'DATA' 0.0260242634151785(1.15.16) } { 'STR' "0.026024" } }
+		{ 'FX32' { 'NAME' "slopeC" } { 'DATA' -0.0025003240616233(1.15.16) } { 'STR' "-0.002500" } }
+		{ 'FX32' { 'NAME' "slopeD" } { 'DATA' -0.0467660460939662(1.15.16) } { 'STR' "-0.046766" } }
 	}
 	{ 'OBJ' 
 		{ 'NAME' "tiger-barb-4" }
@@ -1131,20 +1131,20 @@
 		} }
 		{ 'EULR' { 'NAME' "Orientation" } { 'DATA' 0.0000000000000000(1.15.16) -0.0000000000000000(1.15.16) 0.0000000000000000(1.15.16)  //a,b,c
 		} }
-		{ 'BOX3' { 'NAME' "Global Bounding Box" } { 'DATA' -0.2624999880790710(1.15.16) -0.0997499972581863(1.15.16) -0.1417499929666519(1.15.16) 0.2624999880790710(1.15.16) 0.0997499972581863(1.15.16) 0.1784999966621399(1.15.16)  //min(x,y,z)-max(x,y,z)
+		{ 'BOX3' { 'NAME' "Global Bounding Box" } { 'DATA' -0.2624999880790710(1.15.16) -0.0944999977946281(1.15.16) -0.1443749964237213(1.15.16) 0.2624999880790710(1.15.16) 0.0944999977946281(1.15.16) 0.1811250001192093(1.15.16)  //min(x,y,z)-max(x,y,z)
 		} }
 		{ 'STR' { 'NAME' "Class Name" } { 'DATA' "platform" } }
-		{ 'FILE' { 'NAME' "Mesh Name" } { 'STR' "tiger_barb_mesh.iff" } }
+		{ 'FILE' { 'NAME' "Mesh Name" } { 'STR' "tiger_barb_refined.iff" } }
 		{ 'I32'  { 'NAME' "Model Type" } { 'DATA' 1l } { 'STR' "Mesh" } }
 		{ 'I32' { 'NAME' "Mobility" } { 'STR' "Anchored" } }
 		{ 'FX32' { 'NAME' "Mass" } { 'DATA' 0.0000000000000000(1.15.16) } { 'STR' "0.0" } }
-		{ 'FILE' { 'NAME' "Mesh Name" } { 'STR' "tiger_barb_mesh.iff" } }
+		{ 'FILE' { 'NAME' "Mesh Name" } { 'STR' "tiger_barb_refined.iff" } }
 		{ 'I32' { 'NAME' "Model Type" } { 'STR' "Mesh" } }
 		{ 'I32' { 'NAME' "Visibility Mailbox" } { 'DATA' 1l } { 'STR' "1" } }
-		{ 'FX32' { 'NAME' "slopeA" } { 'DATA' -0.0162651643921167(1.15.16) } { 'STR' "-0.016265" } }
+		{ 'FX32' { 'NAME' "slopeA" } { 'DATA' 0.0254782921876068(1.15.16) } { 'STR' "0.025478" } }
 		{ 'FX32' { 'NAME' "slopeB" } { 'DATA' 0.0000000000000000(1.15.16) } { 'STR' "0.000000" } }
-		{ 'FX32' { 'NAME' "slopeC" } { 'DATA' 0.0000000000000000(1.15.16) } { 'STR' "0.000000" } }
-		{ 'FX32' { 'NAME' "slopeD" } { 'DATA' 0.0260242634151785(1.15.16) } { 'STR' "0.026024" } }
+		{ 'FX32' { 'NAME' "slopeC" } { 'DATA' -0.0025003240616233(1.15.16) } { 'STR' "-0.002500" } }
+		{ 'FX32' { 'NAME' "slopeD" } { 'DATA' -0.0467660460939662(1.15.16) } { 'STR' "-0.046766" } }
 	}
 	{ 'OBJ' 
 		{ 'NAME' "tiger-barb-5" }
@@ -1152,20 +1152,20 @@
 		} }
 		{ 'EULR' { 'NAME' "Orientation" } { 'DATA' 0.0000000000000000(1.15.16) -0.0000000000000000(1.15.16) 0.0000000000000000(1.15.16)  //a,b,c
 		} }
-		{ 'BOX3' { 'NAME' "Global Bounding Box" } { 'DATA' -0.2624999880790710(1.15.16) -0.0997499972581863(1.15.16) -0.1417499929666519(1.15.16) 0.2624999880790710(1.15.16) 0.0997499972581863(1.15.16) 0.1784999966621399(1.15.16)  //min(x,y,z)-max(x,y,z)
+		{ 'BOX3' { 'NAME' "Global Bounding Box" } { 'DATA' -0.2624999880790710(1.15.16) -0.0944999977946281(1.15.16) -0.1443749964237213(1.15.16) 0.2624999880790710(1.15.16) 0.0944999977946281(1.15.16) 0.1811250001192093(1.15.16)  //min(x,y,z)-max(x,y,z)
 		} }
 		{ 'STR' { 'NAME' "Class Name" } { 'DATA' "platform" } }
-		{ 'FILE' { 'NAME' "Mesh Name" } { 'STR' "tiger_barb_mesh.iff" } }
+		{ 'FILE' { 'NAME' "Mesh Name" } { 'STR' "tiger_barb_refined.iff" } }
 		{ 'I32'  { 'NAME' "Model Type" } { 'DATA' 1l } { 'STR' "Mesh" } }
 		{ 'I32' { 'NAME' "Mobility" } { 'STR' "Anchored" } }
 		{ 'FX32' { 'NAME' "Mass" } { 'DATA' 0.0000000000000000(1.15.16) } { 'STR' "0.0" } }
-		{ 'FILE' { 'NAME' "Mesh Name" } { 'STR' "tiger_barb_mesh.iff" } }
+		{ 'FILE' { 'NAME' "Mesh Name" } { 'STR' "tiger_barb_refined.iff" } }
 		{ 'I32' { 'NAME' "Model Type" } { 'STR' "Mesh" } }
 		{ 'I32' { 'NAME' "Visibility Mailbox" } { 'DATA' 1l } { 'STR' "1" } }
-		{ 'FX32' { 'NAME' "slopeA" } { 'DATA' -0.0162651643921167(1.15.16) } { 'STR' "-0.016265" } }
+		{ 'FX32' { 'NAME' "slopeA" } { 'DATA' 0.0254782921876068(1.15.16) } { 'STR' "0.025478" } }
 		{ 'FX32' { 'NAME' "slopeB" } { 'DATA' 0.0000000000000000(1.15.16) } { 'STR' "0.000000" } }
-		{ 'FX32' { 'NAME' "slopeC" } { 'DATA' 0.0000000000000000(1.15.16) } { 'STR' "0.000000" } }
-		{ 'FX32' { 'NAME' "slopeD" } { 'DATA' 0.0260242634151785(1.15.16) } { 'STR' "0.026024" } }
+		{ 'FX32' { 'NAME' "slopeC" } { 'DATA' -0.0025003240616233(1.15.16) } { 'STR' "-0.002500" } }
+		{ 'FX32' { 'NAME' "slopeD" } { 'DATA' -0.0467660460939662(1.15.16) } { 'STR' "-0.046766" } }
 	}
 	{ 'OBJ' 
 		{ 'NAME' "tiger-barb-6" }
@@ -1173,20 +1173,20 @@
 		} }
 		{ 'EULR' { 'NAME' "Orientation" } { 'DATA' 0.0000000000000000(1.15.16) -0.0000000000000000(1.15.16) 0.0000000000000000(1.15.16)  //a,b,c
 		} }
-		{ 'BOX3' { 'NAME' "Global Bounding Box" } { 'DATA' -0.2624999880790710(1.15.16) -0.0997499972581863(1.15.16) -0.1417499929666519(1.15.16) 0.2624999880790710(1.15.16) 0.0997499972581863(1.15.16) 0.1784999966621399(1.15.16)  //min(x,y,z)-max(x,y,z)
+		{ 'BOX3' { 'NAME' "Global Bounding Box" } { 'DATA' -0.2624999880790710(1.15.16) -0.0944999977946281(1.15.16) -0.1443749964237213(1.15.16) 0.2624999880790710(1.15.16) 0.0944999977946281(1.15.16) 0.1811250001192093(1.15.16)  //min(x,y,z)-max(x,y,z)
 		} }
 		{ 'STR' { 'NAME' "Class Name" } { 'DATA' "platform" } }
-		{ 'FILE' { 'NAME' "Mesh Name" } { 'STR' "tiger_barb_mesh.iff" } }
+		{ 'FILE' { 'NAME' "Mesh Name" } { 'STR' "tiger_barb_refined.iff" } }
 		{ 'I32'  { 'NAME' "Model Type" } { 'DATA' 1l } { 'STR' "Mesh" } }
 		{ 'I32' { 'NAME' "Mobility" } { 'STR' "Anchored" } }
 		{ 'FX32' { 'NAME' "Mass" } { 'DATA' 0.0000000000000000(1.15.16) } { 'STR' "0.0" } }
-		{ 'FILE' { 'NAME' "Mesh Name" } { 'STR' "tiger_barb_mesh.iff" } }
+		{ 'FILE' { 'NAME' "Mesh Name" } { 'STR' "tiger_barb_refined.iff" } }
 		{ 'I32' { 'NAME' "Model Type" } { 'STR' "Mesh" } }
 		{ 'I32' { 'NAME' "Visibility Mailbox" } { 'DATA' 1l } { 'STR' "1" } }
-		{ 'FX32' { 'NAME' "slopeA" } { 'DATA' -0.0162651643921167(1.15.16) } { 'STR' "-0.016265" } }
+		{ 'FX32' { 'NAME' "slopeA" } { 'DATA' 0.0254782921876068(1.15.16) } { 'STR' "0.025478" } }
 		{ 'FX32' { 'NAME' "slopeB" } { 'DATA' 0.0000000000000000(1.15.16) } { 'STR' "0.000000" } }
-		{ 'FX32' { 'NAME' "slopeC" } { 'DATA' 0.0000000000000000(1.15.16) } { 'STR' "0.000000" } }
-		{ 'FX32' { 'NAME' "slopeD" } { 'DATA' 0.0260242634151785(1.15.16) } { 'STR' "0.026024" } }
+		{ 'FX32' { 'NAME' "slopeC" } { 'DATA' -0.0025003240616233(1.15.16) } { 'STR' "-0.002500" } }
+		{ 'FX32' { 'NAME' "slopeD" } { 'DATA' -0.0467660460939662(1.15.16) } { 'STR' "-0.046766" } }
 	}
 	{ 'OBJ' 
 		{ 'NAME' "tiger-barb-7" }
@@ -1194,20 +1194,20 @@
 		} }
 		{ 'EULR' { 'NAME' "Orientation" } { 'DATA' 0.0000000000000000(1.15.16) -0.0000000000000000(1.15.16) 0.0000000000000000(1.15.16)  //a,b,c
 		} }
-		{ 'BOX3' { 'NAME' "Global Bounding Box" } { 'DATA' -0.2624999880790710(1.15.16) -0.0997499972581863(1.15.16) -0.1417499929666519(1.15.16) 0.2624999880790710(1.15.16) 0.0997499972581863(1.15.16) 0.1784999966621399(1.15.16)  //min(x,y,z)-max(x,y,z)
+		{ 'BOX3' { 'NAME' "Global Bounding Box" } { 'DATA' -0.2624999880790710(1.15.16) -0.0944999977946281(1.15.16) -0.1443749964237213(1.15.16) 0.2624999880790710(1.15.16) 0.0944999977946281(1.15.16) 0.1811250001192093(1.15.16)  //min(x,y,z)-max(x,y,z)
 		} }
 		{ 'STR' { 'NAME' "Class Name" } { 'DATA' "platform" } }
-		{ 'FILE' { 'NAME' "Mesh Name" } { 'STR' "tiger_barb_mesh.iff" } }
+		{ 'FILE' { 'NAME' "Mesh Name" } { 'STR' "tiger_barb_refined.iff" } }
 		{ 'I32'  { 'NAME' "Model Type" } { 'DATA' 1l } { 'STR' "Mesh" } }
 		{ 'I32' { 'NAME' "Mobility" } { 'STR' "Anchored" } }
 		{ 'FX32' { 'NAME' "Mass" } { 'DATA' 0.0000000000000000(1.15.16) } { 'STR' "0.0" } }
-		{ 'FILE' { 'NAME' "Mesh Name" } { 'STR' "tiger_barb_mesh.iff" } }
+		{ 'FILE' { 'NAME' "Mesh Name" } { 'STR' "tiger_barb_refined.iff" } }
 		{ 'I32' { 'NAME' "Model Type" } { 'STR' "Mesh" } }
 		{ 'I32' { 'NAME' "Visibility Mailbox" } { 'DATA' 1l } { 'STR' "1" } }
-		{ 'FX32' { 'NAME' "slopeA" } { 'DATA' -0.0162651643921167(1.15.16) } { 'STR' "-0.016265" } }
+		{ 'FX32' { 'NAME' "slopeA" } { 'DATA' 0.0254782921876068(1.15.16) } { 'STR' "0.025478" } }
 		{ 'FX32' { 'NAME' "slopeB" } { 'DATA' 0.0000000000000000(1.15.16) } { 'STR' "0.000000" } }
-		{ 'FX32' { 'NAME' "slopeC" } { 'DATA' 0.0000000000000000(1.15.16) } { 'STR' "0.000000" } }
-		{ 'FX32' { 'NAME' "slopeD" } { 'DATA' 0.0260242634151785(1.15.16) } { 'STR' "0.026024" } }
+		{ 'FX32' { 'NAME' "slopeC" } { 'DATA' -0.0025003240616233(1.15.16) } { 'STR' "-0.002500" } }
+		{ 'FX32' { 'NAME' "slopeD" } { 'DATA' -0.0467660460939662(1.15.16) } { 'STR' "-0.046766" } }
 	}
 	{ 'OBJ' 
 		{ 'NAME' "tiger-barb-8" }
@@ -1215,20 +1215,20 @@
 		} }
 		{ 'EULR' { 'NAME' "Orientation" } { 'DATA' 0.0000000000000000(1.15.16) -0.0000000000000000(1.15.16) 0.0000000000000000(1.15.16)  //a,b,c
 		} }
-		{ 'BOX3' { 'NAME' "Global Bounding Box" } { 'DATA' -0.2624999880790710(1.15.16) -0.0997499972581863(1.15.16) -0.1417499929666519(1.15.16) 0.2624999880790710(1.15.16) 0.0997499972581863(1.15.16) 0.1784999966621399(1.15.16)  //min(x,y,z)-max(x,y,z)
+		{ 'BOX3' { 'NAME' "Global Bounding Box" } { 'DATA' -0.2624999880790710(1.15.16) -0.0944999977946281(1.15.16) -0.1443749964237213(1.15.16) 0.2624999880790710(1.15.16) 0.0944999977946281(1.15.16) 0.1811250001192093(1.15.16)  //min(x,y,z)-max(x,y,z)
 		} }
 		{ 'STR' { 'NAME' "Class Name" } { 'DATA' "platform" } }
-		{ 'FILE' { 'NAME' "Mesh Name" } { 'STR' "tiger_barb_mesh.iff" } }
+		{ 'FILE' { 'NAME' "Mesh Name" } { 'STR' "tiger_barb_refined.iff" } }
 		{ 'I32'  { 'NAME' "Model Type" } { 'DATA' 1l } { 'STR' "Mesh" } }
 		{ 'I32' { 'NAME' "Mobility" } { 'STR' "Anchored" } }
 		{ 'FX32' { 'NAME' "Mass" } { 'DATA' 0.0000000000000000(1.15.16) } { 'STR' "0.0" } }
-		{ 'FILE' { 'NAME' "Mesh Name" } { 'STR' "tiger_barb_mesh.iff" } }
+		{ 'FILE' { 'NAME' "Mesh Name" } { 'STR' "tiger_barb_refined.iff" } }
 		{ 'I32' { 'NAME' "Model Type" } { 'STR' "Mesh" } }
 		{ 'I32' { 'NAME' "Visibility Mailbox" } { 'DATA' 1l } { 'STR' "1" } }
-		{ 'FX32' { 'NAME' "slopeA" } { 'DATA' -0.0162651643921167(1.15.16) } { 'STR' "-0.016265" } }
+		{ 'FX32' { 'NAME' "slopeA" } { 'DATA' 0.0254782921876068(1.15.16) } { 'STR' "0.025478" } }
 		{ 'FX32' { 'NAME' "slopeB" } { 'DATA' 0.0000000000000000(1.15.16) } { 'STR' "0.000000" } }
-		{ 'FX32' { 'NAME' "slopeC" } { 'DATA' 0.0000000000000000(1.15.16) } { 'STR' "0.000000" } }
-		{ 'FX32' { 'NAME' "slopeD" } { 'DATA' 0.0260242634151785(1.15.16) } { 'STR' "0.026024" } }
+		{ 'FX32' { 'NAME' "slopeC" } { 'DATA' -0.0025003240616233(1.15.16) } { 'STR' "-0.002500" } }
+		{ 'FX32' { 'NAME' "slopeD" } { 'DATA' -0.0467660460939662(1.15.16) } { 'STR' "-0.046766" } }
 	}
 	{ 'OBJ' 
 		{ 'NAME' "tiger-barb-9" }
@@ -1236,20 +1236,20 @@
 		} }
 		{ 'EULR' { 'NAME' "Orientation" } { 'DATA' 0.0000000000000000(1.15.16) -0.0000000000000000(1.15.16) 0.0000000000000000(1.15.16)  //a,b,c
 		} }
-		{ 'BOX3' { 'NAME' "Global Bounding Box" } { 'DATA' -0.2624999880790710(1.15.16) -0.0997499972581863(1.15.16) -0.1417499929666519(1.15.16) 0.2624999880790710(1.15.16) 0.0997499972581863(1.15.16) 0.1784999966621399(1.15.16)  //min(x,y,z)-max(x,y,z)
+		{ 'BOX3' { 'NAME' "Global Bounding Box" } { 'DATA' -0.2624999880790710(1.15.16) -0.0944999977946281(1.15.16) -0.1443749964237213(1.15.16) 0.2624999880790710(1.15.16) 0.0944999977946281(1.15.16) 0.1811250001192093(1.15.16)  //min(x,y,z)-max(x,y,z)
 		} }
 		{ 'STR' { 'NAME' "Class Name" } { 'DATA' "platform" } }
-		{ 'FILE' { 'NAME' "Mesh Name" } { 'STR' "tiger_barb_mesh.iff" } }
+		{ 'FILE' { 'NAME' "Mesh Name" } { 'STR' "tiger_barb_refined.iff" } }
 		{ 'I32'  { 'NAME' "Model Type" } { 'DATA' 1l } { 'STR' "Mesh" } }
 		{ 'I32' { 'NAME' "Mobility" } { 'STR' "Anchored" } }
 		{ 'FX32' { 'NAME' "Mass" } { 'DATA' 0.0000000000000000(1.15.16) } { 'STR' "0.0" } }
-		{ 'FILE' { 'NAME' "Mesh Name" } { 'STR' "tiger_barb_mesh.iff" } }
+		{ 'FILE' { 'NAME' "Mesh Name" } { 'STR' "tiger_barb_refined.iff" } }
 		{ 'I32' { 'NAME' "Model Type" } { 'STR' "Mesh" } }
 		{ 'I32' { 'NAME' "Visibility Mailbox" } { 'DATA' 1l } { 'STR' "1" } }
-		{ 'FX32' { 'NAME' "slopeA" } { 'DATA' -0.0162651643921167(1.15.16) } { 'STR' "-0.016265" } }
+		{ 'FX32' { 'NAME' "slopeA" } { 'DATA' 0.0254782921876068(1.15.16) } { 'STR' "0.025478" } }
 		{ 'FX32' { 'NAME' "slopeB" } { 'DATA' 0.0000000000000000(1.15.16) } { 'STR' "0.000000" } }
-		{ 'FX32' { 'NAME' "slopeC" } { 'DATA' 0.0000000000000000(1.15.16) } { 'STR' "0.000000" } }
-		{ 'FX32' { 'NAME' "slopeD" } { 'DATA' 0.0260242634151785(1.15.16) } { 'STR' "0.026024" } }
+		{ 'FX32' { 'NAME' "slopeC" } { 'DATA' -0.0025003240616233(1.15.16) } { 'STR' "-0.002500" } }
+		{ 'FX32' { 'NAME' "slopeD" } { 'DATA' -0.0467660460939662(1.15.16) } { 'STR' "-0.046766" } }
 	}
 	{ 'OBJ' 
 		{ 'NAME' "tiger-barb-10" }
@@ -1257,20 +1257,20 @@
 		} }
 		{ 'EULR' { 'NAME' "Orientation" } { 'DATA' 0.0000000000000000(1.15.16) -0.0000000000000000(1.15.16) 0.0000000000000000(1.15.16)  //a,b,c
 		} }
-		{ 'BOX3' { 'NAME' "Global Bounding Box" } { 'DATA' -0.2624999880790710(1.15.16) -0.0997499972581863(1.15.16) -0.1417499929666519(1.15.16) 0.2624999880790710(1.15.16) 0.0997499972581863(1.15.16) 0.1784999966621399(1.15.16)  //min(x,y,z)-max(x,y,z)
+		{ 'BOX3' { 'NAME' "Global Bounding Box" } { 'DATA' -0.2624999880790710(1.15.16) -0.0944999977946281(1.15.16) -0.1443749964237213(1.15.16) 0.2624999880790710(1.15.16) 0.0944999977946281(1.15.16) 0.1811250001192093(1.15.16)  //min(x,y,z)-max(x,y,z)
 		} }
 		{ 'STR' { 'NAME' "Class Name" } { 'DATA' "platform" } }
-		{ 'FILE' { 'NAME' "Mesh Name" } { 'STR' "tiger_barb_mesh.iff" } }
+		{ 'FILE' { 'NAME' "Mesh Name" } { 'STR' "tiger_barb_refined.iff" } }
 		{ 'I32'  { 'NAME' "Model Type" } { 'DATA' 1l } { 'STR' "Mesh" } }
 		{ 'I32' { 'NAME' "Mobility" } { 'STR' "Anchored" } }
 		{ 'FX32' { 'NAME' "Mass" } { 'DATA' 0.0000000000000000(1.15.16) } { 'STR' "0.0" } }
-		{ 'FILE' { 'NAME' "Mesh Name" } { 'STR' "tiger_barb_mesh.iff" } }
+		{ 'FILE' { 'NAME' "Mesh Name" } { 'STR' "tiger_barb_refined.iff" } }
 		{ 'I32' { 'NAME' "Model Type" } { 'STR' "Mesh" } }
 		{ 'I32' { 'NAME' "Visibility Mailbox" } { 'DATA' 1l } { 'STR' "1" } }
-		{ 'FX32' { 'NAME' "slopeA" } { 'DATA' -0.0162651643921167(1.15.16) } { 'STR' "-0.016265" } }
+		{ 'FX32' { 'NAME' "slopeA" } { 'DATA' 0.0254782921876068(1.15.16) } { 'STR' "0.025478" } }
 		{ 'FX32' { 'NAME' "slopeB" } { 'DATA' 0.0000000000000000(1.15.16) } { 'STR' "0.000000" } }
-		{ 'FX32' { 'NAME' "slopeC" } { 'DATA' 0.0000000000000000(1.15.16) } { 'STR' "0.000000" } }
-		{ 'FX32' { 'NAME' "slopeD" } { 'DATA' 0.0260242634151785(1.15.16) } { 'STR' "0.026024" } }
+		{ 'FX32' { 'NAME' "slopeC" } { 'DATA' -0.0025003240616233(1.15.16) } { 'STR' "-0.002500" } }
+		{ 'FX32' { 'NAME' "slopeD" } { 'DATA' -0.0467660460939662(1.15.16) } { 'STR' "-0.046766" } }
 	}
 	{ 'OBJ' 
 		{ 'NAME' "tiger-barb-11" }
@@ -1278,20 +1278,20 @@
 		} }
 		{ 'EULR' { 'NAME' "Orientation" } { 'DATA' 0.0000000000000000(1.15.16) -0.0000000000000000(1.15.16) 0.0000000000000000(1.15.16)  //a,b,c
 		} }
-		{ 'BOX3' { 'NAME' "Global Bounding Box" } { 'DATA' -0.2624999880790710(1.15.16) -0.0997499972581863(1.15.16) -0.1417499929666519(1.15.16) 0.2624999880790710(1.15.16) 0.0997499972581863(1.15.16) 0.1784999966621399(1.15.16)  //min(x,y,z)-max(x,y,z)
+		{ 'BOX3' { 'NAME' "Global Bounding Box" } { 'DATA' -0.2624999880790710(1.15.16) -0.0944999977946281(1.15.16) -0.1443749964237213(1.15.16) 0.2624999880790710(1.15.16) 0.0944999977946281(1.15.16) 0.1811250001192093(1.15.16)  //min(x,y,z)-max(x,y,z)
 		} }
 		{ 'STR' { 'NAME' "Class Name" } { 'DATA' "platform" } }
-		{ 'FILE' { 'NAME' "Mesh Name" } { 'STR' "tiger_barb_mesh.iff" } }
+		{ 'FILE' { 'NAME' "Mesh Name" } { 'STR' "tiger_barb_refined.iff" } }
 		{ 'I32'  { 'NAME' "Model Type" } { 'DATA' 1l } { 'STR' "Mesh" } }
 		{ 'I32' { 'NAME' "Mobility" } { 'STR' "Anchored" } }
 		{ 'FX32' { 'NAME' "Mass" } { 'DATA' 0.0000000000000000(1.15.16) } { 'STR' "0.0" } }
-		{ 'FILE' { 'NAME' "Mesh Name" } { 'STR' "tiger_barb_mesh.iff" } }
+		{ 'FILE' { 'NAME' "Mesh Name" } { 'STR' "tiger_barb_refined.iff" } }
 		{ 'I32' { 'NAME' "Model Type" } { 'STR' "Mesh" } }
 		{ 'I32' { 'NAME' "Visibility Mailbox" } { 'DATA' 1l } { 'STR' "1" } }
-		{ 'FX32' { 'NAME' "slopeA" } { 'DATA' -0.0162651643921167(1.15.16) } { 'STR' "-0.016265" } }
+		{ 'FX32' { 'NAME' "slopeA" } { 'DATA' 0.0254782921876068(1.15.16) } { 'STR' "0.025478" } }
 		{ 'FX32' { 'NAME' "slopeB" } { 'DATA' 0.0000000000000000(1.15.16) } { 'STR' "0.000000" } }
-		{ 'FX32' { 'NAME' "slopeC" } { 'DATA' 0.0000000000000000(1.15.16) } { 'STR' "0.000000" } }
-		{ 'FX32' { 'NAME' "slopeD" } { 'DATA' 0.0260242634151785(1.15.16) } { 'STR' "0.026024" } }
+		{ 'FX32' { 'NAME' "slopeC" } { 'DATA' -0.0025003240616233(1.15.16) } { 'STR' "-0.002500" } }
+		{ 'FX32' { 'NAME' "slopeD" } { 'DATA' -0.0467660460939662(1.15.16) } { 'STR' "-0.046766" } }
 	}
 	{ 'OBJ' 
 		{ 'NAME' "tiger-barb-12" }
@@ -1299,20 +1299,20 @@
 		} }
 		{ 'EULR' { 'NAME' "Orientation" } { 'DATA' 0.0000000000000000(1.15.16) -0.0000000000000000(1.15.16) 0.0000000000000000(1.15.16)  //a,b,c
 		} }
-		{ 'BOX3' { 'NAME' "Global Bounding Box" } { 'DATA' -0.2624999880790710(1.15.16) -0.0997499972581863(1.15.16) -0.1417499929666519(1.15.16) 0.2624999880790710(1.15.16) 0.0997499972581863(1.15.16) 0.1784999966621399(1.15.16)  //min(x,y,z)-max(x,y,z)
+		{ 'BOX3' { 'NAME' "Global Bounding Box" } { 'DATA' -0.2624999880790710(1.15.16) -0.0944999977946281(1.15.16) -0.1443749964237213(1.15.16) 0.2624999880790710(1.15.16) 0.0944999977946281(1.15.16) 0.1811250001192093(1.15.16)  //min(x,y,z)-max(x,y,z)
 		} }
 		{ 'STR' { 'NAME' "Class Name" } { 'DATA' "platform" } }
-		{ 'FILE' { 'NAME' "Mesh Name" } { 'STR' "tiger_barb_mesh.iff" } }
+		{ 'FILE' { 'NAME' "Mesh Name" } { 'STR' "tiger_barb_refined.iff" } }
 		{ 'I32'  { 'NAME' "Model Type" } { 'DATA' 1l } { 'STR' "Mesh" } }
 		{ 'I32' { 'NAME' "Mobility" } { 'STR' "Anchored" } }
 		{ 'FX32' { 'NAME' "Mass" } { 'DATA' 0.0000000000000000(1.15.16) } { 'STR' "0.0" } }
-		{ 'FILE' { 'NAME' "Mesh Name" } { 'STR' "tiger_barb_mesh.iff" } }
+		{ 'FILE' { 'NAME' "Mesh Name" } { 'STR' "tiger_barb_refined.iff" } }
 		{ 'I32' { 'NAME' "Model Type" } { 'STR' "Mesh" } }
 		{ 'I32' { 'NAME' "Visibility Mailbox" } { 'DATA' 1l } { 'STR' "1" } }
-		{ 'FX32' { 'NAME' "slopeA" } { 'DATA' -0.0162651643921167(1.15.16) } { 'STR' "-0.016265" } }
+		{ 'FX32' { 'NAME' "slopeA" } { 'DATA' 0.0254782921876068(1.15.16) } { 'STR' "0.025478" } }
 		{ 'FX32' { 'NAME' "slopeB" } { 'DATA' 0.0000000000000000(1.15.16) } { 'STR' "0.000000" } }
-		{ 'FX32' { 'NAME' "slopeC" } { 'DATA' 0.0000000000000000(1.15.16) } { 'STR' "0.000000" } }
-		{ 'FX32' { 'NAME' "slopeD" } { 'DATA' 0.0260242634151785(1.15.16) } { 'STR' "0.026024" } }
+		{ 'FX32' { 'NAME' "slopeC" } { 'DATA' -0.0025003240616233(1.15.16) } { 'STR' "-0.002500" } }
+		{ 'FX32' { 'NAME' "slopeD" } { 'DATA' -0.0467660460939662(1.15.16) } { 'STR' "-0.046766" } }
 	}
 	{ 'OBJ' 
 		{ 'NAME' "tiger-barb-13" }
@@ -1320,20 +1320,20 @@
 		} }
 		{ 'EULR' { 'NAME' "Orientation" } { 'DATA' 0.0000000000000000(1.15.16) -0.0000000000000000(1.15.16) 0.0000000000000000(1.15.16)  //a,b,c
 		} }
-		{ 'BOX3' { 'NAME' "Global Bounding Box" } { 'DATA' -0.2624999880790710(1.15.16) -0.0997499972581863(1.15.16) -0.1417499929666519(1.15.16) 0.2624999880790710(1.15.16) 0.0997499972581863(1.15.16) 0.1784999966621399(1.15.16)  //min(x,y,z)-max(x,y,z)
+		{ 'BOX3' { 'NAME' "Global Bounding Box" } { 'DATA' -0.2624999880790710(1.15.16) -0.0944999977946281(1.15.16) -0.1443749964237213(1.15.16) 0.2624999880790710(1.15.16) 0.0944999977946281(1.15.16) 0.1811250001192093(1.15.16)  //min(x,y,z)-max(x,y,z)
 		} }
 		{ 'STR' { 'NAME' "Class Name" } { 'DATA' "platform" } }
-		{ 'FILE' { 'NAME' "Mesh Name" } { 'STR' "tiger_barb_mesh.iff" } }
+		{ 'FILE' { 'NAME' "Mesh Name" } { 'STR' "tiger_barb_refined.iff" } }
 		{ 'I32'  { 'NAME' "Model Type" } { 'DATA' 1l } { 'STR' "Mesh" } }
 		{ 'I32' { 'NAME' "Mobility" } { 'STR' "Anchored" } }
 		{ 'FX32' { 'NAME' "Mass" } { 'DATA' 0.0000000000000000(1.15.16) } { 'STR' "0.0" } }
-		{ 'FILE' { 'NAME' "Mesh Name" } { 'STR' "tiger_barb_mesh.iff" } }
+		{ 'FILE' { 'NAME' "Mesh Name" } { 'STR' "tiger_barb_refined.iff" } }
 		{ 'I32' { 'NAME' "Model Type" } { 'STR' "Mesh" } }
 		{ 'I32' { 'NAME' "Visibility Mailbox" } { 'DATA' 1l } { 'STR' "1" } }
-		{ 'FX32' { 'NAME' "slopeA" } { 'DATA' -0.0162651643921167(1.15.16) } { 'STR' "-0.016265" } }
+		{ 'FX32' { 'NAME' "slopeA" } { 'DATA' 0.0254782921876068(1.15.16) } { 'STR' "0.025478" } }
 		{ 'FX32' { 'NAME' "slopeB" } { 'DATA' 0.0000000000000000(1.15.16) } { 'STR' "0.000000" } }
-		{ 'FX32' { 'NAME' "slopeC" } { 'DATA' 0.0000000000000000(1.15.16) } { 'STR' "0.000000" } }
-		{ 'FX32' { 'NAME' "slopeD" } { 'DATA' 0.0260242634151785(1.15.16) } { 'STR' "0.026024" } }
+		{ 'FX32' { 'NAME' "slopeC" } { 'DATA' -0.0025003240616233(1.15.16) } { 'STR' "-0.002500" } }
+		{ 'FX32' { 'NAME' "slopeD" } { 'DATA' -0.0467660460939662(1.15.16) } { 'STR' "-0.046766" } }
 	}
 	{ 'OBJ' 
 		{ 'NAME' "tiger-barb-14" }
@@ -1341,20 +1341,20 @@
 		} }
 		{ 'EULR' { 'NAME' "Orientation" } { 'DATA' 0.0000000000000000(1.15.16) -0.0000000000000000(1.15.16) 0.0000000000000000(1.15.16)  //a,b,c
 		} }
-		{ 'BOX3' { 'NAME' "Global Bounding Box" } { 'DATA' -0.2624999880790710(1.15.16) -0.0997499972581863(1.15.16) -0.1417499929666519(1.15.16) 0.2624999880790710(1.15.16) 0.0997499972581863(1.15.16) 0.1784999966621399(1.15.16)  //min(x,y,z)-max(x,y,z)
+		{ 'BOX3' { 'NAME' "Global Bounding Box" } { 'DATA' -0.2624999880790710(1.15.16) -0.0944999977946281(1.15.16) -0.1443749964237213(1.15.16) 0.2624999880790710(1.15.16) 0.0944999977946281(1.15.16) 0.1811250001192093(1.15.16)  //min(x,y,z)-max(x,y,z)
 		} }
 		{ 'STR' { 'NAME' "Class Name" } { 'DATA' "platform" } }
-		{ 'FILE' { 'NAME' "Mesh Name" } { 'STR' "tiger_barb_mesh.iff" } }
+		{ 'FILE' { 'NAME' "Mesh Name" } { 'STR' "tiger_barb_refined.iff" } }
 		{ 'I32'  { 'NAME' "Model Type" } { 'DATA' 1l } { 'STR' "Mesh" } }
 		{ 'I32' { 'NAME' "Mobility" } { 'STR' "Anchored" } }
 		{ 'FX32' { 'NAME' "Mass" } { 'DATA' 0.0000000000000000(1.15.16) } { 'STR' "0.0" } }
-		{ 'FILE' { 'NAME' "Mesh Name" } { 'STR' "tiger_barb_mesh.iff" } }
+		{ 'FILE' { 'NAME' "Mesh Name" } { 'STR' "tiger_barb_refined.iff" } }
 		{ 'I32' { 'NAME' "Model Type" } { 'STR' "Mesh" } }
 		{ 'I32' { 'NAME' "Visibility Mailbox" } { 'DATA' 1l } { 'STR' "1" } }
-		{ 'FX32' { 'NAME' "slopeA" } { 'DATA' -0.0162651643921167(1.15.16) } { 'STR' "-0.016265" } }
+		{ 'FX32' { 'NAME' "slopeA" } { 'DATA' 0.0254782921876068(1.15.16) } { 'STR' "0.025478" } }
 		{ 'FX32' { 'NAME' "slopeB" } { 'DATA' 0.0000000000000000(1.15.16) } { 'STR' "0.000000" } }
-		{ 'FX32' { 'NAME' "slopeC" } { 'DATA' 0.0000000000000000(1.15.16) } { 'STR' "0.000000" } }
-		{ 'FX32' { 'NAME' "slopeD" } { 'DATA' 0.0260242634151785(1.15.16) } { 'STR' "0.026024" } }
+		{ 'FX32' { 'NAME' "slopeC" } { 'DATA' -0.0025003240616233(1.15.16) } { 'STR' "-0.002500" } }
+		{ 'FX32' { 'NAME' "slopeD" } { 'DATA' -0.0467660460939662(1.15.16) } { 'STR' "-0.046766" } }
 	}
 	{ 'OBJ' 
 		{ 'NAME' "tiger-barb-15" }
@@ -1362,20 +1362,20 @@
 		} }
 		{ 'EULR' { 'NAME' "Orientation" } { 'DATA' 0.0000000000000000(1.15.16) -0.0000000000000000(1.15.16) 0.0000000000000000(1.15.16)  //a,b,c
 		} }
-		{ 'BOX3' { 'NAME' "Global Bounding Box" } { 'DATA' -0.2624999880790710(1.15.16) -0.0997499972581863(1.15.16) -0.1417499929666519(1.15.16) 0.2624999880790710(1.15.16) 0.0997499972581863(1.15.16) 0.1784999966621399(1.15.16)  //min(x,y,z)-max(x,y,z)
+		{ 'BOX3' { 'NAME' "Global Bounding Box" } { 'DATA' -0.2624999880790710(1.15.16) -0.0944999977946281(1.15.16) -0.1443749964237213(1.15.16) 0.2624999880790710(1.15.16) 0.0944999977946281(1.15.16) 0.1811250001192093(1.15.16)  //min(x,y,z)-max(x,y,z)
 		} }
 		{ 'STR' { 'NAME' "Class Name" } { 'DATA' "platform" } }
-		{ 'FILE' { 'NAME' "Mesh Name" } { 'STR' "tiger_barb_mesh.iff" } }
+		{ 'FILE' { 'NAME' "Mesh Name" } { 'STR' "tiger_barb_refined.iff" } }
 		{ 'I32'  { 'NAME' "Model Type" } { 'DATA' 1l } { 'STR' "Mesh" } }
 		{ 'I32' { 'NAME' "Mobility" } { 'STR' "Anchored" } }
 		{ 'FX32' { 'NAME' "Mass" } { 'DATA' 0.0000000000000000(1.15.16) } { 'STR' "0.0" } }
-		{ 'FILE' { 'NAME' "Mesh Name" } { 'STR' "tiger_barb_mesh.iff" } }
+		{ 'FILE' { 'NAME' "Mesh Name" } { 'STR' "tiger_barb_refined.iff" } }
 		{ 'I32' { 'NAME' "Model Type" } { 'STR' "Mesh" } }
 		{ 'I32' { 'NAME' "Visibility Mailbox" } { 'DATA' 1l } { 'STR' "1" } }
-		{ 'FX32' { 'NAME' "slopeA" } { 'DATA' -0.0162651643921167(1.15.16) } { 'STR' "-0.016265" } }
+		{ 'FX32' { 'NAME' "slopeA" } { 'DATA' 0.0254782921876068(1.15.16) } { 'STR' "0.025478" } }
 		{ 'FX32' { 'NAME' "slopeB" } { 'DATA' 0.0000000000000000(1.15.16) } { 'STR' "0.000000" } }
-		{ 'FX32' { 'NAME' "slopeC" } { 'DATA' 0.0000000000000000(1.15.16) } { 'STR' "0.000000" } }
-		{ 'FX32' { 'NAME' "slopeD" } { 'DATA' 0.0260242634151785(1.15.16) } { 'STR' "0.026024" } }
+		{ 'FX32' { 'NAME' "slopeC" } { 'DATA' -0.0025003240616233(1.15.16) } { 'STR' "-0.002500" } }
+		{ 'FX32' { 'NAME' "slopeD" } { 'DATA' -0.0467660460939662(1.15.16) } { 'STR' "-0.046766" } }
 	}
 	{ 'OBJ' 
 		{ 'NAME' "tiger-barb-16" }
@@ -1383,20 +1383,20 @@
 		} }
 		{ 'EULR' { 'NAME' "Orientation" } { 'DATA' 0.0000000000000000(1.15.16) -0.0000000000000000(1.15.16) 0.0000000000000000(1.15.16)  //a,b,c
 		} }
-		{ 'BOX3' { 'NAME' "Global Bounding Box" } { 'DATA' -0.2624999880790710(1.15.16) -0.0997499972581863(1.15.16) -0.1417499929666519(1.15.16) 0.2624999880790710(1.15.16) 0.0997499972581863(1.15.16) 0.1784999966621399(1.15.16)  //min(x,y,z)-max(x,y,z)
+		{ 'BOX3' { 'NAME' "Global Bounding Box" } { 'DATA' -0.2624999880790710(1.15.16) -0.0944999977946281(1.15.16) -0.1443749964237213(1.15.16) 0.2624999880790710(1.15.16) 0.0944999977946281(1.15.16) 0.1811250001192093(1.15.16)  //min(x,y,z)-max(x,y,z)
 		} }
 		{ 'STR' { 'NAME' "Class Name" } { 'DATA' "platform" } }
-		{ 'FILE' { 'NAME' "Mesh Name" } { 'STR' "tiger_barb_mesh.iff" } }
+		{ 'FILE' { 'NAME' "Mesh Name" } { 'STR' "tiger_barb_refined.iff" } }
 		{ 'I32'  { 'NAME' "Model Type" } { 'DATA' 1l } { 'STR' "Mesh" } }
 		{ 'I32' { 'NAME' "Mobility" } { 'STR' "Anchored" } }
 		{ 'FX32' { 'NAME' "Mass" } { 'DATA' 0.0000000000000000(1.15.16) } { 'STR' "0.0" } }
-		{ 'FILE' { 'NAME' "Mesh Name" } { 'STR' "tiger_barb_mesh.iff" } }
+		{ 'FILE' { 'NAME' "Mesh Name" } { 'STR' "tiger_barb_refined.iff" } }
 		{ 'I32' { 'NAME' "Model Type" } { 'STR' "Mesh" } }
 		{ 'I32' { 'NAME' "Visibility Mailbox" } { 'DATA' 1l } { 'STR' "1" } }
-		{ 'FX32' { 'NAME' "slopeA" } { 'DATA' -0.0162651643921167(1.15.16) } { 'STR' "-0.016265" } }
+		{ 'FX32' { 'NAME' "slopeA" } { 'DATA' 0.0254782921876068(1.15.16) } { 'STR' "0.025478" } }
 		{ 'FX32' { 'NAME' "slopeB" } { 'DATA' 0.0000000000000000(1.15.16) } { 'STR' "0.000000" } }
-		{ 'FX32' { 'NAME' "slopeC" } { 'DATA' 0.0000000000000000(1.15.16) } { 'STR' "0.000000" } }
-		{ 'FX32' { 'NAME' "slopeD" } { 'DATA' 0.0260242634151785(1.15.16) } { 'STR' "0.026024" } }
+		{ 'FX32' { 'NAME' "slopeC" } { 'DATA' -0.0025003240616233(1.15.16) } { 'STR' "-0.002500" } }
+		{ 'FX32' { 'NAME' "slopeD" } { 'DATA' -0.0467660460939662(1.15.16) } { 'STR' "-0.046766" } }
 	}
 	{ 'OBJ' 
 		{ 'NAME' "tiger-barb-17" }
@@ -1404,20 +1404,20 @@
 		} }
 		{ 'EULR' { 'NAME' "Orientation" } { 'DATA' 0.0000000000000000(1.15.16) -0.0000000000000000(1.15.16) 0.0000000000000000(1.15.16)  //a,b,c
 		} }
-		{ 'BOX3' { 'NAME' "Global Bounding Box" } { 'DATA' -0.2624999880790710(1.15.16) -0.0997499972581863(1.15.16) -0.1417499929666519(1.15.16) 0.2624999880790710(1.15.16) 0.0997499972581863(1.15.16) 0.1784999966621399(1.15.16)  //min(x,y,z)-max(x,y,z)
+		{ 'BOX3' { 'NAME' "Global Bounding Box" } { 'DATA' -0.2624999880790710(1.15.16) -0.0944999977946281(1.15.16) -0.1443749964237213(1.15.16) 0.2624999880790710(1.15.16) 0.0944999977946281(1.15.16) 0.1811250001192093(1.15.16)  //min(x,y,z)-max(x,y,z)
 		} }
 		{ 'STR' { 'NAME' "Class Name" } { 'DATA' "platform" } }
-		{ 'FILE' { 'NAME' "Mesh Name" } { 'STR' "tiger_barb_mesh.iff" } }
+		{ 'FILE' { 'NAME' "Mesh Name" } { 'STR' "tiger_barb_refined.iff" } }
 		{ 'I32'  { 'NAME' "Model Type" } { 'DATA' 1l } { 'STR' "Mesh" } }
 		{ 'I32' { 'NAME' "Mobility" } { 'STR' "Anchored" } }
 		{ 'FX32' { 'NAME' "Mass" } { 'DATA' 0.0000000000000000(1.15.16) } { 'STR' "0.0" } }
-		{ 'FILE' { 'NAME' "Mesh Name" } { 'STR' "tiger_barb_mesh.iff" } }
+		{ 'FILE' { 'NAME' "Mesh Name" } { 'STR' "tiger_barb_refined.iff" } }
 		{ 'I32' { 'NAME' "Model Type" } { 'STR' "Mesh" } }
 		{ 'I32' { 'NAME' "Visibility Mailbox" } { 'DATA' 1l } { 'STR' "1" } }
-		{ 'FX32' { 'NAME' "slopeA" } { 'DATA' -0.0162651643921167(1.15.16) } { 'STR' "-0.016265" } }
+		{ 'FX32' { 'NAME' "slopeA" } { 'DATA' 0.0254782921876068(1.15.16) } { 'STR' "0.025478" } }
 		{ 'FX32' { 'NAME' "slopeB" } { 'DATA' 0.0000000000000000(1.15.16) } { 'STR' "0.000000" } }
-		{ 'FX32' { 'NAME' "slopeC" } { 'DATA' 0.0000000000000000(1.15.16) } { 'STR' "0.000000" } }
-		{ 'FX32' { 'NAME' "slopeD" } { 'DATA' 0.0260242634151785(1.15.16) } { 'STR' "0.026024" } }
+		{ 'FX32' { 'NAME' "slopeC" } { 'DATA' -0.0025003240616233(1.15.16) } { 'STR' "-0.002500" } }
+		{ 'FX32' { 'NAME' "slopeD" } { 'DATA' -0.0467660460939662(1.15.16) } { 'STR' "-0.046766" } }
 	}
 	{ 'OBJ' 
 		{ 'NAME' "tiger-barb-18" }
@@ -1425,20 +1425,20 @@
 		} }
 		{ 'EULR' { 'NAME' "Orientation" } { 'DATA' 0.0000000000000000(1.15.16) -0.0000000000000000(1.15.16) 0.0000000000000000(1.15.16)  //a,b,c
 		} }
-		{ 'BOX3' { 'NAME' "Global Bounding Box" } { 'DATA' -0.2624999880790710(1.15.16) -0.0997499972581863(1.15.16) -0.1417499929666519(1.15.16) 0.2624999880790710(1.15.16) 0.0997499972581863(1.15.16) 0.1784999966621399(1.15.16)  //min(x,y,z)-max(x,y,z)
+		{ 'BOX3' { 'NAME' "Global Bounding Box" } { 'DATA' -0.2624999880790710(1.15.16) -0.0944999977946281(1.15.16) -0.1443749964237213(1.15.16) 0.2624999880790710(1.15.16) 0.0944999977946281(1.15.16) 0.1811250001192093(1.15.16)  //min(x,y,z)-max(x,y,z)
 		} }
 		{ 'STR' { 'NAME' "Class Name" } { 'DATA' "platform" } }
-		{ 'FILE' { 'NAME' "Mesh Name" } { 'STR' "tiger_barb_mesh.iff" } }
+		{ 'FILE' { 'NAME' "Mesh Name" } { 'STR' "tiger_barb_refined.iff" } }
 		{ 'I32'  { 'NAME' "Model Type" } { 'DATA' 1l } { 'STR' "Mesh" } }
 		{ 'I32' { 'NAME' "Mobility" } { 'STR' "Anchored" } }
 		{ 'FX32' { 'NAME' "Mass" } { 'DATA' 0.0000000000000000(1.15.16) } { 'STR' "0.0" } }
-		{ 'FILE' { 'NAME' "Mesh Name" } { 'STR' "tiger_barb_mesh.iff" } }
+		{ 'FILE' { 'NAME' "Mesh Name" } { 'STR' "tiger_barb_refined.iff" } }
 		{ 'I32' { 'NAME' "Model Type" } { 'STR' "Mesh" } }
 		{ 'I32' { 'NAME' "Visibility Mailbox" } { 'DATA' 1l } { 'STR' "1" } }
-		{ 'FX32' { 'NAME' "slopeA" } { 'DATA' -0.0162651643921167(1.15.16) } { 'STR' "-0.016265" } }
+		{ 'FX32' { 'NAME' "slopeA" } { 'DATA' 0.0254782921876068(1.15.16) } { 'STR' "0.025478" } }
 		{ 'FX32' { 'NAME' "slopeB" } { 'DATA' 0.0000000000000000(1.15.16) } { 'STR' "0.000000" } }
-		{ 'FX32' { 'NAME' "slopeC" } { 'DATA' 0.0000000000000000(1.15.16) } { 'STR' "0.000000" } }
-		{ 'FX32' { 'NAME' "slopeD" } { 'DATA' 0.0260242634151785(1.15.16) } { 'STR' "0.026024" } }
+		{ 'FX32' { 'NAME' "slopeC" } { 'DATA' -0.0025003240616233(1.15.16) } { 'STR' "-0.002500" } }
+		{ 'FX32' { 'NAME' "slopeD" } { 'DATA' -0.0467660460939662(1.15.16) } { 'STR' "-0.046766" } }
 	}
 	{ 'OBJ' 
 		{ 'NAME' "tiger-barb-19" }
@@ -1446,20 +1446,20 @@
 		} }
 		{ 'EULR' { 'NAME' "Orientation" } { 'DATA' 0.0000000000000000(1.15.16) -0.0000000000000000(1.15.16) 0.0000000000000000(1.15.16)  //a,b,c
 		} }
-		{ 'BOX3' { 'NAME' "Global Bounding Box" } { 'DATA' -0.2624999880790710(1.15.16) -0.0997499972581863(1.15.16) -0.1417499929666519(1.15.16) 0.2624999880790710(1.15.16) 0.0997499972581863(1.15.16) 0.1784999966621399(1.15.16)  //min(x,y,z)-max(x,y,z)
+		{ 'BOX3' { 'NAME' "Global Bounding Box" } { 'DATA' -0.2624999880790710(1.15.16) -0.0944999977946281(1.15.16) -0.1443749964237213(1.15.16) 0.2624999880790710(1.15.16) 0.0944999977946281(1.15.16) 0.1811250001192093(1.15.16)  //min(x,y,z)-max(x,y,z)
 		} }
 		{ 'STR' { 'NAME' "Class Name" } { 'DATA' "platform" } }
-		{ 'FILE' { 'NAME' "Mesh Name" } { 'STR' "tiger_barb_mesh.iff" } }
+		{ 'FILE' { 'NAME' "Mesh Name" } { 'STR' "tiger_barb_refined.iff" } }
 		{ 'I32'  { 'NAME' "Model Type" } { 'DATA' 1l } { 'STR' "Mesh" } }
 		{ 'I32' { 'NAME' "Mobility" } { 'STR' "Anchored" } }
 		{ 'FX32' { 'NAME' "Mass" } { 'DATA' 0.0000000000000000(1.15.16) } { 'STR' "0.0" } }
-		{ 'FILE' { 'NAME' "Mesh Name" } { 'STR' "tiger_barb_mesh.iff" } }
+		{ 'FILE' { 'NAME' "Mesh Name" } { 'STR' "tiger_barb_refined.iff" } }
 		{ 'I32' { 'NAME' "Model Type" } { 'STR' "Mesh" } }
 		{ 'I32' { 'NAME' "Visibility Mailbox" } { 'DATA' 1l } { 'STR' "1" } }
-		{ 'FX32' { 'NAME' "slopeA" } { 'DATA' -0.0162651643921167(1.15.16) } { 'STR' "-0.016265" } }
+		{ 'FX32' { 'NAME' "slopeA" } { 'DATA' 0.0254782921876068(1.15.16) } { 'STR' "0.025478" } }
 		{ 'FX32' { 'NAME' "slopeB" } { 'DATA' 0.0000000000000000(1.15.16) } { 'STR' "0.000000" } }
-		{ 'FX32' { 'NAME' "slopeC" } { 'DATA' 0.0000000000000000(1.15.16) } { 'STR' "0.000000" } }
-		{ 'FX32' { 'NAME' "slopeD" } { 'DATA' 0.0260242634151785(1.15.16) } { 'STR' "0.026024" } }
+		{ 'FX32' { 'NAME' "slopeC" } { 'DATA' -0.0025003240616233(1.15.16) } { 'STR' "-0.002500" } }
+		{ 'FX32' { 'NAME' "slopeD" } { 'DATA' -0.0467660460939662(1.15.16) } { 'STR' "-0.046766" } }
 	}
 	{ 'OBJ' 
 		{ 'NAME' "tiger-barb-20" }
@@ -1467,20 +1467,20 @@
 		} }
 		{ 'EULR' { 'NAME' "Orientation" } { 'DATA' 0.0000000000000000(1.15.16) -0.0000000000000000(1.15.16) 0.0000000000000000(1.15.16)  //a,b,c
 		} }
-		{ 'BOX3' { 'NAME' "Global Bounding Box" } { 'DATA' -0.2624999880790710(1.15.16) -0.0997499972581863(1.15.16) -0.1417499929666519(1.15.16) 0.2624999880790710(1.15.16) 0.0997499972581863(1.15.16) 0.1784999966621399(1.15.16)  //min(x,y,z)-max(x,y,z)
+		{ 'BOX3' { 'NAME' "Global Bounding Box" } { 'DATA' -0.2624999880790710(1.15.16) -0.0944999977946281(1.15.16) -0.1443749964237213(1.15.16) 0.2624999880790710(1.15.16) 0.0944999977946281(1.15.16) 0.1811250001192093(1.15.16)  //min(x,y,z)-max(x,y,z)
 		} }
 		{ 'STR' { 'NAME' "Class Name" } { 'DATA' "platform" } }
-		{ 'FILE' { 'NAME' "Mesh Name" } { 'STR' "tiger_barb_mesh.iff" } }
+		{ 'FILE' { 'NAME' "Mesh Name" } { 'STR' "tiger_barb_refined.iff" } }
 		{ 'I32'  { 'NAME' "Model Type" } { 'DATA' 1l } { 'STR' "Mesh" } }
 		{ 'I32' { 'NAME' "Mobility" } { 'STR' "Anchored" } }
 		{ 'FX32' { 'NAME' "Mass" } { 'DATA' 0.0000000000000000(1.15.16) } { 'STR' "0.0" } }
-		{ 'FILE' { 'NAME' "Mesh Name" } { 'STR' "tiger_barb_mesh.iff" } }
+		{ 'FILE' { 'NAME' "Mesh Name" } { 'STR' "tiger_barb_refined.iff" } }
 		{ 'I32' { 'NAME' "Model Type" } { 'STR' "Mesh" } }
 		{ 'I32' { 'NAME' "Visibility Mailbox" } { 'DATA' 1l } { 'STR' "1" } }
-		{ 'FX32' { 'NAME' "slopeA" } { 'DATA' -0.0162651643921167(1.15.16) } { 'STR' "-0.016265" } }
+		{ 'FX32' { 'NAME' "slopeA" } { 'DATA' 0.0254782921876068(1.15.16) } { 'STR' "0.025478" } }
 		{ 'FX32' { 'NAME' "slopeB" } { 'DATA' 0.0000000000000000(1.15.16) } { 'STR' "0.000000" } }
-		{ 'FX32' { 'NAME' "slopeC" } { 'DATA' 0.0000000000000000(1.15.16) } { 'STR' "0.000000" } }
-		{ 'FX32' { 'NAME' "slopeD" } { 'DATA' 0.0260242634151785(1.15.16) } { 'STR' "0.026024" } }
+		{ 'FX32' { 'NAME' "slopeC" } { 'DATA' -0.0025003240616233(1.15.16) } { 'STR' "-0.002500" } }
+		{ 'FX32' { 'NAME' "slopeD" } { 'DATA' -0.0467660460939662(1.15.16) } { 'STR' "-0.046766" } }
 	}
 	{ 'OBJ' 
 		{ 'NAME' "tiger-barb-21" }
@@ -1488,20 +1488,20 @@
 		} }
 		{ 'EULR' { 'NAME' "Orientation" } { 'DATA' 0.0000000000000000(1.15.16) -0.0000000000000000(1.15.16) 0.0000000000000000(1.15.16)  //a,b,c
 		} }
-		{ 'BOX3' { 'NAME' "Global Bounding Box" } { 'DATA' -0.2624999880790710(1.15.16) -0.0997499972581863(1.15.16) -0.1417499929666519(1.15.16) 0.2624999880790710(1.15.16) 0.0997499972581863(1.15.16) 0.1784999966621399(1.15.16)  //min(x,y,z)-max(x,y,z)
+		{ 'BOX3' { 'NAME' "Global Bounding Box" } { 'DATA' -0.2624999880790710(1.15.16) -0.0944999977946281(1.15.16) -0.1443749964237213(1.15.16) 0.2624999880790710(1.15.16) 0.0944999977946281(1.15.16) 0.1811250001192093(1.15.16)  //min(x,y,z)-max(x,y,z)
 		} }
 		{ 'STR' { 'NAME' "Class Name" } { 'DATA' "platform" } }
-		{ 'FILE' { 'NAME' "Mesh Name" } { 'STR' "tiger_barb_mesh.iff" } }
+		{ 'FILE' { 'NAME' "Mesh Name" } { 'STR' "tiger_barb_refined.iff" } }
 		{ 'I32'  { 'NAME' "Model Type" } { 'DATA' 1l } { 'STR' "Mesh" } }
 		{ 'I32' { 'NAME' "Mobility" } { 'STR' "Anchored" } }
 		{ 'FX32' { 'NAME' "Mass" } { 'DATA' 0.0000000000000000(1.15.16) } { 'STR' "0.0" } }
-		{ 'FILE' { 'NAME' "Mesh Name" } { 'STR' "tiger_barb_mesh.iff" } }
+		{ 'FILE' { 'NAME' "Mesh Name" } { 'STR' "tiger_barb_refined.iff" } }
 		{ 'I32' { 'NAME' "Model Type" } { 'STR' "Mesh" } }
 		{ 'I32' { 'NAME' "Visibility Mailbox" } { 'DATA' 1l } { 'STR' "1" } }
-		{ 'FX32' { 'NAME' "slopeA" } { 'DATA' -0.0162651643921167(1.15.16) } { 'STR' "-0.016265" } }
+		{ 'FX32' { 'NAME' "slopeA" } { 'DATA' 0.0254782921876068(1.15.16) } { 'STR' "0.025478" } }
 		{ 'FX32' { 'NAME' "slopeB" } { 'DATA' 0.0000000000000000(1.15.16) } { 'STR' "0.000000" } }
-		{ 'FX32' { 'NAME' "slopeC" } { 'DATA' 0.0000000000000000(1.15.16) } { 'STR' "0.000000" } }
-		{ 'FX32' { 'NAME' "slopeD" } { 'DATA' 0.0260242634151785(1.15.16) } { 'STR' "0.026024" } }
+		{ 'FX32' { 'NAME' "slopeC" } { 'DATA' -0.0025003240616233(1.15.16) } { 'STR' "-0.002500" } }
+		{ 'FX32' { 'NAME' "slopeD" } { 'DATA' -0.0467660460939662(1.15.16) } { 'STR' "-0.046766" } }
 	}
 	{ 'OBJ' 
 		{ 'NAME' "tiger-barb-22" }
@@ -1509,20 +1509,20 @@
 		} }
 		{ 'EULR' { 'NAME' "Orientation" } { 'DATA' 0.0000000000000000(1.15.16) -0.0000000000000000(1.15.16) 0.0000000000000000(1.15.16)  //a,b,c
 		} }
-		{ 'BOX3' { 'NAME' "Global Bounding Box" } { 'DATA' -0.2624999880790710(1.15.16) -0.0997499972581863(1.15.16) -0.1417499929666519(1.15.16) 0.2624999880790710(1.15.16) 0.0997499972581863(1.15.16) 0.1784999966621399(1.15.16)  //min(x,y,z)-max(x,y,z)
+		{ 'BOX3' { 'NAME' "Global Bounding Box" } { 'DATA' -0.2624999880790710(1.15.16) -0.0944999977946281(1.15.16) -0.1443749964237213(1.15.16) 0.2624999880790710(1.15.16) 0.0944999977946281(1.15.16) 0.1811250001192093(1.15.16)  //min(x,y,z)-max(x,y,z)
 		} }
 		{ 'STR' { 'NAME' "Class Name" } { 'DATA' "platform" } }
-		{ 'FILE' { 'NAME' "Mesh Name" } { 'STR' "tiger_barb_mesh.iff" } }
+		{ 'FILE' { 'NAME' "Mesh Name" } { 'STR' "tiger_barb_refined.iff" } }
 		{ 'I32'  { 'NAME' "Model Type" } { 'DATA' 1l } { 'STR' "Mesh" } }
 		{ 'I32' { 'NAME' "Mobility" } { 'STR' "Anchored" } }
 		{ 'FX32' { 'NAME' "Mass" } { 'DATA' 0.0000000000000000(1.15.16) } { 'STR' "0.0" } }
-		{ 'FILE' { 'NAME' "Mesh Name" } { 'STR' "tiger_barb_mesh.iff" } }
+		{ 'FILE' { 'NAME' "Mesh Name" } { 'STR' "tiger_barb_refined.iff" } }
 		{ 'I32' { 'NAME' "Model Type" } { 'STR' "Mesh" } }
 		{ 'I32' { 'NAME' "Visibility Mailbox" } { 'DATA' 1l } { 'STR' "1" } }
-		{ 'FX32' { 'NAME' "slopeA" } { 'DATA' -0.0162651643921167(1.15.16) } { 'STR' "-0.016265" } }
+		{ 'FX32' { 'NAME' "slopeA" } { 'DATA' 0.0254782921876068(1.15.16) } { 'STR' "0.025478" } }
 		{ 'FX32' { 'NAME' "slopeB" } { 'DATA' 0.0000000000000000(1.15.16) } { 'STR' "0.000000" } }
-		{ 'FX32' { 'NAME' "slopeC" } { 'DATA' 0.0000000000000000(1.15.16) } { 'STR' "0.000000" } }
-		{ 'FX32' { 'NAME' "slopeD" } { 'DATA' 0.0260242634151785(1.15.16) } { 'STR' "0.026024" } }
+		{ 'FX32' { 'NAME' "slopeC" } { 'DATA' -0.0025003240616233(1.15.16) } { 'STR' "-0.002500" } }
+		{ 'FX32' { 'NAME' "slopeD" } { 'DATA' -0.0467660460939662(1.15.16) } { 'STR' "-0.046766" } }
 	}
 	{ 'OBJ' 
 		{ 'NAME' "tiger-barb-23" }
@@ -1530,20 +1530,20 @@
 		} }
 		{ 'EULR' { 'NAME' "Orientation" } { 'DATA' 0.0000000000000000(1.15.16) -0.0000000000000000(1.15.16) 0.0000000000000000(1.15.16)  //a,b,c
 		} }
-		{ 'BOX3' { 'NAME' "Global Bounding Box" } { 'DATA' -0.2624999880790710(1.15.16) -0.0997499972581863(1.15.16) -0.1417499929666519(1.15.16) 0.2624999880790710(1.15.16) 0.0997499972581863(1.15.16) 0.1784999966621399(1.15.16)  //min(x,y,z)-max(x,y,z)
+		{ 'BOX3' { 'NAME' "Global Bounding Box" } { 'DATA' -0.2624999880790710(1.15.16) -0.0944999977946281(1.15.16) -0.1443749964237213(1.15.16) 0.2624999880790710(1.15.16) 0.0944999977946281(1.15.16) 0.1811250001192093(1.15.16)  //min(x,y,z)-max(x,y,z)
 		} }
 		{ 'STR' { 'NAME' "Class Name" } { 'DATA' "platform" } }
-		{ 'FILE' { 'NAME' "Mesh Name" } { 'STR' "tiger_barb_mesh.iff" } }
+		{ 'FILE' { 'NAME' "Mesh Name" } { 'STR' "tiger_barb_refined.iff" } }
 		{ 'I32'  { 'NAME' "Model Type" } { 'DATA' 1l } { 'STR' "Mesh" } }
 		{ 'I32' { 'NAME' "Mobility" } { 'STR' "Anchored" } }
 		{ 'FX32' { 'NAME' "Mass" } { 'DATA' 0.0000000000000000(1.15.16) } { 'STR' "0.0" } }
-		{ 'FILE' { 'NAME' "Mesh Name" } { 'STR' "tiger_barb_mesh.iff" } }
+		{ 'FILE' { 'NAME' "Mesh Name" } { 'STR' "tiger_barb_refined.iff" } }
 		{ 'I32' { 'NAME' "Model Type" } { 'STR' "Mesh" } }
 		{ 'I32' { 'NAME' "Visibility Mailbox" } { 'DATA' 1l } { 'STR' "1" } }
-		{ 'FX32' { 'NAME' "slopeA" } { 'DATA' -0.0162651643921167(1.15.16) } { 'STR' "-0.016265" } }
+		{ 'FX32' { 'NAME' "slopeA" } { 'DATA' 0.0254782921876068(1.15.16) } { 'STR' "0.025478" } }
 		{ 'FX32' { 'NAME' "slopeB" } { 'DATA' 0.0000000000000000(1.15.16) } { 'STR' "0.000000" } }
-		{ 'FX32' { 'NAME' "slopeC" } { 'DATA' 0.0000000000000000(1.15.16) } { 'STR' "0.000000" } }
-		{ 'FX32' { 'NAME' "slopeD" } { 'DATA' 0.0260242634151785(1.15.16) } { 'STR' "0.026024" } }
+		{ 'FX32' { 'NAME' "slopeC" } { 'DATA' -0.0025003240616233(1.15.16) } { 'STR' "-0.002500" } }
+		{ 'FX32' { 'NAME' "slopeD" } { 'DATA' -0.0467660460939662(1.15.16) } { 'STR' "-0.046766" } }
 	}
 	{ 'OBJ' 
 		{ 'NAME' "tiger-barb-24" }
@@ -1551,20 +1551,20 @@
 		} }
 		{ 'EULR' { 'NAME' "Orientation" } { 'DATA' 0.0000000000000000(1.15.16) -0.0000000000000000(1.15.16) 0.0000000000000000(1.15.16)  //a,b,c
 		} }
-		{ 'BOX3' { 'NAME' "Global Bounding Box" } { 'DATA' -0.2624999880790710(1.15.16) -0.0997499972581863(1.15.16) -0.1417499929666519(1.15.16) 0.2624999880790710(1.15.16) 0.0997499972581863(1.15.16) 0.1784999966621399(1.15.16)  //min(x,y,z)-max(x,y,z)
+		{ 'BOX3' { 'NAME' "Global Bounding Box" } { 'DATA' -0.2624999880790710(1.15.16) -0.0944999977946281(1.15.16) -0.1443749964237213(1.15.16) 0.2624999880790710(1.15.16) 0.0944999977946281(1.15.16) 0.1811250001192093(1.15.16)  //min(x,y,z)-max(x,y,z)
 		} }
 		{ 'STR' { 'NAME' "Class Name" } { 'DATA' "platform" } }
-		{ 'FILE' { 'NAME' "Mesh Name" } { 'STR' "tiger_barb_mesh.iff" } }
+		{ 'FILE' { 'NAME' "Mesh Name" } { 'STR' "tiger_barb_refined.iff" } }
 		{ 'I32'  { 'NAME' "Model Type" } { 'DATA' 1l } { 'STR' "Mesh" } }
 		{ 'I32' { 'NAME' "Mobility" } { 'STR' "Anchored" } }
 		{ 'FX32' { 'NAME' "Mass" } { 'DATA' 0.0000000000000000(1.15.16) } { 'STR' "0.0" } }
-		{ 'FILE' { 'NAME' "Mesh Name" } { 'STR' "tiger_barb_mesh.iff" } }
+		{ 'FILE' { 'NAME' "Mesh Name" } { 'STR' "tiger_barb_refined.iff" } }
 		{ 'I32' { 'NAME' "Model Type" } { 'STR' "Mesh" } }
 		{ 'I32' { 'NAME' "Visibility Mailbox" } { 'DATA' 1l } { 'STR' "1" } }
-		{ 'FX32' { 'NAME' "slopeA" } { 'DATA' -0.0162651643921167(1.15.16) } { 'STR' "-0.016265" } }
+		{ 'FX32' { 'NAME' "slopeA" } { 'DATA' 0.0254782921876068(1.15.16) } { 'STR' "0.025478" } }
 		{ 'FX32' { 'NAME' "slopeB" } { 'DATA' 0.0000000000000000(1.15.16) } { 'STR' "0.000000" } }
-		{ 'FX32' { 'NAME' "slopeC" } { 'DATA' 0.0000000000000000(1.15.16) } { 'STR' "0.000000" } }
-		{ 'FX32' { 'NAME' "slopeD" } { 'DATA' 0.0260242634151785(1.15.16) } { 'STR' "0.026024" } }
+		{ 'FX32' { 'NAME' "slopeC" } { 'DATA' -0.0025003240616233(1.15.16) } { 'STR' "-0.002500" } }
+		{ 'FX32' { 'NAME' "slopeD" } { 'DATA' -0.0467660460939662(1.15.16) } { 'STR' "-0.046766" } }
 	}
 	{ 'OBJ' 
 		{ 'NAME' "tiger-barb-25" }
@@ -1572,20 +1572,20 @@
 		} }
 		{ 'EULR' { 'NAME' "Orientation" } { 'DATA' 0.0000000000000000(1.15.16) -0.0000000000000000(1.15.16) 0.0000000000000000(1.15.16)  //a,b,c
 		} }
-		{ 'BOX3' { 'NAME' "Global Bounding Box" } { 'DATA' -0.2624999880790710(1.15.16) -0.0997499972581863(1.15.16) -0.1417499929666519(1.15.16) 0.2624999880790710(1.15.16) 0.0997499972581863(1.15.16) 0.1784999966621399(1.15.16)  //min(x,y,z)-max(x,y,z)
+		{ 'BOX3' { 'NAME' "Global Bounding Box" } { 'DATA' -0.2624999880790710(1.15.16) -0.0944999977946281(1.15.16) -0.1443749964237213(1.15.16) 0.2624999880790710(1.15.16) 0.0944999977946281(1.15.16) 0.1811250001192093(1.15.16)  //min(x,y,z)-max(x,y,z)
 		} }
 		{ 'STR' { 'NAME' "Class Name" } { 'DATA' "platform" } }
-		{ 'FILE' { 'NAME' "Mesh Name" } { 'STR' "tiger_barb_mesh.iff" } }
+		{ 'FILE' { 'NAME' "Mesh Name" } { 'STR' "tiger_barb_refined.iff" } }
 		{ 'I32'  { 'NAME' "Model Type" } { 'DATA' 1l } { 'STR' "Mesh" } }
 		{ 'I32' { 'NAME' "Mobility" } { 'STR' "Anchored" } }
 		{ 'FX32' { 'NAME' "Mass" } { 'DATA' 0.0000000000000000(1.15.16) } { 'STR' "0.0" } }
-		{ 'FILE' { 'NAME' "Mesh Name" } { 'STR' "tiger_barb_mesh.iff" } }
+		{ 'FILE' { 'NAME' "Mesh Name" } { 'STR' "tiger_barb_refined.iff" } }
 		{ 'I32' { 'NAME' "Model Type" } { 'STR' "Mesh" } }
 		{ 'I32' { 'NAME' "Visibility Mailbox" } { 'DATA' 1l } { 'STR' "1" } }
-		{ 'FX32' { 'NAME' "slopeA" } { 'DATA' -0.0162651643921167(1.15.16) } { 'STR' "-0.016265" } }
+		{ 'FX32' { 'NAME' "slopeA" } { 'DATA' 0.0254782921876068(1.15.16) } { 'STR' "0.025478" } }
 		{ 'FX32' { 'NAME' "slopeB" } { 'DATA' 0.0000000000000000(1.15.16) } { 'STR' "0.000000" } }
-		{ 'FX32' { 'NAME' "slopeC" } { 'DATA' 0.0000000000000000(1.15.16) } { 'STR' "0.000000" } }
-		{ 'FX32' { 'NAME' "slopeD" } { 'DATA' 0.0260242634151785(1.15.16) } { 'STR' "0.026024" } }
+		{ 'FX32' { 'NAME' "slopeC" } { 'DATA' -0.0025003240616233(1.15.16) } { 'STR' "-0.002500" } }
+		{ 'FX32' { 'NAME' "slopeD" } { 'DATA' -0.0467660460939662(1.15.16) } { 'STR' "-0.046766" } }
 	}
 	{ 'OBJ' 
 		{ 'NAME' "tiger-barb-26" }
@@ -1593,20 +1593,20 @@
 		} }
 		{ 'EULR' { 'NAME' "Orientation" } { 'DATA' 0.0000000000000000(1.15.16) -0.0000000000000000(1.15.16) 0.0000000000000000(1.15.16)  //a,b,c
 		} }
-		{ 'BOX3' { 'NAME' "Global Bounding Box" } { 'DATA' -0.2624999880790710(1.15.16) -0.0997499972581863(1.15.16) -0.1417499929666519(1.15.16) 0.2624999880790710(1.15.16) 0.0997499972581863(1.15.16) 0.1784999966621399(1.15.16)  //min(x,y,z)-max(x,y,z)
+		{ 'BOX3' { 'NAME' "Global Bounding Box" } { 'DATA' -0.2624999880790710(1.15.16) -0.0944999977946281(1.15.16) -0.1443749964237213(1.15.16) 0.2624999880790710(1.15.16) 0.0944999977946281(1.15.16) 0.1811250001192093(1.15.16)  //min(x,y,z)-max(x,y,z)
 		} }
 		{ 'STR' { 'NAME' "Class Name" } { 'DATA' "platform" } }
-		{ 'FILE' { 'NAME' "Mesh Name" } { 'STR' "tiger_barb_mesh.iff" } }
+		{ 'FILE' { 'NAME' "Mesh Name" } { 'STR' "tiger_barb_refined.iff" } }
 		{ 'I32'  { 'NAME' "Model Type" } { 'DATA' 1l } { 'STR' "Mesh" } }
 		{ 'I32' { 'NAME' "Mobility" } { 'STR' "Anchored" } }
 		{ 'FX32' { 'NAME' "Mass" } { 'DATA' 0.0000000000000000(1.15.16) } { 'STR' "0.0" } }
-		{ 'FILE' { 'NAME' "Mesh Name" } { 'STR' "tiger_barb_mesh.iff" } }
+		{ 'FILE' { 'NAME' "Mesh Name" } { 'STR' "tiger_barb_refined.iff" } }
 		{ 'I32' { 'NAME' "Model Type" } { 'STR' "Mesh" } }
 		{ 'I32' { 'NAME' "Visibility Mailbox" } { 'DATA' 1l } { 'STR' "1" } }
-		{ 'FX32' { 'NAME' "slopeA" } { 'DATA' -0.0162651643921167(1.15.16) } { 'STR' "-0.016265" } }
+		{ 'FX32' { 'NAME' "slopeA" } { 'DATA' 0.0254782921876068(1.15.16) } { 'STR' "0.025478" } }
 		{ 'FX32' { 'NAME' "slopeB" } { 'DATA' 0.0000000000000000(1.15.16) } { 'STR' "0.000000" } }
-		{ 'FX32' { 'NAME' "slopeC" } { 'DATA' 0.0000000000000000(1.15.16) } { 'STR' "0.000000" } }
-		{ 'FX32' { 'NAME' "slopeD" } { 'DATA' 0.0260242634151785(1.15.16) } { 'STR' "0.026024" } }
+		{ 'FX32' { 'NAME' "slopeC" } { 'DATA' -0.0025003240616233(1.15.16) } { 'STR' "-0.002500" } }
+		{ 'FX32' { 'NAME' "slopeD" } { 'DATA' -0.0467660460939662(1.15.16) } { 'STR' "-0.046766" } }
 	}
 	{ 'OBJ' 
 		{ 'NAME' "tiger-barb-27" }
@@ -1614,20 +1614,20 @@
 		} }
 		{ 'EULR' { 'NAME' "Orientation" } { 'DATA' 0.0000000000000000(1.15.16) -0.0000000000000000(1.15.16) 0.0000000000000000(1.15.16)  //a,b,c
 		} }
-		{ 'BOX3' { 'NAME' "Global Bounding Box" } { 'DATA' -0.2624999880790710(1.15.16) -0.0997499972581863(1.15.16) -0.1417499929666519(1.15.16) 0.2624999880790710(1.15.16) 0.0997499972581863(1.15.16) 0.1784999966621399(1.15.16)  //min(x,y,z)-max(x,y,z)
+		{ 'BOX3' { 'NAME' "Global Bounding Box" } { 'DATA' -0.2624999880790710(1.15.16) -0.0944999977946281(1.15.16) -0.1443749964237213(1.15.16) 0.2624999880790710(1.15.16) 0.0944999977946281(1.15.16) 0.1811250001192093(1.15.16)  //min(x,y,z)-max(x,y,z)
 		} }
 		{ 'STR' { 'NAME' "Class Name" } { 'DATA' "platform" } }
-		{ 'FILE' { 'NAME' "Mesh Name" } { 'STR' "tiger_barb_mesh.iff" } }
+		{ 'FILE' { 'NAME' "Mesh Name" } { 'STR' "tiger_barb_refined.iff" } }
 		{ 'I32'  { 'NAME' "Model Type" } { 'DATA' 1l } { 'STR' "Mesh" } }
 		{ 'I32' { 'NAME' "Mobility" } { 'STR' "Anchored" } }
 		{ 'FX32' { 'NAME' "Mass" } { 'DATA' 0.0000000000000000(1.15.16) } { 'STR' "0.0" } }
-		{ 'FILE' { 'NAME' "Mesh Name" } { 'STR' "tiger_barb_mesh.iff" } }
+		{ 'FILE' { 'NAME' "Mesh Name" } { 'STR' "tiger_barb_refined.iff" } }
 		{ 'I32' { 'NAME' "Model Type" } { 'STR' "Mesh" } }
 		{ 'I32' { 'NAME' "Visibility Mailbox" } { 'DATA' 1l } { 'STR' "1" } }
-		{ 'FX32' { 'NAME' "slopeA" } { 'DATA' -0.0162651643921167(1.15.16) } { 'STR' "-0.016265" } }
+		{ 'FX32' { 'NAME' "slopeA" } { 'DATA' 0.0254782921876068(1.15.16) } { 'STR' "0.025478" } }
 		{ 'FX32' { 'NAME' "slopeB" } { 'DATA' 0.0000000000000000(1.15.16) } { 'STR' "0.000000" } }
-		{ 'FX32' { 'NAME' "slopeC" } { 'DATA' 0.0000000000000000(1.15.16) } { 'STR' "0.000000" } }
-		{ 'FX32' { 'NAME' "slopeD" } { 'DATA' 0.0260242634151785(1.15.16) } { 'STR' "0.026024" } }
+		{ 'FX32' { 'NAME' "slopeC" } { 'DATA' -0.0025003240616233(1.15.16) } { 'STR' "-0.002500" } }
+		{ 'FX32' { 'NAME' "slopeD" } { 'DATA' -0.0467660460939662(1.15.16) } { 'STR' "-0.046766" } }
 	}
 	{ 'OBJ' 
 		{ 'NAME' "tiger-barb-28" }
@@ -1635,20 +1635,20 @@
 		} }
 		{ 'EULR' { 'NAME' "Orientation" } { 'DATA' 0.0000000000000000(1.15.16) -0.0000000000000000(1.15.16) 0.0000000000000000(1.15.16)  //a,b,c
 		} }
-		{ 'BOX3' { 'NAME' "Global Bounding Box" } { 'DATA' -0.2624999880790710(1.15.16) -0.0997499972581863(1.15.16) -0.1417499929666519(1.15.16) 0.2624999880790710(1.15.16) 0.0997499972581863(1.15.16) 0.1784999966621399(1.15.16)  //min(x,y,z)-max(x,y,z)
+		{ 'BOX3' { 'NAME' "Global Bounding Box" } { 'DATA' -0.2624999880790710(1.15.16) -0.0944999977946281(1.15.16) -0.1443749964237213(1.15.16) 0.2624999880790710(1.15.16) 0.0944999977946281(1.15.16) 0.1811250001192093(1.15.16)  //min(x,y,z)-max(x,y,z)
 		} }
 		{ 'STR' { 'NAME' "Class Name" } { 'DATA' "platform" } }
-		{ 'FILE' { 'NAME' "Mesh Name" } { 'STR' "tiger_barb_mesh.iff" } }
+		{ 'FILE' { 'NAME' "Mesh Name" } { 'STR' "tiger_barb_refined.iff" } }
 		{ 'I32'  { 'NAME' "Model Type" } { 'DATA' 1l } { 'STR' "Mesh" } }
 		{ 'I32' { 'NAME' "Mobility" } { 'STR' "Anchored" } }
 		{ 'FX32' { 'NAME' "Mass" } { 'DATA' 0.0000000000000000(1.15.16) } { 'STR' "0.0" } }
-		{ 'FILE' { 'NAME' "Mesh Name" } { 'STR' "tiger_barb_mesh.iff" } }
+		{ 'FILE' { 'NAME' "Mesh Name" } { 'STR' "tiger_barb_refined.iff" } }
 		{ 'I32' { 'NAME' "Model Type" } { 'STR' "Mesh" } }
 		{ 'I32' { 'NAME' "Visibility Mailbox" } { 'DATA' 1l } { 'STR' "1" } }
-		{ 'FX32' { 'NAME' "slopeA" } { 'DATA' -0.0162651643921167(1.15.16) } { 'STR' "-0.016265" } }
+		{ 'FX32' { 'NAME' "slopeA" } { 'DATA' 0.0254782921876068(1.15.16) } { 'STR' "0.025478" } }
 		{ 'FX32' { 'NAME' "slopeB" } { 'DATA' 0.0000000000000000(1.15.16) } { 'STR' "0.000000" } }
-		{ 'FX32' { 'NAME' "slopeC" } { 'DATA' 0.0000000000000000(1.15.16) } { 'STR' "0.000000" } }
-		{ 'FX32' { 'NAME' "slopeD" } { 'DATA' 0.0260242634151785(1.15.16) } { 'STR' "0.026024" } }
+		{ 'FX32' { 'NAME' "slopeC" } { 'DATA' -0.0025003240616233(1.15.16) } { 'STR' "-0.002500" } }
+		{ 'FX32' { 'NAME' "slopeD" } { 'DATA' -0.0467660460939662(1.15.16) } { 'STR' "-0.046766" } }
 	}
 	{ 'OBJ' 
 		{ 'NAME' "tiger-barb-29" }
@@ -1656,20 +1656,20 @@
 		} }
 		{ 'EULR' { 'NAME' "Orientation" } { 'DATA' 0.0000000000000000(1.15.16) -0.0000000000000000(1.15.16) 0.0000000000000000(1.15.16)  //a,b,c
 		} }
-		{ 'BOX3' { 'NAME' "Global Bounding Box" } { 'DATA' -0.2624999880790710(1.15.16) -0.0997499972581863(1.15.16) -0.1417499929666519(1.15.16) 0.2624999880790710(1.15.16) 0.0997499972581863(1.15.16) 0.1784999966621399(1.15.16)  //min(x,y,z)-max(x,y,z)
+		{ 'BOX3' { 'NAME' "Global Bounding Box" } { 'DATA' -0.2624999880790710(1.15.16) -0.0944999977946281(1.15.16) -0.1443749964237213(1.15.16) 0.2624999880790710(1.15.16) 0.0944999977946281(1.15.16) 0.1811250001192093(1.15.16)  //min(x,y,z)-max(x,y,z)
 		} }
 		{ 'STR' { 'NAME' "Class Name" } { 'DATA' "platform" } }
-		{ 'FILE' { 'NAME' "Mesh Name" } { 'STR' "tiger_barb_mesh.iff" } }
+		{ 'FILE' { 'NAME' "Mesh Name" } { 'STR' "tiger_barb_refined.iff" } }
 		{ 'I32'  { 'NAME' "Model Type" } { 'DATA' 1l } { 'STR' "Mesh" } }
 		{ 'I32' { 'NAME' "Mobility" } { 'STR' "Anchored" } }
 		{ 'FX32' { 'NAME' "Mass" } { 'DATA' 0.0000000000000000(1.15.16) } { 'STR' "0.0" } }
-		{ 'FILE' { 'NAME' "Mesh Name" } { 'STR' "tiger_barb_mesh.iff" } }
+		{ 'FILE' { 'NAME' "Mesh Name" } { 'STR' "tiger_barb_refined.iff" } }
 		{ 'I32' { 'NAME' "Model Type" } { 'STR' "Mesh" } }
 		{ 'I32' { 'NAME' "Visibility Mailbox" } { 'DATA' 1l } { 'STR' "1" } }
-		{ 'FX32' { 'NAME' "slopeA" } { 'DATA' -0.0162651643921167(1.15.16) } { 'STR' "-0.016265" } }
+		{ 'FX32' { 'NAME' "slopeA" } { 'DATA' 0.0254782921876068(1.15.16) } { 'STR' "0.025478" } }
 		{ 'FX32' { 'NAME' "slopeB" } { 'DATA' 0.0000000000000000(1.15.16) } { 'STR' "0.000000" } }
-		{ 'FX32' { 'NAME' "slopeC" } { 'DATA' 0.0000000000000000(1.15.16) } { 'STR' "0.000000" } }
-		{ 'FX32' { 'NAME' "slopeD" } { 'DATA' 0.0260242634151785(1.15.16) } { 'STR' "0.026024" } }
+		{ 'FX32' { 'NAME' "slopeC" } { 'DATA' -0.0025003240616233(1.15.16) } { 'STR' "-0.002500" } }
+		{ 'FX32' { 'NAME' "slopeD" } { 'DATA' -0.0467660460939662(1.15.16) } { 'STR' "-0.046766" } }
 	}
 	{ 'OBJ' 
 		{ 'NAME' "tank-shell" }
