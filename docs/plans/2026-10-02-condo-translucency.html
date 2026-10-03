@@ -1,0 +1,164 @@
+<!doctype html><html lang="en"><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><title>Condo shade and glass: translucency plan</title><style>body{margin:0;background:#f1f5f9;color:#1b2d3b;font:16px/1.6 system-ui,sans-serif}main{max-width:1200px;margin:28px auto;padding:36px 44px;background:white;border-radius:12px}h1{font-size:30px;line-height:1.2}h2{margin-top:38px;border-bottom:1px solid #dae3eb;padding-bottom:7px}h3{margin-top:28px}img{display:block;width:100%;height:auto;margin:22px 0}table{width:100%;border-collapse:collapse;font-size:14px;line-height:1.5}th,td{padding:12px;border:1px solid #dbe3eb;text-align:left;vertical-align:top}th{background:#eaf1f7}code{background:#eef3f7;padding:2px 4px;border-radius:3px;font-size:.87em;overflow-wrap:anywhere}a{color:#125e9b}.task{list-style:none}input{margin-right:8px}@media(max-width:800px){main{padding:20px;margin:0}table{font-size:12px}td,th{padding:7px}}</style><main><h1 id="condo-shade-and-glass-translucency-investigation-and-implementation-plan">Condo shade and glass: translucency investigation and implementation plan</h1>
+<p><strong>Date:</strong> 2026-10-02. <strong>Status:</strong> investigation complete; awaiting Will’s review and approval. No renderer, exporter, model or level implementation has started. The SVGs below are illustrative planning assets, not engine screenshots.</p>
+<h2 id="intended-result">Intended result</h2>
+<p>The lowered balcony shade should let Will see the outside scene through a lightly tinted sheet. The telescoping glass doors should look like glass rather than a solid coloured wall: a faint tint, visible edges and opaque handles, with the patio and lowered shade visible beyond them. Raising the shade and opening the doors retain their existing motion and collision behaviour.</p>
+<p>Start with adjustable material opacity and correctly ordered compositing across desktop GL, Android GLES, WebGL and Metal. Opacity here means how strongly the surface contributes to the image: zero is invisible, one is opaque. This first phase keeps the scene sharp through the material. Optical blur, refraction and physically based reflection would be separate work if later needed; alpha blending alone cannot produce those effects.</p>
+<h2 id="appearance-mockups">Appearance mockups</h2>
+<p><img alt="Six illustrative studies: opaque shade, translucent shade, glass, both layers, stacked doors and a strip-overlap failure" src="2026-10-02-condo-translucency/appearance-mockups.svg" /></p>
+<p>The mockups use shade opacity <strong>0.32</strong> and glass opacity <strong>0.12</strong> as starting points for review, not measured properties of the eventual purchased fabric or existing doors. Suggested tuning ranges: shade 0.20–0.45; glass 0.06–0.18. Keep cassette, solar strip, guides, bottom bar, door handles and locks opaque. The glass highlights shown are an appearance cue; the first phase does not promise a dynamic reflection system.</p>
+<p>True stacked door panes should accumulate a little tint. Accidental double surfaces on one pane, or the existing shade-strip overlap, must not create the same effect. At opacity 0.32, drawing the same sheet twice gives effective opacity approximately 0.54; lowering one material’s alpha without addressing its geometry would therefore be misleading.</p>
+<p><a href="2026-10-02-condo-translucency/preview.html">Open the visual preview</a>. <a href="2026-10-02-condo-translucency/preview.png">Combined PNG preview</a>.</p>
+<h2 id="findings-from-the-current-source">Findings from the current source</h2>
+<table>
+<thead>
+<tr>
+<th>Stage</th>
+<th>Evidence</th>
+<th>Consequence</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>Condo material authoring</td>
+<td><code>wflevels/condo_639_640/blender_create_condo.py</code>: <code>make_flat_material()</code> sets Base Color and diffuse alpha to 1.0. <code>SHADE_RGB['fabric']</code> is beige RGB. Doors reuse the imported <code>glass</code> material.</td>
+<td>Changing only the shade colour cannot make it see-through. The source glass material’s actual alpha/node setup still needs a read-only Blender probe before implementation.</td>
+</tr>
+<tr>
+<td>Shade geometry</td>
+<td>Same generator: <code>SLAT_T = 0.003</code>, <code>SLAT_DY = 0.001</code>, <code>SLAT_OVERLAP = 0.002</code>; slats have front/back surfaces, with top/bottom faces removed.</td>
+<td>Thin-box surfaces and overlapping neighbours need deliberate handling to prevent doubled tint and dark horizontal bands.</td>
+</tr>
+<tr>
+<td>Door geometry</td>
+<td>Same generator: <code>_door_panel()</code> builds solid panels with hardware material slots.</td>
+<td>Make glass surfaces transparent without making the handles transparent or altering collision boxes.</td>
+</tr>
+<tr>
+<td>Blender model export/import</td>
+<td><code>wftools/wf_blender/export_level.py</code>: <code>_extract_mat_info()</code> exports RGB, texture name and flags; it does not export Principled Alpha, Base Color alpha or transmission. <code>_make_blender_material()</code> imports Base Color alpha as 1.0.</td>
+<td>Opacity currently disappears during export and round trip.</td>
+</tr>
+<tr>
+<td>Model format</td>
+<td><code>wfsource/source/gfx/material.hp</code>: <code>_MaterialOnDisk</code> contains flags, <code>Color</code> and a 256-byte texture name; the historical <code>_opacity</code> field is commented out. The exporter assumes a 264-byte MATL record.</td>
+<td>Adding a field directly would break existing asset layout. Preserve MATL size.</td>
+</tr>
+<tr>
+<td>Legacy texture transparency</td>
+<td><code>material.cc</code> picks up <code>bTranslucent</code> and historical texture blend flags. <code>pixelmap.cc</code> decodes texture pixels to alpha 0, 128 or 255. <code>textile-rs/src/bitmap.rs</code> quantizes input alpha into a legacy bit.</td>
+<td>Existing flags are not continuous material opacity. Enabling all texture alpha could also expose old colour-key/black-pixel artefacts; audit separately.</td>
+</tr>
+<tr>
+<td>Shared draw interface</td>
+<td><code>wfsource/source/gfx/renderer_backend.hp</code>: <code>RBVertex</code> contains RGB; <code>DrawTriangle()</code> passes texture, culling exemption and prelit state, but no opacity or blend mode.</td>
+<td>New material state must reach every flat/textured and lit/prelit submission path.</td>
+</tr>
+<tr>
+<td>GL/GLES/WebGL shader</td>
+<td><code>glpipeline/backend_modern.cc</code>: both flat and textured fragment paths output alpha 1.0; texture sampling uses only <code>.rgb</code>. Texture creation also enables blending as a global side effect.</td>
+<td>There is no usable material-opacity path even though blending is sometimes enabled. Blend/depth policy must belong to drawing, not texture creation.</td>
+</tr>
+<tr>
+<td>Metal shader/pipeline</td>
+<td><code>metal/backend_metal.mm</code>: fragment alpha is also 1.0; the inspected pipeline has no blend configuration and uses depth writes.</td>
+<td>Metal needs a corresponding blend pipeline and read-only depth state.</td>
+</tr>
+<tr>
+<td>Ordering</td>
+<td><code>rendobj3.cc</code> groups faces by material; <code>glpipeline/rendobj3.cc</code> submits them under each actor’s transform. Current batches key texture/prelit and flush on state changes.</td>
+<td>Material order and per-actor sorting cannot correctly composite shade strips, glass leaves and the world behind them. Deferred draws must retain their own transforms and lighting state.</td>
+</tr>
+</tbody>
+</table>
+<p>These are source-inspection findings. No new engine captures, runtime benchmarks or regenerated condo assets were produced during this investigation.</p>
+<h2 id="proposed-design">Proposed design</h2>
+<p><img alt="Material export path and opaque-first, back-to-front compositing diagram" src="2026-10-02-condo-translucency/rendering-flow.svg" /></p>
+<h3 id="1-explicit-compatible-material-opacity">1. Explicit, compatible material opacity</h3>
+<ul>
+<li class="task"><input type="checkbox" disabled> Probe the existing <code>glass</code> material and exact face layout read-only; record whether the source uses Alpha, Base Color alpha or transmission. Do not equate transmission automatically with alpha: they describe different rendering effects.</li>
+<li class="task"><input type="checkbox" disabled> Add explicit authoring properties for blend mode (<code>opaque</code> or <code>blend</code>) and opacity. Default existing materials to opaque. For these condo materials, set the properties deliberately and mirror the approved appearance in Blender’s preview. Import restores the same properties.</li>
+<li class="task"><input type="checkbox" disabled> Add an optional <code>OPAC</code> model chunk, leaving MATL unchanged. Proposed payload: a version followed by one fixed-width mode/opacity record per MATL slot, with opacity represented as a bounded fixed-point value. Write it only when a material opts into blending. Final binary field widths are to be documented before coding.</li>
+<li class="task"><input type="checkbox" disabled> Read the chunk without relying on chunk order; validate version, count and opacity range. Missing chunk means fully opaque. The current model loader’s default branch ignores unknown chunks, so older engines are expected to show these assets opaque; verify that complete fallback, including packaging tools, rather than assuming it.</li>
+<li class="task"><input type="checkbox" disabled> Preserve the chunk through Blender import/export, model packaging, editor save and round trip. Audit other model writers/loaders before selecting the final format. Do not repurpose the high byte of <code>Color</code>, which is also used by existing primitive conventions.</li>
+<li class="task"><input type="checkbox" disabled> Add runtime opacity/blend accessors independently of legacy texture blend flags. Keep ordinary RGB updates from resetting opacity.</li>
+</ul>
+<h3 id="2-shared-ordering-and-backend-state">2. Shared ordering and backend state</h3>
+<ul>
+<li class="task"><input type="checkbox" disabled> Pass material opacity and blend mode through every triangle submission variant. Prefer a small explicit draw-state structure over another growing list of boolean arguments.</li>
+<li class="task"><input type="checkbox" disabled> Introduce a common translucent queue so GL and Metal use the same deterministic order. Keep the opaque batching path intact. Queue only blended world triangles; capture vertices, current model/view/projection transforms, normals, texture handle, fog, lighting, prelit and culling policy by value or stable ownership.</li>
+<li class="task"><input type="checkbox" disabled> Render opaque world geometry first, with depth test and writes. Then sort blended triangles back to front in camera space, with a stable tie-breaker, depth testing against the opaque scene, and depth writes disabled. Triangles across different actors must share this ordering; texture batching may combine only adjacent compatible draws after sorting.</li>
+<li class="task"><input type="checkbox" disabled> Partition the queue by camera/render pass. Flush world translucency before matte/HUD/overlay drawing and before frame capture; clear it at the actual frame boundary. Do not let deferred draws inherit the last actor’s transform or leak into another camera’s pass.</li>
+<li class="task"><input type="checkbox" disabled> Use straight-alpha source-over compositing for explicitly opted-in materials. For initial flat glass/shade, alpha is material opacity. Ordinary textured materials retain their present opaque behaviour. Texture-alpha cutouts and continuous texture-alpha preservation remain a separately audited extension; the first phase must not make legacy black texels into unintended holes.</li>
+<li class="task"><input type="checkbox" disabled> GL/GLES/WebGL: explicit per-pass blend/depth state and shader opacity. Metal: equivalent blend factors and write-disabled depth state; preserve the ordinary opaque pipeline. Restore state for overlays and the following frame, including opaque framebuffer alpha.</li>
+</ul>
+<p>Centroid triangle sorting is adequate as the initial approach for these mostly parallel surfaces, but is not a general solution for intersecting/cyclic transparent geometry. Test oblique views and gathered door leaves before accepting it. If this geometry produces visible sorting errors, split the affected surfaces or reconsider the technique; do not claim order-independent transparency.</p>
+<h3 id="3-condo-material-and-geometry-treatment">3. Condo material and geometry treatment</h3>
+<ul>
+<li class="task"><input type="checkbox" disabled> Give the moving door panes a dedicated glass material copy, so tuning does not silently change unrelated condo windows. Keep hardware material slots opaque.</li>
+<li class="task"><input type="checkbox" disabled> Make each pane contribute one visible optical surface from either side. Options to assess during implementation: a two-sided render sheet with unchanged collision geometry, or outward-wound thin boxes with back-face culling that admits one broad face per view. Avoid drawing front and back together for the same pane. Verify side-edge appearance and both camera directions.</li>
+<li class="task"><input type="checkbox" disabled> Apply the same principle to shade strips. Retain actor count, export order, indices, collision and existing motion. Separate render geometry from collision geometry where necessary rather than collapsing moving actors and invalidating Forth indices.</li>
+<li class="task"><input type="checkbox" disabled> Eliminate double coverage at the slat joins while retaining the gap-free visual invariant through the full travel. A simple alpha change or equal tint on every existing box is insufficient. Check front, back and oblique views; crop/split visible strips or use a dedicated visual sheet if the motion representation requires it. The chosen solution must also cover intermediate motion states and raised parking inside the cassette.</li>
+<li class="task"><input type="checkbox" disabled> Tune approved shade/glass opacity with fixed cameras in the actual condo. Lighting and fog affect RGB, not the material’s opacity. Inspect back-facing sheet lighting so the material does not turn black from one side.</li>
+</ul>
+<h2 id="implementation-sequence-after-approval">Implementation sequence after approval</h2>
+<ol>
+<li><strong>Baseline and format:</strong> read-only glass probe, reproducible captures, material contract and OPAC round-trip tests. Deliver material values to a small test scene before rebuilding condo content.</li>
+<li><strong>Renderer:</strong> shared queue, state lifetime and ordering; GL/GLES/WebGL and Metal parity. Prove synthetic layered scenes first.</li>
+<li><strong>Condo:</strong> glass/shade material copies and geometry treatment; preserve interaction/collision/motion invariants; rebuild only the affected variants.</li>
+<li><strong>Review evidence:</strong> matched before/after captures and timing results, including Android/Chromecast. Tune from the visual review before rollout.</li>
+</ol>
+<h2 id="verification-and-review-gates">Verification and review gates</h2>
+<table>
+<thead>
+<tr>
+<th>Case</th>
+<th>Required evidence</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>Legacy assets</td>
+<td>Existing assets without OPAC render as before; exporter emits no new chunk for fully opaque models. Include coloured-but-textured, prelit, sky/matte and HUD examples.</td>
+</tr>
+<tr>
+<td>Export/import</td>
+<td>Two material slots with different opacity; opaque old model; malformed/count-mismatched chunk; round trip retains values and MATL layout.</td>
+</tr>
+<tr>
+<td>Compositing</td>
+<td>Known flat colours over a fixed background at opacity 0, 0.25, 0.5 and 1; two layers in reversed submission order; opaque object in front; late-submitted opaque object behind. Check numeric pixel results within documented tolerances.</td>
+</tr>
+<tr>
+<td>Transforms/state</td>
+<td>Two differently transformed actors and differing fog/lighting states in one queue, multiple camera passes, overlay after translucency, and the next frame.</td>
+</tr>
+<tr>
+<td>Glass</td>
+<td>Closed, partial and fully gathered doors viewed from both sides and obliquely; real stacked panes tint naturally; single panes are not double tinted; handles stay opaque; player cannot pass closed glass.</td>
+</tr>
+<tr>
+<td>Shade</td>
+<td>Raised, half-lowered and closed; seam close-up plus balcony-wide view; no dark bands, gaps, bright seams or leaked parked fabric. Cassette/guides/bar stay opaque.</td>
+</tr>
+<tr>
+<td>Both</td>
+<td>Camera inside looking through closed doors and lowered shade; camera outside looking inward; sort order follows the camera, not actor creation order.</td>
+</tr>
+<tr>
+<td>Platforms and cost</td>
+<td>Matched captures on desktop GL, WebGL, Android GLES/Chromecast and Metal where hardware/build access exists. Record queued triangles, draws, queue memory and CPU/GPU frame time; compare with the same camera/state baseline. Mark unavailable platform evidence explicitly.</td>
+</tr>
+</tbody>
+</table>
+<p>Use the existing condo shade/door geometry and interaction verification scripts, plus renderer capture infrastructure such as <code>tests/compare_renderer_frames.py</code>. Add targeted opacity/order/round-trip tests at the layers that own those behaviours. Existing tests passing is necessary but does not establish the visual result; the matched captures above are required.</p>
+<h2 id="scope-to-approve">Scope to approve</h2>
+<p>Recommended first phase: explicit flat-material opacity, optional model metadata, shared sorted compositing, corresponding GL/GLES/WebGL/Metal support, and corrected condo render surfaces. The mockup values are provisional. Continuous RGBA texture export, frosted blur, refraction, dynamic reflection and order-independent transparency are possible later phases, each with additional format/performance implications.</p>
+<ul>
+<li class="task"><input type="checkbox" checked disabled> Inspect the authoring, model format, draw interface and both active backends.</li>
+<li class="task"><input type="checkbox" checked disabled> Identify strip-overlap, double-surface and legacy-texture compatibility risks.</li>
+<li class="task"><input type="checkbox" checked disabled> Prepare appearance mockups and a rendering-flow diagram.</li>
+<li class="task"><input type="checkbox" disabled> Will reviews and approves this plan.</li>
+<li class="task"><input type="checkbox" disabled> Begin implementation only after that approval.</li>
+</ul>
+<p>Related plans: <a href="2026-09-30-condo-balcony-shade.md">balcony shade</a>, <a href="2026-09-20-condo-project-room-telescoping-doors.md">telescoping glass doors</a>, <a href="2026-09-20-macos-metal-renderer.md">Metal renderer</a>.</p>
+<p>Primary API references for implementation: <a href="https://registry.khronos.org/OpenGL-Refpages/gl4/html/glBlendFunc.xhtml">Khronos glBlendFunc</a>, <a href="https://registry.khronos.org/OpenGL-Refpages/gl4/html/glDepthMask.xhtml">Khronos glDepthMask</a>, <a href="https://developer.apple.com/documentation/metal/mtlrenderpipelinecolorattachmentdescriptor">Apple Metal blend configuration</a>. Repository findings above come from local source inspection; these references are implementation reading, not runtime validation.</p></main></html>

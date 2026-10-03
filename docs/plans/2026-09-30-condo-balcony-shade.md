@@ -37,12 +37,14 @@ So the plan has two halves: **(A) the real-world spec** Will can take to a suppl
 
 ### A. Real-world spec
 
+**Site scheduling requirement (Will, 2026-10-02): no noisy work on Sundays; quiet work is permitted.**
+
 Product class: **outdoor zip screen, cassette (head box) on the soffit, inside-reveal mount, solar-strip battery motor with RF remote**.
 
 | Parameter | Recommendation | Why |
 |---|---|---|
 | Order size | ≈ 267 × 111 cm **overall, cassette included** | 268 cm clear less ~5 mm per side; supplier deducts for guides. Measure the clear width at three heights and order to the smallest |
-| Cassette | ≈ 10 × 10 cm, aluminium, under the soffit **flush with the pony wall's outer face**, so the bottom bar lands on the 10 cm cap. The 35 cm-deep ledge leaves 25 cm of soffit on the balcony side, which shades but does not obstruct | A 111 cm drop rolls to a small diameter; the cassette costs ≈ 10 cm of the opening, so the fabric drops ≈ 98 cm |
+| Cassette | Outdoor-rated for Bangkok; supplier to specify material, finish, actual dimensions and warranty. Prefer ≈ 10 × 10 cm, under the soffit **flush with the pony wall's outer face**, so the bottom bar lands on the 10 cm cap. The 35 cm-deep ledge leaves 25 cm of soffit on the balcony side, which shades but does not obstruct | A 111 cm drop rolls to a small diameter; the cassette costs ≈ 10 cm of the opening, so the fabric drops ≈ 98 cm |
 | Guides | zip tracks on both reveals, ≈ 5 cm wide each | Keep the fabric taut in gusts; fabric width ≈ 257 cm |
 | Bottom bar | ≈ 3 cm, with rubber seal, lands on the pony-wall cap | Cap must be flat and level — a 0–10 mm error shows as a gap along 2.6 m |
 | Fabric (rain) — **required** | **waterproof and see-through** fabric (clear or lightly tinted PVC or similar), full height, that stops **at least 99 % of rain** reaching the grass; side zips and bottom bar sealed against wind-driven rain | Rain protection is imperative and Will wants to see out when it is closed (2026‑09‑30). Clear-PVC zip screens exist. The trade-offs to ask shops about: it lets sun and heat through (tint or solar-control film, or a second roller in screen fabric for the hottest hours), how clear it stays over the years, creasing when rolled, and a thicker roll (a bigger cassette than the 10 cm assumed). An open-weave screen fabric passes most rain, so it cannot be the rain layer |
