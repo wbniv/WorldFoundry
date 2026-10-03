@@ -49,16 +49,25 @@ int Overlay::Build(Scalar fps, int width, int height)
 	if (width <= 0 || height <= 0) { Validate(); return _count; }
 
 	const float scale = std::max(1.0f, std::min(float(width), float(height)) / 360.0f);
-	const float pad = 3.0f * scale;
+	const float pad = 1.5f * scale;
 	const float right = float(width) * 0.97f;
 	const float bottom = float(height) * 0.97f;
-	const float x = right - pad - stb_easy_font_width(text) * scale;
-	const float y = bottom - pad - 12.0f * scale;
-	_rects[_count++] = {x - pad, y - pad, right, bottom, 0x101820B0u};
 
 	// stb writes float positions: retain float alignment on 32-bit ARM.
 	float vertices[MAX_QUADS * 16];
 	const int count = stb_easy_font_print(0, 0, text, NULL, vertices, sizeof(vertices));
+	assert(count > 0);
+	float left = vertices[0], top = vertices[1];
+	float glyphRight = vertices[8], glyphBottom = vertices[9];
+	for (int i = 1; i < count; ++i)
+	{
+		const float* v = vertices + i * 16;
+		left = std::min(left, v[0]); top = std::min(top, v[1]);
+		glyphRight = std::max(glyphRight, v[8]); glyphBottom = std::max(glyphBottom, v[9]);
+	}
+	const float x = right - pad - glyphRight * scale;
+	const float y = bottom - pad - glyphBottom * scale;
+	_rects[_count++] = {x + left * scale - pad, y + top * scale - pad, right, bottom, 0x101820B0u};
 	for (int i = 0; i < count; ++i)
 	{
 		const float* v = vertices + i * 16;

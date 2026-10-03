@@ -2,6 +2,7 @@
 #include <cstdio>
 #include <cstdlib>
 #include <cstring>
+#include <cmath>
 
 void _sys_assert(int, const char* expression, const char* file, int line)
 {
@@ -35,6 +36,19 @@ int main()
             }
             Check(rects[0].x0 > size.first * 0.5f && rects[0].y0 > size.second * 0.5f,
                   "overlay is in the bottom-right corner");
+            float left = rects[1].x0, top = rects[1].y0;
+            float right = rects[1].x1, bottom = rects[1].y1;
+            for (int i = 2; i < count; ++i)
+            {
+                left = std::min(left, rects[i].x0); top = std::min(top, rects[i].y0);
+                right = std::max(right, rects[i].x1); bottom = std::max(bottom, rects[i].y1);
+            }
+            const float pad = 1.5f * std::max(1.0f, std::min(float(size.first), float(size.second)) / 360.0f);
+            Check(std::fabs(left - rects[0].x0 - pad) < 0.001f &&
+                  std::fabs(top - rects[0].y0 - pad) < 0.001f &&
+                  std::fabs(rects[0].x1 - right - pad) < 0.001f &&
+                  std::fabs(rects[0].y1 - bottom - pad) < 0.001f,
+                  "plate has tight equal padding around actual glyph bounds");
             const auto* cached = rects;
             Check(overlay.Build(Scalar::FromFloat(sample.fps), size.first, size.second) == count && overlay.Rects() == cached,
                   "unchanged display reuses cached geometry");

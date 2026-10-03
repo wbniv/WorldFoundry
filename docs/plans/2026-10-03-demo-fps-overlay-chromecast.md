@@ -46,6 +46,9 @@ Bottom right is the default placement. Anchor to the full output surface,
 rather than the camera's possibly square or letterboxed viewport. Start with
 a 3% inset from the right and bottom edges for TV overscan, scaled text with a
 minimum readable size, and white text on a compact translucent dark plate.
+Size the plate to the actual visible glyph bounds, with equal 1.5 font-pixel
+padding on every side (4.5 screen pixels at 1080p); do not use the font line
+height, which leaves excess space below the digits.
 Show only the number, always with one decimal place and no `FPS` label. Keep the right edge fixed as the number changes width.
 
 ![Illustrative steady and hitch readings in the bottom-right counter](2026-10-03-demo-fps-overlay-chromecast/mockup.svg)
@@ -227,3 +230,10 @@ flush pending scene/translucent work, and preserve scene transform/state.
 The APKs use a snapshot of the current workspace's demo bundles, including its
 eight-tank aquarium selector. Copied content remains separate from the overlay
 source commit; retain APK/asset hashes with deployment receipts.
+
+### Padding correction
+
+The first Chromecast capture showed excess space below the digits. The plate
+now follows the actual glyph bounds with half the original padding. Layout
+checks assert equal padding on all four sides for every tested size/value.
+All five release APKs were rebuilt with this correction.
