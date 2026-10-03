@@ -1,6 +1,6 @@
 # Aquarium: 29 tiger barbs, one actor each
 
-**Status:** all three phases implemented and profiled. Phase 3 is complete in the `aquarium/tiger-barbs-phase3` worktree and its normal seven-tank APK is installed on the Chromecast HD. Selector return, clean relaunch and Home/resume are verified. Main-checkout integration remains separate.
+**Status:** all three phases implemented, profiled, integrated with species movement and the diagnostic FPS mailbox, and verified on Chromecast HD. The combined seven-tank release is committed and pushed. The schooling cache is implemented and presentation-profiled; final CPU/control measurements and optimized APK installation await exclusive Chromecast access.
 
 Replace the ten follower clownfish with **29 tiger barbs**, retaining the player's clownfish: **30 fish instead of 11**. First measure the population using one textured, two-sided quad per barb. Then replace each quad with one actual fish mesh, including swimming animation within that same mesh. Plan a third pass for improved meshes, with another profile before adopting them.
 
@@ -315,3 +315,18 @@ The complete measured set contains 21 primary presentation captures, seven separ
 ### Combined app integration — 2026-10-03
 
 Phase 3 is now integrated into the seven-tank app together with the finished species movement and diagnostic FPS mailbox changes. Both Android release ABIs built; all seven tanks launched on Chromecast, and selector return/Home-resume/relaunch passed. The installed package hash is `02c841541d9bf44ab652d606d559b274cce2ddd81cd40f398cb36bb43830390f`. See [integration and validation](2026-10-02-aquarium-tiger-barbs/phase3/integration.md). The original phase table still isolates geometry against its archived native baseline; the next matched comparison isolates schooling costs using the combined native build.
+
+### Schooling optimization — completed presentation comparison
+
+The per-follower neighbour scan now caches the current fish position, heading and squared reach, computes each neighbour address once, and keeps the current fish index on the stack during the scan. It refreshes caches for each follower and reads neighbours afresh, preserving the existing update/commit order. Five behavior updates per frame, all 29 followers, the mesh and the movement/startle rules are retained. No mailbox cells or native primitives were added. Source commit: `aeb11595`; integration: `673d8f31`.
+
+| Combined native build | Median FPS (3 runs) | p95 ms | Missed refresh % |
+|---|---:|---:|---:|
+| Phase 3 before caching | 35.458 | 50.050 | 60.298 |
+| Phase 3 with caching | 37.426 | 50.050 | 53.618 |
+
+FPS increases by **1.967 (+5.55%)**; missed-refresh intervals decrease by **6.680 percentage points**. This is a fresh matched comparison using the integrated species/FPS native engine, separate from the earlier mesh-only phase table. All six presentation runs completed with thermal status 0. The fixed-step Forth comparison checks 480 follower update/commit results against the preserved original: fish state and accumulation outputs match exactly. The same trace uses 21.34% fewer mailbox bridge calls for 30 fish, and 14.15% fewer for 11 fish. Call counts establish reduced work; they are not a substitute for device CPU timing.
+
+The final integrated source/assets/release-package suite passed **73 checks**, and **8 existing schooling regressions** passed. The rebuilt optimized seven-tank APK changes only the bundle; native libraries/resources and all six other species standalones are byte-identical to the verified combined release.
+
+[Comparison and outstanding device measurements](2026-10-02-aquarium-tiger-barbs/phase3/school-cache/README.md) links the measurements and records the pending candidate CPU trace, late baseline control and final optimized APK install. The first candidate CPU capture was excluded when the foreground changed to `org.worldfoundry.wf_game.fpscheck`. The profiler now stops its collector even on that failure. Original and completed presentation evidence remain valid.

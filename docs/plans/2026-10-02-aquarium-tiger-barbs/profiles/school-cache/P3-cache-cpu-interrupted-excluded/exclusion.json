@@ -1,0 +1,4 @@
+{
+  "include_in_comparison": false,
+  "reason": "Foreground changed to org.worldfoundry.wf_game.fpscheck during the timed trace; CPU/frame capture excluded. Completed baseline/candidate presentation runs and baseline CPU trace are unaffected."
+}

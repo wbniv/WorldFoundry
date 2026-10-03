@@ -1,6 +1,7 @@
 | Date | Change |
 |------|--------|
 | [2026-10-03](https://github.com/wbniv/WorldFoundry/commit/f6248fff) | Implement species swimming, pitched rigs and jelly deformation |
+| [2026-10-03](https://github.com/wbniv/WorldFoundry/commit/24fdef05) | Refine phase 3 tiger barb mesh and profile Chromecast costs |
 | [2026-10-03](https://github.com/wbniv/WorldFoundry/commit/cf6b653f) | Update FPS mailbox plan after merge into 2026-new-level |
 | [2026-10-03](https://github.com/wbniv/WorldFoundry/commit/10310efe) | Save pending plans, balcony RFQ materials, notes and transcripts |
 | [2026-10-02](https://github.com/wbniv/WorldFoundry/commit/9cef6dde) | Integrate aquarium tanks, feeding, and flowing betta fins |
@@ -42,6 +43,10 @@ f6248fff	author	Will Norris
 f6248fff	added	1
 f6248fff	deleted	1
 f6248fff	files	1
+24fdef05	author	Will Norris
+24fdef05	added	1
+24fdef05	deleted	1
+24fdef05	files	1
 cf6b653f	author	Will Norris
 cf6b653f	added	2
 cf6b653f	deleted	0

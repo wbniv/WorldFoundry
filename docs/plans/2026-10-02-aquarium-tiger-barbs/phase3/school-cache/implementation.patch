@@ -1,0 +1,67 @@
+diff --git a/wflevels/aquarium/school.fth b/wflevels/aquarium/school.fth
+index d50f48bf..d6a24d67 100644
+--- a/wflevels/aquarium/school.fth
++++ b/wflevels/aquarium/school.fth
+@@ -87,12 +87,11 @@
+   MB_VZ MB_YOU sc@ sch@ * r> 2 + sc+! ;
+ : weight ( j -- w ) 0 = if MB_LEADW par@ else 1 then ;
+ : heading-dot-u ( -- c )
+-  MB_VX me sch@ MB_U sc@ *
+-  MB_VY me sch@ MB_U 1 + sc@ * +
+-  MB_VZ me sch@ MB_U 2 + sc@ * + ;
++  MB_WANT sc@ MB_U sc@ *
++  MB_WANT 1 + sc@ MB_U 1 + sc@ * +
++  MB_WANT 2 + sc@ MB_U 2 + sc@ * + ;
+ 
+ \ ( j -- ) one neighbour of the follower: r = c_j - c_i, d = |r|, u = r/d; ignored in the blind volume or outside every zone
+-: you-delta ( f k -- ) >r dup MB_YOU sc@ sch@ swap me sch@ - r> sc! ;   \ the neighbour's field f minus mine, into slot k
+ : reach2 ( -- n ) MB_RR par@ MB_DRO par@ + MB_DRA par@ + dup * ;
+ : r-rep ( -- r ) MB_RR par@ ;
+ : r-ori ( -- r ) r-rep MB_DRO par@ + ;
+@@ -100,12 +99,13 @@
+ : you-weight ( -- w ) MB_YOU sc@ weight ;
+ : count+ ( k -- ) 1 swap sc+! ;
+ : sch-pair ( j -- )
+-  MB_YOU sc!
+-  MB_X MB_U you-delta
+-  MB_Y MB_U 1 + you-delta
+-  MB_Z MB_U 2 + you-delta
++  dup MB_YOU sc!
++  sch-stride * sch-base +         \ compute this neighbour's address once
++  dup read-mailbox MB_PERP sc@ - MB_U sc!
++  dup 1 + read-mailbox MB_PERP 1 + sc@ - MB_U 1 + sc!
++  2 + read-mailbox MB_PERP 2 + sc@ - MB_U 2 + sc!
+   MB_U vlen2 dup 0.000001 >
+-  over reach2 < &                 \ 0 < d^2 < reach^2
++  over MB_R2 sc@ < &                 \ 0 < d^2 < reach^2
+   if
+     sch-sqrt dup MB_DIST sc!
+     1 swap / MB_U vscale
+@@ -225,12 +225,25 @@
+   0 MB_N_R sc!
+   0 MB_N_O sc!
+   0 MB_N_A sc! ;
++\ Cache values invariant during this follower's neighbour scan. WANT is not
++\ used until sch-want resets it; PERP is not used until sch-turn writes it.
++\ R2 is shared with the separate startle scan, which sets its own radius.
++\ Refresh for EACH follower: sparse updates commit immediately, so later fish
++\ must still see earlier fish's freshly committed state, in the same order.
++: sch-scan-cache
++  MB_X me sch@ MB_PERP sc!
++  MB_Y me sch@ MB_PERP 1 + sc!
++  MB_Z me sch@ MB_PERP 2 + sc!
++  MB_WANT heading>sc
++  reach2 MB_R2 sc! ;
+ : sch-follow
+-  MB_ME sc!
++  dup MB_ME sc!
+   clear-sums
++  sch-scan-cache
+   sch-n 0 do
+-    i me <> if i sch-pair then
++    i over <> if i sch-pair then
+   loop
++  drop
+   sch-walls sch-want
+   sch-startle? if
+     sch-startle-away

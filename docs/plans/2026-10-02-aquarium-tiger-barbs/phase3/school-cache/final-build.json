@@ -1,0 +1,10 @@
+{
+  "apk_sha256": "d6f536248f1f8ad534083fa8c794ed3dcee9c3e2caac7047fa96ea0d8a52484d",
+  "apk_bytes": 3629499,
+  "bundle_sha256": "1090830e5ea19483e8f573c6778e9de3bdb1a207fab807bf01880ca18d8bfabf",
+  "native_and_resources": "Byte-identical to the integrated pre-cache release; only assets/cd.iff differs (apart from signatures).",
+  "other_species_standalones": "All six byte-identical to integrated pre-cache release.",
+  "android_build": "Both release ABIs succeeded; native outputs reused without changes.",
+  "validation": "73 integrated checks passed; 8 existing schooling regressions passed.",
+  "device_install": "Pending clean device coordination after FPS-check app interrupted candidate CPU trace."
+}

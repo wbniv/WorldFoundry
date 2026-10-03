@@ -1,0 +1,5 @@
+{
+  "wflevels/aquarium/school.fth": "b6ff8d739b0d1e4a96f47be9729b006d9002161149b40d28b4dc3edbff4667f5",
+  "tests/test_aquarium_school_cache.py": "a3d604eb2b8555ff1f9c8a7b75aa12aa788f2d9739455197045bfb0eca8cb77b",
+  "tests/fixtures/aquarium/school-before-cache.fth": "0b4ed91372985749691b90329788f8dcbba23316f205c3ecfa26d6a358e09d62"
+}
