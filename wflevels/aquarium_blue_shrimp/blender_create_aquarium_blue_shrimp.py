@@ -36,25 +36,41 @@ COLORS = dict(PALETTE, sand=(.76, .73, .57), sand_hi=(.85, .80, .64),
 MATERIALS = {}
 
 
-def material(key):
-    if key not in MATERIALS:
-        mt = bpy.data.materials.new('shrimp-'+key)
+def material(key, jelly=False):
+    cache_key = (key, jelly)
+    if cache_key not in MATERIALS:
+        mt = bpy.data.materials.new(('jelly-' if jelly else 'shrimp-')+key)
         mt.use_nodes = True
         rgb = (*COLORS[key], 1)
         mt.node_tree.nodes.get('Principled BSDF').inputs['Base Color'].default_value = rgb
         mt.diffuse_color = rgb
-        MATERIALS[key] = mt
-    return MATERIALS[key]
+        if jelly and key not in ('eye', 'glint'):
+            tex = mt.node_tree.nodes.new('ShaderNodeTexImage')
+            tex.image = JELLY_IMAGE
+            mt.node_tree.links.new(tex.outputs['Color'], mt.node_tree.nodes.get('Principled BSDF').inputs['Base Color'])
+            opacity = .18 if key in ('leg', 'antenna') else .28
+            mt['wf_opacity'] = opacity
+            mt.node_tree.nodes.get('Principled BSDF').inputs['Alpha'].default_value = opacity
+            mt.surface_render_method = 'DITHERED'
+        MATERIALS[cache_key] = mt
+    return MATERIALS[cache_key]
 
 
-def blender_mesh(mesh):
+def blender_mesh(mesh, jelly=False):
     data = bpy.data.meshes.new(mesh.name)
     data.from_pydata(mesh.vertices, [], mesh.faces)
     keys = list(dict.fromkeys(mesh.colors))
     for key in keys:
-        data.materials.append(material(key))
+        data.materials.append(material(key, jelly))
     for poly, key in zip(data.polygons, mesh.colors):
         poly.material_index = keys.index(key)
+    if jelly:
+        uv = data.uv_layers.new(name='UVMap')
+        for poly, key in zip(data.polygons, mesh.colors):
+            slot = list(PALETTE).index(key)
+            center = ((slot % 4 + .5) / 4, (slot // 4 + .5) / 2)
+            for loop in poly.loop_indices:
+                uv.data[loop].uv = center
     data.update()
     return data
 
@@ -99,6 +115,11 @@ def static_box(name, lo, hi, key, visible=True):
 
 
 bpy.ops.wm.read_factory_settings(use_empty=True)
+# Same model, a second palette atlas. Alpha is material metadata because the
+# legacy texture packer quantizes alpha; do not claim arbitrary RGBA fidelity.
+from texture import write_jelly_texture
+write_jelly_texture(HERE / 'blue_jelly.tga')
+JELLY_IMAGE = bpy.data.images.load(str(HERE / 'blue_jelly.tga'), check_existing=True)
 assert addon_utils.enable('wf_blender', default_set=False, persistent=False), 'wf_blender unavailable'
 bpy.ops.wf.import_level(filepath=str(REPO/'wflevels/snowgoons-blender/snowgoons-blender.lev'))
 classes = {'director':'Director','camera':'Camera','levelobj':'LevelObj','matte':'Matte',
@@ -123,6 +144,7 @@ assert seen == set(classes), seen
 # Player and all visual parts precede the enclosing shell in physics setup.
 models = shrimp_meshes()
 data = [blender_mesh(m) for m in models]
+jelly_data = [blender_mesh(m, jelly=True) for m in models]
 player = bpy.data.objects['Player']
 player.data = data[0].copy()
 player.location = C.SPAWN
@@ -144,10 +166,10 @@ ALL_PARTS = []
 for k in range(COUNT):
     row = ROWS[k-1] if k else dict(home=(C.SPAWN[0], C.SPAWN[1], C.SAND), size=1, yaw=0)
     parts = []
-    for part, mesh, offset in zip(PARTS, data, OFFSETS):
+    for part, mesh, offset in zip(PARTS, jelly_data if k % 2 == 0 else data, OFFSETS):
         p = actor(f'shrimp-{k:02d}-{part}', mesh,
                   tuple(row['home'][i]+offset[i]*row['size'] for i in range(3)),
-                  mesh_name='shrimp_'+part.replace('-', '_'))
+                  mesh_name=('jelly_' if k % 2 == 0 else 'shrimp_')+part.replace('-', '_'))
         p.scale = (row['size'],)*3
         parts.append(p)
     ALL_PARTS.append(parts)
@@ -337,7 +359,8 @@ player['wf_Script'] = header+prefix[:prefix.index(': sh-place')]+ '\nsh-player-t
 bpy.data.objects['Director']['wf_Script'] = script+'\nsh-director-tick\n'
 
 (HERE/'actor-map.json').write_text(json.dumps(dict(indices=indices,count=COUNT,profile=PROFILE,
-                                                   rows=ROWS,mailboxes=C.MAILBOX),indent=2)+'\n')
+                                                   rows=ROWS,mailboxes=C.MAILBOX,
+                                                   morphs=['blue-jelly' if k%2==0 else 'blue-dream' for k in range(COUNT)]),indent=2)+'\n')
 print(f'{TAG} {COUNT} shrimp, {len(objects)} actors; profile={PROFILE}')
 print(f'{TAG} independent outputs: {HERE/C.LEVEL}.lev')
 bpy.ops.wf.export_level(filepath=str(HERE/(C.LEVEL+'.lev')))

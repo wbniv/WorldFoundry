@@ -24,38 +24,43 @@
 	// Example: `$3fff001` = `IFF` + room `fff` (`PERM`) + slot `001`.
 	{ 'ASMP'
 		$3fff001l { 'STR' "shrimp_hull.iff" }  // IFF PERM fff:001
-		$3000001l { 'STR' "shrimp_body.iff" }  // IFF RM0 000:001
-		$3000002l { 'STR' "shrimp_tail.iff" }  // IFF RM0 000:002
-		$3000003l { 'STR' "shrimp_legs_near.iff" }  // IFF RM0 000:003
-		$3000004l { 'STR' "shrimp_legs_far.iff" }  // IFF RM0 000:004
-		$3000005l { 'STR' "shrimp_antennae.iff" }  // IFF RM0 000:005
-		$3000006l { 'STR' "tank_base.iff" }  // IFF RM0 000:006
-		$3000007l { 'STR' "water_back_0.iff" }  // IFF RM0 000:007
-		$3000008l { 'STR' "water_back_1.iff" }  // IFF RM0 000:008
-		$3000009l { 'STR' "water_back_2.iff" }  // IFF RM0 000:009
-		$300000al { 'STR' "water_back_3.iff" }  // IFF RM0 000:00a
-		$300000bl { 'STR' "water_back_4.iff" }  // IFF RM0 000:00b
-		$300000cl { 'STR' "water_back_5.iff" }  // IFF RM0 000:00c
-		$300000dl { 'STR' "water_back_6.iff" }  // IFF RM0 000:00d
-		$300000el { 'STR' "water_back_7.iff" }  // IFF RM0 000:00e
-		$300000fl { 'STR' "water_back_8.iff" }  // IFF RM0 000:00f
-		$3000010l { 'STR' "water_back_9.iff" }  // IFF RM0 000:010
-		$3000011l { 'STR' "water_back_10.iff" }  // IFF RM0 000:011
-		$3000012l { 'STR' "water_back_11.iff" }  // IFF RM0 000:012
-		$3000013l { 'STR' "back_air.iff" }  // IFF RM0 000:013
-		$3000014l { 'STR' "tank_end__1.iff" }  // IFF RM0 000:014
-		$3000015l { 'STR' "tank_end_1.iff" }  // IFF RM0 000:015
-		$3000016l { 'STR' "front_collider.iff" }  // IFF RM0 000:016
-		$3000017l { 'STR' "tank_rim.iff" }  // IFF RM0 000:017
-		$3000018l { 'STR' "sand.iff" }  // IFF RM0 000:018
-		$3000019l { 'STR' "rock_0.iff" }  // IFF RM0 000:019
-		$300001al { 'STR' "rock_1.iff" }  // IFF RM0 000:01a
-		$300001bl { 'STR' "rock_2.iff" }  // IFF RM0 000:01b
-		$300001cl { 'STR' "branching_wood.iff" }  // IFF RM0 000:01c
-		$300001dl { 'STR' "plants.iff" }  // IFF RM0 000:01d
-		$300001el { 'STR' "moss_patches.iff" }  // IFF RM0 000:01e
-		$300001fl { 'STR' "stand.iff" }  // IFF RM0 000:01f
-		$3000020l { 'STR' "room_backdrop.iff" }  // IFF RM0 000:020
+		$3000001l { 'STR' "jelly_body.iff" }  // IFF RM0 000:001
+		$3000002l { 'STR' "jelly_tail.iff" }  // IFF RM0 000:002
+		$3000003l { 'STR' "jelly_legs_near.iff" }  // IFF RM0 000:003
+		$3000004l { 'STR' "jelly_legs_far.iff" }  // IFF RM0 000:004
+		$3000005l { 'STR' "jelly_antennae.iff" }  // IFF RM0 000:005
+		$3000006l { 'STR' "shrimp_body.iff" }  // IFF RM0 000:006
+		$3000007l { 'STR' "shrimp_tail.iff" }  // IFF RM0 000:007
+		$3000008l { 'STR' "shrimp_legs_near.iff" }  // IFF RM0 000:008
+		$3000009l { 'STR' "shrimp_legs_far.iff" }  // IFF RM0 000:009
+		$300000al { 'STR' "shrimp_antennae.iff" }  // IFF RM0 000:00a
+		$300000bl { 'STR' "tank_base.iff" }  // IFF RM0 000:00b
+		$300000cl { 'STR' "water_back_0.iff" }  // IFF RM0 000:00c
+		$300000dl { 'STR' "water_back_1.iff" }  // IFF RM0 000:00d
+		$300000el { 'STR' "water_back_2.iff" }  // IFF RM0 000:00e
+		$300000fl { 'STR' "water_back_3.iff" }  // IFF RM0 000:00f
+		$3000010l { 'STR' "water_back_4.iff" }  // IFF RM0 000:010
+		$3000011l { 'STR' "water_back_5.iff" }  // IFF RM0 000:011
+		$3000012l { 'STR' "water_back_6.iff" }  // IFF RM0 000:012
+		$3000013l { 'STR' "water_back_7.iff" }  // IFF RM0 000:013
+		$3000014l { 'STR' "water_back_8.iff" }  // IFF RM0 000:014
+		$3000015l { 'STR' "water_back_9.iff" }  // IFF RM0 000:015
+		$3000016l { 'STR' "water_back_10.iff" }  // IFF RM0 000:016
+		$3000017l { 'STR' "water_back_11.iff" }  // IFF RM0 000:017
+		$3000018l { 'STR' "back_air.iff" }  // IFF RM0 000:018
+		$3000019l { 'STR' "tank_end__1.iff" }  // IFF RM0 000:019
+		$300001al { 'STR' "tank_end_1.iff" }  // IFF RM0 000:01a
+		$300001bl { 'STR' "front_collider.iff" }  // IFF RM0 000:01b
+		$300001cl { 'STR' "tank_rim.iff" }  // IFF RM0 000:01c
+		$300001dl { 'STR' "sand.iff" }  // IFF RM0 000:01d
+		$300001el { 'STR' "rock_0.iff" }  // IFF RM0 000:01e
+		$300001fl { 'STR' "rock_1.iff" }  // IFF RM0 000:01f
+		$3000020l { 'STR' "rock_2.iff" }  // IFF RM0 000:020
+		$3000021l { 'STR' "branching_wood.iff" }  // IFF RM0 000:021
+		$3000022l { 'STR' "plants.iff" }  // IFF RM0 000:022
+		$3000023l { 'STR' "moss_patches.iff" }  // IFF RM0 000:023
+		$3000024l { 'STR' "stand.iff" }  // IFF RM0 000:024
+		$3000025l { 'STR' "room_backdrop.iff" }  // IFF RM0 000:025
 	}
 	{ 'ALGN' .align(2048) }
 	{ 'LVL' [ "aquarium_blue_shrimp.lvl" ] }
@@ -73,38 +78,43 @@
 		{ 'ASS' $1000fffl [ "Room0.tga" ] }    // TGA RM0 000:fff
 		{ 'ASS' $5000fffl [ "Room0.ruv" ] }    // RUV RM0 000:fff
 		{ 'ASS' $7000fffl [ "Room0.cyc" ] }    // CYC RM0 000:fff
-		{ 'ASS' $3000001l [ "shrimp_body.iff" ] }  // IFF RM0 000:001
-		{ 'ASS' $3000002l [ "shrimp_tail.iff" ] }  // IFF RM0 000:002
-		{ 'ASS' $3000003l [ "shrimp_legs_near.iff" ] }  // IFF RM0 000:003
-		{ 'ASS' $3000004l [ "shrimp_legs_far.iff" ] }  // IFF RM0 000:004
-		{ 'ASS' $3000005l [ "shrimp_antennae.iff" ] }  // IFF RM0 000:005
-		{ 'ASS' $3000006l [ "tank_base.iff" ] }  // IFF RM0 000:006
-		{ 'ASS' $3000007l [ "water_back_0.iff" ] }  // IFF RM0 000:007
-		{ 'ASS' $3000008l [ "water_back_1.iff" ] }  // IFF RM0 000:008
-		{ 'ASS' $3000009l [ "water_back_2.iff" ] }  // IFF RM0 000:009
-		{ 'ASS' $300000al [ "water_back_3.iff" ] }  // IFF RM0 000:00a
-		{ 'ASS' $300000bl [ "water_back_4.iff" ] }  // IFF RM0 000:00b
-		{ 'ASS' $300000cl [ "water_back_5.iff" ] }  // IFF RM0 000:00c
-		{ 'ASS' $300000dl [ "water_back_6.iff" ] }  // IFF RM0 000:00d
-		{ 'ASS' $300000el [ "water_back_7.iff" ] }  // IFF RM0 000:00e
-		{ 'ASS' $300000fl [ "water_back_8.iff" ] }  // IFF RM0 000:00f
-		{ 'ASS' $3000010l [ "water_back_9.iff" ] }  // IFF RM0 000:010
-		{ 'ASS' $3000011l [ "water_back_10.iff" ] }  // IFF RM0 000:011
-		{ 'ASS' $3000012l [ "water_back_11.iff" ] }  // IFF RM0 000:012
-		{ 'ASS' $3000013l [ "back_air.iff" ] }  // IFF RM0 000:013
-		{ 'ASS' $3000014l [ "tank_end__1.iff" ] }  // IFF RM0 000:014
-		{ 'ASS' $3000015l [ "tank_end_1.iff" ] }  // IFF RM0 000:015
-		{ 'ASS' $3000016l [ "front_collider.iff" ] }  // IFF RM0 000:016
-		{ 'ASS' $3000017l [ "tank_rim.iff" ] }  // IFF RM0 000:017
-		{ 'ASS' $3000018l [ "sand.iff" ] }  // IFF RM0 000:018
-		{ 'ASS' $3000019l [ "rock_0.iff" ] }  // IFF RM0 000:019
-		{ 'ASS' $300001al [ "rock_1.iff" ] }  // IFF RM0 000:01a
-		{ 'ASS' $300001bl [ "rock_2.iff" ] }  // IFF RM0 000:01b
-		{ 'ASS' $300001cl [ "branching_wood.iff" ] }  // IFF RM0 000:01c
-		{ 'ASS' $300001dl [ "plants.iff" ] }  // IFF RM0 000:01d
-		{ 'ASS' $300001el [ "moss_patches.iff" ] }  // IFF RM0 000:01e
-		{ 'ASS' $300001fl [ "stand.iff" ] }  // IFF RM0 000:01f
-		{ 'ASS' $3000020l [ "room_backdrop.iff" ] }  // IFF RM0 000:020
+		{ 'ASS' $3000001l [ "jelly_body.iff" ] }  // IFF RM0 000:001
+		{ 'ASS' $3000002l [ "jelly_tail.iff" ] }  // IFF RM0 000:002
+		{ 'ASS' $3000003l [ "jelly_legs_near.iff" ] }  // IFF RM0 000:003
+		{ 'ASS' $3000004l [ "jelly_legs_far.iff" ] }  // IFF RM0 000:004
+		{ 'ASS' $3000005l [ "jelly_antennae.iff" ] }  // IFF RM0 000:005
+		{ 'ASS' $3000006l [ "shrimp_body.iff" ] }  // IFF RM0 000:006
+		{ 'ASS' $3000007l [ "shrimp_tail.iff" ] }  // IFF RM0 000:007
+		{ 'ASS' $3000008l [ "shrimp_legs_near.iff" ] }  // IFF RM0 000:008
+		{ 'ASS' $3000009l [ "shrimp_legs_far.iff" ] }  // IFF RM0 000:009
+		{ 'ASS' $300000al [ "shrimp_antennae.iff" ] }  // IFF RM0 000:00a
+		{ 'ASS' $300000bl [ "tank_base.iff" ] }  // IFF RM0 000:00b
+		{ 'ASS' $300000cl [ "water_back_0.iff" ] }  // IFF RM0 000:00c
+		{ 'ASS' $300000dl [ "water_back_1.iff" ] }  // IFF RM0 000:00d
+		{ 'ASS' $300000el [ "water_back_2.iff" ] }  // IFF RM0 000:00e
+		{ 'ASS' $300000fl [ "water_back_3.iff" ] }  // IFF RM0 000:00f
+		{ 'ASS' $3000010l [ "water_back_4.iff" ] }  // IFF RM0 000:010
+		{ 'ASS' $3000011l [ "water_back_5.iff" ] }  // IFF RM0 000:011
+		{ 'ASS' $3000012l [ "water_back_6.iff" ] }  // IFF RM0 000:012
+		{ 'ASS' $3000013l [ "water_back_7.iff" ] }  // IFF RM0 000:013
+		{ 'ASS' $3000014l [ "water_back_8.iff" ] }  // IFF RM0 000:014
+		{ 'ASS' $3000015l [ "water_back_9.iff" ] }  // IFF RM0 000:015
+		{ 'ASS' $3000016l [ "water_back_10.iff" ] }  // IFF RM0 000:016
+		{ 'ASS' $3000017l [ "water_back_11.iff" ] }  // IFF RM0 000:017
+		{ 'ASS' $3000018l [ "back_air.iff" ] }  // IFF RM0 000:018
+		{ 'ASS' $3000019l [ "tank_end__1.iff" ] }  // IFF RM0 000:019
+		{ 'ASS' $300001al [ "tank_end_1.iff" ] }  // IFF RM0 000:01a
+		{ 'ASS' $300001bl [ "front_collider.iff" ] }  // IFF RM0 000:01b
+		{ 'ASS' $300001cl [ "tank_rim.iff" ] }  // IFF RM0 000:01c
+		{ 'ASS' $300001dl [ "sand.iff" ] }  // IFF RM0 000:01d
+		{ 'ASS' $300001el [ "rock_0.iff" ] }  // IFF RM0 000:01e
+		{ 'ASS' $300001fl [ "rock_1.iff" ] }  // IFF RM0 000:01f
+		{ 'ASS' $3000020l [ "rock_2.iff" ] }  // IFF RM0 000:020
+		{ 'ASS' $3000021l [ "branching_wood.iff" ] }  // IFF RM0 000:021
+		{ 'ASS' $3000022l [ "plants.iff" ] }  // IFF RM0 000:022
+		{ 'ASS' $3000023l [ "moss_patches.iff" ] }  // IFF RM0 000:023
+		{ 'ASS' $3000024l [ "stand.iff" ] }  // IFF RM0 000:024
+		{ 'ASS' $3000025l [ "room_backdrop.iff" ] }  // IFF RM0 000:025
 	}
 	{ 'ALGN' .align(2048) }
 }

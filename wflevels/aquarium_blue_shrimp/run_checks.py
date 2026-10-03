@@ -144,21 +144,27 @@ try:
         teleport((.5,0,3.8))
         step(3)
         inject(button)
-        for _ in range(6):
+        axis,limit = {'right':(0,C.LIMIT_X),'left':(0,-C.LIMIT_X),
+                      'up':(2,C.WATER-.5),'down':(2,C.SAND+C.HULL_LIFT),
+                      'away':(1,C.LIMIT_Y),'toward':(1,-C.LIMIT_Y)}[name]
+        # Horizontal travel is 0.70 m/s and passive descent 0.28 m/s.
+        # Six simulated seconds cannot reach every wall from this spawn.
+        for _ in range(24):
             step(20)
             x,y,z=position()
             assert abs(x)<=C.LIMIT_X+.08 and abs(y)<=C.LIMIT_Y+.08
             assert C.SAND+C.HULL_LIFT-.08<=z<=C.WATER-.5+.08
             assert value(player,1909)==button, 'desktop input reached the isolated run'
+            if abs(position()[axis]-limit)<.08:
+                break
         results['wall_'+name]=position()
-        axis,limit = {'right':(0,C.LIMIT_X),'left':(0,-C.LIMIT_X),
-                      'up':(2,C.WATER-.5),'down':(2,C.SAND+C.HULL_LIFT),
-                      'away':(1,C.LIMIT_Y),'toward':(1,-C.LIMIT_Y)}[name]
         assert abs(position()[axis]-limit)<.08, (name,position(),limit)
         at_wall=position()[axis]
         opposite={'right':16384,'left':8192,'up':4096,'down':2048,'away':2,'toward':4}[name]
         inject(opposite)
-        step(20)
+        # Reversing horizontal direction includes the authored turn; descent
+        # is 0.28 m/s. Allow three seconds to turn and leave the boundary.
+        step(60)
         assert abs(position()[axis]-at_wall)>.5, ('cannot leave wall',name,position())
         print('PASS: '+name+' input and bounds',flush=True)
     teleport((.5,-.85,2))

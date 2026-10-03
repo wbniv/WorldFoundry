@@ -8,6 +8,7 @@ import json
 import math
 from pathlib import Path
 import re
+import struct
 
 import pytest
 
@@ -110,8 +111,46 @@ def test_exported_population_shares_five_meshes(exported):
             chunk=exported[name]
             assert '"Class Name" } { \'DATA\' "platform"' in chunk
             assert '"Mass" } { \'DATA\' 0.000000' in chunk
-            assert ('shrimp_'+part.replace('-','_')+'.iff') in chunk
+            prefix = 'jelly_' if k % 2 == 0 else 'shrimp_'
+            assert (prefix+part.replace('-','_')+'.iff') in chunk
             assert mapping['indices'][name]==names.index(name)+1
+
+
+def mesh_chunks(path):
+    data = path.read_bytes()
+    assert data[:4] == b'MODL'
+    size = struct.unpack_from('<I', data, 4)[0]
+    chunks, offset = {}, 8
+    while offset < size + 8:
+        tag, length = struct.unpack_from('<4sI', data, offset)
+        chunks[tag] = data[offset+8:offset+8+length]
+        offset += 8 + ((length + 3) & ~3)
+    return chunks
+
+
+def test_morph_balance_and_shared_geometry():
+    mapping = json.loads((LEVEL/'actor-map.json').read_text())
+    assert mapping['morphs'] == ['blue-jelly', 'blue-dream'] * 12
+    for part in G.PARTS:
+        name = part.replace('-', '_') + '.iff'
+        jelly = mesh_chunks(LEVEL/('jelly_' + name))
+        dream = mesh_chunks(LEVEL/('shrimp_' + name))
+        # UV seams may duplicate vertices: compare actual triangle positions.
+        def triangles(chunks):
+            vertices = [struct.unpack_from('<iii', chunks[b'VRTX'], i+12)
+                        for i in range(0, len(chunks[b'VRTX']), 24)]
+            return [tuple(vertices[j] for j in struct.unpack_from('<hhh', chunks[b'FACE'], i))
+                    for i in range(0, len(chunks[b'FACE']), 8)]
+        assert sorted(triangles(jelly)) == sorted(triangles(dream))
+        assert b'OPAC' not in dream
+        version, count = struct.unpack_from('<II', jelly[b'OPAC'])
+        assert version == 1 and count * 264 == len(jelly[b'MATL'])
+        opacity = struct.unpack_from('<'+'I'*count, jelly[b'OPAC'], 8)
+        assert all(0 < x <= 65536 for x in opacity)
+        assert any(x < 65536 for x in opacity)
+        if part == 'body':
+            # Eyes and eye glints remain opaque alongside the shell material.
+            assert 65536 in opacity
 
 
 def test_invisible_player_has_neutral_physics_and_script(exported):
