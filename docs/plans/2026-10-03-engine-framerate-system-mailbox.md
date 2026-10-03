@@ -1,14 +1,15 @@
 # Engine frame rate through a global system mailbox
 
-**Status:** Phase 1 implemented, committed, and merged into `2026-new-level` on 2026-10-03. Linux runtime and Android build/sampler checks passed. Remaining platform validation is listed below. Phase 2 remains deferred.
+**Status:** Phase 1 implemented and validated on Linux, Android, iOS, macOS, and browser/WASM, including the browser editor. Optional backend failures are recorded below. Phase 2 remains deferred.
 **Implementation / merge commit:** [`402d0f2f`](https://github.com/wbniv/WorldFoundry/commit/402d0f2f) (fast-forward merge; pushed to `origin/2026-new-level`).
+**Verification merge:** [`2639369a`](https://github.com/wbniv/WorldFoundry/commit/2639369a), integrating the completed checks with the newer aquarium changes on `2026-new-level`.
 **Date:** 2026-10-03
-**Testing coordination:** Notify Will before any further Chromecast testing. The standalone device sampler test recorded below ran before this preference was received; no game APK was installed or launched.
+**Testing coordination:** Notify Will before any further Chromecast testing. The initial standalone sampler ran before this preference was received. The later game/lifecycle check was announced in advance and is complete; its separate test app was removed.
 **Request:** Have the engine calculate the true measured frame rate on every supported platform and expose it through a predefined global system mailbox for testers and developers. This is diagnostic telemetry and must never drive gameplay mechanics. Games may read it to display an FPS overlay or report performance.
 
 ## Feasibility and existing code
 
-Yes: the current Linux, Android, iOS, macOS, and browser/WASM engine paths share `WFGame::StepFrame`, so the measurement and mailbox behavior can be implemented once. Platform builds and runtime checks are still required before claiming verified support on all five.
+Yes: the current Linux, Android, iOS, macOS, and browser/WASM engine paths share `WFGame::StepFrame`, so the measurement and mailbox behavior can be implemented once. All five now have passing build/runtime evidence for the tested configurations.
 
 The mailbox already exists: [`mailbox.inc`](../../wfsource/source/mailbox/mailbox.inc) reserves `FRAMERATE` at **1903**, inside the global system range `[1901, 1922)`. [`Level::ReadSystemMailbox`](../../wfsource/source/game/level.cc) had no `EMAILBOX_FRAMERATE` case before Phase 1, so reading it reached the invalid/read-unimplemented assertion path (or returned zero with assertions disabled). Reuse this number; no mailbox allocation or range expansion is needed.
 
@@ -88,10 +89,10 @@ Reads return a cached value and never advance the timer. A hitch becomes observa
 ## Phase 1 implementation
 
 1. `WFGame` owns a `FrameRateSampler` and exposes its cached result through `DiagnosticFrameRate()`. Timestamps and interval calculations use high precision monotonic time; only the published result is converted to `Scalar`.
-2. The shared sampler uses `std::chrono::steady_clock` and requires `Clock::is_steady` at compile time. Linux and both Android ABI builds pass; the live clock check also passes on Linux and the connected Android device. Apple/WASM verification remains pending.
+2. The shared sampler uses `std::chrono::steady_clock` and requires `Clock::is_steady` at compile time. Linux, both Android ABIs, iOS, macOS, and WASM builds pass. Native/device/browser runtime checks confirm positive measured samples and lifecycle recovery.
 3. The first active `StepFrame` after reset establishes its baseline at frame start. Sampling occurs after `PageFlip()` or `MeasureDelta()`. Subsequent intervals run between completed frames, including host work between calls. Loading time is excluded from the first interval.
 4. Every valid interval publishes `1.0 / elapsed_seconds`, without smoothing or performance clamps. Nonpositive timestamps reset measurement state instead of dividing by zero. Conversion protects the numeric limits of `Scalar`, including historical fixed-point configurations.
-5. Level load/unload and suspended steps reset the sampler. A thread-safe HAL lifecycle generation also invalidates samples when suspend/resume happens entirely between steps or during a frame. Browser visibility handling is registered for standalone and host-owned contexts; browser runtime validation remains pending.
+5. Level load/unload and suspended steps reset the sampler. A thread-safe HAL lifecycle generation also invalidates samples when suspend/resume happens entirely between steps or during a frame. Real background/resume checks pass on Android, iOS simulators, and both standalone and hosted browsers.
 6. `Level::ReadSystemMailbox` routes `EMAILBOX_FRAMERATE` to its existing `_game` reference. The default system mailbox write rejection policy is retained and verified by the integration test.
 7. The existing `mailbox.inc` constant registration supplies `INDEXOF_FRAMERATE`; its comment and the scripting reference now document diagnostic-only semantics. This exact zForth expression is verified in a running game:
 
@@ -99,7 +100,7 @@ Reads return a cached value and never advance the timer. A hitch becomes observa
    INDEXOF_FRAMERATE read-mailbox  ( -- fps )
    ```
 
-   Other scripting backends continue using their existing mailbox read APIs; direct runtime verification of those backends remains pending.
+   Lua, Fennel, Wren, QuickJS, WAMR, and PILOT pass direct runtime probes too. Alternate backend failures and integer precision limits are listed in the validation record.
 
 No changes to physics timing, display pacing, or `DELTA_TIME` are needed. Keep any broader migration of display timers to monotonic time as separate work.
 
@@ -147,10 +148,14 @@ The implementation uses [`FrameRateSampler`](../../wfsource/source/game/frame_ra
 - [x] Linux standalone and host-context smoke tests pass at one and two load/unload cycles. Smoke checks assert zero FPS after loading and after unloading.
 - [x] Android `arm64-v8a` and `armeabi-v7a` engine builds pass with NDK r26c.
 - [x] Sampler tests pass on a connected `armeabi-v7a` Android device, linked to the real Android lifecycle implementation. NativeActivity/window dependencies are stubbed for this standalone executable; no game APK is installed by this test.
-- [ ] Full Android game mailbox/background-resume integration remains pending.
-- [ ] iOS and macOS Apple-toolchain builds and runtime checks remain pending; this Linux environment has no Apple SDK.
-- [ ] Browser/WASM build, visibility/resume runtime check, and hosted editor check remain pending; an Emscripten toolchain is not installed here.
-- [ ] Direct runtime verification of `StepFrame(false)` and the other optional scripting backends remains pending. The host-context smoke uses `StepFrame(true)`; injected-timestamp tests verify host-gap accounting independently.
+- [x] Android game mailbox/background-resume integration passes on Chromecast (`armeabi-v7a`); the separate diagnostic APK was removed afterward.
+- [x] iOS builds and iPhone/iPad simulator mailbox/background-resume checks pass on Codemagic.
+- [x] macOS build and runtime mailbox checks pass on Codemagic, including unswapped frame steps and level reload.
+- [x] Browser/WASM standalone and hosted editor builds and real visibility/resume checks pass with Emscripten 6.0.0 and isolated Chrome profiles.
+- [x] Direct hosted `StepFrame(false)` runtime verification passes over two load/unload cycles, including a 20 ms host gap. Opt-in probes confirm Lua, zForth, and PILOT reads agree with the cached raw value.
+- [x] Lua, Fennel, Wren, zForth, QuickJS, WAMR, and PILOT runtime probes pass; the opt-in diagnostic probe temporarily uses and restores global user mailbox 1899.
+- [x] Alternate backend checks completed: Ficl passes with integer truncation; Atlast, embed, libforth, pForth, and JerryScript have recorded runtime/build failures.
+- [ ] Fix the failing optional backends and their integer mailbox precision before claiming raw fractional FPS support there. These are separate follow-up work, not unperformed checks.
 - [ ] Phase 2 smoothed mailbox remains deferred.
 
 See [validation commands and evidence](2026-10-03-engine-framerate-system-mailbox/validation.md). On current float-based targets FPS retains fractional values; for historical signed 16.16 configurations, conversion saturates at approximately 32768 FPS and values below one fractional unit round toward zero. These are representation limits, not performance clamps.
@@ -161,8 +166,10 @@ See [validation commands and evidence](2026-10-03-engine-framerate-system-mailbo
 - [x] Push `feature/engine-framerate-mailbox` to origin.
 - [x] Fast-forward merge into `2026-new-level` and push the result to origin on 2026-10-03.
 - [x] Preserve the original checkout's unrelated uncommitted edits; integration used `/tmp/WorldFoundry-framerate-merge`.
+- [x] Complete platform checks and merge their test infrastructure and contained build fixes with the latest `2026-new-level` (`cd36444d`) as `2639369a`.
+- [x] Rebuild the integrated Linux engine and both Android ABIs; all 8 selected native tests and 2 mailbox hot-path checks pass on the merged result.
 
-The feature worktree is `/tmp/WorldFoundry-framerate`. The remaining work is platform/runtime verification listed above; full coverage depends on Apple toolchains and device/browser test access. Notify Will before further Chromecast testing.
+Verification used `/tmp/WorldFoundry-framerate` on `verify/engine-framerate-mailbox`. Platform checks are complete for the configurations in the validation record. Remaining work is the optional backend defects listed above and deferred Phase 2. Physical iOS devices and Android arm64 runtime were not exercised; iOS simulator and Chromecast runtime evidence are recorded explicitly. Notify Will before any new Chromecast testing.
 
 ## Phase 2: optional smoothed FPS mailbox
 

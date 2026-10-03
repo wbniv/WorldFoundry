@@ -130,6 +130,16 @@ Display::~Display()
     Validate();
 }
 
+void Display::GetSurfaceSize(int& w, int& h) const
+{
+    w = h = 0;
+    if (wf_macos_window::Exists()) wf_macos_window::GetDrawableSize(w, h);
+    if (w <= 0 || h <= 0) {
+        w = (_halWindowWidth > 0) ? _halWindowWidth : _xSize;
+        h = (_halWindowHeight > 0) ? _halWindowHeight : _ySize;
+    }
+}
+
 //==============================================================================
 
 void

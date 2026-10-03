@@ -263,6 +263,12 @@ HALWindowCloseRequested(void)
 }
 
 extern "C" void
+HALRequestClose(void)
+{
+    _closeRequested.store(1);
+}
+
+extern "C" void
 HALCloseWindow(void)
 {
     if (_webglContext)

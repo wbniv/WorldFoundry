@@ -54,6 +54,8 @@ int  gDebugPort = 7777;                 // default-on; --debug-port N overrides,
 char gDebugBind[256] = "127.0.0.1";    // bind address; set by --debug-bind ADDR
 extern "C" void WFScriptProfileEnable() __attribute__((weak));   // engine/stubs/scripting_zforth.cc; absent (null) in builds with another Forth or none
 int  gFrameStepSmokeCount = 0;          // >0 = run --frame-step-smoke=N path
+bool gFrameRateChecks = false;         // runtime mailbox probes, diagnostics only
+bool gFrameStepNoSwap = false;         // exercise externally presented frame steps
 bool gWfmutSmoke          = false;      // true = run --wfmut-smoke path
 bool gMemoryTest          = false;      // true = run --memory-test and exit (no level, no window)
 // --capture-frame=N=<path.png>: write backend frame N to a PNG. macOS/Metal
@@ -268,6 +270,10 @@ ParseCommandLine(int argc, char** argv)
 			if ( WFScriptProfileEnable ) WFScriptProfileEnable();
 			DBSTREAM1( cprogress << "Script profiler on" << std::endl; )
 		}
+		else if ( strcmp( argv[index]+1, "-frame-rate-checks" ) == 0 )
+			gFrameRateChecks = true;
+		else if ( strcmp( argv[index]+1, "-frame-step-no-swap" ) == 0 )
+			gFrameStepNoSwap = true;
 		else if ( strncmp( argv[index]+1, "-frame-step-smoke=", 18 ) == 0 )
 		{
 			gFrameStepSmokeCount = atoi( argv[index] + 1 + 18 );
@@ -484,6 +490,8 @@ PIGSMain( int argc, char* * argv )
 	DBSTREAM1( std::cout << __GAME__ << " v" << (char*)szVersion; )
 
 	DBSTREAM1( std::cout << ", Built:" << (char*)szDate << "," << (char*)szTime << " by " << szBuildUser << std::endl; )
+	const char* fpsChecks = std::getenv("WF_FRAME_RATE_CHECKS");
+	gFrameRateChecks = fpsChecks && std::strcmp(fpsChecks, "1") == 0;
 	int commandIndex = ParseCommandLine(argc,argv);
 
 	// --memory-test: pure allocator self-check (memory/pooltest.cc). Runs before

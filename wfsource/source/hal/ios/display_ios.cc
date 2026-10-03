@@ -99,6 +99,12 @@ Display::~Display()
     Validate();
 }
 
+void Display::GetSurfaceSize(int& w, int& h) const
+{
+    w = (_halWindowWidth > 0) ? _halWindowWidth : _xSize;
+    h = (_halWindowHeight > 0) ? _halWindowHeight : _ySize;
+}
+
 //==============================================================================
 
 void

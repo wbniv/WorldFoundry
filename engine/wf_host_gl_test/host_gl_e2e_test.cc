@@ -119,6 +119,8 @@ int main(int argc, char** argv)
     // Parse our own args before handing off to HALStart.
     int         frames = 30;
     int         cycles = 1;
+    bool        noSwap = false;
+    bool        fpsChecks = false;
     std::string level  = "/home/will/WorldFoundry.2026-new-level/wflevels/qbert_practice/qbert_practice-standalone.iff";
 
     for (int i = 1; i < argc; ++i) {
@@ -128,6 +130,10 @@ int main(int argc, char** argv)
             cycles = std::atoi(argv[i] + 9);
         } else if (std::strncmp(argv[i], "--level=", 8) == 0) {
             level = argv[i] + 8;
+        } else if (std::strcmp(argv[i], "--frame-step-no-swap") == 0) {
+            noSwap = true;
+        } else if (std::strcmp(argv[i], "--frame-rate-checks") == 0) {
+            fpsChecks = true;
         } else {
             std::fprintf(stderr, "wf_host_gl_e2e_test: unknown arg '%s'\n", argv[i]);
             std::fprintf(stderr, "  usage: %s [--frames=N] [--cycles=N] [--level=PATH]\n", argv[0]);
@@ -163,9 +169,13 @@ int main(int argc, char** argv)
     std::snprintf(level_arg,  sizeof(level_arg),  "-L%s", level.c_str());
 
     char prog_arg[] = "wf_host_gl_e2e_test";
-    char* hal_argv_storage[] = { prog_arg, frames_arg, cycles_arg, level_arg, nullptr };
+    char no_swap_arg[] = "--frame-step-no-swap";
+    char checks_arg[] = "--frame-rate-checks";
+    char* hal_argv_storage[] = { prog_arg, frames_arg, cycles_arg, level_arg, nullptr, nullptr, nullptr };
     char** hal_argv = hal_argv_storage;
     int    hal_argc = 4;
+    if (noSwap) hal_argv_storage[hal_argc++] = no_swap_arg;
+    if (fpsChecks) hal_argv_storage[hal_argc++] = checks_arg;
 
     // 4. Drive the engine. The init dance mirrors platform_main.cc's main():
     //    sys_init populates the pigsys __argc/__argv globals that HALStart
