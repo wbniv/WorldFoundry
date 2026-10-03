@@ -321,7 +321,11 @@ workflows:
               sleep 2
               xcrun simctl launch "$udid" "$BUNDLE_ID"
               sleep 3
-              python3 "$CM_BUILD_DIR/tests/check_frame_rate_log.py" "$out" --resume
+              python3 "$CM_BUILD_DIR/tests/check_frame_rate_log.py" "$out" --resume || {
+                grep 'FPS CHECK' "$out" || true
+                tail -50 "$out"
+                return 1
+              }
               # Simulator apps are host processes, so ps sees the launched pid.
               if ps -p "$pid" > /dev/null 2>&1; then alive=yes; fi
               echo "--- screenshot ---"
@@ -451,6 +455,8 @@ workflows:
       - ios-aquarium-*-launch.log
       - ios-iphone-launch.log
       - ios-ipad-launch.log
+      - ios-*-stdout.tmp
+      - ios-*-stderr.tmp
       - ios-crash-*
       - ios-verdict.txt
       # RUNTIME_OUTPUT_DIRECTORY is ${CMAKE_SOURCE_DIR}/engine, so the .app
