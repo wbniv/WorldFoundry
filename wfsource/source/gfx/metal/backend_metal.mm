@@ -104,6 +104,7 @@ struct VertexIn {
     float3 color  [[attribute(1)]];
     float2 uv     [[attribute(2)]];
     float3 normal [[attribute(3)]];
+    float opacity [[attribute(4)]];
 };
 
 struct VertexOut {
@@ -112,6 +113,7 @@ struct VertexOut {
     float2 uv;
     float3 lit;
     float  fog_factor;
+    float  opacity;
 };
 
 // Layout must match CPU-side Uniforms struct byte-for-byte.
@@ -139,6 +141,7 @@ vertex VertexOut wf_vs(VertexIn v                  [[stage_in]],
     o.position = u.mvp * float4(v.pos, 1.0);
     o.color    = v.color;
     o.uv       = v.uv;
+    o.opacity  = v.opacity;
 
     if (u.lighting != 0) {
         float3 N = normalize((u.mv * float4(v.normal, 0.0)).xyz);
@@ -181,6 +184,7 @@ fragment float4 wf_fs(VertexOut v                  [[stage_in]],
     if (u.fog != 0) {
         c.rgb = mix(u.fog_color, c.rgb, v.fog_factor);
     }
+    c.a = v.opacity;
     return c;
 }
 )MSL";
@@ -191,6 +195,7 @@ struct Vert
     float r, g, b;
     float u, v;
     float nx, ny, nz;
+    float opacity;
 };
 
 struct Uniforms
@@ -359,6 +364,13 @@ public:
         _fogStart = start; _fogEnd = end;
     }
 
+    void SetOpacity(float opacity) override
+    {
+        if (_opacity == opacity) return;
+        if ((_opacity < 1.0f) != (opacity < 1.0f)) Flush();
+        _opacity = opacity;
+    }
+
     void SetFogEnabled(bool enabled) override
     {
         Flush();
@@ -506,6 +518,9 @@ private:
     id<MTLDevice>              _device          = nil;
     id<MTLCommandQueue>        _queue           = nil;
     id<MTLRenderPipelineState> _pipeline        = nil;
+    id<MTLRenderPipelineState> _blendPipeline = nil;
+    id<MTLDepthStencilState> _blendDepth = nil;
+    float _opacity = 1.0f;
     id<MTLDepthStencilState>   _depthState      = nil;
     id<MTLRenderCommandEncoder> _encoder        = nil;
     id<MTLSamplerState>        _sampler         = nil;
@@ -541,13 +556,14 @@ private:
     bool  _curPrelit = false;
     std::vector<Vert> _cpu;
 
-    static void Pack(Vert& dst, const RBVertex& v,
+    void Pack(Vert& dst, const RBVertex& v,
                      float nx, float ny, float nz)
     {
         dst.x = v.x; dst.y = v.y; dst.z = v.z;
         dst.r = v.r; dst.g = v.g; dst.b = v.b;
         dst.u = v.u; dst.v = v.v;
         dst.nx = nx; dst.ny = ny; dst.nz = nz;
+        dst.opacity = _opacity;
     }
 
     void LazyInit()
@@ -589,6 +605,9 @@ private:
         vd.attributes[3].format      = MTLVertexFormatFloat3;
         vd.attributes[3].offset      = offsetof(Vert, nx);
         vd.attributes[3].bufferIndex = 0;
+        vd.attributes[4].format      = MTLVertexFormatFloat;
+        vd.attributes[4].offset      = offsetof(Vert, opacity);
+        vd.attributes[4].bufferIndex = 0;
         vd.layouts[0].stride         = sizeof(Vert);
         vd.layouts[0].stepFunction   = MTLVertexStepFunctionPerVertex;
 
@@ -609,12 +628,21 @@ private:
             return;
         }
 
+        pd.colorAttachments[0].blendingEnabled = YES;
+        pd.colorAttachments[0].sourceRGBBlendFactor = MTLBlendFactorSourceAlpha;
+        pd.colorAttachments[0].destinationRGBBlendFactor = MTLBlendFactorOneMinusSourceAlpha;
+        pd.colorAttachments[0].sourceAlphaBlendFactor = MTLBlendFactorOne;
+        pd.colorAttachments[0].destinationAlphaBlendFactor = MTLBlendFactorOneMinusSourceAlpha;
+        _blendPipeline = [_device newRenderPipelineStateWithDescriptor:pd error:&err];
+        if (!_blendPipeline) { NSLog(@"wf_game: blend pipeline failed: %@", err); return; }
         // Standard opaque depth test. GL's default is GL_LESS with writes on,
         // so this matches backend_modern.cc rather than inventing a policy.
         MTLDepthStencilDescriptor* dsd = [[MTLDepthStencilDescriptor alloc] init];
         dsd.depthCompareFunction = MTLCompareFunctionLess;
         dsd.depthWriteEnabled    = YES;
         _depthState = [_device newDepthStencilStateWithDescriptor:dsd];
+        dsd.depthWriteEnabled = NO;
+        _blendDepth = [_device newDepthStencilStateWithDescriptor:dsd];
 
         // Repeat + linear, matching the GL backend's GFX_ZBUFFER policy that
         // CreateTexture in backend_modern.cc applies via glTexParameteri.
@@ -735,9 +763,9 @@ private:
             return;
         }
 
-        [_encoder setRenderPipelineState:_pipeline];
+        [_encoder setRenderPipelineState:(_opacity < 1.0f ? _blendPipeline : _pipeline)];
         if (_depthState)
-            [_encoder setDepthStencilState:_depthState];
+            [_encoder setDepthStencilState:(_opacity < 1.0f ? _blendDepth : _depthState)];
         // One batch = one texture (DrawTriangle flushes on a texture change),
         // so a single bind per flush is correct.
         // Always bind something at texture(0) — see _whiteTexture in LazyInit.

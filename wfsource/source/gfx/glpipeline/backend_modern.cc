@@ -63,10 +63,12 @@ static const char* kVS =
     "layout(location=1) in vec3 a_color;\n"
     "layout(location=2) in vec2 a_uv;\n"
     "layout(location=3) in vec3 a_normal;\n"
+    "layout(location=4) in float a_opacity;\n"
     "out vec3  v_color;\n"
     "out vec2  v_uv;\n"
     "out vec3  v_lit;\n"
     "out float v_fog_factor;\n"
+    "out float v_opacity;\n"
     "uniform mat4 u_mvp;\n"
     "uniform mat4 u_mv;\n"
     "uniform int  u_lighting;\n"
@@ -81,6 +83,7 @@ static const char* kVS =
     "    gl_Position = u_mvp * vec4(a_pos, 1.0);\n"
     "    v_color = a_color;\n"
     "    v_uv = a_uv;\n"
+    "    v_opacity = a_opacity;\n"
     "    if (u_lighting != 0) {\n"
     "        vec3 N = normalize((u_mv * vec4(a_normal, 0.0)).xyz);\n"
     "        vec3 lit = u_ambient;\n"
@@ -105,6 +108,7 @@ static const char* kFS =
     "in vec2  v_uv;\n"
     "in vec3  v_lit;\n"
     "in float v_fog_factor;\n"
+    "in float v_opacity;\n"
     "out vec4 frag;\n"
     "uniform sampler2D u_tex;\n"
     "uniform int u_use_tex;\n"
@@ -121,6 +125,7 @@ static const char* kFS =
     "        c = vec4(mix(v_color, texel.rgb, is_white) * v_lit, 1.0);\n"
     "    }\n"
     "    if (u_fog != 0) c.rgb = mix(u_fog_color, c.rgb, v_fog_factor);\n"
+    "    c.a = v_opacity;\n"
     "    frag = c;\n"
     "}\n";
 
@@ -130,6 +135,7 @@ struct Vert
     float r, g, b;
     float u, v;
     float nx, ny, nz;
+    float opacity;
 };
 
 // ---- matrix helpers (all column-major, GL convention) -----------------------
@@ -343,6 +349,15 @@ public:
         _fogEnd   = end;
     }
 
+    void SetOpacity(float opacity) override
+    {
+        if (_opacity == opacity) return;
+        // Different translucent materials can share one sorted batch. Alpha
+        // is per vertex; only switching the blend/depth policy needs a flush.
+        if ((_opacity < 1.0f) != (opacity < 1.0f)) Flush();
+        _opacity = opacity;
+    }
+
     void SetAlphaCutout(bool enabled) override
     {
         if (_alphaCutout == enabled) return;
@@ -432,6 +447,9 @@ public:
     void EndFrame() override
     {
         Flush();
+        // glClear also honours the depth write mask on the next frame.
+        glDepthMask(GL_TRUE);
+        glDisable(GL_BLEND);
     }
 
     // ---- textures (D4/O3) --------------------------------------------------
@@ -557,6 +575,7 @@ private:
     GLint  _uTex        = -1;
     GLint  _uUseTex     = -1;
     GLint  _uAlphaCutout = -1;
+    float _opacity = 1.0f;
     GLint  _uLighting   = -1;
     GLint  _uAmbient    = -1;
     GLint  _uLightDir   = -1;
@@ -588,13 +607,14 @@ private:
     bool  _curPrelit = false;
     std::vector<Vert> _cpu;
 
-    static void Pack(Vert& dst, const RBVertex& v,
+    void Pack(Vert& dst, const RBVertex& v,
                      float nx, float ny, float nz)
     {
         dst.x = v.x; dst.y = v.y; dst.z = v.z;
         dst.r = v.r; dst.g = v.g; dst.b = v.b;
         dst.u = v.u; dst.v = v.v;
         dst.nx = nx; dst.ny = ny; dst.nz = nz;
+        dst.opacity = _opacity;
     }
 
     void FetchUniformLocations()
@@ -644,6 +664,9 @@ private:
         glEnableVertexAttribArray(3);
         glVertexAttribPointer(3, 3, GL_FLOAT, GL_FALSE, stride,
                               (void*)offsetof(Vert, nx));
+        glEnableVertexAttribArray(4);
+        glVertexAttribPointer(4, 1, GL_FLOAT, GL_FALSE, stride,
+                              (void*)offsetof(Vert, opacity));
 
         glBindVertexArray(0);
         glBindBuffer(GL_ARRAY_BUFFER, 0);
@@ -670,6 +693,14 @@ private:
         UpdateMvp();
 
         glUseProgram(_prog);
+        if (_opacity < 1.0f) {
+            glEnable(GL_BLEND);
+            glBlendFuncSeparate(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA, GL_ONE, GL_ONE_MINUS_SRC_ALPHA);
+            glDepthMask(GL_FALSE);
+        } else {
+            glDisable(GL_BLEND);
+            glDepthMask(GL_TRUE);
+        }
         glUniformMatrix4fv(_uMvp, 1, GL_FALSE, _mvp);
         glUniformMatrix4fv(_uMv,  1, GL_FALSE, _mv);
         // A prelit batch is unlit by definition: its vertex colors are final.

@@ -257,6 +257,7 @@ void
 RenderCamera::RenderEnd()
 {
     DBSTREAM1( cgfx<< "RenderCamera::RenderEnd" << std::endl; )
+    RendererBackendGet().FlushTranslucency();
 	_viewPort.RenderEnd();
 #if DO_ASSERTIONS
 	_renderInProgress = false;
@@ -350,4 +351,3 @@ RenderCamera::RenderMatte(ScrollingMatte& _matte, const TileMap& map, Scalar xMu
 }
 
 //============================================================================
-
