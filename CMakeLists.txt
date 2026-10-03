@@ -593,12 +593,19 @@ if(NOT WF_FORTH_ENGINE STREQUAL "none")
         list(APPEND WF_SOURCES ${STUB_SRC}/scripting_ficl.cc)
         list(APPEND WF_INCLUDES ${FICL_DIR})
         list(APPEND WF_DEFS WF_FORTH_ENGINE_FICL)
+        find_package(Python3 REQUIRED COMPONENTS Interpreter)
+        set(_ficl_softcore ${CMAKE_CURRENT_BINARY_DIR}/ficl_softcore.c)
+        execute_process(COMMAND ${Python3_EXECUTABLE} softcore.py
+            softcore.fr jhlocal.fr marker.fr prefix.fr ifbrack.fr oo.fr classes.fr string.fr fileaccess.fr
+            WORKING_DIRECTORY ${FICL_DIR}/softwords
+            OUTPUT_FILE ${_ficl_softcore} COMMAND_ERROR_IS_FATAL ANY)
         set(_ficl_srcs dict.c dpmath.c ficl.c fileaccess.c float.c prefix.c
                        search.c stack.c sysdep.c tools.c vm.c words.c)
         list(TRANSFORM _ficl_srcs PREPEND "${FICL_DIR}/")
-        add_library(ficl STATIC ${_ficl_srcs})
+        add_library(ficl STATIC ${_ficl_srcs} ${_ficl_softcore})
         target_compile_options(ficl PRIVATE -std=gnu11 -O2 -w -fno-strict-aliasing)
         target_include_directories(ficl PUBLIC ${FICL_DIR})
+        target_compile_definitions(ficl PRIVATE FICL_UNIT_TEST=0)
         list(APPEND WF_LINK_LIBS ficl)
     elseif(WF_FORTH_ENGINE STREQUAL "atlast")
         list(APPEND WF_SOURCES ${STUB_SRC}/scripting_atlast.cc)
@@ -1133,7 +1140,20 @@ if(NOT ANDROID AND NOT IOS AND NOT APPLE AND NOT EMSCRIPTEN)
     add_executable(frame_rate_test tests/frame_rate_test.cc
         ${SRC}/hal/linux/lifecycle.cc)
     target_include_directories(frame_rate_test PRIVATE ${SRC})
+    target_compile_definitions(frame_rate_test PRIVATE ${WF_DEFS})
     add_test(NAME frame_rate_sampler COMMAND frame_rate_test)
+    if(NOT WF_FORTH_ENGINE STREQUAL "none" AND NOT WF_FORTH_ENGINE STREQUAL "zforth")
+        add_executable(frame_rate_forth_probe tests/frame_rate_forth_probe.cc
+            ${STUB_SRC}/scripting_${WF_FORTH_ENGINE}.cc)
+        target_include_directories(frame_rate_forth_probe PRIVATE ${WF_INCLUDES})
+        target_compile_definitions(frame_rate_forth_probe PRIVATE ${WF_DEFS})
+        if(WF_FORTH_ENGINE STREQUAL "libforth")
+            target_link_libraries(frame_rate_forth_probe PRIVATE libforth_lib)
+        else()
+            target_link_libraries(frame_rate_forth_probe PRIVATE ${WF_FORTH_ENGINE})
+        endif()
+        add_test(NAME frame_rate_optional_forth COMMAND frame_rate_forth_probe)
+    endif()
     if(WF_DEBUG_BRIDGE AND WF_FORTH_ENGINE STREQUAL "zforth")
         find_package(Python3 COMPONENTS Interpreter)
         if(Python3_Interpreter_FOUND)
@@ -1188,6 +1208,11 @@ if(NOT ANDROID AND NOT IOS AND NOT APPLE AND NOT EMSCRIPTEN)
     add_test(NAME wf_host_gl_e2e_cycle2
         COMMAND $<TARGET_FILE:wf_host_gl_e2e_test> --frames=30 --cycles=2 --level=${WF_TEST_LEVEL}
         WORKING_DIRECTORY ${WF_TEST_RUN_DIR})
+    add_test(NAME frame_rate_host_no_swap
+        COMMAND $<TARGET_FILE:wf_host_gl_e2e_test> --frames=60 --cycles=2 --level=${WF_TEST_LEVEL}
+            --frame-rate-checks --frame-step-no-swap
+        WORKING_DIRECTORY ${WF_TEST_RUN_DIR})
+    set_tests_properties(frame_rate_host_no_swap PROPERTIES LABELS "gl" ENVIRONMENT "DISPLAY=:0")
     add_test(NAME wf_host_gl_e2e_snow_cycle1
         COMMAND $<TARGET_FILE:wf_host_gl_e2e_test> --frames=30 --cycles=1 --level=${WF_TEST_SNOW_LEVEL}
         WORKING_DIRECTORY ${WF_TEST_RUN_DIR})

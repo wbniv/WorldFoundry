@@ -1,0 +1,64 @@
+FPS runtime verification — 2026-10-03
+Linux: 8 selected CTest checks passed; mailbox hot-path pytest: 2 passed.
+
+Linux default script backends
+FPS CHECK PASS backend=fennel raw=0.000000 script=0.000000 generation=0
+FPS CHECK PASS backend=fennel raw=29.673929 script=29.673929 generation=0
+FPS CHECK PASS backend=javascript raw=0.000000 script=0.000000 generation=0
+FPS CHECK PASS backend=javascript raw=29.673929 script=29.673929 generation=0
+FPS CHECK PASS backend=lua raw=0.000000 script=0.000000 generation=0
+FPS CHECK PASS backend=lua raw=29.673929 script=29.673929 generation=0
+FPS CHECK PASS backend=pilot raw=0.000000 script=0.000000 generation=0
+FPS CHECK PASS backend=pilot raw=29.673929 script=29.673929 generation=0
+FPS CHECK PASS backend=wamr raw=0.000000 script=0.000000 generation=0
+FPS CHECK PASS backend=wamr raw=29.673929 script=29.673929 generation=0
+FPS CHECK PASS backend=wren raw=0.000000 script=0.000000 generation=0
+FPS CHECK PASS backend=wren raw=29.673929 script=29.673929 generation=0
+FPS CHECK PASS backend=zforth raw=0.000000 script=0.000000 generation=0
+FPS CHECK PASS backend=zforth raw=29.673929 script=29.673929 generation=0
+
+Chromecast NativeActivity, same PID 32518
+FPS CHECK PASS backend=zforth raw=0.000000 script=0.000000 generation=1
+FPS CHECK PASS backend=zforth raw=34.828491 script=34.828491 generation=1
+FPS CHECK PASS backend=zforth raw=0.000000 script=0.000000 generation=3
+FPS CHECK PASS backend=zforth raw=32.177273 script=32.177273 generation=3
+
+macOS arm64
+FPS CHECK PASS backend=zforth raw=0.000000 script=0.000000 generation=0
+FPS CHECK PASS backend=zforth raw=40.252247 script=40.252247 generation=0
+
+iPhone simulator
+FPS CHECK PASS backend=zforth raw=0.000000 script=0.000000 generation=2
+FPS CHECK PASS backend=zforth raw=113.140305 script=113.140305 generation=2
+FPS CHECK PASS backend=zforth raw=0.000000 script=0.000000 generation=4
+FPS CHECK PASS backend=zforth raw=2.774123 script=2.774123 generation=4
+
+iPad simulator
+FPS CHECK PASS backend=zforth raw=0.000000 script=0.000000 generation=2
+FPS CHECK PASS backend=zforth raw=11.551318 script=11.551318 generation=2
+FPS CHECK PASS backend=zforth raw=0.000000 script=0.000000 generation=4
+FPS CHECK PASS backend=zforth raw=7.008593 script=7.008593 generation=4
+
+Standalone browser, real hide/show
+FPS CHECK PASS backend=zforth raw=0.000000 script=0.000000 generation=0
+FPS CHECK PASS backend=zforth raw=27.247957 script=27.247957 generation=0
+FPS CHECK PASS backend=zforth raw=0.000000 script=0.000000 generation=2
+FPS CHECK PASS backend=zforth raw=21.008404 script=21.008404 generation=2
+
+Hosted browser editor, real hide/show, StepFrame(false)
+FPS CHECK PASS backend=zforth raw=0.000000 script=0.000000 generation=0
+FPS CHECK PASS backend=zforth raw=44.642857 script=44.642857 generation=0
+FPS CHECK PASS backend=zforth raw=0.000000 script=0.000000 generation=2
+FPS CHECK PASS backend=zforth raw=21.551723 script=21.551723 generation=2
+
+Optional backend results:
+Ficl: PASS integer bridge: 62.5 -> 62; 2 -> 2; 0.5 -> 0.
+Atlast: FAIL SIGSEGV.
+embed: FAIL scratch sentinel unchanged.
+libforth: FAIL bridge bounds check; scratch sentinel unchanged.
+pForth: FAIL abort after dictionary initialization.
+JerryScript: FAIL build: -Werror=pedantic; minimal-profile prototype identifiers missing.
+
+Codemagic macOS: https://codemagic.io/app/6aafa6886ab3f21cf431a6cb/build/6ac0b1e614c34c56a5bfae38
+Codemagic iOS: https://codemagic.io/app/6aafa6886ab3f21cf431a6cb/build/6ac0b93f012d4459df20e02a
+Chromecast diagnostic app stopped and uninstalled.

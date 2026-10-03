@@ -8,9 +8,9 @@ The original checkout's unrelated edits were left in place.
 
 ## Linux
 
-Configuration uses GCC 15.2, Debug, Jolt, zForth, Lua, and the debug bridge.
-Sanitizers are disabled for this build. Optional Fennel, JS, WAMR, and Wren
-backends are disabled; no runtime validation is claimed for those backends.
+The initial run used GCC 15.2, Debug, Jolt, zForth, Lua, and the debug bridge,
+with sanitizers and the other optional interpreters disabled. The follow-up
+run below enables all default scripting backends and adds the unswapped host check.
 
 ```sh
 cmake -S . -B build-framerate -G Ninja -DCMAKE_BUILD_TYPE=Debug -DWF_ASAN=OFF \
@@ -37,7 +37,7 @@ PASS: FPS remains available during simulation pause
 PASS: writes to FRAMERATE follow the existing system mailbox rejection policy
 ```
 
-The final CTest run passes all 7 selected tests (sampler, two mailbox configurations,
+The initial CTest run passes all 7 selected tests (sampler, two mailbox configurations,
 and four standalone/host-context smoke runs). The same mailbox checks pass with `-rate10`. Controlled timestamps also verify exact
 500 ms → 2 FPS and 2 s → 0.5 FPS intervals. The mailbox hot-path checks pass
 (2 tests). Existing Q*bert smoke runs emit Forth compile-error messages for
@@ -76,6 +76,162 @@ the live monotonic clock, rather than only checking injected timestamps.
 PASS: raw cadence, stalls, host gaps, invalid samples, lifecycle resets
 ```
 
-This device test does not validate NativeActivity callbacks or an in-game FPS
-overlay. Android game lifecycle integration, Apple builds/runs, and WASM
-visibility handling remain pending as recorded in the parent plan.
+The initial standalone test did not exercise NativeActivity. The follow-up
+game check did: an isolated `org.worldfoundry.wf_game.fpscheck` APK packaged
+the rebuilt 32-bit engine, existing snowgoons assets, and `--frame-rate-checks`.
+Will was notified before installation/testing. The same process (PID 32518)
+survived Home/background and reopening. Named zForth reads matched raw FPS,
+the lifecycle generation advanced from 1 to 3, the first resumed read was zero,
+and positive samples recovered. `check_frame_rate_log.py --resume` passed
+over 3207 samples. The temporary app was stopped and uninstalled; existing
+game applications were untouched. No additional Chromecast testing is running.
+
+## Follow-up Linux and scripting checks
+
+```sh
+cmake -S . -B build-framerate -DWF_ENABLE_FENNEL=ON -DWF_JS_ENGINE=quickjs \
+  -DWF_WASM_ENGINE=wamr -DWF_ENABLE_WREN=ON
+cmake --build build-framerate --target wf_game wf_host_gl_e2e_test frame_rate_test -j4
+ctest --test-dir build-framerate \
+  -R 'frame_rate_|wf_game_smoke_cycle[12]|wf_host_gl_e2e_cycle[12]' --output-on-failure
+```
+
+- [x] All 8 selected tests pass. The added `frame_rate_host_no_swap` uses
+  `StepFrame(false)`, two level load/unload cycles, and a 20 ms host gap.
+- [x] Runtime probes pass for Lua, Fennel, Wren, zForth, QuickJS, WAMR, and PILOT.
+- [x] The two mailbox hot-path pytest checks still pass.
+
+`--frame-rate-checks` (or `WF_FRAME_RATE_CHECKS=1`) reads the named mailbox
+through each compiled interpreter, compares it with the engine's cached value,
+and aborts on disagreement. It temporarily uses global user mailbox 1899 and
+restores its prior value. Logging includes the first positive sample after
+each zero baseline, plus periodic samples. This mode is for validation only.
+
+The checks exposed WAMR 2.2 import-name vectors containing a trailing NUL and
+uninitialized element counts in borrowed C-API vectors. Both were corrected;
+the named imported global `INDEXOF_FRAMERATE` now passes the real WAMR runtime probe.
+
+Alternate Forth bridges use a standalone sampler-backed mailbox fixture and
+the actual interpreter, isolating them from unrelated authored level scripts:
+
+```sh
+cmake -S . -B build-framerate-backends -G Ninja -DCMAKE_BUILD_TYPE=Debug \
+  -DWF_ASAN=OFF -DWF_FORTH_ENGINE=ficl -DWF_NEURAL_FORTH=OFF \
+  -DWF_ENABLE_FENNEL=OFF -DWF_JS_ENGINE=none -DWF_WASM_ENGINE=none -DWF_ENABLE_WREN=OFF
+cmake --build build-framerate-backends --target frame_rate_forth_probe -j4
+ctest --test-dir build-framerate-backends -R frame_rate_optional_forth --output-on-failure
+```
+
+Repeat configuration with `WF_FORTH_ENGINE=atlast`, `embed`, `libforth`, and `pforth`.
+
+| Optional backend | Observed result |
+| --- | --- |
+| Ficl | Passes after building its generated softcore and disabling upstream Unity tests. Existing integer bridge maps raw 62.5 → 62, 2 → 2, and 0.5 → 0. This is a precision limitation. |
+| Atlast | Builds; interpreter probe crashes with SIGSEGV. |
+| embed | Builds; probe leaves the scratch sentinel unchanged instead of writing the read value. |
+| libforth | Builds; bridge execution fails its bounds check and leaves the sentinel unchanged. |
+| pForth | Builds; runtime aborts after dictionary initialization. |
+| JerryScript | Build blocked by GCC 15 `-Werror=pedantic`. A temporary diagnostic override exposed missing Date/RegExp prototype identifiers under the existing minimal profile. The override was removed. |
+
+These failures are recorded follow-up defects; none is counted as a passing
+raw fractional FPS interpreter. The default QuickJS build was restored and
+all 8 native checks passed again.
+
+## Apple builds and runtimes
+
+- [x] [macOS workflow](https://codemagic.io/app/6aafa6886ab3f21cf431a6cb/build/6ac0b1e614c34c56a5bfae38)
+  passes on arm64 Apple hardware, including the full existing workflow and
+  the new mailbox probe with 60 unswapped steps over two load/unload cycles.
+  Raw samples around 30–40 FPS remain independent of the fixed `-rate20` simulation.
+- [x] [iOS workflow](https://codemagic.io/app/6aafa6886ab3f21cf431a6cb/build/6ac0b93f012d4459df20e02a)
+  builds and passes on iPhone and iPad simulators. Real UIKit background/resume
+  is driven by launching Settings then returning to the same game process.
+  Each device log passes `check_frame_rate_log.py --resume` (17 and 16 samples).
+
+These runs use Xcode 26.6. Initial linking exposed missing Apple implementations
+of `Display::GetSurfaceSize` used by the level menu; those were added using
+the existing platform surface dimensions. Physical iOS hardware was not tested.
+
+## Browser and hosted editor
+
+Emscripten 6.0.0 Release builds pass for `wf_game` and `wf_edit_web`. The editor
+uses the existing Yrs Emscripten patch and a native `levtree` build to preload
+the real level document; this run used Rust 1.97.1. Missing browser definitions
+for the shared media interface's `TakePliRequests`/`SendPli` were added as
+empty hooks, matching the existing browser-owned media pipeline.
+
+```sh
+DISPLAY=:0 python3 tests/frame_rate_browser.py build-framerate-web \
+  --output /tmp/framerate-browser-final
+DISPLAY=:0 python3 tests/frame_rate_browser.py build-framerate-web-editor --editor \
+  --output /tmp/framerate-browser-editor-final
+```
+
+The manual browser fixture requires Chrome and Python Playwright. It launches
+a separate profile, attaches with emulation defaults disabled, and uses real
+window minimization/restoration. It verifies frames stop while hidden,
+the resumed mailbox first reports zero, and a subsequent positive script read
+matches the engine. It closes its browser and local HTTP server afterward.
+
+- [x] Standalone browser runtime passes.
+- [x] Hosted editor runtime passes, exercising its real `StepFrame(false)` loop
+  and adopted host WebGL context.
+
+Concise retained results are in [runtime-checks.txt](runtime-checks.txt).
+
+## Integrated result
+
+The verified feature was merged with the newer aquarium work at `cd36444d` as
+[`2639369a`](https://github.com/wbniv/WorldFoundry/commit/2639369a). The integrated
+tree builds on Linux and both Android ABIs. All 8 selected native checks and
+2 mailbox hot-path pytest checks pass again. The Apple workflow links above
+record their exact tested revisions (`330f70de` for macOS, `be82cf5e` for iOS);
+the final integration rerun was native/build validation and did not use Chromecast.
+
+## Review correction 1 — mailbox Scalar arithmetic (superseded below)
+
+The sampler now calculates, stores, and returns `Scalar`, with no separate
+`double` elapsed-seconds or FPS intermediate. Native floating Scalar builds
+convert chrono durations using `FLOAT_TYPE` and divide Scalars. Fixed builds
+calculate the 16.16 reciprocal directly from integer nanoseconds, saturating
+at the signed fixed-point maximum. The game getter and optional Forth fixture
+return the cached Scalar directly.
+
+```sh
+cmake --build build-framerate --target frame_rate_test frame_rate_fixed_test wf_game wf_host_gl_e2e_test -j4
+ctest --test-dir build-framerate -R 'frame_rate_|wf_game_smoke_cycle[12]|wf_host_gl_e2e_cycle[12]' --output-on-failure
+python3 -m pytest tests/test_mailbox_hot_path.py -q
+```
+
+- [x] All 9 selected native tests pass (14.04 s), including both native and
+  fixed-point Scalar samplers, mailbox integration, and the unswapped host.
+- [x] Both mailbox hot-path pytest checks pass.
+- [x] Fixed-point tests cover exact 100 microsecond intervals, maximum-value
+  saturation, fractional stalls, and rates below the 16.16 resolution.
+
+This correction was tested locally on Linux. The earlier platform results
+above describe the earlier revisions; Apple/browser/device runs were not
+repeated for this correction. No Chromecast testing was performed.
+
+## Review correction 2 — use the Scalar abstraction directly
+
+Removed the sampler's representation-specific branch, integer 16.16 handling,
+and separate fixed-point test target. All currently supported runtime builds
+select floating Scalar. Elapsed time now enters through `Scalar::FromFloat`
+and the reciprocal, cached value, and return value use Scalar. There are no
+`SCALAR_TYPE_*` checks, `FLOAT_TYPE` references, or double intermediates in the
+sampler. The 100 microsecond short-interval regression remains in its test.
+
+```sh
+cmake --build build-framerate --target frame_rate_test wf_game wf_host_gl_e2e_test -j4
+ctest --test-dir build-framerate -R 'frame_rate_|wf_game_smoke_cycle[12]|wf_host_gl_e2e_cycle[12]' --output-on-failure
+python3 -m pytest tests/test_mailbox_hot_path.py -q
+```
+
+- [x] All 8 selected native CTests pass (11.62 s).
+- [x] Both mailbox hot-path pytest checks pass.
+- [x] The sampler build and test retain fractional stalls, short intervals,
+  lifecycle resets, repeated reads, and independence from fixed simulation rate.
+
+These checks ran locally on Linux; no further Chromecast testing was performed.
+Earlier platform results retain their recorded revision scope.
