@@ -188,7 +188,7 @@ tree builds on Linux and both Android ABIs. All 8 selected native checks and
 record their exact tested revisions (`330f70de` for macOS, `be82cf5e` for iOS);
 the final integration rerun was native/build validation and did not use Chromecast.
 
-## Review correction 1 — mailbox Scalar arithmetic
+## Review correction 1 — mailbox Scalar arithmetic (superseded below)
 
 The sampler now calculates, stores, and returns `Scalar`, with no separate
 `double` elapsed-seconds or FPS intermediate. Native floating Scalar builds
@@ -212,3 +212,26 @@ python3 -m pytest tests/test_mailbox_hot_path.py -q
 This correction was tested locally on Linux. The earlier platform results
 above describe the earlier revisions; Apple/browser/device runs were not
 repeated for this correction. No Chromecast testing was performed.
+
+## Review correction 2 — use the Scalar abstraction directly
+
+Removed the sampler's representation-specific branch, integer 16.16 handling,
+and separate fixed-point test target. All currently supported runtime builds
+select floating Scalar. Elapsed time now enters through `Scalar::FromFloat`
+and the reciprocal, cached value, and return value use Scalar. There are no
+`SCALAR_TYPE_*` checks, `FLOAT_TYPE` references, or double intermediates in the
+sampler. The 100 microsecond short-interval regression remains in its test.
+
+```sh
+cmake --build build-framerate --target frame_rate_test wf_game wf_host_gl_e2e_test -j4
+ctest --test-dir build-framerate -R 'frame_rate_|wf_game_smoke_cycle[12]|wf_host_gl_e2e_cycle[12]' --output-on-failure
+python3 -m pytest tests/test_mailbox_hot_path.py -q
+```
+
+- [x] All 8 selected native CTests pass (11.62 s).
+- [x] Both mailbox hot-path pytest checks pass.
+- [x] The sampler build and test retain fractional stalls, short intervals,
+  lifecycle resets, repeated reads, and independence from fixed simulation rate.
+
+These checks ran locally on Linux; no further Chromecast testing was performed.
+Earlier platform results retain their recorded revision scope.

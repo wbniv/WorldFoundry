@@ -40,7 +40,7 @@ engine frame cadence; it does not confirm GPU completion or screen presentation.
 | Suspend/resume | Discard the interrupted interval and return zero before the first new valid sample |
 | Active stalls | Include their full elapsed time, including stalls below 1 FPS |
 | Simulation pause/override | Continue measuring real cadence while active frame stepping continues |
-| Numeric limits | Conversion respects `Scalar` precision and saturates only at its representable maximum |
+| Numeric precision | Follows the `Scalar` class used by current supported runtime builds |
 
 Example game reads:
 
@@ -76,17 +76,8 @@ void EndFrame(TimePoint now, unsigned int lifecycleGeneration)
         Reset();
         return;
     }
-#if defined(SCALAR_TYPE_FIXED)
-    const auto nanoseconds = std::chrono::duration_cast<std::chrono::nanoseconds>(now - _last).count();
-    constexpr std::uint64_t numerator = 1000000000ULL * SCALAR_ONE_LS;
-    constexpr std::uint64_t maximum = 0x7fffffffULL;
-    const std::uint64_t raw = nanoseconds > 0 ? numerator / nanoseconds : maximum;
-    const std::uint64_t bounded = raw > maximum ? maximum : raw;
-    _fps = Scalar(static_cast<int16>(bounded >> 16), static_cast<uint16>(bounded & 0xffff));
-#else
-    const Scalar seconds(std::chrono::duration<FLOAT_TYPE>(now - _last).count());
+    const Scalar seconds = Scalar::FromFloat(std::chrono::duration<float>(now - _last).count());
     _fps = Scalar(1, 0) / seconds;
-#endif
     _last = now;
 }
 ```
@@ -96,12 +87,10 @@ generation changes. Later samples measure from the previous frame's completion,
 so idle time between host calls remains in the interval. `Read` returns zero
 when the cached generation no longer matches the HAL generation.
 
-The sampler stores and returns the mailbox's `Scalar` type. Floating Scalar
-builds use their native `FLOAT_TYPE` for chrono conversion and divide Scalars;
-there is no separate double intermediate. Fixed-point builds calculate 16.16
-FPS directly from integer nanoseconds, saturating at the representable maximum.
-This avoids both floating-point arithmetic and quantizing elapsed seconds to
-16.16 before taking the reciprocal.
+The sampler stores and returns the mailbox's `Scalar` type. Elapsed clock time
+enters through `Scalar::FromFloat`; the reciprocal is calculated with Scalar
+arithmetic. There is no separate double intermediate or representation-specific
+branch in the sampler. All current supported runtime builds use floating Scalar.
 
 ### 2. Publish from the common frame loop
 
@@ -235,16 +224,16 @@ the small sampler implementation.
 The [implementation plan](../2026-10-03-engine-framerate-system-mailbox.md)
 contains the design rationale, lifecycle diagrams, and illustrative HUD mockup.
 
-## Review correction 1: use the mailbox type
+## Review correction: use Scalar directly
 
-Will requested replacing the sampler's `double` seconds/FPS with the mailbox
-`Scalar` type. The correction also removes `Scalar::FromDouble` from the getter
-and optional Forth fixture. A dedicated fixed-point sampler target checks
-short intervals, saturation, fractional stalls, lifecycle resets, and values
-below fixed-point resolution alongside the native Scalar sampler tests.
+Will requested the mailbox `Scalar` type and pointed out that checking
+`SCALAR_TYPE_FIXED` inside the sampler defeats the abstraction. The sampler
+now uses `Scalar::FromFloat` at the clock conversion boundary, divides Scalars,
+and caches/returns Scalar directly. The extra fixed-point branch and its test
+target were removed; all five supported runtime builds select floating Scalar.
+The short-interval regression remains in the native sampler test.
 
-- [x] Correction validation: all 9 selected native CTests and both mailbox
-  hot-path pytest checks pass. The ninth test is the fixed-point sampler.
-
-The platform results in the validation table above are baseline evidence;
-the Scalar correction has been retested locally on Linux only.
+All 8 selected native CTests and both mailbox hot-path checks pass.
+Correction validation is recorded in [validation.md](validation.md). Earlier
+Apple/browser/device results describe the baseline revisions, rather than
+new runs of this correction.

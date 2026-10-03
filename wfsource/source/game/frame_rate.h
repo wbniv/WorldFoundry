@@ -2,7 +2,6 @@
 
 #include <math/scalar.hp>
 #include <chrono>
-#include <cstdint>
 
 // Diagnostic cadence only. Simulation clamps/overrides never enter this sampler.
 // Time points are arguments so tests can exercise stalls without real sleeps.
@@ -39,20 +38,8 @@ public:
             Reset();
             return;
         }
-#if defined(SCALAR_TYPE_FIXED)
-        // Divide integer time directly into 16.16 FPS. Quantizing elapsed
-        // seconds to Scalar first would distort short frame intervals.
-        const auto nanoseconds = std::chrono::duration_cast<std::chrono::nanoseconds>(now - _last).count();
-        constexpr std::uint64_t numerator = 1000000000ULL * SCALAR_ONE_LS;
-        constexpr std::uint64_t maximum = 0x7fffffffULL;
-        const std::uint64_t raw = nanoseconds > 0 ? numerator / nanoseconds : maximum;
-        const std::uint64_t bounded = raw > maximum ? maximum : raw;
-        _fps = Scalar(static_cast<int16>(bounded >> 16), static_cast<uint16>(bounded & 0xffff));
-#else
-        // FLOAT_TYPE is the mailbox Scalar's native representation.
-        const Scalar seconds(std::chrono::duration<FLOAT_TYPE>(now - _last).count());
+        const Scalar seconds = Scalar::FromFloat(std::chrono::duration<float>(now - _last).count());
         _fps = Scalar(1, 0) / seconds;
-#endif
         _last = now;
     }
 

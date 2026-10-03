@@ -110,20 +110,10 @@ int main()
     sampler.EndFrame(At(4000) + FrameRateSampler::Clock::duration{1}, changed);
     Check(std::isfinite(sampler.Read(changed).AsFloat()) && sampler.Read(changed) > Scalar(1200, 0),
           "high cadence is finite and has no display FPS cap");
-#if defined(SCALAR_TYPE_FIXED)
-    Check(sampler.Read(changed).AsLong() == 0x7fffffff,
-          "one-tick interval saturates at the fixed mailbox maximum");
     sampler.Reset();
     sampler.BeginFrame(At(5000), changed);
     sampler.EndFrame(At(5000) + std::chrono::microseconds(100), changed);
-    Check(Near(sampler.Read(changed), 10000),
-          "short intervals are not quantized to fixed-point seconds");
-    sampler.Reset();
-    sampler.BeginFrame(At(0), changed);
-    sampler.EndFrame(At(131072), changed);
-    Check(sampler.Read(changed) == Scalar(0, 0),
-          "rates below fixed mailbox resolution become zero without overflow");
-#endif
+    Check(Near(sampler.Read(changed), 10000), "short intervals retain accurate FPS");
     sampler.Reset();
     const auto start = FrameRateSampler::Clock::now();
     sampler.BeginFrame(start, changed);
