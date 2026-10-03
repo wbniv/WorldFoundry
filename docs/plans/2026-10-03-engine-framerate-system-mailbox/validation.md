@@ -1,7 +1,9 @@
 # Phase 1 validation — 2026-10-03
 
 Worktree: `/tmp/WorldFoundry-framerate`.
-Branch: `feature/engine-framerate-mailbox`, based on `10310efe`.
+Implementation commit: [`402d0f2f`](https://github.com/wbniv/WorldFoundry/commit/402d0f2f),
+created on `feature/engine-framerate-mailbox` from `10310efe`, then fast-forward
+merged and pushed to `2026-new-level` on 2026-10-03.
 The original checkout's unrelated edits were left in place.
 
 ## Linux

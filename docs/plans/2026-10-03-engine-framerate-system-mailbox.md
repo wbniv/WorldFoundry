@@ -1,6 +1,7 @@
 # Engine frame rate through a global system mailbox
 
-**Status:** Phase 1 implemented on branch `feature/engine-framerate-mailbox`; Linux runtime and Android build/sampler checks passed. Remaining platform validation is listed below. Phase 2 remains deferred.
+**Status:** Phase 1 implemented, committed, and merged into `2026-new-level` on 2026-10-03. Linux runtime and Android build/sampler checks passed. Remaining platform validation is listed below. Phase 2 remains deferred.
+**Implementation / merge commit:** [`402d0f2f`](https://github.com/wbniv/WorldFoundry/commit/402d0f2f) (fast-forward merge; pushed to `origin/2026-new-level`).
 **Date:** 2026-10-03
 **Testing coordination:** Notify Will before any further Chromecast testing. The standalone device sampler test recorded below ran before this preference was received; no game APK was installed or launched.
 **Request:** Have the engine calculate the true measured frame rate on every supported platform and expose it through a predefined global system mailbox for testers and developers. This is diagnostic telemetry and must never drive gameplay mechanics. Games may read it to display an FPS overlay or report performance.
@@ -9,7 +10,7 @@
 
 Yes: the current Linux, Android, iOS, macOS, and browser/WASM engine paths share `WFGame::StepFrame`, so the measurement and mailbox behavior can be implemented once. Platform builds and runtime checks are still required before claiming verified support on all five.
 
-The mailbox already exists: [`mailbox.inc`](../../wfsource/source/mailbox/mailbox.inc) reserves `FRAMERATE` at **1903**, inside the global system range `[1901, 1922)`. [`Level::ReadSystemMailbox`](../../wfsource/source/game/level.cc) had no `EMAILBOX_FRAMERATE` case before Phase 1, so reading it reached the invalid/read-unimplemented assertion path (or returns zero with assertions disabled). Reuse this number; no mailbox allocation or range expansion is needed.
+The mailbox already exists: [`mailbox.inc`](../../wfsource/source/mailbox/mailbox.inc) reserves `FRAMERATE` at **1903**, inside the global system range `[1901, 1922)`. [`Level::ReadSystemMailbox`](../../wfsource/source/game/level.cc) had no `EMAILBOX_FRAMERATE` case before Phase 1, so reading it reached the invalid/read-unimplemented assertion path (or returned zero with assertions disabled). Reuse this number; no mailbox allocation or range expansion is needed.
 
 Baseline behavior examined before implementation:
 
@@ -84,21 +85,21 @@ sequenceDiagram
 
 Reads return a cached value and never advance the timer. A hitch becomes observable once that frame completes; the engine cannot update an on-screen counter while stalled. After a lifecycle reset, reads return zero until a valid interval completes.
 
-## Implementation design (implemented for Phase 1)
+## Phase 1 implementation
 
-1. Add a small frame-rate sampler owned by `WFGame`, with a read-only accessor returning the cached `Scalar`. Keep timestamps and elapsed intervals in a high precision monotonic representation; convert only the published FPS value to `Scalar`.
-2. Use `std::chrono::steady_clock` in shared engine code as the initial clock choice. The engine already uses it in runtime/script profiling. Confirm `is_steady` and runtime behavior on all five toolchains, including WASM. If a target needs an adapter, expose a monotonic HAL time source with the same semantics rather than branching the FPS algorithm by renderer. Do not use the centisecond-resolution `SYS_TICKS` interface for frame intervals.
-3. At the start of the first active `StepFrame` after reset, establish a baseline. At its end, after display pacing/measurement, feed the completion timestamp into the sampler. Later intervals run from the previous completion to the current completion, including host work between calls. This avoids counting level-loading time while retaining the cost of the first actual frame. Publish only after completing a step.
-4. For each valid completed interval, publish `1.0 / elapsed_seconds` and retain the completion timestamp as the next baseline. Do not smooth or clamp the measured interval; long active stalls must produce their actual low FPS. Reject nonpositive intervals without dividing by zero; reset measurement state if an invalid clock sample prevents a meaningful interval. Handle numeric representability explicitly before conversion, including fixed-point configurations. Numeric overflow/underflow handling is separate from a performance cap; document any limits imposed by the mailbox representation.
-5. Reset sampler state at level boundaries and on application lifecycle transitions. The suspended branch must invalidate it before returning. Also handle platforms that stop scheduling steps while hidden/backgrounded: browser visibility pause/resume and native lifecycle hooks must invalidate the next interval even if no suspended `StepFrame` occurred. Use an engine-thread reset or lifecycle generation flag if callbacks run on another thread.
-6. Add `EMAILBOX_FRAMERATE` to `Level::ReadSystemMailbox`, returning the owning game's cached result. Confirm how `Level` accesses its `WFGame` owner; add a minimal accessor/reference if necessary. Leave writes rejected by the existing system mailbox write policy, and document the read-only contract.
-7. Document the semantics alongside `FRAMERATE` in `mailbox.inc` and in scripting references. Use the existing mailbox constant registration and read primitive. For zForth, the intended usage is:
+1. `WFGame` owns a `FrameRateSampler` and exposes its cached result through `DiagnosticFrameRate()`. Timestamps and interval calculations use high precision monotonic time; only the published result is converted to `Scalar`.
+2. The shared sampler uses `std::chrono::steady_clock` and requires `Clock::is_steady` at compile time. Linux and both Android ABI builds pass; the live clock check also passes on Linux and the connected Android device. Apple/WASM verification remains pending.
+3. The first active `StepFrame` after reset establishes its baseline at frame start. Sampling occurs after `PageFlip()` or `MeasureDelta()`. Subsequent intervals run between completed frames, including host work between calls. Loading time is excluded from the first interval.
+4. Every valid interval publishes `1.0 / elapsed_seconds`, without smoothing or performance clamps. Nonpositive timestamps reset measurement state instead of dividing by zero. Conversion protects the numeric limits of `Scalar`, including historical fixed-point configurations.
+5. Level load/unload and suspended steps reset the sampler. A thread-safe HAL lifecycle generation also invalidates samples when suspend/resume happens entirely between steps or during a frame. Browser visibility handling is registered for standalone and host-owned contexts; browser runtime validation remains pending.
+6. `Level::ReadSystemMailbox` routes `EMAILBOX_FRAMERATE` to its existing `_game` reference. The default system mailbox write rejection policy is retained and verified by the integration test.
+7. The existing `mailbox.inc` constant registration supplies `INDEXOF_FRAMERATE`; its comment and the scripting reference now document diagnostic-only semantics. This exact zForth expression is verified in a running game:
 
    ```forth
    INDEXOF_FRAMERATE read-mailbox  ( -- fps )
    ```
 
-   Confirm this exact expression in a running interpreter. Other interpreters should use their existing global mailbox read APIs and registered constant conventions.
+   Other scripting backends continue using their existing mailbox read APIs; direct runtime verification of those backends remains pending.
 
 No changes to physics timing, display pacing, or `DELTA_TIME` are needed. Keep any broader migration of display timers to monotonic time as separate work.
 
@@ -154,9 +155,14 @@ The implementation uses [`FrameRateSampler`](../../wfsource/source/game/frame_ra
 
 See [validation commands and evidence](2026-10-03-engine-framerate-system-mailbox/validation.md). On current float-based targets FPS retains fractional values; for historical signed 16.16 configurations, conversion saturates at approximately 32768 FPS and values below one fractional unit round toward zero. These are representation limits, not performance clamps.
 
-## Scope and delivery
+## Delivery record
 
-Deliver in three steps: shared sampler and mailbox wiring; focused unit/integration coverage and script documentation; platform builds and runtime evidence. The implementation is small, but all-platform verification depends on Apple toolchains/devices and browser/Android test access.
+- [x] Commit Phase 1 implementation, tests, plan, mockup, diagrams, and validation evidence as `402d0f2f`.
+- [x] Push `feature/engine-framerate-mailbox` to origin.
+- [x] Fast-forward merge into `2026-new-level` and push the result to origin on 2026-10-03.
+- [x] Preserve the original checkout's unrelated uncommitted edits; integration used `/tmp/WorldFoundry-framerate-merge`.
+
+The feature worktree is `/tmp/WorldFoundry-framerate`. The remaining work is platform/runtime verification listed above; full coverage depends on Apple toolchains and device/browser test access. Notify Will before further Chromecast testing.
 
 ## Phase 2: optional smoothed FPS mailbox
 
