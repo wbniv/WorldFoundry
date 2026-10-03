@@ -1,10 +1,11 @@
 # Simulated PR: expose raw diagnostic FPS through system mailbox 1903
 
-**Date:** 2026-10-03  
-**Target branch:** `2026-new-level`  
-**Status:** Retrospective PR document for implemented and merged code; this is not an actual GitHub PR.  
-**Merged baseline:** [`73c0634e`](https://github.com/wbniv/WorldFoundry/commit/73c0634e)  
-**Implementation:** [`402d0f2f`](https://github.com/wbniv/WorldFoundry/commit/402d0f2f)  
+**Date:** 2026-10-03
+**Target branch:** `2026-new-level`
+**Status:** Simulated PR for the merged feature baseline and its reviewed Scalar correction on `verify/engine-framerate-mailbox`; this is not an actual GitHub PR.
+**Reviewed code:** [`eb974d6b`](https://github.com/wbniv/WorldFoundry/commit/eb974d6b)
+**Merged baseline:** [`73c0634e`](https://github.com/wbniv/WorldFoundry/commit/73c0634e)
+**Implementation:** [`402d0f2f`](https://github.com/wbniv/WorldFoundry/commit/402d0f2f)
 **Verification integration:** [`2639369a`](https://github.com/wbniv/WorldFoundry/commit/2639369a)
 
 ## PR description
@@ -54,13 +55,13 @@ local fps = read_mailbox(INDEXOF_FRAMERATE)
 
 ## Code under review
 
-These excerpts describe the implementation including the Scalar correction.
-Source links target `verify/engine-framerate-mailbox`; excerpts omit surrounding
-unrelated code. The commit links above identify the earlier merged baseline.
+These excerpts describe the final reviewed implementation. Source links are
+pinned to `eb974d6b`; excerpts omit surrounding unrelated code. The merged
+baseline and reviewed correction are identified separately above.
 
 ### 1. Sample actual elapsed time independently of simulation
 
-[`wfsource/source/game/frame_rate.h`](https://github.com/wbniv/WorldFoundry/blob/verify/engine-framerate-mailbox/wfsource/source/game/frame_rate.h)
+[`wfsource/source/game/frame_rate.h`](https://github.com/wbniv/WorldFoundry/blob/eb974d6b/wfsource/source/game/frame_rate.h)
 adds a small sampler owned by `WFGame`. Its timestamps are arguments so tests
 can exercise long stalls and invalid timestamps deterministically.
 
@@ -90,13 +91,25 @@ when the cached generation no longer matches the HAL generation.
 The sampler stores and returns the mailbox's `Scalar` type. Elapsed clock time
 enters through `Scalar::FromFloat`; the reciprocal is calculated with Scalar
 arithmetic. There is no separate double intermediate or representation-specific
-branch in the sampler. All current supported runtime builds use floating Scalar.
+branch in the sampler.
+
+`std::chrono` is part of the C++ standard library, included through `<chrono>`
+and available since C++11. It provides the monotonic clock, timestamps, and
+elapsed durations; it adds no third-party dependency. The conversion to
+`duration<float>` expresses elapsed seconds at the boundary with `Scalar`.
+The reciprocal, cached FPS, and mailbox result all use `Scalar`.
+
+`Scalar` remains the engine's numeric class, used for mailbox values, vectors,
+physics, and frame timing. Every supported runtime target—Linux, Android, iOS,
+macOS, and WASM—selects `SCALAR_TYPE_FLOAT` in CMake. Legacy fixed-point code
+remains in the math library but is inactive in those builds. The FPS sampler
+uses the class interface without inspecting its representation.
 
 ### 2. Publish from the common frame loop
 
-[`game.hp`](https://github.com/wbniv/WorldFoundry/blob/verify/engine-framerate-mailbox/wfsource/source/game/game.hp)
+[`game.hp`](https://github.com/wbniv/WorldFoundry/blob/eb974d6b/wfsource/source/game/game.hp)
 owns `FrameRateSampler _frameRate` and exposes `DiagnosticFrameRate()`.
-[`game.cc`](https://github.com/wbniv/WorldFoundry/blob/verify/engine-framerate-mailbox/wfsource/source/game/game.cc)
+[`game.cc`](https://github.com/wbniv/WorldFoundry/blob/eb974d6b/wfsource/source/game/game.cc)
 resets it during level load/unload and suspended stepping, begins sampling
 before update/render, and completes sampling here:
 
@@ -115,7 +128,7 @@ Existing simulation delta clamping and overrides remain independent.
 
 ### 3. Wire the predefined mailbox into games
 
-[`Level::ReadSystemMailbox`](https://github.com/wbniv/WorldFoundry/blob/verify/engine-framerate-mailbox/wfsource/source/game/level.cc)
+[`Level::ReadSystemMailbox`](https://github.com/wbniv/WorldFoundry/blob/eb974d6b/wfsource/source/game/level.cc)
 adds the missing dispatch case:
 
 ```cpp
@@ -123,21 +136,21 @@ case EMAILBOX_FRAMERATE:
     return _game.DiagnosticFrameRate();
 ```
 
-[`mailbox.inc`](https://github.com/wbniv/WorldFoundry/blob/verify/engine-framerate-mailbox/wfsource/source/mailbox/mailbox.inc)
+[`mailbox.inc`](https://github.com/wbniv/WorldFoundry/blob/eb974d6b/wfsource/source/mailbox/mailbox.inc)
 documents the existing 1903 entry. Shared constant generation already supplies
 `INDEXOF_FRAMERATE`; there is no new mailbox allocation or level-format change.
-[`docs/scripting-languages.md`](https://github.com/wbniv/WorldFoundry/blob/verify/engine-framerate-mailbox/docs/scripting-languages.md)
+[`docs/scripting-languages.md`](https://github.com/wbniv/WorldFoundry/blob/eb974d6b/docs/scripting-languages.md)
 documents units, startup behavior, lifecycle resets, and diagnostic use.
 
 ### 4. Invalidate samples across platform lifecycle transitions
 
-[`hal/lifecycle.h`](https://github.com/wbniv/WorldFoundry/blob/verify/engine-framerate-mailbox/wfsource/source/hal/lifecycle.h)
+[`hal/lifecycle.h`](https://github.com/wbniv/WorldFoundry/blob/eb974d6b/wfsource/source/hal/lifecycle.h)
 adds `HALLifecycleGeneration()`. Android, iOS, and the shared Linux/macOS/web
 lifecycle implementations increment an atomic generation on suspend and resume.
 A frame whose generation changes is discarded. This also catches background
 transitions that occur entirely between two calls to `StepFrame`.
 
-[`gfx/gl/emscripten_window.cc`](https://github.com/wbniv/WorldFoundry/blob/verify/engine-framerate-mailbox/wfsource/source/gfx/gl/emscripten_window.cc)
+[`gfx/gl/emscripten_window.cc`](https://github.com/wbniv/WorldFoundry/blob/eb974d6b/wfsource/source/gfx/gl/emscripten_window.cc)
 registers visibility handling for the adopted host WebGL context as well as the
 standalone path, allowing browser/editor background gaps to reset the sampler.
 
@@ -224,16 +237,18 @@ the small sampler implementation.
 The [implementation plan](../2026-10-03-engine-framerate-system-mailbox.md)
 contains the design rationale, lifecycle diagrams, and illustrative HUD mockup.
 
-## Review correction: use Scalar directly
+## Scalar implementation and validation
 
-Will requested the mailbox `Scalar` type and pointed out that checking
-`SCALAR_TYPE_FIXED` inside the sampler defeats the abstraction. The sampler
-now uses `Scalar::FromFloat` at the clock conversion boundary, divides Scalars,
-and caches/returns Scalar directly. The extra fixed-point branch and its test
-target were removed; all five supported runtime builds select floating Scalar.
-The short-interval regression remains in the native sampler test.
+Elapsed time enters through `Scalar::FromFloat`; FPS arithmetic, storage, and
+reads use `Scalar` directly. The sampler has no `SCALAR_TYPE_*` branches,
+`FLOAT_TYPE` references, double intermediates, or fixed-point-specific test
+target. Its native test retains the 100 microsecond interval regression,
+fractional stalls, invalid timestamps, lifecycle resets, and cached reads.
 
-All 8 selected native CTests and both mailbox hot-path checks pass.
-Correction validation is recorded in [validation.md](validation.md). Earlier
-Apple/browser/device results describe the baseline revisions, rather than
-new runs of this correction.
+- [x] The reviewed code at `eb974d6b` passes all 8 selected native CTests.
+- [x] Both mailbox hot-path pytest checks pass.
+- [x] The simulated PR code excerpt matches the implemented sampler.
+
+[validation.md](validation.md) records commands and results. Apple, browser,
+and device evidence above applies to the recorded baseline revisions; the
+reviewed Scalar implementation was retested locally on Linux.
