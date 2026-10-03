@@ -1,0 +1,64 @@
+{
+  "receipt": {
+    "apk": "/tmp/planted-tank-variants/detailed.apk",
+    "apk_sha256": "bacf2208323a77487411b92b1e3df4e6ccbdd96c6b52c2f8c8b9a3d159713170",
+    "protocol": "30.0 s warmup; 36 s planted-tank trace (wide idle, close idle, close crawl; 12 s each); 3 run(s); SurfaceFlinger sampled every 0.75 s",
+    "serial": "",
+    "menu_index": 5,
+    "device": "Chromecast HD\n14\nPhysical size: 1920x1080\n",
+    "revision": "16a77ebc7d19b792bddbb0eaca2b1f420cd6c858"
+  },
+  "runs": [
+    {
+      "run": 1,
+      "layer": "org.worldfoundry.wf_game.aquarium/android.app.NativeActivity#4689",
+      "frames": 832,
+      "refresh_ms": 16.683333,
+      "p50_ms": 50.050064,
+      "p90_ms": 50.050338,
+      "p95_ms": 66.73299,
+      "p99_ms": 66.733743,
+      "worst_ms": 83.416815,
+      "fps": 20.157664895682366,
+      "missed_refresh_percent": 99.63942307692308
+    },
+    {
+      "run": 2,
+      "layer": "org.worldfoundry.wf_game.aquarium/android.app.NativeActivity#4703",
+      "frames": 832,
+      "refresh_ms": 16.683333,
+      "p50_ms": 50.050065,
+      "p90_ms": 50.050256,
+      "p95_ms": 66.732848,
+      "p99_ms": 66.733474,
+      "worst_ms": 83.41694,
+      "fps": 20.13325095543971,
+      "missed_refresh_percent": 99.75961538461539
+    },
+    {
+      "run": 3,
+      "layer": "org.worldfoundry.wf_game.aquarium/android.app.NativeActivity#4719",
+      "frames": 835,
+      "refresh_ms": 16.683333,
+      "p50_ms": 50.050064,
+      "p90_ms": 50.050292,
+      "p95_ms": 66.732934,
+      "p99_ms": 66.733635,
+      "worst_ms": 83.416805,
+      "fps": 20.22217478706548,
+      "missed_refresh_percent": 99.16167664670658
+    }
+  ],
+  "median": {
+    "run": 2,
+    "frames": 832,
+    "refresh_ms": 16.683333,
+    "p50_ms": 50.050064,
+    "p90_ms": 50.050292,
+    "p95_ms": 66.732934,
+    "p99_ms": 66.733635,
+    "worst_ms": 83.416815,
+    "fps": 20.157664895682366,
+    "missed_refresh_percent": 99.63942307692308
+  }
+}

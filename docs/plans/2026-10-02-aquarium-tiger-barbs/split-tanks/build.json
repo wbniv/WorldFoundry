@@ -1,0 +1,69 @@
+{
+  "apk_sha256": "72424bdfe23a43e32320c96164f5db0f39838e9c566ba4c9321c6f21b157435a",
+  "apk_bytes": 3677205,
+  "native": {
+    "lib/arm64-v8a/libwf_game.so": "6b52fa4cfbc4f7c3132e6d6427792577bc74bff7148619b4c7cbfaf1a2c2ab85",
+    "lib/armeabi-v7a/libwf_game.so": "0496dbfddd8888f47dd0eeb93674166ed80c280342c68bab1b4daa841dea8188"
+  },
+  "menu_bundle_sha256": "2baa7b99e4c54cbc939724d9d0f2d8a18c81c236350f33b1d90748515e3f80c4",
+  "menu": [
+    {
+      "index": 0,
+      "name": "Clownfish & Sea Anemone",
+      "path": "wflevels/aquarium-standalone.iff",
+      "sha256": "9d34cef0afb4993d7ae5df8cfdf602734d63c23ea5584fc15a35ded2c224c948"
+    },
+    {
+      "index": 1,
+      "name": "Blue Shrimp",
+      "path": "wflevels/aquarium_blue_shrimp-standalone.iff",
+      "sha256": "79df6b0921dc574e7ccc05198de3704961715f069bf75461bd909e4ea2b5c581"
+    },
+    {
+      "index": 2,
+      "name": "Calm Betta",
+      "path": "wflevels/aquarium_betta-standalone.iff",
+      "sha256": "64ea80d81089f4174630b4647a7cdafb8497ee7222bad1ceaf26d901f0840a85"
+    },
+    {
+      "index": 3,
+      "name": "Jellyfish",
+      "path": "wflevels/aquarium_jellyfish-standalone.iff",
+      "sha256": "fcbf6802b30a7ab661d7cc97c95e620b2b69d15fd1a430c37689cc8c06eb2888"
+    },
+    {
+      "index": 4,
+      "name": "Lionfish",
+      "path": "wflevels/aquarium_lionfish-standalone.iff",
+      "sha256": "71fe1b40cd92190b5e54f97a1222506ccabd76322b4cad7217edd0746f0760f9"
+    },
+    {
+      "index": 5,
+      "name": "Planted Tank",
+      "path": "wflevels/aquarium_plants-standalone.iff",
+      "sha256": "b569b06569e446cb98089c3b437b0908e2a787aea6bc1dc160d3e4fc4d9d91d8"
+    },
+    {
+      "index": 6,
+      "name": "Asian Arowana",
+      "path": "wflevels/aquarium_arowana-standalone.iff",
+      "sha256": "f116a9604b00c7c6edf2fe4dd3e68127d5662e57df28dc66483467a4e868b350"
+    },
+    {
+      "index": 7,
+      "name": "Tiger Barbs",
+      "path": "wflevels/aquarium_tiger_barbs-standalone.iff",
+      "sha256": "6257ea59b9090b3947709e83c276e0c3f49b2b780c8ada9e993c95bec04752ea"
+    }
+  ],
+  "other_six_species_unchanged": true,
+  "tests": "95 passed",
+  "desktop_capture": "Both tanks rendered and exercised with fixed-step native engine; see engine/",
+  "chromecast": "Eight-tank release installed; exact installed APK SHA-256 verified; phone panel dismisses to selector, both changed tanks launch, and back arrow returns to selector. Fresh 50-fish performance traces remain pending.",
+  "size_range_cm": [
+    2.5,
+    7.0
+  ],
+  "fish_count": 50,
+  "resident_count": 49
+}

@@ -80,7 +80,7 @@ try:
         assert mapping['count']==1 and mapping['animal']=='sea_urchin' and mapping['parts']==[] and mapping['rows']==[]
         assert not any(n.startswith('animal-') for n in idx)
         results['static_plant_groups']=[n for n in idx if n.startswith('plant_')]
-        assert len(results['static_plant_groups'])==3
+        assert len(results['static_plant_groups'])==8
         print('PASS: sea urchin, static plants and both cameras',flush=True)
     else:
         before={k:value(*k) for k in watches};step(9);after={k:value(*k) for k in watches}

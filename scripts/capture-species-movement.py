@@ -6,6 +6,7 @@ import json
 import os
 from pathlib import Path
 import resource
+import re
 import subprocess
 import sys
 import time
@@ -20,8 +21,9 @@ ap.add_argument('--video',action='store_true')
 ap.add_argument('--quick',action='store_true',help='short final-build review; the 60-second crawl is in the full capture')
 args=ap.parse_args()
 for kind in args.kinds:
-    level='aquarium_'+kind; here=ROOT/'wflevels'/level; out=args.out.resolve()/kind;out.mkdir(parents=True,exist_ok=True)
-    mapping=json.loads((here/'actor-map.json').read_text());idx=mapping['indices'];player=idx['Player']
+    level='aquarium' if kind=='clownfish' else 'aquarium_'+kind; here=ROOT/'wflevels'/level; out=args.out.resolve()/kind;out.mkdir(parents=True,exist_ok=True)
+    mapping=json.loads((here/'actor-map.json').read_text()) if (here/'actor-map.json').exists() else {'indices':{name:i+1 for i,name in enumerate(re.findall(r"\{ 'OBJ'\s*\{ 'NAME' \"([^\"]+)\" \}",(here/(level+'.lev')).read_text()))}}
+    idx=mapping['indices'];player=idx['Player']
     (out/'build.json').write_text(json.dumps({'standalone_sha256':hashlib.sha256((ROOT/'wflevels'/(level+'-standalone.iff')).read_bytes()).hexdigest(),'engine_sha256':hashlib.sha256((ROOT/'engine/wf_game').read_bytes()).hexdigest(),'fixed_dt':.05,'video_fps':10,'quick':args.quick},indent=2)+'\n')
     env=dict(os.environ,LD_LIBRARY_PATH=str(ROOT/'engine/libs')+':'+os.environ.get('LD_LIBRARY_PATH',''))
     with (out/'runtime.log').open('w') as log:
@@ -41,7 +43,8 @@ for kind in args.kinds:
                     time.sleep(.005)
                 time.sleep(.015)
             def shot(path):
-                path=path.resolve();cli.send({'op':'screenshot','filename':str(path)})
+                path=path.resolve();path.unlink(missing_ok=True)
+                cli.send({'op':'screenshot','filename':str(path)})
                 deadline=time.monotonic()+10
                 while not path.exists():
                     if time.monotonic()>deadline:raise RuntimeError('Screenshot timed out')

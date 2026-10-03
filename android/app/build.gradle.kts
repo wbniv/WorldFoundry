@@ -135,7 +135,7 @@ android {
     //     are a dev shortcut; the real remediation is docs/plans/2026-04-18-
     //     audio-assets-from-iff.md (move audio inside cd.iff).
     //   aquarium: cd.iff → wflevels/aquarium-menu-cd.iff (task build-cd-iff-aquarium-menu),
-    //     six tanks behind the shared selector; aquarium-cd.iff remains the standalone/Apple bundle.
+    //     eight tanks behind the shared selector; aquarium-cd.iff remains the standalone/Apple bundle.
     //     No MIDI or soundfont: the level has no music, and MusicPlayer::play
     //     returns quietly when the soundfont asset is absent.
     //   condo: cd.iff → wflevels/condo-cd.iff (task build-cd-iff-condo; the

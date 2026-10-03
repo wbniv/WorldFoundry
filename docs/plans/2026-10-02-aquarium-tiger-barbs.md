@@ -1,6 +1,8 @@
-# Aquarium: 29 tiger barbs, one actor each
+# Aquarium: separate 50-fish Tiger Barbs tank
 
-**Status:** all three phases implemented, profiled, integrated with species movement and the diagnostic FPS mailbox, and verified on Chromecast HD. The combined seven-tank release is committed and pushed. The schooling cache is implemented and presentation-profiled; final CPU/control measurements and optimized APK installation await exclusive Chromecast access.
+**Status:** the separate 50-fish Tiger Barbs tank and Clownfish & Sea Anemone cleanup are implemented locally. The eight-tank release APK builds, both tanks render in the native engine, and 95 checks pass. The eight-tank release is installed and its selector and both changed tanks are verified on Chromecast. Fresh 50-fish profiling remains pending. See the [current split-tank plan and size variation](#separate-tiger-barbs-tank--requested-2026-10-03) and [visual review](2026-10-02-aquarium-tiger-barbs/split-tanks/index.html).
+
+The original three phases below describe the earlier 30-fish mixed tank. Those phases were implemented, profiled, integrated and verified on Chromecast HD; the seven-tank release was committed and pushed. The schooling cache was implemented and presentation-profiled. Its final CPU/control measurements remain pending, and the archived results do not establish performance for the new 50-fish tank.
 
 Replace the ten follower clownfish with **29 tiger barbs**, retaining the player's clownfish: **30 fish instead of 11**. First measure the population using one textured, two-sided quad per barb. Then replace each quad with one actual fish mesh, including swimming animation within that same mesh. Plan a third pass for improved meshes, with another profile before adopting them.
 
@@ -330,3 +332,23 @@ FPS increases by **1.967 (+5.55%)**; missed-refresh intervals decrease by **6.68
 The final integrated source/assets/release-package suite passed **73 checks**, and **8 existing schooling regressions** passed. The rebuilt optimized seven-tank APK changes only the bundle; native libraries/resources and all six other species standalones are byte-identical to the verified combined release.
 
 [Comparison and outstanding device measurements](2026-10-02-aquarium-tiger-barbs/phase3/school-cache/README.md) links the measurements and records the pending candidate CPU trace, late baseline control and final optimized APK install. The first candidate CPU capture was excluded when the foreground changed to `org.worldfoundry.wf_game.fpscheck`. The profiler now stops its collector even on that failure. Original and completed presentation evidence remain valid.
+
+## Separate Tiger Barbs tank — requested 2026-10-03
+
+Split the mixed tank into **Clownfish & Sea Anemone** and **Tiger Barbs**. The clownfish tank retains its player, anemone animation, cameras and swimming controls, with no school controller, follower actors, school state, actor lookup arrays or unused school mailbox reads. Append the new tank to the selector to preserve the six other species indices.
+
+The new tank contains **50 tiger barbs total: one player-controlled barb and 49 residents**. Use the approved phase 3 mesh/texture and deformation, with one visible mesh per fish; the player alone retains the engine's invisible physics/control hull. Remove the clownfish and marine anemone/rock from this tank. Retain the schooling cache, smooth sparse-update prediction and turn easing, and movement-gated startle. Allocate the 50-fish state and per-resident actor/time/animation arrays without overlaps or use of reserved system mailboxes.
+
+**Size variation:** the new visual target is **2.5–7.0 cm** (0.25–0.70 world metres at scale ×10), instead of the old 4.5–6.0 cm band. This is an authored visual range, not a newly researched biological claim. Use mostly medium fish with fewer small and large fish; assign sizes deterministically and scatter them throughout the school. The controllable fish remains 5.25 cm. Ensure the largest animated fish fits every wall limit. Do not achieve variation by adding mesh parts or actors.
+
+Rebuild both standalones, the eight-entry selector and release APK. Verify species isolation, exact population, size diversity, allocation bounds, controls/animation and menu payload identity. The earlier 30-fish measurements remain archived baselines; 50-fish performance requires a new device measurement when Chromecast access is clear. The interrupted CPU trace from the earlier caching comparison remains excluded.
+
+![New tank mockup: 50 tiger barbs with pronounced size variation](2026-10-02-aquarium-tiger-barbs/split-tanks/population-50.svg)
+
+[Visual review: mockup, native movement videos and expanded mailbox layout](2026-10-02-aquarium-tiger-barbs/split-tanks/index.html). The mockup shows the intended population and size distribution; the videos show actual native-engine rendering and controls at a fixed simulation step, not measured Chromecast performance.
+
+**Local validation:** 95 checks passed, covering exported Forth execution, player movement, single-mesh fish, exact population, size diversity and wall margins, mailbox bounds, school-cache equivalence for 50 fish, selector payloads and release packaging. Both tanks completed native movement captures without runtime errors. The six other species standalones and both Android native libraries are byte-identical to the previously verified release. [Build receipt](2026-10-02-aquarium-tiger-barbs/split-tanks/build.json) records the eight entries and hashes. The APK is `/tmp/aquarium-split-tanks/Aquarium-eight-tanks.apk` (SHA-256 `72424bdfe23a43e32320c96164f5db0f39838e9c566ba4c9321c6f21b157435a`).
+
+**Chromecast validation:** the installed app was a direct-launch profiling APK (SHA-256 `23dc437dc154a22f61ebb5759ff5fde4586499327659bb79bfa69fc954434118`) with no MENU chunk and `--frame-profile` arguments. Replaced it with the eight-tank release using `adb install -r`; verified the installed hash matches the build receipt. The phone panel dismisses to the selector, Clownfish & Sea Anemone and Tiger Barbs both launch, and the back arrow returns to the selector. [Selector screenshot](2026-10-02-aquarium-tiger-barbs/split-tanks/chromecast/selector.png) and [Tiger Barbs on Chromecast](2026-10-02-aquarium-tiger-barbs/split-tanks/chromecast/tiger-barbs.png). After every direct-launch profiling session, reinstall and verify the normal menu release before handing the device back.
+
+**Pending measurements:** collect fresh 50-fish presentation and CPU traces. Preserve the earlier 30-fish comparisons as historical baselines and report the new population's deltas separately.

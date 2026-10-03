@@ -39,10 +39,10 @@ SNOWGOONS_NAME = re.compile(r'^(room|light|camera|director|levelobj|matte|camsho
                             r'statplat|platform|enemy|snowgoon|actbox)_\d+$', re.I)
 
 
-def _objects():
-    if not os.path.exists(LEV):
+def _objects(level_path=LEV):
+    if not os.path.exists(level_path):
         pytest.fail(f'{LEV} missing — run `task aquarium-level`')
-    text = open(LEV).read()
+    text = open(level_path).read()
     objs = []
     for block in text.split("\t{ 'OBJ' ")[1:]:
         name = re.search(r"\{ 'NAME' \"([^\"]+)\" \}", block).group(1)
@@ -191,7 +191,7 @@ def test_no_placeholder_fish_remains(objs):
 def test_director_runs_the_rig_then_the_camera_with_the_right_indices(objs):
     names = [o['name'] for o in objs]
     script = by_name(objs, 'Director')['script']
-    assert script.rstrip().endswith('fish-rig-tick\naq-camera-tick\naq-sway-tick\nsd-tick'), \
+    assert script.rstrip().endswith('fish-rig-tick\naq-camera-tick\naq-sway-tick'), \
         'rig first (after every actor), then cameras, then the anemone sway, then the school'
     h = _header(script)
     for n in CF.PART_NAMES:       # with followers the Director's actor words choose the player's actor when fish-off is 0
@@ -206,51 +206,16 @@ def test_director_runs_the_rig_then_the_camera_with_the_right_indices(objs):
     assert h['aq-touch'] == 0, 'the committed level is the keyboard/gamepad profile'
 
 
-SCHOOL_N = 29
-
-
-def test_each_barb_is_one_mass_zero_scriptless_mesh_actor(objs):
-    names = [o['name'] for o in objs]
-    assert len(objs) == 32 + SCHOOL_N
-    assert len(names) == len(set(names))
-    followers=[by_name(objs,f'tiger-barb-{k}') for k in range(1,SCHOOL_N+1)]
-    assert len({o['mesh'] for o in followers}) == 1
-    assert followers[0]['mesh'] in ('tiger_barb_quad.iff','tiger_barb_mesh.iff','tiger_barb_refined.iff')
-    for fish in followers:
-        assert fish['class']=='platform' and fish['mass']==0
-        assert not fish['script']
-        assert fish['mobility']==by_name(objs,'clownfish-body')['mobility']
-    assert not any(re.match(r'clownfish-.*-\d+$',n) for n in names)
-
-
-def test_the_director_barb_indices_match_export_positions(objs):
-    names=[o['name'] for o in objs]
-    script=by_name(objs,'Director')['script']
-    for k in range(1,SCHOOL_N+1):
-        assert f'{names.index(f"tiger-barb-{k}")+1} {1300+k-1} write-mailbox' in script
-
-
-def test_the_school_and_retained_player_do_not_share_mailboxes(objs):
-    script=by_name(objs,'Director')['script']
-    spans=sorted([(600,639),(700,719),(720,739),(740,759)]+list(TB.RANGES.values()))
-    assert all(a[1]<b[0] for a,b in zip(spans,spans[1:]))
-    assert TB.RANGES['state'][1]-TB.RANGES['state'][0]+1 == 14*(SCHOOL_N+1)
-    assert ': sch-n 30 ;' in script
-    assert ': sd-ptr 1268 ;' in script and 'sch-n 1 - mod' in script
+def test_clownfish_tank_has_no_school_actors_or_mailbox_reads(objs):
+    assert len(objs)==32
+    assert not any(o['name'].startswith('tiger-barb') for o in objs)
     for name in ('Director','Player'):
-        fish_script=by_name(objs,name)['script']
-        assert ': fish-off 0 ;' in fish_script
-        assert '1037 read-mailbox' not in fish_script
-    for name,base in [('sch-base',800),('sch-par',1220),('sch-scr',1242)]:
-        assert f': {name} {base} ;' in script
-
-
-def test_the_dart_startles_the_school_in_the_built_director(objs):
-    script = by_name(objs, 'Director')['script']
-    assert ': sd-dart-check' in script and 'aq-dart-t read-mailbox 0 >' in script and '5 sch-startle-all' in script, 'the dart trigger'
-    assert 'sd-leader sd-mode-update sd-dart-check' in script, 'the Director must run the check every tick'
-    assert ': MB_KICK 21 ;' in script and 'startle-gain' in script and 'sch-startle-away' in script, 'the fast start'
-    assert ': aq-dart-t ' in script, 'the dart timer is a level mailbox the school reads'
+        script=by_name(objs,name)['script']
+        assert ': sch-' not in script and ': sd-' not in script
+        assert 'sd-tick' not in script
+        assert ': fish-off 0 ;' in script
+        assert '1016 read-mailbox' not in script
+        assert '1037 read-mailbox' not in script
 
 
 def test_camshots_a_and_b_sit_outside_the_tank_clear_of_the_fish(objs):

@@ -1,5 +1,6 @@
 | Date | Change |
 |------|--------|
+| [2026-10-03](https://github.com/wbniv/WorldFoundry/commit/16a77ebc) | Explain texture alpha tradeoffs and link translucency implementation commits |
 | [2026-10-03](https://github.com/wbniv/WorldFoundry/commit/cd36444d) | Record schooling cache frame gains and remaining device validation |
 | [2026-10-03](https://github.com/wbniv/WorldFoundry/commit/f6248fff) | Implement species swimming, pitched rigs and jelly deformation |
 | [2026-10-03](https://github.com/wbniv/WorldFoundry/commit/24fdef05) | Refine phase 3 tiger barb mesh and profile Chromecast costs |
@@ -40,6 +41,10 @@
 | [2026-06-26](https://github.com/wbniv/WorldFoundry/commit/16d72fa6) | docs: add plan index (docs/plans/README.md) |
 
 <!--history-meta v1
+16a77ebc	author	Will Norris
+16a77ebc	added	2
+16a77ebc	deleted	1
+16a77ebc	files	1
 cd36444d	author	Will Norris
 cd36444d	added	1
 cd36444d	deleted	1

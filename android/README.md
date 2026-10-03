@@ -38,7 +38,7 @@ soundfont, `task soundfont`, or `-x lintVitalAnalyzeSnowgoonsRelease -x lintVita
 | Flavor (`<app>`) | applicationId | Label / banner | `assets/cd.iff` |
 |---|---|---|---|
 | `snowgoons` | `org.worldfoundry.wf_game` | Snowgoons (`src/snowgoons/res`) | `wflevels/snowgoons-cd.iff` (task `build-cd-iff-snowgoons`), plus `level0.mid` + soundfont |
-| `aquarium` | `org.worldfoundry.wf_game.aquarium` | WF Aquarium (`src/aquarium/res`) | `wflevels/aquarium-cd.iff` (task `build-cd-iff-aquarium`) |
+| `aquarium` | `org.worldfoundry.wf_game.aquarium` | WF Aquarium (`src/aquarium/res`) | `wflevels/aquarium-menu-cd.iff` (task `build-cd-iff-aquarium-menu`): eight tanks behind the shared selector |
 | `condo` | `org.worldfoundry.wf_game.condo` | WF Condo (`src/condo/res`) | `wflevels/condo-cd.iff` (task `build-cd-iff-condo`), plus `wf_args.txt` (the engine flags the level needs) |
 | `smb` | `org.worldfoundry.wf_game.smb` | WF SMB (`src/smb/res`; placeholder name) | `wflevels/smb-menu-cd.iff` (task `build-cd-iff-smb-menu`): a world select (D-pad, OK starts, Back held 1 s returns), then W1‑1 to W1‑4, which chain ([plan](../docs/plans/2026-10-01-level-menu-selector.md)) |
 | `qbert` | `org.worldfoundry.wf_game.qbert` | WF Q\*bert (`src/qbert/res`; placeholder name) | `wflevels/qbert-cd.iff` (task `build-cd-iff-qbert`) |

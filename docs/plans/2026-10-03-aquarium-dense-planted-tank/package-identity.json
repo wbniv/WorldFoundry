@@ -1,0 +1,34 @@
+{
+  "baseline": {
+    "sha256": "f6f778b4cb7cedf7556c8e678bd245d5036929d2ec3758462f99bdc12b1839c7",
+    "native": {
+      "lib/arm64-v8a/libwf_game.so": "55a6dcabc64c70f66ea56d65e0a5edf9ceaf5193f73f42a986f960bd0645c40b",
+      "lib/armeabi-v7a/libwf_game.so": "cb844d34d56aef5d9a4b88fb01760356456f05a114d43892494b7a9f88de7679"
+    },
+    "other_seven_identical": true
+  },
+  "density": {
+    "sha256": "78e73a30744cd38c968b1e92971b09d283a8379bdd2aab5dd6ac9e893583391c",
+    "native": {
+      "lib/arm64-v8a/libwf_game.so": "55a6dcabc64c70f66ea56d65e0a5edf9ceaf5193f73f42a986f960bd0645c40b",
+      "lib/armeabi-v7a/libwf_game.so": "cb844d34d56aef5d9a4b88fb01760356456f05a114d43892494b7a9f88de7679"
+    },
+    "other_seven_identical": true
+  },
+  "detailed": {
+    "sha256": "bacf2208323a77487411b92b1e3df4e6ccbdd96c6b52c2f8c8b9a3d159713170",
+    "native": {
+      "lib/arm64-v8a/libwf_game.so": "55a6dcabc64c70f66ea56d65e0a5edf9ceaf5193f73f42a986f960bd0645c40b",
+      "lib/armeabi-v7a/libwf_game.so": "cb844d34d56aef5d9a4b88fb01760356456f05a114d43892494b7a9f88de7679"
+    },
+    "other_seven_identical": true
+  },
+  "normal-release": {
+    "sha256": "41f4c264351f0d99199b039b8be0fdfb1ff34c654c5fbc775e9e3738d4125aed",
+    "native": {
+      "lib/arm64-v8a/libwf_game.so": "55a6dcabc64c70f66ea56d65e0a5edf9ceaf5193f73f42a986f960bd0645c40b",
+      "lib/armeabi-v7a/libwf_game.so": "cb844d34d56aef5d9a4b88fb01760356456f05a114d43892494b7a9f88de7679"
+    },
+    "other_seven_identical": true
+  }
+}

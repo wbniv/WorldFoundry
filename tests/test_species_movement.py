@@ -33,12 +33,13 @@ def vm(tmp_path_factory):
         text=(here/(level+'.lev')).read_text()
         paths=[]
         prefix='sh' if kind=='blue_shrimp' else 'tk'
-        for name,entry in [('Player',prefix+'-player-tick'),('Director',prefix+'-director-tick')]:
+        entries=('aq-player-tick','barb-player-tick\naq-camera-tick\nsd-tick') if kind=='tiger_barbs' else (prefix+'-player-tick',prefix+'-director-tick')
+        for name,entry in zip(('Player','Director'),entries):
             block=text[text.index('{ \'NAME\' "'+name+'" }'):].split("{ 'OBJ'",1)[0]
             encoded=re.search(r'\{ \'STR\' \{ \'NAME\' "Script" \} \{ \'STR\' ("(?:\\.|[^"\\])*")',block).group(1)
             script=json.loads(encoded).removesuffix('\n'+entry+'\n')
             path=tmp/(kind+name+'.fth');path.write_text(definitions+script);paths.append(path)
-        result=subprocess.run([str(binary),*map(str,paths),str(mapping['indices']['Player']),str(mapping['indices']['Director']),prefix+'-player-tick',prefix+'-director-tick'],input=trace,text=True,capture_output=True)
+        result=subprocess.run([str(binary),*map(str,paths),str(mapping['indices']['Player']),str(mapping['indices']['Director']),*entries],input=trace,text=True,capture_output=True)
         assert result.returncode==0,result.stderr
         keys=['frame','x','y','z','vx','vy','vz',*range(600,751),*range(1100,1112),*range(1200,1281),'part-x','part-y','part-z','part-a','part-b','part-c']
         return [dict(zip(keys,map(float,row))) for row in csv.reader(io.StringIO(result.stdout))]

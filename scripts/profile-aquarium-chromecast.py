@@ -16,9 +16,12 @@ ap.add_argument('--apk', required=True)
 ap.add_argument('--out', required=True)
 ap.add_argument('--runs', type=int, default=3)
 ap.add_argument('--resume', action='store_true')
+ap.add_argument('--menu-index', type=int, help='Select this zero-based menu entry after closing the phone panel; omit for direct standalone benchmark APKs')
 ap.add_argument('--warmup', type=float, default=30)
-ap.add_argument('--scenario', choices=['all','swarm'], default='all')
+ap.add_argument('--scenario', choices=['all','swarm','plants'], default='all')
 args = ap.parse_args()
+if args.menu_index is not None and args.menu_index < 0:
+    ap.error('--menu-index must be non-negative')
 ADB = os.environ.get('ADB', str(Path.home()/'android-sdk-local/platform-tools/adb'))
 A = [ADB] + (['-s', args.serial] if args.serial else [])
 PKG = 'org.worldfoundry.wf_game.aquarium'
@@ -42,8 +45,8 @@ def pct(values, p):
     return s[min(len(s)-1, int((len(s)-1)*p))] if s else None
 
 receipt = {'apk':str(Path(args.apk).resolve()), 'apk_sha256':hashlib.sha256(Path(args.apk).read_bytes()).hexdigest(),
-           'protocol':f'{args.warmup} s warmup; '+('60 s fixed trace (five 12 s segments)' if args.scenario=='all' else '12 s swarm-only diagnostic')+f'; {args.runs} run(s); SurfaceFlinger sampled every 0.75 s',
-           'serial':args.serial, 'device':sh('getprop ro.product.model; getprop ro.build.version.release; wm size'),
+           'protocol':f'{args.warmup} s warmup; '+{'all':'60 s fixed trace (five 12 s segments)', 'swarm':'12 s swarm-only diagnostic', 'plants':'36 s planted-tank trace (wide idle, close idle, close crawl; 12 s each)'}[args.scenario]+f'; {args.runs} run(s); SurfaceFlinger sampled every 0.75 s',
+           'serial':args.serial, 'menu_index':args.menu_index, 'device':sh('getprop ro.product.model; getprop ro.build.version.release; wm size'),
            'revision':subprocess.check_output(['git','rev-parse','HEAD'],text=True).strip()}
 (OUT/'receipt.json').write_text(json.dumps(receipt,indent=2))
 print(adb('install','-r',args.apk).strip(), flush=True)
@@ -59,6 +62,13 @@ for run in range(1,args.runs+1):
     time.sleep(9)
     sh('input keyevent KEYCODE_BACK')  # hides the controller panel on its first opening
     require_foreground()
+    if args.menu_index is not None:
+        for _ in range(args.menu_index):
+            sh('input keyevent KEYCODE_DPAD_DOWN')
+            time.sleep(.15)
+        sh('input keyevent KEYCODE_DPAD_CENTER')
+        time.sleep(3)
+        require_foreground()
     (work/'launch.png').write_bytes(adb('exec-out','screencap','-p',binary=True))
     print(f'run {run}: warming {args.warmup}s',flush=True)
     time.sleep(args.warmup)
@@ -83,6 +93,8 @@ for run in range(1,args.runs+1):
     trace=[('swarm',None),('school-right','KEYCODE_DPAD_RIGHT'),('dart','KEYCODE_DPAD_CENTER'),
            ('turn-left','KEYCODE_DPAD_LEFT'),('close-up-right','KEYCODE_DPAD_RIGHT')]
     if args.scenario=='swarm': trace=trace[:1]
+    if args.scenario=='plants':
+        trace=[('wide-idle',None),('close-idle','KEYCODE_DPAD_CENTER'),('crawl-close','KEYCODE_DPAD_RIGHT')]
     try:
         for name,key in trace:
             start=time.monotonic()-t0

@@ -5,7 +5,7 @@ from pathlib import Path
 import sys
 ROOT=Path(__file__).resolve().parents[1]
 sys.path.insert(0,str(ROOT/'wflevels/aquarium_tanks'))
-from planting import planting
+from planting import planting, placements
 from urchin import urchin
 
 def test_foliage_and_spines_survive_fixed_point_triangle_normals():
@@ -39,6 +39,48 @@ def test_one_visible_urchin_no_fish_or_resident_rig():
 
 def test_menu_appends_planted_tank_without_changing_existing_indices():
     entries=[s for s in (ROOT/'wflevels/aquarium-menu.manifest').read_text().splitlines() if s.startswith('level ')]
-    assert len(entries)==7
+    assert len(entries)==8
     assert entries[5]=='level aquarium_plants-standalone.iff | Planted Tank'
     assert entries[0].startswith('level aquarium-standalone.iff | ')
+
+
+def test_dense_grouping_and_real_mesh_limits():
+    import struct
+    here=ROOT/'wflevels/aquarium_plants'
+    mapping=json.loads((here/'actor-map.json').read_text())
+    groups=[name for name in mapping['indices'] if name.startswith('plant_')]
+    assert len(groups)==8 and len(mapping['indices'])==38
+    text=(here/'aquarium_plants.lev').read_text()
+    assert all(f'{name}.iff' in text for name in groups)
+    total=0
+    for name in groups:
+        data=(here/(name+'.iff')).read_bytes();chunks={};offset=8
+        while offset<len(data):
+            tag=data[offset:offset+4];size=struct.unpack_from('<I',data,offset+4)[0]
+            chunks[tag]=data[offset+8:offset+8+size];offset+=8+(size+3)//4*4
+        vertices=[struct.unpack_from('<iii',chunks[b'VRTX'],i+12) for i in range(0,len(chunks[b'VRTX']),24)]
+        triangles=list(struct.iter_unpack('<hhhh',chunks[b'FACE']))
+        assert 0<len(vertices)<32000 and 0<len(triangles)<32000
+        for a,b,c,material in triangles:
+            assert all(0<=i<len(vertices) for i in (a,b,c))
+            assert len({a,b,c})==3
+            u=[vertices[b][j]-vertices[a][j] for j in range(3)]
+            v=[vertices[c][j]-vertices[a][j] for j in range(3)]
+            assert any((u[1]*v[2]-u[2]*v[1],u[2]*v[0]-u[0]*v[2],u[0]*v[1]-u[1]*v[0]))
+        total+=len(triangles)
+    assert 48000<=total<=80000
+    wrapper=(here/'aquarium_plants-standalone.iff.txt').read_text()
+    assert "'SLOT' 1l" in wrapper and "'ROOM' 24000000l" in wrapper
+
+
+def test_density_and_detail_share_deterministic_population():
+    from collections import Counter
+    points=placements()
+    assert points==placements()
+    assert Counter(p['kind'] for p in points)==dict(broad=64,stems=128,carpet=192)
+    assert len(planting(.635,'density'))==len(planting(.635,'detailed'))==8
+    # A dense central canopy replaces the former empty central strip.
+    center=[p for p in points if p['kind']=='stems' and abs(p['x'])<1]
+    assert len(center)>=16 and min(p['height'] for p in center)>3
+    # Starting body/feet remain clear of foreground roots.
+    assert not any(abs(p['x'])<.65 and p['y']<-.55 for p in points if p['kind']=='carpet')

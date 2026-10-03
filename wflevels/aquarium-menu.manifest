@@ -1,10 +1,11 @@
 # Android Aquarium selector. Standalone levels remain independently buildable.
 title WF Aquarium
 prompt Choose a tank
-level aquarium-standalone.iff | Clownfish & Tiger Barbs
+level aquarium-standalone.iff | Clownfish & Sea Anemone
 level aquarium_blue_shrimp-standalone.iff | Blue Shrimp
 level aquarium_betta-standalone.iff | Calm Betta
 level aquarium_jellyfish-standalone.iff | Jellyfish
 level aquarium_lionfish-standalone.iff | Lionfish
 level aquarium_plants-standalone.iff | Planted Tank
 level aquarium_arowana-standalone.iff | Asian Arowana
+level aquarium_tiger_barbs-standalone.iff | Tiger Barbs

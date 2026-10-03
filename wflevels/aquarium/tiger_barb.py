@@ -1,4 +1,4 @@
-"""One-actor tiger-barb assets and the shared 30-fish mailbox allocation.
+"""One-actor tiger-barb assets and mailbox layouts for up to 50 fish.
 
 X points toward the nose, Y through the body, Z up. Length includes tail.
 The textured card and real mesh share size, atlas and origin conventions.
@@ -177,7 +177,7 @@ def blender_mesh(bpy, quad, texture, refined=False):
     return me
 
 def forth_constants(count, actors, *, updates=5, animate=True, frozen=False):
-    assert 0 <= count <= 29
+    assert 0 <= count <= 49
     assert len(actors)==count
     constants={'sch-base':800,'sch-par':1220,'sch-scr':1242,'sch-n':count+1,
                'sd-flag':1267,'sd-ptr':1268,'sd-blend':1269,'sd-mode':1270,
@@ -185,4 +185,28 @@ def forth_constants(count, actors, *, updates=5, animate=True, frozen=False):
                'sd-px':1279,'sd-py':1280,'sd-pz':1281,'sd-yaw':1282,'sd-pitch':1283,
                'sd-dart-prev':1284,'sd-act':1300,'sd-times':1330,'sd-phases':1360,
                'sd-budget':updates,'sd-animate':int(animate),'sd-frozen':int(frozen)}
-    return '\n'.join(f': {n} {v} ;' for n,v in constants.items())+'\n: sd-actors\n'+''.join(f'  {a} {1300+i} write-mailbox\n' for i,a in enumerate(actors))+';\n'
+    if count > 29:
+        # Fifty fish: 800..1499 state, then params/scratch/director/arrays.
+        for key in list(constants):
+            if key not in ('sch-base', 'sch-n', 'sd-budget', 'sd-animate', 'sd-frozen'):
+                constants[key] += 280
+        constants.update({'sd-act':1580,'sd-times':1630,'sd-phases':1680})
+    return '\n'.join(f': {n} {v} ;' for n,v in constants.items())+'\n: sd-actors\n'+''.join(f'  {a} {constants["sd-act"]+i} write-mailbox\n' for i,a in enumerate(actors))+';\n'
+
+# Authored visual population: small juveniles, mostly medium fish, a few large.
+SCHOOL_LENGTHS_M = (.25,.28,.31,.34,.37,.40,.43,.46,.49,.52,.55,.58,.61,.64,.67,.70)
+
+def school_length(k):
+    # Multiplication permutes the 49 residents; quadratic quantiles favour mids.
+    rank=((k-1)*17)%49
+    if rank<7: return SCHOOL_LENGTHS_M[rank%4]
+    if rank>=42: return SCHOOL_LENGTHS_M[12+(rank-42)%4]
+    return SCHOOL_LENGTHS_M[4+(rank-7)*8//35]
+
+def mailbox_ranges(count):
+    assert 0 <= count <= 49
+    if count <= 29: return dict(RANGES)
+    return {'state':(800,800+14*(count+1)-1),'params':(1500,1521),
+            'scratch':(1522,1546),'director':(1547,1579),
+            'actors':(1580,1580+count-1),'times':(1630,1630+count-1),
+            'phases':(1680,1680+count-1)}

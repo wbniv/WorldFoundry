@@ -1,0 +1,51 @@
+{
+  "vm": "engine/vendor/zforth-41db72d1",
+  "balanced_stack": true,
+  "cases": [
+    {
+      "expression": "-1 tip-weight",
+      "expected": 0,
+      "actual": 0.0
+    },
+    {
+      "expression": "0.5 tip-weight",
+      "expected": 0.25,
+      "actual": 0.25
+    },
+    {
+      "expression": "2 tip-weight",
+      "expected": 1,
+      "actual": 1.0
+    },
+    {
+      "expression": "0.2 0.3 cluster-j",
+      "expected": -0.5,
+      "actual": -0.5
+    },
+    {
+      "expression": "0.25 -1 fork-angle",
+      "expected": 0.17,
+      "actual": 0.170000002
+    },
+    {
+      "expression": "3 6 leaf-turn",
+      "expected": 0.5,
+      "actual": 0.5
+    },
+    {
+      "expression": "0 10 .5 ease",
+      "expected": 4,
+      "actual": 4.0
+    },
+    {
+      "expression": "2 10 -1 ease",
+      "expected": 2,
+      "actual": 2.0
+    },
+    {
+      "expression": "2 10 2 ease",
+      "expected": 10,
+      "actual": 10.0
+    }
+  ]
+}

@@ -1,0 +1,154 @@
+{
+  "baseline": {
+    "plants": 57,
+    "foliage_vertices": 1592,
+    "foliage_triangles": 2328,
+    "foliage_actors": 3,
+    "actor_map_entries": 33,
+    "standalone_bytes": 120832,
+    "standalone_sha256": "b569b06569e446cb98089c3b437b0908e2a787aea6bc1dc160d3e4fc4d9d91d8",
+    "meshes": [
+      {
+        "name": "plant_broad_groups.iff",
+        "vertices": 672,
+        "triangles": 960,
+        "sha256": "bd81831ced59498a4cad0ef30e8b937f67b2ffa97c43b28f5d66449a1ef71037"
+      },
+      {
+        "name": "plant_rear_stems.iff",
+        "vertices": 520,
+        "triangles": 768,
+        "sha256": "452da591287d27463e6be0c1add3d53ae78fa1e0ca2771219cfba6c32fc04336"
+      },
+      {
+        "name": "plant_foreground.iff",
+        "vertices": 400,
+        "triangles": 600,
+        "sha256": "9ae61aaf6f643c4a25c6bcaacdc0b3beb23cd3e3266b7a1fae78ce9d545b7791"
+      }
+    ]
+  },
+  "density": {
+    "plants": 384,
+    "foliage_vertices": 17344,
+    "foliage_triangles": 26112,
+    "foliage_actors": 8,
+    "actor_map_entries": 38,
+    "standalone_bytes": 696320,
+    "standalone_sha256": "b9db378b14760b806726966e2a83d28871359893ce73fd1b413fccff15ffe4be",
+    "meshes": [
+      {
+        "name": "plant_chunk_00.iff",
+        "vertices": 2356,
+        "triangles": 3472,
+        "sha256": "d60fb8ba103cf990555af475ef75b08529b4d07a2e79b7450e12b2def2918c31"
+      },
+      {
+        "name": "plant_chunk_01.iff",
+        "vertices": 2508,
+        "triangles": 3696,
+        "sha256": "eeae92cda23535023b2a63cb8f84e241821c1495d79258eebd0a1bc99e4e07a6"
+      },
+      {
+        "name": "plant_chunk_02.iff",
+        "vertices": 2736,
+        "triangles": 4032,
+        "sha256": "f8f4899f1a9bae501c1c2ffc4e66aaf273f9f9db3d6d9319bdb9b2a71b8eaf33"
+      },
+      {
+        "name": "plant_chunk_03.iff",
+        "vertices": 2128,
+        "triangles": 3136,
+        "sha256": "231839525ef70b92bcf2ad1320d8e9b1722b1c104c17b8c3984b900d6d876b11"
+      },
+      {
+        "name": "plant_chunk_04.iff",
+        "vertices": 1904,
+        "triangles": 2944,
+        "sha256": "ec5257e72b67ccddb8408650fe13c4d7532da86f7d139d94cec645ba85c528be"
+      },
+      {
+        "name": "plant_chunk_05.iff",
+        "vertices": 1904,
+        "triangles": 2944,
+        "sha256": "50e5beb8dcb87033c257fe90584faba56fd36b40ffe881c1942dadd19f7526ba"
+      },
+      {
+        "name": "plant_chunk_06.iff",
+        "vertices": 1930,
+        "triangles": 2984,
+        "sha256": "5acb4686959da824927adac53e067c1f2d1e6d5148ebdb83603c0704c3b20fb4"
+      },
+      {
+        "name": "plant_chunk_07.iff",
+        "vertices": 1878,
+        "triangles": 2904,
+        "sha256": "f635e517e21cdaabe5458f1e82f257bccdc3b0f3454a39e83ed8da60a3ef2947"
+      }
+    ]
+  },
+  "detailed": {
+    "plants": 384,
+    "foliage_vertices": 38335,
+    "foliage_triangles": 66048,
+    "foliage_actors": 8,
+    "actor_map_entries": 38,
+    "standalone_bytes": 1521664,
+    "standalone_sha256": "a9ed47122b7895783d37926cc3e1f3883dbfd686572acff55c841b75b7fd0346",
+    "meshes": [
+      {
+        "name": "plant_chunk_00.iff",
+        "vertices": 2976,
+        "triangles": 4712,
+        "sha256": "5bbccb8e007b84cd3c1dbb352d3e139b0a6ec0c10eecbb4fa6ce4879c08b513e"
+      },
+      {
+        "name": "plant_chunk_01.iff",
+        "vertices": 3168,
+        "triangles": 5016,
+        "sha256": "6682d96d8dcc4284864e78655729502589ce2b80139cb4ac6298473bdf0d71fa"
+      },
+      {
+        "name": "plant_chunk_02.iff",
+        "vertices": 3456,
+        "triangles": 5472,
+        "sha256": "e8af3f1eb0475bc877ba6b2f2d92dd6f6af2b65e03122b8184f7c90dca1378c9"
+      },
+      {
+        "name": "plant_chunk_03.iff",
+        "vertices": 2688,
+        "triangles": 4256,
+        "sha256": "bf5b21cfee3dd6b8a5e0bbdff07ddb52cc82ecda1405b37480f81f9df95312ca"
+      },
+      {
+        "name": "plant_chunk_04.iff",
+        "vertices": 6512,
+        "triangles": 11648,
+        "sha256": "8e2eaba648926224534d041cc7b26b3b2b9098d66a375d17f893b3ac8e2cb197"
+      },
+      {
+        "name": "plant_chunk_05.iff",
+        "vertices": 6512,
+        "triangles": 11648,
+        "sha256": "3c43ce28d204038f2f7c179346e7e479698897398a9848443f4134a925862a62"
+      },
+      {
+        "name": "plant_chunk_06.iff",
+        "vertices": 6538,
+        "triangles": 11688,
+        "sha256": "54c87409d107dbd59194c6b4e5b7e7e68e5b465e165185f6debc973d48619010"
+      },
+      {
+        "name": "plant_chunk_07.iff",
+        "vertices": 6485,
+        "triangles": 11608,
+        "sha256": "7750de3ea2ae4e6a2db87bafcf29d6c3cadf75c04834f932297e168902919815"
+      }
+    ]
+  },
+  "normal_release": {
+    "apk_sha256": "41f4c264351f0d99199b039b8be0fdfb1ff34c654c5fbc775e9e3738d4125aed",
+    "apk_bytes": 4266864,
+    "menu_entries": 8
+  }
+}

@@ -1,0 +1,38 @@
+{
+  "receipt": {
+    "apk": "/tmp/planted-tank-variants/detailed-cpu.apk",
+    "apk_sha256": "0f3d9ee06b537abb0ae0b0d0b5fdeebb541c8f8b1d72f92b66883f61093555f2",
+    "protocol": "30.0 s warmup; 36 s planted-tank trace (wide idle, close idle, close crawl; 12 s each); 1 run(s); SurfaceFlinger sampled every 0.75 s",
+    "serial": "",
+    "menu_index": 5,
+    "device": "Chromecast HD\n14\nPhysical size: 1920x1080\n",
+    "revision": "16a77ebc7d19b792bddbb0eaca2b1f420cd6c858"
+  },
+  "runs": [
+    {
+      "run": 1,
+      "layer": "org.worldfoundry.wf_game.aquarium/android.app.NativeActivity#4764",
+      "frames": 830,
+      "refresh_ms": 16.683333,
+      "p50_ms": 50.050066,
+      "p90_ms": 50.050385,
+      "p95_ms": 66.733178,
+      "p99_ms": 66.733538,
+      "worst_ms": 83.416736,
+      "fps": 20.068649675730548,
+      "missed_refresh_percent": 99.51807228915662
+    }
+  ],
+  "median": {
+    "run": 1,
+    "frames": 830,
+    "refresh_ms": 16.683333,
+    "p50_ms": 50.050066,
+    "p90_ms": 50.050385,
+    "p95_ms": 66.733178,
+    "p99_ms": 66.733538,
+    "worst_ms": 83.416736,
+    "fps": 20.068649675730548,
+    "missed_refresh_percent": 99.51807228915662
+  }
+}

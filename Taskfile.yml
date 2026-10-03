@@ -782,8 +782,8 @@ tasks:
       - wftools/cdpack-rs/target/release/cdpack wfsource/source/game/shell.fth wflevels/aquarium-standalone.iff -o '{{.CD_OUT}}'
 
   build-cd-iff-aquarium-menu:
-    desc: "Package the seven Aquarium tanks with the selector for Android (standalone/Apple bundle remains aquarium-cd.iff)"
-    deps: [tools-build, aquarium-level, aquarium-blue-shrimp-level, aquarium-betta-level, aquarium-jellyfish-level, aquarium-lionfish-level, aquarium-plants-level, aquarium-arowana-level]
+    desc: "Package the eight Aquarium tanks with the selector for Android (standalone/Apple bundle remains aquarium-cd.iff)"
+    deps: [tools-build, aquarium-level, aquarium-blue-shrimp-level, aquarium-betta-level, aquarium-jellyfish-level, aquarium-lionfish-level, aquarium-plants-level, aquarium-arowana-level, aquarium-tiger-barbs-level]
     cmds:
       - wftools/cdpack-rs/target/release/cdpack wfsource/source/game/shell-menu.fth --manifest wflevels/aquarium-menu.manifest -o wflevels/aquarium-menu-cd.iff
 
@@ -961,6 +961,19 @@ tasks:
       - wflevels/aquarium_tanks/*.fth
     generates:
       - wflevels/aquarium_blue_shrimp-standalone.iff
+
+  aquarium-tiger-barbs-level:
+    desc: "Build the independent 50-fish Tiger Barbs tank"
+    deps: [tools-build]
+    cmds:
+      - bash wflevels/aquarium_tiger_barbs/build.sh
+    sources:
+      - wflevels/aquarium_tiger_barbs/build.sh
+      - wflevels/aquarium/*.py
+      - wflevels/aquarium/*.fth
+      - wflevels/aquarium/art/tiger-barb-source.png
+    generates:
+      - wflevels/aquarium_tiger_barbs-standalone.iff
 
   aquarium-betta-level:
     desc: "Build the independent betta Aquarium tank"
