@@ -219,9 +219,11 @@ def test_device_script_parses_and_helps():
 # ---- a built APK (skipped unless one exists) ----------------------------------------------------------
 
 def _apk(flavor):
-    p = APP / "build" / "outputs" / "apk" / flavor / "debug" / f"worldfoundry-{flavor}-debug.apk"
+    build_type = os.environ.get("WF_TEST_ANDROID_BUILD_TYPE", "debug")
+    assert build_type in {"debug", "release"}, build_type
+    p = APP / "build" / "outputs" / "apk" / flavor / build_type / f"worldfoundry-{flavor}-{build_type}.apk"
     if not p.exists():
-        pytest.skip(f"{p.relative_to(REPO)} not built (cd android && ./gradlew :app:assembleDebug)")
+        pytest.skip(f"{p.relative_to(REPO)} not built")
     return p
 
 
@@ -247,5 +249,12 @@ def test_built_apks_badging():
                              text=True, check=True).stdout
         assert f"package: name='{pkg}'" in out
         assert f"leanback-launchable-activity: name='android.app.NativeActivity'  label='{label}'" in out
-        assert "banner='res/drawable/tv_banner.png'" in out
+        banner = re.search(r"^application:.* banner='([^']+)'", out, re.M)
+        assert banner, out
+        # Release resource optimization renames paths; verify the actual banner.
+        source_banner = SRC / flavor / "res/drawable/tv_banner.png"
+        if not source_banner.exists():
+            source_banner = SRC / "main/res/drawable/tv_banner.png"
+        with zipfile.ZipFile(_apk(flavor)) as z:
+            assert z.read(banner.group(1)) == source_banner.read_bytes()
         assert "native-code: 'arm64-v8a'" in out
