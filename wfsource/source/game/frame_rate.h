@@ -1,6 +1,8 @@
 #pragma once
 
+#include <math/scalar.hp>
 #include <chrono>
+#include <cstdint>
 
 // Diagnostic cadence only. Simulation clamps/overrides never enter this sampler.
 // Time points are arguments so tests can exercise stalls without real sleeps.
@@ -14,7 +16,7 @@ public:
     void Reset()
     {
         _hasBaseline = false;
-        _fps = 0.0;
+        _fps = Scalar(0, 0);
     }
 
     void BeginFrame(TimePoint now, unsigned int lifecycleGeneration)
@@ -37,20 +39,32 @@ public:
             Reset();
             return;
         }
-        const double seconds = std::chrono::duration<double>(now - _last).count();
-        _fps = 1.0 / seconds;
+#if defined(SCALAR_TYPE_FIXED)
+        // Divide integer time directly into 16.16 FPS. Quantizing elapsed
+        // seconds to Scalar first would distort short frame intervals.
+        const auto nanoseconds = std::chrono::duration_cast<std::chrono::nanoseconds>(now - _last).count();
+        constexpr std::uint64_t numerator = 1000000000ULL * SCALAR_ONE_LS;
+        constexpr std::uint64_t maximum = 0x7fffffffULL;
+        const std::uint64_t raw = nanoseconds > 0 ? numerator / nanoseconds : maximum;
+        const std::uint64_t bounded = raw > maximum ? maximum : raw;
+        _fps = Scalar(static_cast<int16>(bounded >> 16), static_cast<uint16>(bounded & 0xffff));
+#else
+        // FLOAT_TYPE is the mailbox Scalar's native representation.
+        const Scalar seconds(std::chrono::duration<FLOAT_TYPE>(now - _last).count());
+        _fps = Scalar(1, 0) / seconds;
+#endif
         _last = now;
     }
 
-    double Read(unsigned int lifecycleGeneration) const
+    Scalar Read(unsigned int lifecycleGeneration) const
     {
         // Also handles suspend/resume between steps, when no suspended step ran.
-        return _generation == lifecycleGeneration ? _fps : 0.0;
+        return _generation == lifecycleGeneration ? _fps : Scalar(0, 0);
     }
 
 private:
     TimePoint _last{};
     unsigned int _generation = 0;
     bool _hasBaseline = false;
-    double _fps = 0.0;
+    Scalar _fps{0, 0};
 };

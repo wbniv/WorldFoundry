@@ -187,3 +187,28 @@ tree builds on Linux and both Android ABIs. All 8 selected native checks and
 2 mailbox hot-path pytest checks pass again. The Apple workflow links above
 record their exact tested revisions (`330f70de` for macOS, `be82cf5e` for iOS);
 the final integration rerun was native/build validation and did not use Chromecast.
+
+## Review correction 1 — mailbox Scalar arithmetic
+
+The sampler now calculates, stores, and returns `Scalar`, with no separate
+`double` elapsed-seconds or FPS intermediate. Native floating Scalar builds
+convert chrono durations using `FLOAT_TYPE` and divide Scalars. Fixed builds
+calculate the 16.16 reciprocal directly from integer nanoseconds, saturating
+at the signed fixed-point maximum. The game getter and optional Forth fixture
+return the cached Scalar directly.
+
+```sh
+cmake --build build-framerate --target frame_rate_test frame_rate_fixed_test wf_game wf_host_gl_e2e_test -j4
+ctest --test-dir build-framerate -R 'frame_rate_|wf_game_smoke_cycle[12]|wf_host_gl_e2e_cycle[12]' --output-on-failure
+python3 -m pytest tests/test_mailbox_hot_path.py -q
+```
+
+- [x] All 9 selected native tests pass (14.04 s), including both native and
+  fixed-point Scalar samplers, mailbox integration, and the unswapped host.
+- [x] Both mailbox hot-path pytest checks pass.
+- [x] Fixed-point tests cover exact 100 microsecond intervals, maximum-value
+  saturation, fractional stalls, and rates below the 16.16 resolution.
+
+This correction was tested locally on Linux. The earlier platform results
+above describe the earlier revisions; Apple/browser/device runs were not
+repeated for this correction. No Chromecast testing was performed.

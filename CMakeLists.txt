@@ -1140,7 +1140,15 @@ if(NOT ANDROID AND NOT IOS AND NOT APPLE AND NOT EMSCRIPTEN)
     add_executable(frame_rate_test tests/frame_rate_test.cc
         ${SRC}/hal/linux/lifecycle.cc)
     target_include_directories(frame_rate_test PRIVATE ${SRC})
+    target_compile_definitions(frame_rate_test PRIVATE ${WF_DEFS})
     add_test(NAME frame_rate_sampler COMMAND frame_rate_test)
+    add_executable(frame_rate_fixed_test tests/frame_rate_test.cc
+        ${SRC}/hal/linux/lifecycle.cc)
+    target_include_directories(frame_rate_fixed_test PRIVATE ${SRC})
+    set(FRAME_RATE_FIXED_DEFS ${WF_DEFS})
+    list(REMOVE_ITEM FRAME_RATE_FIXED_DEFS SCALAR_TYPE_FLOAT SCALAR_TYPE_DOUBLE)
+    target_compile_definitions(frame_rate_fixed_test PRIVATE ${FRAME_RATE_FIXED_DEFS} SCALAR_TYPE_FIXED)
+    add_test(NAME frame_rate_sampler_fixed COMMAND frame_rate_fixed_test)
     if(NOT WF_FORTH_ENGINE STREQUAL "none" AND NOT WF_FORTH_ENGINE STREQUAL "zforth")
         add_executable(frame_rate_forth_probe tests/frame_rate_forth_probe.cc
             ${STUB_SRC}/scripting_${WF_FORTH_ENGINE}.cc)
