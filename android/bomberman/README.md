@@ -1,4 +1,4 @@
-# Bomberman solo for Android TV
+# Cat-Boom! solo for Android TV
 
 Offline WebView package of the current `/home/will/wf-games/bomberman` prototype.
 Frozen assets and their source checksums are committed here; this is separate

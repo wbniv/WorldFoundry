@@ -1,0 +1,48 @@
+----------
+1. WARNING in /home/will/WorldFoundry-wbniv/android/bomberman/src/org/worldfoundry/wf_game/bomberman/TvActivity.java (at line 18)
+	getWindow().getDecorView().setSystemUiVisibility(View.SYSTEM_UI_FLAG_FULLSCREEN
+            | View.SYSTEM_UI_FLAG_HIDE_NAVIGATION | View.SYSTEM_UI_FLAG_IMMERSIVE_STICKY);
+	                           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+The method setSystemUiVisibility(int) from the type View is deprecated
+----------
+2. WARNING in /home/will/WorldFoundry-wbniv/android/bomberman/src/org/worldfoundry/wf_game/bomberman/TvActivity.java (at line 18)
+	getWindow().getDecorView().setSystemUiVisibility(View.SYSTEM_UI_FLAG_FULLSCREEN
+	                                                      ^^^^^^^^^^^^^^^^^^^^^^^^^
+The field View.SYSTEM_UI_FLAG_FULLSCREEN is deprecated
+----------
+3. WARNING in /home/will/WorldFoundry-wbniv/android/bomberman/src/org/worldfoundry/wf_game/bomberman/TvActivity.java (at line 19)
+	| View.SYSTEM_UI_FLAG_HIDE_NAVIGATION | View.SYSTEM_UI_FLAG_IMMERSIVE_STICKY);
+	       ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+The field View.SYSTEM_UI_FLAG_HIDE_NAVIGATION is deprecated
+----------
+4. WARNING in /home/will/WorldFoundry-wbniv/android/bomberman/src/org/worldfoundry/wf_game/bomberman/TvActivity.java (at line 19)
+	| View.SYSTEM_UI_FLAG_HIDE_NAVIGATION | View.SYSTEM_UI_FLAG_IMMERSIVE_STICKY);
+	                                             ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+The field View.SYSTEM_UI_FLAG_IMMERSIVE_STICKY is deprecated
+----------
+4 problems (4 warnings)
+Verifies
+Verified using v1 scheme (JAR signing): false
+Verified using v2 scheme (APK Signature Scheme v2): true
+Verified using v3 scheme (APK Signature Scheme v3): true
+Verified using v3.1 scheme (APK Signature Scheme v3.1): false
+Verified using v4 scheme (APK Signature Scheme v4): false
+Verified for SourceStamp: false
+Number of signers: 1
+{
+  "apk": "/home/will/WorldFoundry-wbniv/android/bomberman/build/bomberman-71d079d9c146a20c.apk",
+  "sha256": "71d079d9c146a20cbdf4529df84bd61f87432915e687fa47f6d665e8c1cafd40",
+  "package": "org.worldfoundry.wf_game.bomberman",
+  "nativeCode": false,
+  "source": {
+    "origin": "/home/will/wf-games/bomberman",
+    "files": {
+      "solo-game.html": "2ca028c24e679203c483870c1c0b94953452633112deadc4f9c5fecc1cfc76e6",
+      "solo-game.js": "777614de03494def9c0a03851f923014caff13c47d26997c9ea324fe59183d4c",
+      "solo-game.css": "12ac680c71fa2f92847abdb7eb4bbfc1c76a8b1ada53a50090f5b40b33839615",
+      "cat-roster.js": "d35a5caae488735eba0d7cf9787d26335eac241fc657b9fc56c6998346843bbb",
+      "assets/cat-roster-atlas.png": "8545c371b2ccb79ec4305e5fb579602388c34dad1120a60f79f1843da95e61f7"
+    }
+  },
+  "compilerSha256": "01f5a92ac19bb2b3bf85e295a68f2c73c264369109158b566ce9b490af982948"
+}
