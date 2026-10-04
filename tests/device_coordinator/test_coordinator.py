@@ -426,3 +426,19 @@ def test_new_address_checks_hardware_serial_before_registry_update(monkeypatch):
     with pytest.raises(RuntimeError,match='Hardware serial mismatch'):adapter.connect()
     assert adapter.selector=='192.168.4.49:5555' and not adapter.identity_verified
     assert adapter.device['endpoint']=='192.168.4.46:5555'
+
+
+def test_engine_log_tail_retains_recent_scene_without_reading_old_history(tmp_path):
+    from wf_device.workflows import Adapter, ENGINE_LOG_TAIL_BYTES
+    log = tmp_path/'wf.log'
+    marker = 'level-menu: level 5 starts\n'
+    log.write_bytes(b'x'*(ENGINE_LOG_TAIL_BYTES+1024)+marker.encode())
+    adapter = object.__new__(Adapter)
+    adapter.package = 'org.worldfoundry.wf_game.aquarium'
+    def local_shell(*args, **kwargs):
+        assert args[-1].endswith('/'+adapter.package+'/files/wf.log')
+        return subprocess.check_output([*args[:-1],str(log)],text=True)
+    adapter.shell = local_shell
+    recent = adapter.engine_log_tail()
+    assert len(recent.encode()) == ENGINE_LOG_TAIL_BYTES
+    assert recent.endswith(marker)

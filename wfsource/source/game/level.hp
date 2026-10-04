@@ -161,6 +161,7 @@ class Level
 
 	// update and render methods
 	void update(Scalar deltaTime);
+    void RefreshHardwareInput();
 	void RenderScene();
 	inline bool done() const;                          // returns false when level ends
 	void reset( );

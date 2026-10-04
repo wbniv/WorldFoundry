@@ -1,3 +1,4 @@
+#include <game/plant_settings.h>
 // scripting_zforth.cc — zForth backend for forth_engine namespace.
 //
 // Compiled in when WF_FORTH_ENGINE_ZFORTH is defined (via build_game.sh).
@@ -1315,6 +1316,21 @@ zf_input_state zf_host_sys(zf_ctx* ctx, zf_syscall_id id, const char* /*last_wor
                         static_cast<Actor*>(object)->GetRenderActor().SetJellyDeformation(contraction,phase,pitchLag,rollLag);
                     }
                 }
+            } else if(custom==47) {
+                int actor=int(zf_pop(ctx)),chunk=int(zf_pop(ctx));
+                if(chunk==0)planted::enter();
+                if(chunk>=0&&chunk<8)planted::state().actors[chunk]=actor;
+            } else if(custom==48) {
+                float phase=float(zf_pop(ctx)),dt=float(zf_pop(ctx));
+                auto& s=planted::state();planted::tick(dt,phase);
+                if(theLevel&&s.active)for(int i=0;i<8;i++){
+                    int actor=s.actors[i];if(actor<=0||actor>=theLevel->GetMaxObjectIndex())continue;
+                    BaseObject* obj=theLevel->GetObject(actor);if(obj&&IsActor(obj)){
+                        wf_profile::Scope p(wf_profile::Animation);
+                        static_cast<Actor*>(obj)->GetRenderActor().SetPlantGeometry(s.chunks[i],s.age,s.water,s.generation,s.sway,unsigned(i)==s.topologySlot,s.profileTexture);
+                    }
+                }
+                s.topologySlot=(s.topologySlot+1)%8;
             } else if (custom == 72) {
                 /* Neural-forth dispatch gate: syscall 200 = ZF_SYSCALL_USER + 72.
                  * Pops word-id from stack and routes to nf_dispatch().
@@ -1484,7 +1500,7 @@ void Init(MailboxesManager& mgr)
     if (r != ZF_OK)
         fprintf(stderr, "zforth: init failed (read-actor-mailbox): %d\n", r);
 
-    r = zf_eval(&g_ctx, ": profile-begin 169 sys ; : profile-end 170 sys ; : fish-deform 171 sys ; : fin-deform 172 sys ; : swim-deform 173 sys ; : jelly-deform 174 sys ;");
+    r = zf_eval(&g_ctx, ": profile-begin 169 sys ; : profile-end 170 sys ; : fish-deform 171 sys ; : fin-deform 172 sys ; : swim-deform 173 sys ; : jelly-deform 174 sys ; : plant-register 175 sys ; : plant-step 176 sys ;");
     if (r != ZF_OK) fprintf(stderr, "zforth: profiling/fish bridge init failed: %d\n", r);
 
     // FSN filesystem bridge words (custom 3-7 / sys 131-135)

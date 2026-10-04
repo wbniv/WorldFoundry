@@ -334,3 +334,16 @@ RenderObject3D::SetMaterialColor(int idx, const Color& color)
 }
 
 //============================================================================
+
+// Level-owned runtime buffers; publication happens between scene renders.
+bool RenderObject3D::SetRuntimeGeometry(int vertices, Vertex3D* vertexList, int faces, TriFace* faceList, bool textured)
+{
+ if(vertices<1||vertices>=32000||faces<1||faces>=32000||!vertexList||!faceList)return false;
+ for(int i=0;i<faces;i++)if(faceList[i].v1Index<0||faceList[i].v2Index<0||faceList[i].v3Index<0||faceList[i].v1Index>=vertices||faceList[i].v2Index>=vertices||faceList[i].v3Index>=vertices||faceList[i].materialIndex!=0)return false;
+ _runtimePrimitives.resize(size_t(faces)*ORDER_TABLES);
+ _vertexCount=vertices;_vertexList=vertexList;_faceCount=faces;_faceList=faceList;
+ for(int page=0;page<ORDER_TABLES;page++)_primList[page]=_runtimePrimitives.data()+size_t(page)*faces;
+ // Preserve the exported texture binding when replacing runtime geometry.
+ _materialList[0].SetMaterialFlags(Material::GOURAUD_SHADED|(textured?Material::TEXTURE_MODULATE:0)|(textured?(_materialList[0].GetMaterialFlags()&Material::TEXTURE_MAPPED):0)|Material::LIGHTING_PRELIT);
+ ApplyMaterials(_materialList);return true;
+}

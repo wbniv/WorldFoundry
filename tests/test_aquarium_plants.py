@@ -58,6 +58,9 @@ def test_dense_grouping_and_real_mesh_limits():
         while offset<len(data):
             tag=data[offset:offset+4];size=struct.unpack_from('<I',data,offset+4)[0]
             chunks[tag]=data[offset+8:offset+8+size];offset+=8+(size+3)//4*4
+        flags,colour=struct.unpack_from('<iI',chunks[b'MATL'])
+        assert flags&2 and flags&4  # Opaque texture mapped, prelit; one shared atlas.
+        assert chunks[b'MATL'][8:].split(b'\0',1)[0]==b'leaf_surfaces.tga'
         vertices=[struct.unpack_from('<iii',chunks[b'VRTX'],i+12) for i in range(0,len(chunks[b'VRTX']),24)]
         triangles=list(struct.iter_unpack('<hhhh',chunks[b'FACE']))
         assert 0<len(vertices)<32000 and 0<len(triangles)<32000
@@ -68,7 +71,8 @@ def test_dense_grouping_and_real_mesh_limits():
             v=[vertices[c][j]-vertices[a][j] for j in range(3)]
             assert any((u[1]*v[2]-u[2]*v[1],u[2]*v[0]-u[0]*v[2],u[0]*v[1]-u[1]*v[0]))
         total+=len(triangles)
-    assert 48000<=total<=80000
+    assert total==16  # Eight bounded runtime geometry placeholders.
+    assert "plant-register" in text and "plant-step" in text
     wrapper=(here/'aquarium_plants-standalone.iff.txt').read_text()
     assert "'SLOT' 1l" in wrapper and "'ROOM' 24000000l" in wrapper
 

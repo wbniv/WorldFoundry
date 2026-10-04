@@ -1,6 +1,6 @@
 # Aquarium: clumped plant growth, gentle water motion and an A3 poster
 
-**Status:** researched plant-level implementation plan with completed A3 portrait poster. Runtime colony generation, revised plant forms and sway are not implemented. This supersedes the row-based composition in the [first dense planting pass](2026-10-03-aquarium-dense-planted-tank.md), while retaining its geometry and profiling evidence as a reference.
+**Status:** runtime growth, both water palettes, sway, TV/phone settings and textures are implemented. The bounded-log coordinator update is deployed, and normal planted-level check `J-3317677c68de` passed. The first coordinator benchmark was cancelled after discovering its variants contained older native libraries. Corrected job `J-cfbb812fc1ff` is submitted with all variants verified against the current normal APK; its baseline retains the current selector and other seven tanks, replacing only the planted-level asset. Final matched measurements and repeated-entry memory testing remain outstanding. The A3 portrait poster is complete.
 
 Replace obvious rows with **connected, irregular patches of growth**. Grow toward a mostly-full mature tank: overlapping clumps should eventually cover roughly 75–85% of the submerged interior in the whole-tank view, with local gaps and a small, winding substrate route for the sea urchin. Add subtle, coherent water-driven bending with anchored roots. Make an **A3 portrait poster**, split into saltwater on the left and freshwater on the right; reserve the **bottom 25% of the page** for diagrams and explanations of clumping and branching.
 
@@ -18,46 +18,117 @@ Use a fresh engine-owned seed per entry and log/display it. Allow player seed en
 
 ![Three different seeded tank compositions](2026-10-03-aquatic-plant-clumps-and-poster/seed-variation-mockups.svg)
 
-These are design diagrams and mockups, not engine captures or claims that runtime mesh construction already exists. New runtime interfaces must be implemented and measured. Visible runtime growth is required, alongside gentle sway. Continued mature-tank turnover is a possible later phase.
+These illustrations are design mockups. Actual runtime captures and verification receipts appear below. The runtime mesh interfaces are implemented; the remaining measurements are tracked separately. Continued mature-tank turnover remains a later option.
 
-## Player seed and growth-speed controls
+## Player water-type, seed and growth-speed controls
 
-Show **`Seed: 713`** (the actual current value) at the **bottom left** of the planted-level view, inside the TV safe area. Use readable high-contrast text with a restrained dark backing; reserve the bottom-right area for the existing WF badge/FPS. Keep the seed visible while plants grow, after switching cameras and when reopening a replay. The number stays constant during one ecosystem's lifetime.
+Show **`Seed: 713 · Freshwater`** (or `Saltwater`) (the actual current value) at the **bottom left** of the planted-level view, inside the TV safe area. Use readable high-contrast text with a restrained dark backing; reserve the bottom-right area for the existing WF badge/FPS. Keep the seed visible while plants grow, after switching cameras and when reopening a replay. The number stays constant during one ecosystem's lifetime.
 
 Players can enter a seed and **regenerate the level**:
 
-- **TV remote / gamepad in the level:** hold **A / the remote centre button** for about one second to open the seed editor. A short press retains its existing camera action; distinguish tap versus hold and never perform the camera action after a recognized hold. Show the concise `Hold A: change seed` hint beside the seed. This is proposed input work to implement and check on Chromecast, including key-repeat/release behavior.
+- **TV remote / gamepad in the level:** hold **A / the remote centre button** for about one second to open the seed editor. A short press retains its existing camera action; distinguish tap versus hold and never perform the camera action after a recognized hold. Show the concise `Hold A: change seed` hint beside the seed. Tap/hold handling and remote navigation are implemented and covered by the device checks.
 - **Selector:** with Planted Tank highlighted, **→** opens the same seed editor before entering. Normal selection starts a fresh random ecosystem. Seed-entry regeneration selects Planted Tank with the submitted seed; other level controls remain unchanged.
-- **Connected phone:** provide a `Plant settings` action opening the **entire settings interface on the phone**, not merely a numeric keyboard. Opening settings through the TV/gamepad also presents that full panel on the connected phone. It includes the current seed, numeric entry, growth-speed slider/value, **Apply speed**, **Regenerate**, **New random seed**, validation messages and **Cancel**.
+- **Connected phone:** provide a `Plant settings` action opening the **entire settings interface on the phone**, not merely a numeric keyboard. Opening settings through the TV/gamepad also presents that full panel on the connected phone. It includes the freshwater/saltwater toggle, current seed, numeric entry, growth-speed slider/value, **← Apply settings and close**, **Regenerate**, **New random seed**, validation messages and **Cancel**.
 - **No connected phone:** show the complete TV panel with the standard 10-key keypad and remote/gamepad navigation. Keep both routes functionally equivalent.
 
-The settings panel has a seed field, a standard **10-key numeric keypad** laid out `1 2 3 / 4 5 6 / 7 8 9 / ⌫ 0 Clear`, a **Growth speed** slider, **Regenerate**, **New random seed**, and cancel. Enter the number through the 10-key keypad or phone numeric field; a connected physical numeric keyboard may also type digits directly. Direction arrows move keypad focus; A selects a key or action; **↶** cancels. Pause growth, sway and the urchin while editing. Cancel resumes the same tank at the same growth time, without a new seed or resource replacement. Keep current seed visible/pre-filled; entering a new value replaces it through normal editing.
+The settings panel has a **Freshwater / Saltwater** toggle, a seed field, a standard **10-key numeric keypad** laid out `1 2 3 / 4 5 6 / 7 8 9 / ⌫ 0 Clear`, a **Growth speed** slider, **Regenerate**, **New random seed**, and cancel. Enter the number through the 10-key keypad or phone numeric field; a connected physical numeric keyboard may also type digits directly. Direction arrows move between the spatially nearest controls in the visible grid without wrapping keypad rows. A selects a key/action or enters/leaves speed adjustment; during speed adjustment, ←/→ changes the rate. **← on the remote applies settings and closes**. Invalid seed input stays in the editor. Pause growth, sway and the urchin while editing. Cancel resumes the same tank at the same growth time, without a new seed or resource replacement. Keep current seed visible/pre-filled; entering a new value replaces it through normal editing.
 
 Accept decimal unsigned seeds **0–4,294,967,295**, at most ten digits; zero is valid. Reject empty, non-integer and out-of-range input with a short inline explanation, preserving the current tank. Normalize leading zeros after successful submission. Handle the seed as an exact native integer: do not silently round it through a single float-valued Forth cell. Pass deterministic PRNG state to Forth in an exact supported representation, or keep PRNG state native with explicit bounded-number operations.
 
-**Regenerate** resets the growth clock, safely releases/replaces level-owned growth and mesh buffers, and starts young founders from the submitted seed. Re-entering the same seed replays the same growth choices at the same simulation time, rather than restoring the previous plant ages. **New random seed** chooses and displays a fresh seed and starts a new ecosystem immediately. Log seed, generator version and growth settings for reproduction. Repeated regeneration must not leak buffers or disturb the other aquarium levels.
+**Regenerate** resets the growth clock, safely releases/replaces level-owned growth and mesh buffers, and starts young founders from the submitted seed and water type. Re-entering the same seed replays the same growth choices at the same simulation time, rather than restoring the previous plant ages. **New random seed** chooses and displays a fresh seed and starts a new ecosystem in the selected water type immediately. Log seed, generator version and growth settings for reproduction. Repeated regeneration must not leak buffers or disturb the other aquarium levels.
+
+### Freshwater / saltwater toggle
+
+Add a two-position **Freshwater / Saltwater** toggle to the complete phone panel and TV fallback. Default to **Freshwater**, matching the current plant forms. Remember the last applied water type for subsequent level selections during the session; each normal selection still chooses a fresh random seed. The selected type changes plant forms and their growth rules, rather than merely changing the water colour.
+
+The toggle edits the settings draft. **Regenerate** applies it and starts young colonies using the entered seed and selected speed; **New random seed** starts that selected type with a new seed. Preserve the entered seed when switching the toggle so players can compare the two palettes. Cancel leaves the existing tank unchanged. Remove the **Apply speed** button and preserve its empty position in both layouts. The remote/phone **←** applies all draft settings and closes: speed-only edits retain the existing ecosystem and growth age; seed or water-type edits regenerate young colonies. On the selector it applies the draft for the next entry and closes without entering the tank. There is no extra confirmation step after pressing Regenerate.
+
+Replay identity is **water type + seed + generator version + growth settings**. The same seed in freshwater and saltwater intentionally produces different botanical forms, with repeatable results inside each mode. Display the active type next to the bottom-left seed and include it in logs, phone/TV acknowledgements and profiling receipts. Carry the toggle draft across phone disconnect/reconnect just like seed and speed.
+
+| Water type | Plant palette from poster/research | Growth and motion |
+|---|---|---|
+| Freshwater | Crypt-like rosettes, Vallisneria-like ribbon tufts, Limnophila-like feathery whorls | Short/long daughter runners, rosette leaf emergence, stem nodes and side branches; rooted flexible sway |
+| Saltwater | Eelgrass-like ribbon meadows, Halophila-like paired paddle-leaf carpets, branching brown-algal forms | Connected seagrass rhizomes and paired daughter leaves; bounded algal tip forks with anchored holdfasts; flexible sway weighted from each base |
+
+These are authored plant-form palettes; the marine examples span different climates and are not labelled as one verified natural biotope. Keep species-specific growth rules distinct, particularly rooted/rhizomatous seagrasses versus holdfast-anchored algae. Both modes retain the same level slot, controls, growth-speed slider, clumping/coverage targets and bounded mesh-group strategy. This toggle selects the plants; it does not add water-chemistry simulation or change the player character.
+
+![Freshwater and saltwater mature composition concepts](2026-10-03-aquatic-plant-clumps-and-poster/water-types-mockup.svg)
 
 ### Complete settings interface on a connected phone
 
-Use a phone-sized settings page/drawer instead of sending users back to the TV to finish an action. The seed field opens the phone's numeric keyboard; the full growth-speed slider and every apply/regenerate/random/cancel action are in the same phone panel. Show current seed, selected multiplier and growth state/age. Preserve the normal joystick screen as the return destination after applying or cancelling settings.
+Use a phone-sized settings page/drawer instead of sending users back to the TV to finish an action. The seed field opens the phone's numeric keyboard; the full growth-speed slider and every apply/regenerate/random/cancel action are in the same phone panel. Show current water type, seed, selected multiplier and growth state/age. Preserve the normal joystick screen as the return destination after applying or cancelling settings.
 
-The engine owns the actual seed, growth clock and applied speed; the phone edits a draft. Opening the panel pauses the tank and captures current settings. **Apply speed** submits only the rate and resumes the existing ecosystem; **Regenerate** submits seed/rate and resets growth; **New random seed** requests a new engine seed and resets growth; **Cancel** discards the draft and resumes. Acknowledge success and show the authoritative resulting seed/rate on both devices. Display validation/errors inline on the phone. Do not infer success merely from sending a message.
+The engine owns the actual water type, seed, growth clock and applied speed; the phone edits a draft. Opening the panel pauses the tank and captures current settings. **←** applies the draft and closes, keeping the current ecosystem for speed-only edits and regenerating for seed/water-type edits; **Regenerate** submits water type/seed/rate and resets growth; **New random seed** requests a new engine seed and resets growth; **Cancel** discards the draft and resumes. Acknowledge success and show the authoritative resulting water type/seed/rate on both devices. Display validation/errors inline on the phone. Do not infer success merely from sending a message.
 
-While phone settings are active, the TV can show a restrained `Plant settings on phone` overlay with the current seed/speed; it need not display a second editable keypad. The bottom-left seed remains readable. Support ↶ on the remote to cancel that session. If the phone disconnects, move the open draft to the TV fallback panel, with a clear connection message and no automatic regeneration; keep the tank paused until Apply/Regenerate/Cancel. Reconnecting mirrors authoritative state and the current edit session. Prevent duplicate submissions and stale sessions from regenerating twice; ignore joystick movement while the settings modal is active.
+While phone settings are active, the TV can show a restrained `Plant settings on phone` overlay with the current water type/seed/speed; it need not display a second editable keypad. The bottom-left seed remains readable. Support **←** on the remote to apply and close that session; the explicit **Cancel** button discards edits. If the phone disconnects, move the open draft to the TV fallback panel, with a clear connection message and no automatic regeneration; keep the tank paused until ←/Regenerate/Cancel. Reconnecting mirrors authoritative state and the current edit session. Prevent duplicate submissions and stale sessions from regenerating twice; ignore joystick movement while the settings modal is active.
 
-![Full connected-phone settings mockup](2026-10-03-aquatic-plant-clumps-and-poster/phone-settings-mockup.svg)
+<img src="2026-10-03-aquatic-plant-clumps-and-poster/phone-settings-mockup.svg" alt="Full connected-phone settings mockup" width="320" style="width:320px;max-width:100%;height:auto">
 
 ### Growth-speed slider
 
 Default **1×**: author the mature canopy to appear around **90–180 seconds**, with a visible change in 5–10 seconds. Add selectable **Paused, 0.25×, 0.5×, 1×, 2×, 4× and 8×** positions, initially proposed pending runtime profiling. At 0.25× the target becomes approximately 6–12 minutes; at 2×, 45–90 seconds; at 8×, roughly 11–23 seconds, **if the measured update budget can sustain that rate**. Do not promise unsupported maximum rates: measure them and revise the offered range if necessary.
 
-When the slider is focused, ←/→ decreases/increases the rate; touch dragging chooses a position. Show the selected multiplier beside the track. Changing speed preserves seed, plants, current growth time and growth history. Keep it as a session setting for subsequent regenerations/selections. Cancelling the settings panel discards unsubmitted seed/speed edits. **Regenerate** commits both settings and restarts from young founders; add an **Apply speed** action that commits only speed and resumes the existing ecosystem. A displayed **Paused** growth setting stops growth but leaves gentle water sway and urchin controls active after closing the panel; opening the modal panel still pauses the whole tank.
+When the slider is focused, A enters/leaves rate adjustment, and ←/→ adjusts the rate while editing; touch dragging chooses a position. Show the selected multiplier beside the track. Changing speed preserves seed, plants, current growth time and growth history. Keep it as a session setting for subsequent regenerations/selections. The explicit **Cancel** button discards unsubmitted water-type/seed/speed edits. **Regenerate** commits water type, seed and speed and restarts from young founders; keep the former **Apply speed** position empty; **←** applies and closes, preserving the ecosystem for speed-only changes. A displayed **Paused** growth setting stops growth but leaves gentle water sway and urchin controls active after closing the panel; opening the modal panel still pauses the whole tank.
 
 The slider scales only the fixed-step **growth clock**, not water motion, player movement, camera response or render frame rate. Derive development from accumulated growth time; use seeded fixed-step events so different rates reach the same botanical state at the same growth time. Root-pinned sway uses its own real-time clock. High speeds must respect bounded dirty-group construction/upload budgets and avoid bursts of mesh replacements; measure worst-frame pacing while dragging/changing speed and during rapid growth. Profiles specify seed, multiplier, growth time and young/intermediate/mature snapshot explicitly.
 
 ![Seed display and numeric editor mockup](2026-10-03-aquatic-plant-clumps-and-poster/seed-editor-mockup.svg)
 
 ![Seed validation and regeneration flow](2026-10-03-aquatic-plant-clumps-and-poster/seed-regeneration-diagram.svg)
+
+## Leaf textures — approved addition
+
+Will approved adding textures because shaded solid colours still do not provide convincing plant surfaces. Keep the curved meshes and their lighting, then add surface detail that follows each leaf rather than painting one pattern across an entire colony.
+
+- [x] Generate a six-form albedo preview for the plan.
+- [x] Prepare a compact, padded texture atlas and add UVs to runtime leaf geometry.
+- [x] Bind textured plant materials without adding actors or render groups.
+- [ ] Verify both water palettes, both leaf faces, young growth and mature sway on Chromecast.
+- [ ] Profile the textured version against the same shaded version at matching seed, growth age, camera and input trace; report FPS, p95 pacing, render CPU and memory deltas.
+
+| Form | Surface detail | UV direction |
+|---|---|---|
+| Freshwater broad rosette leaves | Midrib, fine branching veins, restrained mottling | Base to tip along the midrib |
+| Freshwater ribbon leaves | Parallel longitudinal veins and gentle colour variation | Lengthwise along each curved ribbon |
+| Freshwater whorl leaflets | Fine midrib and subtle tissue grain | Lengthwise on each leaflet |
+| Saltwater seagrass ribbons | Parallel fibres and subdued green variation | Base to tip |
+| Saltwater paddle leaves | Midrib and delicate lateral veins | Base to tip on each paddle |
+| Brown-algal forks | Mottled olive/brown tissue and longitudinal striations | Along each branch; no terrestrial leaf venation |
+
+![Generated leaf-surface atlas preview: freshwater above, saltwater below](2026-10-03-aquatic-plant-clumps-and-poster/leaf-texture-atlas-preview.png)
+
+This is a generated artwork preview, not an engine capture or botanical identification plate. Its six rectangular tiles show the proposed surface treatment. Prepare padded production tiles and inspect their boundaries before using the atlas in game.
+
+![Texture ownership and leaf-local UVs](2026-10-03-aquatic-plant-clumps-and-poster/leaf-texture-pipeline.svg)
+
+Use diffuse albedo with restrained contrast; keep directional highlights and shadows in the existing mesh shading. Orient UVs per leaf so veins follow the surface through growth and bending. Use the same leaf surface on front and back with a modest underside tint, and preserve the mesh silhouette; transparent cutout cards are unnecessary for these closed leaves. The production atlas is **256 × 256**, with six **72 × 112** interiors, four-texel extruded gutters and one shared material per existing chunk. It occupies **128 KiB** in the packed 16-bit room page (256 KiB for an RGBA8 GPU upload); inspect filtering, seams, tip stretching and fine-detail readability at TV viewing distance. Scale tiny whorl detail down rather than adding polygons for veins. Preserve seeded layout, birth times, actor count and the eight-group rendering structure. Record the texture resolution, format and memory in the comparison. The native rest-vertex record gains UVs and a separately shaded texture tint: 12 extra bytes per planned vertex (about 0.95 MiB for freshwater seed 713). A developer `--plant-texture=0` control uses the same native binary and level payload to render the shaded comparison. Runtime material changes refresh the cached renderer alongside flags, so its triangle layout matches the published primitives. Plant materials explicitly enable **texture × vertex colour** modulation in the GL and Metal backends: the legacy replace-if-white rule otherwise ignores albedo on shaded grey vertices. Other materials retain the legacy rule. The device check rejects missing green foliage or brown algae; The compositor forwards and retains this mode through deferred draws and state restoration. A recording-backend regression verifies both opaque forwarding and sorted translucent state; Mac/Metal visual verification remains a separate target check.
+
+### Implementation and the white-foliage fix
+
+- [x] Generate and package six opaque leaf/thallus surfaces into the 256² padded atlas.
+- [x] Add width/length UVs to each individual closed blade; preserve them during growth and sway.
+- [x] Retain the existing eight mesh groups, 38 actors and triangle counts.
+- [x] Refresh cached material renderer dispatch when runtime material flags change.
+- [x] Add opt-in texture modulation to GL and Metal and forward it through the common compositing wrapper, including deferred-draw state capture/restoration.
+- [x] Build Android and desktop; verify green textured freshwater foliage on Chromecast. Will confirmed that the colour is working.
+- [x] Extend the production compositor regression to check texture-mode forwarding and restoration (3 focused compositor/translucency checks passed). The earlier aquarium/growth/phone regression suite passed 81 checks.
+- [x] Complete the latest end-to-end phone/device check: remote/selector settings, exact seed, both palettes, disconnect/reconnect draft, apply-on-back, new seed on entry and Home/resume. The earlier interrupted attempts are superseded by the final build’s new receipt.
+- [x] Verify textured saltwater foliage on device: green seagrass and olive/brown algae.
+- [ ] Run three matched release traces per water type against the shaded control, plus separate CPU-instrumented traces, and record deltas.
+
+**Why the leaves appeared white:** the generated atlas contained the intended colours. Runtime vertices supplied a grey lighting tint, expecting **albedo × tint**, but the existing shader uses a legacy **replace-if-white** rule: a vertex that is not nearly white keeps its vertex colour and ignores the sampled texture. The first modulation change also missed the compositing wrapper, whose default no-op method prevented the new mode reaching the actual GL backend. Forwarding the flag through that wrapper fixed the remaining white foliage. Other materials retain the legacy rule.
+
+A separate earlier failure was cached material dispatch: runtime flags selected a Gouraud textured primitive while the cached render function still expected the old flat primitive layout. Refreshing the cached renderer with the flags fixed that crash. Material validation now checks that the cached renderer matches the flags.
+
+The current device test checks foliage colour as well as controls: missing green leaves or missing brown algae fails verification. Keep the generated preview separate from the production atlas and from actual engine evidence. The Metal implementation mirrors the opt-in mode; its visual verification has not been run on an Apple device.
+
+![Actual Chromecast freshwater capture after the colour fix](2026-10-03-aquatic-plant-clumps-and-poster/runtime-evidence/textured-device/freshwater-mature.png)
+
+[Production atlas](2026-10-03-aquatic-plant-clumps-and-poster/leaf-surfaces-atlas.png) · [Texture pipeline diagram](2026-10-03-aquatic-plant-clumps-and-poster/leaf-texture-pipeline.svg). The capture above uses seed **713**, accelerated growth to the mature canopy, and the regular textured renderer. It is visual evidence, not a completed performance result.
+
+![Actual Chromecast saltwater capture](2026-10-03-aquatic-plant-clumps-and-poster/runtime-evidence/textured-device/saltwater-mature.png)
+
+[Final device verification receipt](2026-10-03-aquatic-plant-clumps-and-poster/runtime-evidence/textured-device/checks.json) verifies installed APK SHA-256 `eabc18940d8ab8ba7d62b71a05ab9607d8533d599d1153b4e64d291d5c751e2c`. Colour checks found 127,066 green foliage pixels in freshwater and 131,955 green / 1,469 brown pixels in saltwater inside the fixed foliage region; grey/white foliage fails these checks.
 
 ## Poster and research reference
 
@@ -97,7 +168,7 @@ Correlate species, age, height and colour within each patch, then vary them amon
 
 ### Plant palette and growth rules
 
-Use the freshwater side of the poster as **shape and architecture references** for the current authored plant tank. This does not assert an exact biotope or change the existing sea urchin. Keep marine examples in the poster as a distinct future palette; do not put temperate Fucus into a supposed tropical freshwater habitat.
+Use both sides of the poster as **shape and architecture references** for the two selectable palettes. Freshwater uses rosettes, ribbon tufts and whorled stems; saltwater uses seagrass rhizomes, paired paddle leaves and anchored branching algae. This does not assert an exact biotope or change the existing sea urchin. Keep the palettes separate and retain the climate distinctions of the source examples.
 
 | Form | Colony model | Mesh silhouette | Variation and crowding |
 |---|---|---|---|
@@ -105,13 +176,13 @@ Use the freshwater side of the poster as **shape and architecture references** f
 | Vallisneria-like ribbon tuft | Longer stolon steps with occasional side daughters spread through neighbouring space | Long flexible ribbons, varied width, bend and tip height | Clustered bases, individually curved blades; avoid parallel equal-height fences |
 | Limnophila-like fine stem | Local stem colonies with variable internodes and bounded side branches | Feathery submerged whorls around nodes, rather than identical paired leaves | Vary whorl count, orientation, branch length and age; retain gaps between stems |
 
-Begin around the existing 384 rooted shoots, but distribute them unevenly between 12–18 colonies. Colony quotas, footprint, species mix and age distribution vary per seed; global shoot/leaf/vertex limits stay bounded. These quotas and 75–85% coverage are authoring targets, not measured botanical population ratios. Grow most tall foliage through the back and middle depth, mixed broad colonies in front/middle, and low daughter growth around edges. Preserve a winding substrate route and local pockets for the urchin instead of one bare straight strip. Nearby colonies can interlock; avoid both rectangular botanical partitions and evenly spaced decorative islands.
+Use roughly 384 rooted shoots or anchored plant/algal bases as an initial mature-population reference, but distribute them unevenly between 12–18 colonies. Colony quotas, footprint, species mix and age distribution vary per seed; global shoot/leaf/vertex limits stay bounded. These quotas and 75–85% coverage are authoring targets, not measured botanical population ratios. Grow most tall foliage through the back and middle depth, mixed broad colonies in front/middle, and low daughter growth around edges. Preserve a winding substrate route and local pockets for the urchin instead of one bare straight strip. Nearby colonies can interlock; avoid both rectangular botanical partitions and evenly spaced decorative islands.
 
 For branch structure, use bounded tip growth: extend a parent axis; optionally fork or form a side shoot; reduce daughter segment length/radius gradually; vary branching angles and node spacing; terminate below the minimum useful segment size. Keep leaf arrangement appropriate to the chosen form—basal rosette, ribbon tuft, paired leaves, or whorls. Preserve the curved leaf meshes from the dense pass where they fit the selected form.
 
 ![Proposed clumped tank, replacing rows](2026-10-03-aquatic-plant-clumps-and-poster/tank-clumps-mockup.svg)
 
-This is a concept mockup, not an engine capture. The dense detailed pass remains the measurement reference. The present level contains a sea urchin alongside generic freshwater-style foliage; this is an established authored scene, not a validated freshwater biotope. The poster keeps marine and freshwater examples separate. Choosing a scientifically marine flora for the urchin tank is a separate content decision, not a silent change to the current cast.
+This is a concept mockup, not an engine capture. The dense detailed pass remains the measurement reference. The present level contains a sea urchin alongside generic freshwater-style foliage; this is an established authored scene, not a validated freshwater biotope. The poster keeps marine and freshwater examples separate. The new toggle explicitly selects the freshwater or saltwater plant palette while retaining the current player/controller.
 
 ## Water motion and Forth
 
@@ -134,6 +205,57 @@ The examples use cycles/turns where appropriate. `.08` turns is a schematic bran
 
 Initialize founder colonies on entry, then advance the growth network and geometry **at runtime while the level is active**. Forth supplies the species growth policy and advances bounded growth steps; native code owns graph/vertex buffers and performs bounded incremental mesh construction. During play, Forth computes shared phase, amplitude and a handful of coefficients for the mesh chunks. Prefer a small native deformation operation over interpreting a loop across ~38,000 vertices in Forth. Inspect the existing fin/fish deformation paths for reusable rest-vertex storage and packed weights; **there is currently no verified plant-sway syscall to print as working code**. Do not rotate an entire merged chunk around the world origin, lift roots or allocate a controller for each plant. Smooth whole-mesh deformation should leave collisions and the urchin controller unchanged.
 
+## Implemented runtime and verification status
+
+The native generator creates a bounded, deterministic graph and mature rest geometry at entry: 16 founders expand to at most 384 shoots, rendered through eight mesh groups (38 level actors). Forth registers and ticks those groups; graph construction and vertex work are native. Daughter shoots inherit parent lineage and species-dependent spacing. Underground runners are represented in the graph, not rendered as extending rhizomes.
+
+Growth time reveals geometry and smoothly scales blades from their rooted bases. Topology eligibility advances in half-second age buckets; dirty groups publish with round-robin scheduling, at most one group per frame. This is an authored growth approximation: individual leaf curling/unrolling and fully articulated whorl emergence are future refinements. Slow, coherent native sway follows growth deformation and keeps roots pinned. Rate changes preserve growth age; editing pauses the tank. Mature geometry stays bounded.
+
+For tested seeds 0, 713 and 4,294,967,295, full unfurling occurs at about **117–144 growth seconds** (roughly two minutes at 1×). The last blade finishes around 14.6–18 seconds at 8×; device foliage captures verify accelerated growth, while the full high-speed performance comparison remains pending.
+
+Android and desktop builds succeeded. **81 runtime, phone, asset, selector and species regressions passed**, plus **three compositor/translucency regressions**. The final Chromecast check verified remote grid/keypad/slider actions, phone draft reconnect/cancel/apply, fresh/salt regeneration, selector re-entry and Home/resume. [Final device receipt](2026-10-03-aquatic-plant-clumps-and-poster/runtime-evidence/textured-device/checks.json).
+
+### Saved matched measurements — incomplete matrix
+
+These four cases use the final native libraries, a connected phone, the same wide/close/crawl input trace and three uninstrumented release repeats. The old static asset is measured with the current native binary; earlier static-trial figures below are historical. FPS/p95 exclude warmup and screenshot gaps.
+
+| Case | Release repeats | FPS | p95 frame interval | PSS MiB | FPS delta vs old static |
+|---|---:|---:|---:|---:|---:|
+| Old static detailed tank | 3 | 19.83 | 66.73 ms | 87.65 | — |
+| Freshwater young, frozen | 3 | 40.57 | 33.37 ms | 59.73 | +104.6% |
+| Freshwater spreading, frozen | 3 | 32.02 | 50.05 ms | 64.24 | +61.5% |
+| Freshwater mature, frozen | 3 | 14.66 | 83.42 ms | 78.10 | −26.1% |
+
+The mature runtime tank is slower than the static reference in these traces. These results do **not** isolate texture cost: the matched shaded controls, sway/growth cases, saltwater cases, seed spread and separate CPU runs have not completed. Keep that distinction when choosing an optimization. [Machine-readable results and deltas](2026-10-03-aquatic-plant-clumps-and-poster/runtime-evidence/profiles/comparison.json), [benchmark identities](2026-10-03-aquatic-plant-clumps-and-poster/runtime-evidence/profiles/identities.json).
+
+### Current-version benchmark correction
+
+Will identified the old version during job `J-55854e3f8c29`. Its variants used the older growing-plants native libraries, although its restore APK was current. The job was cancelled and normal-APK restoration/hash verification completed; [cancellation receipt](2026-10-03-aquatic-plant-clumps-and-poster/runtime-evidence/outdated-benchmark-cancelled/receipt.json). Do not use its partial traces as current-build measurements.
+
+All variants were rebuilt from the frozen current normal APK. Native SHA-256 identities are checked against it before submission. The baseline packages the archived planted level inside the current eight-tank selector, keeping the other seven current payloads. [Corrected identities and method](2026-10-03-aquatic-plant-clumps-and-poster/runtime-evidence/coordinator-current-comparison/method.json), [corrected recipe](2026-10-03-aquatic-plant-clumps-and-poster/runtime-evidence/coordinator-current-comparison/recipe.json). Job `J-cfbb812fc1ff` runs the corrected comparison and restores the normal APK afterward. The normal scene check already passed: [verification receipt](2026-10-03-aquatic-plant-clumps-and-poster/runtime-evidence/coordinator-normal-verified/receipt.json).
+
+### Device recovery and remaining checks
+
+The earlier benchmark interruption left restoration unverified. On October 4, coordinator reconnect `J-75b1959ed0da` completed successfully. Normal Aquarium install/check job `J-d5a618ee0f01` installed the current main APK and verified its hash (`79433b3c5e80625b13b4bf566e8fd941185affd62f779488ad30bab775f7c1d5`), then timed out on `cat .../files/wf.log`. Cleanup succeeded and returned the TV home. [Receipt and command timeline](2026-10-03-aquatic-plant-clumps-and-poster/runtime-evidence/coordinator-restore/receipt.json). Installation passed; the scene/capture check did not.
+
+The coordinator now uses a four-million-byte engine-log tail for scene confirmation and evidence, with a bounded logcat fallback. Its 40 coordinator regressions passed, including an oversized historical log retaining its recent scene marker. The initial install needed terminal sudo authentication. Will installed it; the protected source now contains the fix, and the subsequent normal planted-level check passed.
+
+The [superseded benchmark recipe](2026-10-03-aquatic-plant-clumps-and-poster/runtime-evidence/coordinator-texture-comparison/recipe.json) originally compared older native libraries with old-static, freshwater mature textured/shaded and saltwater mature textured/shaded controls (three release runs and one CPU run each). All pairs are rerun through the coordinator with no phone connected. Treat this as a separate protocol from the earlier phone-connected traces. The recipe restores a frozen copy of the current main APK after measurement; [hashes and method](2026-10-03-aquatic-plant-clumps-and-poster/runtime-evidence/coordinator-texture-comparison/method.json). This initial recipe is superseded by the current-version correction above.
+
+- [x] Implement runtime growth, sway, settings and textures; build Android/desktop.
+- [x] Pass final remote/phone and fresh/salt colour checks on Chromecast.
+- [x] Save the first four matched release cases and their raw traces.
+- [x] Recover shared coordinator ownership/connectivity.
+- [x] Restore the current normal APK and verify its installed hash.
+- [x] Prepare and regression-test bounded log collection.
+- [x] Install the protected coordinator update with terminal sudo authentication.
+- [x] Pass normal planted-level scene/capture verification.
+- [ ] Complete matched textured/shaded, growth/sway, saltwater, seed-spread and CPU measurements.
+- [ ] Measure repeated-entry memory and entry-to-phone-ready latency in one process.
+- [ ] Restore and verify the normal APK again after the final benchmark.
+
+The original frozen implementation APK remains in the growing-plants worktree with SHA-256 `eabc18940d8ab8ba7d62b71a05ab9607d8533d599d1153b4e64d291d5c751e2c`. Preserve that identity for its earlier receipts. The current main release is a newer artifact; the two hashes must not be conflated.
+
 ## Runtime implementation and profiling phases
 
 **Measured reference:** the static dense trial is complete. Its matched Chromecast runs produced 39.87 FPS for the 57-plant baseline, 29.94 FPS for 384 plants with simple closed leaves, and 20.21 FPS for 384 detailed plants / 66,048 triangles. Render CPU time rose 3.70 → 18.16 → 42.88 ms while actor CPU stayed near 1.3 ms. These are render-path CPU measurements, not GPU timings. [Full comparison and receipts](2026-10-03-aquarium-dense-planted-tank.md), [machine-readable data](2026-10-03-aquarium-dense-planted-tank/performance.json).
@@ -142,7 +264,7 @@ Initialize founder colonies on entry, then advance the growth network and geomet
 2. **Botanical forms and geometry efficiency:** replace generic paired stems with whorls, introduce ribbon tufts and age variation, and tune branch/leaf silhouettes. Preserve the mostly-full tank rather than reducing plant density to regain FPS. Compare curved leaf section counts, hidden/redundant faces and branch detail at matched seeds. The 66k-triangle reference is a comparison point, not proof it is a good final budget. Test an intermediate geometry budget as well, and show the visual tradeoff before selecting it.
 3. **Watch colonies grow:** advance a deterministic fixed-step growth clock. Spread daughters from existing parents with species-specific spacers and branching rules. Animate young leaves/stems from small forms to mature rest shapes smoothly; do not pop full-sized plants into view or rebuild every group each frame. Batch topology changes only for dirty groups, with a measured per-update budget and fair scheduling. Compare frozen versus growing young/intermediate/mature states at identical seed, topology and camera. Record update spikes and worst-frame pacing, not only average FPS.
 4. **Gentle shared water:** add native root-pinned vertex bending to the same generated meshes. Forth controls shared phase and coefficients; avoid per-vertex interpreted loops and per-plant actors. Compare static versus sway at identical seed and geometry. Use the same startup seed for normal and instrumented builds.
-5. **Player seed editing:** add bottom-left display, tap/hold input handling, selector entry, numeric editor, growth-speed slider and exact integer validation. Verify same-seed replay, new random seed, cancelling without changing the tank, zero/max/invalid inputs, full phone settings, connection/disconnection fallback, phone/remote navigation, apply-speed versus regenerate, and deterministic growth across speed settings.
+5. **Player seed editing:** add bottom-left display, tap/hold input handling, selector entry, numeric editor, freshwater/saltwater toggle, growth-speed slider and exact integer validation. Verify same-seed replay within each water type, palette changes on regeneration, new random seed, cancelling without changing the tank, zero/max/invalid inputs, full phone settings, connection/disconnection fallback, phone/remote navigation, apply-speed versus regenerate, and deterministic growth across speed settings.
 6. **Repeated-entry stability and variation:** repeatedly enter/leave the level, checking new seeds, allocator ownership, peak memory, return-to-selector behavior and regeneration latency. Confirm all other seven level payloads are unaffected. Restore the normal eight-tank release after profiling and verify its installed hash. Continue to test growth through the mature cap, then freeze topology cleanly. Continuous mature turnover is a later option; visible growth from founders is part of this plan.
 
 ### Runtime ownership and bounded work
@@ -162,9 +284,9 @@ The current detailed level uses a 24 MB room pool and one room slot. Runtime gra
 | Shared gentle water | Same growing colonies and meshes | Root-pinned sway | Incremental native deformation and pacing cost |
 | Repeat selections | New seeds; released/recreated level buffers | Same | Variation, bounded generation, no memory growth or leaked resources |
 
-For each steady-state phase, use three repeated release runs with identical native binaries, seeded layout, camera positions and input trace: wide idle, close idle and close crawl. Record presented FPS/p95 pacing, actor/director time, construction/deformation/render CPU, memory, triangles/groups and absolute/percentage deltas. Report startup costs separately so they cannot be hidden inside a steady-state average. For growing captures, also match growth clock, node count and topology state; compare pauses at fixed young/intermediate/mature snapshots and active growth over the same interval. Use multiple seeds to report cost spread and worst observed composition, then replay the same seeds for comparisons.
+Profile both freshwater and saltwater palettes, including their young/intermediate/mature stages; compare per-mode static/growing/sway deltas and cross-mode cost at matched coverage. For each steady-state phase, use three repeated release runs with identical native binaries, seeded layout, camera positions and input trace: wide idle, close idle and close crawl. Record presented FPS/p95 pacing, actor/director time, construction/deformation/render CPU, memory, triangles/groups and absolute/percentage deltas. Report startup costs separately so they cannot be hidden inside a steady-state average. For growing captures, also match water type, growth clock, node count and topology state; compare pauses at fixed young/intermediate/mature snapshots and active growth over the same interval. Use multiple seeds to report cost spread and worst observed composition, then replay the same seeds for comparisons.
 
-Acceptance: bottom-left seed display and player-entered regeneration work on the remote; the same seed reproduces the growth sequence; each selection starts a different young ecosystem that visibly grows into a mostly-full tank; fixed-seed replay is reproducible; colonies have connected growth and irregular outlines; ribbon, rosette and whorled forms remain readable; tall foliage varies in height and age; roots remain fixed under slow coherent sway; the urchin has a usable local route; repeated level entry frees resources; and measured loading/rendering/motion costs are recorded. The A3 portrait PDF remains one page at 297 × 420 mm with its bottom-quarter pattern band and checked Forth examples.
+Acceptance: freshwater/saltwater selection changes plant forms and growth rules on regeneration; bottom-left seed/type display and player-entered regeneration work on the remote; the same seed reproduces the growth sequence; each selection starts a different young ecosystem that visibly grows into a mostly-full tank; fixed-seed replay is reproducible; colonies have connected growth and irregular outlines; ribbon, rosette and whorled forms remain readable; tall foliage varies in height and age; roots remain fixed under slow coherent sway; the urchin has a usable local route; repeated level entry frees resources; and measured loading/rendering/motion costs are recorded. The A3 portrait PDF remains one page at 297 × 420 mm with its bottom-quarter pattern band and checked Forth examples.
 
 ## Poster bibliography
 

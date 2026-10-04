@@ -66,6 +66,12 @@ def material(key):
             mt['wf_opacity'] = opacity
             mt.node_tree.nodes.get('Principled BSDF').inputs['Alpha'].default_value = opacity
             mt.surface_render_method = 'DITHERED'
+        if C.KIND=='plants' and key.startswith('plant_'):
+            mt['wf_prelit']=True
+            if os.environ.get('PLANTED_TANK_DETAIL','runtime')=='runtime':
+                tex=mt.node_tree.nodes.new('ShaderNodeTexImage')
+                tex.image=bpy.data.images.load(str(HERE/'leaf_surfaces.tga'),check_existing=True)
+                mt.node_tree.links.new(tex.outputs['Color'],mt.node_tree.nodes.get('Principled BSDF').inputs['Base Color'])
         if key.startswith(('betta_mem','betta_ray','betta_margin')):mt['wf_prelit']=True
         MATERIALS[key] = mt
     return MATERIALS[key]
@@ -221,7 +227,8 @@ actor('rim',rim)
 static_box('floor',(-HX+WALL,-HY+WALL,WALL),(HX-WALL,HY-WALL,SAND),'backdrop' if C.KIND in ('jellyfish','arowana') else 'sand')
 if C.KIND=='plants':
     for mesh in planting(SAND):
-        actor(mesh.name,mesh)
+        obj=actor(mesh.name,mesh)
+        box_fields(obj,(-5.95,-1.45,SAND,5.95,1.45,WATER))
 elif C.KIND=='betta':
     plants=Mesh('broad_leaves')
     for k,x in enumerate([-5.25,-1.65,2.9,4.0,5.0]):
@@ -379,6 +386,8 @@ if C.KIND=='plants':
     header+=word('look-close',indices['LookClose'])
     plant_core=(COMMON/'plants_controller.fth').read_text()
     core=plant_core
+    if os.environ.get('PLANTED_TANK_DETAIL','runtime')=='runtime':
+        core=core.replace("  JOYSTICK_BUTTON_A tk-edge tk-neutral tk@ not & if 1 tk-camera tk@ - tk-camera tk! then", "  \\ Camera taps and settings holds are handled by the native plant settings.")
     pose=setup=''
     header+=': uf-phase 740 ; : uf-init 741 ; : uf-last-x 742 ; : uf-last-y 743 ; : uf-dx 744 ; : uf-dy 745 ; : uf-u 746 ;\n'
     tick=": tk-director-tick\n tk-camera-tick\n INDEXOF_X_POS tk-player read-actor-mailbox tk-x tk! INDEXOF_Y_POS tk-player read-actor-mailbox tk-y tk!\n"
@@ -391,6 +400,11 @@ if C.KIND=='plants':
         for axis,n in [('X',0),('Y',1)]:
             tick+=f' tk-{axis.lower()} tk@ {num(offset[n])} + uf-u tk@ .5 - .035 * {num(math.cos(math.tau*k/8) if n==0 else math.sin(math.tau*k/8))} * + INDEXOF_{axis}_POS {indices[obj.name]} write-actor-mailbox\n'
         tick+=f' {num(C.BOTTOM)} uf-u tk@ .5 > if uf-u tk@ .5 - 2 * dup 1 swap - * .048 * + then INDEXOF_Z_POS {indices[obj.name]} write-actor-mailbox\n'
+    if os.environ.get('PLANTED_TANK_DETAIL','runtime')=='runtime':
+        header+=': pg-init 747 ; : pg-water 748 ;\n'
+        bindings=' '.join(f'{k} {indices[f"plant_chunk_{k:02d}"]} plant-register' for k in range(8))
+        tick+=f' pg-init tk@ 0 = if {bindings} 1 pg-init tk! then\n'
+        tick+=' pg-water tk@ tk-dt@ + pg-water tk! INDEXOF_DELTA_TIME tk@ pg-water tk@ plant-step\n'
     tick+=' tk-x tk@ uf-last-x tk! tk-y tk@ uf-last-y tk! ;\n'
 
 player['wf_Script']=header+core+'\ntk-player-tick\n'

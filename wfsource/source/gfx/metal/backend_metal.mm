@@ -180,7 +180,7 @@ fragment float4 wf_fs(VertexOut v                  [[stage_in]],
     // and silently darkens every coloured-but-textured face.
     if (u.use_tex != 0) {
         float is_white = step(0.99, min(v.color.r, min(v.color.g, v.color.b)));
-        c = float4(mix(v.color, tex.sample(smp, v.uv).rgb, is_white) * v.lit, 1.0);
+        c = float4(((u.use_tex & 2) != 0 ? tex.sample(smp, v.uv).rgb * v.color : mix(v.color, tex.sample(smp, v.uv).rgb, is_white)) * v.lit, 1.0);
     }
     if (u.fog != 0) {
         c.rgb = mix(u.fog_color, c.rgb, v.fog_factor);
@@ -363,6 +363,13 @@ public:
         Flush();
         _fogColor[0] = r; _fogColor[1] = g; _fogColor[2] = b;
         _fogStart = start; _fogEnd = end;
+    }
+
+    void SetTextureModulation(bool enabled) override
+    {
+        if (_modulateTexture == enabled) return;
+        Flush();
+        _modulateTexture = enabled;
     }
 
     void SetOpacity(float opacity) override
@@ -566,6 +573,7 @@ private:
     id<MTLDepthStencilState> _overlayDepth = nil;
     bool _overlay = false;
     float _opacity = 1.0f;
+    bool _modulateTexture = false;
     id<MTLDepthStencilState>   _depthState      = nil;
     id<MTLRenderCommandEncoder> _encoder        = nil;
     id<MTLSamplerState>        _sampler         = nil;
@@ -752,7 +760,7 @@ private:
         // GPU texture. GetTextureHandle() follows the _parent chain, so a
         // sub-pixelmap correctly reports its atlas parent's texture.
         _boundTexture = _curTexture ? _curTexture->GetTextureHandle() : NULL;
-        u.use_tex     = _boundTexture ? 1 : 0;
+        u.use_tex     = _boundTexture ? (_modulateTexture ? 3 : 1) : 0;
         u._pad        = 0;
     }
 

@@ -35,6 +35,7 @@
 //============================================================================
 
 #include <vector>
+#include <game/plant_growth.h>
 #include <renderassets/fish_deform.h>
 #include <renderassets/swim_deform.h>
 #include <renderassets/fin_deform.h>
@@ -72,6 +73,7 @@ public:
 	// it and applies as a column-scale on the world matrix in Render().
 	// (qbert stretch-and-squash, 2026-05-10.)
 	virtual void SetActorScale(const Vector3& /*scale*/) {}
+	virtual void SetPlantGeometry(const plantgrowth::Chunk&, float, float, unsigned, bool, bool, bool) {}
 	virtual void SetJellyDeformation(float /*contraction*/, float /*phase*/, float /*pitchLag*/, float /*rollLag*/) {}
 	virtual void SetFishDeformation(float /*phase*/, float /*amplitude*/) {}
 	virtual void SetSwimDeformation(float /*phase*/, float /*amplitude*/, float /*bend*/, float /*finPhase*/, float /*finAmplitude*/, float /*minX*/, float /*maxX*/) {}
@@ -115,6 +117,7 @@ public:
 	virtual bool GetHandle(const HandleID thisHandle, Vector3& position) const;
 	virtual void SetMaterialColor(int materialIdx, const Color& color) { _object.SetMaterialColor(materialIdx, color); }
 	virtual void SetActorScale(const Vector3& scale) { _scale = scale; }
+	virtual void SetPlantGeometry(const plantgrowth::Chunk& chunk, float age, float phase, unsigned generation, bool sway, bool publish, bool textured);
 	virtual void SetJellyDeformation(float contraction, float phase, float pitchLag, float rollLag);
 	virtual void SetFishDeformation(float phase, float amplitude);
 	virtual void SetSwimDeformation(float phase, float amplitude, float bend, float finPhase, float finAmplitude, float minX, float maxX);
@@ -126,6 +129,10 @@ protected:
 	RenderActor3D(Memory& memory, int vertexCount,Vertex3D* vertexList,int faceCount, TriFace* faceList, Material*  materials);
 	RenderObject3D _object;
 	Vector3 _scale = Vector3::one;
+	std::vector<Vertex3D> _plantVertices;
+	std::vector<TriFace> _plantFaces;
+	unsigned _plantGeneration=0;
+	int _plantBucket=-1;float _plantMaxBirth=0,_plantLastAge=-1,_plantLastPhase=-1;int _plantVisibleVertices=1;
 	std::vector<wf_render::FishWaveWeight> _fishWeights;
 	float _fishLength = 0;
 	std::vector<wf_render::SwimWaveWeight> _swimWeights;

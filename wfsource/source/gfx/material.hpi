@@ -34,7 +34,7 @@ Material::Validate() const
 	AssertMsg((_materialFlags & (~MATERIAL_FLAGS_MASK)) == 0,"_materialFlags = " << std::hex << _materialFlags << ", MATERIAL_FLAGS_MASK = " << MATERIAL_FLAGS_MASK);
 	ValidateRenderMask(_materialFlags);
 	_color.Validate();
-//	assert(_renderer3D == Get3DRenderObjectPtr());
+	assert(_renderer3D == Get3DRenderObjectPtr());
 	RangeCheck(0,_texture.u,Display::VRAMWidth);
 	RangeCheck(0,_texture.v,Display::VRAMHeight);
 #if DO_ASSERTIONS
@@ -101,3 +101,5 @@ INLINE std::ostream& operator<<(std::ostream& s, const Material& mat)
 #endif
 
 //============================================================================
+
+inline int32 Material::SetMaterialFlags(int32 flags) { int32 previous=_materialFlags; _materialFlags=flags; _renderer3D=Get3DRenderObjectPtr(); return previous; }

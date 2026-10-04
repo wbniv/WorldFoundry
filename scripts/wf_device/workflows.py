@@ -15,6 +15,7 @@ from .store import Store
 
 APPS = {'aquarium', 'condo', 'snowgoons', 'smb', 'qbert'}
 SCENES = ['clownfish', 'blue-shrimp', 'betta', 'jellyfish', 'lionfish', 'planted-tank', 'arowana', 'tiger-barbs']
+ENGINE_LOG_TAIL_BYTES = 4_000_000
 
 class Cancelled(Exception):
     pass
@@ -169,6 +170,13 @@ class Adapter:
         if not self.shell('pidof', self.package, allow_failure=True).strip():
             raise RuntimeError('Target process exited')
 
+    def engine_log_tail(self):
+        # Engine logs accumulate across launches. Reading the entire file can
+        # exceed the command deadline even when the app and transport are healthy.
+        return self.shell('tail', '-c', str(ENGINE_LOG_TAIL_BYTES),
+                          '/sdcard/Android/data/'+self.package+'/files/wf.log',
+                          allow_failure=True)
+
     def launch(self, scene=None):
         self.shell('am','force-stop',self.package)
         self.key('KEYCODE_WAKEUP')
@@ -185,9 +193,9 @@ class Adapter:
             self.key('KEYCODE_DPAD_CENTER')
             self.wait(2)
             self.require_foreground()
-            log = self.shell('cat', '/sdcard/Android/data/'+self.package+'/files/wf.log', allow_failure=True)
+            log = self.engine_log_tail()
             if f'level-menu: level {index} starts' not in log:
-                log += self.adb('logcat','-d','-v','brief')
+                log += self.adb('logcat','-d','-t','2000','-v','brief')
             if f'level-menu: level {index} starts' not in log:
                 raise RuntimeError('Scene selection was not confirmed in engine log')
 
@@ -206,7 +214,7 @@ class Adapter:
         self.out.joinpath(prefix+'screenshot.png').write_bytes(self.adb('exec-out','screencap','-p',binary=True))
         pid = self.shell('pidof',self.package).strip().split()[0]
         self.out.joinpath(prefix+'logcat.txt').write_text(self.adb('logcat','-d','-v','threadtime','--pid='+pid))
-        self.out.joinpath(prefix+'wf.log').write_text(self.shell('cat','/sdcard/Android/data/'+self.package+'/files/wf.log',allow_failure=True))
+        self.out.joinpath(prefix+'wf.log').write_text(self.engine_log_tail())
         self.out.joinpath(prefix+'meminfo.txt').write_text(self.shell('dumpsys','meminfo',self.package))
         self.out.joinpath(prefix+'thermal.txt').write_text(self.shell('dumpsys','thermalservice'))
         log = (self.out/(prefix+'logcat.txt')).read_text() + (self.out/(prefix+'wf.log')).read_text().rsplit('=== wf_game android_main',1)[-1]

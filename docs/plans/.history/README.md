@@ -1,5 +1,6 @@
 | Date | Change |
 |------|--------|
+| [2026-10-04](https://github.com/wbniv/WorldFoundry/commit/334bab60) | Add shared Chromecast Task/API coordinator and repair host activation |
 | [2026-10-03](https://github.com/wbniv/WorldFoundry/commit/73da4c2f) | Show raw frame-rate numbers in every demo renderer |
 | [2026-10-03](https://github.com/wbniv/WorldFoundry/commit/49c37979) | Verify translucent jellyfish on Chromecast and update poster render evidence |
 | [2026-10-03](https://github.com/wbniv/WorldFoundry/commit/55d87fb3) | Split tiger-barb tank and add profiled dense planting with A3 growth poster |
@@ -46,6 +47,10 @@
 | [2026-06-26](https://github.com/wbniv/WorldFoundry/commit/16d72fa6) | docs: add plan index (docs/plans/README.md) |
 
 <!--history-meta v1
+334bab60	author	Will Norris
+334bab60	added	1
+334bab60	deleted	0
+334bab60	files	1
 73da4c2f	author	Will Norris
 73da4c2f	added	1
 73da4c2f	deleted	0

@@ -1866,3 +1866,5 @@ ObjectIsInWhichRoom( int32 idxObject, const _LevelOnDisk* _levelData )
 }
 
 //==============================================================================
+
+void Level::RefreshHardwareInput(){if(_hardwareInput1)_hardwareInput1->update();if(_hardwareInput2)_hardwareInput2->update();if(_hardwareInput3)_hardwareInput3->update();if(_hardwareInput4)_hardwareInput4->update();}

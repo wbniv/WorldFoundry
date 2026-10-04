@@ -1,3 +1,5 @@
+#include <game/plant_ui.h>
+#include <game/level_menu.h>
 //=============================================================================
 // gfx/gl/display.cc: display hardware abstraction class, windows openGL specific code
 // Copyright ( c ) 1997,1998,1999,2000,2001,2002 World Foundry Group  
@@ -1296,6 +1298,8 @@ Display::PageFlip()
 
 
     RendererBackendGet().EndFrame();
+    if(planted::state().active && levelmenu::Drawer()){int w=0,h=0;GetSurfaceSize(w,h);std::vector<PhonepadRect> rects;planted::buildUI(w,h,rects);levelmenu::Drawer()(rects.data(),int(rects.size()),w,h);}
+
 
 #if DESIGNER_CHEATS && defined(__LINUX__)
     // Skip the arcade HUD on levels that don't write the score/timer/lives/

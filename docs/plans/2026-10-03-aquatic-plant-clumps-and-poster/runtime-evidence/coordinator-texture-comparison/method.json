@@ -1,0 +1,16 @@
+{
+  "procedure": "Coordinator plants trace; no connected phone; all texture pairs rerun under this procedure. Do not combine with earlier phone-connected traces.",
+  "restoration_apk_sha256": "79433b3c5e80625b13b4bf566e8fd941185affd62f779488ad30bab775f7c1d5",
+  "variants": {
+    "old-static": "a9b5fb63367e900bfcaacc124d939f1743b43568b4226949016b84475b8eb03c",
+    "freshwater-mature-static": "f88d34fc1fc72e09fd2f50b96442d64a624ad8a2bac89b5f54f3856c2375af5a",
+    "freshwater-mature-static-shaded": "61295f8097071efc210272bad7a7daf4a6c542bc40cce7e5932420516df4242b",
+    "saltwater-mature-static": "d5bff74a090f6db878f38d197e5b17ce52a73f957c0c755f8d8e04b3265c65b5",
+    "saltwater-mature-static-shaded": "a62ecd27e0f8df6ca206931537bfb8a8c5f3462b0ea1b585b2756bec9b506193",
+    "old-static-cpu": "79c7a5b84958c98bbfb627cbe6e2df4f9cc5a9cba816e90730f3ac2a5df7d4f6",
+    "freshwater-mature-static-cpu": "bae03bf8fe45c9b1ae94ea4bf0c65a6b6266747fca44840cca9d0f5c36fdc797",
+    "freshwater-mature-static-shaded-cpu": "5d66280b56d066d58eb5a8914a2d721f118d47aae082e807d1a02d35c52a34b9",
+    "saltwater-mature-static-cpu": "611b36cc4a651c2739365da1fb85f9f333e7660cce17eff9289e824738a1714b",
+    "saltwater-mature-static-shaded-cpu": "7077f5a85bb54790cc623a17e5a923a602a26e9f7ac38e49450847199ee5db94"
+  }
+}

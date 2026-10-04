@@ -647,3 +647,27 @@ RenderActorEmitter::_Validate() const
 #endif
 
 //============================================================================
+
+void RenderActor3D::SetPlantGeometry(const plantgrowth::Chunk& chunk,float age,float phase,unsigned generation,bool sway,bool publish,bool textured)
+{
+ if(chunk.vertices.size()>=32000)return;
+ bool fresh=_plantGeneration!=generation;
+ if(fresh){_plantMaxBirth=0;for(const auto& f:chunk.faces)_plantMaxBirth=std::max(_plantMaxBirth,f.birth);}
+ const int bucket=std::min(int(age*2),int(_plantMaxBirth*2)+1);
+ if(!fresh&&age==_plantLastAge&&(!sway||phase==_plantLastPhase)&&bucket==_plantBucket)return;
+ if(fresh){_plantVertices.resize(std::max(size_t(1),chunk.vertices.size()));
+  if(chunk.vertices.empty())_plantVertices[0]=Vertex3D(Scalar::zero,Scalar::zero,Color(0,0,0),Vector3::zero);for(size_t i=0;i<chunk.vertices.size();i++){uint32_t c=textured?chunk.vertices[i].textureColor:chunk.vertices[i].color;_plantVertices[i]=Vertex3D(Scalar(chunk.vertices[i].u),Scalar(chunk.vertices[i].v),Color((c>>16)&255,(c>>8)&255,c&255),Vector3::zero);}_plantBucket=-1;}
+ plantgrowth::Point lastRoot={1e20f,0,0};float wave=0,secondWave=0;
+ for(size_t i=0;i<chunk.vertices.size();i++){const auto& v=chunk.vertices[i];if(v.root.x!=lastRoot.x||v.root.y!=lastRoot.y){lastRoot=v.root;wave=std::sin(phase*2*plantgrowth::pi/7.f+v.root.x*.10f+v.root.y*.15f);secondWave=std::sin(phase*2*plantgrowth::pi/9.f+.4f+v.root.x*.10f);}auto p=plantgrowth::deformedWave(v,age,wave,secondWave,sway);_plantVertices[i].position=Vector3(Scalar(p.x),Scalar(p.y),Scalar(p.z));}
+ if(fresh||(publish&&bucket!=_plantBucket)){
+  _plantFaces.clear();_plantVisibleVertices=1;_plantFaces.reserve(chunk.faces.size()+1);
+  for(const auto& f:chunk.faces)if(age>=f.birth){
+   TriFace face(f.a,f.b,f.c,0);const auto& a=chunk.vertices[f.a].rest;const auto& b=chunk.vertices[f.b].rest;const auto& c=chunk.vertices[f.c].rest;
+   auto ab=plantgrowth::sub(b,a),ac=plantgrowth::sub(c,a);float x=ab.y*ac.z-ab.z*ac.y,y=ab.z*ac.x-ab.x*ac.z,z=ab.x*ac.y-ab.y*ac.x;float n=std::sqrt(x*x+y*y+z*z);if(n<1e-7f)continue;
+   face.normal=Vector3(Scalar(x/n),Scalar(y/n),Scalar(z/n));_plantFaces.push_back(face);_plantVisibleVertices=std::max(_plantVisibleVertices,1+int(std::max(f.a,std::max(f.b,f.c))));
+  }
+  if(_plantFaces.empty()){TriFace face(0,0,0,0);face.normal=Vector3(Scalar::zero,Scalar::zero,Scalar::one);_plantFaces.push_back(face);}
+  if(_object.SetRuntimeGeometry(_plantVisibleVertices,_plantVertices.data(),int(_plantFaces.size()),_plantFaces.data(),textured)){_plantGeneration=generation;_plantBucket=bucket;}
+ }
+ _plantLastAge=age;_plantLastPhase=phase;
+}

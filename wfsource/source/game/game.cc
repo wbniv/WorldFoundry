@@ -1,3 +1,4 @@
+#include <game/plant_ui.h>
 //==============================================================================
 // game.cc: 
 // Copyright ( c ) 1994,1995,1996,1997,1998,1999,2001,2002,2003 World Foundry Group  
@@ -384,6 +385,7 @@ WFGame::LoadLevel(_DiskFile* levelFile)
 void
 WFGame::UnloadLevel()
 {
+	planted::leave();
 	_frameRate.Reset();
 	DBSTREAM3( cprogress << "WFGame::UnloadLevel" << std::endl; )
 	assert(_curLevel);
@@ -625,7 +627,13 @@ WFGame::StepFrame(bool do_swap, Scalar* out_dt)
 	assert( ValidPtr(_curLevel ));
 	_curLevel->Validate();
 	DBSTREAM2( cflow << "WFGame::update: curLevel->Update" << std::endl; )
-	if ( !DebugServer_IsPaused() )
+	if(planted::state().active){
+        if(planted::state().modal)_curLevel->RefreshHardwareInput();
+        auto buttons=uint32_t(_curLevel->GetMailboxes().ReadMailbox(1909).AsFloat());
+        if(planted::input(buttons,_deltaTime.AsFloat())){auto& mb=_curLevel->GetMailboxes();mb.WriteMailbox(625,Scalar::one-mb.ReadMailbox(625));}
+        planted::uiInput(buttons);
+    }
+	if ( !DebugServer_IsPaused() && !planted::state().modal )
 		_curLevel->update(_deltaTime);
 	DBSTREAM2( cflow << "WFGame::update: render scene" << std::endl; )
 
@@ -809,6 +817,7 @@ WFGame::PollLevelMenu()
 	// a menu bundle runs; elsewhere the request is left alone.
 	if (_levelMenuActive && levelmenu::ConsumeReturnRequest())
 	{
+        if(planted::state().modal){planted::apply();return;}
 		levelmenu::Log("back to the menu");
 		_desiredLevelNum = levelmenu::kAskPlayer;
 		_bContinue = false;
@@ -904,8 +913,13 @@ WFGame::RunLevelMenu()
 		}
 		else
 			buttons = uint32_t(JoystickGetButtonsF(stick));
-		if (ConsumeReturnRequest()) HALRequestClose();
-		menu.Update(buttons, nowMs);
+        if(ConsumeReturnRequest()){if(planted::state().modal)planted::apply();else HALRequestClose();}
+        auto& ps=planted::state();ps.selector=bundle.entries[size_t(menu.Cursor())].name=="Planted Tank";
+        static uint32_t settingsPrevious=0;uint32_t settingsEdge=buttons&~settingsPrevious;settingsPrevious=buttons;
+        if(ps.selector&&!ps.modal&&(settingsEdge&(1u<<13)))planted::open();
+        planted::uiInput(buttons);
+        if(ps.pending){menu.Update(kButtonA,nowMs);menu.Update(0,nowMs+1);ps.pending=false;}
+        else if(!ps.modal)menu.Update(buttons, nowMs);
 		if (menu.Cursor() != lastCursor)
 		{
 			lastCursor = menu.Cursor();
@@ -915,13 +929,14 @@ WFGame::RunLevelMenu()
 			break;
 		int w = 0, h = 0;
 		_display->GetSurfaceSize(w, h);
-		menu.Build(w, h, &rects);
+        if(ps.modal)planted::buildUI(w,h,rects);else menu.Build(w, h, &rects);
 		_display->RenderBegin();
 		Drawer()(rects.data(), int(rects.size()), w, h);
 		_display->RenderEnd();
 		nowMs += int64_t(_display->PageFlip().AsFloat() * 1000.0f);	// also pumps the window's input
 	}
 	JoystickDelete(stick);
+	planted::state().selector=false;
 	SetSelectorVisible(false);
 	ConsumeReturnRequest();			// a Backspace pressed while the menu was up is not for the next level
 	_levelMenuCursor = menu.Cursor();

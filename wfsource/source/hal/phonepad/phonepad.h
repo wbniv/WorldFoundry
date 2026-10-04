@@ -45,6 +45,7 @@
 #include <cstdint>
 #include <string>
 #include <vector>
+#include <functional>
 
 namespace phonepad
 {
@@ -103,8 +104,11 @@ public:
     uint32_t TakeEvents() { uint32_t e = events_; events_ = 0; return e; }
 
     void SetLog(LogFn fn) { log_ = fn; }
+    void SetCommandHandler(std::function<void(const std::string&)> fn) { command_ = std::move(fn); }
+    bool SendText(const std::string& text);
 
 private:
+    std::function<void(const std::string&)> command_;
     struct Conn
     {
         int         fd        = -1;

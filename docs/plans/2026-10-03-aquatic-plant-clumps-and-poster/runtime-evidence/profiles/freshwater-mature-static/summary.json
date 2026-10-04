@@ -1,0 +1,66 @@
+{
+  "receipt": {
+    "apk": "/home/will/WorldFoundry-wbniv/.worktrees/growing-plants/.plant-profile-apks/freshwater-mature-static.apk",
+    "apk_sha256": "f88d34fc1fc72e09fd2f50b96442d64a624ad8a2bac89b5f54f3856c2375af5a",
+    "protocol": "30.0 s warmup; 36 s planted-tank trace (wide idle, close idle, close crawl; 12 s each); 3 run(s); SurfaceFlinger sampled every 0.75 s",
+    "serial": "adb-2628105GN0GT7C-wwfiSB._adb-tls-connect._tcp",
+    "menu_index": 5,
+    "with_phone": true,
+    "growth_speed": null,
+    "device": "Chromecast HD\n14\nPhysical size: 1920x1080\n",
+    "revision": "7df9600a633b76a76fc1653b2dfff76092ebe30f"
+  },
+  "runs": [
+    {
+      "run": 1,
+      "layer": "org.worldfoundry.wf_game.aquarium/android.app.NativeActivity#5985",
+      "frames": 1034,
+      "refresh_ms": 16.683333,
+      "p50_ms": 66.733429,
+      "p90_ms": 83.416127,
+      "p95_ms": 83.416781,
+      "p99_ms": 133.46668,
+      "worst_ms": 5522.190756,
+      "fps": 13.597617035520246,
+      "missed_refresh_percent": 98.35589941972921
+    },
+    {
+      "run": 2,
+      "layer": "org.worldfoundry.wf_game.aquarium/android.app.NativeActivity#6000",
+      "frames": 1020,
+      "refresh_ms": 16.683333,
+      "p50_ms": 66.733428,
+      "p90_ms": 83.415915,
+      "p95_ms": 83.416783,
+      "p99_ms": 116.783506,
+      "worst_ms": 4704.706247,
+      "fps": 13.766894556611536,
+      "missed_refresh_percent": 98.62745098039215
+    },
+    {
+      "run": 3,
+      "layer": "org.worldfoundry.wf_game.aquarium/android.app.NativeActivity#6012",
+      "frames": 903,
+      "refresh_ms": 16.683333,
+      "p50_ms": 66.733434,
+      "p90_ms": 83.416731,
+      "p95_ms": 83.416817,
+      "p99_ms": 133.46674,
+      "worst_ms": 133.466908,
+      "fps": 14.495393977336033,
+      "missed_refresh_percent": 97.78516057585826
+    }
+  ],
+  "median": {
+    "run": 2,
+    "frames": 1020,
+    "refresh_ms": 16.683333,
+    "p50_ms": 66.733429,
+    "p90_ms": 83.416127,
+    "p95_ms": 83.416783,
+    "p99_ms": 133.46668,
+    "worst_ms": 4704.706247,
+    "fps": 13.766894556611536,
+    "missed_refresh_percent": 98.35589941972921
+  }
+}

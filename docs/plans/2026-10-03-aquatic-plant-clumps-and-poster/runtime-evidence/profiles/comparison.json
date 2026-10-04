@@ -1,0 +1,297 @@
+{
+  "method": "Median of uninstrumented release repeats, with matching native libraries and fixed input traces. CPU sections come from separate instrumented runs; nested sections are not additive. Seed 713 except named seed cases. FPS excludes warmup and screenshot gaps.",
+  "cases": [
+    {
+      "name": "old-static",
+      "runs": 3,
+      "cpu_runs": 0,
+      "frames": 716,
+      "fps": 19.832674742295836,
+      "p50_ms": 50.050069,
+      "p90_ms": 50.050342,
+      "p95_ms": 66.732818,
+      "p99_ms": 66.733526,
+      "missed_refresh_percent": 99.86072423398329,
+      "PSS_MiB": 87.6474609375,
+      "scenarios": {
+        "wide-idle": {
+          "fps": 19.979992672356914,
+          "p95_ms": 66.733125
+        },
+        "close-idle": {
+          "fps": 19.756752108788504,
+          "p95_ms": 66.732834
+        },
+        "crawl-close": {
+          "fps": 19.70402621954829,
+          "p95_ms": 66.733298
+        }
+      },
+      "cpu": {},
+      "startup": [],
+      "identity": {
+        "name": "old-static",
+        "apk_sha256": "a9b5fb63367e900bfcaacc124d939f1743b43568b4226949016b84475b8eb03c",
+        "cd_sha256": "0a72b33aeadef35c2f04abd2e2ccd36cb58efbf3bc1e300224392cc37fd75f33",
+        "args": "",
+        "growth_speed": null,
+        "native": {
+          "lib/arm64-v8a/libwf_game.so": "f96b111fc41a95c5ae43ea9932c276ffddfd72f9360f1f863d133c8c91683a9b",
+          "lib/armeabi-v7a/libwf_game.so": "9558f3f93222a091688f9baa740f4cb173f0a15407a2a14d8aaea60171a9c036"
+        }
+      }
+    },
+    {
+      "name": "freshwater-young-static",
+      "runs": 3,
+      "cpu_runs": 0,
+      "frames": 1477,
+      "fps": 40.565440499439454,
+      "p50_ms": 16.683562,
+      "p90_ms": 33.366935,
+      "p95_ms": 33.367112,
+      "p99_ms": 33.367309,
+      "missed_refresh_percent": 47.76119402985075,
+      "PSS_MiB": 59.7265625,
+      "scenarios": {
+        "wide-idle": {
+          "fps": 59.689881862367706,
+          "p95_ms": 16.683562
+        },
+        "close-idle": {
+          "fps": 32.26894303050938,
+          "p95_ms": 33.367191
+        },
+        "crawl-close": {
+          "fps": 29.96998982708548,
+          "p95_ms": 33.367139
+        }
+      },
+      "cpu": {},
+      "startup": [
+        {
+          "seed": 713,
+          "mode": "freshwater",
+          "shoots": 384,
+          "vertices": 82888,
+          "authored_triangles": 53024,
+          "graph_ms": 1.874,
+          "mesh_ms": 40.589
+        },
+        {
+          "seed": 713,
+          "mode": "freshwater",
+          "shoots": 384,
+          "vertices": 82888,
+          "authored_triangles": 53024,
+          "graph_ms": 1.853,
+          "mesh_ms": 40.182
+        },
+        {
+          "seed": 713,
+          "mode": "freshwater",
+          "shoots": 384,
+          "vertices": 82888,
+          "authored_triangles": 53024,
+          "graph_ms": 1.845,
+          "mesh_ms": 40.138
+        }
+      ],
+      "identity": {
+        "name": "freshwater-young-static",
+        "apk_sha256": "d4af6b3e5e04d18d37146fb7df3e6cdca74b6e73e03a54d13c54d6f25001f2e5",
+        "cd_sha256": "742adb3fcfd27f4444ae995760307f64cecc554e8e91c5aa96379af4f8f14ea8",
+        "args": "--plant-seed=713\n--plant-water=freshwater\n--plant-age=0\n--plant-speed=0\n--plant-sway=0\n",
+        "growth_speed": null,
+        "native": {
+          "lib/arm64-v8a/libwf_game.so": "f96b111fc41a95c5ae43ea9932c276ffddfd72f9360f1f863d133c8c91683a9b",
+          "lib/armeabi-v7a/libwf_game.so": "9558f3f93222a091688f9baa740f4cb173f0a15407a2a14d8aaea60171a9c036"
+        }
+      },
+      "reference": "old-static",
+      "delta": {
+        "fps": {
+          "absolute": 20.732765757143618,
+          "percent": 104.53842472860315
+        },
+        "p95_ms": {
+          "absolute": -33.365705999999996,
+          "percent": -49.99894654531148
+        },
+        "PSS_MiB": {
+          "absolute": -27.9208984375,
+          "percent": -31.85591246894185
+        }
+      },
+      "cpu_delta": {}
+    },
+    {
+      "name": "freshwater-spreading-static",
+      "runs": 3,
+      "cpu_runs": 0,
+      "frames": 1155,
+      "fps": 32.02158915657703,
+      "p50_ms": 33.366703,
+      "p90_ms": 33.366869,
+      "p95_ms": 50.049681,
+      "p99_ms": 50.050093,
+      "missed_refresh_percent": 82.23570190641247,
+      "PSS_MiB": 64.236328125,
+      "scenarios": {
+        "wide-idle": {
+          "fps": 35.78007074216225,
+          "p95_ms": 50.050056
+        },
+        "close-idle": {
+          "fps": 30.346181260542885,
+          "p95_ms": 33.366912
+        },
+        "crawl-close": {
+          "fps": 29.969989830568192,
+          "p95_ms": 33.366935
+        }
+      },
+      "cpu": {},
+      "startup": [
+        {
+          "seed": 713,
+          "mode": "freshwater",
+          "shoots": 384,
+          "vertices": 82888,
+          "authored_triangles": 53024,
+          "graph_ms": 2.187,
+          "mesh_ms": 41.358
+        },
+        {
+          "seed": 713,
+          "mode": "freshwater",
+          "shoots": 384,
+          "vertices": 82888,
+          "authored_triangles": 53024,
+          "graph_ms": 1.844,
+          "mesh_ms": 40.732
+        },
+        {
+          "seed": 713,
+          "mode": "freshwater",
+          "shoots": 384,
+          "vertices": 82888,
+          "authored_triangles": 53024,
+          "graph_ms": 2.018,
+          "mesh_ms": 40.418
+        }
+      ],
+      "identity": {
+        "name": "freshwater-spreading-static",
+        "apk_sha256": "3dc59590b10bea989eb05ec00b4a08b081343d514eda50374a6f4ff4b9590b9b",
+        "cd_sha256": "742adb3fcfd27f4444ae995760307f64cecc554e8e91c5aa96379af4f8f14ea8",
+        "args": "--plant-seed=713\n--plant-water=freshwater\n--plant-age=30\n--plant-speed=0\n--plant-sway=0\n",
+        "growth_speed": null,
+        "native": {
+          "lib/arm64-v8a/libwf_game.so": "f96b111fc41a95c5ae43ea9932c276ffddfd72f9360f1f863d133c8c91683a9b",
+          "lib/armeabi-v7a/libwf_game.so": "9558f3f93222a091688f9baa740f4cb173f0a15407a2a14d8aaea60171a9c036"
+        }
+      },
+      "reference": "old-static",
+      "delta": {
+        "fps": {
+          "absolute": 12.188914414281193,
+          "percent": 61.45875214847698
+        },
+        "p95_ms": {
+          "absolute": -16.683136999999995,
+          "percent": -24.999898850367742
+        },
+        "PSS_MiB": {
+          "absolute": -23.4111328125,
+          "percent": -26.71056589898719
+        }
+      },
+      "cpu_delta": {}
+    },
+    {
+      "name": "freshwater-mature-static",
+      "runs": 3,
+      "cpu_runs": 0,
+      "frames": 531,
+      "fps": 14.664715112837722,
+      "p50_ms": 66.733429,
+      "p90_ms": 83.416185,
+      "p95_ms": 83.416783,
+      "p99_ms": 116.78353,
+      "missed_refresh_percent": 98.4934086629002,
+      "PSS_MiB": 78.1025390625,
+      "scenarios": {
+        "wide-idle": {
+          "fps": 14.838288445642306,
+          "p95_ms": 83.416715
+        },
+        "close-idle": {
+          "fps": 14.627708739747934,
+          "p95_ms": 83.416796
+        },
+        "crawl-close": {
+          "fps": 14.51913991341335,
+          "p95_ms": 83.416818
+        }
+      },
+      "cpu": {},
+      "startup": [
+        {
+          "seed": 713,
+          "mode": "freshwater",
+          "shoots": 384,
+          "vertices": 82888,
+          "authored_triangles": 53024,
+          "graph_ms": 1.895,
+          "mesh_ms": 39.685
+        },
+        {
+          "seed": 713,
+          "mode": "freshwater",
+          "shoots": 384,
+          "vertices": 82888,
+          "authored_triangles": 53024,
+          "graph_ms": 1.857,
+          "mesh_ms": 39.348
+        },
+        {
+          "seed": 713,
+          "mode": "freshwater",
+          "shoots": 384,
+          "vertices": 82888,
+          "authored_triangles": 53024,
+          "graph_ms": 1.863,
+          "mesh_ms": 39.484
+        }
+      ],
+      "identity": {
+        "name": "freshwater-mature-static",
+        "apk_sha256": "f88d34fc1fc72e09fd2f50b96442d64a624ad8a2bac89b5f54f3856c2375af5a",
+        "cd_sha256": "742adb3fcfd27f4444ae995760307f64cecc554e8e91c5aa96379af4f8f14ea8",
+        "args": "--plant-seed=713\n--plant-water=freshwater\n--plant-age=150\n--plant-speed=0\n--plant-sway=0\n",
+        "growth_speed": null,
+        "native": {
+          "lib/arm64-v8a/libwf_game.so": "f96b111fc41a95c5ae43ea9932c276ffddfd72f9360f1f863d133c8c91683a9b",
+          "lib/armeabi-v7a/libwf_game.so": "9558f3f93222a091688f9baa740f4cb173f0a15407a2a14d8aaea60171a9c036"
+        }
+      },
+      "reference": "old-static",
+      "delta": {
+        "fps": {
+          "absolute": -5.167959629458114,
+          "percent": -26.05780459070781
+        },
+        "p95_ms": {
+          "absolute": 16.683965,
+          "percent": 25.00113961919006
+        },
+        "PSS_MiB": {
+          "absolute": -9.544921875,
+          "percent": -10.890129357890165
+        }
+      },
+      "cpu_delta": {}
+    }
+  ]
+}

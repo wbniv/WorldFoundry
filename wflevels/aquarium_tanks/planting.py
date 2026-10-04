@@ -148,7 +148,14 @@ def dense_planting(sand, detailed=True):
 
 
 def planting(sand, mode=None):
-    mode=mode or os.environ.get('PLANTED_TANK_DETAIL','detailed')
+    mode=mode or os.environ.get('PLANTED_TANK_DETAIL','runtime')
+    if mode=='runtime':
+        groups=[]
+        for k in range(8):
+            m=Mesh(f'plant_chunk_{k:02d}')
+            m.face([(-5.9,-1.4,sand),(5.9,-1.4,sand),(5.9,1.4,4.82),(-5.9,1.4,4.82)],'plant_green')
+            groups.append(m)
+        return groups
     if mode=='baseline':return baseline_planting(sand)
     if mode not in ('density','detailed'):raise ValueError(f'Unknown planting mode: {mode}')
     return dense_planting(sand, detailed=mode=='detailed')

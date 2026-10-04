@@ -747,6 +747,11 @@ void Server::HandleText(Conn& c, const std::string& text, int64_t nowMs)
         SendFrame(c, 1, text);
         return;
     }
+    if(text.size()>=2&&text[0]=='p'&&text[1]==':'){
+        c.lastRxMs=nowMs;
+        if(c.fd==phoneFd_&&command_)command_(text);
+        return;
+    }
     if (text.size() >= 2 && text[0] >= 'a' && text[0] <= 'z' && text[1] == ':')
     {
         c.lastRxMs = nowMs;   // a frame type this build does not know: ignored, still a heartbeat
@@ -825,3 +830,9 @@ void Server::CloseConn(Conn& c, const char* why)
 }
 
 }  // namespace phonepad
+
+bool phonepad::Server::SendText(const std::string& text){
+ if(text.size()>125||phoneFd_<0)return false;
+ for(auto& c:conns_)if(c.fd==phoneFd_){SendFrame(c,1,text);return true;}
+ return false;
+}

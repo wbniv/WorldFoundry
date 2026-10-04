@@ -455,6 +455,7 @@ _Auto-added from plan "Out of scope"/"Deferred" sections at commit time. Triage 
 - [x] **(completed)** Install and select the jellyfish tank on Chromecast HD. — _from [2026-10-02-jellyfish-biomechanics-poster.md](docs/plans/2026-10-02-jellyfish-biomechanics-poster.md)_  <!-- fp:d3cd62bc9f4bf0cd -->
 - [x] **(completed)** Inspect translucency and pulsing, and capture presented-frame timestamps. — _from [2026-10-02-jellyfish-biomechanics-poster.md](docs/plans/2026-10-02-jellyfish-biomechanics-poster.md)_  <!-- fp:ab7fc35d5530f7d3 -->
 - [x] **(completed)** Record device results and push the focused commits. — _from [2026-10-02-jellyfish-biomechanics-poster.md](docs/plans/2026-10-02-jellyfish-biomechanics-poster.md)_  <!-- fp:c94b7d13e0db6ec3 -->
+- [verify] **2026-10-03-aquatic-plant-clumps-and-poster** — Verification section present but no PASS recorded — run + record the steps. _from [2026-10-03-aquatic-plant-clumps-and-poster.md](docs/plans/2026-10-03-aquatic-plant-clumps-and-poster.md)_  <!-- fp:cae70851e3dcb53d -->
 <!-- END auto-captured-deferrals -->
 
 

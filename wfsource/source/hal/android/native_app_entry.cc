@@ -1,3 +1,4 @@
+#include <game/plant_settings.h>
 //=============================================================================
 // hal/android/native_app_entry.cc: android_main + NativeActivity glue
 // Copyright ( c ) 2026 World Foundry Group
@@ -185,6 +186,7 @@ void PhoneInit()
     gPhonePin = phonepad::MakePin();          // one PIN per launch, kept across pause/resume
     if (gPhonePin.empty()) { gPhoneEnabled = false; WFLOGE("phone controller: off (no random source)"); return; }
     gPhone.SetLog(PhoneLog);
+    gPhone.SetCommandHandler(planted::command);
 }
 
 // Listen on the Wi-Fi address (never 0.0.0.0, never a public address).
@@ -220,6 +222,7 @@ void PhoneStart()
 
 void PhoneStop()
 {
+    planted::state().phone=false;
     if (!gPhoneEnabled) return;
     gPhone.Stop();
     gPhone.TakeEvents();
@@ -242,6 +245,9 @@ void PhonePoll()
         return;
     }
     const joystickButtonsF m = gPhone.Poll(now);
+    planted::state().phone=gPhone.PhoneConnected();
+    static int64_t plantSent=0;
+    if(now-plantSent>=150){gPhone.SendText(planted::message());plantSent=now;}
     const uint32_t ev = gPhone.TakeEvents();
     if (ev) gPhoneOverlay.OnEvents(ev, now);
     if (m != gPhoneButtons)
@@ -403,6 +409,7 @@ int32_t HandleInputEvent(struct android_app* /*app*/, AInputEvent* event)
         // arrived and what it mapped to: "key code=23 action=0 mask=0x...".
         // Back dismisses the visible phone panel before navigating the game.
         // Consume the entire press, including repeats, and hide once on release.
+        if(keyCode==AKEYCODE_BACK&&planted::state().modal){if(action==AKEY_EVENT_ACTION_UP)planted::apply();return 1;}
         if (keyCode == AKEYCODE_BACK && gPhoneOverlay.PanelVisible(NowMs()))
         {
             if (action == AKEY_EVENT_ACTION_UP) gPhoneOverlay.OnBack(NowMs());

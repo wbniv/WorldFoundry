@@ -1,0 +1,73 @@
+{
+  "device": "chromecast-test-01",
+  "workflow": "variant-benchmark",
+  "app": "aquarium",
+  "scene": "planted-tank",
+  "trace": "plants",
+  "duration": 12,
+  "warmup": 30,
+  "apk": "/home/will/WorldFoundry-wbniv/.worktrees/growing-plants/.plant-profile-apks/normal-current.apk",
+  "restore_apk": "/home/will/WorldFoundry-wbniv/.worktrees/growing-plants/.plant-profile-apks/normal-current.apk",
+  "variants": [
+    {
+      "label": "old-static",
+      "apk": "/home/will/WorldFoundry-wbniv/.worktrees/growing-plants/.plant-profile-apks-current/old-static.apk",
+      "runs": 3,
+      "warmup": 30
+    },
+    {
+      "label": "freshwater-mature-static",
+      "apk": "/home/will/WorldFoundry-wbniv/.worktrees/growing-plants/.plant-profile-apks-current/freshwater-mature-static.apk",
+      "runs": 3,
+      "warmup": 30
+    },
+    {
+      "label": "freshwater-mature-static-shaded",
+      "apk": "/home/will/WorldFoundry-wbniv/.worktrees/growing-plants/.plant-profile-apks-current/freshwater-mature-static-shaded.apk",
+      "runs": 3,
+      "warmup": 30
+    },
+    {
+      "label": "saltwater-mature-static",
+      "apk": "/home/will/WorldFoundry-wbniv/.worktrees/growing-plants/.plant-profile-apks-current/saltwater-mature-static.apk",
+      "runs": 3,
+      "warmup": 30
+    },
+    {
+      "label": "saltwater-mature-static-shaded",
+      "apk": "/home/will/WorldFoundry-wbniv/.worktrees/growing-plants/.plant-profile-apks-current/saltwater-mature-static-shaded.apk",
+      "runs": 3,
+      "warmup": 30
+    },
+    {
+      "label": "old-static-cpu",
+      "apk": "/home/will/WorldFoundry-wbniv/.worktrees/growing-plants/.plant-profile-apks-current/old-static-cpu.apk",
+      "runs": 1,
+      "warmup": 30
+    },
+    {
+      "label": "freshwater-mature-static-cpu",
+      "apk": "/home/will/WorldFoundry-wbniv/.worktrees/growing-plants/.plant-profile-apks-current/freshwater-mature-static-cpu.apk",
+      "runs": 1,
+      "warmup": 30
+    },
+    {
+      "label": "freshwater-mature-static-shaded-cpu",
+      "apk": "/home/will/WorldFoundry-wbniv/.worktrees/growing-plants/.plant-profile-apks-current/freshwater-mature-static-shaded-cpu.apk",
+      "runs": 1,
+      "warmup": 30
+    },
+    {
+      "label": "saltwater-mature-static-cpu",
+      "apk": "/home/will/WorldFoundry-wbniv/.worktrees/growing-plants/.plant-profile-apks-current/saltwater-mature-static-cpu.apk",
+      "runs": 1,
+      "warmup": 30
+    },
+    {
+      "label": "saltwater-mature-static-shaded-cpu",
+      "apk": "/home/will/WorldFoundry-wbniv/.worktrees/growing-plants/.plant-profile-apks-current/saltwater-mature-static-shaded-cpu.apk",
+      "runs": 1,
+      "warmup": 30
+    }
+  ]
+}

@@ -1,3 +1,4 @@
+#include <game/plant_settings.h>
 //==============================================================================
 // main.cc:
 // Copyright (c) 1994,1995,1996,1997,1999,2000,2001,2002,2003 World Foundry Group  
@@ -262,6 +263,13 @@ ParseCommandLine(int argc, char** argv)
 			++index;
 			DBSTREAM1( cprogress << "Debug bridge bind: " << gDebugBind << std::endl; )
 		}
+		else if ( strncmp(argv[index], "--plant-seed=",13)==0 ) { uint32_t n;if(planted::parseSeed(argv[index]+13,n)){planted::state().profileSeed=n;planted::state().fixedSeed=true;} }
+        else if ( strncmp(argv[index], "--plant-age=",12)==0 ) {planted::state().profileAge=std::max(0.f,std::min(240.f,float(atof(argv[index]+12))));}
+        else if ( strncmp(argv[index], "--plant-speed=",14)==0 ) {planted::state().profileSpeed=std::max(0,std::min(6,atoi(argv[index]+14)));}
+        else if ( strcmp(argv[index], "--plant-texture=0")==0 ) {planted::state().profileTexture=false;}
+        else if ( strcmp(argv[index], "--plant-sway=0")==0 ) {planted::state().profileSway=false;}
+        else if ( strcmp(argv[index], "--plant-water=saltwater")==0 ) {planted::state().profileWater=1;}
+        else if ( strcmp(argv[index], "--plant-water=freshwater")==0 ) {planted::state().profileWater=0;}
 		else if ( strcmp( argv[index]+1, "-no-fps" ) == 0 )
 		{
 			fpscounter::enabled = false;

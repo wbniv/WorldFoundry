@@ -122,8 +122,8 @@ static const char* kFS =
     "    if (u_use_tex != 0) {\n"
     "        float is_white = step(0.99, min(v_color.r, min(v_color.g, v_color.b)));\n"
     "        vec4 texel = texture(u_tex, v_uv);\n"
-    "        if (u_alpha_cutout != 0 && is_white > 0.5 && texel.a < 0.5) discard;\n"
-    "        c = vec4(mix(v_color, texel.rgb, is_white) * v_lit, 1.0);\n"
+    "        if (u_alpha_cutout != 0 && (is_white > 0.5 || (u_use_tex & 2) != 0) && texel.a < 0.5) discard;\n"
+    "        c = vec4(((u_use_tex & 2) != 0 ? texel.rgb * v_color : mix(v_color, texel.rgb, is_white)) * v_lit, 1.0);\n"
     "    }\n"
     "    if (u_fog != 0) c.rgb = mix(u_fog_color, c.rgb, v_fog_factor);\n"
     "    c.a = v_opacity;\n"
@@ -357,6 +357,13 @@ public:
         // is per vertex; only switching the blend/depth policy needs a flush.
         if ((_opacity < 1.0f) != (opacity < 1.0f)) Flush();
         _opacity = opacity;
+    }
+
+    void SetTextureModulation(bool enabled) override
+    {
+        if (_modulateTexture == enabled) return;
+        Flush();
+        _modulateTexture = enabled;
     }
 
     void SetAlphaCutout(bool enabled) override
@@ -664,6 +671,7 @@ private:
     float _lightColor[RB_MAX_LIGHTS][3];
 
     bool _alphaCutout = false;
+    bool _modulateTexture = false;
     bool  _fogEnabled = false;
     float _fogColor[3] = { 0.0f, 0.0f, 0.0f };
     float _fogStart = 1.0f;
@@ -786,7 +794,7 @@ private:
             glActiveTexture(GL_TEXTURE0);
             _curTexture->SetGLTexture();
             glUniform1i(_uTex, 0);
-            glUniform1i(_uUseTex, 1);
+            glUniform1i(_uUseTex, _modulateTexture ? 3 : 1);
             glUniform1i(_uAlphaCutout, _alphaCutout ? 1 : 0);
         }
         else

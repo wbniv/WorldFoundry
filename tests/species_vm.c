@@ -14,6 +14,7 @@ zf_input_state zf_host_sys(zf_ctx*c,zf_syscall_id id,const char*w) {
  else if(id==130){a=zf_pop(c);mb=zf_pop(c);float v=zf_pop(c);if(a<0||a>=1024||mb<0||mb>=7000)exit(2);actors[a][mb]=v;}
  else if(id==152){a=zf_pop(c);mb=zf_pop(c);zf_push(c,mb<1900?globals[mb]:actors[a][mb]);}
  else if(id==172||id==174){for(int i=0;i<5;i++)zf_pop(c);}
+ else if(id==175||id==176){zf_pop(c);zf_pop(c);}
  else if(id==171){for(int i=0;i<3;i++)zf_pop(c);}
  else if(id==169||id==170||id==0||id==1){zf_pop(c);}
  else {fprintf(stderr,"Unexpected syscall %d\n",id);exit(1);}
