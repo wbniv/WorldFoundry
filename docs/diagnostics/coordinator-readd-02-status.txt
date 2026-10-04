@@ -1,0 +1,19 @@
+{
+  "id": "J-b606660f3fc6",
+  "owner": "5c3060b287de0099d24b3975",
+  "accepted": 1791048558.9802306,
+  "state": "recovery-required",
+  "phase": "recovery-required",
+  "request": {
+    "device": "chromecast-test-02",
+    "workflow": "readd"
+  },
+  "device": "chromecast-test-02",
+  "generation": 1,
+  "cancel": 0,
+  "error": "Device identity/connection not verified; recovery required before further control",
+  "started": 1791048559.0119116,
+  "finished": 1791048575.461087,
+  "worker_pid": 79221,
+  "recovery_resolved": 0
+}

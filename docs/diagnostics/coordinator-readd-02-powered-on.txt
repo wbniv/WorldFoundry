@@ -1,0 +1,8 @@
+Accepted J-e1554f2766e1: queued; readd
+Follow: task chromecast:watch JOB=J-e1554f2766e1
+J-e1554f2766e1: accepted {"device": "chromecast-test-02", "workflow": "readd"}
+J-e1554f2766e1: granted {"device": "chromecast-test-02", "generation": 3}
+J-e1554f2766e1: phase {"phase": "connecting"}
+J-e1554f2766e1: needs-local-setup {"error": "Registered Cast identity not found near last address; supply a verified new discovery hint", "health": "needs-local-setup"}
+J-e1554f2766e1: needs-local-setup: Registered Cast identity not found near last address; supply a verified new discovery hint
+task: Failed to run task "chromecast:readd": exit status 1

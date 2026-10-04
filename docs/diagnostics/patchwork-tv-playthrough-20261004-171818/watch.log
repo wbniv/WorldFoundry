@@ -1,0 +1,10 @@
+J-4d73d0e357bd: accepted {"pool": "chromecast-test", "app": "patchwork", "apk": "4705aa54025d81169bfcc3c906321757fd14c136a9345aff06be92df1481e4f8.apk", "duration": 180.0, "workflow": "check"}
+J-4d73d0e357bd: granted {"device": "chromecast-test-01", "generation": 34}
+J-4d73d0e357bd: phase {"phase": "connecting"}
+J-4d73d0e357bd: phase {"phase": "installing"}
+J-4d73d0e357bd: phase {"phase": "installing"}
+J-4d73d0e357bd: phase {"phase": "launching"}
+J-4d73d0e357bd: phase {"phase": "restoring"}
+J-4d73d0e357bd: failed {"error": "Target app left foreground; measurement invalid", "health": "ready"}
+J-4d73d0e357bd: failed: Target app left foreground; measurement invalid
+task: Failed to run task "chromecast:watch": exit status 1

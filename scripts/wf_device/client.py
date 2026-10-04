@@ -185,10 +185,10 @@ def snapshot_text(snapshot):
 
 def task_command(command):
     client=Client()
-    args={k:os.environ.get('WF_CC_'+k.upper(),'') for k in ('device','pool','job','out','text','workflow','app','scene','apk','require_abi','warmup','runs','duration','watch','validator','async','recipe','trace','pairing_endpoint','address','reason')}
+    args={k:os.environ.get('WF_CC_'+k.upper(),'') for k in ('device','pool','job','out','text','workflow','app','scene','apk','require_abi','warmup','runs','duration','watch','validator','async','recipe','trace','pairing_endpoint','address','method','reason')}
     args={k:v for k,v in args.items() if v!=''}
-    if command in {'check','profile','record','submit','readd'}:
-        keys={'device','pool','require_abi','app','scene','apk','warmup','runs','duration','validator','trace','address'}
+    if command in {'check','profile','record','submit','readd','capture'}:
+        keys={'device','pool','require_abi','app','scene','apk','warmup','runs','duration','validator','trace','address','method'}
         req={k:v for k,v in args.items() if k in keys}
         req['workflow']=args.get('workflow','check') if command=='submit' else command
         for key in ('warmup','duration'):
@@ -203,7 +203,7 @@ def task_command(command):
             if not isinstance(recipe,dict):
                 raise ValueError('Recipe must be a JSON request object')
             req.update(recipe)
-        if req['workflow'] not in {'readd'} and not req.get('apk'):
+        if req['workflow'] not in {'readd','capture'} and not req.get('apk'):
             app=req.get('app','aquarium');req['app']=app
             req['apk']=str(Path(os.environ.get('WF_COORDINATOR_REPO',str(Path(__file__).resolve().parents[2])))/f'android/app/build/outputs/apk/{app}/release/worldfoundry-{app}-release.apk')
         if args.get('pairing_endpoint'):
@@ -217,6 +217,10 @@ def task_command(command):
         if command=='submit' or args.get('async')=='true':
             return 0
         result=client.watch(job['id'])
+        if command=='capture' and result==0:
+            destination=args.get('out') or str(Path('docs/diagnostics')/('chromecast-capture-'+job['id']))
+            client.evidence(job['id'],destination)
+            print('Capture evidence: '+str(Path(destination).resolve()),flush=True)
         return result
     if command in {'reserve','release'}:
         if not args.get('device') or args.get('pool'):

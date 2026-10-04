@@ -19,7 +19,7 @@
 // Media Receiver (every Chromecast supports it). Append ?castAppId=<id> to
 // the URL to override — used during device-registration diagnostic.
 const CAST_APPLICATION_ID =
-  new URLSearchParams(location.search).get('castAppId') || document.querySelector('meta[name="cast-application-id"]')?.content || (document.querySelector('meta[name="game-name"]')?.content === 'patchwork' ? '' : '071CDEDD');
+  new URLSearchParams(location.search).get('castAppId') || document.querySelector('meta[name="cast-application-id"]')?.content || (['patchwork','bomberman'].includes(document.querySelector('meta[name="game-name"]')?.content) ? '' : '071CDEDD');
 
 let bindCastRoom = () => {};
 
@@ -288,7 +288,7 @@ if (needsName() || needsRoom()) {
     entryHintEl.textContent = 'Look at the TV. The receiver shows a 4-letter room code.';
   }
   const createButton = document.getElementById('entry-create');
-  if (gameName === 'patchwork' && needsRoom()) {
+  if (['patchwork','bomberman'].includes(gameName) && needsRoom()) {
     createButton.hidden = false;
     createButton.addEventListener('click', () => {
       if (needsName()) {

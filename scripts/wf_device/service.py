@@ -20,9 +20,9 @@ from .store import Store
 
 MAX_APK = 32*1024*1024
 MAX_REQUEST = 48*1024*1024
-WORKFLOWS = {'check','profile','record','variant-benchmark','readd','install'}
+WORKFLOWS = {'check','profile','record','variant-benchmark','readd','capture','install'}
 REQUEST_KEYS = {'device','pool','require_abi','workflow','app','scene','warmup','duration','runs',
-                'apk','restore_apk','variants','validator','trace','address'}
+                'apk','restore_apk','variants','validator','trace','address','method'}
 
 
 def validate_request(request, scenes):
@@ -34,8 +34,14 @@ def validate_request(request, scenes):
         raise ValueError('Unregistered workflow')
     if request['workflow']=='install' and set(request)-{'device','pool','workflow','app','apk','require_abi'}:
         raise ValueError('Install accepts only target, app, APK and ABI; it never launches or sends input')
+    if request['workflow']=='capture' and set(request)-{'device','pool','workflow','method'}:
+        raise ValueError('Capture accepts only DEVICE or POOL; it preserves the current display')
+    if 'method' in request:
+        from .capture import METHODS
+        if request['workflow']!='capture' or request['method'] not in METHODS:
+            raise ValueError('METHOD must select a reviewed capture backend')
     from .workflows import APPS
-    if request['workflow']!='readd' and request.get('app') not in APPS:
+    if request['workflow'] not in {'readd','capture'} and request.get('app') not in APPS:
         raise ValueError('Unknown app')
     if request.get('scene') and (request.get('app')!='aquarium' or request['scene'] not in scenes):
         raise ValueError('Unknown scene for this app')
@@ -177,7 +183,7 @@ class Coordinator:
                 if not device or device['transport']!='tls' or host!=device['endpoint'].rsplit(':',1)[0] or not separator or not port.isdigit() or not 1<=int(port)<=65535:
                     raise ValueError('Pairing endpoint does not match the registered TLS device')
             references=[req.get('apk'),req.get('restore_apk')]+[v['apk'] for v in req.get('variants',[])]
-            if not self.config.get('fake') and req['workflow']!='readd' and not req.get('apk'):
+            if not self.config.get('fake') and req['workflow'] not in {'readd','capture'} and not req.get('apk'):
                 raise ValueError('An immutable APK is required')
             import re
             for name in filter(None,references):

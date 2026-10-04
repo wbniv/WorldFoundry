@@ -1,0 +1,13 @@
+Warning: The unit file, source configuration file or drop-ins of wf-device-coordinator.service changed on disk. Run 'systemctl daemon-reload' to reload units.
+● wf-device-coordinator.service - World Foundry shared Chromecast coordinator
+     Loaded: loaded (/etc/systemd/system/wf-device-coordinator.service; enabled; preset: enabled)
+     Active: active (running) since Sun 2026-10-04 00:27:55 +07; 1min 5s ago
+ Invocation: 558c82121607496b90ad5c4a448305dd
+   Main PID: 78607 (python3)
+      Tasks: 3 (limit: 34645)
+     Memory: 16.9M (peak: 17.4M)
+        CPU: 851ms
+     CGroup: /system.slice/wf-device-coordinator.service
+             └─78607 /usr/bin/python3 /opt/wf-device-coordinator/scripts/chromecast.py serve --config /etc/wf-device-coordinator/devices.json
+
+Oct 04 00:27:55 will-latitude5320 systemd[1]: Started wf-device-coordinator.service - World Foundry shared Chromecast coordinator.

@@ -347,3 +347,27 @@ bypass verification and remaining specialized harness migrations are still open;
 this successful smoke test does not certify complete enforcement.
 
 Current Aquarium on device 02 was rebuilt and installed through job `J-d6b701aa4f34`; generative plants and the FPS overlay were verified. [Deployment evidence](diagnostics/aquarium-cast2-deployment.md) records the frozen input checksum and on-device result.
+
+## Capture the current display
+
+```sh
+task chromecast:capture DEVICE=chromecast-test-02
+# Optional destination:
+task chromecast:capture DEVICE=chromecast-test-02 OUT=docs/diagnostics/cast2-screen
+```
+
+This queued workflow captures the screen as displayed when its device lease is granted. It installs no APK, sends no keys, and neither launches nor stops an app. It downloads the PNG and receipt after completion and prints the screenshot path. If another job owns the device, capture waits for that job; it cannot promise the earlier screen is still present. `ASYNC=true` submits only; use `watch` and `evidence` separately. Updating an existing protected installation requires rerunning the installer before the service accepts this new workflow.
+
+Capture evidence also includes bounded, read-only power, display, window, foreground-activity, dream and SurfaceFlinger dumps. These identify sleep/off state, the visible app and protected layers when a PNG is blank. Dumps are collected immediately after the screenshot; timestamps identify later observations rather than claiming atomic state. No wake key is sent.
+
+## Alternative capture tests
+
+```sh
+task chromecast:capture DEVICE=chromecast-test-01 METHOD=compare
+task chromecast:capture DEVICE=chromecast-test-02 METHOD=compare
+python3 scripts/analyse-chromecast-capture.py docs/diagnostics/chromecast-capture-J-example
+```
+
+`METHOD` accepts `png` (default), `raw`, `uiautomation`, `record` or `compare`. Compare captures each backend sequentially inside one device lease and records per-method success/errors; “captured” means an artifact was obtained, not that it visually matches the TV. The record backend creates a 3-second 1280×720 recording of the current display, with no app launch, keys or APK installation. Raw capture saves original bytes, a preserved RGBA PNG and a separately labelled opaque preview. The automation helper preserves existing accessibility services and disables its own accessibility use; device-side timeout bounds its lifetime. Coordinator-owned temporary files and recording processes are cleaned before release.
+
+The fixed helper is packaged at `config/device-coordinator/capture-helper.jar` and frozen by the installer. Rebuild with `python3 scripts/device-capture/build.py --ecj /path/to/ecj-3.38.0.jar`; it uses Android SDK 34 and min API 26. The Eclipse compiler is a local build dependency, not installed on the Chromecast. Both production devices meet the minimum API.

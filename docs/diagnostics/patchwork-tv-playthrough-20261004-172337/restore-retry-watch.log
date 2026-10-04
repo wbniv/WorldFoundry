@@ -1,0 +1,9 @@
+J-88f13b0d7667: accepted {"device": "chromecast-test-01", "app": "patchwork", "apk": "69a1d30bbdb38c439de1e45552d4ec986d1f2e1e3d241aa0b7d7aab40b16b6b6.apk", "duration": 15.0, "workflow": "check"}
+J-88f13b0d7667: granted {"device": "chromecast-test-01", "generation": 41}
+J-88f13b0d7667: phase {"phase": "connecting"}
+J-88f13b0d7667: phase {"phase": "installing"}
+J-88f13b0d7667: phase {"phase": "installing"}
+J-88f13b0d7667: phase {"phase": "launching"}
+J-88f13b0d7667: phase {"phase": "restoring"}
+J-88f13b0d7667: completed {"error": null, "health": "ready"}
+J-88f13b0d7667: completed

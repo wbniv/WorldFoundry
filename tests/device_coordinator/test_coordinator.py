@@ -64,6 +64,70 @@ def submit(client,device=None,pool=None,duration=.2,**kwargs):
                                    **({'device':device} if device else {'pool':pool}),**kwargs))['id']
 
 
+def test_reservation_blocks_fixed_jobs_and_routes_pool_to_other_device(service):
+    _,_,a,b=service
+    reservation=a.call('reserve',{'device':'d2','reason':'Watching TV'})
+    assert reservation['state']=='reserved'
+    fixed=submit(b,device='d2')
+    pooled=submit(b,pool='test')
+    assert wait(b,pooled)['device']=='d1'
+    assert b.call('status',{'job':fixed})['state']=='queued'
+    snapshot=b.call('queue')
+    assert next(d for d in snapshot['devices'] if d['id']=='d2')['reservation']['reason']=='Watching TV'
+    a.call('release',{'device':'d2'})
+    assert wait(b,fixed)['state']=='completed'
+
+
+def test_reservation_waits_for_active_cleanup_and_survives_store_restart(service):
+    cfg,_,a,b=service
+    active=submit(b,device='d2',duration=.6)
+    deadline=time.monotonic()+3
+    while b.call('status',{'job':active})['state']=='queued' and time.monotonic()<deadline:
+        time.sleep(.02)
+    assert a.call('reserve',{'device':'d2'})['state']=='waiting-for-cleanup'
+    queued=submit(b,device='d2')
+    assert wait(b,active)['state']=='completed'
+    reopened=Store(cfg['state'])
+    reservation=next(d for d in reopened.devices() if d['id']=='d2')['reservation']
+    assert reservation['state']=='reserved'
+    assert b.call('status',{'job':queued})['state']=='queued'
+    a.call('release',{'device':'d2'})
+    assert wait(b,queued)['state']=='completed'
+
+
+def test_reservation_owner_validation_and_idempotence(service):
+    _,_,a,b=service
+    initial=a.call('reserve',{'device':'d1'})
+    for method in ('reserve','release'):
+        with pytest.raises(RuntimeError,match='owner'):
+            b.call(method,{'device':'d1'})
+    changed=a.call('reserve',{'device':'d1','reason':'Movie'})
+    assert changed['created']==initial['created'] and changed['reason']=='Movie'
+    for request in ({'device':'missing'},{'device':'d2','reason':''},{'device':'d2','reason':'x'*201},{'pool':'test'}):
+        with pytest.raises(RuntimeError):
+            a.call('reserve',request)
+    assert a.call('release',{'device':'d1'})['released']
+    assert not a.call('release',{'device':'d1'})['released']
+
+
+def test_reservation_task_commands(service,tmp_path):
+    cfg,_,_,_=service
+    env=dict(os.environ,WF_COORDINATOR_SOCKET=cfg['socket'],WF_COORDINATOR_CLIENT_STATE=str(tmp_path/'task-reserver'))
+    for operation in ('reserve','release'):
+        result=subprocess.run(['task','chromecast:'+operation,'DEVICE=d2','REASON=Watching TV'],
+                              cwd=ROOT,env=env,text=True,capture_output=True,timeout=10)
+        assert result.returncode==0,result.stderr
+        assert ('reserved; Watching TV' if operation=='reserve' else 'released; queued jobs') in result.stdout
+    Store(cfg['state'],[{'id':f'chromecast-test-0{n}','health':'ready'} for n in (1,2)])
+    for n in (1,2):
+        for operation in ('reserve','release'):
+            result=subprocess.run(['task',f'cast{n}:'+operation,'REASON=Watching TV'],
+                                  cwd=ROOT,env=env,text=True,capture_output=True,timeout=10)
+            assert result.returncode==0,result.stderr
+            assert f'chromecast-test-0{n}:' in result.stdout
+            assert ('reserved; Watching TV' if operation=='reserve' else 'released; queued jobs') in result.stdout
+
+
 def test_per_device_fifo_and_parallel_devices(service):
     cfg,_,a,b=service
     first=submit(a,device='d1',duration=.5)
@@ -428,6 +492,105 @@ def test_new_address_checks_hardware_serial_before_registry_update(monkeypatch):
     assert adapter.device['endpoint']=='192.168.4.46:5555'
 
 
+def test_capture_accepts_no_apk_and_rejects_app_mutations(service):
+    _,_,client,_=service
+    jid=client.submit({'workflow':'capture','device':'d2'})['id']
+    job=wait(client,jid)
+    assert job['state']=='completed'
+    assert job['request']=={'workflow':'capture','device':'d2'}
+    for field,value in [('apk','anything.apk'),('app','aquarium'),('scene','jellyfish'),('validator','poke-resume')]:
+        with pytest.raises(ValueError,match='Capture accepts only'):
+            validate_request({'workflow':'capture','device':'d2',field:value},['jellyfish'])
+
+
+def test_capture_preserves_foreground_and_never_installs(tmp_path):
+    from wf_device.workflows import Adapter
+    cfg=config(tmp_path);store=Store(cfg['state'],cfg['devices'])
+    owner=store.register(os.getuid(),'capture-test')['session']
+    job=store.submit(owner,{'workflow':'capture','device':'d2'})
+    store.claim();job=store.job(job['id'])
+    adapter=Adapter(store,job,cfg)
+    adapter.connect=lambda: setattr(adapter,'identity_verified',True)
+    commands=[]
+    png=b'\x89PNG\r\n\x1a\n'+b'fixture-image-data'
+    def adb(*args,**kwargs):
+        commands.append(args)
+        assert args==('exec-out','screencap','-p')
+        assert kwargs=={'binary':True}
+        return png
+    adapter.adb=adb
+    queries=[]
+    def shell(*args,**kwargs):
+        queries.append(args)
+        assert args[0]=='dumpsys'
+        return 'diagnostic fixture'
+    adapter.shell=shell
+    adapter.run();adapter.cleanup()
+    assert commands==[('exec-out','screencap','-p')]
+    assert (adapter.out/'screenshot.png').read_bytes()==png
+    assert adapter.restoration=='unchanged: current display captured without input'
+    assert queries==[('dumpsys','power'),('dumpsys','display'),('dumpsys','window'),
+                     ('dumpsys','activity','activities'),('dumpsys','dreams'),('dumpsys','SurfaceFlinger')]
+    assert (adapter.out/'power.txt').read_text()=='diagnostic fixture'
+    assert all(v['result']=='saved' for v in json.loads((adapter.out/'display-diagnostics.json').read_text()).values())
+
+
+def test_raw_capture_preserves_rgb_when_alpha_is_zero(tmp_path):
+    import struct
+    from PIL import Image
+    from wf_device.capture import save_raw
+    data=struct.pack('<4I',2,1,1,1)+bytes([123,45,67,0,1,2,3,255])
+    summary=save_raw(data,tmp_path)
+    assert summary['alpha_min']==0 and summary['nonzero_rgb_pixels']==2
+    assert Image.open(tmp_path/'raw-preserved.png').getpixel((0,0))==(123,45,67,0)
+    assert Image.open(tmp_path/'raw-opaque-preview.png').getpixel((0,0))==(123,45,67,255)
+    assert (tmp_path/'raw-screencap.bin').read_bytes()==data
+    with pytest.raises(RuntimeError,match='pixel length'):
+        save_raw(data[:-1],tmp_path)
+
+
+def test_capture_methods_reject_unreviewed_backends(service):
+    _,_,client,_=service
+    for method in ['png','raw','uiautomation','record','compare']:
+        job=client.submit({'workflow':'capture','device':'d2','method':method})
+        assert wait(client,job['id'])['state']=='completed'
+    with pytest.raises(ValueError,match='reviewed capture'):
+        validate_request({'workflow':'capture','device':'d2','method':'shell'},[])
+    with pytest.raises(ValueError,match='reviewed capture'):
+        validate_request({'workflow':'check','app':'aquarium','device':'d2','method':'record'},[])
+
+
+def test_observational_record_only_controls_owned_recording(tmp_path):
+    from wf_device.workflows import Adapter
+    from wf_device.capture import capture_current
+    cfg=config(tmp_path);store=Store(cfg['state'],cfg['devices'])
+    owner=store.register(os.getuid(),'capture-test')['session']
+    job=store.submit(owner,{'workflow':'capture','device':'d2','method':'record'})
+    store.claim();adapter=Adapter(store,store.job(job['id']),cfg)
+    adapter.identity_verified=True
+    calls=[]
+    def adb(*args,**kwargs):
+        calls.append(args)
+        if args[0]=='shell':
+            assert args[1].startswith('screenrecord --time-limit 3 ')
+            return '999'
+        assert args[:2]==('exec-out','cat')
+        return b'recording data'*100
+    def shell(*args,**kwargs):
+        calls.append(args)
+        if args[:2]==('cat','/proc/999/cmdline'):return ''
+        if args[0]=='rm':
+            assert args[1]=='-f' and job['id'] in args[2]
+            return ''
+        assert args[0]=='cat'
+        return 'recording log'
+    adapter.adb=adb;adapter.shell=shell
+    capture_current(adapter);adapter.cleanup()
+    assert (adapter.out/'capture.mp4').is_file()
+    assert adapter.record_pid is None
+    assert not any('am' in call or 'input' in call or 'install' in call for call in calls)
+
+
 def test_engine_log_tail_retains_recent_scene_without_reading_old_history(tmp_path):
     from wf_device.workflows import Adapter, ENGINE_LOG_TAIL_BYTES
     log = tmp_path/'wf.log'
@@ -442,70 +605,6 @@ def test_engine_log_tail_retains_recent_scene_without_reading_old_history(tmp_pa
     recent = adapter.engine_log_tail()
     assert len(recent.encode()) == ENGINE_LOG_TAIL_BYTES
     assert recent.endswith(marker)
-
-
-def test_reservation_blocks_fixed_jobs_and_routes_pool_to_other_device(service):
-    _,_,a,b=service
-    reservation=a.call('reserve',{'device':'d2','reason':'Watching TV'})
-    assert reservation['state']=='reserved'
-    fixed=submit(b,device='d2')
-    pooled=submit(b,pool='test')
-    assert wait(b,pooled)['device']=='d1'
-    assert b.call('status',{'job':fixed})['state']=='queued'
-    snapshot=b.call('queue')
-    assert next(d for d in snapshot['devices'] if d['id']=='d2')['reservation']['reason']=='Watching TV'
-    a.call('release',{'device':'d2'})
-    assert wait(b,fixed)['state']=='completed'
-
-
-def test_reservation_waits_for_active_cleanup_and_survives_store_restart(service):
-    cfg,_,a,b=service
-    active=submit(b,device='d2',duration=.6)
-    deadline=time.monotonic()+3
-    while b.call('status',{'job':active})['state']=='queued' and time.monotonic()<deadline:
-        time.sleep(.02)
-    assert a.call('reserve',{'device':'d2'})['state']=='waiting-for-cleanup'
-    queued=submit(b,device='d2')
-    assert wait(b,active)['state']=='completed'
-    reopened=Store(cfg['state'])
-    reservation=next(d for d in reopened.devices() if d['id']=='d2')['reservation']
-    assert reservation['state']=='reserved'
-    assert b.call('status',{'job':queued})['state']=='queued'
-    a.call('release',{'device':'d2'})
-    assert wait(b,queued)['state']=='completed'
-
-
-def test_reservation_owner_validation_and_idempotence(service):
-    _,_,a,b=service
-    initial=a.call('reserve',{'device':'d1'})
-    for method in ('reserve','release'):
-        with pytest.raises(RuntimeError,match='owner'):
-            b.call(method,{'device':'d1'})
-    changed=a.call('reserve',{'device':'d1','reason':'Movie'})
-    assert changed['created']==initial['created'] and changed['reason']=='Movie'
-    for request in ({'device':'missing'},{'device':'d2','reason':''},{'device':'d2','reason':'x'*201},{'pool':'test'}):
-        with pytest.raises(RuntimeError):
-            a.call('reserve',request)
-    assert a.call('release',{'device':'d1'})['released']
-    assert not a.call('release',{'device':'d1'})['released']
-
-
-def test_reservation_task_commands(service,tmp_path):
-    cfg,_,_,_=service
-    env=dict(os.environ,WF_COORDINATOR_SOCKET=cfg['socket'],WF_COORDINATOR_CLIENT_STATE=str(tmp_path/'task-reserver'))
-    for operation in ('reserve','release'):
-        result=subprocess.run(['task','chromecast:'+operation,'DEVICE=d2','REASON=Watching TV'],
-                              cwd=ROOT,env=env,text=True,capture_output=True,timeout=10)
-        assert result.returncode==0,result.stderr
-        assert ('reserved; Watching TV' if operation=='reserve' else 'released; queued jobs') in result.stdout
-    Store(cfg['state'],[{'id':f'chromecast-test-0{n}','health':'ready'} for n in (1,2)])
-    for n in (1,2):
-        for operation in ('reserve','release'):
-            result=subprocess.run(['task',f'cast{n}:'+operation,'REASON=Watching TV'],
-                                  cwd=ROOT,env=env,text=True,capture_output=True,timeout=10)
-            assert result.returncode==0,result.stderr
-            assert f'chromecast-test-0{n}:' in result.stdout
-            assert ('reserved; Watching TV' if operation=='reserve' else 'released; queued jobs') in result.stdout
 
 
 def test_service_restart_during_drained_maintenance_keeps_queue_and_reservation(tmp_path):

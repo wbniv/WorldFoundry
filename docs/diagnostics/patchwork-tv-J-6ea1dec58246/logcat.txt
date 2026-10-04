@@ -1,0 +1,167 @@
+--------- beginning of main
+10-04 14:52:10.267  6980  6980 I _game.patchwork: Using CollectorTypeCMC GC.
+10-04 14:52:10.279  6980  6980 E _game.patchwork: Not starting debugger since process cannot load the jdwp agent.
+10-04 14:52:10.324  6980  6980 D CompatibilityChangeReporter: Compat change id reported: 171979766; UID 10152; state: ENABLED
+10-04 14:52:10.324  6980  6980 D CompatibilityChangeReporter: Compat change id reported: 242716250; UID 10152; state: ENABLED
+10-04 14:52:10.353  6980  6980 I _game.patchwork: Failed to add image file: Failed to find OatDexFile for DexFile /data/app/~~_hs-45u7KDEpvZNPg4UpPA==/org.worldfoundry.wf_game.patchwork-lyaDfZfz0CD9GwnIBUVThQ==/base.apk (canonical path /data/app/~~_hs-45u7KDEpvZNPg4UpPA==/org.worldfoundry.wf_game.patchwork-lyaDfZfz0CD9GwnIBUVThQ==/base.apk) in OatFile /data/app/~~iHkUqViwDIs_tCtKuspyDQ==/org.worldfoundry.wf_game.patchwork-f5ZbF33_k6-SospXNdfOUg==/oat/arm/base.odex
+10-04 14:52:10.357  6980  6980 D nativeloader: Configuring clns-4 for other apk /data/app/~~iHkUqViwDIs_tCtKuspyDQ==/org.worldfoundry.wf_game.patchwork-f5ZbF33_k6-SospXNdfOUg==/base.apk. target_sdk_version=34, uses_libraries=, library_path=/data/app/~~iHkUqViwDIs_tCtKuspyDQ==/org.worldfoundry.wf_game.patchwork-f5ZbF33_k6-SospXNdfOUg==/lib/arm, permitted_path=/data:/mnt/expand:/data/user/0/org.worldfoundry.wf_game.patchwork
+10-04 14:52:10.374  6980  6980 V GraphicsEnvironment: Currently set values for:
+10-04 14:52:10.374  6980  6980 V GraphicsEnvironment:   angle_gl_driver_selection_pkgs=[]
+10-04 14:52:10.374  6980  6980 V GraphicsEnvironment:   angle_gl_driver_selection_values=[]
+10-04 14:52:10.375  6980  6980 V GraphicsEnvironment: ANGLE GameManagerService for org.worldfoundry.wf_game.patchwork: false
+10-04 14:52:10.375  6980  6980 V GraphicsEnvironment: org.worldfoundry.wf_game.patchwork is not listed in per-application setting
+10-04 14:52:10.375  6980  6980 V GraphicsEnvironment: Neither updatable production driver nor prerelease driver is supported.
+10-04 14:52:10.459  6980  6980 I WebViewFactory: Loading com.google.android.webview version 153.0.8010.36 (code 801003600)
+10-04 14:52:10.472  6980  6980 D ApplicationLoaders: Returning zygote-cached class loader: /system/framework/android.test.base.jar
+10-04 14:52:10.489  6980  6980 D nativeloader: Configuring clns-5 for other apk /data/app/~~71H4z0ABnw9ItCpCpx9G-w==/com.google.android.webview-SkD2_zXivUw8fXZOciFNxQ==/base.apk. target_sdk_version=36, uses_libraries=, library_path=/data/app/~~71H4z0ABnw9ItCpCpx9G-w==/com.google.android.webview-SkD2_zXivUw8fXZOciFNxQ==/lib/arm:/data/app/~~71H4z0ABnw9ItCpCpx9G-w==/com.google.android.webview-SkD2_zXivUw8fXZOciFNxQ==/base.apk!/lib/armeabi-v7a, permitted_path=/data:/mnt/expand
+10-04 14:52:10.667  6980  6980 I cr_WVCFactoryProvider: version=153.0.8010.36 (801003600) minSdkVersion=29 multiprocess=true packageId=127 splits=<none>
+10-04 14:52:10.815  6980  6980 I cr_LibraryLoader: Successfully loaded native library
+10-04 14:52:10.844  6980  6980 I cr_CachingUmaRecorder: Flushed 46 samples from 21 histograms, 0 samples were dropped.
+10-04 14:52:10.846  6980  6980 I cr_ChildProcLH: ScopedServiceBindingBatch.tryActivate: false
+10-04 14:52:10.854  6980  6980 I cr_CombinedPProvider: #registerProvider() provider:WV.hj@f2a4c1 isPolicyCacheEnabled:false policyProvidersSize:0
+10-04 14:52:10.854  6980  6980 I cr_PolicyProvider: #setManagerAndSource() 0
+10-04 14:52:10.857  6980  7003 I cr_policy: registerReceiver succeeded after 2ms
+10-04 14:52:10.870  6980  6980 I cr_DisplayManager: Is Display Topology available: false
+10-04 14:52:10.969  6980  6980 I cr_CombinedPProvider: #linkNativeInternal() 1
+10-04 14:52:10.970  6980  6980 D CompatibilityChangeReporter: Compat change id reported: 183155436; UID 10152; state: ENABLED
+10-04 14:52:10.975  6980  6980 I cr_AppResProvider: #getApplicationRestrictionsFromUserManager() Bundle[EMPTY_PARCEL]
+10-04 14:52:10.975  6980  6980 I cr_PolicyProvider: #notifySettingsAvailable() 0
+10-04 14:52:10.975  6980  6980 I cr_CombinedPProvider: #onSettingsAvailable() 0
+10-04 14:52:10.975  6980  6980 I cr_CombinedPProvider: #flushPolicies()
+10-04 14:52:11.138  6980  7028 W chromium: [WARNING:net/dns/dns_config_service_android.cc:69] Failed to read DnsConfig.
+10-04 14:52:11.161  6980  6980 D CompatibilityChangeReporter: Compat change id reported: 214741472; UID 10152; state: ENABLED
+10-04 14:52:11.232  6980  6980 D CompatibilityChangeReporter: Compat change id reported: 171228096; UID 10152; state: ENABLED
+10-04 14:52:11.279  6980  6980 D CompatibilityChangeReporter: Compat change id reported: 193247900; UID 10152; state: ENABLED
+10-04 14:52:11.496  6980  7034 W cr_media: BLUETOOTH_CONNECT permission is missing.
+10-04 14:52:11.503  6980  7034 W cr_media: getBluetoothAdapter() requires BLUETOOTH permission
+10-04 14:52:11.503  6980  7034 W cr_media: registerBluetoothIntentsIfNeeded: Requires BLUETOOTH permission
+10-04 14:52:11.550  6980  6980 I QuiltNightTV: TV_LAUNCH http://192.168.4.21:8096/receiver?display=android-tv&deviceCheck=1
+10-04 14:52:11.562  6980  6980 D CompatibilityChangeReporter: Compat change id reported: 237531167; UID 10152; state: DISABLED
+10-04 14:52:11.567  6980  6980 W OpenGLRenderer: Unknown dataspace 0
+10-04 14:52:11.599  6980  6980 I cr_AppResProvider: #getApplicationRestrictionsFromUserManager() Bundle[EMPTY_PARCEL]
+10-04 14:52:11.599  6980  6980 I cr_PolicyProvider: #notifySettingsAvailable() 0
+10-04 14:52:11.600  6980  6980 I cr_CombinedPProvider: #onSettingsAvailable() 0
+10-04 14:52:11.600  6980  6980 I cr_CombinedPProvider: #flushPolicies()
+10-04 14:52:11.620  6980  7056 I CameraManagerGlobal: Connecting to camera service
+10-04 14:52:11.624  6980  7044 W libc    : Access denied finding property "vendor.mali.platform.config"
+10-04 14:52:11.639  6980  7044 I mali    : Successfully parsed 1 environment variable(s) from /vendor/etc/mali_platform.config.
+10-04 14:52:11.640  6980  7044 W libc    : Access denied finding property "vendor.mali.debug.config"
+10-04 14:52:11.643  6980  7044 W libc    : Access denied finding property "vendor.mali.base_max_nr_instances"
+10-04 14:52:11.644  6980  7044 W libc    : Access denied finding property "vendor.mali.cctx_memory_class_unnamed"
+10-04 14:52:11.644  6980  7044 W libc    : Access denied finding property "vendor.mali.cctx_memory_class_default_heap"
+10-04 14:52:11.644  6980  7044 W libc    : Access denied finding property "vendor.mali.cctx_memory_class_base_internal"
+10-04 14:52:11.645  6980  7044 W libc    : Access denied finding property "vendor.mali.cctx_memory_class_framepool"
+10-04 14:52:11.645  6980  7044 W libc    : Access denied finding property "vendor.mali.cctx_memory_class_tiler"
+10-04 14:52:11.645  6980  7044 W libc    : Access denied finding property "vendor.mali.cctx_memory_class_program"
+10-04 14:52:11.645  6980  7044 W libc    : Access denied finding property "vendor.mali.cctx_memory_class_egl_color_plane"
+10-04 14:52:11.645  6980  7044 W libc    : Access denied finding property "vendor.mali.cctx_memory_class_egl_color_plane_imported"
+10-04 14:52:11.645  6980  7044 W libc    : Access denied finding property "vendor.mali.cctx_memory_class_vao"
+10-04 14:52:11.645  6980  7044 W libc    : Access denied finding property "vendor.mali.cctx_memory_class_img"
+10-04 14:52:11.647  6980  7044 W libc    : Access denied finding property "vendor.mali.cctx_memory_class_internal_surface"
+10-04 14:52:11.647  6980  7044 W libc    : Access denied finding property "vendor.mali.cctx_memory_class_buf"
+10-04 14:52:11.647  6980  7044 W libc    : Access denied finding property "vendor.mali.cctx_memory_class_crc"
+10-04 14:52:11.647  6980  7044 W libc    : Access denied finding property "vendor.mali.cctx_memory_class_cpom_hmem"
+10-04 14:52:11.647  6980  7044 W libc    : Access denied finding property "vendor.mali.cctx_memory_class_cpom_rsd"
+10-04 14:52:11.647  6980  7044 W libc    : Access denied finding property "vendor.mali.cctx_memory_class_cpom_mbs2"
+10-04 14:52:11.648  6980  7044 W libc    : Access denied finding property "vendor.mali.cctx_memory_class_cpom_static"
+10-04 14:52:11.648  6980  7044 W libc    : Access denied finding property "vendor.mali.cctx_memory_class_cframe_hmem"
+10-04 14:52:11.648  6980  7044 W libc    : Access denied finding property "vendor.mali.cctx_memory_class_cframe_sample_pos"
+10-04 14:52:11.648  6980  7044 W libc    : Access denied finding property "vendor.mali.cctx_memory_class_cframe_discard"
+10-04 14:52:11.648  6980  7044 W libc    : Access denied finding property "vendor.mali.cctx_memory_class_cframe_tess_geom"
+10-04 14:52:11.648  6980  7044 W libc    : Access denied finding property "vendor.mali.cctx_memory_class_cobj_hmem"
+10-04 14:52:11.648  6980  7044 W libc    : Access denied finding property "vendor.mali.cctx_memory_class_cmar_hmem"
+10-04 14:52:11.648  6980  7044 W libc    : Access denied finding property "vendor.mali.cctx_memory_class_cmar_prof_dump"
+10-04 14:52:11.649  6980  7044 W libc    : Access denied finding property "vendor.mali.cctx_memory_class_cblend_hmem"
+10-04 14:52:11.649  6980  7044 W libc    : Access denied finding property "vendor.mali.cctx_memory_class_gles_hmem"
+10-04 14:52:11.649  6980  7044 W libc    : Access denied finding property "vendor.mali.cctx_memory_class_gles_query"
+10-04 14:52:11.649  6980  7044 W libc    : Access denied finding property "vendor.mali.cctx_memory_class_gles_query_host"
+10-04 14:52:11.649  6980  7044 W libc    : Access denied finding property "vendor.mali.cctx_memory_class_gles_multiview"
+10-04 14:52:11.649  6980  7044 W libc    : Access denied finding property "vendor.mali.cctx_memory_class_cdeps_hmem"
+10-04 14:52:11.649  6980  7044 W libc    : Access denied finding property "vendor.mali.cctx_memory_class_cmem_suballoc"
+10-04 14:52:11.649  6980  7044 W libc    : Access denied finding property "vendor.mali.cctx_memory_class_cmem_hoard"
+10-04 14:52:11.649  6980  7044 W libc    : Access denied finding property "vendor.mali.cctx_memory_class_cmem_registry"
+10-04 14:52:11.650  6980  7044 W libc    : Access denied finding property "vendor.mali.cctx_memory_class_cl_payload"
+10-04 14:52:11.650  6980  7044 W libc    : Access denied finding property "vendor.mali.cctx_memory_class_cl_wlm_tls"
+10-04 14:52:11.650  6980  7044 W libc    : Access denied finding property "vendor.mali.cctx_memory_class_cl_hmem"
+10-04 14:52:11.650  6980  7044 W libc    : Access denied finding property "vendor.mali.cctx_memory_class_cl_svm"
+10-04 14:52:11.651  6980  7044 W libc    : Access denied finding property "vendor.mali.cctx_memory_class_cl_protected"
+10-04 14:52:11.651  6980  7044 W libc    : Access denied finding property "vendor.mali.cctx_memory_class_cinstr"
+10-04 14:52:11.651  6980  7044 W libc    : Access denied finding property "vendor.mali.cctx_memory_class_gfx_device_memory_cpu_uncached"
+10-04 14:52:11.651  6980  7044 W libc    : Access denied finding property "vendor.mali.cctx_memory_class_gfx_device_memory_cpu_cached"
+10-04 14:52:11.651  6980  7044 W libc    : Access denied finding property "vendor.mali.cctx_memory_class_gfx_device_memory_transient"
+10-04 14:52:11.651  6980  7044 W libc    : Access denied finding property "vendor.mali.cctx_memory_class_gfx_device_memory_protected"
+10-04 14:52:11.651  6980  7044 W libc    : Access denied finding property "vendor.mali.cctx_memory_class_gfx_device_external"
+10-04 14:52:11.651  6980  7044 W libc    : Access denied finding property "vendor.mali.cctx_memory_class_gfx_device_external_swapchain"
+10-04 14:52:11.652  6980  7044 W libc    : Access denied finding property "vendor.mali.cctx_memory_class_gfx_device_internal"
+10-04 14:52:11.652  6980  7044 W libc    : Access denied finding property "vendor.mali.cctx_memory_class_gfx_device_internal_tls"
+10-04 14:52:11.652  6980  7044 W libc    : Access denied finding property "vendor.mali.cctx_memory_class_gfx_device_internal_host"
+10-04 14:52:11.652  6980  7044 W libc    : Access denied finding property "vendor.mali.cctx_memory_class_gfx_device_internal_protected"
+10-04 14:52:11.652  6980  7044 W libc    : Access denied finding property "vendor.mali.cctx_memory_class_gfx_device_internal_transient"
+10-04 14:52:11.652  6980  7044 W libc    : Access denied finding property "vendor.mali.cctx_memory_class_gfx_descriptor_pool"
+10-04 14:52:11.652  6980  7044 W libc    : Access denied finding property "vendor.mali.cctx_memory_class_gfx_command_allocator"
+10-04 14:52:11.652  6980  7044 W libc    : Access denied finding property "vendor.mali.cctx_memory_class_gfx_command_allocator_host"
+10-04 14:52:11.652  6980  7044 W libc    : Access denied finding property "vendor.mali.cctx_memory_class_gfx_command_allocator_protected"
+10-04 14:52:11.653  6980  7044 W libc    : Access denied finding property "vendor.mali.cctx_memory_class_gfx_graph_internal_host"
+10-04 14:52:11.653  6980  7044 W libc    : Access denied finding property "vendor.mali.cctx_memory_class_gfx_graph_internal_device"
+10-04 14:52:11.653  6980  7044 W libc    : Access denied finding property "vendor.mali.cctx_memory_class_gfx_graph_internal_device_transient"
+10-04 14:52:11.653  6980  7044 W libc    : Access denied finding property "vendor.mali.cctx_memory_class_vk_bound_buffer"
+10-04 14:52:11.653  6980  7044 W libc    : Access denied finding property "vendor.mali.cctx_memory_class_vk_bound_image"
+10-04 14:52:11.658  6980  7044 W libc    : Access denied finding property "vendor.mali.cctx_memory_class_cmar_signal"
+10-04 14:52:11.658  6980  7044 W libc    : Access denied finding property "vendor.mali.cctx_memory_class_cmar_flush_chain"
+10-04 14:52:11.658  6980  7044 W libc    : Access denied finding property "vendor.mali.cctx_memory_class_cmar_metadata_list"
+10-04 14:52:11.658  6980  7044 W libc    : Access denied finding property "vendor.mali.cctx_memory_class_jit"
+10-04 14:52:11.658  6980  7044 W libc    : Access denied finding property "vendor.mali.cctx_memory_class_mmu"
+10-04 14:52:11.659  6980  7044 W libc    : Access denied finding property "vendor.mali.osu_protected_memory_heap_name"
+10-04 14:52:11.659  6980  7044 W libc    : Access denied finding property "vendor.mali.osu_ion_protected_memory_heap_name"
+10-04 14:52:11.659  6980  7044 W libc    : Access denied finding property "vendor.mali.platform_agt_frequency_khz"
+10-04 14:52:11.660  6980  7044 W libc    : Access denied finding property "vendor.mali.hal_dump_dir"
+10-04 14:52:11.660  6980  6997 W libc    : Access denied finding property "vendor.mali.platform.config"
+10-04 14:52:11.661  6980  6997 I mali    : Successfully parsed 1 environment variable(s) from /vendor/etc/mali_platform.config.
+10-04 14:52:11.661  6980  6997 W libc    : Access denied finding property "vendor.mali.debug.config"
+10-04 14:52:11.692  6980  6997 W libc    : Access denied finding property "ro.vendor.arm.egl.configs.yuyv.hal_format"
+10-04 14:52:11.692  6980  6997 W libc    : Access denied finding property "ro.vendor.arm.egl.configs.yuyv.recordable"
+10-04 14:52:11.692  6980  6997 W libc    : Access denied finding property "ro.vendor.arm.egl.configs.yuyv.dataspaces_to_exclude"
+10-04 14:52:11.692  6980  6997 W libc    : Access denied finding property "ro.vendor.arm.egl.configs.nv12.hal_format"
+10-04 14:52:11.692  6980  6997 W libc    : Access denied finding property "ro.vendor.arm.egl.configs.nv12.recordable"
+10-04 14:52:11.693  6980  6997 W libc    : Access denied finding property "ro.vendor.arm.egl.configs.nv12.dataspaces_to_exclude"
+10-04 14:52:11.693  6980  6997 W libc    : Access denied finding property "ro.vendor.arm.egl.configs.nv21.hal_format"
+10-04 14:52:11.693  6980  6997 W libc    : Access denied finding property "ro.vendor.arm.egl.configs.nv21.recordable"
+10-04 14:52:11.693  6980  6997 W libc    : Access denied finding property "ro.vendor.arm.egl.configs.nv21.dataspaces_to_exclude"
+10-04 14:52:11.693  6980  6997 W libc    : Access denied finding property "ro.vendor.arm.egl.configs.nv16.hal_format"
+10-04 14:52:11.693  6980  6997 W libc    : Access denied finding property "ro.vendor.arm.egl.configs.nv16.recordable"
+10-04 14:52:11.693  6980  6997 W libc    : Access denied finding property "ro.vendor.arm.egl.configs.nv16.dataspaces_to_exclude"
+10-04 14:52:11.693  6980  6997 W libc    : Access denied finding property "ro.vendor.arm.egl.configs.yuv420.hal_format"
+10-04 14:52:11.693  6980  6997 W libc    : Access denied finding property "ro.vendor.arm.egl.configs.yuv420.recordable"
+10-04 14:52:11.693  6980  6997 W libc    : Access denied finding property "ro.vendor.arm.egl.configs.yuv420.dataspaces_to_exclude"
+10-04 14:52:11.693  6980  6997 W libc    : Access denied finding property "ro.vendor.arm.egl.configs.yvu420.hal_format"
+10-04 14:52:11.693  6980  6997 W libc    : Access denied finding property "ro.vendor.arm.egl.configs.yvu420.recordable"
+10-04 14:52:11.693  6980  6997 W libc    : Access denied finding property "ro.vendor.arm.egl.configs.yvu420.dataspaces_to_exclude"
+10-04 14:52:11.694  6980  6997 W libc    : Access denied finding property "ro.vendor.arm.egl.configs.y410.hal_format"
+10-04 14:52:11.694  6980  6997 W libc    : Access denied finding property "ro.vendor.arm.egl.configs.y410.recordable"
+10-04 14:52:11.694  6980  6997 W libc    : Access denied finding property "ro.vendor.arm.egl.configs.y410.dataspaces_to_exclude"
+10-04 14:52:11.694  6980  6997 W libc    : Access denied finding property "ro.vendor.arm.egl.configs.y210.hal_format"
+10-04 14:52:11.694  6980  6997 W libc    : Access denied finding property "ro.vendor.arm.egl.configs.y210.recordable"
+10-04 14:52:11.694  6980  6997 W libc    : Access denied finding property "ro.vendor.arm.egl.configs.y210.dataspaces_to_exclude"
+10-04 14:52:11.694  6980  6997 W libc    : Access denied finding property "ro.vendor.arm.egl.configs.y0l2.hal_format"
+10-04 14:52:11.694  6980  6997 W libc    : Access denied finding property "ro.vendor.arm.egl.configs.y0l2.recordable"
+10-04 14:52:11.694  6980  6997 W libc    : Access denied finding property "ro.vendor.arm.egl.configs.y0l2.dataspaces_to_exclude"
+10-04 14:52:11.694  6980  6997 W libc    : Access denied finding property "ro.vendor.arm.egl.configs.p210.hal_format"
+10-04 14:52:11.694  6980  6997 W libc    : Access denied finding property "ro.vendor.arm.egl.configs.p210.recordable"
+10-04 14:52:11.695  6980  6997 W libc    : Access denied finding property "ro.vendor.arm.egl.configs.p210.dataspaces_to_exclude"
+10-04 14:52:11.695  6980  6997 W libc    : Access denied finding property "ro.vendor.arm.egl.configs.p010.hal_format"
+10-04 14:52:11.695  6980  6997 W libc    : Access denied finding property "ro.vendor.arm.egl.configs.p010.recordable"
+10-04 14:52:11.695  6980  6997 W libc    : Access denied finding property "ro.vendor.arm.egl.configs.p010.dataspaces_to_exclude"
+10-04 14:52:12.244  6980  6997 E OpenGLRenderer: Unable to match the desired swap behavior.
+10-04 14:52:12.411  6980  6992 I OpenGLRenderer: Davey! duration=879ms; Flags=1, FrameTimelineVsyncId=35236513, IntendedVsync=203489365763567, Vsync=203489449180232, InputEventId=0, HandleInputStart=203489464592321, AnimationStart=203489464594571, PerformTraversalsStart=203489466675446, DrawStart=203490091177696, FrameDeadline=203489382446900, FrameInterval=203489463937529, FrameStartTime=16683333, SyncQueued=203490094864155, SyncStart=203490095105488, IssueDrawCommandsStart=203490097061238, SwapBuffers=203490235139697, FrameCompleted=203490245997530, DequeueBufferDuration=51279666, QueueBufferDuration=884000, GpuCompleted=203490245997530, SwapBuffersCompleted=203490238123197, DisplayPresentTime=0, CommandSubmissionCompleted=203490235139697, 
+10-04 14:52:12.414  6980  6980 I Choreographer: Skipped 46 frames!  The application may be doing too much work on its main thread.
+10-04 14:52:12.443  6980  6995 I OpenGLRenderer: Davey! duration=794ms; Flags=0, FrameTimelineVsyncId=35236547, IntendedVsync=203489482548600, Vsync=203490249985000, InputEventId=0, HandleInputStart=203490265049447, AnimationStart=203490265051697, PerformTraversalsStart=203490265128530, DrawStart=203490265486280, FrameDeadline=203490266663549, FrameInterval=203490259991072, FrameStartTime=16683400, SyncQueued=203490266355905, SyncStart=203490266474030, IssueDrawCommandsStart=203490266609530, SwapBuffers=203490270329947, FrameCompleted=203490277089738, DequeueBufferDuration=61583, QueueBufferDuration=730666, GpuCompleted=203490277089738, SwapBuffersCompleted=203490273401405, DisplayPresentTime=0, CommandSubmissionCompleted=203490270329947, 
+10-04 14:52:12.616  6980  7041 W VideoCapabilities: Unrecognized profile/level 0/4 for video/mpeg2
+10-04 14:52:12.616  6980  7041 I VideoCapabilities: Unsupported profile 3 for video/mpeg2
+10-04 14:52:12.616  6980  7041 I VideoCapabilities: Unsupported profile 4 for video/mpeg2
+10-04 14:52:12.616  6980  7041 I VideoCapabilities: Unsupported profile 5 for video/mpeg2
+10-04 14:52:12.617  6980  7041 I VideoCapabilities: Unsupported profile 2 for video/mp4v-es
+10-04 14:52:12.617  6980  7041 I VideoCapabilities: Unsupported profile 8 for video/mp4v-es
+10-04 14:52:12.617  6980  7041 I VideoCapabilities: Unsupported profile 16 for video/mp4v-es
+10-04 14:52:12.617  6980  7041 I VideoCapabilities: Unsupported profile 1024 for video/mp4v-es
+10-04 14:52:12.643  6980  7041 W cr_VAUtil: Unknown profile: 32768 for codec video/x-vnd.on2.vp9
+10-04 14:52:12.643  6980  7041 W cr_VAUtil: Unknown profile: 32768 for codec video/x-vnd.on2.vp9

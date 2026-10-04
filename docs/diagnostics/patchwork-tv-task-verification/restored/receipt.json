@@ -1,0 +1,279 @@
+{
+  "job": {
+    "id": "J-c7d8fa5d3fa8",
+    "owner": "d15f47a5d533edf02af1e3e1",
+    "accepted": 1791103436.1287847,
+    "state": "running",
+    "phase": "restoring",
+    "request": {
+      "device": "chromecast-test-01",
+      "app": "patchwork",
+      "apk": "89e7f370e4365f474a79af11875a259136e3c70da9568a748ba729580d52fd45.apk",
+      "duration": 15.0,
+      "workflow": "check"
+    },
+    "device": "chromecast-test-01",
+    "generation": 22,
+    "cancel": 0,
+    "error": null,
+    "started": 1791103436.208917,
+    "finished": null,
+    "worker_pid": 330845,
+    "recovery_resolved": 0
+  },
+  "device": {
+    "id": "chromecast-test-01",
+    "serial": "2628105GN0GT7C",
+    "model": "Chromecast HD",
+    "device": "boreal",
+    "android": "14",
+    "abis": [
+      "armeabi-v7a",
+      "armeabi"
+    ],
+    "transport": "tls",
+    "endpoint": "192.168.4.43:41277",
+    "pools": [
+      "chromecast-test"
+    ],
+    "health": "ready",
+    "enrolled": true,
+    "ipv6_addresses": [
+      "fd5d:59ce:7438:1:7104:7f7e:6f75:edbe",
+      "fd5d:59ce:7438:1:581b:d19a:27a5:c4db",
+      "fd5d:59ce:7438:1:3b82:772d:8d07:d5f6",
+      "fd5d:59ce:7438:1:401f:2bff:fe13:98df",
+      "fe80::401f:2bff:fe13:98df"
+    ],
+    "generation": 22,
+    "last_seen": 1791103436.5246058,
+    "boot_id": "9ec069a1-861f-449a-a777-29554a2f1ed4",
+    "sdk": "34",
+    "reservation": null
+  },
+  "result": "failed",
+  "error": "Target app left foreground; measurement invalid",
+  "cleanup_verified": true,
+  "restoration": "home-fallback: previous app launcher unavailable",
+  "commands": [
+    {
+      "args": [
+        "mdns",
+        "services"
+      ],
+      "start": 1791103436.4035125,
+      "end": 1791103436.4069736,
+      "returncode": 0
+    },
+    {
+      "args": [
+        "connect",
+        "192.168.4.43:41277"
+      ],
+      "start": 1791103436.4078193,
+      "end": 1791103436.4294791,
+      "returncode": 0
+    },
+    {
+      "args": [
+        "shell",
+        "getprop ro.serialno"
+      ],
+      "start": 1791103436.4308572,
+      "end": 1791103436.5245743,
+      "returncode": 0
+    },
+    {
+      "args": [
+        "shell",
+        "cat /proc/sys/kernel/random/boot_id"
+      ],
+      "start": 1791103436.5259407,
+      "end": 1791103436.6689181,
+      "returncode": 0
+    },
+    {
+      "args": [
+        "shell",
+        "getprop ro.product.model"
+      ],
+      "start": 1791103436.6701639,
+      "end": 1791103436.7431722,
+      "returncode": 0
+    },
+    {
+      "args": [
+        "shell",
+        "getprop ro.build.version.release"
+      ],
+      "start": 1791103436.744477,
+      "end": 1791103436.8235466,
+      "returncode": 0
+    },
+    {
+      "args": [
+        "shell",
+        "getprop ro.build.version.sdk"
+      ],
+      "start": 1791103436.8249989,
+      "end": 1791103436.9397495,
+      "returncode": 0
+    },
+    {
+      "args": [
+        "shell",
+        "getprop ro.product.device"
+      ],
+      "start": 1791103436.9421394,
+      "end": 1791103437.0080218,
+      "returncode": 0
+    },
+    {
+      "args": [
+        "shell",
+        "getprop ro.product.cpu.abilist"
+      ],
+      "start": 1791103437.009289,
+      "end": 1791103437.1023397,
+      "returncode": 0
+    },
+    {
+      "args": [
+        "shell",
+        "ip -6 addr show wlan0"
+      ],
+      "start": 1791103437.1036727,
+      "end": 1791103437.1973236,
+      "returncode": 0
+    },
+    {
+      "args": [
+        "shell",
+        "dumpsys activity activities"
+      ],
+      "start": 1791103437.2206008,
+      "end": 1791103437.3263242,
+      "returncode": 0
+    },
+    {
+      "args": [
+        "install",
+        "-r",
+        "/var/lib/wf-device-coordinator/inputs/89e7f370e4365f474a79af11875a259136e3c70da9568a748ba729580d52fd45.apk"
+      ],
+      "start": 1791103437.3749778,
+      "end": 1791103440.3919601,
+      "returncode": 0
+    },
+    {
+      "args": [
+        "shell",
+        "pm path org.worldfoundry.wf_game.patchwork"
+      ],
+      "start": 1791103440.393295,
+      "end": 1791103440.6114702,
+      "returncode": 0
+    },
+    {
+      "args": [
+        "shell",
+        "sha256sum '/data/app/~~mX1cuH3qpnd4UjXl6ZAHxw==/org.worldfoundry.wf_game.patchwork-dP7t6Y87HdZlrWrHS-XHpw==/base.apk'"
+      ],
+      "start": 1791103440.6128554,
+      "end": 1791103440.7110784,
+      "returncode": 0
+    },
+    {
+      "args": [
+        "shell",
+        "am force-stop org.worldfoundry.wf_game.patchwork"
+      ],
+      "start": 1791103440.7379766,
+      "end": 1791103441.1139653,
+      "returncode": 0
+    },
+    {
+      "args": [
+        "shell",
+        "input keyevent KEYCODE_WAKEUP"
+      ],
+      "start": 1791103441.1153653,
+      "end": 1791103441.502938,
+      "returncode": 0
+    },
+    {
+      "args": [
+        "shell",
+        "am start -W -n org.worldfoundry.wf_game.patchwork/.TvActivity"
+      ],
+      "start": 1791103441.654274,
+      "end": 1791103443.952291,
+      "returncode": 0
+    },
+    {
+      "args": [
+        "shell",
+        "dumpsys activity activities"
+      ],
+      "start": 1791103448.9549668,
+      "end": 1791103449.1330817,
+      "returncode": 0
+    },
+    {
+      "args": [
+        "shell",
+        "pidof org.worldfoundry.wf_game.patchwork"
+      ],
+      "start": 1791103449.1347158,
+      "end": 1791103449.246056,
+      "returncode": 0
+    },
+    {
+      "args": [
+        "shell",
+        "dumpsys activity activities"
+      ],
+      "start": 1791103464.248753,
+      "end": 1791103464.4687111,
+      "returncode": 0
+    },
+    {
+      "args": [
+        "shell",
+        "am force-stop org.worldfoundry.wf_game.patchwork"
+      ],
+      "start": 1791103464.4923315,
+      "end": 1791103464.6466606,
+      "returncode": 0
+    },
+    {
+      "args": [
+        "shell",
+        "am start -W -a android.intent.action.MAIN -c android.intent.category.LEANBACK_LAUNCHER -p com.google.android.apps.tv.launcherx"
+      ],
+      "start": 1791103464.6484177,
+      "end": 1791103464.7852376,
+      "returncode": 0
+    },
+    {
+      "args": [
+        "shell",
+        "input keyevent KEYCODE_HOME"
+      ],
+      "start": 1791103464.7866306,
+      "end": 1791103464.921203,
+      "returncode": 0
+    },
+    {
+      "args": [
+        "shell",
+        "pidof org.worldfoundry.wf_game.patchwork"
+      ],
+      "start": 1791103465.0728602,
+      "end": 1791103465.377614,
+      "returncode": 1
+    }
+  ],
+  "finished": 1791103465.3787785,
+  "concurrent_jobs": []
+}

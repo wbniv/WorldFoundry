@@ -1,0 +1,298 @@
+<!doctype html><html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><title>Keer op Keer Chromecast implementation plan</title><style>body{font:17px/1.65 system-ui,sans-serif;color:#202630;background:#f5f6f8;margin:0}main{max-width:1100px;margin:32px auto;padding:40px;background:white;border-radius:12px}h1,h2{line-height:1.25}h2{margin-top:2em}a{color:#1859b8}table{border-collapse:collapse;width:100%;font-size:15px}th,td{padding:12px;border:1px solid #d5dae2;text-align:left;vertical-align:top}th{background:#edf1f7}pre{padding:18px;background:#edf1f7;overflow:auto}code{font-size:.9em}@media(max-width:700px){main{margin:0;padding:20px}table{display:block;overflow-x:auto}}</style></head><body><main><h1>Keer op Keer Chromecast implementation plan</h1>
+<p>Date: 2026-10-04<br />
+Status: Draft for Will’s review. Implementation has not started.<br />
+Project: <a href="README.md">Keer op Keer</a></p>
+<p>Build a couch multiplayer game for 2–6 players. Each player uses a phone
+browser to choose dice and mark their own board. Chromecast shows the shared
+dice pool, whose turn it is, who is still choosing, completed columns and
+colors, and the score. Reuse the existing party-games platform.</p>
+<p>Chromecast presents the shared elements: rolled dice, available choices,
+turn order, player readiness, bonus claims and results. Phones provide each
+player’s board and move controls. All proposed defaults below are open for review. Approval of
+this plan is required before starting Phase 0 or changing game/platform code.</p>
+<h2>Existing digital versions</h2>
+<p>Yes: this game already has digital editions. Checked on 2026-10-04 using
+developer and storefront listings; these apps have not been installed or
+play-tested during planning. Availability may vary by storefront region.</p>
+<table>
+<thead>
+<tr>
+<th>Product</th>
+<th>Platforms</th>
+<th>Advertised capabilities</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>Outline Development’s officially licensed Encore! Digital Edition, also named Noch mal! / Keer op Keer in regional listings</td>
+<td><a href="https://play.google.com/store/apps/details?id=de.development.outline.nochmal">Android</a>, <a href="https://apps.apple.com/gb/app/encore-digital-edition/id1374587455">iPhone/iPad</a>; the <a href="https://www.outline-development.com/en/games/">developer also lists Amazon</a></td>
+<td>Solo mode, two players sharing one device, automatic dice selection/turn completion, digital scoresheet and dice modes. The Apple listing additionally supports installation on compatible Apple silicon Macs and Apple Vision.</td>
+</tr>
+<tr>
+<td>Ster Software’s Keer op Keer Sheet</td>
+<td><a href="https://play.google.com/store/apps/details?id=nl.stersoftware.xopx">Android</a>, <a href="https://apps.apple.com/nl/app/keer-op-keer-sheet/id1597275546">iPhone/iPad</a></td>
+<td>Digital boards, built-in dice, automatic scoring, sheet editor and multiple modes. The description supports one phone per player but does not establish synchronized network rooms or a shared TV receiver.</td>
+</tr>
+</tbody>
+</table>
+<p>The reviewed listings do not advertise Chromecast coordination with a
+separate phone per player. This is a gap in the verified descriptions, not
+proof that no such product exists. Browser dice rollers also exist, such as
+<a href="https://digitaledobbelsteen.nl/spellen/keer-op-keer">Digitale Dobbelsteen</a>;
+they should not be treated as verified full multiplayer adaptations.</p>
+<p>The proposed value of this project is the shared TV experience: synchronized
+turns, a single authoritative dice pool, simultaneous bonus resolution and
+individual phone boards. Phase 0 will compare the existing apps’ board
+interaction, confirmation flow and multiplayer features before finalizing
+our UI. Any purchase or installation for that comparison happens after plan
+approval. A public release’s branding/assets/licensing approach remains a
+release decision; existing app licenses do not transfer to this project.</p>
+<h2>Proposed experience</h2>
+<table>
+<thead>
+<tr>
+<th>Screen</th>
+<th>What players see and do</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>TV lobby</td>
+<td>Join URL, QR code, room code, connected players and ready status.</td>
+</tr>
+<tr>
+<td>Phone lobby</td>
+<td>Enter name, join room, mark ready; host starts the game.</td>
+</tr>
+<tr>
+<td>TV during play</td>
+<td>Active player, turn number, three color dice and three number dice, reserved pair, remaining shared choices, player submission status, public bonuses and scores.</td>
+</tr>
+<tr>
+<td>Phone during play</td>
+<td>Own 15-column board, dice choices, Joker balance, selected cells, confirmation/pass controls, score breakdown and help.</td>
+</tr>
+<tr>
+<td>TV turn recap</td>
+<td>New columns/colors, bonus awards, score changes, next player.</td>
+</tr>
+<tr>
+<td>Game over</td>
+<td>Ranked results, score breakdown, ties, and host-controlled rematch.</td>
+</tr>
+</tbody>
+</table>
+<p>The phone shows “Roll” only to the active player. The server generates the
+roll; TV animation illustrates the returned result. Players select a color
+die and a number die, choose Joker values if necessary, tap cells, then
+confirm. Selecting cells is a reversible local draft. Confirmation commits
+one move; there is no undo after acceptance. Passing is always available.</p>
+<p>On ordinary turns the active player commits first. Their two dice are then
+unavailable to everyone else. Other players choose concurrently from the
+remaining four dice; their selections do not consume dice for one another.
+During the first three turns everyone may use all six dice, including the
+active player’s pair. An active-player pass leaves all six available.</p>
+<p>No default turn timer. Show who is still thinking without penalizing slow
+players. The host may pause and explicitly remove an absent player, with a
+confirmation explaining that their seat is forfeited for this game.</p>
+<p>Show bonus/score summaries publicly. Keep live phone selections private.
+Because tabletop players can inspect one another’s boards, provide a public
+board overview on the TV during pauses/recaps, selected by the host; this
+shows committed marks only. Default TV layout stays focused on coordination.</p>
+<h2>Rules and simultaneous resolution</h2>
+<p>Use the <a href="rules/encore-official-rules-en.pdf">archived English rulebook</a> and
+<a href="rules/encore-official-rules-en.txt">text transcription</a> as references.</p>
+<ul>
+<li>Use one verified base board for everyone, with columns A–O, start column H,
+  five colors, stars, column rewards, color rewards and eight Joker uses.
+  Record the board as explicit data and check every cell against the PDF.</li>
+<li>A move marks exactly 1–5 previously unmarked cells of the chosen color.
+  They form one orthogonally connected group that touches an existing mark
+  or includes a cell in H. Diagonal contact does not qualify.</li>
+<li>Each Joker die consumes one Joker use; using both consumes two. A number
+  Joker allows 1–5, never six. No remaining uses means no Joker selection.</li>
+<li>Resolve every player’s accepted move/pass together at the turn boundary.
+  Keep the bonus availability from the beginning of that turn. Players who
+  complete the same previously unclaimed column that turn all get the higher
+  value, regardless of which phone submitted first.</li>
+<li>Proposed ruling: apply that same simultaneous tie treatment to first
+  completion of a color. The English text explicitly covers column ties but
+  is less explicit about color ties; verify against Dutch rules/publisher
+  clarification in Phase 0 and document the final ruling.</li>
+<li>Finish the entire turn when someone completes their second color. Everyone
+  still gets their move/pass, then calculate final scores.</li>
+<li>Score completed columns + completed colors + unused Jokers − two per
+  unmarked star. Break score ties by unused Jokers, then declare joint winners.</li>
+</ul>
+<p>Turn numbers count individual rolls, rather than a full lap of the table.
+Player order is fixed at game start; a removed seat is skipped. Late arrivals
+wait for the next game. Rematch resets boards, awards and rolls and rotates
+the starting player. Solo play and additional sheets are later extensions.</p>
+<h2>Architecture and platform changes</h2>
+<p>Implement a game plugin under this directory, selected with
+<code>WF_GAME=keer-op-keer</code>. Reuse the Node/WebSocket relay, room codes, Cast
+launcher, receiver shell, controller shell and existing feedback helpers.</p>
+<p>Proposed files:</p>
+<pre><code class="language-text">keer-op-keer.js             per-room authoritative state machine
+rules.js                   move validation and score calculation
+boards/base.json            verified board, stars and rewards
+client/controller.js/.css   phone board and controls
+client/receiver.js/.css     TV lobby, shared pool and recaps
+test/                      rules, protocol and room integration tests
+</code></pre>
+<p>The server owns dice results, boards, Joker use, submissions, awards and
+phase transitions. Phones send intent; they never submit trusted scores.
+Assign each die a stable ID so identical results remain distinct physical
+dice. Every command carries game ID, turn ID and action ID. Reject stale
+commands; retries return the original acknowledgement without applying the
+move twice. Version snapshots so reconnects cannot restore an older state.</p>
+<p>Proposed flow:</p>
+<pre><code class="language-text">LOBBY → WAIT_FOR_ROLL → ACTIVE_CHOICE → OTHER_CHOICES → RESOLVE → TURN_RECAP
+                             ↑                                      |
+                             └──── WAIT_FOR_ROLL for next player ───┘
+RESOLVE → GAME_OVER when a second color has been completed
+</code></pre>
+<p>On the first three turns, the UI may let other players draft immediately,
+but commit processing still uses the same turn boundary. Pause preserves
+the underlying phase and accepted submissions.</p>
+<p>Use game-prefixed messages for roll, submit, pass, pause, resume, rematch,
+snapshot request and acknowledgements. Broadcast public state; send personal
+boards and validation feedback through <code>services.sendTo</code>. Public board
+inspection uses an explicit public projection of committed marks.</p>
+<p>Required shared-platform work should be small and covered by regressions:</p>
+<ul>
+<li>Explicit receiver-ready/snapshot handshake after its module mounts. A
+  reconnecting or newly attached TV must receive current game state without
+  waiting for a player action.</li>
+<li>Receiver WebSocket reconnect with retry/backoff and restoration to the
+  same room; current receiver code closes without reconnecting.</li>
+<li>Game-specific seat retention beyond the current 20-second grace. Proposed
+  default: retain a disconnected seat for the match, pause if it blocks the
+  turn, and let the host remove it. Preserve the existing default for other
+  games. Use a server-issued resume credential; a name alone cannot reclaim
+  a seat. Keep public room codes separate from seat credentials.</li>
+<li>Presence and receiver connectivity notifications, host transfer after
+  explicit departure, and late-join handling. Reconnection restores accepted
+  submissions; a lost acknowledgement cannot duplicate a move.</li>
+<li>Resolve the launch/join sequence: the existing phone entry gate needs a
+  room code, while a fresh receiver creates one. Provide a launch-first host
+  entry or sender-to-receiver room binding, and prove that host and TV land
+  in the same room. Everyone else joins using the displayed QR/code.</li>
+</ul>
+<p>An in-memory server is enough for the first release: phone/TV reconnects
+restore the match while the server lives. A server restart ends the match
+with a clear message. Durable saves are a later phase, not an implied promise.</p>
+<h2>Implementation phases</h2>
+<table>
+<thead>
+<tr>
+<th>Phase</th>
+<th>Deliverable</th>
+<th>Exit condition</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>0 — Rules and Cast feasibility</td>
+<td>Existing-app comparison, verified board data specification, color-tie ruling, phone/TV wireframes, current hosting/app-ID audit, coordinator test-route definition.</td>
+<td>Comparison findings and rules/board specification are reviewed; a minimal receiver can launch through a coordinator-owned session and join the same room as its host.</td>
+</tr>
+<tr>
+<td>1 — Rules engine</td>
+<td>Pure validation/scoring module and deterministic per-room turn engine, without UI.</td>
+<td>Tests cover adjacency, H starts, exact counts, Joker limits, first-three-turn exception, pass, simultaneous awards, final-turn completion and ties.</td>
+</tr>
+<tr>
+<td>2 — Phone board prototype</td>
+<td>Responsive board, selectable dice, Joker choices, draft marks, confirm/pass and contextual help against a local test driver.</td>
+<td>A player can make and correct a draft on a small phone; invalid selections explain the rule; the base board matches the reference.</td>
+</tr>
+<tr>
+<td>3 — Multiplayer browser game</td>
+<td>Plugin integration, room lobby, public/private snapshots and synchronized turns with a browser TV.</td>
+<td>Two and six simulated players finish deterministic games; duplicate/stale commands and separate rooms cannot corrupt state.</td>
+</tr>
+<tr>
+<td>4 — TV presentation and recovery</td>
+<td>TV dice pool, reservations, status, recaps, public board inspection, QR joining, reconnect/pause/removal/rematch behavior.</td>
+<td>A full browser playthrough survives lost connections, refreshes and lost acknowledgements; TV restore is immediate and scores agree everywhere.</td>
+</tr>
+<tr>
+<td>5 — Real Chromecast validation</td>
+<td>Staged HTTPS/WSS deployment and complete sessions on both dedicated Chromecasts with real phone browsers.</td>
+<td>Both devices pass launch/join, turns, final scoring, receiver recovery and rematch; captured evidence accompanies results.</td>
+</tr>
+<tr>
+<td>6 — Release polish</td>
+<td>Guided first turn, accessibility pass, restrained feedback, documentation and approved release deployment.</td>
+<td>Fresh users can join and finish a game; required tests pass; release URL/version and known limits are documented.</td>
+</tr>
+</tbody>
+</table>
+<p>Dependencies are sequential. Phase 2 may use fixtures before the multiplayer
+protocol is ready. Phase 0 discovers Cast blockers early; browser work may
+continue after approval if Cast registration or coordinator support needs
+external changes, but device verification remains an explicit open gate.</p>
+<h2>Phone usability and TV layout</h2>
+<p>The board is 15 columns wide, which makes individual cells too small on many
+portrait phones. Start with a landscape board that fits the screen and a
+portrait view with a scrollable/zoomable board, fixed dice/confirm controls,
+and persistent selection count. Preserve the full board overview and start
+column marker. Test this in Phase 2 before committing to the interaction.
+Use tap-to-toggle cells and a clear-selection action; drag marking is optional
+polish because it can conflict with scrolling.</p>
+<p>Identify colors with distinct shapes/labels as well as color. Use visible
+selection outlines, star/Joker labels, focusable cells and accessible names
+such as “H4, blue, star, unmarked.” Disable confirmation until the draft is
+valid, but always explain what remains to be selected. Confirmation becomes
+“Submitting” until acknowledged, then “Waiting for other players.”</p>
+<p>On TV, keep dice large and readable across the room. Mark reserved dice
+visibly instead of removing them without explanation. Show “all six dice
+available” during the opening turns and active-player passes. Keep the
+room code visible, allow for overscan, and test at 720p and 1080p. Draw dice
+with CSS/SVG for consistent device rendering; Unicode in the archived text
+does not require reliance on TV font coverage.</p>
+<h2>Cast delivery and device evidence</h2>
+<p>Use the existing Custom Web Receiver path. It needs app registration and a
+reachable hosted receiver; test devices must be registered for unpublished
+receivers. These requirements are described in Google’s
+<a href="https://developers.google.com/cast/docs/web_receiver/basic">receiver documentation</a>
+and <a href="https://developers.google.com/cast/docs/registration">registration documentation</a>.
+Use HTTPS/WSS for staging/release. Audit the current app ID and hosted URL;
+the earlier platform plan leaves physical Cast verification pending.</p>
+<p>The coordinator currently documents APK-centric Aquarium/Condo workflows.
+Phase 0 must establish a supported Cast-web launch/input/capture workflow
+within coordinator ownership. If an adapter is needed, specify and add that
+support through the service’s maintained interface. Do not assume an
+<code>APP=keer-op-keer</code> workflow already exists, or substitute direct ADB/Cast
+control. Freeze/version web assets before each job; freeze an APK locally
+first if the approved test route requires a packaged launcher.</p>
+<p>Use <code>task chromecast:devices</code> and <code>task chromecast:queue</code>, submit with
+<code>DEVICE=chromecast-test-01</code> or <code>DEVICE=chromecast-test-02</code>, follow with
+<code>task chromecast:watch JOB=...</code>, and download with
+<code>task chromecast:evidence JOB=... OUT=...</code>. Installation, launch, input,
+capture and cleanup belong to one owned session. Coordinator downtime leaves
+device testing pending; there is no direct-control fallback.</p>
+<p>Save evidence under this project’s <code>evidence/</code> directory, identified by job
+and build/version. Include TV captures, phone screenshots, sanitized event
+logs and a concise result sheet. Never include seat credentials. Any manual
+diagnostic command requested from Will writes to a named file, prints its
+destination, and is read directly afterward.</p>
+<p>The physical matrix covers both TVs, Android Chrome and iPhone Safari phone
+controllers, two-player play and six-controller load. Verify foreground
+return, brief network loss, receiver reload/relaunch, host departure and
+late joins. iPhone players can join by QR even if launching Cast from their
+browser is unavailable; establish a supported host launch route in Phase 0.</p>
+<h2>Review decisions</h2>
+<p>Recommended defaults for approval:</p>
+<ol>
+<li>Faithful base game, 2–6 players, shared dice choice tiles, one base sheet.</li>
+<li>Existing web party-game platform and Custom Web Receiver deployment.</li>
+<li>Untimed turns, explicit confirmation, host pause/removal, retained seats.</li>
+<li>Simultaneous awards at turn boundaries; verify the color-tie ruling.</li>
+<li>Public scores/bonuses and optional TV inspection of committed boards.</li>
+<li>Initial release recovers client connections but does not survive server restart.</li>
+</ol>
+<p>After Will reviews this document, revise any requested choices before
+implementation. Approval to build does not mean the release is already
+published; Phase 6 prepares a concrete release for review before deployment.</p></main></body></html>

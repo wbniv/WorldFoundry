@@ -1,0 +1,203 @@
+--------- beginning of main
+10-04 17:56:54.494 32692 32692 I f_game.aquarium: Using CollectorTypeCMC GC.
+10-04 17:56:54.505 32692 32692 E f_game.aquarium: Not starting debugger since process cannot load the jdwp agent.
+10-04 17:56:54.557 32692 32692 D CompatibilityChangeReporter: Compat change id reported: 171979766; UID 10147; state: ENABLED
+10-04 17:56:54.557 32692 32692 D CompatibilityChangeReporter: Compat change id reported: 242716250; UID 10147; state: ENABLED
+10-04 17:56:54.580 32692 32692 D nativeloader: Configuring clns-4 for other apk /data/app/~~40e4YNIbNXh1kfNrcQ4MDQ==/org.worldfoundry.wf_game.aquarium-ATn_-apxwYImZW6qK7O5Pg==/base.apk. target_sdk_version=34, uses_libraries=, library_path=/data/app/~~40e4YNIbNXh1kfNrcQ4MDQ==/org.worldfoundry.wf_game.aquarium-ATn_-apxwYImZW6qK7O5Pg==/lib/arm:/data/app/~~40e4YNIbNXh1kfNrcQ4MDQ==/org.worldfoundry.wf_game.aquarium-ATn_-apxwYImZW6qK7O5Pg==/base.apk!/lib/armeabi-v7a, permitted_path=/data:/mnt/expand:/data/user/0/org.worldfoundry.wf_game.aquarium
+10-04 17:56:54.603 32692 32692 V GraphicsEnvironment: Currently set values for:
+10-04 17:56:54.603 32692 32692 V GraphicsEnvironment:   angle_gl_driver_selection_pkgs=[]
+10-04 17:56:54.603 32692 32692 V GraphicsEnvironment:   angle_gl_driver_selection_values=[]
+10-04 17:56:54.604 32692 32692 V GraphicsEnvironment: ANGLE GameManagerService for org.worldfoundry.wf_game.aquarium: false
+10-04 17:56:54.604 32692 32692 V GraphicsEnvironment: org.worldfoundry.wf_game.aquarium is not listed in per-application setting
+10-04 17:56:54.604 32692 32692 V GraphicsEnvironment: Neither updatable production driver nor prerelease driver is supported.
+10-04 17:56:54.715 32692 32712 I wf_game : diagnostic log: /storage/emulated/0/Android/data/org.worldfoundry.wf_game.aquarium/files/wf.log
+10-04 17:56:54.715 32692 32712 I wf_game : android_main: enter
+10-04 17:56:54.715 32692 32712 I wf_game : android_main: assetMgr=0xee08c800
+10-04 17:56:54.716 32692 32712 I wf_game : android_main: uiMode=4 (tv=1)
+10-04 17:56:54.716 32692 32712 I wf_game : android_main: waiting for APP_CMD_INIT_WINDOW
+10-04 17:56:54.720 32692 32692 D CompatibilityChangeReporter: Compat change id reported: 210923482; UID 10147; state: ENABLED
+10-04 17:56:54.722 32692 32712 I wf_game : APP_CMD_RESUME
+10-04 17:56:54.727 32692 32712 I wf_game : phonepad: listening on 192.168.4.43:8765
+10-04 17:56:54.727 32692 32712 I wf_game : phone controller: open http://192.168.4.43:8765/?k=157198 (PIN 157198)
+10-04 17:56:54.727 32692 32692 D CompatibilityChangeReporter: Compat change id reported: 237531167; UID 10147; state: DISABLED
+10-04 17:56:54.765 32692 32712 I wf_game : APP_CMD_INIT_WINDOW
+10-04 17:56:54.765 32692 32712 W libc    : Access denied finding property "vendor.mali.platform.config"
+10-04 17:56:54.767 32692 32712 I mali    : Successfully parsed 1 environment variable(s) from /vendor/etc/mali_platform.config.
+10-04 17:56:54.767 32692 32712 W libc    : Access denied finding property "vendor.mali.debug.config"
+10-04 17:56:54.768 32692 32712 W libc    : Access denied finding property "vendor.mali.base_max_nr_instances"
+10-04 17:56:54.769 32692 32712 W libc    : Access denied finding property "vendor.mali.cctx_memory_class_unnamed"
+10-04 17:56:54.769 32692 32712 W libc    : Access denied finding property "vendor.mali.cctx_memory_class_default_heap"
+10-04 17:56:54.769 32692 32712 W libc    : Access denied finding property "vendor.mali.cctx_memory_class_base_internal"
+10-04 17:56:54.769 32692 32712 W libc    : Access denied finding property "vendor.mali.cctx_memory_class_framepool"
+10-04 17:56:54.769 32692 32712 W libc    : Access denied finding property "vendor.mali.cctx_memory_class_tiler"
+10-04 17:56:54.769 32692 32712 W libc    : Access denied finding property "vendor.mali.cctx_memory_class_program"
+10-04 17:56:54.770 32692 32712 W libc    : Access denied finding property "vendor.mali.cctx_memory_class_egl_color_plane"
+10-04 17:56:54.770 32692 32712 W libc    : Access denied finding property "vendor.mali.cctx_memory_class_egl_color_plane_imported"
+10-04 17:56:54.770 32692 32712 W libc    : Access denied finding property "vendor.mali.cctx_memory_class_vao"
+10-04 17:56:54.770 32692 32712 W libc    : Access denied finding property "vendor.mali.cctx_memory_class_img"
+10-04 17:56:54.770 32692 32712 W libc    : Access denied finding property "vendor.mali.cctx_memory_class_internal_surface"
+10-04 17:56:54.770 32692 32712 W libc    : Access denied finding property "vendor.mali.cctx_memory_class_buf"
+10-04 17:56:54.771 32692 32712 W libc    : Access denied finding property "vendor.mali.cctx_memory_class_crc"
+10-04 17:56:54.771 32692 32712 W libc    : Access denied finding property "vendor.mali.cctx_memory_class_cpom_hmem"
+10-04 17:56:54.771 32692 32712 W libc    : Access denied finding property "vendor.mali.cctx_memory_class_cpom_rsd"
+10-04 17:56:54.771 32692 32712 W libc    : Access denied finding property "vendor.mali.cctx_memory_class_cpom_mbs2"
+10-04 17:56:54.771 32692 32712 W libc    : Access denied finding property "vendor.mali.cctx_memory_class_cpom_static"
+10-04 17:56:54.771 32692 32712 W libc    : Access denied finding property "vendor.mali.cctx_memory_class_cframe_hmem"
+10-04 17:56:54.771 32692 32712 W libc    : Access denied finding property "vendor.mali.cctx_memory_class_cframe_sample_pos"
+10-04 17:56:54.771 32692 32712 W libc    : Access denied finding property "vendor.mali.cctx_memory_class_cframe_discard"
+10-04 17:56:54.771 32692 32712 W libc    : Access denied finding property "vendor.mali.cctx_memory_class_cframe_tess_geom"
+10-04 17:56:54.771 32692 32712 W libc    : Access denied finding property "vendor.mali.cctx_memory_class_cobj_hmem"
+10-04 17:56:54.771 32692 32712 W libc    : Access denied finding property "vendor.mali.cctx_memory_class_cmar_hmem"
+10-04 17:56:54.772 32692 32712 W libc    : Access denied finding property "vendor.mali.cctx_memory_class_cmar_prof_dump"
+10-04 17:56:54.772 32692 32712 W libc    : Access denied finding property "vendor.mali.cctx_memory_class_cblend_hmem"
+10-04 17:56:54.772 32692 32712 W libc    : Access denied finding property "vendor.mali.cctx_memory_class_gles_hmem"
+10-04 17:56:54.772 32692 32712 W libc    : Access denied finding property "vendor.mali.cctx_memory_class_gles_query"
+10-04 17:56:54.772 32692 32712 W libc    : Access denied finding property "vendor.mali.cctx_memory_class_gles_query_host"
+10-04 17:56:54.772 32692 32712 W libc    : Access denied finding property "vendor.mali.cctx_memory_class_gles_multiview"
+10-04 17:56:54.772 32692 32712 W libc    : Access denied finding property "vendor.mali.cctx_memory_class_cdeps_hmem"
+10-04 17:56:54.772 32692 32712 W libc    : Access denied finding property "vendor.mali.cctx_memory_class_cmem_suballoc"
+10-04 17:56:54.772 32692 32712 W libc    : Access denied finding property "vendor.mali.cctx_memory_class_cmem_hoard"
+10-04 17:56:54.772 32692 32712 W libc    : Access denied finding property "vendor.mali.cctx_memory_class_cmem_registry"
+10-04 17:56:54.772 32692 32712 W libc    : Access denied finding property "vendor.mali.cctx_memory_class_cl_payload"
+10-04 17:56:54.773 32692 32712 W libc    : Access denied finding property "vendor.mali.cctx_memory_class_cl_wlm_tls"
+10-04 17:56:54.773 32692 32712 W libc    : Access denied finding property "vendor.mali.cctx_memory_class_cl_hmem"
+10-04 17:56:54.773 32692 32712 W libc    : Access denied finding property "vendor.mali.cctx_memory_class_cl_svm"
+10-04 17:56:54.773 32692 32712 W libc    : Access denied finding property "vendor.mali.cctx_memory_class_cl_protected"
+10-04 17:56:54.773 32692 32712 W libc    : Access denied finding property "vendor.mali.cctx_memory_class_cinstr"
+10-04 17:56:54.773 32692 32712 W libc    : Access denied finding property "vendor.mali.cctx_memory_class_gfx_device_memory_cpu_uncached"
+10-04 17:56:54.773 32692 32712 W libc    : Access denied finding property "vendor.mali.cctx_memory_class_gfx_device_memory_cpu_cached"
+10-04 17:56:54.773 32692 32712 W libc    : Access denied finding property "vendor.mali.cctx_memory_class_gfx_device_memory_transient"
+10-04 17:56:54.773 32692 32712 W libc    : Access denied finding property "vendor.mali.cctx_memory_class_gfx_device_memory_protected"
+10-04 17:56:54.773 32692 32712 W libc    : Access denied finding property "vendor.mali.cctx_memory_class_gfx_device_external"
+10-04 17:56:54.773 32692 32712 W libc    : Access denied finding property "vendor.mali.cctx_memory_class_gfx_device_external_swapchain"
+10-04 17:56:54.774 32692 32712 W libc    : Access denied finding property "vendor.mali.cctx_memory_class_gfx_device_internal"
+10-04 17:56:54.774 32692 32712 W libc    : Access denied finding property "vendor.mali.cctx_memory_class_gfx_device_internal_tls"
+10-04 17:56:54.774 32692 32712 W libc    : Access denied finding property "vendor.mali.cctx_memory_class_gfx_device_internal_host"
+10-04 17:56:54.774 32692 32712 W libc    : Access denied finding property "vendor.mali.cctx_memory_class_gfx_device_internal_protected"
+10-04 17:56:54.774 32692 32712 W libc    : Access denied finding property "vendor.mali.cctx_memory_class_gfx_device_internal_transient"
+10-04 17:56:54.774 32692 32712 W libc    : Access denied finding property "vendor.mali.cctx_memory_class_gfx_descriptor_pool"
+10-04 17:56:54.774 32692 32712 W libc    : Access denied finding property "vendor.mali.cctx_memory_class_gfx_command_allocator"
+10-04 17:56:54.774 32692 32712 W libc    : Access denied finding property "vendor.mali.cctx_memory_class_gfx_command_allocator_host"
+10-04 17:56:54.774 32692 32712 W libc    : Access denied finding property "vendor.mali.cctx_memory_class_gfx_command_allocator_protected"
+10-04 17:56:54.775 32692 32712 W libc    : Access denied finding property "vendor.mali.cctx_memory_class_gfx_graph_internal_host"
+10-04 17:56:54.775 32692 32712 W libc    : Access denied finding property "vendor.mali.cctx_memory_class_gfx_graph_internal_device"
+10-04 17:56:54.775 32692 32712 W libc    : Access denied finding property "vendor.mali.cctx_memory_class_gfx_graph_internal_device_transient"
+10-04 17:56:54.775 32692 32712 W libc    : Access denied finding property "vendor.mali.cctx_memory_class_vk_bound_buffer"
+10-04 17:56:54.775 32692 32712 W libc    : Access denied finding property "vendor.mali.cctx_memory_class_vk_bound_image"
+10-04 17:56:54.775 32692 32712 W libc    : Access denied finding property "vendor.mali.cctx_memory_class_cmar_signal"
+10-04 17:56:54.775 32692 32712 W libc    : Access denied finding property "vendor.mali.cctx_memory_class_cmar_flush_chain"
+10-04 17:56:54.775 32692 32712 W libc    : Access denied finding property "vendor.mali.cctx_memory_class_cmar_metadata_list"
+10-04 17:56:54.775 32692 32712 W libc    : Access denied finding property "vendor.mali.cctx_memory_class_jit"
+10-04 17:56:54.775 32692 32712 W libc    : Access denied finding property "vendor.mali.cctx_memory_class_mmu"
+10-04 17:56:54.776 32692 32712 W libc    : Access denied finding property "vendor.mali.osu_protected_memory_heap_name"
+10-04 17:56:54.776 32692 32712 W libc    : Access denied finding property "vendor.mali.osu_ion_protected_memory_heap_name"
+10-04 17:56:54.776 32692 32712 W libc    : Access denied finding property "vendor.mali.platform_agt_frequency_khz"
+10-04 17:56:54.776 32692 32712 W libc    : Access denied finding property "vendor.mali.hal_dump_dir"
+10-04 17:56:54.776 32692 32712 W libc    : Access denied finding property "vendor.mali.platform.config"
+10-04 17:56:54.777 32692 32712 I mali    : Successfully parsed 1 environment variable(s) from /vendor/etc/mali_platform.config.
+10-04 17:56:54.777 32692 32712 W libc    : Access denied finding property "vendor.mali.debug.config"
+10-04 17:56:54.802 32692 32712 W libc    : Access denied finding property "ro.vendor.arm.egl.configs.yuyv.hal_format"
+10-04 17:56:54.802 32692 32712 W libc    : Access denied finding property "ro.vendor.arm.egl.configs.yuyv.recordable"
+10-04 17:56:54.802 32692 32712 W libc    : Access denied finding property "ro.vendor.arm.egl.configs.yuyv.dataspaces_to_exclude"
+10-04 17:56:54.802 32692 32712 W libc    : Access denied finding property "ro.vendor.arm.egl.configs.nv12.hal_format"
+10-04 17:56:54.803 32692 32712 W libc    : Access denied finding property "ro.vendor.arm.egl.configs.nv12.recordable"
+10-04 17:56:54.803 32692 32712 W libc    : Access denied finding property "ro.vendor.arm.egl.configs.nv12.dataspaces_to_exclude"
+10-04 17:56:54.803 32692 32712 W libc    : Access denied finding property "ro.vendor.arm.egl.configs.nv21.hal_format"
+10-04 17:56:54.803 32692 32712 W libc    : Access denied finding property "ro.vendor.arm.egl.configs.nv21.recordable"
+10-04 17:56:54.803 32692 32712 W libc    : Access denied finding property "ro.vendor.arm.egl.configs.nv21.dataspaces_to_exclude"
+10-04 17:56:54.803 32692 32712 W libc    : Access denied finding property "ro.vendor.arm.egl.configs.nv16.hal_format"
+10-04 17:56:54.803 32692 32712 W libc    : Access denied finding property "ro.vendor.arm.egl.configs.nv16.recordable"
+10-04 17:56:54.803 32692 32712 W libc    : Access denied finding property "ro.vendor.arm.egl.configs.nv16.dataspaces_to_exclude"
+10-04 17:56:54.803 32692 32712 W libc    : Access denied finding property "ro.vendor.arm.egl.configs.yuv420.hal_format"
+10-04 17:56:54.803 32692 32712 W libc    : Access denied finding property "ro.vendor.arm.egl.configs.yuv420.recordable"
+10-04 17:56:54.803 32692 32712 W libc    : Access denied finding property "ro.vendor.arm.egl.configs.yuv420.dataspaces_to_exclude"
+10-04 17:56:54.803 32692 32712 W libc    : Access denied finding property "ro.vendor.arm.egl.configs.yvu420.hal_format"
+10-04 17:56:54.803 32692 32712 W libc    : Access denied finding property "ro.vendor.arm.egl.configs.yvu420.recordable"
+10-04 17:56:54.804 32692 32712 W libc    : Access denied finding property "ro.vendor.arm.egl.configs.yvu420.dataspaces_to_exclude"
+10-04 17:56:54.804 32692 32712 W libc    : Access denied finding property "ro.vendor.arm.egl.configs.y410.hal_format"
+10-04 17:56:54.804 32692 32712 W libc    : Access denied finding property "ro.vendor.arm.egl.configs.y410.recordable"
+10-04 17:56:54.804 32692 32712 W libc    : Access denied finding property "ro.vendor.arm.egl.configs.y410.dataspaces_to_exclude"
+10-04 17:56:54.804 32692 32712 W libc    : Access denied finding property "ro.vendor.arm.egl.configs.y210.hal_format"
+10-04 17:56:54.804 32692 32712 W libc    : Access denied finding property "ro.vendor.arm.egl.configs.y210.recordable"
+10-04 17:56:54.804 32692 32712 W libc    : Access denied finding property "ro.vendor.arm.egl.configs.y210.dataspaces_to_exclude"
+10-04 17:56:54.804 32692 32712 W libc    : Access denied finding property "ro.vendor.arm.egl.configs.y0l2.hal_format"
+10-04 17:56:54.804 32692 32712 W libc    : Access denied finding property "ro.vendor.arm.egl.configs.y0l2.recordable"
+10-04 17:56:54.804 32692 32712 W libc    : Access denied finding property "ro.vendor.arm.egl.configs.y0l2.dataspaces_to_exclude"
+10-04 17:56:54.804 32692 32712 W libc    : Access denied finding property "ro.vendor.arm.egl.configs.p210.hal_format"
+10-04 17:56:54.804 32692 32712 W libc    : Access denied finding property "ro.vendor.arm.egl.configs.p210.recordable"
+10-04 17:56:54.804 32692 32712 W libc    : Access denied finding property "ro.vendor.arm.egl.configs.p210.dataspaces_to_exclude"
+10-04 17:56:54.804 32692 32712 W libc    : Access denied finding property "ro.vendor.arm.egl.configs.p010.hal_format"
+10-04 17:56:54.805 32692 32712 W libc    : Access denied finding property "ro.vendor.arm.egl.configs.p010.recordable"
+10-04 17:56:54.805 32692 32712 W libc    : Access denied finding property "ro.vendor.arm.egl.configs.p010.dataspaces_to_exclude"
+10-04 17:56:54.834 32692 32712 I wf_game : EGL surface ready: 1920x1080 (context reused)
+10-04 17:56:54.834 32692 32712 I wf_game : android_main: EGL ready, entering HALStart
+10-04 17:56:54.834 32692 32712 I wf_game : android_main: wf_args.txt gave 0 argument(s)
+10-04 17:56:54.836 32692 32712 I AAudio  : AAudioStreamBuilder_openStream() called ----------------------------------------
+10-04 17:56:54.836 32692 32712 I AudioStreamBuilder: rate   =      0, channels  = 0, channelMask = 0, format   = 5, sharing = SH, dir = OUTPUT
+10-04 17:56:54.836 32692 32712 I AudioStreamBuilder: device =      0, sessionId = -1, perfMode = 12, callback: ON with frames = 0
+10-04 17:56:54.836 32692 32712 I AudioStreamBuilder: usage  =      0, contentType = 0, inputPreset = 0, allowedCapturePolicy = 0
+10-04 17:56:54.836 32692 32712 I AudioStreamBuilder: privacy sensitive = false, opPackageName = (null), attributionTag = (null)
+10-04 17:56:54.838 32692 32712 D f_game.aquarium: PlayerBase::PlayerBase()
+10-04 17:56:54.889 32692 32712 D AudioStreamInternal_Client: configureDataInformation() original HW burst = 384, minMicros = 1000 => SW burst = 384
+10-04 17:56:54.889 32692 32712 D IsochronousClockModel: setFramesPerBurst() - mFramesPerBurst = 384 - mBurstPeriodNanos = 8000000
+10-04 17:56:54.889 32692 32712 D AAudioStream: setState(s#1) from 0 to 2
+10-04 17:56:54.889 32692 32712 I AAudioFlowGraph: configure() source format = 0x00000005, channels = 2, sink format = 0x00000005, channels = 2, useMonoBlend = 0, audioBalance = 0.000000, isExclusive 0
+10-04 17:56:54.892 32692 32712 I AAudio  : AAudioStreamBuilder_openStream() returns 0 = AAUDIO_OK for s#1 ----------------
+10-04 17:56:54.893 32692 32712 D AAudio  : AAudioStream_requestStart(s#1) called --------------
+10-04 17:56:54.893 32692 32712 D AAudioStream: setState(s#1) from 2 to 3
+10-04 17:56:54.937 32692 32712 D AAudio  : AAudioStream_requestStart(s#1) returned 0 ---------
+10-04 17:56:54.944 32692 32727 D AudioStreamInternalPlay_Client: callbackLoop() entering >>>>>>>>>>>>>>>
+10-04 17:56:54.944 32692 32727 D AudioStreamInternal_Client: onEventFromServer - got AAUDIO_SERVICE_EVENT_STARTED
+10-04 17:56:54.944 32692 32727 D AAudioStream: setState(s#1) from 3 to 4
+10-04 17:56:55.005 32692 32712 I wf_game : level-menu: showing 8 entries ("WF Aquarium"), cursor on 0
+10-04 17:57:00.252 32692 32712 I wf_game : key code=4 action=0 (Back: hides the phone panel)
+10-04 17:57:00.286 32692 32712 I wf_game : key code=4 action=1 (Back: hides the phone panel)
+10-04 17:57:01.887 32692 32712 I wf_game : key code=20 action=0 mask=0x1000
+10-04 17:57:01.889 32692 32712 I wf_game : level-menu: cursor on 1 (Blue Shrimp)
+10-04 17:57:01.921 32692 32712 I wf_game : key code=20 action=1 mask=0x1000
+10-04 17:57:02.288 32692 32712 I wf_game : key code=20 action=0 mask=0x1000
+10-04 17:57:02.290 32692 32712 I wf_game : level-menu: cursor on 2 (Calm Betta)
+10-04 17:57:02.320 32692 32712 I wf_game : key code=20 action=1 mask=0x1000
+10-04 17:57:02.688 32692 32712 I wf_game : key code=20 action=0 mask=0x1000
+10-04 17:57:02.689 32692 32712 I wf_game : level-menu: cursor on 3 (Jellyfish)
+10-04 17:57:02.721 32692 32712 I wf_game : key code=20 action=1 mask=0x1000
+10-04 17:57:03.088 32692 32712 I wf_game : key code=20 action=0 mask=0x1000
+10-04 17:57:03.090 32692 32712 I wf_game : level-menu: cursor on 4 (Lionfish)
+10-04 17:57:03.107 32692 32712 I wf_game : key code=20 action=1 mask=0x1000
+10-04 17:57:03.505 32692 32712 I wf_game : key code=20 action=0 mask=0x1000
+10-04 17:57:03.508 32692 32712 I wf_game : level-menu: cursor on 5 (Planted Tank)
+10-04 17:57:03.541 32692 32712 I wf_game : key code=20 action=1 mask=0x1000
+10-04 17:57:03.905 32692 32712 I wf_game : key code=23 action=0 mask=0x1
+10-04 17:57:03.939 32692 32712 I wf_game : key code=23 action=1 mask=0x1
+10-04 17:57:03.941 32692 32712 I wf_game : level-menu: LEVEL_TO_RUN=5 (Planted Tank)
+10-04 17:57:03.941 32692 32712 I wf_game : level-menu: level 5 starts
+10-04 17:57:52.197 32692 32712 I wf_game : key code=23 action=0 mask=0x1
+10-04 17:57:52.736 32692 32712 I wf_game : key code=23 action=1 mask=0x1
+10-04 17:58:06.146 32692 32712 I wf_game : key code=22 action=0 mask=0x2000
+10-04 17:58:06.702 32692 32712 I wf_game : key code=22 action=1 mask=0x2000
+10-04 17:58:06.967 32692 32712 I wf_game : key code=22 action=0 mask=0x2000
+10-04 17:58:07.545 32692 32712 I wf_game : key code=22 action=1 mask=0x2000
+10-04 17:58:07.853 32692 32712 I wf_game : key code=22 action=0 mask=0x2000
+10-04 17:58:08.351 32692 32712 I wf_game : key code=22 action=1 mask=0x2000
+10-04 17:58:08.814 32692 32712 I wf_game : key code=22 action=0 mask=0x2000
+10-04 17:58:09.268 32692 32712 I wf_game : key code=22 action=1 mask=0x2000
+10-04 17:58:09.583 32692 32712 I wf_game : key code=22 action=0 mask=0x2000
+10-04 17:58:10.152 32692 32712 I wf_game : key code=22 action=1 mask=0x2000
+10-04 17:58:10.685 32692 32712 I wf_game : key code=22 action=0 mask=0x2000
+10-04 17:58:11.223 32692 32712 I wf_game : key code=22 action=1 mask=0x2000
+10-04 17:58:11.578 32692 32712 I wf_game : key code=22 action=0 mask=0x2000
+10-04 17:58:12.082 32692 32712 I wf_game : key code=22 action=1 mask=0x2000
+10-04 17:58:12.342 32692 32712 I wf_game : key code=22 action=0 mask=0x2000
+10-04 17:58:12.837 32692 32712 I wf_game : key code=22 action=1 mask=0x2000
+10-04 17:58:13.154 32692 32712 I wf_game : key code=22 action=0 mask=0x2000
+10-04 17:58:13.693 32692 32712 I wf_game : key code=22 action=1 mask=0x2000
+10-04 17:58:14.039 32692 32712 I wf_game : key code=22 action=0 mask=0x2000
+10-04 17:58:14.529 32692 32712 I wf_game : key code=22 action=1 mask=0x2000
+10-04 17:58:14.980 32692 32712 I wf_game : key code=22 action=0 mask=0x2000
+10-04 17:58:15.475 32692 32712 I wf_game : key code=22 action=1 mask=0x2000
+10-04 17:58:15.679 32692 32712 I wf_game : key code=22 action=0 mask=0x2000
+10-04 17:58:16.223 32692 32712 I wf_game : key code=22 action=1 mask=0x2000
+10-04 17:58:16.533 32692 32712 I wf_game : key code=22 action=0 mask=0x2000
+10-04 17:58:17.134 32692 32712 I wf_game : key code=22 action=1 mask=0x2000
+10-04 17:58:17.433 32692 32712 I wf_game : key code=22 action=0 mask=0x2000
+10-04 17:58:17.933 32692 32712 I wf_game : key code=22 action=1 mask=0x2000

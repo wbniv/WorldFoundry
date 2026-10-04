@@ -1,0 +1,55 @@
+{
+  "job": {
+    "id": "J-b606660f3fc6",
+    "owner": "5c3060b287de0099d24b3975",
+    "accepted": 1791048558.9802306,
+    "state": "running",
+    "phase": "connecting",
+    "request": {
+      "device": "chromecast-test-02",
+      "workflow": "readd"
+    },
+    "device": "chromecast-test-02",
+    "generation": 1,
+    "cancel": 0,
+    "error": null,
+    "started": 1791048559.0119116,
+    "finished": null,
+    "worker_pid": 79221,
+    "recovery_resolved": 0
+  },
+  "device": {
+    "id": "chromecast-test-02",
+    "serial": "26031HFDD67QH7",
+    "name": "Project Room",
+    "model": "Chromecast",
+    "device": "sabrina",
+    "android": "12",
+    "sdk": "31",
+    "abis": [
+      "armeabi-v7a",
+      "armeabi"
+    ],
+    "transport": "legacy-tcp",
+    "endpoint": "192.168.4.46:5555",
+    "pools": [
+      "chromecast-test"
+    ],
+    "health": "offline",
+    "enrolled": true,
+    "ipv6_addresses": [
+      "fd5d:59ce:7438:1:5820:7a08:bc9b:a903",
+      "fd5d:59ce:7438:1:2555:eb86:7321:678",
+      "fe80::7156:9529:ebee:236b"
+    ],
+    "cast_udn": "5e305387-266b-84a6-639e-50805d1f06c2",
+    "generation": 1
+  },
+  "result": "recovery-required",
+  "error": "Device identity/connection not verified; recovery required before further control",
+  "cleanup_verified": false,
+  "restoration": null,
+  "commands": [],
+  "finished": 1791048575.4592156,
+  "concurrent_jobs": []
+}

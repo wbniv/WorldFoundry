@@ -1,0 +1,33 @@
+{
+  "job": "J-e33d994fc93a",
+  "display_on": true,
+  "awake": true,
+  "foreground": "com.google.android.youtube.tv",
+  "png_rgba_extrema": [
+    [
+      0,
+      0
+    ],
+    [
+      0,
+      0
+    ],
+    [
+      0,
+      0
+    ],
+    [
+      0,
+      0
+    ]
+  ],
+  "youtube_layers_secure": false,
+  "youtube_layers_protected": false,
+  "sideband_streams": "null",
+  "hardware_planes": [
+    "HWCVIDEO",
+    "OSD"
+  ],
+  "diagnosis": "suspected vendor screenshot composition limitation during hardware video playback; exact cause unproven",
+  "playback_interrupted": false
+}

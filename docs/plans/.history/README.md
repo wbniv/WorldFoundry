@@ -1,5 +1,6 @@
 | Date | Change |
 |------|--------|
+| [2026-10-04](https://github.com/wbniv/WorldFoundry/commit/8d165c7c) | Record plant atlas resolution profiles and retain 256 default |
 | [2026-10-04](https://github.com/wbniv/WorldFoundry/commit/98485d9b) | Allow coordinated background installs and drain service upgrades |
 | [2026-10-04](https://github.com/wbniv/WorldFoundry/commit/e45a7ac1) | Reconcile plant docs with implemented runtime and final texture measurements |
 | [2026-10-04](https://github.com/wbniv/WorldFoundry/commit/d7e70afb) | Record current-build plant texture cost and verified APK restoration |
@@ -51,6 +52,10 @@
 | [2026-06-26](https://github.com/wbniv/WorldFoundry/commit/16d72fa6) | docs: add plan index (docs/plans/README.md) |
 
 <!--history-meta v1
+8d165c7c	author	Will Norris
+8d165c7c	added	1
+8d165c7c	deleted	1
+8d165c7c	files	1
 98485d9b	author	Will Norris
 98485d9b	added	2
 98485d9b	deleted	0

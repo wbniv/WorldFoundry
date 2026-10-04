@@ -1,0 +1,1 @@
+PASS: actual autoplay overview markup fits six boards, long/unbroken names and all three skins at 960×540

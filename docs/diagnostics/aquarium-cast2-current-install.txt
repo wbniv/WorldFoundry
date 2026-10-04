@@ -1,0 +1,11 @@
+Accepted J-d6b701aa4f34: queued; check
+Follow: task chromecast:watch JOB=J-d6b701aa4f34
+J-d6b701aa4f34: accepted {"device": "chromecast-test-02", "app": "aquarium", "scene": "planted-tank", "apk": "79433b3c5e80625b13b4bf566e8fd941185affd62f779488ad30bab775f7c1d5.apk", "workflow": "check"}
+J-d6b701aa4f34: granted {"device": "chromecast-test-02", "generation": 7}
+J-d6b701aa4f34: phase {"phase": "connecting"}
+J-d6b701aa4f34: phase {"phase": "installing"}
+J-d6b701aa4f34: phase {"phase": "installing"}
+J-d6b701aa4f34: phase {"phase": "launching"}
+J-d6b701aa4f34: phase {"phase": "restoring"}
+J-d6b701aa4f34: completed {"error": null, "health": "ready"}
+J-d6b701aa4f34: completed

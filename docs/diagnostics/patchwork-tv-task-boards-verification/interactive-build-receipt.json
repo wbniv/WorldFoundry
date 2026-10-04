@@ -1,0 +1,11 @@
+{
+  "origin": "https://collections-timing-riding-computing.trycloudflare.com",
+  "automatedCheck": false,
+  "visualCheck": false,
+  "apk": "/home/will/WorldFoundry-wbniv/party-games/games/patchwork/tv/build/interactive/quilt-night-8ae2cdcbdae9d5e8.apk",
+  "sha256": "8ae2cdcbdae9d5e8e774639a2cd6210ee030473d51294e17a79334c9b424079f",
+  "package": "org.worldfoundry.wf_game.patchwork",
+  "activity": "org.worldfoundry.wf_game.patchwork.TvActivity",
+  "compilerSha256": "01f5a92ac19bb2b3bf85e295a68f2c73c264369109158b566ce9b490af982948",
+  "nativeCode": false
+}

@@ -1,0 +1,16 @@
+COMMAND: systemctl show drkonqi-coredump-processor@100-20504-107547_111970-0.service --property=Result,ExecMainCode,ExecMainStatus,CollectMode,IPAddressDeny
+CollectMode=inactive
+Result=timeout
+ExecMainCode=2
+ExecMainStatus=15
+IPAddressDeny=0.0.0.0/0 ::/0
+COMMAND: journalctl -b -u drkonqi-coredump-processor@100-20504-107547_111970-0.service -n 10 --no-pager
+-- No entries --
+COMMAND: systemctl show apport-coredump-hook@100-20504-107547_111970-0.service --property=Result,ExecMainCode,ExecMainStatus,CollectMode,IPAddressDeny
+CollectMode=inactive
+Result=exit-code
+ExecMainCode=1
+ExecMainStatus=1
+IPAddressDeny=0.0.0.0/0 ::/0
+COMMAND: journalctl -b -u apport-coredump-hook@100-20504-107547_111970-0.service -n 10 --no-pager
+-- No entries --

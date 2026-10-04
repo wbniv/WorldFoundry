@@ -1,0 +1,132 @@
+{
+  "raw-opaque-preview.png": {
+    "size": [
+      1920,
+      1080
+    ],
+    "rgba_extrema": [
+      [
+        0,
+        255
+      ],
+      [
+        0,
+        255
+      ],
+      [
+        0,
+        255
+      ],
+      [
+        255,
+        255
+      ]
+    ],
+    "fully_transparent": false,
+    "rgb_all_zero": false
+  },
+  "raw-preserved.png": {
+    "size": [
+      1920,
+      1080
+    ],
+    "rgba_extrema": [
+      [
+        0,
+        255
+      ],
+      [
+        0,
+        255
+      ],
+      [
+        0,
+        255
+      ],
+      [
+        255,
+        255
+      ]
+    ],
+    "fully_transparent": false,
+    "rgb_all_zero": false
+  },
+  "record-frame-01.png": {
+    "size": [
+      1280,
+      720
+    ],
+    "rgba_extrema": [
+      [
+        0,
+        255
+      ],
+      [
+        0,
+        255
+      ],
+      [
+        0,
+        255
+      ],
+      [
+        255,
+        255
+      ]
+    ],
+    "fully_transparent": false,
+    "rgb_all_zero": false
+  },
+  "screenshot.png": {
+    "size": [
+      1920,
+      1080
+    ],
+    "rgba_extrema": [
+      [
+        0,
+        255
+      ],
+      [
+        0,
+        255
+      ],
+      [
+        0,
+        255
+      ],
+      [
+        255,
+        255
+      ]
+    ],
+    "fully_transparent": false,
+    "rgb_all_zero": false
+  },
+  "uiautomation.png": {
+    "size": [
+      1920,
+      1080
+    ],
+    "rgba_extrema": [
+      [
+        0,
+        255
+      ],
+      [
+        0,
+        255
+      ],
+      [
+        0,
+        255
+      ],
+      [
+        255,
+        255
+      ]
+    ],
+    "fully_transparent": false,
+    "rgb_all_zero": false
+  }
+}

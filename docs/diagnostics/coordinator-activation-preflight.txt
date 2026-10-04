@@ -1,0 +1,11 @@
+LoadState=loaded
+ActiveState=inactive
+FragmentPath=/etc/systemd/system/wf-device-coordinator.service
+NeedDaemonReload=no
+
+LoadState=loaded
+ActiveState=inactive
+FragmentPath=/etc/systemd/system/wf-device-coordinator-network.timer
+NeedDaemonReload=no
+STAT   RSS     TIME
+Ss   65036 06:47:54

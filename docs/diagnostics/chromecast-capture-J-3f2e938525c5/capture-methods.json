@@ -1,0 +1,22 @@
+{
+  "png": {
+    "status": "captured",
+    "started": 1791094282.0188198,
+    "finished": 1791094284.6253874
+  },
+  "raw": {
+    "status": "captured",
+    "started": 1791094284.651304,
+    "finished": 1791094288.155804
+  },
+  "uiautomation": {
+    "status": "captured",
+    "started": 1791094288.1872997,
+    "finished": 1791094292.197286
+  },
+  "record": {
+    "status": "captured",
+    "started": 1791094292.2338905,
+    "finished": 1791094296.449042
+  }
+}

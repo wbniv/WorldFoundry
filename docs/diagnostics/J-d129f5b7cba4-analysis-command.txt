@@ -1,0 +1,160 @@
+No frame at 1.4 seconds; see /home/will/WorldFoundry-wbniv/docs/diagnostics/chromecast-capture-J-d129f5b7cba4/ffmpeg-frame-03.txt
+No frame at 2.5 seconds; see /home/will/WorldFoundry-wbniv/docs/diagnostics/chromecast-capture-J-d129f5b7cba4/ffmpeg-frame-04.txt
+{
+  "raw-opaque-preview.png": {
+    "size": [
+      1920,
+      1080
+    ],
+    "rgba_extrema": [
+      [
+        0,
+        154
+      ],
+      [
+        0,
+        130
+      ],
+      [
+        0,
+        123
+      ],
+      [
+        255,
+        255
+      ]
+    ],
+    "fully_transparent": false,
+    "rgb_all_zero": false
+  },
+  "raw-preserved.png": {
+    "size": [
+      1920,
+      1080
+    ],
+    "rgba_extrema": [
+      [
+        0,
+        154
+      ],
+      [
+        0,
+        130
+      ],
+      [
+        0,
+        123
+      ],
+      [
+        255,
+        255
+      ]
+    ],
+    "fully_transparent": false,
+    "rgb_all_zero": false
+  },
+  "record-frame-01.png": {
+    "size": [
+      1280,
+      720
+    ],
+    "rgba_extrema": [
+      [
+        0,
+        255
+      ],
+      [
+        0,
+        255
+      ],
+      [
+        0,
+        255
+      ],
+      [
+        255,
+        255
+      ]
+    ],
+    "fully_transparent": false,
+    "rgb_all_zero": false
+  },
+  "record-frame-02.png": {
+    "size": [
+      1280,
+      720
+    ],
+    "rgba_extrema": [
+      [
+        0,
+        255
+      ],
+      [
+        0,
+        255
+      ],
+      [
+        0,
+        255
+      ],
+      [
+        255,
+        255
+      ]
+    ],
+    "fully_transparent": false,
+    "rgb_all_zero": false
+  },
+  "screenshot.png": {
+    "size": [
+      1920,
+      1080
+    ],
+    "rgba_extrema": [
+      [
+        0,
+        255
+      ],
+      [
+        0,
+        255
+      ],
+      [
+        0,
+        236
+      ],
+      [
+        255,
+        255
+      ]
+    ],
+    "fully_transparent": false,
+    "rgb_all_zero": false
+  },
+  "uiautomation.png": {
+    "size": [
+      1920,
+      1080
+    ],
+    "rgba_extrema": [
+      [
+        0,
+        255
+      ],
+      [
+        0,
+        255
+      ],
+      [
+        0,
+        255
+      ],
+      [
+        255,
+        255
+      ]
+    ],
+    "fully_transparent": false,
+    "rgb_all_zero": false
+  }
+}

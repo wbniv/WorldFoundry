@@ -1,0 +1,280 @@
+--------- beginning of main
+10-04 17:11:30.250 23547 23547 I _game.patchwork: Using CollectorTypeCMC GC.
+10-04 17:11:30.331 23547 23547 E _game.patchwork: Not starting debugger since process cannot load the jdwp agent.
+10-04 17:11:30.424 23547 23547 D CompatibilityChangeReporter: Compat change id reported: 171979766; UID 10152; state: ENABLED
+10-04 17:11:30.424 23547 23547 D CompatibilityChangeReporter: Compat change id reported: 242716250; UID 10152; state: ENABLED
+10-04 17:11:30.507 23547 23547 I _game.patchwork: Failed to add image file: Failed to find OatDexFile for DexFile /data/app/~~-ZcV1gg5yy5Jd4kvkfoyGw==/org.worldfoundry.wf_game.patchwork-i6WAzkKvZtaF0Bb_dVqZLg==/base.apk (canonical path /data/app/~~-ZcV1gg5yy5Jd4kvkfoyGw==/org.worldfoundry.wf_game.patchwork-i6WAzkKvZtaF0Bb_dVqZLg==/base.apk) in OatFile /data/app/~~M0A246OPcZWW8jkMVUUN7w==/org.worldfoundry.wf_game.patchwork-9l2DdD8GgpLI6IvM0Mf-Pg==/oat/arm/base.odex
+10-04 17:11:30.510 23547 23547 D nativeloader: Configuring clns-4 for other apk /data/app/~~M0A246OPcZWW8jkMVUUN7w==/org.worldfoundry.wf_game.patchwork-9l2DdD8GgpLI6IvM0Mf-Pg==/base.apk. target_sdk_version=34, uses_libraries=, library_path=/data/app/~~M0A246OPcZWW8jkMVUUN7w==/org.worldfoundry.wf_game.patchwork-9l2DdD8GgpLI6IvM0Mf-Pg==/lib/arm, permitted_path=/data:/mnt/expand:/data/user/0/org.worldfoundry.wf_game.patchwork
+10-04 17:11:30.565 23547 23547 V GraphicsEnvironment: Currently set values for:
+10-04 17:11:30.566 23547 23547 V GraphicsEnvironment:   angle_gl_driver_selection_pkgs=[]
+10-04 17:11:30.566 23547 23547 V GraphicsEnvironment:   angle_gl_driver_selection_values=[]
+10-04 17:11:30.567 23547 23547 V GraphicsEnvironment: ANGLE GameManagerService for org.worldfoundry.wf_game.patchwork: false
+10-04 17:11:30.567 23547 23547 V GraphicsEnvironment: org.worldfoundry.wf_game.patchwork is not listed in per-application setting
+10-04 17:11:30.567 23547 23547 V GraphicsEnvironment: Neither updatable production driver nor prerelease driver is supported.
+10-04 17:11:30.699 23547 23547 I WebViewFactory: Loading com.google.android.webview version 153.0.8010.36 (code 801003600)
+10-04 17:11:30.709 23547 23547 D ApplicationLoaders: Returning zygote-cached class loader: /system/framework/android.test.base.jar
+10-04 17:11:30.737 23547 23547 D nativeloader: Configuring clns-5 for other apk /data/app/~~71H4z0ABnw9ItCpCpx9G-w==/com.google.android.webview-SkD2_zXivUw8fXZOciFNxQ==/base.apk. target_sdk_version=36, uses_libraries=, library_path=/data/app/~~71H4z0ABnw9ItCpCpx9G-w==/com.google.android.webview-SkD2_zXivUw8fXZOciFNxQ==/lib/arm:/data/app/~~71H4z0ABnw9ItCpCpx9G-w==/com.google.android.webview-SkD2_zXivUw8fXZOciFNxQ==/base.apk!/lib/armeabi-v7a, permitted_path=/data:/mnt/expand
+10-04 17:11:30.956 23547 23547 I cr_WVCFactoryProvider: version=153.0.8010.36 (801003600) minSdkVersion=29 multiprocess=true packageId=127 splits=<none>
+10-04 17:11:31.112 23547 23572 I chromium: [1004/171131.062028:INFO:android_webview/browser/variations/variations_seed_loader.cc:67] Failed to open file for reading.: No such file or directory (2)
+10-04 17:11:31.202 23547 23547 I cr_LibraryLoader: Successfully loaded native library
+10-04 17:11:31.231 23547 23547 I cr_CachingUmaRecorder: Flushed 46 samples from 21 histograms, 0 samples were dropped.
+10-04 17:11:31.233 23547 23547 I cr_ChildProcLH: ScopedServiceBindingBatch.tryActivate: false
+10-04 17:11:31.241 23547 23547 I cr_CombinedPProvider: #registerProvider() provider:WV.hj@f2a4c1 isPolicyCacheEnabled:false policyProvidersSize:0
+10-04 17:11:31.242 23547 23547 I cr_PolicyProvider: #setManagerAndSource() 0
+10-04 17:11:31.248 23547 23573 I cr_policy: registerReceiver succeeded after 6ms
+10-04 17:11:31.268 23547 23547 I cr_DisplayManager: Is Display Topology available: false
+10-04 17:11:31.391 23547 23547 I cr_CombinedPProvider: #linkNativeInternal() 1
+10-04 17:11:31.392 23547 23547 D CompatibilityChangeReporter: Compat change id reported: 183155436; UID 10152; state: ENABLED
+10-04 17:11:31.404 23547 23547 I cr_AppResProvider: #getApplicationRestrictionsFromUserManager() Bundle[EMPTY_PARCEL]
+10-04 17:11:31.405 23547 23547 I cr_PolicyProvider: #notifySettingsAvailable() 0
+10-04 17:11:31.405 23547 23547 I cr_CombinedPProvider: #onSettingsAvailable() 0
+10-04 17:11:31.405 23547 23547 I cr_CombinedPProvider: #flushPolicies()
+10-04 17:11:31.597 23547 23596 W chromium: [WARNING:net/dns/dns_config_service_android.cc:69] Failed to read DnsConfig.
+10-04 17:11:31.622 23547 23547 D CompatibilityChangeReporter: Compat change id reported: 214741472; UID 10152; state: ENABLED
+10-04 17:11:31.699 23547 23547 D CompatibilityChangeReporter: Compat change id reported: 171228096; UID 10152; state: ENABLED
+10-04 17:11:31.748 23547 23547 D CompatibilityChangeReporter: Compat change id reported: 193247900; UID 10152; state: ENABLED
+10-04 17:11:31.910 23547 23602 W cr_media: BLUETOOTH_CONNECT permission is missing.
+10-04 17:11:31.921 23547 23602 W cr_media: getBluetoothAdapter() requires BLUETOOTH permission
+10-04 17:11:31.921 23547 23602 W cr_media: registerBluetoothIntentsIfNeeded: Requires BLUETOOTH permission
+10-04 17:11:31.946 23547 23547 I QuiltNightTV: TV_LAUNCH https://collections-timing-riding-computing.trycloudflare.com/receiver?display=android-tv&deviceCheck=1
+10-04 17:11:31.960 23547 23547 D CompatibilityChangeReporter: Compat change id reported: 237531167; UID 10152; state: DISABLED
+10-04 17:11:31.962 23547 23547 W OpenGLRenderer: Unknown dataspace 0
+10-04 17:11:32.029 23547 23624 I CameraManagerGlobal: Connecting to camera service
+10-04 17:11:32.035 23547 23613 W libc    : Access denied finding property "vendor.mali.platform.config"
+10-04 17:11:32.040 23547 23547 I cr_AppResProvider: #getApplicationRestrictionsFromUserManager() Bundle[EMPTY_PARCEL]
+10-04 17:11:32.040 23547 23547 I cr_PolicyProvider: #notifySettingsAvailable() 0
+10-04 17:11:32.040 23547 23547 I cr_CombinedPProvider: #onSettingsAvailable() 0
+10-04 17:11:32.040 23547 23547 I cr_CombinedPProvider: #flushPolicies()
+10-04 17:11:32.044 23547 23613 I mali    : Successfully parsed 1 environment variable(s) from /vendor/etc/mali_platform.config.
+10-04 17:11:32.048 23547 23613 W libc    : Access denied finding property "vendor.mali.debug.config"
+10-04 17:11:32.053 23547 23613 W libc    : Access denied finding property "vendor.mali.base_max_nr_instances"
+10-04 17:11:32.054 23547 23613 W libc    : Access denied finding property "vendor.mali.cctx_memory_class_unnamed"
+10-04 17:11:32.055 23547 23613 W libc    : Access denied finding property "vendor.mali.cctx_memory_class_default_heap"
+10-04 17:11:32.055 23547 23613 W libc    : Access denied finding property "vendor.mali.cctx_memory_class_base_internal"
+10-04 17:11:32.055 23547 23613 W libc    : Access denied finding property "vendor.mali.cctx_memory_class_framepool"
+10-04 17:11:32.055 23547 23613 W libc    : Access denied finding property "vendor.mali.cctx_memory_class_tiler"
+10-04 17:11:32.055 23547 23613 W libc    : Access denied finding property "vendor.mali.cctx_memory_class_program"
+10-04 17:11:32.055 23547 23613 W libc    : Access denied finding property "vendor.mali.cctx_memory_class_egl_color_plane"
+10-04 17:11:32.055 23547 23613 W libc    : Access denied finding property "vendor.mali.cctx_memory_class_egl_color_plane_imported"
+10-04 17:11:32.055 23547 23613 W libc    : Access denied finding property "vendor.mali.cctx_memory_class_vao"
+10-04 17:11:32.055 23547 23613 W libc    : Access denied finding property "vendor.mali.cctx_memory_class_img"
+10-04 17:11:32.055 23547 23613 W libc    : Access denied finding property "vendor.mali.cctx_memory_class_internal_surface"
+10-04 17:11:32.056 23547 23613 W libc    : Access denied finding property "vendor.mali.cctx_memory_class_buf"
+10-04 17:11:32.056 23547 23613 W libc    : Access denied finding property "vendor.mali.cctx_memory_class_crc"
+10-04 17:11:32.056 23547 23613 W libc    : Access denied finding property "vendor.mali.cctx_memory_class_cpom_hmem"
+10-04 17:11:32.056 23547 23613 W libc    : Access denied finding property "vendor.mali.cctx_memory_class_cpom_rsd"
+10-04 17:11:32.056 23547 23613 W libc    : Access denied finding property "vendor.mali.cctx_memory_class_cpom_mbs2"
+10-04 17:11:32.056 23547 23613 W libc    : Access denied finding property "vendor.mali.cctx_memory_class_cpom_static"
+10-04 17:11:32.056 23547 23613 W libc    : Access denied finding property "vendor.mali.cctx_memory_class_cframe_hmem"
+10-04 17:11:32.056 23547 23613 W libc    : Access denied finding property "vendor.mali.cctx_memory_class_cframe_sample_pos"
+10-04 17:11:32.056 23547 23613 W libc    : Access denied finding property "vendor.mali.cctx_memory_class_cframe_discard"
+10-04 17:11:32.056 23547 23613 W libc    : Access denied finding property "vendor.mali.cctx_memory_class_cframe_tess_geom"
+10-04 17:11:32.056 23547 23613 W libc    : Access denied finding property "vendor.mali.cctx_memory_class_cobj_hmem"
+10-04 17:11:32.056 23547 23613 W libc    : Access denied finding property "vendor.mali.cctx_memory_class_cmar_hmem"
+10-04 17:11:32.057 23547 23613 W libc    : Access denied finding property "vendor.mali.cctx_memory_class_cmar_prof_dump"
+10-04 17:11:32.057 23547 23613 W libc    : Access denied finding property "vendor.mali.cctx_memory_class_cblend_hmem"
+10-04 17:11:32.057 23547 23613 W libc    : Access denied finding property "vendor.mali.cctx_memory_class_gles_hmem"
+10-04 17:11:32.057 23547 23613 W libc    : Access denied finding property "vendor.mali.cctx_memory_class_gles_query"
+10-04 17:11:32.057 23547 23613 W libc    : Access denied finding property "vendor.mali.cctx_memory_class_gles_query_host"
+10-04 17:11:32.057 23547 23613 W libc    : Access denied finding property "vendor.mali.cctx_memory_class_gles_multiview"
+10-04 17:11:32.057 23547 23613 W libc    : Access denied finding property "vendor.mali.cctx_memory_class_cdeps_hmem"
+10-04 17:11:32.057 23547 23613 W libc    : Access denied finding property "vendor.mali.cctx_memory_class_cmem_suballoc"
+10-04 17:11:32.057 23547 23613 W libc    : Access denied finding property "vendor.mali.cctx_memory_class_cmem_hoard"
+10-04 17:11:32.057 23547 23613 W libc    : Access denied finding property "vendor.mali.cctx_memory_class_cmem_registry"
+10-04 17:11:32.057 23547 23613 W libc    : Access denied finding property "vendor.mali.cctx_memory_class_cl_payload"
+10-04 17:11:32.057 23547 23613 W libc    : Access denied finding property "vendor.mali.cctx_memory_class_cl_wlm_tls"
+10-04 17:11:32.058 23547 23613 W libc    : Access denied finding property "vendor.mali.cctx_memory_class_cl_hmem"
+10-04 17:11:32.058 23547 23613 W libc    : Access denied finding property "vendor.mali.cctx_memory_class_cl_svm"
+10-04 17:11:32.058 23547 23613 W libc    : Access denied finding property "vendor.mali.cctx_memory_class_cl_protected"
+10-04 17:11:32.058 23547 23613 W libc    : Access denied finding property "vendor.mali.cctx_memory_class_cinstr"
+10-04 17:11:32.058 23547 23613 W libc    : Access denied finding property "vendor.mali.cctx_memory_class_gfx_device_memory_cpu_uncached"
+10-04 17:11:32.058 23547 23613 W libc    : Access denied finding property "vendor.mali.cctx_memory_class_gfx_device_memory_cpu_cached"
+10-04 17:11:32.058 23547 23613 W libc    : Access denied finding property "vendor.mali.cctx_memory_class_gfx_device_memory_transient"
+10-04 17:11:32.058 23547 23613 W libc    : Access denied finding property "vendor.mali.cctx_memory_class_gfx_device_memory_protected"
+10-04 17:11:32.058 23547 23613 W libc    : Access denied finding property "vendor.mali.cctx_memory_class_gfx_device_external"
+10-04 17:11:32.058 23547 23613 W libc    : Access denied finding property "vendor.mali.cctx_memory_class_gfx_device_external_swapchain"
+10-04 17:11:32.059 23547 23613 W libc    : Access denied finding property "vendor.mali.cctx_memory_class_gfx_device_internal"
+10-04 17:11:32.059 23547 23613 W libc    : Access denied finding property "vendor.mali.cctx_memory_class_gfx_device_internal_tls"
+10-04 17:11:32.059 23547 23613 W libc    : Access denied finding property "vendor.mali.cctx_memory_class_gfx_device_internal_host"
+10-04 17:11:32.059 23547 23613 W libc    : Access denied finding property "vendor.mali.cctx_memory_class_gfx_device_internal_protected"
+10-04 17:11:32.059 23547 23613 W libc    : Access denied finding property "vendor.mali.cctx_memory_class_gfx_device_internal_transient"
+10-04 17:11:32.059 23547 23613 W libc    : Access denied finding property "vendor.mali.cctx_memory_class_gfx_descriptor_pool"
+10-04 17:11:32.059 23547 23613 W libc    : Access denied finding property "vendor.mali.cctx_memory_class_gfx_command_allocator"
+10-04 17:11:32.059 23547 23613 W libc    : Access denied finding property "vendor.mali.cctx_memory_class_gfx_command_allocator_host"
+10-04 17:11:32.059 23547 23613 W libc    : Access denied finding property "vendor.mali.cctx_memory_class_gfx_command_allocator_protected"
+10-04 17:11:32.059 23547 23613 W libc    : Access denied finding property "vendor.mali.cctx_memory_class_gfx_graph_internal_host"
+10-04 17:11:32.059 23547 23613 W libc    : Access denied finding property "vendor.mali.cctx_memory_class_gfx_graph_internal_device"
+10-04 17:11:32.060 23547 23613 W libc    : Access denied finding property "vendor.mali.cctx_memory_class_gfx_graph_internal_device_transient"
+10-04 17:11:32.060 23547 23613 W libc    : Access denied finding property "vendor.mali.cctx_memory_class_vk_bound_buffer"
+10-04 17:11:32.060 23547 23613 W libc    : Access denied finding property "vendor.mali.cctx_memory_class_vk_bound_image"
+10-04 17:11:32.060 23547 23613 W libc    : Access denied finding property "vendor.mali.cctx_memory_class_cmar_signal"
+10-04 17:11:32.060 23547 23613 W libc    : Access denied finding property "vendor.mali.cctx_memory_class_cmar_flush_chain"
+10-04 17:11:32.060 23547 23613 W libc    : Access denied finding property "vendor.mali.cctx_memory_class_cmar_metadata_list"
+10-04 17:11:32.060 23547 23613 W libc    : Access denied finding property "vendor.mali.cctx_memory_class_jit"
+10-04 17:11:32.060 23547 23613 W libc    : Access denied finding property "vendor.mali.cctx_memory_class_mmu"
+10-04 17:11:32.061 23547 23613 W libc    : Access denied finding property "vendor.mali.osu_protected_memory_heap_name"
+10-04 17:11:32.061 23547 23613 W libc    : Access denied finding property "vendor.mali.osu_ion_protected_memory_heap_name"
+10-04 17:11:32.061 23547 23613 W libc    : Access denied finding property "vendor.mali.platform_agt_frequency_khz"
+10-04 17:11:32.061 23547 23613 W libc    : Access denied finding property "vendor.mali.hal_dump_dir"
+10-04 17:11:32.093 23547 23618 D TrafficStats: tagSocket(132) with statsTag=0xffffffff, statsUid=-1
+10-04 17:11:32.098 23547 23565 W libc    : Access denied finding property "vendor.mali.platform.config"
+10-04 17:11:32.098 23547 23565 I mali    : Successfully parsed 1 environment variable(s) from /vendor/etc/mali_platform.config.
+10-04 17:11:32.099 23547 23565 W libc    : Access denied finding property "vendor.mali.debug.config"
+10-04 17:11:32.129 23547 23565 W libc    : Access denied finding property "ro.vendor.arm.egl.configs.yuyv.hal_format"
+10-04 17:11:32.129 23547 23565 W libc    : Access denied finding property "ro.vendor.arm.egl.configs.yuyv.recordable"
+10-04 17:11:32.129 23547 23565 W libc    : Access denied finding property "ro.vendor.arm.egl.configs.yuyv.dataspaces_to_exclude"
+10-04 17:11:32.129 23547 23565 W libc    : Access denied finding property "ro.vendor.arm.egl.configs.nv12.hal_format"
+10-04 17:11:32.129 23547 23565 W libc    : Access denied finding property "ro.vendor.arm.egl.configs.nv12.recordable"
+10-04 17:11:32.129 23547 23565 W libc    : Access denied finding property "ro.vendor.arm.egl.configs.nv12.dataspaces_to_exclude"
+10-04 17:11:32.129 23547 23565 W libc    : Access denied finding property "ro.vendor.arm.egl.configs.nv21.hal_format"
+10-04 17:11:32.129 23547 23565 W libc    : Access denied finding property "ro.vendor.arm.egl.configs.nv21.recordable"
+10-04 17:11:32.129 23547 23565 W libc    : Access denied finding property "ro.vendor.arm.egl.configs.nv21.dataspaces_to_exclude"
+10-04 17:11:32.129 23547 23565 W libc    : Access denied finding property "ro.vendor.arm.egl.configs.nv16.hal_format"
+10-04 17:11:32.129 23547 23565 W libc    : Access denied finding property "ro.vendor.arm.egl.configs.nv16.recordable"
+10-04 17:11:32.130 23547 23565 W libc    : Access denied finding property "ro.vendor.arm.egl.configs.nv16.dataspaces_to_exclude"
+10-04 17:11:32.130 23547 23565 W libc    : Access denied finding property "ro.vendor.arm.egl.configs.yuv420.hal_format"
+10-04 17:11:32.130 23547 23565 W libc    : Access denied finding property "ro.vendor.arm.egl.configs.yuv420.recordable"
+10-04 17:11:32.130 23547 23565 W libc    : Access denied finding property "ro.vendor.arm.egl.configs.yuv420.dataspaces_to_exclude"
+10-04 17:11:32.130 23547 23565 W libc    : Access denied finding property "ro.vendor.arm.egl.configs.yvu420.hal_format"
+10-04 17:11:32.130 23547 23565 W libc    : Access denied finding property "ro.vendor.arm.egl.configs.yvu420.recordable"
+10-04 17:11:32.130 23547 23565 W libc    : Access denied finding property "ro.vendor.arm.egl.configs.yvu420.dataspaces_to_exclude"
+10-04 17:11:32.130 23547 23565 W libc    : Access denied finding property "ro.vendor.arm.egl.configs.y410.hal_format"
+10-04 17:11:32.130 23547 23565 W libc    : Access denied finding property "ro.vendor.arm.egl.configs.y410.recordable"
+10-04 17:11:32.130 23547 23565 W libc    : Access denied finding property "ro.vendor.arm.egl.configs.y410.dataspaces_to_exclude"
+10-04 17:11:32.131 23547 23565 W libc    : Access denied finding property "ro.vendor.arm.egl.configs.y210.hal_format"
+10-04 17:11:32.131 23547 23565 W libc    : Access denied finding property "ro.vendor.arm.egl.configs.y210.recordable"
+10-04 17:11:32.131 23547 23565 W libc    : Access denied finding property "ro.vendor.arm.egl.configs.y210.dataspaces_to_exclude"
+10-04 17:11:32.131 23547 23565 W libc    : Access denied finding property "ro.vendor.arm.egl.configs.y0l2.hal_format"
+10-04 17:11:32.131 23547 23565 W libc    : Access denied finding property "ro.vendor.arm.egl.configs.y0l2.recordable"
+10-04 17:11:32.131 23547 23565 W libc    : Access denied finding property "ro.vendor.arm.egl.configs.y0l2.dataspaces_to_exclude"
+10-04 17:11:32.131 23547 23565 W libc    : Access denied finding property "ro.vendor.arm.egl.configs.p210.hal_format"
+10-04 17:11:32.131 23547 23565 W libc    : Access denied finding property "ro.vendor.arm.egl.configs.p210.recordable"
+10-04 17:11:32.131 23547 23565 W libc    : Access denied finding property "ro.vendor.arm.egl.configs.p210.dataspaces_to_exclude"
+10-04 17:11:32.131 23547 23565 W libc    : Access denied finding property "ro.vendor.arm.egl.configs.p010.hal_format"
+10-04 17:11:32.131 23547 23565 W libc    : Access denied finding property "ro.vendor.arm.egl.configs.p010.recordable"
+10-04 17:11:32.132 23547 23565 W libc    : Access denied finding property "ro.vendor.arm.egl.configs.p010.dataspaces_to_exclude"
+10-04 17:11:32.785 23547 23565 E OpenGLRenderer: Unable to match the desired swap behavior.
+10-04 17:11:32.991 23547 23562 I OpenGLRenderer: Davey! duration=1056ms; Flags=1, FrameTimelineVsyncId=36004671, IntendedVsync=211849762400682, Vsync=211849879184188, InputEventId=0, HandleInputStart=211849892262308, AnimationStart=211849892264308, PerformTraversalsStart=211849894345474, DrawStart=211850632097975, FrameDeadline=211849779084015, FrameInterval=211849890827891, FrameStartTime=16683358, SyncQueued=211850647934016, SyncStart=211850648153433, IssueDrawCommandsStart=211850649816433, SwapBuffers=211850814425475, FrameCompleted=211850818952266, DequeueBufferDuration=60254125, QueueBufferDuration=844708, GpuCompleted=211850818952266, SwapBuffersCompleted=211850816963558, DisplayPresentTime=0, CommandSubmissionCompleted=211850814425475, 
+10-04 17:11:33.009 23547 23547 I Choreographer: Skipped 56 frames!  The application may be doing too much work on its main thread.
+10-04 17:11:33.041 23547 23562 I OpenGLRenderer: Davey! duration=957ms; Flags=0, FrameTimelineVsyncId=36004744, IntendedVsync=211849912550882, Vsync=211850846818874, InputEventId=0, HandleInputStart=211850856271225, AnimationStart=211850856273558, PerformTraversalsStart=211850856344433, DrawStart=211850856814225, FrameDeadline=211850846818927, FrameInterval=211850855549933, FrameStartTime=16683357, SyncQueued=211850857872933, SyncStart=211850857968725, IssueDrawCommandsStart=211850863631058, SwapBuffers=211850865781433, FrameCompleted=211850869900017, DequeueBufferDuration=39792, QueueBufferDuration=846084, GpuCompleted=211850869900017, SwapBuffersCompleted=211850867603725, DisplayPresentTime=0, CommandSubmissionCompleted=211850865781433, 
+10-04 17:11:33.218 23547 23609 W VideoCapabilities: Unrecognized profile/level 0/4 for video/mpeg2
+10-04 17:11:33.218 23547 23609 I VideoCapabilities: Unsupported profile 3 for video/mpeg2
+10-04 17:11:33.218 23547 23609 I VideoCapabilities: Unsupported profile 4 for video/mpeg2
+10-04 17:11:33.218 23547 23609 I VideoCapabilities: Unsupported profile 5 for video/mpeg2
+10-04 17:11:33.219 23547 23609 I VideoCapabilities: Unsupported profile 2 for video/mp4v-es
+10-04 17:11:33.219 23547 23609 I VideoCapabilities: Unsupported profile 8 for video/mp4v-es
+10-04 17:11:33.219 23547 23609 I VideoCapabilities: Unsupported profile 16 for video/mp4v-es
+10-04 17:11:33.219 23547 23609 I VideoCapabilities: Unsupported profile 1024 for video/mp4v-es
+10-04 17:11:33.253 23547 23609 W cr_VAUtil: Unknown profile: 32768 for codec video/x-vnd.on2.vp9
+10-04 17:11:33.254 23547 23609 W cr_VAUtil: Unknown profile: 32768 for codec video/x-vnd.on2.vp9
+10-04 17:11:33.443 23547 23618 I QuiltNightTV: TV_NETWORK_CHECK HTTP 200
+10-04 17:11:33.595 23547 23547 I QuiltNightTV: TV_PAGE_STARTED https://collections-timing-riding-computing.trycloudflare.com/receiver?display=android-tv&deviceCheck=1
+10-04 17:11:34.689 23547 23547 I QuiltNightTV: TV_PAGE_LOADED https://collections-timing-riding-computing.trycloudflare.com/receiver?display=android-tv&deviceCheck=1
+10-04 17:11:36.471 23547 23547 I QuiltNightTV: PD_RECEIVER_MOUNTED
+10-04 17:11:36.665 23547 23547 I QuiltNightTV: PD_DISPLAY_STATE LOBBY 0:0
+10-04 17:11:36.677 23547 23547 I QuiltNightTV: PD_DISPLAY_STATE LOBBY 0:0
+10-04 17:11:37.523 23547 23547 I QuiltNightTV: PD_DISPLAY_STATE LOBBY 0:0
+10-04 17:11:37.690 23547 23547 I QuiltNightTV: PD_DISPLAY_STATE LOBBY 0:0
+10-04 17:11:37.702 23547 23547 I QuiltNightTV: PD_DISPLAY_STATE LOBBY 0:0
+10-04 17:11:38.111 23547 23547 I QuiltNightTV: PD_DISPLAY_STATE LOBBY 0:0
+10-04 17:11:39.360 23547 23547 I QuiltNightTV: PD_DISPLAY_STATE STARTING 1:1
+10-04 17:11:39.940 23547 23547 I QuiltNightTV: PD_DISPLAY_STATE STARTING 1:1
+10-04 17:11:39.948 23547 23547 I QuiltNightTV: PD_DISPLAY_STATE STARTING 1:1
+10-04 17:11:40.390 23547 23547 I QuiltNightTV: PD_DISPLAY_STATE PLACING 1:2
+10-04 17:11:40.978 23547 23547 I QuiltNightTV: PD_DISPLAY_STATE PLACING 1:2
+10-04 17:11:40.991 23547 23547 I QuiltNightTV: PD_DISPLAY_STATE PLACING 1:2
+10-04 17:11:41.580 23547 23547 I QuiltNightTV: PD_DISPLAY_STATE PLACING 1:3
+10-04 17:11:41.601 23547 23547 I QuiltNightTV: PD_AUTOPLAY_BOARDS 1:1
+10-04 17:11:46.290 23547 23547 I QuiltNightTV: PD_DISPLAY_STATE PLACING 1:3
+10-04 17:11:46.327 23547 23547 I QuiltNightTV: PD_DISPLAY_STATE PLACING 1:3
+10-04 17:11:46.904 23547 23547 I QuiltNightTV: PD_DISPLAY_STATE PLACING 1:4
+10-04 17:11:46.918 23547 23547 I QuiltNightTV: PD_AUTOPLAY_BOARDS 1:2
+10-04 17:11:50.077 23547 23558 W System  : A resource failed to call end. 
+10-04 17:11:51.410 23547 23547 I QuiltNightTV: PD_DISPLAY_STATE PLACING 1:4
+10-04 17:11:51.418 23547 23547 I QuiltNightTV: PD_DISPLAY_STATE PLACING 1:4
+10-04 17:11:51.856 23547 23547 I QuiltNightTV: PD_DISPLAY_STATE PLACING 1:5
+10-04 17:11:51.871 23547 23547 I QuiltNightTV: PD_AUTOPLAY_BOARDS 1:3
+10-04 17:11:56.379 23547 23547 I QuiltNightTV: PD_DISPLAY_STATE PLACING 1:5
+10-04 17:11:56.386 23547 23547 I QuiltNightTV: PD_DISPLAY_STATE PLACING 1:5
+10-04 17:11:56.944 23547 23547 I QuiltNightTV: PD_DISPLAY_STATE PLACING 1:6
+10-04 17:11:56.953 23547 23547 I QuiltNightTV: PD_AUTOPLAY_BOARDS 1:4
+10-04 17:12:01.673 23547 23547 I QuiltNightTV: PD_DISPLAY_STATE PLACING 1:6
+10-04 17:12:01.703 23547 23547 I QuiltNightTV: PD_DISPLAY_STATE PLACING 1:6
+10-04 17:12:02.217 23547 23547 I QuiltNightTV: PD_DISPLAY_STATE PLACING 1:7
+10-04 17:12:02.234 23547 23547 I QuiltNightTV: PD_AUTOPLAY_BOARDS 1:5
+10-04 17:12:06.779 23547 23547 I QuiltNightTV: PD_DISPLAY_STATE PLACING 1:7
+10-04 17:12:06.783 23547 23547 I QuiltNightTV: PD_DISPLAY_STATE PLACING 1:7
+10-04 17:12:07.224 23547 23547 I QuiltNightTV: PD_DISPLAY_STATE SCORING 1:8
+10-04 17:12:07.230 23547 23547 I QuiltNightTV: PD_AUTOPLAY_BOARDS 1:6
+10-04 17:12:11.685 23547 23547 I QuiltNightTV: PD_DISPLAY_STATE SCORING 1:8
+10-04 17:12:11.688 23547 23547 I QuiltNightTV: PD_DISPLAY_STATE SCORING 1:8
+10-04 17:12:12.123 23547 23547 I QuiltNightTV: PD_DISPLAY_STATE ROUND_RESULTS 1:9
+10-04 17:12:13.125 23547 23547 I QuiltNightTV: PD_DISPLAY_STATE PLACING 1:10
+10-04 17:12:13.561 23547 23547 I QuiltNightTV: PD_DISPLAY_STATE PLACING 1:10
+10-04 17:12:13.574 23547 23547 I QuiltNightTV: PD_DISPLAY_STATE PLACING 1:10
+10-04 17:12:14.147 23547 23547 I QuiltNightTV: PD_DISPLAY_STATE PLACING 1:11
+10-04 17:12:14.163 23547 23547 I QuiltNightTV: PD_AUTOPLAY_BOARDS 2:1
+10-04 17:12:18.651 23547 23547 I QuiltNightTV: PD_DISPLAY_STATE PLACING 1:11
+10-04 17:12:18.656 23547 23547 I QuiltNightTV: PD_DISPLAY_STATE PLACING 1:11
+10-04 17:12:19.086 23547 23547 I QuiltNightTV: PD_DISPLAY_STATE PLACING 1:12
+10-04 17:12:19.128 23547 23547 I QuiltNightTV: PD_AUTOPLAY_BOARDS 2:2
+10-04 17:12:23.609 23547 23547 I QuiltNightTV: PD_DISPLAY_STATE PLACING 1:12
+10-04 17:12:23.615 23547 23547 I QuiltNightTV: PD_DISPLAY_STATE PLACING 1:12
+10-04 17:12:24.177 23547 23547 I QuiltNightTV: PD_DISPLAY_STATE PLACING 1:13
+10-04 17:12:24.222 23547 23547 I QuiltNightTV: PD_AUTOPLAY_BOARDS 2:3
+10-04 17:12:28.689 23547 23547 I QuiltNightTV: PD_DISPLAY_STATE PLACING 1:13
+10-04 17:12:28.704 23547 23547 I QuiltNightTV: PD_DISPLAY_STATE PLACING 1:13
+10-04 17:12:29.145 23547 23547 I QuiltNightTV: PD_DISPLAY_STATE PLACING 1:14
+10-04 17:12:29.159 23547 23547 I QuiltNightTV: PD_AUTOPLAY_BOARDS 2:4
+10-04 17:12:33.619 23547 23547 I QuiltNightTV: PD_DISPLAY_STATE PLACING 1:14
+10-04 17:12:33.651 23547 23547 I QuiltNightTV: PD_DISPLAY_STATE PLACING 1:14
+10-04 17:12:34.212 23547 23547 I QuiltNightTV: PD_DISPLAY_STATE PLACING 1:15
+10-04 17:12:34.225 23547 23547 I QuiltNightTV: PD_AUTOPLAY_BOARDS 2:5
+10-04 17:12:38.735 23547 23547 I QuiltNightTV: PD_DISPLAY_STATE PLACING 1:15
+10-04 17:12:38.744 23547 23547 I QuiltNightTV: PD_DISPLAY_STATE PLACING 1:15
+10-04 17:12:39.332 23547 23547 I QuiltNightTV: PD_DISPLAY_STATE SCORING 1:16
+10-04 17:12:39.343 23547 23547 I QuiltNightTV: PD_AUTOPLAY_BOARDS 2:6
+10-04 17:12:43.839 23547 23547 I QuiltNightTV: PD_DISPLAY_STATE SCORING 1:16
+10-04 17:12:43.847 23547 23547 I QuiltNightTV: PD_DISPLAY_STATE SCORING 1:16
+10-04 17:12:44.284 23547 23547 I QuiltNightTV: PD_DISPLAY_STATE ROUND_RESULTS 1:17
+10-04 17:12:45.223 23547 23547 I QuiltNightTV: PD_DISPLAY_STATE PLACING 1:18
+10-04 17:12:45.893 23547 23547 I QuiltNightTV: PD_DISPLAY_STATE PLACING 1:18
+10-04 17:12:45.905 23547 23547 I QuiltNightTV: PD_DISPLAY_STATE PLACING 1:18
+10-04 17:12:46.344 23547 23547 I QuiltNightTV: PD_DISPLAY_STATE PLACING 1:19
+10-04 17:12:46.365 23547 23547 I QuiltNightTV: PD_AUTOPLAY_BOARDS 3:1
+10-04 17:12:51.026 23547 23547 I QuiltNightTV: PD_DISPLAY_STATE PLACING 1:19
+10-04 17:12:51.041 23547 23547 I QuiltNightTV: PD_DISPLAY_STATE PLACING 1:19
+10-04 17:12:51.636 23547 23547 I QuiltNightTV: PD_DISPLAY_STATE PLACING 1:20
+10-04 17:12:51.656 23547 23547 I QuiltNightTV: PD_AUTOPLAY_BOARDS 3:2
+10-04 17:12:56.134 23547 23547 I QuiltNightTV: PD_DISPLAY_STATE PLACING 1:20
+10-04 17:12:56.139 23547 23547 I QuiltNightTV: PD_DISPLAY_STATE PLACING 1:20
+10-04 17:12:56.741 23547 23547 I QuiltNightTV: PD_DISPLAY_STATE PLACING 1:21
+10-04 17:12:56.759 23547 23547 I QuiltNightTV: PD_AUTOPLAY_BOARDS 3:3
+10-04 17:13:01.254 23547 23547 I QuiltNightTV: PD_DISPLAY_STATE PLACING 1:21
+10-04 17:13:01.260 23547 23547 I QuiltNightTV: PD_DISPLAY_STATE PLACING 1:21
+10-04 17:13:01.861 23547 23547 I QuiltNightTV: PD_DISPLAY_STATE PLACING 1:22
+10-04 17:13:01.876 23547 23547 I QuiltNightTV: PD_AUTOPLAY_BOARDS 3:4
+10-04 17:13:06.371 23547 23547 I QuiltNightTV: PD_DISPLAY_STATE PLACING 1:22
+10-04 17:13:06.375 23547 23547 I QuiltNightTV: PD_DISPLAY_STATE PLACING 1:22
+10-04 17:13:06.807 23547 23547 I QuiltNightTV: PD_DISPLAY_STATE PLACING 1:23
+10-04 17:13:06.844 23547 23547 I QuiltNightTV: PD_AUTOPLAY_BOARDS 3:5
+10-04 17:13:11.487 23547 23547 I QuiltNightTV: PD_DISPLAY_STATE PLACING 1:23
+10-04 17:13:11.497 23547 23547 I QuiltNightTV: PD_DISPLAY_STATE PLACING 1:23
+10-04 17:13:11.928 23547 23547 I QuiltNightTV: PD_DISPLAY_STATE SCORING 1:24
+10-04 17:13:11.937 23547 23547 I QuiltNightTV: PD_AUTOPLAY_BOARDS 3:6
+10-04 17:13:16.402 23547 23547 I QuiltNightTV: PD_DISPLAY_STATE SCORING 1:24
+10-04 17:13:16.422 23547 23547 I QuiltNightTV: PD_DISPLAY_STATE SCORING 1:24
+10-04 17:13:16.846 23547 23547 I QuiltNightTV: PD_DISPLAY_STATE FINISHED 1:25
+10-04 17:13:18.049 23547 23547 I QuiltNightTV: PD_DISPLAY_STATE FINISHED 1:25
+10-04 17:13:19.078 23547 23547 I QuiltNightTV: PD_DISPLAY_STATE FINISHED 1:25
+10-04 17:13:19.928 23547 23547 I QuiltNightTV: PD_DISPLAY_STATE FINISHED 1:25
+10-04 17:13:20.955 23547 23547 I QuiltNightTV: PD_DISPLAY_STATE FINISHED 1:25
+10-04 17:13:21.935 23547 23547 I QuiltNightTV: PD_DISPLAY_STATE FINISHED 1:25
+10-04 17:13:22.959 23547 23547 I QuiltNightTV: PD_DISPLAY_STATE FINISHED 1:25
+10-04 17:13:23.985 23547 23547 I QuiltNightTV: PD_DISPLAY_STATE FINISHED 1:25
+10-04 17:13:25.007 23547 23547 I QuiltNightTV: PD_DISPLAY_STATE FINISHED 1:25
+10-04 17:13:26.031 23547 23547 I QuiltNightTV: PD_DISPLAY_STATE FINISHED 1:25
+10-04 17:13:27.055 23547 23547 I QuiltNightTV: PD_DISPLAY_STATE FINISHED 1:25
+10-04 17:13:28.079 23547 23547 I QuiltNightTV: PD_DISPLAY_STATE FINISHED 1:25
+10-04 17:13:28.933 23547 23547 I QuiltNightTV: PD_DISPLAY_STATE FINISHED 1:25
+10-04 17:13:29.105 23547 23547 I QuiltNightTV: PD_DEVICE_CHECK_COMPLETE

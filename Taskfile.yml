@@ -626,6 +626,7 @@ tasks:
       WF_CC_TRACE: '{{.TRACE | default ""}}'
       WF_CC_PAIRING_ENDPOINT: '{{.PAIRING_ENDPOINT | default ""}}'
       WF_CC_ADDRESS: '{{.ADDRESS | default ""}}'
+      WF_CC_METHOD: '{{.METHOD | default ""}}'
       WF_CC_REASON: '{{.REASON | default ""}}'
     cmds:
       - python3 scripts/chromecast.py task devices
@@ -709,6 +710,13 @@ tasks:
     env: *chromecast_env
     cmds:
       - python3 scripts/chromecast.py task profile
+
+  chromecast:capture:
+    desc: "Capture the current Chromecast display without launch, input or installation"
+    silent: true
+    env: *chromecast_env
+    cmds:
+      - python3 scripts/chromecast.py task capture
 
   chromecast:record:
     desc: "Coordinated Chromecast record"

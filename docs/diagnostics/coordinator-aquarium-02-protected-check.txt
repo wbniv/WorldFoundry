@@ -1,0 +1,11 @@
+Accepted J-a6cb710bb33c: queued; check
+Follow: task chromecast:watch JOB=J-a6cb710bb33c
+J-a6cb710bb33c: accepted {"device": "chromecast-test-02", "app": "aquarium", "scene": "jellyfish", "workflow": "check", "apk": "eabc18940d8ab8ba7d62b71a05ab9607d8533d599d1153b4e64d291d5c751e2c.apk"}
+J-a6cb710bb33c: granted {"device": "chromecast-test-02", "generation": 6}
+J-a6cb710bb33c: phase {"phase": "connecting"}
+J-a6cb710bb33c: phase {"phase": "installing"}
+J-a6cb710bb33c: phase {"phase": "installing"}
+J-a6cb710bb33c: phase {"phase": "launching"}
+J-a6cb710bb33c: phase {"phase": "restoring"}
+J-a6cb710bb33c: completed {"error": null, "health": "ready"}
+J-a6cb710bb33c: completed

@@ -1,0 +1,29 @@
+{
+  "job": "J-72e95f41027a",
+  "device": "chromecast-test-01",
+  "size": [
+    1920,
+    1080
+  ],
+  "mode": "RGBA",
+  "extrema": [
+    [
+      0,
+      205
+    ],
+    [
+      0,
+      186
+    ],
+    [
+      0,
+      178
+    ],
+    [
+      255,
+      255
+    ]
+  ],
+  "result": "nonblank video image; large dark areas and horizontal artifacts visible",
+  "playback_interrupted": false
+}

@@ -34,6 +34,7 @@ class Adapter:
         self.cleanup_mode = False
         self.uncertain_install = False
         self.record_pid = None
+        self.capture_remote = []
         self.process = None
         self.commands = []
         self.restoration = None
@@ -414,6 +415,11 @@ class Adapter:
         if self.req['workflow']=='install':
             self.restoration='unchanged: background install without launch or input'
             return
+        if self.req['workflow']=='capture':
+            for remote in self.capture_remote:
+                self.shell('rm','-f',remote)
+            self.restoration='unchanged: current display captured without input'
+            return
         self.store.phase(self.job['id'],'restoring')
         if self.record_pid:
             cmdline = self.shell('cat',f'/proc/{self.record_pid}/cmdline',allow_failure=True)
@@ -451,6 +457,24 @@ class Adapter:
             (self.out/'background-install.json').write_text(json.dumps({'before':before,'after':after,'foreground_unchanged':before==after},indent=2))
             if before != after:
                 raise RuntimeError('Foreground changed during background installation; no corrective input sent')
+            return
+        if self.req['workflow']=='capture':
+            from .capture import capture_current
+            capture_current(self)
+            # Keep capture observational. Collect the state needed to explain
+            # blank captures without waking the TV or changing its foreground.
+            diagnostics={}
+            for name,args in [('power',('power',)),('display',('display',)),
+                              ('window',('window',)),('activity',('activity','activities')),
+                              ('dreams',('dreams',)),('surfaceflinger',('SurfaceFlinger',))]:
+                started=time.time()
+                try:
+                    result=self.shell('dumpsys',*args,timeout=10)
+                    (self.out/(name+'.txt')).write_text(result)
+                    diagnostics[name]={'started':started,'finished':time.time(),'result':'saved'}
+                except (RuntimeError,TimeoutError) as exc:
+                    diagnostics[name]={'started':started,'finished':time.time(),'error':str(exc)}
+            (self.out/'display-diagnostics.json').write_text(json.dumps(diagnostics,indent=2))
             return
         if self.req['workflow']=='readd':
             with self.store.db() as db:

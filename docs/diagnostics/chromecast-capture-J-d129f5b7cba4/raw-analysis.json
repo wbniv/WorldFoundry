@@ -1,0 +1,10 @@
+{
+  "width": 1920,
+  "height": 1080,
+  "format": 1,
+  "color_space": 1,
+  "alpha_min": 255,
+  "alpha_max": 255,
+  "nonzero_rgb_pixels": 1440465,
+  "opaque_preview": "Derived preview: original alpha replaced with 255; RGB unchanged"
+}

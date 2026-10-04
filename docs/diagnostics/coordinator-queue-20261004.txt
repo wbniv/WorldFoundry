@@ -1,0 +1,5 @@
+Snapshot 2026-10-04 05:42:39 +0700; revision 22; connected
+chromecast-test-01: needs-local-setup; unowned; Chromecast_HD; ABI armeabi-v7a,armeabi
+chromecast-test-02: needs-local-setup; unowned; Chromecast; ABI armeabi-v7a,armeabi
+Waiting:
+Pool positions depend on eligibility and release order.

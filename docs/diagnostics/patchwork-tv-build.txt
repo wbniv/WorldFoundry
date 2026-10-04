@@ -1,0 +1,49 @@
+----------
+1. WARNING in /home/will/WorldFoundry-wbniv/party-games/games/patchwork/tv/src/org/worldfoundry/wf_game/patchwork/TvActivity.java (at line 27)
+	getWindow().getDecorView().setSystemUiVisibility(
+            View.SYSTEM_UI_FLAG_FULLSCREEN | View.SYSTEM_UI_FLAG_HIDE_NAVIGATION
+            | View.SYSTEM_UI_FLAG_IMMERSIVE_STICKY | View.SYSTEM_UI_FLAG_LAYOUT_STABLE);
+	                           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+The method setSystemUiVisibility(int) from the type View is deprecated
+----------
+2. WARNING in /home/will/WorldFoundry-wbniv/party-games/games/patchwork/tv/src/org/worldfoundry/wf_game/patchwork/TvActivity.java (at line 28)
+	View.SYSTEM_UI_FLAG_FULLSCREEN | View.SYSTEM_UI_FLAG_HIDE_NAVIGATION
+	     ^^^^^^^^^^^^^^^^^^^^^^^^^
+The field View.SYSTEM_UI_FLAG_FULLSCREEN is deprecated
+----------
+3. WARNING in /home/will/WorldFoundry-wbniv/party-games/games/patchwork/tv/src/org/worldfoundry/wf_game/patchwork/TvActivity.java (at line 28)
+	View.SYSTEM_UI_FLAG_FULLSCREEN | View.SYSTEM_UI_FLAG_HIDE_NAVIGATION
+	                                      ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+The field View.SYSTEM_UI_FLAG_HIDE_NAVIGATION is deprecated
+----------
+4. WARNING in /home/will/WorldFoundry-wbniv/party-games/games/patchwork/tv/src/org/worldfoundry/wf_game/patchwork/TvActivity.java (at line 29)
+	| View.SYSTEM_UI_FLAG_IMMERSIVE_STICKY | View.SYSTEM_UI_FLAG_LAYOUT_STABLE);
+	       ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+The field View.SYSTEM_UI_FLAG_IMMERSIVE_STICKY is deprecated
+----------
+5. WARNING in /home/will/WorldFoundry-wbniv/party-games/games/patchwork/tv/src/org/worldfoundry/wf_game/patchwork/TvActivity.java (at line 29)
+	| View.SYSTEM_UI_FLAG_IMMERSIVE_STICKY | View.SYSTEM_UI_FLAG_LAYOUT_STABLE);
+	                                              ^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+The field View.SYSTEM_UI_FLAG_LAYOUT_STABLE is deprecated
+----------
+5 problems (5 warnings)
+Generating 2,048 bit RSA key pair and self-signed certificate (SHA384withRSA) with a validity of 3,650 days
+	for: CN=Quilt Night Development
+Verifies
+Verified using v1 scheme (JAR signing): false
+Verified using v2 scheme (APK Signature Scheme v2): true
+Verified using v3 scheme (APK Signature Scheme v3): true
+Verified using v3.1 scheme (APK Signature Scheme v3.1): false
+Verified using v4 scheme (APK Signature Scheme v4): false
+Verified for SourceStamp: false
+Number of signers: 1
+{
+  "origin": "http://192.168.4.21:8096",
+  "automatedCheck": false,
+  "apk": "/home/will/WorldFoundry-wbniv/party-games/games/patchwork/tv/build/interactive/quilt-night-86c3dd2661a7ddbc.apk",
+  "sha256": "86c3dd2661a7ddbc350af532ac18ab0eb4d7da1d6ee558a795b461e911a30d25",
+  "package": "org.worldfoundry.wf_game.patchwork",
+  "activity": "org.worldfoundry.wf_game.patchwork.TvActivity",
+  "compilerSha256": "01f5a92ac19bb2b3bf85e295a68f2c73c264369109158b566ce9b490af982948",
+  "nativeCode": false
+}

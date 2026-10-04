@@ -1,0 +1,13 @@
+Accepted J-8fab5343f20e: queued; capture
+Follow: task chromecast:watch JOB=J-8fab5343f20e
+J-8fab5343f20e: accepted {"device": "chromecast-test-01", "method": "compare", "workflow": "capture"}
+J-8fab5343f20e: granted {"device": "chromecast-test-01", "generation": 10}
+J-8fab5343f20e: phase {"phase": "connecting"}
+J-8fab5343f20e: phase {"phase": "capturing-png"}
+J-8fab5343f20e: phase {"phase": "capturing-raw"}
+J-8fab5343f20e: phase {"phase": "capturing-uiautomation"}
+J-8fab5343f20e: phase {"phase": "capturing-record"}
+J-8fab5343f20e: completed {"error": null, "health": "ready"}
+J-8fab5343f20e: completed
+J-8fab5343f20e: completed; verified 19 artifacts -> /home/will/WorldFoundry-wbniv/docs/diagnostics/chromecast-capture-J-8fab5343f20e
+Capture evidence: /home/will/WorldFoundry-wbniv/docs/diagnostics/chromecast-capture-J-8fab5343f20e

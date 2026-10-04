@@ -1,0 +1,233 @@
+
+> party-games-platform-server@0.1.0 test
+> node --test test/*.test.js
+
+TAP version 13
+# [image] BUTTON_PRESS from Bob (id=2) phase=PLAY targetShown=true alreadyPressed=false alreadyLocked=false
+# [image] BUTTON_PRESS from Alice (id=1) phase=PLAY targetShown=true alreadyPressed=false alreadyLocked=false
+# Subtest: image game end-to-end: reveal → play → all players commit → ranked scores
+ok 1 - image game end-to-end: reveal → play → all players commit → ranked scores
+  ---
+  duration_ms: 145.942697
+  type: 'test'
+  ...
+# [image] BUTTON_PRESS from Alice (id=1) phase=REVEAL targetShown=false alreadyPressed=false alreadyLocked=false
+# Subtest: image game end-to-end: early press during REVEAL locks out the presser
+ok 2 - image game end-to-end: early press during REVEAL locks out the presser
+  ---
+  duration_ms: 35.607882
+  type: 'test'
+  ...
+# Subtest: reaction game end-to-end: countdown → open → ranked scores
+ok 3 - reaction game end-to-end: countdown → open → ranked scores
+  ---
+  duration_ms: 154.305707
+  type: 'test'
+  ...
+# Subtest: reaction game end-to-end: early press locks out the presser
+ok 4 - reaction game end-to-end: early press locks out the presser
+  ---
+  duration_ms: 20.870551
+  type: 'test'
+  ...
+# Subtest: receiver gets empty STATE on HELLO
+ok 5 - receiver gets empty STATE on HELLO
+  ---
+  duration_ms: 131.459958
+  type: 'test'
+  ...
+# Subtest: controller HELLO yields WELCOME and broadcasts STATE
+ok 6 - controller HELLO yields WELCOME and broadcasts STATE
+  ---
+  duration_ms: 30.015969
+  type: 'test'
+  ...
+# Subtest: PING from controller yields PONG to everyone with client+server ts
+ok 7 - PING from controller yields PONG to everyone with client+server ts
+  ---
+  duration_ms: 29.252827
+  type: 'test'
+  ...
+# Subtest: disconnect broadcasts updated STATE without the departed player
+ok 8 - disconnect broadcasts updated STATE without the departed player
+  ---
+  duration_ms: 27.953066
+  type: 'test'
+  ...
+# Subtest: PING from unregistered socket is ignored
+ok 9 - PING from unregistered socket is ignored
+  ---
+  duration_ms: 114.609652
+  type: 'test'
+  ...
+# Subtest: malformed JSON does not crash or leak state
+ok 10 - malformed JSON does not crash or leak state
+  ---
+  duration_ms: 10.579344
+  type: 'test'
+  ...
+# Subtest: name is truncated to MAX_NAME_LEN characters
+ok 11 - name is truncated to MAX_NAME_LEN characters
+  ---
+  duration_ms: 5.604499
+  type: 'test'
+  ...
+# Subtest: repeated HELLO from same socket is ignored (role stays first-set)
+ok 12 - repeated HELLO from same socket is ignored (role stays first-set)
+  ---
+  duration_ms: 87.348684
+  type: 'test'
+  ...
+# Subtest: HELLO with unknown role ignored; client stays anonymous (PING drops)
+ok 13 - HELLO with unknown role ignored; client stays anonymous (PING drops)
+  ---
+  duration_ms: 115.119813
+  type: 'test'
+  ...
+# Subtest: oversize payload is rejected by ws (closes connection)
+ok 14 - oversize payload is rejected by ws (closes connection)
+  ---
+  duration_ms: 20.536665
+  type: 'test'
+  ...
+# Subtest: two rooms on one server are fully isolated
+ok 15 - two rooms on one server are fully isolated
+  ---
+  duration_ms: 104.829553
+  type: 'test'
+  ...
+# Subtest: HELLO without a room rejects controllers with NEED_ROOM
+ok 16 - HELLO without a room rejects controllers with NEED_ROOM
+  ---
+  duration_ms: 5.830265
+  type: 'test'
+  ...
+# Subtest: HELLO with malformed room code rejects with BAD_ROOM
+ok 17 - HELLO with malformed room code rejects with BAD_ROOM
+  ---
+  duration_ms: 5.286075
+  type: 'test'
+  ...
+# Subtest: receiver with no room gets a server-generated code back in WELCOME_RECEIVER
+ok 18 - receiver with no room gets a server-generated code back in WELCOME_RECEIVER
+  ---
+  duration_ms: 6.343225
+  type: 'test'
+  ...
+# Subtest: session-id reconnect within grace: resumes same player id, WELCOME.resumed=true
+ok 19 - session-id reconnect within grace: resumes same player id, WELCOME.resumed=true
+  ---
+  duration_ms: 12.657899
+  type: 'test'
+  ...
+# Subtest: session-id reconnect: a DIFFERENT sessionId gets a fresh player id
+ok 20 - session-id reconnect: a DIFFERENT sessionId gets a fresh player id
+  ---
+  duration_ms: 8.701883
+  type: 'test'
+  ...
+# Subtest: session-id reconnect: missing sessionId falls back to old behavior (no resume)
+ok 21 - session-id reconnect: missing sessionId falls back to old behavior (no resume)
+  ---
+  duration_ms: 11.579052
+  type: 'test'
+  ...
+# Subtest: after grace expires, session slot is released and reconnect is treated as fresh
+ok 22 - after grace expires, session slot is released and reconnect is treated as fresh
+  ---
+  duration_ms: 66.117744
+  type: 'test'
+  ...
+# Subtest: grace window keeps the room alive even after all sockets drop
+ok 23 - grace window keeps the room alive even after all sockets drop
+  ---
+  duration_ms: 63.314543
+  type: 'test'
+  ...
+# Subtest: static file routing — index + sibling assets + 404
+ok 24 - static file routing — index + sibling assets + 404
+  ---
+  duration_ms: 33.9838
+  type: 'test'
+  ...
+# Subtest: /controller has game-name meta, game-root div, and stylesheet link when game has CSS
+ok 25 - /controller has game-name meta, game-root div, and stylesheet link when game has CSS
+  ---
+  duration_ms: 119.563876
+  type: 'test'
+  ...
+# Subtest: /receiver has game-name meta and stylesheet when game has CSS
+ok 26 - /receiver has game-name meta and stylesheet when game has CSS
+  ---
+  duration_ms: 15.825005
+  type: 'test'
+  ...
+# Subtest: placeholder empty when no game is active
+ok 27 - placeholder empty when no game is active
+  ---
+  duration_ms: 7.80321
+  type: 'test'
+  ...
+# Subtest: stylesheet tag omitted when per-game CSS file is missing
+ok 28 - stylesheet tag omitted when per-game CSS file is missing
+  ---
+  duration_ms: 16.128163
+  type: 'test'
+  ...
+# Subtest: /game/client/<file> resolves under the active game
+ok 29 - /game/client/<file> resolves under the active game
+  ---
+  duration_ms: 8.188248
+  type: 'test'
+  ...
+# Subtest: /game/client/<missing> returns a helpful 404
+ok 30 - /game/client/<missing> returns a helpful 404
+  ---
+  duration_ms: 7.75794
+  type: 'test'
+  ...
+# Subtest: /game/* path traversal returns 403
+ok 31 - /game/* path traversal returns 403
+  ---
+  duration_ms: 4.423131
+  type: 'test'
+  ...
+# Subtest: /game/* when no game active returns 404 with clear message
+ok 32 - /game/* when no game active returns 404 with clear message
+  ---
+  duration_ms: 6.496055
+  type: 'test'
+  ...
+# Subtest: /shell-lib/<file> serves from platform/shell-lib
+ok 33 - /shell-lib/<file> serves from platform/shell-lib
+  ---
+  duration_ms: 8.838874
+  type: 'test'
+  ...
+# Subtest: /shell-lib/* path traversal returns 403
+ok 34 - /shell-lib/* path traversal returns 403
+  ---
+  duration_ms: 6.583292
+  type: 'test'
+  ...
+# Subtest: worst-take-wins end-to-end: 3 players, one round, winner scores
+ok 35 - worst-take-wins end-to-end: 3 players, one round, winner scores
+  ---
+  duration_ms: 129.907575
+  type: 'test'
+  ...
+# Subtest: START_GAME rejected with <3 players, surfaces ERROR to host
+ok 36 - START_GAME rejected with <3 players, surfaces ERROR to host
+  ---
+  duration_ms: 24.422979
+  type: 'test'
+  ...
+1..36
+# tests 36
+# suites 0
+# pass 36
+# fail 0
+# cancelled 0
+# skipped 0
+# todo 0
+# duration_ms 1470.873148

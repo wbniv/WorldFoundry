@@ -1,0 +1,1 @@
+PASS: Android-TV path, LAN origin, two simulated phones inside display, 18 turns and final score ceremony. Physical device test remains separate.

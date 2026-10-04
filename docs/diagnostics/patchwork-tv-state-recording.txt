@@ -1,0 +1,12 @@
+Accepted J-2104f8e72e64: queued; record
+Follow: task chromecast:watch JOB=J-2104f8e72e64
+J-2104f8e72e64: accepted {"pool": "chromecast-test", "app": "patchwork", "apk": "470b452adccbddf8d12fc27eb5865248bdd670eb331f665c2c8fc2fc9c928315.apk", "warmup": 0.0, "duration": 150.0, "workflow": "record"}
+J-2104f8e72e64: granted {"device": "chromecast-test-01", "generation": 19}
+J-2104f8e72e64: phase {"phase": "connecting"}
+J-2104f8e72e64: phase {"phase": "installing"}
+J-2104f8e72e64: phase {"phase": "installing"}
+J-2104f8e72e64: phase {"phase": "launching"}
+J-2104f8e72e64: phase {"phase": "recording"}
+J-2104f8e72e64: phase {"phase": "restoring"}
+J-2104f8e72e64: completed {"error": null, "health": "ready"}
+J-2104f8e72e64: completed

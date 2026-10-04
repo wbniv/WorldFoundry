@@ -1,0 +1,6 @@
+Reloading systemd (installer limit 60 seconds; systemctl may time out earlier). A client timeout does not cancel the manager reload.
+Installed. Authorize the fresh service host on each TV if prompted.
+Run task chromecast:readd DEVICE=chromecast-test-01, then device 02.
+Dashboard: http://127.0.0.1:8767
+Enforcement is not certified: run bypass checks, including IPv6/DHCP and sandbox/escalated routes.
+Restart participating Codex sessions to load managed hooks; cloud-orchestrated sessions may require managed remote hooks.

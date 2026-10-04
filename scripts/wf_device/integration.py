@@ -5,7 +5,7 @@ import shlex
 import sys
 from .client import Client
 
-NOTICE='Chromecast test jobs have standing authorization. Use task chromecast:devices/queue/submit/check/profile/record/readd/watch/evidence/message/cancel. The coordinator owns each complete device session. Do not request routine testing permission or run raw Chromecast ADB. Service downtime has no direct fallback.'
+NOTICE='Chromecast test jobs have standing authorization. Use task chromecast:devices/queue/submit/check/profile/record/capture/readd/watch/evidence/message/cancel. The coordinator owns each complete device session. Do not request routine testing permission or run raw Chromecast ADB. Service downtime has no direct fallback.'
 
 
 def hook_decision(payload):
@@ -25,7 +25,7 @@ def hook_decision(payload):
         except ValueError:
             words=[]
         if (len(words)>=2 and words[0]=='/opt/wf-device-coordinator/bin/chromecast'
-                and words[1] in {'devices','queue','status','submit','check','profile','record','readd','watch','evidence','message','cancel'}
+                and words[1] in {'devices','queue','status','submit','check','profile','record','capture','readd','watch','evidence','message','cancel'}
                 and not re.search(r'[;&|`\n]|\$\(',command)):
             return {'hookSpecificOutput':{'hookEventName':event,'decision':{'behavior':'allow'}}}
         return {}

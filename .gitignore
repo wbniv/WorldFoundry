@@ -96,3 +96,6 @@ wfsource/source/game/output.mp4
 
 # One-time credential setup (scripts/setup.sh) run logs + session caches
 .setup-logs/
+
+# Separate local Git checkouts; their changes belong to their own branches.
+/.worktrees/

@@ -1,0 +1,8 @@
+Accepted J-86536e599a69: queued; readd
+Follow: task chromecast:watch JOB=J-86536e599a69
+J-86536e599a69: accepted {"device": "chromecast-test-01", "workflow": "readd"}
+J-86536e599a69: granted {"device": "chromecast-test-01", "generation": 4}
+J-86536e599a69: phase {"phase": "connecting"}
+J-86536e599a69: needs-local-setup {"error": "Connect failed; enable debugging and authorize this service host on the TV", "health": "needs-local-setup"}
+J-86536e599a69: needs-local-setup: Connect failed; enable debugging and authorize this service host on the TV
+task: Failed to run task "chromecast:readd": exit status 1

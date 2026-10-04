@@ -1,0 +1,437 @@
+{
+  "job": {
+    "id": "J-a6cb710bb33c",
+    "owner": "5c3060b287de0099d24b3975",
+    "accepted": 1791068616.474055,
+    "state": "running",
+    "phase": "restoring",
+    "request": {
+      "device": "chromecast-test-02",
+      "app": "aquarium",
+      "scene": "jellyfish",
+      "workflow": "check",
+      "apk": "eabc18940d8ab8ba7d62b71a05ab9607d8533d599d1153b4e64d291d5c751e2c.apk"
+    },
+    "device": "chromecast-test-02",
+    "generation": 6,
+    "cancel": 0,
+    "error": null,
+    "started": 1791068616.530997,
+    "finished": null,
+    "worker_pid": 151957,
+    "recovery_resolved": 0
+  },
+  "device": {
+    "id": "chromecast-test-02",
+    "serial": "26031HFDD67QH7",
+    "name": "Project Room",
+    "model": "Chromecast",
+    "device": "sabrina",
+    "android": "12",
+    "sdk": "31",
+    "abis": [
+      "armeabi-v7a",
+      "armeabi"
+    ],
+    "transport": "legacy-tcp",
+    "endpoint": "192.168.4.49:5555",
+    "pools": [
+      "chromecast-test"
+    ],
+    "health": "ready",
+    "enrolled": true,
+    "ipv6_addresses": [
+      "fd5d:59ce:7438:1:cc0c:96e5:4ca4:6cc0",
+      "fd5d:59ce:7438:1:2555:eb86:7321:678",
+      "fe80::7156:9529:ebee:236b"
+    ],
+    "cast_udn": "5e305387-266b-84a6-639e-50805d1f06c2",
+    "generation": 6,
+    "last_seen": 1791068617.0267162,
+    "boot_id": "e16e2745-fc4e-4e9c-8996-96108117a466"
+  },
+  "result": "completed",
+  "error": null,
+  "cleanup_verified": true,
+  "restoration": "previous-app-TV-launcher",
+  "commands": [
+    {
+      "args": [
+        "connect",
+        "192.168.4.49:5555"
+      ],
+      "start": 1791068616.9515777,
+      "end": 1791068616.9608707,
+      "returncode": 0
+    },
+    {
+      "args": [
+        "shell",
+        "getprop ro.serialno"
+      ],
+      "start": 1791068616.9621105,
+      "end": 1791068617.0266817,
+      "returncode": 0
+    },
+    {
+      "args": [
+        "shell",
+        "cat /proc/sys/kernel/random/boot_id"
+      ],
+      "start": 1791068617.0277774,
+      "end": 1791068617.0848124,
+      "returncode": 0
+    },
+    {
+      "args": [
+        "shell",
+        "getprop ro.product.model"
+      ],
+      "start": 1791068617.0864153,
+      "end": 1791068617.1336126,
+      "returncode": 0
+    },
+    {
+      "args": [
+        "shell",
+        "getprop ro.build.version.release"
+      ],
+      "start": 1791068617.1347806,
+      "end": 1791068617.1764202,
+      "returncode": 0
+    },
+    {
+      "args": [
+        "shell",
+        "getprop ro.build.version.sdk"
+      ],
+      "start": 1791068617.177664,
+      "end": 1791068617.2182915,
+      "returncode": 0
+    },
+    {
+      "args": [
+        "shell",
+        "getprop ro.product.device"
+      ],
+      "start": 1791068617.2194667,
+      "end": 1791068617.2672055,
+      "returncode": 0
+    },
+    {
+      "args": [
+        "shell",
+        "getprop ro.product.cpu.abilist"
+      ],
+      "start": 1791068617.2683172,
+      "end": 1791068617.311711,
+      "returncode": 0
+    },
+    {
+      "args": [
+        "shell",
+        "ip -6 addr show wlan0"
+      ],
+      "start": 1791068617.3128743,
+      "end": 1791068617.3573954,
+      "returncode": 0
+    },
+    {
+      "args": [
+        "shell",
+        "dumpsys activity activities"
+      ],
+      "start": 1791068617.3794334,
+      "end": 1791068617.5506556,
+      "returncode": 0
+    },
+    {
+      "args": [
+        "install",
+        "-r",
+        "/var/lib/wf-device-coordinator/inputs/eabc18940d8ab8ba7d62b71a05ab9607d8533d599d1153b4e64d291d5c751e2c.apk"
+      ],
+      "start": 1791068617.6143625,
+      "end": 1791068621.7246366,
+      "returncode": 0
+    },
+    {
+      "args": [
+        "shell",
+        "pm path org.worldfoundry.wf_game.aquarium"
+      ],
+      "start": 1791068621.726041,
+      "end": 1791068621.8213735,
+      "returncode": 0
+    },
+    {
+      "args": [
+        "shell",
+        "sha256sum '/data/app/~~_T88d6_EvyQf_m1C7LRuaA==/org.worldfoundry.wf_game.aquarium-XQm-e0E_NZKTz3X18yrHJQ==/base.apk'"
+      ],
+      "start": 1791068621.8227274,
+      "end": 1791068621.9139845,
+      "returncode": 0
+    },
+    {
+      "args": [
+        "shell",
+        "am force-stop org.worldfoundry.wf_game.aquarium"
+      ],
+      "start": 1791068621.9388766,
+      "end": 1791068622.0754566,
+      "returncode": 0
+    },
+    {
+      "args": [
+        "shell",
+        "input keyevent KEYCODE_WAKEUP"
+      ],
+      "start": 1791068622.076517,
+      "end": 1791068622.182381,
+      "returncode": 0
+    },
+    {
+      "args": [
+        "shell",
+        "am start -W -n org.worldfoundry.wf_game.aquarium/android.app.NativeActivity"
+      ],
+      "start": 1791068622.3335702,
+      "end": 1791068623.0324497,
+      "returncode": 0
+    },
+    {
+      "args": [
+        "shell",
+        "dumpsys activity activities"
+      ],
+      "start": 1791068628.0354419,
+      "end": 1791068628.3021927,
+      "returncode": 0
+    },
+    {
+      "args": [
+        "shell",
+        "pidof org.worldfoundry.wf_game.aquarium"
+      ],
+      "start": 1791068628.3036509,
+      "end": 1791068628.3732383,
+      "returncode": 0
+    },
+    {
+      "args": [
+        "shell",
+        "input keyevent KEYCODE_BACK"
+      ],
+      "start": 1791068628.374975,
+      "end": 1791068628.517387,
+      "returncode": 0
+    },
+    {
+      "args": [
+        "shell",
+        "dumpsys activity activities"
+      ],
+      "start": 1791068629.669475,
+      "end": 1791068629.7579875,
+      "returncode": 0
+    },
+    {
+      "args": [
+        "shell",
+        "pidof org.worldfoundry.wf_game.aquarium"
+      ],
+      "start": 1791068629.7594652,
+      "end": 1791068629.8373928,
+      "returncode": 0
+    },
+    {
+      "args": [
+        "shell",
+        "input keyevent KEYCODE_DPAD_DOWN"
+      ],
+      "start": 1791068629.8387535,
+      "end": 1791068629.9856358,
+      "returncode": 0
+    },
+    {
+      "args": [
+        "shell",
+        "input keyevent KEYCODE_DPAD_DOWN"
+      ],
+      "start": 1791068630.1370602,
+      "end": 1791068630.3866427,
+      "returncode": 0
+    },
+    {
+      "args": [
+        "shell",
+        "input keyevent KEYCODE_DPAD_DOWN"
+      ],
+      "start": 1791068630.537898,
+      "end": 1791068630.8048344,
+      "returncode": 0
+    },
+    {
+      "args": [
+        "shell",
+        "input keyevent KEYCODE_DPAD_CENTER"
+      ],
+      "start": 1791068630.9566145,
+      "end": 1791068631.2230616,
+      "returncode": 0
+    },
+    {
+      "args": [
+        "shell",
+        "dumpsys activity activities"
+      ],
+      "start": 1791068633.3757267,
+      "end": 1791068633.6083984,
+      "returncode": 0
+    },
+    {
+      "args": [
+        "shell",
+        "pidof org.worldfoundry.wf_game.aquarium"
+      ],
+      "start": 1791068633.6100526,
+      "end": 1791068633.6760304,
+      "returncode": 0
+    },
+    {
+      "args": [
+        "shell",
+        "cat /sdcard/Android/data/org.worldfoundry.wf_game.aquarium/files/wf.log"
+      ],
+      "start": 1791068633.6772618,
+      "end": 1791068633.8324945,
+      "returncode": 0
+    },
+    {
+      "args": [
+        "logcat",
+        "-d",
+        "-v",
+        "brief"
+      ],
+      "start": 1791068633.834124,
+      "end": 1791068636.081272,
+      "returncode": 0
+    },
+    {
+      "args": [
+        "shell",
+        "dumpsys activity activities"
+      ],
+      "start": 1791068639.1010778,
+      "end": 1791068639.3324146,
+      "returncode": 0
+    },
+    {
+      "args": [
+        "shell",
+        "pidof org.worldfoundry.wf_game.aquarium"
+      ],
+      "start": 1791068639.3340187,
+      "end": 1791068639.4019837,
+      "returncode": 0
+    },
+    {
+      "args": [
+        "exec-out",
+        "screencap",
+        "-p"
+      ],
+      "start": 1791068639.4034755,
+      "end": 1791068640.7946634,
+      "returncode": 0
+    },
+    {
+      "args": [
+        "shell",
+        "pidof org.worldfoundry.wf_game.aquarium"
+      ],
+      "start": 1791068640.7968705,
+      "end": 1791068640.8652868,
+      "returncode": 0
+    },
+    {
+      "args": [
+        "logcat",
+        "-d",
+        "-v",
+        "threadtime",
+        "--pid=8360"
+      ],
+      "start": 1791068640.866468,
+      "end": 1791068641.0105095,
+      "returncode": 0
+    },
+    {
+      "args": [
+        "shell",
+        "cat /sdcard/Android/data/org.worldfoundry.wf_game.aquarium/files/wf.log"
+      ],
+      "start": 1791068641.0122283,
+      "end": 1791068641.164998,
+      "returncode": 0
+    },
+    {
+      "args": [
+        "shell",
+        "dumpsys meminfo org.worldfoundry.wf_game.aquarium"
+      ],
+      "start": 1791068641.1673105,
+      "end": 1791068641.5503695,
+      "returncode": 0
+    },
+    {
+      "args": [
+        "shell",
+        "dumpsys thermalservice"
+      ],
+      "start": 1791068641.5521681,
+      "end": 1791068641.6109366,
+      "returncode": 0
+    },
+    {
+      "args": [
+        "shell",
+        "am force-stop org.worldfoundry.wf_game.aquarium"
+      ],
+      "start": 1791068641.635629,
+      "end": 1791068641.7694237,
+      "returncode": 0
+    },
+    {
+      "args": [
+        "shell",
+        "am start -W -a android.intent.action.MAIN -c android.intent.category.LEANBACK_LAUNCHER -p com.google.android.youtube.tv"
+      ],
+      "start": 1791068641.7706633,
+      "end": 1791068641.9583437,
+      "returncode": 0
+    },
+    {
+      "args": [
+        "shell",
+        "dumpsys activity activities"
+      ],
+      "start": 1791068641.9598746,
+      "end": 1791068642.0494394,
+      "returncode": 0
+    },
+    {
+      "args": [
+        "shell",
+        "pidof org.worldfoundry.wf_game.aquarium"
+      ],
+      "start": 1791068642.0511224,
+      "end": 1791068642.1194537,
+      "returncode": 1
+    }
+  ],
+  "finished": 1791068642.1205523,
+  "concurrent_jobs": []
+}

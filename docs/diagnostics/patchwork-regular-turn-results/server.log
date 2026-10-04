@@ -1,0 +1,21 @@
+game plugin: patchwork
+party-games platform ready on http://localhost:43499
+  receiver:   http://localhost:43499/receiver
+  controller: http://localhost:43499/controller?name=Alice
+[ws] room GDGG created
+[ws] player joined room=GDGG id=1 name=Alice
+[ws] receiver attached to room=GDGG
+[ws] player joined room=GDGG id=2 name=Bob
+[ws] player dropped room=GDGG id=2 — grace 300000ms
+[ws] player resumed room=GDGG id=2 name=Bob
+[ws] receiver detached room=GDGG
+[ws] receiver attached to room=GDGG
+[ws] player dropped room=GDGG id=2 — grace 300000ms
+[ws] player resumed room=GDGG id=2 name=Bob
+[ws] receiver detached room=GDGG
+[ws] receiver attached to room=GDGG
+[ws] receiver detached room=GDGG
+[ws] player dropped room=GDGG id=1 — grace 300000ms
+[ws] player dropped room=GDGG id=2 — grace 300000ms
+
+received SIGTERM, shutting down
