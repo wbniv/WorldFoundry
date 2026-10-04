@@ -1,6 +1,7 @@
 #!/usr/bin/env python3
 """Analyse saved SurfaceFlinger captures, excluding screenshot gaps and warmup."""
 import argparse
+import gzip
 import json
 from pathlib import Path
 import re
@@ -41,10 +42,21 @@ def analyse(work):
     result = {'combined': stats(combined,refresh), 'scenarios': per,
               'clock_offset_seconds': offset,
               'clock_alignment_note': 'Median latest-present timestamp minus poll start; boundaries approximate within one poll round trip plus a frame.'}
-    memory = (work/'meminfo.txt').read_text()
+    memory_path = work/'meminfo.txt'
+    if memory_path.exists():
+        memory = memory_path.read_text()
+    else:
+        with gzip.open(work/'meminfo.txt.gz','rt') as source:
+            memory = source.read()
     pss = re.search(r'TOTAL PSS:\s*(\d+)',memory)
     if pss: result['PSS_MiB']=int(pss[1])/1024
-    log = (work/'wf.log').read_text().rsplit('=== wf_game android_main',1)[-1]
+    log_path = work/'wf.log'
+    if log_path.exists():
+        log_text = log_path.read_text()
+    else:
+        with gzip.open(work/'wf.log.gz','rt') as source:
+            log_text = source.read()
+    log = log_text.rsplit('=== wf_game android_main',1)[-1]
     windows = []
     for chunk in log.split('frame-window: ')[1:]:
         m = re.match(r'start-ns=(\d+) end-ns=(\d+)',chunk)

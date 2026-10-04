@@ -1,5 +1,5 @@
 <!doctype html><html><head><meta charset="utf-8"><title>Aquarium plant level plan</title><style>body{font:17px/1.6 system-ui;max-width:1080px;margin:36px auto;padding:0 24px;color:#183a32;background:#f4f5ef}img{max-width:100%;height:auto}table{border-collapse:collapse;width:100%}td,th{border:1px solid #bdc8ba;padding:8px;text-align:left}pre{overflow:auto;background:#e6ebe0;padding:16px}a{color:#176658}</style></head><body><h1 id="aquarium-clumped-plant-growth-gentle-water-motion-and-an-a3-poster">Aquarium: clumped plant growth, gentle water motion and an A3 poster</h1>
-<p><strong>Status:</strong> runtime growth, both water palettes, sway, TV/phone settings and textures are implemented. The bounded-log coordinator update is deployed, and normal planted-level check <code>J-3317677c68de</code> passed. The first coordinator benchmark was cancelled after discovering its variants contained older native libraries. Corrected job <code>J-cfbb812fc1ff</code> is submitted with all variants verified against the current normal APK; its baseline retains the current selector and other seven tanks, replacing only the planted-level asset. Final matched measurements and repeated-entry memory testing remain outstanding. The A3 portrait poster is complete.</p>
+<p><strong>Status:</strong> seeded runtime growth, fresh/salt palettes, sway, TV/phone settings and leaf textures are implemented and device-verified. The corrected current-native texture comparison is complete: 15 release traces and five separate CPU traces, with normal-APK restoration/hash verification passed. Textures cost about 34–35% of mature-tank FPS and 24–27 ms/frame of CPU rendering; actor cost remains about 1.3 ms. Broader growth/sway/seed-spread measurements and repeated-entry memory testing remain pending. The A3 portrait poster is complete. Implementation is committed as <code>0aa37847</code>.</p>
 <p>Replace obvious rows with <strong>connected, irregular patches of growth</strong>. Grow toward a mostly-full mature tank: overlapping clumps should eventually cover roughly 75–85% of the submerged interior in the whole-tank view, with local gaps and a small, winding substrate route for the sea urchin. Add subtle, coherent water-driven bending with anchored roots. Make an <strong>A3 portrait poster</strong>, split into saltwater on the left and freshwater on the right; reserve the <strong>bottom 25% of the page</strong> for diagrams and explanations of clumping and branching.</p>
 <h2 id="plant-level-behavior">Plant-level behavior</h2>
 <p><strong>Every time the player selects Planted Tank, start a new seeded ecosystem and let the player watch it grow.</strong> Begin with 12–18 small young founder colonies. Runners extend, daughter shoots emerge, leaves unfurl, stems elongate and side branches/whorls appear; the scene gradually becomes the mostly-full mature tank. Returning to the selector and selecting it again starts different founders and growth choices. Changing camera keeps the current ecosystem; pause freezes growth and sway, and resume continues without a large catch-up jump. The eight-tank selector, sea urchin and existing controls remain the content baseline.</p>
@@ -66,7 +66,7 @@
 <li>[x] Prepare a compact, padded texture atlas and add UVs to runtime leaf geometry.</li>
 <li>[x] Bind textured plant materials without adding actors or render groups.</li>
 <li>[ ] Verify both water palettes, both leaf faces, young growth and mature sway on Chromecast.</li>
-<li>[ ] Profile the textured version against the same shaded version at matching seed, growth age, camera and input trace; report FPS, p95 pacing, render CPU and memory deltas.</li>
+<li>[x] Profile mature static textures against shaded controls at seed 713, age 150, matching cameras/input; report FPS, p95, render CPU and memory. Growth/sway profiling remains pending.</li>
 </ul>
 <table>
 <thead>
@@ -124,7 +124,7 @@
 <li>[x] Extend the production compositor regression to check texture-mode forwarding and restoration (3 focused compositor/translucency checks passed). The earlier aquarium/growth/phone regression suite passed 81 checks.</li>
 <li>[x] Complete the latest end-to-end phone/device check: remote/selector settings, exact seed, both palettes, disconnect/reconnect draft, apply-on-back, new seed on entry and Home/resume. The earlier interrupted attempts are superseded by the final build’s new receipt.</li>
 <li>[x] Verify textured saltwater foliage on device: green seagrass and olive/brown algae.</li>
-<li>[ ] Run three matched release traces per water type against the shaded control, plus separate CPU-instrumented traces, and record deltas.</li>
+<li>[x] Run three matched mature-static release traces per water type against shaded controls, plus separate CPU traces, and record deltas.</li>
 </ul>
 <p><strong>Why the leaves appeared white:</strong> the generated atlas contained the intended colours. Runtime vertices supplied a grey lighting tint, expecting <strong>albedo × tint</strong>, but the existing shader uses a legacy <strong>replace-if-white</strong> rule: a vertex that is not nearly white keeps its vertex colour and ignores the sampled texture. The first modulation change also missed the compositing wrapper, whose default no-op method prevented the new mode reaching the actual GL backend. Forwarding the flag through that wrapper fixed the remaining white foliage. Other materials retain the legacy rule.</p>
 <p>A separate earlier failure was cached material dispatch: runtime flags selected a Gouraud textured primitive while the cached render function still expected the old flat primitive layout. Refreshing the cached renderer with the flags fixed that crash. Material validation now checks that the cached renderer matches the flags.</p>
@@ -200,6 +200,74 @@
 </code></pre>
 <p>The examples use cycles/turns where appropriate. <code>.08</code> turns is a schematic branching parameter, not a measured universal angle. <code>cluster-j</code> needs independent uniform inputs supplied by a deterministic generator; it creates a centre-heavy triangular distribution but is not by itself a full clumping model. <code>leaf-turn</code> describes a radial rosette before authored angular/length variation. <code>ease</code> is a simple stable interpolation rule, not a physical spring. The poster prints the smallest helpers; the accompanying Forth file contains comments and numeric checks.</p>
 <p>Initialize founder colonies on entry, then advance the growth network and geometry <strong>at runtime while the level is active</strong>. Forth supplies the species growth policy and advances bounded growth steps; native code owns graph/vertex buffers and performs bounded incremental mesh construction. During play, Forth computes shared phase, amplitude and a handful of coefficients for the mesh chunks. Prefer a small native deformation operation over interpreting a loop across ~38,000 vertices in Forth. Inspect the existing fin/fish deformation paths for reusable rest-vertex storage and packed weights; <strong>there is currently no verified plant-sway syscall to print as working code</strong>. Do not rotate an entire merged chunk around the world origin, lift roots or allocate a controller for each plant. Smooth whole-mesh deformation should leave collisions and the urchin controller unchanged.</p>
+<h2 id="completed-current-build-texture-comparison">Completed current-build texture comparison</h2>
+<p><strong>PASS:</strong> coordinator job <code>J-cfbb812fc1ff</code> completed all <strong>20 traces</strong> (three uninstrumented release repeats and one separate CPU trace for each of five cases). Every variant has the current normal APK's identical native libraries; the reference swaps only the archived planted-level asset into the current selector. Native identity checks passed before submission. Each trace uses a 30-second warmup, then 12 seconds each of wide idle, close idle and close crawl. No phone was connected. Timed analysis excludes screenshot gaps and warmup; do not pool these results with the older phone-connected traces.</p>
+<table>
+<thead>
+<tr>
+<th>Case</th>
+<th style="text-align: right;">FPS</th>
+<th style="text-align: right;">p95 ms</th>
+<th style="text-align: right;">Render CPU ms</th>
+<th style="text-align: right;">Actors CPU ms</th>
+<th style="text-align: right;">Growth/deform CPU ms</th>
+<th style="text-align: right;">PSS MiB</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>old-static</td>
+<td style="text-align: right;">20.20</td>
+<td style="text-align: right;">50.05</td>
+<td style="text-align: right;">42.78</td>
+<td style="text-align: right;">1.30</td>
+<td style="text-align: right;">0.00</td>
+<td style="text-align: right;">84.42</td>
+</tr>
+<tr>
+<td>freshwater-mature-static</td>
+<td style="text-align: right;">14.64</td>
+<td style="text-align: right;">83.42</td>
+<td style="text-align: right;">60.39</td>
+<td style="text-align: right;">1.33</td>
+<td style="text-align: right;">0.02</td>
+<td style="text-align: right;">67.60</td>
+</tr>
+<tr>
+<td>freshwater-mature-static-shaded</td>
+<td style="text-align: right;">22.19</td>
+<td style="text-align: right;">50.05</td>
+<td style="text-align: right;">33.02</td>
+<td style="text-align: right;">1.30</td>
+<td style="text-align: right;">0.02</td>
+<td style="text-align: right;">77.85</td>
+</tr>
+<tr>
+<td>saltwater-mature-static</td>
+<td style="text-align: right;">16.52</td>
+<td style="text-align: right;">66.73</td>
+<td style="text-align: right;">53.70</td>
+<td style="text-align: right;">1.33</td>
+<td style="text-align: right;">0.02</td>
+<td style="text-align: right;">75.99</td>
+</tr>
+<tr>
+<td>saltwater-mature-static-shaded</td>
+<td style="text-align: right;">25.43</td>
+<td style="text-align: right;">66.73</td>
+<td style="text-align: right;">29.55</td>
+<td style="text-align: right;">1.32</td>
+<td style="text-align: right;">0.02</td>
+<td style="text-align: right;">76.24</td>
+</tr>
+</tbody>
+</table>
+<p>The freshwater texture pair loses <strong>7.55 FPS (−34.0%)</strong>, increases p95 interval by <strong>33.37 ms (+66.7%)</strong>, and adds <strong>27.37 ms (+82.9%)</strong> of render CPU. Saltwater loses <strong>8.91 FPS (−35.0%)</strong> and adds <strong>24.14 ms (+81.7%)</strong> of render CPU; its p95 interval remains approximately <strong>66.73 ms</strong> in both modes. Actor CPU changes by only <strong>+0.030 ms</strong> freshwater / <strong>+0.006 ms</strong> saltwater. Both retain 38 level objects, eight plant groups, about 25 engine draws, and identical paired geometry. Submitted triangle counts are after culling; authored geometry counts include the closed leaf backs.</p>
+<p>The shaded runtime forms are faster than the archived static detailed reference: <strong>+9.9% FPS</strong> freshwater / <strong>+25.9% FPS</strong> saltwater. The textured forms are slower. The measured CPU increase makes the texture submission/render path the first optimization candidate; this does not isolate GPU time or identify one specific hot function. Keep leaf detail, density and coloured surface appearance when investigating bulk submission, UV work and material handling. These measurements do not justify reducing actors further as the first remedy.</p>
+<p><img alt="Current-build texture comparison: FPS and render CPU" src="2026-10-03-aquatic-plant-clumps-and-poster/runtime-evidence/coordinator-current-comparison/final/texture-comparison.png" /></p>
+<p><a href="2026-10-03-aquatic-plant-clumps-and-poster/runtime-evidence/coordinator-current-comparison/final/comparison.json">Measured values, per-camera results and absolute/percentage deltas</a>. CPU timings use complete five-second thread-CPU windows inside timed segments; nested sections are not additive, and CPU repeats are diagnostic single runs. PSS values are process snapshots and vary with Android accounting/allocator state. Both textured/shaded controls retain the atlas and the same native buffers: their PSS differences are <strong>not</strong> texture-storage savings.</p>
+<p><a href="2026-10-03-aquatic-plant-clumps-and-poster/runtime-evidence/coordinator-current-comparison/final/receipt.json">Completion/restoration receipt</a> records successful reinstall and installed-hash verification of normal APK <code>79433b3c5e80625b13b4bf566e8fd941185affd62f779488ad30bab775f7c1d5</code>, followed by verified cleanup. The earlier <a href="2026-10-03-aquatic-plant-clumps-and-poster/runtime-evidence/coordinator-normal-verified/receipt.json">normal planted-level capture/check</a> passed with that same artifact. Raw benchmark captures remain in the coordinator evidence; this plan commits analysed results, identities, receipts and representative captures.</p>
+<p>This completes the <strong>mature static texture comparison</strong>, not the broader runtime matrix. Growth-versus-frozen, sway-versus-static, alternate-seed cost spread, speed-change pacing and same-process repeated-entry memory/entry latency remain separate pending checks. The historical direct phone/lifetime procedures are preserved as reference text under <code>docs/reference/device-harnesses/</code>; they need typed coordinator workflows before being run again.</p>
 <h2 id="implemented-runtime-and-verification-status">Implemented runtime and verification status</h2>
 <p>The native generator creates a bounded, deterministic graph and mature rest geometry at entry: 16 founders expand to at most 384 shoots, rendered through eight mesh groups (38 level actors). Forth registers and ticks those groups; graph construction and vertex work are native. Daughter shoots inherit parent lineage and species-dependent spacing. Underground runners are represented in the graph, not rendered as extending rhizomes.</p>
 <p>Growth time reveals geometry and smoothly scales blades from their rooted bases. Topology eligibility advances in half-second age buckets; dirty groups publish with round-robin scheduling, at most one group per frame. This is an authored growth approximation: individual leaf curling/unrolling and fully articulated whorl emergence are future refinements. Slow, coherent native sway follows growth deformation and keeps roots pinned. Rate changes preserve growth age; editing pauses the tank. Mature geometry stays bounded.</p>
@@ -256,7 +324,7 @@
 <p>The mature runtime tank is slower than the static reference in these traces. These results do <strong>not</strong> isolate texture cost: the matched shaded controls, sway/growth cases, saltwater cases, seed spread and separate CPU runs have not completed. Keep that distinction when choosing an optimization. <a href="2026-10-03-aquatic-plant-clumps-and-poster/runtime-evidence/profiles/comparison.json">Machine-readable results and deltas</a>, <a href="2026-10-03-aquatic-plant-clumps-and-poster/runtime-evidence/profiles/identities.json">benchmark identities</a>.</p>
 <h3 id="current-version-benchmark-correction">Current-version benchmark correction</h3>
 <p>Will identified the old version during job <code>J-55854e3f8c29</code>. Its variants used the older growing-plants native libraries, although its restore APK was current. The job was cancelled and normal-APK restoration/hash verification completed; <a href="2026-10-03-aquatic-plant-clumps-and-poster/runtime-evidence/outdated-benchmark-cancelled/receipt.json">cancellation receipt</a>. Do not use its partial traces as current-build measurements.</p>
-<p>All variants were rebuilt from the frozen current normal APK. Native SHA-256 identities are checked against it before submission. The baseline packages the archived planted level inside the current eight-tank selector, keeping the other seven current payloads. <a href="2026-10-03-aquatic-plant-clumps-and-poster/runtime-evidence/coordinator-current-comparison/method.json">Corrected identities and method</a>, <a href="2026-10-03-aquatic-plant-clumps-and-poster/runtime-evidence/coordinator-current-comparison/recipe.json">corrected recipe</a>. Job <code>J-cfbb812fc1ff</code> runs the corrected comparison and restores the normal APK afterward. The normal scene check already passed: <a href="2026-10-03-aquatic-plant-clumps-and-poster/runtime-evidence/coordinator-normal-verified/receipt.json">verification receipt</a>.</p>
+<p>All variants were rebuilt from the frozen current normal APK. Native SHA-256 identities are checked against it before submission. The baseline packages the archived planted level inside the current eight-tank selector, keeping the other seven current payloads. <a href="2026-10-03-aquatic-plant-clumps-and-poster/runtime-evidence/coordinator-current-comparison/method.json">Corrected identities and method</a>, <a href="2026-10-03-aquatic-plant-clumps-and-poster/runtime-evidence/coordinator-current-comparison/recipe.json">corrected recipe</a>. Job <code>J-cfbb812fc1ff</code> completed the corrected comparison and verified normal-APK restoration. The normal scene check already passed: <a href="2026-10-03-aquatic-plant-clumps-and-poster/runtime-evidence/coordinator-normal-verified/receipt.json">verification receipt</a>.</p>
 <h3 id="device-recovery-and-remaining-checks">Device recovery and remaining checks</h3>
 <p>The earlier benchmark interruption left restoration unverified. On October 4, coordinator reconnect <code>J-75b1959ed0da</code> completed successfully. Normal Aquarium install/check job <code>J-d5a618ee0f01</code> installed the current main APK and verified its hash (<code>79433b3c5e80625b13b4bf566e8fd941185affd62f779488ad30bab775f7c1d5</code>), then timed out on <code>cat .../files/wf.log</code>. Cleanup succeeded and returned the TV home. <a href="2026-10-03-aquatic-plant-clumps-and-poster/runtime-evidence/coordinator-restore/receipt.json">Receipt and command timeline</a>. Installation passed; the scene/capture check did not.</p>
 <p>The coordinator now uses a four-million-byte engine-log tail for scene confirmation and evidence, with a bounded logcat fallback. Its 40 coordinator regressions passed, including an oversized historical log retaining its recent scene marker. The initial install needed terminal sudo authentication. Will installed it; the protected source now contains the fix, and the subsequent normal planted-level check passed.</p>
@@ -272,7 +340,7 @@
 <li>[x] Pass normal planted-level scene/capture verification.</li>
 <li>[ ] Complete matched textured/shaded, growth/sway, saltwater, seed-spread and CPU measurements.</li>
 <li>[ ] Measure repeated-entry memory and entry-to-phone-ready latency in one process.</li>
-<li>[ ] Restore and verify the normal APK again after the final benchmark.</li>
+<li>[x] Restore and verify the normal APK after the completed mature-static texture benchmark.</li>
 </ul>
 <p>The original frozen implementation APK remains in the growing-plants worktree with SHA-256 <code>eabc18940d8ab8ba7d62b71a05ab9607d8533d599d1153b4e64d291d5c751e2c</code>. Preserve that identity for its earlier receipts. The current main release is a newer artifact; the two hashes must not be conflated.</p>
 <h2 id="runtime-implementation-and-profiling-phases">Runtime implementation and profiling phases</h2>
