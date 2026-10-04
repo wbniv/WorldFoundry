@@ -1,11 +1,11 @@
 #!/usr/bin/env python3
-"""Plan-only runtime-generation diagrams and three independently seeded compositions."""
+"""Implemented runtime ownership diagram and conceptual seeded compositions."""
 import importlib.util,math,random
 from pathlib import Path
 HERE=Path(__file__).resolve().parent
 spec=importlib.util.spec_from_file_location('poster_art',HERE/'generate-poster.py');art=importlib.util.module_from_spec(spec);spec.loader.exec_module(art)
 s=art.SVG(1200,680);s.rect(0,0,1200,680,'#f4f3e9');s.text(30,42,'A new ecosystem each selection — watch its colonies grow',30,weight='bold')
-boxes=[(35,85,330,125,'1. Enter Planted Tank','Fresh logged seed; fixed override','for comparisons and bug reports.'),(435,85,330,125,'2. Grow connected colonies','Forth chooses nodes and branches.','Native code stores bounded graphs.'),(835,85,330,125,'3. Seed young plant meshes','Water-type palette; eight','groups, not 384 plant actors.'),(835,285,330,125,'4. Grow during play','Runners, daughters, leaf unfurling;','publish validated dirty groups.'),(435,285,330,125,'5. Gentle shared water','Root-pinned native vertex bend;','Forth updates a few coefficients.'),(35,285,330,125,'6. Leave / select again','Release level-owned buffers.','Next selection gets a new seed.')]
+boxes=[(35,85,330,125,'1. Enter Planted Tank','Fresh logged seed; fixed override','for comparisons and bug reports.'),(435,85,330,125,'2. Build the growth graph','Native lineage and species rules.','16 founders; bounded to 384 shoots.'),(835,85,330,125,'3. Build mature rest meshes','Water-type palette; eight groups.','Forth registers and ticks chunks.'),(835,285,330,125,'4. Grow during play','Reveal shoots; scale rooted blades.','Publish one dirty group per frame.'),(435,285,330,125,'5. Gentle shared water','Root-pinned native vertex bend;','Native clock; slow coherent sway.'),(35,285,330,125,'6. Leave / select again','Release level-owned buffers.','Next selection gets a new seed.')]
 for x,y,w,h,title,line1,line2 in boxes:
  s.rect(x,y,w,h,'#dce7cc',12);s.text(x+16,y+35,title,20,weight='bold');s.text(x+16,y+70,line1,17);s.text(x+16,y+99,line2,17)
 for a,b,y in [(365,435,147),(765,835,147),(835,765,347),(435,365,347)]:s.path(f'M{a} {y} L{b} {y}',stroke='#638175',sw=3);s.path(f'M{b-9 if b>a else b+9} {y-6} L{b} {y} L{b-9 if b>a else b+9} {y+6}',stroke='#638175',sw=3)
@@ -15,7 +15,7 @@ s.text(36,527,'Render packaging: merge completed colonies by spatial bounds, ind
 s.text(36,580,'Runtime: young founders → spreading colonies → mature canopy; gentle sway throughout.',21)
 s.text(36,631,'Profile loading, generation, mesh construction, deformation, rendering and memory separately.',21)
 s.save('runtime-generation-diagram.svg')
-s=art.SVG(1200,1370);s.rect(0,0,1200,1370,'#0c2229');s.text(30,42,'Three seeds; different mature outcomes after visible growth',29,'#dfead6');s.text(30,75,'Concepts only — runtime geometry and seed controls still require implementation.',18,'#b9d0bf')
+s=art.SVG(1200,1370);s.rect(0,0,1200,1370,'#0c2229');s.text(30,42,'Three seeds; different mature outcomes after visible growth',29,'#dfead6');s.text(30,75,'Concept layouts, not engine captures; actual runtime controls and geometry are implemented.',18,'#b9d0bf')
 for row,seed in enumerate([713,2049,9173]):
  rng=random.Random(seed);top=110+row*405;s.rect(42,top,1116,320,'#174a4c');s.rect(42,top+286,1116,34,'#b7a987');centres=[]
  for k in range(12):

@@ -1,5 +1,6 @@
 | Date | Change |
 |------|--------|
+| [2026-10-04](https://github.com/wbniv/WorldFoundry/commit/d7e70afb) | Record current-build plant texture cost and verified APK restoration |
 | [2026-10-04](https://github.com/wbniv/WorldFoundry/commit/0aa37847) | Add seeded growing plant tank, settings and leaf textures |
 | [2026-10-03](https://github.com/wbniv/WorldFoundry/commit/6f7f9df4) | Plan complete plant settings on connected phone with TV fallback |
 | [2026-10-03](https://github.com/wbniv/WorldFoundry/commit/14c1a1dc) | Specify ten-key and phone seed entry for plant growth |
@@ -7,6 +8,10 @@
 | [2026-10-03](https://github.com/wbniv/WorldFoundry/commit/55d87fb3) | Split tiger-barb tank and add profiled dense planting with A3 growth poster |
 
 <!--history-meta v1
+d7e70afb	author	Will Norris
+d7e70afb	added	29
+d7e70afb	deleted	5
+d7e70afb	files	1
 0aa37847	author	Will Norris
 0aa37847	added	141
 0aa37847	deleted	19

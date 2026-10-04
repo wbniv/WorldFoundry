@@ -1,6 +1,6 @@
 # Aquarium: a tank mostly full of detailed plants
 
-**Status:** dense static trial implemented, captured, profiled and installed on Chromecast. The row-based layout needs revision: see the [researched clumping and gentle-sway plan](2026-10-03-aquatic-plant-clumps-and-poster.md).
+**Status:** completed historical dense-static trial. The current Planted Tank uses seeded runtime colonies, fresh/salt textures, visible growth and gentle sway; see the [implemented successor and current-build benchmark](2026-10-03-aquatic-plant-clumps-and-poster.md). Keep this trial's captures and performance figures as archived evidence; its row-based asset is only the current benchmark's reference control.
 
 Make **Planted Tank mostly full of plants**, rather than a few separated clumps around a large open center. Target **75–85% projected foliage coverage of the submerged interior in the whole-tank camera**, including tall growth through the center and overlapping layers in depth. This is a visual composition target, not a claim that solid plant geometry occupies that percentage of the water volume. Keep a narrow, irregular route at substrate height for the existing sea urchin, with enough visibility to use the close camera. Keep the selector name **Planted Tank** and index **5**.
 

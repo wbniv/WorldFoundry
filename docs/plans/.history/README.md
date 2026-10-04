@@ -1,5 +1,6 @@
 | Date | Change |
 |------|--------|
+| [2026-10-04](https://github.com/wbniv/WorldFoundry/commit/d7e70afb) | Record current-build plant texture cost and verified APK restoration |
 | [2026-10-04](https://github.com/wbniv/WorldFoundry/commit/0aa37847) | Add seeded growing plant tank, settings and leaf textures |
 | [2026-10-04](https://github.com/wbniv/WorldFoundry/commit/334bab60) | Add shared Chromecast Task/API coordinator and repair host activation |
 | [2026-10-03](https://github.com/wbniv/WorldFoundry/commit/73da4c2f) | Show raw frame-rate numbers in every demo renderer |
@@ -48,6 +49,10 @@
 | [2026-06-26](https://github.com/wbniv/WorldFoundry/commit/16d72fa6) | docs: add plan index (docs/plans/README.md) |
 
 <!--history-meta v1
+d7e70afb	author	Will Norris
+d7e70afb	added	1
+d7e70afb	deleted	1
+d7e70afb	files	1
 0aa37847	author	Will Norris
 0aa37847	added	1
 0aa37847	deleted	1

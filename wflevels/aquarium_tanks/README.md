@@ -1,13 +1,13 @@
-# Four new Aquarium tanks
+# Aquarium tank sources and runtime plants
 
-Independent Betta, Jellyfish, Lionfish and Planted Tank levels. The original aquarium and Blue Shrimp sources, current app bundle, Android assets, Taskfile and engine are left to their existing work.
+Shared source toolkit for Betta, Jellyfish, Lionfish and Planted Tank. The current Android bundle uses the eight-tank selector in `wflevels/aquarium-menu.manifest`. Older six-tank preview commands below are retained as development history.
 
 | Tank | Animals | Visual rig | Scene |
 |---|---:|---|---|
 | Calm Betta | 1 | Body, tail, dorsal and anal fins | Broad leaves, pale sand, red/gold Thai pavilion with an empty open hall; no Buddha figure or statues |
 | Jellyfish | 6 | Bell, oral arms, fringe | Dark rounded display; independent drifting routes and pulse phases |
 | Lionfish | 2 | Body/spines, tail and two fan fins | Sparse low reef rocks, pale sand and open water |
-| Planted Tank | 1 sea urchin | Rounded test and radial spines | Three static foliage groups, pale substrate |
+| Planted Tank | 1 sea urchin | Rounded test and radial spines | Seeded freshwater/saltwater growth in eight mesh groups, pale substrate |
 
 Build with `bash wflevels/aquarium_betta/build.sh`, `bash wflevels/aquarium_jellyfish/build.sh` and `bash wflevels/aquarium_lionfish/build.sh`. Each owns its exported files and standalone IFF. The new local toolkit provides procedural meshes, Blender scaffolding and a zForth controller/pose library without importing either existing aquarium generator. `TANK_COUNT=1` makes a single-animal build; `TANK_PROFILE=touch` selects the touch mode/action mapping. Rebuild without either variable to restore the default keyboard/population artifact.
 
@@ -29,13 +29,13 @@ App packaging, the final first-tank label, release performance, Android/Chromeca
 
 Desktop results: all three runtime checks pass; 11 content tests and three focused SMB menu regressions pass. The isolated six-tank menu passes all seven selections and six returns. Current debug estimates: Betta 11.0 ms/frame, Jellyfish 26.1 ms/frame, Lionfish 9.0 ms/frame. These do not establish release/device performance; Jellyfish needs tuning and target-device measurement.
 
-## Installed six-tank Android selector
+## Current Android selector
 
 The single Android menu path is `wflevels/aquarium-menu.manifest` → `wflevels/aquarium-menu-cd.iff`. Both APK tasks depend on `build-cd-iff-aquarium-menu`; the flavor asset symlink points to that bundle. The accidental five-tank path was removed. `aquarium-cd.iff` remains the direct/Apple bundle.
 
-Planted Tank is index 5, with one sea urchin, three static foliage groups, substrate and the tank structure. Its speed is 0.0125 world units/second, 1/20 of the initial crawl speed. It stays on the substrate; desktop B/C controls depth, arrows left/right crawl and A toggles wide/close views. Build/run using `wflevels/aquarium_plants/build.sh` and `run.sh`. `run_checks.py plants --video --cost` verifies mesh presence, substrate height, four crawl boundaries, inward recovery and view input release. The touch profile uses A for mode and B for view changes; physical touch is pending.
+Planted Tank is index 5 in the current eight-tank selector, with one sea urchin, eight runtime foliage groups, substrate and tank structure (38 actors total). Its speed is 0.0125 world units/second, 1/20 of the initial crawl speed. It stays on the substrate; desktop B/C controls depth, arrows left/right crawl and short A toggles wide/close views; hold A opens plant settings. Build/run using `wflevels/aquarium_plants/build.sh` and `run.sh`. `run_checks.py plants --video --cost` verifies mesh presence, substrate height, four crawl boundaries, inward recovery and view input release. Current phone/remote settings and lifecycle checks passed on Chromecast; see the runtime section below.
 
-`python3 wflevels/aquarium_tanks/check_menu.py --installed-bundle` checks exact six-tank packaged payloads and the desktop sequence 5 → 2 → 3 → 4 → 0 → 1 → 5. The first aquarium standalone is preserved byte-for-byte during menu reconciliation. Tests: `python3 -m pytest tests/test_aquarium_menu.py tests/test_aquarium_plants.py -q`.
+`python3 wflevels/aquarium_tanks/check_menu.py --installed-bundle` checks the packaged tank payloads and the desktop sequence 5 → 2 → 3 → 4 → 0 → 1 → 5. The first aquarium standalone is preserved byte-for-byte during menu reconciliation. Tests: `python3 -m pytest tests/test_aquarium_menu.py tests/test_aquarium_plants.py -q`.
 
 ## Runtime planted colonies (2026-10-03)
 
@@ -44,3 +44,9 @@ Planted Tank now generates a fresh seeded ecosystem on selection: 16 founder sho
 Short A changes camera; hold A about one second opens plant settings. With Planted Tank highlighted in the selector, Right opens settings before entry. The phone provides the complete interface when connected; otherwise use the remote’s visible grid and numeric keypad. A enters/leaves slider adjustment; Left/Right adjusts while editing. The standard back arrow applies the draft and closes: speed-only edits preserve age, while seed/water edits regenerate. The former Apply speed button position stays empty; explicit Cancel discards edits. Growth speed does not change water sway or urchin movement.
 
 The bottom-left display identifies the actual unsigned 32-bit seed and water type. Normal re-entry chooses a new seed; entering the same seed replays the same layout and growth history within that water type. [Plan, diagrams, captures and performance evidence](../../docs/plans/2026-10-03-aquatic-plant-clumps-and-poster.md).
+
+## Current mature-static texture performance (2026-10-04)
+
+Twenty coordinator-owned Chromecast HD traces used matching current native libraries: three release runs and one separate CPU trace per case. Freshwater textured/shaded: **14.64 / 22.19 FPS**, render CPU **60.39 / 33.02 ms**. Saltwater textured/shaded: **16.52 / 25.43 FPS**, render CPU **53.70 / 29.55 ms**. Actor CPU stays near **1.3 ms**, with 38 level actors in every case. Texture rendering costs 34–35% FPS; these CPU measurements do not measure GPU time.
+
+The normal APK was restored and its installed hash verified. [Full tables, charts, evidence and reproduction](../../docs/plans/2026-10-03-aquatic-plant-clumps-and-poster.md#completed-current-build-texture-comparison). Implementation: `0aa37847`; benchmark: `d7e70afb`. Active growth/sway comparisons, seed-cost spread, speed-change pacing and same-process repeated-entry memory/latency remain pending. Use the shared coordinator for device work; archived direct-device procedures are reference text.

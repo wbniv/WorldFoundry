@@ -1,8 +1,13 @@
 | Date | Change |
 |------|--------|
+| [2026-10-04](https://github.com/wbniv/WorldFoundry/commit/0aa37847) | Add seeded growing plant tank, settings and leaf textures |
 | [2026-10-02](https://github.com/wbniv/WorldFoundry/commit/9cef6dde) | Integrate aquarium tanks, feeding, and flowing betta fins |
 
 <!--history-meta v1
+0aa37847	author	Will Norris
+0aa37847	added	8
+0aa37847	deleted	0
+0aa37847	files	1
 9cef6dde	author	Will Norris
 9cef6dde	added	38
 9cef6dde	deleted	0
