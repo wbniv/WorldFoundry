@@ -1,0 +1,717 @@
+{
+  "job": "J-ff43c21dd4e7",
+  "native": {
+    "lib/arm64-v8a/libwf_game.so": "565c5eed2c66c5b115decf322bc0cf9aa628e693e851110736ea1406f6766dc3",
+    "lib/armeabi-v7a/libwf_game.so": "6ab5579c342b8cc4c69fe76a28af35710ce50fe3f00d267f7cd0dd04fc354043"
+  },
+  "normal_restored": true,
+  "normal_apk_sha256": "79433b3c5e80625b13b4bf566e8fd941185affd62f779488ad30bab775f7c1d5",
+  "thermal_statuses": [
+    0
+  ],
+  "core_temperature_C_range": [
+    48.300003,
+    52.7
+  ],
+  "method": "Three release repeats plus one separate CPU run per case; 30-second warmup; 12 seconds each wide, close and crawl. Seed 713, age 150, speed/sway zero, no phone. All native libraries and plant geometry match. CPU sections are nested thread time, not GPU timing. Case blocks are sequential, not randomized; small timing differences and PSS differences need caution. The 512 atlas is repacked from original art and requires 512-square transient slots plus global VRAM height 1024, compared with production 256-square slots and height 512. This measures the current renderer configuration needed for improved looks, not atlas resolution in isolation. Camera audit reclassifies stationary segments from their actual screenshot framing. Primary FPS/CPU analysis includes only wide and close idle in every repeat, excluding the first second of each segment for camera/input settling; all crawl segments are excluded because startup input can reverse camera order. Original samples/segments remain intact; matched-static contains derived inputs.",
+  "cases": [
+    {
+      "case": "freshwater-256",
+      "water": "freshwater",
+      "size": 256,
+      "frames": 323,
+      "fps": 14.72289974998743,
+      "p50_ms": 66.733427,
+      "p90_ms": 66.734028,
+      "p95_ms": 83.416766,
+      "p99_ms": 100.100166,
+      "missed_refresh_percent": 98.75,
+      "PSS_MiB": 78.40625,
+      "PSS_range_MiB": [
+        78.0654296875,
+        79.4296875
+      ],
+      "FPS_range": [
+        14.641826788485627,
+        14.88227969060389
+      ],
+      "CPU_windows": 3,
+      "CPU_ms_and_counters": {
+        "update": 1.5446973451327435,
+        "actors": 1.3208115044247788,
+        "director": 0.15666106194690266,
+        "render": 60.28659646017699,
+        "school": 0.0,
+        "pose": 0.0,
+        "animation": 0.017363716814159293,
+        "total": 61.83126017699115,
+        "level-objects": 38.0,
+        "render-actors": 26.0,
+        "draws": 25.0,
+        "triangles": 27050.15046017699,
+        "actor-mailbox-writes": 29.0,
+        "fish-deformations": 0.0
+      },
+      "scenarios": {
+        "close-idle": {
+          "fps": 14.552953886333526,
+          "p95_ms": 83.416777
+        },
+        "wide-idle": {
+          "fps": 14.89362280531348,
+          "p95_ms": 66.734057
+        }
+      }
+    },
+    {
+      "case": "freshwater-512",
+      "water": "freshwater",
+      "size": 512,
+      "frames": 326,
+      "fps": 14.803357684657529,
+      "p50_ms": 66.733426,
+      "p90_ms": 66.733787,
+      "p95_ms": 83.416781,
+      "p99_ms": 133.466751,
+      "missed_refresh_percent": 97.54601226993866,
+      "PSS_MiB": 82.7587890625,
+      "PSS_range_MiB": [
+        79.8310546875,
+        83.3046875
+      ],
+      "FPS_range": [
+        14.565278731467508,
+        14.815609025143532
+      ],
+      "CPU_windows": 3,
+      "CPU_ms_and_counters": {
+        "update": 1.554593721973094,
+        "actors": 1.330118385650224,
+        "director": 0.15851121076233182,
+        "render": 60.62540224215247,
+        "school": 0.0,
+        "pose": 0.0,
+        "animation": 0.017861434977578475,
+        "total": 62.18002959641256,
+        "level-objects": 38.0,
+        "render-actors": 26.0,
+        "draws": 25.0,
+        "triangles": 27050.071677130047,
+        "actor-mailbox-writes": 29.0,
+        "fish-deformations": 0.0
+      },
+      "scenarios": {
+        "wide-idle": {
+          "fps": 15.0297260605906,
+          "p95_ms": 66.733781
+        },
+        "close-idle": {
+          "fps": 14.579993790818044,
+          "p95_ms": 116.783466
+        }
+      },
+      "delta": {
+        "fps": {
+          "absolute": 0.08045793467009865,
+          "percent": 0.5464815765669151
+        },
+        "p95_ms": {
+          "absolute": 1.5000000004761205e-05,
+          "percent": 1.7981996580651582e-05
+        },
+        "PSS_MiB": {
+          "absolute": 4.3525390625,
+          "percent": 5.551265444400166
+        }
+      },
+      "CPU_delta_ms": {
+        "render": 0.3388057819754806,
+        "actors": 0.009306881225445318,
+        "animation": 0.0004977181634191821,
+        "total": 0.3487694194214086
+      }
+    },
+    {
+      "case": "saltwater-256",
+      "water": "saltwater",
+      "size": 256,
+      "frames": 365,
+      "fps": 16.63733240665294,
+      "p50_ms": 66.733331,
+      "p90_ms": 66.73348,
+      "p95_ms": 66.733701,
+      "p99_ms": 100.100133,
+      "missed_refresh_percent": 98.89196675900277,
+      "PSS_MiB": 78.337890625,
+      "PSS_range_MiB": [
+        76.458984375,
+        78.4423828125
+      ],
+      "FPS_range": [
+        16.430017057821665,
+        16.677764908804374
+      ],
+      "CPU_windows": 3,
+      "CPU_ms_and_counters": {
+        "update": 1.520866265060241,
+        "actors": 1.301120481927711,
+        "director": 0.15387108433734942,
+        "render": 53.696098795180724,
+        "school": 0.0,
+        "pose": 0.0,
+        "animation": 0.01730120481927711,
+        "total": 55.216997590361444,
+        "level-objects": 38.0,
+        "render-actors": 26.0,
+        "draws": 25.0,
+        "triangles": 23808.71490361446,
+        "actor-mailbox-writes": 29.0,
+        "fish-deformations": 0.0
+      },
+      "scenarios": {
+        "wide-idle": {
+          "fps": 16.919994097798458,
+          "p95_ms": 66.733521
+        },
+        "close-idle": {
+          "fps": 16.330678822879975,
+          "p95_ms": 66.734063
+        }
+      }
+    },
+    {
+      "case": "saltwater-512",
+      "water": "saltwater",
+      "size": 512,
+      "frames": 348,
+      "fps": 15.855682546037373,
+      "p50_ms": 66.733405,
+      "p90_ms": 66.733552,
+      "p95_ms": 66.73377,
+      "p99_ms": 116.783495,
+      "missed_refresh_percent": 97.1264367816092,
+      "PSS_MiB": 82.251953125,
+      "PSS_range_MiB": [
+        78.6533203125,
+        82.333984375
+      ],
+      "FPS_range": [
+        15.838354355484887,
+        15.948155516714328
+      ],
+      "CPU_windows": 3,
+      "CPU_ms_and_counters": {
+        "update": 1.615048510638298,
+        "actors": 1.3845489361702128,
+        "director": 0.16198255319148935,
+        "render": 53.67547319148936,
+        "school": 0.0,
+        "pose": 0.0,
+        "animation": 0.017936170212765955,
+        "total": 55.29052510638298,
+        "level-objects": 38.0,
+        "render-actors": 26.0,
+        "draws": 25.0,
+        "triangles": 23827.646689361703,
+        "actor-mailbox-writes": 29.0,
+        "fish-deformations": 0.0
+      },
+      "scenarios": {
+        "wide-idle": {
+          "fps": 16.7060891634828,
+          "p95_ms": 66.733536
+        },
+        "close-idle": {
+          "fps": 15.030266668010746,
+          "p95_ms": 116.783387
+        }
+      },
+      "delta": {
+        "fps": {
+          "absolute": -0.781649860615568,
+          "percent": -4.698168200949104
+        },
+        "p95_ms": {
+          "absolute": 6.900000001053286e-05,
+          "percent": 0.00010339603375708606
+        },
+        "PSS_MiB": {
+          "absolute": 3.9140625,
+          "percent": 4.996384851280267
+        }
+      },
+      "CPU_delta_ms": {
+        "render": -0.020625603691364347,
+        "actors": 0.08342845424250189,
+        "animation": 0.0006349653934888469,
+        "total": 0.07352751602153518
+      }
+    }
+  ],
+  "camera_audit": {
+    "freshwater-256/run-2": [
+      {
+        "label": "wide-idle",
+        "camera": "wide-idle",
+        "corner_pixel": [
+          6,
+          15,
+          25
+        ]
+      },
+      {
+        "label": "close-idle",
+        "camera": "close-idle",
+        "corner_pixel": [
+          32,
+          67,
+          88
+        ]
+      },
+      {
+        "label": "crawl-close",
+        "camera": "close-idle",
+        "corner_pixel": [
+          32,
+          67,
+          88
+        ]
+      }
+    ],
+    "freshwater-256/run-1": [
+      {
+        "label": "wide-idle",
+        "camera": "close-idle",
+        "corner_pixel": [
+          32,
+          67,
+          88
+        ]
+      },
+      {
+        "label": "close-idle",
+        "camera": "wide-idle",
+        "corner_pixel": [
+          6,
+          15,
+          25
+        ]
+      },
+      {
+        "label": "crawl-close",
+        "camera": "wide-idle",
+        "corner_pixel": [
+          6,
+          15,
+          25
+        ]
+      }
+    ],
+    "freshwater-256/run-3": [
+      {
+        "label": "wide-idle",
+        "camera": "wide-idle",
+        "corner_pixel": [
+          6,
+          15,
+          25
+        ]
+      },
+      {
+        "label": "close-idle",
+        "camera": "close-idle",
+        "corner_pixel": [
+          32,
+          67,
+          88
+        ]
+      },
+      {
+        "label": "crawl-close",
+        "camera": "close-idle",
+        "corner_pixel": [
+          32,
+          67,
+          88
+        ]
+      }
+    ],
+    "freshwater-512/run-2": [
+      {
+        "label": "wide-idle",
+        "camera": "wide-idle",
+        "corner_pixel": [
+          6,
+          15,
+          25
+        ]
+      },
+      {
+        "label": "close-idle",
+        "camera": "close-idle",
+        "corner_pixel": [
+          32,
+          67,
+          88
+        ]
+      },
+      {
+        "label": "crawl-close",
+        "camera": "close-idle",
+        "corner_pixel": [
+          32,
+          67,
+          88
+        ]
+      }
+    ],
+    "freshwater-512/run-1": [
+      {
+        "label": "wide-idle",
+        "camera": "wide-idle",
+        "corner_pixel": [
+          6,
+          15,
+          25
+        ]
+      },
+      {
+        "label": "close-idle",
+        "camera": "close-idle",
+        "corner_pixel": [
+          32,
+          67,
+          88
+        ]
+      },
+      {
+        "label": "crawl-close",
+        "camera": "close-idle",
+        "corner_pixel": [
+          32,
+          67,
+          88
+        ]
+      }
+    ],
+    "freshwater-512/run-3": [
+      {
+        "label": "wide-idle",
+        "camera": "wide-idle",
+        "corner_pixel": [
+          6,
+          15,
+          25
+        ]
+      },
+      {
+        "label": "close-idle",
+        "camera": "close-idle",
+        "corner_pixel": [
+          32,
+          67,
+          88
+        ]
+      },
+      {
+        "label": "crawl-close",
+        "camera": "close-idle",
+        "corner_pixel": [
+          32,
+          67,
+          88
+        ]
+      }
+    ],
+    "saltwater-256/run-2": [
+      {
+        "label": "wide-idle",
+        "camera": "wide-idle",
+        "corner_pixel": [
+          6,
+          15,
+          25
+        ]
+      },
+      {
+        "label": "close-idle",
+        "camera": "close-idle",
+        "corner_pixel": [
+          32,
+          67,
+          88
+        ]
+      },
+      {
+        "label": "crawl-close",
+        "camera": "close-idle",
+        "corner_pixel": [
+          32,
+          67,
+          88
+        ]
+      }
+    ],
+    "saltwater-256/run-1": [
+      {
+        "label": "wide-idle",
+        "camera": "wide-idle",
+        "corner_pixel": [
+          6,
+          15,
+          25
+        ]
+      },
+      {
+        "label": "close-idle",
+        "camera": "close-idle",
+        "corner_pixel": [
+          32,
+          67,
+          88
+        ]
+      },
+      {
+        "label": "crawl-close",
+        "camera": "close-idle",
+        "corner_pixel": [
+          32,
+          67,
+          88
+        ]
+      }
+    ],
+    "saltwater-256/run-3": [
+      {
+        "label": "wide-idle",
+        "camera": "wide-idle",
+        "corner_pixel": [
+          6,
+          15,
+          25
+        ]
+      },
+      {
+        "label": "close-idle",
+        "camera": "close-idle",
+        "corner_pixel": [
+          32,
+          67,
+          88
+        ]
+      },
+      {
+        "label": "crawl-close",
+        "camera": "close-idle",
+        "corner_pixel": [
+          32,
+          67,
+          88
+        ]
+      }
+    ],
+    "saltwater-512/run-2": [
+      {
+        "label": "wide-idle",
+        "camera": "wide-idle",
+        "corner_pixel": [
+          6,
+          15,
+          25
+        ]
+      },
+      {
+        "label": "close-idle",
+        "camera": "close-idle",
+        "corner_pixel": [
+          32,
+          67,
+          88
+        ]
+      },
+      {
+        "label": "crawl-close",
+        "camera": "close-idle",
+        "corner_pixel": [
+          32,
+          67,
+          88
+        ]
+      }
+    ],
+    "saltwater-512/run-1": [
+      {
+        "label": "wide-idle",
+        "camera": "wide-idle",
+        "corner_pixel": [
+          6,
+          15,
+          25
+        ]
+      },
+      {
+        "label": "close-idle",
+        "camera": "close-idle",
+        "corner_pixel": [
+          32,
+          67,
+          88
+        ]
+      },
+      {
+        "label": "crawl-close",
+        "camera": "close-idle",
+        "corner_pixel": [
+          32,
+          67,
+          88
+        ]
+      }
+    ],
+    "saltwater-512/run-3": [
+      {
+        "label": "wide-idle",
+        "camera": "wide-idle",
+        "corner_pixel": [
+          6,
+          15,
+          25
+        ]
+      },
+      {
+        "label": "close-idle",
+        "camera": "close-idle",
+        "corner_pixel": [
+          32,
+          67,
+          88
+        ]
+      },
+      {
+        "label": "crawl-close",
+        "camera": "close-idle",
+        "corner_pixel": [
+          32,
+          67,
+          88
+        ]
+      }
+    ],
+    "freshwater-256-cpu/run-1": [
+      {
+        "label": "wide-idle",
+        "camera": "wide-idle",
+        "corner_pixel": [
+          6,
+          15,
+          25
+        ]
+      },
+      {
+        "label": "close-idle",
+        "camera": "close-idle",
+        "corner_pixel": [
+          32,
+          67,
+          88
+        ]
+      },
+      {
+        "label": "crawl-close",
+        "camera": "close-idle",
+        "corner_pixel": [
+          32,
+          67,
+          88
+        ]
+      }
+    ],
+    "freshwater-512-cpu/run-1": [
+      {
+        "label": "wide-idle",
+        "camera": "wide-idle",
+        "corner_pixel": [
+          6,
+          15,
+          25
+        ]
+      },
+      {
+        "label": "close-idle",
+        "camera": "close-idle",
+        "corner_pixel": [
+          32,
+          67,
+          88
+        ]
+      },
+      {
+        "label": "crawl-close",
+        "camera": "close-idle",
+        "corner_pixel": [
+          32,
+          67,
+          88
+        ]
+      }
+    ],
+    "saltwater-256-cpu/run-1": [
+      {
+        "label": "wide-idle",
+        "camera": "wide-idle",
+        "corner_pixel": [
+          6,
+          15,
+          25
+        ]
+      },
+      {
+        "label": "close-idle",
+        "camera": "close-idle",
+        "corner_pixel": [
+          32,
+          67,
+          88
+        ]
+      },
+      {
+        "label": "crawl-close",
+        "camera": "close-idle",
+        "corner_pixel": [
+          32,
+          67,
+          88
+        ]
+      }
+    ],
+    "saltwater-512-cpu/run-1": [
+      {
+        "label": "wide-idle",
+        "camera": "wide-idle",
+        "corner_pixel": [
+          6,
+          15,
+          25
+        ]
+      },
+      {
+        "label": "close-idle",
+        "camera": "close-idle",
+        "corner_pixel": [
+          32,
+          67,
+          88
+        ]
+      },
+      {
+        "label": "crawl-close",
+        "camera": "close-idle",
+        "corner_pixel": [
+          32,
+          67,
+          88
+        ]
+      }
+    ]
+  }
+}

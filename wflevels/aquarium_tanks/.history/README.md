@@ -1,9 +1,14 @@
 | Date | Change |
 |------|--------|
+| [2026-10-04](https://github.com/wbniv/WorldFoundry/commit/e45a7ac1) | Reconcile plant docs with implemented runtime and final texture measurements |
 | [2026-10-04](https://github.com/wbniv/WorldFoundry/commit/0aa37847) | Add seeded growing plant tank, settings and leaf textures |
 | [2026-10-02](https://github.com/wbniv/WorldFoundry/commit/9cef6dde) | Integrate aquarium tanks, feeding, and flowing betta fins |
 
 <!--history-meta v1
+e45a7ac1	author	Will Norris
+e45a7ac1	added	12
+e45a7ac1	deleted	6
+e45a7ac1	files	1
 0aa37847	author	Will Norris
 0aa37847	added	8
 0aa37847	deleted	0

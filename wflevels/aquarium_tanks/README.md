@@ -50,3 +50,18 @@ The bottom-left display identifies the actual unsigned 32-bit seed and water typ
 Twenty coordinator-owned Chromecast HD traces used matching current native libraries: three release runs and one separate CPU trace per case. Freshwater textured/shaded: **14.64 / 22.19 FPS**, render CPU **60.39 / 33.02 ms**. Saltwater textured/shaded: **16.52 / 25.43 FPS**, render CPU **53.70 / 29.55 ms**. Actor CPU stays near **1.3 ms**, with 38 level actors in every case. Texture rendering costs 34–35% FPS; these CPU measurements do not measure GPU time.
 
 The normal APK was restored and its installed hash verified. [Full tables, charts, evidence and reproduction](../../docs/plans/2026-10-03-aquatic-plant-clumps-and-poster.md#completed-current-build-texture-comparison). Implementation: `0aa37847`; benchmark: `d7e70afb`. Active growth/sway comparisons, seed-cost spread, speed-change pacing and same-process repeated-entry memory/latency remain pending. Use the shared coordinator for device work; archived direct-device procedures are reference text.
+
+## Plant atlas resolution decision (2026-10-04)
+
+Keep the production atlas at **256 × 256**, with six 72 × 112 leaf interiors and four-texel gutters. The larger source artwork is an authoring reference; it is not deployed. The 128 and 512 variants remain comparison artifacts.
+
+| Trial | Appearance | Measured cost / benefit | Decision |
+|---|---|---|---|
+| 128 versus 256 | Softer veins and tissue grain in close-up | Saves 96 KiB of packed page data; no useful FPS/render CPU gain | Keep 256, confirmed by Will |
+| 512 versus 256 | Finer close-up grain; subtle whole-tank difference | About +4 MiB PSS; saltwater −4.7% stationary-view FPS; worse close-up p95 pacing | Profile complete; production remains 256 |
+
+The 512 profile completed 16 corrected coordinator traces with identical native libraries and geometry. Actual wide/close stationary views were audited, relabelled where entry input reversed the order, and analysed after one second of settling; crawl was excluded from every case. Close-up p95 rises to about 117 ms, versus 83 ms freshwater / 67 ms saltwater at 256. Freshwater average FPS is essentially unchanged. These stationary aggregates are separate from the preceding three-segment texture-toggle and 128 protocols.
+
+The 512 variants use original artwork repacked into 144 × 224 interiors, plus `--vram-slot-width=512 --vram-slot-height=512 --vram-height=1024`. The last flag satisfies the legacy strict UV height bound. Configured CPU pixel-buffer capacity increases by 8.75 MiB; each uploaded transient GPU slot increases by 768 KiB, with lazy allocation. PSS snapshots do not isolate GPU residency. Normal 256 APK restoration and installed-hash verification passed after both completed comparisons.
+
+[Resolution tables, paired captures, camera audit and reproduction](../../docs/plans/2026-10-03-aquatic-plant-clumps-and-poster.md#completed-512-atlas-qualitycost-comparison). Renderer submission/UV optimization and broader growth/sway/lifetime profiling remain separate work.

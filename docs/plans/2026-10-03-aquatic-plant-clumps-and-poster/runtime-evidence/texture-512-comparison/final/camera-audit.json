@@ -1,0 +1,466 @@
+{
+  "freshwater-256/run-2": [
+    {
+      "label": "wide-idle",
+      "camera": "wide-idle",
+      "corner_pixel": [
+        6,
+        15,
+        25
+      ]
+    },
+    {
+      "label": "close-idle",
+      "camera": "close-idle",
+      "corner_pixel": [
+        32,
+        67,
+        88
+      ]
+    },
+    {
+      "label": "crawl-close",
+      "camera": "close-idle",
+      "corner_pixel": [
+        32,
+        67,
+        88
+      ]
+    }
+  ],
+  "freshwater-256/run-1": [
+    {
+      "label": "wide-idle",
+      "camera": "close-idle",
+      "corner_pixel": [
+        32,
+        67,
+        88
+      ]
+    },
+    {
+      "label": "close-idle",
+      "camera": "wide-idle",
+      "corner_pixel": [
+        6,
+        15,
+        25
+      ]
+    },
+    {
+      "label": "crawl-close",
+      "camera": "wide-idle",
+      "corner_pixel": [
+        6,
+        15,
+        25
+      ]
+    }
+  ],
+  "freshwater-256/run-3": [
+    {
+      "label": "wide-idle",
+      "camera": "wide-idle",
+      "corner_pixel": [
+        6,
+        15,
+        25
+      ]
+    },
+    {
+      "label": "close-idle",
+      "camera": "close-idle",
+      "corner_pixel": [
+        32,
+        67,
+        88
+      ]
+    },
+    {
+      "label": "crawl-close",
+      "camera": "close-idle",
+      "corner_pixel": [
+        32,
+        67,
+        88
+      ]
+    }
+  ],
+  "freshwater-512/run-2": [
+    {
+      "label": "wide-idle",
+      "camera": "wide-idle",
+      "corner_pixel": [
+        6,
+        15,
+        25
+      ]
+    },
+    {
+      "label": "close-idle",
+      "camera": "close-idle",
+      "corner_pixel": [
+        32,
+        67,
+        88
+      ]
+    },
+    {
+      "label": "crawl-close",
+      "camera": "close-idle",
+      "corner_pixel": [
+        32,
+        67,
+        88
+      ]
+    }
+  ],
+  "freshwater-512/run-1": [
+    {
+      "label": "wide-idle",
+      "camera": "wide-idle",
+      "corner_pixel": [
+        6,
+        15,
+        25
+      ]
+    },
+    {
+      "label": "close-idle",
+      "camera": "close-idle",
+      "corner_pixel": [
+        32,
+        67,
+        88
+      ]
+    },
+    {
+      "label": "crawl-close",
+      "camera": "close-idle",
+      "corner_pixel": [
+        32,
+        67,
+        88
+      ]
+    }
+  ],
+  "freshwater-512/run-3": [
+    {
+      "label": "wide-idle",
+      "camera": "wide-idle",
+      "corner_pixel": [
+        6,
+        15,
+        25
+      ]
+    },
+    {
+      "label": "close-idle",
+      "camera": "close-idle",
+      "corner_pixel": [
+        32,
+        67,
+        88
+      ]
+    },
+    {
+      "label": "crawl-close",
+      "camera": "close-idle",
+      "corner_pixel": [
+        32,
+        67,
+        88
+      ]
+    }
+  ],
+  "saltwater-256/run-2": [
+    {
+      "label": "wide-idle",
+      "camera": "wide-idle",
+      "corner_pixel": [
+        6,
+        15,
+        25
+      ]
+    },
+    {
+      "label": "close-idle",
+      "camera": "close-idle",
+      "corner_pixel": [
+        32,
+        67,
+        88
+      ]
+    },
+    {
+      "label": "crawl-close",
+      "camera": "close-idle",
+      "corner_pixel": [
+        32,
+        67,
+        88
+      ]
+    }
+  ],
+  "saltwater-256/run-1": [
+    {
+      "label": "wide-idle",
+      "camera": "wide-idle",
+      "corner_pixel": [
+        6,
+        15,
+        25
+      ]
+    },
+    {
+      "label": "close-idle",
+      "camera": "close-idle",
+      "corner_pixel": [
+        32,
+        67,
+        88
+      ]
+    },
+    {
+      "label": "crawl-close",
+      "camera": "close-idle",
+      "corner_pixel": [
+        32,
+        67,
+        88
+      ]
+    }
+  ],
+  "saltwater-256/run-3": [
+    {
+      "label": "wide-idle",
+      "camera": "wide-idle",
+      "corner_pixel": [
+        6,
+        15,
+        25
+      ]
+    },
+    {
+      "label": "close-idle",
+      "camera": "close-idle",
+      "corner_pixel": [
+        32,
+        67,
+        88
+      ]
+    },
+    {
+      "label": "crawl-close",
+      "camera": "close-idle",
+      "corner_pixel": [
+        32,
+        67,
+        88
+      ]
+    }
+  ],
+  "saltwater-512/run-2": [
+    {
+      "label": "wide-idle",
+      "camera": "wide-idle",
+      "corner_pixel": [
+        6,
+        15,
+        25
+      ]
+    },
+    {
+      "label": "close-idle",
+      "camera": "close-idle",
+      "corner_pixel": [
+        32,
+        67,
+        88
+      ]
+    },
+    {
+      "label": "crawl-close",
+      "camera": "close-idle",
+      "corner_pixel": [
+        32,
+        67,
+        88
+      ]
+    }
+  ],
+  "saltwater-512/run-1": [
+    {
+      "label": "wide-idle",
+      "camera": "wide-idle",
+      "corner_pixel": [
+        6,
+        15,
+        25
+      ]
+    },
+    {
+      "label": "close-idle",
+      "camera": "close-idle",
+      "corner_pixel": [
+        32,
+        67,
+        88
+      ]
+    },
+    {
+      "label": "crawl-close",
+      "camera": "close-idle",
+      "corner_pixel": [
+        32,
+        67,
+        88
+      ]
+    }
+  ],
+  "saltwater-512/run-3": [
+    {
+      "label": "wide-idle",
+      "camera": "wide-idle",
+      "corner_pixel": [
+        6,
+        15,
+        25
+      ]
+    },
+    {
+      "label": "close-idle",
+      "camera": "close-idle",
+      "corner_pixel": [
+        32,
+        67,
+        88
+      ]
+    },
+    {
+      "label": "crawl-close",
+      "camera": "close-idle",
+      "corner_pixel": [
+        32,
+        67,
+        88
+      ]
+    }
+  ],
+  "freshwater-256-cpu/run-1": [
+    {
+      "label": "wide-idle",
+      "camera": "wide-idle",
+      "corner_pixel": [
+        6,
+        15,
+        25
+      ]
+    },
+    {
+      "label": "close-idle",
+      "camera": "close-idle",
+      "corner_pixel": [
+        32,
+        67,
+        88
+      ]
+    },
+    {
+      "label": "crawl-close",
+      "camera": "close-idle",
+      "corner_pixel": [
+        32,
+        67,
+        88
+      ]
+    }
+  ],
+  "freshwater-512-cpu/run-1": [
+    {
+      "label": "wide-idle",
+      "camera": "wide-idle",
+      "corner_pixel": [
+        6,
+        15,
+        25
+      ]
+    },
+    {
+      "label": "close-idle",
+      "camera": "close-idle",
+      "corner_pixel": [
+        32,
+        67,
+        88
+      ]
+    },
+    {
+      "label": "crawl-close",
+      "camera": "close-idle",
+      "corner_pixel": [
+        32,
+        67,
+        88
+      ]
+    }
+  ],
+  "saltwater-256-cpu/run-1": [
+    {
+      "label": "wide-idle",
+      "camera": "wide-idle",
+      "corner_pixel": [
+        6,
+        15,
+        25
+      ]
+    },
+    {
+      "label": "close-idle",
+      "camera": "close-idle",
+      "corner_pixel": [
+        32,
+        67,
+        88
+      ]
+    },
+    {
+      "label": "crawl-close",
+      "camera": "close-idle",
+      "corner_pixel": [
+        32,
+        67,
+        88
+      ]
+    }
+  ],
+  "saltwater-512-cpu/run-1": [
+    {
+      "label": "wide-idle",
+      "camera": "wide-idle",
+      "corner_pixel": [
+        6,
+        15,
+        25
+      ]
+    },
+    {
+      "label": "close-idle",
+      "camera": "close-idle",
+      "corner_pixel": [
+        32,
+        67,
+        88
+      ]
+    },
+    {
+      "label": "crawl-close",
+      "camera": "close-idle",
+      "corner_pixel": [
+        32,
+        67,
+        88
+      ]
+    }
+  ]
+}

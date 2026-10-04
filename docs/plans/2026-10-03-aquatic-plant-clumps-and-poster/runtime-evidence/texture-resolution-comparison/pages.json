@@ -1,0 +1,16 @@
+[
+  {
+    "size": 256,
+    "packed_page_bytes": 131090,
+    "pixel_payload_bytes": 131072,
+    "atlas_png_bytes": 84629,
+    "level_sha256": "b0c8b9fe039421cb8f6020cafe0153ae218fde45e2ca608944c58c12fde4fbf1"
+  },
+  {
+    "size": 128,
+    "packed_page_bytes": 32786,
+    "pixel_payload_bytes": 32768,
+    "atlas_png_bytes": 23512,
+    "level_sha256": "2b9bea3fa4bb86fa9039d775947b614e1aea425bc9efdecfd838d06f9a3f7f6b"
+  }
+]

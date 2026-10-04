@@ -1,0 +1,22 @@
+[
+  {
+    "size": 256,
+    "packed_page_bytes": 131090,
+    "pixel_payload_bytes": 131072,
+    "atlas_png_bytes": 84629,
+    "room_slot_size": 256,
+    "source": "production atlas",
+    "level_sha256": "b0c8b9fe039421cb8f6020cafe0153ae218fde45e2ca608944c58c12fde4fbf1",
+    "global_vram_height": 512
+  },
+  {
+    "size": 512,
+    "packed_page_bytes": 524306,
+    "pixel_payload_bytes": 524288,
+    "atlas_png_bytes": 346690,
+    "room_slot_size": 512,
+    "source": "original artwork repacked",
+    "level_sha256": "6db7340bba8ca043b4eabd49742f514948d1782b1b12c99ba4d321eaf206b233",
+    "global_vram_height": 1024
+  }
+]

@@ -1,5 +1,6 @@
 | Date | Change |
 |------|--------|
+| [2026-10-04](https://github.com/wbniv/WorldFoundry/commit/98485d9b) | Allow coordinated background installs and drain service upgrades |
 | [2026-10-04](https://github.com/wbniv/WorldFoundry/commit/e45a7ac1) | Reconcile plant docs with implemented runtime and final texture measurements |
 | [2026-10-04](https://github.com/wbniv/WorldFoundry/commit/d7e70afb) | Record current-build plant texture cost and verified APK restoration |
 | [2026-10-04](https://github.com/wbniv/WorldFoundry/commit/0aa37847) | Add seeded growing plant tank, settings and leaf textures |
@@ -50,6 +51,11 @@
 | [2026-06-26](https://github.com/wbniv/WorldFoundry/commit/16d72fa6) | docs: add plan index (docs/plans/README.md) |
 
 <!--history-meta v1
+98485d9b	author	Will Norris
+98485d9b	added	2
+98485d9b	deleted	0
+98485d9b	files	1
+98485d9b	body	Preserve personal reservations and per-device test exclusivity, add bounded deployment readiness and stopped-service recovery, and package Bomberman for offline Android TV installation. Record verified installations on both Chromecasts. The isolated staged coordinator suite passes all 50 tests.
 e45a7ac1	author	Will Norris
 e45a7ac1	added	2
 e45a7ac1	deleted	2

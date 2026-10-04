@@ -1,0 +1,43 @@
+{
+  "combined": {
+    "frames": 582,
+    "fps": 16.556747825084667,
+    "p50_ms": 66.73332,
+    "p90_ms": 66.733507,
+    "p95_ms": 66.733789,
+    "p99_ms": 83.417034,
+    "missed_refresh_percent": 99.14089347079037
+  },
+  "scenarios": {
+    "wide-idle": {
+      "frames": 203,
+      "fps": 16.97045432223816,
+      "p50_ms": 66.733309,
+      "p90_ms": 66.733462,
+      "p95_ms": 66.733553,
+      "p99_ms": 66.733756,
+      "missed_refresh_percent": 100.0
+    },
+    "close-idle": {
+      "frames": 197,
+      "fps": 16.377497557019193,
+      "p50_ms": 66.733361,
+      "p90_ms": 66.73358,
+      "p95_ms": 66.734029,
+      "p99_ms": 100.100122,
+      "missed_refresh_percent": 98.98477157360406
+    },
+    "crawl-close": {
+      "frames": 182,
+      "fps": 16.306541377280524,
+      "p50_ms": 66.733297,
+      "p90_ms": 66.733525,
+      "p95_ms": 66.734064,
+      "p99_ms": 100.100072,
+      "missed_refresh_percent": 98.35164835164835
+    }
+  },
+  "clock_offset_seconds": 222347.41168646203,
+  "clock_alignment_note": "Median latest-present timestamp minus poll start; boundaries approximate within one poll round trip plus a frame.",
+  "PSS_MiB": 71.3994140625
+}

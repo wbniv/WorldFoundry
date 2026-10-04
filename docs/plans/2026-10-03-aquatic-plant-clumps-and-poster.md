@@ -1,6 +1,6 @@
 # Aquarium: clumped plant growth, gentle water motion and an A3 poster
 
-**Status:** seeded runtime growth, fresh/salt palettes, sway, TV/phone settings and leaf textures are implemented and device-verified. The corrected current-native texture comparison is complete: 15 release traces and five separate CPU traces, with normal-APK restoration/hash verification passed. Textures cost about 34–35% of mature-tank FPS and 24–27 ms/frame of CPU rendering; actor cost remains about 1.3 ms. Broader growth/sway/seed-spread measurements and repeated-entry memory testing remain pending. The A3 portrait poster is complete. Implementation is committed as `0aa37847`; the completed benchmark and restoration evidence are committed as `d7e70afb`.
+**Status:** runtime growth, fresh/salt textures, gentle sway and TV/phone settings are implemented and device-verified. The mature textured/shaded and 128/256/512 atlas comparisons are complete, with normal-APK restoration verified. **Keep 256**, as approved: 128 softens detail without useful speed gain; 512 adds fine close-up grain, about 4 MiB PSS and worse close-up pacing, with a 4.7% saltwater FPS cost. Broader growth/sway/seed-spread and repeated-entry memory measurements remain pending. The A3 portrait poster is complete. Implementation: `0aa37847`; earlier texture benchmark: `d7e70afb`.
 
 Replace obvious rows with **connected, irregular patches of growth**. Grow toward a mostly-full mature tank: overlapping clumps should eventually cover roughly 75–85% of the submerged interior in the whole-tank view, with local gaps and a small, winding substrate route for the sea urchin. Add subtle, coherent water-driven bending with anchored roots. Make an **A3 portrait poster**, split into saltwater on the left and freshwater on the right; reserve the **bottom 25% of the page** for diagrams and explanations of clumping and branching.
 
@@ -101,7 +101,7 @@ This is a generated artwork preview, not an engine capture or botanical identifi
 
 ![Texture ownership and leaf-local UVs](2026-10-03-aquatic-plant-clumps-and-poster/leaf-texture-pipeline.svg)
 
-Use diffuse albedo with restrained contrast; keep directional highlights and shadows in the existing mesh shading. Orient UVs per leaf so veins follow the surface through growth and bending. Use the same leaf surface on front and back with a modest underside tint, and preserve the mesh silhouette; transparent cutout cards are unnecessary for these closed leaves. The production atlas is **256 × 256**, with six **72 × 112** interiors, four-texel extruded gutters and one shared material per existing chunk. It occupies **128 KiB** in the packed 16-bit room page (256 KiB for an RGBA8 GPU upload); inspect filtering, seams, tip stretching and fine-detail readability at TV viewing distance. Scale tiny whorl detail down rather than adding polygons for veins. Preserve seeded layout, birth times, actor count and the eight-group rendering structure. Record the texture resolution, format and memory in the comparison. The native rest-vertex record gains UVs and a separately shaded texture tint: 12 extra bytes per planned vertex (about 0.95 MiB for freshwater seed 713). A developer `--plant-texture=0` control uses the same native binary and level payload to render the shaded comparison. Runtime material changes refresh the cached renderer alongside flags, so its triangle layout matches the published primitives. Plant materials explicitly enable **texture × vertex colour** modulation in the GL and Metal backends: the legacy replace-if-white rule otherwise ignores albedo on shaded grey vertices. Other materials retain the legacy rule. The device check rejects missing green foliage or brown algae; The compositor forwards and retains this mode through deferred draws and state restoration. A recording-backend regression verifies both opaque forwarding and sorted translucent state; Mac/Metal visual verification remains a separate target check.
+Use diffuse albedo with restrained contrast; keep directional highlights and shadows in the existing mesh shading. Orient UVs per leaf so veins follow the surface through growth and bending. Use the same leaf surface on front and back with a modest underside tint, and preserve the mesh silhouette; transparent cutout cards are unnecessary for these closed leaves. The production atlas is **256 × 256**, with six **72 × 112** interiors, four-texel extruded gutters and one shared material per existing chunk. It occupies **128 KiB** in the packed 16-bit room page (the current GL room slot remains 256 × 256 / 256 KiB RGBA8 even when a smaller page is loaded); inspect filtering, seams, tip stretching and fine-detail readability at TV viewing distance. Scale tiny whorl detail down rather than adding polygons for veins. Preserve seeded layout, birth times, actor count and the eight-group rendering structure. Record the texture resolution, format and memory in the comparison. The native rest-vertex record gains UVs and a separately shaded texture tint: 12 extra bytes per planned vertex (about 0.95 MiB for freshwater seed 713). A developer `--plant-texture=0` control uses the same native binary and level payload to render the shaded comparison. Runtime material changes refresh the cached renderer alongside flags, so its triangle layout matches the published primitives. Plant materials explicitly enable **texture × vertex colour** modulation in the GL and Metal backends: the legacy replace-if-white rule otherwise ignores albedo on shaded grey vertices. Other materials retain the legacy rule. The device check rejects missing green foliage or brown algae; The compositor forwards and retains this mode through deferred draws and state restoration. A recording-backend regression verifies both opaque forwarding and sorted translucent state; Mac/Metal visual verification remains a separate target check.
 
 ### Implementation and the white-foliage fix
 
@@ -205,6 +205,152 @@ The examples use cycles/turns where appropriate. `.08` turns is a schematic bran
 
 The implemented native generator builds the bounded lineage graph and mature rest meshes at entry. During play, growth age reveals shoots and scales rooted blades; native deformation applies gentle sway. Forth registers the eight chunks with `plant-register` (syscall 175) and invokes `plant-step` (176); native code owns the species rules, buffers, growth clock and sway coefficients. The mature freshwater seed-713 rest mesh has 82,888 vertices, so vertex work stays native. This implements visible authored growth rather than drawing an extending underground runner or physically unrolling each leaf. Individual plants have no actors, and roots remain pinned.
 
+## Completed 512 atlas quality/cost comparison
+
+Will requested profiling **512 for improved looks**, with performance measured as a possible cost rather than an expected benefit. The approved production default remains **256** during this experiment. **PASS:** coordinator job `J-ff43c21dd4e7` completed all **16 corrected traces**, restored and hash-verified the normal 256 APK. The corrected benchmark compares freshwater and saltwater at 256 and 512, each with three release repeats and one separate CPU trace. Seed 713, age 150, paused growth/sway, cameras, geometry, native libraries and no-phone conditions match the preceding protocol. Fresh 256 control traces are measured inside this session rather than reusing earlier timings.
+
+The 512 atlas is **repacked from the original six-tile artwork**, not upscaled from the production atlas. Its interiors are **144 × 224** with eight-texel extruded gutters and the same normalized tile layout. Packed page payload rises from **128 to 512 KiB (+384 KiB)**. The compiled planted level rises from **196,608 to 589,824 bytes (+384 KiB)**. Source meshes, level script and 256 control are checked byte-for-byte.
+
+The larger page requires `--vram-slot-width=512 --vram-slot-height=512 --vram-height=1024` with the existing native renderer. The global VRAM height must exceed 512 because the legacy UV descriptor check uses a strict `<` bound. This changes all nine transient room slots, not just the planted page: the nine CPU RGBA8 pixel buffers rise from **2.25 to 9 MiB (+6.75 MiB allocated capacity)**. GPU textures are created lazily on each slot’s first `Load`: each uploaded slot rises from **256 KiB to 1 MiB (+768 KiB)**, with +6.75 MiB total capacity only if all nine are uploaded. These figures describe buffers, not measured driver residency or process PSS; the profile will report PSS separately. The global CPU pixel map also grows by **2 MiB** when its height rises from 512 to 1024, giving **8.75 MiB total extra CPU buffer capacity**. GPU residency remains dependent on which slots are uploaded. Permanent/palette sizes and production settings remain unchanged. A future per-room allocation optimization would be a separate change.
+
+![Actual 256 production atlas and 512 repacked original artwork](2026-10-03-aquatic-plant-clumps-and-poster/runtime-evidence/texture-512-comparison/atlas-comparison.png)
+
+The first attempt (`J-95746bdfdb14`) failed entering the 512 scene and verified restoration. It provides no valid 512 timing. A desktop diagnostic reproduced `h = 512, Display::VRAMHeight = 512` in `gfx/rmuv.hpi`; raising only the test VRAM height to 1024 passed the ten-frame standalone diagnostic. The diagnostic uses a desktop build solely to identify the bound; it is not a Chromecast performance result. [Failed-attempt receipt](2026-10-03-aquatic-plant-clumps-and-poster/runtime-evidence/texture-512-comparison/failed-attempt/receipt.json).
+
+The corrected Chromecast scene check **passed** as job `J-ad42f2d506ff`, verified the expected mature seed/geometry and all three VRAM arguments, and restored the normal APK. [Preflight capture](2026-10-03-aquatic-plant-clumps-and-poster/runtime-evidence/texture-512-comparison/preflight/screenshot.png) · [Receipt](2026-10-03-aquatic-plant-clumps-and-poster/runtime-evidence/texture-512-comparison/preflight/receipt.json).
+
+**Camera audit:** the first 256 repeat entered close framing, then toggled to wide; other observed repeats followed the intended order. The primary comparison therefore uses both actual stationary views per repeat, reclassifies their labels from screenshots, excludes the first second of each segment for camera/input settling, and excludes crawl from every case. Every run contains both distinct stationary views; all 16 camera pairs passed the audit. This keeps the camera workload matched without hiding the input/entry timing issue. Raw traces remain unchanged alongside derived matched-static inputs and the audit.
+
+**Visual result:** 512 adds finer freshwater vein/surface grain and saltwater tissue detail in close-up. At whole-tank scale the difference is subtle. Silhouettes, curvature, broad vein patterns and density are unchanged; higher resolution does not address faceting or UV distortion. These representative captures show no obvious new tile-edge seam. The report pairs the **actual** matching camera views, including the corrected first 256 view labels, and preserves screenshot pixels in the detail crops.
+
+| Water / atlas | FPS (range) | p95 ms | Render CPU ms | Actor CPU ms | Deform CPU ms | PSS MiB |
+|---|---:|---:|---:|---:|---:|---:|
+| freshwater-256 | 14.72 (14.64–14.88) | 83.42 | 60.29 | 1.32 | 0.017 | 78.41 |
+| freshwater-512 | 14.80 (14.57–14.82) | 83.42 | 60.63 | 1.33 | 0.018 | 82.76 |
+| saltwater-256 | 16.64 (16.43–16.68) | 66.73 | 53.70 | 1.30 | 0.017 | 78.34 |
+| saltwater-512 | 15.86 (15.84–15.95) | 66.73 | 53.68 | 1.38 | 0.018 | 82.25 |
+
+| 512 versus 256 | FPS delta | Render CPU delta | Median PSS delta | Packed-page increase |
+|---|---:|---:|---:|---:|
+| freshwater | +0.08 / +0.55% | +0.34 ms / +0.56% | +4.35 MiB | +384 KiB / +300% |
+| saltwater | -0.78 / -4.70% | -0.02 ms / -0.04% | +3.91 MiB | +384 KiB / +300% |
+
+| Actual stationary camera | Fresh 256 FPS / p95 ms | Fresh 512 FPS / p95 ms | Salt 256 FPS / p95 ms | Salt 512 FPS / p95 ms |
+|---|---:|---:|---:|---:|
+| wide-idle | 14.89 / 66.73 | 15.03 / 66.73 | 16.92 / 66.73 | 16.71 / 66.73 |
+| close-idle | 14.55 / 83.42 | 14.58 / 116.78 | 16.33 / 66.73 | 15.03 / 116.78 |
+
+**Cost:** freshwater median FPS is essentially unchanged (+0.55%, overlapping repeat ranges). Saltwater drops **4.70%** across the matched stationary views, and about **7.96%** in close-up. Combined p95 remains roughly 83.42 ms freshwater / 66.73 ms saltwater, but that hides worse close-up tails: freshwater **83.42 → 116.78 ms**, saltwater **66.73 → 116.78 ms**. The larger atlas/configuration is a visual-quality option with a measured pacing cost in this session, not a performance optimization.
+
+CPU rendering changes only **+0.34 ms** freshwater / **−0.02 ms** saltwater. These are separate single diagnostic runs, each with three complete five-second CPU windows within the retained idle intervals. Nested thread timings are not additive or GPU timings. The presentation changes with roughly stable render CPU do not identify their cause; this test does not isolate GPU/cache/driver time.
+
+| Case | PSS snapshot range across three release repeats |
+|---|---:|
+| freshwater-256 | 78.07–79.43 MiB |
+| freshwater-512 | 79.83–83.30 MiB |
+| saltwater-256 | 76.46–78.44 MiB |
+| saltwater-512 | 78.65–82.33 MiB |
+
+PSS rises by about **4 MiB** in both water types, while configured CPU buffer capacity rises by 8.75 MiB. PSS includes process/driver/allocator accounting and does not separately measure GPU residency; do not equate either value with atlas bytes alone. Case blocks are sequential rather than randomized. Thermal snapshots all report status 0; current core temperatures ranged from **48.3 to 52.7°C**. Geometry and native libraries match; all CPU cases retain 38 objects, 26 render actors and 25 draws.
+
+These values use only audited stationary views, with one second removed at each segment start. They should not be directly pooled with the earlier 128 comparison’s three-segment aggregate.
+
+![Measured FPS and render CPU for matched stationary views](2026-10-03-aquatic-plant-clumps-and-poster/runtime-evidence/texture-512-comparison/final/resolution-comparison.png)
+
+![Freshwater whole-tank views, 256 left and 512 right](2026-10-03-aquatic-plant-clumps-and-poster/runtime-evidence/texture-512-comparison/final/freshwater-wide-idle-pair.png)
+
+![Freshwater close detail, 256 left and 512 right](2026-10-03-aquatic-plant-clumps-and-poster/runtime-evidence/texture-512-comparison/final/freshwater-close-idle-detail.png)
+
+![Saltwater whole-tank views, 256 left and 512 right](2026-10-03-aquatic-plant-clumps-and-poster/runtime-evidence/texture-512-comparison/final/saltwater-wide-idle-pair.png)
+
+![Saltwater close detail, 256 left and 512 right](2026-10-03-aquatic-plant-clumps-and-poster/runtime-evidence/texture-512-comparison/final/saltwater-close-idle-detail.png)
+
+[Complete freshwater close views](2026-10-03-aquatic-plant-clumps-and-poster/runtime-evidence/texture-512-comparison/final/freshwater-close-idle-pair.png) · [Complete saltwater close views](2026-10-03-aquatic-plant-clumps-and-poster/runtime-evidence/texture-512-comparison/final/saltwater-close-idle-pair.png) · [Camera audit](2026-10-03-aquatic-plant-clumps-and-poster/runtime-evidence/texture-512-comparison/final/camera-audit.json) · [Freshwater audit contact sheet](2026-10-03-aquatic-plant-clumps-and-poster/runtime-evidence/texture-512-comparison/final/freshwater-camera-audit.png) · [Saltwater audit contact sheet](2026-10-03-aquatic-plant-clumps-and-poster/runtime-evidence/texture-512-comparison/final/saltwater-camera-audit.png) · [Measured values and deltas](2026-10-03-aquatic-plant-clumps-and-poster/runtime-evidence/texture-512-comparison/final/comparison.json) · [Completed restoration receipt](2026-10-03-aquatic-plant-clumps-and-poster/runtime-evidence/texture-512-comparison/final/receipt.json).
+
+**Production remains 256 × 256**, as approved. The 512 variants are profiling/visual-review artifacts. Normal APK `79433b3c5e80625b13b4bf566e8fd941185affd62f779488ad30bab775f7c1d5` was restored and its installed hash verified; cleanup returned Home/prior foreground. No production texture, native code or shared coordinator deployment changed.
+
+Reproduce the audited comparison from the repository root:
+
+```bash
+plant_512=docs/plans/2026-10-03-aquatic-plant-clumps-and-poster/runtime-evidence/texture-512-comparison
+python3 scripts/summarise-plant-resolution-comparison.py "$plant_512/final" \
+  --recipe "$plant_512/recipe.json" \
+  --identities "$plant_512/identities.json" \
+  --comparison-size 512 --matched-static
+```
+
+The helper verifies completion/restoration, frozen APK/native identities, the required VRAM flags, repeat counts, distinct camera views and CPU-window coverage. Original logs are preserved losslessly as gzip files; `matched-static` contains derived stationary inputs with corrected labels and settling intervals. `package-plant-resolution-comparison.py --sizes 256 512` rebuilds isolated variants from a frozen current APK while checking exact production 256 payload and unchanged source geometry. Saved recipes identify this completed session’s artifacts.
+
+ [Frozen identities](2026-10-03-aquatic-plant-clumps-and-poster/runtime-evidence/texture-512-comparison/identities.json), [packed sizes](2026-10-03-aquatic-plant-clumps-and-poster/runtime-evidence/texture-512-comparison/pages.json), [recipe](2026-10-03-aquatic-plant-clumps-and-poster/runtime-evidence/texture-512-comparison/recipe.json).
+
+## Completed atlas resolution comparison — keep 256
+
+**PASS:** coordinator job `J-fde5d307fbae` completed all **16 traces**, restored the normal APK and verified its installed hash. It compares **256 × 256 versus 128 × 128** in both freshwater and saltwater. Each case has three release traces plus a separate CPU trace, using identical current native libraries, seed 713, mature age 150, paused growth and sway. Cameras, geometry and texture modulation remain unchanged. The 256 level control is byte-for-byte identical to production. The smaller atlas is a Lanczos downsample of the entire production atlas, preserving normalized UV layout; interiors become 36 × 56 with two-texel gutters.
+
+| Atlas | Packed 16-bit pixels | Room TGA including header | Compiled planted level | Leaf interiors |
+|---|---:|---:|---:|---|
+| 256 × 256 | 128 KiB | 131,090 bytes | 196,608 bytes | 72 × 112 |
+| 128 × 128 | 32 KiB | 32,786 bytes | 98,304 bytes | 36 × 56 |
+
+The reduction saves **96 KiB / 75%** of texture-page payload and **96 KiB / 50%** of the compiled planted level. It does not change plant buffers, actors, topology or per-triangle texture submission. The modern GL renderer allocates fixed 256 × 256 room slots and uploads the whole slot through `PixelMap::Load`; loading a smaller page does not automatically shrink those slots. Process PSS snapshots are not an isolated GPU-memory measurement.
+
+![The actual deployed atlases enlarged equally to reveal their texels](2026-10-03-aquatic-plant-clumps-and-poster/runtime-evidence/texture-resolution-comparison/atlas-comparison.png)
+
+**Decision: keep 256 × 256**, confirmed by Will after reviewing the comparison findings. The large source artwork is an authoring reference, not the deployed map. The 128 variant remains a comparison artifact; production assets and native code are unchanged.
+
+| Water / atlas | FPS (range) | p95 ms | Render CPU ms | Actor CPU ms | Deform CPU ms | PSS MiB |
+|---|---:|---:|---:|---:|---:|---:|
+| freshwater-256 | 14.66 (14.63–14.81) | 83.42 | 60.50 | 1.39 | 0.018 | 68.76 |
+| freshwater-128 | 14.80 (14.70–14.80) | 83.42 | 60.64 | 1.34 | 0.018 | 72.45 |
+| saltwater-256 | 16.49 (16.46–16.59) | 66.73 | 53.70 | 1.33 | 0.018 | 73.30 |
+| saltwater-128 | 16.55 (16.47–16.56) | 66.73 | 53.53 | 1.33 | 0.018 | 72.47 |
+
+| 128 versus 256 | FPS delta | Render CPU delta | Combined p95 delta | PSS snapshot delta |
+|---|---:|---:|---:|---:|
+| Freshwater | +0.14 / +0.97% | +0.14 ms / +0.23% | ≈0 ms | +3.68 MiB |
+| Saltwater | +0.06 / +0.37% | −0.16 ms / −0.30% | ≈0 ms | −0.83 MiB |
+
+The release FPS ranges overlap in both water types. There is **no useful measured performance gain** from halving resolution. CPU timings come from separate diagnostic runs, using 4–6 complete five-second windows inside timed segments; nested sections are not additive and are not GPU timings. Case blocks were sequential rather than randomized. All thermal snapshots report status 0; current core temperatures ranged from 47.1 to 52.7°C. PSS varies with Android accounting and allocation state, so these process snapshots do not establish texture-memory savings.
+
+All CPU cases retain **38 level objects, 26 render actors and 25 engine draws**. Average submitted triangles remain approximately 27,055 freshwater and 23,827 saltwater; small differences reflect camera movement/culling and frame weighting. Source geometry and compiled mesh/level scripts were checked byte-for-byte. Native hashes match the frozen production APK in every variant.
+
+| Camera | Fresh 256 FPS / p95 ms | Fresh 128 FPS / p95 ms | Salt 256 FPS / p95 ms | Salt 128 FPS / p95 ms |
+|---|---:|---:|---:|---:|
+| wide-idle | 14.94 / 66.73 | 15.01 / 66.73 | 16.92 / 66.73 | 16.97 / 66.73 |
+| close-idle | 14.63 / 83.42 | 14.72 / 83.42 | 16.43 / 66.73 | 16.38 / 66.73 |
+| crawl-close | 14.40 / 83.42 | 14.61 / 83.42 | 16.17 / 66.73 | 16.28 / 83.42 |
+
+The combined p95 stays unchanged, but the saltwater 128 crawl segment has a worse median p95 (83.42 versus 66.73 ms). This reinforces the absence of a demonstrated pacing improvement; it does not establish a resolution-caused regression from this small sequential sample.
+
+![Measured FPS and rendering CPU for both atlas resolutions](2026-10-03-aquatic-plant-clumps-and-poster/runtime-evidence/texture-resolution-comparison/final/resolution-comparison.png)
+
+At whole-tank scale the two variants look very similar. Close-up native-pixel crops show softer freshwater veins and reduced saltwater surface grain at 128. The 256 atlas retains clearer leaf detail. Neither comparison capture introduces an obvious new tile-edge seam; this is a visual assessment of these cameras and seed, not an exhaustive filtering test. Each paired image uses the same crop coordinates and original screenshot pixels; click complete views to inspect their full size.
+
+![Freshwater whole-tank comparison, 256 left and 128 right](2026-10-03-aquatic-plant-clumps-and-poster/runtime-evidence/texture-resolution-comparison/final/freshwater-wide-idle-pair.png)
+
+![Freshwater close detail, 256 left and 128 right](2026-10-03-aquatic-plant-clumps-and-poster/runtime-evidence/texture-resolution-comparison/final/freshwater-close-idle-detail.png)
+
+![Saltwater whole-tank comparison, 256 left and 128 right](2026-10-03-aquatic-plant-clumps-and-poster/runtime-evidence/texture-resolution-comparison/final/saltwater-wide-idle-pair.png)
+
+![Saltwater close detail, 256 left and 128 right](2026-10-03-aquatic-plant-clumps-and-poster/runtime-evidence/texture-resolution-comparison/final/saltwater-close-idle-detail.png)
+
+[Complete freshwater close views](2026-10-03-aquatic-plant-clumps-and-poster/runtime-evidence/texture-resolution-comparison/final/freshwater-close-idle-pair.png) · [Complete saltwater close views](2026-10-03-aquatic-plant-clumps-and-poster/runtime-evidence/texture-resolution-comparison/final/saltwater-close-idle-pair.png) · [Measured values and deltas](2026-10-03-aquatic-plant-clumps-and-poster/runtime-evidence/texture-resolution-comparison/final/comparison.json) · [Completion/restoration receipt](2026-10-03-aquatic-plant-clumps-and-poster/runtime-evidence/texture-resolution-comparison/final/receipt.json).
+
+The verified restored normal APK is `79433b3c5e80625b13b4bf566e8fd941185affd62f779488ad30bab775f7c1d5`. Cleanup returns the prior foreground/Home rather than leaving the test scene running. The previous textured/shaded comparison still identifies texture-path CPU cost; atlas resolution does not remove that per-triangle work. Keep the current detail while investigating renderer submission/UV processing separately.
+
+Reproduce the saved measurements from the repository root:
+
+```bash
+plant_resolution=docs/plans/2026-10-03-aquatic-plant-clumps-and-poster/runtime-evidence/texture-resolution-comparison
+python3 scripts/summarise-plant-resolution-comparison.py "$plant_resolution/final" \
+  --recipe "$plant_resolution/recipe.json" \
+  --identities "$plant_resolution/identities.json"
+```
+
+`package-plant-resolution-comparison.py` generates isolated variants from a frozen current APK, verifies unchanged geometry/native libraries and an exact production 256 control, and records actual packed-page dimensions. Losslessly compressed engine, memory and thermal logs preserve the raw evidence. A new device comparison must freeze the then-current production APK; saved recipe paths identify this completed run.
+
+ [Frozen APK identities](2026-10-03-aquatic-plant-clumps-and-poster/runtime-evidence/texture-resolution-comparison/identities.json), [page sizes](2026-10-03-aquatic-plant-clumps-and-poster/runtime-evidence/texture-resolution-comparison/pages.json), [recipe](2026-10-03-aquatic-plant-clumps-and-poster/runtime-evidence/texture-resolution-comparison/recipe.json).
+
 ## Completed current-build texture comparison
 
 **PASS:** coordinator job `J-cfbb812fc1ff` completed all **20 traces** (three uninstrumented release repeats and one separate CPU trace for each of five cases). Every variant has the current normal APK's identical native libraries; the reference swaps only the archived planted-level asset into the current selector. Native identity checks passed before submission. Each trace uses a 30-second warmup, then 12 seconds each of wide idle, close idle and close crawl. No phone was connected. Timed analysis excludes screenshot gaps and warmup; do not pool these results with the older phone-connected traces.
@@ -305,6 +451,7 @@ The original frozen implementation APK remains in the growing-plants worktree wi
 | Gentle water | Native root-pinned coherent bending, independent of growth rate | Implemented and visually checked; static-versus-sway incremental cost pending |
 | Seed / water / speed settings | Exact uint32 seed, TV grid/keypad, connected-phone panel, apply-on-back, cancel and reconnect draft | Remote/phone device checks passed, including selector return and Home/resume |
 | Mature-static texture cost | Matching native libraries, geometry, cameras and trace; textured/shaded pairs | **Complete:** three release repeats plus one CPU trace per case; 34–35% FPS cost, actor CPU ≈1.3 ms |
+| Atlas resolution / quality | 128 and 512 compared with matching 256 controls; all native libraries/geometry fixed | **Complete:** retain approved 256; 512 offers subtle close detail with memory/pacing cost, and is not adopted |
 | Repeated entry | Level-owned render buffers released on exit; new seed on normal entry | Source ownership and re-entry functionality checked; same-process memory/latency stress measurement pending |
 
 Next measurement work: add typed coordinator workflows for active-growth and repeated-entry phone assertions, then measure young/spreading/mature growth, static/sway pairs, seeds 0/713/MAX and settings speed changes. Keep layout, camera trace and native identity matched within each comparison. Every device session must restore and hash-verify the normal APK before releasing ownership. Renderer optimization is a separate implementation decision; the measured texture-path CPU cost is its starting evidence.

@@ -1,0 +1,251 @@
+{
+  "job": "J-fde5d307fbae",
+  "native": {
+    "lib/arm64-v8a/libwf_game.so": "565c5eed2c66c5b115decf322bc0cf9aa628e693e851110736ea1406f6766dc3",
+    "lib/armeabi-v7a/libwf_game.so": "6ab5579c342b8cc4c69fe76a28af35710ce50fe3f00d267f7cd0dd04fc354043"
+  },
+  "normal_restored": true,
+  "normal_apk_sha256": "79433b3c5e80625b13b4bf566e8fd941185affd62f779488ad30bab775f7c1d5",
+  "thermal_statuses": [
+    0
+  ],
+  "core_temperature_C_range": [
+    47.100002,
+    52.7
+  ],
+  "method": "Three release repeats plus one separate CPU run per case; 30-second warmup; 12 seconds each wide, close and crawl. Seed 713, age 150, speed/sway zero, no phone. All native libraries and plant geometry match. CPU sections are nested thread time, not GPU timing. Case blocks are sequential, not randomized; small timing differences and PSS differences need caution.",
+  "cases": [
+    {
+      "case": "freshwater-256",
+      "water": "freshwater",
+      "size": 256,
+      "frames": 520,
+      "fps": 14.660766359107562,
+      "p50_ms": 66.733431,
+      "p90_ms": 83.415889,
+      "p95_ms": 83.416767,
+      "p99_ms": 83.416899,
+      "missed_refresh_percent": 99.43396226415095,
+      "PSS_MiB": 68.763671875,
+      "FPS_range": [
+        14.629900066978005,
+        14.810344352425167
+      ],
+      "CPU_windows": 5,
+      "CPU_ms_and_counters": {
+        "update": 1.618290810810811,
+        "actors": 1.3885262162162162,
+        "director": 0.16088783783783783,
+        "render": 60.50174459459459,
+        "school": 0.0,
+        "pose": 0.0,
+        "animation": 0.018378378378378378,
+        "total": 62.12003540540541,
+        "level-objects": 38.0,
+        "render-actors": 26.0,
+        "draws": 25.0,
+        "triangles": 27058.1028972973,
+        "actor-mailbox-writes": 29.0,
+        "fish-deformations": 0.0
+      },
+      "scenarios": {
+        "wide-idle": {
+          "fps": 14.943020019017009,
+          "p95_ms": 66.734025
+        },
+        "close-idle": {
+          "fps": 14.62970208998676,
+          "p95_ms": 83.416755
+        },
+        "crawl-close": {
+          "fps": 14.402844008829522,
+          "p95_ms": 83.416789
+        }
+      }
+    },
+    {
+      "case": "freshwater-128",
+      "water": "freshwater",
+      "size": 128,
+      "frames": 529,
+      "fps": 14.803104065197246,
+      "p50_ms": 66.733427,
+      "p90_ms": 66.733897,
+      "p95_ms": 83.416756,
+      "p99_ms": 83.417202,
+      "missed_refresh_percent": 99.22330097087378,
+      "PSS_MiB": 72.447265625,
+      "FPS_range": [
+        14.699566370698433,
+        14.803780819826802
+      ],
+      "CPU_windows": 4,
+      "CPU_ms_and_counters": {
+        "update": 1.5652093959731546,
+        "actors": 1.3369194630872483,
+        "director": 0.16063557046979865,
+        "render": 60.63810268456376,
+        "school": 0.0,
+        "pose": 0.0,
+        "animation": 0.017947651006711408,
+        "total": 62.20328657718122,
+        "level-objects": 38.0,
+        "render-actors": 26.0,
+        "draws": 25.0,
+        "triangles": 27055.328798657716,
+        "actor-mailbox-writes": 29.0,
+        "fish-deformations": 0.0
+      },
+      "scenarios": {
+        "wide-idle": {
+          "fps": 15.005952860242177,
+          "p95_ms": 66.733793
+        },
+        "close-idle": {
+          "fps": 14.716298197189696,
+          "p95_ms": 83.416759
+        },
+        "crawl-close": {
+          "fps": 14.60722173295613,
+          "p95_ms": 83.416806
+        }
+      },
+      "delta": {
+        "fps": {
+          "absolute": 0.142337706089684,
+          "percent": 0.9708749365701541
+        },
+        "p95_ms": {
+          "absolute": -1.0999999986438525e-05,
+          "percent": -1.3186797309661102e-05
+        },
+        "PSS_MiB": {
+          "absolute": 3.68359375,
+          "percent": 5.356889254977704
+        }
+      },
+      "CPU_delta_ms": {
+        "render": 0.1363580899691712,
+        "actors": -0.0516067531289679,
+        "animation": -0.0004307273716669703,
+        "total": 0.08325117177580665
+      }
+    },
+    {
+      "case": "saltwater-256",
+      "water": "saltwater",
+      "size": 256,
+      "frames": 583,
+      "fps": 16.48705356058306,
+      "p50_ms": 66.733339,
+      "p90_ms": 66.733482,
+      "p95_ms": 66.733602,
+      "p99_ms": 100.100009,
+      "missed_refresh_percent": 98.79931389365352,
+      "PSS_MiB": 73.302734375,
+      "FPS_range": [
+        16.457427267972523,
+        16.58519596005397
+      ],
+      "CPU_windows": 6,
+      "CPU_ms_and_counters": {
+        "update": 1.5586440643863178,
+        "actors": 1.331633601609658,
+        "director": 0.1606255533199195,
+        "render": 53.69501146881287,
+        "school": 0.0,
+        "pose": 0.0,
+        "animation": 0.01756519114688129,
+        "total": 55.25363923541248,
+        "level-objects": 38.0,
+        "render-actors": 26.0,
+        "draws": 25.0,
+        "triangles": 23827.179076458753,
+        "actor-mailbox-writes": 29.0,
+        "fish-deformations": 0.0
+      },
+      "scenarios": {
+        "wide-idle": {
+          "fps": 16.923248621522223,
+          "p95_ms": 66.733469
+        },
+        "close-idle": {
+          "fps": 16.429829043525473,
+          "p95_ms": 66.733662
+        },
+        "crawl-close": {
+          "fps": 16.174280057635844,
+          "p95_ms": 66.734037
+        }
+      }
+    },
+    {
+      "case": "saltwater-128",
+      "water": "saltwater",
+      "size": 128,
+      "frames": 584,
+      "fps": 16.547846987974715,
+      "p50_ms": 66.733332,
+      "p90_ms": 66.733507,
+      "p95_ms": 66.733789,
+      "p99_ms": 100.100134,
+      "missed_refresh_percent": 98.8013698630137,
+      "PSS_MiB": 72.470703125,
+      "FPS_range": [
+        16.47291663327863,
+        16.556747825084667
+      ],
+      "CPU_windows": 6,
+      "CPU_ms_and_counters": {
+        "update": 1.5602202811244978,
+        "actors": 1.3317648594377511,
+        "director": 0.1618777108433735,
+        "render": 53.53458192771084,
+        "school": 0.0,
+        "pose": 0.0,
+        "animation": 0.018111646586345384,
+        "total": 55.09481887550201,
+        "level-objects": 38.0,
+        "render-actors": 26.0,
+        "draws": 25.0,
+        "triangles": 23827.321234939758,
+        "actor-mailbox-writes": 29.0,
+        "fish-deformations": 0.0
+      },
+      "scenarios": {
+        "wide-idle": {
+          "fps": 16.97045432223816,
+          "p95_ms": 66.733495
+        },
+        "close-idle": {
+          "fps": 16.377497557019193,
+          "p95_ms": 66.734495
+        },
+        "crawl-close": {
+          "fps": 16.275673316874173,
+          "p95_ms": 83.416074
+        }
+      },
+      "delta": {
+        "fps": {
+          "absolute": 0.06079342739165483,
+          "percent": 0.3687343355091466
+        },
+        "p95_ms": {
+          "absolute": 0.0001869999999968286,
+          "percent": 0.00028021865206007135
+        },
+        "PSS_MiB": {
+          "absolute": -0.83203125,
+          "percent": -1.1350616823425974
+        }
+      },
+      "CPU_delta_ms": {
+        "render": -0.1604295411020331,
+        "actors": 0.00013125782809320086,
+        "animation": 0.0005464554394640948,
+        "total": -0.1588203599104716
+      }
+    }
+  ]
+}

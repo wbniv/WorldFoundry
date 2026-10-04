@@ -1,0 +1,82 @@
+[
+  {
+    "name": "freshwater-256",
+    "apk_sha256": "9a2740a45ba40ef42459061ccf7b5612280339d9bc90f832e37570750871efe4",
+    "native": {
+      "lib/arm64-v8a/libwf_game.so": "565c5eed2c66c5b115decf322bc0cf9aa628e693e851110736ea1406f6766dc3",
+      "lib/armeabi-v7a/libwf_game.so": "6ab5579c342b8cc4c69fe76a28af35710ce50fe3f00d267f7cd0dd04fc354043"
+    },
+    "args": "--plant-seed=713\n--plant-water=freshwater\n--plant-age=150\n--plant-speed=0\n--plant-sway=0\n",
+    "cd_sha256": "742adb3fcfd27f4444ae995760307f64cecc554e8e91c5aa96379af4f8f14ea8"
+  },
+  {
+    "name": "freshwater-256-cpu",
+    "apk_sha256": "fd7826703214e8196e33b4efe8d425e87edf0a9d98d7ab93efbd3bceb5aa6ce6",
+    "native": {
+      "lib/arm64-v8a/libwf_game.so": "565c5eed2c66c5b115decf322bc0cf9aa628e693e851110736ea1406f6766dc3",
+      "lib/armeabi-v7a/libwf_game.so": "6ab5579c342b8cc4c69fe76a28af35710ce50fe3f00d267f7cd0dd04fc354043"
+    },
+    "args": "--plant-seed=713\n--plant-water=freshwater\n--plant-age=150\n--plant-speed=0\n--plant-sway=0\n--frame-profile\n",
+    "cd_sha256": "742adb3fcfd27f4444ae995760307f64cecc554e8e91c5aa96379af4f8f14ea8"
+  },
+  {
+    "name": "saltwater-256",
+    "apk_sha256": "567adbfc0884857b603a412a93c5ccc968566b4ce8a9bfb8ee1f41b0ef405831",
+    "native": {
+      "lib/arm64-v8a/libwf_game.so": "565c5eed2c66c5b115decf322bc0cf9aa628e693e851110736ea1406f6766dc3",
+      "lib/armeabi-v7a/libwf_game.so": "6ab5579c342b8cc4c69fe76a28af35710ce50fe3f00d267f7cd0dd04fc354043"
+    },
+    "args": "--plant-seed=713\n--plant-water=saltwater\n--plant-age=150\n--plant-speed=0\n--plant-sway=0\n",
+    "cd_sha256": "742adb3fcfd27f4444ae995760307f64cecc554e8e91c5aa96379af4f8f14ea8"
+  },
+  {
+    "name": "saltwater-256-cpu",
+    "apk_sha256": "f8db8a2c30e3ebe5e0c0aa6e204489c0342332c0c72a21b308ddd37a748fd6c9",
+    "native": {
+      "lib/arm64-v8a/libwf_game.so": "565c5eed2c66c5b115decf322bc0cf9aa628e693e851110736ea1406f6766dc3",
+      "lib/armeabi-v7a/libwf_game.so": "6ab5579c342b8cc4c69fe76a28af35710ce50fe3f00d267f7cd0dd04fc354043"
+    },
+    "args": "--plant-seed=713\n--plant-water=saltwater\n--plant-age=150\n--plant-speed=0\n--plant-sway=0\n--frame-profile\n",
+    "cd_sha256": "742adb3fcfd27f4444ae995760307f64cecc554e8e91c5aa96379af4f8f14ea8"
+  },
+  {
+    "name": "freshwater-128",
+    "apk_sha256": "57be4e13ae953e36783aa3909b49005caafb1d94dac275d7d813cd02075f3bcc",
+    "native": {
+      "lib/arm64-v8a/libwf_game.so": "565c5eed2c66c5b115decf322bc0cf9aa628e693e851110736ea1406f6766dc3",
+      "lib/armeabi-v7a/libwf_game.so": "6ab5579c342b8cc4c69fe76a28af35710ce50fe3f00d267f7cd0dd04fc354043"
+    },
+    "args": "--plant-seed=713\n--plant-water=freshwater\n--plant-age=150\n--plant-speed=0\n--plant-sway=0\n",
+    "cd_sha256": "09c4f306a124a20501dde5257cfa5f00f7b556b86f52c7ab81851fee4ab5a99e"
+  },
+  {
+    "name": "freshwater-128-cpu",
+    "apk_sha256": "110d59d47e72ebf4437542529ca288e31a42576550f564921b3bb4981575e17d",
+    "native": {
+      "lib/arm64-v8a/libwf_game.so": "565c5eed2c66c5b115decf322bc0cf9aa628e693e851110736ea1406f6766dc3",
+      "lib/armeabi-v7a/libwf_game.so": "6ab5579c342b8cc4c69fe76a28af35710ce50fe3f00d267f7cd0dd04fc354043"
+    },
+    "args": "--plant-seed=713\n--plant-water=freshwater\n--plant-age=150\n--plant-speed=0\n--plant-sway=0\n--frame-profile\n",
+    "cd_sha256": "09c4f306a124a20501dde5257cfa5f00f7b556b86f52c7ab81851fee4ab5a99e"
+  },
+  {
+    "name": "saltwater-128",
+    "apk_sha256": "de7f8844828a739e52b8e382c8a3fa734c9b2366bf5be597591be449cc3478ed",
+    "native": {
+      "lib/arm64-v8a/libwf_game.so": "565c5eed2c66c5b115decf322bc0cf9aa628e693e851110736ea1406f6766dc3",
+      "lib/armeabi-v7a/libwf_game.so": "6ab5579c342b8cc4c69fe76a28af35710ce50fe3f00d267f7cd0dd04fc354043"
+    },
+    "args": "--plant-seed=713\n--plant-water=saltwater\n--plant-age=150\n--plant-speed=0\n--plant-sway=0\n",
+    "cd_sha256": "09c4f306a124a20501dde5257cfa5f00f7b556b86f52c7ab81851fee4ab5a99e"
+  },
+  {
+    "name": "saltwater-128-cpu",
+    "apk_sha256": "69c11af7639ab6e7fc3b740496b0538bca9467d1480213e786dd20a22b2b6b8f",
+    "native": {
+      "lib/arm64-v8a/libwf_game.so": "565c5eed2c66c5b115decf322bc0cf9aa628e693e851110736ea1406f6766dc3",
+      "lib/armeabi-v7a/libwf_game.so": "6ab5579c342b8cc4c69fe76a28af35710ce50fe3f00d267f7cd0dd04fc354043"
+    },
+    "args": "--plant-seed=713\n--plant-water=saltwater\n--plant-age=150\n--plant-speed=0\n--plant-sway=0\n--frame-profile\n",
+    "cd_sha256": "09c4f306a124a20501dde5257cfa5f00f7b556b86f52c7ab81851fee4ab5a99e"
+  }
+]
