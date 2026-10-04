@@ -442,3 +442,116 @@ def test_engine_log_tail_retains_recent_scene_without_reading_old_history(tmp_pa
     recent = adapter.engine_log_tail()
     assert len(recent.encode()) == ENGINE_LOG_TAIL_BYTES
     assert recent.endswith(marker)
+
+
+def test_reservation_blocks_fixed_jobs_and_routes_pool_to_other_device(service):
+    _,_,a,b=service
+    reservation=a.call('reserve',{'device':'d2','reason':'Watching TV'})
+    assert reservation['state']=='reserved'
+    fixed=submit(b,device='d2')
+    pooled=submit(b,pool='test')
+    assert wait(b,pooled)['device']=='d1'
+    assert b.call('status',{'job':fixed})['state']=='queued'
+    snapshot=b.call('queue')
+    assert next(d for d in snapshot['devices'] if d['id']=='d2')['reservation']['reason']=='Watching TV'
+    a.call('release',{'device':'d2'})
+    assert wait(b,fixed)['state']=='completed'
+
+
+def test_reservation_waits_for_active_cleanup_and_survives_store_restart(service):
+    cfg,_,a,b=service
+    active=submit(b,device='d2',duration=.6)
+    deadline=time.monotonic()+3
+    while b.call('status',{'job':active})['state']=='queued' and time.monotonic()<deadline:
+        time.sleep(.02)
+    assert a.call('reserve',{'device':'d2'})['state']=='waiting-for-cleanup'
+    queued=submit(b,device='d2')
+    assert wait(b,active)['state']=='completed'
+    reopened=Store(cfg['state'])
+    reservation=next(d for d in reopened.devices() if d['id']=='d2')['reservation']
+    assert reservation['state']=='reserved'
+    assert b.call('status',{'job':queued})['state']=='queued'
+    a.call('release',{'device':'d2'})
+    assert wait(b,queued)['state']=='completed'
+
+
+def test_reservation_owner_validation_and_idempotence(service):
+    _,_,a,b=service
+    initial=a.call('reserve',{'device':'d1'})
+    for method in ('reserve','release'):
+        with pytest.raises(RuntimeError,match='owner'):
+            b.call(method,{'device':'d1'})
+    changed=a.call('reserve',{'device':'d1','reason':'Movie'})
+    assert changed['created']==initial['created'] and changed['reason']=='Movie'
+    for request in ({'device':'missing'},{'device':'d2','reason':''},{'device':'d2','reason':'x'*201},{'pool':'test'}):
+        with pytest.raises(RuntimeError):
+            a.call('reserve',request)
+    assert a.call('release',{'device':'d1'})['released']
+    assert not a.call('release',{'device':'d1'})['released']
+
+
+def test_reservation_task_commands(service,tmp_path):
+    cfg,_,_,_=service
+    env=dict(os.environ,WF_COORDINATOR_SOCKET=cfg['socket'],WF_COORDINATOR_CLIENT_STATE=str(tmp_path/'task-reserver'))
+    for operation in ('reserve','release'):
+        result=subprocess.run(['task','chromecast:'+operation,'DEVICE=d2','REASON=Watching TV'],
+                              cwd=ROOT,env=env,text=True,capture_output=True,timeout=10)
+        assert result.returncode==0,result.stderr
+        assert ('reserved; Watching TV' if operation=='reserve' else 'released; queued jobs') in result.stdout
+    Store(cfg['state'],[{'id':f'chromecast-test-0{n}','health':'ready'} for n in (1,2)])
+    for n in (1,2):
+        for operation in ('reserve','release'):
+            result=subprocess.run(['task',f'cast{n}:'+operation,'REASON=Watching TV'],
+                                  cwd=ROOT,env=env,text=True,capture_output=True,timeout=10)
+            assert result.returncode==0,result.stderr
+            assert f'chromecast-test-0{n}:' in result.stdout
+            assert ('reserved; Watching TV' if operation=='reserve' else 'released; queued jobs') in result.stdout
+
+
+def test_service_restart_during_drained_maintenance_keeps_queue_and_reservation(tmp_path):
+    cfg=config(tmp_path)
+    path=tmp_path/'config.json'
+    path.write_text(json.dumps(cfg))
+    process=subprocess.Popen([sys.executable,str(ROOT/'scripts/chromecast.py'),'serve','--config',str(path)],
+                             stdout=subprocess.PIPE,stderr=subprocess.PIPE)
+    deadline=time.monotonic()+5
+    while not Path(cfg['socket']).exists() and time.monotonic()<deadline:
+        time.sleep(.02)
+    a=Client(cfg['socket'],tmp_path/'a.json')
+    b=Client(cfg['socket'],tmp_path/'b.json')
+    store = Store(cfg['state'])
+    a.call('reserve', {'device': 'd2', 'reason': 'Watching TV'})
+    active = submit(b, device='d1', duration=.3)
+    deadline = time.monotonic()+3
+    while b.call('status', {'job': active})['state'] == 'queued' and time.monotonic() < deadline:
+        time.sleep(.02)
+    with store.db() as db:
+        db.execute('BEGIN IMMEDIATE')
+        db.execute('INSERT INTO maintenance VALUES(1,?,?)', ('Test deployment', time.time()))
+    queued = b.call('submit', {'workflow': 'install', 'device': 'd2', 'app': 'bomberman'})['id']
+    assert wait(b, active)['state'] == 'completed'
+    assert b.call('status', {'job': queued})['state'] == 'queued'
+    process.terminate()
+    process.communicate(timeout=5)
+    path = Path(cfg['state']).parent/'config.json'
+    restarted = subprocess.Popen([sys.executable, str(ROOT/'scripts/chromecast.py'), 'serve', '--config', str(path)],
+                                 stdout=subprocess.PIPE, stderr=subprocess.PIPE)
+    try:
+        deadline = time.monotonic()+5
+        while True:
+            try:
+                assert a.call('capabilities')['maintenance_drain']
+                break
+            except (RuntimeError, ConnectionRefusedError):
+                if time.monotonic() >= deadline:
+                    raise
+                time.sleep(.02)
+        assert a.call('queue')['maintenance']['reason'] == 'Test deployment'
+        assert b.call('status', {'job': queued})['state'] == 'queued'
+        assert next(d for d in a.call('devices') if d['id']=='d2')['reservation']['owner'] == a.credentials['session']
+        with store.db() as db:
+            db.execute('DELETE FROM maintenance')
+        assert wait(b, queued)['state'] == 'completed'
+    finally:
+        restarted.terminate()
+        restarted.communicate(timeout=5)

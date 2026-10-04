@@ -44,13 +44,21 @@ class Client:
             sock.settimeout(120)
             try:
                 sock.connect(self.path)
+            except PermissionError as exc:
+                raise RuntimeError('Coordinator socket access denied at '+self.path+
+                                   '; this may be a sandbox restriction, not a service outage. '
+                                   'Retry the same Task command with escalation; no direct ADB fallback') from exc
             except OSError as exc:
-                raise RuntimeError('Coordinator unavailable at '+self.path+'; no direct ADB fallback') from exc
+                raise RuntimeError('Coordinator connection failed at '+self.path+': '+str(exc)+
+                                   '; no direct ADB fallback') from exc
             sock.sendall(json.dumps(request).encode()+b'\n')
             stream=sock.makefile('rb')
             raw=stream.readline(128*1024*1024)
         result=json.loads(raw)
         if not result['ok']:
+            if method in {'reserve','release'} and result['error']=='Unknown operation':
+                raise RuntimeError('The installed coordinator does not support reservations yet. '
+                                   'Run task chromecast:install from your terminal, then retry this command.')
             raise RuntimeError(result['error'])
         return result['result']
 
@@ -153,6 +161,8 @@ def box_table(headers, rows):
 
 def snapshot_text(snapshot):
     lines=[f"Snapshot {time.strftime('%Y-%m-%d %H:%M:%S %z',time.localtime(snapshot['time']))}; revision {snapshot['revision']}; connected"]
+    if snapshot.get('maintenance'):
+        lines.append('Maintenance: grants paused; '+snapshot['maintenance']['reason'])
     devices=[]
     for device in snapshot['devices']:
         active=[j for j in snapshot['jobs'] if j['device']==device['id'] and j['state']=='running']
@@ -175,7 +185,7 @@ def snapshot_text(snapshot):
 
 def task_command(command):
     client=Client()
-    args={k:os.environ.get('WF_CC_'+k.upper(),'') for k in ('device','pool','job','out','text','workflow','app','scene','apk','require_abi','warmup','runs','duration','watch','validator','async','recipe','trace','pairing_endpoint','address')}
+    args={k:os.environ.get('WF_CC_'+k.upper(),'') for k in ('device','pool','job','out','text','workflow','app','scene','apk','require_abi','warmup','runs','duration','watch','validator','async','recipe','trace','pairing_endpoint','address','reason')}
     args={k:v for k,v in args.items() if v!=''}
     if command in {'check','profile','record','submit','readd'}:
         keys={'device','pool','require_abi','app','scene','apk','warmup','runs','duration','validator','trace','address'}
@@ -193,7 +203,7 @@ def task_command(command):
             if not isinstance(recipe,dict):
                 raise ValueError('Recipe must be a JSON request object')
             req.update(recipe)
-        if req['workflow']!='readd' and not req.get('apk'):
+        if req['workflow'] not in {'readd'} and not req.get('apk'):
             app=req.get('app','aquarium');req['app']=app
             req['apk']=str(Path(os.environ.get('WF_COORDINATOR_REPO',str(Path(__file__).resolve().parents[2])))/f'android/app/build/outputs/apk/{app}/release/worldfoundry-{app}-release.apk')
         if args.get('pairing_endpoint'):
@@ -204,8 +214,24 @@ def task_command(command):
         job=client.submit(req)
         print(f"Accepted {job['id']}: {job['state']}; {req['workflow']}",flush=True)
         print(f"Follow: task chromecast:watch JOB={job['id']}",flush=True)
-        return 0 if command=='submit' or args.get('async')=='true' else client.watch(job['id'])
-    if command=='devices':
+        if command=='submit' or args.get('async')=='true':
+            return 0
+        result=client.watch(job['id'])
+        return result
+    if command in {'reserve','release'}:
+        if not args.get('device') or args.get('pool'):
+            raise ValueError('Reserve/release requires DEVICE, not POOL')
+        request={'device':args['device']}
+        if command=='reserve':
+            request['reason']=args.get('reason','Personal use')
+        result=client.call(command,request)
+        if command=='reserve':
+            print(f"{result['device']}: {result['state']}; {result['reason']}; retained until you release it")
+            if result['state']=='waiting-for-cleanup':
+                print('An active job is finishing; wait for status to show reserved before using the device.')
+        else:
+            print(f"{result['device']}: "+('released; queued jobs may now start' if result['released'] else 'no reservation to release'))
+    elif command=='devices':
         for d in client.call('devices'):
             print(f"{d['id']}: {d['health']}; {d.get('model')}; serial {d['serial']}; Android {d.get('android')}; ABI {','.join(d.get('abis',[]))}; endpoint {d.get('endpoint')}; pools {','.join(d.get('pools',[]))}")
     elif command in {'queue','status'}:

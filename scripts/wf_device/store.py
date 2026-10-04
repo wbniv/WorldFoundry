@@ -21,6 +21,8 @@ class Store:
               health TEXT NOT NULL, generation INTEGER NOT NULL DEFAULT 0);
             CREATE TABLE IF NOT EXISTS sessions(id TEXT PRIMARY KEY, uid INTEGER NOT NULL,
               token_hash TEXT NOT NULL, label TEXT NOT NULL);
+            CREATE TABLE IF NOT EXISTS reservations(device TEXT PRIMARY KEY REFERENCES devices(id),
+              owner TEXT NOT NULL REFERENCES sessions(id), reason TEXT NOT NULL, created REAL NOT NULL);
             CREATE TABLE IF NOT EXISTS jobs(id TEXT PRIMARY KEY, owner TEXT NOT NULL,
               accepted REAL NOT NULL, state TEXT NOT NULL, phase TEXT NOT NULL,
               request TEXT NOT NULL, device TEXT, generation INTEGER, cancel INTEGER DEFAULT 0,
@@ -30,6 +32,8 @@ class Store:
             CREATE TABLE IF NOT EXISTS messages(id TEXT PRIMARY KEY, sender TEXT NOT NULL,
               recipient TEXT NOT NULL, job TEXT NOT NULL, text TEXT NOT NULL,
               created REAL NOT NULL, acknowledged REAL);
+            CREATE TABLE IF NOT EXISTS maintenance(id INTEGER PRIMARY KEY CHECK(id=1),
+              reason TEXT NOT NULL, started REAL NOT NULL);
             ''')
             if 'recovery_resolved' not in {row[1] for row in db.execute('PRAGMA table_info(jobs)')}:
                 db.execute('ALTER TABLE jobs ADD COLUMN recovery_resolved INTEGER DEFAULT 0')
@@ -78,7 +82,42 @@ class Store:
     def devices(self):
         with self.db() as db:
             rows = db.execute('SELECT * FROM devices ORDER BY id').fetchall()
-        return [dict(json.loads(r['data']), health=r['health'], generation=r['generation']) for r in rows]
+            reservations = {r['device']: dict(r) for r in db.execute('''
+              SELECT r.*,s.label,CASE WHEN EXISTS(SELECT 1 FROM jobs j
+                WHERE j.device=r.device AND j.state='running') THEN 'waiting-for-cleanup'
+                ELSE 'reserved' END AS state
+              FROM reservations r JOIN sessions s ON s.id=r.owner''')}
+        return [dict(json.loads(r['data']), health=r['health'], generation=r['generation'],
+                     reservation=reservations.get(r['id'])) for r in rows]
+
+    def reserve(self, owner, device, reason='Personal use'):
+        if not isinstance(reason, str) or not 1 <= len(reason.strip()) <= 200:
+            raise ValueError('Reservation reason must contain 1..200 characters')
+        with self.db() as db:
+            db.execute('BEGIN IMMEDIATE')
+            if not db.execute('SELECT 1 FROM devices WHERE id=?', (device,)).fetchone():
+                raise ValueError('Unknown device')
+            current = db.execute('SELECT * FROM reservations WHERE device=?', (device,)).fetchone()
+            if current and current['owner'] != owner:
+                raise PermissionError('Device is already reserved by another authenticated owner')
+            db.execute('''INSERT INTO reservations VALUES(?,?,?,?)
+              ON CONFLICT(device) DO UPDATE SET reason=excluded.reason''',
+                       (device, owner, reason.strip(), time.time()))
+            self.event(db, None, 'device-reserved', {'device': device, 'reason': reason.strip()})
+        return next(d['reservation'] for d in self.devices() if d['id'] == device)
+
+    def release(self, owner, device):
+        with self.db() as db:
+            db.execute('BEGIN IMMEDIATE')
+            if not db.execute('SELECT 1 FROM devices WHERE id=?', (device,)).fetchone():
+                raise ValueError('Unknown device')
+            current = db.execute('SELECT * FROM reservations WHERE device=?', (device,)).fetchone()
+            if current and current['owner'] != owner:
+                raise PermissionError('Only the authenticated reservation owner can release it')
+            if current:
+                db.execute('DELETE FROM reservations WHERE device=?', (device,))
+                self.event(db, None, 'device-released', {'device': device})
+        return {'device': device, 'released': bool(current)}
 
     @staticmethod
     def eligible(request, device):
@@ -113,12 +152,16 @@ class Store:
         grants = []
         with self.db() as db:
             db.execute('BEGIN IMMEDIATE')
+            if db.execute('SELECT 1 FROM maintenance WHERE id=1').fetchone():
+                return []
             busy = {r[0] for r in db.execute("SELECT device FROM jobs WHERE state='running'")}
+            reserved = {r[0] for r in db.execute('SELECT device FROM reservations')}
             waiting = list(db.execute("SELECT * FROM jobs WHERE state='queued' ORDER BY rowid"))
             devices = list(db.execute('SELECT * FROM devices ORDER BY id'))
             for row in waiting:
                 req = json.loads(row['request'])
                 candidates = [d for d in devices if d['id'] not in busy
+                              and (d['id'] not in reserved or req['workflow'] == 'install')
                               and self.eligible(req, json.loads(d['data']))
                               and (d['health'] == 'ready' or req['workflow'] == 'readd')]
                 if not candidates:
@@ -188,7 +231,10 @@ class Store:
             r['eligible'] = [d['id'] for d in devices if self.eligible(r['request'], d)]
             if r['eligible'] or r['device'] in {d['id'] for d in devices}:
                 jobs.append(r)
-        return {'time': time.time(), 'revision': revision, 'devices': devices, 'jobs': jobs}
+        with self.db() as db:
+            maintenance = db.execute('SELECT reason,started FROM maintenance WHERE id=1').fetchone()
+        return {'time': time.time(), 'revision': revision, 'devices': devices, 'jobs': jobs,
+                'maintenance': dict(maintenance) if maintenance else None}
 
     def events(self, cursor=0, jid=None):
         with self.db() as db:

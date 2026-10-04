@@ -1,5 +1,6 @@
 | Date | Change |
 |------|--------|
+| [2026-10-04](https://github.com/wbniv/WorldFoundry/commit/e45a7ac1) | Reconcile plant docs with implemented runtime and final texture measurements |
 | [2026-10-04](https://github.com/wbniv/WorldFoundry/commit/d7e70afb) | Record current-build plant texture cost and verified APK restoration |
 | [2026-10-04](https://github.com/wbniv/WorldFoundry/commit/0aa37847) | Add seeded growing plant tank, settings and leaf textures |
 | [2026-10-04](https://github.com/wbniv/WorldFoundry/commit/334bab60) | Add shared Chromecast Task/API coordinator and repair host activation |
@@ -49,6 +50,10 @@
 | [2026-06-26](https://github.com/wbniv/WorldFoundry/commit/16d72fa6) | docs: add plan index (docs/plans/README.md) |
 
 <!--history-meta v1
+e45a7ac1	author	Will Norris
+e45a7ac1	added	2
+e45a7ac1	deleted	2
+e45a7ac1	files	1
 d7e70afb	author	Will Norris
 d7e70afb	added	1
 d7e70afb	deleted	1

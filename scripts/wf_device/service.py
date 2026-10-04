@@ -20,7 +20,7 @@ from .store import Store
 
 MAX_APK = 32*1024*1024
 MAX_REQUEST = 48*1024*1024
-WORKFLOWS = {'check','profile','record','variant-benchmark','readd'}
+WORKFLOWS = {'check','profile','record','variant-benchmark','readd','install'}
 REQUEST_KEYS = {'device','pool','require_abi','workflow','app','scene','warmup','duration','runs',
                 'apk','restore_apk','variants','validator','trace','address'}
 
@@ -32,6 +32,8 @@ def validate_request(request, scenes):
         raise ValueError('Specify exactly one DEVICE or POOL')
     if request.get('workflow') not in WORKFLOWS:
         raise ValueError('Unregistered workflow')
+    if request['workflow']=='install' and set(request)-{'device','pool','workflow','app','apk','require_abi'}:
+        raise ValueError('Install accepts only target, app, APK and ABI; it never launches or sends input')
     from .workflows import APPS
     if request['workflow']!='readd' and request.get('app') not in APPS:
         raise ValueError('Unknown app')
@@ -151,6 +153,8 @@ class Coordinator:
         if method=='register':
             return self.store.register(uid,args['label'])
         owner=self.store.authenticate(uid,call.get('credentials',{}))
+        if method=='capabilities':
+            return {'workflows': sorted(WORKFLOWS), 'maintenance_drain': True}
         if method=='upload':
             return self.upload(args['data'])
         if method=='submit':
@@ -185,6 +189,12 @@ class Coordinator:
             return job
         if method=='devices':
             return self.store.devices()
+        if method in {'reserve','release'}:
+            if set(args) - ({'device','reason'} if method=='reserve' else {'device'}) or not isinstance(args.get('device'),str):
+                raise ValueError('Reservation operations require DEVICE; reserve also accepts REASON')
+            if method=='reserve':
+                return self.store.reserve(owner,args['device'],args.get('reason','Personal use'))
+            return self.store.release(owner,args['device'])
         if method=='queue':
             return self.store.snapshot(args.get('device'),args.get('pool'))
         if method=='status':

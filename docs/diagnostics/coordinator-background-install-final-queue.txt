@@ -1,0 +1,19 @@
+Snapshot 2026-10-04 19:06:36 +0700; revision 552; connected
+
+Devices
+╔════════════════════╦════════╦═══════════════╦═══════════════════════╦═════════════╦══════════════════════╗
+║ Device             ║ Health ║ Model         ║ Owner / reservation   ║ Job / phase ║ ABI                  ║
+╠════════════════════╬════════╬═══════════════╬═══════════════════════╬═════════════╬══════════════════════╣
+║ chromecast-test-01 ║ ready  ║ Chromecast HD ║ unowned               ║ —           ║ armeabi-v7a, armeabi ║
+╠════════════════════╬════════╬═══════════════╬═══════════════════════╬═════════════╬══════════════════════╣
+║ chromecast-test-02 ║ ready  ║ Chromecast    ║ reserved: interactive ║ —           ║ armeabi-v7a, armeabi ║
+║                    ║        ║               ║ Watching TV           ║             ║                      ║
+╚════════════════════╩════════╩═══════════════╩═══════════════════════╩═════════════╩══════════════════════╝
+
+Waiting jobs
+╔══════╦═══════╦════════╦══════════════════╗
+║ Job  ║ Owner ║ Target ║ Eligible devices ║
+╠══════╬═══════╬════════╬══════════════════╣
+║ None ║ —     ║ —      ║ —                ║
+╚══════╩═══════╩════════╩══════════════════╝
+Pool positions depend on eligibility and release order.

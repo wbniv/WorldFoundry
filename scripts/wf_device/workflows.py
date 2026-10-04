@@ -13,7 +13,8 @@ import zipfile
 from pathlib import Path
 from .store import Store
 
-APPS = {'aquarium', 'condo', 'snowgoons', 'smb', 'qbert'}
+APPS = {'aquarium', 'condo', 'snowgoons', 'smb', 'qbert', 'bomberman'}
+JAVA_APPS = {'bomberman'}
 SCENES = ['clownfish', 'blue-shrimp', 'betta', 'jellyfish', 'lionfish', 'planted-tank', 'arowana', 'tiger-barbs']
 ENGINE_LOG_TAIL_BYTES = 4_000_000
 
@@ -170,6 +171,9 @@ class Adapter:
         if not self.shell('pidof', self.package, allow_failure=True).strip():
             raise RuntimeError('Target process exited')
 
+    def activity(self):
+        return self.package + ('/.TvActivity' if self.req.get('app') in JAVA_APPS else '/android.app.NativeActivity')
+
     def engine_log_tail(self):
         # Engine logs accumulate across launches. Reading the entire file can
         # exceed the command deadline even when the app and transport are healthy.
@@ -180,7 +184,7 @@ class Adapter:
     def launch(self, scene=None):
         self.shell('am','force-stop',self.package)
         self.key('KEYCODE_WAKEUP')
-        result = self.shell('am','start','-W','-n',self.package+'/android.app.NativeActivity')
+        result = self.shell('am','start','-W','-n',self.activity())
         if 'Error' in result or 'Exception' in result:
             raise RuntimeError('App launch failed: '+result[:1000])
         self.wait(self.config.get('launch_wait', 5))
@@ -218,7 +222,7 @@ class Adapter:
         self.out.joinpath(prefix+'meminfo.txt').write_text(self.shell('dumpsys','meminfo',self.package))
         self.out.joinpath(prefix+'thermal.txt').write_text(self.shell('dumpsys','thermalservice'))
         log = (self.out/(prefix+'logcat.txt')).read_text() + (self.out/(prefix+'wf.log')).read_text().rsplit('=== wf_game android_main',1)[-1]
-        if any(word in log for word in ('Fatal signal','ASSERTION FAILED','zforth compile error','zforth eval error')):
+        if any(word in log for word in ('Fatal signal','FATAL EXCEPTION','TV_START_FAILED','ASSERTION FAILED','zforth compile error','zforth eval error')):
             raise RuntimeError('Runtime failure in captured logs')
 
     def install(self, name):
@@ -228,7 +232,7 @@ class Adapter:
             raise RuntimeError('Staged input hash mismatch')
         with zipfile.ZipFile(path) as bundle:
             abis = {n.split('/')[1] for n in bundle.namelist() if n.startswith('lib/')}
-        if not abis.intersection(self.device['abis']):
+        if not abis.intersection(self.device['abis']) and not (self.req.get('app') in JAVA_APPS and not abis):
             raise ValueError('APK has no compatible native ABI')
         badging = subprocess.check_output([self.config['aapt'], 'dump', 'badging', str(path)], timeout=15, text=True)
         match = re.search(r"package: name='([^']+)'",badging)
@@ -384,7 +388,7 @@ class Adapter:
                     raise RuntimeError('Betta animation assertion failed')
                 assertions.append({'betta_animated_pixels':count})
             self.key('KEYCODE_HOME'); self.wait(.5)
-            self.shell('am','start','-n',self.package+'/android.app.NativeActivity'); self.wait(1)
+            self.shell('am','start','-n',self.activity()); self.wait(1)
             if self.shell('pidof',self.package).strip() != initial:
                 raise RuntimeError('Home/resume changed process')
             self.key('KEYCODE_BACK'); self.wait(1)
@@ -407,6 +411,9 @@ class Adapter:
             raise RuntimeError('Uncertain remote install: device restart required before readd')
         if not self.identity_verified:
             raise RuntimeError('Device identity/connection not verified; recovery required before further control')
+        if self.req['workflow']=='install':
+            self.restoration='unchanged: background install without launch or input'
+            return
         self.store.phase(self.job['id'],'restoring')
         if self.record_pid:
             cmdline = self.shell('cat',f'/proc/{self.record_pid}/cmdline',allow_failure=True)
@@ -435,6 +442,16 @@ class Adapter:
 
     def run(self):
         self.connect()
+        if self.req['workflow']=='install':
+            before = self.foreground()
+            if any(self.package+'/' in line for line in before):
+                raise RuntimeError('Cannot update the foreground app without interrupting it')
+            self.install(self.req['apk'])
+            after = self.foreground()
+            (self.out/'background-install.json').write_text(json.dumps({'before':before,'after':after,'foreground_unchanged':before==after},indent=2))
+            if before != after:
+                raise RuntimeError('Foreground changed during background installation; no corrective input sent')
+            return
         if self.req['workflow']=='readd':
             with self.store.db() as db:
                 oldjobs=[self.store.job(row[0]) for row in db.execute("SELECT id FROM jobs WHERE device=? AND state='recovery-required' AND recovery_resolved=0",(self.device['id'],))]
@@ -483,7 +500,7 @@ class Adapter:
                 self.capture('after-keys-')
                 self.key('KEYCODE_DPAD_CENTER');self.wait(1);self.capture('after-ok-')
                 self.key('KEYCODE_HOME');self.wait(1)
-                self.shell('am','start','-n',self.package+'/android.app.NativeActivity');self.wait(2)
+                self.shell('am','start','-n',self.activity());self.wait(2)
                 self.require_foreground()
                 if self.shell('pidof',self.package).strip()!=initial:
                     raise RuntimeError('Home/resume changed process')

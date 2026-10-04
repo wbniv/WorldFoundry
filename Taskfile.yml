@@ -576,6 +576,11 @@ tasks:
     cmds:
       - bash scripts/android-device-run.sh --release --app {{.APP}} {{.CLI_ARGS}}
 
+  chromecast:install:
+    desc: "Install/update the protected coordinator; saves an installation log (requires sudo)"
+    cmds:
+      - sudo python3 scripts/install-device-coordinator.py --reload-timeout 60 {{.CLI_ARGS}}
+
   chromecast:devices:
     desc: "Coordinated Chromecast devices"
     silent: true
@@ -600,6 +605,7 @@ tasks:
       WF_CC_TRACE: '{{.TRACE | default ""}}'
       WF_CC_PAIRING_ENDPOINT: '{{.PAIRING_ENDPOINT | default ""}}'
       WF_CC_ADDRESS: '{{.ADDRESS | default ""}}'
+      WF_CC_REASON: '{{.REASON | default ""}}'
     cmds:
       - python3 scripts/chromecast.py task devices
 
@@ -616,6 +622,44 @@ tasks:
     env: *chromecast_env
     cmds:
       - python3 scripts/chromecast.py task queue
+
+  chromecast:reserve:
+    desc: "Reserve a Chromecast for personal use until explicitly released"
+    silent: true
+    env: *chromecast_env
+    cmds:
+      - python3 scripts/chromecast.py task reserve
+
+  chromecast:release:
+    desc: "Release your personal Chromecast reservation"
+    silent: true
+    env: *chromecast_env
+    cmds:
+      - python3 scripts/chromecast.py task release
+
+  cast1:reserve:
+    desc: "Reserve cast1 for personal use (optional REASON)"
+    cmds:
+      - task: chromecast:reserve
+        vars: {DEVICE: chromecast-test-01}
+
+  cast1:release:
+    desc: "Release your cast1 reservation"
+    cmds:
+      - task: chromecast:release
+        vars: {DEVICE: chromecast-test-01}
+
+  cast2:reserve:
+    desc: "Reserve cast2 for personal use (optional REASON)"
+    cmds:
+      - task: chromecast:reserve
+        vars: {DEVICE: chromecast-test-02}
+
+  cast2:release:
+    desc: "Release your cast2 reservation"
+    cmds:
+      - task: chromecast:release
+        vars: {DEVICE: chromecast-test-02}
 
   chromecast:status:
     desc: "Coordinated Chromecast status"

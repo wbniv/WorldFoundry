@@ -1,0 +1,28 @@
+{
+  "apk": {
+    "apk": "/home/will/WorldFoundry-wbniv/android/bomberman/build/bomberman-79a44b2e72253f32.apk",
+    "sha256": "79a44b2e72253f3236777b44c6540d1fad576335331438edeb373e8da39012b6",
+    "package": "org.worldfoundry.wf_game.bomberman",
+    "nativeCode": false,
+    "source": {
+      "origin": "/home/will/wf-games/bomberman",
+      "files": {
+        "solo-game.html": "2ca028c24e679203c483870c1c0b94953452633112deadc4f9c5fecc1cfc76e6",
+        "solo-game.js": "777614de03494def9c0a03851f923014caff13c47d26997c9ea324fe59183d4c",
+        "solo-game.css": "12ac680c71fa2f92847abdb7eb4bbfc1c76a8b1ada53a50090f5b40b33839615",
+        "cat-roster.js": "d35a5caae488735eba0d7cf9787d26335eac241fc657b9fc56c6998346843bbb",
+        "assets/cat-roster-atlas.png": "8545c371b2ccb79ec4305e5fb579602388c34dad1120a60f79f1843da95e61f7"
+      }
+    },
+    "compilerSha256": "01f5a92ac19bb2b3bf85e295a68f2c73c264369109158b566ce9b490af982948"
+  },
+  "devices": {
+    "chromecast-test-01": "J-ac7fa776da28",
+    "chromecast-test-02": "J-905b237085a2"
+  },
+  "jobs": [
+    "J-ac7fa776da28",
+    "J-905b237085a2"
+  ],
+  "exit": 0
+}

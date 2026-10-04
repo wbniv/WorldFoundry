@@ -1,8 +1,87 @@
 # Shared Chromecast coordinator
 
 The implementation uses a Python standard-library service, an authenticated
-JSON API over a Unix socket, twelve Task targets and a read-only loopback
+JSON API over a Unix socket, Task commands and a read-only loopback
 HTTP dashboard. **There is no MCP adapter.**
+
+## Reserving a device for personal use
+
+From your terminal:
+
+```sh
+task cast2:reserve REASON="Watching TV"
+task cast2:release
+```
+
+Cast1 has matching `cast1:reserve` and `cast1:release` shortcuts. The general
+commands work with any registered device:
+
+```sh
+task chromecast:reserve DEVICE=chromecast-test-02 REASON="Watching TV"
+task chromecast:release DEVICE=chromecast-test-02
+task chromecast:queue
+```
+
+Example output:
+
+```text
+chromecast-test-02: reserved; Watching TV; retained until you release it
+chromecast-test-02: released; queued jobs may now start
+```
+
+A reservation immediately blocks all new grants on that device, including
+captures and reconnect jobs. Pool jobs can use the other device. Existing work
+finishes its normal cleanup; until then the reservation shows
+`waiting-for-cleanup`. Check queue/status for `reserved` before taking over.
+The command never interrupts a running app or changes the TV screen.
+
+Exception authorized by Will on 2026-10-04: `WORKFLOW=install` performs only a
+background APK install and checksum verification. It retains the reservation,
+serializes against other owned sessions, rejects updating the foreground app,
+and sends no launch, cleanup navigation or remote input. Use
+`task chromecast:submit DEVICE=chromecast-test-02 WORKFLOW=install APP=bomberman APK=/absolute/path/frozen.apk`.
+The adapter requires deployment before this workflow is available; an unknown
+workflow response is not permission to use direct ADB.
+
+The prepared service now exposes authenticated `capabilities` with supported
+workflows and `maintenance_drain`. Install-only jobs can run on an idle reserved
+device while another device is testing. They wait for any complete session on
+their own device, including cleanup, to avoid contaminating measurements.
+
+Reviewed adapter upgrades use `android/bomberman/deploy-coordinator.py` through
+the Bomberman installer. The administrator helper persists a maintenance drain,
+waits for running sessions, retains queued work, verifies the restarted service,
+and resumes grants. Queue and dashboard display the maintenance reason. The
+first upgrade of an older scheduler still uses a transactional idle check before
+stopping it; only the updated scheduler honors the drain while it is running.
+Deployment failure restores previous adapters and keeps the service stopped
+with maintenance retained, since older adapters may ignore that state. Correct
+the reported error and rerun the reviewed deployment to recover. Drain timeout
+does not cancel jobs. Full provisioning with `task chromecast:install` retains
+its existing active-session guard; it is separate from this adapter upgrade.
+
+Run `python3 android/bomberman/install.py` from a terminal for the prepared
+upgrade and installation. It authenticates sudo locally when needed, reports
+service upgrade and APK submission separately, saves the installation log under
+`docs/diagnostics/bomberman-chromecast/`, and persists per-device job IDs before
+watching so an interrupted watcher can resume. See the
+[background installation plan](plans/2026-10-04-chromecast-background-install.md).
+
+Reservations live in the protected `coordinator.sqlite3` database, survive
+service restarts, and have no expiry. Queue and dashboard show the reservation
+owner, reason and state alongside any draining job. Only the authenticated
+session that created a reservation can release or update it. Ordinary terminal
+calls use the persistent `interactive` session, so you can release from another
+terminal using the same account and client state. Calls made from a Codex
+session use that session's identity; do not reserve on behalf of the user from
+an agent session. Repeating your reserve command updates the reason; repeating
+release is harmless. Do not delete the terminal's client credentials while it
+owns a reservation.
+
+Deploy new service features once with `task chromecast:install` (interactive
+sudo; installation output is saved under `docs/diagnostics/`). It wraps the
+installer with a 60-second reload limit. Reservations require this updated
+protected service; subsequent reserve/release calls require no sudo or install.
 
 Both dedicated test devices are registered by their verified hardware serial:
 

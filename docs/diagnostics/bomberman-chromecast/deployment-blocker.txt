@@ -1,0 +1,4 @@
+Attempt: sudo -n python3 /tmp/deploy-bomberman-coordinator.py
+Result: sudo: interactive authentication is required
+No protected adapter files changed. No Chromecast installation jobs submitted.
+Resume from a terminal: python3 /home/will/WorldFoundry-wbniv/android/bomberman/install.py

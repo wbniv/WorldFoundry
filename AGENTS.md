@@ -9,6 +9,15 @@ profiling and lifecycle tests on these dedicated devices. Do not ask Will for
 recurring permission to use them. Coordinate complete sessions through the
 shared service, using `task chromecast:*`.
 
+Will can reserve devices for personal use with `task cast1:reserve` or
+`task cast2:reserve` and release them with the corresponding `:release` command.
+Respect reservations shown in queue/status. Do not release or create personal
+reservations on Will's behalf from an agent session; his terminal owns them.
+Will authorizes background installation during video playback (2026-10-04).
+Use only `WORKFLOW=install`: it preserves the reservation, rejects updates to
+the foreground app, and never launches an app or sends input. All interactive
+test workflows remain blocked by a personal reservation.
+
 - `chromecast-test-01`: Chromecast HD, Android 14, serial `2628105GN0GT7C`.
 - `chromecast-test-02`: Project Room, Chromecast (`sabrina`), Android 12,
   serial `26031HFDD67QH7`.
