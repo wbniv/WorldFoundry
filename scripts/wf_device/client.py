@@ -4,7 +4,9 @@ import hashlib
 import json
 import os
 import socket
+import shutil
 import sys
+import textwrap
 import time
 from pathlib import Path
 from .store import TERMINAL
@@ -122,17 +124,51 @@ class Client:
         return result
 
 
+def box_table(headers, rows):
+    """Wrap cells to the terminal width without dropping IDs or status text."""
+    rows=[[str(value) for value in row] for row in rows]
+    widths=[max(len(header),max((len(line) for row in rows for line in row[i].splitlines()),default=0))
+            for i,header in enumerate(headers)]
+    budget=max(40,shutil.get_terminal_size((120,24)).columns)-3*len(headers)-1
+    minimum=[max(len(header),6) for header in headers]
+    while sum(widths)>budget:
+        candidates=[i for i,width in enumerate(widths) if width>minimum[i]]
+        if not candidates:break
+        widest=max(candidates,key=lambda i:widths[i])
+        widths[widest]-=1
+    def border(left,junction,right):
+        return left+junction.join('═'*(width+2) for width in widths)+right
+    def line(cells):
+        return '║'+'║'.join(' '+cell.ljust(width)+' ' for cell,width in zip(cells,widths))+'║'
+    lines=[border('╔','╦','╗'),line(headers),border('╠','╬','╣')]
+    for index,row in enumerate(rows):
+        wrapped=[sum((textwrap.wrap(part,width=width,break_on_hyphens=False) or ['']
+                      for part in cell.splitlines() or ['']),[]) for cell,width in zip(row,widths)]
+        for offset in range(max(map(len,wrapped))):
+            lines.append(line([cell[offset] if offset<len(cell) else '' for cell in wrapped]))
+        if index<len(rows)-1:lines.append(border('╠','╬','╣'))
+    lines.append(border('╚','╩','╝'))
+    return '\n'.join(lines)
+
+
 def snapshot_text(snapshot):
     lines=[f"Snapshot {time.strftime('%Y-%m-%d %H:%M:%S %z',time.localtime(snapshot['time']))}; revision {snapshot['revision']}; connected"]
+    devices=[]
     for device in snapshot['devices']:
         active=[j for j in snapshot['jobs'] if j['device']==device['id'] and j['state']=='running']
-        owner=', '.join(j['label']+' / '+j['id']+' / '+j['phase'] for j in active) or 'unowned'
-        lines.append(f"{device['id']}: {device['health']}; {owner}; {device.get('model','unknown')}; ABI {','.join(device.get('abis',[]))}")
-    lines.append('Waiting:')
+        owner='\n'.join(j['label'] for j in active) or 'unowned'
+        job_phase='\n'.join(j['id']+'\n'+j['phase'] for j in active) or '—'
+        if device.get('reservation'):
+            r=device['reservation']
+            owner=f"{r['state']}: {r['label']}\n{r['reason']}"+(('\nActive: '+owner) if active else '')
+        devices.append([device['id'],device['health'],device.get('model','unknown'),owner,job_phase,', '.join(device.get('abis',[])) or '—'])
+    lines+=['','Devices',box_table(['Device','Health','Model','Owner / reservation','Job / phase','ABI'],devices or [['None','—','—','—','—','—']])]
+    waiting=[]
     for job in snapshot['jobs']:
         if job['state']=='queued':
             req=job['request'];selector=req.get('device') or 'pool:'+req['pool']
-            lines.append(f"  {job['id']} {job['label']} {selector}; eligible {','.join(job['eligible'])}; awaiting compatible free/ready device")
+            waiting.append([job['id'],job['label'],selector,', '.join(job['eligible']) or 'None'])
+    lines+=['','Waiting jobs',box_table(['Job','Owner','Target','Eligible devices'],waiting or [['None','—','—','—']])]
     lines.append('Pool positions depend on eligibility and release order.')
     return '\n'.join(lines)
 
