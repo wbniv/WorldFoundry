@@ -8,7 +8,14 @@
   <link rel="icon" type="image/svg+xml" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 16 16'%3E%3Ctext y='14' font-size='14'%3E%F0%9F%8E%B2%3C/text%3E%3C/svg%3E">
   <link rel="stylesheet" href="receiver.css">
   {{GAME_STYLESHEET}}
-  <script src="https://www.gstatic.com/cast/sdk/libs/caf_receiver/v3/cast_receiver_framework.js"></script>
+  <script>
+    // Load CAF only on a Cast receiver. A TV WebView must not wait for an
+    // unrelated external SDK before it can show the local game.
+    if (new URLSearchParams(location.search).get('display') !== 'android-tv'
+        && /CrKey|AndroidTV|Android TV|Tizen\/|web0s/i.test(navigator.userAgent)) {
+      document.write('<script src="https://www.gstatic.com/cast/sdk/libs/caf_receiver/v3/cast_receiver_framework.js"><\/script>');
+    }
+  </script>
 </head>
 <body>
   <div id="app">

@@ -45,7 +45,7 @@ let mounted = false;
 // (Chromecast's internal IPC port) — it fails and retries forever, spamming
 // the console. CrKey is the Chromecast user-agent marker; Android TV / Tizen
 // / webOS cover other Cast-capable TV platforms we might end up on.
-const looksLikeCastDevice = /CrKey|AndroidTV|Android TV|Tizen\/|web0s/i.test(navigator.userAgent);
+const looksLikeCastDevice = urlParams.get('display') !== 'android-tv' && /CrKey|AndroidTV|Android TV|Tizen\/|web0s/i.test(navigator.userAgent);
 let isCastContext = false;
 let castSessionDetail = '';
 if (looksLikeCastDevice && typeof cast !== 'undefined' && cast.framework) {
@@ -61,6 +61,16 @@ if (looksLikeCastDevice && typeof cast !== 'undefined' && cast.framework) {
     });
     ctx.addEventListener(cast.framework.system.EventType.SENDER_DISCONNECTED, (ev) => {
       pushLog(`sender disconnected: ${ev.senderId}`);
+    });
+    if (gameName === 'patchwork') ctx.addCustomMessageListener('urn:x-cast:org.worldfoundry.party', event => {
+      let data = event.data;
+      try { if (typeof data === 'string') data = JSON.parse(data); } catch { return; }
+      if (data?.type !== 'BIND_ROOM' || !/^[ABCDEFGHJKLMNPRSTUVWXYZ]{4}$/.test(data.room)) return;
+      if (roomCode === data.room) return;
+      roomCode = data.room; roomCodeEl.textContent = roomCode;
+      urlParams.set('room', roomCode); history.replaceState(null, '', location.pathname + '?' + urlParams);
+      unmountGame(); currentPlayers = [];
+      const previous = ws; ws = null; previous?.close(); connect();
     });
     ctx.start();
     isCastContext = true;
@@ -140,16 +150,22 @@ function noop() {}
 // ───── WebSocket ───────────────────────────────────────────────────────────
 
 const wsUrl = (location.protocol === 'https:' ? 'wss://' : 'ws://') + location.host + '/ws';
-const ws = new WebSocket(wsUrl);
+let ws;
+let retryMs = 500;
+function connect() {
+const socket = ws = new WebSocket(wsUrl);
 
-ws.addEventListener('open', () => {
+socket.addEventListener('open', () => {
+  if (socket !== ws) return;
+  retryMs = 500;
   ws.send(JSON.stringify({ type: 'HELLO', role: 'receiver', room: roomCode || undefined }));
   refreshStatus(isCastContext ? 'cast + server connected' + castSessionDetail : 'server connected (browser)');
 });
-ws.addEventListener('close', () => { unmountGame(); refreshStatus('disconnected'); });
-ws.addEventListener('error', (e) => console.warn('[ws] error', e));
+socket.addEventListener('close', () => { if (socket !== ws) return; refreshStatus('disconnected · reconnecting'); setTimeout(connect, retryMs); retryMs = Math.min(8000, retryMs * 2); });
+socket.addEventListener('error', (e) => console.warn('[ws] error', e));
 
-ws.addEventListener('message', async (ev) => {
+socket.addEventListener('message', async (ev) => {
+  if (socket !== ws) return;
   let msg;
   try { msg = JSON.parse(ev.data); } catch { return; }
   if (!msg || typeof msg.type !== 'string') return;
@@ -165,7 +181,9 @@ ws.addEventListener('message', async (ev) => {
         history.replaceState(null, '', newUrl);
       }
       await loadGameModule();
+      if (socket !== ws) return;
       mountGame();
+      if (socket === ws && socket.readyState === WebSocket.OPEN) socket.send(JSON.stringify({type:'RECEIVER_READY'}));
       break;
 
     case 'STATE':
@@ -184,6 +202,9 @@ ws.addEventListener('message', async (ev) => {
     }
   }
 });
+
+}
+connect();
 
 // ───── helpers ─────────────────────────────────────────────────────────────
 

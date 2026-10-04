@@ -1,0 +1,422 @@
+PD_RECEIVER_MOUNTED
+PD_DISPLAY_STATE LOBBY 0:0
+PD_VISUAL_FRAME {"time":1791102124199,"phase":"LOBBY","round":0,"turn":0,"ready":"all","ceremony":0,"players":0}
+PD_DISPLAY_STATE LOBBY 0:0
+PD_VISUAL_FRAME {"time":1791102124233,"phase":"LOBBY","round":0,"turn":0,"ready":"all","ceremony":0,"players":0}
+PD_VISUAL_FRAME {"time":1791102124271,"phase":"LOBBY","round":0,"turn":0,"ready":"all","ceremony":0,"players":0}
+PD_DISPLAY_STATE LOBBY 0:0
+PD_VISUAL_FRAME {"time":1791102124275,"phase":"LOBBY","round":0,"turn":0,"ready":"all","ceremony":0,"players":0}
+PD_DISPLAY_STATE LOBBY 0:0
+PD_VISUAL_FRAME {"time":1791102124277,"phase":"LOBBY","round":0,"turn":0,"ready":"all","ceremony":0,"players":0}
+PD_VISUAL_FRAME {"time":1791102124283,"phase":"LOBBY","round":0,"turn":0,"ready":"all","ceremony":0,"players":0}
+PD_DISPLAY_STATE LOBBY 0:0
+PD_VISUAL_FRAME {"time":1791102124287,"phase":"LOBBY","round":0,"turn":0,"ready":"all","ceremony":0,"players":0}
+PD_VISUAL_FRAME {"time":1791102124288,"phase":"LOBBY","round":0,"turn":0,"ready":"all","ceremony":0,"players":0}
+PD_DISPLAY_STATE LOBBY 0:0
+PD_VISUAL_FRAME {"time":1791102124290,"phase":"LOBBY","round":0,"turn":0,"ready":"all","ceremony":0,"players":0}
+PD_DISPLAY_STATE LOBBY 0:0
+PD_VISUAL_FRAME {"time":1791102124290,"phase":"LOBBY","round":0,"turn":0,"ready":"all","ceremony":0,"players":0}
+PD_DISPLAY_STATE LOBBY 0:0
+PD_VISUAL_FRAME {"time":1791102124293,"phase":"LOBBY","round":0,"turn":0,"ready":"all","ceremony":0,"players":0}
+PD_VISUAL_FRAME {"time":1791102124294,"phase":"LOBBY","round":0,"turn":0,"ready":"all","ceremony":0,"players":0}
+PD_DISPLAY_STATE LOBBY 0:0
+PD_VISUAL_FRAME {"time":1791102124295,"phase":"LOBBY","round":0,"turn":0,"ready":"all","ceremony":0,"players":0}
+PD_DISPLAY_STATE LOBBY 0:0
+PD_VISUAL_FRAME {"time":1791102124297,"phase":"LOBBY","round":0,"turn":0,"ready":"all","ceremony":0,"players":0}
+PD_VISUAL_FRAME {"time":1791102124305,"phase":"LOBBY","round":0,"turn":0,"ready":"all","ceremony":0,"players":0}
+PD_DISPLAY_STATE LOBBY 0:0
+PD_VISUAL_FRAME {"time":1791102124314,"phase":"LOBBY","round":0,"turn":0,"ready":"all","ceremony":0,"players":0}
+PD_DISPLAY_STATE LOBBY 0:0
+PD_VISUAL_FRAME {"time":1791102124315,"phase":"LOBBY","round":0,"turn":0,"ready":"all","ceremony":0,"players":0}
+PD_VISUAL_FRAME {"time":1791102124321,"phase":"LOBBY","round":0,"turn":0,"ready":"all","ceremony":0,"players":0}
+PD_DISPLAY_STATE LOBBY 0:0
+PD_VISUAL_FRAME {"time":1791102124325,"phase":"LOBBY","round":0,"turn":0,"ready":"all","ceremony":0,"players":0}
+PD_DISPLAY_STATE LOBBY 0:0
+PD_VISUAL_FRAME {"time":1791102124329,"phase":"LOBBY","round":0,"turn":0,"ready":"all","ceremony":0,"players":0}
+PD_DISPLAY_STATE STARTING 1:1
+PD_VISUAL_FRAME {"time":1791102134332,"phase":"STARTING","round":0,"turn":0,"ready":"none","ceremony":0,"players":6}
+PD_DISPLAY_STATE STARTING 1:1
+PD_VISUAL_FRAME {"time":1791102135388,"phase":"STARTING","round":0,"turn":0,"ready":"some","ceremony":0,"players":6}
+PD_DISPLAY_STATE STARTING 1:1
+PD_VISUAL_FRAME {"time":1791102135507,"phase":"STARTING","round":0,"turn":0,"ready":"some","ceremony":0,"players":6}
+PD_DISPLAY_STATE STARTING 1:1
+PD_VISUAL_FRAME {"time":1791102135627,"phase":"STARTING","round":0,"turn":0,"ready":"some","ceremony":0,"players":6}
+PD_DISPLAY_STATE STARTING 1:1
+PD_VISUAL_FRAME {"time":1791102135748,"phase":"STARTING","round":0,"turn":0,"ready":"some","ceremony":0,"players":6}
+PD_DISPLAY_STATE STARTING 1:1
+PD_VISUAL_FRAME {"time":1791102135868,"phase":"STARTING","round":0,"turn":0,"ready":"some","ceremony":0,"players":6}
+PD_DISPLAY_STATE STARTING 1:1
+PD_VISUAL_FRAME {"time":1791102135988,"phase":"STARTING","round":0,"turn":0,"ready":"all","ceremony":0,"players":6}
+PD_DISPLAY_STATE PLACING 1:2
+PD_VISUAL_FRAME {"time":1791102136993,"phase":"PLACING","round":1,"turn":1,"ready":"none","ceremony":0,"players":6}
+PD_DISPLAY_STATE PLACING 1:2
+PD_VISUAL_FRAME {"time":1791102138006,"phase":"PLACING","round":1,"turn":1,"ready":"some","ceremony":0,"players":6}
+PD_DISPLAY_STATE PLACING 1:2
+PD_VISUAL_FRAME {"time":1791102138124,"phase":"PLACING","round":1,"turn":1,"ready":"some","ceremony":0,"players":6}
+PD_DISPLAY_STATE PLACING 1:2
+PD_VISUAL_FRAME {"time":1791102138245,"phase":"PLACING","round":1,"turn":1,"ready":"some","ceremony":0,"players":6}
+PD_DISPLAY_STATE PLACING 1:2
+PD_VISUAL_FRAME {"time":1791102138367,"phase":"PLACING","round":1,"turn":1,"ready":"some","ceremony":0,"players":6}
+PD_DISPLAY_STATE PLACING 1:2
+PD_VISUAL_FRAME {"time":1791102138486,"phase":"PLACING","round":1,"turn":1,"ready":"some","ceremony":0,"players":6}
+PD_DISPLAY_STATE PLACING 1:2
+PD_VISUAL_FRAME {"time":1791102138607,"phase":"PLACING","round":1,"turn":1,"ready":"all","ceremony":0,"players":6}
+PD_DISPLAY_STATE PLACING 1:3
+PD_VISUAL_FRAME {"time":1791102139613,"phase":"PLACING","round":1,"turn":2,"ready":"none","ceremony":0,"players":6}
+PD_DISPLAY_STATE PLACING 1:3
+PD_VISUAL_FRAME {"time":1791102140629,"phase":"PLACING","round":1,"turn":2,"ready":"some","ceremony":0,"players":6}
+PD_DISPLAY_STATE PLACING 1:3
+PD_VISUAL_FRAME {"time":1791102140748,"phase":"PLACING","round":1,"turn":2,"ready":"some","ceremony":0,"players":6}
+PD_DISPLAY_STATE PLACING 1:3
+PD_VISUAL_FRAME {"time":1791102140868,"phase":"PLACING","round":1,"turn":2,"ready":"some","ceremony":0,"players":6}
+PD_DISPLAY_STATE PLACING 1:3
+PD_VISUAL_FRAME {"time":1791102140988,"phase":"PLACING","round":1,"turn":2,"ready":"some","ceremony":0,"players":6}
+PD_DISPLAY_STATE PLACING 1:3
+PD_VISUAL_FRAME {"time":1791102141108,"phase":"PLACING","round":1,"turn":2,"ready":"some","ceremony":0,"players":6}
+PD_DISPLAY_STATE PLACING 1:3
+PD_VISUAL_FRAME {"time":1791102141229,"phase":"PLACING","round":1,"turn":2,"ready":"all","ceremony":0,"players":6}
+PD_DISPLAY_STATE PLACING 1:4
+PD_VISUAL_FRAME {"time":1791102142234,"phase":"PLACING","round":1,"turn":3,"ready":"none","ceremony":0,"players":6}
+PD_DISPLAY_STATE PLACING 1:4
+PD_VISUAL_FRAME {"time":1791102143245,"phase":"PLACING","round":1,"turn":3,"ready":"some","ceremony":0,"players":6}
+PD_DISPLAY_STATE PLACING 1:4
+PD_VISUAL_FRAME {"time":1791102143365,"phase":"PLACING","round":1,"turn":3,"ready":"some","ceremony":0,"players":6}
+PD_DISPLAY_STATE PLACING 1:4
+PD_VISUAL_FRAME {"time":1791102143485,"phase":"PLACING","round":1,"turn":3,"ready":"some","ceremony":0,"players":6}
+PD_DISPLAY_STATE PLACING 1:4
+PD_VISUAL_FRAME {"time":1791102143605,"phase":"PLACING","round":1,"turn":3,"ready":"some","ceremony":0,"players":6}
+PD_DISPLAY_STATE PLACING 1:4
+PD_VISUAL_FRAME {"time":1791102143725,"phase":"PLACING","round":1,"turn":3,"ready":"some","ceremony":0,"players":6}
+PD_DISPLAY_STATE PLACING 1:4
+PD_VISUAL_FRAME {"time":1791102143846,"phase":"PLACING","round":1,"turn":3,"ready":"all","ceremony":0,"players":6}
+PD_DISPLAY_STATE PLACING 1:5
+PD_VISUAL_FRAME {"time":1791102144852,"phase":"PLACING","round":1,"turn":4,"ready":"none","ceremony":0,"players":6}
+PD_DISPLAY_STATE PLACING 1:5
+PD_VISUAL_FRAME {"time":1791102145862,"phase":"PLACING","round":1,"turn":4,"ready":"some","ceremony":0,"players":6}
+PD_DISPLAY_STATE PLACING 1:5
+PD_VISUAL_FRAME {"time":1791102145982,"phase":"PLACING","round":1,"turn":4,"ready":"some","ceremony":0,"players":6}
+PD_DISPLAY_STATE PLACING 1:5
+PD_VISUAL_FRAME {"time":1791102146102,"phase":"PLACING","round":1,"turn":4,"ready":"some","ceremony":0,"players":6}
+PD_DISPLAY_STATE PLACING 1:5
+PD_VISUAL_FRAME {"time":1791102146224,"phase":"PLACING","round":1,"turn":4,"ready":"some","ceremony":0,"players":6}
+PD_DISPLAY_STATE PLACING 1:5
+PD_VISUAL_FRAME {"time":1791102146343,"phase":"PLACING","round":1,"turn":4,"ready":"some","ceremony":0,"players":6}
+PD_DISPLAY_STATE PLACING 1:5
+PD_VISUAL_FRAME {"time":1791102146463,"phase":"PLACING","round":1,"turn":4,"ready":"all","ceremony":0,"players":6}
+PD_DISPLAY_STATE PLACING 1:6
+PD_VISUAL_FRAME {"time":1791102147468,"phase":"PLACING","round":1,"turn":5,"ready":"none","ceremony":0,"players":6}
+PD_DISPLAY_STATE PLACING 1:6
+PD_VISUAL_FRAME {"time":1791102148478,"phase":"PLACING","round":1,"turn":5,"ready":"some","ceremony":0,"players":6}
+PD_DISPLAY_STATE PLACING 1:6
+PD_VISUAL_FRAME {"time":1791102148599,"phase":"PLACING","round":1,"turn":5,"ready":"some","ceremony":0,"players":6}
+PD_DISPLAY_STATE PLACING 1:6
+PD_VISUAL_FRAME {"time":1791102148719,"phase":"PLACING","round":1,"turn":5,"ready":"some","ceremony":0,"players":6}
+PD_DISPLAY_STATE PLACING 1:6
+PD_VISUAL_FRAME {"time":1791102148839,"phase":"PLACING","round":1,"turn":5,"ready":"some","ceremony":0,"players":6}
+PD_DISPLAY_STATE PLACING 1:6
+PD_VISUAL_FRAME {"time":1791102148960,"phase":"PLACING","round":1,"turn":5,"ready":"some","ceremony":0,"players":6}
+PD_DISPLAY_STATE PLACING 1:6
+PD_VISUAL_FRAME {"time":1791102149081,"phase":"PLACING","round":1,"turn":5,"ready":"all","ceremony":0,"players":6}
+PD_DISPLAY_STATE PLACING 1:7
+PD_VISUAL_FRAME {"time":1791102150088,"phase":"PLACING","round":1,"turn":6,"ready":"none","ceremony":0,"players":6}
+PD_DISPLAY_STATE PLACING 1:7
+PD_VISUAL_FRAME {"time":1791102151100,"phase":"PLACING","round":1,"turn":6,"ready":"some","ceremony":0,"players":6}
+PD_DISPLAY_STATE PLACING 1:7
+PD_VISUAL_FRAME {"time":1791102151219,"phase":"PLACING","round":1,"turn":6,"ready":"some","ceremony":0,"players":6}
+PD_DISPLAY_STATE PLACING 1:7
+PD_VISUAL_FRAME {"time":1791102151340,"phase":"PLACING","round":1,"turn":6,"ready":"some","ceremony":0,"players":6}
+PD_DISPLAY_STATE PLACING 1:7
+PD_VISUAL_FRAME {"time":1791102151462,"phase":"PLACING","round":1,"turn":6,"ready":"some","ceremony":0,"players":6}
+PD_DISPLAY_STATE PLACING 1:7
+PD_VISUAL_FRAME {"time":1791102151580,"phase":"PLACING","round":1,"turn":6,"ready":"some","ceremony":0,"players":6}
+PD_DISPLAY_STATE PLACING 1:7
+PD_VISUAL_FRAME {"time":1791102151703,"phase":"PLACING","round":1,"turn":6,"ready":"all","ceremony":0,"players":6}
+PD_DISPLAY_STATE SCORING 1:8
+PD_VISUAL_FRAME {"time":1791102152712,"phase":"SCORING","round":1,"turn":6,"ready":"none","ceremony":0,"players":6}
+PD_DISPLAY_STATE SCORING 1:8
+PD_VISUAL_FRAME {"time":1791102153726,"phase":"SCORING","round":1,"turn":6,"ready":"some","ceremony":0,"players":6}
+PD_DISPLAY_STATE SCORING 1:8
+PD_VISUAL_FRAME {"time":1791102153847,"phase":"SCORING","round":1,"turn":6,"ready":"some","ceremony":0,"players":6}
+PD_DISPLAY_STATE SCORING 1:8
+PD_VISUAL_FRAME {"time":1791102153967,"phase":"SCORING","round":1,"turn":6,"ready":"some","ceremony":0,"players":6}
+PD_DISPLAY_STATE SCORING 1:8
+PD_VISUAL_FRAME {"time":1791102154087,"phase":"SCORING","round":1,"turn":6,"ready":"some","ceremony":0,"players":6}
+PD_DISPLAY_STATE SCORING 1:8
+PD_VISUAL_FRAME {"time":1791102154210,"phase":"SCORING","round":1,"turn":6,"ready":"some","ceremony":0,"players":6}
+PD_DISPLAY_STATE SCORING 1:8
+PD_VISUAL_FRAME {"time":1791102154328,"phase":"SCORING","round":1,"turn":6,"ready":"all","ceremony":0,"players":6}
+PD_DISPLAY_STATE ROUND_RESULTS 1:9
+PD_VISUAL_FRAME {"time":1791102155336,"phase":"ROUND_RESULTS","round":1,"turn":6,"ready":"none","ceremony":0,"players":6}
+PD_DISPLAY_STATE PLACING 1:10
+PD_VISUAL_FRAME {"time":1791102157843,"phase":"PLACING","round":2,"turn":1,"ready":"none","ceremony":0,"players":6}
+PD_DISPLAY_STATE PLACING 1:10
+PD_VISUAL_FRAME {"time":1791102158857,"phase":"PLACING","round":2,"turn":1,"ready":"some","ceremony":0,"players":6}
+PD_DISPLAY_STATE PLACING 1:10
+PD_VISUAL_FRAME {"time":1791102158976,"phase":"PLACING","round":2,"turn":1,"ready":"some","ceremony":0,"players":6}
+PD_DISPLAY_STATE PLACING 1:10
+PD_VISUAL_FRAME {"time":1791102159097,"phase":"PLACING","round":2,"turn":1,"ready":"some","ceremony":0,"players":6}
+PD_DISPLAY_STATE PLACING 1:10
+PD_VISUAL_FRAME {"time":1791102159217,"phase":"PLACING","round":2,"turn":1,"ready":"some","ceremony":0,"players":6}
+PD_DISPLAY_STATE PLACING 1:10
+PD_VISUAL_FRAME {"time":1791102159339,"phase":"PLACING","round":2,"turn":1,"ready":"some","ceremony":0,"players":6}
+PD_DISPLAY_STATE PLACING 1:10
+PD_VISUAL_FRAME {"time":1791102159459,"phase":"PLACING","round":2,"turn":1,"ready":"all","ceremony":0,"players":6}
+PD_DISPLAY_STATE PLACING 1:11
+PD_VISUAL_FRAME {"time":1791102160466,"phase":"PLACING","round":2,"turn":2,"ready":"none","ceremony":0,"players":6}
+PD_DISPLAY_STATE PLACING 1:11
+PD_VISUAL_FRAME {"time":1791102161478,"phase":"PLACING","round":2,"turn":2,"ready":"some","ceremony":0,"players":6}
+PD_DISPLAY_STATE PLACING 1:11
+PD_VISUAL_FRAME {"time":1791102161598,"phase":"PLACING","round":2,"turn":2,"ready":"some","ceremony":0,"players":6}
+PD_DISPLAY_STATE PLACING 1:11
+PD_VISUAL_FRAME {"time":1791102161720,"phase":"PLACING","round":2,"turn":2,"ready":"some","ceremony":0,"players":6}
+PD_DISPLAY_STATE PLACING 1:11
+PD_VISUAL_FRAME {"time":1791102161840,"phase":"PLACING","round":2,"turn":2,"ready":"some","ceremony":0,"players":6}
+PD_DISPLAY_STATE PLACING 1:11
+PD_VISUAL_FRAME {"time":1791102161960,"phase":"PLACING","round":2,"turn":2,"ready":"some","ceremony":0,"players":6}
+PD_DISPLAY_STATE PLACING 1:11
+PD_VISUAL_FRAME {"time":1791102162082,"phase":"PLACING","round":2,"turn":2,"ready":"all","ceremony":0,"players":6}
+PD_DISPLAY_STATE PLACING 1:12
+PD_VISUAL_FRAME {"time":1791102163088,"phase":"PLACING","round":2,"turn":3,"ready":"none","ceremony":0,"players":6}
+PD_DISPLAY_STATE PLACING 1:12
+PD_VISUAL_FRAME {"time":1791102164103,"phase":"PLACING","round":2,"turn":3,"ready":"some","ceremony":0,"players":6}
+PD_DISPLAY_STATE PLACING 1:12
+PD_VISUAL_FRAME {"time":1791102164221,"phase":"PLACING","round":2,"turn":3,"ready":"some","ceremony":0,"players":6}
+PD_DISPLAY_STATE PLACING 1:12
+PD_VISUAL_FRAME {"time":1791102164345,"phase":"PLACING","round":2,"turn":3,"ready":"some","ceremony":0,"players":6}
+PD_DISPLAY_STATE PLACING 1:12
+PD_VISUAL_FRAME {"time":1791102164463,"phase":"PLACING","round":2,"turn":3,"ready":"some","ceremony":0,"players":6}
+PD_DISPLAY_STATE PLACING 1:12
+PD_VISUAL_FRAME {"time":1791102164583,"phase":"PLACING","round":2,"turn":3,"ready":"some","ceremony":0,"players":6}
+PD_DISPLAY_STATE PLACING 1:12
+PD_VISUAL_FRAME {"time":1791102164704,"phase":"PLACING","round":2,"turn":3,"ready":"all","ceremony":0,"players":6}
+PD_DISPLAY_STATE PLACING 1:13
+PD_VISUAL_FRAME {"time":1791102165710,"phase":"PLACING","round":2,"turn":4,"ready":"none","ceremony":0,"players":6}
+PD_DISPLAY_STATE PLACING 1:13
+PD_VISUAL_FRAME {"time":1791102166724,"phase":"PLACING","round":2,"turn":4,"ready":"some","ceremony":0,"players":6}
+PD_DISPLAY_STATE PLACING 1:13
+PD_VISUAL_FRAME {"time":1791102166844,"phase":"PLACING","round":2,"turn":4,"ready":"some","ceremony":0,"players":6}
+PD_DISPLAY_STATE PLACING 1:13
+PD_VISUAL_FRAME {"time":1791102166964,"phase":"PLACING","round":2,"turn":4,"ready":"some","ceremony":0,"players":6}
+PD_DISPLAY_STATE PLACING 1:13
+PD_VISUAL_FRAME {"time":1791102167088,"phase":"PLACING","round":2,"turn":4,"ready":"some","ceremony":0,"players":6}
+PD_DISPLAY_STATE PLACING 1:13
+PD_VISUAL_FRAME {"time":1791102167205,"phase":"PLACING","round":2,"turn":4,"ready":"some","ceremony":0,"players":6}
+PD_DISPLAY_STATE PLACING 1:13
+PD_VISUAL_FRAME {"time":1791102167326,"phase":"PLACING","round":2,"turn":4,"ready":"all","ceremony":0,"players":6}
+PD_DISPLAY_STATE PLACING 1:14
+PD_VISUAL_FRAME {"time":1791102168333,"phase":"PLACING","round":2,"turn":5,"ready":"none","ceremony":0,"players":6}
+PD_DISPLAY_STATE PLACING 1:14
+PD_VISUAL_FRAME {"time":1791102169346,"phase":"PLACING","round":2,"turn":5,"ready":"some","ceremony":0,"players":6}
+PD_DISPLAY_STATE PLACING 1:14
+PD_VISUAL_FRAME {"time":1791102169466,"phase":"PLACING","round":2,"turn":5,"ready":"some","ceremony":0,"players":6}
+PD_DISPLAY_STATE PLACING 1:14
+PD_VISUAL_FRAME {"time":1791102169587,"phase":"PLACING","round":2,"turn":5,"ready":"some","ceremony":0,"players":6}
+PD_DISPLAY_STATE PLACING 1:14
+PD_VISUAL_FRAME {"time":1791102169711,"phase":"PLACING","round":2,"turn":5,"ready":"some","ceremony":0,"players":6}
+PD_DISPLAY_STATE PLACING 1:14
+PD_VISUAL_FRAME {"time":1791102169828,"phase":"PLACING","round":2,"turn":5,"ready":"some","ceremony":0,"players":6}
+PD_DISPLAY_STATE PLACING 1:14
+PD_VISUAL_FRAME {"time":1791102169950,"phase":"PLACING","round":2,"turn":5,"ready":"all","ceremony":0,"players":6}
+PD_DISPLAY_STATE PLACING 1:15
+PD_VISUAL_FRAME {"time":1791102170957,"phase":"PLACING","round":2,"turn":6,"ready":"none","ceremony":0,"players":6}
+PD_DISPLAY_STATE PLACING 1:15
+PD_VISUAL_FRAME {"time":1791102171971,"phase":"PLACING","round":2,"turn":6,"ready":"some","ceremony":0,"players":6}
+PD_DISPLAY_STATE PLACING 1:15
+PD_VISUAL_FRAME {"time":1791102172090,"phase":"PLACING","round":2,"turn":6,"ready":"some","ceremony":0,"players":6}
+PD_DISPLAY_STATE PLACING 1:15
+PD_VISUAL_FRAME {"time":1791102172210,"phase":"PLACING","round":2,"turn":6,"ready":"some","ceremony":0,"players":6}
+PD_DISPLAY_STATE PLACING 1:15
+PD_VISUAL_FRAME {"time":1791102172332,"phase":"PLACING","round":2,"turn":6,"ready":"some","ceremony":0,"players":6}
+PD_DISPLAY_STATE PLACING 1:15
+PD_VISUAL_FRAME {"time":1791102172454,"phase":"PLACING","round":2,"turn":6,"ready":"some","ceremony":0,"players":6}
+PD_DISPLAY_STATE PLACING 1:15
+PD_VISUAL_FRAME {"time":1791102172575,"phase":"PLACING","round":2,"turn":6,"ready":"all","ceremony":0,"players":6}
+PD_DISPLAY_STATE SCORING 1:16
+PD_VISUAL_FRAME {"time":1791102173582,"phase":"SCORING","round":2,"turn":6,"ready":"none","ceremony":0,"players":6}
+PD_DISPLAY_STATE SCORING 1:16
+PD_VISUAL_FRAME {"time":1791102174593,"phase":"SCORING","round":2,"turn":6,"ready":"some","ceremony":0,"players":6}
+PD_DISPLAY_STATE SCORING 1:16
+PD_VISUAL_FRAME {"time":1791102174713,"phase":"SCORING","round":2,"turn":6,"ready":"some","ceremony":0,"players":6}
+PD_DISPLAY_STATE SCORING 1:16
+PD_VISUAL_FRAME {"time":1791102174834,"phase":"SCORING","round":2,"turn":6,"ready":"some","ceremony":0,"players":6}
+PD_DISPLAY_STATE SCORING 1:16
+PD_VISUAL_FRAME {"time":1791102174955,"phase":"SCORING","round":2,"turn":6,"ready":"some","ceremony":0,"players":6}
+PD_DISPLAY_STATE SCORING 1:16
+PD_VISUAL_FRAME {"time":1791102175076,"phase":"SCORING","round":2,"turn":6,"ready":"some","ceremony":0,"players":6}
+PD_DISPLAY_STATE SCORING 1:16
+PD_VISUAL_FRAME {"time":1791102175196,"phase":"SCORING","round":2,"turn":6,"ready":"all","ceremony":0,"players":6}
+PD_DISPLAY_STATE ROUND_RESULTS 1:17
+PD_VISUAL_FRAME {"time":1791102176206,"phase":"ROUND_RESULTS","round":2,"turn":6,"ready":"none","ceremony":0,"players":6}
+PD_DISPLAY_STATE PLACING 1:18
+PD_VISUAL_FRAME {"time":1791102178716,"phase":"PLACING","round":3,"turn":1,"ready":"none","ceremony":0,"players":6}
+PD_DISPLAY_STATE PLACING 1:18
+PD_VISUAL_FRAME {"time":1791102179730,"phase":"PLACING","round":3,"turn":1,"ready":"some","ceremony":0,"players":6}
+PD_DISPLAY_STATE PLACING 1:18
+PD_VISUAL_FRAME {"time":1791102179850,"phase":"PLACING","round":3,"turn":1,"ready":"some","ceremony":0,"players":6}
+PD_DISPLAY_STATE PLACING 1:18
+PD_VISUAL_FRAME {"time":1791102179971,"phase":"PLACING","round":3,"turn":1,"ready":"some","ceremony":0,"players":6}
+PD_DISPLAY_STATE PLACING 1:18
+PD_VISUAL_FRAME {"time":1791102180091,"phase":"PLACING","round":3,"turn":1,"ready":"some","ceremony":0,"players":6}
+PD_DISPLAY_STATE PLACING 1:18
+PD_VISUAL_FRAME {"time":1791102180213,"phase":"PLACING","round":3,"turn":1,"ready":"some","ceremony":0,"players":6}
+PD_DISPLAY_STATE PLACING 1:18
+PD_VISUAL_FRAME {"time":1791102180333,"phase":"PLACING","round":3,"turn":1,"ready":"all","ceremony":0,"players":6}
+PD_DISPLAY_STATE PLACING 1:19
+PD_VISUAL_FRAME {"time":1791102181341,"phase":"PLACING","round":3,"turn":2,"ready":"none","ceremony":0,"players":6}
+PD_DISPLAY_STATE PLACING 1:19
+PD_VISUAL_FRAME {"time":1791102182355,"phase":"PLACING","round":3,"turn":2,"ready":"some","ceremony":0,"players":6}
+PD_DISPLAY_STATE PLACING 1:19
+PD_VISUAL_FRAME {"time":1791102182475,"phase":"PLACING","round":3,"turn":2,"ready":"some","ceremony":0,"players":6}
+PD_DISPLAY_STATE PLACING 1:19
+PD_VISUAL_FRAME {"time":1791102182598,"phase":"PLACING","round":3,"turn":2,"ready":"some","ceremony":0,"players":6}
+PD_DISPLAY_STATE PLACING 1:19
+PD_VISUAL_FRAME {"time":1791102182718,"phase":"PLACING","round":3,"turn":2,"ready":"some","ceremony":0,"players":6}
+PD_DISPLAY_STATE PLACING 1:19
+PD_VISUAL_FRAME {"time":1791102182839,"phase":"PLACING","round":3,"turn":2,"ready":"some","ceremony":0,"players":6}
+PD_DISPLAY_STATE PLACING 1:19
+PD_VISUAL_FRAME {"time":1791102182961,"phase":"PLACING","round":3,"turn":2,"ready":"all","ceremony":0,"players":6}
+PD_DISPLAY_STATE PLACING 1:20
+PD_VISUAL_FRAME {"time":1791102183968,"phase":"PLACING","round":3,"turn":3,"ready":"none","ceremony":0,"players":6}
+PD_DISPLAY_STATE PLACING 1:20
+PD_VISUAL_FRAME {"time":1791102184988,"phase":"PLACING","round":3,"turn":3,"ready":"some","ceremony":0,"players":6}
+PD_DISPLAY_STATE PLACING 1:20
+PD_VISUAL_FRAME {"time":1791102185107,"phase":"PLACING","round":3,"turn":3,"ready":"some","ceremony":0,"players":6}
+PD_DISPLAY_STATE PLACING 1:20
+PD_VISUAL_FRAME {"time":1791102185230,"phase":"PLACING","round":3,"turn":3,"ready":"some","ceremony":0,"players":6}
+PD_DISPLAY_STATE PLACING 1:20
+PD_VISUAL_FRAME {"time":1791102185351,"phase":"PLACING","round":3,"turn":3,"ready":"some","ceremony":0,"players":6}
+PD_DISPLAY_STATE PLACING 1:20
+PD_VISUAL_FRAME {"time":1791102185470,"phase":"PLACING","round":3,"turn":3,"ready":"some","ceremony":0,"players":6}
+PD_DISPLAY_STATE PLACING 1:20
+PD_VISUAL_FRAME {"time":1791102185592,"phase":"PLACING","round":3,"turn":3,"ready":"all","ceremony":0,"players":6}
+PD_DISPLAY_STATE PLACING 1:21
+PD_VISUAL_FRAME {"time":1791102186599,"phase":"PLACING","round":3,"turn":4,"ready":"none","ceremony":0,"players":6}
+PD_DISPLAY_STATE PLACING 1:21
+PD_VISUAL_FRAME {"time":1791102187611,"phase":"PLACING","round":3,"turn":4,"ready":"some","ceremony":0,"players":6}
+PD_DISPLAY_STATE PLACING 1:21
+PD_VISUAL_FRAME {"time":1791102187732,"phase":"PLACING","round":3,"turn":4,"ready":"some","ceremony":0,"players":6}
+PD_DISPLAY_STATE PLACING 1:21
+PD_VISUAL_FRAME {"time":1791102187852,"phase":"PLACING","round":3,"turn":4,"ready":"some","ceremony":0,"players":6}
+PD_DISPLAY_STATE PLACING 1:21
+PD_VISUAL_FRAME {"time":1791102187974,"phase":"PLACING","round":3,"turn":4,"ready":"some","ceremony":0,"players":6}
+PD_DISPLAY_STATE PLACING 1:21
+PD_VISUAL_FRAME {"time":1791102188094,"phase":"PLACING","round":3,"turn":4,"ready":"some","ceremony":0,"players":6}
+PD_DISPLAY_STATE PLACING 1:21
+PD_VISUAL_FRAME {"time":1791102188216,"phase":"PLACING","round":3,"turn":4,"ready":"all","ceremony":0,"players":6}
+PD_DISPLAY_STATE PLACING 1:22
+PD_VISUAL_FRAME {"time":1791102189226,"phase":"PLACING","round":3,"turn":5,"ready":"none","ceremony":0,"players":6}
+PD_DISPLAY_STATE PLACING 1:22
+PD_VISUAL_FRAME {"time":1791102190242,"phase":"PLACING","round":3,"turn":5,"ready":"some","ceremony":0,"players":6}
+PD_DISPLAY_STATE PLACING 1:22
+PD_VISUAL_FRAME {"time":1791102190368,"phase":"PLACING","round":3,"turn":5,"ready":"some","ceremony":0,"players":6}
+PD_DISPLAY_STATE PLACING 1:22
+PD_VISUAL_FRAME {"time":1791102190485,"phase":"PLACING","round":3,"turn":5,"ready":"some","ceremony":0,"players":6}
+PD_DISPLAY_STATE PLACING 1:22
+PD_VISUAL_FRAME {"time":1791102190606,"phase":"PLACING","round":3,"turn":5,"ready":"some","ceremony":0,"players":6}
+PD_DISPLAY_STATE PLACING 1:22
+PD_VISUAL_FRAME {"time":1791102190727,"phase":"PLACING","round":3,"turn":5,"ready":"some","ceremony":0,"players":6}
+PD_DISPLAY_STATE PLACING 1:22
+PD_VISUAL_FRAME {"time":1791102190848,"phase":"PLACING","round":3,"turn":5,"ready":"all","ceremony":0,"players":6}
+PD_DISPLAY_STATE PLACING 1:23
+PD_VISUAL_FRAME {"time":1791102191857,"phase":"PLACING","round":3,"turn":6,"ready":"none","ceremony":0,"players":6}
+PD_DISPLAY_STATE PLACING 1:23
+PD_VISUAL_FRAME {"time":1791102192868,"phase":"PLACING","round":3,"turn":6,"ready":"some","ceremony":0,"players":6}
+PD_DISPLAY_STATE PLACING 1:23
+PD_VISUAL_FRAME {"time":1791102192991,"phase":"PLACING","round":3,"turn":6,"ready":"some","ceremony":0,"players":6}
+PD_DISPLAY_STATE PLACING 1:23
+PD_VISUAL_FRAME {"time":1791102193111,"phase":"PLACING","round":3,"turn":6,"ready":"some","ceremony":0,"players":6}
+PD_DISPLAY_STATE PLACING 1:23
+PD_VISUAL_FRAME {"time":1791102193231,"phase":"PLACING","round":3,"turn":6,"ready":"some","ceremony":0,"players":6}
+PD_DISPLAY_STATE PLACING 1:23
+PD_VISUAL_FRAME {"time":1791102193351,"phase":"PLACING","round":3,"turn":6,"ready":"some","ceremony":0,"players":6}
+PD_DISPLAY_STATE PLACING 1:23
+PD_VISUAL_FRAME {"time":1791102193477,"phase":"PLACING","round":3,"turn":6,"ready":"all","ceremony":0,"players":6}
+PD_DISPLAY_STATE SCORING 1:24
+PD_VISUAL_FRAME {"time":1791102194481,"phase":"SCORING","round":3,"turn":6,"ready":"none","ceremony":0,"players":6}
+PD_DISPLAY_STATE SCORING 1:24
+PD_VISUAL_FRAME {"time":1791102195489,"phase":"SCORING","round":3,"turn":6,"ready":"some","ceremony":0,"players":6}
+PD_DISPLAY_STATE SCORING 1:24
+PD_VISUAL_FRAME {"time":1791102195610,"phase":"SCORING","round":3,"turn":6,"ready":"some","ceremony":0,"players":6}
+PD_DISPLAY_STATE SCORING 1:24
+PD_VISUAL_FRAME {"time":1791102195730,"phase":"SCORING","round":3,"turn":6,"ready":"some","ceremony":0,"players":6}
+PD_DISPLAY_STATE SCORING 1:24
+PD_VISUAL_FRAME {"time":1791102195851,"phase":"SCORING","round":3,"turn":6,"ready":"some","ceremony":0,"players":6}
+PD_DISPLAY_STATE SCORING 1:24
+PD_VISUAL_FRAME {"time":1791102195971,"phase":"SCORING","round":3,"turn":6,"ready":"some","ceremony":0,"players":6}
+PD_DISPLAY_STATE SCORING 1:24
+PD_VISUAL_FRAME {"time":1791102196093,"phase":"SCORING","round":3,"turn":6,"ready":"all","ceremony":0,"players":6}
+PD_DISPLAY_STATE FINISHED 1:25
+PD_VISUAL_FRAME {"time":1791102197099,"phase":"FINISHED","round":3,"turn":6,"ready":"none","ceremony":0,"players":6}
+PD_DISPLAY_STATE FINISHED 1:25
+PD_VISUAL_FRAME {"time":1791102198605,"phase":"FINISHED","round":3,"turn":6,"ready":"none","ceremony":1,"players":6}
+PD_DISPLAY_STATE FINISHED 1:25
+PD_VISUAL_FRAME {"time":1791102200105,"phase":"FINISHED","round":3,"turn":6,"ready":"none","ceremony":2,"players":6}
+PD_DISPLAY_STATE FINISHED 1:25
+PD_VISUAL_FRAME {"time":1791102201606,"phase":"FINISHED","round":3,"turn":6,"ready":"none","ceremony":3,"players":6}
+PD_DISPLAY_STATE FINISHED 1:25
+PD_VISUAL_FRAME {"time":1791102203104,"phase":"FINISHED","round":3,"turn":6,"ready":"none","ceremony":4,"players":6}
+PD_DISPLAY_STATE FINISHED 1:25
+PD_VISUAL_FRAME {"time":1791102204605,"phase":"FINISHED","round":3,"turn":6,"ready":"none","ceremony":5,"players":6}
+PD_DISPLAY_STATE FINISHED 1:25
+PD_VISUAL_FRAME {"time":1791102206104,"phase":"FINISHED","round":3,"turn":6,"ready":"none","ceremony":6,"players":6}
+PD_DISPLAY_STATE FINISHED 1:25
+PD_VISUAL_FRAME {"time":1791102207605,"phase":"FINISHED","round":3,"turn":6,"ready":"none","ceremony":7,"players":6}
+PD_DISPLAY_STATE FINISHED 1:25
+PD_VISUAL_FRAME {"time":1791102209104,"phase":"FINISHED","round":3,"turn":6,"ready":"none","ceremony":8,"players":6}
+PD_DISPLAY_STATE FINISHED 1:25
+PD_VISUAL_FRAME {"time":1791102210605,"phase":"FINISHED","round":3,"turn":6,"ready":"none","ceremony":9,"players":6}
+PD_DISPLAY_STATE FINISHED 1:25
+PD_VISUAL_FRAME {"time":1791102212105,"phase":"FINISHED","round":3,"turn":6,"ready":"none","ceremony":10,"players":6}
+PD_DISPLAY_STATE FINISHED 1:25
+PD_VISUAL_FRAME {"time":1791102213606,"phase":"FINISHED","round":3,"turn":6,"ready":"none","ceremony":11,"players":6}
+PD_DISPLAY_STATE FINISHED 1:25
+PD_VISUAL_FRAME {"time":1791102215104,"phase":"FINISHED","round":3,"turn":6,"ready":"none","ceremony":12,"players":6}
+PD_DISPLAY_STATE FINISHED 1:25
+PD_VISUAL_FRAME {"time":1791102216604,"phase":"FINISHED","round":3,"turn":6,"ready":"none","ceremony":13,"players":6}
+PD_DISPLAY_STATE FINISHED 1:25
+PD_VISUAL_FRAME {"time":1791102218105,"phase":"FINISHED","round":3,"turn":6,"ready":"none","ceremony":14,"players":6}
+PD_DISPLAY_STATE FINISHED 1:25
+PD_VISUAL_FRAME {"time":1791102219604,"phase":"FINISHED","round":3,"turn":6,"ready":"none","ceremony":15,"players":6}
+PD_DISPLAY_STATE FINISHED 1:25
+PD_VISUAL_FRAME {"time":1791102221105,"phase":"FINISHED","round":3,"turn":6,"ready":"none","ceremony":16,"players":6}
+PD_DISPLAY_STATE FINISHED 1:25
+PD_VISUAL_FRAME {"time":1791102222605,"phase":"FINISHED","round":3,"turn":6,"ready":"none","ceremony":17,"players":6}
+PD_DISPLAY_STATE FINISHED 1:25
+PD_VISUAL_FRAME {"time":1791102224104,"phase":"FINISHED","round":3,"turn":6,"ready":"none","ceremony":18,"players":6}
+PD_DISPLAY_STATE FINISHED 1:25
+PD_VISUAL_FRAME {"time":1791102225604,"phase":"FINISHED","round":3,"turn":6,"ready":"none","ceremony":19,"players":6}
+PD_DISPLAY_STATE FINISHED 1:25
+PD_VISUAL_FRAME {"time":1791102227105,"phase":"FINISHED","round":3,"turn":6,"ready":"none","ceremony":20,"players":6}
+PD_DISPLAY_STATE FINISHED 1:25
+PD_VISUAL_FRAME {"time":1791102228605,"phase":"FINISHED","round":3,"turn":6,"ready":"none","ceremony":21,"players":6}
+PD_DISPLAY_STATE FINISHED 1:25
+PD_VISUAL_FRAME {"time":1791102230105,"phase":"FINISHED","round":3,"turn":6,"ready":"none","ceremony":22,"players":6}
+PD_DISPLAY_STATE FINISHED 1:25
+PD_VISUAL_FRAME {"time":1791102231605,"phase":"FINISHED","round":3,"turn":6,"ready":"none","ceremony":23,"players":6}
+PD_DISPLAY_STATE FINISHED 1:25
+PD_VISUAL_FRAME {"time":1791102233105,"phase":"FINISHED","round":3,"turn":6,"ready":"none","ceremony":24,"players":6}
+PD_DISPLAY_STATE FINISHED 1:25
+PD_VISUAL_FRAME {"time":1791102234605,"phase":"FINISHED","round":3,"turn":6,"ready":"none","ceremony":25,"players":6}
+PD_DISPLAY_STATE FINISHED 1:25
+PD_VISUAL_FRAME {"time":1791102236105,"phase":"FINISHED","round":3,"turn":6,"ready":"none","ceremony":26,"players":6}
+PD_DISPLAY_STATE FINISHED 1:25
+PD_VISUAL_FRAME {"time":1791102237607,"phase":"FINISHED","round":3,"turn":6,"ready":"none","ceremony":27,"players":6}
+PD_DISPLAY_STATE FINISHED 1:25
+PD_VISUAL_FRAME {"time":1791102239105,"phase":"FINISHED","round":3,"turn":6,"ready":"none","ceremony":28,"players":6}
+PD_DISPLAY_STATE FINISHED 1:25
+PD_VISUAL_FRAME {"time":1791102240605,"phase":"FINISHED","round":3,"turn":6,"ready":"none","ceremony":29,"players":6}
+PD_DISPLAY_STATE FINISHED 1:25
+PD_VISUAL_FRAME {"time":1791102242105,"phase":"FINISHED","round":3,"turn":6,"ready":"none","ceremony":30,"players":6}
+PD_DISPLAY_STATE FINISHED 1:25
+PD_VISUAL_FRAME {"time":1791102243604,"phase":"FINISHED","round":3,"turn":6,"ready":"none","ceremony":31,"players":6}
+PD_DISPLAY_STATE FINISHED 1:25
+PD_VISUAL_FRAME {"time":1791102245104,"phase":"FINISHED","round":3,"turn":6,"ready":"none","ceremony":32,"players":6}
+PD_DISPLAY_STATE FINISHED 1:25
+PD_VISUAL_FRAME {"time":1791102246604,"phase":"FINISHED","round":3,"turn":6,"ready":"none","ceremony":33,"players":6}
+PD_DISPLAY_STATE FINISHED 1:25
+PD_VISUAL_FRAME {"time":1791102248107,"phase":"FINISHED","round":3,"turn":6,"ready":"none","ceremony":34,"players":6}
+PD_DISPLAY_STATE FINISHED 1:25
+PD_VISUAL_FRAME {"time":1791102249604,"phase":"FINISHED","round":3,"turn":6,"ready":"none","ceremony":35,"players":6}
+PD_DISPLAY_STATE FINISHED 1:25
+PD_VISUAL_FRAME {"time":1791102251104,"phase":"FINISHED","round":3,"turn":6,"ready":"none","ceremony":36,"players":6}
+PD_DEVICE_CHECK_COMPLETE

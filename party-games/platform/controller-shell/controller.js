@@ -19,7 +19,9 @@
 // Media Receiver (every Chromecast supports it). Append ?castAppId=<id> to
 // the URL to override — used during device-registration diagnostic.
 const CAST_APPLICATION_ID =
-  new URLSearchParams(location.search).get('castAppId') || '071CDEDD';
+  new URLSearchParams(location.search).get('castAppId') || document.querySelector('meta[name="cast-application-id"]')?.content || (document.querySelector('meta[name="game-name"]')?.content === 'patchwork' ? '' : '071CDEDD');
+
+let bindCastRoom = () => {};
 
 const PLATFORM_RESERVED_TYPES = new Set([
   'WELCOME', 'WELCOME_RECEIVER', 'STATE', 'PONG', 'NEED_ROOM', 'BAD_ROOM',
@@ -35,6 +37,7 @@ let name = (params.get('name') || '').slice(0, 32);
 // Room code: required to connect. If the URL has ?room=ABCD use it; otherwise
 // show the entry-gate and wait for the user to enter one.
 let roomCode = (params.get('room') || '').toUpperCase();
+let createRoom = false;
 
 // Per-tab session id: survives reload (sessionStorage), dies with the tab.
 // Server keeps the player's slot + scores alive for ~20 s after the WS drops;
@@ -167,7 +170,7 @@ let reconnectAttempt = 0;
 let reconnectTimer = null;
 
 function connect() {
-  if (!roomCode) return;    // wait for room-gate submission
+  if (!roomCode && !createRoom) return;    // wait for room-gate submission
   if (reconnectTimer) { clearTimeout(reconnectTimer); reconnectTimer = null; }
   // Don't unmount up-front — if the server resumes our session (WELCOME
   // carries resumed:true + same id), the game module's in-memory state is
@@ -182,7 +185,8 @@ function connect() {
       type: 'HELLO',
       role: 'controller',
       name,
-      room: roomCode,
+      room: roomCode || undefined,
+      ...(createRoom ? {createRoom:true} : {}),
       sessionId,
     }));
   });
@@ -212,11 +216,15 @@ async function handleMessage(ev) {
       // refresh myId/hostId and let the existing subscribers continue.
       if (!msg.resumed && mounted) unmountGame();
       myId = msg.id;
+      roomCode = msg.room; createRoom = false; params.set('room',roomCode);
+      history.replaceState(null,'',location.pathname+'?'+params+location.hash);
+      bindCastRoom();
+      if (msg.sessionId) { sessionId = msg.sessionId; try { sessionStorage.setItem(SESSION_KEY, sessionId); } catch {} }
       hostId = msg.hostId;
       statusEl.textContent = msg.resumed
         ? `reconnected · id=${myId}`
         : `connected · id=${myId}`;
-      if (!msg.resumed) {
+      if (!mounted) {
         await loadGameModule();
         mountGame();
       }
@@ -278,6 +286,18 @@ if (needsName() || needsRoom()) {
   } else {
     entryHeadingEl.textContent = 'Enter room code';
     entryHintEl.textContent = 'Look at the TV. The receiver shows a 4-letter room code.';
+  }
+  const createButton = document.getElementById('entry-create');
+  if (gameName === 'patchwork' && needsRoom()) {
+    createButton.hidden = false;
+    createButton.addEventListener('click', () => {
+      if (needsName()) {
+        const entered = nameInputEl.value.trim().slice(0,32);
+        if (!entered) { nameInputEl.setCustomValidity('name required'); nameInputEl.reportValidity(); return; }
+        nameInputEl.setCustomValidity(''); name = entered; params.set('name',name); refreshNameEl();
+      }
+      createRoom = true; entryGateEl.hidden = true; connect();
+    });
   }
   entryGateEl.hidden = false;
   statusEl.textContent = 'waiting for entry';
@@ -423,6 +443,7 @@ window.__onGCastApiAvailable = (isAvailable) => {
 };
 
 function initCastContext() {
+  if (!CAST_APPLICATION_ID) { setCastState('TV casting setup pending · use the shared browser display', 'unavail'); document.getElementById('cast-button').hidden = true; return; }
   try {
     const AUTO_JOIN_POLICY = chrome.cast.AutoJoinPolicy.ORIGIN_SCOPED || 'origin_scoped';
     const ctx = cast.framework.CastContext.getInstance();
@@ -431,6 +452,15 @@ function initCastContext() {
       autoJoinPolicy: AUTO_JOIN_POLICY,
       resumeSavedSession: true,
     });
+    const bindRoom = () => {
+      if (!roomCode || gameName !== 'patchwork') return;
+      const session = ctx.getCurrentSession();
+      session?.sendMessage('urn:x-cast:org.worldfoundry.party', {type:'BIND_ROOM',room:roomCode})
+        .catch(e => setCastState('cast: room connection failed', 'unavail'));
+    };
+    bindCastRoom = bindRoom;
+    ctx.addEventListener(cast.framework.CastContextEventType.SESSION_STATE_CHANGED, bindRoom);
+    bindRoom();
     const applyCastState = (state) => {
       switch (state) {
         case cast.framework.CastState.NO_DEVICES_AVAILABLE:

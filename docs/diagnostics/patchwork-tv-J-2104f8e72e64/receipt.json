@@ -1,0 +1,5064 @@
+{
+  "job": {
+    "id": "J-2104f8e72e64",
+    "owner": "d15f47a5d533edf02af1e3e1",
+    "accepted": 1791102250.210931,
+    "state": "running",
+    "phase": "restoring",
+    "request": {
+      "pool": "chromecast-test",
+      "app": "patchwork",
+      "apk": "470b452adccbddf8d12fc27eb5865248bdd670eb331f665c2c8fc2fc9c928315.apk",
+      "warmup": 0.0,
+      "duration": 150.0,
+      "workflow": "record"
+    },
+    "device": "chromecast-test-01",
+    "generation": 19,
+    "cancel": 0,
+    "error": null,
+    "started": 1791102250.2356045,
+    "finished": null,
+    "worker_pid": 312363,
+    "recovery_resolved": 0
+  },
+  "device": {
+    "id": "chromecast-test-01",
+    "serial": "2628105GN0GT7C",
+    "model": "Chromecast HD",
+    "device": "boreal",
+    "android": "14",
+    "abis": [
+      "armeabi-v7a",
+      "armeabi"
+    ],
+    "transport": "tls",
+    "endpoint": "192.168.4.43:41277",
+    "pools": [
+      "chromecast-test"
+    ],
+    "health": "ready",
+    "enrolled": true,
+    "ipv6_addresses": [
+      "fd5d:59ce:7438:1:7104:7f7e:6f75:edbe",
+      "fd5d:59ce:7438:1:581b:d19a:27a5:c4db",
+      "fd5d:59ce:7438:1:3b82:772d:8d07:d5f6",
+      "fd5d:59ce:7438:1:401f:2bff:fe13:98df",
+      "fe80::401f:2bff:fe13:98df"
+    ],
+    "generation": 19,
+    "last_seen": 1791102250.5912838,
+    "boot_id": "9ec069a1-861f-449a-a777-29554a2f1ed4",
+    "sdk": "34",
+    "reservation": null
+  },
+  "result": "completed",
+  "error": null,
+  "cleanup_verified": true,
+  "restoration": "home-fallback: previous app launcher unavailable",
+  "commands": [
+    {
+      "args": [
+        "mdns",
+        "services"
+      ],
+      "start": 1791102250.4365888,
+      "end": 1791102250.440442,
+      "returncode": 0
+    },
+    {
+      "args": [
+        "connect",
+        "192.168.4.43:41277"
+      ],
+      "start": 1791102250.441501,
+      "end": 1791102250.4984298,
+      "returncode": 0
+    },
+    {
+      "args": [
+        "shell",
+        "getprop ro.serialno"
+      ],
+      "start": 1791102250.4998057,
+      "end": 1791102250.5912573,
+      "returncode": 0
+    },
+    {
+      "args": [
+        "shell",
+        "cat /proc/sys/kernel/random/boot_id"
+      ],
+      "start": 1791102250.5924911,
+      "end": 1791102250.664461,
+      "returncode": 0
+    },
+    {
+      "args": [
+        "shell",
+        "getprop ro.product.model"
+      ],
+      "start": 1791102250.6662061,
+      "end": 1791102250.7435148,
+      "returncode": 0
+    },
+    {
+      "args": [
+        "shell",
+        "getprop ro.build.version.release"
+      ],
+      "start": 1791102250.7445576,
+      "end": 1791102250.808502,
+      "returncode": 0
+    },
+    {
+      "args": [
+        "shell",
+        "getprop ro.build.version.sdk"
+      ],
+      "start": 1791102250.809807,
+      "end": 1791102250.9121969,
+      "returncode": 0
+    },
+    {
+      "args": [
+        "shell",
+        "getprop ro.product.device"
+      ],
+      "start": 1791102250.9134905,
+      "end": 1791102251.0243845,
+      "returncode": 0
+    },
+    {
+      "args": [
+        "shell",
+        "getprop ro.product.cpu.abilist"
+      ],
+      "start": 1791102251.0255892,
+      "end": 1791102251.0930238,
+      "returncode": 0
+    },
+    {
+      "args": [
+        "shell",
+        "ip -6 addr show wlan0"
+      ],
+      "start": 1791102251.0942261,
+      "end": 1791102251.178652,
+      "returncode": 0
+    },
+    {
+      "args": [
+        "shell",
+        "dumpsys activity activities"
+      ],
+      "start": 1791102251.2007027,
+      "end": 1791102251.297188,
+      "returncode": 0
+    },
+    {
+      "args": [
+        "install",
+        "-r",
+        "/var/lib/wf-device-coordinator/inputs/470b452adccbddf8d12fc27eb5865248bdd670eb331f665c2c8fc2fc9c928315.apk"
+      ],
+      "start": 1791102251.341654,
+      "end": 1791102253.9262047,
+      "returncode": 0
+    },
+    {
+      "args": [
+        "shell",
+        "pm path org.worldfoundry.wf_game.patchwork"
+      ],
+      "start": 1791102253.9274619,
+      "end": 1791102254.1015656,
+      "returncode": 0
+    },
+    {
+      "args": [
+        "shell",
+        "sha256sum '/data/app/~~e2GUSmSJF6MiKTfxhw-9Yg==/org.worldfoundry.wf_game.patchwork-BKG0d7Oy0j8i2SX-FbbQOw==/base.apk'"
+      ],
+      "start": 1791102254.1031234,
+      "end": 1791102254.2508433,
+      "returncode": 0
+    },
+    {
+      "args": [
+        "shell",
+        "am force-stop org.worldfoundry.wf_game.patchwork"
+      ],
+      "start": 1791102254.2875755,
+      "end": 1791102254.6849494,
+      "returncode": 0
+    },
+    {
+      "args": [
+        "shell",
+        "input keyevent KEYCODE_WAKEUP"
+      ],
+      "start": 1791102254.6864867,
+      "end": 1791102254.910166,
+      "returncode": 0
+    },
+    {
+      "args": [
+        "shell",
+        "am start -W -n org.worldfoundry.wf_game.patchwork/.TvActivity"
+      ],
+      "start": 1791102255.0619085,
+      "end": 1791102257.6027443,
+      "returncode": 0
+    },
+    {
+      "args": [
+        "shell",
+        "dumpsys activity activities"
+      ],
+      "start": 1791102262.604729,
+      "end": 1791102262.8054302,
+      "returncode": 0
+    },
+    {
+      "args": [
+        "shell",
+        "pidof org.worldfoundry.wf_game.patchwork"
+      ],
+      "start": 1791102262.8069558,
+      "end": 1791102262.9472733,
+      "returncode": 0
+    },
+    {
+      "args": [
+        "shell",
+        "dumpsys activity activities"
+      ],
+      "start": 1791102262.9497511,
+      "end": 1791102263.0423675,
+      "returncode": 0
+    },
+    {
+      "args": [
+        "shell",
+        "pidof org.worldfoundry.wf_game.patchwork"
+      ],
+      "start": 1791102263.0438447,
+      "end": 1791102263.1587758,
+      "returncode": 0
+    },
+    {
+      "args": [
+        "shell",
+        "screenrecord --time-limit 150 /data/local/tmp/wf-J-2104f8e72e64.mp4 >/dev/null 2>&1 & echo $!"
+      ],
+      "start": 1791102263.159831,
+      "end": 1791102263.2278545,
+      "returncode": 0
+    },
+    {
+      "args": [
+        "shell",
+        "dumpsys activity activities"
+      ],
+      "start": 1791102263.2643,
+      "end": 1791102263.363841,
+      "returncode": 0
+    },
+    {
+      "args": [
+        "shell",
+        "pidof org.worldfoundry.wf_game.patchwork"
+      ],
+      "start": 1791102263.3651814,
+      "end": 1791102263.4487453,
+      "returncode": 0
+    },
+    {
+      "args": [
+        "shell",
+        "cat /proc/11403/cmdline"
+      ],
+      "start": 1791102263.4500327,
+      "end": 1791102263.5250955,
+      "returncode": 0
+    },
+    {
+      "args": [
+        "shell",
+        "dumpsys activity activities"
+      ],
+      "start": 1791102264.0273263,
+      "end": 1791102264.1639762,
+      "returncode": 0
+    },
+    {
+      "args": [
+        "shell",
+        "pidof org.worldfoundry.wf_game.patchwork"
+      ],
+      "start": 1791102264.1654992,
+      "end": 1791102264.2511296,
+      "returncode": 0
+    },
+    {
+      "args": [
+        "shell",
+        "cat /proc/11403/cmdline"
+      ],
+      "start": 1791102264.2524655,
+      "end": 1791102264.3298953,
+      "returncode": 0
+    },
+    {
+      "args": [
+        "shell",
+        "dumpsys activity activities"
+      ],
+      "start": 1791102264.8340354,
+      "end": 1791102265.1466155,
+      "returncode": 0
+    },
+    {
+      "args": [
+        "shell",
+        "pidof org.worldfoundry.wf_game.patchwork"
+      ],
+      "start": 1791102265.1484644,
+      "end": 1791102265.2365968,
+      "returncode": 0
+    },
+    {
+      "args": [
+        "shell",
+        "cat /proc/11403/cmdline"
+      ],
+      "start": 1791102265.2379146,
+      "end": 1791102265.3068268,
+      "returncode": 0
+    },
+    {
+      "args": [
+        "shell",
+        "dumpsys activity activities"
+      ],
+      "start": 1791102265.8094337,
+      "end": 1791102265.9529288,
+      "returncode": 0
+    },
+    {
+      "args": [
+        "shell",
+        "pidof org.worldfoundry.wf_game.patchwork"
+      ],
+      "start": 1791102265.9545708,
+      "end": 1791102266.0443444,
+      "returncode": 0
+    },
+    {
+      "args": [
+        "shell",
+        "cat /proc/11403/cmdline"
+      ],
+      "start": 1791102266.045584,
+      "end": 1791102266.1159358,
+      "returncode": 0
+    },
+    {
+      "args": [
+        "shell",
+        "dumpsys activity activities"
+      ],
+      "start": 1791102266.6180696,
+      "end": 1791102266.771605,
+      "returncode": 0
+    },
+    {
+      "args": [
+        "shell",
+        "pidof org.worldfoundry.wf_game.patchwork"
+      ],
+      "start": 1791102266.773315,
+      "end": 1791102266.8617358,
+      "returncode": 0
+    },
+    {
+      "args": [
+        "shell",
+        "cat /proc/11403/cmdline"
+      ],
+      "start": 1791102266.8630488,
+      "end": 1791102266.9553683,
+      "returncode": 0
+    },
+    {
+      "args": [
+        "shell",
+        "dumpsys activity activities"
+      ],
+      "start": 1791102267.4572017,
+      "end": 1791102267.572833,
+      "returncode": 0
+    },
+    {
+      "args": [
+        "shell",
+        "pidof org.worldfoundry.wf_game.patchwork"
+      ],
+      "start": 1791102267.5743861,
+      "end": 1791102267.6802142,
+      "returncode": 0
+    },
+    {
+      "args": [
+        "shell",
+        "cat /proc/11403/cmdline"
+      ],
+      "start": 1791102267.6812396,
+      "end": 1791102267.7576022,
+      "returncode": 0
+    },
+    {
+      "args": [
+        "shell",
+        "dumpsys activity activities"
+      ],
+      "start": 1791102268.259399,
+      "end": 1791102268.4012513,
+      "returncode": 0
+    },
+    {
+      "args": [
+        "shell",
+        "pidof org.worldfoundry.wf_game.patchwork"
+      ],
+      "start": 1791102268.4024253,
+      "end": 1791102268.4818091,
+      "returncode": 0
+    },
+    {
+      "args": [
+        "shell",
+        "cat /proc/11403/cmdline"
+      ],
+      "start": 1791102268.4838338,
+      "end": 1791102268.5667796,
+      "returncode": 0
+    },
+    {
+      "args": [
+        "shell",
+        "dumpsys activity activities"
+      ],
+      "start": 1791102269.0691195,
+      "end": 1791102269.2099686,
+      "returncode": 0
+    },
+    {
+      "args": [
+        "shell",
+        "pidof org.worldfoundry.wf_game.patchwork"
+      ],
+      "start": 1791102269.2115655,
+      "end": 1791102269.297055,
+      "returncode": 0
+    },
+    {
+      "args": [
+        "shell",
+        "cat /proc/11403/cmdline"
+      ],
+      "start": 1791102269.2983048,
+      "end": 1791102269.3828251,
+      "returncode": 0
+    },
+    {
+      "args": [
+        "shell",
+        "dumpsys activity activities"
+      ],
+      "start": 1791102269.8852472,
+      "end": 1791102270.0294235,
+      "returncode": 0
+    },
+    {
+      "args": [
+        "shell",
+        "pidof org.worldfoundry.wf_game.patchwork"
+      ],
+      "start": 1791102270.0311632,
+      "end": 1791102270.1231844,
+      "returncode": 0
+    },
+    {
+      "args": [
+        "shell",
+        "cat /proc/11403/cmdline"
+      ],
+      "start": 1791102270.1245909,
+      "end": 1791102270.1999276,
+      "returncode": 0
+    },
+    {
+      "args": [
+        "shell",
+        "dumpsys activity activities"
+      ],
+      "start": 1791102270.702141,
+      "end": 1791102270.9144366,
+      "returncode": 0
+    },
+    {
+      "args": [
+        "shell",
+        "pidof org.worldfoundry.wf_game.patchwork"
+      ],
+      "start": 1791102270.9160485,
+      "end": 1791102271.0169654,
+      "returncode": 0
+    },
+    {
+      "args": [
+        "shell",
+        "cat /proc/11403/cmdline"
+      ],
+      "start": 1791102271.0186203,
+      "end": 1791102271.1441302,
+      "returncode": 0
+    },
+    {
+      "args": [
+        "shell",
+        "dumpsys activity activities"
+      ],
+      "start": 1791102271.6473176,
+      "end": 1791102271.938883,
+      "returncode": 0
+    },
+    {
+      "args": [
+        "shell",
+        "pidof org.worldfoundry.wf_game.patchwork"
+      ],
+      "start": 1791102271.941264,
+      "end": 1791102272.0844524,
+      "returncode": 0
+    },
+    {
+      "args": [
+        "shell",
+        "cat /proc/11403/cmdline"
+      ],
+      "start": 1791102272.0856538,
+      "end": 1791102272.1582024,
+      "returncode": 0
+    },
+    {
+      "args": [
+        "shell",
+        "dumpsys activity activities"
+      ],
+      "start": 1791102272.660534,
+      "end": 1791102272.9610224,
+      "returncode": 0
+    },
+    {
+      "args": [
+        "shell",
+        "pidof org.worldfoundry.wf_game.patchwork"
+      ],
+      "start": 1791102272.9627676,
+      "end": 1791102273.054043,
+      "returncode": 0
+    },
+    {
+      "args": [
+        "shell",
+        "cat /proc/11403/cmdline"
+      ],
+      "start": 1791102273.055251,
+      "end": 1791102273.147862,
+      "returncode": 0
+    },
+    {
+      "args": [
+        "shell",
+        "dumpsys activity activities"
+      ],
+      "start": 1791102273.6501877,
+      "end": 1791102273.9612699,
+      "returncode": 0
+    },
+    {
+      "args": [
+        "shell",
+        "pidof org.worldfoundry.wf_game.patchwork"
+      ],
+      "start": 1791102273.9633598,
+      "end": 1791102274.0534723,
+      "returncode": 0
+    },
+    {
+      "args": [
+        "shell",
+        "cat /proc/11403/cmdline"
+      ],
+      "start": 1791102274.0547872,
+      "end": 1791102274.1296804,
+      "returncode": 0
+    },
+    {
+      "args": [
+        "shell",
+        "dumpsys activity activities"
+      ],
+      "start": 1791102274.6322172,
+      "end": 1791102274.7762835,
+      "returncode": 0
+    },
+    {
+      "args": [
+        "shell",
+        "pidof org.worldfoundry.wf_game.patchwork"
+      ],
+      "start": 1791102274.777982,
+      "end": 1791102274.8723142,
+      "returncode": 0
+    },
+    {
+      "args": [
+        "shell",
+        "cat /proc/11403/cmdline"
+      ],
+      "start": 1791102274.873623,
+      "end": 1791102274.967277,
+      "returncode": 0
+    },
+    {
+      "args": [
+        "shell",
+        "dumpsys activity activities"
+      ],
+      "start": 1791102275.469828,
+      "end": 1791102275.7816386,
+      "returncode": 0
+    },
+    {
+      "args": [
+        "shell",
+        "pidof org.worldfoundry.wf_game.patchwork"
+      ],
+      "start": 1791102275.783369,
+      "end": 1791102275.8827116,
+      "returncode": 0
+    },
+    {
+      "args": [
+        "shell",
+        "cat /proc/11403/cmdline"
+      ],
+      "start": 1791102275.8840168,
+      "end": 1791102275.982982,
+      "returncode": 0
+    },
+    {
+      "args": [
+        "shell",
+        "dumpsys activity activities"
+      ],
+      "start": 1791102276.485767,
+      "end": 1791102276.6110923,
+      "returncode": 0
+    },
+    {
+      "args": [
+        "shell",
+        "pidof org.worldfoundry.wf_game.patchwork"
+      ],
+      "start": 1791102276.6124263,
+      "end": 1791102276.711207,
+      "returncode": 0
+    },
+    {
+      "args": [
+        "shell",
+        "cat /proc/11403/cmdline"
+      ],
+      "start": 1791102276.7125309,
+      "end": 1791102276.7932634,
+      "returncode": 0
+    },
+    {
+      "args": [
+        "shell",
+        "dumpsys activity activities"
+      ],
+      "start": 1791102277.2957635,
+      "end": 1791102277.429357,
+      "returncode": 0
+    },
+    {
+      "args": [
+        "shell",
+        "pidof org.worldfoundry.wf_game.patchwork"
+      ],
+      "start": 1791102277.4309378,
+      "end": 1791102277.6087875,
+      "returncode": 0
+    },
+    {
+      "args": [
+        "shell",
+        "cat /proc/11403/cmdline"
+      ],
+      "start": 1791102277.6100276,
+      "end": 1791102277.7499535,
+      "returncode": 0
+    },
+    {
+      "args": [
+        "shell",
+        "dumpsys activity activities"
+      ],
+      "start": 1791102278.2523553,
+      "end": 1791102278.4413085,
+      "returncode": 0
+    },
+    {
+      "args": [
+        "shell",
+        "pidof org.worldfoundry.wf_game.patchwork"
+      ],
+      "start": 1791102278.4431891,
+      "end": 1791102278.5404181,
+      "returncode": 0
+    },
+    {
+      "args": [
+        "shell",
+        "cat /proc/11403/cmdline"
+      ],
+      "start": 1791102278.5414412,
+      "end": 1791102278.6175327,
+      "returncode": 0
+    },
+    {
+      "args": [
+        "shell",
+        "dumpsys activity activities"
+      ],
+      "start": 1791102279.1200137,
+      "end": 1791102279.2379105,
+      "returncode": 0
+    },
+    {
+      "args": [
+        "shell",
+        "pidof org.worldfoundry.wf_game.patchwork"
+      ],
+      "start": 1791102279.2394605,
+      "end": 1791102279.35433,
+      "returncode": 0
+    },
+    {
+      "args": [
+        "shell",
+        "cat /proc/11403/cmdline"
+      ],
+      "start": 1791102279.3556802,
+      "end": 1791102279.4238858,
+      "returncode": 0
+    },
+    {
+      "args": [
+        "shell",
+        "dumpsys activity activities"
+      ],
+      "start": 1791102279.926541,
+      "end": 1791102280.080066,
+      "returncode": 0
+    },
+    {
+      "args": [
+        "shell",
+        "pidof org.worldfoundry.wf_game.patchwork"
+      ],
+      "start": 1791102280.0830085,
+      "end": 1791102280.1734583,
+      "returncode": 0
+    },
+    {
+      "args": [
+        "shell",
+        "cat /proc/11403/cmdline"
+      ],
+      "start": 1791102280.1748066,
+      "end": 1791102280.2821684,
+      "returncode": 0
+    },
+    {
+      "args": [
+        "shell",
+        "dumpsys activity activities"
+      ],
+      "start": 1791102280.7847302,
+      "end": 1791102280.9423022,
+      "returncode": 0
+    },
+    {
+      "args": [
+        "shell",
+        "pidof org.worldfoundry.wf_game.patchwork"
+      ],
+      "start": 1791102280.9440958,
+      "end": 1791102281.05329,
+      "returncode": 0
+    },
+    {
+      "args": [
+        "shell",
+        "cat /proc/11403/cmdline"
+      ],
+      "start": 1791102281.0548043,
+      "end": 1791102281.1382005,
+      "returncode": 0
+    },
+    {
+      "args": [
+        "shell",
+        "dumpsys activity activities"
+      ],
+      "start": 1791102281.6409106,
+      "end": 1791102281.915635,
+      "returncode": 0
+    },
+    {
+      "args": [
+        "shell",
+        "pidof org.worldfoundry.wf_game.patchwork"
+      ],
+      "start": 1791102281.9173415,
+      "end": 1791102282.0662022,
+      "returncode": 0
+    },
+    {
+      "args": [
+        "shell",
+        "cat /proc/11403/cmdline"
+      ],
+      "start": 1791102282.0676022,
+      "end": 1791102282.2058108,
+      "returncode": 0
+    },
+    {
+      "args": [
+        "shell",
+        "dumpsys activity activities"
+      ],
+      "start": 1791102282.7081838,
+      "end": 1791102282.9665515,
+      "returncode": 0
+    },
+    {
+      "args": [
+        "shell",
+        "pidof org.worldfoundry.wf_game.patchwork"
+      ],
+      "start": 1791102282.9684517,
+      "end": 1791102283.0642412,
+      "returncode": 0
+    },
+    {
+      "args": [
+        "shell",
+        "cat /proc/11403/cmdline"
+      ],
+      "start": 1791102283.0658045,
+      "end": 1791102283.1628296,
+      "returncode": 0
+    },
+    {
+      "args": [
+        "shell",
+        "dumpsys activity activities"
+      ],
+      "start": 1791102283.665567,
+      "end": 1791102283.8832479,
+      "returncode": 0
+    },
+    {
+      "args": [
+        "shell",
+        "pidof org.worldfoundry.wf_game.patchwork"
+      ],
+      "start": 1791102283.8852043,
+      "end": 1791102283.9764614,
+      "returncode": 0
+    },
+    {
+      "args": [
+        "shell",
+        "cat /proc/11403/cmdline"
+      ],
+      "start": 1791102283.97813,
+      "end": 1791102284.059878,
+      "returncode": 0
+    },
+    {
+      "args": [
+        "shell",
+        "dumpsys activity activities"
+      ],
+      "start": 1791102284.5624335,
+      "end": 1791102284.7884424,
+      "returncode": 0
+    },
+    {
+      "args": [
+        "shell",
+        "pidof org.worldfoundry.wf_game.patchwork"
+      ],
+      "start": 1791102284.790089,
+      "end": 1791102284.9103549,
+      "returncode": 0
+    },
+    {
+      "args": [
+        "shell",
+        "cat /proc/11403/cmdline"
+      ],
+      "start": 1791102284.9117467,
+      "end": 1791102284.9838004,
+      "returncode": 0
+    },
+    {
+      "args": [
+        "shell",
+        "dumpsys activity activities"
+      ],
+      "start": 1791102285.4868693,
+      "end": 1791102285.7024841,
+      "returncode": 0
+    },
+    {
+      "args": [
+        "shell",
+        "pidof org.worldfoundry.wf_game.patchwork"
+      ],
+      "start": 1791102285.70455,
+      "end": 1791102285.7986374,
+      "returncode": 0
+    },
+    {
+      "args": [
+        "shell",
+        "cat /proc/11403/cmdline"
+      ],
+      "start": 1791102285.8000348,
+      "end": 1791102285.8801289,
+      "returncode": 0
+    },
+    {
+      "args": [
+        "shell",
+        "dumpsys activity activities"
+      ],
+      "start": 1791102286.3826337,
+      "end": 1791102286.5823674,
+      "returncode": 0
+    },
+    {
+      "args": [
+        "shell",
+        "pidof org.worldfoundry.wf_game.patchwork"
+      ],
+      "start": 1791102286.5841036,
+      "end": 1791102286.6982844,
+      "returncode": 0
+    },
+    {
+      "args": [
+        "shell",
+        "cat /proc/11403/cmdline"
+      ],
+      "start": 1791102286.6997707,
+      "end": 1791102286.7969575,
+      "returncode": 0
+    },
+    {
+      "args": [
+        "shell",
+        "dumpsys activity activities"
+      ],
+      "start": 1791102287.2994723,
+      "end": 1791102287.4664538,
+      "returncode": 0
+    },
+    {
+      "args": [
+        "shell",
+        "pidof org.worldfoundry.wf_game.patchwork"
+      ],
+      "start": 1791102287.468178,
+      "end": 1791102287.592551,
+      "returncode": 0
+    },
+    {
+      "args": [
+        "shell",
+        "cat /proc/11403/cmdline"
+      ],
+      "start": 1791102287.5939968,
+      "end": 1791102287.6807272,
+      "returncode": 0
+    },
+    {
+      "args": [
+        "shell",
+        "dumpsys activity activities"
+      ],
+      "start": 1791102288.183313,
+      "end": 1791102288.467747,
+      "returncode": 0
+    },
+    {
+      "args": [
+        "shell",
+        "pidof org.worldfoundry.wf_game.patchwork"
+      ],
+      "start": 1791102288.469541,
+      "end": 1791102288.5704303,
+      "returncode": 0
+    },
+    {
+      "args": [
+        "shell",
+        "cat /proc/11403/cmdline"
+      ],
+      "start": 1791102288.5718522,
+      "end": 1791102288.6521597,
+      "returncode": 0
+    },
+    {
+      "args": [
+        "shell",
+        "dumpsys activity activities"
+      ],
+      "start": 1791102289.1546593,
+      "end": 1791102289.3322592,
+      "returncode": 0
+    },
+    {
+      "args": [
+        "shell",
+        "pidof org.worldfoundry.wf_game.patchwork"
+      ],
+      "start": 1791102289.333921,
+      "end": 1791102289.4364324,
+      "returncode": 0
+    },
+    {
+      "args": [
+        "shell",
+        "cat /proc/11403/cmdline"
+      ],
+      "start": 1791102289.4378986,
+      "end": 1791102289.5350094,
+      "returncode": 0
+    },
+    {
+      "args": [
+        "shell",
+        "dumpsys activity activities"
+      ],
+      "start": 1791102290.037561,
+      "end": 1791102290.3138072,
+      "returncode": 0
+    },
+    {
+      "args": [
+        "shell",
+        "pidof org.worldfoundry.wf_game.patchwork"
+      ],
+      "start": 1791102290.3152895,
+      "end": 1791102290.4634874,
+      "returncode": 0
+    },
+    {
+      "args": [
+        "shell",
+        "cat /proc/11403/cmdline"
+      ],
+      "start": 1791102290.4648662,
+      "end": 1791102290.5468984,
+      "returncode": 0
+    },
+    {
+      "args": [
+        "shell",
+        "dumpsys activity activities"
+      ],
+      "start": 1791102291.049442,
+      "end": 1791102291.3545072,
+      "returncode": 0
+    },
+    {
+      "args": [
+        "shell",
+        "pidof org.worldfoundry.wf_game.patchwork"
+      ],
+      "start": 1791102291.3559797,
+      "end": 1791102291.4386604,
+      "returncode": 0
+    },
+    {
+      "args": [
+        "shell",
+        "cat /proc/11403/cmdline"
+      ],
+      "start": 1791102291.4400113,
+      "end": 1791102291.5241227,
+      "returncode": 0
+    },
+    {
+      "args": [
+        "shell",
+        "dumpsys activity activities"
+      ],
+      "start": 1791102292.0271091,
+      "end": 1791102292.208899,
+      "returncode": 0
+    },
+    {
+      "args": [
+        "shell",
+        "pidof org.worldfoundry.wf_game.patchwork"
+      ],
+      "start": 1791102292.2106416,
+      "end": 1791102292.3017344,
+      "returncode": 0
+    },
+    {
+      "args": [
+        "shell",
+        "cat /proc/11403/cmdline"
+      ],
+      "start": 1791102292.3031247,
+      "end": 1791102292.3776875,
+      "returncode": 0
+    },
+    {
+      "args": [
+        "shell",
+        "dumpsys activity activities"
+      ],
+      "start": 1791102292.8801587,
+      "end": 1791102293.1756663,
+      "returncode": 0
+    },
+    {
+      "args": [
+        "shell",
+        "pidof org.worldfoundry.wf_game.patchwork"
+      ],
+      "start": 1791102293.1772587,
+      "end": 1791102293.26869,
+      "returncode": 0
+    },
+    {
+      "args": [
+        "shell",
+        "cat /proc/11403/cmdline"
+      ],
+      "start": 1791102293.2702823,
+      "end": 1791102293.3520772,
+      "returncode": 0
+    },
+    {
+      "args": [
+        "shell",
+        "dumpsys activity activities"
+      ],
+      "start": 1791102293.8550367,
+      "end": 1791102294.0079744,
+      "returncode": 0
+    },
+    {
+      "args": [
+        "shell",
+        "pidof org.worldfoundry.wf_game.patchwork"
+      ],
+      "start": 1791102294.009646,
+      "end": 1791102294.0887163,
+      "returncode": 0
+    },
+    {
+      "args": [
+        "shell",
+        "cat /proc/11403/cmdline"
+      ],
+      "start": 1791102294.0900078,
+      "end": 1791102294.162408,
+      "returncode": 0
+    },
+    {
+      "args": [
+        "shell",
+        "dumpsys activity activities"
+      ],
+      "start": 1791102294.665071,
+      "end": 1791102294.791392,
+      "returncode": 0
+    },
+    {
+      "args": [
+        "shell",
+        "pidof org.worldfoundry.wf_game.patchwork"
+      ],
+      "start": 1791102294.7934856,
+      "end": 1791102294.9125662,
+      "returncode": 0
+    },
+    {
+      "args": [
+        "shell",
+        "cat /proc/11403/cmdline"
+      ],
+      "start": 1791102294.9141138,
+      "end": 1791102295.035521,
+      "returncode": 0
+    },
+    {
+      "args": [
+        "shell",
+        "dumpsys activity activities"
+      ],
+      "start": 1791102295.5382502,
+      "end": 1791102295.8421233,
+      "returncode": 0
+    },
+    {
+      "args": [
+        "shell",
+        "pidof org.worldfoundry.wf_game.patchwork"
+      ],
+      "start": 1791102295.8439918,
+      "end": 1791102295.9324512,
+      "returncode": 0
+    },
+    {
+      "args": [
+        "shell",
+        "cat /proc/11403/cmdline"
+      ],
+      "start": 1791102295.9338229,
+      "end": 1791102296.005011,
+      "returncode": 0
+    },
+    {
+      "args": [
+        "shell",
+        "dumpsys activity activities"
+      ],
+      "start": 1791102296.5072234,
+      "end": 1791102296.680594,
+      "returncode": 0
+    },
+    {
+      "args": [
+        "shell",
+        "pidof org.worldfoundry.wf_game.patchwork"
+      ],
+      "start": 1791102296.682446,
+      "end": 1791102296.782501,
+      "returncode": 0
+    },
+    {
+      "args": [
+        "shell",
+        "cat /proc/11403/cmdline"
+      ],
+      "start": 1791102296.7838619,
+      "end": 1791102296.8648298,
+      "returncode": 0
+    },
+    {
+      "args": [
+        "shell",
+        "dumpsys activity activities"
+      ],
+      "start": 1791102297.3683012,
+      "end": 1791102297.4959464,
+      "returncode": 0
+    },
+    {
+      "args": [
+        "shell",
+        "pidof org.worldfoundry.wf_game.patchwork"
+      ],
+      "start": 1791102297.4981205,
+      "end": 1791102297.593477,
+      "returncode": 0
+    },
+    {
+      "args": [
+        "shell",
+        "cat /proc/11403/cmdline"
+      ],
+      "start": 1791102297.594857,
+      "end": 1791102297.6813476,
+      "returncode": 0
+    },
+    {
+      "args": [
+        "shell",
+        "dumpsys activity activities"
+      ],
+      "start": 1791102298.1840906,
+      "end": 1791102298.3240025,
+      "returncode": 0
+    },
+    {
+      "args": [
+        "shell",
+        "pidof org.worldfoundry.wf_game.patchwork"
+      ],
+      "start": 1791102298.3257675,
+      "end": 1791102298.434714,
+      "returncode": 0
+    },
+    {
+      "args": [
+        "shell",
+        "cat /proc/11403/cmdline"
+      ],
+      "start": 1791102298.4359004,
+      "end": 1791102298.524191,
+      "returncode": 0
+    },
+    {
+      "args": [
+        "shell",
+        "dumpsys activity activities"
+      ],
+      "start": 1791102299.026463,
+      "end": 1791102299.325103,
+      "returncode": 0
+    },
+    {
+      "args": [
+        "shell",
+        "pidof org.worldfoundry.wf_game.patchwork"
+      ],
+      "start": 1791102299.3267646,
+      "end": 1791102299.4487703,
+      "returncode": 0
+    },
+    {
+      "args": [
+        "shell",
+        "cat /proc/11403/cmdline"
+      ],
+      "start": 1791102299.4514513,
+      "end": 1791102299.534374,
+      "returncode": 0
+    },
+    {
+      "args": [
+        "shell",
+        "dumpsys activity activities"
+      ],
+      "start": 1791102300.0369964,
+      "end": 1791102300.15501,
+      "returncode": 0
+    },
+    {
+      "args": [
+        "shell",
+        "pidof org.worldfoundry.wf_game.patchwork"
+      ],
+      "start": 1791102300.1566212,
+      "end": 1791102300.3183007,
+      "returncode": 0
+    },
+    {
+      "args": [
+        "shell",
+        "cat /proc/11403/cmdline"
+      ],
+      "start": 1791102300.3196857,
+      "end": 1791102300.4661572,
+      "returncode": 0
+    },
+    {
+      "args": [
+        "shell",
+        "dumpsys activity activities"
+      ],
+      "start": 1791102300.9688127,
+      "end": 1791102301.1665668,
+      "returncode": 0
+    },
+    {
+      "args": [
+        "shell",
+        "pidof org.worldfoundry.wf_game.patchwork"
+      ],
+      "start": 1791102301.1681697,
+      "end": 1791102301.2596376,
+      "returncode": 0
+    },
+    {
+      "args": [
+        "shell",
+        "cat /proc/11403/cmdline"
+      ],
+      "start": 1791102301.2610402,
+      "end": 1791102301.3591278,
+      "returncode": 0
+    },
+    {
+      "args": [
+        "shell",
+        "dumpsys activity activities"
+      ],
+      "start": 1791102301.8616655,
+      "end": 1791102302.0060968,
+      "returncode": 0
+    },
+    {
+      "args": [
+        "shell",
+        "pidof org.worldfoundry.wf_game.patchwork"
+      ],
+      "start": 1791102302.0076413,
+      "end": 1791102302.1202965,
+      "returncode": 0
+    },
+    {
+      "args": [
+        "shell",
+        "cat /proc/11403/cmdline"
+      ],
+      "start": 1791102302.1217582,
+      "end": 1791102302.1967416,
+      "returncode": 0
+    },
+    {
+      "args": [
+        "shell",
+        "dumpsys activity activities"
+      ],
+      "start": 1791102302.7006419,
+      "end": 1791102302.8035195,
+      "returncode": 0
+    },
+    {
+      "args": [
+        "shell",
+        "pidof org.worldfoundry.wf_game.patchwork"
+      ],
+      "start": 1791102302.8052235,
+      "end": 1791102302.8890824,
+      "returncode": 0
+    },
+    {
+      "args": [
+        "shell",
+        "cat /proc/11403/cmdline"
+      ],
+      "start": 1791102302.8905087,
+      "end": 1791102302.9739335,
+      "returncode": 0
+    },
+    {
+      "args": [
+        "shell",
+        "dumpsys activity activities"
+      ],
+      "start": 1791102303.476526,
+      "end": 1791102303.7100842,
+      "returncode": 0
+    },
+    {
+      "args": [
+        "shell",
+        "pidof org.worldfoundry.wf_game.patchwork"
+      ],
+      "start": 1791102303.7123246,
+      "end": 1791102303.8097522,
+      "returncode": 0
+    },
+    {
+      "args": [
+        "shell",
+        "cat /proc/11403/cmdline"
+      ],
+      "start": 1791102303.8110747,
+      "end": 1791102303.8834398,
+      "returncode": 0
+    },
+    {
+      "args": [
+        "shell",
+        "dumpsys activity activities"
+      ],
+      "start": 1791102304.3860903,
+      "end": 1791102304.653534,
+      "returncode": 0
+    },
+    {
+      "args": [
+        "shell",
+        "pidof org.worldfoundry.wf_game.patchwork"
+      ],
+      "start": 1791102304.6552577,
+      "end": 1791102304.7866201,
+      "returncode": 0
+    },
+    {
+      "args": [
+        "shell",
+        "cat /proc/11403/cmdline"
+      ],
+      "start": 1791102304.7880182,
+      "end": 1791102304.8685799,
+      "returncode": 0
+    },
+    {
+      "args": [
+        "shell",
+        "dumpsys activity activities"
+      ],
+      "start": 1791102305.3712988,
+      "end": 1791102305.6744294,
+      "returncode": 0
+    },
+    {
+      "args": [
+        "shell",
+        "pidof org.worldfoundry.wf_game.patchwork"
+      ],
+      "start": 1791102305.6761012,
+      "end": 1791102305.825484,
+      "returncode": 0
+    },
+    {
+      "args": [
+        "shell",
+        "cat /proc/11403/cmdline"
+      ],
+      "start": 1791102305.8269053,
+      "end": 1791102305.909594,
+      "returncode": 0
+    },
+    {
+      "args": [
+        "shell",
+        "dumpsys activity activities"
+      ],
+      "start": 1791102306.4127953,
+      "end": 1791102306.5340552,
+      "returncode": 0
+    },
+    {
+      "args": [
+        "shell",
+        "pidof org.worldfoundry.wf_game.patchwork"
+      ],
+      "start": 1791102306.5358067,
+      "end": 1791102306.6619995,
+      "returncode": 0
+    },
+    {
+      "args": [
+        "shell",
+        "cat /proc/11403/cmdline"
+      ],
+      "start": 1791102306.6635385,
+      "end": 1791102306.764478,
+      "returncode": 0
+    },
+    {
+      "args": [
+        "shell",
+        "dumpsys activity activities"
+      ],
+      "start": 1791102307.2668204,
+      "end": 1791102307.5367386,
+      "returncode": 0
+    },
+    {
+      "args": [
+        "shell",
+        "pidof org.worldfoundry.wf_game.patchwork"
+      ],
+      "start": 1791102307.538574,
+      "end": 1791102307.635016,
+      "returncode": 0
+    },
+    {
+      "args": [
+        "shell",
+        "cat /proc/11403/cmdline"
+      ],
+      "start": 1791102307.6363232,
+      "end": 1791102307.7378345,
+      "returncode": 0
+    },
+    {
+      "args": [
+        "shell",
+        "dumpsys activity activities"
+      ],
+      "start": 1791102308.2405593,
+      "end": 1791102308.5524926,
+      "returncode": 0
+    },
+    {
+      "args": [
+        "shell",
+        "pidof org.worldfoundry.wf_game.patchwork"
+      ],
+      "start": 1791102308.554278,
+      "end": 1791102308.6490843,
+      "returncode": 0
+    },
+    {
+      "args": [
+        "shell",
+        "cat /proc/11403/cmdline"
+      ],
+      "start": 1791102308.650395,
+      "end": 1791102308.7276754,
+      "returncode": 0
+    },
+    {
+      "args": [
+        "shell",
+        "dumpsys activity activities"
+      ],
+      "start": 1791102309.230208,
+      "end": 1791102309.4007812,
+      "returncode": 0
+    },
+    {
+      "args": [
+        "shell",
+        "pidof org.worldfoundry.wf_game.patchwork"
+      ],
+      "start": 1791102309.4025354,
+      "end": 1791102309.7269886,
+      "returncode": 0
+    },
+    {
+      "args": [
+        "shell",
+        "cat /proc/11403/cmdline"
+      ],
+      "start": 1791102309.7280073,
+      "end": 1791102309.7971206,
+      "returncode": 0
+    },
+    {
+      "args": [
+        "shell",
+        "dumpsys activity activities"
+      ],
+      "start": 1791102310.2999592,
+      "end": 1791102310.4741077,
+      "returncode": 0
+    },
+    {
+      "args": [
+        "shell",
+        "pidof org.worldfoundry.wf_game.patchwork"
+      ],
+      "start": 1791102310.4755616,
+      "end": 1791102310.5632982,
+      "returncode": 0
+    },
+    {
+      "args": [
+        "shell",
+        "cat /proc/11403/cmdline"
+      ],
+      "start": 1791102310.564964,
+      "end": 1791102310.6336792,
+      "returncode": 0
+    },
+    {
+      "args": [
+        "shell",
+        "dumpsys activity activities"
+      ],
+      "start": 1791102311.1358924,
+      "end": 1791102311.2251475,
+      "returncode": 0
+    },
+    {
+      "args": [
+        "shell",
+        "pidof org.worldfoundry.wf_game.patchwork"
+      ],
+      "start": 1791102311.2275398,
+      "end": 1791102311.3173714,
+      "returncode": 0
+    },
+    {
+      "args": [
+        "shell",
+        "cat /proc/11403/cmdline"
+      ],
+      "start": 1791102311.318797,
+      "end": 1791102311.3968115,
+      "returncode": 0
+    },
+    {
+      "args": [
+        "shell",
+        "dumpsys activity activities"
+      ],
+      "start": 1791102311.8995252,
+      "end": 1791102312.151408,
+      "returncode": 0
+    },
+    {
+      "args": [
+        "shell",
+        "pidof org.worldfoundry.wf_game.patchwork"
+      ],
+      "start": 1791102312.1529255,
+      "end": 1791102312.280462,
+      "returncode": 0
+    },
+    {
+      "args": [
+        "shell",
+        "cat /proc/11403/cmdline"
+      ],
+      "start": 1791102312.2818027,
+      "end": 1791102312.4077468,
+      "returncode": 0
+    },
+    {
+      "args": [
+        "shell",
+        "dumpsys activity activities"
+      ],
+      "start": 1791102312.9096062,
+      "end": 1791102313.0445273,
+      "returncode": 0
+    },
+    {
+      "args": [
+        "shell",
+        "pidof org.worldfoundry.wf_game.patchwork"
+      ],
+      "start": 1791102313.0461524,
+      "end": 1791102313.163844,
+      "returncode": 0
+    },
+    {
+      "args": [
+        "shell",
+        "cat /proc/11403/cmdline"
+      ],
+      "start": 1791102313.1654053,
+      "end": 1791102313.2359045,
+      "returncode": 0
+    },
+    {
+      "args": [
+        "shell",
+        "dumpsys activity activities"
+      ],
+      "start": 1791102313.7383769,
+      "end": 1791102313.876717,
+      "returncode": 0
+    },
+    {
+      "args": [
+        "shell",
+        "pidof org.worldfoundry.wf_game.patchwork"
+      ],
+      "start": 1791102313.8784153,
+      "end": 1791102313.983053,
+      "returncode": 0
+    },
+    {
+      "args": [
+        "shell",
+        "cat /proc/11403/cmdline"
+      ],
+      "start": 1791102313.9843125,
+      "end": 1791102314.063991,
+      "returncode": 0
+    },
+    {
+      "args": [
+        "shell",
+        "dumpsys activity activities"
+      ],
+      "start": 1791102314.5664918,
+      "end": 1791102314.7109396,
+      "returncode": 0
+    },
+    {
+      "args": [
+        "shell",
+        "pidof org.worldfoundry.wf_game.patchwork"
+      ],
+      "start": 1791102314.712494,
+      "end": 1791102314.8350842,
+      "returncode": 0
+    },
+    {
+      "args": [
+        "shell",
+        "cat /proc/11403/cmdline"
+      ],
+      "start": 1791102314.836554,
+      "end": 1791102314.975773,
+      "returncode": 0
+    },
+    {
+      "args": [
+        "shell",
+        "dumpsys activity activities"
+      ],
+      "start": 1791102315.4785357,
+      "end": 1791102315.7249308,
+      "returncode": 0
+    },
+    {
+      "args": [
+        "shell",
+        "pidof org.worldfoundry.wf_game.patchwork"
+      ],
+      "start": 1791102315.7272089,
+      "end": 1791102315.816165,
+      "returncode": 0
+    },
+    {
+      "args": [
+        "shell",
+        "cat /proc/11403/cmdline"
+      ],
+      "start": 1791102315.8175719,
+      "end": 1791102315.9163806,
+      "returncode": 0
+    },
+    {
+      "args": [
+        "shell",
+        "dumpsys activity activities"
+      ],
+      "start": 1791102316.4201546,
+      "end": 1791102316.5440931,
+      "returncode": 0
+    },
+    {
+      "args": [
+        "shell",
+        "pidof org.worldfoundry.wf_game.patchwork"
+      ],
+      "start": 1791102316.5457118,
+      "end": 1791102316.642214,
+      "returncode": 0
+    },
+    {
+      "args": [
+        "shell",
+        "cat /proc/11403/cmdline"
+      ],
+      "start": 1791102316.6435695,
+      "end": 1791102316.7234821,
+      "returncode": 0
+    },
+    {
+      "args": [
+        "shell",
+        "dumpsys activity activities"
+      ],
+      "start": 1791102317.2264097,
+      "end": 1791102317.3721817,
+      "returncode": 0
+    },
+    {
+      "args": [
+        "shell",
+        "pidof org.worldfoundry.wf_game.patchwork"
+      ],
+      "start": 1791102317.3738506,
+      "end": 1791102317.4805958,
+      "returncode": 0
+    },
+    {
+      "args": [
+        "shell",
+        "cat /proc/11403/cmdline"
+      ],
+      "start": 1791102317.4820714,
+      "end": 1791102317.5605094,
+      "returncode": 0
+    },
+    {
+      "args": [
+        "shell",
+        "dumpsys activity activities"
+      ],
+      "start": 1791102318.063141,
+      "end": 1791102318.2602093,
+      "returncode": 0
+    },
+    {
+      "args": [
+        "shell",
+        "pidof org.worldfoundry.wf_game.patchwork"
+      ],
+      "start": 1791102318.2616422,
+      "end": 1791102318.3741481,
+      "returncode": 0
+    },
+    {
+      "args": [
+        "shell",
+        "cat /proc/11403/cmdline"
+      ],
+      "start": 1791102318.3756773,
+      "end": 1791102318.4927163,
+      "returncode": 0
+    },
+    {
+      "args": [
+        "shell",
+        "dumpsys activity activities"
+      ],
+      "start": 1791102318.995194,
+      "end": 1791102319.1979148,
+      "returncode": 0
+    },
+    {
+      "args": [
+        "shell",
+        "pidof org.worldfoundry.wf_game.patchwork"
+      ],
+      "start": 1791102319.199171,
+      "end": 1791102319.2966745,
+      "returncode": 0
+    },
+    {
+      "args": [
+        "shell",
+        "cat /proc/11403/cmdline"
+      ],
+      "start": 1791102319.2980804,
+      "end": 1791102319.372803,
+      "returncode": 0
+    },
+    {
+      "args": [
+        "shell",
+        "dumpsys activity activities"
+      ],
+      "start": 1791102319.875504,
+      "end": 1791102320.008842,
+      "returncode": 0
+    },
+    {
+      "args": [
+        "shell",
+        "pidof org.worldfoundry.wf_game.patchwork"
+      ],
+      "start": 1791102320.010482,
+      "end": 1791102320.0969236,
+      "returncode": 0
+    },
+    {
+      "args": [
+        "shell",
+        "cat /proc/11403/cmdline"
+      ],
+      "start": 1791102320.0983737,
+      "end": 1791102320.1848164,
+      "returncode": 0
+    },
+    {
+      "args": [
+        "shell",
+        "dumpsys activity activities"
+      ],
+      "start": 1791102320.6874824,
+      "end": 1791102320.8435972,
+      "returncode": 0
+    },
+    {
+      "args": [
+        "shell",
+        "pidof org.worldfoundry.wf_game.patchwork"
+      ],
+      "start": 1791102320.8448396,
+      "end": 1791102320.9406645,
+      "returncode": 0
+    },
+    {
+      "args": [
+        "shell",
+        "cat /proc/11403/cmdline"
+      ],
+      "start": 1791102320.9416556,
+      "end": 1791102321.0277972,
+      "returncode": 0
+    },
+    {
+      "args": [
+        "shell",
+        "dumpsys activity activities"
+      ],
+      "start": 1791102321.529597,
+      "end": 1791102321.6623356,
+      "returncode": 0
+    },
+    {
+      "args": [
+        "shell",
+        "pidof org.worldfoundry.wf_game.patchwork"
+      ],
+      "start": 1791102321.663806,
+      "end": 1791102321.8067045,
+      "returncode": 0
+    },
+    {
+      "args": [
+        "shell",
+        "cat /proc/11403/cmdline"
+      ],
+      "start": 1791102321.8080218,
+      "end": 1791102321.8767333,
+      "returncode": 0
+    },
+    {
+      "args": [
+        "shell",
+        "dumpsys activity activities"
+      ],
+      "start": 1791102322.3792956,
+      "end": 1791102322.5907557,
+      "returncode": 0
+    },
+    {
+      "args": [
+        "shell",
+        "pidof org.worldfoundry.wf_game.patchwork"
+      ],
+      "start": 1791102322.59219,
+      "end": 1791102322.6749327,
+      "returncode": 0
+    },
+    {
+      "args": [
+        "shell",
+        "cat /proc/11403/cmdline"
+      ],
+      "start": 1791102322.6763692,
+      "end": 1791102322.7585676,
+      "returncode": 0
+    },
+    {
+      "args": [
+        "shell",
+        "dumpsys activity activities"
+      ],
+      "start": 1791102323.260572,
+      "end": 1791102323.3799357,
+      "returncode": 0
+    },
+    {
+      "args": [
+        "shell",
+        "pidof org.worldfoundry.wf_game.patchwork"
+      ],
+      "start": 1791102323.381259,
+      "end": 1791102323.5733294,
+      "returncode": 0
+    },
+    {
+      "args": [
+        "shell",
+        "cat /proc/11403/cmdline"
+      ],
+      "start": 1791102323.5749102,
+      "end": 1791102323.7069366,
+      "returncode": 0
+    },
+    {
+      "args": [
+        "shell",
+        "dumpsys activity activities"
+      ],
+      "start": 1791102324.2089047,
+      "end": 1791102324.417953,
+      "returncode": 0
+    },
+    {
+      "args": [
+        "shell",
+        "pidof org.worldfoundry.wf_game.patchwork"
+      ],
+      "start": 1791102324.4191604,
+      "end": 1791102324.5042655,
+      "returncode": 0
+    },
+    {
+      "args": [
+        "shell",
+        "cat /proc/11403/cmdline"
+      ],
+      "start": 1791102324.5058832,
+      "end": 1791102324.5867794,
+      "returncode": 0
+    },
+    {
+      "args": [
+        "shell",
+        "dumpsys activity activities"
+      ],
+      "start": 1791102325.088667,
+      "end": 1791102325.256324,
+      "returncode": 0
+    },
+    {
+      "args": [
+        "shell",
+        "pidof org.worldfoundry.wf_game.patchwork"
+      ],
+      "start": 1791102325.2576413,
+      "end": 1791102325.3387537,
+      "returncode": 0
+    },
+    {
+      "args": [
+        "shell",
+        "cat /proc/11403/cmdline"
+      ],
+      "start": 1791102325.339812,
+      "end": 1791102325.4146402,
+      "returncode": 0
+    },
+    {
+      "args": [
+        "shell",
+        "dumpsys activity activities"
+      ],
+      "start": 1791102325.917574,
+      "end": 1791102326.0700045,
+      "returncode": 0
+    },
+    {
+      "args": [
+        "shell",
+        "pidof org.worldfoundry.wf_game.patchwork"
+      ],
+      "start": 1791102326.0719163,
+      "end": 1791102326.1673467,
+      "returncode": 0
+    },
+    {
+      "args": [
+        "shell",
+        "cat /proc/11403/cmdline"
+      ],
+      "start": 1791102326.1683178,
+      "end": 1791102326.2565072,
+      "returncode": 0
+    },
+    {
+      "args": [
+        "shell",
+        "dumpsys activity activities"
+      ],
+      "start": 1791102326.758372,
+      "end": 1791102326.9420054,
+      "returncode": 0
+    },
+    {
+      "args": [
+        "shell",
+        "pidof org.worldfoundry.wf_game.patchwork"
+      ],
+      "start": 1791102326.9439626,
+      "end": 1791102327.0773466,
+      "returncode": 0
+    },
+    {
+      "args": [
+        "shell",
+        "cat /proc/11403/cmdline"
+      ],
+      "start": 1791102327.0784833,
+      "end": 1791102327.1568594,
+      "returncode": 0
+    },
+    {
+      "args": [
+        "shell",
+        "dumpsys activity activities"
+      ],
+      "start": 1791102327.6588526,
+      "end": 1791102327.9045577,
+      "returncode": 0
+    },
+    {
+      "args": [
+        "shell",
+        "pidof org.worldfoundry.wf_game.patchwork"
+      ],
+      "start": 1791102327.9058707,
+      "end": 1791102328.0152473,
+      "returncode": 0
+    },
+    {
+      "args": [
+        "shell",
+        "cat /proc/11403/cmdline"
+      ],
+      "start": 1791102328.0163946,
+      "end": 1791102328.0787175,
+      "returncode": 0
+    },
+    {
+      "args": [
+        "shell",
+        "dumpsys activity activities"
+      ],
+      "start": 1791102328.580569,
+      "end": 1791102328.7074013,
+      "returncode": 0
+    },
+    {
+      "args": [
+        "shell",
+        "pidof org.worldfoundry.wf_game.patchwork"
+      ],
+      "start": 1791102328.7093108,
+      "end": 1791102328.8003194,
+      "returncode": 0
+    },
+    {
+      "args": [
+        "shell",
+        "cat /proc/11403/cmdline"
+      ],
+      "start": 1791102328.8012936,
+      "end": 1791102328.8863635,
+      "returncode": 0
+    },
+    {
+      "args": [
+        "shell",
+        "dumpsys activity activities"
+      ],
+      "start": 1791102329.3889327,
+      "end": 1791102329.6581774,
+      "returncode": 0
+    },
+    {
+      "args": [
+        "shell",
+        "pidof org.worldfoundry.wf_game.patchwork"
+      ],
+      "start": 1791102329.6595476,
+      "end": 1791102329.8205183,
+      "returncode": 0
+    },
+    {
+      "args": [
+        "shell",
+        "cat /proc/11403/cmdline"
+      ],
+      "start": 1791102329.8216882,
+      "end": 1791102329.88998,
+      "returncode": 0
+    },
+    {
+      "args": [
+        "shell",
+        "dumpsys activity activities"
+      ],
+      "start": 1791102330.3919587,
+      "end": 1791102330.5568378,
+      "returncode": 0
+    },
+    {
+      "args": [
+        "shell",
+        "pidof org.worldfoundry.wf_game.patchwork"
+      ],
+      "start": 1791102330.558128,
+      "end": 1791102330.653608,
+      "returncode": 0
+    },
+    {
+      "args": [
+        "shell",
+        "cat /proc/11403/cmdline"
+      ],
+      "start": 1791102330.6548066,
+      "end": 1791102330.737207,
+      "returncode": 0
+    },
+    {
+      "args": [
+        "shell",
+        "dumpsys activity activities"
+      ],
+      "start": 1791102331.2393773,
+      "end": 1791102331.412309,
+      "returncode": 0
+    },
+    {
+      "args": [
+        "shell",
+        "pidof org.worldfoundry.wf_game.patchwork"
+      ],
+      "start": 1791102331.4135795,
+      "end": 1791102331.4944053,
+      "returncode": 0
+    },
+    {
+      "args": [
+        "shell",
+        "cat /proc/11403/cmdline"
+      ],
+      "start": 1791102331.4954622,
+      "end": 1791102331.5730753,
+      "returncode": 0
+    },
+    {
+      "args": [
+        "shell",
+        "dumpsys activity activities"
+      ],
+      "start": 1791102332.0752037,
+      "end": 1791102332.2285233,
+      "returncode": 0
+    },
+    {
+      "args": [
+        "shell",
+        "pidof org.worldfoundry.wf_game.patchwork"
+      ],
+      "start": 1791102332.2304718,
+      "end": 1791102332.3858178,
+      "returncode": 0
+    },
+    {
+      "args": [
+        "shell",
+        "cat /proc/11403/cmdline"
+      ],
+      "start": 1791102332.387245,
+      "end": 1791102332.521834,
+      "returncode": 0
+    },
+    {
+      "args": [
+        "shell",
+        "dumpsys activity activities"
+      ],
+      "start": 1791102333.0246897,
+      "end": 1791102333.22157,
+      "returncode": 0
+    },
+    {
+      "args": [
+        "shell",
+        "pidof org.worldfoundry.wf_game.patchwork"
+      ],
+      "start": 1791102333.2229156,
+      "end": 1791102333.3076556,
+      "returncode": 0
+    },
+    {
+      "args": [
+        "shell",
+        "cat /proc/11403/cmdline"
+      ],
+      "start": 1791102333.3087645,
+      "end": 1791102333.3881047,
+      "returncode": 0
+    },
+    {
+      "args": [
+        "shell",
+        "dumpsys activity activities"
+      ],
+      "start": 1791102333.8900218,
+      "end": 1791102334.7883377,
+      "returncode": 0
+    },
+    {
+      "args": [
+        "shell",
+        "pidof org.worldfoundry.wf_game.patchwork"
+      ],
+      "start": 1791102334.7898448,
+      "end": 1791102334.9158545,
+      "returncode": 0
+    },
+    {
+      "args": [
+        "shell",
+        "cat /proc/11403/cmdline"
+      ],
+      "start": 1791102334.917284,
+      "end": 1791102334.9813845,
+      "returncode": 0
+    },
+    {
+      "args": [
+        "shell",
+        "dumpsys activity activities"
+      ],
+      "start": 1791102335.4837494,
+      "end": 1791102335.6860352,
+      "returncode": 0
+    },
+    {
+      "args": [
+        "shell",
+        "pidof org.worldfoundry.wf_game.patchwork"
+      ],
+      "start": 1791102335.6871262,
+      "end": 1791102335.789261,
+      "returncode": 0
+    },
+    {
+      "args": [
+        "shell",
+        "cat /proc/11403/cmdline"
+      ],
+      "start": 1791102335.7903829,
+      "end": 1791102335.8769412,
+      "returncode": 0
+    },
+    {
+      "args": [
+        "shell",
+        "dumpsys activity activities"
+      ],
+      "start": 1791102336.37886,
+      "end": 1791102336.5106375,
+      "returncode": 0
+    },
+    {
+      "args": [
+        "shell",
+        "pidof org.worldfoundry.wf_game.patchwork"
+      ],
+      "start": 1791102336.512046,
+      "end": 1791102336.6091337,
+      "returncode": 0
+    },
+    {
+      "args": [
+        "shell",
+        "cat /proc/11403/cmdline"
+      ],
+      "start": 1791102336.610194,
+      "end": 1791102336.716122,
+      "returncode": 0
+    },
+    {
+      "args": [
+        "shell",
+        "dumpsys activity activities"
+      ],
+      "start": 1791102337.2180274,
+      "end": 1791102337.5195296,
+      "returncode": 0
+    },
+    {
+      "args": [
+        "shell",
+        "pidof org.worldfoundry.wf_game.patchwork"
+      ],
+      "start": 1791102337.5209,
+      "end": 1791102337.666265,
+      "returncode": 0
+    },
+    {
+      "args": [
+        "shell",
+        "cat /proc/11403/cmdline"
+      ],
+      "start": 1791102337.6677074,
+      "end": 1791102337.7718728,
+      "returncode": 0
+    },
+    {
+      "args": [
+        "shell",
+        "dumpsys activity activities"
+      ],
+      "start": 1791102338.273851,
+      "end": 1791102338.5387404,
+      "returncode": 0
+    },
+    {
+      "args": [
+        "shell",
+        "pidof org.worldfoundry.wf_game.patchwork"
+      ],
+      "start": 1791102338.5404012,
+      "end": 1791102338.6224139,
+      "returncode": 0
+    },
+    {
+      "args": [
+        "shell",
+        "cat /proc/11403/cmdline"
+      ],
+      "start": 1791102338.6234355,
+      "end": 1791102338.7076855,
+      "returncode": 0
+    },
+    {
+      "args": [
+        "shell",
+        "dumpsys activity activities"
+      ],
+      "start": 1791102339.209764,
+      "end": 1791102339.410709,
+      "returncode": 0
+    },
+    {
+      "args": [
+        "shell",
+        "pidof org.worldfoundry.wf_game.patchwork"
+      ],
+      "start": 1791102339.4124331,
+      "end": 1791102339.5133727,
+      "returncode": 0
+    },
+    {
+      "args": [
+        "shell",
+        "cat /proc/11403/cmdline"
+      ],
+      "start": 1791102339.514514,
+      "end": 1791102339.6231039,
+      "returncode": 0
+    },
+    {
+      "args": [
+        "shell",
+        "dumpsys activity activities"
+      ],
+      "start": 1791102340.125783,
+      "end": 1791102340.4100978,
+      "returncode": 0
+    },
+    {
+      "args": [
+        "shell",
+        "pidof org.worldfoundry.wf_game.patchwork"
+      ],
+      "start": 1791102340.411731,
+      "end": 1791102340.515206,
+      "returncode": 0
+    },
+    {
+      "args": [
+        "shell",
+        "cat /proc/11403/cmdline"
+      ],
+      "start": 1791102340.5161479,
+      "end": 1791102340.5807288,
+      "returncode": 0
+    },
+    {
+      "args": [
+        "shell",
+        "dumpsys activity activities"
+      ],
+      "start": 1791102341.082905,
+      "end": 1791102341.2299905,
+      "returncode": 0
+    },
+    {
+      "args": [
+        "shell",
+        "pidof org.worldfoundry.wf_game.patchwork"
+      ],
+      "start": 1791102341.231161,
+      "end": 1791102341.3297539,
+      "returncode": 0
+    },
+    {
+      "args": [
+        "shell",
+        "cat /proc/11403/cmdline"
+      ],
+      "start": 1791102341.3312738,
+      "end": 1791102341.4112673,
+      "returncode": 0
+    },
+    {
+      "args": [
+        "shell",
+        "dumpsys activity activities"
+      ],
+      "start": 1791102341.9132123,
+      "end": 1791102342.0725195,
+      "returncode": 0
+    },
+    {
+      "args": [
+        "shell",
+        "pidof org.worldfoundry.wf_game.patchwork"
+      ],
+      "start": 1791102342.073814,
+      "end": 1791102342.1933913,
+      "returncode": 0
+    },
+    {
+      "args": [
+        "shell",
+        "cat /proc/11403/cmdline"
+      ],
+      "start": 1791102342.1945271,
+      "end": 1791102342.317604,
+      "returncode": 0
+    },
+    {
+      "args": [
+        "shell",
+        "dumpsys activity activities"
+      ],
+      "start": 1791102342.8198438,
+      "end": 1791102343.0611289,
+      "returncode": 0
+    },
+    {
+      "args": [
+        "shell",
+        "pidof org.worldfoundry.wf_game.patchwork"
+      ],
+      "start": 1791102343.0622952,
+      "end": 1791102343.1586077,
+      "returncode": 0
+    },
+    {
+      "args": [
+        "shell",
+        "cat /proc/11403/cmdline"
+      ],
+      "start": 1791102343.1600223,
+      "end": 1791102343.2411385,
+      "returncode": 0
+    },
+    {
+      "args": [
+        "shell",
+        "dumpsys activity activities"
+      ],
+      "start": 1791102343.7429793,
+      "end": 1791102343.8677425,
+      "returncode": 0
+    },
+    {
+      "args": [
+        "shell",
+        "pidof org.worldfoundry.wf_game.patchwork"
+      ],
+      "start": 1791102343.8690414,
+      "end": 1791102343.9763823,
+      "returncode": 0
+    },
+    {
+      "args": [
+        "shell",
+        "cat /proc/11403/cmdline"
+      ],
+      "start": 1791102343.9775543,
+      "end": 1791102344.0725527,
+      "returncode": 0
+    },
+    {
+      "args": [
+        "shell",
+        "dumpsys activity activities"
+      ],
+      "start": 1791102344.5745022,
+      "end": 1791102344.7786736,
+      "returncode": 0
+    },
+    {
+      "args": [
+        "shell",
+        "pidof org.worldfoundry.wf_game.patchwork"
+      ],
+      "start": 1791102344.7798584,
+      "end": 1791102344.8734863,
+      "returncode": 0
+    },
+    {
+      "args": [
+        "shell",
+        "cat /proc/11403/cmdline"
+      ],
+      "start": 1791102344.8747532,
+      "end": 1791102344.9722342,
+      "returncode": 0
+    },
+    {
+      "args": [
+        "shell",
+        "dumpsys activity activities"
+      ],
+      "start": 1791102345.4748373,
+      "end": 1791102345.7072527,
+      "returncode": 0
+    },
+    {
+      "args": [
+        "shell",
+        "pidof org.worldfoundry.wf_game.patchwork"
+      ],
+      "start": 1791102345.7089794,
+      "end": 1791102345.818955,
+      "returncode": 0
+    },
+    {
+      "args": [
+        "shell",
+        "cat /proc/11403/cmdline"
+      ],
+      "start": 1791102345.8200161,
+      "end": 1791102345.9047577,
+      "returncode": 0
+    },
+    {
+      "args": [
+        "shell",
+        "dumpsys activity activities"
+      ],
+      "start": 1791102346.4072955,
+      "end": 1791102346.6251702,
+      "returncode": 0
+    },
+    {
+      "args": [
+        "shell",
+        "pidof org.worldfoundry.wf_game.patchwork"
+      ],
+      "start": 1791102346.627178,
+      "end": 1791102346.7085404,
+      "returncode": 0
+    },
+    {
+      "args": [
+        "shell",
+        "cat /proc/11403/cmdline"
+      ],
+      "start": 1791102346.7100282,
+      "end": 1791102346.8094203,
+      "returncode": 0
+    },
+    {
+      "args": [
+        "shell",
+        "dumpsys activity activities"
+      ],
+      "start": 1791102347.3116016,
+      "end": 1791102347.5760548,
+      "returncode": 0
+    },
+    {
+      "args": [
+        "shell",
+        "pidof org.worldfoundry.wf_game.patchwork"
+      ],
+      "start": 1791102347.577323,
+      "end": 1791102347.6576886,
+      "returncode": 0
+    },
+    {
+      "args": [
+        "shell",
+        "cat /proc/11403/cmdline"
+      ],
+      "start": 1791102347.6587472,
+      "end": 1791102347.7339737,
+      "returncode": 0
+    },
+    {
+      "args": [
+        "shell",
+        "dumpsys activity activities"
+      ],
+      "start": 1791102348.2365572,
+      "end": 1791102348.3745246,
+      "returncode": 0
+    },
+    {
+      "args": [
+        "shell",
+        "pidof org.worldfoundry.wf_game.patchwork"
+      ],
+      "start": 1791102348.3761618,
+      "end": 1791102348.4656248,
+      "returncode": 0
+    },
+    {
+      "args": [
+        "shell",
+        "cat /proc/11403/cmdline"
+      ],
+      "start": 1791102348.4666731,
+      "end": 1791102348.5438678,
+      "returncode": 0
+    },
+    {
+      "args": [
+        "shell",
+        "dumpsys activity activities"
+      ],
+      "start": 1791102349.0457017,
+      "end": 1791102349.1978471,
+      "returncode": 0
+    },
+    {
+      "args": [
+        "shell",
+        "pidof org.worldfoundry.wf_game.patchwork"
+      ],
+      "start": 1791102349.199183,
+      "end": 1791102349.3147058,
+      "returncode": 0
+    },
+    {
+      "args": [
+        "shell",
+        "cat /proc/11403/cmdline"
+      ],
+      "start": 1791102349.3157136,
+      "end": 1791102349.3885686,
+      "returncode": 0
+    },
+    {
+      "args": [
+        "shell",
+        "dumpsys activity activities"
+      ],
+      "start": 1791102349.8906798,
+      "end": 1791102350.0216086,
+      "returncode": 0
+    },
+    {
+      "args": [
+        "shell",
+        "pidof org.worldfoundry.wf_game.patchwork"
+      ],
+      "start": 1791102350.0239406,
+      "end": 1791102350.116666,
+      "returncode": 0
+    },
+    {
+      "args": [
+        "shell",
+        "cat /proc/11403/cmdline"
+      ],
+      "start": 1791102350.1180959,
+      "end": 1791102350.196504,
+      "returncode": 0
+    },
+    {
+      "args": [
+        "shell",
+        "dumpsys activity activities"
+      ],
+      "start": 1791102350.6984997,
+      "end": 1791102350.842857,
+      "returncode": 0
+    },
+    {
+      "args": [
+        "shell",
+        "pidof org.worldfoundry.wf_game.patchwork"
+      ],
+      "start": 1791102350.8441088,
+      "end": 1791102350.9543915,
+      "returncode": 0
+    },
+    {
+      "args": [
+        "shell",
+        "cat /proc/11403/cmdline"
+      ],
+      "start": 1791102350.9558287,
+      "end": 1791102351.0388846,
+      "returncode": 0
+    },
+    {
+      "args": [
+        "shell",
+        "dumpsys activity activities"
+      ],
+      "start": 1791102351.5405326,
+      "end": 1791102351.6431227,
+      "returncode": 0
+    },
+    {
+      "args": [
+        "shell",
+        "pidof org.worldfoundry.wf_game.patchwork"
+      ],
+      "start": 1791102351.644304,
+      "end": 1791102351.7421677,
+      "returncode": 0
+    },
+    {
+      "args": [
+        "shell",
+        "cat /proc/11403/cmdline"
+      ],
+      "start": 1791102351.743246,
+      "end": 1791102351.8138332,
+      "returncode": 0
+    },
+    {
+      "args": [
+        "shell",
+        "dumpsys activity activities"
+      ],
+      "start": 1791102352.315813,
+      "end": 1791102352.414163,
+      "returncode": 0
+    },
+    {
+      "args": [
+        "shell",
+        "pidof org.worldfoundry.wf_game.patchwork"
+      ],
+      "start": 1791102352.415977,
+      "end": 1791102352.5443473,
+      "returncode": 0
+    },
+    {
+      "args": [
+        "shell",
+        "cat /proc/11403/cmdline"
+      ],
+      "start": 1791102352.545558,
+      "end": 1791102352.611484,
+      "returncode": 0
+    },
+    {
+      "args": [
+        "shell",
+        "dumpsys activity activities"
+      ],
+      "start": 1791102353.1137655,
+      "end": 1791102353.3077834,
+      "returncode": 0
+    },
+    {
+      "args": [
+        "shell",
+        "pidof org.worldfoundry.wf_game.patchwork"
+      ],
+      "start": 1791102353.3093305,
+      "end": 1791102353.4042327,
+      "returncode": 0
+    },
+    {
+      "args": [
+        "shell",
+        "cat /proc/11403/cmdline"
+      ],
+      "start": 1791102353.4056902,
+      "end": 1791102353.540028,
+      "returncode": 0
+    },
+    {
+      "args": [
+        "shell",
+        "dumpsys activity activities"
+      ],
+      "start": 1791102354.0430756,
+      "end": 1791102354.333599,
+      "returncode": 0
+    },
+    {
+      "args": [
+        "shell",
+        "pidof org.worldfoundry.wf_game.patchwork"
+      ],
+      "start": 1791102354.3353276,
+      "end": 1791102354.4222236,
+      "returncode": 0
+    },
+    {
+      "args": [
+        "shell",
+        "cat /proc/11403/cmdline"
+      ],
+      "start": 1791102354.4235973,
+      "end": 1791102354.5179431,
+      "returncode": 0
+    },
+    {
+      "args": [
+        "shell",
+        "dumpsys activity activities"
+      ],
+      "start": 1791102355.0202649,
+      "end": 1791102355.1565259,
+      "returncode": 0
+    },
+    {
+      "args": [
+        "shell",
+        "pidof org.worldfoundry.wf_game.patchwork"
+      ],
+      "start": 1791102355.1581304,
+      "end": 1791102355.2562711,
+      "returncode": 0
+    },
+    {
+      "args": [
+        "shell",
+        "cat /proc/11403/cmdline"
+      ],
+      "start": 1791102355.257639,
+      "end": 1791102355.357136,
+      "returncode": 0
+    },
+    {
+      "args": [
+        "shell",
+        "dumpsys activity activities"
+      ],
+      "start": 1791102355.8592582,
+      "end": 1791102356.1613877,
+      "returncode": 0
+    },
+    {
+      "args": [
+        "shell",
+        "pidof org.worldfoundry.wf_game.patchwork"
+      ],
+      "start": 1791102356.1630533,
+      "end": 1791102356.2534986,
+      "returncode": 0
+    },
+    {
+      "args": [
+        "shell",
+        "cat /proc/11403/cmdline"
+      ],
+      "start": 1791102356.2548153,
+      "end": 1791102356.325285,
+      "returncode": 0
+    },
+    {
+      "args": [
+        "shell",
+        "dumpsys activity activities"
+      ],
+      "start": 1791102356.827622,
+      "end": 1791102356.9881382,
+      "returncode": 0
+    },
+    {
+      "args": [
+        "shell",
+        "pidof org.worldfoundry.wf_game.patchwork"
+      ],
+      "start": 1791102356.9896462,
+      "end": 1791102357.0818617,
+      "returncode": 0
+    },
+    {
+      "args": [
+        "shell",
+        "cat /proc/11403/cmdline"
+      ],
+      "start": 1791102357.0831373,
+      "end": 1791102357.1650047,
+      "returncode": 0
+    },
+    {
+      "args": [
+        "shell",
+        "dumpsys activity activities"
+      ],
+      "start": 1791102357.667306,
+      "end": 1791102357.7976036,
+      "returncode": 0
+    },
+    {
+      "args": [
+        "shell",
+        "pidof org.worldfoundry.wf_game.patchwork"
+      ],
+      "start": 1791102357.798959,
+      "end": 1791102357.9170144,
+      "returncode": 0
+    },
+    {
+      "args": [
+        "shell",
+        "cat /proc/11403/cmdline"
+      ],
+      "start": 1791102357.918331,
+      "end": 1791102358.0016165,
+      "returncode": 0
+    },
+    {
+      "args": [
+        "shell",
+        "dumpsys activity activities"
+      ],
+      "start": 1791102358.5043156,
+      "end": 1791102358.616766,
+      "returncode": 0
+    },
+    {
+      "args": [
+        "shell",
+        "pidof org.worldfoundry.wf_game.patchwork"
+      ],
+      "start": 1791102358.6183333,
+      "end": 1791102358.7330294,
+      "returncode": 0
+    },
+    {
+      "args": [
+        "shell",
+        "cat /proc/11403/cmdline"
+      ],
+      "start": 1791102358.7344756,
+      "end": 1791102358.8078122,
+      "returncode": 0
+    },
+    {
+      "args": [
+        "shell",
+        "dumpsys activity activities"
+      ],
+      "start": 1791102359.3102348,
+      "end": 1791102359.4418073,
+      "returncode": 0
+    },
+    {
+      "args": [
+        "shell",
+        "pidof org.worldfoundry.wf_game.patchwork"
+      ],
+      "start": 1791102359.4434342,
+      "end": 1791102359.5585816,
+      "returncode": 0
+    },
+    {
+      "args": [
+        "shell",
+        "cat /proc/11403/cmdline"
+      ],
+      "start": 1791102359.55982,
+      "end": 1791102359.6567402,
+      "returncode": 0
+    },
+    {
+      "args": [
+        "shell",
+        "dumpsys activity activities"
+      ],
+      "start": 1791102360.1592677,
+      "end": 1791102360.4657736,
+      "returncode": 0
+    },
+    {
+      "args": [
+        "shell",
+        "pidof org.worldfoundry.wf_game.patchwork"
+      ],
+      "start": 1791102360.4674113,
+      "end": 1791102360.5555875,
+      "returncode": 0
+    },
+    {
+      "args": [
+        "shell",
+        "cat /proc/11403/cmdline"
+      ],
+      "start": 1791102360.5569627,
+      "end": 1791102360.6327958,
+      "returncode": 0
+    },
+    {
+      "args": [
+        "shell",
+        "dumpsys activity activities"
+      ],
+      "start": 1791102361.1352468,
+      "end": 1791102361.2776318,
+      "returncode": 0
+    },
+    {
+      "args": [
+        "shell",
+        "pidof org.worldfoundry.wf_game.patchwork"
+      ],
+      "start": 1791102361.279507,
+      "end": 1791102361.3704906,
+      "returncode": 0
+    },
+    {
+      "args": [
+        "shell",
+        "cat /proc/11403/cmdline"
+      ],
+      "start": 1791102361.3717082,
+      "end": 1791102361.4739687,
+      "returncode": 0
+    },
+    {
+      "args": [
+        "shell",
+        "dumpsys activity activities"
+      ],
+      "start": 1791102361.9764738,
+      "end": 1791102362.11943,
+      "returncode": 0
+    },
+    {
+      "args": [
+        "shell",
+        "pidof org.worldfoundry.wf_game.patchwork"
+      ],
+      "start": 1791102362.1212687,
+      "end": 1791102362.2031636,
+      "returncode": 0
+    },
+    {
+      "args": [
+        "shell",
+        "cat /proc/11403/cmdline"
+      ],
+      "start": 1791102362.20454,
+      "end": 1791102362.2745144,
+      "returncode": 0
+    },
+    {
+      "args": [
+        "shell",
+        "dumpsys activity activities"
+      ],
+      "start": 1791102362.777609,
+      "end": 1791102362.9213598,
+      "returncode": 0
+    },
+    {
+      "args": [
+        "shell",
+        "pidof org.worldfoundry.wf_game.patchwork"
+      ],
+      "start": 1791102362.9230056,
+      "end": 1791102363.01781,
+      "returncode": 0
+    },
+    {
+      "args": [
+        "shell",
+        "cat /proc/11403/cmdline"
+      ],
+      "start": 1791102363.0190616,
+      "end": 1791102363.0976,
+      "returncode": 0
+    },
+    {
+      "args": [
+        "shell",
+        "dumpsys activity activities"
+      ],
+      "start": 1791102363.6001794,
+      "end": 1791102363.7524216,
+      "returncode": 0
+    },
+    {
+      "args": [
+        "shell",
+        "pidof org.worldfoundry.wf_game.patchwork"
+      ],
+      "start": 1791102363.754125,
+      "end": 1791102363.841545,
+      "returncode": 0
+    },
+    {
+      "args": [
+        "shell",
+        "cat /proc/11403/cmdline"
+      ],
+      "start": 1791102363.84279,
+      "end": 1791102363.9193678,
+      "returncode": 0
+    },
+    {
+      "args": [
+        "shell",
+        "dumpsys activity activities"
+      ],
+      "start": 1791102364.4219258,
+      "end": 1791102364.575463,
+      "returncode": 0
+    },
+    {
+      "args": [
+        "shell",
+        "pidof org.worldfoundry.wf_game.patchwork"
+      ],
+      "start": 1791102364.5771441,
+      "end": 1791102364.6715643,
+      "returncode": 0
+    },
+    {
+      "args": [
+        "shell",
+        "cat /proc/11403/cmdline"
+      ],
+      "start": 1791102364.6728818,
+      "end": 1791102364.7372248,
+      "returncode": 0
+    },
+    {
+      "args": [
+        "shell",
+        "dumpsys activity activities"
+      ],
+      "start": 1791102365.2397945,
+      "end": 1791102365.3825517,
+      "returncode": 0
+    },
+    {
+      "args": [
+        "shell",
+        "pidof org.worldfoundry.wf_game.patchwork"
+      ],
+      "start": 1791102365.3839738,
+      "end": 1791102365.466487,
+      "returncode": 0
+    },
+    {
+      "args": [
+        "shell",
+        "cat /proc/11403/cmdline"
+      ],
+      "start": 1791102365.4677455,
+      "end": 1791102365.5467765,
+      "returncode": 0
+    },
+    {
+      "args": [
+        "shell",
+        "dumpsys activity activities"
+      ],
+      "start": 1791102366.0492446,
+      "end": 1791102366.1763196,
+      "returncode": 0
+    },
+    {
+      "args": [
+        "shell",
+        "pidof org.worldfoundry.wf_game.patchwork"
+      ],
+      "start": 1791102366.1779664,
+      "end": 1791102366.2972069,
+      "returncode": 0
+    },
+    {
+      "args": [
+        "shell",
+        "cat /proc/11403/cmdline"
+      ],
+      "start": 1791102366.298512,
+      "end": 1791102366.4378648,
+      "returncode": 0
+    },
+    {
+      "args": [
+        "shell",
+        "dumpsys activity activities"
+      ],
+      "start": 1791102366.9401674,
+      "end": 1791102367.0936096,
+      "returncode": 0
+    },
+    {
+      "args": [
+        "shell",
+        "pidof org.worldfoundry.wf_game.patchwork"
+      ],
+      "start": 1791102367.095181,
+      "end": 1791102367.1877317,
+      "returncode": 0
+    },
+    {
+      "args": [
+        "shell",
+        "cat /proc/11403/cmdline"
+      ],
+      "start": 1791102367.1891418,
+      "end": 1791102367.2866125,
+      "returncode": 0
+    },
+    {
+      "args": [
+        "shell",
+        "dumpsys activity activities"
+      ],
+      "start": 1791102367.789119,
+      "end": 1791102367.935251,
+      "returncode": 0
+    },
+    {
+      "args": [
+        "shell",
+        "pidof org.worldfoundry.wf_game.patchwork"
+      ],
+      "start": 1791102367.9367676,
+      "end": 1791102368.0247443,
+      "returncode": 0
+    },
+    {
+      "args": [
+        "shell",
+        "cat /proc/11403/cmdline"
+      ],
+      "start": 1791102368.0261464,
+      "end": 1791102368.096505,
+      "returncode": 0
+    },
+    {
+      "args": [
+        "shell",
+        "dumpsys activity activities"
+      ],
+      "start": 1791102368.5989785,
+      "end": 1791102368.7203698,
+      "returncode": 0
+    },
+    {
+      "args": [
+        "shell",
+        "pidof org.worldfoundry.wf_game.patchwork"
+      ],
+      "start": 1791102368.721943,
+      "end": 1791102368.8197145,
+      "returncode": 0
+    },
+    {
+      "args": [
+        "shell",
+        "cat /proc/11403/cmdline"
+      ],
+      "start": 1791102368.8212585,
+      "end": 1791102368.983954,
+      "returncode": 0
+    },
+    {
+      "args": [
+        "shell",
+        "dumpsys activity activities"
+      ],
+      "start": 1791102369.486454,
+      "end": 1791102369.8515036,
+      "returncode": 0
+    },
+    {
+      "args": [
+        "shell",
+        "pidof org.worldfoundry.wf_game.patchwork"
+      ],
+      "start": 1791102369.8531604,
+      "end": 1791102370.010892,
+      "returncode": 0
+    },
+    {
+      "args": [
+        "shell",
+        "cat /proc/11403/cmdline"
+      ],
+      "start": 1791102370.0120323,
+      "end": 1791102370.2147057,
+      "returncode": 0
+    },
+    {
+      "args": [
+        "shell",
+        "dumpsys activity activities"
+      ],
+      "start": 1791102370.7171676,
+      "end": 1791102370.8993323,
+      "returncode": 0
+    },
+    {
+      "args": [
+        "shell",
+        "pidof org.worldfoundry.wf_game.patchwork"
+      ],
+      "start": 1791102370.9008336,
+      "end": 1791102370.9816387,
+      "returncode": 0
+    },
+    {
+      "args": [
+        "shell",
+        "cat /proc/11403/cmdline"
+      ],
+      "start": 1791102370.982843,
+      "end": 1791102371.0782354,
+      "returncode": 0
+    },
+    {
+      "args": [
+        "shell",
+        "dumpsys activity activities"
+      ],
+      "start": 1791102371.5807462,
+      "end": 1791102371.7418022,
+      "returncode": 0
+    },
+    {
+      "args": [
+        "shell",
+        "pidof org.worldfoundry.wf_game.patchwork"
+      ],
+      "start": 1791102371.7440906,
+      "end": 1791102371.8337214,
+      "returncode": 0
+    },
+    {
+      "args": [
+        "shell",
+        "cat /proc/11403/cmdline"
+      ],
+      "start": 1791102371.8350601,
+      "end": 1791102371.9090157,
+      "returncode": 0
+    },
+    {
+      "args": [
+        "shell",
+        "dumpsys activity activities"
+      ],
+      "start": 1791102372.412145,
+      "end": 1791102372.5412054,
+      "returncode": 0
+    },
+    {
+      "args": [
+        "shell",
+        "pidof org.worldfoundry.wf_game.patchwork"
+      ],
+      "start": 1791102372.5427728,
+      "end": 1791102372.6500783,
+      "returncode": 0
+    },
+    {
+      "args": [
+        "shell",
+        "cat /proc/11403/cmdline"
+      ],
+      "start": 1791102372.6513784,
+      "end": 1791102372.7342534,
+      "returncode": 0
+    },
+    {
+      "args": [
+        "shell",
+        "dumpsys activity activities"
+      ],
+      "start": 1791102373.236483,
+      "end": 1791102373.370951,
+      "returncode": 0
+    },
+    {
+      "args": [
+        "shell",
+        "pidof org.worldfoundry.wf_game.patchwork"
+      ],
+      "start": 1791102373.3725135,
+      "end": 1791102373.5047867,
+      "returncode": 0
+    },
+    {
+      "args": [
+        "shell",
+        "cat /proc/11403/cmdline"
+      ],
+      "start": 1791102373.5059404,
+      "end": 1791102373.5942626,
+      "returncode": 0
+    },
+    {
+      "args": [
+        "shell",
+        "dumpsys activity activities"
+      ],
+      "start": 1791102374.097589,
+      "end": 1791102374.4007778,
+      "returncode": 0
+    },
+    {
+      "args": [
+        "shell",
+        "pidof org.worldfoundry.wf_game.patchwork"
+      ],
+      "start": 1791102374.402405,
+      "end": 1791102374.4854348,
+      "returncode": 0
+    },
+    {
+      "args": [
+        "shell",
+        "cat /proc/11403/cmdline"
+      ],
+      "start": 1791102374.4866865,
+      "end": 1791102374.5647879,
+      "returncode": 0
+    },
+    {
+      "args": [
+        "shell",
+        "dumpsys activity activities"
+      ],
+      "start": 1791102375.067186,
+      "end": 1791102375.2260919,
+      "returncode": 0
+    },
+    {
+      "args": [
+        "shell",
+        "pidof org.worldfoundry.wf_game.patchwork"
+      ],
+      "start": 1791102375.2277455,
+      "end": 1791102375.311227,
+      "returncode": 0
+    },
+    {
+      "args": [
+        "shell",
+        "cat /proc/11403/cmdline"
+      ],
+      "start": 1791102375.3125644,
+      "end": 1791102375.397029,
+      "returncode": 0
+    },
+    {
+      "args": [
+        "shell",
+        "dumpsys activity activities"
+      ],
+      "start": 1791102375.8997114,
+      "end": 1791102376.0178883,
+      "returncode": 0
+    },
+    {
+      "args": [
+        "shell",
+        "pidof org.worldfoundry.wf_game.patchwork"
+      ],
+      "start": 1791102376.019975,
+      "end": 1791102376.106863,
+      "returncode": 0
+    },
+    {
+      "args": [
+        "shell",
+        "cat /proc/11403/cmdline"
+      ],
+      "start": 1791102376.108271,
+      "end": 1791102376.1773074,
+      "returncode": 0
+    },
+    {
+      "args": [
+        "shell",
+        "dumpsys activity activities"
+      ],
+      "start": 1791102376.6798599,
+      "end": 1791102376.8752587,
+      "returncode": 0
+    },
+    {
+      "args": [
+        "shell",
+        "pidof org.worldfoundry.wf_game.patchwork"
+      ],
+      "start": 1791102376.876822,
+      "end": 1791102377.0365057,
+      "returncode": 0
+    },
+    {
+      "args": [
+        "shell",
+        "cat /proc/11403/cmdline"
+      ],
+      "start": 1791102377.0381157,
+      "end": 1791102377.1161983,
+      "returncode": 0
+    },
+    {
+      "args": [
+        "shell",
+        "dumpsys activity activities"
+      ],
+      "start": 1791102377.61846,
+      "end": 1791102377.9169314,
+      "returncode": 0
+    },
+    {
+      "args": [
+        "shell",
+        "pidof org.worldfoundry.wf_game.patchwork"
+      ],
+      "start": 1791102377.9185236,
+      "end": 1791102378.0218754,
+      "returncode": 0
+    },
+    {
+      "args": [
+        "shell",
+        "cat /proc/11403/cmdline"
+      ],
+      "start": 1791102378.0230508,
+      "end": 1791102378.0909517,
+      "returncode": 0
+    },
+    {
+      "args": [
+        "shell",
+        "dumpsys activity activities"
+      ],
+      "start": 1791102378.5934794,
+      "end": 1791102378.889018,
+      "returncode": 0
+    },
+    {
+      "args": [
+        "shell",
+        "pidof org.worldfoundry.wf_game.patchwork"
+      ],
+      "start": 1791102378.8905346,
+      "end": 1791102378.973786,
+      "returncode": 0
+    },
+    {
+      "args": [
+        "shell",
+        "cat /proc/11403/cmdline"
+      ],
+      "start": 1791102378.9749997,
+      "end": 1791102379.0984693,
+      "returncode": 0
+    },
+    {
+      "args": [
+        "shell",
+        "dumpsys activity activities"
+      ],
+      "start": 1791102379.6008344,
+      "end": 1791102379.7293065,
+      "returncode": 0
+    },
+    {
+      "args": [
+        "shell",
+        "pidof org.worldfoundry.wf_game.patchwork"
+      ],
+      "start": 1791102379.7308986,
+      "end": 1791102379.8304157,
+      "returncode": 0
+    },
+    {
+      "args": [
+        "shell",
+        "cat /proc/11403/cmdline"
+      ],
+      "start": 1791102379.8317974,
+      "end": 1791102379.9158235,
+      "returncode": 0
+    },
+    {
+      "args": [
+        "shell",
+        "dumpsys activity activities"
+      ],
+      "start": 1791102380.4182682,
+      "end": 1791102380.5157506,
+      "returncode": 0
+    },
+    {
+      "args": [
+        "shell",
+        "pidof org.worldfoundry.wf_game.patchwork"
+      ],
+      "start": 1791102380.517301,
+      "end": 1791102380.6030452,
+      "returncode": 0
+    },
+    {
+      "args": [
+        "shell",
+        "cat /proc/11403/cmdline"
+      ],
+      "start": 1791102380.6042125,
+      "end": 1791102380.6722476,
+      "returncode": 0
+    },
+    {
+      "args": [
+        "shell",
+        "dumpsys activity activities"
+      ],
+      "start": 1791102381.1745334,
+      "end": 1791102381.3530393,
+      "returncode": 0
+    },
+    {
+      "args": [
+        "shell",
+        "pidof org.worldfoundry.wf_game.patchwork"
+      ],
+      "start": 1791102381.3545597,
+      "end": 1791102381.4532871,
+      "returncode": 0
+    },
+    {
+      "args": [
+        "shell",
+        "cat /proc/11403/cmdline"
+      ],
+      "start": 1791102381.4546468,
+      "end": 1791102381.5453124,
+      "returncode": 0
+    },
+    {
+      "args": [
+        "shell",
+        "dumpsys activity activities"
+      ],
+      "start": 1791102382.0477645,
+      "end": 1791102382.195025,
+      "returncode": 0
+    },
+    {
+      "args": [
+        "shell",
+        "pidof org.worldfoundry.wf_game.patchwork"
+      ],
+      "start": 1791102382.1968617,
+      "end": 1791102382.299653,
+      "returncode": 0
+    },
+    {
+      "args": [
+        "shell",
+        "cat /proc/11403/cmdline"
+      ],
+      "start": 1791102382.3010118,
+      "end": 1791102382.39287,
+      "returncode": 0
+    },
+    {
+      "args": [
+        "shell",
+        "dumpsys activity activities"
+      ],
+      "start": 1791102382.89531,
+      "end": 1791102383.205077,
+      "returncode": 0
+    },
+    {
+      "args": [
+        "shell",
+        "pidof org.worldfoundry.wf_game.patchwork"
+      ],
+      "start": 1791102383.2066836,
+      "end": 1791102383.333251,
+      "returncode": 0
+    },
+    {
+      "args": [
+        "shell",
+        "cat /proc/11403/cmdline"
+      ],
+      "start": 1791102383.3344805,
+      "end": 1791102383.404236,
+      "returncode": 0
+    },
+    {
+      "args": [
+        "shell",
+        "dumpsys activity activities"
+      ],
+      "start": 1791102383.907196,
+      "end": 1791102384.0297835,
+      "returncode": 0
+    },
+    {
+      "args": [
+        "shell",
+        "pidof org.worldfoundry.wf_game.patchwork"
+      ],
+      "start": 1791102384.0313585,
+      "end": 1791102384.1247802,
+      "returncode": 0
+    },
+    {
+      "args": [
+        "shell",
+        "cat /proc/11403/cmdline"
+      ],
+      "start": 1791102384.1260998,
+      "end": 1791102384.206639,
+      "returncode": 0
+    },
+    {
+      "args": [
+        "shell",
+        "dumpsys activity activities"
+      ],
+      "start": 1791102384.7087748,
+      "end": 1791102384.8348582,
+      "returncode": 0
+    },
+    {
+      "args": [
+        "shell",
+        "pidof org.worldfoundry.wf_game.patchwork"
+      ],
+      "start": 1791102384.836431,
+      "end": 1791102384.9311574,
+      "returncode": 0
+    },
+    {
+      "args": [
+        "shell",
+        "cat /proc/11403/cmdline"
+      ],
+      "start": 1791102384.9327784,
+      "end": 1791102385.0117767,
+      "returncode": 0
+    },
+    {
+      "args": [
+        "shell",
+        "dumpsys activity activities"
+      ],
+      "start": 1791102385.5140166,
+      "end": 1791102385.6695764,
+      "returncode": 0
+    },
+    {
+      "args": [
+        "shell",
+        "pidof org.worldfoundry.wf_game.patchwork"
+      ],
+      "start": 1791102385.6709356,
+      "end": 1791102385.7646365,
+      "returncode": 0
+    },
+    {
+      "args": [
+        "shell",
+        "cat /proc/11403/cmdline"
+      ],
+      "start": 1791102385.766029,
+      "end": 1791102385.8315544,
+      "returncode": 0
+    },
+    {
+      "args": [
+        "shell",
+        "dumpsys activity activities"
+      ],
+      "start": 1791102386.333886,
+      "end": 1791102386.4660223,
+      "returncode": 0
+    },
+    {
+      "args": [
+        "shell",
+        "pidof org.worldfoundry.wf_game.patchwork"
+      ],
+      "start": 1791102386.4676564,
+      "end": 1791102386.5783496,
+      "returncode": 0
+    },
+    {
+      "args": [
+        "shell",
+        "cat /proc/11403/cmdline"
+      ],
+      "start": 1791102386.579545,
+      "end": 1791102386.6504269,
+      "returncode": 0
+    },
+    {
+      "args": [
+        "shell",
+        "dumpsys activity activities"
+      ],
+      "start": 1791102387.1528287,
+      "end": 1791102387.3032987,
+      "returncode": 0
+    },
+    {
+      "args": [
+        "shell",
+        "pidof org.worldfoundry.wf_game.patchwork"
+      ],
+      "start": 1791102387.304902,
+      "end": 1791102387.3880408,
+      "returncode": 0
+    },
+    {
+      "args": [
+        "shell",
+        "cat /proc/11403/cmdline"
+      ],
+      "start": 1791102387.3892002,
+      "end": 1791102387.4676323,
+      "returncode": 0
+    },
+    {
+      "args": [
+        "shell",
+        "dumpsys activity activities"
+      ],
+      "start": 1791102387.9701252,
+      "end": 1791102388.1070762,
+      "returncode": 0
+    },
+    {
+      "args": [
+        "shell",
+        "pidof org.worldfoundry.wf_game.patchwork"
+      ],
+      "start": 1791102388.1086671,
+      "end": 1791102388.1912484,
+      "returncode": 0
+    },
+    {
+      "args": [
+        "shell",
+        "cat /proc/11403/cmdline"
+      ],
+      "start": 1791102388.1925123,
+      "end": 1791102388.283475,
+      "returncode": 0
+    },
+    {
+      "args": [
+        "shell",
+        "dumpsys activity activities"
+      ],
+      "start": 1791102388.785951,
+      "end": 1791102388.9272287,
+      "returncode": 0
+    },
+    {
+      "args": [
+        "shell",
+        "pidof org.worldfoundry.wf_game.patchwork"
+      ],
+      "start": 1791102388.9287326,
+      "end": 1791102389.0123498,
+      "returncode": 0
+    },
+    {
+      "args": [
+        "shell",
+        "cat /proc/11403/cmdline"
+      ],
+      "start": 1791102389.0136395,
+      "end": 1791102389.0834048,
+      "returncode": 0
+    },
+    {
+      "args": [
+        "shell",
+        "dumpsys activity activities"
+      ],
+      "start": 1791102389.5858517,
+      "end": 1791102389.7372205,
+      "returncode": 0
+    },
+    {
+      "args": [
+        "shell",
+        "pidof org.worldfoundry.wf_game.patchwork"
+      ],
+      "start": 1791102389.7387352,
+      "end": 1791102389.8369362,
+      "returncode": 0
+    },
+    {
+      "args": [
+        "shell",
+        "cat /proc/11403/cmdline"
+      ],
+      "start": 1791102389.8384376,
+      "end": 1791102389.919022,
+      "returncode": 0
+    },
+    {
+      "args": [
+        "shell",
+        "dumpsys activity activities"
+      ],
+      "start": 1791102390.4230902,
+      "end": 1791102390.5554326,
+      "returncode": 0
+    },
+    {
+      "args": [
+        "shell",
+        "pidof org.worldfoundry.wf_game.patchwork"
+      ],
+      "start": 1791102390.556745,
+      "end": 1791102390.6410077,
+      "returncode": 0
+    },
+    {
+      "args": [
+        "shell",
+        "cat /proc/11403/cmdline"
+      ],
+      "start": 1791102390.6420789,
+      "end": 1791102390.7528617,
+      "returncode": 0
+    },
+    {
+      "args": [
+        "shell",
+        "dumpsys activity activities"
+      ],
+      "start": 1791102391.2551568,
+      "end": 1791102391.3601441,
+      "returncode": 0
+    },
+    {
+      "args": [
+        "shell",
+        "pidof org.worldfoundry.wf_game.patchwork"
+      ],
+      "start": 1791102391.3620749,
+      "end": 1791102391.4535053,
+      "returncode": 0
+    },
+    {
+      "args": [
+        "shell",
+        "cat /proc/11403/cmdline"
+      ],
+      "start": 1791102391.4551294,
+      "end": 1791102391.5309217,
+      "returncode": 0
+    },
+    {
+      "args": [
+        "shell",
+        "dumpsys activity activities"
+      ],
+      "start": 1791102392.0334036,
+      "end": 1791102392.207365,
+      "returncode": 0
+    },
+    {
+      "args": [
+        "shell",
+        "pidof org.worldfoundry.wf_game.patchwork"
+      ],
+      "start": 1791102392.2087483,
+      "end": 1791102392.2976654,
+      "returncode": 0
+    },
+    {
+      "args": [
+        "shell",
+        "cat /proc/11403/cmdline"
+      ],
+      "start": 1791102392.2990346,
+      "end": 1791102392.3736694,
+      "returncode": 0
+    },
+    {
+      "args": [
+        "shell",
+        "dumpsys activity activities"
+      ],
+      "start": 1791102392.8755999,
+      "end": 1791102393.0419397,
+      "returncode": 0
+    },
+    {
+      "args": [
+        "shell",
+        "pidof org.worldfoundry.wf_game.patchwork"
+      ],
+      "start": 1791102393.0434158,
+      "end": 1791102393.1393116,
+      "returncode": 0
+    },
+    {
+      "args": [
+        "shell",
+        "cat /proc/11403/cmdline"
+      ],
+      "start": 1791102393.1405118,
+      "end": 1791102393.2066476,
+      "returncode": 0
+    },
+    {
+      "args": [
+        "shell",
+        "dumpsys activity activities"
+      ],
+      "start": 1791102393.7090151,
+      "end": 1791102393.8433306,
+      "returncode": 0
+    },
+    {
+      "args": [
+        "shell",
+        "pidof org.worldfoundry.wf_game.patchwork"
+      ],
+      "start": 1791102393.8450096,
+      "end": 1791102393.9361887,
+      "returncode": 0
+    },
+    {
+      "args": [
+        "shell",
+        "cat /proc/11403/cmdline"
+      ],
+      "start": 1791102393.9375474,
+      "end": 1791102394.01104,
+      "returncode": 0
+    },
+    {
+      "args": [
+        "shell",
+        "dumpsys activity activities"
+      ],
+      "start": 1791102394.51436,
+      "end": 1791102394.6994843,
+      "returncode": 0
+    },
+    {
+      "args": [
+        "shell",
+        "pidof org.worldfoundry.wf_game.patchwork"
+      ],
+      "start": 1791102394.7012124,
+      "end": 1791102394.7884777,
+      "returncode": 0
+    },
+    {
+      "args": [
+        "shell",
+        "cat /proc/11403/cmdline"
+      ],
+      "start": 1791102394.7896695,
+      "end": 1791102394.861981,
+      "returncode": 0
+    },
+    {
+      "args": [
+        "shell",
+        "dumpsys activity activities"
+      ],
+      "start": 1791102395.3644903,
+      "end": 1791102395.4710698,
+      "returncode": 0
+    },
+    {
+      "args": [
+        "shell",
+        "pidof org.worldfoundry.wf_game.patchwork"
+      ],
+      "start": 1791102395.4726343,
+      "end": 1791102395.5704787,
+      "returncode": 0
+    },
+    {
+      "args": [
+        "shell",
+        "cat /proc/11403/cmdline"
+      ],
+      "start": 1791102395.5718298,
+      "end": 1791102395.6462748,
+      "returncode": 0
+    },
+    {
+      "args": [
+        "shell",
+        "dumpsys activity activities"
+      ],
+      "start": 1791102396.148664,
+      "end": 1791102396.3227654,
+      "returncode": 0
+    },
+    {
+      "args": [
+        "shell",
+        "pidof org.worldfoundry.wf_game.patchwork"
+      ],
+      "start": 1791102396.3243837,
+      "end": 1791102396.423639,
+      "returncode": 0
+    },
+    {
+      "args": [
+        "shell",
+        "cat /proc/11403/cmdline"
+      ],
+      "start": 1791102396.425005,
+      "end": 1791102396.5019908,
+      "returncode": 0
+    },
+    {
+      "args": [
+        "shell",
+        "dumpsys activity activities"
+      ],
+      "start": 1791102397.004392,
+      "end": 1791102397.1297398,
+      "returncode": 0
+    },
+    {
+      "args": [
+        "shell",
+        "pidof org.worldfoundry.wf_game.patchwork"
+      ],
+      "start": 1791102397.1313255,
+      "end": 1791102397.216766,
+      "returncode": 0
+    },
+    {
+      "args": [
+        "shell",
+        "cat /proc/11403/cmdline"
+      ],
+      "start": 1791102397.2180812,
+      "end": 1791102397.2988307,
+      "returncode": 0
+    },
+    {
+      "args": [
+        "shell",
+        "dumpsys activity activities"
+      ],
+      "start": 1791102397.8013353,
+      "end": 1791102397.9774117,
+      "returncode": 0
+    },
+    {
+      "args": [
+        "shell",
+        "pidof org.worldfoundry.wf_game.patchwork"
+      ],
+      "start": 1791102397.979072,
+      "end": 1791102398.0803053,
+      "returncode": 0
+    },
+    {
+      "args": [
+        "shell",
+        "cat /proc/11403/cmdline"
+      ],
+      "start": 1791102398.0816293,
+      "end": 1791102398.1761847,
+      "returncode": 0
+    },
+    {
+      "args": [
+        "shell",
+        "dumpsys activity activities"
+      ],
+      "start": 1791102398.678683,
+      "end": 1791102398.7721226,
+      "returncode": 0
+    },
+    {
+      "args": [
+        "shell",
+        "pidof org.worldfoundry.wf_game.patchwork"
+      ],
+      "start": 1791102398.7737277,
+      "end": 1791102398.8621879,
+      "returncode": 0
+    },
+    {
+      "args": [
+        "shell",
+        "cat /proc/11403/cmdline"
+      ],
+      "start": 1791102398.8635974,
+      "end": 1791102398.9431565,
+      "returncode": 0
+    },
+    {
+      "args": [
+        "shell",
+        "dumpsys activity activities"
+      ],
+      "start": 1791102399.4458704,
+      "end": 1791102399.5788257,
+      "returncode": 0
+    },
+    {
+      "args": [
+        "shell",
+        "pidof org.worldfoundry.wf_game.patchwork"
+      ],
+      "start": 1791102399.580483,
+      "end": 1791102399.6682482,
+      "returncode": 0
+    },
+    {
+      "args": [
+        "shell",
+        "cat /proc/11403/cmdline"
+      ],
+      "start": 1791102399.669568,
+      "end": 1791102399.7446713,
+      "returncode": 0
+    },
+    {
+      "args": [
+        "shell",
+        "dumpsys activity activities"
+      ],
+      "start": 1791102400.247193,
+      "end": 1791102400.393388,
+      "returncode": 0
+    },
+    {
+      "args": [
+        "shell",
+        "pidof org.worldfoundry.wf_game.patchwork"
+      ],
+      "start": 1791102400.3958178,
+      "end": 1791102400.4869745,
+      "returncode": 0
+    },
+    {
+      "args": [
+        "shell",
+        "cat /proc/11403/cmdline"
+      ],
+      "start": 1791102400.4884083,
+      "end": 1791102400.5734015,
+      "returncode": 0
+    },
+    {
+      "args": [
+        "shell",
+        "dumpsys activity activities"
+      ],
+      "start": 1791102401.0756269,
+      "end": 1791102401.2140222,
+      "returncode": 0
+    },
+    {
+      "args": [
+        "shell",
+        "pidof org.worldfoundry.wf_game.patchwork"
+      ],
+      "start": 1791102401.2155833,
+      "end": 1791102401.2989342,
+      "returncode": 0
+    },
+    {
+      "args": [
+        "shell",
+        "cat /proc/11403/cmdline"
+      ],
+      "start": 1791102401.30013,
+      "end": 1791102401.4235675,
+      "returncode": 0
+    },
+    {
+      "args": [
+        "shell",
+        "dumpsys activity activities"
+      ],
+      "start": 1791102401.9252858,
+      "end": 1791102402.0236237,
+      "returncode": 0
+    },
+    {
+      "args": [
+        "shell",
+        "pidof org.worldfoundry.wf_game.patchwork"
+      ],
+      "start": 1791102402.0260854,
+      "end": 1791102402.1122427,
+      "returncode": 0
+    },
+    {
+      "args": [
+        "shell",
+        "cat /proc/11403/cmdline"
+      ],
+      "start": 1791102402.1133215,
+      "end": 1791102402.1907172,
+      "returncode": 0
+    },
+    {
+      "args": [
+        "shell",
+        "dumpsys activity activities"
+      ],
+      "start": 1791102402.6930056,
+      "end": 1791102402.8637798,
+      "returncode": 0
+    },
+    {
+      "args": [
+        "shell",
+        "pidof org.worldfoundry.wf_game.patchwork"
+      ],
+      "start": 1791102402.8654327,
+      "end": 1791102402.9536555,
+      "returncode": 0
+    },
+    {
+      "args": [
+        "shell",
+        "cat /proc/11403/cmdline"
+      ],
+      "start": 1791102402.954831,
+      "end": 1791102403.0316403,
+      "returncode": 0
+    },
+    {
+      "args": [
+        "shell",
+        "dumpsys activity activities"
+      ],
+      "start": 1791102403.5341287,
+      "end": 1791102403.661312,
+      "returncode": 0
+    },
+    {
+      "args": [
+        "shell",
+        "pidof org.worldfoundry.wf_game.patchwork"
+      ],
+      "start": 1791102403.662959,
+      "end": 1791102403.752748,
+      "returncode": 0
+    },
+    {
+      "args": [
+        "shell",
+        "cat /proc/11403/cmdline"
+      ],
+      "start": 1791102403.7540448,
+      "end": 1791102403.8378918,
+      "returncode": 0
+    },
+    {
+      "args": [
+        "shell",
+        "dumpsys activity activities"
+      ],
+      "start": 1791102404.3403451,
+      "end": 1791102404.497407,
+      "returncode": 0
+    },
+    {
+      "args": [
+        "shell",
+        "pidof org.worldfoundry.wf_game.patchwork"
+      ],
+      "start": 1791102404.4989965,
+      "end": 1791102404.6244876,
+      "returncode": 0
+    },
+    {
+      "args": [
+        "shell",
+        "cat /proc/11403/cmdline"
+      ],
+      "start": 1791102404.6258454,
+      "end": 1791102404.6995707,
+      "returncode": 0
+    },
+    {
+      "args": [
+        "shell",
+        "dumpsys activity activities"
+      ],
+      "start": 1791102405.2019527,
+      "end": 1791102405.3069525,
+      "returncode": 0
+    },
+    {
+      "args": [
+        "shell",
+        "pidof org.worldfoundry.wf_game.patchwork"
+      ],
+      "start": 1791102405.3104186,
+      "end": 1791102405.418494,
+      "returncode": 0
+    },
+    {
+      "args": [
+        "shell",
+        "cat /proc/11403/cmdline"
+      ],
+      "start": 1791102405.4205205,
+      "end": 1791102405.500488,
+      "returncode": 0
+    },
+    {
+      "args": [
+        "shell",
+        "dumpsys activity activities"
+      ],
+      "start": 1791102406.003123,
+      "end": 1791102406.1236596,
+      "returncode": 0
+    },
+    {
+      "args": [
+        "shell",
+        "pidof org.worldfoundry.wf_game.patchwork"
+      ],
+      "start": 1791102406.1252654,
+      "end": 1791102406.2189493,
+      "returncode": 0
+    },
+    {
+      "args": [
+        "shell",
+        "cat /proc/11403/cmdline"
+      ],
+      "start": 1791102406.2201705,
+      "end": 1791102406.2996147,
+      "returncode": 0
+    },
+    {
+      "args": [
+        "shell",
+        "dumpsys activity activities"
+      ],
+      "start": 1791102406.8020327,
+      "end": 1791102406.9448307,
+      "returncode": 0
+    },
+    {
+      "args": [
+        "shell",
+        "pidof org.worldfoundry.wf_game.patchwork"
+      ],
+      "start": 1791102406.9464414,
+      "end": 1791102407.036629,
+      "returncode": 0
+    },
+    {
+      "args": [
+        "shell",
+        "cat /proc/11403/cmdline"
+      ],
+      "start": 1791102407.038775,
+      "end": 1791102407.1188552,
+      "returncode": 0
+    },
+    {
+      "args": [
+        "shell",
+        "dumpsys activity activities"
+      ],
+      "start": 1791102407.6212897,
+      "end": 1791102407.7765374,
+      "returncode": 0
+    },
+    {
+      "args": [
+        "shell",
+        "pidof org.worldfoundry.wf_game.patchwork"
+      ],
+      "start": 1791102407.778596,
+      "end": 1791102407.879593,
+      "returncode": 0
+    },
+    {
+      "args": [
+        "shell",
+        "cat /proc/11403/cmdline"
+      ],
+      "start": 1791102407.8809562,
+      "end": 1791102407.9506829,
+      "returncode": 0
+    },
+    {
+      "args": [
+        "shell",
+        "dumpsys activity activities"
+      ],
+      "start": 1791102408.452894,
+      "end": 1791102408.5972927,
+      "returncode": 0
+    },
+    {
+      "args": [
+        "shell",
+        "pidof org.worldfoundry.wf_game.patchwork"
+      ],
+      "start": 1791102408.5988958,
+      "end": 1791102408.6948,
+      "returncode": 0
+    },
+    {
+      "args": [
+        "shell",
+        "cat /proc/11403/cmdline"
+      ],
+      "start": 1791102408.6962974,
+      "end": 1791102408.7746532,
+      "returncode": 0
+    },
+    {
+      "args": [
+        "shell",
+        "dumpsys activity activities"
+      ],
+      "start": 1791102409.2775507,
+      "end": 1791102409.4013991,
+      "returncode": 0
+    },
+    {
+      "args": [
+        "shell",
+        "pidof org.worldfoundry.wf_game.patchwork"
+      ],
+      "start": 1791102409.403042,
+      "end": 1791102409.4909036,
+      "returncode": 0
+    },
+    {
+      "args": [
+        "shell",
+        "cat /proc/11403/cmdline"
+      ],
+      "start": 1791102409.4921196,
+      "end": 1791102409.5622382,
+      "returncode": 0
+    },
+    {
+      "args": [
+        "shell",
+        "dumpsys activity activities"
+      ],
+      "start": 1791102410.0650272,
+      "end": 1791102410.2247953,
+      "returncode": 0
+    },
+    {
+      "args": [
+        "shell",
+        "pidof org.worldfoundry.wf_game.patchwork"
+      ],
+      "start": 1791102410.2264555,
+      "end": 1791102410.3171847,
+      "returncode": 0
+    },
+    {
+      "args": [
+        "shell",
+        "cat /proc/11403/cmdline"
+      ],
+      "start": 1791102410.3184695,
+      "end": 1791102410.3894467,
+      "returncode": 0
+    },
+    {
+      "args": [
+        "shell",
+        "dumpsys activity activities"
+      ],
+      "start": 1791102410.8919344,
+      "end": 1791102411.0505571,
+      "returncode": 0
+    },
+    {
+      "args": [
+        "shell",
+        "pidof org.worldfoundry.wf_game.patchwork"
+      ],
+      "start": 1791102411.0522654,
+      "end": 1791102411.153934,
+      "returncode": 0
+    },
+    {
+      "args": [
+        "shell",
+        "cat /proc/11403/cmdline"
+      ],
+      "start": 1791102411.1552386,
+      "end": 1791102411.2242675,
+      "returncode": 0
+    },
+    {
+      "args": [
+        "shell",
+        "dumpsys activity activities"
+      ],
+      "start": 1791102411.726877,
+      "end": 1791102411.8690197,
+      "returncode": 0
+    },
+    {
+      "args": [
+        "shell",
+        "pidof org.worldfoundry.wf_game.patchwork"
+      ],
+      "start": 1791102411.8705406,
+      "end": 1791102411.9587789,
+      "returncode": 0
+    },
+    {
+      "args": [
+        "shell",
+        "cat /proc/11403/cmdline"
+      ],
+      "start": 1791102411.9600217,
+      "end": 1791102412.0414522,
+      "returncode": 0
+    },
+    {
+      "args": [
+        "shell",
+        "dumpsys activity activities"
+      ],
+      "start": 1791102412.5444262,
+      "end": 1791102412.7018201,
+      "returncode": 0
+    },
+    {
+      "args": [
+        "shell",
+        "pidof org.worldfoundry.wf_game.patchwork"
+      ],
+      "start": 1791102412.7034936,
+      "end": 1791102412.8093126,
+      "returncode": 0
+    },
+    {
+      "args": [
+        "shell",
+        "cat /proc/11403/cmdline"
+      ],
+      "start": 1791102412.8109138,
+      "end": 1791102412.8873405,
+      "returncode": 0
+    },
+    {
+      "args": [
+        "shell",
+        "dumpsys activity activities"
+      ],
+      "start": 1791102413.3898196,
+      "end": 1791102413.5006032,
+      "returncode": 0
+    },
+    {
+      "args": [
+        "shell",
+        "pidof org.worldfoundry.wf_game.patchwork"
+      ],
+      "start": 1791102413.5023108,
+      "end": 1791102413.590532,
+      "returncode": 0
+    },
+    {
+      "args": [
+        "shell",
+        "cat /proc/11403/cmdline"
+      ],
+      "start": 1791102413.5918045,
+      "end": 1791102413.6615922,
+      "returncode": 0
+    },
+    {
+      "args": [
+        "shell",
+        "dumpsys activity activities"
+      ],
+      "start": 1791102414.163838,
+      "end": 1791102414.308927,
+      "returncode": 0
+    },
+    {
+      "args": [
+        "shell",
+        "pidof org.worldfoundry.wf_game.patchwork"
+      ],
+      "start": 1791102414.3105104,
+      "end": 1791102414.3985436,
+      "returncode": 0
+    },
+    {
+      "args": [
+        "shell",
+        "cat /proc/11403/cmdline"
+      ],
+      "start": 1791102414.4001336,
+      "end": 1791102414.4757226,
+      "returncode": 1
+    },
+    {
+      "args": [
+        "exec-out",
+        "cat",
+        "/data/local/tmp/wf-J-2104f8e72e64.mp4"
+      ],
+      "start": 1791102414.477258,
+      "end": 1791102416.4162705,
+      "returncode": 0
+    },
+    {
+      "args": [
+        "shell",
+        "rm -f /data/local/tmp/wf-J-2104f8e72e64.mp4"
+      ],
+      "start": 1791102416.4280462,
+      "end": 1791102416.5085225,
+      "returncode": 0
+    },
+    {
+      "args": [
+        "shell",
+        "dumpsys activity activities"
+      ],
+      "start": 1791102416.5105908,
+      "end": 1791102416.6073787,
+      "returncode": 0
+    },
+    {
+      "args": [
+        "shell",
+        "pidof org.worldfoundry.wf_game.patchwork"
+      ],
+      "start": 1791102416.6090276,
+      "end": 1791102416.7139049,
+      "returncode": 0
+    },
+    {
+      "args": [
+        "exec-out",
+        "screencap",
+        "-p"
+      ],
+      "start": 1791102416.7155728,
+      "end": 1791102418.184552,
+      "returncode": 0
+    },
+    {
+      "args": [
+        "shell",
+        "pidof org.worldfoundry.wf_game.patchwork"
+      ],
+      "start": 1791102418.186132,
+      "end": 1791102418.2830184,
+      "returncode": 0
+    },
+    {
+      "args": [
+        "logcat",
+        "-d",
+        "-v",
+        "threadtime",
+        "--pid=11262"
+      ],
+      "start": 1791102418.284591,
+      "end": 1791102418.4356265,
+      "returncode": 0
+    },
+    {
+      "args": [
+        "shell",
+        "cat /sdcard/Android/data/org.worldfoundry.wf_game.patchwork/files/wf.log"
+      ],
+      "start": 1791102418.4372528,
+      "end": 1791102418.5334094,
+      "returncode": 1
+    },
+    {
+      "args": [
+        "shell",
+        "dumpsys meminfo org.worldfoundry.wf_game.patchwork"
+      ],
+      "start": 1791102418.5347793,
+      "end": 1791102419.0161774,
+      "returncode": 0
+    },
+    {
+      "args": [
+        "shell",
+        "dumpsys thermalservice"
+      ],
+      "start": 1791102419.0177672,
+      "end": 1791102419.10948,
+      "returncode": 0
+    },
+    {
+      "args": [
+        "shell",
+        "am force-stop org.worldfoundry.wf_game.patchwork"
+      ],
+      "start": 1791102419.1387625,
+      "end": 1791102419.4586413,
+      "returncode": 0
+    },
+    {
+      "args": [
+        "shell",
+        "am start -W -a android.intent.action.MAIN -c android.intent.category.LEANBACK_LAUNCHER -p com.google.android.apps.tv.launcherx"
+      ],
+      "start": 1791102419.4600868,
+      "end": 1791102419.595816,
+      "returncode": 0
+    },
+    {
+      "args": [
+        "shell",
+        "input keyevent KEYCODE_HOME"
+      ],
+      "start": 1791102419.5970354,
+      "end": 1791102419.7232807,
+      "returncode": 0
+    },
+    {
+      "args": [
+        "shell",
+        "pidof org.worldfoundry.wf_game.patchwork"
+      ],
+      "start": 1791102419.874771,
+      "end": 1791102420.1023867,
+      "returncode": 1
+    }
+  ],
+  "finished": 1791102420.103389,
+  "concurrent_jobs": []
+}

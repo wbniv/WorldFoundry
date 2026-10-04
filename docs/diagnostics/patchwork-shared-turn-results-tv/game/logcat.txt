@@ -1,0 +1,486 @@
+--------- beginning of main
+10-04 18:40:05.476 15937 15937 I _game.patchwork: Using CollectorTypeCMC GC.
+10-04 18:40:05.489 15937 15937 E _game.patchwork: Not starting debugger since process cannot load the jdwp agent.
+10-04 18:40:05.538 15937 15937 D CompatibilityChangeReporter: Compat change id reported: 171979766; UID 10152; state: ENABLED
+10-04 18:40:05.538 15937 15937 D CompatibilityChangeReporter: Compat change id reported: 242716250; UID 10152; state: ENABLED
+10-04 18:40:05.557 15937 15937 I _game.patchwork: Failed to add image file: Failed to find OatDexFile for DexFile /data/app/~~l-u9CogeYaefWdipcxkoYw==/org.worldfoundry.wf_game.patchwork-IDeTFNM-MLfJibVF9Xwo4A==/base.apk (canonical path /data/app/~~l-u9CogeYaefWdipcxkoYw==/org.worldfoundry.wf_game.patchwork-IDeTFNM-MLfJibVF9Xwo4A==/base.apk) in OatFile /data/app/~~3_QcYYrL2IwMylwdFvqtiA==/org.worldfoundry.wf_game.patchwork-vUyXsXlCeGm4zoPjTdTMYg==/oat/arm/base.odex
+10-04 18:40:05.560 15937 15937 D nativeloader: Configuring clns-4 for other apk /data/app/~~3_QcYYrL2IwMylwdFvqtiA==/org.worldfoundry.wf_game.patchwork-vUyXsXlCeGm4zoPjTdTMYg==/base.apk. target_sdk_version=34, uses_libraries=, library_path=/data/app/~~3_QcYYrL2IwMylwdFvqtiA==/org.worldfoundry.wf_game.patchwork-vUyXsXlCeGm4zoPjTdTMYg==/lib/arm, permitted_path=/data:/mnt/expand:/data/user/0/org.worldfoundry.wf_game.patchwork
+10-04 18:40:05.583 15937 15937 V GraphicsEnvironment: Currently set values for:
+10-04 18:40:05.583 15937 15937 V GraphicsEnvironment:   angle_gl_driver_selection_pkgs=[]
+10-04 18:40:05.583 15937 15937 V GraphicsEnvironment:   angle_gl_driver_selection_values=[]
+10-04 18:40:05.584 15937 15937 V GraphicsEnvironment: ANGLE GameManagerService for org.worldfoundry.wf_game.patchwork: false
+10-04 18:40:05.584 15937 15937 V GraphicsEnvironment: org.worldfoundry.wf_game.patchwork is not listed in per-application setting
+10-04 18:40:05.584 15937 15937 V GraphicsEnvironment: Neither updatable production driver nor prerelease driver is supported.
+10-04 18:40:05.662 15937 15937 I WebViewFactory: Loading com.google.android.webview version 153.0.8010.36 (code 801003600)
+10-04 18:40:05.674 15937 15937 D ApplicationLoaders: Returning zygote-cached class loader: /system/framework/android.test.base.jar
+10-04 18:40:05.694 15937 15937 D nativeloader: Configuring clns-5 for other apk /data/app/~~71H4z0ABnw9ItCpCpx9G-w==/com.google.android.webview-SkD2_zXivUw8fXZOciFNxQ==/base.apk. target_sdk_version=36, uses_libraries=, library_path=/data/app/~~71H4z0ABnw9ItCpCpx9G-w==/com.google.android.webview-SkD2_zXivUw8fXZOciFNxQ==/lib/arm:/data/app/~~71H4z0ABnw9ItCpCpx9G-w==/com.google.android.webview-SkD2_zXivUw8fXZOciFNxQ==/base.apk!/lib/armeabi-v7a, permitted_path=/data:/mnt/expand
+10-04 18:40:05.821 15937 15937 I cr_WVCFactoryProvider: version=153.0.8010.36 (801003600) minSdkVersion=29 multiprocess=true packageId=127 splits=<none>
+10-04 18:40:05.865 15937 15960 I chromium: [1004/184005.848690:INFO:android_webview/browser/variations/variations_seed_loader.cc:67] Failed to open file for reading.: No such file or directory (2)
+10-04 18:40:05.917 15937 15937 I cr_LibraryLoader: Successfully loaded native library
+10-04 18:40:05.927 15937 15937 I cr_CachingUmaRecorder: Flushed 46 samples from 21 histograms, 0 samples were dropped.
+10-04 18:40:05.930 15937 15937 I cr_ChildProcLH: ScopedServiceBindingBatch.tryActivate: false
+10-04 18:40:05.939 15937 15937 I cr_CombinedPProvider: #registerProvider() provider:WV.hj@3c92466 isPolicyCacheEnabled:false policyProvidersSize:0
+10-04 18:40:05.940 15937 15937 I cr_PolicyProvider: #setManagerAndSource() 0
+10-04 18:40:05.946 15937 15960 I cr_policy: registerReceiver succeeded after 5ms
+10-04 18:40:05.958 15937 15937 I cr_DisplayManager: Is Display Topology available: false
+10-04 18:40:06.038 15937 15937 I cr_CombinedPProvider: #linkNativeInternal() 1
+10-04 18:40:06.039 15937 15937 D CompatibilityChangeReporter: Compat change id reported: 183155436; UID 10152; state: ENABLED
+10-04 18:40:06.043 15937 15937 I cr_AppResProvider: #getApplicationRestrictionsFromUserManager() Bundle[EMPTY_PARCEL]
+10-04 18:40:06.044 15937 15937 I cr_PolicyProvider: #notifySettingsAvailable() 0
+10-04 18:40:06.044 15937 15937 I cr_CombinedPProvider: #onSettingsAvailable() 0
+10-04 18:40:06.044 15937 15937 I cr_CombinedPProvider: #flushPolicies()
+10-04 18:40:06.222 15937 15991 W chromium: [WARNING:net/dns/dns_config_service_android.cc:69] Failed to read DnsConfig.
+10-04 18:40:06.247 15937 15937 D CompatibilityChangeReporter: Compat change id reported: 214741472; UID 10152; state: ENABLED
+10-04 18:40:06.311 15937 15937 D CompatibilityChangeReporter: Compat change id reported: 171228096; UID 10152; state: ENABLED
+10-04 18:40:06.344 15937 15937 D CompatibilityChangeReporter: Compat change id reported: 193247900; UID 10152; state: ENABLED
+10-04 18:40:06.476 15937 15993 W cr_media: BLUETOOTH_CONNECT permission is missing.
+10-04 18:40:06.485 15937 15993 W cr_media: getBluetoothAdapter() requires BLUETOOTH permission
+10-04 18:40:06.485 15937 15993 W cr_media: registerBluetoothIntentsIfNeeded: Requires BLUETOOTH permission
+10-04 18:40:06.513 15937 15937 I QuiltNightTV: TV_LAUNCH https://collections-timing-riding-computing.trycloudflare.com/receiver?display=android-tv&deviceCheck=1
+10-04 18:40:06.525 15937 15937 D CompatibilityChangeReporter: Compat change id reported: 237531167; UID 10152; state: DISABLED
+10-04 18:40:06.529 15937 16002 W libc    : Access denied finding property "vendor.mali.platform.config"
+10-04 18:40:06.537 15937 15937 W OpenGLRenderer: Unknown dataspace 0
+10-04 18:40:06.542 15937 16002 I mali    : Successfully parsed 1 environment variable(s) from /vendor/etc/mali_platform.config.
+10-04 18:40:06.545 15937 16002 W libc    : Access denied finding property "vendor.mali.debug.config"
+10-04 18:40:06.551 15937 16002 W libc    : Access denied finding property "vendor.mali.base_max_nr_instances"
+10-04 18:40:06.556 15937 16002 W libc    : Access denied finding property "vendor.mali.cctx_memory_class_unnamed"
+10-04 18:40:06.556 15937 16002 W libc    : Access denied finding property "vendor.mali.cctx_memory_class_default_heap"
+10-04 18:40:06.556 15937 16002 W libc    : Access denied finding property "vendor.mali.cctx_memory_class_base_internal"
+10-04 18:40:06.556 15937 16002 W libc    : Access denied finding property "vendor.mali.cctx_memory_class_framepool"
+10-04 18:40:06.556 15937 16002 W libc    : Access denied finding property "vendor.mali.cctx_memory_class_tiler"
+10-04 18:40:06.557 15937 16002 W libc    : Access denied finding property "vendor.mali.cctx_memory_class_program"
+10-04 18:40:06.557 15937 16002 W libc    : Access denied finding property "vendor.mali.cctx_memory_class_egl_color_plane"
+10-04 18:40:06.557 15937 16002 W libc    : Access denied finding property "vendor.mali.cctx_memory_class_egl_color_plane_imported"
+10-04 18:40:06.557 15937 16002 W libc    : Access denied finding property "vendor.mali.cctx_memory_class_vao"
+10-04 18:40:06.557 15937 16002 W libc    : Access denied finding property "vendor.mali.cctx_memory_class_img"
+10-04 18:40:06.557 15937 16002 W libc    : Access denied finding property "vendor.mali.cctx_memory_class_internal_surface"
+10-04 18:40:06.557 15937 16002 W libc    : Access denied finding property "vendor.mali.cctx_memory_class_buf"
+10-04 18:40:06.557 15937 16002 W libc    : Access denied finding property "vendor.mali.cctx_memory_class_crc"
+10-04 18:40:06.557 15937 16002 W libc    : Access denied finding property "vendor.mali.cctx_memory_class_cpom_hmem"
+10-04 18:40:06.557 15937 16002 W libc    : Access denied finding property "vendor.mali.cctx_memory_class_cpom_rsd"
+10-04 18:40:06.557 15937 16002 W libc    : Access denied finding property "vendor.mali.cctx_memory_class_cpom_mbs2"
+10-04 18:40:06.558 15937 16002 W libc    : Access denied finding property "vendor.mali.cctx_memory_class_cpom_static"
+10-04 18:40:06.558 15937 16002 W libc    : Access denied finding property "vendor.mali.cctx_memory_class_cframe_hmem"
+10-04 18:40:06.558 15937 16002 W libc    : Access denied finding property "vendor.mali.cctx_memory_class_cframe_sample_pos"
+10-04 18:40:06.558 15937 16002 W libc    : Access denied finding property "vendor.mali.cctx_memory_class_cframe_discard"
+10-04 18:40:06.558 15937 16002 W libc    : Access denied finding property "vendor.mali.cctx_memory_class_cframe_tess_geom"
+10-04 18:40:06.559 15937 16002 W libc    : Access denied finding property "vendor.mali.cctx_memory_class_cobj_hmem"
+10-04 18:40:06.559 15937 16002 W libc    : Access denied finding property "vendor.mali.cctx_memory_class_cmar_hmem"
+10-04 18:40:06.559 15937 16002 W libc    : Access denied finding property "vendor.mali.cctx_memory_class_cmar_prof_dump"
+10-04 18:40:06.559 15937 16002 W libc    : Access denied finding property "vendor.mali.cctx_memory_class_cblend_hmem"
+10-04 18:40:06.560 15937 16002 W libc    : Access denied finding property "vendor.mali.cctx_memory_class_gles_hmem"
+10-04 18:40:06.560 15937 16002 W libc    : Access denied finding property "vendor.mali.cctx_memory_class_gles_query"
+10-04 18:40:06.560 15937 16002 W libc    : Access denied finding property "vendor.mali.cctx_memory_class_gles_query_host"
+10-04 18:40:06.560 15937 16002 W libc    : Access denied finding property "vendor.mali.cctx_memory_class_gles_multiview"
+10-04 18:40:06.560 15937 16002 W libc    : Access denied finding property "vendor.mali.cctx_memory_class_cdeps_hmem"
+10-04 18:40:06.560 15937 16002 W libc    : Access denied finding property "vendor.mali.cctx_memory_class_cmem_suballoc"
+10-04 18:40:06.560 15937 16002 W libc    : Access denied finding property "vendor.mali.cctx_memory_class_cmem_hoard"
+10-04 18:40:06.560 15937 16002 W libc    : Access denied finding property "vendor.mali.cctx_memory_class_cmem_registry"
+10-04 18:40:06.560 15937 16002 W libc    : Access denied finding property "vendor.mali.cctx_memory_class_cl_payload"
+10-04 18:40:06.560 15937 16002 W libc    : Access denied finding property "vendor.mali.cctx_memory_class_cl_wlm_tls"
+10-04 18:40:06.560 15937 16002 W libc    : Access denied finding property "vendor.mali.cctx_memory_class_cl_hmem"
+10-04 18:40:06.561 15937 16002 W libc    : Access denied finding property "vendor.mali.cctx_memory_class_cl_svm"
+10-04 18:40:06.561 15937 16002 W libc    : Access denied finding property "vendor.mali.cctx_memory_class_cl_protected"
+10-04 18:40:06.561 15937 16002 W libc    : Access denied finding property "vendor.mali.cctx_memory_class_cinstr"
+10-04 18:40:06.561 15937 16002 W libc    : Access denied finding property "vendor.mali.cctx_memory_class_gfx_device_memory_cpu_uncached"
+10-04 18:40:06.561 15937 16002 W libc    : Access denied finding property "vendor.mali.cctx_memory_class_gfx_device_memory_cpu_cached"
+10-04 18:40:06.561 15937 16002 W libc    : Access denied finding property "vendor.mali.cctx_memory_class_gfx_device_memory_transient"
+10-04 18:40:06.561 15937 16002 W libc    : Access denied finding property "vendor.mali.cctx_memory_class_gfx_device_memory_protected"
+10-04 18:40:06.561 15937 16002 W libc    : Access denied finding property "vendor.mali.cctx_memory_class_gfx_device_external"
+10-04 18:40:06.561 15937 16002 W libc    : Access denied finding property "vendor.mali.cctx_memory_class_gfx_device_external_swapchain"
+10-04 18:40:06.561 15937 16002 W libc    : Access denied finding property "vendor.mali.cctx_memory_class_gfx_device_internal"
+10-04 18:40:06.562 15937 16002 W libc    : Access denied finding property "vendor.mali.cctx_memory_class_gfx_device_internal_tls"
+10-04 18:40:06.562 15937 16002 W libc    : Access denied finding property "vendor.mali.cctx_memory_class_gfx_device_internal_host"
+10-04 18:40:06.562 15937 16002 W libc    : Access denied finding property "vendor.mali.cctx_memory_class_gfx_device_internal_protected"
+10-04 18:40:06.563 15937 16002 W libc    : Access denied finding property "vendor.mali.cctx_memory_class_gfx_device_internal_transient"
+10-04 18:40:06.563 15937 16002 W libc    : Access denied finding property "vendor.mali.cctx_memory_class_gfx_descriptor_pool"
+10-04 18:40:06.563 15937 16002 W libc    : Access denied finding property "vendor.mali.cctx_memory_class_gfx_command_allocator"
+10-04 18:40:06.563 15937 16002 W libc    : Access denied finding property "vendor.mali.cctx_memory_class_gfx_command_allocator_host"
+10-04 18:40:06.564 15937 16002 W libc    : Access denied finding property "vendor.mali.cctx_memory_class_gfx_command_allocator_protected"
+10-04 18:40:06.564 15937 16002 W libc    : Access denied finding property "vendor.mali.cctx_memory_class_gfx_graph_internal_host"
+10-04 18:40:06.564 15937 16002 W libc    : Access denied finding property "vendor.mali.cctx_memory_class_gfx_graph_internal_device"
+10-04 18:40:06.564 15937 16002 W libc    : Access denied finding property "vendor.mali.cctx_memory_class_gfx_graph_internal_device_transient"
+10-04 18:40:06.564 15937 16002 W libc    : Access denied finding property "vendor.mali.cctx_memory_class_vk_bound_buffer"
+10-04 18:40:06.565 15937 16002 W libc    : Access denied finding property "vendor.mali.cctx_memory_class_vk_bound_image"
+10-04 18:40:06.565 15937 16002 W libc    : Access denied finding property "vendor.mali.cctx_memory_class_cmar_signal"
+10-04 18:40:06.565 15937 16002 W libc    : Access denied finding property "vendor.mali.cctx_memory_class_cmar_flush_chain"
+10-04 18:40:06.565 15937 16002 W libc    : Access denied finding property "vendor.mali.cctx_memory_class_cmar_metadata_list"
+10-04 18:40:06.565 15937 16002 W libc    : Access denied finding property "vendor.mali.cctx_memory_class_jit"
+10-04 18:40:06.565 15937 16002 W libc    : Access denied finding property "vendor.mali.cctx_memory_class_mmu"
+10-04 18:40:06.565 15937 16002 W libc    : Access denied finding property "vendor.mali.osu_protected_memory_heap_name"
+10-04 18:40:06.566 15937 16002 W libc    : Access denied finding property "vendor.mali.osu_ion_protected_memory_heap_name"
+10-04 18:40:06.566 15937 16002 W libc    : Access denied finding property "vendor.mali.platform_agt_frequency_khz"
+10-04 18:40:06.566 15937 16002 W libc    : Access denied finding property "vendor.mali.hal_dump_dir"
+10-04 18:40:06.582 15937 16002 W libc    : Access denied finding property "vendor.mali.base_max_nr_instances"
+10-04 18:40:06.583 15937 16002 W libc    : Access denied finding property "vendor.mali.cctx_memory_class_unnamed"
+10-04 18:40:06.583 15937 16002 W libc    : Access denied finding property "vendor.mali.cctx_memory_class_default_heap"
+10-04 18:40:06.583 15937 16002 W libc    : Access denied finding property "vendor.mali.cctx_memory_class_base_internal"
+10-04 18:40:06.583 15937 16002 W libc    : Access denied finding property "vendor.mali.cctx_memory_class_framepool"
+10-04 18:40:06.583 15937 16002 W libc    : Access denied finding property "vendor.mali.cctx_memory_class_tiler"
+10-04 18:40:06.583 15937 16002 W libc    : Access denied finding property "vendor.mali.cctx_memory_class_program"
+10-04 18:40:06.583 15937 16002 W libc    : Access denied finding property "vendor.mali.cctx_memory_class_egl_color_plane"
+10-04 18:40:06.583 15937 16002 W libc    : Access denied finding property "vendor.mali.cctx_memory_class_egl_color_plane_imported"
+10-04 18:40:06.584 15937 16002 W libc    : Access denied finding property "vendor.mali.cctx_memory_class_vao"
+10-04 18:40:06.584 15937 16002 W libc    : Access denied finding property "vendor.mali.cctx_memory_class_img"
+10-04 18:40:06.584 15937 16002 W libc    : Access denied finding property "vendor.mali.cctx_memory_class_internal_surface"
+10-04 18:40:06.584 15937 16002 W libc    : Access denied finding property "vendor.mali.cctx_memory_class_buf"
+10-04 18:40:06.584 15937 16002 W libc    : Access denied finding property "vendor.mali.cctx_memory_class_crc"
+10-04 18:40:06.584 15937 16002 W libc    : Access denied finding property "vendor.mali.cctx_memory_class_cpom_hmem"
+10-04 18:40:06.584 15937 16002 W libc    : Access denied finding property "vendor.mali.cctx_memory_class_cpom_rsd"
+10-04 18:40:06.584 15937 16002 W libc    : Access denied finding property "vendor.mali.cctx_memory_class_cpom_mbs2"
+10-04 18:40:06.584 15937 16002 W libc    : Access denied finding property "vendor.mali.cctx_memory_class_cpom_static"
+10-04 18:40:06.584 15937 16002 W libc    : Access denied finding property "vendor.mali.cctx_memory_class_cframe_hmem"
+10-04 18:40:06.584 15937 16002 W libc    : Access denied finding property "vendor.mali.cctx_memory_class_cframe_sample_pos"
+10-04 18:40:06.584 15937 16002 W libc    : Access denied finding property "vendor.mali.cctx_memory_class_cframe_discard"
+10-04 18:40:06.585 15937 16002 W libc    : Access denied finding property "vendor.mali.cctx_memory_class_cframe_tess_geom"
+10-04 18:40:06.585 15937 16002 W libc    : Access denied finding property "vendor.mali.cctx_memory_class_cobj_hmem"
+10-04 18:40:06.585 15937 16002 W libc    : Access denied finding property "vendor.mali.cctx_memory_class_cmar_hmem"
+10-04 18:40:06.585 15937 16002 W libc    : Access denied finding property "vendor.mali.cctx_memory_class_cmar_prof_dump"
+10-04 18:40:06.585 15937 16002 W libc    : Access denied finding property "vendor.mali.cctx_memory_class_cblend_hmem"
+10-04 18:40:06.585 15937 16002 W libc    : Access denied finding property "vendor.mali.cctx_memory_class_gles_hmem"
+10-04 18:40:06.585 15937 16002 W libc    : Access denied finding property "vendor.mali.cctx_memory_class_gles_query"
+10-04 18:40:06.588 15937 16002 W libc    : Access denied finding property "vendor.mali.cctx_memory_class_gles_query_host"
+10-04 18:40:06.588 15937 16002 W libc    : Access denied finding property "vendor.mali.cctx_memory_class_gles_multiview"
+10-04 18:40:06.588 15937 16002 W libc    : Access denied finding property "vendor.mali.cctx_memory_class_cdeps_hmem"
+10-04 18:40:06.588 15937 16002 W libc    : Access denied finding property "vendor.mali.cctx_memory_class_cmem_suballoc"
+10-04 18:40:06.588 15937 16002 W libc    : Access denied finding property "vendor.mali.cctx_memory_class_cmem_hoard"
+10-04 18:40:06.589 15937 16002 W libc    : Access denied finding property "vendor.mali.cctx_memory_class_cmem_registry"
+10-04 18:40:06.589 15937 16002 W libc    : Access denied finding property "vendor.mali.cctx_memory_class_cl_payload"
+10-04 18:40:06.589 15937 16002 W libc    : Access denied finding property "vendor.mali.cctx_memory_class_cl_wlm_tls"
+10-04 18:40:06.589 15937 16002 W libc    : Access denied finding property "vendor.mali.cctx_memory_class_cl_hmem"
+10-04 18:40:06.589 15937 16002 W libc    : Access denied finding property "vendor.mali.cctx_memory_class_cl_svm"
+10-04 18:40:06.589 15937 16002 W libc    : Access denied finding property "vendor.mali.cctx_memory_class_cl_protected"
+10-04 18:40:06.589 15937 16002 W libc    : Access denied finding property "vendor.mali.cctx_memory_class_cinstr"
+10-04 18:40:06.589 15937 16002 W libc    : Access denied finding property "vendor.mali.cctx_memory_class_gfx_device_memory_cpu_uncached"
+10-04 18:40:06.589 15937 16002 W libc    : Access denied finding property "vendor.mali.cctx_memory_class_gfx_device_memory_cpu_cached"
+10-04 18:40:06.589 15937 16002 W libc    : Access denied finding property "vendor.mali.cctx_memory_class_gfx_device_memory_transient"
+10-04 18:40:06.589 15937 16002 W libc    : Access denied finding property "vendor.mali.cctx_memory_class_gfx_device_memory_protected"
+10-04 18:40:06.589 15937 16002 W libc    : Access denied finding property "vendor.mali.cctx_memory_class_gfx_device_external"
+10-04 18:40:06.590 15937 16002 W libc    : Access denied finding property "vendor.mali.cctx_memory_class_gfx_device_external_swapchain"
+10-04 18:40:06.591 15937 16002 W libc    : Access denied finding property "vendor.mali.cctx_memory_class_gfx_device_internal"
+10-04 18:40:06.591 15937 16002 W libc    : Access denied finding property "vendor.mali.cctx_memory_class_gfx_device_internal_tls"
+10-04 18:40:06.595 15937 16002 W libc    : Access denied finding property "vendor.mali.cctx_memory_class_gfx_device_internal_host"
+10-04 18:40:06.595 15937 16002 W libc    : Access denied finding property "vendor.mali.cctx_memory_class_gfx_device_internal_protected"
+10-04 18:40:06.595 15937 16002 W libc    : Access denied finding property "vendor.mali.cctx_memory_class_gfx_device_internal_transient"
+10-04 18:40:06.595 15937 16002 W libc    : Access denied finding property "vendor.mali.cctx_memory_class_gfx_descriptor_pool"
+10-04 18:40:06.596 15937 16002 W libc    : Access denied finding property "vendor.mali.cctx_memory_class_gfx_command_allocator"
+10-04 18:40:06.596 15937 16002 W libc    : Access denied finding property "vendor.mali.cctx_memory_class_gfx_command_allocator_host"
+10-04 18:40:06.596 15937 16002 W libc    : Access denied finding property "vendor.mali.cctx_memory_class_gfx_command_allocator_protected"
+10-04 18:40:06.596 15937 16002 W libc    : Access denied finding property "vendor.mali.cctx_memory_class_gfx_graph_internal_host"
+10-04 18:40:06.596 15937 16002 W libc    : Access denied finding property "vendor.mali.cctx_memory_class_gfx_graph_internal_device"
+10-04 18:40:06.596 15937 16002 W libc    : Access denied finding property "vendor.mali.cctx_memory_class_gfx_graph_internal_device_transient"
+10-04 18:40:06.596 15937 16002 W libc    : Access denied finding property "vendor.mali.cctx_memory_class_vk_bound_buffer"
+10-04 18:40:06.596 15937 16002 W libc    : Access denied finding property "vendor.mali.cctx_memory_class_vk_bound_image"
+10-04 18:40:06.596 15937 16002 W libc    : Access denied finding property "vendor.mali.cctx_memory_class_cmar_signal"
+10-04 18:40:06.596 15937 16002 W libc    : Access denied finding property "vendor.mali.cctx_memory_class_cmar_flush_chain"
+10-04 18:40:06.596 15937 16002 W libc    : Access denied finding property "vendor.mali.cctx_memory_class_cmar_metadata_list"
+10-04 18:40:06.597 15937 16002 W libc    : Access denied finding property "vendor.mali.cctx_memory_class_jit"
+10-04 18:40:06.597 15937 16002 W libc    : Access denied finding property "vendor.mali.cctx_memory_class_mmu"
+10-04 18:40:06.597 15937 16002 W libc    : Access denied finding property "vendor.mali.osu_protected_memory_heap_name"
+10-04 18:40:06.597 15937 16002 W libc    : Access denied finding property "vendor.mali.osu_ion_protected_memory_heap_name"
+10-04 18:40:06.597 15937 16002 W libc    : Access denied finding property "vendor.mali.platform_agt_frequency_khz"
+10-04 18:40:06.597 15937 16002 W libc    : Access denied finding property "vendor.mali.hal_dump_dir"
+10-04 18:40:06.598 15937 16002 W libc    : Access denied finding property "vendor.mali.platform.config"
+10-04 18:40:06.599 15937 16002 I mali    : Successfully parsed 1 environment variable(s) from /vendor/etc/mali_platform.config.
+10-04 18:40:06.599 15937 16002 W libc    : Access denied finding property "vendor.mali.debug.config"
+10-04 18:40:06.607 15937 16007 D TrafficStats: tagSocket(149) with statsTag=0xffffffff, statsUid=-1
+10-04 18:40:06.611 15937 16022 I CameraManagerGlobal: Connecting to camera service
+10-04 18:40:06.614 15937 15937 I cr_AppResProvider: #getApplicationRestrictionsFromUserManager() Bundle[EMPTY_PARCEL]
+10-04 18:40:06.614 15937 15937 I cr_PolicyProvider: #notifySettingsAvailable() 0
+10-04 18:40:06.614 15937 15937 I cr_CombinedPProvider: #onSettingsAvailable() 0
+10-04 18:40:06.614 15937 15937 I cr_CombinedPProvider: #flushPolicies()
+10-04 18:40:06.626 15937 16002 W libc    : Access denied finding property "ro.vendor.arm.egl.configs.yuyv.hal_format"
+10-04 18:40:06.626 15937 16002 W libc    : Access denied finding property "ro.vendor.arm.egl.configs.yuyv.recordable"
+10-04 18:40:06.626 15937 16002 W libc    : Access denied finding property "ro.vendor.arm.egl.configs.yuyv.dataspaces_to_exclude"
+10-04 18:40:06.626 15937 16002 W libc    : Access denied finding property "ro.vendor.arm.egl.configs.nv12.hal_format"
+10-04 18:40:06.626 15937 16002 W libc    : Access denied finding property "ro.vendor.arm.egl.configs.nv12.recordable"
+10-04 18:40:06.626 15937 16002 W libc    : Access denied finding property "ro.vendor.arm.egl.configs.nv12.dataspaces_to_exclude"
+10-04 18:40:06.626 15937 16002 W libc    : Access denied finding property "ro.vendor.arm.egl.configs.nv21.hal_format"
+10-04 18:40:06.627 15937 16002 W libc    : Access denied finding property "ro.vendor.arm.egl.configs.nv21.recordable"
+10-04 18:40:06.627 15937 16002 W libc    : Access denied finding property "ro.vendor.arm.egl.configs.nv21.dataspaces_to_exclude"
+10-04 18:40:06.627 15937 16002 W libc    : Access denied finding property "ro.vendor.arm.egl.configs.nv16.hal_format"
+10-04 18:40:06.627 15937 16002 W libc    : Access denied finding property "ro.vendor.arm.egl.configs.nv16.recordable"
+10-04 18:40:06.627 15937 16002 W libc    : Access denied finding property "ro.vendor.arm.egl.configs.nv16.dataspaces_to_exclude"
+10-04 18:40:06.627 15937 16002 W libc    : Access denied finding property "ro.vendor.arm.egl.configs.yuv420.hal_format"
+10-04 18:40:06.627 15937 16002 W libc    : Access denied finding property "ro.vendor.arm.egl.configs.yuv420.recordable"
+10-04 18:40:06.627 15937 16002 W libc    : Access denied finding property "ro.vendor.arm.egl.configs.yuv420.dataspaces_to_exclude"
+10-04 18:40:06.627 15937 16002 W libc    : Access denied finding property "ro.vendor.arm.egl.configs.yvu420.hal_format"
+10-04 18:40:06.627 15937 16002 W libc    : Access denied finding property "ro.vendor.arm.egl.configs.yvu420.recordable"
+10-04 18:40:06.627 15937 16002 W libc    : Access denied finding property "ro.vendor.arm.egl.configs.yvu420.dataspaces_to_exclude"
+10-04 18:40:06.628 15937 16002 W libc    : Access denied finding property "ro.vendor.arm.egl.configs.y410.hal_format"
+10-04 18:40:06.628 15937 16002 W libc    : Access denied finding property "ro.vendor.arm.egl.configs.y410.recordable"
+10-04 18:40:06.628 15937 16002 W libc    : Access denied finding property "ro.vendor.arm.egl.configs.y410.dataspaces_to_exclude"
+10-04 18:40:06.628 15937 16002 W libc    : Access denied finding property "ro.vendor.arm.egl.configs.y210.hal_format"
+10-04 18:40:06.628 15937 16002 W libc    : Access denied finding property "ro.vendor.arm.egl.configs.y210.recordable"
+10-04 18:40:06.628 15937 16002 W libc    : Access denied finding property "ro.vendor.arm.egl.configs.y210.dataspaces_to_exclude"
+10-04 18:40:06.628 15937 16002 W libc    : Access denied finding property "ro.vendor.arm.egl.configs.y0l2.hal_format"
+10-04 18:40:06.628 15937 16002 W libc    : Access denied finding property "ro.vendor.arm.egl.configs.y0l2.recordable"
+10-04 18:40:06.628 15937 16002 W libc    : Access denied finding property "ro.vendor.arm.egl.configs.y0l2.dataspaces_to_exclude"
+10-04 18:40:06.628 15937 16002 W libc    : Access denied finding property "ro.vendor.arm.egl.configs.p210.hal_format"
+10-04 18:40:06.629 15937 16002 W libc    : Access denied finding property "ro.vendor.arm.egl.configs.p210.recordable"
+10-04 18:40:06.629 15937 16002 W libc    : Access denied finding property "ro.vendor.arm.egl.configs.p210.dataspaces_to_exclude"
+10-04 18:40:06.629 15937 16002 W libc    : Access denied finding property "ro.vendor.arm.egl.configs.p010.hal_format"
+10-04 18:40:06.629 15937 16002 W libc    : Access denied finding property "ro.vendor.arm.egl.configs.p010.recordable"
+10-04 18:40:06.629 15937 16002 W libc    : Access denied finding property "ro.vendor.arm.egl.configs.p010.dataspaces_to_exclude"
+10-04 18:40:06.760 15937 15955 E OpenGLRenderer: Unable to match the desired swap behavior.
+10-04 18:40:06.890 15937 16001 W chromium: [WARNING:android_webview/browser/gfx/display_webview.cc:33] WebView overlays are enabled!
+10-04 18:40:07.180 15937 15999 W VideoCapabilities: Unrecognized profile/level 0/4 for video/mpeg2
+10-04 18:40:07.180 15937 15999 I VideoCapabilities: Unsupported profile 3 for video/mpeg2
+10-04 18:40:07.180 15937 15999 I VideoCapabilities: Unsupported profile 4 for video/mpeg2
+10-04 18:40:07.180 15937 15999 I VideoCapabilities: Unsupported profile 5 for video/mpeg2
+10-04 18:40:07.181 15937 15999 I VideoCapabilities: Unsupported profile 2 for video/mp4v-es
+10-04 18:40:07.181 15937 15999 I VideoCapabilities: Unsupported profile 8 for video/mp4v-es
+10-04 18:40:07.181 15937 15999 I VideoCapabilities: Unsupported profile 16 for video/mp4v-es
+10-04 18:40:07.181 15937 15999 I VideoCapabilities: Unsupported profile 1024 for video/mp4v-es
+10-04 18:40:07.216 15937 15999 W cr_VAUtil: Unknown profile: 32768 for codec video/x-vnd.on2.vp9
+10-04 18:40:07.216 15937 15999 W cr_VAUtil: Unknown profile: 32768 for codec video/x-vnd.on2.vp9
+10-04 18:40:07.760 15937 16007 I QuiltNightTV: TV_NETWORK_CHECK HTTP 200
+10-04 18:40:07.805 15937 15937 I QuiltNightTV: TV_PAGE_STARTED https://collections-timing-riding-computing.trycloudflare.com/receiver?display=android-tv&deviceCheck=1
+10-04 18:40:08.684 15937 15937 I QuiltNightTV: TV_PAGE_LOADED https://collections-timing-riding-computing.trycloudflare.com/receiver?display=android-tv&deviceCheck=1
+10-04 18:40:10.437 15937 15937 I QuiltNightTV: PD_RECEIVER_MOUNTED
+10-04 18:40:10.622 15937 15937 I QuiltNightTV: PD_DISPLAY_STATE LOBBY 0:0
+10-04 18:40:10.648 15937 15937 I QuiltNightTV: PD_DISPLAY_STATE LOBBY 0:0
+10-04 18:40:10.839 15937 15937 I QuiltNightTV: PD_AUTOPLAY_PLAYERS 6
+10-04 18:40:11.352 15937 15937 I QuiltNightTV: PD_DISPLAY_STATE LOBBY 0:0
+10-04 18:40:11.416 15937 15937 I QuiltNightTV: PD_DISPLAY_STATE LOBBY 0:0
+10-04 18:40:11.476 15937 15937 I QuiltNightTV: PD_DISPLAY_STATE LOBBY 0:0
+10-04 18:40:11.646 15937 15937 I QuiltNightTV: PD_DISPLAY_STATE LOBBY 0:0
+10-04 18:40:11.730 15937 15937 I QuiltNightTV: PD_DISPLAY_STATE LOBBY 0:0
+10-04 18:40:11.851 15937 15937 I QuiltNightTV: PD_DISPLAY_STATE LOBBY 0:0
+10-04 18:40:11.936 15937 15937 I QuiltNightTV: PD_DISPLAY_STATE LOBBY 0:0
+10-04 18:40:12.008 15937 15937 I QuiltNightTV: PD_DISPLAY_STATE LOBBY 0:0
+10-04 18:40:12.153 15937 15937 I QuiltNightTV: PD_DISPLAY_STATE LOBBY 0:0
+10-04 18:40:12.232 15937 15937 I QuiltNightTV: PD_DISPLAY_STATE LOBBY 0:0
+10-04 18:40:12.339 15937 15937 I QuiltNightTV: PD_DISPLAY_STATE LOBBY 0:0
+10-04 18:40:12.466 15937 15937 I QuiltNightTV: PD_DISPLAY_STATE LOBBY 0:0
+10-04 18:40:14.133 15937 15937 I QuiltNightTV: PD_DISPLAY_STATE STARTING 1:1
+10-04 18:40:14.601 15937 15937 I QuiltNightTV: PD_DISPLAY_STATE STARTING 1:1
+10-04 18:40:14.646 15937 15937 I QuiltNightTV: PD_DISPLAY_STATE STARTING 1:1
+10-04 18:40:14.655 15937 15937 I QuiltNightTV: PD_DISPLAY_STATE STARTING 1:1
+10-04 18:40:14.712 15937 15937 I QuiltNightTV: PD_DISPLAY_STATE STARTING 1:1
+10-04 18:40:14.718 15937 15937 I QuiltNightTV: PD_DISPLAY_STATE STARTING 1:1
+10-04 18:40:14.723 15937 15937 I QuiltNightTV: PD_DISPLAY_STATE STARTING 1:1
+10-04 18:40:15.171 15937 15937 I QuiltNightTV: PD_DISPLAY_STATE PLACING 1:2
+10-04 18:40:15.753 15937 15937 I QuiltNightTV: PD_DISPLAY_STATE PLACING 1:2
+10-04 18:40:15.772 15937 15937 I QuiltNightTV: PD_DISPLAY_STATE PLACING 1:2
+10-04 18:40:15.807 15937 15937 I QuiltNightTV: PD_DISPLAY_STATE PLACING 1:2
+10-04 18:40:15.818 15937 15937 I QuiltNightTV: PD_DISPLAY_STATE PLACING 1:2
+10-04 18:40:15.837 15937 15937 I QuiltNightTV: PD_DISPLAY_STATE PLACING 1:2
+10-04 18:40:15.842 15937 15937 I QuiltNightTV: PD_DISPLAY_STATE PLACING 1:2
+10-04 18:40:16.397 15937 15937 I QuiltNightTV: PD_DISPLAY_STATE TURN_RESULTS 1:3
+10-04 18:40:16.415 15937 15937 I QuiltNightTV: PD_AUTOPLAY_BOARDS 1:1
+10-04 18:40:20.489 15937 15937 I QuiltNightTV: PD_DISPLAY_STATE PLACING 1:4
+10-04 18:40:21.074 15937 15937 I QuiltNightTV: PD_DISPLAY_STATE PLACING 1:4
+10-04 18:40:21.113 15937 15937 I QuiltNightTV: PD_DISPLAY_STATE PLACING 1:4
+10-04 18:40:21.119 15937 15937 I QuiltNightTV: PD_DISPLAY_STATE PLACING 1:4
+10-04 18:40:21.125 15937 15937 I QuiltNightTV: PD_DISPLAY_STATE PLACING 1:4
+10-04 18:40:21.133 15937 15937 I QuiltNightTV: PD_DISPLAY_STATE PLACING 1:4
+10-04 18:40:21.138 15937 15937 I QuiltNightTV: PD_DISPLAY_STATE PLACING 1:4
+10-04 18:40:21.683 15937 15937 I QuiltNightTV: PD_DISPLAY_STATE TURN_RESULTS 1:5
+10-04 18:40:21.702 15937 15937 I QuiltNightTV: PD_AUTOPLAY_BOARDS 1:2
+10-04 18:40:25.292 15937 15948 W System  : A resource failed to call end. 
+10-04 18:40:25.780 15937 15937 I QuiltNightTV: PD_DISPLAY_STATE PLACING 1:6
+10-04 18:40:26.398 15937 15937 I QuiltNightTV: PD_DISPLAY_STATE PLACING 1:6
+10-04 18:40:26.484 15937 15937 I QuiltNightTV: PD_DISPLAY_STATE PLACING 1:6
+10-04 18:40:26.490 15937 15937 I QuiltNightTV: PD_DISPLAY_STATE PLACING 1:6
+10-04 18:40:26.495 15937 15937 I QuiltNightTV: PD_DISPLAY_STATE PLACING 1:6
+10-04 18:40:26.499 15937 15937 I QuiltNightTV: PD_DISPLAY_STATE PLACING 1:6
+10-04 18:40:26.504 15937 15937 I QuiltNightTV: PD_DISPLAY_STATE PLACING 1:6
+10-04 18:40:27.011 15937 15937 I QuiltNightTV: PD_DISPLAY_STATE TURN_RESULTS 1:7
+10-04 18:40:27.023 15937 15937 I QuiltNightTV: PD_AUTOPLAY_BOARDS 1:3
+10-04 18:40:31.109 15937 15937 I QuiltNightTV: PD_DISPLAY_STATE PLACING 1:8
+10-04 18:40:31.749 15937 15937 I QuiltNightTV: PD_DISPLAY_STATE PLACING 1:8
+10-04 18:40:31.806 15937 15937 I QuiltNightTV: PD_DISPLAY_STATE PLACING 1:8
+10-04 18:40:31.812 15937 15937 I QuiltNightTV: PD_DISPLAY_STATE PLACING 1:8
+10-04 18:40:31.852 15937 15937 I QuiltNightTV: PD_DISPLAY_STATE PLACING 1:8
+10-04 18:40:31.857 15937 15937 I QuiltNightTV: PD_DISPLAY_STATE PLACING 1:8
+10-04 18:40:31.864 15937 15937 I QuiltNightTV: PD_DISPLAY_STATE PLACING 1:8
+10-04 18:40:32.333 15937 15937 I QuiltNightTV: PD_DISPLAY_STATE TURN_RESULTS 1:9
+10-04 18:40:32.347 15937 15937 I QuiltNightTV: PD_AUTOPLAY_BOARDS 1:4
+10-04 18:40:36.428 15937 15937 I QuiltNightTV: PD_DISPLAY_STATE PLACING 1:10
+10-04 18:40:37.056 15937 15937 I QuiltNightTV: PD_DISPLAY_STATE PLACING 1:10
+10-04 18:40:37.091 15937 15937 I QuiltNightTV: PD_DISPLAY_STATE PLACING 1:10
+10-04 18:40:37.095 15937 15937 I QuiltNightTV: PD_DISPLAY_STATE PLACING 1:10
+10-04 18:40:37.100 15937 15937 I QuiltNightTV: PD_DISPLAY_STATE PLACING 1:10
+10-04 18:40:37.105 15937 15937 I QuiltNightTV: PD_DISPLAY_STATE PLACING 1:10
+10-04 18:40:37.111 15937 15937 I QuiltNightTV: PD_DISPLAY_STATE PLACING 1:10
+10-04 18:40:37.668 15937 15937 I QuiltNightTV: PD_DISPLAY_STATE TURN_RESULTS 1:11
+10-04 18:40:37.683 15937 15937 I QuiltNightTV: PD_AUTOPLAY_BOARDS 1:5
+10-04 18:40:41.788 15937 15937 I QuiltNightTV: PD_DISPLAY_STATE PLACING 1:12
+10-04 18:40:42.369 15937 15937 I QuiltNightTV: PD_DISPLAY_STATE PLACING 1:12
+10-04 18:40:42.382 15937 15937 I QuiltNightTV: PD_DISPLAY_STATE PLACING 1:12
+10-04 18:40:42.387 15937 15937 I QuiltNightTV: PD_DISPLAY_STATE PLACING 1:12
+10-04 18:40:42.411 15937 15937 I QuiltNightTV: PD_DISPLAY_STATE PLACING 1:12
+10-04 18:40:42.417 15937 15937 I QuiltNightTV: PD_DISPLAY_STATE PLACING 1:12
+10-04 18:40:42.422 15937 15937 I QuiltNightTV: PD_DISPLAY_STATE PLACING 1:12
+10-04 18:40:42.991 15937 15937 I QuiltNightTV: PD_DISPLAY_STATE TURN_RESULTS 1:13
+10-04 18:40:43.005 15937 15937 I QuiltNightTV: PD_AUTOPLAY_BOARDS 1:6
+10-04 18:40:47.286 15937 15937 I QuiltNightTV: PD_DISPLAY_STATE SCORING 1:14
+10-04 18:40:47.901 15937 15937 I QuiltNightTV: PD_DISPLAY_STATE SCORING 1:14
+10-04 18:40:47.904 15937 15937 I QuiltNightTV: PD_DISPLAY_STATE SCORING 1:14
+10-04 18:40:47.927 15937 15937 I QuiltNightTV: PD_DISPLAY_STATE SCORING 1:14
+10-04 18:40:47.930 15937 15937 I QuiltNightTV: PD_DISPLAY_STATE SCORING 1:14
+10-04 18:40:47.934 15937 15937 I QuiltNightTV: PD_DISPLAY_STATE SCORING 1:14
+10-04 18:40:47.937 15937 15937 I QuiltNightTV: PD_DISPLAY_STATE SCORING 1:14
+10-04 18:40:48.515 15937 15937 I QuiltNightTV: PD_DISPLAY_STATE ROUND_RESULTS 1:15
+10-04 18:40:49.540 15937 15937 I QuiltNightTV: PD_DISPLAY_STATE PLACING 1:16
+10-04 18:40:50.371 15937 15937 I QuiltNightTV: PD_DISPLAY_STATE PLACING 1:16
+10-04 18:40:50.386 15937 15937 I QuiltNightTV: PD_DISPLAY_STATE PLACING 1:16
+10-04 18:40:50.440 15937 15937 I QuiltNightTV: PD_DISPLAY_STATE PLACING 1:16
+10-04 18:40:50.482 15937 15937 I QuiltNightTV: PD_DISPLAY_STATE PLACING 1:16
+10-04 18:40:50.487 15937 15937 I QuiltNightTV: PD_DISPLAY_STATE PLACING 1:16
+10-04 18:40:50.492 15937 15937 I QuiltNightTV: PD_DISPLAY_STATE PLACING 1:16
+10-04 18:40:50.959 15937 15937 I QuiltNightTV: PD_DISPLAY_STATE TURN_RESULTS 1:17
+10-04 18:40:50.970 15937 15937 I QuiltNightTV: PD_AUTOPLAY_BOARDS 2:1
+10-04 18:40:55.112 15937 15937 I QuiltNightTV: PD_DISPLAY_STATE PLACING 1:18
+10-04 18:40:55.685 15937 15937 I QuiltNightTV: PD_DISPLAY_STATE PLACING 1:18
+10-04 18:40:55.736 15937 15937 I QuiltNightTV: PD_DISPLAY_STATE PLACING 1:18
+10-04 18:40:55.784 15937 15937 I QuiltNightTV: PD_DISPLAY_STATE PLACING 1:18
+10-04 18:40:55.794 15937 15937 I QuiltNightTV: PD_DISPLAY_STATE PLACING 1:18
+10-04 18:40:55.841 15937 15937 I QuiltNightTV: PD_DISPLAY_STATE PLACING 1:18
+10-04 18:40:55.847 15937 15937 I QuiltNightTV: PD_DISPLAY_STATE PLACING 1:18
+10-04 18:40:56.356 15937 15937 I QuiltNightTV: PD_DISPLAY_STATE TURN_RESULTS 1:19
+10-04 18:40:56.369 15937 15937 I QuiltNightTV: PD_AUTOPLAY_BOARDS 2:2
+10-04 18:41:00.799 15937 15937 I QuiltNightTV: PD_DISPLAY_STATE PLACING 1:20
+10-04 18:41:01.427 15937 15937 I QuiltNightTV: PD_DISPLAY_STATE PLACING 1:20
+10-04 18:41:01.451 15937 15937 I QuiltNightTV: PD_DISPLAY_STATE PLACING 1:20
+10-04 18:41:01.456 15937 15937 I QuiltNightTV: PD_DISPLAY_STATE PLACING 1:20
+10-04 18:41:01.485 15937 15937 I QuiltNightTV: PD_DISPLAY_STATE PLACING 1:20
+10-04 18:41:01.494 15937 15937 I QuiltNightTV: PD_DISPLAY_STATE PLACING 1:20
+10-04 18:41:01.509 15937 15937 I QuiltNightTV: PD_DISPLAY_STATE PLACING 1:20
+10-04 18:41:02.031 15937 15937 I QuiltNightTV: PD_DISPLAY_STATE TURN_RESULTS 1:21
+10-04 18:41:02.045 15937 15937 I QuiltNightTV: PD_AUTOPLAY_BOARDS 2:3
+10-04 18:41:06.177 15937 15937 I QuiltNightTV: PD_DISPLAY_STATE PLACING 1:22
+10-04 18:41:06.744 15937 15937 I QuiltNightTV: PD_DISPLAY_STATE PLACING 1:22
+10-04 18:41:06.754 15937 15937 I QuiltNightTV: PD_DISPLAY_STATE PLACING 1:22
+10-04 18:41:06.758 15937 15937 I QuiltNightTV: PD_DISPLAY_STATE PLACING 1:22
+10-04 18:41:06.792 15937 15937 I QuiltNightTV: PD_DISPLAY_STATE PLACING 1:22
+10-04 18:41:06.808 15937 15937 I QuiltNightTV: PD_DISPLAY_STATE PLACING 1:22
+10-04 18:41:06.812 15937 15937 I QuiltNightTV: PD_DISPLAY_STATE PLACING 1:22
+10-04 18:41:07.356 15937 15937 I QuiltNightTV: PD_DISPLAY_STATE TURN_RESULTS 1:23
+10-04 18:41:07.375 15937 15937 I QuiltNightTV: PD_AUTOPLAY_BOARDS 2:4
+10-04 18:41:11.493 15937 15937 I QuiltNightTV: PD_DISPLAY_STATE PLACING 1:24
+10-04 18:41:12.077 15937 15937 I QuiltNightTV: PD_DISPLAY_STATE PLACING 1:24
+10-04 18:41:12.119 15937 15937 I QuiltNightTV: PD_DISPLAY_STATE PLACING 1:24
+10-04 18:41:12.158 15937 15937 I QuiltNightTV: PD_DISPLAY_STATE PLACING 1:24
+10-04 18:41:12.163 15937 15937 I QuiltNightTV: PD_DISPLAY_STATE PLACING 1:24
+10-04 18:41:12.169 15937 15937 I QuiltNightTV: PD_DISPLAY_STATE PLACING 1:24
+10-04 18:41:12.231 15937 15937 I QuiltNightTV: PD_DISPLAY_STATE PLACING 1:24
+10-04 18:41:12.685 15937 15937 I QuiltNightTV: PD_DISPLAY_STATE TURN_RESULTS 1:25
+10-04 18:41:12.707 15937 15937 I QuiltNightTV: PD_AUTOPLAY_BOARDS 2:5
+10-04 18:41:16.790 15937 15937 I QuiltNightTV: PD_DISPLAY_STATE PLACING 1:26
+10-04 18:41:17.393 15937 15937 I QuiltNightTV: PD_DISPLAY_STATE PLACING 1:26
+10-04 18:41:17.399 15937 15937 I QuiltNightTV: PD_DISPLAY_STATE PLACING 1:26
+10-04 18:41:17.436 15937 15937 I QuiltNightTV: PD_DISPLAY_STATE PLACING 1:26
+10-04 18:41:17.444 15937 15937 I QuiltNightTV: PD_DISPLAY_STATE PLACING 1:26
+10-04 18:41:17.448 15937 15937 I QuiltNightTV: PD_DISPLAY_STATE PLACING 1:26
+10-04 18:41:17.452 15937 15937 I QuiltNightTV: PD_DISPLAY_STATE PLACING 1:26
+10-04 18:41:18.096 15937 15937 I QuiltNightTV: PD_DISPLAY_STATE TURN_RESULTS 1:27
+10-04 18:41:18.113 15937 15937 I QuiltNightTV: PD_AUTOPLAY_BOARDS 2:6
+10-04 18:41:22.309 15937 15937 I QuiltNightTV: PD_DISPLAY_STATE SCORING 1:28
+10-04 18:41:22.919 15937 15937 I QuiltNightTV: PD_DISPLAY_STATE SCORING 1:28
+10-04 18:41:22.996 15937 15937 I QuiltNightTV: PD_DISPLAY_STATE SCORING 1:28
+10-04 18:41:23.000 15937 15937 I QuiltNightTV: PD_DISPLAY_STATE SCORING 1:28
+10-04 18:41:23.003 15937 15937 I QuiltNightTV: PD_DISPLAY_STATE SCORING 1:28
+10-04 18:41:23.007 15937 15937 I QuiltNightTV: PD_DISPLAY_STATE SCORING 1:28
+10-04 18:41:23.010 15937 15937 I QuiltNightTV: PD_DISPLAY_STATE SCORING 1:28
+10-04 18:41:23.536 15937 15937 I QuiltNightTV: PD_DISPLAY_STATE ROUND_RESULTS 1:29
+10-04 18:41:24.560 15937 15937 I QuiltNightTV: PD_DISPLAY_STATE PLACING 1:30
+10-04 18:41:25.235 15937 15937 I QuiltNightTV: PD_DISPLAY_STATE PLACING 1:30
+10-04 18:41:25.252 15937 15937 I QuiltNightTV: PD_DISPLAY_STATE PLACING 1:30
+10-04 18:41:25.261 15937 15937 I QuiltNightTV: PD_DISPLAY_STATE PLACING 1:30
+10-04 18:41:25.293 15937 15937 I QuiltNightTV: PD_DISPLAY_STATE PLACING 1:30
+10-04 18:41:25.309 15937 15937 I QuiltNightTV: PD_DISPLAY_STATE PLACING 1:30
+10-04 18:41:25.315 15937 15937 I QuiltNightTV: PD_DISPLAY_STATE PLACING 1:30
+10-04 18:41:25.828 15937 15937 I QuiltNightTV: PD_DISPLAY_STATE TURN_RESULTS 1:31
+10-04 18:41:25.842 15937 15937 I QuiltNightTV: PD_AUTOPLAY_BOARDS 3:1
+10-04 18:41:30.126 15937 15937 I QuiltNightTV: PD_DISPLAY_STATE PLACING 1:32
+10-04 18:41:30.713 15937 15937 I QuiltNightTV: PD_DISPLAY_STATE PLACING 1:32
+10-04 18:41:30.766 15937 15937 I QuiltNightTV: PD_DISPLAY_STATE PLACING 1:32
+10-04 18:41:30.773 15937 15937 I QuiltNightTV: PD_DISPLAY_STATE PLACING 1:32
+10-04 18:41:30.778 15937 15937 I QuiltNightTV: PD_DISPLAY_STATE PLACING 1:32
+10-04 18:41:30.795 15937 15937 I QuiltNightTV: PD_DISPLAY_STATE PLACING 1:32
+10-04 18:41:30.800 15937 15937 I QuiltNightTV: PD_DISPLAY_STATE PLACING 1:32
+10-04 18:41:31.318 15937 15937 I QuiltNightTV: PD_DISPLAY_STATE TURN_RESULTS 1:33
+10-04 18:41:31.332 15937 15937 I QuiltNightTV: PD_AUTOPLAY_BOARDS 3:2
+10-04 18:41:35.725 15937 15937 I QuiltNightTV: PD_DISPLAY_STATE PLACING 1:34
+10-04 18:41:36.337 15937 15937 I QuiltNightTV: PD_DISPLAY_STATE PLACING 1:34
+10-04 18:41:36.352 15937 15937 I QuiltNightTV: PD_DISPLAY_STATE PLACING 1:34
+10-04 18:41:36.384 15937 15937 I QuiltNightTV: PD_DISPLAY_STATE PLACING 1:34
+10-04 18:41:36.422 15937 15937 I QuiltNightTV: PD_DISPLAY_STATE PLACING 1:34
+10-04 18:41:36.428 15937 15937 I QuiltNightTV: PD_DISPLAY_STATE PLACING 1:34
+10-04 18:41:36.432 15937 15937 I QuiltNightTV: PD_DISPLAY_STATE PLACING 1:34
+10-04 18:41:36.886 15937 15937 I QuiltNightTV: PD_DISPLAY_STATE TURN_RESULTS 1:35
+10-04 18:41:36.902 15937 15937 I QuiltNightTV: PD_AUTOPLAY_BOARDS 3:3
+10-04 18:41:41.079 15937 15937 I QuiltNightTV: PD_DISPLAY_STATE PLACING 1:36
+10-04 18:41:41.664 15937 15937 I QuiltNightTV: PD_DISPLAY_STATE PLACING 1:36
+10-04 18:41:41.676 15937 15937 I QuiltNightTV: PD_DISPLAY_STATE PLACING 1:36
+10-04 18:41:41.709 15937 15937 I QuiltNightTV: PD_DISPLAY_STATE PLACING 1:36
+10-04 18:41:41.720 15937 15937 I QuiltNightTV: PD_DISPLAY_STATE PLACING 1:36
+10-04 18:41:41.725 15937 15937 I QuiltNightTV: PD_DISPLAY_STATE PLACING 1:36
+10-04 18:41:41.731 15937 15937 I QuiltNightTV: PD_DISPLAY_STATE PLACING 1:36
+10-04 18:41:42.272 15937 15937 I QuiltNightTV: PD_DISPLAY_STATE TURN_RESULTS 1:37
+10-04 18:41:42.289 15937 15937 I QuiltNightTV: PD_AUTOPLAY_BOARDS 3:4
+10-04 18:41:46.374 15937 15937 I QuiltNightTV: PD_DISPLAY_STATE PLACING 1:38
+10-04 18:41:47.035 15937 15937 I QuiltNightTV: PD_DISPLAY_STATE PLACING 1:38
+10-04 18:41:47.055 15937 15937 I QuiltNightTV: PD_DISPLAY_STATE PLACING 1:38
+10-04 18:41:47.060 15937 15937 I QuiltNightTV: PD_DISPLAY_STATE PLACING 1:38
+10-04 18:41:47.065 15937 15937 I QuiltNightTV: PD_DISPLAY_STATE PLACING 1:38
+10-04 18:41:47.094 15937 15937 I QuiltNightTV: PD_DISPLAY_STATE PLACING 1:38
+10-04 18:41:47.100 15937 15937 I QuiltNightTV: PD_DISPLAY_STATE PLACING 1:38
+10-04 18:41:47.611 15937 15937 I QuiltNightTV: PD_DISPLAY_STATE TURN_RESULTS 1:39
+10-04 18:41:47.623 15937 15937 I QuiltNightTV: PD_AUTOPLAY_BOARDS 3:5
+10-04 18:41:51.728 15937 15937 I QuiltNightTV: PD_DISPLAY_STATE PLACING 1:40
+10-04 18:41:52.310 15937 15937 I QuiltNightTV: PD_DISPLAY_STATE PLACING 1:40
+10-04 18:41:52.316 15937 15937 I QuiltNightTV: PD_DISPLAY_STATE PLACING 1:40
+10-04 18:41:52.320 15937 15937 I QuiltNightTV: PD_DISPLAY_STATE PLACING 1:40
+10-04 18:41:52.346 15937 15937 I QuiltNightTV: PD_DISPLAY_STATE PLACING 1:40
+10-04 18:41:52.350 15937 15937 I QuiltNightTV: PD_DISPLAY_STATE PLACING 1:40
+10-04 18:41:52.362 15937 15937 I QuiltNightTV: PD_DISPLAY_STATE PLACING 1:40
+10-04 18:41:52.924 15937 15937 I QuiltNightTV: PD_DISPLAY_STATE TURN_RESULTS 1:41
+10-04 18:41:52.934 15937 15937 I QuiltNightTV: PD_AUTOPLAY_BOARDS 3:6
+10-04 18:41:57.019 15937 15937 I QuiltNightTV: PD_DISPLAY_STATE SCORING 1:42
+10-04 18:41:57.635 15937 15937 I QuiltNightTV: PD_DISPLAY_STATE SCORING 1:42
+10-04 18:41:57.648 15937 15937 I QuiltNightTV: PD_DISPLAY_STATE SCORING 1:42
+10-04 18:41:57.731 15937 15937 I QuiltNightTV: PD_DISPLAY_STATE SCORING 1:42
+10-04 18:41:57.733 15937 15937 I QuiltNightTV: PD_DISPLAY_STATE SCORING 1:42
+10-04 18:41:57.736 15937 15937 I QuiltNightTV: PD_DISPLAY_STATE SCORING 1:42
+10-04 18:41:57.738 15937 15937 I QuiltNightTV: PD_DISPLAY_STATE SCORING 1:42
+10-04 18:41:58.264 15937 15937 I QuiltNightTV: PD_DISPLAY_STATE FINISHED 1:43
+10-04 18:41:59.478 15937 15937 I QuiltNightTV: PD_DISPLAY_STATE FINISHED 1:43
+10-04 18:42:00.501 15937 15937 I QuiltNightTV: PD_DISPLAY_STATE FINISHED 1:43
+10-04 18:42:01.524 15937 15937 I QuiltNightTV: PD_DISPLAY_STATE FINISHED 1:43
+10-04 18:42:02.452 15937 15937 I QuiltNightTV: PD_DISPLAY_STATE FINISHED 1:43
+10-04 18:42:03.471 15937 15937 I QuiltNightTV: PD_DISPLAY_STATE FINISHED 1:43
+10-04 18:42:04.504 15937 15937 I QuiltNightTV: PD_DISPLAY_STATE FINISHED 1:43
+10-04 18:42:05.352 15937 15937 I QuiltNightTV: PD_DISPLAY_STATE FINISHED 1:43
+10-04 18:42:06.546 15937 15937 I QuiltNightTV: PD_DISPLAY_STATE FINISHED 1:43
+10-04 18:42:07.406 15937 15937 I QuiltNightTV: PD_DISPLAY_STATE FINISHED 1:43
+10-04 18:42:08.601 15937 15937 I QuiltNightTV: PD_DISPLAY_STATE FINISHED 1:43
+10-04 18:42:09.460 15937 15937 I QuiltNightTV: PD_DISPLAY_STATE FINISHED 1:43
+10-04 18:42:10.448 15937 15937 I QuiltNightTV: PD_DISPLAY_STATE FINISHED 1:43
+10-04 18:42:11.460 15937 15937 I QuiltNightTV: PD_DISPLAY_STATE FINISHED 1:43
+10-04 18:42:12.485 15937 15937 I QuiltNightTV: PD_DISPLAY_STATE FINISHED 1:43
+10-04 18:42:13.343 15937 15937 I QuiltNightTV: PD_DISPLAY_STATE FINISHED 1:43
+10-04 18:42:14.356 15937 15937 I QuiltNightTV: PD_DISPLAY_STATE FINISHED 1:43
+10-04 18:42:15.380 15937 15937 I QuiltNightTV: PD_DISPLAY_STATE FINISHED 1:43
+10-04 18:42:16.587 15937 15937 I QuiltNightTV: PD_DISPLAY_STATE FINISHED 1:43
+10-04 18:42:17.452 15937 15937 I QuiltNightTV: PD_DISPLAY_STATE FINISHED 1:43
+10-04 18:42:18.474 15937 15937 I QuiltNightTV: PD_DISPLAY_STATE FINISHED 1:43
+10-04 18:42:19.455 15937 15937 I QuiltNightTV: PD_DISPLAY_STATE FINISHED 1:43
+10-04 18:42:20.475 15937 15937 I QuiltNightTV: PD_DISPLAY_STATE FINISHED 1:43
+10-04 18:42:21.506 15937 15937 I QuiltNightTV: PD_DISPLAY_STATE FINISHED 1:43
+10-04 18:42:22.542 15937 15937 I QuiltNightTV: PD_DISPLAY_STATE FINISHED 1:43
+10-04 18:42:23.448 15937 15937 I QuiltNightTV: PD_DISPLAY_STATE FINISHED 1:43
+10-04 18:42:24.454 15937 15937 I QuiltNightTV: PD_DISPLAY_STATE FINISHED 1:43
+10-04 18:42:25.798 15937 15937 I QuiltNightTV: PD_DISPLAY_STATE FINISHED 1:43
+10-04 18:42:26.770 15937 15937 I QuiltNightTV: PD_DISPLAY_STATE FINISHED 1:43
+10-04 18:42:27.362 15937 15937 I QuiltNightTV: PD_DISPLAY_STATE FINISHED 1:43
+10-04 18:42:28.391 15937 15937 I QuiltNightTV: PD_DISPLAY_STATE FINISHED 1:43
+10-04 18:42:29.584 15937 15937 I QuiltNightTV: PD_DISPLAY_STATE FINISHED 1:43
+10-04 18:42:30.613 15937 15937 I QuiltNightTV: PD_DISPLAY_STATE FINISHED 1:43
+10-04 18:42:31.632 15937 15937 I QuiltNightTV: PD_DISPLAY_STATE FINISHED 1:43
+10-04 18:42:32.556 15937 15937 I QuiltNightTV: PD_DISPLAY_STATE FINISHED 1:43
+10-04 18:42:33.371 15937 15937 I QuiltNightTV: PD_DISPLAY_STATE FINISHED 1:43
+10-04 18:42:34.415 15937 15937 I QuiltNightTV: PD_DISPLAY_STATE FINISHED 1:43
+10-04 18:42:34.520 15937 15937 I QuiltNightTV: PD_DEVICE_CHECK_COMPLETE

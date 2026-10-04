@@ -3,7 +3,7 @@
 
 const { createServer } = require('./createServer');
 
-const PORT = Number(process.env.PORT) || 8080;
+const PORT = process.env.PORT === '0' ? 0 : Number(process.env.PORT) || 8080;
 const GAME_NAME = process.env.WF_GAME ?? 'reaction';   // set WF_GAME=none to run the bare platform
 
 let gameFactory = null;
@@ -28,7 +28,7 @@ if (GAME_NAME && GAME_NAME !== 'none') {
   }
 }
 
-createServer({ port: PORT, gameFactory, gameName: GAME_NAME && GAME_NAME !== 'none' ? GAME_NAME : null }).then(({ port, close }) => {
+createServer({ port: PORT, gameFactory, publicOrigin:process.env.WF_PUBLIC_ORIGIN, castApplicationId:process.env.WF_CAST_APP_ID, ...(GAME_NAME === 'patchwork' ? {sessionGraceMs:5*60_000, presence:true, preferConnectedHost:true, serverSessionIds:true, allowControllerCreate:true} : {}), gameName: GAME_NAME && GAME_NAME !== 'none' ? GAME_NAME : null }).then(({ port, close }) => {
   console.log(`party-games platform ready on http://localhost:${port}`);
   console.log(`  receiver:   http://localhost:${port}/receiver`);
   console.log(`  controller: http://localhost:${port}/controller?name=Alice`);

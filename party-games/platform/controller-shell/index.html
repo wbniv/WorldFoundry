@@ -5,6 +5,7 @@
   <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
   <meta name="apple-mobile-web-app-capable" content="yes">
   <meta name="mobile-web-app-capable" content="yes">
+  <meta name="cast-application-id" content="{{CAST_APPLICATION_ID}}">
   <meta name="game-name" content="{{GAME_NAME}}">
   <title>Party Games · Controller</title>
   <link rel="icon" type="image/svg+xml" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 16 16'%3E%3Ctext y='14' font-size='14'%3E%F0%9F%8E%B2%3C/text%3E%3C/svg%3E">
@@ -49,6 +50,7 @@
                maxlength="4" pattern="[A-Z]{4}"
                aria-label="4-letter room code">
       </label>
+      <button id="entry-create" type="button" class="room-join" hidden>Create game</button>
       <button id="entry-join" type="submit" class="room-join">JOIN</button>
     </form>
   </div>

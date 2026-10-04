@@ -13,8 +13,8 @@ import zipfile
 from pathlib import Path
 from .store import Store
 
-APPS = {'aquarium', 'condo', 'snowgoons', 'smb', 'qbert', 'bomberman'}
-JAVA_APPS = {'bomberman'}
+APPS = {'aquarium', 'condo', 'snowgoons', 'smb', 'qbert', 'patchwork', 'bomberman'}
+JAVA_APPS = {'patchwork', 'bomberman'}
 SCENES = ['clownfish', 'blue-shrimp', 'betta', 'jellyfish', 'lionfish', 'planted-tank', 'arowana', 'tiger-barbs']
 ENGINE_LOG_TAIL_BYTES = 4_000_000
 
@@ -492,6 +492,14 @@ class Adapter:
         if self.req['workflow']=='check':
             self.wait(self.req.get('duration',3))
             self.capture()
+            if self.req.get('app') == 'patchwork':
+                log = (self.out/'logcat.txt').read_text()
+                if 'PD_RECEIVER_MOUNTED' not in log:
+                    raise RuntimeError('JavaScript receiver did not mount in the TV WebView')
+                with zipfile.ZipFile(self.store.root/'inputs'/self.req['apk']) as bundle:
+                    automated = json.loads(bundle.read('assets/connection.json')).get('automatedCheck') is True
+                if automated and 'PD_DEVICE_CHECK_COMPLETE' not in log:
+                    raise RuntimeError('The in-app two-player game did not complete; inspect the WebView logs')
             if self.req.get('validator')=='menu-back':
                 self.check_menu()
             elif self.req.get('validator')=='poke-resume':

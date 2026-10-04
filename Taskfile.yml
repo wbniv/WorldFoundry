@@ -8,6 +8,27 @@ includes:
 
 tasks:
 
+  patchwork:playthrough:
+    desc: "Play a complete browser game with two phones and TV; manage a local server and save evidence (HEADED=1 to watch, OUT/ORIGIN optional)"
+    silent: true
+    env:
+      WF_PD_OUT: '{{.OUT | default ""}}'
+      WF_PD_ORIGIN: '{{.ORIGIN | default ""}}'
+      WF_PD_HEADED: '{{.HEADED | default "0"}}'
+      WF_PD_SLOW_MS: '{{.SLOW_MS | default ""}}'
+    cmds:
+      - python3 party-games/games/patchwork/scripts/playthrough.py {{.CLI_ARGS}}
+
+  patchwork:playthrough:tv:
+    desc: "Build/freeze and play a complete game with 2–6 random players on an allocated Chromecast; save evidence and restore the ordinary app (ORIGIN overrides the development host)"
+    silent: true
+    env:
+      WF_PD_ORIGIN: '{{.ORIGIN | default "https://collections-timing-riding-computing.trycloudflare.com"}}'
+      WF_PD_OUT: '{{.OUT | default ""}}'
+      WF_PD_POOL: '{{.POOL | default "chromecast-test"}}'
+    cmds:
+      - python3 party-games/games/patchwork/scripts/playthrough-tv.py {{.CLI_ARGS}}
+
   setup:
     desc: "One-time: bootstrap the AWS wf-terraform profile, Codemagic API token + app id, and PagerDuty routing key. Idempotent, plan-then-confirm on every mutation. See docs/SETUP.md."
     cmds:

@@ -1,0 +1,9 @@
+J-c95d141e2cb1: accepted {"pool": "chromecast-test", "app": "patchwork", "apk": "acc3c84b8eb7d9c6720e5f2cf09cea80b22267364473e070d733ed5b438df0df.apk", "duration": 180.0, "workflow": "check"}
+J-c95d141e2cb1: granted {"device": "chromecast-test-01", "generation": 55}
+J-c95d141e2cb1: phase {"phase": "connecting"}
+J-c95d141e2cb1: phase {"phase": "installing"}
+J-c95d141e2cb1: phase {"phase": "installing"}
+J-c95d141e2cb1: phase {"phase": "launching"}
+J-c95d141e2cb1: phase {"phase": "restoring"}
+J-c95d141e2cb1: completed {"error": null, "health": "ready"}
+J-c95d141e2cb1: completed

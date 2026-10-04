@@ -7,6 +7,8 @@
 const http = require('http');
 const fs = require('fs');
 const path = require('path');
+const crypto = require('crypto');
+const QRCode = require('qrcode');
 const { WebSocketServer } = require('ws');
 
 const MIME = {
@@ -54,13 +56,20 @@ function resolveStatic(url) {
 // shell HTML ships with these tokens in the head; createServer is the
 // only thing that expands them. Games get selected at launch time via
 // `WF_GAME` (threaded in as `gameName`), not per-request.
-function applyShellTemplate(html, gameName, role, gamesRoot) {
+function applyShellTemplate(html, gameName, role, gamesRoot, castApplicationId = '') {
   const name = gameName || '';
   const styleTag = (name && gameCssExists(gamesRoot, name, role))
     ? `<link rel="stylesheet" href="/game/client/${role}.css">`
     : '';
+  if (name && fs.existsSync(path.join(gamesRoot, name, 'client', 'assets', 'icons', 'favicon.png'))) {
+    html = html.replace(/<link rel="icon"[^>]*>/, '<link rel="icon" type="image/png" href="/game/assets/icons/favicon.png">');
+    if (fs.existsSync(path.join(gamesRoot, name, 'client', 'assets', 'icons', 'apple-touch-icon.png'))) {
+      html = html.replace('</head>', '<link rel="apple-touch-icon" href="/game/assets/icons/apple-touch-icon.png">\n</head>');
+    }
+  }
   return html
     .replace(/\{\{GAME_NAME\}\}/g, name)
+    .replace(/\{\{CAST_APPLICATION_ID\}\}/g, /^[A-Fa-f0-9]{8}$/.test(castApplicationId) ? castApplicationId : '')
     .replace(/\{\{GAME_STYLESHEET\}\}/g, styleTag);
 }
 
@@ -113,6 +122,19 @@ function createServer(opts = {}) {
 
   const server = http.createServer((req, res) => {
     const cleanUrl = (req.url || '').split('?')[0];
+
+    if (cleanUrl === '/join-qr') {
+      const code = new URL(req.url, 'http://localhost').searchParams.get('room') || '';
+      if (!ROOM_CODE_RE.test(code)) { res.writeHead(400); res.end('invalid room'); return; }
+      let join;
+      try { join = new URL('/controller', opts.publicOrigin || `http://${req.headers.host}`); }
+      catch { res.writeHead(400); res.end('invalid origin'); return; }
+      join.searchParams.set('room', code);
+      QRCode.toString(join.href, {type:'svg',errorCorrectionLevel:'M',margin:2}).then(svg => {
+        res.setHeader('content-type','image/svg+xml'); res.setHeader('cache-control','no-store'); res.end(svg);
+      }).catch(() => { res.writeHead(500); res.end('QR unavailable'); });
+      return;
+    }
 
     // ── shared shell-lib helpers ───────────────────────────────────────────
     // /shell-lib/<path> → <staticRoot>/shell-lib/<path>. Exposes reusable
@@ -214,7 +236,7 @@ function createServer(opts = {}) {
       }
       let body = data;
       if (isShellHtml) {
-        body = applyShellTemplate(data, gameName, role, gamesRoot);
+        body = applyShellTemplate(data, gameName, role, gamesRoot, opts.castApplicationId);
       }
       res.setHeader('content-type', MIME[path.extname(filePath)] || 'application/octet-stream');
       // Dev loop: forbid browser caching so controller.js / receiver.js / CSS
@@ -303,7 +325,7 @@ function createServer(opts = {}) {
     return {
       type: 'STATE',
       room: room.code,
-      players: [...room.players.values()].map(p => ({ id: p.id, name: p.name })),
+      players: [...room.players.values()].map(p => ({ id: p.id, name: p.name, ...(opts.presence ? {connected:!!p.ws} : {}) })),
       hostId: firstHostId(room),
     };
   }
@@ -318,13 +340,14 @@ function createServer(opts = {}) {
 
   function sendToInRoom(room, playerId, msg) {
     const p = room.players.get(playerId);
-    if (p && p.ws.readyState === p.ws.OPEN) p.ws.send(JSON.stringify(msg));
+    if (p?.ws && p.ws.readyState === p.ws.OPEN) p.ws.send(JSON.stringify(msg));
   }
 
   /** First-joined player is host; re-elect when they leave. */
   function firstHostId(room) {
     let first = null;
     for (const p of room.players.values()) {
+      if (opts.preferConnectedHost && !p.ws) continue;
       if (!first || p.joinedAt < first.joinedAt) first = p;
     }
     return first ? first.id : null;
@@ -337,7 +360,8 @@ function createServer(opts = {}) {
     return {
       broadcast(msg) { broadcastRoom(room, msg); },
       sendTo(playerId, msg) { sendToInRoom(room, playerId, msg); },
-      getPlayers() { return [...room.players.values()].map(p => ({ id: p.id, name: p.name })); },
+      getPlayers() { return [...room.players.values()].map(p => ({ id: p.id, name: p.name, ...(opts.presence ? {connected:!!p.ws} : {}) })); },
+      getReceiverCount() { return [...room.receivers].filter(ws => ws.gameReady && ws.readyState === ws.OPEN).length; },
       getHost() {
         const id = firstHostId(room);
         if (id == null) return null;
@@ -380,7 +404,7 @@ function createServer(opts = {}) {
             return;
           }
           if (!reqRoom) {
-            if (requestedRole === 'receiver') {
+            if (requestedRole === 'receiver' || (opts.allowControllerCreate && msg.createRoom === true)) {
               reqRoom = generateRoomCode();
             } else {
               // Controllers need a code. Tell them so they can prompt.
@@ -406,14 +430,16 @@ function createServer(opts = {}) {
           // SESSION_GRACE_MS), resume their slot rather than allocating a new
           // one — preserves scores and any mid-round state the game holds.
           const rawSession = typeof msg.sessionId === 'string' ? msg.sessionId : '';
-          const sessionId = SESSION_ID_RE.test(rawSession) ? rawSession : null;
+          let sessionId = SESSION_ID_RE.test(rawSession) ? rawSession : null;
           let resumed = false;
           if (sessionId) {
             const existingId = room.sessions.get(sessionId);
             const existing = existingId != null ? room.players.get(existingId) : null;
             if (existing) {
               if (existing.graceCancel) { existing.graceCancel(); existing.graceCancel = null; }
+              const previousSocket = existing.ws;
               existing.ws = ws;
+              if (previousSocket && previousSocket !== ws) previousSocket.close(4001, "Session resumed elsewhere");
               playerId = existingId;
               resumed = true;
               log(`[ws] player resumed room=${room.code} id=${playerId} name=${existing.name}`);
@@ -421,6 +447,7 @@ function createServer(opts = {}) {
           }
 
           if (!resumed) {
+            if (opts.serverSessionIds) sessionId = crypto.randomBytes(24).toString('base64url');
             playerId = room.nextPlayerId++;
             const name = String(msg.name ?? '').slice(0, MAX_NAME_LEN) || `Player ${playerId}`;
             const player = { id: playerId, name, ws, joinedAt: now(), sessionId: sessionId || null };
@@ -449,8 +476,14 @@ function createServer(opts = {}) {
           } catch (e) { log(`[game] ${resumed ? 'onReconnect' : 'onJoin'} threw`, e); }
           break;
         }
+        case 'RECEIVER_READY': {
+          if (role !== 'receiver' || !room) break;
+          ws.gameReady = true;
+          room.game?.onReceiverReady?.(room.services);
+          break;
+        }
         case 'PING': {
-          if (role !== 'controller' || playerId == null || !room) break;
+          if (role !== 'controller' || playerId == null || !room || room.players.get(playerId)?.ws !== ws) break;
           const clientTs = Number.isFinite(msg.clientTs) ? msg.clientTs : null;
           broadcastRoom(room, {
             type: 'PONG',
@@ -462,7 +495,10 @@ function createServer(opts = {}) {
           break;
         }
         default: {
-          if (role === 'controller' && playerId != null && room && room.game?.onMessage) {
+          if (role === 'receiver' && room) {
+            room.game?.onReceiverMessage?.(msg, room.services);
+          }
+          if (role === 'controller' && playerId != null && room && room.players.get(playerId)?.ws === ws && room.game?.onMessage) {
             try {
               const p = room.players.get(playerId);
               room.game.onMessage({ id: p.id, name: p.name }, msg, room.services);
@@ -479,6 +515,7 @@ function createServer(opts = {}) {
       room.everyone.delete(ws);
       if (role === 'receiver') {
         room.receivers.delete(ws);
+        room.game?.onPresence?.(room.services);
         log(`[ws] receiver detached room=${room.code}`);
         destroyRoomIfEmpty(room);
         return;
@@ -492,6 +529,8 @@ function createServer(opts = {}) {
         return;
       }
       p.ws = null;
+      if (opts.presence) broadcastRoom(room, snapshotState(room));
+      room.game?.onPresence?.(room.services);
       if (!p.sessionId) {
         // No session → can't resume. Remove immediately as before.
         finalizePlayerLeave(room, playerId);

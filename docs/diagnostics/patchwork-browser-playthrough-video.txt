@@ -1,0 +1,1 @@
+PASS: complete six-player game, all 18 overviews and final ceremony. /home/will/WorldFoundry-wbniv/docs/diagnostics/patchwork-browser-playthrough-video/quilt-night-playthrough.mp4

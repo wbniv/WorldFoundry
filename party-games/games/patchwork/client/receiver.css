@@ -1,0 +1,141 @@
+@import url('./common.css');
+body{background:#d4d9d2;margin:0}
+#app{max-width:none;width:100%;padding:22px}
+#app>header{display:flex;align-items:center;gap:20px;margin-bottom:10px}
+#app>header h1,#log{display:none}
+#app>header p{margin:0;font-size:14px}
+.room-code-line{margin-left:auto!important}
+.room-code{font-size:24px;letter-spacing:.15em}
+#stage{padding:0}
+.television{padding:30px;min-height:calc(100vh - 82px)}
+.lobby{display:grid;grid-template-columns:1.2fr 1fr;gap:50px;align-items:center;padding:50px}
+.lobby h2{font-size:48px;line-height:1.1}
+.join-code{font-size:90px;font-weight:800;letter-spacing:.18em}
+.join-url{overflow-wrap:anywhere}
+.join-qr{width:180px;height:180px;background:white;border:10px solid white;border-radius:12px}
+.tv-roster{font-size:26px;list-style:none;padding:0}
+.tv-roster li{padding:8px;border-bottom:1px solid var(--line)}
+.shared-table{display:grid;grid-template-columns:2fr 1fr;gap:35px;align-items:center;margin:30px 0}
+.card-pool{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:14px}
+.shared-card{background:var(--surface);border:2px solid var(--line);border-radius:16px;padding:12px;min-height:170px;text-align:center}
+.shared-card.token{border:4px solid var(--accent);box-shadow:0 0 0 4px #267a7520}
+.shared-card .patch{height:105px;margin:8px 0}
+.shared-card .card-marker{font-size:13px;font-weight:800}
+.shared-card>span:last-child{font-size:12px;color:var(--muted)}
+.shared-table aside{text-align:center}
+.shared-table aside .patch{height:170px;margin:15px auto}
+.die{font-size:80px}
+.shared-table h2{font-size:26px}
+.tv-readiness{display:flex;gap:15px;flex-wrap:wrap;border-top:1px solid var(--line);padding-top:20px}
+.tv-readiness>div{display:flex;flex-direction:column;min-width:125px;padding:15px;border-radius:12px;background:var(--surface);font-size:20px}
+.tv-readiness span{font-size:15px;color:var(--muted)}
+.tv-readiness .ready{border:2px solid var(--accent)}
+.score-prep{text-align:center;padding:80px 15px;font-size:24px}
+.score-prep h2{font-size:40px}
+.round-results{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:20px;margin:20px auto;max-width:1100px}
+.round-results article{max-width:300px}
+.round-results strong{font-size:32px}
+.round-results .quilt{max-width:260px}
+.tv-note{font-size:20px}
+.ceremony{display:grid;grid-template-columns:minmax(300px,.9fr) minmax(350px,1.1fr);gap:55px;align-items:center;margin:35px auto;max-width:1200px}
+.ceremony h2{font-size:38px}
+.ceremony .quilt{max-width:550px}
+.arithmetic{font-size:clamp(30px,4vw,65px);font-weight:800;line-height:1.25}
+.presentation-step{color:var(--muted);font-size:16px}
+.television .standings{max-width:900px;margin:40px auto;font-size:25px}
+@media(max-width:850px){.television{padding:20px}
+.lobby{padding:20px;gap:20px}
+.lobby h2{font-size:30px}
+.join-code{font-size:60px}
+.shared-table{grid-template-columns:2fr 1fr;gap:15px}
+.shared-card{min-height:120px;padding:6px}
+.shared-card .patch{height:70px}
+.ceremony{gap:25px;grid-template-columns:1fr 1fr}
+.ceremony h2{font-size:28px}
+}
+
+
+:root{color-scheme:light}
+body{padding:0;color:#233e43}
+#app{padding:12px 3vw}
+#app>header{height:26px;gap:12px;margin:0 0 8px;align-items:center}
+#app>header .status{font-size:12px;color:#425e60;opacity:1}
+.room-code-line{color:#425e60;opacity:1}
+.room-code{background:none;color:#267a75;-webkit-text-fill-color:currentColor;font-size:20px}
+#stage{margin:0;min-height:0}
+.television{height:calc(100vh - 58px);min-height:0;display:flex;flex-direction:column;padding:20px 26px}
+.television .heading{flex:none}
+.television .heading h1{font-size:32px;line-height:1.4;margin-bottom:0}
+.television .eyebrow{margin-bottom:5px}
+.television .shared-table{flex:1;min-height:0;margin:14px 0;gap:25px}
+.shared-card{min-height:0;padding:8px}
+.shared-card .patch{height:min(12vh,125px);margin:5px 0}
+.shared-table aside .patch{height:min(20vh,170px)}
+.shared-table aside .die{font-size:62px}
+.shared-table aside h2{font-size:24px}
+.tv-readiness{padding-top:10px;gap:10px;flex:none}
+.tv-readiness>div{padding:8px 12px;font-size:17px;min-width:110px}
+.tv-readiness span{font-size:13px}
+.television .development{margin-top:8px!important;flex:none}
+.ceremony{flex:1;min-height:0;margin:12px auto;gap:40px;width:100%}
+.ceremony .quilt{width:min(40vw,calc(100vh - 220px));max-width:520px}
+.ceremony h2{font-size:32px}
+.arithmetic{font-size:clamp(28px,3.5vw,56px)}
+.round-results{flex:1;min-height:0;margin:16px auto;gap:14px;width:100%;align-content:center}
+.round-results article{margin:auto}
+.round-results .quilt{width:min(18vw,calc((100vh - 340px)/2));max-width:260px}
+.round-results p{margin:4px 0}
+.round-results h2{margin:0 0 5px}
+.tv-note{font-size:16px;margin:0!important}
+.lobby{flex:1;padding:25px;gap:35px;min-height:0}
+.lobby h2{font-size:38px}
+.lobby .join-code{font-size:72px}
+.score-prep{flex:1;min-height:0;display:flex;flex-direction:column;justify-content:center;padding:30px}
+.television .standings{width:100%;margin:25px auto;font-size:22px}
+.card-pool{min-height:0;align-self:stretch;grid-auto-rows:minmax(0,1fr)}
+.shared-card{display:flex;flex-direction:column;min-width:0}
+.shared-card .patch{flex:1;min-height:0;height:auto;max-height:100px;width:100%}
+.tv-readiness{display:grid;grid-template-columns:repeat(6,minmax(0,1fr))}
+.tv-readiness>div{min-width:0;font-size:13px;overflow-wrap:anywhere}
+.tv-readiness strong{line-height:1.25}
+.tv-readiness span{font-size:12px}
+.tv-roster{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:4px;font-size:14px;line-height:1.25;margin:8px 0 0}
+.tv-roster li{padding:4px;overflow-wrap:anywhere}
+.round-results article{min-width:0;text-align:center}
+.round-results h2{font-size:15px;overflow-wrap:anywhere}
+.television .standings{flex:1;min-height:0;display:flex;flex-direction:column;justify-content:center;gap:6px;margin:12px auto}
+.television .standings li{min-height:0;padding:8px 12px;margin:0;gap:18px;font-size:18px}
+.television .standings li span{min-width:0;overflow-wrap:anywhere}
+.television .standings strong{flex:none}
+.ceremony article{min-width:0;overflow-wrap:anywhere}
+.autoplay-quilts{flex:1;min-height:0;display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:16px;align-items:center;padding:10px 0}
+.autoplay-quilts article{display:flex;flex-direction:column;align-items:center;min-height:0;min-width:0}
+.autoplay-quilts h2{font-size:16px;text-align:center;overflow-wrap:anywhere;max-width:100%;margin:0 0 8px}
+.autoplay-quilts .quilt{width:min(32vw,calc(100vh - 245px));max-width:380px}
+.autoplay-note{font-size:14px;text-align:center;margin:0!important}
+:is([data-player-count="5"],[data-player-count="6"]) .autoplay-quilts{grid-template-columns:repeat(3,minmax(0,1fr))}
+:is([data-player-count="3"],[data-player-count="4"],[data-player-count="5"],[data-player-count="6"]) .autoplay-quilts .quilt{width:min(14vw,calc((100vh - 220px)/2 - 45px))}
+:is([data-player-count="3"],[data-player-count="4"],[data-player-count="5"],[data-player-count="6"]) .autoplay-quilts h2{font-size:14px;line-height:1.25}
+
+/* Google TV WebView uses a 960×540 CSS viewport on the HD device. */
+@media(max-height:600px){
+  .television{padding:16px 22px}
+  .television .heading h1{font-size:26px}
+  .lobby{padding:12px;gap:24px}
+  .lobby h2{font-size:28px}
+  .lobby p{font-size:14px;margin-bottom:10px}
+  .lobby .join-url{font-size:13px}
+  .lobby .join-code{font-size:54px}
+  .join-qr{width:144px;height:144px}
+  .shared-table aside .die{font-size:42px;line-height:1}
+  .shared-table aside h2{font-size:18px;margin:8px 0}
+  .shared-table aside p{font-size:13px;margin:8px 0}
+  .shared-table aside .patch{height:65px;margin:8px auto}
+  .round-results .quilt{width:min(14vw,calc((100vh - 240px)/2 - 65px))}
+  .round-results strong{font-size:23px}
+  .round-results p{font-size:13px}
+  .ceremony{gap:24px;grid-template-columns:minmax(0,.9fr) minmax(0,1.1fr)}
+  .ceremony h2{font-size:24px}
+  .ceremony p{font-size:14px}
+  .ceremony .arithmetic{font-size:30px}
+}
