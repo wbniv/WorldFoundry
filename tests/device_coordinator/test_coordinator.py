@@ -1,0 +1,428 @@
+"""Behavior tests across real client/service/worker processes, with fake hardware."""
+import base64
+import hashlib
+import io
+import json
+import os
+from pathlib import Path
+import signal
+import subprocess
+import sys
+import time
+import zipfile
+import pytest
+
+ROOT=Path(__file__).resolve().parents[2]
+sys.path.insert(0,str(ROOT/'scripts'))
+from wf_device.client import Client
+from wf_device.service import Coordinator, validate_request
+from wf_device.store import Store, TERMINAL
+from wf_device.integration import hook_decision
+
+
+def config(tmp_path):
+    return {'state':str(tmp_path/'state'),'socket':str(tmp_path/'service.sock'),'allowed_uids':[os.getuid()],
+            'fake':True,'scenes':['jellyfish'],
+            'devices':[{'id':'d1','serial':'serial1','health':'ready','enrolled':True,'abis':['arm32'],'pools':['test']},
+                       {'id':'d2','serial':'serial2','health':'ready','enrolled':True,'abis':['arm64'],'pools':['test']}]}
+
+@pytest.fixture
+def service(tmp_path):
+    cfg=config(tmp_path);path=tmp_path/'config.json';path.write_text(json.dumps(cfg))
+    p=subprocess.Popen([sys.executable,str(ROOT/'scripts/chromecast.py'),'serve','--config',str(path)],stdout=subprocess.PIPE,stderr=subprocess.PIPE)
+    deadline=time.monotonic()+5
+    while not Path(cfg['socket']).exists() and p.poll() is None and time.monotonic()<deadline:
+        time.sleep(.02)
+    if not Path(cfg['socket']).exists():
+        p.terminate();out,err=p.communicate(timeout=5)
+        pytest.fail(err.decode()+out.decode())
+    a=Client(cfg['socket'],tmp_path/'a.json');b=Client(cfg['socket'],tmp_path/'b.json')
+    yield cfg,p,a,b
+    # Cancel owned work through the authenticated API; wait for worker cleanup.
+    for client in (a,b):
+        for job in client.call('queue')['jobs']:
+            try: client.call('cancel',{'job':job['id']})
+            except RuntimeError: pass
+    deadline=time.monotonic()+5
+    while a.call('queue')['jobs'] and time.monotonic()<deadline:
+        time.sleep(.03)
+    p.terminate();p.communicate(timeout=5)
+
+
+def wait(client,jid):
+    deadline=time.monotonic()+7
+    while time.monotonic()<deadline:
+        job=client.call('status',{'job':jid})
+        if job['state'] in TERMINAL:
+            return job
+        time.sleep(.03)
+    raise AssertionError('Job did not terminate')
+
+
+def submit(client,device=None,pool=None,duration=.2,**kwargs):
+    return client.call('submit',dict({'workflow':'check','app':'aquarium','duration':duration},
+                                   **({'device':device} if device else {'pool':pool}),**kwargs))['id']
+
+
+def test_per_device_fifo_and_parallel_devices(service):
+    cfg,_,a,b=service
+    first=submit(a,device='d1',duration=.5)
+    second=submit(b,device='d1',duration=.2)
+    parallel=submit(b,device='d2',duration=.2)
+    x,y,z=[wait(a,j) for j in (first,second,parallel)]
+    assert x['state']==y['state']==z['state']=='completed'
+    assert x['finished']<=y['started']
+    assert z['started']<x['finished']
+    assert x['generation']<y['generation']
+
+
+def test_pool_eligibility_does_not_block_other_device(service):
+    _,_,a,b=service
+    busy=submit(a,device='d1',duration=.6)
+    incompatible=submit(b,pool='test',require_abi='arm32',duration=.1)
+    runnable=submit(b,pool='test',require_abi='arm64',duration=.1)
+    x=wait(a,runnable);y=wait(a,busy);z=wait(a,incompatible)
+    assert x['device']=='d2' and x['finished']<y['finished']
+    assert z['device']=='d1' and z['started']>=y['finished']
+
+
+def test_oldest_pool_request_precedes_new_fixed_request(service):
+    _,_,a,b=service
+    first=submit(a,device='d1',duration=.5)
+    pool=submit(b,pool='test',require_abi='arm32',duration=.1)
+    fixed=submit(a,device='d1',duration=.1)
+    x,y,z=[wait(a,j) for j in (first,pool,fixed)]
+    assert x['finished']<=y['started'] and y['finished']<=z['started']
+
+
+def test_cancel_waiter_and_owner_isolation(service):
+    _,_,a,b=service
+    first=submit(a,device='d1',duration=.5)
+    waiting=submit(b,device='d1',duration=.1)
+    with pytest.raises(RuntimeError,match='authenticated owner'):
+        b.call('cancel',{'job':first})
+    b.call('cancel',{'job':waiting})
+    assert wait(a,waiting)['state']=='cancelled'
+    assert wait(a,first)['state']=='completed'
+
+
+def test_active_cancel_waits_for_cleanup_before_handoff(service):
+    _,_,a,b=service
+    first=submit(a,device='d1',duration=2)
+    deadline=time.monotonic()+3
+    while a.call('status',{'job':first})['state']!='running' and time.monotonic()<deadline: time.sleep(.02)
+    nextjob=submit(b,device='d1',duration=.1)
+    a.call('cancel',{'job':first})
+    x,y=wait(a,first),wait(a,nextjob)
+    assert x['state']=='cancelled' and x['finished']<=y['started']
+
+
+def test_messages_ack_once_without_changing_lease(service):
+    _,_,a,b=service
+    jid=submit(a,device='d1',duration=.8)
+    mid=b.call('message',{'job':jid,'text':'Hello "literal" $(do not execute)'})['id']
+    messages=a.call('inbox');assert messages[0]['id']==mid
+    a.call('acknowledge',{'ids':[mid]});a.call('acknowledge',{'ids':[mid]})
+    assert a.call('inbox')==[]
+    assert len([e for e in a.call('events',{'job':jid}) if e['kind']=='message-delivered'])==1
+    assert wait(a,jid)['state']=='completed'
+
+
+def test_authentication_rejects_forged_token(service):
+    _,_,a,_=service
+    old=a.credentials;a.credentials=dict(old,token='forged')
+    with pytest.raises(RuntimeError,match='credentials'):a.call('devices')
+    a.credentials=old
+
+
+def test_unknown_workflow_and_no_compatible_hardware_rejected(service):
+    _,_,a,_=service
+    with pytest.raises(RuntimeError,match='Unregistered'):
+        a.call('submit',{'workflow':'shell','device':'d1','app':'aquarium'})
+    with pytest.raises(RuntimeError,match='No compatible'):
+        submit(a,pool='test',require_abi='missing')
+    with pytest.raises(RuntimeError,match='Unknown workflow request'):
+        submit(a,device='d1',shell='dangerous')
+
+
+def test_cross_device_and_stale_generations_rejected(service):
+    cfg,_,a,_=service
+    jid=submit(a,device='d1',duration=.8)
+    deadline=time.monotonic()+3
+    while a.call('status',{'job':jid})['generation'] is None and time.monotonic()<deadline:time.sleep(.02)
+    job=a.call('status',{'job':jid});store=Store(cfg['state'])
+    with pytest.raises(PermissionError):store.validate_lease(jid,'d2',job['generation'])
+    with pytest.raises(PermissionError):store.validate_lease(jid,'d1',job['generation']-1)
+    wait(a,jid)
+    with pytest.raises(PermissionError):store.validate_lease(jid,'d1',job['generation'])
+
+
+def test_immutable_upload_and_evidence_conflict(service,tmp_path):
+    _,_,a,_=service
+    data=io.BytesIO()
+    with zipfile.ZipFile(data,'w') as z:z.writestr('AndroidManifest.xml',b'example')
+    apk=tmp_path/'input.apk';apk.write_bytes(data.getvalue())
+    stored=a.upload(apk);apk.write_bytes(b'changed')
+    assert stored==hashlib.sha256(data.getvalue()).hexdigest()+'.apk'
+    jid=submit(a,device='d1');wait(a,jid)
+    out=tmp_path/'evidence';a.evidence(jid,out)
+    (out/'receipt.json').write_text('conflict')
+    with pytest.raises(FileExistsError):a.evidence(jid,out)
+
+
+def test_worker_death_gates_device_not_other_device(service):
+    _,_,a,b=service
+    jid=submit(a,device='d1',duration=4)
+    deadline=time.monotonic()+3
+    while time.monotonic()<deadline:
+        job=a.call('status',{'job':jid})
+        if job['worker_pid']:break
+        time.sleep(.02)
+    os.kill(job['worker_pid'],signal.SIGKILL)
+    failed=wait(a,jid);assert failed['state']=='recovery-required'
+    waiting=submit(b,device='d1',duration=.1)
+    other=submit(b,device='d2',duration=.1)
+    assert wait(a,other)['state']=='completed'
+    assert a.call('status',{'job':waiting})['state']=='queued'
+    recovery=a.call('submit',{'workflow':'readd','device':'d1'})['id']
+    assert wait(a,recovery)['state']=='completed'
+    assert wait(a,waiting)['state']=='completed'
+
+
+def test_filtered_queue_includes_pool_competition(service):
+    _,_,a,b=service
+    first=submit(a,device='d1',duration=.8)
+    pool=submit(b,pool='test',require_abi='arm32',duration=.2)
+    filtered=a.call('queue',{'device':'d1'})
+    assert {first,pool}<={j['id'] for j in filtered['jobs']}
+
+
+def test_hook_denies_raw_but_does_not_approve_mutable_taskfile():
+    raw={'hook_event_name':'PreToolUse','tool_input':{'command':'adb -s 192.168.4.46:5555 shell input keyevent 3'}}
+    assert hook_decision(raw)['hookSpecificOutput']['permissionDecision']=='deny'
+    assert hook_decision({'hook_event_name':'PermissionRequest','tool_input':{'command':'task chromecast:check'}})=={}
+    fixed={'hook_event_name':'PermissionRequest','tool_input':{'command':'/opt/wf-device-coordinator/bin/chromecast queue'}}
+    assert hook_decision(fixed)['hookSpecificOutput']['decision']['behavior']=='allow'
+    fixed['tool_input']['command']+='; evil'
+    assert hook_decision(fixed)=={}
+
+
+def test_variant_recipe_rejects_path_labels_and_requires_restore():
+    with pytest.raises(ValueError):
+        validate_request({'workflow':'variant-benchmark','device':'d1','app':'aquarium','variants':[]},['jellyfish'])
+    with pytest.raises(ValueError):
+        validate_request({'workflow':'variant-benchmark','device':'d1','app':'aquarium','restore_apk':'x','variants':[{'label':'../evil','apk':'x'}]},['jellyfish'])
+
+
+def test_task_values_preserve_literal_message_text(service,tmp_path):
+    cfg,_,a,_=service
+    jid=submit(a,device='d1',duration=.8)
+    marker=tmp_path/'must-not-exist'
+    text=f'Thai ไทย "quote" `touch {marker}` $(touch {marker})\nsecond line'
+    env=dict(os.environ,WF_COORDINATOR_SOCKET=cfg['socket'],WF_COORDINATOR_CLIENT_STATE=str(tmp_path/'task-client'))
+    result=subprocess.run(['task','chromecast:message','JOB='+jid,'TEXT='+text],cwd=ROOT,env=env,capture_output=True,text=True,timeout=5)
+    assert result.returncode==0,result.stderr
+    assert not marker.exists()
+    assert a.call('inbox')[0]['text']==text
+
+
+def test_pairing_code_is_not_persisted_in_jobs_or_events(service):
+    cfg,_,a,_=service
+    store=Store(cfg['state']);device=store.devices()[0]
+    device.update(transport='tls',endpoint='192.168.4.43:41277')
+    store.update_device('d1',device)
+    jid=a.call('submit',{'workflow':'readd','device':'d1','_setup':{'endpoint':'192.168.4.43:40001','code':'123456'}})['id']
+    wait(a,jid)
+    assert '123456' not in json.dumps(a.call('status',{'job':jid}))
+    assert '123456' not in json.dumps(a.call('events',{'job':jid}))
+    assert b'123456' not in Path(cfg['state'],'coordinator.sqlite3').read_bytes()
+
+
+def test_fifo_does_not_depend_on_wall_clock_order(tmp_path):
+    cfg=config(tmp_path);s=Store(cfg['state'],cfg['devices']);owner=s.register(os.getuid(),'test')['session']
+    first=s.submit(owner,{'workflow':'check','app':'aquarium','device':'d1'})
+    second=s.submit(owner,{'workflow':'check','app':'aquarium','device':'d1'})
+    with s.db() as db:db.execute('UPDATE jobs SET accepted=0 WHERE id=?',(second['id'],))
+    assert s.claim()==[first['id']]
+
+
+def test_policy_merge_preserves_other_hooks_and_constraints(tmp_path):
+    import importlib.util
+    spec=importlib.util.spec_from_file_location('wf_installer',ROOT/'scripts/install-device-coordinator.py')
+    module=importlib.util.module_from_spec(spec);spec.loader.exec_module(module)
+    import tomllib
+    old={'allowed_approval_policies':['on-request'],'features':{'hooks':False},'hooks':{'PreToolUse':[{'matcher':'Bash','hooks':[{'type':'command','command':'/other/trusted-hook'}]}]}}
+    policy=tmp_path/'requirements.toml';policy.write_text(module.toml_dump(old))
+    fragment=tomllib.loads((ROOT/'config/device-coordinator/requirements.toml').read_text())
+    result=tomllib.loads(module.merge_requirements(policy,fragment))
+    assert result['allowed_approval_policies']==old['allowed_approval_policies']
+    assert result['features']['hooks'] is True
+    assert result['hooks']['PreToolUse'][0]==old['hooks']['PreToolUse'][0]
+    policy.write_text(module.toml_dump(result))
+    assert tomllib.loads(module.merge_requirements(policy,fragment))==result
+
+
+def test_png_decoder_handles_sub_and_up_filters():
+    import struct,zlib
+    from wf_device.image_assertions import pixels
+    def chunk(kind,data):return struct.pack('>I',len(data))+kind+data+struct.pack('>I',zlib.crc32(kind+data)&0xffffffff)
+    header=struct.pack('>IIBBBBB',2,2,8,2,0,0,0)
+    # RGB row: red then green, encoded with Sub; second row identical with Up.
+    raw=b'\x01\xff\x00\x00\x01\xff\x00'+b'\x02'+bytes(6)
+    png=b'\x89PNG\r\n\x1a\n'+chunk(b'IHDR',header)+chunk(b'IDAT',zlib.compress(raw))+chunk(b'IEND',b'')
+    w,h,c,rows=pixels(png)
+    assert (w,h,c)==(2,2,3)
+    assert rows[0]==rows[1]==bytearray([255,0,0,0,255,0])
+
+
+def test_cleanup_restores_exported_launcher_not_internal_activity(tmp_path):
+    from wf_device.workflows import Adapter
+    class S:
+        def phase(self,*_):pass
+    adapter=Adapter.__new__(Adapter)
+    adapter.cleanup_mode=False;adapter.identity_verified=True;adapter.uncertain_install=False;adapter.store=S();adapter.job={'id':'example'}
+    adapter.req={'workflow':'check'};adapter.record_pid=None;adapter.package='org.worldfoundry.wf_game.aquarium'
+    adapter.previous='com.google.android.youtube.tv/internal.PrivateActivity'
+    commands=[]
+    def shell(*words,**kwargs):
+        commands.append(words)
+        return 'Status: ok' if words[:2]==('am','start') else ''
+    adapter.shell=shell;adapter.foreground=lambda:['com.google.android.youtube.tv/exported.Launcher']
+    adapter.key=lambda key:commands.append(('key',key))
+    adapter.cleanup()
+    starts=[cmd for cmd in commands if cmd[:2]==('am','start')]
+    assert starts and '-n' not in starts[0]
+    assert 'android.intent.category.LEANBACK_LAUNCHER' in starts[0]
+    assert adapter.restoration=='previous-app-TV-launcher'
+
+
+def test_legacy_discovery_skips_another_chromecast_and_pins_udn():
+    from wf_device.discovery import rediscover
+    seen=[]
+    def fetch(ip):
+        seen.append(ip)
+        if ip=='192.168.4.47':return 'different-chromecast'
+        if ip=='192.168.4.48':return 'expected-udn'
+        raise ConnectionRefusedError()
+    assert rediscover('192.168.4.46','expected-udn',fetch=fetch)=='192.168.4.48'
+    assert seen==['192.168.4.46','192.168.4.47','192.168.4.48']
+
+
+@pytest.mark.parametrize('failure', ['timeout', 'exit'])
+def test_installer_reports_bounded_administrative_failures(monkeypatch, failure):
+    import importlib.util
+    spec=importlib.util.spec_from_file_location('wf_installer_failure',ROOT/'scripts/install-device-coordinator.py')
+    module=importlib.util.module_from_spec(spec);spec.loader.exec_module(module)
+    seen=[]
+    def run(command, **kwargs):
+        seen.append(kwargs)
+        if failure=='timeout':
+            raise subprocess.TimeoutExpired(command,kwargs['timeout'],stderr=b'Reload daemon failed')
+        raise subprocess.CalledProcessError(1,command,stderr='Connection timed out')
+    monkeypatch.setattr(module.subprocess,'run',run)
+    with pytest.raises(module.DeploymentError,match='systemctl daemon-reload') as error:
+        module.admin_step(['systemctl','daemon-reload'],timeout=15)
+    assert seen[0]['timeout']==15 and seen[0]['capture_output']
+    assert ('timed out after 15 seconds' if failure=='timeout' else 'Connection timed out') in str(error.value)
+
+
+def test_installer_stops_before_mutation_when_manager_is_unavailable(monkeypatch,capsys):
+    import importlib.util
+    spec=importlib.util.spec_from_file_location('wf_installer_preflight',ROOT/'scripts/install-device-coordinator.py')
+    module=importlib.util.module_from_spec(spec);spec.loader.exec_module(module)
+    monkeypatch.setattr(module.os,'geteuid',lambda:0)
+    monkeypatch.setattr(module.sys,'argv',['install-device-coordinator.py'])
+    monkeypatch.setattr(module.pwd,'getpwnam',lambda _:pytest.fail('Provisioning began before manager preflight'))
+    def failed(*args,**kwargs):raise module.DeploymentError('Connection timed out')
+    monkeypatch.setattr(module,'admin_step',failed)
+    assert module.main()==1
+    assert 'No installation files were changed' in capsys.readouterr().err
+
+
+@pytest.mark.parametrize('needs_reload', ['no', 'yes'])
+def test_installer_resume_checks_loaded_units_without_another_reload(monkeypatch,needs_reload):
+    import importlib.util
+    spec=importlib.util.spec_from_file_location('wf_installer_resume',ROOT/'scripts/install-device-coordinator.py')
+    module=importlib.util.module_from_spec(spec);spec.loader.exec_module(module)
+    commands=[]
+    def step(command,**kwargs):
+        commands.append(command)
+        out=''
+        if command[:2]==['systemctl','show']:
+            out=f'LoadState=loaded\nNeedDaemonReload={needs_reload}\nFragmentPath=/etc/systemd/system/{command[2]}\n'
+        return subprocess.CompletedProcess(command,0,stdout=out)
+    monkeypatch.setattr(module,'admin_step',step)
+    monkeypatch.setattr(module.Path,'exists',lambda _:True)
+    if needs_reload=='yes':
+        with pytest.raises(module.DeploymentError,match='has not loaded'):
+            module.activate(resume=True)
+        assert len(commands)==1
+    else:
+        module.activate(resume=True)
+        assert ['systemctl','enable','--no-reload','wf-device-coordinator.service','wf-device-coordinator-network.timer'] in commands
+        assert any(command[:2]==['systemctl','start'] for command in commands)
+    assert not any('daemon-reload' in command for command in commands)
+
+
+def test_persistent_adb_server_does_not_inherit_device_lock(tmp_path):
+    import fcntl
+    from wf_device.workflows import ensure_adb_server
+    lock=open(tmp_path/'device.lock','a');fcntl.flock(lock,fcntl.LOCK_EX)
+    os.set_inheritable(lock.fileno(),True)
+    pidfile=tmp_path/'daemon.pid'
+    daemon=tmp_path/'daemon.py'
+    daemon.write_text('import os,time\nfrom pathlib import Path\nPath('+repr(str(pidfile))+').write_text(str(os.getpid()))\ntime.sleep(15)\n')
+    adb=tmp_path/'adb'
+    adb.write_text('#!'+sys.executable+'\nimport subprocess,sys\nsubprocess.Popen([sys.executable,'+repr(str(daemon))+'],close_fds=False,stdout=subprocess.DEVNULL,stderr=subprocess.DEVNULL)\n')
+    adb.chmod(0o755)
+    try:
+        ensure_adb_server({'adb':str(adb)})
+        deadline=time.monotonic()+3
+        while not pidfile.exists() and time.monotonic()<deadline:time.sleep(.02)
+        assert pidfile.exists()
+        lock.close()
+        with open(tmp_path/'device.lock','a') as next_owner:
+            fcntl.flock(next_owner,fcntl.LOCK_EX|fcntl.LOCK_NB)
+    finally:
+        lock.close()
+        if pidfile.exists():os.kill(int(pidfile.read_text()),signal.SIGTERM)
+
+
+def test_cast_discovery_failure_retains_setup_error(tmp_path,monkeypatch):
+    from wf_device.workflows import Adapter,NeedsSetup
+    import wf_device.discovery
+    adapter=Adapter.__new__(Adapter)
+    adapter.device={'transport':'legacy-tcp','endpoint':'192.168.4.46:5555','cast_udn':'expected'}
+    adapter.req={}
+    adapter.store=type('StoreStub',(),{'phase':lambda *_:None})();adapter.job={'id':'j'}
+    adapter.guard=lambda:None
+    def unavailable(*args,**kwargs):raise RuntimeError('Registered Cast identity not found')
+    monkeypatch.setattr(wf_device.discovery,'rediscover',unavailable)
+    with pytest.raises(NeedsSetup,match='Registered Cast identity not found'):adapter.connect()
+
+
+def test_address_hint_is_lan_scoped_and_readd_only(service):
+    cfg,_,a,_=service
+    store=Store(cfg['state']);device=store.devices()[0]
+    device.update(transport='legacy-tcp',endpoint='192.168.4.46:5555')
+    store.update_device('d1',device)
+    jid=a.call('submit',{'workflow':'readd','device':'d1','address':'192.168.4.49'})['id']
+    assert wait(a,jid)['request']['address']=='192.168.4.49'
+    for address in ('127.0.0.1','8.8.8.8','192.168.9.49','192.168.4.49; id'):
+        with pytest.raises(RuntimeError):a.call('submit',{'workflow':'readd','device':'d1','address':address})
+    with pytest.raises(ValueError):validate_request({'workflow':'check','device':'d1','app':'aquarium','address':'192.168.4.49'},['jellyfish'])
+
+
+def test_new_address_checks_hardware_serial_before_registry_update(monkeypatch):
+    from wf_device.workflows import Adapter
+    import wf_device.discovery
+    adapter=Adapter.__new__(Adapter)
+    adapter.req={'workflow':'readd','address':'192.168.4.49'}
+    adapter.device={'transport':'legacy-tcp','endpoint':'192.168.4.46:5555','cast_udn':'old','serial':'expected-serial'}
+    adapter.store=type('StoreStub',(),{'phase':lambda *_:None,'update_device':lambda *_:pytest.fail('Mismatched hardware registered')})()
+    adapter.job={'id':'j'};adapter.identity_verified=False
+    adapter.adb=lambda *args,**kwargs:'connected';adapter.shell=lambda *args,**kwargs:'other-device-serial'
+    monkeypatch.setattr(wf_device.discovery,'rediscover',lambda *_args,**_kwargs:pytest.fail('Explicit hint unnecessarily required Cast discovery'))
+    with pytest.raises(RuntimeError,match='Hardware serial mismatch'):adapter.connect()
+    assert adapter.selector=='192.168.4.49:5555' and not adapter.identity_verified
+    assert adapter.device['endpoint']=='192.168.4.46:5555'

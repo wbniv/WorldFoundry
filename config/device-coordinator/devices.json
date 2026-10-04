@@ -1,0 +1,75 @@
+{
+  "state": "/var/lib/wf-device-coordinator",
+  "socket": "/run/wf-device-coordinator/coordinator.sock",
+  "adb": "/opt/wf-device-coordinator/bin/adb",
+  "aapt": "/opt/wf-device-coordinator/bin/aapt",
+  "adb_home": "/var/lib/wf-device-coordinator/adb-home",
+  "adb_socket": "localfilesystem:/var/lib/wf-device-coordinator/adb.sock",
+  "allowed_uids": [
+    1000
+  ],
+  "scenes": [
+    "clownfish",
+    "blue-shrimp",
+    "betta",
+    "jellyfish",
+    "lionfish",
+    "planted-tank",
+    "arowana",
+    "tiger-barbs"
+  ],
+  "devices": [
+    {
+      "id": "chromecast-test-01",
+      "serial": "2628105GN0GT7C",
+      "model": "Chromecast_HD",
+      "device": "boreal",
+      "android": "14",
+      "abis": [
+        "armeabi-v7a",
+        "armeabi"
+      ],
+      "transport": "tls",
+      "endpoint": "192.168.4.43:41277",
+      "pools": [
+        "chromecast-test"
+      ],
+      "health": "offline",
+      "enrolled": true,
+      "ipv6_addresses": [
+        "fd5d:59ce:7438:1:581b:d19a:27a5:c4db",
+        "fd5d:59ce:7438:1:3b82:772d:8d07:d5f6",
+        "fd5d:59ce:7438:1:401f:2bff:fe13:98df",
+        "fe80::401f:2bff:fe13:98df"
+      ]
+    },
+    {
+      "id": "chromecast-test-02",
+      "serial": "26031HFDD67QH7",
+      "name": "Project Room",
+      "model": "Chromecast",
+      "device": "sabrina",
+      "android": "12",
+      "sdk": "31",
+      "abis": [
+        "armeabi-v7a",
+        "armeabi"
+      ],
+      "transport": "legacy-tcp",
+      "endpoint": "192.168.4.46:5555",
+      "pools": [
+        "chromecast-test"
+      ],
+      "health": "offline",
+      "enrolled": true,
+      "ipv6_addresses": [
+        "fd5d:59ce:7438:1:5820:7a08:bc9b:a903",
+        "fd5d:59ce:7438:1:2555:eb86:7321:678",
+        "fe80::7156:9529:ebee:236b"
+      ],
+      "cast_udn": "5e305387-266b-84a6-639e-50805d1f06c2"
+    }
+  ],
+  "dashboard_port": 8767,
+  "enforcement": "provisioned rules; bypass verification pending"
+}

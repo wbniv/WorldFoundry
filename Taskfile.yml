@@ -576,15 +576,129 @@ tasks:
     cmds:
       - bash scripts/android-device-run.sh --release --app {{.APP}} {{.CLI_ARGS}}
 
-  chromecast-aquarium:
-    desc: "Aquarium app on a Chromecast with Google TV (usage: task chromecast-aquarium -- <ip> [--release] [--build] [--poke]): adb connect, install, launch, wait, screenshot + logcat + frame pacing → ~/tmp/android-device-run/, PASS/FAIL. docs/plans/2026-09-30-aquarium-chromecast.md"
+  chromecast:devices:
+    desc: "Coordinated Chromecast devices"
+    silent: true
+    env: &chromecast_env
+      WF_CC_DEVICE: '{{.DEVICE | default ""}}'
+      WF_CC_POOL: '{{.POOL | default ""}}'
+      WF_CC_JOB: '{{.JOB | default ""}}'
+      WF_CC_OUT: '{{.OUT | default ""}}'
+      WF_CC_TEXT: '{{.TEXT | default ""}}'
+      WF_CC_WORKFLOW: '{{.WORKFLOW | default ""}}'
+      WF_CC_APP: '{{.APP | default ""}}'
+      WF_CC_SCENE: '{{.SCENE | default ""}}'
+      WF_CC_APK: '{{.APK | default ""}}'
+      WF_CC_REQUIRE_ABI: '{{.REQUIRE_ABI | default ""}}'
+      WF_CC_WARMUP: '{{.WARMUP | default ""}}'
+      WF_CC_RUNS: '{{.RUNS | default ""}}'
+      WF_CC_DURATION: '{{.DURATION | default ""}}'
+      WF_CC_WATCH: '{{.WATCH | default ""}}'
+      WF_CC_VALIDATOR: '{{.VALIDATOR | default ""}}'
+      WF_CC_ASYNC: '{{.ASYNC | default ""}}'
+      WF_CC_RECIPE: '{{.RECIPE | default ""}}'
+      WF_CC_TRACE: '{{.TRACE | default ""}}'
+      WF_CC_PAIRING_ENDPOINT: '{{.PAIRING_ENDPOINT | default ""}}'
+      WF_CC_ADDRESS: '{{.ADDRESS | default ""}}'
     cmds:
-      - bash scripts/android-device-run.sh --app aquarium {{.CLI_ARGS}}
+      - python3 scripts/chromecast.py task devices
+
+  chromecast:readd:
+    desc: "Coordinated Chromecast readd"
+    silent: true
+    env: *chromecast_env
+    cmds:
+      - python3 scripts/chromecast.py task readd
+
+  chromecast:queue:
+    desc: "Coordinated Chromecast queue"
+    silent: true
+    env: *chromecast_env
+    cmds:
+      - python3 scripts/chromecast.py task queue
+
+  chromecast:status:
+    desc: "Coordinated Chromecast status"
+    silent: true
+    env: *chromecast_env
+    cmds:
+      - python3 scripts/chromecast.py task status
+
+  chromecast:submit:
+    desc: "Coordinated Chromecast submit"
+    silent: true
+    env: *chromecast_env
+    cmds:
+      - python3 scripts/chromecast.py task submit
+
+  chromecast:check:
+    desc: "Coordinated Chromecast check"
+    silent: true
+    env: *chromecast_env
+    cmds:
+      - python3 scripts/chromecast.py task check
+
+  chromecast:profile:
+    desc: "Coordinated Chromecast profile"
+    silent: true
+    env: *chromecast_env
+    cmds:
+      - python3 scripts/chromecast.py task profile
+
+  chromecast:record:
+    desc: "Coordinated Chromecast record"
+    silent: true
+    env: *chromecast_env
+    cmds:
+      - python3 scripts/chromecast.py task record
+
+  chromecast:watch:
+    desc: "Coordinated Chromecast watch"
+    silent: true
+    env: *chromecast_env
+    cmds:
+      - python3 scripts/chromecast.py task watch
+
+  chromecast:evidence:
+    desc: "Coordinated Chromecast evidence"
+    silent: true
+    env: *chromecast_env
+    cmds:
+      - python3 scripts/chromecast.py task evidence
+
+  chromecast:message:
+    desc: "Coordinated Chromecast message"
+    silent: true
+    env: *chromecast_env
+    cmds:
+      - python3 scripts/chromecast.py task message
+
+  chromecast:cancel:
+    desc: "Coordinated Chromecast cancel"
+    silent: true
+    env: *chromecast_env
+    cmds:
+      - python3 scripts/chromecast.py task cancel
+
+  chromecast-aquarium:
+    desc: "Compatibility alias: use task chromecast:check APP=aquarium DEVICE=..."
+    cmds:
+      - task: chromecast:check
+        vars:
+          APP: aquarium
+          DEVICE: '{{.DEVICE | default ""}}'
+          POOL: '{{.POOL | default ""}}'
+          APK: '{{.APK | default ""}}'
 
   chromecast-condo:
-    desc: "Condo app on a Chromecast (usage: task chromecast-condo -- [<ip>] --release [--build] [--poke]): same as chromecast-aquarium for org.worldfoundry.wf_game.condo. docs/plans/2026-10-01-condo-chromecast.md"
+    desc: "Compatibility alias: use task chromecast:check APP=condo DEVICE=..."
     cmds:
-      - bash scripts/android-device-run.sh --app condo {{.CLI_ARGS}}
+      - task: chromecast:check
+        vars:
+          APP: condo
+          DEVICE: '{{.DEVICE | default ""}}'
+          POOL: '{{.POOL | default ""}}'
+          APK: '{{.APK | default ""}}'
 
   soundfont:
     desc: "Build wfsource/source/game/florestan-subset.sf2 (the engine's soundfont) from FluidR3_GM, keeping only the presets the MIDI files use (scripts/make-soundfont-subset.py; MIT base, see engine/vendor/README.md). The Android snowgoons flavor and desktop music need it"
@@ -597,9 +711,9 @@ tasks:
       - python3 scripts/gen-qr-logo.py {{.CLI_ARGS}}
 
   find-chromecast:
-    desc: "Find the Chromecast after its DHCP address changed (usage: task find-chromecast -- [--from <ip>] [--span N] [--model REGEX]): walks the last octet up, then down, from the last known address and asks each host's Cast descriptor for its model. adb over Wi-Fi then needs Wireless debugging switched on at the TV"
+    desc: "Compatibility alias: list registered devices with task chromecast:devices"
     cmds:
-      - bash scripts/find-chromecast.sh {{.CLI_ARGS}}
+      - task: chromecast:devices
 
 
   run:

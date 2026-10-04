@@ -136,6 +136,15 @@ fi
     "build it: scripts/android-device-run.sh --build ... (or: cd android && ANDROID_HOME=$ANDROID_HOME ./gradlew :app:assemble${APP^}${TYPE^})" \
     "or download worldfoundry-$APP-debug.apk from the Codemagic android-apk-debug build and pass --apk PATH"
 
+# Registered Chromecast targets use the shared service; other Android hardware
+# retains this generic runner. No coordinator failure falls back to raw ADB.
+case "$TARGET" in
+    ""|chromecast-test-*|192.168.4.43|192.168.4.43:*|192.168.4.46|192.168.4.46:*|*2628105GN0GT7C*|*26031HFDD67QH7*)
+        exec env PYTHONPATH="$REPO/scripts" python3 -c 'from wf_device.legacy import android; raise SystemExit(android())' \
+            --serial "$TARGET" --app "$APP" --apk "$APK" --seconds "$SECONDS_TO_RUN" --poke "$POKE" --resume "$RESUME"
+        ;;
+esac
+
 # ---- connect ------------------------------------------------------------------------
 if [[ -n "$TARGET" && "$TARGET" =~ ^[0-9]+\.[0-9]+\.[0-9]+\.[0-9]+$ ]]; then
     TARGET="$TARGET:5555"

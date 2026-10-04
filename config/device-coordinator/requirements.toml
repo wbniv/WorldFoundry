@@ -1,0 +1,34 @@
+# Merge these tables into /etc/codex/requirements.toml; don't overwrite other policies.
+[features]
+hooks = true
+
+[hooks]
+managed_dir = "/opt/wf-device-coordinator/hooks"
+
+[[hooks.SessionStart]]
+matcher = "startup|resume|compact"
+[[hooks.SessionStart.hooks]]
+type = "command"
+command = "/usr/bin/python3 /opt/wf-device-coordinator/scripts/chromecast.py hook"
+timeout = 3
+
+[[hooks.PreToolUse]]
+matcher = ".*"
+[[hooks.PreToolUse.hooks]]
+type = "command"
+command = "/usr/bin/python3 /opt/wf-device-coordinator/scripts/chromecast.py hook"
+timeout = 3
+
+[[hooks.PermissionRequest]]
+matcher = "Bash"
+[[hooks.PermissionRequest.hooks]]
+type = "command"
+command = "/usr/bin/python3 /opt/wf-device-coordinator/scripts/chromecast.py hook"
+timeout = 3
+
+[[hooks.PostToolUse]]
+matcher = ".*"
+[[hooks.PostToolUse.hooks]]
+type = "command"
+command = "/usr/bin/python3 /opt/wf-device-coordinator/scripts/chromecast.py hook"
+timeout = 3

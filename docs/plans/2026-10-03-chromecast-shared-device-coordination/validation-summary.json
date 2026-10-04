@@ -1,0 +1,43 @@
+{
+  "deployment": "development only; stopped before protected provisioning",
+  "protected_enforcement_verified": false,
+  "parallel_interval_overlap_seconds": 28.19463539123535,
+  "jobs": [
+    {
+      "id": "J-14130e2a5d4a",
+      "device": "chromecast-test-01",
+      "state": "completed",
+      "started": 1791039947.1786633,
+      "finished": 1791039983.3338823,
+      "generation": 4,
+      "request": {
+        "device": "chromecast-test-01",
+        "workflow": "check",
+        "app": "aquarium",
+        "scene": "jellyfish",
+        "apk": "41f4c264351f0d99199b039b8be0fdfb1ff34c654c5fbc775e9e3738d4125aed.apk",
+        "duration": 3
+      }
+    },
+    {
+      "id": "J-42db239a1a07",
+      "device": "chromecast-test-02",
+      "state": "completed",
+      "started": 1791039947.2809918,
+      "finished": 1791039975.4756272,
+      "generation": 5,
+      "request": {
+        "device": "chromecast-test-02",
+        "workflow": "check",
+        "app": "aquarium",
+        "scene": "jellyfish",
+        "apk": "41f4c264351f0d99199b039b8be0fdfb1ff34c654c5fbc775e9e3738d4125aed.apk",
+        "duration": 3
+      }
+    }
+  ],
+  "other_completed_jobs": {
+    "profile_device_02": "J-8aea2aeba530",
+    "record_device_01": "J-45714b705f21"
+  }
+}

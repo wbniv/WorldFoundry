@@ -1,0 +1,7 @@
+[Unit]
+Description=Refresh Chromecast address rules from protected registry
+[Timer]
+OnBootSec=5
+OnUnitActiveSec=5
+[Install]
+WantedBy=timers.target

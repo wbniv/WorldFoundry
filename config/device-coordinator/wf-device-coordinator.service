@@ -1,0 +1,28 @@
+[Unit]
+Description=World Foundry shared Chromecast coordinator
+After=network-online.target
+Wants=network-online.target
+
+[Service]
+Type=simple
+User=wf-device-coordinator
+Group=will
+UMask=0077
+RuntimeDirectory=wf-device-coordinator
+RuntimeDirectoryMode=0750
+StateDirectory=wf-device-coordinator
+StateDirectoryMode=0700
+ExecStart=/usr/bin/python3 /opt/wf-device-coordinator/scripts/chromecast.py serve --config /etc/wf-device-coordinator/devices.json
+Restart=on-failure
+RestartSec=2
+KillMode=control-group
+TimeoutStopSec=40
+NoNewPrivileges=true
+ProtectSystem=strict
+ProtectHome=true
+PrivateTmp=true
+RestrictAddressFamilies=AF_UNIX AF_INET AF_INET6 AF_NETLINK
+ReadWritePaths=/var/lib/wf-device-coordinator /run/wf-device-coordinator
+
+[Install]
+WantedBy=multi-user.target

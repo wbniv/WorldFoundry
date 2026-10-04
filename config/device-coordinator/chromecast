@@ -1,0 +1,3 @@
+#!/bin/sh
+# Immutable installed client; fixed module and operation, no caller code.
+exec /usr/bin/python3 /opt/wf-device-coordinator/scripts/chromecast.py task "$@"

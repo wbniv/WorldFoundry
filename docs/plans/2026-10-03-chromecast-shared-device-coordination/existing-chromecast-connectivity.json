@@ -1,0 +1,29 @@
+{
+  "observed_at_utc": "2026-10-03T13:25:06Z",
+  "observed_at_bangkok": "2026-10-03 20:25:06 +07",
+  "logical_device_id": "chromecast-test-01",
+  "hardware_serial": "2628105GN0GT7C",
+  "adb_model": "Chromecast_HD",
+  "product": "boreal",
+  "android_release": "14",
+  "abi_list": [
+    "armeabi-v7a",
+    "armeabi"
+  ],
+  "adb_wifi_enabled": true,
+  "adb_state": "device",
+  "adb_selector": "adb-2628105GN0GT7C-wwfiSB._adb-tls-connect._tcp",
+  "mdns_service": "adb-2628105GN0GT7C-wwfiSB",
+  "mdns_service_type": "_adb-tls-connect._tcp",
+  "connect_endpoint_observed": "192.168.4.43:41277",
+  "wifi_ipv4_observed": "192.168.4.43/22",
+  "adb_path": "/home/will/android-sdk-local/platform-tools/adb",
+  "adb_version": "1.0.41 / 37.0.1-15733141",
+  "pairing_endpoint": null,
+  "pairing_code": null,
+  "notes": [
+    "Verified through read-only host ADB queries; no install, input, pairing or reconnect was performed.",
+    "Endpoint, mDNS suffix and transport ID are observations, not stable device identity.",
+    "No TLS pairing service was advertised during this observation."
+  ]
+}

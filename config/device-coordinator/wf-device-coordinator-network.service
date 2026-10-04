@@ -1,0 +1,5 @@
+[Unit]
+Description=Refresh protected Chromecast address rules
+[Service]
+Type=oneshot
+ExecStart=/usr/bin/python3 /opt/wf-device-coordinator/config/refresh-network.py

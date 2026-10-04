@@ -1,0 +1,3 @@
+# Protected installed client only. Never allow all of task, python or a shell.
+prefix_rule(pattern=["/opt/wf-device-coordinator/bin/chromecast"], decision="allow")
+# Hooks guide registered-device calls; host network restrictions are mandatory.
