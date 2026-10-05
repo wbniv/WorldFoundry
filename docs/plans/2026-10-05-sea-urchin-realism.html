@@ -307,4 +307,45 @@
 <p><a href="2026-10-05-sea-urchin-realism/evidence/phase-3/device-motion/capture.mp4">Phase 3 Chromecast movement video</a> · <a href="2026-10-05-sea-urchin-realism/evidence/phase-3/device-motion/urchin-segments.json">urchin-specific action timeline</a>. Device record job <code>J-e8e0b6b373e5</code> completed successfully. The existing reviewed <code>school</code> trace supplied only its input choreography: here A switches the camera and horizontal movement crawls; no fish/dart/climb behavior is involved. Original service labels are preserved separately for provenance. The 49.93-second video is visual evidence; its nominal encoder frame rate is not game FPS. Wide view runs first; A selects the close camera at approximately 21 seconds, followed by left/right crawling and pauses.</p>
 <video controls preload="metadata" style="width:100%;max-width:960px" poster="2026-10-05-sea-urchin-realism/evidence/phase-3/chromecast/release/run-1/close-idle.png"><source src="2026-10-05-sea-urchin-realism/evidence/phase-3/device-motion/capture.mp4" type="video/mp4"><track kind="captions" src="2026-10-05-sea-urchin-realism/evidence/phase-3/device-motion/urchin-captions.vtt" srclang="en" label="Controls"></video>
 
-<p>The normal build is saved at <code>android/app/build/outputs/apk/aquarium/release/worldfoundry-aquarium-release.apk</code> and installed on Chromecast 1 under job <code>J-9c1d7ce29667</code>; launcher artwork verification passed. SHA-256: <code>9ab68610506321d42b5a08ec2a4cbb0b3932390fb941f4e912fa6fe38794d5fd</code>. Chromecast 2 remains unavailable (<code>needs-local-setup</code>). This work makes no engine edits. Optional full articulation/flexible feet, species-specific response tuning and the freshwater resident decision remain outside completed phases 0–3. The sea-anemone/generic work stays set aside.</p></main></html>
+<p>The normal build is saved at <code>android/app/build/outputs/apk/aquarium/release/worldfoundry-aquarium-release.apk</code> and installed on Chromecast 1 under job <code>J-9c1d7ce29667</code>; launcher artwork verification passed. SHA-256: <code>9ab68610506321d42b5a08ec2a4cbb0b3932390fb941f4e912fa6fe38794d5fd</code>. Chromecast 2 remains unavailable (<code>needs-local-setup</code>). This work makes no engine edits. Optional full articulation/flexible feet, species-specific response tuning and the freshwater resident decision remain outside completed phases 0–3. The sea-anemone/generic work stays set aside.</p>
+<h3>Delivery record</h3>
+<p>All four implementation phases were committed separately and pushed to <code>2026-new-level</code> on 5 October 2026.</p>
+<table>
+<thead>
+<tr>
+<th>Phase</th>
+<th>Delivered</th>
+<th>Commit</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>0</td>
+<td>Research, A3 poster, frozen baseline and Chromecast measurements</td>
+<td><a href="https://github.com/wbniv/WorldFoundry/commit/6186420c">6186420c</a></td>
+</tr>
+<tr>
+<td>1</td>
+<td>Textured model, shared 256² atlas and matched profile</td>
+<td><a href="https://github.com/wbniv/WorldFoundry/commit/12cc5c97">12cc5c97</a></td>
+</tr>
+<tr>
+<td>2</td>
+<td>Anchored contacts, travel-driven crawl and matched profile</td>
+<td><a href="https://github.com/wbniv/WorldFoundry/commit/775f883c">775f883c</a></td>
+</tr>
+<tr>
+<td>3</td>
+<td>Eight basal pivots, final comparison, device video and normal APK</td>
+<td><a href="https://github.com/wbniv/WorldFoundry/commit/6bf7793c">6bf7793c</a></td>
+</tr>
+</tbody>
+</table>
+<p>Performance evidence is exclusively from Chromecast 1. Desktop/Forth host evidence verifies geometry, state transitions and contact correctness. The completed checks are 27 asset/contact/pivot tests, the eight-level selector/back-arrow/Home-resume device check, and final installation with launcher artwork verification.</p>
+<p>Remaining review and optional work:</p>
+<ul>
+<li>Review the recorded motion for species-specific tuning and decide the freshwater resident treatment in phase 5.</li>
+<li>Recheck connected-phone settings holds, modal transitions and reconnect behavior; these were not exercised by the recorded remote choreography or menu validator.</li>
+<li>Verify on Chromecast 2 once local setup is complete.</li>
+<li>Phase 4 full articulation and flexible feet remain optional. Any required engine changes need separate discussion and explicit permission. The current prototype has eight moving spines and rigid stems/discs.</li>
+</ul></main></html>

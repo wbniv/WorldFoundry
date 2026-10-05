@@ -203,3 +203,23 @@ Normal gameplay packaging preserves the original runtime/VRAM arguments and remo
 <video controls preload="metadata" style="width:100%;max-width:960px" poster="2026-10-05-sea-urchin-realism/evidence/phase-3/chromecast/release/run-1/close-idle.png"><source src="2026-10-05-sea-urchin-realism/evidence/phase-3/device-motion/capture.mp4" type="video/mp4"><track kind="captions" src="2026-10-05-sea-urchin-realism/evidence/phase-3/device-motion/urchin-captions.vtt" srclang="en" label="Controls"></video>
 
 The normal build is saved at `android/app/build/outputs/apk/aquarium/release/worldfoundry-aquarium-release.apk` and installed on Chromecast 1 under job `J-9c1d7ce29667`; launcher artwork verification passed. SHA-256: `9ab68610506321d42b5a08ec2a4cbb0b3932390fb941f4e912fa6fe38794d5fd`. Chromecast 2 remains unavailable (`needs-local-setup`). This work makes no engine edits. Optional full articulation/flexible feet, species-specific response tuning and the freshwater resident decision remain outside completed phases 0–3. The sea-anemone/generic work stays set aside.
+
+### Delivery record
+
+All four implementation phases were committed separately and pushed to `2026-new-level` on 5 October 2026.
+
+| Phase | Delivered | Commit |
+|---|---|---|
+| 0 | Research, A3 poster, frozen baseline and Chromecast measurements | [6186420c](https://github.com/wbniv/WorldFoundry/commit/6186420c) |
+| 1 | Textured model, shared 256² atlas and matched profile | [12cc5c97](https://github.com/wbniv/WorldFoundry/commit/12cc5c97) |
+| 2 | Anchored contacts, travel-driven crawl and matched profile | [775f883c](https://github.com/wbniv/WorldFoundry/commit/775f883c) |
+| 3 | Eight basal pivots, final comparison, device video and normal APK | [6bf7793c](https://github.com/wbniv/WorldFoundry/commit/6bf7793c) |
+
+Performance evidence is exclusively from Chromecast 1. Desktop/Forth host evidence verifies geometry, state transitions and contact correctness. The completed checks are 27 asset/contact/pivot tests, the eight-level selector/back-arrow/Home-resume device check, and final installation with launcher artwork verification.
+
+Remaining review and optional work:
+
+- Review the recorded motion for species-specific tuning and decide the freshwater resident treatment in phase 5.
+- Recheck connected-phone settings holds, modal transitions and reconnect behavior; these were not exercised by the recorded remote choreography or menu validator.
+- Verify on Chromecast 2 once local setup is complete.
+- Phase 4 full articulation and flexible feet remain optional. Any required engine changes need separate discussion and explicit permission. The current prototype has eight moving spines and rigid stems/discs.
