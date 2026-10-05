@@ -1,5 +1,8 @@
 # Condo level: the surroundings — near buildings, the Bangkok skyline, the bridges
 
+**2026-10-05 update:** Will replaced the enclosing rectangular podium with the combined 639/640 floorplan, retaining the full hallway and parapet footprint. The original box description below records the earlier implementation. [Current geometry check](2026-10-02-condo-translucency/condo/floorplan-podium/model.txt) verifies sampled coverage and a closed manifold; [current capture](2026-10-02-condo-translucency/condo/floorplan-podium/after-podium.png).
+
+
 ## Context
 
 [The site skybox](2026-09-19-condo-site-skybox.md) paints every neighbour flat on the ground

@@ -1,8 +1,14 @@
 | Date | Change |
 |------|--------|
+| [2026-09-19](https://github.com/wbniv/WorldFoundry/commit/9c36ba82) | feat(wf_blender): export/import reverse the face hand — Blender-outward is WF-outward |
 | [2026-09-19](https://github.com/wbniv/WorldFoundry/commit/70815109) | feat(condo): the surroundings — near buildings as geometry, 8 km skyline, the bridges, catalog |
 
 <!--history-meta v1
+9c36ba82	author	Will Norris
+9c36ba82	added	3
+9c36ba82	deleted	1
+9c36ba82	files	1
+9c36ba82	body	The engine's face normal is (v2−v0)×(v1−v0) (gfx/face.hpi, "reversed for our\nhandedness"), Blender's is (v1−v0)×(v2−v0), and the add-on passed loop order through\nunchanged — so every mesh authored in Blender was inside-out in WF: culled from outside\nunder WF_CULL=1, lit by the one-sided lighting from the far side. The exporter now\nwrites each face's loop reversed and the importer reverses it back; import → export of a\nnative level is byte-identical (verified on snowgoons-blender's five meshes; the only\n.lev bytes that move are the slope fields, whose sign now matches the engine).\n\nRule going forward: author for Blender. The condo script's hand compensations are\nremoved (boxes and prisms: recalc only; the dome: recalc + reverse; the ground quad\nwound counter-clockwise from above). The hand box list in 14 level scripts becomes\ncorrect without change.\n\nSweep: scripts/sweep_blender_levels.py rebuilt every Blender-built level with a\nbefore / after / after+WF_CULL contact sheet (docs/plans/2026-09-19-exporter-face-hand/).\nRebuilt: condo (+tour), moon, smb w1-1..4 (cd.iff rebuilt), pilot_demo, treemap, filesys,\nfilelight, dome. Restored from HEAD and filed: qbert_practice and mm_practice_blender_rt\nno longer reproduce from their scripts with either exporter (camshot Target exports as\nthe scaffold's name → movecam assert; rt loses texture + slope) — an ObjRef regression\nin the restored exporter, separate from this change.\n\nTests: tests/fixtures/qbert_practice-golden.lev regenerated (it never covered face order\nand was already failing on Blender 5.0.1 float noise); new\ntest_exported_faces_are_wf_outward parses an exported box and checks every face's WF\nnormal points away from its centroid — fails with the reversal removed.\n\nDocs: level-building.md § winding and troubleshooting § backface culling rewritten\n("author for Blender; the exporter adapts"); the earlier "recalc then reverse" advice\nretired.\n\nPlan: docs/plans/2026-09-19-exporter-face-hand.md\n\nCo-Authored-By: Claude Opus 5 <noreply@anthropic.com>\nClaude-Session: https://claude.ai/code/session_017hM4VFRoFFkipNVRLTs42g
 70815109	author	Will Norris
 70815109	added	233
 70815109	deleted	0

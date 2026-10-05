@@ -67,6 +67,17 @@ for i in range(3):
         # The handled leaf also contains opaque lock/handle faces.
         check(o.name + f' black frame coverage from side {side}',
               area >= frame_area-1e-5 if i == 0 else abs(area-frame_area) < 1e-5)
+    if i == 0:
+        x0 = min(p.x for p in all_points)
+        yc = glass_points[0].y
+        # Hardware projects beyond the frame's front/back faces; the key has
+        # its own material. Its full footprint must sit within the 10 cm stile.
+        hardware = {v for p in o.data.polygons
+                    if p.material_index == 2 or
+                    (p.material_index == 1 and any(abs(o.data.vertices[v].co.y-yc) > .051 for v in p.vertices))
+                    for v in p.vertices}
+        check('handle and lock on both sides fit inside the black frame',
+              bool(hardware) and all(x0-1e-5 <= o.data.vertices[v].co.x <= x0+.10+1e-5 for v in hardware))
     check(o.name + ' closed collision box retained',
           len([p for p in o.data.polygons if o.data.materials[p.material_index].get('wf_opacity') == 0]) == 12)
     check(o.name + ' collision mass stays 75', o['wf_Mass'] == 75)

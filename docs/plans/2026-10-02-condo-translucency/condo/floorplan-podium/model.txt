@@ -1,0 +1,11 @@
+00:03.023  blend            | Read blend: "/home/will/WorldFoundry-wbniv/wflevels/condo_639_640/condo_639_640.blend"
+BlenderMCP addon registered
+PASS footprint matches combined 639/640 slabs plus full hallway: 6549 inside, 2099 outside samples
+PASS hallway retained across its full width
+PASS lower-five-floor height and scenery-only mass retained
+PASS podium is a closed manifold without internal open seams
+RESULT: PASS
+BlenderMCP addon unregistered
+Blender 5.0.1
+
+Blender quit

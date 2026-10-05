@@ -707,16 +707,63 @@ as_statplat(site_buildings)
 site_buildings['wf_Mass'] = 0.0
 print(f"[condo] site-buildings: {_nb} prisms, {len(_nm.polygons)} tris (skipped {_skipped})")
 
-# The podium: floors 1–5 under the units + corridor, so the doll-house is the top of a building.
+# Floors 1–5 follow the actual combined slab outline, including the rounded
+# 640 frontage and the 639 setbacks. Keep the full corridor and its parapet.
+# Only Z needs separation: the top is 2 cm below the sixth-floor slab, the
+# bottom 5 cm above the map. XY follows the surveyed floorplan exactly.
+# Resolve the planar union before extrusion. The surveyed rounded frontage
+# contains overlapping floor triangles/T-junctions; a 3D box union leaves
+# non-manifold edges there. Shapely 2.1 supplies constrained cap triangulation.
+try:
+    from shapely import union_all, constrained_delaunay_triangles
+    from shapely.geometry import Polygon, box as planar_box
+    from shapely.geometry.polygon import orient
+except ImportError as exc:
+    raise SystemExit('[condo] floorplan podium needs Shapely >= 2.1 in Blender Python') from exc
+
+_podium_floor_faces = []
+for _name in ('unit-639', 'unit-640'):
+    _shell = bpy.data.objects[_name]
+    _points = [_shell.matrix_world @ v.co for v in _shell.data.vertices]
+    _floor = [p for p in _shell.data.polygons if p.normal.z > .99
+              and all(abs(_points[i].z) < 1e-4 for i in p.vertices)]
+    assert _floor, f'{_name}: no floor-top faces for podium outline'
+    _podium_floor_faces.extend(Polygon([(_points[i].x, _points[i].y) for i in p.vertices]) for p in _floor)
 cx0, cy0, cx1, cy1 = CORRIDOR
-# Inset 5 cm from every surface it would otherwise share a plane with: the ground quad
-# below (z 0.05), the parapet's east face and the units' side walls (x/y), the slab bottoms
-# above (top 2 cm under them) — coincident faces flicker.
-_ins = 0.05
-site_podium = add_flat_actor('site-podium',
-                             box_mesh('site-podium', min(cx0, -7.95) + _ins, cy0 - PARAPET_T + _ins, _ins,
-                                      max(cx1, 8.05) - _ins, 0.05 - _ins, UNIT_Z - SLAB_T - 0.02),
-                             (0.72, 0.72, 0.70))
+_podium_floor_faces.append(planar_box(cx0, cy0 - PARAPET_T, cx1, cy1))
+# A 10 micrometre authoring grid removes float noise at coincident edges.
+_footprint = union_all(_podium_floor_faces, grid_size=1e-5).simplify(1e-5, preserve_topology=True)
+assert _footprint.is_valid and not _footprint.is_empty
+_polygons = [_footprint] if _footprint.geom_type == 'Polygon' else list(_footprint.geoms)
+_vertices, _faces, _vertex_indices = [], [], {}
+_podium_z0, _podium_z1 = .05, UNIT_Z - SLAB_T - .02
+
+def _podium_vertex(x, y, z):
+    key = (round(x, 6), round(y, 6), z)
+    if key not in _vertex_indices:
+        _vertex_indices[key] = len(_vertices)
+        _vertices.append(key)
+    return _vertex_indices[key]
+
+for _polygon in _polygons:
+    _polygon = orient(_polygon, sign=1.0)
+    _caps = constrained_delaunay_triangles(_polygon)
+    assert abs(sum(t.area for t in _caps.geoms) - _polygon.area) < 1e-6
+    for _triangle in _caps.geoms:
+        _xy = list(orient(_triangle, sign=1.0).exterior.coords)[:-1]
+        _faces.append([_podium_vertex(x, y, _podium_z0) for x, y in reversed(_xy)])
+        _faces.append([_podium_vertex(x, y, _podium_z1) for x, y in _xy])
+    # Exterior is CCW, holes CW, so both sets of side faces point outward.
+    for _ring in [_polygon.exterior, *_polygon.interiors]:
+        _xy = list(_ring.coords)
+        for (x0, y0), (x1, y1) in zip(_xy, _xy[1:]):
+            _faces.append([_podium_vertex(x0, y0, _podium_z0), _podium_vertex(x1, y1, _podium_z0),
+                           _podium_vertex(x1, y1, _podium_z1), _podium_vertex(x0, y0, _podium_z1)])
+_podium_mesh = bpy.data.meshes.new('site-podium')
+_podium_mesh.from_pydata(_vertices, [], _faces)
+site_podium = add_flat_actor('site-podium', _podium_mesh, (0.72, 0.72, 0.70))
+print(f"[condo] site-podium: combined 639/640 floorplan + full hallway, "
+      f"{_footprint.area:.3f} m², {len(_podium_mesh.polygons)} tris")
 site_podium['wf_Mass'] = 0.0
 
 NOT_LIFTED = {site_map.name, skydome.name, site_buildings.name, site_podium.name, 'room_condo', 'Matte'}   # world-space
@@ -1315,7 +1362,7 @@ if CONDO_DOORS:
                     f.material_index = 1
         if add_hardware:
             # A U-pull on each face: cylindrical vertical bar plus the two short
-            # standoffs that bridge the glass.  The vertical handle centre is
+            # standoffs mounted on the black aluminum stile.  The vertical handle centre is
             # 1.45 m above the finished floor, with the key cylinder below it.
             def add_cylinder(center, radius, depth, axis, material_index):
                 result = _bmesh.ops.create_cone(
@@ -1341,7 +1388,7 @@ if CONDO_DOORS:
                     if all(vert in vset for vert in face.verts):
                         face.material_index = material_index
 
-            handle_x = x0 + 0.25
+            handle_x = x0 + DOOR_FRAME_W / 2  # centered in the 10 cm stile
             handle_z = 1.45
             for side in (-1.0, 1.0):
                 face_y = yc + side * (GLASS_T / 2)
@@ -1356,7 +1403,7 @@ if CONDO_DOORS:
                 # Cylindrical keyed lock below the handle on both faces. The key
                 # projects from the project-room side (negative Y), as in the photo.
                 lock_y = face_y + side * 0.014
-                add_cylinder((handle_x, lock_y, 1.05), 0.055, 0.018, (0.0, side, 0.0), 1)
+                add_cylinder((handle_x, lock_y, 1.05), 0.040, 0.018, (0.0, side, 0.0), 1)
                 add_box((handle_x, lock_y + side * 0.011, 1.05),
                         (0.018, 0.006, 0.034), 2)
             add_box((handle_x, yc - GLASS_T / 2 - 0.085, 1.05),

@@ -1,0 +1,154 @@
+task: Task "condo-textures" is up to date
+task: Task "tools-build" is up to date
+task: [condo-level] set -euo pipefail
+blender --background --python-expr "import addon_utils; raise SystemExit(0 if addon_utils.enable('wf_blender', default_set=False, persistent=False) else 1)" >/dev/null 2>&1 \
+  || { echo "wf_blender add-on not installed — 'sudo apt install worldfoundry-blender-editor-exporter' (apt.worldfoundry.org) or 'task blender-install'" >&2; exit 1; }
+blender --background --python-exit-code 1 \
+  --python wflevels/condo_639_640/blender_create_condo.py -- "/home/will/docs/aircon/units-639-640.blend" \
+  2>&1 | { grep -E '^\[condo\]|^Info: Exported|Error|Traceback|Assert' || true; }
+# pipefail above: a failing Blender step fails the task (a bare `|| true` used to mask it
+# and let the previous .lev through to build-level).
+test -s wflevels/condo_639_640/condo_639_640.lev
+
+[condo] importing scaffold /home/will/WorldFoundry-wbniv/wflevels/snowgoons-blender/snowgoons-blender.lev
+[condo] scaffold classes: ['camera', 'camshot', 'director', 'levelobj', 'light', 'matte', 'player', 'room', 'target']
+[condo] appended 78 objects from units-639-640.blend
+[condo] converted: 58 meshes, 6 tubes, 13 room outlines; dropped 1 sub-threshold faces; skipped hidden: ['unit-640-drop-ceiling']
+[condo] unit-639: 61 floor faces at shade 0.55
+[condo] unit-640: 66 floor faces at shade 0.55
+[condo] unit-639: 294 floor-seam, 296 ceiling-seam, 83 corner-seam faces at shade 0.75 (band 0.12 m)
+[condo] unit-640: 288 floor-seam, 300 ceiling-seam, 4 corner-seam faces at shade 0.75 (band 0.12 m)
+[condo] site-buildings: 113 prisms, 1203 tris (skipped 0)
+[condo] site-podium: combined 639/640 floorplan + full hallway, 267.458 m², 232 tris
+[condo] site: corridor 18×2 m + parapet, site-map ±80 m, skydome R=160 m 1106 verts 2208 tris; units → z=15.75
+[condo] window POV cameras: OFF — no automatic cuts, cs_dollhouse is the only automatic shot (CONDO_POV_TRIGGERS=1 restores cs_balcony / cs_master and their zones)
+[condo] 639-project-rm: 639-front-strip-S-wall-jamb2 trimmed x 3.65…7.80 → 3.65…3.80; x 3.80…7.80 becomes telescoping doors
+[condo] 639-project-rm telescoping doors: 3 solid panels (1.33 m each, explicit Mass 75); panel 2 fixed at x 6.47…7.80, panels 0…1 slide -2.67 m, -1.33 m to close the x 3.80…7.80 frontage over 2.0 s; z 0.00…2.70 at y -2.00, tracks 0.11 m apart; panel 0 has 33 cm black pull handles on both faces and keyed lock below; interaction reach 0.80 m from any panel, either side; A/Space toggles while in mailbox zone 92; mailboxes press-latch 91, target 93, closedness 94
+[condo] west-façade ledge: west-facade-ledge along the façade x -4.21…8.05, built x -4.21…7.90 (cut at wall tops), z 2.15…2.70, 18 boxes (2 sub-1 cm dropped), full 35 cm depth only where a floor is behind it; intersects: 639-daikin-lineset (11 verts, x 2.53…2.65 z 2.24…2.36); unit-640 (1 verts, x -4.11…-4.11 z 2.58…2.58)
+[condo] west-façade ledge colours (from the wall at each x): x -4.21…-3.80 unit-639.001, x -3.70…-0.10 unit-639.001, x 0.05…0.25 unit-639.001, x 0.25…0.40 unit-639, x 0.55…2.65 unit-639, x 2.75…5.70 unit-639, x 5.80…6.55 unit-639, x 6.70…7.90 unit-639; across wall gaps, nearest wall's colour: x 0.05…0.25 unit-639.001, x 0.25…0.40 unit-639, x 2.75…5.43 unit-639, x 5.43…5.70 unit-639, x 5.80…6.55 unit-639
+[condo] balcony shade: 639-patio-recessed x 2.75…5.55 (2.80 m), 639-patio from x 5.55; floor recessed 7 cm over x 2.75…5.55 y -1.95…-0.10 (4 faces, 10 risers, 0 degenerate triangles dropped = 0.0e+00 m²; drain 24 verts eased); old parapet 20 faces removed; grass 1 cm over the recess, top z -0.06 → 6 cm step
+[condo] balcony shade: span x 2.75…5.43 (2.680 m), floor z -0.07, cap z 1.04 (10 cm pony wall), soffit z 2.15 (west-façade ledge y -0.35…0.00 to z 2.70); north jamb x 5.43…5.70; cassette 10×10 cm (solar strip 1.00 m on its west face); 2 guides; 8 slats × 12.23 cm + bar, all stowed in the cassette when raised; 2.0 s travel; A/Space within 0.90 m (player y ≥ -1.00; door reach ends at y -1.04); wall switch on the south jamb at y -0.30, z 1.14; mailboxes init 60, press-latch 61, reach 62, target 63, closedness 64; overhead parts Mass statplat default
+[condo] lights: Sun az 30.0° alt 50.0°, FillLight az 195.0° alt 35.0° intensity 0.35, Ambient 0.38
+[condo] Forth camera profile: desktop
+[condo] C / keyboard 3: switch apartments, remembering each indoor position
+[condo] 639-project-rm telescoping doors: movable panels are runtime actors 30…31 (export positions 29…31 + bias 1); verify with `wf_game --debug-print-actors`
+[condo] balcony shade: slats + bar are runtime actors 40…48 (export positions 39…47 + bias 1); verify with `wf_game --debug-print-actors`
+[condo] saved assembled scene → /home/will/WorldFoundry-wbniv/wflevels/condo_639_640/condo_639_640.blend
+[condo] exporting 115 actors → /home/will/WorldFoundry-wbniv/wflevels/condo_639_640/condo_639_640.lev
+Info: Exported 115 objects to /home/will/WorldFoundry-wbniv/wflevels/condo_639_640/condo_639_640.lev
+[condo] done: {'mesh': 58, 'curve': 6, 'room': 13, 'skipped': ['unit-640-drop-ceiling']}
+task: [condo-level] bash wftools/wf_blender/build_level_binary.sh condo_639_640
+[1/5] iffcomp-rs  condo_639_640.lev  →  condo_639_640.lev.bin
+[2/5] levcomp-rs  condo_639_640.lev.bin  →  condo_639_640.lvl + asset.inc + condo_639_640.iff.txt + condo_639_640.ini
+levcomp v0.1.0
+  input : condo_639_640.lev.bin
+  .lc   : /home/will/WorldFoundry-wbniv/wfsource/source/oas/objects.lc
+  output: condo_639_640.lvl
+  oad   : /home/will/WorldFoundry-wbniv/wfsource/source/oas
+  meshes: .
+  parsed 115 objects
+  loaded 29 classes
+  loaded OAD schemas
+  mesh bbox for player.iff: [-12465, -13107, 0, 15728, 13107, 108789]
+  mesh bbox for corridor.iff: [-589824, -1140326, -9830, 589824, -1009254, 0]
+  mesh bbox for corridor_parapet.iff: [-589824, -1150156, 0, 589824, -1140326, 72089]
+  mesh bbox for site_map.iff: [-5242880, -5242880, 0, 5242880, 5242880, 0]
+  mesh bbox for skydome.iff: [-10485760, -10485760, -10485760, 10485760, 10485760, 10485760]
+  mesh bbox for site_buildings.iff: [-11333140, -10821960, 0, 9119990, 10867180, 1677721]
+  mesh bbox for site_podium.iff: [-589824, -1150156, 3276, 589824, 0, 1021050]
+  mesh bbox for 639_project_door_panel_0.iff: [423799, -150405, 0, 511180, -130088, 176947]
+  mesh bbox for 639_project_door_panel_1.iff: [423799, -134348, 0, 511180, -127795, 176947]
+  mesh bbox for 639_project_door_panel_2.iff: [423799, -127139, 0, 511180, -120586, 176947]
+  mesh bbox for 639_patio_grass.iff: [180224, -127795, -4587, 363724, -6553, -3932]
+  mesh bbox for 639_balcony_pony_wall.iff: [180224, -6553, 0, 355860, 0, 68157]
+  mesh bbox for 639_balcony_north_jamb.iff: [355860, -6553, 0, 373555, 0, 176947]
+  mesh bbox for west_facade_ledge.iff: [-275618, -22937, 140902, 517734, 0, 176947]
+  mesh bbox for 639_balcony_shade_cassette.iff: [180224, -6553, 134348, 355860, 0, 140902]
+  mesh bbox for 639_balcony_shade_guide_s.iff: [180224, -4587, 68157, 183500, -1966, 134348]
+  mesh bbox for 639_balcony_shade_guide_n.iff: [352583, -4587, 68157, 355860, -1966, 134348]
+  mesh bbox for 639_balcony_shade_slat_0.iff: [182845, -3604, -131, 353239, -3276, 8142]
+  mesh bbox for 639_balcony_shade_slat_1.iff: [182845, -3538, -131, 353239, -3276, 8142]
+  mesh bbox for 639_balcony_shade_slat_2.iff: [182845, -3473, -131, 353239, -3276, 8142]
+  mesh bbox for 639_balcony_shade_slat_3.iff: [182845, -3407, -131, 353239, -3211, 8142]
+  mesh bbox for 639_balcony_shade_slat_4.iff: [182845, -3342, -131, 353239, -3145, 8142]
+  mesh bbox for 639_balcony_shade_slat_5.iff: [182845, -3276, -131, 353239, -3080, 8142]
+  mesh bbox for 639_balcony_shade_slat_6.iff: [182845, -3276, -131, 353239, -3014, 8142]
+  mesh bbox for 639_balcony_shade_slat_7.iff: [182845, -3276, -131, 353239, -2949, 8142]
+  mesh bbox for 639_balcony_shade_bar.iff: [183500, -4587, 68288, 352583, -1966, 70254]
+  mesh bbox for 639_balcony_shade_switch.iff: [180224, -22609, 70123, 181862, -16711, 79298]
+  mesh bbox for unit_639.iff: [-3276, -1009254, -9830, 527564, 3276, 176947]
+  mesh bbox for 639_front_strip_s_wal_97eb.iff: [-9830, -3276, -88473, 9830, 3276, 88473]
+  mesh bbox for 639_front_strip_s_wal_6196.iff: [-26214, -3276, -22937, 26214, 3276, 22937]
+  mesh bbox for 639_front_strip_s_wal_a77d.iff: [-57344, -3276, -88473, 57344, 3276, 88473]
+  mesh bbox for 639_front_strip_s_wal_9daf.iff: [-26214, -3276, -22937, 26214, 3276, 22937]
+  mesh bbox for 639_front_strip_s_wal_f6c7.iff: [-135987, -3276, -88473, -126156, 3276, 88473]
+  mesh bbox for 639_bath_n_e_wall.iff: [-3276, -65536, -88473, 3276, 65536, 88473]
+  mesh bbox for 639_guest_project_wall.iff: [-3276, -196608, -88473, 3276, 196608, 88473]
+  mesh bbox for 639_kitchen_n_wall_jamb0.iff: [-93388, -3276, -88473, 93388, 3276, 88473]
+  mesh bbox for 639_kitchen_n_wall_do_c21b.iff: [-26214, -3276, -22937, 26214, 3276, 22937]
+  mesh bbox for 639_kitchen_n_wall_jamb1.iff: [-9830, -3276, -88473, 9830, 3276, 88473]
+  mesh bbox for 639_kitchen_n_wall_do_8213.iff: [-26214, -3276, -22937, 26214, 3276, 22937]
+  mesh bbox for 639_kitchen_n_wall_jamb2.iff: [-99942, -3276, -88473, 99942, 3276, 88473]
+  mesh bbox for 639_bath_s_n_wall.iff: [-65536, -3276, -88473, 65536, 3276, 88473]
+  mesh bbox for 639_bath_s_e_wall_jamb0.iff: [-3276, -4915, -88473, 3276, 4915, 88473]
+  mesh bbox for 639_bath_s_e_wall_doo_9132.iff: [-3276, -26214, -22937, 3276, 26214, 22937]
+  mesh bbox for 639_bath_s_e_wall_jamb1.iff: [-3276, -34406, -88473, 3276, 34406, 88473]
+  mesh bbox for 639_consumer_unit.iff: [-18432, -8192, -13107, 18432, 8192, 13107]
+  mesh bbox for 639_window_1.iff: [-3276, -155648, -45875, 3276, 155648, 45875]
+  mesh bbox for 639_daikin_18k_guest_b546.iff: [-29491, -7208, -9830, 29491, 7208, 9830]
+  mesh bbox for 639_daikin_18k_guest_d870.iff: [-26214, -9830, -18022, 26214, 9830, 18022]
+  mesh bbox for 639_daikin_drain.iff: [120258, -139778, -3048, 206730, 10771, 143472]
+  mesh bbox for 639_daikin_lineset.iff: [118947, -139264, 32166, 210726, 22528, 157941]
+  mesh bbox for 639_daikin_power.iff: [39137, -993853, 111411, 500285, -136700, 169694]
+  mesh bbox for unit_640.iff: [-521011, -1009254, -9830, 3276, 3276, 176947]
+  mesh bbox for 640_master_bed_s_wall_w.iff: [-163840, -3276, -88473, 163840, 3276, 88473]
+  mesh bbox for 640_master_bed_s_wall_w2.iff: [-14745, -3276, -88473, 14745, 3276, 88473]
+  mesh bbox for 640_master_bed_s_wall_e.iff: [-22937, -3276, -88473, 22937, 3276, 88473]
+  mesh bbox for 640_master_bed_s_door_9839.iff: [-57344, -3276, -19660, 57344, 3276, 19660]
+  mesh bbox for 640_bath_closet_s_wal_61af.iff: [-63365, -3276, -88473, 63365, 3276, 88473]
+  mesh bbox for 640_bath_closet_s_wal_724f.iff: [-26214, -3276, -22937, 26214, 3276, 22937]
+  mesh bbox for 640_bath_closet_s_wal_5139.iff: [-90931, -3276, -88473, 90931, 3276, 88473]
+  mesh bbox for 640_bath_closet_s_wal_200d.iff: [-26214, -3276, -22937, 26214, 3276, 22937]
+  mesh bbox for 640_bath_closet_s_wal_0083.iff: [-11468, -3276, -88473, 11468, 3276, 88473]
+  mesh bbox for 640_bath_closet_divider.iff: [-3276, -65536, -88473, 3276, 65536, 88473]
+  mesh bbox for 640_room_s_of_master_b087.iff: [-3276, -108134, -88473, 3276, 108134, 88473]
+  mesh bbox for 640_room_s_of_master_f291.iff: [-95027, -3276, -88473, 95027, 3276, 88473]
+  mesh bbox for 640_nong_ice_w_wall_jamb0.iff: [-3276, -4915, -88473, 3276, 4915, 88473]
+  mesh bbox for 640_nong_ice_w_wall_d_9703.iff: [-3276, -26214, -22937, 3276, 26214, 22937]
+  mesh bbox for 640_nong_ice_w_wall_jamb1.iff: [-3276, -77004, -88473, 3276, 77004, 88473]
+  mesh bbox for 640_nong_ice_s_wall.iff: [-95027, -3276, -88473, 95027, 3276, 88473]
+  mesh bbox for 640_bath_s_w_wall_jamb0.iff: [-3276, -4915, -88473, 3276, 4915, 88473]
+  mesh bbox for 640_bath_s_w_wall_doo_9831.iff: [-3276, -26214, -22937, 3276, 26214, 22937]
+  mesh bbox for 640_bath_s_w_wall_jamb1.iff: [-3276, -34406, -88473, 3276, 34406, 88473]
+  mesh bbox for 640_consumer_unit.iff: [-18432, -8192, -13107, 18432, 8192, 13107]
+  mesh bbox for 640_curve_window_1.iff: [-10726, -20952, -45875, 10726, 20952, 45875]
+  mesh bbox for 640_curve_window_2.iff: [-9356, -22894, -45875, 9356, 22894, 45875]
+  mesh bbox for 640_curve_window_3.iff: [-7861, -24533, -45875, 7861, 24533, 45875]
+  mesh bbox for 640_curve_window_4.iff: [-6263, -25845, -45875, 6263, 25845, 45875]
+  mesh bbox for 640_curve_window_5.iff: [-4585, -26811, -45875, 4585, 26811, 45875]
+  mesh bbox for 640_curve_window_6.iff: [-2850, -27416, -45875, 2850, 27416, 45875]
+  mesh bbox for 640_window_0.iff: [-655, -170393, -45875, 655, 170393, 45875]
+  mesh bbox for 640_xiaomi_18k_nongic_e8a4.iff: [-29491, -7208, -9830, 29491, 7208, 9830]
+  mesh bbox for 640_xiaomi_18k_nongic_4c79.iff: [-9830, -26214, -18022, 9830, 26214, 18022]
+  mesh bbox for 640_xiaomi_power.iff: [-359628, -1002700, 108953, -134348, -445644, 136806]
+  mesh bbox for 640_xiaomi_drain.iff: [-359679, -895667, 63078, -79462, -445644, 169593]
+  mesh bbox for 640_xiaomi_lineset.iff: [-547225, -543129, 36864, -413696, -445644, 136806]
+  mesh bbox for 640_living_nw_column.iff: [-13107, -13107, -88473, 13107, 13107, 88473]
+  mesh bbox for 640_xiaomi_condensate_pump.iff: [-5898, -3276, -3932, 5898, 3276, 3932]
+  mesh bbox for 640_midea_24k_master_219b.iff: [-29491, -7208, -9830, 29491, 7208, 9830]
+  mesh bbox for 640_midea_24k_master_94f8.iff: [-23682, -26822, -18022, 23682, 26822, 18022]
+  mesh bbox for 640_midea_drain_a_clo_57b6.iff: [-186941, -139778, 64955, -181698, -103939, 143472]
+  mesh bbox for 640_midea_lineset_a_c_09f9.iff: [-426629, -150962, 38009, -180387, -77153, 167742]
+  mesh bbox for 640_midea_power_a_clo_39bb.iff: [-186941, -993853, 111411, 494141, -112104, 174943]
+  wrote 26152 bytes
+  wrote asset.inc
+  wrote condo_639_640.iff.txt
+  wrote condo_639_640.ini
+[3/5] textile-rs  -ini=condo_639_640.ini  →  palN.tga / RoomN.{tga,ruv,cyc} / Perm.{tga,ruv,cyc}
+    textile.flags overrides: PAGEX=256 PAGEY=256 PERMPAGEX=1024 PERMPAGEY=1024
+[4/5] iffcomp-rs  condo_639_640.iff.txt  →  ../condo_639_640.iff
+
+✓ built /home/will/WorldFoundry-wbniv/wflevels/condo_639_640.iff (2426880 bytes)
+
+[5/5] iffcomp-rs  condo_639_640-standalone.iff.txt  →  ../condo_639_640-standalone.iff
+✓ built /home/will/WorldFoundry-wbniv/wflevels/condo_639_640-standalone.iff (2430976 bytes)
