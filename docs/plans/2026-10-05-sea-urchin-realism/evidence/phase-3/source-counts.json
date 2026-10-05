@@ -1,0 +1,11 @@
+{
+  "animal_actors": 17,
+  "scene_actors": 46,
+  "animal_triangles": 3540,
+  "spines": 101,
+  "pivot_actors": 8,
+  "atlas": [
+    256,
+    256
+  ]
+}

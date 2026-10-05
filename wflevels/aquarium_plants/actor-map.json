@@ -22,27 +22,35 @@
     "urchin-foot-5": 15,
     "urchin-foot-6": 16,
     "urchin-foot-7": 17,
-    "tank-base": 18,
-    "water-back": 19,
-    "back-air": 20,
-    "tank-end--1": 21,
-    "tank-end-1": 22,
-    "front-collider": 23,
-    "rim": 24,
-    "floor": 25,
-    "plant_chunk_00": 26,
-    "plant_chunk_01": 27,
-    "plant_chunk_02": 28,
-    "plant_chunk_03": 29,
-    "plant_chunk_04": 30,
-    "plant_chunk_05": 31,
-    "plant_chunk_06": 32,
-    "plant_chunk_07": 33,
-    "stand": 34,
-    "room-backdrop": 35,
-    "AmbientLight": 36,
-    "LookClose": 37,
-    "cs_close": 38
+    "urchin-spine-0": 18,
+    "urchin-spine-1": 19,
+    "urchin-spine-2": 20,
+    "urchin-spine-3": 21,
+    "urchin-spine-4": 22,
+    "urchin-spine-5": 23,
+    "urchin-spine-6": 24,
+    "urchin-spine-7": 25,
+    "tank-base": 26,
+    "water-back": 27,
+    "back-air": 28,
+    "tank-end--1": 29,
+    "tank-end-1": 30,
+    "front-collider": 31,
+    "rim": 32,
+    "floor": 33,
+    "plant_chunk_00": 34,
+    "plant_chunk_01": 35,
+    "plant_chunk_02": 36,
+    "plant_chunk_03": 37,
+    "plant_chunk_04": 38,
+    "plant_chunk_05": 39,
+    "plant_chunk_06": 40,
+    "plant_chunk_07": 41,
+    "stand": 42,
+    "room-backdrop": 43,
+    "AmbientLight": 44,
+    "LookClose": 45,
+    "cs_close": 46
   },
   "mailboxes": {
     "init": 600,
@@ -77,7 +85,7 @@
   "parts": [],
   "offsets": [],
   "urchin_contacts": {
-    "phase": 2,
+    "phase": 3,
     "scratch": [
       800,
       839
@@ -160,6 +168,155 @@
           -0.17677669529663692
         ],
         "support_limit": 0.0268
+      }
+    ]
+  },
+  "urchin_spines": {
+    "slots": [
+      1000,
+      1095
+    ],
+    "stride": 12,
+    "scratch": [
+      1100,
+      1111
+    ],
+    "spines": [
+      {
+        "actor": 18,
+        "slot": 0,
+        "source_index": 0,
+        "root": [
+          0.2916138021424912,
+          0.0,
+          -0.05668
+        ],
+        "rest": [
+          0.041861283735802314,
+          0.0
+        ],
+        "wait": 4.1,
+        "sign": 1,
+        "length": 0.195
+      },
+      {
+        "actor": 19,
+        "slot": 1,
+        "source_index": 4,
+        "root": [
+          -0.064890175607299,
+          0.2843024352861824,
+          -0.05668
+        ],
+        "rest": [
+          0.041861283735802314,
+          0.2857142857142857
+        ],
+        "wait": 4.51,
+        "sign": -1,
+        "length": 0.195
+      },
+      {
+        "actor": 20,
+        "slot": 2,
+        "source_index": 8,
+        "root": [
+          -0.26273495718104034,
+          -0.12652648685187184,
+          -0.05668
+        ],
+        "rest": [
+          0.041861283735802314,
+          -0.42857142857142855
+        ],
+        "wait": 4.92,
+        "sign": 1,
+        "length": 0.195
+      },
+      {
+        "actor": 21,
+        "slot": 3,
+        "source_index": 11,
+        "root": [
+          0.0648901756072987,
+          -0.28430243528618243,
+          -0.05668
+        ],
+        "rest": [
+          0.041861283735802314,
+          -0.21428571428571447
+        ],
+        "wait": 5.33,
+        "sign": -1,
+        "length": 0.195
+      },
+      {
+        "actor": 22,
+        "slot": 4,
+        "source_index": 14,
+        "root": [
+          0.29732058222183966,
+          0.03861520150492895,
+          0.02616
+        ],
+        "rest": [
+          -0.01914472938707328,
+          0.02055555555555556
+        ],
+        "wait": 5.739999999999999,
+        "sign": 1,
+        "length": 0.229
+      },
+      {
+        "actor": 23,
+        "slot": 5,
+        "source_index": 19,
+        "root": [
+          -0.0896577271118758,
+          0.28609815513059916,
+          0.02616
+        ],
+        "rest": [
+          -0.01914472938707328,
+          0.2983333333333333
+        ],
+        "wait": 6.1499999999999995,
+        "sign": -1,
+        "length": 0.229
+      },
+      {
+        "actor": 24,
+        "slot": 6,
+        "source_index": 24,
+        "root": [
+          -0.2661827803683674,
+          -0.13797604804952737,
+          0.02616
+        ],
+        "rest": [
+          -0.01914472938707328,
+          -0.423888888888889
+        ],
+        "wait": 6.56,
+        "sign": 1,
+        "length": 0.229
+      },
+      {
+        "actor": 25,
+        "slot": 7,
+        "source_index": 29,
+        "root": [
+          0.1821020365864434,
+          -0.23817957651962865,
+          0.02616
+        ],
+        "rest": [
+          -0.01914472938707328,
+          -0.14611111111111114
+        ],
+        "wait": 6.969999999999999,
+        "sign": -1,
+        "length": 0.229
       }
     ]
   },

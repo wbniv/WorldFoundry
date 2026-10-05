@@ -4,6 +4,7 @@ from pathlib import Path
 from mesh import Mesh
 COLORS=dict(urchin_surface=(1,1,1),urchin_foot=(1,1,1))
 TEXTURE='urchin_surfaces.tga'
+PIVOT_SPINES=(0,4,8,11,14,19,24,29)
 
 class UrchinMesh(Mesh):
     def __init__(self,name):
@@ -51,9 +52,16 @@ def add_spine(m,s):
     tip=tuple(root[j]+d[j]*L for j in range(3))
     for k in range(sides):m.face([rings[-1][k],rings[-1][(k+1)%sides],tip],'urchin_surface',[uv(k,.69),uv(k+1,.69),uv(k+.5,1)])
 
-def urchin():
+def urchin(articulated=True):
     m=UrchinMesh('sea_urchin');m.ellipsoid((0,0,0),(.32,.32,.23),'urchin_surface',18,12)
-    for s in spine_specs():add_spine(m,s)
+    for index,s in enumerate(spine_specs()):
+        if not articulated or index not in PIVOT_SPINES:add_spine(m,s)
+    return m
+
+def spine_mesh(index):
+    """Canonical rigid shaft: pivot at origin, local +X points toward tip."""
+    spec=dict(spine_specs()[index],root=(0,0,0),direction=(1,0,0))
+    m=UrchinMesh(f'urchin_spine_{PIVOT_SPINES.index(index)}');add_spine(m,spec)
     return m
 
 def tube_foot():

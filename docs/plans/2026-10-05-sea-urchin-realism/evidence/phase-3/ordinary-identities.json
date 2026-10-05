@@ -1,0 +1,13 @@
+[
+  {
+    "label": "release",
+    "apk": "/tmp/wf-sea-urchin-phases/ordinary/release.apk",
+    "apk_sha256": "9ab68610506321d42b5a08ec2a4cbb0b3932390fb941f4e912fa6fe38794d5fd",
+    "cd_sha256": "11299402fc1f86d7a72de7f93c4009c7056afe95265bae030dfeb3a36eba77f5",
+    "args": "--vram-width=2048\n--vram-height=1024\n--vram-slot-width=512\n--vram-slot-height=512\n--vram-perm-width=512\n--vram-perm-height=512\n",
+    "native": {
+      "lib/arm64-v8a/libwf_game.so": "def91ed87e233688e24469c4e84865337144b62f8a6300476e92879e7ca5ef90",
+      "lib/armeabi-v7a/libwf_game.so": "1284a37230be29f64cb8dffeb84044e63b8c2a9266168e6b811fb27e7ee4cc50"
+    }
+  }
+]

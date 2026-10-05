@@ -31,9 +31,13 @@ def main():
                 for mb in (3009,3010,3011,3012,3013,3014,3040,3041,3042):cli.watch(idx=actor,mailbox=mb)
             cli.watch(idx=player,mailbox=1906)
             contacts=mapping.get('urchin_contacts')
+            spines=mapping.get('urchin_spines')
             if contacts:
                 for foot in contacts['feet']:
                     for field in (0,1,4,8,10):cli.watch(idx=director,mailbox=840+16*foot['slot']+field)
+            if spines:
+                for spine in spines['spines']:
+                    for field in (0,1,2,3,8):cli.watch(idx=director,mailbox=1000+12*spine['slot']+field)
             def value(actor,mb):
                 with cli._lock:return cli.mailbox_values.get((actor,mb),0)
             def step(n):
@@ -63,7 +67,7 @@ def main():
                 cli.inject_input('joystick1_raw',bits,duration_frames=-1)
                 for k in range(n):
                     step(1)
-                    trace.append(dict(frame=frame,scenario=label,time=value(player,1906),poses={name:[value(actor,mb) for mb in (3009,3010,3011,3012,3013,3014,3040,3041,3042)] for name,actor in idx.items() if actor in actors},contacts={str(foot['slot']):[value(director,840+16*foot['slot']+field) for field in (0,1,4,8,10)] for foot in contacts['feet']} if contacts else {}))
+                    trace.append(dict(frame=frame,scenario=label,time=value(player,1906),poses={name:[value(actor,mb) for mb in (3009,3010,3011,3012,3013,3014,3040,3041,3042)] for name,actor in idx.items() if actor in actors},contacts={str(foot['slot']):[value(director,840+16*foot['slot']+field) for field in (0,1,4,8,10)] for foot in contacts['feet']} if contacts else {},spines={str(spine['slot']):[value(director,1000+12*spine['slot']+field) for field in (0,1,2,3,8)] for spine in spines['spines']} if spines else {}))
                     if a.video and frame%2==0:shot(f'frames/frame-{frame//2:04d}')
                     frame+=1
                 shot(label)

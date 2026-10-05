@@ -18,14 +18,17 @@ def main():
     p.add_argument('--base', type=Path, required=True)
     p.add_argument('--cd', type=Path, default=ROOT/'wflevels/aquarium-menu-cd.iff')
     p.add_argument('--out', type=Path, required=True)
+    p.add_argument('--ordinary', action='store_true', help='Preserve normal runtime arguments; omit benchmark variants/recipe')
     a = p.parse_args()
     a.out.mkdir(parents=True, exist_ok=True)
     args = '--plant-seed=713\n--plant-water=saltwater\n--plant-age=150\n--plant-speed=0\n'
     tools = Path('/home/will/android-sdk-local/build-tools/34.0.0')
     receipts = []
     with zipfile.ZipFile(a.base) as source:
+        if a.ordinary:
+            args = source.read('assets/wf_args.txt').decode() if 'assets/wf_args.txt' in source.namelist() else ''
         native = {n:sha(source.read(n)) for n in source.namelist() if n.startswith('lib/')}
-        for cpu in (False, True):
+        for cpu in ((False,) if a.ordinary else (False, True)):
             label = 'cpu' if cpu else 'release'
             unsigned, aligned, apk = [a.out/(label+suffix) for suffix in ('-unsigned.apk','-aligned.apk','.apk')]
             runtime_args = args + ('--frame-profile\n' if cpu else '')
@@ -44,6 +47,9 @@ def main():
             aligned.unlink()
             receipts.append(dict(label=label,apk=str(apk.resolve()),apk_sha256=sha(apk.read_bytes()),cd_sha256=sha(a.cd.read_bytes()),args=runtime_args,native=native))
     (a.out/'identities.json').write_text(json.dumps(receipts,indent=2)+'\n')
+    if a.ordinary:
+        print(a.out/'release.apk')
+        return
     recipe=dict(workflow='variant-benchmark',device='chromecast-test-01',app='aquarium',scene='planted-tank',apk=receipts[0]['apk'],restore_apk=receipts[0]['apk'],trace='plants',duration=60,warmup=15,runs=3,variants=[dict(label=r['label'],apk=r['apk'],runs=1 if r['label']=='cpu' else 3,warmup=15) for r in receipts])
     (a.out/'recipe.json').write_text(json.dumps(recipe,indent=2)+'\n')
     print(a.out/'recipe.json')

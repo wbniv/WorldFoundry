@@ -6,10 +6,10 @@ import sys
 ROOT=Path(__file__).resolve().parents[1]
 sys.path.insert(0,str(ROOT/'wflevels/aquarium_tanks'))
 from planting import planting, placements
-from urchin import urchin, tube_foot
+from urchin import urchin, tube_foot, spine_mesh, PIVOT_SPINES
 
 def test_foliage_and_spines_survive_fixed_point_triangle_normals():
-    for mesh in [*planting(.635),urchin(),tube_foot()]:
+    for mesh in [*planting(.635),urchin(),tube_foot(),*[spine_mesh(k) for k in PIVOT_SPINES]]:
         for face in mesh.faces:
             for j in range(1,len(face)-1):
                 a,b,c=[mesh.vertices[i] for i in (face[0],face[j],face[j+1])]
@@ -49,7 +49,7 @@ def test_dense_grouping_and_real_mesh_limits():
     here=ROOT/'wflevels/aquarium_plants'
     mapping=json.loads((here/'actor-map.json').read_text())
     groups=[name for name in mapping['indices'] if name.startswith('plant_')]
-    assert len(groups)==8 and len(mapping['indices'])==38
+    assert len(groups)==8 and len(mapping['indices'])==46
     text=(here/'aquarium_plants.lev').read_text()
     assert all(f'{name}.iff' in text for name in groups)
     total=0

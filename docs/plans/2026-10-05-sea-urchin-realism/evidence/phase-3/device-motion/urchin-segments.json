@@ -1,0 +1,42 @@
+[
+  {
+    "start": 4.219007678329945e-06,
+    "end": 8.308295788010582,
+    "action": "Idle; sparse spine holds and pivots"
+  },
+  {
+    "start": 8.308303727011662,
+    "end": 14.596350867999718,
+    "action": "Crawl right"
+  },
+  {
+    "start": 14.596354570996482,
+    "end": 21.003460283973254,
+    "action": "Released; feet settle"
+  },
+  {
+    "start": 21.00346278399229,
+    "end": 27.44713383197086,
+    "action": "A tap: change to close camera"
+  },
+  {
+    "start": 27.447136068018153,
+    "end": 33.01662424596725,
+    "action": "Crawl left"
+  },
+  {
+    "start": 33.016626971017104,
+    "end": 37.46383518096991,
+    "action": "Released; feet settle"
+  },
+  {
+    "start": 37.46383701701416,
+    "end": 42.02501417597523,
+    "action": "Crawl right (substrate height stays fixed)"
+  },
+  {
+    "start": 42.02501664200099,
+    "end": 45.40823950298363,
+    "action": "Released; sparse spine holds and pivots"
+  }
+]

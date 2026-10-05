@@ -25,6 +25,14 @@
 	{ 'ASMP'
 		$3fff001l { 'STR' "sea_urchin.iff" }  // IFF PERM fff:001
 		$3fff002l { 'STR' "urchin_tube_foot.iff" }  // IFF PERM fff:002
+		$3fff003l { 'STR' "urchin_spine_0.iff" }  // IFF PERM fff:003
+		$3fff004l { 'STR' "urchin_spine_1.iff" }  // IFF PERM fff:004
+		$3fff005l { 'STR' "urchin_spine_2.iff" }  // IFF PERM fff:005
+		$3fff006l { 'STR' "urchin_spine_3.iff" }  // IFF PERM fff:006
+		$3fff007l { 'STR' "urchin_spine_4.iff" }  // IFF PERM fff:007
+		$3fff008l { 'STR' "urchin_spine_5.iff" }  // IFF PERM fff:008
+		$3fff009l { 'STR' "urchin_spine_6.iff" }  // IFF PERM fff:009
+		$3fff00al { 'STR' "urchin_spine_7.iff" }  // IFF PERM fff:00a
 		$3000001l { 'STR' "tank_base.iff" }  // IFF RM0 000:001
 		$3000002l { 'STR' "water_back.iff" }  // IFF RM0 000:002
 		$3000003l { 'STR' "back_air.iff" }  // IFF RM0 000:003
@@ -54,6 +62,14 @@
 		{ 'ASS' $7ffffffl [ "Perm.cyc" ] }     // CYC PERM fff:fff
 		{ 'ASS' $3fff001l [ "sea_urchin.iff" ] }  // IFF PERM fff:001
 		{ 'ASS' $3fff002l [ "urchin_tube_foot.iff" ] }  // IFF PERM fff:002
+		{ 'ASS' $3fff003l [ "urchin_spine_0.iff" ] }  // IFF PERM fff:003
+		{ 'ASS' $3fff004l [ "urchin_spine_1.iff" ] }  // IFF PERM fff:004
+		{ 'ASS' $3fff005l [ "urchin_spine_2.iff" ] }  // IFF PERM fff:005
+		{ 'ASS' $3fff006l [ "urchin_spine_3.iff" ] }  // IFF PERM fff:006
+		{ 'ASS' $3fff007l [ "urchin_spine_4.iff" ] }  // IFF PERM fff:007
+		{ 'ASS' $3fff008l [ "urchin_spine_5.iff" ] }  // IFF PERM fff:008
+		{ 'ASS' $3fff009l [ "urchin_spine_6.iff" ] }  // IFF PERM fff:009
+		{ 'ASS' $3fff00al [ "urchin_spine_7.iff" ] }  // IFF PERM fff:00a
 	}
 	{ 'ALGN' .align(2048) }
 	{ 'RM0'

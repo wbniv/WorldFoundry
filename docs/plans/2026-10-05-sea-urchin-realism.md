@@ -1,6 +1,6 @@
 # Sea urchin: traction, articulated spines and a textured model
 
-5 October 2026 · **Phases 0–3 authorized; phases 0–2 completed; phase 3 pending.** The sea-anemone and generic-deformation projects remain set aside. This plan does not authorize engine changes.
+5 October 2026 · **Phases 0–3 completed; each phase committed and pushed.** The sea-anemone and generic-deformation projects remain set aside. This plan does not authorize engine changes.
 
 Improve the planted tank's sea urchin so it crawls with visible traction, has a more convincing short-spined silhouette and surface, and moves its spines through basal joints. Keep the slow movement the user previously chose. Separate believable contact from decorative motion, and measure actor/script costs as well as geometry.
 
@@ -132,13 +132,15 @@ Phases 1–3 can be explored using assets, level generators and Forth plus exist
 
 Use the Chromecast coordinator, through `task chromecast:*`; freeze the APK before submitting each test. Profile both device models when available and respect reservations. For each revision use the same seed, water mode, growth age and camera; run three 60-second samples each for idle, crawl/diagonal/reversal and dense mature plants. Separate plant regeneration/growth cost from steady-state animal updates. Never publish invented timing deltas.
 
-| Revision | Animal / scene actors | Animal triangles | Atlas | Script / mailbox cost | CPU/frame p50 / p95 | FPS | Delta vs baseline |
-|---|---|---|---|---|---|---|---|
-| Baseline, source audit | 9 / 38 | 860 source | Flat colors | Measure | Measure | Measure | — |
-| Phase 1 | Target 9 / 38 | Target 2k–4k | 256² | Measure | Measure | Measure | Pending |
-| Phase 2 | Target 9 / 38 | Record | 256² | Measure anchors/contact writes | Measure | Measure | Pending |
-| Phase 3, eight pivots | Target 17 / 46 | Record | 256² | Measure added transforms | Measure | Measure | Pending |
-| Optional single-mesh route | Target ≤ baseline actors | Record | 256² | Measure pose submission/evaluation | Measure | Measure | Pending |
+[Measured comparison report](2026-10-05-sea-urchin-realism/comparison.html) · [machine-readable comparison](2026-10-05-sea-urchin-realism/comparison.json) · [frozen native-library hashes](2026-10-05-sea-urchin-realism/evidence/native-library-check.json).
+
+| Revision | Animal / scene actors | Animal source triangles | Atlas | Status |
+|---|---:|---:|---|---|
+| Phase 0 baseline | 9 / 38 | 860 | Flat colors | Measured on Chromecast |
+| Phase 1 model | 9 / 38 | 3,540 | 256² | Implemented and measured |
+| Phase 2 contacts | 9 / 38 | 3,540 | 256² | Implemented and measured |
+| Phase 3 eight pivots | 17 / 46 | 3,540 | Same 256² | Implemented and measured |
+| Optional single-mesh route | Target ≤ baseline actors | Undetermined | 256² initially | Deferred; engine discussion/permission if required |
 
 Report draw/material batches, memory and animal update time if exposed; otherwise state which metrics are unavailable. Report absolute milliseconds and percent differences. A capped FPS can conceal extra CPU work. Animal actor count matters alongside triangles; compare the eight-pivot prototype with the static revision before proposing an engine extension.
 
@@ -178,6 +180,26 @@ Eight existing feet now retain world-space anchors during support and use separa
 
 The rigid prototype stems aim and stretch between pad and body root through existing actor rotation/scale; the discs tilt with them. Independently level pads and curved flexible stems remain outside phases 0–3. Actual-engine Forth host checks exercise both floating and 16.16-quantized mailbox storage: asset/contact checks total 22 passed. A 400-frame native correctness trace recorded 2,411 consecutive planted contact pairs with zero anchor drift, 38 completed cycles and maximum endpoint error 0.000395 world units. Native trace/video is visual/control evidence only; debug stepping remained wide, so close review uses device captures. [Correctness evidence](2026-10-05-sea-urchin-realism/evidence/phase-2/native/correctness.json).
 
-Matched Chromecast job `J-0043bcb35806` completed successfully. Release median 13.639 FPS (−6.06% vs baseline, −0.60% vs phase 1), p95 present interval 83.417 ms. Single instrumented repeat: actor CPU 1.303 ms (−0.010 ms vs baseline, +0.016 ms vs phase 1), render CPU 58.936 ms (+3.825 ms vs baseline, +0.017 ms vs phase 1). These small phase 1–2 timing differences do not establish a causal performance change. The comparison includes absolute CPU deltas, FPS percentages and raw compressed logs.
+Matched Chromecast job `J-0043bcb35806` completed successfully. Release median 13.639 FPS (−6.06% vs baseline, −0.60% vs phase 1), p95 present interval 83.417 ms. Single instrumented repeat: actor CPU 1.303 ms (−0.010 ms vs baseline, +0.016 ms vs phase 1), render CPU 58.936 ms (+3.825 ms vs baseline, +0.017 ms vs phase 1). Director CPU, which includes contact Forth plus runtime plants, measured 7.336 ms (+0.376 ms vs phase 1); plant animation measured 6.760 ms. Actor mailbox writes rose from 29 to 53/frame. The CPU samples do not isolate statistical or causal attribution. The comparison includes absolute CPU deltas, FPS percentages and raw compressed logs.
 
 ![Phase 2 close view on Chromecast 1](2026-10-05-sea-urchin-realism/evidence/phase-2/chromecast/release/run-1/close-idle.png)
+
+![Measured contact support, recovery and lift](2026-10-05-sea-urchin-realism/contact-trace.svg)
+
+### Phase 3 · Eight rigid basal pivots
+
+Eight representative lower/equatorial primary shafts now have local origins at their basal joints and are removed from the static body mesh. Their rigid lengths and shared atlas remain unchanged; total geometry stays at 3,540 source triangles. Counts rise from 9 to 17 animal actors and from 38 to 46 scene actors. Each uses existing rotation B/C mailboxes, with no independent actor script; the Director owns eight 12-cell slots 1000–1095 and scratch 1100–1111. These ranges do not overlap the foot slots.
+
+Smooth 0.7-second orientation changes lead into 1.25-second holds and 1-second recovery, then staggered 4.10–6.97-second rest intervals. Small orientation adjustments alternate direction; actual travel contributes a bounded local direction bias. This is an authored prototype, not a claim to reproduce a measured *S. purpuratus* reflex. The representative lower shafts retain substrate clearance across their complete envelopes. No whole-crown sine wave, bending shaft, remote-button defensive reflex or engine changes. Other spines remain static and curved flexible feet remain deferred.
+
+Asset/contact/pivot checks: 27 passed, including float and 16.16-quantized Forth, base attachment, rigid length, bounded continuous angles, asynchronous holds, ground clearance, long-pause suppression, teleport reset, mailbox ownership and no duplicated triangles. Matched Chromecast job `J-4b484dfa0849` completed successfully. Release median 13.514 FPS (−6.92% vs phase 0, −0.91% vs phase 2), p95 present interval 83.417 ms. Single instrumented repeat: actor CPU 1.473 ms (+0.170 ms vs phase 2), Director CPU 7.559 ms (+0.222 ms), render CPU 59.403 ms (+0.467 ms). Mailbox writes rose from 53 to 93/frame; render actors from 26 to 34, draws from 19 to 27. Rendered triangle counters stayed effectively unchanged (25,154.2 vs 25,154.5/frame). These are observed revision differences, not isolated causal estimates from repeated CPU samples.
+
+![Phase 3 close view on Chromecast 1](2026-10-05-sea-urchin-realism/evidence/phase-3/chromecast/release/run-1/close-idle.png)
+
+Normal gameplay packaging preserves the original runtime/VRAM arguments and removes the benchmark-only seed, age and zero-growth overrides. Its CD content and native libraries are byte-identical to the measured phase 3 build. [Normal APK identity](2026-10-05-sea-urchin-realism/evidence/phase-3/ordinary-identities.json). Final selector/Home/resume verification used this normal build, not the fixed-scene benchmark. Job `J-4df2eb1a5e7f` passed all eight level starts, level-to-selector back-arrow transitions, Home/resume process continuity, betta animation, and selector exit. [Assertions](2026-10-05-sea-urchin-realism/evidence/phase-3/menu-check/assertions.json).
+
+[Phase 3 Chromecast movement video](2026-10-05-sea-urchin-realism/evidence/phase-3/device-motion/capture.mp4) · [urchin-specific action timeline](2026-10-05-sea-urchin-realism/evidence/phase-3/device-motion/urchin-segments.json). Device record job `J-e8e0b6b373e5` completed successfully. The existing reviewed `school` trace supplied only its input choreography: here A switches the camera and horizontal movement crawls; no fish/dart/climb behavior is involved. Original service labels are preserved separately for provenance. The 49.93-second video is visual evidence; its nominal encoder frame rate is not game FPS. Wide view runs first; A selects the close camera at approximately 21 seconds, followed by left/right crawling and pauses.
+
+<video controls preload="metadata" style="width:100%;max-width:960px" poster="2026-10-05-sea-urchin-realism/evidence/phase-3/chromecast/release/run-1/close-idle.png"><source src="2026-10-05-sea-urchin-realism/evidence/phase-3/device-motion/capture.mp4" type="video/mp4"><track kind="captions" src="2026-10-05-sea-urchin-realism/evidence/phase-3/device-motion/urchin-captions.vtt" srclang="en" label="Controls"></video>
+
+The normal build is saved at `android/app/build/outputs/apk/aquarium/release/worldfoundry-aquarium-release.apk` and installed on Chromecast 1 under job `J-9c1d7ce29667`; launcher artwork verification passed. SHA-256: `9ab68610506321d42b5a08ec2a4cbb0b3932390fb941f4e912fa6fe38794d5fd`. Chromecast 2 remains unavailable (`needs-local-setup`). This work makes no engine edits. Optional full articulation/flexible feet, species-specific response tuning and the freshwater resident decision remain outside completed phases 0–3. The sea-anemone/generic work stays set aside.

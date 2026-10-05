@@ -56,9 +56,80 @@
 <td style="text-align: right;">-0.010</td>
 <td style="text-align: right;">3.825</td>
 </tr>
+<tr>
+<td>3</td>
+<td style="text-align: right;">17 / 46</td>
+<td style="text-align: right;">3540</td>
+<td style="text-align: right;">13.514</td>
+<td style="text-align: right;">-6.923</td>
+<td style="text-align: right;">83.417</td>
+<td style="text-align: right;">1.473</td>
+<td style="text-align: right;">59.403</td>
+<td style="text-align: right;">79.923</td>
+<td style="text-align: right;">0.160</td>
+<td style="text-align: right;">4.292</td>
+</tr>
 </tbody>
 </table>
 <p>Source triangle counts can differ from cooked meshes. Presented p95 is frame interval, not CPU time. The coordinator’s reviewed plants trace uses cardinal key events; diagonal, reversal and anchor checks use deterministic host/runtime correctness traces. Chromecast 2 currently requires local setup. CPU repeats are exploratory single runs; do not infer statistical certainty from small deltas.</p>
+<h2>Instrumented script and rendering cost</h2>
+<table>
+<thead>
+<tr>
+<th>Phase</th>
+<th style="text-align: right;">Director CPU ms</th>
+<th style="text-align: right;">Δ Director CPU ms</th>
+<th style="text-align: right;">Plant animation CPU ms</th>
+<th style="text-align: right;">Actor mailbox writes/frame</th>
+<th style="text-align: right;">Render actors/frame</th>
+<th style="text-align: right;">Draws/frame</th>
+<th style="text-align: right;">Rendered triangles/frame</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>0</td>
+<td style="text-align: right;">6.971</td>
+<td style="text-align: right;">0.000</td>
+<td style="text-align: right;">6.784</td>
+<td style="text-align: right;">29.000</td>
+<td style="text-align: right;">26.000</td>
+<td style="text-align: right;">25.000</td>
+<td style="text-align: right;">23827.064</td>
+</tr>
+<tr>
+<td>1</td>
+<td style="text-align: right;">6.960</td>
+<td style="text-align: right;">-0.012</td>
+<td style="text-align: right;">6.772</td>
+<td style="text-align: right;">29.000</td>
+<td style="text-align: right;">26.000</td>
+<td style="text-align: right;">19.000</td>
+<td style="text-align: right;">25159.962</td>
+</tr>
+<tr>
+<td>2</td>
+<td style="text-align: right;">7.336</td>
+<td style="text-align: right;">0.365</td>
+<td style="text-align: right;">6.760</td>
+<td style="text-align: right;">53.000</td>
+<td style="text-align: right;">26.000</td>
+<td style="text-align: right;">19.000</td>
+<td style="text-align: right;">25154.234</td>
+</tr>
+<tr>
+<td>3</td>
+<td style="text-align: right;">7.559</td>
+<td style="text-align: right;">0.588</td>
+<td style="text-align: right;">6.739</td>
+<td style="text-align: right;">93.000</td>
+<td style="text-align: right;">34.000</td>
+<td style="text-align: right;">27.000</td>
+<td style="text-align: right;">25154.464</td>
+</tr>
+</tbody>
+</table>
+<p>Director CPU includes its Forth and runtime plant calls. The animation section measures existing runtime plant animation and overlaps Director CPU; do not add it again. These counters cover the whole planted scene, not an isolated animal. Source animal triangles and rendered scene triangles are distinct.</p>
 <h2>Phase 0 scenarios</h2>
 <table>
 <thead>
@@ -136,6 +207,33 @@
 <tr>
 <td>crawl-close</td>
 <td style="text-align: right;">13.511</td>
+<td style="text-align: right;">83.417</td>
+</tr>
+</tbody>
+</table>
+<h2>Phase 3 scenarios</h2>
+<table>
+<thead>
+<tr>
+<th>Scenario</th>
+<th style="text-align: right;">FPS</th>
+<th style="text-align: right;">p95 present ms</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>wide-idle</td>
+<td style="text-align: right;">13.583</td>
+<td style="text-align: right;">83.417</td>
+</tr>
+<tr>
+<td>close-idle</td>
+<td style="text-align: right;">13.567</td>
+<td style="text-align: right;">83.417</td>
+</tr>
+<tr>
+<td>crawl-close</td>
+<td style="text-align: right;">13.399</td>
 <td style="text-align: right;">83.417</td>
 </tr>
 </tbody>

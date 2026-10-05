@@ -16,7 +16,7 @@ sys.path.insert(0,str(COMMON))
 from mesh import Mesh
 import species
 from models import COLORS as ANIMAL_COLORS, JELLY_OPACITY, models
-from urchin import COLORS as URCHIN_COLORS, TEXTURE as URCHIN_TEXTURE, urchin, tube_foot, write_texture as write_urchin_texture
+from urchin import COLORS as URCHIN_COLORS, TEXTURE as URCHIN_TEXTURE, urchin, tube_foot, spine_specs, spine_mesh, PIVOT_SPINES, write_texture as write_urchin_texture
 from planting import COLORS as PLANT_COLORS, planting
 from temple import COLORS as TEMPLE_COLORS, pavilion
 LEVEL=sys.argv[sys.argv.index('--')+1]
@@ -217,6 +217,7 @@ for k in range(0 if C.KIND=='plants' else COUNT):
     parts.append(group)
 
 urchin_feet=[]
+urchin_spines=[]
 if C.KIND=='plants':
     foot_data=blender_mesh(tube_foot())
     for k in range(8):
@@ -226,6 +227,14 @@ if C.KIND=='plants':
         # Share the body atlas in PERM, leaving the runtime plant page unchanged.
         obj['wf_Moves Between Rooms']=True
         urchin_feet.append((obj,offset))
+    specs=spine_specs()
+    for k,index in enumerate(PIVOT_SPINES):
+        spec=specs[index];offset=spec['root'];d=spec['direction']
+        rest_b=-math.asin(d[2])/math.tau;rest_c=math.atan2(d[1],d[0])/math.tau
+        obj=actor(f'urchin-spine-{k}',spine_mesh(index),tuple(C.SPAWN[j]+offset[j] for j in range(3)),mesh_name=f'urchin_spine_{k}')
+        obj.rotation_euler=(0,rest_b*math.tau,rest_c*math.tau)
+        obj['wf_Moves Between Rooms']=True
+        urchin_spines.append((obj,index,offset,rest_b,rest_c))
 
 if FEEDING:
     import goldfish
@@ -432,6 +441,10 @@ if C.KIND=='plants':
     for k,(obj,offset) in enumerate(urchin_feet):
         tick+=f' {num(offset[0])} {num(offset[1])} {num(.017+.0014*k)} {k} {indices[obj.name]} uf-foot\n'
     core+=(COMMON/'urchin_motion.fth').read_text()
+    core+=(COMMON/'urchin_spines.fth').read_text()
+    for k,(obj,index,offset,rest_b,rest_c) in enumerate(urchin_spines):
+        tick+=f' {num(offset[0])} {num(offset[1])} {num(offset[2])} {num(rest_b)} {num(rest_c)} {num(4.1+k*.41)} {1 if k%2==0 else -1} {k} {indices[obj.name]} us-spine\n'
+
     if os.environ.get('PLANTED_TANK_DETAIL','runtime')=='runtime':
         header+=': pg-init 747 ; : pg-water 748 ;\n'
         bindings=' '.join(f'{k} {indices[f"plant_chunk_{k:02d}"]} plant-register' for k in range(8))
@@ -447,7 +460,8 @@ if C.KIND=='arowana':
     mailboxes={n:v for n,v in ar_values.items() if 700<=v<800}
 (HERE/'actor-map.json').write_text(json.dumps(dict(level=LEVEL,title=C.TITLE,kind=C.KIND,count=COUNT,
     profile=PROFILE,indices=indices,mailboxes=mailboxes,parts=[m.name for m in meshes],offsets=offsets,
-    urchin_contacts=(dict(phase=2,scratch=[800,839],slots=[840,967],stride=16,distance_scale=1024,feet=[dict(actor=indices[obj.name],slot=k,offset=list(offset),support_limit=.017+.0014*k) for k,(obj,offset) in enumerate(urchin_feet)]) if C.KIND=='plants' else None),
+    urchin_contacts=(dict(phase=3,scratch=[800,839],slots=[840,967],stride=16,distance_scale=1024,feet=[dict(actor=indices[obj.name],slot=k,offset=list(offset),support_limit=.017+.0014*k) for k,(obj,offset) in enumerate(urchin_feet)]) if C.KIND=='plants' else None),
+    urchin_spines=(dict(slots=[1000,1095],stride=12,scratch=[1100,1111],spines=[dict(actor=indices[obj.name],slot=k,source_index=index,root=list(offset),rest=[rest_b,rest_c],wait=4.1+k*.41,sign=1 if k%2==0 else -1,length=spine_specs()[index]['length']) for k,(obj,index,offset,rest_b,rest_c) in enumerate(urchin_spines)]) if C.KIND=='plants' else None),
     movement=({'states':species.STATES,'kind':'pulse-and-drift' if C.KIND=='jellyfish' else 'steer-and-swim', 'jelly_states':species.JELLY if C.KIND=='jellyfish' else None} if C.KIND in ('betta','lionfish','jellyfish') else None),
     lionfish_rig=({'parts':1,'regions':lionfish_model.REGIONS,'triangles':sum(len(f)-2 for f in meshes[0].faces),
                   'palette_seed':0,'palettes':[lionfish_model.palette_for(0,k) for k in range(COUNT)],

@@ -1,10 +1,15 @@
 | Date | Change |
 |------|--------|
+| [2026-10-05](https://github.com/wbniv/WorldFoundry/commit/775f883c) | Implement sea urchin phase 2 anchored crawl and record Chromecast deltas |
 | [2026-10-05](https://github.com/wbniv/WorldFoundry/commit/12cc5c97) | Implement sea urchin phase 1 textured model and profile its cost |
 | [2026-10-03](https://github.com/wbniv/WorldFoundry/commit/55d87fb3) | Split tiger-barb tank and add profiled dense planting with A3 growth poster |
 | [2026-10-02](https://github.com/wbniv/WorldFoundry/commit/9cef6dde) | Integrate aquarium tanks, feeding, and flowing betta fins |
 
 <!--history-meta v1
+775f883c	author	Will Norris
+775f883c	added	3
+775f883c	deleted	3
+775f883c	files	1
 12cc5c97	author	Will Norris
 12cc5c97	added	6
 12cc5c97	deleted	4

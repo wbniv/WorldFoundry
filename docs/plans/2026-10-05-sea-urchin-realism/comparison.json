@@ -62,8 +62,11 @@
     },
     "cpu_delta_ms": {
       "actors": 0.0,
+      "director": 0.0,
       "render": 0.0,
-      "animation": 0.0
+      "animation": 0.0,
+      "update": 0.0,
+      "total": 0.0
     }
   },
   {
@@ -132,8 +135,11 @@
     },
     "cpu_delta_ms": {
       "actors": -0.025760755061817298,
+      "director": -0.011665157003036164,
       "render": 3.808564406718183,
-      "animation": -0.01226927154766777
+      "animation": -0.01226927154766777,
+      "update": -0.03764543702185996,
+      "total": 3.7709458012568717
     }
   },
   {
@@ -202,8 +208,85 @@
     },
     "cpu_delta_ms": {
       "actors": -0.009939451729179316,
+      "director": 0.36506561172856866,
       "render": 3.82508409228447,
-      "animation": -0.024649845083555277
+      "animation": -0.024649845083555277,
+      "update": 0.3541968365534256,
+      "total": 4.179313741070075
+    }
+  },
+  {
+    "phase": 3,
+    "frames": 2425,
+    "fps": 13.514348454297146,
+    "p50_ms": 66.733488,
+    "p90_ms": 83.416871,
+    "p95_ms": 83.416998,
+    "p99_ms": 100.100114,
+    "missed_refresh_percent": 100.0,
+    "PSS_MiB": 79.9228515625,
+    "cpu": {
+      "update": 9.100392557932265,
+      "actors": 1.4729714795008912,
+      "director": 7.55871256684492,
+      "render": 59.4025825311943,
+      "school": 0.0,
+      "pose": 0.0,
+      "animation": 6.738518939393939,
+      "total": 68.5029781194296,
+      "level-objects": 46.0,
+      "render-actors": 34.0,
+      "draws": 27.0,
+      "triangles": 25154.463587344027,
+      "actor-mailbox-writes": 93.0,
+      "fish-deformations": 0.0
+    },
+    "scenarios": {
+      "wide-idle": {
+        "fps": 13.583280311842724,
+        "p95_ms": 83.416893
+      },
+      "close-idle": {
+        "fps": 13.56659324910214,
+        "p95_ms": 83.416975
+      },
+      "crawl-close": {
+        "fps": 13.398546308363969,
+        "p95_ms": 83.41713
+      }
+    },
+    "source_counts": {
+      "animal_actors": 17,
+      "scene_actors": 46,
+      "animal_triangles": 3540,
+      "spines": 101,
+      "pivot_actors": 8,
+      "atlas": [
+        256,
+        256
+      ]
+    },
+    "delta_vs_phase_0": {
+      "fps": {
+        "absolute": -1.0052392180370013,
+        "percent": -6.923331713836478
+      },
+      "p95_ms": {
+        "absolute": 0.00019600000000252749,
+        "percent": 0.00023496465375583142
+      },
+      "PSS_MiB": {
+        "absolute": 1.970703125,
+        "percent": 2.5280934066622462
+      }
+    },
+    "cpu_delta_ms": {
+      "actors": 0.15997962794784581,
+      "director": 0.5875389887892526,
+      "render": 4.291912946684413,
+      "animation": -0.045641165487062096,
+      "update": 0.7497578665244404,
+      "total": 5.041691552265419
     }
   }
 ]

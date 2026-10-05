@@ -1,0 +1,200 @@
+{
+  "job": {
+    "id": "J-9c1d7ce29667",
+    "owner": "50834354a173f73472469f04",
+    "accepted": 1791216968.0153596,
+    "state": "running",
+    "phase": "installing",
+    "request": {
+      "device": "chromecast-test-01",
+      "app": "aquarium",
+      "apk": "9ab68610506321d42b5a08ec2a4cbb0b3932390fb941f4e912fa6fe38794d5fd.apk",
+      "workflow": "install"
+    },
+    "device": "chromecast-test-01",
+    "generation": 113,
+    "cancel": 0,
+    "error": null,
+    "started": 1791216968.1067395,
+    "finished": null,
+    "worker_pid": 820987,
+    "recovery_resolved": 0,
+    "installation": "9ab68610506321d42b5a08ec2a4cbb0b3932390fb941f4e912fa6fe38794d5fd.apk"
+  },
+  "device": {
+    "id": "chromecast-test-01",
+    "serial": "2628105GN0GT7C",
+    "model": "Chromecast HD",
+    "device": "boreal",
+    "android": "14",
+    "abis": [
+      "armeabi-v7a",
+      "armeabi"
+    ],
+    "transport": "tls",
+    "endpoint": "192.168.4.43:41277",
+    "pools": [
+      "chromecast-test"
+    ],
+    "health": "ready",
+    "enrolled": true,
+    "ipv6_addresses": [
+      "fd5d:59ce:7438:1:5817:ea6d:792c:d2e5",
+      "fd5d:59ce:7438:1:7104:7f7e:6f75:edbe",
+      "fd5d:59ce:7438:1:581b:d19a:27a5:c4db",
+      "fd5d:59ce:7438:1:3b82:772d:8d07:d5f6",
+      "fd5d:59ce:7438:1:401f:2bff:fe13:98df",
+      "fe80::401f:2bff:fe13:98df"
+    ],
+    "generation": 113,
+    "last_seen": 1791216968.5602877,
+    "boot_id": "9ec069a1-861f-449a-a777-29554a2f1ed4",
+    "sdk": "34",
+    "reservation": null
+  },
+  "result": "launcher-verification-pending",
+  "error": "APK installed; launcher verification pending",
+  "cleanup_verified": true,
+  "restoration": "unchanged: background install without launch or input",
+  "commands": [
+    {
+      "args": [
+        "mdns",
+        "services"
+      ],
+      "start": 1791216968.2918088,
+      "end": 1791216968.2955315,
+      "returncode": 0
+    },
+    {
+      "args": [
+        "connect",
+        "192.168.4.43:41277"
+      ],
+      "start": 1791216968.2966814,
+      "end": 1791216968.4812064,
+      "returncode": 0
+    },
+    {
+      "args": [
+        "shell",
+        "getprop ro.serialno"
+      ],
+      "start": 1791216968.4828644,
+      "end": 1791216968.5602577,
+      "returncode": 0
+    },
+    {
+      "args": [
+        "shell",
+        "cat /proc/sys/kernel/random/boot_id"
+      ],
+      "start": 1791216968.561616,
+      "end": 1791216968.6305516,
+      "returncode": 0
+    },
+    {
+      "args": [
+        "shell",
+        "getprop ro.product.model"
+      ],
+      "start": 1791216968.6317925,
+      "end": 1791216968.6992126,
+      "returncode": 0
+    },
+    {
+      "args": [
+        "shell",
+        "getprop ro.build.version.release"
+      ],
+      "start": 1791216968.7008584,
+      "end": 1791216968.7636507,
+      "returncode": 0
+    },
+    {
+      "args": [
+        "shell",
+        "getprop ro.build.version.sdk"
+      ],
+      "start": 1791216968.7651293,
+      "end": 1791216968.8282082,
+      "returncode": 0
+    },
+    {
+      "args": [
+        "shell",
+        "getprop ro.product.device"
+      ],
+      "start": 1791216968.8309245,
+      "end": 1791216968.8966424,
+      "returncode": 0
+    },
+    {
+      "args": [
+        "shell",
+        "getprop ro.product.cpu.abilist"
+      ],
+      "start": 1791216968.8980908,
+      "end": 1791216968.96281,
+      "returncode": 0
+    },
+    {
+      "args": [
+        "shell",
+        "ip -6 addr show wlan0"
+      ],
+      "start": 1791216968.9642334,
+      "end": 1791216969.0705705,
+      "returncode": 0
+    },
+    {
+      "args": [
+        "shell",
+        "dumpsys activity activities"
+      ],
+      "start": 1791216969.0933416,
+      "end": 1791216969.1860898,
+      "returncode": 0
+    },
+    {
+      "args": [
+        "install",
+        "-r",
+        "/var/lib/wf-device-coordinator/inputs/9ab68610506321d42b5a08ec2a4cbb0b3932390fb941f4e912fa6fe38794d5fd.apk"
+      ],
+      "start": 1791216969.2202911,
+      "end": 1791216974.5001264,
+      "returncode": 0
+    },
+    {
+      "args": [
+        "shell",
+        "pm path org.worldfoundry.wf_game.aquarium"
+      ],
+      "start": 1791216974.5015922,
+      "end": 1791216974.7149575,
+      "returncode": 0
+    },
+    {
+      "args": [
+        "shell",
+        "sha256sum '/data/app/~~9EOfAbsT554rCXo6O5yb4Q==/org.worldfoundry.wf_game.aquarium-9rtykLQ-Ol9v1MDQV2EqCg==/base.apk'"
+      ],
+      "start": 1791216974.7162588,
+      "end": 1791216974.852158,
+      "returncode": 0
+    },
+    {
+      "args": [
+        "shell",
+        "dumpsys activity activities"
+      ],
+      "start": 1791216974.8536413,
+      "end": 1791216975.061512,
+      "returncode": 0
+    }
+  ],
+  "finished": 1791216975.0845764,
+  "launcher": null,
+  "concurrent_jobs": []
+}

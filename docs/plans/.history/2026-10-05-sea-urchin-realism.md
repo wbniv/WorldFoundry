@@ -1,9 +1,14 @@
 | Date | Change |
 |------|--------|
+| [2026-10-05](https://github.com/wbniv/WorldFoundry/commit/775f883c) | Implement sea urchin phase 2 anchored crawl and record Chromecast deltas |
 | [2026-10-05](https://github.com/wbniv/WorldFoundry/commit/12cc5c97) | Implement sea urchin phase 1 textured model and profile its cost |
 | [2026-10-05](https://github.com/wbniv/WorldFoundry/commit/6186420c) | Record sea urchin research and phase 0 Chromecast baseline |
 
 <!--history-meta v1
+775f883c	author	Will Norris
+775f883c	added	12
+775f883c	deleted	2
+775f883c	files	1
 12cc5c97	author	Will Norris
 12cc5c97	added	7
 12cc5c97	deleted	1
