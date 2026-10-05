@@ -49,7 +49,9 @@ device while another device is testing. They wait for any complete session on
 their own device, including cleanup, to avoid contaminating measurements.
 
 Reviewed adapter upgrades use `android/bomberman/deploy-coordinator.py` through
-the Bomberman installer. The administrator helper persists a maintenance drain,
+the app installer. The helper accepts `--review /absolute/path/deploy-review.json`
+to select the app's reviewed adapter hashes; the default remains Bomberman's
+review. The administrator helper persists a maintenance drain,
 waits for running sessions, retains queued work, verifies the restarted service,
 and resumes grants. Queue and dashboard display the maintenance reason. The
 first upgrade of an older scheduler still uses a transactional idle check before
@@ -164,7 +166,49 @@ Use a comma-separated `DEVICE` list or `DEVICE=all` to target every registered d
 - `task chromecast:readd DEVICE=all`
 - `task chromecast:queue DEVICE=chromecast-test-01,chromecast-test-02`
 
-`APP=bomberman` without `APK` resolves the latest frozen APK from its build receipt and verifies its hash. Other apps retain their release APK defaults. Specify `APK=/absolute/path/frozen.apk` to choose a particular build.
+`APP=bomberman` and `APP=primes` without `APK` resolve the latest frozen APK from their respective build receipts and verify its hash. Primes uses `android/prime-numbers/build/build-receipt.json`. Other apps retain their release APK defaults. Specify `APK=/absolute/path/frozen.apk` to choose a particular build.
+
+### Prime Numbers installation and checks
+
+`APP=primes` is the offline Java/WebView study app, package
+`org.worldfoundry.wf_game.primes`. Build and freeze it locally before submitting:
+
+```sh
+python3 android/prime-numbers/build.py
+python3 android/prime-numbers/verify.py
+python3 android/prime-numbers/install.py
+```
+
+The installer authenticates a reviewed adapter upgrade in the terminal only
+when needed, submits installation and `VALIDATOR=prime-study` verification on
+Chromecast 1, and saves output, durable job IDs, and downloaded evidence under
+`docs/diagnostics/prime-numbers-chromecast/`. Connection jobs ending in
+`needs-local-setup` trigger one bounded reconnect sequence with up to three
+owned `readd` jobs, followed by a replacement install/check. It stops if recovery
+is exhausted or connection fails again after successful recovery.
+
+If background installation rejects updating the foreground Prime Numbers app,
+the program installs through its separately owned interactive check session.
+That check waits behind personal reservations. Failed runtime checks require
+investigation; `python3 android/prime-numbers/install.py --retry-check` explicitly
+replaces one failed check and retains its evidence.
+
+For an individual check, use:
+
+```sh
+task chromecast:check DEVICE=chromecast-test-01 APP=primes VALIDATOR=prime-study
+```
+
+The validator is accepted only with `APP=primes` and `WORKFLOW=check`. It checks
+reference-only Study, all four held/released directions, Recall marking and
+results, Home/resume, and Back exit. Leave the physical remote untouched during
+automated input checks; extra presses can invalidate navigation assertions.
+Chromecast 1 verification passed in `J-9638f51a96ce` on 2026-10-06; Chromecast 2
+and actual WebView 91 testing remain pending. See the
+[app README](../android/prime-numbers/README.md) and
+[delivery plan](plans/2026-10-06-prime-numbers-chromecast.md) for current evidence.
+
+### Launcher verification and batch evidence
 
 Multi-device submission returns a durable `BATCH=B-…` and one `JOB=J-…` per target. All targets are validated before admission. Jobs schedule independently; personal reservations remain effective. Watch with `task chromecast:watch BATCH=B-example`, inspect with `task chromecast:status BATCH=B-example`, download with `task chromecast:evidence BATCH=B-example OUT=/absolute/path/evidence`, or cancel unfinished children with `task chromecast:cancel BATCH=B-example`. Evidence is grouped as `OUT/<device>/<job>/`, with `batch.json` recording individual outcomes. Closing a watcher does not cancel the batch. A partial failure returns nonzero while retaining successful results.
 

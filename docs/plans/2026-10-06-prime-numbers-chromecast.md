@@ -2,6 +2,23 @@
 
 Status: implemented, installed, and hardware-verified on Chromecast 1, including the latest reference-only Study revision, 2026-10-06. Chromecast 2 / WebView 91 verification and the ten-minute study soak remain pending.
 
+## Current delivery
+
+Implementation and saved verification evidence are committed in `525b1d29` and pushed to `origin/2026-new-level`. The installed artifact is `primes-32c0237d6bbad591.apk`, SHA256 `32c0237d6bbad591edce019fb4cfe0d22f0e67bf5da8e22e9412c8d8c1483d26`; [build receipt](../diagnostics/prime-numbers-chromecast/reference-only/build-receipt.json). Earlier build results below are historical and do not describe additional modes in the current app.
+
+| Item | Current result | Evidence / remaining work |
+| --- | --- | --- |
+| Study | Complete | 1–100 chart; highlighted primes without stars; 25-prime list fills the right column; OK keeps the chart visible. |
+| Recall | Complete | OK marks/unmarks directly; Check reviews all marks; answers stay hidden until Check. |
+| Icon and banner | Packaged; circular launcher icon verified | Actual banner presentation on a banner-style TV launcher remains unverified. |
+| Browser verification | PASS | Both target sizes and selected newer APIs removed; [results](../diagnostics/prime-numbers-chromecast/reference-only/browser/results.json). |
+| Installer and coordinator tests | PASS | 12 recovery/retry cases plus 4 admission cases; [output](../diagnostics/prime-numbers-chromecast/reference-only/tooling-tests.txt). |
+| Chromecast 1 installation and input | PASS | Job `J-9638f51a96ce`; [assertions](../diagnostics/prime-numbers-chromecast/J-9638f51a96ce/prime-assertions.json). Tested WebView 153.0.8010.36. |
+| Chromecast 2 / WebView 91 | Pending | Device needs local setup; verify actual startup, directions including hold/release, Recall, Back, and Home/resume. |
+| Ten-minute Study soak | Pending | Check prolonged readability and responsive input afterward on hardware. |
+
+Keep the TV remote untouched during automated checks. Will confirmed physical input during two earlier failed navigation checks; the later uninterrupted check passed. Installer recovery and explicit check retry are implemented in the program, with saved jobs/evidence; no ad hoc device-control fallback is required.
+
 ## Goal
 
 Build an offline Chromecast / Android TV app that displays every integer from 1 through 100 and clearly highlights the primes. It should work as a quiet reference chart for memorization, with optional active recall using only the TV remote. Launch directly into the chart, without sign-in, a phone, or a network connection.
@@ -13,7 +30,7 @@ Build an offline Chromecast / Android TV app that displays every integer from 1 
 - Give the selected cell a separate high-contrast outline so focus cannot be confused with prime highlighting.
 - Remove the default “The Idea” explanation section. Fill the whole right column with “The 25 to remember,” displayed as an ordered 5×5 list of large prime numerals.
 - Study stays a reference chart. OK on a number leaves the prime list visible; there is no explanation mode or factor list.
-- Reserve roughly 5% margins around the TV viewport and verify layout at 960×540 and 1920×1080. Use a responsive detail panel, with grid numerals targeting at least 24 CSS pixels at the smaller viewport. Confirm couch-distance readability on actual hardware.
+- Reserve roughly 5% margins around the TV viewport and verify layout at 960×540 and 1920×1080. Use a responsive right column, with grid numerals targeting at least 24 CSS pixels at the smaller viewport. Confirm couch-distance readability on actual hardware.
 - Avoid background motion, flashing, timers, and sound. Keep the screen awake only while the app is foreground so it can serve as a study display.
 
 ## Remote controls
@@ -28,7 +45,7 @@ Build an offline Chromecast / Android TV app that displays every integer from 1 
 | OK on a mode control | Enter that mode and return focus to the grid. |
 | OK on Check | Review all selected prime candidates together; no per-number questions. |
 | Down from mode controls | Return to the last selected grid cell. |
-| Back | Hide Recall results first; return from Recall to Study next; from Study, allow normal Android exit. |
+| Back | Hide Recall results first; return from Recall to Study next; in Study, return from mode controls to the chart before normal Android exit. |
 
 Include short visible control hints and accessible labels for the numbers, classification, and focus state. Hide actual classifications in Recall until Check.
 
@@ -38,7 +55,7 @@ Keep the same number positions but hide actual prime classifications and the pri
 
 The learner chooses Check from the top controls when ready. Review all marks together: number of correctly marked primes, incorrect marks in coral, and missed primes outlined on the chart and listed in the right panel. Back hides results while preserving marks; changing a mark also hides results. Returning to Study restores the reference chart. Re-entering Recall resets marks. No timer, score persistence, or streaks.
 
-This adds a small memorization exercise while keeping the always-visible highlighted chart as the default experience. Adaptive quizzes, accounts, analytics, and more number ranges can be considered later.
+This adds a small memorization exercise while keeping the highlighted chart as the default experience.
 
 ## Number correctness
 
@@ -56,15 +73,17 @@ Check every value in the range, particularly 1, 2, 49, 97, and 100. Classify 1 a
 
 ## Implementation
 
-Create a standalone app under `android/prime-numbers/`, with proposed package `org.worldfoundry.wf_game.primes`, launcher label **Prime Numbers**, and activity `.TvActivity`.
+The standalone app is under `android/prime-numbers/`, with package `org.worldfoundry.wf_game.primes`, launcher label **Prime Numbers**, and activity `.TvActivity`.
 
-Use the existing [Bomberman wrapper](../../android/bomberman/README.md) and its `build.py` as packaging references: a Java Activity displaying bundled HTML/CSS/JavaScript in a WebView, built with the installed Android SDK and pinned Java compiler. Keep prime-study logic independent of the wrapper. Proposed files:
+The existing [Bomberman wrapper](../../android/bomberman/README.md) and its `build.py` provided packaging references: a Java Activity displaying bundled HTML/CSS/JavaScript in a WebView, built with the installed Android SDK and pinned Java compiler. Prime-study logic stays independent of the wrapper. Implemented files:
 
 - `assets/index.html`, `study.css`, and `study.js` for the chart, focus, and recall state.
 - `src/org/worldfoundry/wf_game/primes/TvActivity.java` for fullscreen presentation, remote key forwarding, console logging, and lifecycle handling.
 - `AndroidManifest.xml` with a Leanback launcher, landscape orientation, touchscreen optional, no Internet permission, and app-specific icon/banner resources.
 - `build.py` producing a signed, hash-named frozen APK and a receipt with APK SHA256, package identity, and source hashes; retain a stable development signing key for upgrades.
 - `verify.py` for number correctness and browser interaction checks using Python Playwright, plus a short build/run README.
+- `install.py` for reviewed coordinator deployment, durable job following, bounded reconnect, foreground-app handling, evidence retrieval, and explicit failed-check retry.
+- `scripts/wf_device/prime_checks.py` for the fixed, coordinator-owned hardware input check.
 
 ### Launcher icon and TV banner
 
@@ -99,7 +118,7 @@ No World Foundry engine changes are required. If implementation reveals an engin
 
 Complete when the frozen APK launches from each TV's app launcher, all 100 numbers fit and are readable, mathematical classification is correct, Study and Recall work with the remote, and both devices have reviewed coordinator evidence. Until then, describe builds, installations, and verified behavior separately.
 
-## Implementation results, 2026-10-06
+## Initial implementation results, 2026-10-06 (superseded app revision)
 
 - Implemented [`android/prime-numbers/`](../../android/prime-numbers/README.md): offline chart, explanations, Recall, all remote input, lifecycle input cleanup, and generated icon/banner. No engine code changed.
 - Signed frozen APK: `primes-485c4b8d6f7fe248.apk`, SHA256 `485c4b8d6f7fe248317cefc99f9a634a7d43ddcc922f00a978e45a36a44e18d2`. [Build receipt](../diagnostics/prime-numbers-chromecast/build-receipt.json) and [build output](../diagnostics/prime-numbers-chromecast/build.log). Manifest inspection resolves the expected app label, 512×512 icon, 320×180 banner, and TV activity.
