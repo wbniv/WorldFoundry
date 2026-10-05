@@ -1,0 +1,28 @@
+{
+  "status": "failed",
+  "home": "com.google.android.apps.tv.launcherx/.home.HomeActivity",
+  "apk": "8027b8e5abe3bf7bb16350d3ba4112a934adb805e0290070f69301fddcdce312.apk",
+  "attempts": [
+    {
+      "verified": false,
+      "reason": "No identifiable tile geometry or comparable artwork",
+      "screenshot": "attempt-1-view-1.png",
+      "hierarchy": "attempt-1-view-1.xml",
+      "attempt": 1
+    },
+    {
+      "verified": false,
+      "reason": "No identifiable tile geometry or comparable artwork",
+      "screenshot": "attempt-2-view-1.png",
+      "hierarchy": "attempt-2-view-1.xml",
+      "attempt": 2
+    }
+  ],
+  "refreshes": [
+    {
+      "operation": "launcher-force-stop-and-home",
+      "package": "com.google.android.apps.tv.launcherx"
+    }
+  ],
+  "error": "APK installed, but launcher artwork is stale or unverified after bounded recovery; inspect launcher evidence."
+}

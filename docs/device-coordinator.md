@@ -1,6 +1,6 @@
 # Shared Chromecast coordinator
 
-The implementation uses a Python standard-library service, an authenticated
+The implementation uses a Python standard-library coordinator (Pillow for launcher artwork comparisons), an authenticated
 JSON API over a Unix socket, Task commands and a read-only loopback
 HTTP dashboard. **There is no MCP adapter.**
 
@@ -152,6 +152,33 @@ and temporary IPv6 address changes introduce a discovery/refresh gap; a
 stronger managed network/container boundary must close it. The five-second
 registry refresh alone does not establish complete enforcement. Preserve
 unrelated Android devices when tightening runtime permissions.
+
+## Multiple-device commands and launcher verification
+
+Implemented, deployed and verified on both Chromecasts on 2026-10-05, including a real stale-art trial and automatic launcher-data reset/recheck. Full process suite: 89 tests passed. Check authenticated `capabilities` for `device_batches` and `launcher_verification` before treating these features as active.
+
+Use a comma-separated `DEVICE` list or `DEVICE=all` to target every registered device. `all` is frozen when accepted; `POOL` still selects one eligible device. Examples:
+
+- `task chromecast:submit DEVICE=all WORKFLOW=install APP=bomberman`
+- `task chromecast:capture DEVICE=chromecast-test-01,chromecast-test-02 OUT=/absolute/path/captures`
+- `task chromecast:readd DEVICE=all`
+- `task chromecast:queue DEVICE=chromecast-test-01,chromecast-test-02`
+
+`APP=bomberman` without `APK` resolves the latest frozen APK from its build receipt and verifies its hash. Other apps retain their release APK defaults. Specify `APK=/absolute/path/frozen.apk` to choose a particular build.
+
+Multi-device submission returns a durable `BATCH=B-…` and one `JOB=J-…` per target. All targets are validated before admission. Jobs schedule independently; personal reservations remain effective. Watch with `task chromecast:watch BATCH=B-example`, inspect with `task chromecast:status BATCH=B-example`, download with `task chromecast:evidence BATCH=B-example OUT=/absolute/path/evidence`, or cancel unfinished children with `task chromecast:cancel BATCH=B-example`. Evidence is grouped as `OUT/<device>/<job>/`, with `batch.json` recording individual outcomes. Closing a watcher does not cancel the batch. A partial failure returns nonzero while retaining successful results.
+
+Comma lists/all also work for device listing and reserve/release operations. Reservation changes validate all selected devices and owners before updating anything. Run personal reservations from your own terminal. Pairing codes and explicit reconnect addresses require one device at a time.
+
+Installation now has two owned stages. First it installs in the background and verifies the installed APK checksum without changing the foreground. Then it obtains interactive access, opens the resolved HOME launcher and compares the identified app tile against artwork extracted from the frozen APK. The final result is successful only after visible artwork verification. Screenshots, hierarchy, reference resource hashes and comparison scores are saved under the job's `launcher/` evidence.
+
+If the tile is stale, the service restarts the reviewed launcher and checks again. If it remains stale, it clears the launcher's data/cache, reopens it and rechecks. **Will authorized this on 2026-10-05; it resets the launcher home layout/app order, while preserving game data.** Resets are restricted to the reviewed Google TV launcher packages and an identified mismatching tile. Inconclusive or missing tiles produce an explicit verification failure instead of pretending the checksum proves the icon is fresh.
+
+When a personal reservation blocks interactive access, the job reports `launcher-verification-pending`, releases the installation session and persists its continuation. It resumes automatically once eligible; no HOME/input/reset occurs during the reserved background installation. A newer installed APK supersedes an older pending check. Cancelling after APK installation leaves that APK installed and records its artwork as unverified.
+
+The current implementation uses PNG/adaptive raster references and UI hierarchy identification. Unsupported artwork formats, ambiguous/missing tile geometry, or a black capture cannot pass verification. Verify the concrete launcher layout on each device during acceptance; process tests are not a substitute for that check.
+
+See the [implementation and acceptance plan](plans/2026-10-05-chromecast-multiple-device-commands.md).
 
 ## Task interface
 

@@ -1,5 +1,6 @@
 | Date | Change |
 |------|--------|
+| [2026-10-05](https://github.com/wbniv/WorldFoundry/commit/d72c3a7f) | Save pending capture tooling, game drafts, and runtime evidence |
 | [2026-10-04](https://github.com/wbniv/WorldFoundry/commit/8d165c7c) | Record plant atlas resolution profiles and retain 256 default |
 | [2026-10-04](https://github.com/wbniv/WorldFoundry/commit/98485d9b) | Allow coordinated background installs and drain service upgrades |
 | [2026-10-04](https://github.com/wbniv/WorldFoundry/commit/e45a7ac1) | Reconcile plant docs with implemented runtime and final texture measurements |
@@ -52,6 +53,10 @@
 | [2026-06-26](https://github.com/wbniv/WorldFoundry/commit/16d72fa6) | docs: add plan index (docs/plans/README.md) |
 
 <!--history-meta v1
+d72c3a7f	author	Will Norris
+d72c3a7f	added	6
+d72c3a7f	deleted	2
+d72c3a7f	files	1
 8d165c7c	author	Will Norris
 8d165c7c	added	1
 8d165c7c	deleted	1

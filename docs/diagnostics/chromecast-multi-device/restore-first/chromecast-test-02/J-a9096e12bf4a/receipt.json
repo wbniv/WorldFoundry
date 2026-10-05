@@ -1,0 +1,344 @@
+{
+  "job": {
+    "id": "J-a9096e12bf4a",
+    "owner": "50834354a173f73472469f04",
+    "accepted": 1791158567.8365777,
+    "state": "running",
+    "phase": "restoring",
+    "request": {
+      "app": "bomberman",
+      "workflow": "install",
+      "apk": "71d079d9c146a20cbdf4529df84bd61f87432915e687fa47f6d665e8c1cafd40.apk",
+      "device": "chromecast-test-02"
+    },
+    "device": "chromecast-test-02",
+    "generation": 23,
+    "cancel": 0,
+    "error": null,
+    "started": 1791158571.9930477,
+    "finished": null,
+    "worker_pid": 546470,
+    "recovery_resolved": 0,
+    "installation": "71d079d9c146a20cbdf4529df84bd61f87432915e687fa47f6d665e8c1cafd40.apk"
+  },
+  "device": {
+    "id": "chromecast-test-02",
+    "serial": "26031HFDD67QH7",
+    "name": "Project Room",
+    "model": "Chromecast",
+    "device": "sabrina",
+    "android": "12",
+    "sdk": "31",
+    "abis": [
+      "armeabi-v7a",
+      "armeabi"
+    ],
+    "transport": "legacy-tcp",
+    "endpoint": "192.168.4.54:5555",
+    "pools": [
+      "chromecast-test"
+    ],
+    "health": "ready",
+    "enrolled": true,
+    "ipv6_addresses": [
+      "fd5d:59ce:7438:1:40cf:bedc:33cd:967f",
+      "fd5d:59ce:7438:1:2555:eb86:7321:678",
+      "fe80::7156:9529:ebee:236b"
+    ],
+    "cast_udn": "5e305387-266b-84a6-639e-50805d1f06c2",
+    "generation": 23,
+    "last_seen": 1791158572.3956323,
+    "boot_id": "4b85df3a-e993-4a81-95b8-23f6c021d844",
+    "reservation": null
+  },
+  "result": "failed",
+  "error": "APK installed, but launcher artwork is stale or unverified after bounded recovery; inspect launcher evidence.",
+  "cleanup_verified": true,
+  "restoration": "previous-app-TV-launcher",
+  "commands": [
+    {
+      "args": [
+        "connect",
+        "192.168.4.54:5555"
+      ],
+      "start": 1791158572.3310235,
+      "end": 1791158572.3392935,
+      "returncode": 0
+    },
+    {
+      "args": [
+        "shell",
+        "getprop ro.serialno"
+      ],
+      "start": 1791158572.3405547,
+      "end": 1791158572.3956075,
+      "returncode": 0
+    },
+    {
+      "args": [
+        "shell",
+        "cat /proc/sys/kernel/random/boot_id"
+      ],
+      "start": 1791158572.3968432,
+      "end": 1791158572.4565938,
+      "returncode": 0
+    },
+    {
+      "args": [
+        "shell",
+        "getprop ro.product.model"
+      ],
+      "start": 1791158572.4580996,
+      "end": 1791158572.507328,
+      "returncode": 0
+    },
+    {
+      "args": [
+        "shell",
+        "getprop ro.build.version.release"
+      ],
+      "start": 1791158572.5087545,
+      "end": 1791158572.5637035,
+      "returncode": 0
+    },
+    {
+      "args": [
+        "shell",
+        "getprop ro.build.version.sdk"
+      ],
+      "start": 1791158572.5650766,
+      "end": 1791158572.6086087,
+      "returncode": 0
+    },
+    {
+      "args": [
+        "shell",
+        "getprop ro.product.device"
+      ],
+      "start": 1791158572.6100218,
+      "end": 1791158572.6618862,
+      "returncode": 0
+    },
+    {
+      "args": [
+        "shell",
+        "getprop ro.product.cpu.abilist"
+      ],
+      "start": 1791158572.6633186,
+      "end": 1791158572.7244153,
+      "returncode": 0
+    },
+    {
+      "args": [
+        "shell",
+        "ip -6 addr show wlan0"
+      ],
+      "start": 1791158572.7258365,
+      "end": 1791158572.7777627,
+      "returncode": 0
+    },
+    {
+      "args": [
+        "shell",
+        "dumpsys activity activities"
+      ],
+      "start": 1791158572.792725,
+      "end": 1791158572.8559198,
+      "returncode": 0
+    },
+    {
+      "args": [
+        "shell",
+        "pm path org.worldfoundry.wf_game.bomberman"
+      ],
+      "start": 1791158572.9045367,
+      "end": 1791158572.978929,
+      "returncode": 0
+    },
+    {
+      "args": [
+        "shell",
+        "sha256sum '/data/app/~~w3JOKzEJW2bA8_AsFqmzug==/org.worldfoundry.wf_game.bomberman-9UxXnYeDjHKprJoe169ToA==/base.apk'"
+      ],
+      "start": 1791158572.9803784,
+      "end": 1791158573.0454478,
+      "returncode": 0
+    },
+    {
+      "args": [
+        "shell",
+        "cmd package resolve-activity --brief -a android.intent.action.MAIN -c android.intent.category.HOME"
+      ],
+      "start": 1791158573.3280017,
+      "end": 1791158573.5895703,
+      "returncode": 0
+    },
+    {
+      "args": [
+        "shell",
+        "am start -W -n com.google.android.apps.tv.launcherx/.home.HomeActivity"
+      ],
+      "start": 1791158573.6050982,
+      "end": 1791158573.9542134,
+      "returncode": 0
+    },
+    {
+      "args": [
+        "shell",
+        "dumpsys activity activities"
+      ],
+      "start": 1791158576.9557924,
+      "end": 1791158577.140251,
+      "returncode": 0
+    },
+    {
+      "args": [
+        "shell",
+        "uiautomator dump --compressed /data/local/tmp/wf-J-a9096e12bf4a-launcher.xml"
+      ],
+      "start": 1791158577.141892,
+      "end": 1791158579.8983219,
+      "returncode": 0
+    },
+    {
+      "args": [
+        "shell",
+        "cat /data/local/tmp/wf-J-a9096e12bf4a-launcher.xml"
+      ],
+      "start": 1791158579.8995788,
+      "end": 1791158579.9606128,
+      "returncode": 0
+    },
+    {
+      "args": [
+        "exec-out",
+        "screencap",
+        "-p"
+      ],
+      "start": 1791158579.9622836,
+      "end": 1791158582.3631022,
+      "returncode": 0
+    },
+    {
+      "args": [
+        "shell",
+        "am force-stop com.google.android.apps.tv.launcherx"
+      ],
+      "start": 1791158583.1121986,
+      "end": 1791158583.3774793,
+      "returncode": 0
+    },
+    {
+      "args": [
+        "shell",
+        "am start -W -n com.google.android.apps.tv.launcherx/.home.HomeActivity"
+      ],
+      "start": 1791158583.378932,
+      "end": 1791158584.295894,
+      "returncode": 0
+    },
+    {
+      "args": [
+        "shell",
+        "dumpsys activity activities"
+      ],
+      "start": 1791158587.2978406,
+      "end": 1791158587.3807564,
+      "returncode": 0
+    },
+    {
+      "args": [
+        "shell",
+        "uiautomator dump --compressed /data/local/tmp/wf-J-a9096e12bf4a-launcher.xml"
+      ],
+      "start": 1791158587.3823936,
+      "end": 1791158590.106987,
+      "returncode": 0
+    },
+    {
+      "args": [
+        "shell",
+        "cat /data/local/tmp/wf-J-a9096e12bf4a-launcher.xml"
+      ],
+      "start": 1791158590.107948,
+      "end": 1791158590.167786,
+      "returncode": 0
+    },
+    {
+      "args": [
+        "exec-out",
+        "screencap",
+        "-p"
+      ],
+      "start": 1791158590.1689687,
+      "end": 1791158591.58497,
+      "returncode": 0
+    },
+    {
+      "args": [
+        "shell",
+        "rm -f /data/local/tmp/wf-J-a9096e12bf4a-launcher.xml"
+      ],
+      "start": 1791158591.9786623,
+      "end": 1791158592.2596872,
+      "returncode": 0
+    },
+    {
+      "args": [
+        "shell",
+        "cmd package resolve-activity --brief -a android.intent.action.MAIN -c android.intent.category.HOME"
+      ],
+      "start": 1791158592.2758067,
+      "end": 1791158592.329817,
+      "returncode": 0
+    },
+    {
+      "args": [
+        "shell",
+        "am start -W -a android.intent.action.MAIN -c android.intent.category.LEANBACK_LAUNCHER -p com.google.android.youtube.tv"
+      ],
+      "start": 1791158592.3317862,
+      "end": 1791158592.5505242,
+      "returncode": 0
+    },
+    {
+      "args": [
+        "shell",
+        "dumpsys activity activities"
+      ],
+      "start": 1791158592.552079,
+      "end": 1791158592.6512864,
+      "returncode": 0
+    }
+  ],
+  "finished": 1791158592.6526525,
+  "launcher": {
+    "status": "failed",
+    "home": "com.google.android.apps.tv.launcherx/.home.HomeActivity",
+    "apk": "71d079d9c146a20cbdf4529df84bd61f87432915e687fa47f6d665e8c1cafd40.apk",
+    "attempts": [
+      {
+        "verified": false,
+        "reason": "No identifiable tile geometry or comparable artwork",
+        "screenshot": "attempt-1-view-1.png",
+        "hierarchy": "attempt-1-view-1.xml",
+        "attempt": 1
+      },
+      {
+        "verified": false,
+        "reason": "No identifiable tile geometry or comparable artwork",
+        "screenshot": "attempt-2-view-1.png",
+        "hierarchy": "attempt-2-view-1.xml",
+        "attempt": 2
+      }
+    ],
+    "refreshes": [
+      {
+        "operation": "launcher-force-stop-and-home",
+        "package": "com.google.android.apps.tv.launcherx"
+      }
+    ],
+    "error": "APK installed, but launcher artwork is stale or unverified after bounded recovery; inspect launcher evidence."
+  },
+  "concurrent_jobs": []
+}

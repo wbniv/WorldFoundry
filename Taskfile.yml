@@ -609,6 +609,7 @@ tasks:
       WF_CC_DEVICE: '{{.DEVICE | default ""}}'
       WF_CC_POOL: '{{.POOL | default ""}}'
       WF_CC_JOB: '{{.JOB | default ""}}'
+      WF_CC_BATCH: '{{.BATCH | default ""}}'
       WF_CC_OUT: '{{.OUT | default ""}}'
       WF_CC_TEXT: '{{.TEXT | default ""}}'
       WF_CC_WORKFLOW: '{{.WORKFLOW | default ""}}'
@@ -691,7 +692,7 @@ tasks:
       - python3 scripts/chromecast.py task status
 
   chromecast:submit:
-    desc: "Coordinated Chromecast submit"
+    desc: "Submit jobs: DEVICE=id,id or all; WORKFLOW=install verifies launcher artwork"
     silent: true
     env: *chromecast_env
     cmds:
@@ -726,14 +727,14 @@ tasks:
       - python3 scripts/chromecast.py task record
 
   chromecast:watch:
-    desc: "Coordinated Chromecast watch"
+    desc: "Follow a Chromecast JOB or multi-device BATCH"
     silent: true
     env: *chromecast_env
     cmds:
       - python3 scripts/chromecast.py task watch
 
   chromecast:evidence:
-    desc: "Coordinated Chromecast evidence"
+    desc: "Download verified evidence for JOB or BATCH into OUT"
     silent: true
     env: *chromecast_env
     cmds:

@@ -1,0 +1,9 @@
+{
+  "before": [
+    "    mResumedActivity: ActivityRecord{3c4d29c u0 com.google.android.youtube.tv/com.google.android.apps.youtube.tv.activity.MainActivity t39}"
+  ],
+  "after": [
+    "    mResumedActivity: ActivityRecord{3c4d29c u0 com.google.android.youtube.tv/com.google.android.apps.youtube.tv.activity.MainActivity t39}"
+  ],
+  "foreground_unchanged": true
+}

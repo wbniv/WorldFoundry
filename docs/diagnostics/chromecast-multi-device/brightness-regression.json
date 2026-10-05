@@ -1,0 +1,16 @@
+{
+  "bounds": [
+    1216,
+    914,
+    1352,
+    991
+  ],
+  "reference": "expected-banner-0.png",
+  "resource": "res/drawable-nodpi-v4/cat_boom_banner.png",
+  "kind": "banner",
+  "mean_absolute_error": 44.41735537190083,
+  "rms_error": 58.29319730517318,
+  "worst_region_error": 62.29296875,
+  "brightness_gain": 0.4491296111840912,
+  "verified": false
+}

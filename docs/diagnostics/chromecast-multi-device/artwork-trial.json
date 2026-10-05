@@ -1,0 +1,11 @@
+{
+  "normal_apk": "/home/will/WorldFoundry-wbniv/android/bomberman/build/bomberman-71d079d9c146a20c.apk",
+  "normal_sha256": "71d079d9c146a20cbdf4529df84bd61f87432915e687fa47f6d665e8c1cafd40",
+  "trial_apk": "/home/will/WorldFoundry-wbniv/.worktrees/growing-plants/.coordinator-artwork-trial/artwork-trial.apk",
+  "trial_sha256": "8027b8e5abe3bf7bb16350d3ba4112a934adb805e0290070f69301fddcdce312",
+  "changed_resources": [
+    "res/drawable-nodpi-v4/cat_boom_icon.png",
+    "res/drawable-nodpi-v4/cat_boom_banner.png"
+  ],
+  "manifest_and_classes_unchanged": true
+}

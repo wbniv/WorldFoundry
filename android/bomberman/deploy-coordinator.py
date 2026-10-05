@@ -30,8 +30,10 @@ def reviewed(review, deployed):
             raise RuntimeError('Unsafe reviewed filename')
         if hashlib.sha256((ROOT/'scripts/wf_device'/name).read_bytes()).hexdigest() != hashes['new']:
             raise RuntimeError('Source changed after review: '+name)
-        if deployed and hashlib.sha256((DEST/name).read_bytes()).hexdigest() not in {hashes['old'], hashes['new']}:
-            raise RuntimeError('Deployed adapter changed after review: '+name)
+        if deployed:
+            actual = hashlib.sha256((DEST/name).read_bytes()).hexdigest() if (DEST/name).exists() else None
+            if actual not in {hashes['old'], hashes['new']}:
+                raise RuntimeError('Deployed adapter changed after review: '+name)
 
 
 def wait_and_stop(timeout=3600):
@@ -59,7 +61,7 @@ def wait_and_stop(timeout=3600):
 
 def verify_service(timeout=30):
     # Authenticate as the configured client user, never print its credentials.
-    code = "import sys;sys.path.insert(0,'/opt/wf-device-coordinator/scripts');from wf_device.client import Client;c=Client();r=c.call('capabilities');assert 'install' in r['workflows'] and r['maintenance_drain'];assert c.call('queue')['maintenance']"
+    code = "import sys;sys.path.insert(0,'/opt/wf-device-coordinator/scripts');from wf_device.client import Client;import wf_device.launcher;c=Client();r=c.call('capabilities');assert 'install' in r['workflows'] and r['maintenance_drain'] and r['device_batches'] and r['launcher_verification'];assert c.call('queue')['maintenance']"
     deadline = time.monotonic()+timeout
     while True:
         try:
@@ -88,8 +90,11 @@ def main():
             reviewed(review, deployed=True)
             for name in review:
                 backup = DEST/(name+'.before-background-install')
-                shutil.copy2(DEST/name, backup)
-                backups[name] = backup
+                if (DEST/name).exists():
+                    shutil.copy2(DEST/name, backup)
+                    backups[name] = backup
+                else:
+                    backups[name] = None
                 temp = DEST/(name+'.deploying')
                 shutil.copy2(ROOT/'scripts/wf_device'/name, temp)
                 os.chown(temp, 0, 0)
@@ -101,7 +106,10 @@ def main():
             # Stop before restoring so no broker reads partially restored code.
             subprocess.run(['systemctl', 'stop', UNIT], check=True, timeout=30)
             for name, backup in backups.items():
-                shutil.copy2(backup, DEST/name)
+                if backup is None:
+                    (DEST/name).unlink(missing_ok=True)
+                else:
+                    shutil.copy2(backup, DEST/name)
             # An older restored scheduler may ignore maintenance; keep the unit
             # stopped until a verified upgrade can safely resume grants.
             print('Deployment failed; previous adapters restored and service kept stopped. Maintenance remains paused; inspect the log and rerun deployment.', file=sys.stderr, flush=True)
@@ -109,7 +117,7 @@ def main():
         with sqlite3.connect(STATE/'coordinator.sqlite3', timeout=10) as db:
             db.execute('BEGIN IMMEDIATE')
             maintenance(db, False)
-    print('Verified background-install capability; queue resumed; reservations retained.', flush=True)
+    print('Verified multi-device commands and launcher verification; queue resumed; reservations retained.', flush=True)
     return 0
 
 

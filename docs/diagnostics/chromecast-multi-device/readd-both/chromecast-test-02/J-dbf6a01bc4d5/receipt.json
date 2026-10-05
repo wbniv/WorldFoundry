@@ -1,0 +1,144 @@
+{
+  "job": {
+    "id": "J-dbf6a01bc4d5",
+    "owner": "50834354a173f73472469f04",
+    "accepted": 1791159041.7820408,
+    "state": "running",
+    "phase": "restoring",
+    "request": {
+      "workflow": "readd",
+      "device": "chromecast-test-02"
+    },
+    "device": "chromecast-test-02",
+    "generation": 26,
+    "cancel": 0,
+    "error": null,
+    "started": 1791159041.8653166,
+    "finished": null,
+    "worker_pid": 549709,
+    "recovery_resolved": 0,
+    "installation": null
+  },
+  "device": {
+    "id": "chromecast-test-02",
+    "serial": "26031HFDD67QH7",
+    "name": "Project Room",
+    "model": "Chromecast",
+    "device": "sabrina",
+    "android": "12",
+    "sdk": "31",
+    "abis": [
+      "armeabi-v7a",
+      "armeabi"
+    ],
+    "transport": "legacy-tcp",
+    "endpoint": "192.168.4.54:5555",
+    "pools": [
+      "chromecast-test"
+    ],
+    "health": "ready",
+    "enrolled": true,
+    "ipv6_addresses": [
+      "fd5d:59ce:7438:1:40cf:bedc:33cd:967f",
+      "fd5d:59ce:7438:1:2555:eb86:7321:678",
+      "fe80::7156:9529:ebee:236b"
+    ],
+    "cast_udn": "5e305387-266b-84a6-639e-50805d1f06c2",
+    "generation": 26,
+    "last_seen": 1791159042.240841,
+    "boot_id": "4b85df3a-e993-4a81-95b8-23f6c021d844",
+    "reservation": null
+  },
+  "result": "completed",
+  "error": null,
+  "cleanup_verified": true,
+  "restoration": null,
+  "commands": [
+    {
+      "args": [
+        "connect",
+        "192.168.4.54:5555"
+      ],
+      "start": 1791159042.160937,
+      "end": 1791159042.1692307,
+      "returncode": 0
+    },
+    {
+      "args": [
+        "shell",
+        "getprop ro.serialno"
+      ],
+      "start": 1791159042.170318,
+      "end": 1791159042.2408173,
+      "returncode": 0
+    },
+    {
+      "args": [
+        "shell",
+        "cat /proc/sys/kernel/random/boot_id"
+      ],
+      "start": 1791159042.2420182,
+      "end": 1791159042.295441,
+      "returncode": 0
+    },
+    {
+      "args": [
+        "shell",
+        "getprop ro.product.model"
+      ],
+      "start": 1791159042.2967234,
+      "end": 1791159042.3455024,
+      "returncode": 0
+    },
+    {
+      "args": [
+        "shell",
+        "getprop ro.build.version.release"
+      ],
+      "start": 1791159042.3468559,
+      "end": 1791159042.4018602,
+      "returncode": 0
+    },
+    {
+      "args": [
+        "shell",
+        "getprop ro.build.version.sdk"
+      ],
+      "start": 1791159042.4032335,
+      "end": 1791159042.447811,
+      "returncode": 0
+    },
+    {
+      "args": [
+        "shell",
+        "getprop ro.product.device"
+      ],
+      "start": 1791159042.4490957,
+      "end": 1791159042.4939005,
+      "returncode": 0
+    },
+    {
+      "args": [
+        "shell",
+        "getprop ro.product.cpu.abilist"
+      ],
+      "start": 1791159042.4950812,
+      "end": 1791159042.5475547,
+      "returncode": 0
+    },
+    {
+      "args": [
+        "shell",
+        "ip -6 addr show wlan0"
+      ],
+      "start": 1791159042.5487626,
+      "end": 1791159042.6180933,
+      "returncode": 0
+    }
+  ],
+  "finished": 1791159042.6430705,
+  "launcher": null,
+  "concurrent_jobs": [
+    "J-0676e21e31a0"
+  ]
+}

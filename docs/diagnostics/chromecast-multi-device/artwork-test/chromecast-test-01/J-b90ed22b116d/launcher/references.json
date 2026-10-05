@@ -1,0 +1,19 @@
+{
+  "package": "org.worldfoundry.wf_game.bomberman",
+  "label": "Cat-Boom!",
+  "apk_sha256": "8027b8e5abe3bf7bb16350d3ba4112a934adb805e0290070f69301fddcdce312",
+  "references": [
+    {
+      "kind": "banner",
+      "resource": "res/drawable-nodpi-v4/cat_boom_banner.png",
+      "file": "expected-banner-0.png",
+      "sha256": "51d9414e92605805e05d33510ea3c0f2a453e416b001f36fa61910e195394142"
+    },
+    {
+      "kind": "icon",
+      "resource": "res/drawable-nodpi-v4/cat_boom_icon.png",
+      "file": "expected-icon-1.png",
+      "sha256": "9fd13b52c4bb9ce99a1a004429d57c0e31d97a5b3d41d1ce2b60aaed183abd2a"
+    }
+  ]
+}

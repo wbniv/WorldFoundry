@@ -24,6 +24,12 @@ class Cancelled(Exception):
 class NeedsSetup(Exception):
     pass
 
+class DeferredLauncher(Exception):
+    pass
+
+class Superseded(Exception):
+    pass
+
 class Adapter:
     def __init__(self, store, job, config):
         self.store, self.job, self.config = store, job, config
@@ -39,6 +45,8 @@ class Adapter:
         self.commands = []
         self.restoration = None
         self.previous = None
+        self.launcher_touched = False
+        self.launcher_result = None
         self.identity_verified = False
         self.lock_fd = None
         self.package = ('org.worldfoundry.wf_game' +
@@ -413,7 +421,24 @@ class Adapter:
         if not self.identity_verified:
             raise RuntimeError('Device identity/connection not verified; recovery required before further control')
         if self.req['workflow']=='install':
-            self.restoration='unchanged: background install without launch or input'
+            for remote in self.capture_remote:
+                self.shell('rm','-f',remote)
+            if not self.launcher_touched:
+                self.restoration='unchanged: background install without launch or input'
+                return
+            self.store.phase(self.job['id'],'restoring')
+            previous_package = self.previous.split('/')[0] if self.previous else None
+            home = self.shell('cmd','package','resolve-activity','--brief','-a','android.intent.action.MAIN',
+                              '-c','android.intent.category.HOME').strip().splitlines()[-1]
+            if previous_package == home.split('/')[0] or not previous_package:
+                self.shell('am','start','-W','-n',home)
+                self.restoration='home'
+            else:
+                self.shell('am','start','-W','-a','android.intent.action.MAIN',
+                           '-c','android.intent.category.LEANBACK_LAUNCHER','-p',previous_package)
+                if not any(previous_package+'/' in line for line in self.foreground()):
+                    raise RuntimeError('Could not restore foreground after launcher verification')
+                self.restoration='previous-app-TV-launcher'
             return
         if self.req['workflow']=='capture':
             for remote in self.capture_remote:
@@ -450,13 +475,26 @@ class Adapter:
         self.connect()
         if self.req['workflow']=='install':
             before = self.foreground()
-            if any(self.package+'/' in line for line in before):
-                raise RuntimeError('Cannot update the foreground app without interrupting it')
-            self.install(self.req['apk'])
-            after = self.foreground()
-            (self.out/'background-install.json').write_text(json.dumps({'before':before,'after':after,'foreground_unchanged':before==after},indent=2))
-            if before != after:
-                raise RuntimeError('Foreground changed during background installation; no corrective input sent')
+            if not self.job['installation']:
+                if any(self.package+'/' in line for line in before):
+                    raise RuntimeError('Cannot update the foreground app without interrupting it')
+                self.install(self.req['apk'])
+                after = self.foreground()
+                (self.out/'background-install.json').write_text(json.dumps({'before':before,'after':after,'foreground_unchanged':before==after},indent=2))
+                self.store.installed(self.job['id'], self.req['apk'])
+                if before != after:
+                    raise RuntimeError('Foreground changed during background installation; no corrective input sent')
+                # A fresh scheduler grant for the interactive stage is required:
+                # reservations may have appeared during the installation.
+                raise DeferredLauncher('APK installed; launcher verification pending')
+            components=re.findall(r'([A-Za-z0-9_.]+/[A-Za-z0-9_.$]+)', ' '.join(before))
+            self.previous=components[-1] if components else None
+            from .launcher import verify
+            self.launcher_result=verify(self)
+            if self.launcher_result['status']=='superseded':
+                raise Superseded('A newer APK replaced this installation; launcher check superseded')
+            if self.launcher_result['status']!='verified':
+                raise RuntimeError(self.launcher_result['error'])
             return
         if self.req['workflow']=='capture':
             from .capture import capture_current
@@ -600,12 +638,19 @@ def execute(root, jid, config, setup=None):
                 if store.job(jid)['cancel']:
                     raise Cancelled('Cancelled fake job')
                 time.sleep(.02)
+            if job['request']['workflow']=='install' and not job['installation']:
+                store.installed(jid,job['request'].get('apk','fake.apk'))
+                raise DeferredLauncher('APK installed; launcher verification pending')
         else:
             adapter=Adapter(store,job,config)
             adapter.lock_fd=lock.fileno()
             if setup:
                 adapter.pair(setup)
             adapter.run()
+    except DeferredLauncher as exc:
+        state,error='launcher-verification-pending',str(exc)
+    except Superseded as exc:
+        state,error='superseded',str(exc)
     except Cancelled as exc:
         state,error='cancelled',str(exc)
     except NeedsSetup as exc:
@@ -625,12 +670,18 @@ def execute(root, jid, config, setup=None):
                  'result':state,'error':error,'cleanup_verified':health=='ready',
                  'restoration':adapter.restoration if adapter else 'fake-cleanup',
                  'commands':adapter.commands if adapter else [], 'finished':time.time(),
+                 'launcher':adapter.launcher_result if adapter else None,
                  'concurrent_jobs':[j['id'] for j in store.snapshot()['jobs'] if j['state']=='running' and j['id']!=jid]}
+        if state=='launcher-verification-pending':
+            (out/'install-receipt.json').write_text(json.dumps(receipt,indent=2))
         (out/'receipt.json').write_text(json.dumps(receipt,indent=2))
-        store.finish(jid,state,error,health)
         lock.close()
         if legacy:
             legacy.close()
+        if state=='launcher-verification-pending':
+            store.defer_launcher(jid)
+        else:
+            store.finish(jid,state,error,health)
 
 
 def ensure_adb_server(config):

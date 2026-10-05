@@ -1,0 +1,192 @@
+{
+  "job": {
+    "id": "J-c6b1e9005c21",
+    "owner": "50834354a173f73472469f04",
+    "accepted": 1791158491.8907404,
+    "state": "running",
+    "phase": "installing",
+    "request": {
+      "app": "bomberman",
+      "apk": "8027b8e5abe3bf7bb16350d3ba4112a934adb805e0290070f69301fddcdce312.apk",
+      "workflow": "install",
+      "device": "chromecast-test-02"
+    },
+    "device": "chromecast-test-02",
+    "generation": 20,
+    "cancel": 0,
+    "error": null,
+    "started": 1791158491.9693828,
+    "finished": null,
+    "worker_pid": 545831,
+    "recovery_resolved": 0,
+    "installation": "8027b8e5abe3bf7bb16350d3ba4112a934adb805e0290070f69301fddcdce312.apk"
+  },
+  "device": {
+    "id": "chromecast-test-02",
+    "serial": "26031HFDD67QH7",
+    "name": "Project Room",
+    "model": "Chromecast",
+    "device": "sabrina",
+    "android": "12",
+    "sdk": "31",
+    "abis": [
+      "armeabi-v7a",
+      "armeabi"
+    ],
+    "transport": "legacy-tcp",
+    "endpoint": "192.168.4.54:5555",
+    "pools": [
+      "chromecast-test"
+    ],
+    "health": "ready",
+    "enrolled": true,
+    "ipv6_addresses": [
+      "fd5d:59ce:7438:1:40cf:bedc:33cd:967f",
+      "fd5d:59ce:7438:1:2555:eb86:7321:678",
+      "fe80::7156:9529:ebee:236b"
+    ],
+    "cast_udn": "5e305387-266b-84a6-639e-50805d1f06c2",
+    "generation": 20,
+    "last_seen": 1791158492.3703809,
+    "boot_id": "4b85df3a-e993-4a81-95b8-23f6c021d844",
+    "reservation": null
+  },
+  "result": "launcher-verification-pending",
+  "error": "APK installed; launcher verification pending",
+  "cleanup_verified": true,
+  "restoration": "unchanged: background install without launch or input",
+  "commands": [
+    {
+      "args": [
+        "connect",
+        "192.168.4.54:5555"
+      ],
+      "start": 1791158492.267694,
+      "end": 1791158492.2812731,
+      "returncode": 0
+    },
+    {
+      "args": [
+        "shell",
+        "getprop ro.serialno"
+      ],
+      "start": 1791158492.2823849,
+      "end": 1791158492.3703387,
+      "returncode": 0
+    },
+    {
+      "args": [
+        "shell",
+        "cat /proc/sys/kernel/random/boot_id"
+      ],
+      "start": 1791158492.3718228,
+      "end": 1791158492.4339554,
+      "returncode": 0
+    },
+    {
+      "args": [
+        "shell",
+        "getprop ro.product.model"
+      ],
+      "start": 1791158492.4352837,
+      "end": 1791158492.4854918,
+      "returncode": 0
+    },
+    {
+      "args": [
+        "shell",
+        "getprop ro.build.version.release"
+      ],
+      "start": 1791158492.4866753,
+      "end": 1791158492.5262833,
+      "returncode": 0
+    },
+    {
+      "args": [
+        "shell",
+        "getprop ro.build.version.sdk"
+      ],
+      "start": 1791158492.5274,
+      "end": 1791158492.5716321,
+      "returncode": 0
+    },
+    {
+      "args": [
+        "shell",
+        "getprop ro.product.device"
+      ],
+      "start": 1791158492.5728326,
+      "end": 1791158492.6234581,
+      "returncode": 0
+    },
+    {
+      "args": [
+        "shell",
+        "getprop ro.product.cpu.abilist"
+      ],
+      "start": 1791158492.6248243,
+      "end": 1791158492.6697276,
+      "returncode": 0
+    },
+    {
+      "args": [
+        "shell",
+        "ip -6 addr show wlan0"
+      ],
+      "start": 1791158492.6711605,
+      "end": 1791158492.7236352,
+      "returncode": 0
+    },
+    {
+      "args": [
+        "shell",
+        "dumpsys activity activities"
+      ],
+      "start": 1791158492.7310066,
+      "end": 1791158492.8066537,
+      "returncode": 0
+    },
+    {
+      "args": [
+        "install",
+        "-r",
+        "/var/lib/wf-device-coordinator/inputs/8027b8e5abe3bf7bb16350d3ba4112a934adb805e0290070f69301fddcdce312.apk"
+      ],
+      "start": 1791158492.8266337,
+      "end": 1791158495.3112335,
+      "returncode": 0
+    },
+    {
+      "args": [
+        "shell",
+        "pm path org.worldfoundry.wf_game.bomberman"
+      ],
+      "start": 1791158495.3128622,
+      "end": 1791158495.4223008,
+      "returncode": 0
+    },
+    {
+      "args": [
+        "shell",
+        "sha256sum '/data/app/~~Sp-_0Gwwhwad0w8aQv18hQ==/org.worldfoundry.wf_game.bomberman-Rcq_3dmH5tRulwfZo5_zLA==/base.apk'"
+      ],
+      "start": 1791158495.42355,
+      "end": 1791158495.49488,
+      "returncode": 0
+    },
+    {
+      "args": [
+        "shell",
+        "dumpsys activity activities"
+      ],
+      "start": 1791158495.4963436,
+      "end": 1791158495.5882053,
+      "returncode": 0
+    }
+  ],
+  "finished": 1791158495.603284,
+  "launcher": null,
+  "concurrent_jobs": [
+    "J-b90ed22b116d"
+  ]
+}

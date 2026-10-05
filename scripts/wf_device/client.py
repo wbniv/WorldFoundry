@@ -3,13 +3,14 @@ import base64
 import hashlib
 import json
 import os
+import secrets
 import socket
 import shutil
 import sys
 import textwrap
 import time
 from pathlib import Path
-from .store import TERMINAL
+from .store import TERMINAL, selection
 
 class Client:
     def __init__(self, path=None, session_file=None):
@@ -68,14 +69,73 @@ class Client:
             raise ValueError('APK exceeds 32 MiB upload limit')
         return self.call('upload',{'data':base64.b64encode(path.read_bytes()).decode()})['apk']
 
-    def submit(self,request):
+    def freeze(self,request):
         req=dict(request)
+        uploaded={}
+        def upload(path):
+            key=str(Path(path).resolve())
+            if key not in uploaded:
+                uploaded[key]=self.upload(path)
+            return uploaded[key]
         for key in ('apk','restore_apk'):
             if req.get(key):
-                req[key]=self.upload(req[key])
+                req[key]=upload(req[key])
         if 'variants' in req:
-            req['variants']=[dict(v,apk=self.upload(v['apk'])) for v in req['variants']]
+            req['variants']=[dict(v,apk=upload(v['apk'])) for v in req['variants']]
+        return req
+
+    def submit(self,request):
+        targets=selection(request['device']) if request.get('device') else None
+        multiple=targets and (len(targets)>1 or targets==['all'])
+        if multiple:
+            if request.get('pool') or request.get('_setup') or request.get('address'):
+                raise ValueError('Multiple DEVICE cannot share POOL, ADDRESS or pairing setup')
+            if not self.call('capabilities').get('device_batches'):
+                raise RuntimeError('Coordinator upgrade required for multiple DEVICE; no jobs submitted')
+        req=self.freeze(request)
+        if multiple:
+            req.pop('device')
+            # Retry exactly this admission if the socket response is lost. Inputs
+            # are already immutable and the service token prevents duplication.
+            args={'devices':targets,'request':req,'token':secrets.token_hex(16)}
+            try:
+                return self.call('submit_batch',args)
+            except (OSError, json.JSONDecodeError):
+                return self.call('submit_batch',args)
+        if targets:
+            req['device']=targets[0]
         return self.call('submit',req)
+
+    def watch_batch(self,bid):
+        previous=None
+        while True:
+            batch=self.call('batch',{'batch':bid})
+            rows=[[j['target'],j['id'],j['phase'],j['error'] or ''] for j in batch['jobs']]
+            if rows!=previous:
+                print(bid+'\n'+box_table(['Device','Job','State / phase','Error'],rows),flush=True)
+                previous=rows
+            self.notifications()
+            if batch['state']!='pending':
+                return 0 if batch['state']=='completed' else 1
+            time.sleep(.5)
+
+    def batch_evidence(self,bid,out):
+        batch=self.call('batch',{'batch':bid})
+        root=Path(out);root.mkdir(parents=True,exist_ok=True)
+        for job in batch['jobs']:
+            for value in (job['target'],job['id']):
+                if Path(value).name!=value or value in {'.','..'}:
+                    raise ValueError('Unsafe batch evidence path')
+            destination=root/job['target']/job['id']
+            if not destination.resolve().is_relative_to(root.resolve()):
+                raise ValueError('Batch evidence escapes output directory')
+            self.evidence(job['id'],destination)
+        # Do not persist the admission token or session credentials.
+        manifest=root/'batch.json'
+        if manifest.is_symlink():
+            raise ValueError('Unsafe batch manifest path')
+        manifest.write_text(json.dumps(batch,indent=2)+'\n')
+        return batch
 
     def watch(self,jid):
         cursor=0
@@ -185,8 +245,28 @@ def snapshot_text(snapshot):
 
 def task_command(command):
     client=Client()
-    args={k:os.environ.get('WF_CC_'+k.upper(),'') for k in ('device','pool','job','out','text','workflow','app','scene','apk','require_abi','warmup','runs','duration','watch','validator','async','recipe','trace','pairing_endpoint','address','method','reason')}
+    args={k:os.environ.get('WF_CC_'+k.upper(),'') for k in ('device','pool','job','batch','out','text','workflow','app','scene','apk','require_abi','warmup','runs','duration','watch','validator','async','recipe','trace','pairing_endpoint','address','method','reason')}
     args={k:v for k,v in args.items() if v!=''}
+    if args.get('job') and args.get('batch'):
+        raise ValueError('Specify JOB or BATCH, not both')
+    if (args.get('job') or args.get('batch')) and (args.get('device') or args.get('pool')):
+        raise ValueError('JOB/BATCH cannot be combined with DEVICE/POOL')
+    if args.get('device') and args.get('pool'):
+        raise ValueError('Specify DEVICE or POOL, not both')
+    if args.get('batch'):
+        if command not in {'watch','status','evidence','cancel'}:
+            raise ValueError('BATCH supports watch, status, evidence and cancel')
+        bid=args['batch']
+        if command=='watch':return client.watch_batch(bid)
+        if command=='evidence':client.batch_evidence(bid,args['out']);return 0
+        if command=='cancel':
+            client.call('cancel_batch',{'batch':bid})
+            # Completed successes remain successful; cancellation is successful
+            # when no child is left queued/running and none has a cleanup failure.
+            client.watch_batch(bid)
+            batch=client.call('batch',{'batch':bid})
+            return 0 if all(j['state'] in {'cancelled','completed','superseded'} for j in batch['jobs']) else 1
+        print(json.dumps(client.call('batch',{'batch':bid}),indent=2));return 0
     if command in {'check','profile','record','submit','readd','capture'}:
         keys={'device','pool','require_abi','app','scene','apk','warmup','runs','duration','validator','trace','address','method'}
         req={k:v for k,v in args.items() if k in keys}
@@ -202,41 +282,63 @@ def task_command(command):
             recipe=json.loads(Path(args['recipe']).read_text())
             if not isinstance(recipe,dict):
                 raise ValueError('Recipe must be a JSON request object')
+            for key in ('device','pool'):
+                if key in recipe and (args.get('device') or args.get('pool')) and recipe[key]!=args.get(key):
+                    raise ValueError('Recipe target conflicts with command selection')
             req.update(recipe)
         if req['workflow'] not in {'readd','capture'} and not req.get('apk'):
             app=req.get('app','aquarium');req['app']=app
-            req['apk']=str(Path(os.environ.get('WF_COORDINATOR_REPO',str(Path(__file__).resolve().parents[2])))/f'android/app/build/outputs/apk/{app}/release/worldfoundry-{app}-release.apk')
+            repo=Path(os.environ.get('WF_COORDINATOR_REPO',str(Path(__file__).resolve().parents[2])))
+            if app=='bomberman':
+                receipt=json.loads((repo/'android/bomberman/build/build-receipt.json').read_text())
+                req['apk']=receipt['apk']
+                if hashlib.sha256(Path(req['apk']).read_bytes()).hexdigest()!=receipt['sha256']:
+                    raise ValueError('Latest Bomberman build receipt does not match APK')
+            else:
+                req['apk']=str(repo/f'android/app/build/outputs/apk/{app}/release/worldfoundry-{app}-release.apk')
         if args.get('pairing_endpoint'):
+            if selection(req.get('device'))==['all'] or len(selection(req.get('device')))!=1:
+                raise ValueError('Pairing requires exactly one DEVICE')
             if command!='readd' or not sys.stdin.isatty():
                 raise ValueError('Pairing requires readd in an interactive terminal; never pass the code as an argument')
             import getpass
             req['_setup']={'endpoint':args['pairing_endpoint'],'code':getpass.getpass('Fresh TV pairing code: ')}
         job=client.submit(req)
         print(f"Accepted {job['id']}: {job['state']}; {req['workflow']}",flush=True)
-        print(f"Follow: task chromecast:watch JOB={job['id']}",flush=True)
+        batch=job['id'].startswith('B-')
+        if batch:
+            for child in job['jobs']:
+                print(child['target']+': '+child['id'],flush=True)
+        print(f"Follow: task chromecast:watch {'BATCH' if batch else 'JOB'}={job['id']}",flush=True)
         if command=='submit' or args.get('async')=='true':
             return 0
-        result=client.watch(job['id'])
+        result=client.watch_batch(job['id']) if batch else client.watch(job['id'])
         if command=='capture' and result==0:
             destination=args.get('out') or str(Path('docs/diagnostics')/('chromecast-capture-'+job['id']))
-            client.evidence(job['id'],destination)
+            if batch:client.batch_evidence(job['id'],destination)
+            else:client.evidence(job['id'],destination)
             print('Capture evidence: '+str(Path(destination).resolve()),flush=True)
         return result
     if command in {'reserve','release'}:
         if not args.get('device') or args.get('pool'):
             raise ValueError('Reserve/release requires DEVICE, not POOL')
-        request={'device':args['device']}
+        targets=selection(args['device'])
+        multiple=len(targets)>1 or targets==['all']
+        if multiple and not client.call('capabilities').get('device_batches'):
+            raise RuntimeError('Coordinator upgrade required for multiple DEVICE')
+        request={'devices':targets} if multiple else {'device':targets[0]}
         if command=='reserve':
             request['reason']=args.get('reason','Personal use')
-        result=client.call(command,request)
-        if command=='reserve':
-            print(f"{result['device']}: {result['state']}; {result['reason']}; retained until you release it")
-            if result['state']=='waiting-for-cleanup':
-                print('An active job is finishing; wait for status to show reserved before using the device.')
-        else:
-            print(f"{result['device']}: "+('released; queued jobs may now start' if result['released'] else 'no reservation to release'))
+        results=client.call(command+'_many' if multiple else command,request)
+        for result in results if multiple else [results]:
+            if command=='reserve':
+                print(f"{result['device']}: {result['state']}; {result['reason']}; retained until you release it")
+                if result['state']=='waiting-for-cleanup':
+                    print('An active job is finishing; wait for status to show reserved before using the device.')
+            else:
+                print(f"{result['device']}: "+('released; queued jobs may now start' if result['released'] else 'no reservation to release'))
     elif command=='devices':
-        for d in client.call('devices'):
+        for d in client.call('devices',{'device':args['device']} if args.get('device') else {}):
             print(f"{d['id']}: {d['health']}; {d.get('model')}; serial {d['serial']}; Android {d.get('android')}; ABI {','.join(d.get('abis',[]))}; endpoint {d.get('endpoint')}; pools {','.join(d.get('pools',[]))}")
     elif command in {'queue','status'}:
         query={k:args[k] for k in ('device','pool','job') if k in args}

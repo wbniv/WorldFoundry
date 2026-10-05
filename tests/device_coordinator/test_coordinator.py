@@ -650,6 +650,12 @@ def test_service_restart_during_drained_maintenance_keeps_queue_and_reservation(
         assert next(d for d in a.call('devices') if d['id']=='d2')['reservation']['owner'] == a.credentials['session']
         with store.db() as db:
             db.execute('DELETE FROM maintenance')
+        deadline=time.monotonic()+5
+        while b.call('status', {'job': queued})['phase']!='launcher-verification-pending' and time.monotonic()<deadline:
+            time.sleep(.03)
+        assert b.call('status', {'job': queued})['phase']=='launcher-verification-pending'
+        assert next(d for d in a.call('devices') if d['id']=='d2')['reservation']['owner']==a.credentials['session']
+        a.call('release', {'device':'d2'})
         assert wait(b, queued)['state'] == 'completed'
     finally:
         restarted.terminate()

@@ -1,0 +1,482 @@
+{
+  "job": {
+    "id": "J-fcf47177949b",
+    "owner": "50834354a173f73472469f04",
+    "accepted": 1791158879.6790295,
+    "state": "running",
+    "phase": "restoring",
+    "request": {
+      "app": "bomberman",
+      "workflow": "install",
+      "apk": "71d079d9c146a20cbdf4529df84bd61f87432915e687fa47f6d665e8c1cafd40.apk",
+      "device": "chromecast-test-02"
+    },
+    "device": "chromecast-test-02",
+    "generation": 25,
+    "cancel": 0,
+    "error": null,
+    "started": 1791158884.2401555,
+    "finished": null,
+    "worker_pid": 549131,
+    "recovery_resolved": 0,
+    "installation": "71d079d9c146a20cbdf4529df84bd61f87432915e687fa47f6d665e8c1cafd40.apk"
+  },
+  "device": {
+    "id": "chromecast-test-02",
+    "serial": "26031HFDD67QH7",
+    "name": "Project Room",
+    "model": "Chromecast",
+    "device": "sabrina",
+    "android": "12",
+    "sdk": "31",
+    "abis": [
+      "armeabi-v7a",
+      "armeabi"
+    ],
+    "transport": "legacy-tcp",
+    "endpoint": "192.168.4.54:5555",
+    "pools": [
+      "chromecast-test"
+    ],
+    "health": "ready",
+    "enrolled": true,
+    "ipv6_addresses": [
+      "fd5d:59ce:7438:1:40cf:bedc:33cd:967f",
+      "fd5d:59ce:7438:1:2555:eb86:7321:678",
+      "fe80::7156:9529:ebee:236b"
+    ],
+    "cast_udn": "5e305387-266b-84a6-639e-50805d1f06c2",
+    "generation": 25,
+    "last_seen": 1791158884.548664,
+    "boot_id": "4b85df3a-e993-4a81-95b8-23f6c021d844",
+    "reservation": null
+  },
+  "result": "completed",
+  "error": null,
+  "cleanup_verified": true,
+  "restoration": "home",
+  "commands": [
+    {
+      "args": [
+        "connect",
+        "192.168.4.54:5555"
+      ],
+      "start": 1791158884.4869957,
+      "end": 1791158884.4948869,
+      "returncode": 0
+    },
+    {
+      "args": [
+        "shell",
+        "getprop ro.serialno"
+      ],
+      "start": 1791158884.4959323,
+      "end": 1791158884.5486364,
+      "returncode": 0
+    },
+    {
+      "args": [
+        "shell",
+        "cat /proc/sys/kernel/random/boot_id"
+      ],
+      "start": 1791158884.5499225,
+      "end": 1791158884.6098297,
+      "returncode": 0
+    },
+    {
+      "args": [
+        "shell",
+        "getprop ro.product.model"
+      ],
+      "start": 1791158884.6111512,
+      "end": 1791158884.6657462,
+      "returncode": 0
+    },
+    {
+      "args": [
+        "shell",
+        "getprop ro.build.version.release"
+      ],
+      "start": 1791158884.6671343,
+      "end": 1791158884.713315,
+      "returncode": 0
+    },
+    {
+      "args": [
+        "shell",
+        "getprop ro.build.version.sdk"
+      ],
+      "start": 1791158884.7146437,
+      "end": 1791158884.7695575,
+      "returncode": 0
+    },
+    {
+      "args": [
+        "shell",
+        "getprop ro.product.device"
+      ],
+      "start": 1791158884.7709403,
+      "end": 1791158884.8415685,
+      "returncode": 0
+    },
+    {
+      "args": [
+        "shell",
+        "getprop ro.product.cpu.abilist"
+      ],
+      "start": 1791158884.8430634,
+      "end": 1791158884.8877995,
+      "returncode": 0
+    },
+    {
+      "args": [
+        "shell",
+        "ip -6 addr show wlan0"
+      ],
+      "start": 1791158884.8891647,
+      "end": 1791158884.9514568,
+      "returncode": 0
+    },
+    {
+      "args": [
+        "shell",
+        "dumpsys activity activities"
+      ],
+      "start": 1791158884.9667525,
+      "end": 1791158885.0581625,
+      "returncode": 0
+    },
+    {
+      "args": [
+        "shell",
+        "pm path org.worldfoundry.wf_game.bomberman"
+      ],
+      "start": 1791158885.1092503,
+      "end": 1791158885.1888385,
+      "returncode": 0
+    },
+    {
+      "args": [
+        "shell",
+        "sha256sum '/data/app/~~KiVStR-lP4I1Q83Sums8GA==/org.worldfoundry.wf_game.bomberman-DMApZ9kBBa9CX00D3cImBg==/base.apk'"
+      ],
+      "start": 1791158885.1902385,
+      "end": 1791158885.2630868,
+      "returncode": 0
+    },
+    {
+      "args": [
+        "shell",
+        "cmd package resolve-activity --brief -a android.intent.action.MAIN -c android.intent.category.HOME"
+      ],
+      "start": 1791158885.5630918,
+      "end": 1791158885.7098694,
+      "returncode": 0
+    },
+    {
+      "args": [
+        "shell",
+        "am start -W -n com.google.android.apps.tv.launcherx/.home.HomeActivity"
+      ],
+      "start": 1791158885.7257717,
+      "end": 1791158885.8141534,
+      "returncode": 0
+    },
+    {
+      "args": [
+        "shell",
+        "dumpsys activity activities"
+      ],
+      "start": 1791158888.815926,
+      "end": 1791158889.0348504,
+      "returncode": 0
+    },
+    {
+      "args": [
+        "shell",
+        "uiautomator dump --compressed /data/local/tmp/wf-J-fcf47177949b-launcher.xml"
+      ],
+      "start": 1791158889.0366454,
+      "end": 1791158891.6874177,
+      "returncode": 0
+    },
+    {
+      "args": [
+        "shell",
+        "cat /data/local/tmp/wf-J-fcf47177949b-launcher.xml"
+      ],
+      "start": 1791158891.688768,
+      "end": 1791158891.7395344,
+      "returncode": 0
+    },
+    {
+      "args": [
+        "exec-out",
+        "screencap",
+        "-p"
+      ],
+      "start": 1791158891.741201,
+      "end": 1791158894.4221096,
+      "returncode": 0
+    },
+    {
+      "args": [
+        "shell",
+        "am force-stop com.google.android.apps.tv.launcherx"
+      ],
+      "start": 1791158895.1936958,
+      "end": 1791158895.4727864,
+      "returncode": 0
+    },
+    {
+      "args": [
+        "shell",
+        "am start -W -n com.google.android.apps.tv.launcherx/.home.HomeActivity"
+      ],
+      "start": 1791158895.4740942,
+      "end": 1791158896.551957,
+      "returncode": 0
+    },
+    {
+      "args": [
+        "shell",
+        "dumpsys activity activities"
+      ],
+      "start": 1791158899.5535867,
+      "end": 1791158899.6391613,
+      "returncode": 0
+    },
+    {
+      "args": [
+        "shell",
+        "uiautomator dump --compressed /data/local/tmp/wf-J-fcf47177949b-launcher.xml"
+      ],
+      "start": 1791158899.6407337,
+      "end": 1791158902.4556098,
+      "returncode": 0
+    },
+    {
+      "args": [
+        "shell",
+        "cat /data/local/tmp/wf-J-fcf47177949b-launcher.xml"
+      ],
+      "start": 1791158902.4569871,
+      "end": 1791158902.5286899,
+      "returncode": 0
+    },
+    {
+      "args": [
+        "exec-out",
+        "screencap",
+        "-p"
+      ],
+      "start": 1791158902.5303142,
+      "end": 1791158903.8964,
+      "returncode": 0
+    },
+    {
+      "args": [
+        "shell",
+        "pm clear com.google.android.apps.tv.launcherx"
+      ],
+      "start": 1791158904.2494667,
+      "end": 1791158904.9075336,
+      "returncode": 0
+    },
+    {
+      "args": [
+        "shell",
+        "am start -W -n com.google.android.apps.tv.launcherx/.home.HomeActivity"
+      ],
+      "start": 1791158904.9090843,
+      "end": 1791158905.928743,
+      "returncode": 0
+    },
+    {
+      "args": [
+        "shell",
+        "dumpsys activity activities"
+      ],
+      "start": 1791158908.9306428,
+      "end": 1791158909.0898805,
+      "returncode": 0
+    },
+    {
+      "args": [
+        "shell",
+        "uiautomator dump --compressed /data/local/tmp/wf-J-fcf47177949b-launcher.xml"
+      ],
+      "start": 1791158909.091537,
+      "end": 1791158913.5168533,
+      "returncode": 0
+    },
+    {
+      "args": [
+        "shell",
+        "cat /data/local/tmp/wf-J-fcf47177949b-launcher.xml"
+      ],
+      "start": 1791158913.5188925,
+      "end": 1791158913.587333,
+      "returncode": 0
+    },
+    {
+      "args": [
+        "exec-out",
+        "screencap",
+        "-p"
+      ],
+      "start": 1791158913.588953,
+      "end": 1791158916.3385127,
+      "returncode": 0
+    },
+    {
+      "args": [
+        "shell",
+        "input keyevent KEYCODE_DPAD_RIGHT"
+      ],
+      "start": 1791158916.9401963,
+      "end": 1791158917.0733275,
+      "returncode": 0
+    },
+    {
+      "args": [
+        "shell",
+        "dumpsys activity activities"
+      ],
+      "start": 1791158918.2247257,
+      "end": 1791158918.279971,
+      "returncode": 0
+    },
+    {
+      "args": [
+        "shell",
+        "uiautomator dump --compressed /data/local/tmp/wf-J-fcf47177949b-launcher.xml"
+      ],
+      "start": 1791158918.2812142,
+      "end": 1791158921.7078774,
+      "returncode": 0
+    },
+    {
+      "args": [
+        "shell",
+        "cat /data/local/tmp/wf-J-fcf47177949b-launcher.xml"
+      ],
+      "start": 1791158921.709927,
+      "end": 1791158921.7630818,
+      "returncode": 0
+    },
+    {
+      "args": [
+        "exec-out",
+        "screencap",
+        "-p"
+      ],
+      "start": 1791158921.7647913,
+      "end": 1791158924.5318851,
+      "returncode": 0
+    },
+    {
+      "args": [
+        "shell",
+        "rm -f /data/local/tmp/wf-J-fcf47177949b-launcher.xml"
+      ],
+      "start": 1791158925.571158,
+      "end": 1791158925.6430578,
+      "returncode": 0
+    },
+    {
+      "args": [
+        "shell",
+        "cmd package resolve-activity --brief -a android.intent.action.MAIN -c android.intent.category.HOME"
+      ],
+      "start": 1791158925.65192,
+      "end": 1791158925.7154808,
+      "returncode": 0
+    },
+    {
+      "args": [
+        "shell",
+        "am start -W -n com.google.android.apps.tv.launcherx/.home.HomeActivity"
+      ],
+      "start": 1791158925.7171926,
+      "end": 1791158925.8142703,
+      "returncode": 0
+    }
+  ],
+  "finished": 1791158925.8152778,
+  "launcher": {
+    "status": "verified",
+    "home": "com.google.android.apps.tv.launcherx/.home.HomeActivity",
+    "apk": "71d079d9c146a20cbdf4529df84bd61f87432915e687fa47f6d665e8c1cafd40.apk",
+    "attempts": [
+      {
+        "bounds": [
+          500,
+          906,
+          652,
+          1058
+        ],
+        "reference": "expected-icon-1.png",
+        "resource": "res/drawable-nodpi-v4/cat_boom_icon.png",
+        "kind": "icon",
+        "mean_absolute_error": 58.81816182937555,
+        "rms_error": 73.82278686771869,
+        "worst_region_error": 71.83639143730888,
+        "brightness_gain": 1.3703801938756233,
+        "verified": false,
+        "screenshot": "attempt-1-view-1.png",
+        "hierarchy": "attempt-1-view-1.xml",
+        "attempt": 1
+      },
+      {
+        "bounds": [
+          500,
+          906,
+          652,
+          1058
+        ],
+        "reference": "expected-icon-1.png",
+        "resource": "res/drawable-nodpi-v4/cat_boom_icon.png",
+        "kind": "icon",
+        "mean_absolute_error": 58.8183817062445,
+        "rms_error": 73.82290365711258,
+        "worst_region_error": 71.83639143730888,
+        "brightness_gain": 1.3703765605243654,
+        "verified": false,
+        "screenshot": "attempt-2-view-1.png",
+        "hierarchy": "attempt-2-view-1.xml",
+        "attempt": 2
+      },
+      {
+        "bounds": [
+          500,
+          655,
+          652,
+          807
+        ],
+        "reference": "expected-icon-1.png",
+        "resource": "res/drawable-nodpi-v4/cat_boom_icon.png",
+        "kind": "icon",
+        "mean_absolute_error": 11.291116974494285,
+        "rms_error": 13.1885458491371,
+        "worst_region_error": 15.6015625,
+        "brightness_gain": 0.8222673565189589,
+        "verified": true,
+        "screenshot": "attempt-3-view-2.png",
+        "hierarchy": "attempt-3-view-2.xml",
+        "attempt": 3
+      }
+    ],
+    "refreshes": [
+      {
+        "operation": "launcher-force-stop-and-home",
+        "package": "com.google.android.apps.tv.launcherx"
+      },
+      {
+        "operation": "launcher-data-reset-and-home",
+        "package": "com.google.android.apps.tv.launcherx"
+      }
+    ]
+  },
+  "concurrent_jobs": []
+}

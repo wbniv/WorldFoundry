@@ -16,7 +16,7 @@ import threading
 import time
 import zipfile
 from pathlib import Path
-from .store import Store
+from .store import Store, selection
 
 MAX_APK = 32*1024*1024
 MAX_REQUEST = 48*1024*1024
@@ -113,7 +113,7 @@ class Coordinator:
                         if job['state']=='running':
                             self.store.finish(jid,'recovery-required','Worker exited during '+job['phase']+' without verified cleanup',health='recovery-required')
                         self.children.pop(jid)
-                for jid in self.store.claim():
+                for jid in self.store.claim(exclude=set(self.children)):
                     log=open(self.store.root/'evidence'/(jid+'.worker.log'),'ab')
                     try:
                         with self.setup_lock:
@@ -160,9 +160,30 @@ class Coordinator:
             return self.store.register(uid,args['label'])
         owner=self.store.authenticate(uid,call.get('credentials',{}))
         if method=='capabilities':
-            return {'workflows': sorted(WORKFLOWS), 'maintenance_drain': True}
+            return {'workflows': sorted(WORKFLOWS), 'maintenance_drain': True,
+                    'device_batches': True, 'launcher_verification': True}
         if method=='upload':
             return self.upload(args['data'])
+        if method=='submit_batch':
+            if set(args) != {'devices','request','token'} or not isinstance(args['request'],dict):
+                raise ValueError('Batch requires devices, request and token')
+            req = dict(args['request'])
+            if any(k in req for k in ('device','pool','_setup','address')):
+                raise ValueError('Batch request must not override selection or share pairing/address setup')
+            validate_request(dict(req, device='batch-validation'), self.config['scenes'])
+            self.validate_inputs(req)
+            return self.store.submit_batch(owner, args['devices'], req, args['token'])
+        if method=='batch':
+            return self.store.batch(args['batch'])
+        if method=='cancel_batch':
+            return self.store.cancel_batch(owner, args['batch'])
+        if method in {'reserve_many','release_many'}:
+            allowed = {'devices','reason'} if method=='reserve_many' else {'devices'}
+            if set(args)-allowed or 'devices' not in args:
+                raise ValueError('Invalid multi-device reservation request')
+            if method=='reserve_many' and not isinstance(args.get('reason','Personal use'),str):
+                raise ValueError('Reservation reason must be text')
+            return self.store.reserve_many(owner, args['devices'], args.get('reason','Personal use') if method=='reserve_many' else None)
         if method=='submit':
             args=dict(args)
             setup=args.pop('_setup',None)
@@ -182,19 +203,18 @@ class Coordinator:
                 host,separator,port=setup['endpoint'].rpartition(':')
                 if not device or device['transport']!='tls' or host!=device['endpoint'].rsplit(':',1)[0] or not separator or not port.isdigit() or not 1<=int(port)<=65535:
                     raise ValueError('Pairing endpoint does not match the registered TLS device')
-            references=[req.get('apk'),req.get('restore_apk')]+[v['apk'] for v in req.get('variants',[])]
-            if not self.config.get('fake') and req['workflow'] not in {'readd','capture'} and not req.get('apk'):
-                raise ValueError('An immutable APK is required')
-            import re
-            for name in filter(None,references):
-                if not isinstance(name,str) or not re.fullmatch(r'[a-f0-9]{64}\.apk',name) or not (self.store.root/'inputs'/name).is_file():
-                    raise ValueError('Unknown staged input')
+            self.validate_inputs(req)
             with self.setup_lock:
                 job=self.store.submit(owner,req)
                 if setup:self.setup[job['id']]=setup
             return job
         if method=='devices':
-            return self.store.devices()
+            devices = self.store.devices()
+            if args.get('device'):
+                with self.store.db() as db:
+                    selected = self.store.resolve_targets(db, args['device'])
+                devices = [d for d in devices if d['id'] in selected]
+            return devices
         if method in {'reserve','release'}:
             if set(args) - ({'device','reason'} if method=='reserve' else {'device'}) or not isinstance(args.get('device'),str):
                 raise ValueError('Reservation operations require DEVICE; reserve also accepts REASON')
@@ -202,9 +222,9 @@ class Coordinator:
                 return self.store.reserve(owner,args['device'],args.get('reason','Personal use'))
             return self.store.release(owner,args['device'])
         if method=='queue':
-            return self.store.snapshot(args.get('device'),args.get('pool'))
+            return self.snapshot(args)
         if method=='status':
-            return self.store.job(args['job']) if args.get('job') else self.store.snapshot(args.get('device'),args.get('pool'))
+            return self.store.job(args['job']) if args.get('job') else self.snapshot(args)
         if method=='events':
             return self.store.events(int(args.get('cursor',0)),args.get('job'))
         if method=='cancel':
@@ -237,6 +257,29 @@ class Coordinator:
                 stream.seek(offset);data=stream.read(1024*1024)
             return {'data':base64.b64encode(data).decode(),'offset':offset,'bytes':len(data)}
         raise ValueError('Unknown operation')
+
+    def validate_inputs(self, req):
+        import re
+        references=[req.get('apk'),req.get('restore_apk')]+[v['apk'] for v in req.get('variants',[])]
+        if not self.config.get('fake') and req['workflow'] not in {'readd','capture'} and not req.get('apk'):
+            raise ValueError('An immutable APK is required')
+        for name in filter(None,references):
+            if not isinstance(name,str) or not re.fullmatch(r'[a-f0-9]{64}\.apk',name) or not (self.store.root/'inputs'/name).is_file():
+                raise ValueError('Unknown staged input')
+
+    def snapshot(self, args):
+        if args.get('device') and args.get('pool'):
+            raise ValueError('Specify DEVICE or POOL, not both')
+        result = self.store.snapshot(pool=args.get('pool'))
+        if args.get('device'):
+            with self.store.db() as db:
+                targets = self.store.resolve_targets(db, args['device'])
+            result['devices'] = [d for d in result['devices'] if d['id'] in targets]
+            result['jobs'] = [j for j in result['jobs'] if j['device'] in targets or set(j['eligible']).intersection(targets)]
+            for job in result['jobs']:
+                job['eligible'] = [d for d in job['eligible'] if d in targets]
+            result['batches'] = [b for b in result['batches'] if set(b['targets']).intersection(targets)]
+        return result
 
 class Handler(socketserver.StreamRequestHandler):
     def handle(self):
