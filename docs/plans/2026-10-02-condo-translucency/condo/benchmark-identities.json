@@ -1,0 +1,20 @@
+{
+  "opaque-baseline": {
+    "apk_sha256": "b2b235ef975ab1daa36884fd424a4af9b204028caea1b0b12f8f4ecc1ae7c6a1",
+    "cd_sha256": "bb91e9c82555e31ae8dcdcc6bdc634354127da7c0b1d6e763862c3d206e4b4dc",
+    "native": {
+      "lib/arm64-v8a/libwf_game.so": "565c5eed2c66c5b115decf322bc0cf9aa628e693e851110736ea1406f6766dc3",
+      "lib/armeabi-v7a/libwf_game.so": "6ab5579c342b8cc4c69fe76a28af35710ce50fe3f00d267f7cd0dd04fc354043"
+    },
+    "fps": 29.969989644857847
+  },
+  "translucent-frames": {
+    "apk_sha256": "6c3c767a0a0c89e3490751fe21eedcb04452de009ed7e97892da73002a646c36",
+    "cd_sha256": "b2e3ddd1fd8d08f7830377835f7a09d8e1742a8dc30fd2b9d7fb53910a5d7f75",
+    "native": {
+      "lib/arm64-v8a/libwf_game.so": "565c5eed2c66c5b115decf322bc0cf9aa628e693e851110736ea1406f6766dc3",
+      "lib/armeabi-v7a/libwf_game.so": "6ab5579c342b8cc4c69fe76a28af35710ce50fe3f00d267f7cd0dd04fc354043"
+    },
+    "fps": 29.969989666117026
+  }
+}

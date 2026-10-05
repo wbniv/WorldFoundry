@@ -1,5 +1,6 @@
 | Date | Change |
 |------|--------|
+| [2026-10-03](https://github.com/wbniv/WorldFoundry/commit/10310efe) | Save pending plans, balcony RFQ materials, notes and transcripts |
 | [2026-09-30](https://github.com/wbniv/WorldFoundry/commit/1e4cf3e0) | RFQ packet: Zigbee motor is a price check only; plan is fixed-code RF + own bridge |
 | [2026-09-30](https://github.com/wbniv/WorldFoundry/commit/65bf4504) | RFQ packet: remote must be fixed code, not rolling/hopping code |
 | [2026-09-30](https://github.com/wbniv/WorldFoundry/commit/20c29cbd) | Balcony shade: see-through waterproof (clear PVC) fabric wanted; packet, LINE message and plan updated |
@@ -17,6 +18,10 @@
 | [2026-09-30](https://github.com/wbniv/WorldFoundry/commit/ce0a2fa6) | Plan condo 639 balcony zip screen (solar-strip motor) and 7 cm floor recess |
 
 <!--history-meta v1
+10310efe	author	Will Norris
+10310efe	added	3
+10310efe	deleted	1
+10310efe	files	1
 1e4cf3e0	author	Will Norris
 1e4cf3e0	added	1
 1e4cf3e0	deleted	1

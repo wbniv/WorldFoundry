@@ -202,6 +202,28 @@ def make_flat_material(name, rgb):
     return mat
 
 
+def set_sheet_opacity(mat, opacity):
+    """Explicit engine opacity, mirrored in Blender; prelit sheets read equally from both sides."""
+    assert 0.0 <= opacity <= 1.0
+    mat['wf_opacity'] = opacity
+    mat['wf_double_sided'] = True
+    mat['wf_prelit'] = True
+    mat.diffuse_color = (*mat.diffuse_color[:3], opacity)
+    bsdf = next(n for n in mat.node_tree.nodes if n.type == 'BSDF_PRINCIPLED')
+    bsdf.inputs['Alpha'].default_value = opacity
+    bsdf.inputs['Base Color'].default_value = (*bsdf.inputs['Base Color'].default_value[:3], opacity)
+    if hasattr(mat, 'surface_render_method'):
+        mat.surface_render_method = 'DITHERED'
+    return mat
+
+
+def add_optical_sheet(bm, x0, x1, y, z0, z1, material_index):
+    """One quad, rendered from either side; collision boxes remain separate invisible faces."""
+    face = bm.faces.new([bm.verts.new(co) for co in
+                         ((x0, y, z0), (x1, y, z0), (x1, y, z1), (x0, y, z1))])
+    face.material_index = material_index
+
+
 def bake_transform(obj):
     """Fold rotation+scale (and any parent transform) into the mesh verts, leaving
     only a translation on the object. The Jolt trimesh body is built from raw
@@ -1234,6 +1256,14 @@ if CONDO_DOORS:
     _glass = bpy.data.materials.get('glass')
     assert _glass is not None, "no `glass` material in the appended source"
 
+    # Dedicated door material: the surveyed window materials retain their appearance.
+    _door_glass = set_sheet_opacity(_glass.copy(), float(os.environ.get('CONDO_GLASS_OPACITY', '0.12')))
+    _door_glass.name = 'door-glass'
+    _door_collision = set_sheet_opacity(make_flat_material('door-collision', (1, 1, 1)), 0.0)
+    _door_black = make_flat_material('door-hardware-black', (0.035, 0.035, 0.040))
+    _door_key = make_flat_material('door-key-metal', (0.52, 0.48, 0.35))
+    DOOR_FRAME_W = 0.10  # Will, 2026-10-05: each pane has a 10 cm black aluminum border
+
     # This wall runs along X: x 3.80 (compass south, the guest-bedroom corner) →
     # x 7.80 (compass north, the 639-patio corner). 4.00 m, three equal bays.
     DOOR_X0, DOOR_X1 = _dr_mn.x, _dr_mx.x
@@ -1264,6 +1294,25 @@ if CONDO_DOORS:
         for v in cube:
             v.co = ((x0 + x1) / 2 + v.co.x * (x1 - x0), yc + v.co.y * GLASS_T,
                     WALL_H / 2 + v.co.z * WALL_H)
+        # Keep the closed solid trimesh for physics, but give it zero optical opacity.
+        # Hardware slots 1/2 are unchanged. Slot 3 is a single two-sided pane.
+        for f in bm.faces:
+            f.material_index = 0
+        add_optical_sheet(bm, x0 + DOOR_FRAME_W, x1 - DOOR_FRAME_W, yc,
+                          DOOR_FRAME_W, WALL_H - DOOR_FRAME_W, 3)
+        # Four opaque rails form a 10 cm border, within the original door bounds.
+        for lo, hi in (((x0, 0), (x0 + DOOR_FRAME_W, WALL_H)),
+                       ((x1 - DOOR_FRAME_W, 0), (x1, WALL_H)),
+                       ((x0 + DOOR_FRAME_W, 0), (x1 - DOOR_FRAME_W, DOOR_FRAME_W)),
+                       ((x0 + DOOR_FRAME_W, WALL_H - DOOR_FRAME_W), (x1 - DOOR_FRAME_W, WALL_H))):
+            verts = _bmesh.ops.create_cube(bm, size=1.0)['verts']
+            vset = set(verts)
+            for v in verts:
+                v.co = ((lo[0]+hi[0])/2 + v.co.x*(hi[0]-lo[0]),
+                        yc + v.co.y*GLASS_T, (lo[1]+hi[1])/2 + v.co.z*(hi[1]-lo[1]))
+            for f in bm.faces:
+                if all(v in vset for v in f.verts):
+                    f.material_index = 1
         if add_hardware:
             # A U-pull on each face: cylindrical vertical bar plus the two short
             # standoffs that bridge the glass.  The vertical handle centre is
@@ -1317,10 +1366,10 @@ if CONDO_DOORS:
         me = bpy.data.meshes.new(name)
         bm.to_mesh(me)
         bm.free()
-        me.materials.append(_glass)
-        if add_hardware:
-            me.materials.append(make_flat_material('door-hardware-black', (0.035, 0.035, 0.040)))
-            me.materials.append(make_flat_material('door-key-metal', (0.52, 0.48, 0.35)))
+        me.materials.append(_door_collision)
+        me.materials.append(_door_black)
+        me.materials.append(_door_key)
+        me.materials.append(_door_glass)
         obj = bpy.data.objects.new(name, me)
         scene.collection.objects.link(obj)
         clean_mesh(me, recalc=False)
@@ -1495,8 +1544,8 @@ SLAT_T         = 0.003    # fabric thickness (y)
 SLAT_DY        = 0.001    # slat i is offset i·1 mm in y: overlapping slats never share a plane
 SLAT_TUCK      = 0.01     # slat ends run this far into the guides (the zip channel)
 SLAT_PARK_EPS  = 0.005    # open: the parked bar sits this far inside the cassette, clear of its bottom face
-SLAT_OVERLAP   = 0.002    # each slat runs this far past its nominal top and bottom, so neighbours overlap
-                          # (SLAT_DY keeps the overlap non-coplanar) and no seam can ever open a gap.
+SLAT_OVERLAP   = 0.002    # retained collision sides overlap past nominal strip ends. Optical
+                          # sheets meet without overlap in one plane and shorten during travel.
 # Slats have no top/bottom faces: fabric has no edge. A 3 mm horizontal face seen nearly edge-on
 # rendered as a row of single-pixel sparkles along every slat in the closed capture.
 SOLAR_STRIP_L  = 1.00     # placeholder strip length, centred on the cassette's west face
@@ -1853,6 +1902,8 @@ if CONDO_SHADE:
 
     # (3) the shade
     _m = {k: make_flat_material(f'shade-{k}', rgb) for k, rgb in SHADE_RGB.items()}
+    set_sheet_opacity(_m['fabric'], float(os.environ.get('CONDO_SHADE_OPACITY', '0.32')))
+    _fabric_collision = set_sheet_opacity(make_flat_material('shade-collision', (1, 1, 1)), 0.0)
     _sx0 = (OPEN_X0 + OPEN_X1 - SOLAR_STRIP_L) / 2
     _sz0 = CASS_BOT + (CASS_H - SOLAR_STRIP_H) / 2
 
@@ -1877,10 +1928,22 @@ if CONDO_SHADE:
     for _i in range(SLAT_N):
         _yc = FABRIC_Y + (_i - (SLAT_N - 1) / 2) * SLAT_DY
         _top = CASS_BOT - _i * SLAT_H
-        shade_slats.append(_box_actor(f'639-balcony-shade-slat-{_i}',
-                                      (FAB_X0, _yc - SLAT_T / 2, _top - SLAT_H - SLAT_OVERLAP),
-                                      (FAB_X1, _yc + SLAT_T / 2, _top + SLAT_OVERLAP), _m['fabric'],
-                                      face_mat=_drop_edges))
+        _bottom = _top - SLAT_H
+        def _fabric_faces(bm):
+            _drop_edges(bm)
+            # Original overlapping collision sides are invisible. All optical strips
+            # share a plane and meet exactly; there is no doubled tint at joins.
+            add_optical_sheet(bm, FAB_X0, FAB_X1, FABRIC_Y, _bottom, _top, 1)
+        _slat = _box_actor(f'639-balcony-shade-slat-{_i}',
+                          (FAB_X0, _yc - SLAT_T / 2, _bottom - SLAT_OVERLAP),
+                          (FAB_X1, _yc + SLAT_T / 2, _top + SLAT_OVERLAP),
+                          [_fabric_collision, _m['fabric']], face_mat=_fabric_faces)
+        # Rebase at the nominal bottom so render-only Z scale shortens the sheet
+        # upwards. Physics retains its original mesh and park offsets unscaled.
+        for v in _slat.data.vertices:
+            v.co.z -= _bottom
+        _slat.location.z = _bottom
+        shade_slats.append(_slat)
     shade_slats.append(_box_actor('639-balcony-shade-bar', (OPEN_X0 + GUIDE_W, FABRIC_Y - BAR_D / 2, BAR_BOT),
                                   (OPEN_X1 - GUIDE_W, FABRIC_Y + BAR_D / 2, BAR_TOP), _m['bar']))
     if SHADE_OVERHEAD_MASS != '':
@@ -1952,11 +2015,16 @@ if CONDO_SHADE:
                      f"{step}+ {MB_SHADE_TARGET} read-mailbox min else "
                      f"{step}- {MB_SHADE_TARGET} read-mailbox max then "
                      f"dup {MB_SHADE_CLOSEDNESS} write-mailbox 1 swap - ")          # ( 1−c )
-        # Z_POS on a world-baked mesh is an offset on top of the actor's Position, which
-        # § 9b set to the lift (troubleshooting § 6): write lift + park·(1 − c).
+        # Write each rebased actor's lifted nominal-bottom position plus park*(1-c).
+        # The bar remains world-baked with base_z = the floor lift.
         writes = "".join(f"dup {shade_park[k]:.5f} * {base_z[k]:.4f} + INDEXOF_Z_POS {idx0 + k} write-actor-mailbox "
                          for k in range(len(shade_park)))
-        return init + reach + press + toggle + integrate + writes + "drop\n"
+        # With p = 1-c, adjacent optical strips meet throughout travel:
+        # bottom_i + park_i*p + H*c == bottom_(i-1) + park_(i-1)*p.
+        # Scale affects rendering only; Jolt collision and the bar keep their motion.
+        scales = "".join(f"dup 1 swap - 3042 {idx0 + k} write-actor-mailbox "
+                         for k in range(SLAT_N))
+        return init + reach + press + toggle + integrate + writes + scales + "drop\n"
 
     print(f"[condo] balcony shade: {SHADE_ROOM} x {_pr[0].x:.2f}…{_pr[1].x:.2f} ({PATIO_W:.2f} m), "
           f"{SHADE_MAIN_PATIO} from x {_pm[0].x:.2f}; floor recessed {FLOOR_RECESS * 100:.0f} cm over "

@@ -1,0 +1,25 @@
+PASS  physical button removed: no wall switch actor
+actors: player=8 panel0=30
+PASS  default open: target=0.0 closedness=0.0 panel0.x=-0.0
+PASS  far press ignored: target=0.0
+PASS  near press toggles closed: target=1.0
+PASS  continuous close: closedness=0.102013
+PASS  settles closed: closedness=1.0 panel0.x=-2.6667
+PASS  panel at 4.45 from side -2.65 opens: 0.0
+PASS  panel at 4.45 from side -1.35 opens: 0.0
+PASS  panel at 5.8 from side -2.65 opens: 0.0
+PASS  panel at 5.8 from side -1.35 opens: 0.0
+PASS  panel at 7.1 from side -2.65 opens: 0.0
+PASS  panel at 7.1 from side -1.35 opens: 0.0
+PASS  second press opens: closedness=0.001633
+PASS  empty open bay ignores press: 0.0
+PASS  held press toggles once: 1.0
+PASS  mid-slide reversal has no snap: before=0.206612 after=0.203651 final=0.0
+PASS  gathered one-third blocks passage: final y=-2.379985 vs door plane -2.00
+PASS  collision test door closed: closedness=1.0
+PASS  closed left third blocks passage: x=4.45 final y=-2.379985 vs door plane -2.00
+PASS  closed left/middle seam third blocks passage: x=5.13 final y=-2.269985 vs door plane -2.00
+PASS  closed middle third blocks passage: x=5.8 final y=-2.269985 vs door plane -2.00
+PASS  closed middle/right seam third blocks passage: x=6.47 final y=-2.159984 vs door plane -2.00
+PASS  closed right/fixed third blocks passage: x=7.1 final y=-2.159984 vs door plane -2.00
+RESULT: PASS

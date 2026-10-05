@@ -84,7 +84,8 @@ def test_condo_flavor_and_art():
 def test_condo_tasks_and_device_script():
     tasks = yaml.safe_load((REPO / "Taskfile.yml").read_text())["tasks"]
     assert "condo_639_640-standalone.iff" in str(tasks["build-cd-iff-condo"]["cmds"])
-    assert "android-device-run.sh --app condo" in str(tasks["chromecast-condo"]["cmds"])
+    alias = tasks["chromecast-condo"]["cmds"][0]
+    assert alias["task"] == "chromecast:check" and alias["vars"]["APP"] == "condo"
     body = SCRIPT.read_text()
     assert "condo)     PKG=org.worldfoundry.wf_game.condo" in body
     h = subprocess.run(["bash", str(SCRIPT), "-h"], capture_output=True, text=True, timeout=30)

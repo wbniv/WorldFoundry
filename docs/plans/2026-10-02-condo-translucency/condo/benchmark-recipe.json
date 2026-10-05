@@ -1,0 +1,24 @@
+{
+  "device": "chromecast-test-01",
+  "workflow": "variant-benchmark",
+  "app": "condo",
+  "trace": "idle",
+  "duration": 12,
+  "warmup": 10,
+  "apk": "/tmp/condo-translucent-release.apk",
+  "restore_apk": "/tmp/condo-translucent-release.apk",
+  "variants": [
+    {
+      "label": "opaque-baseline",
+      "apk": "/tmp/condo-baseline-release.apk",
+      "runs": 1,
+      "warmup": 10
+    },
+    {
+      "label": "translucent-frames",
+      "apk": "/tmp/condo-translucent-release.apk",
+      "runs": 1,
+      "warmup": 10
+    }
+  ]
+}

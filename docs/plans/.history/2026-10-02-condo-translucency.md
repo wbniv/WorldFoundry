@@ -1,9 +1,14 @@
 | Date | Change |
 |------|--------|
+| [2026-10-03](https://github.com/wbniv/WorldFoundry/commit/16a77ebc) | Explain texture alpha tradeoffs and link translucency implementation commits |
 | [2026-10-03](https://github.com/wbniv/WorldFoundry/commit/50982a16) | Document translucency implementation commits and shrimp render evidence |
 | [2026-10-03](https://github.com/wbniv/WorldFoundry/commit/10310efe) | Save pending plans, balcony RFQ materials, notes and transcripts |
 
 <!--history-meta v1
+16a77ebc	author	Will Norris
+16a77ebc	added	9
+16a77ebc	deleted	5
+16a77ebc	files	1
 50982a16	author	Will Norris
 50982a16	added	118
 50982a16	deleted	19

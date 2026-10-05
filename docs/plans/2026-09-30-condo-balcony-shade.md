@@ -1,5 +1,8 @@
 # Condo 639: motorised zip screen on the back balcony
 
+**Rendering update, 2026-10-05:** the translucent integration preserves the original collision strips and parking motion, but replaces their visible overlapping sides with coplanar optical sheets that shorten using render-only Z scale. Fabric opacity is 0.32. The motion/geometry discussion below records the original opaque implementation; see [current implementation and runtime captures](2026-10-02-condo-translucency.md#condo-integration--2026-10-05).
+
+
 ## Context
 
 The back balcony of 639 is an open opening onto the west (Bangkok afternoon sun, monsoon rain, gusts, 6th floor ≈ 16 m up). Will wants a **motorised outdoor zip screen in a cassette, mounted under the concrete ledge (beam) of the opening**, with the **solar-strip motor option** (battery motor charged by a thin photovoltaic strip — no mains wiring to the balcony).

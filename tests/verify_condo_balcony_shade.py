@@ -51,6 +51,7 @@ BUTTON_A = 1 << 0
 JOY_UP, JOY_DOWN = 1 << 11, 1 << 12
 UNIT_Z = 15.75
 SLAT_H = (2.05 - 1.072) / 8          # blender_create_condo.py § 7d
+SLAT0_BASE = UNIT_Z + 2.05 - SLAT_H
 PARK0 = SLAT_H + 0.03 + 0.005        # slat 0 parked offset: SLAT_H + BAR_H + eps
 PARK_BAR = 8 * SLAT_H + 0.03 + 0.005  # the bar stows 5 mm inside the cassette (bottom z 2.055)
 CAM_DZ = 9.0                          # cs_dollhouse relative Z offset (0, −3.5, 9)
@@ -160,6 +161,8 @@ try:
     for mb in (MB_REACH, MB_TARGET, MB_CLOSEDNESS, MB_DOOR_TARGET, MB_DOOR_CLOSEDNESS, CAMSHOT):
         cli.watch(1, mb)
     cli.watch(panel0, X_POS)
+    for idx in range(slat0, slat0 + 8):
+        cli.watch(idx, 3042)  # render-only Z scale
     for idx in (slat0, bar):
         cli.watch(idx, Z_POS)
     for mb in (X_POS, Y_POS, Z_POS):
@@ -168,14 +171,19 @@ try:
     cli.watch(1, TIME)
     for idx, mb in ((1, MB_TARGET), (1, MB_CLOSEDNESS), (slat0, Z_POS), (bar, Z_POS), (player, Z_POS), (1, CAMSHOT)):
         wait_value(cli, idx, mb, lambda _v: True, timeout=5.0)
+    for idx in range(slat0, slat0 + 8):
+        wait_value(cli, idx, 3042, lambda _v: True)
+    check("raised optical fabric has zero height",
+          all(value(cli, idx, 3042) == 0 for idx in range(slat0, slat0 + 8)),
+          "all eight render scales are zero")
     dollhouse = value(cli, 1, CAMSHOT)          # the engine seeds it with the first CamShot: cs_dollhouse
 
     s0, b0 = value(cli, slat0, Z_POS), value(cli, bar, Z_POS)
     check("loads open, slats parked in the cassette",
           abs(value(cli, 1, MB_TARGET) or 0) < 1e-3 and abs(value(cli, 1, MB_CLOSEDNESS) or 0) < 1e-3
-          and s0 is not None and abs(s0 - (UNIT_Z + PARK0)) < 2e-3 and b0 is not None and abs(b0 - (UNIT_Z + PARK_BAR)) < 2e-3,
+          and s0 is not None and abs(s0 - (SLAT0_BASE + PARK0)) < 2e-3 and b0 is not None and abs(b0 - (UNIT_Z + PARK_BAR)) < 2e-3,
           f"target={value(cli, 1, MB_TARGET)} closedness={value(cli, 1, MB_CLOSEDNESS)} "
-          f"slat0.z={s0} (want {UNIT_Z + PARK0:.4f}) bar.z={b0} (want {UNIT_Z + PARK_BAR:.4f})")
+          f"slat0.z={s0} (want {SLAT0_BASE + PARK0:.4f}) bar.z={b0} (want {UNIT_Z + PARK_BAR:.4f})")
 
     # ── Verification 4: step down, step up, walls ──────────────────────────────
     move(cli, player, 4.40, -3.20)
@@ -214,20 +222,27 @@ try:
     tgt = wait_value(cli, 1, MB_TARGET, lambda v: v > 0.5, timeout=1.0)
     lt0 = value(cli, 1, TIME)
     mid = wait_value(cli, 1, MB_CLOSEDNESS, lambda v: 0.2 <= v <= 0.8, timeout=3.0)
+    scales = [value(cli, idx, 3042) for idx in range(slat0, slat0 + 8)]
+    check("optical strips shorten together during travel",
+          mid is not None and all(v is not None and abs(v-mid) < .03 for v in scales),
+          f"closedness {mid}, scales {scales}")
     closed = wait_value(cli, 1, MB_CLOSEDNESS, lambda v: v > 0.995, timeout=6.0)
     lt1 = value(cli, 1, TIME)
     dt = time.time() - t0
     ldt = None if lt0 is None or lt1 is None else lt1 - lt0
     time.sleep(0.15)
     s1, b1 = value(cli, slat0, Z_POS), value(cli, bar, Z_POS)
+    check("closed optical fabric has full height",
+          all(value(cli, idx, 3042) == 1 for idx in range(slat0, slat0 + 8)),
+          "all eight render scales are one")
     check("near press closes", tgt is not None and tgt > 0.5, f"target={tgt} reach={value(cli, 1, MB_REACH)}")
     check("continuous travel", mid is not None and 0.2 <= mid <= 0.8, f"closedness sampled mid-travel={mid}")
     check("full close in about 2 s of level time", closed is not None and closed > 0.995
           and ldt is not None and 1.7 < ldt < 2.4,
           f"closedness={closed} after {ldt if ldt is None else round(ldt, 2)} s level time "
           f"({dt:.2f} s wall clock, incl. bridge polling)")
-    check("slats and bar land on their baked positions", s1 is not None and abs(s1 - UNIT_Z) < 2e-3
-          and b1 is not None and abs(b1 - UNIT_Z) < 2e-3, f"slat0.z={s1} bar.z={b1} (want {UNIT_Z})")
+    check("slats and bar land on their baked positions", s1 is not None and abs(s1 - SLAT0_BASE) < 2e-3
+          and b1 is not None and abs(b1 - UNIT_Z) < 2e-3, f"slat0.z={s1} bar.z={b1} (want slat {SLAT0_BASE}, bar {UNIT_Z})")
 
     press_a(cli)
     before = wait_value(cli, 1, MB_CLOSEDNESS, lambda v: 0.35 < v < 0.75, timeout=3.0)
@@ -247,7 +262,7 @@ try:
     opened = wait_value(cli, 1, MB_CLOSEDNESS, lambda v: v < 0.005, timeout=4.0)
     s2 = value(cli, slat0, Z_POS)
     check("reopens and parks the slats again", opened is not None and opened < 0.005
-          and s2 is not None and abs(s2 - (UNIT_Z + PARK0)) < 2e-3, f"closedness={opened} slat0.z={s2}")
+          and s2 is not None and abs(s2 - (SLAT0_BASE + PARK0)) < 2e-3, f"closedness={opened} slat0.z={s2}")
 
     # ── One A press, one thing: the shade's and the doors' reach bands are disjoint ──
     def both():

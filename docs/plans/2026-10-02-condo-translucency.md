@@ -1,8 +1,8 @@
 # Engine translucency support: materials, compositing and backends
 
-**Date:** 2026-10-02; implementation/writeup 2026-10-03. **Status:** engine support implemented and exercised with the mixed shrimp tank on desktop GL and Chromecast GLES. Metal changes await Apple validation; WebGL runtime validation remains open. Condo material/geometry changes remain separately pending. Planning SVGs are labelled separately from actual game captures.
+**Date:** 2026-10-02; implementation/writeup 2026-10-03. **Status:** engine support implemented and exercised with the mixed shrimp tank on desktop GL and Chromecast GLES. Metal changes await Apple validation; WebGL runtime validation remains open. Condo material/geometry integration implemented 2026-10-05; desktop captures and Chromecast release checks pass. Planning SVGs are labelled separately from actual game captures.
 
-The engine work is shared by the condo shade/glass and the separately planned shrimp materials. Material authoring/serialization, render-state transport, sorted compositing and backend parity belong here. Shrimp content and its A3 poster are in the [mixed shrimp tank plan](2026-10-03-aquarium-blue-shrimp-varieties.md). Shrimp display support is authorized; condo material/geometry changes await approval.
+The engine work is shared by the condo shade/glass and the separately planned shrimp materials. Material authoring/serialization, render-state transport, sorted compositing and backend parity belong here. Shrimp content and its A3 poster are in the [mixed shrimp tank plan](2026-10-03-aquarium-blue-shrimp-varieties.md). Will authorized condo material/geometry integration on 2026-10-05 and specified 10 cm black aluminum borders on every sliding pane.
 
 ## Shrimp implementation learnings — 2026-10-03
 
@@ -96,7 +96,46 @@ The desktop debug/ASan timing estimate is approximately **108.8 ms/frame** and i
 
 This is centroid-sorted alpha compositing. Intersecting triangles or cyclic overlaps can still produce incorrect local ordering; it is not order-independent transparency. Curved shells may accumulate tint where their existing mesh pieces overlap, and visual tuning remains reviewable in the [A3 poster](../reference/blue-shrimp-poster/poster.pdf). The original Blue Dream materials remain opaque in this rollout because Will requested that half the colony retain the original appearance.
 
-The engine now supplies the shared mechanism for glass and the cassette shade, but this implementation does not alter condo geometry or materials. The pane/slat overlap investigation and condo acceptance cases below remain open. Refraction, reflection, blur and continuous texture-alpha export also remain outside this change.
+The shared mechanism now also drives the condo glass and cassette shade. The condo integration and evidence are recorded below. Refraction, reflection, blur and continuous texture-alpha export also remain outside this change.
+
+## Condo integration — 2026-10-05
+
+Will requested implementation and specified **10 cm black aluminum borders on every sliding door**. The source blend remains read-only. Its surveyed `glass` material has diffuse/node Alpha 0.30 and Transmission Weight 0; see the [source probe](2026-10-02-condo-translucency/condo/source-glass.txt). The moving doors now use a dedicated `door-glass` copy at **0.12** opacity, leaving unrelated windows unchanged. Four opaque black rails enclose an inset glass sheet; handles and keyed locks remain opaque and move with panel 0.
+
+Each door has one two-sided optical sheet rather than two tinted broad faces. The original solid collision-box faces remain in the same actor, with a zero-opacity material. True stacked leaves therefore contribute one layer each. The shade similarly keeps its eight actors, original collision sides and park offsets, but adds one coplanar two-sided optical strip per actor at **0.32** opacity. No actor is added or removed, so the contiguous runtime index ranges remain valid.
+
+Shade optical geometry is rebased at each strip's nominal bottom. The Director applies render-only Z scale equal to closedness `c`; collision keeps its original unscaled motion. With height `H`, nominal bottom `b_i`, and park offset `P_i`, the optical interval is `[b_i + P_i(1-c), b_i + P_i(1-c) + Hc]`. Adjacent intervals meet for every `c`, including reversal during travel. At `c=0` the optical strips have zero area above the cassette opening; the bar keeps its original parking motion. The original collision overlaps do not contribute tint. The sheet materials are prelit to preserve the same faint tint from both sides rather than going dark under back-facing lighting; shared fog still affects RGB.
+
+`CONDO_SHADE_OPACITY` and `CONDO_GLASS_OPACITY` are optional build-time tuning values; defaults are 0.32 and 0.12. The regular standalone level, exported models, saved Blender scene and Android `condo-cd.iff` have been regenerated. The separate historical touch/tour assets are not rebuilt by this integration.
+
+### Actual desktop captures
+
+These are **engine captures**, separate from the original illustrative mockups. The capture helper temporarily freezes the running player/Director scripts and applies exact actor poses; it does not modify the saved level. Existing interaction tests independently exercise the shipped Forth motion. Each directory contains all 15 combinations of three viewpoints and five states.
+
+| View | Opaque baseline | Translucent glass and fabric, black borders |
+|---|---|---|
+| Inside, both closed | [Before](2026-10-02-condo-translucency/condo/before/inside-closed-closed.png) | [After](2026-10-02-condo-translucency/condo/after/inside-closed-closed.png) |
+| Outside, half shade | [Before](2026-10-02-condo-translucency/condo/before/outside-half-open.png) | [After](2026-10-02-condo-translucency/condo/after/outside-half-open.png) |
+| Outside, both closed | [Before](2026-10-02-condo-translucency/condo/before/outside-closed-closed.png) | [After](2026-10-02-condo-translucency/condo/after/outside-closed-closed.png) |
+| Oblique, gathered panes | [Before](2026-10-02-condo-translucency/condo/before/oblique-closed-open.png) | [After](2026-10-02-condo-translucency/condo/after/oblique-closed-open.png) |
+
+![Actual condo runtime: closed glass and lowered shade with opaque black aluminum frame](2026-10-02-condo-translucency/condo/after/inside-closed-closed.png)
+
+### Validation
+
+- [Optical geometry](2026-10-02-condo-translucency/condo/optical-model.txt): one optical sheet per pane/strip; 10 cm frame coverage on both faces; opacity/hardware separation; contiguous coplanar coverage at 101 shade positions; zero-area raised fabric; unchanged imported window material. Join tolerance is one 16.16 unit (about 0.015 mm), accounting for Blender float precision.
+- [Shade model](2026-10-02-condo-translucency/condo/shade-model.txt): floor recess, pony wall, guides, cassette, original overlapping collision bounds, ledge colors and switch pass.
+- [Door runtime](2026-10-02-condo-translucency/condo/door-runtime.txt): A proximity, two-second sliding, mid-travel reversal, held-key latch, gathered-stack collision, and all closed bays/seams pass with the black frames.
+- [Shade runtime](2026-10-02-condo-translucency/condo/shade-runtime.txt): motion, reversal, reach separation, floor step, pony-wall collision and camera policy pass; all eight live render scales are checked while raised, moving and closed.
+- [Regression suite](2026-10-02-condo-translucency/condo/regression.txt): `pytest -q tests/test_translucent_queue.py tests/test_condo_android.py` — **8 passed**. Updated the stale legacy-device-task assertion to require coordinator ownership.
+- [Android release build](2026-10-02-condo-translucency/condo/apk-build.txt): both ABIs pass. Frozen APK SHA-256 `6c3c767a0a0c89e3490751fe21eedcb04452de009ed7e97892da73002a646c36`.
+- Chromecast HD coordinator check **J-8aa681d465e0** passed, with cleanup verified; [receipt](2026-10-02-condo-translucency/condo/chromecast/receipt.json), [capture](2026-10-02-condo-translucency/condo/chromecast/screenshot.png). The device check uses the normal opening pose, with the shade raised.
+- Chromecast HD profile **J-9c23c09905bf**: [summary](2026-10-02-condo-translucency/condo/chromecast-profile/run-1/summary.json) records **29.97 fps**, median/p99 **33.37 ms**, 363 intervals over 12 seconds at the normal opening pose. This is a present-time measurement; it does not establish whether translucency changed performance relative to the older 60 fps report. A same-engine asset comparison is recorded below.
+
+
+- Chromecast HD same-engine comparison **J-6cb09e41669f**: [opaque baseline](2026-10-02-condo-translucency/condo/chromecast-comparison/opaque-baseline/summary.json) and [translucent + framed](2026-10-02-condo-translucency/condo/chromecast-comparison/translucent-frames/summary.json) both measured **29.97 fps** with median/p99 **33.37 ms**, one 12-second run each after 10 seconds of warmup. [Native library hashes match](2026-10-02-condo-translucency/condo/benchmark-identities.json); only the level assets differ. No frame-rate change was measured at this opening pose. This does not explain the older 60 fps result or measure a lowered-shade scene. The coordinator [verified normal-APK restoration and cleanup](2026-10-02-condo-translucency/condo/chromecast-comparison/receipt.json).
+
+Metal and browser WebGL runtime checks, on-device lowered-shade close-ups, numeric GPU compositing pixels, and explicit queue/draw/CPU/GPU counters remain open. Existing shared renderer tests and GLES startup validation do not replace those checks.
 
 ## Intended result
 
@@ -129,7 +168,7 @@ True stacked door panes should accumulate a little tint. Accidental double surfa
 | Metal shader/pipeline | `metal/backend_metal.mm`: fragment alpha is also 1.0; the inspected pipeline has no blend configuration and uses depth writes. | Metal needs a corresponding blend pipeline and read-only depth state. |
 | Ordering | `rendobj3.cc` groups faces by material; `glpipeline/rendobj3.cc` submits them under each actor’s transform. Current batches key texture/prelit and flush on state changes. | Material order and per-actor sorting cannot correctly composite shade strips, glass leaves and the world behind them. Deferred draws must retain their own transforms and lighting state. |
 
-These describe the initial read-only investigation. The implementation and runtime evidence added on 2026-10-03 are recorded in the simulated PR above; condo assets have not been regenerated.
+These describe the initial read-only investigation. Engine work is recorded in the simulated PR above; regenerated condo assets and validation follow below.
 
 ## Proposed design
 
@@ -137,8 +176,8 @@ These describe the initial read-only investigation. The implementation and runti
 
 ### 1. Explicit, compatible material opacity
 
-- [ ] Probe the existing `glass` material and exact face layout read-only; record whether the source uses Alpha, Base Color alpha or transmission. Do not equate transmission automatically with alpha: they describe different rendering effects.
-- [ ] Add explicit authoring properties for blend mode (`opaque` or `blend`) and opacity. Default existing materials to opaque. For these condo materials, set the properties deliberately and mirror the approved appearance in Blender’s preview. Import restores the same properties.
+- [x] Probe the existing `glass` material and exact face layout read-only; record whether the source uses Alpha, Base Color alpha or transmission. Do not equate transmission automatically with alpha: they describe different rendering effects.
+- [x] Use the implemented `wf_opacity` authoring contract: values below 1 select blending, and missing values mean opaque. Deliberately set condo sheet opacity and mirror Alpha/Base Color alpha in Blender. The existing importer restores opacity; no redundant blend-mode property is needed.
 - [x] Add an optional `OPAC` model chunk, leaving MATL unchanged; the final v1 layout is documented in the simulated PR above. Opacity below 1.0 opts into blending.
 - [x] Read OPAC after MATL under the existing ordered-model contract; validate version, count, size and opacity range. Missing chunk means fully opaque. Full older-engine compatibility remains a separate validation item.
 - [ ] Preserve the chunk through Blender import/export, model packaging, editor save and round trip. Audit other model writers/loaders before selecting the final format. Do not repurpose the high byte of `Color`, which is also used by existing primitive conventions.
@@ -157,11 +196,11 @@ Centroid triangle sorting is adequate as the initial approach for these mostly p
 
 ### 3. Condo material and geometry treatment
 
-- [ ] Give the moving door panes a dedicated glass material copy, so tuning does not silently change unrelated condo windows. Keep hardware material slots opaque.
-- [ ] Make each pane contribute one visible optical surface from either side. Options to assess during implementation: a two-sided render sheet with unchanged collision geometry, or outward-wound thin boxes with back-face culling that admits one broad face per view. Avoid drawing front and back together for the same pane. Verify side-edge appearance and both camera directions.
-- [ ] Apply the same principle to shade strips. Retain actor count, export order, indices, collision and existing motion. Separate render geometry from collision geometry where necessary rather than collapsing moving actors and invalidating Forth indices.
-- [ ] Eliminate double coverage at the slat joins while retaining the gap-free visual invariant through the full travel. A simple alpha change or equal tint on every existing box is insufficient. Check front, back and oblique views; crop/split visible strips or use a dedicated visual sheet if the motion representation requires it. The chosen solution must also cover intermediate motion states and raised parking inside the cassette.
-- [ ] Tune approved shade/glass opacity with fixed cameras in the actual condo. Lighting and fog affect RGB, not the material’s opacity. Inspect back-facing sheet lighting so the material does not turn black from one side.
+- [x] Give the moving door panes a dedicated glass material copy, so tuning does not silently change unrelated condo windows. Keep hardware material slots opaque.
+- [x] Make each pane contribute one visible optical surface from either side. Options to assess during implementation: a two-sided render sheet with unchanged collision geometry, or outward-wound thin boxes with back-face culling that admits one broad face per view. Avoid drawing front and back together for the same pane. Verify side-edge appearance and both camera directions.
+- [x] Apply the same principle to shade strips. Retain actor count, export order, indices, collision and existing motion. Separate render geometry from collision geometry where necessary rather than collapsing moving actors and invalidating Forth indices.
+- [x] Eliminate double coverage at the slat joins while retaining the gap-free visual invariant through the full travel. A simple alpha change or equal tint on every existing box is insufficient. Check front, back and oblique views; crop/split visible strips or use a dedicated visual sheet if the motion representation requires it. The chosen solution must also cover intermediate motion states and raised parking inside the cassette.
+- [x] Tune approved shade/glass opacity with fixed cameras in the actual condo. Lighting and fog affect RGB, not the material’s opacity. Inspect back-facing sheet lighting so the material does not turn black from one side.
 
 ## Additional engine validation client: translucent shrimp
 
@@ -200,7 +239,7 @@ Recommended first phase: explicit flat-material opacity, optional model metadata
 - [x] Will authorizes the shared engine work for the second shrimp appearance on 2026-10-03.
 - [x] Implement and exercise that engine path with shrimp on desktop and Chromecast.
 - [ ] Complete remaining cross-platform, numeric compositing and regression evidence.
-- [ ] Will approves condo-specific material/geometry integration before it starts.
+- [x] Will approves condo-specific material/geometry integration before it starts.
 
 Related plans: [existing Blue Shrimp tank and menu](2026-10-02-aquarium-levels-blue-shrimp.md), [balcony shade](2026-09-30-condo-balcony-shade.md), [telescoping glass doors](2026-09-20-condo-project-room-telescoping-doors.md), [Metal renderer](2026-09-20-macos-metal-renderer.md).
 
