@@ -1,0 +1,38 @@
+{
+  "right": {
+    "displacement": [
+      0.06,
+      0.0,
+      0.0
+    ],
+    "distance": 0.06,
+    "simulation_seconds": 4.950016999999999
+  },
+  "diagonal": {
+    "displacement": [
+      0.04430200000000001,
+      0.04242800000000002,
+      0.0
+    ],
+    "distance": 0.06134168556536413,
+    "simulation_seconds": 4.950018999999999
+  },
+  "reverse": {
+    "displacement": [
+      -0.0411,
+      -0.041099,
+      0.0
+    ],
+    "distance": 0.05812347031105421,
+    "simulation_seconds": 4.949965000000001
+  },
+  "released": {
+    "displacement": [
+      -0.0013259999999999939,
+      -0.0013250000000000206,
+      0.0
+    ],
+    "distance": 0.00187454021029159,
+    "simulation_seconds": 2.949954999999999
+  }
+}

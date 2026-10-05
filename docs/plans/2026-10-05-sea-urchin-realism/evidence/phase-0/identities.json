@@ -1,0 +1,24 @@
+[
+  {
+    "label": "release",
+    "apk": "/tmp/wf-sea-urchin-phases/phase-0/release.apk",
+    "apk_sha256": "4ebf1634ac16c60d2d1a3bf80b2ae2ea32fa85cf8dadace8a151ab1a43d5d152",
+    "cd_sha256": "4c05a5bad5d7b0fabce3c566ab0995abbf73dcec7634a72141a91088600bd6b8",
+    "args": "--plant-seed=713\n--plant-water=saltwater\n--plant-age=150\n--plant-speed=0\n",
+    "native": {
+      "lib/arm64-v8a/libwf_game.so": "def91ed87e233688e24469c4e84865337144b62f8a6300476e92879e7ca5ef90",
+      "lib/armeabi-v7a/libwf_game.so": "1284a37230be29f64cb8dffeb84044e63b8c2a9266168e6b811fb27e7ee4cc50"
+    }
+  },
+  {
+    "label": "cpu",
+    "apk": "/tmp/wf-sea-urchin-phases/phase-0/cpu.apk",
+    "apk_sha256": "5aaa83ff863f62511a10313fc2e7d481cc37eb5a8666bf41c6bd225910fca052",
+    "cd_sha256": "4c05a5bad5d7b0fabce3c566ab0995abbf73dcec7634a72141a91088600bd6b8",
+    "args": "--plant-seed=713\n--plant-water=saltwater\n--plant-age=150\n--plant-speed=0\n--frame-profile\n",
+    "native": {
+      "lib/arm64-v8a/libwf_game.so": "def91ed87e233688e24469c4e84865337144b62f8a6300476e92879e7ca5ef90",
+      "lib/armeabi-v7a/libwf_game.so": "1284a37230be29f64cb8dffeb84044e63b8c2a9266168e6b811fb27e7ee4cc50"
+    }
+  }
+]

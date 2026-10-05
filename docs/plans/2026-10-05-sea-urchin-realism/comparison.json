@@ -1,0 +1,69 @@
+[
+  {
+    "phase": 0,
+    "frames": 2605,
+    "fps": 14.519587672334147,
+    "p50_ms": 66.733431,
+    "p90_ms": 83.416737,
+    "p95_ms": 83.416802,
+    "p99_ms": 83.417081,
+    "missed_refresh_percent": 99.96164173379363,
+    "PSS_MiB": 77.9521484375,
+    "cpu": {
+      "update": 8.350634691407825,
+      "actors": 1.3129918515530454,
+      "director": 6.971173578055668,
+      "render": 55.110669584509886,
+      "school": 0.0,
+      "pose": 0.0,
+      "animation": 6.784160104881001,
+      "total": 63.46128656716418,
+      "level-objects": 38.0,
+      "render-actors": 26.0,
+      "draws": 25.0,
+      "triangles": 23827.06415167406,
+      "actor-mailbox-writes": 29.0,
+      "fish-deformations": 0.0
+    },
+    "scenarios": {
+      "wide-idle": {
+        "fps": 14.680540381676263,
+        "p95_ms": 83.416768
+      },
+      "close-idle": {
+        "fps": 14.513716084822368,
+        "p95_ms": 83.416813
+      },
+      "crawl-close": {
+        "fps": 14.362722302605148,
+        "p95_ms": 83.416827
+      }
+    },
+    "source_counts": {
+      "animal_actors": 9,
+      "scene_actors": 38,
+      "animal_triangles": 860,
+      "spines": 61,
+      "atlas": null
+    },
+    "delta_vs_phase_0": {
+      "fps": {
+        "absolute": 0.0,
+        "percent": 0.0
+      },
+      "p95_ms": {
+        "absolute": 0.0,
+        "percent": 0.0
+      },
+      "PSS_MiB": {
+        "absolute": 0.0,
+        "percent": 0.0
+      }
+    },
+    "cpu_delta_ms": {
+      "actors": 0.0,
+      "render": 0.0,
+      "animation": 0.0
+    }
+  }
+]
