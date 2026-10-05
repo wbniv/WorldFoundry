@@ -77,10 +77,14 @@ def verify_service(timeout=30):
             time.sleep(.2)
 
 
-def main():
+def main(argv=()):
     if os.geteuid() != 0:
         raise SystemExit('Administrator deployment requires sudo; device tests use the coordinator.')
-    review = json.loads((ROOT/'android/bomberman/deploy-review.json').read_text())
+    import argparse
+    parser = argparse.ArgumentParser(description=__doc__)
+    parser.add_argument('--review', type=Path, default=ROOT/'android/bomberman/deploy-review.json')
+    args = parser.parse_args(argv)
+    review = json.loads(args.review.read_text())
     with (STATE/'locks/deployment.lock').open('a') as lock:
         fcntl.flock(lock, fcntl.LOCK_EX | fcntl.LOCK_NB)
         reviewed(review, deployed=True)
@@ -122,4 +126,4 @@ def main():
 
 
 if __name__ == '__main__':
-    raise SystemExit(main())
+    raise SystemExit(main(sys.argv[1:]))

@@ -1,0 +1,35 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Prime Numbers</title>
+  <link rel="stylesheet" href="study.css">
+</head>
+<body>
+  <main>
+    <header>
+      <div><p class="eyebrow">A LITTLE PRACTICE, EVERY DAY</p><h1>Prime Numbers<span class="range">1–100</span></h1></div>
+      <nav aria-label="Study mode"><button id="study" type="button">Study</button><button id="recall" type="button">Recall</button><button id="check" type="button" hidden>Check</button></nav>
+    </header>
+    <section class="workspace">
+      <section class="chart" aria-label="Numbers 1 to 100">
+        <div id="grid" role="grid" aria-label="Number chart"></div>
+        <div class="legend"><span id="legend-prime"><i>●</i> Prime</span><span id="legend-other">● Other numbers</span><span id="progress">25 primes · 100 numbers</span></div>
+      </section>
+      <aside>
+        <div id="details" hidden>
+          <p class="eyebrow" id="panel-label"></p>
+          <h2 id="panel-title"></h2>
+          <p id="panel-body"></p>
+          <p id="review-missing" hidden></p><p id="review-wrong" hidden></p>
+        </div>
+        <section id="prime-list"><h2>The 25 to remember</h2><div id="prime-values" role="list" aria-label="The 25 prime numbers from 1 to 100"></div></section>
+        <p id="panel-hint" hidden></p>
+      </aside>
+    </section>
+    <footer><span><b>↑ ↓ ← →</b> Move <b>OK</b> <span id="ok-hint">Select mode</span> <b>BACK</b> Return</span><span>Up from the first row for controls</span></footer>
+  </main>
+  <script src="study.js"></script>
+</body>
+</html>

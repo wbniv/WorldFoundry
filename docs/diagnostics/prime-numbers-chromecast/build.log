@@ -1,0 +1,63 @@
+Artwork: /home/will/WorldFoundry-wbniv/android/prime-numbers/res/drawable-nodpi
+----------
+1. WARNING in /home/will/WorldFoundry-wbniv/android/prime-numbers/src/org/worldfoundry/wf_game/primes/TvActivity.java (at line 24)
+	getWindow().getDecorView().setSystemUiVisibility(View.SYSTEM_UI_FLAG_FULLSCREEN
+            | View.SYSTEM_UI_FLAG_HIDE_NAVIGATION | View.SYSTEM_UI_FLAG_IMMERSIVE_STICKY);
+	                           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+The method setSystemUiVisibility(int) from the type View is deprecated
+----------
+2. WARNING in /home/will/WorldFoundry-wbniv/android/prime-numbers/src/org/worldfoundry/wf_game/primes/TvActivity.java (at line 24)
+	getWindow().getDecorView().setSystemUiVisibility(View.SYSTEM_UI_FLAG_FULLSCREEN
+	                                                      ^^^^^^^^^^^^^^^^^^^^^^^^^
+The field View.SYSTEM_UI_FLAG_FULLSCREEN is deprecated
+----------
+3. WARNING in /home/will/WorldFoundry-wbniv/android/prime-numbers/src/org/worldfoundry/wf_game/primes/TvActivity.java (at line 25)
+	| View.SYSTEM_UI_FLAG_HIDE_NAVIGATION | View.SYSTEM_UI_FLAG_IMMERSIVE_STICKY);
+	       ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+The field View.SYSTEM_UI_FLAG_HIDE_NAVIGATION is deprecated
+----------
+4. WARNING in /home/will/WorldFoundry-wbniv/android/prime-numbers/src/org/worldfoundry/wf_game/primes/TvActivity.java (at line 25)
+	| View.SYSTEM_UI_FLAG_HIDE_NAVIGATION | View.SYSTEM_UI_FLAG_IMMERSIVE_STICKY);
+	                                             ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+The field View.SYSTEM_UI_FLAG_IMMERSIVE_STICKY is deprecated
+----------
+5. WARNING in /home/will/WorldFoundry-wbniv/android/prime-numbers/src/org/worldfoundry/wf_game/primes/TvActivity.java (at line 36)
+	display.getSettings().setAllowFileAccessFromFileURLs(false);
+	                      ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+The method setAllowFileAccessFromFileURLs(boolean) from the type WebSettings is deprecated
+----------
+6. WARNING in /home/will/WorldFoundry-wbniv/android/prime-numbers/src/org/worldfoundry/wf_game/primes/TvActivity.java (at line 37)
+	display.getSettings().setAllowUniversalAccessFromFileURLs(false);
+	                      ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+The method setAllowUniversalAccessFromFileURLs(boolean) from the type WebSettings is deprecated
+----------
+6 problems (6 warnings)
+Verifies
+Verified using v1 scheme (JAR signing): false
+Verified using v2 scheme (APK Signature Scheme v2): true
+Verified using v3 scheme (APK Signature Scheme v3): true
+Verified using v3.1 scheme (APK Signature Scheme v3.1): false
+Verified using v4 scheme (APK Signature Scheme v4): false
+Verified for SourceStamp: false
+Number of signers: 1
+{
+  "apk": "/home/will/WorldFoundry-wbniv/android/prime-numbers/build/primes-485c4b8d6f7fe248.apk",
+  "sha256": "485c4b8d6f7fe248317cefc99f9a634a7d43ddcc922f00a978e45a36a44e18d2",
+  "package": "org.worldfoundry.wf_game.primes",
+  "nativeCode": false,
+  "source": {
+    "AndroidManifest.xml": "0c1cdc77f895119133331edfda48fd9b7c59b2c061c6d376f5c042c7aeb86cf0",
+    "README.md": "7601c2b48adcd8671dea91ed5d7e5e507460aac220d87f3e79704c970b965115",
+    "artwork.py": "1b38963fe4a6840347839d9a2acfd59ef0afef2c42915ac274fc912f127f517c",
+    "assets/index.html": "168d6514b8a0e76b86e1e19aede2c58011bd5327aaaf2a998929e6b503e6ed75",
+    "assets/study.css": "5ad454e994afff4d054cdf455d25802d065bc4efc6f0d06c4a3c940d4ffddd7a",
+    "assets/study.js": "f6cfe2de6b5921743df96b551fdcffea15385982a4941519a94bda4974e5f461",
+    "build.py": "f9ceb0bf8e410c6b75fb25a24c316b1363ead69ef5303c54485396e8f6e82e57",
+    "deploy-review.json": "5af02095835cee0b41d6fe12594a4aa82e1102b7809c6ab80131f821a11f1180",
+    "res/drawable-nodpi/banner.png": "5d5c2b28e239f2ce00fb12d7d5a323751ac74d3d9aaba86d0ef217de4abb337d",
+    "res/drawable-nodpi/icon.png": "47f26956cc85960bc524f28afd8107d198327bdcd8fdd5ef01c648b2cb6ac727",
+    "src/org/worldfoundry/wf_game/primes/TvActivity.java": "80707caf886441c227ceb3e02fcc95f58088cc71bb8008d1d281558fc0af02e4",
+    "verify.py": "1b175cc58a259b6010c3ac8a99a84aa74053dee19a3f259319b6ea325fe65687"
+  },
+  "compilerSha256": "01f5a92ac19bb2b3bf85e295a68f2c73c264369109158b566ce9b490af982948"
+}

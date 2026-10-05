@@ -289,11 +289,12 @@ def task_command(command):
         if req['workflow'] not in {'readd','capture'} and not req.get('apk'):
             app=req.get('app','aquarium');req['app']=app
             repo=Path(os.environ.get('WF_COORDINATOR_REPO',str(Path(__file__).resolve().parents[2])))
-            if app=='bomberman':
-                receipt=json.loads((repo/'android/bomberman/build/build-receipt.json').read_text())
+            if app in {'bomberman','primes'}:
+                folder = 'prime-numbers' if app == 'primes' else 'bomberman'
+                receipt=json.loads((repo/f'android/{folder}/build/build-receipt.json').read_text())
                 req['apk']=receipt['apk']
                 if hashlib.sha256(Path(req['apk']).read_bytes()).hexdigest()!=receipt['sha256']:
-                    raise ValueError('Latest Bomberman build receipt does not match APK')
+                    raise ValueError('Latest '+app+' build receipt does not match APK')
             else:
                 req['apk']=str(repo/f'android/app/build/outputs/apk/{app}/release/worldfoundry-{app}-release.apk')
         if args.get('pairing_endpoint'):

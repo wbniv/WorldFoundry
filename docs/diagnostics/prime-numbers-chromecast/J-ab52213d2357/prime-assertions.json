@@ -1,0 +1,36 @@
+{
+  "directions": [
+    {
+      "direction": "UP",
+      "before": 45,
+      "after": 35,
+      "released": true
+    },
+    {
+      "direction": "DOWN",
+      "before": 35,
+      "after": 45,
+      "released": true
+    },
+    {
+      "direction": "LEFT",
+      "before": 45,
+      "after": 44,
+      "released": true
+    },
+    {
+      "direction": "RIGHT",
+      "before": 44,
+      "after": 45,
+      "released": true
+    }
+  ],
+  "explanations": [
+    1,
+    2,
+    4
+  ],
+  "recall": "PASS",
+  "home_resume": "PASS",
+  "back_exit": "PASS"
+}

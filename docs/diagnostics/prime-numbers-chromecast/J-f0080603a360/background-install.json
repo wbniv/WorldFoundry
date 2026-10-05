@@ -1,0 +1,9 @@
+{
+  "before": [
+    "      topResumedActivity=ActivityRecord{73e17ec u0 com.google.android.apps.tv.launcherx/.home.HomeActivity t759}"
+  ],
+  "after": [
+    "      topResumedActivity=ActivityRecord{73e17ec u0 com.google.android.apps.tv.launcherx/.home.HomeActivity t759}"
+  ],
+  "foreground_unchanged": true
+}

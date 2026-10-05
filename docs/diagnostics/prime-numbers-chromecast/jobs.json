@@ -1,0 +1,17 @@
+{
+  "sha256": "32c0237d6bbad591edce019fb4cfe0d22f0e67bf5da8e22e9412c8d8c1483d26",
+  "apk": "/home/will/WorldFoundry-wbniv/android/prime-numbers/build/primes-32c0237d6bbad591.apk",
+  "jobs": {
+    "install": "J-ad277fb46a9d",
+    "check": "J-9638f51a96ce"
+  },
+  "history": [
+    {
+      "workflow": "install",
+      "job": "J-ad277fb46a9d",
+      "state": "failed",
+      "action": "install in owned check session"
+    }
+  ],
+  "install_in_check": true
+}

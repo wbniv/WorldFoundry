@@ -1,0 +1,19 @@
+{
+  "package": "org.worldfoundry.wf_game.primes",
+  "label": "Prime Numbers",
+  "apk_sha256": "74c457236f3cef623efba1dec794f119ac783a50ec53b394fff111c1cec528ad",
+  "references": [
+    {
+      "kind": "banner",
+      "resource": "res/drawable-nodpi-v4/banner.png",
+      "file": "expected-banner-0.png",
+      "sha256": "07656a3cb94d2ffb91467a341a58c0f8f5313a3a8921b9c78fd3e1fb7a3d83c5"
+    },
+    {
+      "kind": "icon",
+      "resource": "res/drawable-nodpi-v4/icon.png",
+      "file": "expected-icon-1.png",
+      "sha256": "1ff504e6ac7b483d2848f77bce240b024eeb874455308e60e324cc7deba6823b"
+    }
+  ]
+}

@@ -49,8 +49,10 @@ def validate_request(request, scenes):
         raise ValueError('Unknown reviewed trace')
     if request.get('trace')=='school' and request['workflow']!='record':
         raise ValueError('School trace is a recording workflow')
-    if request.get('validator') not in (None,'menu-back','poke-resume'):
+    if request.get('validator') not in (None,'menu-back','poke-resume','prime-study'):
         raise ValueError('Unknown validator')
+    if request.get('validator') == 'prime-study' and (request.get('app') != 'primes' or request['workflow'] != 'check'):
+        raise ValueError('Prime study validator requires a Primes check workflow')
     for field, lower, upper in [('warmup',0,300),('duration',.05,180),('runs',1,10)]:
         if field in request and (isinstance(request[field],bool) or not isinstance(request[field],(int,float))
                                  or not lower<=request[field]<=upper):

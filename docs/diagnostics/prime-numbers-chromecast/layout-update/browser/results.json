@@ -1,0 +1,26 @@
+[
+  {
+    "viewport": {
+      "width": 960,
+      "height": 540
+    },
+    "legacy_api_removal": false,
+    "result": "PASS"
+  },
+  {
+    "viewport": {
+      "width": 1920,
+      "height": 1080
+    },
+    "legacy_api_removal": false,
+    "result": "PASS"
+  },
+  {
+    "viewport": {
+      "width": 960,
+      "height": 540
+    },
+    "legacy_api_removal": true,
+    "result": "PASS"
+  }
+]

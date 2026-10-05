@@ -1,0 +1,22 @@
+{
+  "apk": "/home/will/WorldFoundry-wbniv/android/prime-numbers/build/primes-32c0237d6bbad591.apk",
+  "sha256": "32c0237d6bbad591edce019fb4cfe0d22f0e67bf5da8e22e9412c8d8c1483d26",
+  "package": "org.worldfoundry.wf_game.primes",
+  "nativeCode": false,
+  "source": {
+    "AndroidManifest.xml": "0c1cdc77f895119133331edfda48fd9b7c59b2c061c6d376f5c042c7aeb86cf0",
+    "README.md": "4867aacdd5eaf56e436a1833c386f426ff12951675a95b0e8532d436901bcb8a",
+    "artwork.py": "1b38963fe4a6840347839d9a2acfd59ef0afef2c42915ac274fc912f127f517c",
+    "assets/index.html": "d5efe15bff607766b130ab4986a450ae3436e7d061a18cb0a2d7a2737a4f4a75",
+    "assets/study.css": "9371d766eda57d2609dadab9beea39ecad427fc763b43736f3bb10b635731ffd",
+    "assets/study.js": "8f102d3d9a5b958ad9bd105ec4f065938df618830ebbbf762d9e8dd30b15c23c",
+    "build.py": "f9ceb0bf8e410c6b75fb25a24c316b1363ead69ef5303c54485396e8f6e82e57",
+    "deploy-review.json": "1313e686e202b1996feeee2e1954e5a6cd0960bd1638263ac832b82a9ff5fdd5",
+    "install.py": "3cba860174ae6a68d092a8eea20f662d6610e9c512d8b5d3422927a5faf9753c",
+    "res/drawable-nodpi/banner.png": "5d5c2b28e239f2ce00fb12d7d5a323751ac74d3d9aaba86d0ef217de4abb337d",
+    "res/drawable-nodpi/icon.png": "47f26956cc85960bc524f28afd8107d198327bdcd8fdd5ef01c648b2cb6ac727",
+    "src/org/worldfoundry/wf_game/primes/TvActivity.java": "80707caf886441c227ceb3e02fcc95f58088cc71bb8008d1d281558fc0af02e4",
+    "verify.py": "cedae4d8e67f6aa8f6b6cc4a07557a87dbb11e6fc3285d73fc4938efe4ae9d10"
+  },
+  "compilerSha256": "01f5a92ac19bb2b3bf85e295a68f2c73c264369109158b566ce9b490af982948"
+}
