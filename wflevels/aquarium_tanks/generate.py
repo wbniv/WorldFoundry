@@ -428,31 +428,26 @@ if C.KIND=='plants':
     if os.environ.get('PLANTED_TANK_DETAIL','runtime')=='runtime':
         core=core.replace("  JOYSTICK_BUTTON_A tk-edge tk-neutral tk@ not & if 1 tk-camera tk@ - tk-camera tk! then", "  \\ Camera taps and settings holds are handled by the native plant settings.")
     pose=setup=''
-    header+=': uf-phase 740 ; : uf-init 741 ; : uf-last-x 742 ; : uf-last-y 743 ; : uf-dx 744 ; : uf-dy 745 ; : uf-u 746 ;\n'
-    tick=": tk-director-tick\n tk-camera-tick\n INDEXOF_X_POS tk-player read-actor-mailbox tk-x tk! INDEXOF_Y_POS tk-player read-actor-mailbox tk-y tk!\n"
-    tick+=' uf-init tk@ 0 = if tk-x tk@ uf-last-x tk! tk-y tk@ uf-last-y tk! 1 uf-init tk! then\n'
-    tick+=' tk-x tk@ uf-last-x tk@ - uf-dx tk! tk-y tk@ uf-last-y tk@ - uf-dy tk!\n'
-    tick+=' uf-phase tk@ uf-dx tk@ abs uf-dy tk@ abs + .06 / + dup 1 >= if 1 - then uf-phase tk!\n'
+    tick=": tk-director-tick\n tk-camera-tick\n INDEXOF_X_POS tk-player read-actor-mailbox INDEXOF_Y_POS tk-player read-actor-mailbox INDEXOF_Z_POS tk-player read-actor-mailbox uf-begin\n"
     for k,(obj,offset) in enumerate(urchin_feet):
-        # Alternating contact/swing groups, advancing only with displacement.
-        tick+=f' uf-phase tk@ {num((k%2)*.5)} + dup 1 >= if 1 - then uf-u tk!\n'
-        for axis,n in [('X',0),('Y',1)]:
-            tick+=f' tk-{axis.lower()} tk@ {num(offset[n])} + uf-u tk@ .5 - .035 * {num(math.cos(math.tau*k/8) if n==0 else math.sin(math.tau*k/8))} * + INDEXOF_{axis}_POS {indices[obj.name]} write-actor-mailbox\n'
-        tick+=f' {num(C.BOTTOM)} uf-u tk@ .5 > if uf-u tk@ .5 - 2 * dup 1 swap - * .048 * + then INDEXOF_Z_POS {indices[obj.name]} write-actor-mailbox\n'
+        tick+=f' {num(offset[0])} {num(offset[1])} {num(.017+.0014*k)} {k} {indices[obj.name]} uf-foot\n'
+    core+=(COMMON/'urchin_motion.fth').read_text()
     if os.environ.get('PLANTED_TANK_DETAIL','runtime')=='runtime':
         header+=': pg-init 747 ; : pg-water 748 ;\n'
         bindings=' '.join(f'{k} {indices[f"plant_chunk_{k:02d}"]} plant-register' for k in range(8))
         tick+=f' pg-init tk@ 0 = if {bindings} 1 pg-init tk! then\n'
         tick+=' pg-water tk@ tk-dt@ + pg-water tk! INDEXOF_DELTA_TIME tk@ pg-water tk@ plant-step\n'
-    tick+=' tk-x tk@ uf-last-x tk! tk-y tk@ uf-last-y tk! ;\n'
+    tick+=' ;\n'
 
-player['wf_Script']=header+core+'\ntk-player-tick\n'
+player_core=core.split('\\ Urchin contacts:')[0] if C.KIND=='plants' else core
+player['wf_Script']=header+player_core+'\ntk-player-tick\n'
 bpy.data.objects['Director']['wf_Script']=header+core+pose+setup+feeding+tick+'\ntk-director-tick\n'
 if C.KIND=='arowana':
     player['wf_Script'],bpy.data.objects['Director']['wf_Script'],ar_values=arowana.scripts(indices,[m.name for m in meshes],offsets,PROFILE,C)
     mailboxes={n:v for n,v in ar_values.items() if 700<=v<800}
 (HERE/'actor-map.json').write_text(json.dumps(dict(level=LEVEL,title=C.TITLE,kind=C.KIND,count=COUNT,
     profile=PROFILE,indices=indices,mailboxes=mailboxes,parts=[m.name for m in meshes],offsets=offsets,
+    urchin_contacts=(dict(phase=2,scratch=[800,839],slots=[840,967],stride=16,distance_scale=1024,feet=[dict(actor=indices[obj.name],slot=k,offset=list(offset),support_limit=.017+.0014*k) for k,(obj,offset) in enumerate(urchin_feet)]) if C.KIND=='plants' else None),
     movement=({'states':species.STATES,'kind':'pulse-and-drift' if C.KIND=='jellyfish' else 'steer-and-swim', 'jelly_states':species.JELLY if C.KIND=='jellyfish' else None} if C.KIND in ('betta','lionfish','jellyfish') else None),
     lionfish_rig=({'parts':1,'regions':lionfish_model.REGIONS,'triangles':sum(len(f)-2 for f in meshes[0].faces),
                   'palette_seed':0,'palettes':[lionfish_model.palette_for(0,k) for k in range(COUNT)],

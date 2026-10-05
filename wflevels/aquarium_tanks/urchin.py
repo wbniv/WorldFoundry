@@ -12,7 +12,7 @@ class UrchinMesh(Mesh):
         points=list(points)
         if uvs is None:
             if color=='urchin_foot':
-                uvs=[((154+32*math.atan2(p[1],p[0])/math.pi)/256,(216+min(25,max(-25,p[2]*100)))/256) for p in points]
+                uvs=[((180+32*math.atan2(p[1],p[0])/math.pi)/256,(216+min(25,max(-25,p[2]*100)))/256) for p in points]
             else:
                 a=[math.atan2(p[1],p[0])/math.tau%1 for p in points]
                 if max(a)-min(a)>.5:a=[x+1 if x<.5 else x for x in a]
@@ -57,10 +57,10 @@ def urchin():
     return m
 
 def tube_foot():
-    """Body-relative phase 1 rest pose; pad bottoms at the substrate."""
+    """Disc-rooted foot, local +X stem; existing actor transforms aim the root."""
     m=UrchinMesh('urchin_tube_foot')
-    m.swept_tube([(0,0,-.135),(.005,0,-.167),(.008,0,-.199),(0,0,-.218)],.012,'urchin_foot',6)
-    m.ellipsoid((0,0,-.218),(.028,.028,.012),'urchin_foot',6,3)
+    m.swept_tube([(.006,0,0),(.034,0,.002),(.068,0,.002),(.1,0,0)],.0125,'urchin_foot',6)
+    m.ellipsoid((0,0,0),(.011,.024,.024),'urchin_foot',6,3)
     return m
 
 def write_texture(folder):

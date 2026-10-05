@@ -1,6 +1,6 @@
 # Sea urchin: traction, articulated spines and a textured model
 
-5 October 2026 · **Phases 0–3 authorized; phases 0–1 completed; phases 2–3 pending.** The sea-anemone and generic-deformation projects remain set aside. This plan does not authorize engine changes.
+5 October 2026 · **Phases 0–3 authorized; phases 0–2 completed; phase 3 pending.** The sea-anemone and generic-deformation projects remain set aside. This plan does not authorize engine changes.
 
 Improve the planted tank's sea urchin so it crawls with visible traction, has a more convincing short-spined silhouette and surface, and moves its spines through basal joints. Keep the slow movement the user previously chose. Separate believable contact from decorative motion, and measure actor/script costs as well as geometry.
 
@@ -27,7 +27,7 @@ The principal distinction is between a soft, adhesive tube foot and a rigid spin
 | Art | Flat material colors; no dedicated urchin texture atlas | Readable markings, anatomy and material separation |
 | A button | Runtime plant settings owns short camera tap / long settings hold | Preserve current behavior and modal input handling |
 
-Counts were computed from the current Python mesh faces using `sum(len(face)-2)`, before compilation; cooked counts may differ. Scene count comes from the existing generated actor map, not a fresh build. No urchin performance measurements were made for this document.
+The phase 0 counts were computed from the frozen baseline Python mesh faces using `sum(len(face)-2)`, before compilation; cooked counts may differ. Scene count comes from the existing generated actor map, not a fresh build. No performance measurements were available when this plan was first written; completed Chromecast measurements now appear in the implementation log and comparison report.
 
 Sources: [urchin.py](../../wflevels/aquarium_tanks/urchin.py), [plants_controller.fth](../../wflevels/aquarium_tanks/plants_controller.fth), [generate.py](../../wflevels/aquarium_tanks/generate.py), [current actor map](../../wflevels/aquarium_plants/actor-map.json).
 
@@ -171,3 +171,13 @@ Phase 0 results: 14.520 FPS, p95 present interval 83.417 ms, actor CPU 1.313 ms 
 Implementation retains 9 animal / 38 scene actors and uses 3,540 animal source triangles. One 256² atlas covers the opaque purple test and spines, with material opacity 0.78 on pale feet. Body and feet share the existing PERM asset slot, preserving the runtime plant texture page. Source geometry and cooked material checks: 8 passed. The first trial exposed undersized foot-pad faces; simplified pad topology fixes the engine assertion, and feet now participate in the fixed-point normal check. No engine changes. Matched device job: `J-64d791da3158`, completed. Release median 13.722 FPS (−5.50% vs phase 0); p95 present interval 83.417 ms. Instrumented actor CPU 1.287 ms (−0.026 ms), render CPU 58.919 ms (+3.808 ms). The render increase is observed in a single instrumented repeat, not a statistically isolated attribution to geometry.
 
 ![Phase 1 close view on Chromecast 1](2026-10-05-sea-urchin-realism/evidence/phase-1/chromecast/release/run-1/close-idle.png)
+
+### Phase 2 · World-space contacts
+
+Eight existing feet now retain world-space anchors during support and use separate release, recovery and reach envelopes. Euclidean actual travel drives new contacts, so blocked input does not march and diagonal travel has no Manhattan-distance phase bias. Per-foot support limits stagger contact changes. Smooth reversals preserve anchors. The Director owns scratch 800–839 and eight 16-cell contact slots 840–967; generated actor bindings record ownership. Travel is stored at 1024× scale to preserve small steps in 16.16 mailboxes. No extra actors or source triangles: 9 animal / 38 scene, 3,540 triangles.
+
+The rigid prototype stems aim and stretch between pad and body root through existing actor rotation/scale; the discs tilt with them. Independently level pads and curved flexible stems remain outside phases 0–3. Actual-engine Forth host checks exercise both floating and 16.16-quantized mailbox storage: asset/contact checks total 22 passed. A 400-frame native correctness trace recorded 2,411 consecutive planted contact pairs with zero anchor drift, 38 completed cycles and maximum endpoint error 0.000395 world units. Native trace/video is visual/control evidence only; debug stepping remained wide, so close review uses device captures. [Correctness evidence](2026-10-05-sea-urchin-realism/evidence/phase-2/native/correctness.json).
+
+Matched Chromecast job `J-0043bcb35806` completed successfully. Release median 13.639 FPS (−6.06% vs baseline, −0.60% vs phase 1), p95 present interval 83.417 ms. Single instrumented repeat: actor CPU 1.303 ms (−0.010 ms vs baseline, +0.016 ms vs phase 1), render CPU 58.936 ms (+3.825 ms vs baseline, +0.017 ms vs phase 1). These small phase 1–2 timing differences do not establish a causal performance change. The comparison includes absolute CPU deltas, FPS percentages and raw compressed logs.
+
+![Phase 2 close view on Chromecast 1](2026-10-05-sea-urchin-realism/evidence/phase-2/chromecast/release/run-1/close-idle.png)

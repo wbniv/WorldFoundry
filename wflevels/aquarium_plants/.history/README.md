@@ -1,9 +1,14 @@
 | Date | Change |
 |------|--------|
+| [2026-10-05](https://github.com/wbniv/WorldFoundry/commit/12cc5c97) | Implement sea urchin phase 1 textured model and profile its cost |
 | [2026-10-03](https://github.com/wbniv/WorldFoundry/commit/55d87fb3) | Split tiger-barb tank and add profiled dense planting with A3 growth poster |
 | [2026-10-02](https://github.com/wbniv/WorldFoundry/commit/9cef6dde) | Integrate aquarium tanks, feeding, and flowing betta fins |
 
 <!--history-meta v1
+12cc5c97	author	Will Norris
+12cc5c97	added	6
+12cc5c97	deleted	4
+12cc5c97	files	1
 55d87fb3	author	Will Norris
 55d87fb3	added	3
 55d87fb3	deleted	1

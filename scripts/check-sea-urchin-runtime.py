@@ -30,6 +30,10 @@ def main():
             for actor in actors:
                 for mb in (3009,3010,3011,3012,3013,3014,3040,3041,3042):cli.watch(idx=actor,mailbox=mb)
             cli.watch(idx=player,mailbox=1906)
+            contacts=mapping.get('urchin_contacts')
+            if contacts:
+                for foot in contacts['feet']:
+                    for field in (0,1,4,8,10):cli.watch(idx=director,mailbox=840+16*foot['slot']+field)
             def value(actor,mb):
                 with cli._lock:return cli.mailbox_values.get((actor,mb),0)
             def step(n):
@@ -48,6 +52,9 @@ def main():
             # bridge injects the gameplay mailbox. Select the close view directly
             # for visual diagnostics; this is not a test of the native A gesture.
             cli.set_mailbox(mapping['mailboxes']['camera'],1,idx=0)
+            # Camera selection is handled by the game loop, outside paused
+            # actor stepping. Let it select the requested view, then pause.
+            cli.send({'op':'resume'});time.sleep(.3);cli.send({'op':'pause'})
             step(10);shot('close')
             trace=[]
             if a.video:(a.out/'frames').mkdir(exist_ok=True)
@@ -56,7 +63,7 @@ def main():
                 cli.inject_input('joystick1_raw',bits,duration_frames=-1)
                 for k in range(n):
                     step(1)
-                    trace.append(dict(frame=frame,scenario=label,time=value(player,1906),poses={name:[value(actor,mb) for mb in (3009,3010,3011,3012,3013,3014,3040,3041,3042)] for name,actor in idx.items() if actor in actors}))
+                    trace.append(dict(frame=frame,scenario=label,time=value(player,1906),poses={name:[value(actor,mb) for mb in (3009,3010,3011,3012,3013,3014,3040,3041,3042)] for name,actor in idx.items() if actor in actors},contacts={str(foot['slot']):[value(director,840+16*foot['slot']+field) for field in (0,1,4,8,10)] for foot in contacts['feet']} if contacts else {}))
                     if a.video and frame%2==0:shot(f'frames/frame-{frame//2:04d}')
                     frame+=1
                 shot(label)
