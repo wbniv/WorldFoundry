@@ -1,0 +1,7 @@
+{
+  "format": "A3 portrait, 297 x 420 mm",
+  "pdf_pages": 1,
+  "review": "PDF dimensions checked with pdfinfo; rendered PNG visually inspected, including complete footer and engine inset",
+  "overflow_observed": false,
+  "preview": "poster.png"
+}

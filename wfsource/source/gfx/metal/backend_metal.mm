@@ -106,6 +106,8 @@ struct VertexIn {
     float2 uv     [[attribute(2)]];
     float3 normal [[attribute(3)]];
     float opacity [[attribute(4)]];
+    float4 palette_dark [[attribute(5)]];
+    float3 palette_light [[attribute(6)]];
 };
 
 struct VertexOut {
@@ -115,6 +117,8 @@ struct VertexOut {
     float3 lit;
     float  fog_factor;
     float  opacity;
+    float4 palette_dark;
+    float3 palette_light;
 };
 
 // Layout must match CPU-side Uniforms struct byte-for-byte.
@@ -143,6 +147,8 @@ vertex VertexOut wf_vs(VertexIn v                  [[stage_in]],
     o.color    = v.color;
     o.uv       = v.uv;
     o.opacity  = v.opacity;
+    o.palette_dark = v.palette_dark;
+    o.palette_light = v.palette_light;
 
     if (u.lighting != 0) {
         float3 N = normalize((u.mv * float4(v.normal, 0.0)).xyz);
@@ -180,7 +186,9 @@ fragment float4 wf_fs(VertexOut v                  [[stage_in]],
     // and silently darkens every coloured-but-textured face.
     if (u.use_tex != 0) {
         float is_white = step(0.99, min(v.color.r, min(v.color.g, v.color.b)));
-        c = float4(((u.use_tex & 2) != 0 ? tex.sample(smp, v.uv).rgb * v.color : mix(v.color, tex.sample(smp, v.uv).rgb, is_white)) * v.lit, 1.0);
+        float3 sample=tex.sample(smp,v.uv).rgb;
+        float3 albedo=v.palette_dark.a>0.5 ? mix(v.palette_dark.xyz,v.palette_light,clamp((sample.r-.08)/.85,0.0,1.0)) : ((u.use_tex & 2)!=0 ? sample*v.color : mix(v.color,sample,is_white));
+        c=float4(albedo*v.lit,1.0);
     }
     if (u.fog != 0) {
         c.rgb = mix(u.fog_color, c.rgb, v.fog_factor);
@@ -197,6 +205,8 @@ struct Vert
     float u, v;
     float nx, ny, nz;
     float opacity;
+    float paletteDark[4];
+    float paletteLight[3];
 };
 
 struct Uniforms
@@ -372,6 +382,11 @@ public:
         _modulateTexture = enabled;
     }
 
+    void SetTexturePalette(bool e,unsigned dark,unsigned light) override
+    {
+        // Per-vertex endpoints preserve batching through sorted fish fins.
+        _paletteEnabled=e;_paletteDark=dark;_paletteLight=light;
+    }
     void SetOpacity(float opacity) override
     {
         if (_opacity == opacity) return;
@@ -574,6 +589,7 @@ private:
     bool _overlay = false;
     float _opacity = 1.0f;
     bool _modulateTexture = false;
+    bool _paletteEnabled=false; unsigned _paletteDark=0,_paletteLight=0xffffff;
     id<MTLDepthStencilState>   _depthState      = nil;
     id<MTLRenderCommandEncoder> _encoder        = nil;
     id<MTLSamplerState>        _sampler         = nil;
@@ -617,6 +633,12 @@ private:
         dst.u = v.u; dst.v = v.v;
         dst.nx = nx; dst.ny = ny; dst.nz = nz;
         dst.opacity = _opacity;
+        for (int i=0;i<3;++i) {
+            const int shift=16-8*i;
+            dst.paletteDark[i]=float((_paletteDark>>shift)&255)/255.f;
+            dst.paletteLight[i]=float((_paletteLight>>shift)&255)/255.f;
+        }
+        dst.paletteDark[3]=_paletteEnabled ? 1.f : 0.f;
     }
 
     void LazyInit()
@@ -661,6 +683,12 @@ private:
         vd.attributes[4].format      = MTLVertexFormatFloat;
         vd.attributes[4].offset      = offsetof(Vert, opacity);
         vd.attributes[4].bufferIndex = 0;
+        vd.attributes[5].format      = MTLVertexFormatFloat4;
+        vd.attributes[5].offset      = offsetof(Vert, paletteDark);
+        vd.attributes[5].bufferIndex = 0;
+        vd.attributes[6].format      = MTLVertexFormatFloat3;
+        vd.attributes[6].offset      = offsetof(Vert, paletteLight);
+        vd.attributes[6].bufferIndex = 0;
         vd.layouts[0].stride         = sizeof(Vert);
         vd.layouts[0].stepFunction   = MTLVertexStepFunctionPerVertex;
 

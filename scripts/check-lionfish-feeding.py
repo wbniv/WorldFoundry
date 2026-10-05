@@ -5,19 +5,23 @@ from pathlib import Path
 ROOT=Path(__file__).resolve().parents[1]
 sys.path.insert(0,str(ROOT/'tests'))
 from debug_bridge_client import BridgeClient
-OUT=Path(os.environ.get('OUT',ROOT/'docs/plans/2026-10-02-lionfish-goldfish-feeding/engine'))
+OUT=Path(os.environ.get('OUT',ROOT/'docs/plans/2026-10-05-lionfish-realism/runtime'))
 OUT.mkdir(parents=True,exist_ok=True)
 mapping=json.loads((ROOT/'wflevels/aquarium_lionfish/actor-map.json').read_text())
 idx=mapping['indices'];pl=idx['Player'];director=idx['Director']
 env=dict(os.environ,LD_LIBRARY_PATH=str(ROOT/'engine/libs'),WF_REST_HOST='127.0.0.1',WF_REST_PORT='18933')
 log=(OUT/'runtime.log').open('w')
 proc=subprocess.Popen([str(ROOT/'engine/wf_game'),'-L'+str(ROOT/'wflevels/aquarium_lionfish-standalone.iff'),
-                       '-rate20','-width=1280','-height=960','--debug-port','17933','--debug-bind','127.0.0.1','--debug-print-actors'],
+                       '-rate20','--vram-width=2048','--vram-height=1024','--vram-slot-width=512','--vram-slot-height=512','--vram-perm-width=512','--vram-perm-height=512','-width=1280','-height=960','--debug-port','17933','--debug-bind','127.0.0.1'],
                        cwd=ROOT/'wflevels/aquarium_lionfish',env=env,stdout=log,stderr=subprocess.STDOUT)
 cli=None
 report={}
 try:
     cli=BridgeClient(port=17933,timeout=20);cli.send({'op':'pause'})
+    cli.watch(idx=999999,mailbox=930)
+    rejected=cli.wait_for(lambda m:m.get('op')=='error',timeout=5)
+    assert rejected and 'out of range' in rejected.get('message',''),rejected
+    report['debug_bridge_invalid_actor_rejected']='PASS'
     cli.inject_input('joystick1_raw',0,duration_frames=-1)
     for actor,boxes in [(pl,[1906,3009,3010,3011]),(director,list(range(930,979))+list(range(1000,1048))+list(range(1050,1074))+list(range(1100,1110))+list(range(1200,1232))+[600,602,605,606,609])]:
         for m in boxes:cli.watch(idx=actor,mailbox=m)
@@ -67,7 +71,7 @@ try:
     hold(0,1);setval(1002,.65);setval(1003,0);setval(1004,2.5)
     eaten=value(934);shot('mouth-rest');hold(1,1)
     assert value(934)==eaten and value(1015)==1 and value(936)>0
-    shot('mouth-open');hold(1,1);shot('mouth-capture')
+    shot('mouth-open');hold(1,5);shot('mouth-capture')
     assert value(934)==eaten+1 and value(933)==0 and value(1000)==0
     report['player_mouth_capture_and_out_of_range']='PASS'
     hold(1,5);shot('mouth-closed');assert value(936)==0 and value(934)==eaten+1
@@ -86,8 +90,8 @@ try:
         step(2)
         pos=[value(m) for m in (1100,1101,1102)]
         max_step=max(max_step,math.dist(prior,pos));prior=pos
-        samples.append({'tick':2*k,'resident':pos,'active':value(933),'target':value(932),'state':value(1108),'awareness':value(1011),'alarm':value(1012),'burst':value(1013),'gape':value(937)})
-        if k<180:shot(f'frames/frame-{k:03d}')
+        samples.append({'tick':2*k,'resident':pos,'active':value(933),'target':value(932),'state':value(1108),'awareness':value(1011),'alarm':value(1012),'burst':value(1013),'gape':value(937),'prey':[value(m) for m in (1002,1003,1004)],'strike':[value(m) for m in range(1216,1221)]})
+        if k<10:shot(f'frames/frame-{k:03d}')
         if value(935)>before:break
     assert value(935)>before,('Resident never caught prey',samples[-1])
     assert max_step<.15,('Resident teleported',max_step)

@@ -78,6 +78,7 @@ public:
 	virtual void SetFishDeformation(float /*phase*/, float /*amplitude*/) {}
 	virtual void SetSwimDeformation(float /*phase*/, float /*amplitude*/, float /*bend*/, float /*finPhase*/, float /*finAmplitude*/, float /*minX*/, float /*maxX*/) {}
 	virtual void SetFinDeformation(float /*phase*/, float /*amplitude*/, float /*sweep*/, float /*spread*/) {}
+    virtual void SetLionPose(float, float, float, float, unsigned, unsigned) {}
 	void Validate() const;
 #if DO_VALIDATION
 	virtual void _Validate() const = 0;
@@ -122,6 +123,7 @@ public:
 	virtual void SetFishDeformation(float phase, float amplitude);
 	virtual void SetSwimDeformation(float phase, float amplitude, float bend, float finPhase, float finAmplitude, float minX, float maxX);
 	virtual void SetFinDeformation(float phase, float amplitude, float sweep, float spread);
+    virtual void SetLionPose(float phase,float drive,float turn,float gape,unsigned dark,unsigned light);
 #if DO_VALIDATION
 	virtual void _Validate() const;
 #endif
@@ -138,6 +140,7 @@ protected:
 	std::vector<wf_render::SwimWaveWeight> _swimWeights;
 	float _swimMinX = 0, _swimMaxX = 0;
 	std::vector<wf_render::FinWaveWeight> _finWeights;
+    std::vector<wf_render::LionRest> _lionRest;
 	std::vector<wf_render::JellyWeight> _jellyWeights;
 private:
 };

@@ -1,5 +1,14 @@
 # Shared Chromecast testing
 
+## Engine changes require explicit permission
+
+Will requires discussion and explicit permission before modifying any World
+Foundry engine code. Authorization to implement a level, asset, animation or
+plan does not authorize engine changes. Read-only engine investigation is fine;
+prepare a concrete proposal describing the required engine changes and obtain
+permission before editing engine code. Continue authorized asset/script/tooling
+work independently when possible. This applies to every platform/backend.
+
 When asking Will to run a diagnostic command, save its output to a file (prefer
 `docs/diagnostics/`), print the destination, and read it directly afterward.
 Do not require Will to copy large terminal output into the conversation.

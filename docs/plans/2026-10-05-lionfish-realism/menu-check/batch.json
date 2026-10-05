@@ -1,0 +1,60 @@
+{
+  "id": "B-608e327e0b25",
+  "owner": "50834354a173f73472469f04",
+  "targets": [
+    "chromecast-test-01",
+    "chromecast-test-02"
+  ],
+  "created": 1791166673.687464,
+  "jobs": [
+    {
+      "id": "J-ff7e542e5207",
+      "owner": "50834354a173f73472469f04",
+      "accepted": 1791166673.6876874,
+      "state": "failed",
+      "phase": "failed",
+      "request": {
+        "app": "aquarium",
+        "apk": "56923b15c160ed6b938826729dbb437c380fe317065409db0b2dc3e76a236f41.apk",
+        "validator": "menu-back",
+        "workflow": "check",
+        "device": "chromecast-test-01"
+      },
+      "device": "chromecast-test-01",
+      "generation": 85,
+      "cancel": 0,
+      "error": "Betta animation assertion failed",
+      "started": 1791166673.7880077,
+      "finished": 1791166740.4141748,
+      "worker_pid": 594788,
+      "recovery_resolved": 0,
+      "installation": null,
+      "target": "chromecast-test-01"
+    },
+    {
+      "id": "J-c42e53c515b8",
+      "owner": "50834354a173f73472469f04",
+      "accepted": 1791166673.6879222,
+      "state": "failed",
+      "phase": "failed",
+      "request": {
+        "app": "aquarium",
+        "apk": "56923b15c160ed6b938826729dbb437c380fe317065409db0b2dc3e76a236f41.apk",
+        "validator": "menu-back",
+        "workflow": "check",
+        "device": "chromecast-test-02"
+      },
+      "device": "chromecast-test-02",
+      "generation": 40,
+      "cancel": 0,
+      "error": "Betta animation assertion failed",
+      "started": 1791166673.7882335,
+      "finished": 1791166730.2206662,
+      "worker_pid": 594789,
+      "recovery_resolved": 0,
+      "installation": null,
+      "target": "chromecast-test-02"
+    }
+  ],
+  "state": "failed"
+}

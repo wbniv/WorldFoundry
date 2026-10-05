@@ -96,6 +96,9 @@ public:
     float GetOpacity() const { return _opacity; }
     void SetOpacity(float opacity) { assert(opacity >= 0.0f && opacity <= 1.0f); _opacity = opacity; }
 	const Color& SetColor(const Color& color);
+    void SetTexturePalette(unsigned dark,unsigned light) { _paletteDark=dark; _paletteLight=light; }
+    unsigned PaletteDark() const { return _paletteDark; }
+    unsigned PaletteLight() const { return _paletteLight; }
 
 	inline int32 GetMaterialFlags() const;
 	int32 SetMaterialFlags(int32 materialType);
@@ -124,6 +127,7 @@ public:
 		SINGLE_SIDED = 0,
 		DOUBLE_SIDED = 8,
 		ALPHA_CUTOUT = 16,
+        TEXTURE_PALETTE = 64, // Shared grayscale sample maps between two per-instance colors.
         TEXTURE_MODULATE = 32, // Explicit albedo × vertex shading; legacy replacement remains default.
 
 		POLYGON_TYPE_FLAGS	= GOURAUD_SHADED | TEXTURE_MAPPED,
@@ -142,7 +146,7 @@ public:
 		TEXTURE_TRANSLUCENCY_ONE_BACK_QUARTER_PRIMITIVE = 4<< 8|TEXTURE_TRANSLUCENCY_ON,
 		// bit 10 indicates on/off, bits 8-9 indicate rate
 
-		MATERIAL_FLAGS_MASK=TEXTURE_MODULATE|DOUBLE_SIDED|ALPHA_CUTOUT|RENDERER_SELECTION_MASK|TEXTURE_TRANSLUCENCY_HALF_BACK_HALF_PRIMITIVE|TEXTURE_TRANSLUCENCY_ONE_BACK_ONE_PRIMITIVE|TEXTURE_TRANSLUCENCY_ONE_BACK_NEGATIVE_ONE_PRIMITIVE|TEXTURE_TRANSLUCENCY_ONE_BACK_QUARTER_PRIMITIVE
+		MATERIAL_FLAGS_MASK=TEXTURE_PALETTE|TEXTURE_MODULATE|DOUBLE_SIDED|ALPHA_CUTOUT|RENDERER_SELECTION_MASK|TEXTURE_TRANSLUCENCY_HALF_BACK_HALF_PRIMITIVE|TEXTURE_TRANSLUCENCY_ONE_BACK_ONE_PRIMITIVE|TEXTURE_TRANSLUCENCY_ONE_BACK_NEGATIVE_ONE_PRIMITIVE|TEXTURE_TRANSLUCENCY_ONE_BACK_QUARTER_PRIMITIVE
 	};
 
 #if DO_IOSTREAMS
@@ -168,6 +172,7 @@ private:
 	Texture _texture;
     const PixelMap* _texturePixelMap;
     float _opacity = 1.0f;
+    unsigned _paletteDark=0, _paletteLight=0xffffff;
 };
 
 //============================================================================

@@ -188,7 +188,7 @@ void RenderActor3D::SetJellyDeformation(float contraction, float phase, float pi
     if (!std::isfinite(contraction) || !std::isfinite(phase) || !std::isfinite(pitchLag) || !std::isfinite(rollLag)) return;
     Vertex3D* vertices=_object.GetWrittableVertexList();
     const int count=_object.GetVertexCount();
-    if (!vertices || count<=0 || !_fishWeights.empty() || !_finWeights.empty() || !_swimWeights.empty()) return;
+    if (!vertices || count<=0 || !_lionRest.empty() || !_fishWeights.empty() || !_finWeights.empty() || !_swimWeights.empty()) return;
     if (_jellyWeights.empty()) {
         _jellyWeights.reserve(count);
         for(int i=0;i<count;i++) {
@@ -214,7 +214,7 @@ void RenderActor3D::SetSwimDeformation(float phase, float amplitude, float bend,
         !std::isfinite(minX) || !std::isfinite(maxX) || maxX-minX<.001f) return;
     Vertex3D* vertices=_object.GetWrittableVertexList();
     const int count=_object.GetVertexCount();
-    if (!vertices || count<=0 || !_fishWeights.empty() || !_finWeights.empty() || !_jellyWeights.empty()) return;
+    if (!vertices || count<=0 || !_lionRest.empty() || !_fishWeights.empty() || !_finWeights.empty() || !_jellyWeights.empty()) return;
     if (_swimWeights.empty()) {
         _swimMinX=minX; _swimMaxX=maxX; _swimWeights.reserve(count);
         for(int i=0;i<count;i++) {
@@ -241,7 +241,7 @@ void RenderActor3D::SetFishDeformation(float phase, float amplitude)
     if (!std::isfinite(phase) || !std::isfinite(amplitude)) return;
     Vertex3D* vertices=_object.GetWrittableVertexList();
     const int count=_object.GetVertexCount();
-    if (!vertices || count<=0 || !_finWeights.empty() || !_swimWeights.empty() || !_jellyWeights.empty()) return;
+    if (!vertices || count<=0 || !_lionRest.empty() || !_finWeights.empty() || !_swimWeights.empty() || !_jellyWeights.empty()) return;
     if (_fishWeights.empty()) {
         float minX=vertices[0].position.X().AsFloat(),maxX=minX;
         for(int i=1;i<count;i++){ float x=vertices[i].position.X().AsFloat(); minX=std::min(minX,x); maxX=std::max(maxX,x); }
@@ -264,7 +264,7 @@ void RenderActor3D::SetFinDeformation(float phase, float amplitude, float sweep,
     if (!std::isfinite(phase) || !std::isfinite(amplitude) || !std::isfinite(sweep) || !std::isfinite(spread)) return;
     Vertex3D* vertices=_object.GetWrittableVertexList();
     const int count=_object.GetVertexCount();
-    if (!vertices || count<=0 || !_fishWeights.empty() || !_swimWeights.empty() || !_jellyWeights.empty()) return;
+    if (!vertices || count<=0 || !_lionRest.empty() || !_fishWeights.empty() || !_swimWeights.empty() || !_jellyWeights.empty()) return;
     if (_finWeights.empty()) {
         std::map<int,std::pair<float,float>> roots;
         // Root rows are authored explicitly, including every across-fin coordinate.
@@ -670,4 +670,23 @@ void RenderActor3D::SetPlantGeometry(const plantgrowth::Chunk& chunk,float age,f
   if(_object.SetRuntimeGeometry(_plantVisibleVertices,_plantVertices.data(),int(_plantFaces.size()),_plantFaces.data(),textured)){_plantGeneration=generation;_plantBucket=bucket;}
  }
  _plantLastAge=age;_plantLastPhase=phase;
+}
+
+void RenderActor3D::SetLionPose(float phase,float drive,float turn,float gape,unsigned dark,unsigned light)
+{
+    if(!std::isfinite(phase)||!std::isfinite(drive)||!std::isfinite(turn)||!std::isfinite(gape)) return;
+    const auto& rig=_object.GetLionRig();
+    const int count=_object.GetVertexCount(); auto* vertices=_object.GetWrittableVertexList();
+    if(!vertices || rig.size()!=unsigned(count) || !_fishWeights.empty() || !_finWeights.empty() || !_swimWeights.empty() || !_jellyWeights.empty()) return;
+    if(_lionRest.empty()) for(int i=0;i<count;i++) {
+        const auto& p=vertices[i].position;
+        _lionRest.push_back({p.X().AsFloat(),p.Y().AsFloat(),p.Z().AsFloat()});
+    }
+    phase=std::fmod(phase,1.f);drive=wf_render::lionClamp(drive,0,1);
+    turn=wf_render::lionClamp(turn,-1,1);gape=wf_render::lionClamp(gape,0,1);
+    for(int i=0;i<count;i++) {
+        float x,y,z;wf_render::lionPose(_lionRest[i],rig[i],phase,drive,turn,gape,x,y,z);
+        vertices[i].position=Vector3(Scalar(x),Scalar(y),Scalar(z));
+    }
+    _object.SetLionPalette(dark,light);
 }

@@ -45,24 +45,26 @@ extern LMalloc testMemory;
 #include <vector>
 #include "gfx/glpipeline/backend_factory.cc"
 LMalloc testMemory;
-struct Recorded { float x,z,opacity,ambient,fog; bool prelit,modulate; };
+struct Recorded { float x,z,opacity,ambient,fog; bool prelit,modulate,palette; unsigned dark,light; };
 struct Backend : RendererBackend {
  std::vector<Recorded> draws;
  float opacity=1, ambient=0, fog=0;
- bool modulate=false;
+ int ambientCalls=0;
+ bool modulate=false,palette=false;unsigned dark=0,light=0xffffff;
  void SetProjection(float,float,float,float) override {}
  void SetModelView(const Matrix34&) override {}
  void ResetModelView() override {}
- void SetAmbient(float r,float,float) override { ambient=r; }
+ void SetAmbient(float r,float,float) override { ambient=r; ++ambientCalls; }
  void SetDirLight(int,float,float,float,float,float,float) override {}
  void SetLightingEnabled(bool) override {}
  void SetFog(float r,float,float,float,float) override { fog=r; }
  void SetFogEnabled(bool) override {}
+ void SetTexturePalette(bool e,unsigned d,unsigned l) override { palette=e;dark=d;light=l; }
  void SetOpacity(float x) override { opacity=x; }
  void SetTextureModulation(bool x) override { modulate=x; }
  void DrawTriangle(const RBVertex& a,const RBVertex&,const RBVertex&,
                    float,float,float,const PixelMap*,bool,bool p) override {
-   draws.push_back({a.x,a.z,opacity,ambient,fog,p,modulate});
+   draws.push_back({a.x,a.z,opacity,ambient,fog,p,modulate,palette,dark,light});
  }
  void EndFrame() override {}
  RBTextureHandle CreateTexture(int,int,RBTextureFormat,const void*) override { return nullptr; }
@@ -75,15 +77,21 @@ int main() {
  auto submit=[&](bool prelit=false) { r.DrawTriangle(v,v,v,0,0,1,nullptr,false,prelit); };
  r.SetProjection(45,1,.1,100);
  r.SetAmbient(.2,0,0); r.SetFog(.3,0,0,1,10);
+ r.SetTexturePalette(true,0x330011,0xffffaa);
  r.SetTextureModulation(true); r.SetOpacity(.25); submit(true); // near translucent, encountered first
  Matrix34 far; far[3][0].value=7; far[3][2].value=-8;
+ r.SetTexturePalette(true,0x553300,0xffdd88);
  r.SetTextureModulation(false); r.SetModelView(far); r.SetAmbient(.8,0,0); r.SetOpacity(.5); submit();
+ r.SetTexturePalette(false,0,0xffffff);
  r.SetTextureModulation(true); r.ResetModelView(); r.SetOpacity(1); submit(); // scenery encountered later
  assert(backend.draws.size()==1 && backend.draws[0].opacity==1 && backend.draws[0].modulate);
  r.FlushTranslucency();
  assert(backend.draws.size()==3);
  assert(backend.draws[1].x==7 && backend.draws[1].z==-10);
  assert(backend.draws[1].opacity==.5 && backend.draws[1].ambient==.8f && !backend.draws[1].modulate);
+ assert(backend.draws[1].palette && backend.draws[1].dark==0x553300 && backend.draws[1].light==0xffdd88);
+ assert(backend.draws[2].palette && backend.draws[2].dark==0x330011 && backend.draws[2].light==0xffffaa);
+ assert(!backend.draws[0].palette);
  assert(backend.draws[2].z==-2 && backend.draws[2].ambient==.2f);
  assert(backend.draws[2].fog==.3f && backend.draws[2].prelit && backend.draws[2].modulate);
  assert(testMemory.allocated==0 && backend.opacity==1 && backend.modulate);
@@ -95,6 +103,21 @@ int main() {
  r.SetOpacity(0); submit(); r.EndFrame(); assert(backend.draws.size()==5);
  r.SetTextureModulation(false); r.SetOpacity(1); submit(); r.EndFrame();
  assert(testMemory.allocated==0 && backend.draws.back().opacity==1 && !backend.draws.back().modulate);
+ // Alternating palettes in depth order retain each color without replaying
+ // lighting/fog uniforms and flushing every triangle's GPU batch.
+ r.ResetModelView(); r.SetOpacity(.55);
+ const int before=backend.ambientCalls;
+ const size_t drawStart=backend.draws.size();
+ for(int i=0;i<40;++i) {
+   v.z=-50.f+i;
+   r.SetTexturePalette(true,i%2?0x550000:0x330000,0xffffaa);
+   submit();
+ }
+ r.EndFrame();
+ assert(backend.draws.size()==drawStart+40);
+ assert(backend.ambientCalls-before<=1);
+ for(int i=0;i<40;++i) assert(backend.draws[drawStart+i].dark==(i%2?0x550000u:0x330000u));
+ assert(testMemory.allocated==0);
 }
 '''
     source = tmp_path/'queue.cc'

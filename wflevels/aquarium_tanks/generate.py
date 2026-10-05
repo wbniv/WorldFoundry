@@ -30,6 +30,7 @@ COUNT=int(os.environ.get('TANK_COUNT',str(C.COUNT)))
 assert (COUNT==C.COUNT if C.KIND=='plants' else 1<=COUNT<=C.COUNT)
 ROWS=C.RESIDENTS[:COUNT-1]
 FEEDING=C.KIND=='lionfish' and os.environ.get('LIONFISH_FEEDING','1')!='0'
+LION_RIG=C.KIND=='lionfish' and os.environ.get('LIONFISH_REALISM','1')!='0'
 BETTA_FINS=C.KIND=='betta' and os.environ.get('BETTA_FINS','1')!='0'
 if BETTA_FINS:
     sys.path.insert(0,str(HERE))
@@ -72,7 +73,14 @@ def material(key):
                 tex=mt.node_tree.nodes.new('ShaderNodeTexImage')
                 tex.image=bpy.data.images.load(str(HERE/'leaf_surfaces.tga'),check_existing=True)
                 mt.node_tree.links.new(tex.outputs['Color'],mt.node_tree.nodes.get('Principled BSDF').inputs['Base Color'])
-        if key.startswith(('betta_mem','betta_ray','betta_margin')):mt['wf_prelit']=True
+        if LION_RIG and key in ('body','fin'):
+            mt['wf_texture_palette']=True
+            mt['wf_palette_texture']='lionfish_'+('body' if key=='body' else 'fins')+'.tga'
+            tex=mt.node_tree.nodes.new('ShaderNodeTexImage')
+            tex.image=bpy.data.images.load(str(HERE/mt['wf_palette_texture']),check_existing=True)
+            mt.node_tree.links.new(tex.outputs['Color'],mt.node_tree.nodes.get('Principled BSDF').inputs['Base Color'])
+            if key=='fin':mt['wf_opacity']=.55;mt['wf_double_sided']=True
+        if key.startswith(('betta_mem' ,'betta_ray','betta_margin')):mt['wf_prelit']=True
         MATERIALS[key] = mt
     return MATERIALS[key]
 
@@ -90,6 +98,8 @@ def blender_mesh(mesh):
         uv=data.uv_layers.new(name='FinWeights')
         for poly in data.polygons:
             for li in poly.loop_indices:uv.data[li].uv=mesh.uvs[data.loops[li].vertex_index]
+    if LION_RIG and hasattr(mesh,'regions'):
+        lionfish_model.rig_attributes(data,mesh)
     return data
 
 
@@ -133,7 +143,10 @@ def static_box(name, lo, hi, key, visible=True):
 
 
 bpy.ops.wm.read_factory_settings(use_empty=True)
-assert addon_utils.enable('wf_blender', default_set=False, persistent=False), 'wf_blender unavailable'
+# Use this checkout's exporter, including its optional lionfish rig metadata.
+sys.path.insert(0,str(REPO/'wftools'))
+import wf_blender
+wf_blender.register()
 bpy.ops.wf.import_level(filepath=str(REPO/'wflevels/snowgoons-blender/snowgoons-blender.lev'))
 classes = {'director':'Director','camera':'Camera','levelobj':'LevelObj','matte':'Matte',
            'light':'SunLight','room':'Room','camshot':'cs_wide','target':'LookAt','player':'Player'}
@@ -160,6 +173,11 @@ if BETTA_FINS:meshes,offsets=detailed_models()
 if FEEDING:
     from lionfish_mouth import feeding_models
     meshes,offsets=feeding_models()
+if LION_RIG:
+    import lionfish_model
+    lionfish_model.write_textures(HERE)
+    COLORS.update(body=(1,1,1),fin=(1,1,1),eye=(.009,.015,.017),mouth=(.009,.015,.017))
+    meshes,offsets=[lionfish_model.geometry()],[(0,0,0)]
 data=[blender_mesh(m) for m in meshes]
 player=bpy.data.objects['Player']
 if C.KIND=='plants':
@@ -187,6 +205,7 @@ for k in range(0 if C.KIND=='plants' else COUNT):
     for m,d,offset in zip(meshes,data,offsets):
         obj=actor(f'animal-{k:02d}-{m.name}',d,tuple(pos[i]+offset[i]*scale for i in range(3)),mesh_name=m.name)
         obj.scale=(scale,)*3
+        if LION_RIG:obj['wf_lion_rig']=True
         group.append(obj)
     parts.append(group)
 
@@ -310,6 +329,7 @@ if FEEDING:
     header+=goldfish.constants(indices,int(os.environ.get('LIONFISH_INITIAL_GOLDFISH','0')),
                               os.environ.get('LIONFISH_AUTOEAT','1')!='0')
     feeding=(COMMON/'lionfish_feeding.fth').read_text()
+    feeding=(COMMON/'lionfish_suction.fth').read_text()+'\n'+feeding
     obstacles=': gf-obstacles\n'
     for x,y,rx,ry,h in C.ROCKS:
         obstacles+=' '+' '.join(num(v) for v in (x-rx,x+rx,y-ry,y+ry,SAND,SAND+h))+' gf-rock\n'
@@ -342,10 +362,20 @@ for j,(m,off) in enumerate(zip(meshes,offsets)):
     pose+=' '+position+f' {a} {b} {c} {650+j} tk@ tk-part\n'
     for axis in 'XYZ':
         expr='tk-scale tk@'
-        if j==0 and C.KIND=='lionfish' and axis=='Y':
+        if j==0 and C.KIND=='lionfish' and not LION_RIG and axis=='Y':
             expr+=' tk-gait .022 * 1 + *'
         pose+=f' {expr} INDEXOF_{axis}_SCALE {650+j} tk@ write-actor-mailbox\n'
 if C.KIND=='jellyfish':pose+=' j-rig\n'
+if LION_RIG:
+    # Palette selected via the same stable helper for every animal/spawn.
+    palette=': lf-palette\n'
+    for k in range(COUNT):
+        dark,light=lionfish_model.packed_palette(0,k)
+        palette+=f' 650 tk@ {indices[parts[k][0].name]} = if {dark} {light} exit then\n'
+    dark,light=lionfish_model.packed_palette(0,0)
+    palette+=f' {dark} {light} ;\n'
+    pose=palette+pose
+    pose+=' tk-phase tk@ tk-pose-drive tk@ tk-pose-roll tk@ .012 / -1 max 1 min gf-bite tk@ lf-palette 650 tk@ lion-pose\n'
 pose+=(' 5 profile-end\n' if FEEDING else '')+';\n'
 if BETTA_FINS:
     fin_motion=(HERE/'fin_motion.fth').read_text()
@@ -415,6 +445,9 @@ if C.KIND=='arowana':
 (HERE/'actor-map.json').write_text(json.dumps(dict(level=LEVEL,title=C.TITLE,kind=C.KIND,count=COUNT,
     profile=PROFILE,indices=indices,mailboxes=mailboxes,parts=[m.name for m in meshes],offsets=offsets,
     movement=({'states':species.STATES,'kind':'pulse-and-drift' if C.KIND=='jellyfish' else 'steer-and-swim', 'jelly_states':species.JELLY if C.KIND=='jellyfish' else None} if C.KIND in ('betta','lionfish','jellyfish') else None),
+    lionfish_rig=({'parts':1,'regions':lionfish_model.REGIONS,'triangles':sum(len(f)-2 for f in meshes[0].faces),
+                  'palette_seed':0,'palettes':[lionfish_model.palette_for(0,k) for k in range(COUNT)],
+                  'shared_textures':['lionfish_body.tga','lionfish_fins.tga'],'fin_opacity':.55} if LION_RIG else None),
     animal=('sea_urchin' if C.KIND=='plants' else C.KIND),spawn=C.SPAWN,bottom=C.BOTTOM,top=C.TOP,limits=[LIMIT_X,LIMIT_Y],rows=ROWS,
     betta_fins=({'groups':8,'actor_lookup':[650,657],'motion_mailboxes':[660,666],
                  'weights':'solid UV.x across fin; UV.y root-to-tip','physics_bodies_added':0,
@@ -422,7 +455,8 @@ if C.KIND=='arowana':
     feeding=({'slots':3,'base':1000,'stride':16,'release':930,'eat':931,'count':933,'target':932,
               'player_eaten':934,'resident_eaten':935,'resident_state':1100,'behavior_state':1108,
               'sensory_memory_base':1050,'sensory_memory_stride':8,
-              'strike_base':1200,'strike_stride':16,'strike_duration':.26,'capture_time':.10,
+              'strike_base':1200,'strike_stride':16,'strike_duration':.26,'capture_target_time':.10,'capture_rule':'swept mouth entry and prey fit; transport completes consumption',
+              'flow_scratch':[1300,1347],
               'observation_time':.65,'sight_range':5.5,'sight_memory':.8,
               'slot_fields':['active','generation','x','y','z','yaw','vx','vy','vz','phase','age',
                              'resident_awareness','alarm','escape_remaining','escape_cooldown','strike_owner'],

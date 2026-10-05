@@ -452,9 +452,24 @@ def _write_mesh_iff(blobj, filepath: str) -> bool:
     Returns True on success.
     """
     import bmesh as _bmesh
+    import math
     mesh = blobj.data
     if mesh is None or not hasattr(mesh, 'vertices'):
         return False
+
+    rig = None
+    if blobj.get('wf_lion_rig', False):
+        names=('wf_lion_region','wf_lion_weight','wf_lion_pivot')
+        if any(n not in mesh.attributes for n in names):
+            raise ValueError('Lionfish rig requires region, weight and pivot point attributes')
+        rig=[]
+        for i in range(len(mesh.vertices)):
+            region=int(mesh.attributes[names[0]].data[i].value)
+            weight=float(mesh.attributes[names[1]].data[i].value)
+            pivot=tuple(mesh.attributes[names[2]].data[i].vector)
+            if not 0<=region<10 or not 0<=weight<=1 or not all(math.isfinite(v) for v in pivot):
+                raise ValueError('Invalid lionfish rig point metadata')
+            rig.append((region,round(weight*65536),*(round(v*65536) for v in pivot)))
 
     # Triangulate into a temporary bmesh
     bm = _bmesh.new()
@@ -470,6 +485,7 @@ def _write_mesh_iff(blobj, filepath: str) -> bool:
     # its own VRTX entry.  This is necessary because VRTX stores one UV per
     # vertex — without splitting, seam edges pick up the wrong UV from whichever
     # loop was visited first.
+    split_rig = []
     split_verts = []          # list of (co, u, v)
     split_map   = {}          # (orig_vi, u_key, v_key) → new_vi
 
@@ -491,6 +507,7 @@ def _write_mesh_iff(blobj, filepath: str) -> bool:
             if key not in split_map:
                 split_map[key] = len(split_verts)
                 split_verts.append((bm.verts[orig_vi].co.copy(), u, v))
+                split_rig.append(rig[orig_vi] if rig is not None else ())
             tri.append(split_map[key])
         face_triples.append((tri[2], tri[1], tri[0], face.material_index))   # Blender hand → WF hand
 
@@ -507,16 +524,15 @@ def _write_mesh_iff(blobj, filepath: str) -> bool:
     def _vkey(co, u, v):
         return (int(round(co.x * 65536)), int(round(co.y * 65536)), int(round(co.z * 65536)),
                 int(round(u * 65536)), int(round(v * 65536)))
-    _canon = {}            # _vkey → final index (sorted)
-    for co, u, v in sorted(split_verts, key=lambda t: _vkey(*t)):
-        k = _vkey(co, u, v)
-        if k not in _canon:
-            _canon[k] = len(_canon)
-    _old_to_new = [_canon[_vkey(*t)] for t in split_verts]
-    _canon_verts = [None] * len(_canon)
-    for co, u, v in split_verts:
-        _canon_verts[_canon[_vkey(co, u, v)]] = (co, u, v)
-    split_verts = _canon_verts
+    # Metadata is part of identity: coincident roots with different rig roles
+    # must not merge even when their position and UV are identical.
+    keys=[_vkey(*v)+meta for v,meta in zip(split_verts,split_rig)]
+    _canon={key:i for i,key in enumerate(sorted(set(keys)))}
+    _old_to_new=[_canon[key] for key in keys]
+    _canon_verts=[None]*len(_canon);_canon_rig=[None]*len(_canon)
+    for v,meta,key in zip(split_verts,split_rig,keys):
+        _canon_verts[_canon[key]]=v;_canon_rig[_canon[key]]=meta
+    split_verts=_canon_verts;split_rig=_canon_rig
     _faces = []
     for a, b, c, m in face_triples:
         na, nb, nc = _old_to_new[a], _old_to_new[b], _old_to_new[c]
@@ -564,6 +580,11 @@ def _write_mesh_iff(blobj, filepath: str) -> bool:
                 g = int(bc[1] * 255) & 0xFF
                 b = int(bc[2] * 255) & 0xFF
                 color = (r << 16) | (g << 8) | b
+        # A palette material must name its shared grayscale image explicitly.
+        if mat.get('wf_texture_palette', False):
+            tex=str(mat.get('wf_palette_texture',''))
+            if not tex: raise ValueError('Palette material missing shared texture')
+            flags |= 2|64
         if mat.get('wf_double_sided', False): flags |= 8
         if mat.get('wf_prelit', False): flags |= 4
         if mat.get('wf_alpha_cutout', False): flags |= 16
@@ -591,9 +612,14 @@ def _write_mesh_iff(blobj, filepath: str) -> bool:
         payload = struct.pack('<II', 1, len(opacities))
         payload += struct.pack('<' + 'I' * len(opacities), *opacities)
         opac = _write_iff_chunk('OPAC', payload)
+    lrig=b''
+    if rig is not None:
+        payload=struct.pack('<II',1,len(split_rig))
+        payload+=b''.join(struct.pack('<Iiiii',*meta) for meta in split_rig)
+        lrig=_write_iff_chunk('LRIG',payload)
     # Assemble MODL
     inner = (
-        _write_iff_chunk('VRTX', bytes(vrtx)) +
+        _write_iff_chunk('VRTX', bytes(vrtx)) + lrig +
         _write_iff_chunk('MATL', matl) + opac +
         _write_iff_chunk('FACE', bytes(face_data))
     )

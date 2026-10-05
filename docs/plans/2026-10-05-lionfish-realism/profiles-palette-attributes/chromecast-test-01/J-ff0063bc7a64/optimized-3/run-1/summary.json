@@ -1,0 +1,15 @@
+{
+  "run": 1,
+  "frames": 273,
+  "interval_count": 273,
+  "fps": 9.075770562658878,
+  "refresh_ms": 16.683333,
+  "p50_ms": 116.783177,
+  "p90_ms": 133.46683,
+  "p95_ms": 133.466867,
+  "p99_ms": 150.150214,
+  "worst_ms": 183.516907,
+  "missed_refresh_percent": 100.0,
+  "duration_seconds": 30,
+  "layer": "org.worldfoundry.wf_game.aquarium/android.app.NativeActivity#8642"
+}

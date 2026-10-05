@@ -56,14 +56,14 @@
   gf-clear-ray & ;
 : gf-player-mouth
   tk-heading tk@ gf-mouth-yaw tk! tk-pitch tk@ gf-mouth-pitch tk! 1 gf-mouth-scale tk!
-  INDEXOF_X_POS tk-player read-actor-mailbox tk-heading tk@ tk-cos tk-pitch tk@ tk-cos * .56 * + gf-mouth-x tk!
-  INDEXOF_Y_POS tk-player read-actor-mailbox tk-heading tk@ tk-sin tk-pitch tk@ tk-cos * .56 * + gf-mouth-y tk!
-  INDEXOF_Z_POS tk-player read-actor-mailbox tk-pitch tk@ tk-sin .56 * + gf-mouth-z tk! ;
+  INDEXOF_X_POS tk-player read-actor-mailbox tk-heading tk@ tk-cos tk-pitch tk@ tk-cos * .626 * + gf-mouth-x tk!
+  INDEXOF_Y_POS tk-player read-actor-mailbox tk-heading tk@ tk-sin tk-pitch tk@ tk-cos * .626 * + gf-mouth-y tk!
+  INDEXOF_Z_POS tk-player read-actor-mailbox tk-pitch tk@ tk-sin .626 * + gf-mouth-z tk! ;
 : gf-resident-mouth
   gf-ryaw tk@ gf-mouth-yaw tk! gf-rpitch tk@ gf-mouth-pitch tk! .75 gf-mouth-scale tk!
-  gf-rx tk@ gf-ryaw tk@ tk-cos gf-rpitch tk@ tk-cos * .42 * + gf-mouth-x tk!
-  gf-ry tk@ gf-ryaw tk@ tk-sin gf-rpitch tk@ tk-cos * .42 * + gf-mouth-y tk!
-  gf-rz tk@ gf-rpitch tk@ tk-sin .42 * + gf-mouth-z tk! ;
+  gf-rx tk@ gf-ryaw tk@ tk-cos gf-rpitch tk@ tk-cos * .4695 * + gf-mouth-x tk!
+  gf-ry tk@ gf-ryaw tk@ tk-sin gf-rpitch tk@ tk-cos * .4695 * + gf-mouth-y tk!
+  gf-rz tk@ gf-rpitch tk@ tk-sin .4695 * + gf-mouth-z tk! ;
 : gf-consume
   gf-hide gf-count tk@ 1 - 0 max gf-count tk!
   gf-owner tk@ 1 = if
@@ -72,6 +72,7 @@
 : gf-strike-start
   0 gs@ 0 < 15 gf@ 0 = & if
     0 0 gs! gf-i tk@ 1 gs! 1 gf@ 2 gs! 0 3 gs!
+    gf-mouth-x tk@ 5 gs! gf-mouth-y tk@ 6 gs! gf-mouth-z tk@ 7 gs!
     gf-owner tk@ 15 gf! 2 gf-event
   then ;
 : gf-player-eat
@@ -84,30 +85,121 @@
       tk-cooldown tk@ 0 <= if .3 tk-dart tk! 1 tk-cooldown tk! then
     then
   then ;
+\ Flow scratch 1320..1343; slot-generation and reservation fields remain unchanged.
+: lf-remaining 1320 ; : lf-prev-x 1321 ; : lf-prev-y 1322 ; : lf-prev-z 1323 ;
+: lf-yaw-c 1324 ; : lf-yaw-s 1325 ; : lf-pitch-c 1326 ; : lf-pitch-s 1327 ;
+: lf-pulse 1328 ; : lf-slot 1329 ; : lf-t 1330 ; : lf-hit-y 1331 ; : lf-hit-z 1332 ;
+: lf-old-vx 1333 ; : lf-old-vy 1334 ; : lf-old-vz 1335 ;
+: lf-old-x 1336 ; : lf-old-y 1337 ; : lf-old-z 1338 ; : lf-dx 1339 ; : lf-dy 1340 ; : lf-dz 1341 ;
+: lf-world-x 1342 ; : lf-world-y 1343 ;
+: lf-mouth-vx 1344 ; : lf-mouth-vy 1345 ; : lf-mouth-vz 1346 ;
+: lf-resident-y 1347 ;
+: lf-frame
+  gf-mouth-yaw tk@ tk-cos lf-yaw-c tk! gf-mouth-yaw tk@ tk-sin lf-yaw-s tk!
+  gf-mouth-pitch tk@ tk-cos lf-pitch-c tk! gf-mouth-pitch tk@ tk-sin lf-pitch-s tk! ;
+: lf-local ( world-x world-y world-z -- local-x local-y local-z )
+  lf-dz tk! lf-dy tk! lf-dx tk!
+  lf-dx tk@ lf-yaw-c tk@ * lf-dy tk@ lf-yaw-s tk@ * + lf-world-x tk!
+  lf-world-x tk@ lf-pitch-c tk@ * lf-dz tk@ lf-pitch-s tk@ * +
+  lf-dy tk@ lf-yaw-c tk@ * lf-dx tk@ lf-yaw-s tk@ * -
+  lf-dz tk@ lf-pitch-c tk@ * lf-world-x tk@ lf-pitch-s tk@ * - ;
+: lf-world ( local-x local-y local-z -- world-x world-y world-z )
+  lf-dz tk! lf-dy tk! lf-dx tk!
+  lf-dx tk@ lf-pitch-c tk@ * lf-dz tk@ lf-pitch-s tk@ * - lf-world-x tk!
+  lf-world-x tk@ lf-yaw-c tk@ * lf-dy tk@ lf-yaw-s tk@ * -
+  lf-world-x tk@ lf-yaw-s tk@ * lf-dy tk@ lf-yaw-c tk@ * +
+  lf-dx tk@ lf-pitch-s tk@ * lf-dz tk@ lf-pitch-c tk@ * + ;
+: lf-prey-local
+  2 gf@ gf-mouth-x tk@ - 3 gf@ gf-mouth-y tk@ - 4 gf@ gf-mouth-z tk@ - lf-local
+  2 lf! 1 lf! 0 lf!
+  6 gf@ lf-mouth-vx tk@ - 7 gf@ lf-mouth-vy tk@ - 8 gf@ lf-mouth-vz tk@ - lf-local 5 lf! 4 lf! 3 lf! ;
+: lf-store-prey
+  0 lf@ 1 lf@ 2 lf@ lf-world
+  gf-mouth-z tk@ + 4 gf! gf-mouth-y tk@ + 3 gf! gf-mouth-x tk@ + 2 gf!
+  3 lf@ 4 lf@ 5 lf@ lf-world
+  lf-mouth-vz tk@ + 8 gf! lf-mouth-vy tk@ + 7 gf! lf-mouth-vx tk@ + 6 gf! ;
+: lf-mouth-entry
+  \ Swept centre entry, body-fit clearance and actual gape; never a timer eat.
+  0 lf@ .015 gf-mouth-scale tk@ * <= lf-prev-x tk@ -.10 gf-mouth-scale tk@ * >= &
+  gf-gape tk@ .35 >= & gf-clear-ray & if
+    lf-prev-x tk@ 0 lf@ - abs .00001 > if
+      lf-prev-x tk@ lf-prev-x tk@ 0 lf@ - / gf-clamp01
+    else 1 then lf-t tk!
+    lf-prev-y tk@ 1 lf@ over - lf-t tk@ * + lf-hit-y tk!
+    lf-prev-z tk@ 2 lf@ over - lf-t tk@ * + lf-hit-z tk!
+    lf-hit-y tk@ abs .16 gf-mouth-scale tk@ * .060 - <=
+    lf-hit-z tk@ abs .16 gf-mouth-scale tk@ * .095 - <= &
+  else 0 then ;
+: lf-transport
+  \ Only after spatial entry: axial flow inside mouth/throat; retain curved motion.
+  3 lf@ -2 gf-mouth-scale tk@ * over - 6 lf@ 40 * 1 min * + 3 lf!
+  4 lf@ 1 6 lf@ 25 * - 0 max * 4 lf!
+  5 lf@ 1 6 lf@ 25 * - 0 max * 5 lf!
+  3 0 do i lf@ i 3 + lf@ 6 lf@ * + i lf! loop ;
+: lf-suction
+  gf-i tk@ lf-slot tk! lf-frame
+  tk-dt@ lf-remaining tk!
+  \ At most ten 5ms steps (tk-dt@ is bounded at 50ms). Keep live escape velocity.
+  10 0 do lf-remaining tk@ 0 > if
+    lf-remaining tk@ .005 min dup 6 lf! lf-remaining tk@ swap - lf-remaining tk!
+    lf-slot tk@ gf-i tk! lf-prey-local
+    0 lf@ lf-prev-x tk! 1 lf@ lf-prev-y tk! 2 lf@ lf-prev-z tk!
+    0 gs@ lf-remaining tk@ - .08 < if 0 gs@ lf-remaining tk@ - .08 / gf-clamp01 dup 1 swap - * 4 * else 0 then
+    lf-pulse tk!
+    3 gs@ 1 = if lf-transport else
+      lf-pulse tk@ 7 lf! .16 gf-mouth-scale tk@ * 8 lf!
+      gf-clear-ray 9 lf! .2 18 lf! 0 15 lf! 0 16 lf! 0 17 lf!
+      \ Baseline swim already integrates once; retain only the flow correction.
+      3 lf@ lf-old-vx tk! 4 lf@ lf-old-vy tk! 5 lf@ lf-old-vz tk!
+      lf-step
+      0 lf@ lf-old-vx tk@ 6 lf@ * - 0 lf!
+      1 lf@ lf-old-vy tk@ 6 lf@ * - 1 lf!
+      2 lf@ lf-old-vz tk@ 6 lf@ * - 2 lf!
+    then
+    lf-store-prey
+    3 gs@ 0 = if lf-mouth-entry if 1 3 gs! 0 4 gs! then then
+    3 gs@ 1 = if
+      4 gs@ 6 lf@ + 4 gs!
+      0 lf@ -.34 gf-mouth-scale tk@ * <= if gf-consume 2 3 gs! then
+    then
+  then loop ;
+: lf-neighbors
+  \ Water flow is spatial: nearby unreserved prey also feels it, without capture.
+  3 0 do i 1 gs@ <> if i gf-i tk! gf-live 15 gf@ 0 = & if
+    lf-frame lf-prey-local tk-dt@ lf-remaining tk!
+    10 0 do lf-remaining tk@ 0 > if
+      lf-remaining tk@ .005 min dup 6 lf! lf-remaining tk@ swap - lf-remaining tk!
+      0 gs@ lf-remaining tk@ - .08 < if
+        0 gs@ lf-remaining tk@ - .08 / gf-clamp01 dup 1 swap - * 4 * else 0 then 7 lf!
+      .16 gf-mouth-scale tk@ * 8 lf! gf-clear-ray 9 lf!
+      .2 18 lf! 0 15 lf! 0 16 lf! 0 17 lf!
+      3 lf@ lf-old-vx tk! 4 lf@ lf-old-vy tk! 5 lf@ lf-old-vz tk!
+      lf-step
+      0 lf@ lf-old-vx tk@ 6 lf@ * - 0 lf!
+      1 lf@ lf-old-vy tk@ 6 lf@ * - 1 lf!
+      2 lf@ lf-old-vz tk@ 6 lf@ * - 2 lf!
+    then loop lf-store-prey
+  then then loop 1 gs@ gf-i tk! ;
 : gf-strike-tick
   0 gf-gape tk!
   0 gs@ 0 >= if
     0 gs@ tk-dt@ + gf-strike-duration min dup 0 gs! gf-elapsed tk!
-    1 gs@ gf-i tk!
-    gf-live 1 gf@ 2 gs@ = & 15 gf@ gf-owner tk@ = & if
-      3 gs@ not if
-        gf-owner tk@ 1 = if gf-player-mouth else gf-resident-mouth then
-        gf-elapsed tk@ .0001 + gf-capture-time >= if
-          gf-edible if gf-consume then
-          1 3 gs!
-          gf-live if 0 15 gf! then
-        else
-          \ Short suction draw only while the prey remains in actual mouth reach.
-          gf-elapsed tk@ .06 >= gf-edible & if
-            2 gf@ gf-mouth-x tk@ over - tk-dt@ 10 * gf-clamp01 * + 2 gf!
-            3 gf@ gf-mouth-y tk@ over - tk-dt@ 10 * gf-clamp01 * + 3 gf!
-            4 gf@ gf-mouth-z tk@ over - tk-dt@ 10 * gf-clamp01 * + 4 gf!
-          then
-        then
-      then
-    then
     gf-elapsed tk@ .08 <= if gf-elapsed tk@ .08 / else
       gf-strike-duration gf-elapsed tk@ - .18 / then gf-clamp01 gf-gape tk!
+    1 gs@ gf-i tk!
+    gf-live 1 gf@ 2 gs@ = & 15 gf@ gf-owner tk@ = & if
+      gf-owner tk@ 1 = if gf-player-mouth else gf-resident-mouth then
+      \ Mouth protrusion is local, coordinated with the visual gulp.
+      gf-mouth-x tk@ gf-mouth-yaw tk@ tk-cos gf-mouth-pitch tk@ tk-cos * .04 gf-mouth-scale tk@ * gf-gape tk@ * * + gf-mouth-x tk!
+      gf-mouth-y tk@ gf-mouth-yaw tk@ tk-sin gf-mouth-pitch tk@ tk-cos * .04 gf-mouth-scale tk@ * gf-gape tk@ * * + gf-mouth-y tk!
+      gf-mouth-z tk@ gf-mouth-pitch tk@ tk-sin .04 gf-mouth-scale tk@ * gf-gape tk@ * * + gf-mouth-z tk!
+      gf-mouth-x tk@ 5 gs@ - tk-dt@ .0001 max / lf-mouth-vx tk!
+      gf-mouth-y tk@ 6 gs@ - tk-dt@ .0001 max / lf-mouth-vy tk!
+      gf-mouth-z tk@ 7 gs@ - tk-dt@ .0001 max / lf-mouth-vz tk!
+      gf-mouth-x tk@ 5 gs! gf-mouth-y tk@ 6 gs! gf-mouth-z tk@ 7 gs!
+      3 gs@ 2 < if lf-suction then
+      lf-neighbors
+    then
     gf-elapsed tk@ gf-strike-duration >= if
       gf-live 1 gf@ 2 gs@ = & 15 gf@ gf-owner tk@ = & if 0 15 gf! then
       -1 0 gs! -1 1 gs! 0 gf-gape tk!
@@ -201,9 +293,9 @@
   else drop then
   gf-best tk@ gf-target tk! ;
 : gf-resident-move
-  gf-acquire 0 gf-rstate tk!
+  gf-acquire 0 gf-rstate tk! .12 lf-resident-y tk!
   gf-target tk@ 0 >= if
-    gf-target tk@ gf-i tk! 0 gm@ gf-a tk! 2 gm@ gf-b tk!
+    gf-target tk@ gf-i tk! 0 gm@ gf-a tk! 1 gm@ lf-resident-y tk! 2 gm@ gf-b tk!
     .70 gf-speed tk! 2 gf-rstate tk!
   else gf-rlook tk@ 0 >= if
     gf-rlook tk@ gf-i tk! 0 gm@ gf-a tk! 2 gm@ gf-b tk!
@@ -215,7 +307,7 @@
   then then
   2 gf-owner tk! 0 gs@ 0 >= if 3 gf-rstate tk! .08 gf-speed tk! then
   gf-a tk@ gf-rx tk@ - gf-dx tk!
-  .12 gf-ry tk@ - gf-dy tk!
+  lf-resident-y tk@ gf-ry tk@ - gf-dy tk!
   INDEXOF_X_POS tk-player read-actor-mailbox gf-rx tk@ - dup *
   INDEXOF_Z_POS tk-player read-actor-mailbox gf-rz tk@ - dup * + 1.2 < if
     INDEXOF_Y_POS tk-player read-actor-mailbox 0 >= if -.45 else .45 then
@@ -237,10 +329,11 @@
   gf-rpitch tk@ tk-sin tk-fz tk!
   tk-fx tk@ -4.3 4.3 gf-rx tk@ tk-axis-cap
   tk-fy tk@ -.45 .45 gf-ry tk@ tk-axis-cap min
-  tk-fz tk@ 2.05 3.6 gf-rz tk@ tk-axis-cap min gf-rv tk@ min gf-rv tk!
+  gf-rv tk@ min gf-rv tk!
   gf-rx tk@ tk-fx tk@ gf-rv tk@ * tk-dt@ * + gf-rx tk!
   gf-ry tk@ tk-fy tk@ gf-rv tk@ * tk-dt@ * + gf-ry tk!
-  gf-rz tk@ tk-fz tk@ gf-rv tk@ * tk-dt@ * + gf-rz tk!
+  \ Surface contact removes normal motion, preserving motion along the glass.
+  gf-rz tk@ tk-fz tk@ gf-rv tk@ * tk-dt@ * + 2.05 max 3.6 min gf-rz tk!
   gf-rphase tk@ tk-dt@ gf-rv tk@ 1.2 * .35 + * + tk-frac gf-rphase tk!
   gf-autoeat gf-target tk@ 0 >= & 0 gs@ 0 < & if
     gf-resident-mouth gf-target tk@ gf-i tk! gf-live if gf-edible if gf-strike-start then then
@@ -321,7 +414,9 @@
   4 profile-begin
   gf-release tk@ if gf-release-one 0 gf-release tk! then
   gf-eat tk@ if gf-player-eat 0 gf-eat tk! then
-  3 0 do i gf-i tk! gf-live if gf-swim then loop
+  3 0 do i gf-i tk! gf-live if 15 gf@ 0 > if
+    15 gf@ gf-owner tk! 3 gs@ 1 <> if gf-swim then
+  else gf-swim then then loop
   \ Start the player strike first; reservations prevent duplicate resident claims.
   1 gf-owner tk! gf-strike-tick
   gf-resident if gf-resident-move then

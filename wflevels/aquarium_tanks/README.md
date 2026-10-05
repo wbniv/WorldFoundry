@@ -6,7 +6,7 @@ Shared source toolkit for Betta, Jellyfish, Lionfish and Planted Tank. The curre
 |---|---:|---|---|
 | Calm Betta | 1 | Body, tail, dorsal and anal fins | Broad leaves, pale sand, red/gold Thai pavilion with an empty open hall; no Buddha figure or statues |
 | Jellyfish | 6 | Bell, oral arms, fringe | Dark rounded display; independent drifting routes and pulse phases |
-| Lionfish | 2 | Body/spines, tail and two fan fins | Sparse low reef rocks, pale sand and open water |
+| Lionfish | 2 | One native mesh per fish; selective jaw, skull and curved fin deformation | Sparse low reef rocks, pale sand and open water |
 | Planted Tank | 1 sea urchin | Rounded test and radial spines | Seeded freshwater/saltwater growth in eight mesh groups, pale substrate |
 
 Build with `bash wflevels/aquarium_betta/build.sh`, `bash wflevels/aquarium_jellyfish/build.sh` and `bash wflevels/aquarium_lionfish/build.sh`. Each owns its exported files and standalone IFF. The new local toolkit provides procedural meshes, Blender scaffolding and a zForth controller/pose library without importing either existing aquarium generator. `TANK_COUNT=1` makes a single-animal build; `TANK_PROFILE=touch` selects the touch mode/action mapping. Rebuild without either variable to restore the default keyboard/population artifact.
@@ -65,3 +65,53 @@ The 512 profile completed 16 corrected coordinator traces with identical native 
 The 512 variants use original artwork repacked into 144 × 224 interiors, plus `--vram-slot-width=512 --vram-slot-height=512 --vram-height=1024`. The last flag satisfies the legacy strict UV height bound. Configured CPU pixel-buffer capacity increases by 8.75 MiB; each uploaded transient GPU slot increases by 768 KiB, with lazy allocation. PSS snapshots do not isolate GPU residency. Normal 256 APK restoration and installed-hash verification passed after both completed comparisons.
 
 [Resolution tables, paired captures, camera audit and reproduction](../../docs/plans/2026-10-03-aquatic-plant-clumps-and-poster.md#completed-512-atlas-qualitycost-comparison). Renderer submission/UV optimization and broader growth/sway/lifetime profiling remain separate work.
+
+## Lionfish realism (5 October 2026)
+
+The current lionfish uses one 4,068-triangle mesh per animal, shared 256² body
+and fin maps, stable per-fish palette remapping and 0.55 translucent membranes.
+Named region/weight/pivot attributes export separately from texture UVs to LRIG
+v1. `lion-pose` publishes phase, drive, turn, gape, dark/light packed colors and
+actor index once per fish. The approved native implementation caches rest
+vertices and keeps instances independent. Future fish IDs use `palette_for`;
+no recolored texture files are needed. `LIONFISH_REALISM=0` retains the historical
+multipart geometry for asset comparisons; use the archived baseline engine/APK
+for a true performance baseline.
+
+Build only this level, then repack the existing selector without regenerating
+other tanks:
+
+```sh
+bash wflevels/aquarium_lionfish/build.sh
+wftools/cdpack-rs/target/release/cdpack wfsource/source/game/shell-menu.fth \
+  --manifest wflevels/aquarium-menu.manifest -o wflevels/aquarium-menu-cd.iff
+cd android
+./gradlew assembleAquariumRelease
+```
+
+The standalone `run.sh` and Aquarium `wf_args.txt` both configure 512² texture
+slots/permanent page in a 2048 × 1024 pixel buffer. Those are packed pages;
+each source lionfish map is still 256². Other tank payloads remain unchanged.
+The local exporter is imported from this checkout; install its matching
+`wf_core` extension before Blender export. The Rust `iffcomp`, `levcomp`,
+`textile` and `cdpack` tools must be built.
+
+Verify actual feeding with `python3 scripts/check-lionfish-feeding.py` (desktop
+GUI required). It checks release limits, proximity, complete gulp, slot reuse,
+delayed notice, natural resident pursuit/capture and escape from actual approach.
+Focused tests live in `tests/test_lionfish_{feeding,rig,suction,realism_asset}.py`.
+The Director owns every prey write; scratch 1300–1347 is transient flow work.
+A reservation never immobilizes prey. Swept aperture entry starts engulfment;
+intraoral transport, rather than a timer, completes consumption.
+
+Prepare measurement APKs with `scripts/profile-lionfish-realism.py prepare`
+(`--help` lists the exact baseline-checkout/APK and signing options), submit its
+recipe with `task chromecast:submit DEVICE=all RECIPE=/absolute/path/recipe.json`,
+and fetch evidence with `task chromecast:evidence BATCH=... OUT=...`. Fixed
+three-prey measurement variants disable resident auto-capture; the normal APK
+retains it and is restored by the service. Presentation samples use three runs,
+while separate CPU variants add existing `--frame-profile` instrumentation.
+The summary script reads only the final complete CPU window so old app sessions
+in appended logs cannot contaminate the result.
+
+[Implementation, device evidence, deltas and A3 poster](../../docs/plans/2026-10-05-lionfish-realism.md).

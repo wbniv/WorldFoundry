@@ -8,7 +8,11 @@ import pytest
 ROOT=Path(__file__).resolve().parents[1]
 sys.path.insert(0,str(ROOT/'docs/reference/swarming-poster'))
 sys.path.insert(0,str(ROOT/'wflevels/aquarium_tanks'))
-import zfhost
+# Reuse the built host library; test the scripts and assets from this worktree.
+import importlib.util
+PRIMARY=ROOT.parents[1] if ROOT.parent.name=='.worktrees' else ROOT
+spec=importlib.util.spec_from_file_location('zfhost',PRIMARY/'docs/reference/swarming-poster/zfhost.py')
+zfhost=importlib.util.module_from_spec(spec);spec.loader.exec_module(zfhost)
 import goldfish
 
 @pytest.fixture
@@ -23,7 +27,7 @@ def tank(tmp_path,request):
                       ' '.join(f': JOYSTICK_BUTTON_{n} {v} ;' for n,v in buttons.items())+
                       ' : read-actor-mailbox 100 * + read-mailbox ; '
                       ': write-actor-mailbox 100 * + write-mailbox ; : fish-deform drop drop drop ; '
-                      ': profile-begin drop ; : profile-end drop ;')=='ok'
+                      ': profile-begin drop ; : profile-end drop ; : lion-pose drop drop drop drop drop drop drop ;')=='ok'
         # Compile the actual generated Director script, without executing its entry.
         text=(ROOT/'wflevels/aquarium_lionfish/aquarium_lionfish.lev').read_text()
         encoded=re.search(r'\{ \'STR\' \{ \'NAME\' "Script" \} \{ \'STR\' ("(?:\\.|[^"\\])*")',text).group(1)
@@ -70,7 +74,7 @@ def test_player_requires_a_and_mouth_proximity(tank,pos,eaten):
     h.write(1909,1);evaluate(h,'tk-input gf-tick')
     if eaten:
         assert h.read(934)==0 and h.read(1015)==1 # reserved until capture, not eaten on A
-        evaluate(h,'tk-input gf-tick')
+        for _ in range(5):evaluate(h,'tk-input gf-tick')
     assert h.read(934)==int(eaten)
     assert h.read(933)==int(not eaten)
     if not eaten:assert h.read(605)>0
@@ -85,7 +89,7 @@ def test_slot_reuse_nearest_choice_and_player_priority(tank):
     old=h.read(1001)
     h.write(1909,1);evaluate(h,'tk-input gf-tick')
     assert h.read(1015)==1 and h.read(934)==0
-    evaluate(h,'tk-input gf-tick')
+    for _ in range(5):evaluate(h,'tk-input gf-tick')
     assert h.read(934)==1
     assert h.read(1000)==0
     # An independent resident may catch the other fish, but cannot eat slot0 again.
@@ -128,8 +132,8 @@ def test_export_slots_visibility_material_and_mailboxes():
     import struct
     here=ROOT/'wflevels/aquarium_lionfish'
     mapping=json.loads((here/'actor-map.json').read_text())
-    assert len(mapping['indices'])==41 and mapping['feeding']['slots']==3
-    assert len([n for n in mapping['indices'] if n.endswith(('_mouth'))])==4
+    assert len(mapping['indices'])==31 and mapping['feeding']['slots']==3
+    assert len([n for n in mapping['indices'] if n.startswith('animal-')])==2
     assert len([n for n in mapping['indices'] if n.startswith('goldfish-')])==3
     text=(here/'aquarium_lionfish.lev').read_text()
     for k in range(3):
@@ -216,10 +220,10 @@ def test_whole_gulp_once_at_varied_frame_rates(tank,dt):
 
 
 def test_missed_strike_finishes_animation_without_consuming(tank):
-    h=tank;prey(h,(.65,0,2.5));h.write(1909,1)
+    h=tank;prey(h,(.79,0,2.5));h.write(1909,1)
     evaluate(h,'tk-input gf-tick');assert h.read(1015)==1
     evaluate(h,'0 gf-i tk! 2 2 gf! tk-input gf-tick')
-    assert h.read(934)==0 and h.read(933)==1 and h.read(1015)==0 and h.read(936)>0
+    assert h.read(934)==0 and h.read(933)==1 and h.read(1015)==1 and h.read(936)>0
     for _ in range(6):evaluate(h,'tk-input gf-tick')
     assert h.read(1200)==-1 and h.read(934)==0 and h.read(936)==0
 
@@ -280,7 +284,7 @@ def test_pitched_mouth_and_sight_follow_forward_axis(tank):
     evaluate(h,'gf-release-one 0 gf-i tk! .083333333 tk-pitch tk!')
     # A prey ahead of the raised mouth is edible; a prey at the old level mouth is not.
     evaluate(h,'.5715768 2 gf! 0 3 gf! 2.83 4 gf! gf-player-mouth')
-    assert h.read(943)==pytest.approx(2.78,abs=.002)
+    assert h.read(943)==pytest.approx(2.813,abs=.002)
     evaluate(h,'gf-edible gf-see tk!')
     assert h.read(964)==1
     evaluate(h,'.65 2 gf! 0 3 gf! 2.5 4 gf! gf-player-mouth gf-edible gf-see tk!')

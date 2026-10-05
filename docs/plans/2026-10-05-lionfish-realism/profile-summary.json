@@ -1,0 +1,1250 @@
+[
+  {
+    "device": "chromecast-test-01",
+    "variant": "baseline-0",
+    "job": "J-2cfca46ac34f",
+    "runs": [
+      {
+        "run": 1,
+        "frames": 357,
+        "interval_count": 357,
+        "fps": 29.96998993842209,
+        "refresh_ms": 16.683333,
+        "p50_ms": 33.366708,
+        "p90_ms": 33.36712,
+        "p95_ms": 33.367196,
+        "p99_ms": 33.367376,
+        "worst_ms": 33.367573,
+        "missed_refresh_percent": 100.0,
+        "duration_seconds": 12,
+        "layer": "org.worldfoundry.wf_game.aquarium/android.app.NativeActivity#8411"
+      },
+      {
+        "run": 2,
+        "frames": 357,
+        "interval_count": 357,
+        "fps": 29.96998951070767,
+        "refresh_ms": 16.683333,
+        "p50_ms": 33.366719,
+        "p90_ms": 33.367125,
+        "p95_ms": 33.367149,
+        "p99_ms": 33.367293,
+        "worst_ms": 33.367331,
+        "missed_refresh_percent": 100.0,
+        "duration_seconds": 12,
+        "layer": "org.worldfoundry.wf_game.aquarium/android.app.NativeActivity#8422"
+      },
+      {
+        "run": 3,
+        "frames": 365,
+        "interval_count": 365,
+        "fps": 29.969989962740808,
+        "refresh_ms": 16.683333,
+        "p50_ms": 33.366719,
+        "p90_ms": 33.367119,
+        "p95_ms": 33.367163,
+        "p99_ms": 33.367352,
+        "worst_ms": 33.371221,
+        "missed_refresh_percent": 100.0,
+        "duration_seconds": 12,
+        "layer": "org.worldfoundry.wf_game.aquarium/android.app.NativeActivity#8433"
+      }
+    ],
+    "fps_median": 29.96998993842209,
+    "pss_kib_runs": [
+      50269,
+      50344,
+      50426
+    ],
+    "pss_kib_median": 50344,
+    "cpu_last_window_mean_ms": {
+      "update": 2.8142,
+      "actors": 1.6916,
+      "director": 1.053,
+      "render": 3.1032,
+      "school": 0.6489,
+      "pose": 0.6519,
+      "animation": 0.0,
+      "total": 5.9174
+    },
+    "counters_last_window": {
+      "level-objects": 41.0,
+      "render-actors": 25.0,
+      "draws": 24.0,
+      "triangles": 956.245,
+      "actor-mailbox-writes": 108.0,
+      "fish-deformations": 0.0
+    },
+    "evidence": "docs/plans/2026-10-05-lionfish-realism/profiles-first-trial/chromecast-test-01/J-2cfca46ac34f/baseline-0"
+  },
+  {
+    "device": "chromecast-test-01",
+    "variant": "baseline-3",
+    "job": "J-2cfca46ac34f",
+    "runs": [
+      {
+        "run": 1,
+        "frames": 364,
+        "interval_count": 364,
+        "fps": 29.96998977715827,
+        "refresh_ms": 16.683333,
+        "p50_ms": 33.366725,
+        "p90_ms": 33.366946,
+        "p95_ms": 33.367025,
+        "p99_ms": 33.367152,
+        "worst_ms": 33.369209,
+        "missed_refresh_percent": 100.0,
+        "duration_seconds": 12,
+        "layer": "org.worldfoundry.wf_game.aquarium/android.app.NativeActivity#8455"
+      },
+      {
+        "run": 2,
+        "frames": 364,
+        "interval_count": 364,
+        "fps": 29.969990507562915,
+        "refresh_ms": 16.683333,
+        "p50_ms": 33.366711,
+        "p90_ms": 33.366939,
+        "p95_ms": 33.367072,
+        "p99_ms": 33.367143,
+        "worst_ms": 33.367281,
+        "missed_refresh_percent": 100.0,
+        "duration_seconds": 12,
+        "layer": "org.worldfoundry.wf_game.aquarium/android.app.NativeActivity#8466"
+      },
+      {
+        "run": 3,
+        "frames": 364,
+        "interval_count": 364,
+        "fps": 29.969989305849886,
+        "refresh_ms": 16.683333,
+        "p50_ms": 33.366723,
+        "p90_ms": 33.366975,
+        "p95_ms": 33.367084,
+        "p99_ms": 33.36725,
+        "worst_ms": 33.368222,
+        "missed_refresh_percent": 100.0,
+        "duration_seconds": 12,
+        "layer": "org.worldfoundry.wf_game.aquarium/android.app.NativeActivity#8477"
+      }
+    ],
+    "fps_median": 29.96998977715827,
+    "pss_kib_runs": [
+      50479,
+      50168,
+      50184
+    ],
+    "pss_kib_median": 50184,
+    "cpu_last_window_mean_ms": {
+      "update": 3.6137,
+      "actors": 1.5244,
+      "director": 2.0266,
+      "render": 3.3339,
+      "school": 1.6692,
+      "pose": 0.5767,
+      "animation": 0.0192,
+      "total": 6.9476
+    },
+    "counters_last_window": {
+      "level-objects": 41.0,
+      "render-actors": 28.0,
+      "draws": 27.0,
+      "triangles": 1112.813,
+      "actor-mailbox-writes": 126.0,
+      "fish-deformations": 3.0
+    },
+    "evidence": "docs/plans/2026-10-05-lionfish-realism/profiles-first-trial/chromecast-test-01/J-2cfca46ac34f/baseline-3"
+  },
+  {
+    "device": "chromecast-test-01",
+    "variant": "realism-0",
+    "job": "J-2cfca46ac34f",
+    "runs": [
+      {
+        "run": 1,
+        "frames": 76,
+        "interval_count": 76,
+        "fps": 6.799161816686994,
+        "refresh_ms": 16.683333,
+        "p50_ms": 133.466843,
+        "p90_ms": 216.883621,
+        "p95_ms": 266.933754,
+        "p99_ms": 316.983549,
+        "worst_ms": 316.983672,
+        "missed_refresh_percent": 100.0,
+        "duration_seconds": 12,
+        "layer": "org.worldfoundry.wf_game.aquarium/android.app.NativeActivity#8499"
+      },
+      {
+        "run": 2,
+        "frames": 98,
+        "interval_count": 98,
+        "fps": 8.102231692859853,
+        "refresh_ms": 16.683333,
+        "p50_ms": 116.78353,
+        "p90_ms": 150.150201,
+        "p95_ms": 150.15035,
+        "p99_ms": 166.833598,
+        "worst_ms": 183.516892,
+        "missed_refresh_percent": 100.0,
+        "duration_seconds": 12,
+        "layer": "org.worldfoundry.wf_game.aquarium/android.app.NativeActivity#8510"
+      },
+      {
+        "run": 3,
+        "frames": 94,
+        "interval_count": 94,
+        "fps": 8.261522048000773,
+        "refresh_ms": 16.683333,
+        "p50_ms": 116.783498,
+        "p90_ms": 150.150074,
+        "p95_ms": 166.833233,
+        "p99_ms": 183.516951,
+        "worst_ms": 216.8836,
+        "missed_refresh_percent": 100.0,
+        "duration_seconds": 12,
+        "layer": "org.worldfoundry.wf_game.aquarium/android.app.NativeActivity#8521"
+      }
+    ],
+    "fps_median": 8.102231692859853,
+    "pss_kib_runs": [
+      62668,
+      62133,
+      62122
+    ],
+    "pss_kib_median": 62133,
+    "cpu_last_window_mean_ms": {
+      "update": 2.2674,
+      "actors": 1.1699,
+      "director": 1.0437,
+      "render": 138.4856,
+      "school": 0.6241,
+      "pose": 0.7438,
+      "animation": 0.5999,
+      "total": 140.753
+    },
+    "counters_last_window": {
+      "level-objects": 31.0,
+      "render-actors": 15.0,
+      "draws": 1023.394,
+      "triangles": 6437.424,
+      "actor-mailbox-writes": 18.0,
+      "fish-deformations": 2.0
+    },
+    "evidence": "docs/plans/2026-10-05-lionfish-realism/profiles-first-trial/chromecast-test-01/J-2cfca46ac34f/realism-0"
+  },
+  {
+    "device": "chromecast-test-01",
+    "variant": "realism-3",
+    "job": "J-2cfca46ac34f",
+    "runs": [
+      {
+        "run": 1,
+        "frames": 81,
+        "interval_count": 81,
+        "fps": 6.828605219036756,
+        "refresh_ms": 16.683333,
+        "p50_ms": 150.150162,
+        "p90_ms": 166.833593,
+        "p95_ms": 183.516892,
+        "p99_ms": 200.200291,
+        "worst_ms": 200.200401,
+        "missed_refresh_percent": 100.0,
+        "duration_seconds": 12,
+        "layer": "org.worldfoundry.wf_game.aquarium/android.app.NativeActivity#8543"
+      },
+      {
+        "run": 2,
+        "frames": 79,
+        "interval_count": 79,
+        "fps": 6.6320144994816275,
+        "refresh_ms": 16.683333,
+        "p50_ms": 150.150201,
+        "p90_ms": 166.833829,
+        "p95_ms": 183.516938,
+        "p99_ms": 233.566878,
+        "worst_ms": 266.93357,
+        "missed_refresh_percent": 100.0,
+        "duration_seconds": 12,
+        "layer": "org.worldfoundry.wf_game.aquarium/android.app.NativeActivity#8554"
+      },
+      {
+        "run": 3,
+        "frames": 76,
+        "interval_count": 76,
+        "fps": 6.526416065849799,
+        "refresh_ms": 16.683333,
+        "p50_ms": 150.150199,
+        "p90_ms": 183.51693,
+        "p95_ms": 183.516981,
+        "p99_ms": 216.883621,
+        "worst_ms": 216.883651,
+        "missed_refresh_percent": 100.0,
+        "duration_seconds": 12,
+        "layer": "org.worldfoundry.wf_game.aquarium/android.app.NativeActivity#8565"
+      }
+    ],
+    "fps_median": 6.6320144994816275,
+    "pss_kib_runs": [
+      63379,
+      63456,
+      62797
+    ],
+    "pss_kib_median": 63379,
+    "cpu_last_window_mean_ms": {
+      "update": 3.2216,
+      "actors": 1.1807,
+      "director": 1.987,
+      "render": 164.1435,
+      "school": 1.555,
+      "pose": 0.7518,
+      "animation": 0.628,
+      "total": 167.3651
+    },
+    "counters_last_window": {
+      "level-objects": 31.0,
+      "render-actors": 18.0,
+      "draws": 1142.536,
+      "triangles": 6625.357,
+      "actor-mailbox-writes": 36.0,
+      "fish-deformations": 5.0
+    },
+    "evidence": "docs/plans/2026-10-05-lionfish-realism/profiles-first-trial/chromecast-test-01/J-2cfca46ac34f/realism-3"
+  },
+  {
+    "device": "chromecast-test-02",
+    "variant": "baseline-0",
+    "job": "J-7607a38921e7",
+    "runs": [
+      {
+        "run": 1,
+        "frames": 718,
+        "interval_count": 718,
+        "fps": 59.93995087159672,
+        "refresh_ms": 16.683333,
+        "p50_ms": 16.683416,
+        "p90_ms": 16.696917,
+        "p95_ms": 16.703167,
+        "p99_ms": 16.713875,
+        "worst_ms": 16.737041,
+        "missed_refresh_percent": 0.0,
+        "duration_seconds": 12,
+        "layer": "org.worldfoundry.wf_game.aquarium/android.app.NativeActivity#0"
+      },
+      {
+        "run": 2,
+        "frames": 734,
+        "interval_count": 734,
+        "fps": 59.93997670183083,
+        "refresh_ms": 16.683333,
+        "p50_ms": 16.683458,
+        "p90_ms": 16.69575,
+        "p95_ms": 16.702125,
+        "p99_ms": 16.717042,
+        "worst_ms": 16.9285,
+        "missed_refresh_percent": 0.0,
+        "duration_seconds": 12,
+        "layer": "org.worldfoundry.wf_game.aquarium/android.app.NativeActivity#0"
+      },
+      {
+        "run": 3,
+        "frames": 742,
+        "interval_count": 742,
+        "fps": 59.93999010467991,
+        "refresh_ms": 16.683333,
+        "p50_ms": 16.683541,
+        "p90_ms": 16.69575,
+        "p95_ms": 16.701333,
+        "p99_ms": 16.713167,
+        "worst_ms": 16.749875,
+        "missed_refresh_percent": 0.0,
+        "duration_seconds": 12,
+        "layer": "org.worldfoundry.wf_game.aquarium/android.app.NativeActivity#0"
+      }
+    ],
+    "fps_median": 59.93997670183083,
+    "pss_kib_runs": [
+      21957,
+      20720,
+      20705
+    ],
+    "pss_kib_median": 20720,
+    "cpu_last_window_mean_ms": {
+      "update": 2.6105,
+      "actors": 1.6154,
+      "director": 0.9279,
+      "render": 2.908,
+      "school": 0.581,
+      "pose": 0.5646,
+      "animation": 0.0,
+      "total": 5.5184
+    },
+    "counters_last_window": {
+      "level-objects": 41.0,
+      "render-actors": 25.0,
+      "draws": 24.0,
+      "triangles": 955.34,
+      "actor-mailbox-writes": 108.0,
+      "fish-deformations": 0.0
+    },
+    "evidence": "docs/plans/2026-10-05-lionfish-realism/profiles-first-trial/chromecast-test-02/J-7607a38921e7/baseline-0"
+  },
+  {
+    "device": "chromecast-test-02",
+    "variant": "baseline-3",
+    "job": "J-7607a38921e7",
+    "runs": [
+      {
+        "run": 1,
+        "frames": 698,
+        "interval_count": 698,
+        "fps": 59.939954820502926,
+        "refresh_ms": 16.683333,
+        "p50_ms": 16.683417,
+        "p90_ms": 16.696541,
+        "p95_ms": 16.702125,
+        "p99_ms": 16.717917,
+        "worst_ms": 16.805583,
+        "missed_refresh_percent": 0.0,
+        "duration_seconds": 12,
+        "layer": "org.worldfoundry.wf_game.aquarium/android.app.NativeActivity#0"
+      },
+      {
+        "run": 2,
+        "frames": 685,
+        "interval_count": 685,
+        "fps": 59.93980159622385,
+        "refresh_ms": 16.683333,
+        "p50_ms": 16.683417,
+        "p90_ms": 16.695792,
+        "p95_ms": 16.700625,
+        "p99_ms": 16.713084,
+        "worst_ms": 16.909334,
+        "missed_refresh_percent": 0.0,
+        "duration_seconds": 12,
+        "layer": "org.worldfoundry.wf_game.aquarium/android.app.NativeActivity#0"
+      },
+      {
+        "run": 3,
+        "frames": 674,
+        "interval_count": 674,
+        "fps": 59.93998195200207,
+        "refresh_ms": 16.683333,
+        "p50_ms": 16.683292,
+        "p90_ms": 16.696,
+        "p95_ms": 16.703875,
+        "p99_ms": 16.715292,
+        "worst_ms": 16.768084,
+        "missed_refresh_percent": 0.0,
+        "duration_seconds": 12,
+        "layer": "org.worldfoundry.wf_game.aquarium/android.app.NativeActivity#0"
+      }
+    ],
+    "fps_median": 59.939954820502926,
+    "pss_kib_runs": [
+      21990,
+      20639,
+      20732
+    ],
+    "pss_kib_median": 20732,
+    "cpu_last_window_mean_ms": {
+      "update": 3.5047,
+      "actors": 1.5182,
+      "director": 1.921,
+      "render": 3.4042,
+      "school": 1.5908,
+      "pose": 0.5343,
+      "animation": 0.023,
+      "total": 6.9089
+    },
+    "counters_last_window": {
+      "level-objects": 41.0,
+      "render-actors": 28.0,
+      "draws": 27.0,
+      "triangles": 1113.507,
+      "actor-mailbox-writes": 126.0,
+      "fish-deformations": 3.0
+    },
+    "evidence": "docs/plans/2026-10-05-lionfish-realism/profiles-first-trial/chromecast-test-02/J-7607a38921e7/baseline-3"
+  },
+  {
+    "device": "chromecast-test-02",
+    "variant": "realism-0",
+    "job": "J-7607a38921e7",
+    "runs": [
+      {
+        "run": 1,
+        "frames": 104,
+        "interval_count": 104,
+        "fps": 8.93087308431932,
+        "refresh_ms": 16.683333,
+        "p50_ms": 116.775083,
+        "p90_ms": 133.486875,
+        "p95_ms": 150.153708,
+        "p99_ms": 166.820416,
+        "worst_ms": 183.521292,
+        "missed_refresh_percent": 100.0,
+        "duration_seconds": 12,
+        "layer": "org.worldfoundry.wf_game.aquarium/android.app.NativeActivity#0"
+      },
+      {
+        "run": 2,
+        "frames": 106,
+        "interval_count": 106,
+        "fps": 9.102655265777694,
+        "refresh_ms": 16.683333,
+        "p50_ms": 116.770833,
+        "p90_ms": 133.473667,
+        "p95_ms": 150.139708,
+        "p99_ms": 150.160375,
+        "worst_ms": 166.853125,
+        "missed_refresh_percent": 100.0,
+        "duration_seconds": 12,
+        "layer": "org.worldfoundry.wf_game.aquarium/android.app.NativeActivity#0"
+      },
+      {
+        "run": 3,
+        "frames": 106,
+        "interval_count": 106,
+        "fps": 9.063683412891258,
+        "refresh_ms": 16.683333,
+        "p50_ms": 116.769875,
+        "p90_ms": 133.472833,
+        "p95_ms": 150.084625,
+        "p99_ms": 150.155251,
+        "worst_ms": 150.158792,
+        "missed_refresh_percent": 100.0,
+        "duration_seconds": 12,
+        "layer": "org.worldfoundry.wf_game.aquarium/android.app.NativeActivity#0"
+      }
+    ],
+    "fps_median": 9.063683412891258,
+    "pss_kib_runs": [
+      34641,
+      32524,
+      32579
+    ],
+    "pss_kib_median": 32579,
+    "cpu_last_window_mean_ms": {
+      "update": 1.7897,
+      "actors": 0.9855,
+      "director": 0.7517,
+      "render": 110.4475,
+      "school": 0.4437,
+      "pose": 0.5244,
+      "animation": 0.4172,
+      "total": 112.2372
+    },
+    "counters_last_window": {
+      "level-objects": 31.0,
+      "render-actors": 15.0,
+      "draws": 1019.186,
+      "triangles": 6437.767,
+      "actor-mailbox-writes": 18.0,
+      "fish-deformations": 2.0
+    },
+    "evidence": "docs/plans/2026-10-05-lionfish-realism/profiles-first-trial/chromecast-test-02/J-7607a38921e7/realism-0"
+  },
+  {
+    "device": "chromecast-test-02",
+    "variant": "realism-3",
+    "job": "J-7607a38921e7",
+    "runs": [
+      {
+        "run": 1,
+        "frames": 86,
+        "interval_count": 86,
+        "fps": 7.385168409700718,
+        "refresh_ms": 16.683333,
+        "p50_ms": 133.465959,
+        "p90_ms": 150.159792,
+        "p95_ms": 166.829708,
+        "p99_ms": 200.196458,
+        "worst_ms": 283.595167,
+        "missed_refresh_percent": 100.0,
+        "duration_seconds": 12,
+        "layer": "org.worldfoundry.wf_game.aquarium/android.app.NativeActivity#0"
+      },
+      {
+        "run": 2,
+        "frames": 86,
+        "interval_count": 86,
+        "fps": 7.5363227446269505,
+        "refresh_ms": 16.683333,
+        "p50_ms": 133.462917,
+        "p90_ms": 150.157208,
+        "p95_ms": 166.810042,
+        "p99_ms": 183.508708,
+        "worst_ms": 183.523917,
+        "missed_refresh_percent": 100.0,
+        "duration_seconds": 12,
+        "layer": "org.worldfoundry.wf_game.aquarium/android.app.NativeActivity#0"
+      },
+      {
+        "run": 3,
+        "frames": 94,
+        "interval_count": 94,
+        "fps": 7.782268729953181,
+        "refresh_ms": 16.683333,
+        "p50_ms": 133.460459,
+        "p90_ms": 150.150792,
+        "p95_ms": 150.164084,
+        "p99_ms": 166.825708,
+        "worst_ms": 166.825792,
+        "missed_refresh_percent": 100.0,
+        "duration_seconds": 12,
+        "layer": "org.worldfoundry.wf_game.aquarium/android.app.NativeActivity#0"
+      }
+    ],
+    "fps_median": 7.5363227446269505,
+    "pss_kib_runs": [
+      34768,
+      33410,
+      33140
+    ],
+    "pss_kib_median": 33410,
+    "cpu_last_window_mean_ms": {
+      "update": 2.4412,
+      "actors": 0.9775,
+      "director": 1.4121,
+      "render": 132.3151,
+      "school": 1.1175,
+      "pose": 0.508,
+      "animation": 0.4221,
+      "total": 134.7564
+    },
+    "counters_last_window": {
+      "level-objects": 31.0,
+      "render-actors": 18.0,
+      "draws": 1094.306,
+      "triangles": 6601.889,
+      "actor-mailbox-writes": 36.0,
+      "fish-deformations": 5.0
+    },
+    "evidence": "docs/plans/2026-10-05-lionfish-realism/profiles-first-trial/chromecast-test-02/J-7607a38921e7/realism-3"
+  },
+  {
+    "device": "chromecast-test-01",
+    "variant": "optimized-0",
+    "job": "J-ff0063bc7a64",
+    "runs": [
+      {
+        "run": 1,
+        "frames": 275,
+        "interval_count": 275,
+        "fps": 9.286475627408501,
+        "refresh_ms": 16.683333,
+        "p50_ms": 100.100186,
+        "p90_ms": 133.466849,
+        "p95_ms": 133.467012,
+        "p99_ms": 150.150198,
+        "worst_ms": 166.833551,
+        "missed_refresh_percent": 100.0,
+        "duration_seconds": 30,
+        "layer": "org.worldfoundry.wf_game.aquarium/android.app.NativeActivity#8598"
+      },
+      {
+        "run": 2,
+        "frames": 272,
+        "interval_count": 272,
+        "fps": 9.30575018657516,
+        "refresh_ms": 16.683333,
+        "p50_ms": 100.100158,
+        "p90_ms": 133.466789,
+        "p95_ms": 133.466857,
+        "p99_ms": 150.150461,
+        "worst_ms": 300.300346,
+        "missed_refresh_percent": 100.0,
+        "duration_seconds": 30,
+        "layer": "org.worldfoundry.wf_game.aquarium/android.app.NativeActivity#8609"
+      },
+      {
+        "run": 3,
+        "frames": 281,
+        "interval_count": 281,
+        "fps": 9.40431832623461,
+        "refresh_ms": 16.683333,
+        "p50_ms": 100.100174,
+        "p90_ms": 133.466832,
+        "p95_ms": 133.466868,
+        "p99_ms": 150.150192,
+        "worst_ms": 150.150216,
+        "missed_refresh_percent": 100.0,
+        "duration_seconds": 30,
+        "layer": "org.worldfoundry.wf_game.aquarium/android.app.NativeActivity#8620"
+      }
+    ],
+    "fps_median": 9.30575018657516,
+    "pss_kib_runs": [
+      65675,
+      66104,
+      66007
+    ],
+    "pss_kib_median": 66007,
+    "cpu_last_window_mean_ms": {
+      "update": 2.2456,
+      "actors": 1.1619,
+      "director": 1.0253,
+      "render": 106.8637,
+      "school": 0.6086,
+      "pose": 0.7308,
+      "animation": 0.589,
+      "total": 109.1093
+    },
+    "counters_last_window": {
+      "level-objects": 31.0,
+      "render-actors": 15.0,
+      "draws": 1001.116,
+      "triangles": 6432.465,
+      "actor-mailbox-writes": 18.0,
+      "fish-deformations": 2.0
+    },
+    "evidence": "docs/plans/2026-10-05-lionfish-realism/profiles-palette-attributes/chromecast-test-01/J-ff0063bc7a64/optimized-0"
+  },
+  {
+    "device": "chromecast-test-01",
+    "variant": "optimized-3",
+    "job": "J-ff0063bc7a64",
+    "runs": [
+      {
+        "run": 1,
+        "frames": 273,
+        "interval_count": 273,
+        "fps": 9.075770562658878,
+        "refresh_ms": 16.683333,
+        "p50_ms": 116.783177,
+        "p90_ms": 133.46683,
+        "p95_ms": 133.466867,
+        "p99_ms": 150.150214,
+        "worst_ms": 183.516907,
+        "missed_refresh_percent": 100.0,
+        "duration_seconds": 30,
+        "layer": "org.worldfoundry.wf_game.aquarium/android.app.NativeActivity#8642"
+      },
+      {
+        "run": 2,
+        "frames": 260,
+        "interval_count": 260,
+        "fps": 8.910460015304677,
+        "refresh_ms": 16.683333,
+        "p50_ms": 116.783471,
+        "p90_ms": 133.466836,
+        "p95_ms": 133.466861,
+        "p99_ms": 150.150212,
+        "worst_ms": 166.833539,
+        "missed_refresh_percent": 100.0,
+        "duration_seconds": 30,
+        "layer": "org.worldfoundry.wf_game.aquarium/android.app.NativeActivity#8653"
+      },
+      {
+        "run": 3,
+        "frames": 264,
+        "interval_count": 264,
+        "fps": 9.032051609650882,
+        "refresh_ms": 16.683333,
+        "p50_ms": 116.783261,
+        "p90_ms": 133.466845,
+        "p95_ms": 133.466867,
+        "p99_ms": 150.150189,
+        "worst_ms": 166.833571,
+        "missed_refresh_percent": 100.0,
+        "duration_seconds": 30,
+        "layer": "org.worldfoundry.wf_game.aquarium/android.app.NativeActivity#8664"
+      }
+    ],
+    "fps_median": 9.032051609650882,
+    "pss_kib_runs": [
+      67209,
+      67389,
+      67485
+    ],
+    "pss_kib_median": 67389,
+    "cpu_last_window_mean_ms": {
+      "update": 3.1311,
+      "actors": 1.1522,
+      "director": 1.9204,
+      "render": 106.5453,
+      "school": 1.5082,
+      "pose": 0.7265,
+      "animation": 0.6035,
+      "total": 109.6764
+    },
+    "counters_last_window": {
+      "level-objects": 31.0,
+      "render-actors": 18.0,
+      "draws": 1027.535,
+      "triangles": 6643.698,
+      "actor-mailbox-writes": 36.0,
+      "fish-deformations": 5.0
+    },
+    "evidence": "docs/plans/2026-10-05-lionfish-realism/profiles-palette-attributes/chromecast-test-01/J-ff0063bc7a64/optimized-3"
+  },
+  {
+    "device": "chromecast-test-02",
+    "variant": "optimized-0",
+    "job": "J-f75b3a9c25e6",
+    "runs": [
+      {
+        "run": 1,
+        "frames": 313,
+        "interval_count": 313,
+        "fps": 10.481137417835825,
+        "refresh_ms": 16.683333,
+        "p50_ms": 100.093417,
+        "p90_ms": 116.783333,
+        "p95_ms": 116.806083,
+        "p99_ms": 133.474042,
+        "worst_ms": 150.343916,
+        "missed_refresh_percent": 100.0,
+        "duration_seconds": 30,
+        "layer": "org.worldfoundry.wf_game.aquarium/android.app.NativeActivity#0"
+      },
+      {
+        "run": 2,
+        "frames": 310,
+        "interval_count": 310,
+        "fps": 10.345996914945736,
+        "refresh_ms": 16.683333,
+        "p50_ms": 100.094709,
+        "p90_ms": 116.786292,
+        "p95_ms": 116.795875,
+        "p99_ms": 133.476459,
+        "worst_ms": 133.490209,
+        "missed_refresh_percent": 100.0,
+        "duration_seconds": 30,
+        "layer": "org.worldfoundry.wf_game.aquarium/android.app.NativeActivity#0"
+      },
+      {
+        "run": 3,
+        "frames": 312,
+        "interval_count": 312,
+        "fps": 10.412747294609535,
+        "refresh_ms": 16.683333,
+        "p50_ms": 100.093833,
+        "p90_ms": 116.784167,
+        "p95_ms": 116.798584,
+        "p99_ms": 133.496709,
+        "worst_ms": 150.156833,
+        "missed_refresh_percent": 100.0,
+        "duration_seconds": 30,
+        "layer": "org.worldfoundry.wf_game.aquarium/android.app.NativeActivity#0"
+      }
+    ],
+    "fps_median": 10.412747294609535,
+    "pss_kib_runs": [
+      36569,
+      35015,
+      35009
+    ],
+    "pss_kib_median": 35015,
+    "cpu_last_window_mean_ms": {
+      "update": 1.7732,
+      "actors": 0.9823,
+      "director": 0.7335,
+      "render": 96.4291,
+      "school": 0.4327,
+      "pose": 0.5092,
+      "animation": 0.4059,
+      "total": 98.2023
+    },
+    "counters_last_window": {
+      "level-objects": 31.0,
+      "render-actors": 15.0,
+      "draws": 1020.959,
+      "triangles": 6432.245,
+      "actor-mailbox-writes": 18.0,
+      "fish-deformations": 2.0
+    },
+    "evidence": "docs/plans/2026-10-05-lionfish-realism/profiles-palette-attributes/chromecast-test-02/J-f75b3a9c25e6/optimized-0"
+  },
+  {
+    "device": "chromecast-test-02",
+    "variant": "optimized-3",
+    "job": "J-f75b3a9c25e6",
+    "runs": [
+      {
+        "run": 1,
+        "frames": 299,
+        "interval_count": 299,
+        "fps": 10.046010105716265,
+        "refresh_ms": 16.683333,
+        "p50_ms": 100.09975,
+        "p90_ms": 116.785416,
+        "p95_ms": 116.7985,
+        "p99_ms": 133.4705,
+        "worst_ms": 150.168625,
+        "missed_refresh_percent": 100.0,
+        "duration_seconds": 30,
+        "layer": "org.worldfoundry.wf_game.aquarium/android.app.NativeActivity#0"
+      },
+      {
+        "run": 2,
+        "frames": 299,
+        "interval_count": 299,
+        "fps": 10.165654967016813,
+        "refresh_ms": 16.683333,
+        "p50_ms": 100.097708,
+        "p90_ms": 116.78575,
+        "p95_ms": 116.800375,
+        "p99_ms": 133.473792,
+        "worst_ms": 150.1465,
+        "missed_refresh_percent": 100.0,
+        "duration_seconds": 30,
+        "layer": "org.worldfoundry.wf_game.aquarium/android.app.NativeActivity#0"
+      },
+      {
+        "run": 3,
+        "frames": 301,
+        "interval_count": 301,
+        "fps": 10.153041751726368,
+        "refresh_ms": 16.683333,
+        "p50_ms": 100.097333,
+        "p90_ms": 116.785625,
+        "p95_ms": 116.797792,
+        "p99_ms": 133.471041,
+        "worst_ms": 150.146334,
+        "missed_refresh_percent": 100.0,
+        "duration_seconds": 30,
+        "layer": "org.worldfoundry.wf_game.aquarium/android.app.NativeActivity#0"
+      }
+    ],
+    "fps_median": 10.153041751726368,
+    "pss_kib_runs": [
+      36809,
+      35566,
+      35496
+    ],
+    "pss_kib_median": 35566,
+    "cpu_last_window_mean_ms": {
+      "update": 2.4505,
+      "actors": 0.9991,
+      "director": 1.3978,
+      "render": 89.6009,
+      "school": 1.0964,
+      "pose": 0.5121,
+      "animation": 0.4265,
+      "total": 92.0515
+    },
+    "counters_last_window": {
+      "level-objects": 31.0,
+      "render-actors": 18.0,
+      "draws": 1000.212,
+      "triangles": 6641.827,
+      "actor-mailbox-writes": 36.0,
+      "fish-deformations": 5.0
+    },
+    "evidence": "docs/plans/2026-10-05-lionfish-realism/profiles-palette-attributes/chromecast-test-02/J-f75b3a9c25e6/optimized-3"
+  },
+  {
+    "device": "chromecast-test-01",
+    "variant": "optimized-0",
+    "job": "J-63c329bcfa6d",
+    "runs": [
+      {
+        "run": 1,
+        "frames": 882,
+        "interval_count": 882,
+        "fps": 29.986989042221204,
+        "refresh_ms": 16.683333,
+        "p50_ms": 33.366711,
+        "p90_ms": 33.366761,
+        "p95_ms": 33.366856,
+        "p99_ms": 33.367151,
+        "worst_ms": 50.050065,
+        "missed_refresh_percent": 99.77324263038548,
+        "duration_seconds": 30,
+        "layer": "org.worldfoundry.wf_game.aquarium/android.app.NativeActivity#8697"
+      },
+      {
+        "run": 2,
+        "frames": 891,
+        "interval_count": 891,
+        "fps": 29.9868171994614,
+        "refresh_ms": 16.683333,
+        "p50_ms": 33.366711,
+        "p90_ms": 33.366817,
+        "p95_ms": 33.366892,
+        "p99_ms": 33.36707,
+        "worst_ms": 50.050041,
+        "missed_refresh_percent": 99.77553310886644,
+        "duration_seconds": 30,
+        "layer": "org.worldfoundry.wf_game.aquarium/android.app.NativeActivity#8708"
+      },
+      {
+        "run": 3,
+        "frames": 883,
+        "interval_count": 883,
+        "fps": 29.969989595381502,
+        "refresh_ms": 16.683333,
+        "p50_ms": 33.366712,
+        "p90_ms": 33.366834,
+        "p95_ms": 33.366889,
+        "p99_ms": 33.367067,
+        "worst_ms": 33.367455,
+        "missed_refresh_percent": 100.0,
+        "duration_seconds": 30,
+        "layer": "org.worldfoundry.wf_game.aquarium/android.app.NativeActivity#8719"
+      }
+    ],
+    "fps_median": 29.9868171994614,
+    "pss_kib_runs": [
+      60673,
+      60847,
+      60746
+    ],
+    "pss_kib_median": 60746,
+    "cpu_last_window_mean_ms": {
+      "update": 2.2029,
+      "actors": 1.1231,
+      "director": 1.0211,
+      "render": 17.6992,
+      "school": 0.6069,
+      "pose": 0.7342,
+      "animation": 0.5949,
+      "total": 19.9021
+    },
+    "counters_last_window": {
+      "level-objects": 31.0,
+      "render-actors": 15.0,
+      "draws": 18.0,
+      "triangles": 6431.613,
+      "actor-mailbox-writes": 18.0,
+      "fish-deformations": 2.0
+    },
+    "evidence": "docs/plans/2026-10-05-lionfish-realism/profiles-final/chromecast-test-01/J-63c329bcfa6d/optimized-0"
+  },
+  {
+    "device": "chromecast-test-01",
+    "variant": "optimized-3",
+    "job": "J-63c329bcfa6d",
+    "runs": [
+      {
+        "run": 1,
+        "frames": 882,
+        "interval_count": 882,
+        "fps": 29.98698885258988,
+        "refresh_ms": 16.683333,
+        "p50_ms": 33.366711,
+        "p90_ms": 33.366765,
+        "p95_ms": 33.36685,
+        "p99_ms": 33.367035,
+        "worst_ms": 50.050209,
+        "missed_refresh_percent": 99.77324263038548,
+        "duration_seconds": 30,
+        "layer": "org.worldfoundry.wf_game.aquarium/android.app.NativeActivity#8741"
+      },
+      {
+        "run": 2,
+        "frames": 887,
+        "interval_count": 887,
+        "fps": 29.98689314145443,
+        "refresh_ms": 16.683333,
+        "p50_ms": 33.366712,
+        "p90_ms": 33.366766,
+        "p95_ms": 33.36685,
+        "p99_ms": 33.367029,
+        "worst_ms": 50.050138,
+        "missed_refresh_percent": 99.66178128523111,
+        "duration_seconds": 30,
+        "layer": "org.worldfoundry.wf_game.aquarium/android.app.NativeActivity#8752"
+      },
+      {
+        "run": 3,
+        "frames": 883,
+        "interval_count": 883,
+        "fps": 29.986969416463324,
+        "refresh_ms": 16.683333,
+        "p50_ms": 33.366713,
+        "p90_ms": 33.366767,
+        "p95_ms": 33.366855,
+        "p99_ms": 33.367081,
+        "worst_ms": 50.050076,
+        "missed_refresh_percent": 99.43374858437146,
+        "duration_seconds": 30,
+        "layer": "org.worldfoundry.wf_game.aquarium/android.app.NativeActivity#8763"
+      }
+    ],
+    "fps_median": 29.986969416463324,
+    "pss_kib_runs": [
+      60604,
+      60455,
+      60211
+    ],
+    "pss_kib_median": 60455,
+    "cpu_last_window_mean_ms": {
+      "update": 3.1378,
+      "actors": 1.1294,
+      "director": 1.9505,
+      "render": 18.2516,
+      "school": 1.5346,
+      "pose": 0.7348,
+      "animation": 0.6109,
+      "total": 21.3894
+    },
+    "counters_last_window": {
+      "level-objects": 31.0,
+      "render-actors": 18.0,
+      "draws": 21.0,
+      "triangles": 6622.26,
+      "actor-mailbox-writes": 36.0,
+      "fish-deformations": 5.0
+    },
+    "evidence": "docs/plans/2026-10-05-lionfish-realism/profiles-final/chromecast-test-01/J-63c329bcfa6d/optimized-3"
+  },
+  {
+    "device": "chromecast-test-02",
+    "variant": "optimized-0",
+    "job": "J-14ca13d3fb2c",
+    "runs": [
+      {
+        "run": 1,
+        "frames": 1177,
+        "interval_count": 1177,
+        "fps": 40.016708686021225,
+        "refresh_ms": 16.683333,
+        "p50_ms": 16.745959,
+        "p90_ms": 33.380625,
+        "p95_ms": 33.388333,
+        "p99_ms": 33.404917,
+        "worst_ms": 33.437166,
+        "missed_refresh_percent": 49.78759558198811,
+        "duration_seconds": 30,
+        "layer": "org.worldfoundry.wf_game.aquarium/android.app.NativeActivity#0"
+      },
+      {
+        "run": 2,
+        "frames": 1176,
+        "interval_count": 1176,
+        "fps": 39.86965829346973,
+        "refresh_ms": 16.683333,
+        "p50_ms": 33.298417,
+        "p90_ms": 33.380542,
+        "p95_ms": 33.390375,
+        "p99_ms": 33.406958,
+        "worst_ms": 33.516958,
+        "missed_refresh_percent": 50.34013605442177,
+        "duration_seconds": 30,
+        "layer": "org.worldfoundry.wf_game.aquarium/android.app.NativeActivity#0"
+      },
+      {
+        "run": 3,
+        "frames": 1190,
+        "interval_count": 1190,
+        "fps": 39.91528571353531,
+        "refresh_ms": 16.683333,
+        "p50_ms": 33.300167,
+        "p90_ms": 33.381584,
+        "p95_ms": 33.390084,
+        "p99_ms": 33.4095,
+        "worst_ms": 33.575292,
+        "missed_refresh_percent": 50.168067226890756,
+        "duration_seconds": 30,
+        "layer": "org.worldfoundry.wf_game.aquarium/android.app.NativeActivity#0"
+      }
+    ],
+    "fps_median": 39.91528571353531,
+    "pss_kib_runs": [
+      33186,
+      31619,
+      31592
+    ],
+    "pss_kib_median": 31619,
+    "cpu_last_window_mean_ms": {
+      "update": 1.9088,
+      "actors": 1.0318,
+      "director": 0.8207,
+      "render": 14.7598,
+      "school": 0.4859,
+      "pose": 0.5717,
+      "animation": 0.454,
+      "total": 16.6686
+    },
+    "counters_last_window": {
+      "level-objects": 31.0,
+      "render-actors": 15.0,
+      "draws": 18.0,
+      "triangles": 6430.85,
+      "actor-mailbox-writes": 18.0,
+      "fish-deformations": 2.0
+    },
+    "evidence": "docs/plans/2026-10-05-lionfish-realism/profiles-final/chromecast-test-02/J-14ca13d3fb2c/optimized-0"
+  },
+  {
+    "device": "chromecast-test-02",
+    "variant": "optimized-3",
+    "job": "J-14ca13d3fb2c",
+    "runs": [
+      {
+        "run": 1,
+        "frames": 1177,
+        "interval_count": 1177,
+        "fps": 39.70138340091448,
+        "refresh_ms": 16.683333,
+        "p50_ms": 33.313709,
+        "p90_ms": 33.375042,
+        "p95_ms": 33.3855,
+        "p99_ms": 33.402875,
+        "worst_ms": 33.421625,
+        "missed_refresh_percent": 50.97706032285472,
+        "duration_seconds": 30,
+        "layer": "org.worldfoundry.wf_game.aquarium/android.app.NativeActivity#0"
+      },
+      {
+        "run": 2,
+        "frames": 1189,
+        "interval_count": 1189,
+        "fps": 39.83717332513024,
+        "refresh_ms": 16.683333,
+        "p50_ms": 33.32125,
+        "p90_ms": 33.375542,
+        "p95_ms": 33.38275,
+        "p99_ms": 33.399916,
+        "worst_ms": 33.429709,
+        "missed_refresh_percent": 50.462573591253154,
+        "duration_seconds": 30,
+        "layer": "org.worldfoundry.wf_game.aquarium/android.app.NativeActivity#0"
+      },
+      {
+        "run": 3,
+        "frames": 1174,
+        "interval_count": 1174,
+        "fps": 39.846882114381216,
+        "refresh_ms": 16.683333,
+        "p50_ms": 33.314667,
+        "p90_ms": 33.37675,
+        "p95_ms": 33.384375,
+        "p99_ms": 33.396375,
+        "worst_ms": 33.435542,
+        "missed_refresh_percent": 50.42589437819421,
+        "duration_seconds": 30,
+        "layer": "org.worldfoundry.wf_game.aquarium/android.app.NativeActivity#0"
+      }
+    ],
+    "fps_median": 39.83717332513024,
+    "pss_kib_runs": [
+      33257,
+      31775,
+      31788
+    ],
+    "pss_kib_median": 31788,
+    "cpu_last_window_mean_ms": {
+      "update": 2.6757,
+      "actors": 1.0382,
+      "director": 1.5804,
+      "render": 15.4682,
+      "school": 1.2437,
+      "pose": 0.5756,
+      "animation": 0.4764,
+      "total": 18.144
+    },
+    "counters_last_window": {
+      "level-objects": 31.0,
+      "render-actors": 18.0,
+      "draws": 21.0,
+      "triangles": 6613.89,
+      "actor-mailbox-writes": 36.0,
+      "fish-deformations": 5.0
+    },
+    "evidence": "docs/plans/2026-10-05-lionfish-realism/profiles-final/chromecast-test-02/J-14ca13d3fb2c/optimized-3"
+  }
+]

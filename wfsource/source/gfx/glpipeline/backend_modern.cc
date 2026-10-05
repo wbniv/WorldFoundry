@@ -65,11 +65,15 @@ static const char* kVS =
     "layout(location=2) in vec2 a_uv;\n"
     "layout(location=3) in vec3 a_normal;\n"
     "layout(location=4) in float a_opacity;\n"
+    "layout(location=5) in vec4 a_palette_dark;\n"
+    "layout(location=6) in vec3 a_palette_light;\n"
     "out vec3  v_color;\n"
     "out vec2  v_uv;\n"
     "out vec3  v_lit;\n"
     "out float v_fog_factor;\n"
     "out float v_opacity;\n"
+    "out vec4 v_palette_dark;\n"
+    "out vec3 v_palette_light;\n"
     "uniform mat4 u_mvp;\n"
     "uniform mat4 u_mv;\n"
     "uniform int  u_lighting;\n"
@@ -85,6 +89,8 @@ static const char* kVS =
     "    v_color = a_color;\n"
     "    v_uv = a_uv;\n"
     "    v_opacity = a_opacity;\n"
+    "    v_palette_dark = a_palette_dark;\n"
+    "    v_palette_light = a_palette_light;\n"
     "    if (u_lighting != 0) {\n"
     "        vec3 N = normalize((u_mv * vec4(a_normal, 0.0)).xyz);\n"
     "        vec3 lit = u_ambient;\n"
@@ -110,6 +116,8 @@ static const char* kFS =
     "in vec3  v_lit;\n"
     "in float v_fog_factor;\n"
     "in float v_opacity;\n"
+    "in vec4 v_palette_dark;\n"
+    "in vec3 v_palette_light;\n"
     "out vec4 frag;\n"
     "uniform sampler2D u_tex;\n"
     "uniform int u_use_tex;\n"
@@ -123,7 +131,8 @@ static const char* kFS =
     "        float is_white = step(0.99, min(v_color.r, min(v_color.g, v_color.b)));\n"
     "        vec4 texel = texture(u_tex, v_uv);\n"
     "        if (u_alpha_cutout != 0 && (is_white > 0.5 || (u_use_tex & 2) != 0) && texel.a < 0.5) discard;\n"
-    "        c = vec4(((u_use_tex & 2) != 0 ? texel.rgb * v_color : mix(v_color, texel.rgb, is_white)) * v_lit, 1.0);\n"
+    "        vec3 albedo = v_palette_dark.a > 0.5 ? mix(v_palette_dark.rgb, v_palette_light, clamp((texel.r - 0.08) / 0.85, 0.0, 1.0)) : ((u_use_tex & 2) != 0 ? texel.rgb * v_color : mix(v_color, texel.rgb, is_white));\n"
+    "        c = vec4(albedo * v_lit, 1.0);\n"
     "    }\n"
     "    if (u_fog != 0) c.rgb = mix(u_fog_color, c.rgb, v_fog_factor);\n"
     "    c.a = v_opacity;\n"
@@ -137,6 +146,8 @@ struct Vert
     float u, v;
     float nx, ny, nz;
     float opacity;
+    float paletteDark[4]; // RGB endpoints plus enabled flag.
+    float paletteLight[3];
 };
 
 // ---- matrix helpers (all column-major, GL convention) -----------------------
@@ -350,6 +361,12 @@ public:
         _fogEnd   = end;
     }
 
+    void SetTexturePalette(bool e,unsigned dark,unsigned light) override
+    {
+        // Palette belongs to each vertex, so sorted translucent fish can share
+        // a draw call even when their palettes alternate in depth order.
+        _paletteEnabled=e;_paletteDark=dark;_paletteLight=light;
+    }
     void SetOpacity(float opacity) override
     {
         if (_opacity == opacity) return;
@@ -649,6 +666,7 @@ private:
     GLint  _uMv         = -1;
     GLint  _uTex        = -1;
     GLint  _uUseTex     = -1;
+    bool _paletteEnabled=false; unsigned _paletteDark=0,_paletteLight=0xffffff;
     GLint  _uAlphaCutout = -1;
     float _opacity = 1.0f;
     GLint  _uLighting   = -1;
@@ -691,6 +709,12 @@ private:
         dst.u = v.u; dst.v = v.v;
         dst.nx = nx; dst.ny = ny; dst.nz = nz;
         dst.opacity = _opacity;
+        for (int i=0;i<3;++i) {
+            const int shift=16-8*i;
+            dst.paletteDark[i]=float((_paletteDark>>shift)&255)/255.f;
+            dst.paletteLight[i]=float((_paletteLight>>shift)&255)/255.f;
+        }
+        dst.paletteDark[3]=_paletteEnabled ? 1.f : 0.f;
     }
 
     void FetchUniformLocations()
@@ -743,6 +767,13 @@ private:
         glEnableVertexAttribArray(4);
         glVertexAttribPointer(4, 1, GL_FLOAT, GL_FALSE, stride,
                               (void*)offsetof(Vert, opacity));
+
+        glEnableVertexAttribArray(5);
+        glVertexAttribPointer(5, 4, GL_FLOAT, GL_FALSE, stride,
+                              (void*)offsetof(Vert, paletteDark));
+        glEnableVertexAttribArray(6);
+        glVertexAttribPointer(6, 3, GL_FLOAT, GL_FALSE, stride,
+                              (void*)offsetof(Vert, paletteLight));
 
         glBindVertexArray(0);
         glBindBuffer(GL_ARRAY_BUFFER, 0);

@@ -79,6 +79,8 @@ RenderObject3D::Render(ViewPort& vp,const Matrix34& position)
 		globalRendererVariables.currentRenderMaterial->Validate();
 		RendererBackendGet().SetAlphaCutout(globalRendererVariables.currentRenderMaterial->IsAlphaCutout());
         RendererBackendGet().SetTextureModulation((globalRendererVariables.currentRenderMaterial->GetMaterialFlags() & Material::TEXTURE_MODULATE) != 0);
+        const Material& mat=*globalRendererVariables.currentRenderMaterial;
+        RendererBackendGet().SetTexturePalette((mat.GetMaterialFlags() & Material::TEXTURE_PALETTE)!=0, mat.PaletteDark(),mat.PaletteLight());
 		renderer = globalRendererVariables.currentRenderMaterial->Get3DRenderer();
 		int currentMaterial = globalRendererVariables.currentRenderFace->materialIndex;
 

@@ -21,6 +21,7 @@
 #include <cmath>
 #include <cstdlib>
 #include <cstring>
+#include <cstddef>
 
 // Translucent faces must follow ALL opaque submissions, including scenery
 // encountered later in the level. Store vertices in eye space so sorting is
@@ -33,7 +34,8 @@ class CompositingBackend : public RendererBackend
         float ambient[3];
         float light[RB_MAX_LIGHTS][6];
         float fog[5];
-        int32 lighting, fogEnabled, cutout, textureModulation;
+        int32 lighting, fogEnabled, cutout, textureModulation, paletteEnabled;
+        unsigned paletteDark, paletteLight;
     };
     struct Triangle {
         RBVertex vertices[3];
@@ -66,8 +68,14 @@ class CompositingBackend : public RendererBackend
         _states[_stateCount] = _state;
         return _stateCount++;
     }
-    void ApplyState(const State& state)
+    void ApplyState(const State& state, const State* previous = NULL)
     {
+        // Palette-only changes must not replay uniform setters: those flush
+        // GPU batches, defeating the per-vertex palette when fins interleave.
+        if (previous && !std::memcmp(&state, previous, offsetof(State, paletteEnabled))) {
+            _backend.SetTexturePalette(state.paletteEnabled!=0,state.paletteDark,state.paletteLight);
+            return;
+        }
         _backend.SetAmbient(state.ambient[0], state.ambient[1], state.ambient[2]);
         for (int32 i = 0; i < RB_MAX_LIGHTS; ++i) {
             const float* l = state.light[i];
@@ -78,6 +86,7 @@ class CompositingBackend : public RendererBackend
         _backend.SetFogEnabled(state.fogEnabled != 0);
         _backend.SetAlphaCutout(state.cutout != 0);
         _backend.SetTextureModulation(state.textureModulation != 0);
+        _backend.SetTexturePalette(state.paletteEnabled!=0,state.paletteDark,state.paletteLight);
     }
     static int Compare(const void* a, const void* b)
     {
@@ -97,13 +106,13 @@ class CompositingBackend : public RendererBackend
         int32 state = -1;
         for (int32 i = 0; i < _count; ++i) {
             const Triangle& t = _triangles[i];
-            if (t.state != state) { ApplyState(_states[t.state]); state = t.state; }
+            if (t.state != state) { ApplyState(_states[t.state], state >= 0 ? &_states[state] : NULL); state = t.state; }
             _backend.SetOpacity(t.opacity);
             _backend.DrawTriangle(t.vertices[0],t.vertices[1],t.vertices[2],
                 t.normal[0],t.normal[1],t.normal[2],t.texture,t.cullExempt != 0,t.prelit != 0);
         }
         _backend.SetOpacity(1); // flush last blended batch
-        ApplyState(_state); // light directions are already in eye space
+        ApplyState(_state, state >= 0 ? &_states[state] : NULL); // directions already in eye space
         if (!_identity) _backend.SetModelView(_modelView);
         _memory.Free(_triangles);
         _triangles = NULL;
@@ -147,6 +156,8 @@ public:
     void SetAlphaCutout(bool e) override { _state.cutout=e; _backend.SetAlphaCutout(e); }
     void SetTextureModulation(bool e) override
     { _state.textureModulation=e; _backend.SetTextureModulation(e); }
+    void SetTexturePalette(bool e,unsigned d,unsigned l) override
+    { _state.paletteEnabled=e; _state.paletteDark=d; _state.paletteLight=l; _backend.SetTexturePalette(e,d,l); }
     void SetOpacity(float opacity) override
     { assert(opacity >= 0 && opacity <= 1); _opacity=opacity; }
     void DrawTriangle(const RBVertex& a,const RBVertex& b,const RBVertex& c,

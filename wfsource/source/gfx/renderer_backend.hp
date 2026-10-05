@@ -90,6 +90,9 @@ public:
     // Opt-in albedo modulation; legacy materials retain replace-if-white.
     virtual void SetTextureModulation(bool /*enabled*/) {}
 
+    // Opt-in shared grayscale texture palette; disabled materials keep old rendering.
+    virtual void SetTexturePalette(bool /*enabled*/, unsigned /*dark*/, unsigned /*light*/) {}
+
     // Explicit opt-in material opacity. Legacy materials remain opaque.
     virtual void SetOpacity(float /*opacity*/) {}
 

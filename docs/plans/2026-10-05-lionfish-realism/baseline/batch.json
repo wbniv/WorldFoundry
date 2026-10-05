@@ -1,0 +1,66 @@
+{
+  "id": "B-9c8742611020",
+  "owner": "50834354a173f73472469f04",
+  "targets": [
+    "chromecast-test-01",
+    "chromecast-test-02"
+  ],
+  "created": 1791162883.2503045,
+  "jobs": [
+    {
+      "id": "J-34e6b275de28",
+      "owner": "50834354a173f73472469f04",
+      "accepted": 1791162883.250518,
+      "state": "completed",
+      "phase": "completed",
+      "request": {
+        "app": "aquarium",
+        "scene": "lionfish",
+        "warmup": 15.0,
+        "runs": 3,
+        "duration": 30.0,
+        "workflow": "profile",
+        "apk": "79433b3c5e80625b13b4bf566e8fd941185affd62f779488ad30bab775f7c1d5.apk",
+        "device": "chromecast-test-01"
+      },
+      "device": "chromecast-test-01",
+      "generation": 83,
+      "cancel": 0,
+      "error": null,
+      "started": 1791162883.341759,
+      "finished": 1791163082.6798003,
+      "worker_pid": 573880,
+      "recovery_resolved": 0,
+      "installation": null,
+      "target": "chromecast-test-01"
+    },
+    {
+      "id": "J-27cb639c0b5f",
+      "owner": "50834354a173f73472469f04",
+      "accepted": 1791162883.2507415,
+      "state": "completed",
+      "phase": "completed",
+      "request": {
+        "app": "aquarium",
+        "scene": "lionfish",
+        "warmup": 15.0,
+        "runs": 3,
+        "duration": 30.0,
+        "workflow": "profile",
+        "apk": "79433b3c5e80625b13b4bf566e8fd941185affd62f779488ad30bab775f7c1d5.apk",
+        "device": "chromecast-test-02"
+      },
+      "device": "chromecast-test-02",
+      "generation": 38,
+      "cancel": 0,
+      "error": null,
+      "started": 1791162883.3420165,
+      "finished": 1791163073.8004405,
+      "worker_pid": 573881,
+      "recovery_resolved": 0,
+      "installation": null,
+      "target": "chromecast-test-02"
+    }
+  ],
+  "state": "completed"
+}

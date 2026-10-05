@@ -1331,6 +1331,18 @@ zf_input_state zf_host_sys(zf_ctx* ctx, zf_syscall_id id, const char* /*last_wor
                     }
                 }
                 s.topologySlot=(s.topologySlot+1)%8;
+            } else if(custom==49) {
+                const int actor=int(zf_pop(ctx));
+                const float light=float(zf_pop(ctx)),dark=float(zf_pop(ctx));
+                const float gape=float(zf_pop(ctx)),turn=float(zf_pop(ctx)),drive=float(zf_pop(ctx)),phase=float(zf_pop(ctx));
+                if(std::isfinite(dark)&&std::isfinite(light)&&dark>=0&&dark<=16777215&&light>=0&&light<=16777215&&
+                    theLevel&&actor>0&&actor<theLevel->GetMaxObjectIndex()) {
+                    BaseObject* object=theLevel->GetObject(actor);
+                    if(object&&IsActor(object)) {
+                        wf_profile::Scope profile(wf_profile::Animation);wf_profile::count(5);
+                        static_cast<Actor*>(object)->GetRenderActor().SetLionPose(phase,drive,turn,gape,unsigned(dark),unsigned(light));
+                    }
+                }
             } else if (custom == 72) {
                 /* Neural-forth dispatch gate: syscall 200 = ZF_SYSCALL_USER + 72.
                  * Pops word-id from stack and routes to nf_dispatch().
@@ -1500,7 +1512,7 @@ void Init(MailboxesManager& mgr)
     if (r != ZF_OK)
         fprintf(stderr, "zforth: init failed (read-actor-mailbox): %d\n", r);
 
-    r = zf_eval(&g_ctx, ": profile-begin 169 sys ; : profile-end 170 sys ; : fish-deform 171 sys ; : fin-deform 172 sys ; : swim-deform 173 sys ; : jelly-deform 174 sys ; : plant-register 175 sys ; : plant-step 176 sys ;");
+    r = zf_eval(&g_ctx, ": profile-begin 169 sys ; : profile-end 170 sys ; : fish-deform 171 sys ; : fin-deform 172 sys ; : swim-deform 173 sys ; : jelly-deform 174 sys ; : plant-register 175 sys ; : plant-step 176 sys ; : lion-pose 177 sys ;");
     if (r != ZF_OK) fprintf(stderr, "zforth: profiling/fish bridge init failed: %d\n", r);
 
     // FSN filesystem bridge words (custom 3-7 / sys 131-135)

@@ -341,7 +341,7 @@ static void handle_client(int fd)
                 ::write(fd, resp, strlen(resp));
 
             } else if (op == "scene:set_prop") {
-                PendingUpdate u;
+                PendingUpdate u{};
                 u.kind      = PendingUpdate::SET_PROP;
                 u.actor_idx = (int)parse_jnum(line, "idx");
                 u.key       = parse_jstr(line, "key");
@@ -352,7 +352,7 @@ static void handle_client(int fd)
                 }
 
             } else if (op == "scene:set_transform") {
-                PendingUpdate u;
+                PendingUpdate u{};
                 u.kind      = PendingUpdate::SET_TRANSFORM;
                 u.actor_idx = (int)parse_jnum(line, "idx");
                 float pos[3] = {};
@@ -381,21 +381,21 @@ static void handle_client(int fd)
                 gStepN.fetch_add(n);
 
             } else if (op == "undo_step") {
-                PendingUpdate u;
+                PendingUpdate u{};
                 u.kind = PendingUpdate::UNDO_STEP;
                 u.actor_idx = 0;
                 std::lock_guard<std::mutex> lk(gQueueMutex);
                 gQueue.push(u);
 
             } else if (op == "revert_all") {
-                PendingUpdate u;
+                PendingUpdate u{};
                 u.kind = PendingUpdate::REVERT_ALL;
                 u.actor_idx = 0;
                 std::lock_guard<std::mutex> lk(gQueueMutex);
                 gQueue.push(u);
 
             } else if (op == "scene:pick") {
-                PendingUpdate u;
+                PendingUpdate u{};
                 u.kind = PendingUpdate::PICK;
                 float ro[3] = {}, rd[3] = {};
                 if (parse_jvec3(line, "ray_origin", ro) && parse_jvec3(line, "ray_dir", rd)) {
@@ -406,7 +406,7 @@ static void handle_client(int fd)
                 }
 
             } else if (op == "set_mailbox") {
-                PendingUpdate u;
+                PendingUpdate u{};
                 u.kind        = PendingUpdate::SET_MAILBOX;
                 u.actor_idx   = (int)parse_jnum(line, "idx");      // 0 = global
                 u.mailbox_idx = (int)parse_jnum(line, "mailbox");
@@ -415,7 +415,7 @@ static void handle_client(int fd)
                 gQueue.push(u);
 
             } else if (op == "inject_input") {
-                PendingUpdate u;
+                PendingUpdate u{};
                 u.kind = PendingUpdate::INJECT_INPUT;
                 // Either "slot_id" (raw mailbox enum int) or "slot" (string name).
                 int slot_id = (int)parse_jnum(line, "slot_id");
@@ -443,7 +443,7 @@ static void handle_client(int fd)
                 }
 
             } else if (op == "reload_script") {
-                PendingUpdate u;
+                PendingUpdate u{};
                 u.kind       = PendingUpdate::RELOAD_SCRIPT;
                 u.actor_idx  = (int)parse_jnum(line, "idx");
                 u.script_src = parse_jstr(line, "source");
@@ -453,7 +453,7 @@ static void handle_client(int fd)
                 }
 
             } else if (op == "set_shader") {
-                PendingUpdate u;
+                PendingUpdate u{};
                 u.kind     = PendingUpdate::SET_SHADER;
                 u.vert_src = parse_jstr(line, "vert");
                 u.frag_src = parse_jstr(line, "frag");
@@ -463,7 +463,7 @@ static void handle_client(int fd)
                 }
 
             } else if (op == "screenshot") {
-                PendingUpdate u;
+                PendingUpdate u{};
                 u.kind     = PendingUpdate::SCREENSHOT;
                 u.filename = parse_jstr(line, "filename");
                 if (!u.filename.empty()) {
@@ -472,7 +472,7 @@ static void handle_client(int fd)
                 }
 
             } else if (op == "watch" || op == "unwatch") {
-                PendingUpdate u;
+                PendingUpdate u{};
                 u.kind        = (op == "watch") ? PendingUpdate::WATCH : PendingUpdate::UNWATCH;
                 u.actor_idx   = (int)parse_jnum(line, "idx");
                 u.mailbox_idx = (int)parse_jnum(line, "mailbox");
@@ -646,7 +646,11 @@ void DebugServer_DrainQueue(Level& level)
 
     while (!local.empty()) {
         const PendingUpdate& u = local.front();
-        BaseObject* bo = level.GetObject(u.actor_idx);
+        if(u.actor_idx<0 || u.actor_idx>=level.GetMaxObjectIndex()) {
+            send_all_locked("{\"op\":\"error\",\"message\":\"actor index out of range\"}\n");
+            local.pop(); continue;
+        }
+        BaseObject* bo = u.actor_idx>0 ? level.GetObject(u.actor_idx) : nullptr;
         Actor* actor = IsActor(bo) ? static_cast<Actor*>(bo) : nullptr;
 
         if (u.kind == PendingUpdate::SET_TRANSFORM && actor) {

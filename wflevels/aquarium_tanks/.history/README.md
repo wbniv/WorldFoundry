@@ -1,10 +1,15 @@
 | Date | Change |
 |------|--------|
+| [2026-10-04](https://github.com/wbniv/WorldFoundry/commit/8d165c7c) | Record plant atlas resolution profiles and retain 256 default |
 | [2026-10-04](https://github.com/wbniv/WorldFoundry/commit/e45a7ac1) | Reconcile plant docs with implemented runtime and final texture measurements |
 | [2026-10-04](https://github.com/wbniv/WorldFoundry/commit/0aa37847) | Add seeded growing plant tank, settings and leaf textures |
 | [2026-10-02](https://github.com/wbniv/WorldFoundry/commit/9cef6dde) | Integrate aquarium tanks, feeding, and flowing betta fins |
 
 <!--history-meta v1
+8d165c7c	author	Will Norris
+8d165c7c	added	15
+8d165c7c	deleted	0
+8d165c7c	files	1
 e45a7ac1	author	Will Norris
 e45a7ac1	added	12
 e45a7ac1	deleted	6

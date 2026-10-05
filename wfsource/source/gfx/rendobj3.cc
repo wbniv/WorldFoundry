@@ -64,6 +64,7 @@ RenderObject3D::RenderObject3D( Memory& memory, const RenderObject3D& obj3d )
 {
 #pragma message( __FILE__ ": use reference counting" )
 
+    _lionRig=obj3d._lionRig;
 	_materialList = obj3d._materialList;
 	_materialCount = obj3d._materialCount;
 
@@ -71,6 +72,12 @@ RenderObject3D::RenderObject3D( Memory& memory, const RenderObject3D& obj3d )
 	_handleList = obj3d._handleList;
 	_vertexCount = obj3d._vertexCount;
 	_vertexList = obj3d._vertexList;
+    if(!_lionRig.empty()) {
+        _vertexList=new(memory) Vertex3D[_vertexCount];
+        for(int i=0;i<_vertexCount;i++) _vertexList[i]=obj3d._vertexList[i];
+        _materialList=new(memory) Material[_materialCount];
+        for(int i=0;i<_materialCount;i++) _materialList[i]=obj3d._materialList[i];
+    }
 	_faceCount = obj3d._faceCount;
 	_faceList = obj3d._faceList;
 
@@ -215,6 +222,24 @@ RenderObject3D::RenderObject3D(Memory& memory, binistream& input,int32 userData,
 				assert(chunkIter->BytesLeft() == 0);
 				break;
 			}
+            case IFFTAG('L','R','I','G'):
+            {
+                // v1: version/count followed by region, weight and pivot XYZ (16.16).
+                // Invalid optional metadata is discarded, never partially applied.
+                uint32 version=0,count=0;
+                if(chunkIter->BytesLeft()<8) break;
+                chunkIter->ReadBytes(&version,4); chunkIter->ReadBytes(&count,4);
+                if(version!=1 || count!=uint32(vertexCount) || count>32767 ||
+                    chunkIter->BytesLeft()!=count*20 || !_lionRig.empty()) break;
+                std::vector<wf_render::LionRig> rig; rig.reserve(count); bool valid=true;
+                for(uint32 i=0;i<count;i++) {
+                    int32 v[5]; chunkIter->ReadBytes(v,sizeof(v));
+                    if(v[0]<0 || v[0]>=wf_render::LionRegionCount || v[1]<0 || v[1]>65536) valid=false;
+                    rig.push_back({unsigned(v[0]),v[1]/65536.f,v[2]/65536.f,v[3]/65536.f,v[4]/65536.f});
+                }
+                if(valid) _lionRig.swap(rig);
+                break;
+            }
             case IFFTAG('O','P','A','C'):
             {
                 uint32 version, count;
@@ -346,4 +371,10 @@ bool RenderObject3D::SetRuntimeGeometry(int vertices, Vertex3D* vertexList, int 
  // Preserve the exported texture binding when replacing runtime geometry.
  _materialList[0].SetMaterialFlags(Material::GOURAUD_SHADED|(textured?Material::TEXTURE_MODULATE:0)|(textured?(_materialList[0].GetMaterialFlags()&Material::TEXTURE_MAPPED):0)|Material::LIGHTING_PRELIT);
  ApplyMaterials(_materialList);return true;
+}
+
+void RenderObject3D::SetLionPalette(unsigned dark,unsigned light)
+{
+    for(int i=0;i<_materialCount;i++) if(_materialList[i].GetMaterialFlags() & Material::TEXTURE_PALETTE)
+        _materialList[i].SetTexturePalette(dark,light);
 }
