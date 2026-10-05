@@ -16,7 +16,7 @@ sys.path.insert(0,str(COMMON))
 from mesh import Mesh
 import species
 from models import COLORS as ANIMAL_COLORS, JELLY_OPACITY, models
-from urchin import COLORS as URCHIN_COLORS, urchin, tube_foot
+from urchin import COLORS as URCHIN_COLORS, TEXTURE as URCHIN_TEXTURE, urchin, tube_foot, write_texture as write_urchin_texture
 from planting import COLORS as PLANT_COLORS, planting
 from temple import COLORS as TEMPLE_COLORS, pavilion
 LEVEL=sys.argv[sys.argv.index('--')+1]
@@ -24,6 +24,7 @@ assert LEVEL in ('aquarium_betta','aquarium_jellyfish','aquarium_lionfish','aqua
 HERE=REPO/'wflevels'/LEVEL
 spec=importlib.util.spec_from_file_location('tank_config',HERE/'config.py')
 C=importlib.util.module_from_spec(spec); spec.loader.exec_module(C)
+if C.KIND=='plants':write_urchin_texture(HERE)
 PROFILE=os.environ.get('TANK_PROFILE','keyboard')
 assert PROFILE in ('keyboard','touch','remote')
 COUNT=int(os.environ.get('TANK_COUNT',str(C.COUNT)))
@@ -81,6 +82,12 @@ def material(key):
             mt.node_tree.links.new(tex.outputs['Color'],mt.node_tree.nodes.get('Principled BSDF').inputs['Base Color'])
             if key=='fin':mt['wf_opacity']=.55;mt['wf_double_sided']=True
         if key.startswith(('betta_mem' ,'betta_ray','betta_margin')):mt['wf_prelit']=True
+        if C.KIND=='plants' and key.startswith('urchin_'):
+            mt['wf_prelit']=True
+            tex=mt.node_tree.nodes.new('ShaderNodeTexImage')
+            tex.image=bpy.data.images.load(str(HERE/URCHIN_TEXTURE),check_existing=True)
+            mt.node_tree.links.new(tex.outputs['Color'],mt.node_tree.nodes.get('Principled BSDF').inputs['Base Color'])
+            if key=='urchin_foot':mt['wf_opacity']=.78
         MATERIALS[key] = mt
     return MATERIALS[key]
 
@@ -216,6 +223,8 @@ if C.KIND=='plants':
         angle=math.tau*k/8
         offset=(.25*math.cos(angle),.25*math.sin(angle))
         obj=actor(f'urchin-foot-{k}',foot_data,(C.SPAWN[0]+offset[0],C.SPAWN[1]+offset[1],C.SPAWN[2]),mesh_name='urchin_tube_foot')
+        # Share the body atlas in PERM, leaving the runtime plant page unchanged.
+        obj['wf_Moves Between Rooms']=True
         urchin_feet.append((obj,offset))
 
 if FEEDING:

@@ -6,10 +6,10 @@ import sys
 ROOT=Path(__file__).resolve().parents[1]
 sys.path.insert(0,str(ROOT/'wflevels/aquarium_tanks'))
 from planting import planting, placements
-from urchin import urchin
+from urchin import urchin, tube_foot
 
 def test_foliage_and_spines_survive_fixed_point_triangle_normals():
-    for mesh in [*planting(.635),urchin()]:
+    for mesh in [*planting(.635),urchin(),tube_foot()]:
         for face in mesh.faces:
             for j in range(1,len(face)-1):
                 a,b,c=[mesh.vertices[i] for i in (face[0],face[j],face[j+1])]

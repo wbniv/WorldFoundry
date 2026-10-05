@@ -5,6 +5,7 @@ Performance evidence comes exclusively from Chromecast 1. Desktop captures check
 | Phase | Animal / scene actors | Animal source triangles | FPS | p95 present ms | Actor CPU ms | Render CPU ms | PSS MiB | Δ actor CPU ms |
 |---|---:|---:|---:|---:|---:|---:|---:|---:|
 | 0 | 9 / 38 | 860 | 14.520 | 83.417 | 1.313 | 55.111 | 77.952 | 0.000 |
+| 1 | 9 / 38 | 3540 | 13.722 | 83.417 | 1.287 | 58.919 | 70.220 | -0.026 |
 
 Source triangle counts can differ from cooked meshes. Presented p95 is frame interval, not CPU time. The coordinator’s reviewed plants trace uses cardinal key events; diagonal, reversal and anchor checks use deterministic host/runtime correctness traces. Chromecast 2 currently requires local setup. CPU repeats are exploratory single runs; do not infer statistical certainty from small deltas.
 
@@ -15,3 +16,11 @@ Source triangle counts can differ from cooked meshes. Presented p95 is frame int
 | wide-idle | 14.681 | 83.417 |
 | close-idle | 14.514 | 83.417 |
 | crawl-close | 14.363 | 83.417 |
+
+## Phase 1 scenarios
+
+| Scenario | FPS | p95 present ms |
+|---|---:|---:|
+| wide-idle | 13.813 | 83.417 |
+| close-idle | 13.733 | 83.417 |
+| crawl-close | 13.605 | 83.417 |

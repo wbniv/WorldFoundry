@@ -1,8 +1,13 @@
 | Date | Change |
 |------|--------|
+| [2026-10-03](https://github.com/wbniv/WorldFoundry/commit/55d87fb3) | Split tiger-barb tank and add profiled dense planting with A3 growth poster |
 | [2026-10-02](https://github.com/wbniv/WorldFoundry/commit/9cef6dde) | Integrate aquarium tanks, feeding, and flowing betta fins |
 
 <!--history-meta v1
+55d87fb3	author	Will Norris
+55d87fb3	added	3
+55d87fb3	deleted	1
+55d87fb3	files	1
 9cef6dde	author	Will Norris
 9cef6dde	added	7
 9cef6dde	deleted	0

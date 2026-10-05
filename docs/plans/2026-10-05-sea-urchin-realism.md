@@ -1,6 +1,6 @@
 # Sea urchin: traction, articulated spines and a textured model
 
-5 October 2026 · **Phases 0–3 authorized; phase 0 completed; phases 1–3 pending.** The sea-anemone and generic-deformation projects remain set aside. This plan does not authorize engine changes.
+5 October 2026 · **Phases 0–3 authorized; phases 0–1 completed; phases 2–3 pending.** The sea-anemone and generic-deformation projects remain set aside. This plan does not authorize engine changes.
 
 Improve the planted tank's sea urchin so it crawls with visible traction, has a more convincing short-spined silhouette and surface, and moves its spines through basal joints. Keep the slow movement the user previously chose. Separate believable contact from decorative motion, and measure actor/script costs as well as geometry.
 
@@ -165,3 +165,9 @@ Phase 0 completed matched device baselines under job `J-949aa09956f9`. [Phase co
 Phase 0 results: 14.520 FPS, p95 present interval 83.417 ms, actor CPU 1.313 ms and render CPU 55.111 ms (CPU is one separately instrumented repeat). Existing plant content tests: 5 passed. Native frame stepping is correctness-only.
 
 ![Baseline close view on Chromecast 1](2026-10-05-sea-urchin-realism/evidence/phase-0/chromecast/release/run-1/close-idle.png)
+
+### Phase 1 · Mesh and texture
+
+Implementation retains 9 animal / 38 scene actors and uses 3,540 animal source triangles. One 256² atlas covers the opaque purple test and spines, with material opacity 0.78 on pale feet. Body and feet share the existing PERM asset slot, preserving the runtime plant texture page. Source geometry and cooked material checks: 8 passed. The first trial exposed undersized foot-pad faces; simplified pad topology fixes the engine assertion, and feet now participate in the fixed-point normal check. No engine changes. Matched device job: `J-64d791da3158`, completed. Release median 13.722 FPS (−5.50% vs phase 0); p95 present interval 83.417 ms. Instrumented actor CPU 1.287 ms (−0.026 ms), render CPU 58.919 ms (+3.808 ms). The render increase is observed in a single instrumented repeat, not a statistically isolated attribution to geometry.
+
+![Phase 1 close view on Chromecast 1](2026-10-05-sea-urchin-realism/evidence/phase-1/chromecast/release/run-1/close-idle.png)
