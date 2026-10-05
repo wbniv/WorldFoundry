@@ -1137,6 +1137,10 @@ if(NOT ANDROID AND NOT IOS AND NOT APPLE AND NOT EMSCRIPTEN)
     # external-host path stays clean and are labelled `gl` so headless CI
     # can exclude them via `ctest -LE gl`.
     enable_testing()
+    add_executable(texture_atlas_address_test tests/texture_atlas_address_test.cc)
+    target_link_libraries(texture_atlas_address_test PRIVATE wfengine)
+    target_compile_options(texture_atlas_address_test PRIVATE -fno-rtti -fpermissive)
+    add_test(NAME texture_atlas_address COMMAND texture_atlas_address_test)
     if(WF_DEBUG_BRIDGE)
         add_executable(debug_listener_reconnect_test tests/debug_listener_reconnect_test.cc)
         target_link_libraries(debug_listener_reconnect_test PRIVATE wfengine)

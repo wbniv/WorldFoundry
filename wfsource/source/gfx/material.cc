@@ -237,6 +237,8 @@ Material::Construct()
 
 
 
+#if defined(VIDEO_MEMORY_IN_ONE_PIXELMAP)
+#define TexturePage(texture) getTPage(TEXTURE_MODE_16BIT_DIRECT,((_materialFlags>>8)&0x3),(texture).u,(texture).v)
 #define CalcVRAMuv(uin,vin,resultu,resultv,texture) \
 	{ \
 	Scalar u(uin); \
@@ -252,6 +254,26 @@ Material::Construct()
 	AssertMsg(vramV >= Scalar::zero,"v = " << v << ", height= " << texture.h << ", v = " << texture.v << ", vramV = " << vramV); \
 	resultv = vramV.WholePart(); \
 	}
+#else
+// Modern backends bind a PixelMap directly. Carry complete atlas coordinates
+// in the widened primitive UVs; PSX texture-page masks truncate origins >=1024.
+// Permanent and room textures may have different sizes, so validate against
+// the bound map rather than the configured transient slot dimensions.
+#define TexturePage(texture) 0
+#define CalcVRAMuv(uin,vin,resultu,resultv,texture) \
+    { \
+    Scalar u(uin), v(vin); \
+    CLIP01(u); CLIP01(v); \
+    Scalar atlasU = (u * int((texture).w-1)) + Scalar((texture).u,0); \
+    Scalar atlasV = (v * int((texture).h-1)) + Scalar((texture).v,0); \
+    AssertMsg(_texturePixelMap, "textured material has no PixelMap"); \
+    AssertMsg(atlasU >= Scalar::zero && atlasU < Scalar(_texturePixelMap->GetBaseXSize(),0), "atlas U outside bound texture: " << atlasU); \
+    AssertMsg(atlasV >= Scalar::zero && atlasV < Scalar(_texturePixelMap->GetBaseYSize(),0), "atlas V outside bound texture: " << atlasV); \
+    AssertMsg(atlasU.WholePart() <= 65535 && atlasV.WholePart() <= 65535, "atlas UV exceeds primitive storage"); \
+    resultu = uint16(atlasU.WholePart()); \
+    resultv = uint16(atlasV.WholePart()); \
+    }
+#endif
 
 //-----------------------------------------------------------------------------
 
@@ -287,7 +309,7 @@ Material::InitPrimitive(Primitive& prim, const Vertex3D& vertex0, const Vertex3D
 			setRGB0(poly, color.Red(),color.Green(),color.Blue());
 #pragma message ("KTS: handle 4 & 8 bit textures as soon as I get data from textile")
 //			poly->tpage = getTPage(TEXTURE_MODE_16BIT_DIRECT,TEXTURE_TRANS_HALF_BACK_HALF_PRIMITIVE,_texture.u,_texture.v);
-			poly->tpage = getTPage(TEXTURE_MODE_16BIT_DIRECT,((_materialFlags>>8)&0x3),_texture.u,_texture.v);
+			poly->tpage = TexturePage(_texture);
 
             poly->pPixelMap = _texturePixelMap;
 
@@ -361,7 +383,7 @@ Material::InitPrimitive(Primitive& prim, const Vertex3D& vertex0, const Vertex3D
 			setRGB0(poly, vertex0.color.Red(),vertex0.color.Green(),vertex0.color.Blue());
 			setRGB1(poly, vertex1.color.Red(),vertex1.color.Green(),vertex1.color.Blue());
 			setRGB2(poly, vertex2.color.Red(),vertex2.color.Green(),vertex2.color.Blue());
-			poly->tpage = getTPage(TEXTURE_MODE_16BIT_DIRECT,((_materialFlags>>8)&0x3),_texture.u,_texture.v);
+			poly->tpage = TexturePage(_texture);
             poly->pPixelMap = _texturePixelMap;
 
 			if(_materialFlags & TEXTURE_TRANSLUCENCY_ON)
