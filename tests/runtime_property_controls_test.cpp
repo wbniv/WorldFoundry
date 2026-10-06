@@ -15,8 +15,8 @@ int main(int argc,char** argv){
  assert(!form.back());propertyui::syncText(form);assert(!form.drawer&&form.value()=="5801868");
  press(1);ui.focus=16+int(propertyui::recentColours().size());press(1);assert(ui.page==1);press(1);assert(ui.planeAdjust);press(1u<<13);assert(ui.preview!=ui.original&&form.value()=="5801868");
  // Repeat is time-based and release stops it without affecting the form draft.
- ui.repeatButtons=1u<<13;ui.holdStart=ui.lastRepeat=std::chrono::steady_clock::now()-std::chrono::milliseconds(1400);double oldS=ui.saturation;propertyui::input(form,1u<<13);assert(ui.saturation>oldS);propertyui::input(form,0);oldS=ui.saturation;propertyui::input(form,0);assert(ui.saturation==oldS);
- assert(!form.back());propertyui::syncText(form);assert(form.drawer&&!ui.planeAdjust);assert(!form.back());propertyui::syncText(form);assert(!form.drawer&&form.value()=="5801868");
+ ui.repeatButtons=1u<<13;ui.holdStart=ui.lastRepeat=std::chrono::steady_clock::now()-std::chrono::milliseconds(1400);double oldH=ui.hue;propertyui::input(form,1u<<13);assert(ui.hue>oldH);propertyui::input(form,0);oldH=ui.hue;propertyui::input(form,0);assert(ui.hue==oldH);
+ assert(!form.back());propertyui::syncText(form);assert(form.drawer&&!ui.planeAdjust);double beforeV=ui.value,beforeH=ui.hue,beforeS=ui.saturation;ui.focus=1;press(1u<<13);assert(ui.value>beforeV&&ui.hue==beforeH&&ui.saturation==beforeS);press(1u<<14);assert(std::abs(ui.value-beforeV)<1e-9);assert(!form.back());propertyui::syncText(form);assert(!form.drawer&&form.value()=="5801868");
  // Palette confirmation updates only the form draft; Cancel leaves the object alone.
  press(1);ui.focus=4;press(1);assert(ui.preview==0x58a78c);ui.focus=17+int(propertyui::recentColours().size());press(1);assert(!form.drawer&&propertyui::rgb(form.value())==0x58a78c&&*object->get(201)=="5801868");assert(form.edit.commit());assert(*object->get(201)==std::to_string(0x58a78c));
  // Preserve hue through grey/black and do not change RGB just by opening.

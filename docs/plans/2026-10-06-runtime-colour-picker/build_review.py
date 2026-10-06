@@ -83,6 +83,17 @@ for x,title,desc in [(24,'Open picker','Copy existing form draft'),(324,'Adjust 
     body+=rect(x,65,260,100,'#24424e','#729999')+text(x+16,96,title,19)+text(x+16,132,desc,15)
 body+=text(289,124,'→',26)+text(589,124,'→',26)+text(40,208,'Cancel / ↶: discard picker preview; retain pre-picker form draft.',17)+text(40,247,'Outer form apply-and-close: validated settings reach the runtime object.',17)
 (HERE/'draft-flow.svg').write_text(wrap(920,280,body));ET.parse(HERE/'draft-flow.svg')
+# Current Custom control; retain the original A/B/C proposals above for comparison.
+body=text(24,36,'Custom · Hue/saturation square + Value',24)
+body+=rect(40,75,310,310,'url(#hue)',rx=0)
+body+='<rect x="40" y="75" width="310" height="310" fill="url(#neutral)"/>'
+body+='<rect x="40" y="75" width="310" height="310" fill="black" opacity=".345"/>'
+body+=rect(40,425,310,20,'url(#brightness)',rx=3)+text(40,414,'Value (brightness) · 65.5%',16)
+body+=text(390,110,'← / →  Hue',18)+text(390,150,'↑ / ↓  Saturation',18)
+body+=text(390,210,'Value slider: ← / → brightness',17)
+body+=text(390,260,'Original / Preview · RGB / Hex',17)+text(390,300,'Use colour / Cancel',17)
+svg=wrap(800,490,body).replace('</defs>','<linearGradient id="neutral" x2="0" y2="1"><stop stop-color="white" stop-opacity="0"/><stop offset="1" stop-color="white"/></linearGradient></defs>')
+(HERE/'custom-value.svg').write_text(svg);ET.parse(HERE/'custom-value.svg')
 plan=HERE.parent/(HERE.name+'.md')
 page=markdown.markdown(plan.read_text(),extensions=['tables','fenced_code'])
 css='body{font:17px/1.65 system-ui,sans-serif;color:#dce8ed;background:#10222c;max-width:1120px;margin:32px auto;padding:0 24px}a{color:#88d9c5}h1,h2,h3{line-height:1.25}h2{margin-top:2em}img{display:block;max-width:100%;height:auto;margin:24px 0;border-radius:12px}table{border-collapse:collapse;width:100%;font-size:15px}td,th{border:1px solid #46606c;padding:10px;text-align:left;vertical-align:top}th{background:#203b48}code{color:#c5dfac}@media print{body{background:white;color:black;font-size:11pt}a{color:#234}h2,h3{break-after:avoid}img,table{break-inside:avoid}}'

@@ -88,9 +88,9 @@ inline void input(wfprops::Form& form,uint32_t buttons){auto& ui=controls(form);
   offset=0;for(int i=0;i<row;++i)offset+=rows[i];ui.focus=offset+col;
   if(edge&1){if(ui.focus<16)colourValues(ui,palette()[ui.focus]);else if(ui.focus<actions)colourValues(ui,recentColours()[ui.focus-16]);else if(ui.focus==actions){ui.page=1;ui.focus=0;}else finishColour(form,ui,ui.focus==actions+1);}
  }else if(ui.page==1){
-  if(ui.planeAdjust){if(edge&left)ui.saturation=std::max(0.,ui.saturation-.01);if(edge&right)ui.saturation=std::min(1.,ui.saturation+.01);if(edge&up)ui.value=std::min(1.,ui.value+.01);if(edge&down)ui.value=std::max(0.,ui.value-.01);if(edge&(up|down|left|right))ui.preview=hsv(ui.hue,ui.saturation,ui.value);if(edge&1)ui.planeAdjust=false;}
+  if(ui.planeAdjust){if(edge&left)ui.hue=std::fmod(ui.hue+359,360);if(edge&right)ui.hue=std::fmod(ui.hue+1,360);if(edge&up)ui.saturation=std::min(1.,ui.saturation+.01);if(edge&down)ui.saturation=std::max(0.,ui.saturation-.01);if(edge&(up|down|left|right))ui.preview=hsv(ui.hue,ui.saturation,ui.value);if(edge&1)ui.planeAdjust=false;}
   else {if(edge&up)ui.focus=std::max(0,ui.focus-1);if(edge&down)ui.focus=std::min(4,ui.focus+1);
-   if(ui.focus==1&&(edge&(left|right))){ui.hue=std::fmod(ui.hue+((edge&right)?1:359),360);ui.preview=hsv(ui.hue,ui.saturation,ui.value);}
+   if(ui.focus==1&&(edge&(left|right))){ui.value=std::max(0.,std::min(1.,ui.value+((edge&right)?.01:-.01)));ui.preview=hsv(ui.hue,ui.saturation,ui.value);}
    if(edge&1){if(ui.focus==0)ui.planeAdjust=true;else if(ui.focus==2){ui.page=2;ui.focus=0;}else if(ui.focus==3)finishColour(form,ui,true);else if(ui.focus==4){ui.page=0;ui.focus=16+int(recentColours().size());}}
   }
  }else {if(edge&up)ui.focus=std::max(0,ui.focus-1);if(edge&down)ui.focus=std::min(4,ui.focus+1);if(edge&1){if(ui.focus<4)colourText(form,ui,ui.focus);else{ui.page=1;ui.focus=2;}}}

@@ -81,18 +81,18 @@ body.off .ctl{opacity:.35}
 #plant-settings .colour-grid button[aria-pressed=true],#plant-settings .colour-recent button[aria-pressed=true]{border-color:white;box-shadow:0 0 0 2px #111 inset}
 #plant-settings .property-colour button:focus-visible{outline:3px solid #f1cd79;outline-offset:3px}
 #plant-settings .colour-recent{display:grid;grid-template-columns:repeat(6,1fr);gap:8px;margin:12px 0}
-#plant-settings .colour-plane{position:relative;height:260px;max-width:420px;touch-action:none;margin:16px 0;background:linear-gradient(to top,#000,transparent),linear-gradient(to right,#fff,transparent),var(--hue)}
+#plant-settings .colour-plane{position:relative;height:260px;max-width:420px;touch-action:none;margin:16px 0;background:linear-gradient(rgba(0,0,0,var(--darkness)),rgba(0,0,0,var(--darkness))),linear-gradient(to top,#fff,transparent),linear-gradient(to right,#f00,#ff0,#0f0,#0ff,#00f,#f0f,#f00)}
 #plant-settings .colour-marker{position:absolute;width:14px;height:14px;border:2px solid white;border-radius:50%;box-shadow:0 0 0 2px black;transform:translate(-50%,-50%);pointer-events:none}
 #plant-settings .colour-preview{display:flex;gap:12px;margin:12px 0}
 #plant-settings .colour-preview span{flex:1;min-height:54px;padding:8px;border-radius:8px;text-shadow:0 1px 3px black;color:white}
 #plant-settings .colour-actions{display:flex;gap:8px;flex-wrap:wrap;margin:12px 0}
 #plant-settings .colour-actions button,#plant-settings .colour-open,#plant-settings .colour-back{padding:12px;border:1px solid var(--line);border-radius:8px;background:var(--panel);color:var(--fg)}
 #plant-settings .colour-details input{margin:6px 0}
-#plant-settings input[data-hue]{-webkit-appearance:none;appearance:none;background:transparent}
-#plant-settings input[data-hue]::-webkit-slider-runnable-track{height:18px;border-radius:6px;background:linear-gradient(to right,#f00,#ff0,#0f0,#0ff,#00f,#f0f,#f00)}
-#plant-settings input[data-hue]::-webkit-slider-thumb{-webkit-appearance:none;width:18px;height:26px;margin-top:-4px;border:2px solid #10222c;border-radius:5px;background:#fff}
-#plant-settings input[data-hue]::-moz-range-track{height:18px;border-radius:6px;background:linear-gradient(to right,#f00,#ff0,#0f0,#0ff,#00f,#f0f,#f00)}
-#plant-settings input[data-hue]::-moz-range-thumb{width:14px;height:24px;border:2px solid #10222c;border-radius:5px;background:#fff}
+#plant-settings input[data-value]{-webkit-appearance:none;appearance:none;background:transparent}
+#plant-settings input[data-value]::-webkit-slider-runnable-track{height:18px;border-radius:6px;background:linear-gradient(to right,#000,var(--value-colour))}
+#plant-settings input[data-value]::-webkit-slider-thumb{-webkit-appearance:none;width:18px;height:26px;margin-top:-4px;border:2px solid #10222c;border-radius:5px;background:#fff}
+#plant-settings input[data-value]::-moz-range-track{height:18px;border-radius:6px;background:linear-gradient(to right,#000,var(--value-colour))}
+#plant-settings input[data-value]::-moz-range-thumb{width:14px;height:24px;border:2px solid #10222c;border-radius:5px;background:#fff}
 #plant-settings .colour-picker-panel{position:fixed;inset:0;z-index:30;background:var(--bg);overflow:auto;padding:20px max(20px,calc((100vw - 580px)/2));touch-action:pan-y}
 #plant-settings .colour-picker-panel[hidden]{display:none}
 #plant-settings input[type=range]{width:100%;height:44px;touch-action:auto}
@@ -183,8 +183,8 @@ body.off .ctl{opacity:.35}
     const grid=document.createElement('div');grid.className='colour-grid';panel.appendChild(grid);const recent=document.createElement('div');recent.className='colour-recent';panel.appendChild(recent);
     const custom=document.createElement('div');custom.hidden=true;panel.appendChild(custom);
     const plane=document.createElement('div');plane.className='colour-plane';plane.setAttribute('aria-label','Colour spectrum; use the labelled sliders for keyboard input');const marker=document.createElement('span');marker.className='colour-marker';plane.appendChild(marker);custom.appendChild(plane);
-    const sliders=[];['Hue','Saturation','Value'].forEach((name,i)=>{const label=document.createElement('label');label.textContent=name+' ';const out=document.createElement('output');label.appendChild(out);const input=document.createElement('input');input.type='range';input.min='0';input.max=i===0?'359':'100';input.step='1';input.setAttribute('aria-label',name);if(i===0)input.dataset.hue='true';label.appendChild(input);custom.appendChild(label);sliders.push([input,out]);input.addEventListener('input',()=>{ui.hsv[i]=Number(input.value)/(i===0?1:100);ui.preview=colourRGB.apply(null,ui.hsv);paint();});});
-    function point(e){const bounds=plane.getBoundingClientRect();ui.hsv[1]=Math.max(0,Math.min(1,(e.clientX-bounds.left)/bounds.width));ui.hsv[2]=Math.max(0,Math.min(1,1-(e.clientY-bounds.top)/bounds.height));ui.preview=colourRGB.apply(null,ui.hsv);paint();}
+    const sliders=[];['Hue','Saturation','Value'].forEach((name,i)=>{const label=document.createElement('label');label.textContent=name+' ';const out=document.createElement('output');label.appendChild(out);const input=document.createElement('input');input.type='range';input.min='0';input.max=i===0?'359':'100';input.step='1';input.setAttribute('aria-label',name);if(i===2)input.dataset.value='true';label.appendChild(input);custom.appendChild(label);sliders.push([input,out]);input.addEventListener('input',()=>{ui.hsv[i]=Number(input.value)/(i===0?1:100);ui.preview=colourRGB.apply(null,ui.hsv);paint();});});
+    function point(e){const bounds=plane.getBoundingClientRect();ui.hsv[0]=Math.max(0,Math.min(359,(e.clientX-bounds.left)/bounds.width*360));ui.hsv[1]=Math.max(0,Math.min(1,1-(e.clientY-bounds.top)/bounds.height));ui.preview=colourRGB.apply(null,ui.hsv);paint();}
     plane.addEventListener('pointerdown',e=>{plane.setPointerCapture(e.pointerId);point(e);});plane.addEventListener('pointermove',e=>{if(plane.hasPointerCapture(e.pointerId))point(e);});
     const details=document.createElement('details');details.className='colour-details';const summary=document.createElement('summary');summary.textContent='RGB / Hex details';details.appendChild(summary);panel.appendChild(details);const exact=[];
     ['Red','Green','Blue','Hex'].forEach((name,i)=>{const label=document.createElement('label');label.textContent=name;const input=document.createElement('input');input.type='text';input.inputMode=i===3?'text':'numeric';input.maxLength=i===3?7:3;input.autocomplete='off';input.setAttribute('aria-label',name);label.appendChild(input);details.appendChild(label);exact.push(input);
@@ -196,7 +196,7 @@ body.off .ctl{opacity:.35}
     const customButton=button(actions,'Custom',()=>{custom.hidden=!custom.hidden;grid.hidden=!custom.hidden;recent.hidden=!custom.hidden||!recentColours.length;customButton.textContent=custom.hidden?'Custom':'Palette';panel.scrollTop=0;paint();});
     ui.cancel=()=>{panel.hidden=true;ui.open.hidden=false;if(activeColour===ui)activeColour=null;colourSync(group,ui.saved);};
     button(actions,'Use colour',()=>{if(exact.some(input=>!input.checkValidity())){exact.find(input=>!input.checkValidity()).reportValidity();return;}ui.saved=ui.preview;recentColours=[ui.saved].concat(recentColours.filter(value=>value!==ui.saved)).slice(0,6);propertySend('set',f.id+':'+String(ui.saved));ui.cancel();});button(actions,'Cancel',ui.cancel);
-    function paint(){old.textContent='Original';next.textContent='Preview';old.style.background=colourHex(ui.original);next.style.background=colourHex(ui.preview);readout.textContent=colourHex(ui.preview).toUpperCase();plane.style.setProperty('--hue',colourHex(colourRGB(ui.hsv[0],1,1)));marker.style.left=(ui.hsv[1]*100)+'%';marker.style.top=((1-ui.hsv[2])*100)+'%';
+    function paint(){old.textContent='Original';next.textContent='Preview';old.style.background=colourHex(ui.original);next.style.background=colourHex(ui.preview);readout.textContent=colourHex(ui.preview).toUpperCase();plane.style.setProperty('--darkness',String(1-ui.hsv[2]));sliders[2][0].style.setProperty('--value-colour',colourHex(colourRGB(ui.hsv[0],ui.hsv[1],1)));marker.style.left=(ui.hsv[0]/360*100)+'%';marker.style.top=((1-ui.hsv[1])*100)+'%';
       sliders.forEach((pair,i)=>{pair[0].value=String(Math.round(ui.hsv[i]*(i===0?1:100)));pair[1].textContent=pair[0].value+(i===0?'°':'%');});exact.forEach((input,i)=>{if(input!==document.activeElement){input.value=i===3?colourHex(ui.preview).toUpperCase():String((ui.preview>>((2-i)*8))&255);input.setCustomValidity('');}});
       group.querySelectorAll('button[data-colour]').forEach(b=>{const selected=Number(b.dataset.colour)===ui.preview;b.setAttribute('aria-pressed',String(selected));b.textContent=selected?'✓':'';});}
     colourSync(group,f.value);return group;

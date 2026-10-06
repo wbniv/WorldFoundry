@@ -6,9 +6,9 @@ Replace the basic runtime RGB picker with a visual colour editor for all `BUTTON
 
 ## Selected design and approval boundary
 
-Will selected **C — Palette first + custom shades** on 2026-10-06. Implement the palette grid as the initial view, with selected/highlighted swatches, recent session colours and a Custom route to Option A’s saturation/value square and hue strip. Keep exact RGB/hex entry available.
+Will selected **C — Palette first + custom shades** on 2026-10-06. Implement the palette grid as the initial view, with selected/highlighted swatches, recent session colours and a Custom route to a hue/saturation square and Value (brightness) strip. Keep exact RGB/hex entry available.
 
-The proposed engine surface is limited to `wfsource/source/game/runtime_property_controls.h` (palette navigation, temporary colour state, HSV conversion, custom editing and confirmation/cancellation) and `wfsource/source/game/runtime_property_ui.cc` (palette, original/preview swatches, custom square/hue strip and mode-specific hints). Spectrum drawing would initially use bounded existing solid rectangles, with cached colour calculations; device profiling will decide whether that approach is acceptable. No renderer API, core property binding, storage format, or Forth bridge change is proposed. If existing text-entry callbacks need adjustment for RGB/hex, keep it within the UI helper and the existing host contract.
+The proposed engine surface is limited to `wfsource/source/game/runtime_property_controls.h` (palette navigation, temporary colour state, HSV conversion, custom editing and confirmation/cancellation) and `wfsource/source/game/runtime_property_ui.cc` (palette, original/preview swatches, custom square/value strip and mode-specific hints). Spectrum drawing would initially use bounded existing solid rectangles, with cached colour calculations; device profiling will decide whether that approach is acceptable. No renderer API, core property binding, storage format, or Forth bridge change is proposed. If existing text-entry callbacks need adjustment for RGB/hex, keep it within the UI helper and the existing host contract.
 
 The phone implementation changes `wfsource/source/hal/phonepad/controller.html` to the same palette/custom workflow with browser controls compatible with WebView 91. Tests and these documents accompany the changes. Any additional engine files or renderer changes require a fresh proposal. Permission for the two TV engine UI files was explicitly granted by Will (“i authorize”). The [AGENTS.md](../../AGENTS.md) rule still applies to any additional engine surface. Android Java text-field contrast was also corrected after Will reported unreadable black text; this uses the existing dialog and IME.
 
@@ -171,3 +171,13 @@ Ordinary app test jobs close/restore their session afterward; these checks do no
 ![Readable native TV editor on cast1](2026-10-06-runtime-colour-picker/evidence/native-retry/chromecast-test-01/J-58b0227d4b12/native-numeric-keyboard-screenshot.png)
 
 [Matching readable editor capture on cast2](2026-10-06-runtime-colour-picker/evidence/native-retry/chromecast-test-02/J-d0a71323fbf2/native-numeric-keyboard-screenshot.png).
+
+## Custom control correction — 2026-10-06
+
+Custom now uses a hue/saturation square and a separate **Value (brightness)** slider, replacing the hue strip. Hue runs horizontally and saturation vertically; the whole square reflects the selected brightness. TV square adjustment uses ←/→ for hue and ↑/↓ for saturation; the focused Value slider uses ←/→ for brightness. Phone/tablet/web use the same axes, with separately labelled Hue/Saturation/Value sliders for keyboard access. RGB/hex storage, preview, confirmation and cancellation stay unchanged. The original A/B comparison above records the earlier alternatives.
+
+![Custom hue/saturation square and Value slider](2026-10-06-runtime-colour-picker/custom-value.svg)
+
+Regression checks cover changing brightness without changing hue/saturation, reaching black and returning to colour, square gestures preserving brightness, and held-input release.
+
+Validation: **PASS** — TV picker/control regression and phone/browser transport regression (2 tests, 37.64 s). Saved output: [`evidence/custom-value-tests.log`](2026-10-06-runtime-colour-picker/evidence/custom-value-tests.log). Android release rebuild **PASS**. The updated APK is installed on both Chromecasts; coordinated launch/resume checks and cleanup **PASS** (batch `B-53a4f42194d7`, cast1 `J-803b9fb870c9`, cast2 `J-564db629decd`). APK SHA-256: `ae04e3f7514db529b69bb38a5a3bd29f632662fca0c801ec6b643e61ab91d0da`. Build log, frozen-release receipt and device evidence: [`evidence/custom-value/`](2026-10-06-runtime-colour-picker/evidence/custom-value/). These device checks verify installation and app lifecycle; full remote colour-editing acceptance and profiling remain pending.

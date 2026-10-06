@@ -59,14 +59,14 @@ void build(wfprops::Form& editor,bool phone,int w,int h,std::vector<PhonepadRect
      int actions=16+n;item(ui.focus==actions,630,760,280,58,"Custom");item(ui.focus==actions+1,940,760,280,58,"Use colour");item(ui.focus==actions+2,1250,760,280,58,"Cancel");
     }else if(ui.page==1){
      // Bounded 24x24 grid uses the existing solid-rectangle overlay; no renderer API change.
-     static double spectrumHue=-1;static std::array<uint32_t,576> spectrum;
-     if(spectrumHue!=ui.hue){spectrumHue=ui.hue;for(int y=0;y<24;++y)for(int x=0;x<24;++x)spectrum[y*24+x]=(hsv(ui.hue,x/23.,1-y/23.)<<8)|255u;}
+     static double spectrumValue=-1;static std::array<uint32_t,576> spectrum;
+     if(spectrumValue!=ui.value){spectrumValue=ui.value;for(int y=0;y<24;++y)for(int x=0;x<24;++x)spectrum[y*24+x]=(hsv(x*360./24,1-y/23.,ui.value)<<8)|255u;}
      for(int y=0;y<24;++y)for(int x=0;x<24;++x)rect(640+x*16,290+y*16,16,16,spectrum[y*24+x]);
      if(ui.focus==0)outline(640,290,384,384,ui.planeAdjust?0xefce83ffu:0xffffffffu);
-     float px=640+ui.saturation*384,py=290+(1-ui.value)*384;rect(px-8,py-8,16,16,0x000000ffu);rect(px-5,py-5,10,10,0xffffffffu);
-     item(ui.focus==1,630,700,420,70,"Hue: "+std::to_string(int(std::round(ui.hue))));for(int x=0;x<72;++x)rect(645+x*5.3f,745,5.4f,16,(hsv(x*5,1,1)<<8)|255u);rect(645+ui.hue/360*381-3,740,6,26,0xffffffffu);
+     float px=640+ui.hue/360*384,py=290+(1-ui.saturation)*384;rect(px-8,py-8,16,16,0x000000ffu);rect(px-5,py-5,10,10,0xffffffffu);
+     item(ui.focus==1,630,700,420,70,"Value: "+std::to_string(int(std::round(ui.value*100)))+"%");for(int x=0;x<72;++x)rect(645+x*5.3f,745,5.4f,16,(hsv(ui.hue,ui.saturation,x/71.)<<8)|255u);rect(645+ui.value*381-3,740,6,26,0xffffffffu);
      item(ui.focus==2,1100,565,510,60,"RGB / Hex details");item(ui.focus==3,1100,640,510,60,"Use colour");item(ui.focus==4,1100,715,510,60,"Palette");
-     text(650,791,2,"S "+std::to_string(int(std::round(ui.saturation*100)))+"% / V "+std::to_string(int(std::round(ui.value*100)))+"%");
+     text(650,791,2,"H "+std::to_string(int(std::round(ui.hue)))+" / S "+std::to_string(int(std::round(ui.saturation*100)))+"% / V "+std::to_string(int(std::round(ui.value*100)))+"%");
     }else {const char* names[]={"Red","Green","Blue","Hex"};for(int i=0;i<4;++i)item(ui.focus==i,630,300+i*95,530, 70,names[i]+std::string(": ")+(i==3?hex(ui.preview):std::to_string((ui.preview>>((2-i)*8))&255)));item(ui.focus==4,630,700,530,65,"Custom colour");}
     if(ui.nativeOpen){rect(620,270,1030,500,0x102621ffu);text(655,330,3,"Editing with the system keyboard");}
    }else {rect(600,205,1080,300,0x102621ffu);text(630,235,3,field?field->label:"");text(630,330,3,"Editing with the system keyboard");}
@@ -74,7 +74,7 @@ void build(wfprops::Form& editor,bool phone,int w,int h,std::vector<PhonepadRect
   }
  }
  const auto* focused=f.field();bool direct=!f.rail&&focused&&!focused->readonly&&(focused->kind==2||focused->kind==4||focused->show==2);
- text(225,840,2.7f,f.edit.error.empty()?(f.drawer?(colour(focused)?(controls(f).planeAdjust?"Arrows: saturation / value   A: finish":controls(f).page==1?"Up / down: select   Left / right: hue":"Arrows: select   A: choose"):"Use the system text editor"):direct?"Up / down: select   Left / right: change":"Arrows: select   A: edit"):f.edit.error,0xffdd99ffu);
+ text(225,840,2.7f,f.edit.error.empty()?(f.drawer?(colour(focused)?(controls(f).planeAdjust?"Arrows: hue / saturation   A: finish":controls(f).page==1?"Up / down: select   Left / right: value":"Arrows: select   A: choose"):"Use the system text editor"):direct?"Up / down: select   Left / right: change":"Arrows: select   A: edit"):f.edit.error,0xffdd99ffu);
  remoteui::BackArrow(painter,1260,840,4,0xf1f2e4ffu);text(1310,840,2.7f,f.drawer?(colour(focused)?(controls(f).planeAdjust?"Finish adjustment":"Cancel colour"):"Close editor"):"Apply / close");
 }
 }
