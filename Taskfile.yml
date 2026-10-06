@@ -967,7 +967,7 @@ tasks:
         bash wftools/wf_blender/build_level_binary.sh "$1"
 
   build-cd-iff:
-    desc: "Assemble wfsource/source/game/cd.iff from shell.fth + standalone level IFFs via cdpack-rs (SMB W1-1=0, W1-2=1, W1-3=2, W1-4=3, snowgoons=4, qbert=5, Astra Marble Madness=6)"
+    desc: "Assemble wfsource/source/game/cd.iff from shell.fth + standalone level IFFs via cdpack-rs (SMB W1-1=0, W1-2=1, W1-3=2, W1-4=3, snowgoons=4, qbert=5, Astra Marble Madness=6, baseline=7)"
     cmds:
       - cargo build --release --manifest-path wftools/cdpack-rs/Cargo.toml
       # Feed the *-standalone.iff (L4-rooted) files, NOT the bare LVAS *.iff:
@@ -977,7 +977,7 @@ tasks:
       # boots into Mario. Flagpole/axe advance ActBoxes chain the loop:
       # W1-1 writes LEVEL_TO_RUN=1 (-> W1-2), W1-2 writes 2 (-> W1-3), W1-3 writes 3
       # (-> W1-4), W1-4 writes 0 (-> W1-1) — an endless W1-1->W1-2->W1-3->W1-4 loop.
-      # snowgoons/qbert stay at 4/5; Astra Marble Madness is appended at 6.
+      # snowgoons/qbert stay at 4/5; Astra Marble Madness stays at 6; baseline is 7.
       # See docs/plans/2026-06-03-build-faithful-smb-w1-4.md.
       - |
         wftools/cdpack-rs/target/release/cdpack \
@@ -989,6 +989,7 @@ tasks:
           wflevels/snowgoons-standalone.iff \
           wflevels/qbert_practice-standalone.iff \
           wflevels/marble-madness-3d-astra-standalone.iff \
+          wflevels/baseline-standalone.iff \
           -o wfsource/source/game/cd.iff
 
   build-cd-iff-aquarium:

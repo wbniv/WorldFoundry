@@ -1,0 +1,26 @@
+{
+  "assertions": {
+    "baseline_catalog_attached": true,
+    "grounded_spawn": true,
+    "hardware_up_moves_positive_y": true,
+    "hardware_press_release_received": true,
+    "released_input_settles": true,
+    "released_direction_20": true,
+    "released_direction_22": true,
+    "released_direction_21": true,
+    "picker_pauses_simulation": true,
+    "tv_selects_second_owner": true,
+    "stable_two_owner_picker": true,
+    "stale_picker_session_ignored": true,
+    "other_instance_unchanged": true,
+    "reconnect_preserves_invalid_draft": true,
+    "apply_readback": true,
+    "home_resume_same_process": true,
+    "home_resume_releases_input": true,
+    "home_cancels_uncommitted_draft": true,
+    "reset_chord_without_settings_or_jump": true,
+    "reset_chord_keeps_gameplay": true
+  },
+  "fullEvidencePath": "docs/diagnostics/baseline/generic-settings/default-devices-final/chromecast-test-02/J-a0c9af6adb2a/baseline-checks.json",
+  "fullEvidenceSha256": "abbd7359b9f3035328e905770df35557078e6c36d632cfbcebb501b5d57e9025"
+}

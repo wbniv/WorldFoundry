@@ -6,6 +6,7 @@ import json
 import os
 from pathlib import Path
 import re
+import shutil
 import struct
 import subprocess
 import sys
@@ -50,15 +51,31 @@ def structural():
     check('catalog contains two object instances',data[:4]==b'RP01' and struct.unpack_from('<I',data,4)[0]==2)
     check('standalone L4 and sector-aligned asset', (ROOT/'wflevels/baseline-standalone.iff').read_bytes()[:2]==b'L4' and (ROOT/'wflevels/baseline-standalone.iff').stat().st_size%2048==0)
 
-def desktop():
+def bundle_checks(path):
+    data=path.read_bytes()
+    check('main CD GAME and TOC framing',data[:4]==b'GAME' and data[8:12]==b'TOC\0')
+    toc_size=struct.unpack_from('<I',data,12)[0]
+    check('main CD has shell and eight levels',toc_size==9*12)
+    entries=[struct.unpack_from('<4sII',data,16+i*12) for i in range(9)]
+    names=['smb_w1_1','smb_w1_2','smb_w1_3','smb_w1_4','snowgoons','qbert_practice','marble-madness-3d-astra','baseline']
+    check('main CD preserves shell entry',entries[0][0]==b'SHEL' and entries[0][1]==2048)
+    for index,name in enumerate(names):
+        tag,offset,size=entries[index+1]
+        expected=(ROOT/'wflevels'/(name+'-standalone.iff')).read_bytes()
+        check('main CD level '+str(index)+' is '+name,offset%2048==0 and size==len(expected) and data[offset:offset+size]==expected)
+
+def desktop(bundle=None):
     sys.path.insert(0,str(ROOT/'tests'))
     from debug_bridge_client import BridgeClient
     port=7785
     ids=json.loads((HERE/'actor-map.json').read_text())['indices'];player=ids['Player']
-    capture=OUT/'desktop';capture.mkdir(exist_ok=True)
+    capture=OUT/('desktop-cd' if bundle else 'desktop');capture.mkdir(exist_ok=True)
     env=dict(os.environ,DISPLAY=os.environ.get('DISPLAY',':0'),LD_LIBRARY_PATH=str(ROOT/'engine/libs'))
     log=(capture/'engine.log').open('w')
     args=[str(ROOT/'engine/wf_game'),'-L'+str(ROOT/'wflevels/baseline-standalone.iff'),'--debug-port',str(port),'--debug-bind','127.0.0.1','--debug-print-actors','-width=1280','-height=720','--vram-width=5120','--vram-height=2048','--vram-slot-width=1024','--vram-slot-height=1024','--vram-perm-width=1024','--vram-perm-height=1024']
+    if bundle:
+        shutil.copyfile(bundle,capture/'cd.iff')
+        args.pop(1);args.append('7')
     proc=subprocess.Popen(args,cwd=capture,env=env,stdout=log,stderr=subprocess.STDOUT)
     bridge=None
     try:
@@ -116,10 +133,11 @@ def desktop():
         log.close()
 
 if __name__=='__main__':
-    ap=argparse.ArgumentParser();ap.add_argument('--desktop',action='store_true');args=ap.parse_args()
+    ap=argparse.ArgumentParser();ap.add_argument('--desktop',action='store_true');ap.add_argument('--bundle',type=Path,help='Verify baseline at TOC index 7 in a main CD');args=ap.parse_args()
     try:
         structural()
-        if args.desktop:desktop()
+        if args.bundle:bundle_checks(args.bundle)
+        if args.desktop:desktop(args.bundle)
     finally:
         OUT.mkdir(exist_ok=True)
-        (OUT/'verification.json').write_text(json.dumps(dict(desktop_requested=args.desktop,desktopExecutableSha256=hashlib.sha256((ROOT/'engine/wf_game').read_bytes()).hexdigest(),standaloneSha256=hashlib.sha256((ROOT/'wflevels/baseline-standalone.iff').read_bytes()).hexdigest(),checks=RESULTS),indent=2)+'\n')
+        (OUT/'verification.json').write_text(json.dumps(dict(desktop_requested=args.desktop,bundleSha256=hashlib.sha256(args.bundle.read_bytes()).hexdigest() if args.bundle else None,desktopExecutableSha256=hashlib.sha256((ROOT/'engine/wf_game').read_bytes()).hexdigest(),standaloneSha256=hashlib.sha256((ROOT/'wflevels/baseline-standalone.iff').read_bytes()).hexdigest(),checks=RESULTS),indent=2)+'\n')

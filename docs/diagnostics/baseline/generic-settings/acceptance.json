@@ -1,0 +1,40 @@
+{
+  "baseline": [
+    {
+      "preset": "default",
+      "device": "chromecast-test-01",
+      "job": "J-e601819a7f9b",
+      "assertions": 20,
+      "passed": true
+    },
+    {
+      "preset": "default",
+      "device": "chromecast-test-02",
+      "job": "J-a0c9af6adb2a",
+      "assertions": 20,
+      "passed": true
+    },
+    {
+      "preset": "gallery",
+      "device": "chromecast-test-01",
+      "job": "J-4cc047e0b1e1",
+      "assertions": 20,
+      "passed": true
+    },
+    {
+      "preset": "gallery",
+      "device": "chromecast-test-02",
+      "job": "J-4e30129df9c6",
+      "assertions": 20,
+      "passed": true
+    }
+  ],
+  "mainCd": {
+    "previousSha256": "d6e82c87e0b54510d99d90267db49351df68a8432d802c948569e4bbbc6fd996",
+    "bundleSha256": "e1312895042c34ade45701a5b64eff005ec653860a3dfc9422b92627c3e97a00",
+    "existingShellAndSevenEntriesAndBodiesUnchanged": true,
+    "baselineIndex": 7,
+    "bootLevel": 0
+  },
+  "plantAcceptance": "pending native IME harness replacement of retained initial zero"
+}

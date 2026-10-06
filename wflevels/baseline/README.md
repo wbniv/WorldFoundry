@@ -74,10 +74,19 @@ under ignored `build/`. SDK discovery uses `ANDROID_HOME`, `ANDROID_SDK_ROOT`,
 then `~/android-sdk-local`. No signing keys or machine paths are portable config.
 
 Chromecast sessions use the shared coordinator with `APP=baseline` and the
-reviewed `baseline-settings` validator. Device acceptance remains pending
-the corrected held-input/lifecycle harness deployment and reruns. Add the baseline to
-the main `cd.iff` only after matching native/device verification succeeds;
-preserve all existing level indices and its boot level.
+reviewed `baseline-settings` validator. Default and gallery passed all 20 checks
+on both cast1 and cast2, including TV/phone ownership, Apply/Cancel, reconnect,
+Home/resume and held/released directional input. Baseline is now appended to the
+main `cd.iff` at index 7; existing indices and boot level 0 are preserved.
+`task build-cd-iff` rebuilds it. Verify bundle loading and gameplay with:
+
+```sh
+python3 wflevels/baseline/verify.py --desktop --bundle wfsource/source/game/cd.iff
+```
+
+The rebuilt bundle passed all 156 checks; the previous shell and seven level
+entries and bodies also match byte-for-byte. See the
+[final acceptance evidence](../../docs/diagnostics/baseline/generic-settings/README.md).
 
 The five-field default and 118-field gallery come from level-owned OAS/OAD.
 [settings-coverage.json](settings-coverage.json) accounts for every declared

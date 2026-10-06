@@ -12,9 +12,9 @@ Finding Your Way consumes the finished baseline in a separate migration.
 - [x] Specify a minimal scene, larger floor and coordinate tools.
 - [x] Create architecture/layout diagrams and interactive scene mockups.
 - [x] Implement the baseline generator, editable `.blend`, exporter/build entry points and docs.
-- [ ] Verify export, native movement/collision, camera behavior and coordinate conventions.
+- [x] Verify export, native movement/collision, camera behavior and coordinate conventions.
 - [ ] Migrate current documentation, quick starts, examples and screenshots from the Snowgoons scaffold to the verified new baseline.
-- [ ] After baseline verification passes, append it to the main `cd.iff`, preserve existing level indices and verify selection/launch from the assembled bundle.
+- [x] After baseline verification passes, append it to the main `cd.iff`, preserve existing level indices and verify selection/launch from the assembled bundle.
 - [ ] Commit and release the verified baseline; migrate a copy of Finding Your Way separately.
 
 ## Current implementation
@@ -22,11 +22,12 @@ Finding Your Way consumes the finished baseline in a separate migration.
 Initial implementation is under [wflevels/baseline](../../wflevels/baseline/README.md).
 The generator starts empty and saves an editable Blender file. Export/build,
 optional fixture exclusion and OAS/OAD source/compiled checks are implemented.
-Native movement/camera checks pass, with [saved desktop evidence](../diagnostics/baseline/default/README.md); device verification and main
-`cd.iff` integration remain gated. The generic form entry-point and Planted Tank
-routing migration have a [concrete engine proposal](../../wflevels/baseline/docs/generic-settings-integration.md).
-They use the existing schema/catalog/draft system and require explicit engine
-approval before editing engine code.
+Native gameplay checks and all 20 default/gallery assertions passed on both Chromecasts.
+Baseline is appended at main CD index 7, preserving the previous shell and seven levels.
+The rebuilt bundle passed all 156 checks. The shared settings host and Planted Tank
+consumer migration are implemented under explicit engine authorization.
+[Acceptance evidence](../diagnostics/baseline/generic-settings/README.md)
+records hashes and the outstanding plant native keyboard harness rerun.
 
 ## Scene contract
 
@@ -269,8 +270,8 @@ shared normalizer and catalog cooker. The matrix is the coverage contract. Initi
 `wflevels/baseline/settings.oas`, `settings-gallery.oas`, their compiled OADs and
 `settings-coverage.json`: five representative default fields and 118 gallery
 fields, with all descriptor types/presentation codes classified. Source/compiled
-checks are implemented; complete interactive coverage and the shared settings
-host remain pending. The small mockup is representative, not the complete gallery.
+checks and the shared settings host are implemented. Default/gallery device
+acceptance passed; complete interactive coverage of every presentation remains pending. The small mockup is representative, not the complete gallery.
 
 The manifest must classify all 29 declared button types and all 13 base
 `showAs` codes (0…12), plus the VECTOR modifier. The scalar, reference, text and

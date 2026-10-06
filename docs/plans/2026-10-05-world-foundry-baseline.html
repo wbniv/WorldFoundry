@@ -9,20 +9,21 @@ Finding Your Way consumes the finished baseline in a separate migration.</p>
 <li>[x] Specify a minimal scene, larger floor and coordinate tools.</li>
 <li>[x] Create architecture/layout diagrams and interactive scene mockups.</li>
 <li>[x] Implement the baseline generator, editable <code>.blend</code>, exporter/build entry points and docs.</li>
-<li>[ ] Verify export, native movement/collision, camera behavior and coordinate conventions.</li>
+<li>[x] Verify export, native movement/collision, camera behavior and coordinate conventions.</li>
 <li>[ ] Migrate current documentation, quick starts, examples and screenshots from the Snowgoons scaffold to the verified new baseline.</li>
-<li>[ ] After baseline verification passes, append it to the main <code>cd.iff</code>, preserve existing level indices and verify selection/launch from the assembled bundle.</li>
+<li>[x] After baseline verification passes, append it to the main <code>cd.iff</code>, preserve existing level indices and verify selection/launch from the assembled bundle.</li>
 <li>[ ] Commit and release the verified baseline; migrate a copy of Finding Your Way separately.</li>
 </ul>
 <h2>Current implementation</h2>
 <p>Initial implementation is under <a href="../../wflevels/baseline/README.md">wflevels/baseline</a>.
 The generator starts empty and saves an editable Blender file. Export/build,
 optional fixture exclusion and OAS/OAD source/compiled checks are implemented.
-Native movement/camera checks pass, with <a href="../diagnostics/baseline/default/README.md">saved desktop evidence</a>; device verification and main
-<code>cd.iff</code> integration remain gated. The generic form entry-point and Planted Tank
-routing migration have a <a href="../../wflevels/baseline/docs/generic-settings-integration.md">concrete engine proposal</a>.
-They use the existing schema/catalog/draft system and require explicit engine
-approval before editing engine code.</p>
+Native gameplay checks and all 20 default/gallery assertions passed on both Chromecasts.
+Baseline is appended at main CD index 7, preserving the previous shell and seven levels.
+The rebuilt bundle passed all 156 checks. The shared settings host and Planted Tank
+consumer migration are implemented under explicit engine authorization.
+<a href="../diagnostics/baseline/generic-settings/README.md">Acceptance evidence</a>
+records hashes and the outstanding plant native keyboard harness rerun.</p>
 <h2>Scene contract</h2>
 <p>Start from an empty Blender scene. Construct each required World Foundry actor explicitly using the existing OAD schemas and a reviewed configuration manifest. Inspect the proven player/camera setup for compatible values; do not import the Snowgoons level, its models, actors, textures or scripts. Every retained actor gets a documented purpose and explicit settings. An actor that appears required must be confirmed by export/runtime testing before it becomes part of the baseline.</p>
 <p>Default proposed floor: <strong>200 × 200 world units</strong>, centred at <code>(0, 0, 0)</code>, with its walking surface at <code>Z=0</code> and a 0.5-unit slab below it. This is over 50 times the area of the current 26 × 28 Temple floor. Treat one Blender unit as one world unit; use a provisional metre interpretation for dimensions and speed, and verify exporter/runtime scale before documenting it as metres. Keep dimensions configurable. Test this size against native bounds, numeric precision and clipping rather than assuming that arbitrarily larger coordinates work.</p>
@@ -439,8 +440,8 @@ shared normalizer and catalog cooker. The matrix is the coverage contract. Initi
 <code>wflevels/baseline/settings.oas</code>, <code>settings-gallery.oas</code>, their compiled OADs and
 <code>settings-coverage.json</code>: five representative default fields and 118 gallery
 fields, with all descriptor types/presentation codes classified. Source/compiled
-checks are implemented; complete interactive coverage and the shared settings
-host remain pending. The small mockup is representative, not the complete gallery.</p>
+checks and the shared settings host are implemented. Default/gallery device
+acceptance passed; complete interactive coverage of every presentation remains pending. The small mockup is representative, not the complete gallery.</p>
 <p>The manifest must classify all 29 declared button types and all 13 base
 <code>showAs</code> codes (0…12), plus the VECTOR modifier. The scalar, reference, text and
 structural types are covered above. Give explicit exclusions for

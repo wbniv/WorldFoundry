@@ -3,8 +3,8 @@
 6 October 2026. Concrete engine proposal for the
 [generic OAS/OAD plan](../../../docs/plans/2026-10-06-runtime-oas-oad-object-editor.md).
 Engine changes explicitly authorized by Will on 6 October 2026 under
-[AGENTS.md](../../../AGENTS.md). The shared host and plant consumer migration are implemented. Device acceptance
-and the subsequent main-CD addition are in progress.
+[AGENTS.md](../../../AGENTS.md). The shared host and plant consumer migration are implemented. Baseline device acceptance and the main-CD addition are complete. Plant
+native keyboard acceptance is awaiting a corrected test input sequence.
 
 The baseline already exports two independently addressed OAD catalog owners.
 Planted Tank already exports Seed, Water type and Growth speed through that
@@ -81,15 +81,22 @@ Validation recorded in `docs/diagnostics/baseline/generic-settings/`:
 - The actual full gallery catalog passed two-owner host validation/commit with
   178 visible rows. Presentation gaps remain as described in the descriptor
   audit; catalog attachment alone does not prove every control's presentation.
-- Cast1 default passed movement/release, TV selection, instance isolation,
-  invalid-value rejection, Apply readback and phone reconnect before the
-  observer disconnected at Home/resume. Cast2 stopped on an unsupported timed
-  Android input command. Both are harness failures requiring reruns, not full
-  device acceptance.
-- Coordinator fixes are committed in the standalone coordinator repository:
-  a bounded directional/OK hold helper and explicit observer reconnection.
-  Its 147 tests passed. The reviewed v3 release awaits interactive sudo
-  installation before final default/gallery and plant sessions on both devices.
+- Default and gallery each passed all 20 baseline assertions on both cast1 and
+  cast2. This includes real held/released directional input, two-owner TV
+  selection, stale sessions, instance isolation, invalid drafts, Apply/Cancel,
+  phone reconnect, same-process Home/resume and reset chords.
+- Baseline was appended at main CD index 7 after those sessions passed. All 156
+  bundle/source/native checks passed. The existing shell and seven entries and
+  bodies are byte-identical to the previous bundle; boot remains level 0.
+- Plant sessions with the shared checkout's separate native IME enhancement
+  stopped at the text-entry harness: the initial seed 0 was retained, yielding
+  01254 when the harness expected 1254. The reviewed validator correction deletes
+  that initial digit before typing. Plant device acceptance remains pending;
+  the independently compiled generic host and plant simulation tests passed.
+- Coordinator fixes live in the standalone coordinator repository. The v4
+  reviewed release is installed; baseline acceptance uses that release.
 
-Do not add baseline to the main CD until those matching sessions pass. Keep
-existing level indices and boot behavior when appending it at index 7.
+[Final evidence and hashes](../../../docs/diagnostics/baseline/generic-settings/README.md)
+record the accepted baseline and outstanding plant check. Gallery catalog
+coverage is comprehensive; interactive coverage of every descriptor presentation
+remains a separate acceptance requirement.
