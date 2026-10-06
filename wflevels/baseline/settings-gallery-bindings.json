@@ -1,0 +1,315 @@
+{
+  "version": 1,
+  "owner": "SampleSettings",
+  "title": "Baseline settings",
+  "fields": {
+    "Signed_INT8_N_A_1": {
+      "id": 1
+    },
+    "Signed_INT8_NUMBER_2": {
+      "id": 2
+    },
+    "Signed_INT8_SLIDER_3": {
+      "id": 3
+    },
+    "Enum_INT8_N_A_5": {
+      "id": 5
+    },
+    "Enum_INT8_NUMBER_6": {
+      "id": 6
+    },
+    "Enum_INT8_SLIDER_7": {
+      "id": 7
+    },
+    "Enum_INT8_TOGGLE_8": {
+      "id": 8
+    },
+    "Enum_INT8_DROPMENU_9": {
+      "id": 9
+    },
+    "Enum_INT8_RADIOBUTTONS_10": {
+      "id": 10
+    },
+    "Enum_INT8_COMBOBOX_11": {
+      "id": 11
+    },
+    "Boolean_INT8_CHECKBOX_13": {
+      "id": 13
+    },
+    "Boolean_INT8_TOGGLE_14": {
+      "id": 14
+    },
+    "BooleanLabels_INT8_CHECKBOX_16": {
+      "id": 16
+    },
+    "BooleanLabels_INT8_TOGGLE_17": {
+      "id": 17
+    },
+    "BooleanLabels_INT8_RADIOBUTTONS_18": {
+      "id": 18
+    },
+    "Signed_INT16_N_A_20": {
+      "id": 20
+    },
+    "Signed_INT16_NUMBER_21": {
+      "id": 21
+    },
+    "Signed_INT16_SLIDER_22": {
+      "id": 22
+    },
+    "Enum_INT16_N_A_24": {
+      "id": 24
+    },
+    "Enum_INT16_NUMBER_25": {
+      "id": 25
+    },
+    "Enum_INT16_SLIDER_26": {
+      "id": 26
+    },
+    "Enum_INT16_TOGGLE_27": {
+      "id": 27
+    },
+    "Enum_INT16_DROPMENU_28": {
+      "id": 28
+    },
+    "Enum_INT16_RADIOBUTTONS_29": {
+      "id": 29
+    },
+    "Enum_INT16_COMBOBOX_30": {
+      "id": 30
+    },
+    "Boolean_INT16_CHECKBOX_32": {
+      "id": 32
+    },
+    "Boolean_INT16_TOGGLE_33": {
+      "id": 33
+    },
+    "BooleanLabels_INT16_CHECKBOX_35": {
+      "id": 35
+    },
+    "BooleanLabels_INT16_TOGGLE_36": {
+      "id": 36
+    },
+    "BooleanLabels_INT16_RADIOBUTTONS_37": {
+      "id": 37
+    },
+    "Signed_INT32_N_A_39": {
+      "id": 39
+    },
+    "Signed_INT32_NUMBER_40": {
+      "id": 40
+    },
+    "Signed_INT32_SLIDER_41": {
+      "id": 41
+    },
+    "Enum_INT32_N_A_43": {
+      "id": 43
+    },
+    "Enum_INT32_NUMBER_44": {
+      "id": 44
+    },
+    "Enum_INT32_SLIDER_45": {
+      "id": 45
+    },
+    "Enum_INT32_TOGGLE_46": {
+      "id": 46
+    },
+    "Enum_INT32_DROPMENU_47": {
+      "id": 47
+    },
+    "Enum_INT32_RADIOBUTTONS_48": {
+      "id": 48
+    },
+    "Enum_INT32_COMBOBOX_49": {
+      "id": 49
+    },
+    "Boolean_INT32_CHECKBOX_51": {
+      "id": 51
+    },
+    "Boolean_INT32_TOGGLE_52": {
+      "id": 52
+    },
+    "BooleanLabels_INT32_CHECKBOX_54": {
+      "id": 54
+    },
+    "BooleanLabels_INT32_TOGGLE_55": {
+      "id": 55
+    },
+    "BooleanLabels_INT32_RADIOBUTTONS_56": {
+      "id": 56
+    },
+    "Fraction_FIXED16_N_A_58": {
+      "id": 58
+    },
+    "Fraction_FIXED16_NUMBER_59": {
+      "id": 59
+    },
+    "Fraction_FIXED16_SLIDER_60": {
+      "id": 60
+    },
+    "Fraction_FIXED32_N_A_62": {
+      "id": 62
+    },
+    "Fraction_FIXED32_NUMBER_63": {
+      "id": 63
+    },
+    "Fraction_FIXED32_SLIDER_64": {
+      "id": 64
+    },
+    "Mailbox_INT32_MAILBOX_66": {
+      "id": 66
+    },
+    "Colour_INT32_COLOR_68": {
+      "id": 68
+    },
+    "Text_STRING_N_A_70": {
+      "id": 70,
+      "initial": "Baseline",
+      "max_length": 31
+    },
+    "Text_STRING_NUMBER_71": {
+      "id": 71,
+      "initial": "4294967295",
+      "rule": "uint32-decimal",
+      "max_length": 31
+    },
+    "Multiline_STRING_TEXTEDITOR_73": {
+      "id": 73,
+      "initial": "First line\nSecond line",
+      "multiline": true,
+      "max_length": 63
+    },
+    "TextSuggestions_STRING_COMBOBOX_74": {
+      "id": 74,
+      "initial": "Custom",
+      "max_length": 31
+    },
+    "PathText_STRING_FILENAME_75": {
+      "id": 75,
+      "initial": "player.iff",
+      "max_length": 31
+    },
+    "Asset_FILENAME_N_A_76": {
+      "id": 76,
+      "initial": "player.iff"
+    },
+    "Asset_FILENAME_FILENAME_77": {
+      "id": 77,
+      "initial": "player.iff"
+    },
+    "Asset_MESHNAME_N_A_79": {
+      "id": 79,
+      "initial": "player.iff"
+    },
+    "Asset_MESHNAME_FILENAME_80": {
+      "id": 80,
+      "initial": "player.iff"
+    },
+    "Reference_OBJECT_REFERENCE_N_A_82": {
+      "id": 82,
+      "initial": "UnitCube"
+    },
+    "Reference_OBJECT_REFERENCE_COMBOBOX_83": {
+      "id": 83,
+      "initial": "UnitCube"
+    },
+    "Reference_CAMERA_REFERENCE_N_A_85": {
+      "id": 85,
+      "initial": "Camera"
+    },
+    "Reference_CAMERA_REFERENCE_COMBOBOX_86": {
+      "id": 86,
+      "initial": "Camera"
+    },
+    "Reference_LIGHT_REFERENCE_N_A_88": {
+      "id": 88,
+      "initial": "Directional"
+    },
+    "Reference_LIGHT_REFERENCE_COMBOBOX_89": {
+      "id": 89,
+      "initial": "Directional"
+    },
+    "Reference_CLASS_REFERENCE_N_A_91": {
+      "id": 91,
+      "initial": "statplat"
+    },
+    "Reference_CLASS_REFERENCE_COMBOBOX_92": {
+      "id": 92,
+      "initial": "statplat"
+    },
+    "Annotation_XDATA_N_A_94": {
+      "id": 94,
+      "initial": "Baseline annotation",
+      "multiline": true,
+      "max_length": 80
+    },
+    "Annotation_XDATA_TEXTEDITOR_95": {
+      "id": 95,
+      "initial": "Baseline annotation",
+      "multiline": true,
+      "max_length": 80
+    },
+    "Annotation_XDATA_DROPMENU_96": {
+      "id": 96,
+      "initial": "Baseline annotation",
+      "multiline": true,
+      "max_length": 80
+    },
+    "Annotation_XDATA_COMBOBOX_97": {
+      "id": 97,
+      "initial": "Baseline annotation",
+      "multiline": true,
+      "max_length": 80
+    },
+    "VectorReference_OBJECT_REFERENCE_VECTOR_N_A_99": {
+      "id": 99,
+      "initial": "Player"
+    },
+    "DirectionX_FIXED32_VECTOR_N_A_101": {
+      "id": 101
+    },
+    "DirectionY_FIXED32_VECTOR_N_A_102": {
+      "id": 102
+    },
+    "DirectionZ_FIXED32_VECTOR_N_A_103": {
+      "id": 103
+    },
+    "DirectionX_FIXED32_VECTOR_NUMBER_104": {
+      "id": 104
+    },
+    "DirectionY_FIXED32_VECTOR_NUMBER_105": {
+      "id": 105
+    },
+    "DirectionZ_FIXED32_VECTOR_NUMBER_106": {
+      "id": 106
+    },
+    "DirectionX_FIXED32_VECTOR_SLIDER_107": {
+      "id": 107
+    },
+    "DirectionY_FIXED32_VECTOR_SLIDER_108": {
+      "id": 108
+    },
+    "DirectionZ_FIXED32_VECTOR_SLIDER_109": {
+      "id": 109
+    },
+    "NegativeEnum_INT32_RADIOBUTTONS_113": {
+      "id": 113
+    },
+    "ManyChoices_INT32_RADIOBUTTONS_114": {
+      "id": 114
+    },
+    "ReadOnly_INT32_NUMBER_115": {
+      "id": 115,
+      "readonly": true
+    },
+    "ReadOnlyText_STRING_N_A_116": {
+      "id": 116,
+      "initial": "Read only",
+      "readonly": true,
+      "max_length": 31
+    },
+    "EnableDependent_INT32_CHECKBOX_117": {
+      "id": 117
+    }
+  }
+}

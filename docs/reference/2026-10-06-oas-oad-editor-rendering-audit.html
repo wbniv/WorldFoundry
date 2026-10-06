@@ -1,0 +1,237 @@
+<!doctype html><meta charset="utf-8"><title>OAS/OAD rendering audit</title><style>body{max-width:1200px;margin:35px auto;padding:20px;font:16px/1.6 system-ui}table{border-collapse:collapse}td,th{border:1px solid #bcc;padding:10px;vertical-align:top}a{color:#126b75}</style><h1>OAS/OAD editor rendering audit</h1>
+<p>Date: 2026-10-06. Source audit of Blender, wf-edit and the runtime form.</p>
+<h2>Finding</h2>
+<p>The runtime shares Rust schema normalization and strict scalar validation with
+authoring tooling, but does not share their widget rendering or complete editing
+behavior. Its initial implementation supports a small scalar subset with simple
+fallbacks; those fallbacks lose meaningful <code>showAs</code> presentation.</p>
+<p>The authoring editors also differ. Blender often shows enums as visible buttons;
+wf-edit originally used dropdowns even for radio hints. The approved update now
+uses highlighted choice buttons for that hint. Neither implements every legacy
+type/hint exactly. Copying either renderer wholesale would retain gaps.</p>
+<h2>Observed behavior</h2>
+<table>
+<thead>
+<tr>
+<th>Feature</th>
+<th>Blender</th>
+<th>wf-edit</th>
+<th>Runtime TV / phone</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>Metadata</td>
+<td>Shared Rust schema through Python</td>
+<td>Own OAD reader, correlated to document fields</td>
+<td>Shared Rust-normalized cooked catalog</td>
+</tr>
+<tr>
+<td>Plain integer</td>
+<td>Blender property</td>
+<td>InputInt; Enter commits; range clamp</td>
+<td>TV numeric keypad; phone bounded text; shared validation</td>
+</tr>
+<tr>
+<td>Fixed point</td>
+<td>Blender numeric property</td>
+<td>InputFloat; slider hint uses SliderFloat</td>
+<td>TV keypad/arrow step; phone text/range; scale-aware slider audit remains</td>
+</tr>
+<tr>
+<td>Integer slider</td>
+<td>Plain numeric property; enums become buttons</td>
+<td>Plain Int still uses InputInt</td>
+<td>Initial TV only stepped arrows; approved update draws track/thumb and labelled stops. Phone already renders range for show=2</td>
+</tr>
+<tr>
+<td>Enum/dropdown</td>
+<td>Button row; hints 4/5 with &gt;3 choices use two-column grid</td>
+<td>BeginCombo for all enums</td>
+<td>Initially one label on TV, dropdown on phone unless slider</td>
+</tr>
+<tr>
+<td>Enum/radio</td>
+<td>Selected/depressed buttons</td>
+<td>Previously dropdown; new show=5 branch renders highlighted buttons</td>
+<td>show=5 renders highlighted single-choice buttons on TV and phone, without circles; device verification pending</td>
+</tr>
+<tr>
+<td>Boolean</td>
+<td>Checkbox-style operator; special two-choice enum handling</td>
+<td>Checkbox</td>
+<td>TV left/off, right/on; phone checkbox for Bool; enum radio is separate</td>
+</tr>
+<tr>
+<td>RGB colour</td>
+<td>Hex label and colour picker</td>
+<td>ColorEdit3 and hex</td>
+<td>New UI: TV swatch/hex and three channel sliders; phone native colour picker plus R/G/B sliders. Existing packed integer storage; local tests pass, device acceptance pending</td>
+</tr>
+<tr>
+<td>Object reference</td>
+<td>Searchable scene picker; missing-target warning</td>
+<td>Editable reference text</td>
+<td>Read-only reference; no typed target picker</td>
+</tr>
+<tr>
+<td>File/mesh reference</td>
+<td>Path text plus filtered browser</td>
+<td>Editable path; Browse disabled</td>
+<td>Read-only; no cooked-asset picker</td>
+</tr>
+<tr>
+<td>Text</td>
+<td>Blender text property</td>
+<td>Text input; multiline/Notes path has documented caveats</td>
+<td>Android native EditText/system IME for text and numbers; custom key grids removed. Phone native text keyboard. Standalone desktop runtime currently uses connected browser entry; physical text-event integration remains pending</td>
+</tr>
+<tr>
+<td>Annotation/XData</td>
+<td>Ignored annotation surfaced by normalizer</td>
+<td>Some annotations hidden; shipped Notes multiline path documented dormant</td>
+<td>Explicitly bound Notes become multiline string overlays: native Android multiline editor, phone textarea. Actual TV IME newline acceptance pending. Converted/script XData stays outside configuration</td>
+</tr>
+<tr>
+<td>Vector/Euler/box</td>
+<td>Native scene properties plus scalar schema fields</td>
+<td>Component widgets for document VEC3/EULR/BOX3</td>
+<td>No grouped vector/Euler/box catalog widget</td>
+</tr>
+<tr>
+<td>Sections/groups</td>
+<td>Panel structure</td>
+<td>Section/group controls</td>
+<td>TV section rail but skips group labels; phone heading rows</td>
+</tr>
+<tr>
+<td>Hidden fields</td>
+<td>Panel skips</td>
+<td>Dispatcher skips</td>
+<td>Cooker omits, so effective-value readback cannot retrieve them through this catalog</td>
+</tr>
+<tr>
+<td>Commit</td>
+<td>Blender object properties; separate exporter/live bridge</td>
+<td>Document transactions, CRDT/live engine propagation</td>
+<td>Per-instance draft, Apply/Cancel, revision/session/generation checks, Forth effective reads</td>
+</tr>
+</tbody>
+</table>
+<p>The earlier claim that both TV and phone lost growth-speed's slider hint was
+too broad: the phone already honored it. TV did not. Growth speed briefly used
+INT32 / RADIOBUTTONS for comparison, then Will selected SHOW_AS_SLIDER. Final
+speed is a seven-stop visible slider preserving values 0–6 and rate mapping.
+Water type keeps SHOW_AS_RADIOBUTTONS metadata, presented as highlighted choices
+without a literal radio circle. Blender already uses this style; wf-edit, TV and
+phone now match it.
+Choice rendering is host-specific implementation, not a shared wf-edit widget.</p>
+<p>Will's follow-up requires finishing the <strong>Enum/dropdown</strong> row on TV, phone and
+the authoring editors. Target highlighted choice buttons, with hints 4/5 and
+more than three choices arranged in two columns; retain labelled sliders for
+slider hints. The initial label/dropdown fallbacks in the table are historical
+observations, not the completion target. Shared policy, navigation rules and
+actual TV/phone/editor acceptance are specified in the
+<a href="../plans/2026-10-06-runtime-oas-oad-object-editor.md#finish-enumdropdown-controls-on-tv-phone-and-authoring-editors">runtime plan</a>.</p>
+<h2>Visibility filtering and known usage</h2>
+<p>Apply visibility and semantic eligibility before counting a missing widget.
+<code>SHOW_AS_HIDDEN</code> fields need omission and, where required, retention/readback
+checks; they do not need visible controls. A disabled conditional field is not
+universally hidden: evaluate the states that can enable it. Likewise, one
+host skipping a descriptor does not establish that its intended presentation
+is hidden in every host.</p>
+<p>A binary inventory of the 43 checked-in <code>wfsource/source/oas/*.oad</code> files and
+<code>wflevels/aquarium_plants/settings.oad</code> found the following. Counts include
+repeated fields from common blocks, not unique property definitions. This is
+known shipped-descriptor usage, not a claim about every possible OAS schema.</p>
+<table>
+<thead>
+<tr>
+<th>Case</th>
+<th>Known usage</th>
+<th>Treatment in the review/gallery</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>Compiler flags and common-block markers</td>
+<td>All 355 occurrences have <code>showAs=HIDDEN</code>: NoInstances, Room, CommonBlock, EndCommon, ExtractCameraNew, ExtractLight and Shortcut</td>
+<td>Exclude from visible-widget gaps and runtime configuration rows; audit authoring/export semantics and omission</td>
+</tr>
+<tr>
+<td>Generated slope coefficients</td>
+<td>144 hidden Fixed32 entries, <code>slopeA</code>…<code>slopeD</code>; the same inventory also has 1,692 visible Fixed32 entries</td>
+<td>Exclude these generated fields from visible slider/numeric requirements; retain visible fixed-point coverage and hidden omission checks</td>
+</tr>
+<tr>
+<td>Light colour/direction components</td>
+<td>Hidden component declarations in <code>light.oas</code> are commented out</td>
+<td>Do not count commented declarations as active widget examples; this does not exclude visible RGB controls or document transforms</td>
+</tr>
+<tr>
+<td>RGB colour</td>
+<td>69 Int32/COLOR entries, including camera fog and background colours</td>
+<td>Keep the visible colour-widget gap; these examples are not explicitly hidden, though some have enable conditions</td>
+</tr>
+<tr>
+<td>Object/file/class references</td>
+<td>360 object references, 242 filenames and 6 class references; none use HIDDEN</td>
+<td>Keep visible reference behavior in scope; conditional references must be tested in an eligible state</td>
+</tr>
+<tr>
+<td>Annotation/XData</td>
+<td>37 Notes and one test String use XDATA_IGNORE with non-hidden hints; 43 other XData entries have conversion actions</td>
+<td>Separate annotation behavior from converted/script data. wf-edit skips shipped N_A Notes, but Blender surfaces annotations; do not classify all annotations as hidden. Converted/script data stays outside runtime configuration</td>
+</tr>
+<tr>
+<td>Vector/Euler/box</td>
+<td>71 object-reference descriptors carry the VECTOR modifier; these are not scalar X/Y/Z triplets. wf-edit also handles document VEC3/EULR/BOX3 fields independently of OAD</td>
+<td>Keep document-transform behavior distinct from a proposed grouped scalar runtime widget. Do not claim a shipped scalar-vector gap from hidden light components or reference modifiers</td>
+</tr>
+<tr>
+<td>Unused type/hint combinations</td>
+<td>No entries for narrow numeric storage, camera/light references or mesh-name descriptors in this inventory</td>
+<td>Mark proposed examples as synthetic compatibility coverage, rather than missing controls required by known shipped examples</td>
+</tr>
+</tbody>
+</table>
+<p>The Observed behavior table describes renderer capabilities, including fallback
+paths. Its rows are not automatically runtime implementation requirements.
+Retain historical observations even when a case is filtered from the visible
+gallery, and record the exclusion reason. For annotations, runtime retention
+must be an explicit decision because XDATA_IGNORE produces no actor binary
+bytes; an authoring text box alone does not imply a runtime editable setting.</p>
+<h2>Sharing and remaining work</h2>
+<p>Reuse schema parsing, order/IDs, widths/scales, choice labels, constraints and
+validation fixtures. Define a shared presentation policy mapping type plus hint
+to an abstract control family, then render through host-specific widgets. Enum
+radios, dropdowns and labelled sliders must remain distinct despite integer
+storage. Do not import wf-edit or ImGui into the game.</p>
+<p>Keep layout, focus, scrolling, accessibility and input local. Authoring
+document/CRDT transactions remain separate from runtime instance transactions.
+Equivalent values and constraints do not imply identical mutation capabilities.</p>
+<ul>
+<li>[ ] Define a tested type/<code>showAs</code> presentation policy; runtime dispatch is currently local.</li>
+<li>[ ] Finish generic enum/dropdown choice rows and two-column grids across TV, phone, wf-edit and Blender; verify actual displays and interaction before marking complete.</li>
+<li>[ ] Add visible TV sliders and audit fixed-point min/max/step conversion on phone.</li>
+<li>[x] Implement RGB UI through the approved scope, preserving packed values and existing transactions; local UI/browser tests pass, actual device acceptance remains.</li>
+<li>[ ] Design vector widgets through separately approved scope, preserving atomic typed edits.</li>
+<li>[ ] Design cooked-asset and typed-reference pickers with lifetime checks; retain read-only fallbacks meanwhile.</li>
+<li>[x] Replace custom Android text/numeric grids with the system editor/IME; native callbacks and phone text/Notes round trips pass local tests. Launch/resume passes on cast1; actual Gboard entry requires the reviewed coordinator update and rerun.</li>
+<li>[ ] Connect standalone desktop runtime text events/IME; existing browser text entry works. No custom on-screen keyboard fallback is requested.</li>
+<li>[ ] Render TV group labels and verify section navigation with an all-enum section.</li>
+<li>[ ] Separate hidden retention from visibility when effective readback is required.</li>
+<li>[ ] Audit conditional enable expressions and original metadata retention; do not claim full legacy form parity.</li>
+<li>[ ] Use the baseline pair-coverage fixture to verify gaps; numeric fallbacks do not count as finished widgets.</li>
+</ul>
+<h2>Source anchors</h2>
+<ul>
+<li><a href="../../wftools/wf_blender/panels.py">Blender</a>: <code>_draw_field</code>.</li>
+<li><a href="../../engine/wf_edit/property_panel.cc">wf-edit</a>: <code>WidgetFor</code> / <code>RenderProperties</code>. Its header's read-only wording is stale; renderer commits edits.</li>
+<li><a href="../../wftools/wf_attr_schema/src/lib.rs">Shared normalization</a>: <code>classify</code> / <code>field_layout</code>.</li>
+<li><a href="../../scripts/build-object-properties.py">Catalog cooker</a>: <code>KINDS</code> / <code>catalog</code>.</li>
+<li><a href="../../engine/runtime_property_form.cpp">Runtime input</a>, <a href="../../wfsource/source/game/runtime_property_ui.cc">TV</a>, <a href="../../wfsource/source/hal/phonepad/controller.html">phone</a>.</li>
+<li><a href="../../wfsource/source/oas/types3ds.s">OAS macros</a>, <a href="../../wfsource/source/oas/oad.h">descriptor codes</a>.</li>
+</ul>
+<p>Related: <a href="../plans/2026-10-06-runtime-oas-oad-object-editor.md">runtime plan</a>,
+<a href="../plans/2026-10-05-world-foundry-baseline.md">baseline gallery</a>.</p>

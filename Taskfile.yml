@@ -917,6 +917,42 @@ tasks:
       - wftools/levcomp-rs/target/release/levcomp
       - wftools/textile-rs/target/release/textile
 
+  baseline:generate:
+    desc: "Generate a new empty-scene baseline Blender file; never overwrites baseline.blend"
+    cmds:
+      - python3 wflevels/baseline/prepare_assets.py
+      - blender --background --python-exit-code 1 --python wflevels/baseline/generate.py --
+
+  baseline:export:
+    desc: "Export the reviewed baseline.blend without regeneration"
+    cmds:
+      - python3 wflevels/baseline/build.py --export-only
+
+  baseline:build:
+    desc: "Build the reviewed World Foundry baseline using the existing tools"
+    cmds:
+      - python3 wflevels/baseline/build.py
+
+  baseline:diagnostics:
+    desc: "Build the optional baseline diagnostic fixtures in an independent generated Blender file"
+    cmds:
+      - python3 wflevels/baseline/build.py --preset diagnostics
+
+  baseline:settings-gallery:
+    desc: "Build the complete OAS/OAD coverage catalog; interactive host integration remains separately approved"
+    cmds:
+      - python3 wflevels/baseline/build.py --preset settings-gallery
+
+  baseline:verify:
+    desc: "Verify baseline geometry contract and compiled OAS/OAD coverage"
+    cmds:
+      - python3 wflevels/baseline/verify.py
+
+  baseline:check:
+    desc: "Run an owned native desktop baseline movement/collision/camera session"
+    cmds:
+      - python3 wflevels/baseline/verify.py --desktop
+
   build-level:
     desc: "Build a level's inner + standalone .iff (usage: task build-level -- qbert_practice)"
     deps: [tools-build]

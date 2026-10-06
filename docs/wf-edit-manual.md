@@ -1,5 +1,14 @@
 # `wf-edit` — World Foundry collaborative level editor: user manual
 
+For new-level authoring, begin with the
+[editable baseline](../wflevels/baseline/README.md), then export/build it with
+`task baseline:build`. The compiled standalone is
+`wflevels/baseline-standalone.iff`; open it explicitly using the binary-level
+workflow below. Its [actor contract](../wflevels/baseline/docs/scene-contract.md)
+and [runtime reference](diagnostics/baseline/default/README.md) identify the
+expected scene. Baseline editor screenshots and save/reload acceptance remain
+pending; older sample-specific screenshots keep their original names.
+
 **Applies to:** `wf-edit` v1 (Linux/X11 native **and** WASM/WebGL2 browser build), as of 2026-06-13.
 **Audience:** level designers and engine developers running the editor.
 

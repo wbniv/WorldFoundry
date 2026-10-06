@@ -1,0 +1,24 @@
+{
+  "version": 1,
+  "owner": "SampleSettings",
+  "title": "Baseline settings",
+  "fields": {
+    "Signed_INT32_NUMBER_40": {
+      "id": 40
+    },
+    "Fraction_FIXED32_SLIDER_64": {
+      "id": 64
+    },
+    "Enum_INT32_RADIOBUTTONS_48": {
+      "id": 48
+    },
+    "Boolean_INT32_CHECKBOX_51": {
+      "id": 51
+    },
+    "Text_STRING_N_A_70": {
+      "id": 70,
+      "initial": "Baseline",
+      "max_length": 31
+    }
+  }
+}

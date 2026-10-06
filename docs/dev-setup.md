@@ -1,5 +1,19 @@
 # Dev Environment Setup (Linux)
 
+After building the engine and content tools below, use the
+[baseline quick start](../wflevels/baseline/README.md) for new level work:
+
+```sh
+task baseline:build
+task baseline:verify
+task baseline:check
+```
+
+The level is built separately from native code. These commands select the
+baseline explicitly; executable boot defaults retain their documented behavior.
+See [desktop evidence](diagnostics/baseline/default/README.md) and the
+[scene contract](../wflevels/baseline/docs/scene-contract.md).
+
 Minimum setup to build and run `wf_game` on a fresh Linux (Ubuntu 24.04 verified) box, plus the Rust-port asset pipeline tools.
 
 ## System packages (apt)

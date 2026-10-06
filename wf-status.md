@@ -1,5 +1,10 @@
 # WorldFoundry Project Status
 
+Start new levels with the [World Foundry baseline](wflevels/baseline/README.md):
+editable Blender scene, explicit actor defaults, isolated build and native
+verification. [Desktop evidence](docs/diagnostics/baseline/default/README.md)
+is available; shared settings integration and Chromecast acceptance are pending.
+
 **As of:** 2026-06-04  
 **Branch:** `2026-new-level`
 

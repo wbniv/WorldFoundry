@@ -1,0 +1,25 @@
+{
+  "indices": {
+    "Level": 1,
+    "Room": 2,
+    "Director": 3,
+    "Player": 4,
+    "Camera": 5,
+    "CameraOrigin": 6,
+    "TargetFollow": 7,
+    "TargetFirst": 8,
+    "Follow": 9,
+    "FirstPerson": 10,
+    "Directional": 11,
+    "Ambient": 12,
+    "Background": 13,
+    "Floor": 14,
+    "OriginAxes": 15,
+    "UnitCube": 16,
+    "SpawnRuler": 17,
+    "CoordinateLabels": 18,
+    "SampleSettings": 19,
+    "SampleSettings2": 20
+  },
+  "preset": "default"
+}

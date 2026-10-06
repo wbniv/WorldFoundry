@@ -42,6 +42,18 @@ internals at the bottom. For per-symptom debugging recipes, see
 
 ## Start here — references for level designers
 
+For a new level, start with the [editable baseline](../wflevels/baseline/README.md):
+open `wflevels/baseline/baseline.blend`, save a working copy, and run
+`python3 wflevels/baseline/build.py --blend /path/to/your-copy.blend`.
+`task baseline:build` builds the reviewed default; `task baseline:check` checks
+native movement, collision, reset and camera switching. Use its
+[scene contract](../wflevels/baseline/docs/scene-contract.md) and
+[coordinate guide](../wflevels/baseline/docs/coordinates-and-scale.md) for
+explicit actor settings. Desktop evidence is
+[recorded here](diagnostics/baseline/default/README.md); Chromecast acceptance
+and integration into the main CD remain pending.
+
+
 Three documents to keep open while building any level. They cover
 "what actors are available," "what a finished port looks like," and
 "how to verify behaviour at runtime without rebuilding."

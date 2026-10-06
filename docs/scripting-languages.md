@@ -1,5 +1,14 @@
 # Scripting languages in WF
 
+For a minimal level script example, use the baseline's
+[player input](../wflevels/baseline/scripts/player.fth) and
+[director reset/camera script](../wflevels/baseline/scripts/baseline.fth).
+The [baseline quick start](../wflevels/baseline/README.md) builds the reviewed
+scene and runs native input checks. The generated Blender scene embeds these
+scripts with explicit actor constants; export preserves that embedded version.
+After changing generator script sources, generate a separate scene and review
+it before replacing the default `.blend`.
+
 ## Diagnostic frame rate
 
 `INDEXOF_FRAMERATE` (global system mailbox **1903**) is read-only diagnostic

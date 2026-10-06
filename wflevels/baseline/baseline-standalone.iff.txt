@@ -1,0 +1,7 @@
+// Explicit baseline heaps and native doomstick/follow-camera input policy.
+{ 'L4'
+  { 'ALGN' .align(2048) }
+  { 'RAM' 'OBJD' 400000l 'PERM' 2000000l 'ROOM' 4000000l 'FLAG' 1l 1l }
+  { 'ALGN' .align(2048) }
+  [ "../baseline.iff" ]
+}

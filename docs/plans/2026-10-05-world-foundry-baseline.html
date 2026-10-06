@@ -1,0 +1,547 @@
+<!doctype html><html><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><title>World Foundry baseline plan</title><style>body{font:17px/1.6 system-ui;max-width:1150px;margin:40px auto;padding:0 26px;color:#21343b;background:#f5f7f6}h1,h2,h3{line-height:1.2}h2{margin-top:2em}a{color:#146b75}img{max-width:100%;height:auto}table{border-collapse:collapse;width:100%;font-size:15px}th,td{border:1px solid #c6d4d0;padding:10px;vertical-align:top;text-align:left}th{background:#e3ece7}pre{background:#102833;color:#e9f3ef;padding:20px;overflow:auto}</style></head><body><h1>A clean World Foundry baseline level</h1>
+<p>Create a reusable starting level, editable Blender file, small authoring/build toolkit and dedicated documentation. Update current level-authoring and debugging documentation to use this new baseline as the standard starting point. This becomes the foundation for new levels instead of importing Snowgoons and carrying its settings forward. Implementation authorized on 2026-10-06; the <code>.blend</code> and production toolkit are deliverables below.</p>
+<h2>Status</h2>
+<p>Moved on 2026-10-06 from Finding Your Way into the World Foundry project, with
+the complete plan-specific mockup bundle. Implementation ownership is now here;
+Finding Your Way consumes the finished baseline in a separate migration.</p>
+<ul>
+<li>[x] Inspect the current generator, scaffold actor types and native build pipeline.</li>
+<li>[x] Specify a minimal scene, larger floor and coordinate tools.</li>
+<li>[x] Create architecture/layout diagrams and interactive scene mockups.</li>
+<li>[x] Implement the baseline generator, editable <code>.blend</code>, exporter/build entry points and docs.</li>
+<li>[ ] Verify export, native movement/collision, camera behavior and coordinate conventions.</li>
+<li>[ ] Migrate current documentation, quick starts, examples and screenshots from the Snowgoons scaffold to the verified new baseline.</li>
+<li>[ ] After baseline verification passes, append it to the main <code>cd.iff</code>, preserve existing level indices and verify selection/launch from the assembled bundle.</li>
+<li>[ ] Commit and release the verified baseline; migrate a copy of Finding Your Way separately.</li>
+</ul>
+<h2>Current implementation</h2>
+<p>Initial implementation is under <a href="../../wflevels/baseline/README.md">wflevels/baseline</a>.
+The generator starts empty and saves an editable Blender file. Export/build,
+optional fixture exclusion and OAS/OAD source/compiled checks are implemented.
+Native movement/camera checks pass, with <a href="../diagnostics/baseline/default/README.md">saved desktop evidence</a>; device verification and main
+<code>cd.iff</code> integration remain gated. The generic form entry-point and Planted Tank
+routing migration have a <a href="../../wflevels/baseline/docs/generic-settings-integration.md">concrete engine proposal</a>.
+They use the existing schema/catalog/draft system and require explicit engine
+approval before editing engine code.</p>
+<h2>Scene contract</h2>
+<p>Start from an empty Blender scene. Construct each required World Foundry actor explicitly using the existing OAD schemas and a reviewed configuration manifest. Inspect the proven player/camera setup for compatible values; do not import the Snowgoons level, its models, actors, textures or scripts. Every retained actor gets a documented purpose and explicit settings. An actor that appears required must be confirmed by export/runtime testing before it becomes part of the baseline.</p>
+<p>Default proposed floor: <strong>200 × 200 world units</strong>, centred at <code>(0, 0, 0)</code>, with its walking surface at <code>Z=0</code> and a 0.5-unit slab below it. This is over 50 times the area of the current 26 × 28 Temple floor. Treat one Blender unit as one world unit; use a provisional metre interpretation for dimensions and speed, and verify exporter/runtime scale before documenting it as metres. Keep dimensions configurable. Test this size against native bounds, numeric precision and clipping rather than assuming that arbitrarily larger coordinates work.</p>
+<p>The floor has <strong>1-unit minor grid lines</strong>, stronger <strong>10-unit major lines</strong>, and numbered major coordinates around the perimeter and near the origin. Make the grid a small repeating texture with deliberately aligned UVs; avoid thousands of line actors, duplicate coplanar surfaces or a huge unique texture. Verify wrapping/repetition through the existing texture atlas path. If UV wrapping cannot survive that path, use bounded tiled floor render meshes and retain a small collision mesh. Measure export/chunk sizes before choosing the fallback. Minor lines can become faint at distance; major lines should remain readable. Use a neutral dark floor so the RGB axes stand out.</p>
+<h3>Required default objects</h3>
+<table>
+<thead>
+<tr>
+<th>Object / collection</th>
+<th>Purpose</th>
+<th>Proposed settings</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><code>CORE/Level</code>, <code>CORE/Room</code></td>
+<td>Level metadata and spatial membership</td>
+<td>Explicit mailbox count and room bounds enclosing floor, camera and player; runtime-confirmed margin</td>
+</tr>
+<tr>
+<td><code>CORE/Director</code></td>
+<td>Minimal level initialization</td>
+<td>Only reset, camera and debug state; no adventure/dialogue logic</td>
+</tr>
+<tr>
+<td><code>CORE/Player</code></td>
+<td>Movement and collision reference</td>
+<td>Simple visible capsule-shaped proxy; explicit collision hull, dimensions, speed and gravity</td>
+</tr>
+<tr>
+<td><code>CORE/Camera</code>, follow/target actors as needed</td>
+<td>Inspect the scene while playing</td>
+<td>Documented follower with optional first-person mode; explicit near/far planes and input bindings</td>
+</tr>
+<tr>
+<td><code>CORE/Directional</code>, <code>CORE/Ambient</code>, background actor if required</td>
+<td>Stable lighting reference</td>
+<td>One directional and one ambient light, neutral background</td>
+</tr>
+<tr>
+<td><code>GROUND/Floor</code></td>
+<td>Large collision surface and grid</td>
+<td>200 × 200, top at Z=0, consistent grid origin; no invisible rescue floor</td>
+</tr>
+<tr>
+<td><code>DEBUG_DEFAULT/OriginAxes</code></td>
+<td>Coordinate orientation and scale</td>
+<td>Three unit basis arrows, labels and endpoint coordinates</td>
+</tr>
+<tr>
+<td><code>DEBUG_DEFAULT/Spawn</code></td>
+<td>Identify initial position/facing</td>
+<td>At <code>(0, -5, clearance)</code>, labelled ring and forward arrow; visual mesh has no collision</td>
+</tr>
+<tr>
+<td><code>DEBUG_DEFAULT/UnitCube</code></td>
+<td>Known scale and collision reference</td>
+<td>1 × 1 × 1 cube at <code>(5, 0, 0.5)</code>, dimension labels and visible collider</td>
+</tr>
+<tr>
+<td><code>DEBUG_DEFAULT/Ruler</code></td>
+<td>Distance/speed reference</td>
+<td>Flat 10-unit measuring strip alongside the origin area; contrasting 1-unit ticks</td>
+</tr>
+</tbody>
+</table>
+<p>Player dimensions are a proposed 0.6-unit diameter and 1.8-unit height. Native collision may use a different shape: display the actual configured hull, not an invented capsule collider. The camera must cover the floor diagonal from the intended viewpoints; select a tested far plane and room bounds together. Keep reset-to-spawn available so the large floor is practical to explore. Debug meshes do not become unintended physical obstacles.</p>
+<h2>RGB coordinate frame</h2>
+<p>Use three <strong>unit basis vectors</strong> from a shared origin:</p>
+<table>
+<thead>
+<tr>
+<th>Axis</th>
+<th>Colour</th>
+<th>Vector / tip</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>X</td>
+<td>Red <code>#ef5350</code></td>
+<td><code>(1, 0, 0)</code></td>
+</tr>
+<tr>
+<td>Y</td>
+<td>Green <code>#66bb6a</code></td>
+<td><code>(0, 1, 0)</code></td>
+</tr>
+<tr>
+<td>Z</td>
+<td>Blue <code>#42a5f5</code></td>
+<td><code>(0, 0, 1)</code></td>
+</tr>
+</tbody>
+</table>
+<p>Each shaft plus arrowhead ends exactly one unit from the origin. Put the letters <strong>X</strong>, <strong>Y</strong>, <strong>Z</strong> beyond the tips and label the origin <code>(0,0,0)</code>. Include short negative-axis ticks so direction is unambiguous. These are three separate unit vectors; a diagonal <code>(1,1,1)</code> would have length √3. Keep geometry dimensions accurate even when the preview shows a magnified detail.</p>
+<p>Blender authoring uses Z-up. Verify the export/runtime axis mapping and handedness using known point locations, movement and camera captures. Document the verified mapping instead of assuming the runtime matches Blender. Include labels as actual exported geometry or textured meshes; Blender viewport-only annotations must not masquerade as runtime features. Labels carry axis identity independently of colour.</p>
+<p>A magnified coordinate-frame view is useful for inspecting the one-unit arrows. A screen-corner orientation compass is an optional later overlay only if the existing runtime can support it through level assets/scripts. The mockup inset is explanatory UI, not a promised engine HUD.</p>
+<h2>Optional debugging fixtures</h2>
+<p>Keep these in separate collections, excluded from the default export. Provide a <code>diagnostics</code> preset that enables a selected set. Each collection has an explicit name, purpose, actor/texture cost and reset behavior.</p>
+<table>
+<thead>
+<tr>
+<th>Fixture</th>
+<th>What it tests</th>
+<th>First implementation</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>Collision gallery: box, sphere-like mesh, wedge, thin wall</td>
+<td>Hull alignment, collision versus visual mesh, face winding</td>
+<td>Three simple solids and visible actual hulls; distinguish render mesh from collision data</td>
+</tr>
+<tr>
+<td>Ramp and stair lane</td>
+<td>Grounding, slopes, step heights, edge cases</td>
+<td>Labelled 15°/30°/45° ramps; 0.1/0.2/0.4-unit steps; enable only tested physics features</td>
+</tr>
+<tr>
+<td>Floor seam and drop edge</td>
+<td>Snagging, tunnelling, airborne state and recovery</td>
+<td>Small bounded test pad beside the main floor; reset after falling</td>
+</tr>
+<tr>
+<td>Camera target / occlusion wall</td>
+<td>Follow distance, near clipping, obstruction behavior</td>
+<td>Height-marked target and movable wall; document observed obstruction behavior</td>
+</tr>
+<tr>
+<td>Material / UV swatches</td>
+<td>Lighting, UV orientation, mirroring, transparency, texture seams</td>
+<td>Neutral/rgb swatches, checkerboard and asymmetric labelled UV test pattern</td>
+</tr>
+<tr>
+<td>Moving platform / rotating object</td>
+<td>Script timing, transforms, attachment behavior</td>
+<td>Off by default; add after static baseline passes</td>
+</tr>
+<tr>
+<td>Room-boundary pair</td>
+<td>Membership, adjacency, asset loading</td>
+<td>Separate two-room preset, not an invisible complication in the default room</td>
+</tr>
+<tr>
+<td>Runtime readout and input echo</td>
+<td>Position, heading, speed, grounded state, camera mode, pressed/released controls</td>
+<td>Use available logs/captures first; add an on-screen panel only with existing level capabilities</td>
+</tr>
+<tr>
+<td>Timing / actor counters</td>
+<td>Regressions from enabled fixtures</td>
+<td>Existing coordinator profiling and runtime logs; report measured values rather than decorative HUD numbers</td>
+</tr>
+</tbody>
+</table>
+<p>Recommended first extras: unit cube/ruler, collision gallery, slope/step lane, UV swatches and reset-to-spawn. Add motion, room transitions and readouts after the static baseline is dependable. Baseline physics parameters should be documented together; this should not silently inherit the adventure's disabled jumping, dialogue input remapping or 512-mailbox allocation.</p>
+<h2>Deliverables and ownership</h2>
+<p>Use <code>wflevels/baseline/</code> in World Foundry for the implementation. Keep it
+independent of Finding Your Way's <code>parmenides-slice</code>; other games consume this
+baseline as the standard template. Follow existing level build conventions.</p>
+<pre><code class="language-text">wflevels/baseline/
+  README.md                 # quick start, export/build/play
+  baseline.json             # dimensions, actors, camera, controls, presets
+  baseline.blend            # reviewed editable default scene
+  generate.py               # empty scene → explicit actors and meshes
+  fixtures.py               # optional fixture builders
+  build.py                  # existing WF compilation and APK packaging
+  verify.py                 # structural and exported/runtime assertions
+  scripts/baseline.fth       # minimal level behavior
+  settings.oas              # level-owned sample object property schema
+  settings-bindings.json    # stable field IDs and instance exposure
+  docs/
+    scene-contract.md       # object inventory and inheritance-free defaults
+    coordinates-and-scale.md
+    controls-and-debugging.md
+    export-and-runtime.md
+  build/                    # ignored outputs, receipts and diagnostics
+</code></pre>
+<p>The <code>.blend</code> is a real deliverable, not just a disposable intermediate. Keep its clean default collections visible and optional fixtures hidden/excluded. Document generator ownership: regenerating produces a new output and must not overwrite hand-edited <code>baseline.blend</code> without an explicit command. Preserve editable meshes, readable actor names and collection grouping. Commit the reviewed Blender file plus source/config; record Blender/exporter/tool versions in build receipts. Exclude signing keys and machine-specific absolute paths from the portable configuration.</p>
+<p>Proposed commands: <code>task baseline:generate</code>, <code>baseline:export</code>, <code>baseline:build</code>, <code>baseline:verify</code>, and <code>baseline:check</code>. Export the reviewed <code>.blend</code> independently of regeneration, so manual edits can be tested. Build an independent Android package such as <code>org.worldfoundry.wf_game.baseline</code>; use the existing engine libraries unchanged and identify their hashes in receipts.</p>
+<h2>Documentation migration to the new baseline</h2>
+<p>Make the new baseline the documented starting point for creating, exporting, playing and debugging a level. Update existing entry points as well as writing the new baseline docs; a separate guide alone is insufficient. Name it <strong>World Foundry baseline</strong> consistently and link to its reviewed <code>.blend</code>, configuration, quick start and debug-fixture guide.</p>
+<table>
+<thead>
+<tr>
+<th>Documentation area</th>
+<th>Planned update</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>Finding Your Way <code>README.md</code>, <code>docs/operations.md</code>, <code>docs/plans/world-foundry-adventure.md</code></td>
+<td>Point new-level authoring and debugging instructions to World Foundry's <code>wflevels/baseline/README.md</code>; describe the separate migration of the existing adventure accurately</td>
+</tr>
+<tr>
+<td><code>game/parmenides-slice/README.md</code></td>
+<td>Document use of the new baseline after the adventure generator is migrated and parity passes; link its explicit player/camera setup rather than recommending a Snowgoons import</td>
+</tr>
+<tr>
+<td>World Foundry <code>README.md</code> and <code>docs/dev-setup.md</code></td>
+<td>Make the baseline the first new-level/verification walkthrough, with explicit build/output paths and tested launch commands</td>
+</tr>
+<tr>
+<td>World Foundry <code>docs/wf-edit-manual.md</code></td>
+<td>Replace starter walkthroughs with baseline assets, actor names and fresh editor screenshots; demonstrate grid scale, axes and unit cube</td>
+</tr>
+<tr>
+<td>World Foundry <code>docs/level-layouts.md</code></td>
+<td>Add a baseline layout/inventory section and make it the recommended reusable template; describe optional diagnostics separately</td>
+</tr>
+<tr>
+<td>World Foundry <code>docs/scripting-languages.md</code></td>
+<td>Use the minimal baseline player/director behavior for introductory examples; identify any sample-specific script demos explicitly</td>
+</tr>
+<tr>
+<td>Blender/exporter guides and linked quick starts discovered during implementation</td>
+<td>Use the new <code>.blend</code> and baseline export paths for create-a-level examples; document required actors and explicit defaults</td>
+</tr>
+</tbody>
+</table>
+<p>For each guide, update copyable commands, asset paths, screenshots, labels, actor counts and expected output together. Capture actual baseline/editor/runtime images once implementation passes; schematic plan mockups do not become verification screenshots. Link shared scene/coordinate/controls documentation rather than maintaining conflicting copies of the actor defaults.</p>
+<p>Current runtime and editor defaults may still select Snowgoons: <code>docs/dev-setup.md</code> documents a hardcoded boot level, and <code>docs/wf-edit-manual.md</code> documents Snowgoons defaults. Use verified explicit launch arguments, a build wrapper or the appropriate level package in the new walkthrough. Continue to document actual executable defaults accurately until they change. Changing engine defaults is a separate implementation decision subject to the existing engine-approval rule; replacing documentation examples does not require claiming such a change.</p>
+<p>Preserve factual historical investigations, archived milestone receipts and Snowgoons-specific regression/game documentation. They describe real past artifacts. Label a superseded starter guide and link to the new baseline where appropriate; do not replace historical asset names or byte-identity claims with baseline names. Keep Snowgoons available as a sample/regression fixture, while making the new baseline the recommended authoring template.</p>
+<ul>
+<li>[ ] Inventory active Snowgoons-as-starter references across both repositories and record each destination/update.</li>
+<li>[ ] Update the main quick start and level-creation walkthrough to use only the baseline's assets, scripts and build commands.</li>
+<li>[ ] Update editor, scripting, layout and exporter examples with verified baseline screenshots and expected output.</li>
+<li>[ ] Run every documented command from a fresh generated baseline or reviewed <code>.blend</code>, following the stated prerequisites.</li>
+<li>[ ] Check relative links and asset paths; search again for remaining Snowgoons starter instructions and resolve or explicitly retain each occurrence.</li>
+<li>[ ] Confirm historical evidence and sample-specific tests still identify their original assets correctly.</li>
+</ul>
+<h2>Architecture diagram</h2>
+<details><summary>Architecture diagram source</summary><pre><code class="language-mermaid">flowchart LR
+    C[Explicit baseline config + OAD schemas] --&gt; G[Empty-scene generator]
+    G --&gt; B[Editable baseline.blend]
+    F[Optional fixture presets] --&gt; G
+    B --&gt; E[WF Blender exporter]
+    E --&gt; L[LEV + meshes + textures + level Forth]
+    L --&gt; T[Existing WF asset compilers]
+    T --&gt; P[Native level package]
+    R[Existing native runtime] --&gt; A[Independent baseline APK]
+    P --&gt; A
+    A --&gt; V[Desktop checks + coordinator-owned device session]
+    V --&gt; D[Receipts, captures and documentation]
+</code></pre></details>
+<p><a href="2026-10-05-world-foundry-baseline/layout.svg"><img alt="Baseline layout diagram" src="2026-10-05-world-foundry-baseline/layout.svg" /></a></p>
+<h2>Mockups</h2>
+<p>These are schematic previews of the proposed scene, not Blender renders or evidence of a playable implementation. The interactive preview switches between the sparse default and optional diagnostics. The floor overview draws major grid lines; the 1-unit detail and coordinate inset show the fine scale. Prototype controls are review controls, not final gameplay bindings.</p>
+<p><a href="2026-10-05-world-foundry-baseline/mockups.html">Open interactive mockups</a>.</p>
+<h3>Default baseline — large floor and scale tools</h3>
+<p><a href="2026-10-05-world-foundry-baseline/mockups.html"><img alt="Default baseline mockup" src="2026-10-05-world-foundry-baseline/baseline.png" /></a></p>
+<h3>Diagnostics preset — optional collision and camera fixtures</h3>
+<p><a href="2026-10-05-world-foundry-baseline/mockups.html#diagnostics"><img alt="Diagnostics mockup" src="2026-10-05-world-foundry-baseline/diagnostics.png" /></a></p>
+<h2>Implementation sequence and acceptance</h2>
+<ol>
+<li>Inventory required OAD types and enumerate explicit defaults. Confirm actor IDs, references, input policy and camera configuration using the existing runtime. Create the new configuration/schema documentation first.</li>
+<li>Generate the empty-scene baseline, floor/grid, lighting, player/camera and unit references. Save the editable <code>.blend</code>. Add optional fixtures in separate collections with a tested export exclusion mechanism.</li>
+<li>Export and compile with the existing toolchain. Verify that grid UVs, axis colours/labels, collision hulls, scene units and room membership survive the pipeline. Record measured actor, triangle, texture and chunk counts.</li>
+<li>Check native movement in +X/+Y, gravity/up direction, scale and camera switching. Walk a known 10-unit distance, test floor quadrants/seams and confirm repeatable reset. Inspect collision rather than accepting appearance alone.</li>
+<li>Verify the same frozen APK on Chromecast through <code>task chromecast:*</code>, with coordinator-owned launch/input/capture/lifecycle sessions. Capture the axes, grid, cube and diagnostics preset; keep receipts and hashes. Phone acceptance is separate if a phone target is added.</li>
+<li>Migrate the documentation entry points listed above after the baseline passes. Execute each updated walkthrough, capture real screenshots, verify links and audit remaining Snowgoons starter references.</li>
+<li>After the baseline passes native and device verification, append <code>baseline-standalone.iff</code> to the main <code>build-cd-iff</code> bundle without shifting existing TOC indices or changing its boot level. Rebuild <code>cd.iff</code> and verify the baseline launches from the assembled bundle. Keep this integration gated on matching verification evidence.</li>
+<li>
+<p>Commit source, docs, reviewed Blender file and test evidence. Demonstrate that a second fresh level can be created using only this baseline, without a Snowgoons import or Parmenides dialogue/assets. Migrate Finding Your Way in a separate change after parity checks.</p>
+</li>
+<li>
+<p>[ ] Default exported inventory contains only documented core actors and sparse debug references.</p>
+</li>
+<li>[ ] Floor spans exactly −100…+100 on X/Y, with its top at Z=0 and measured 1/10-unit spacing.</li>
+<li>[ ] All three axes are perpendicular, have unit-length tips, carry correct colours and readable X/Y/Z labels in Blender and runtime.</li>
+<li>[ ] Native axis mapping, scale, collision shape, speed/gravity and camera clips are verified and documented.</li>
+<li>[ ] Optional fixtures add no actors/textures/scripts to the default export; generated scene has no adventure content or Snowgoons asset references.</li>
+<li>[ ] Regeneration and manual-edit workflows preserve user work and have reproducible receipts.</li>
+<li>[ ] Current new-level walkthroughs start from the new baseline, all documented commands/links work, and screenshots show the verified baseline; executable defaults and historical Snowgoons records remain accurate.</li>
+<li>[ ] Native desktop checks and matching APK device evidence pass; camera, input release, reset and Home/resume work.</li>
+</ol>
+<p>Engine modifications remain governed by <a href="../../AGENTS.md">World Foundry’s AGENTS.md</a>: “Authorization to implement a level, asset, animation or plan does not authorize engine changes.” Investigate existing capabilities and continue asset/script/tooling work; prepare a concrete proposal for discussion if a required feature needs an engine change. No engine changes are part of this planning work.</p>
+<h2>Sample configuration object: generic OAS/OAD settings</h2>
+<p>Add <code>CONFIG/SampleSettings</code> with a level-owned <code>settings.oas</code> and bindings to the
+<a href="2026-10-06-runtime-oas-oad-object-editor.md">generic runtime object editor</a>.
+Use one instance with readable sections and groups, plus a second instance for
+isolation tests. The default baseline includes a small representative settings
+section; the <code>settings-gallery</code> preset exposes the complete coverage fixture.
+Keep it separate from gameplay/physics defaults so exploring the gallery cannot
+break the movement reference.</p>
+<p>The complete fixture contains <strong>one field per meaningful type/<code>showAs</code> pair</strong>,
+not just one field per normalized widget kind. Expand every type listed in a
+matrix row into separate fields and IDs. Save a coverage manifest containing
+the original button type, byte width, full <code>showAs</code> byte (including modifier
+bits), range, choices, default, stable field ID and expected TV/phone behavior.
+Also record identity/display names, help, section/group order, enable expression,
+string length/filter, XData conversion action, exposure/read-only policy and
+known-versus-synthetic provenance. Preserve the original metadata even
+when several descriptors use the same generic widget.</p>
+<h3>Coverage matrix</h3>
+<p>Sources: <a href="../../wfsource/source/oas/oad.h">legacy descriptor codes</a>,
+<a href="../../wfsource/source/oas/types3ds.s">OAS descriptor macros</a>,
+<a href="../../wftools/wf_attr_schema/src/lib.rs">shared normalization</a>,
+<a href="../../scripts/build-object-properties.py">current catalog cooker</a>.</p>
+<table>
+<thead>
+<tr>
+<th>Type / semantic constraint</th>
+<th><code>showAs</code> values; create a distinct example for each</th>
+<th>Sample / expected behavior</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><code>BUTTON_INT8</code>, <code>INT16</code>, <code>INT32</code>, plain signed integer</td>
+<td><code>N_A</code>, <code>NUMBER</code>, <code>SLIDER</code>, <code>HIDDEN</code></td>
+<td>Signed count; explicit width/range; slider uses arrows directly; hidden field never becomes a row</td>
+</tr>
+<tr>
+<td><code>INT8</code>, <code>INT16</code>, <code>INT32</code>, bounded enumerated values with labels</td>
+<td><code>N_A</code>, <code>NUMBER</code>, <code>SLIDER</code>, <code>TOGGLE</code>, <code>DROPMENU</code>, <code>RADIOBUTTONS</code>, <code>COMBOBOX</code></td>
+<td><code>Low\|Medium\|High</code>, including a nonzero minimum; arrows change enum values directly; preserve labels and numeric storage</td>
+</tr>
+<tr>
+<td><code>INT8</code>, <code>INT16</code>, <code>INT32</code>, Boolean range 0…1, without choice labels</td>
+<td><code>CHECKBOX</code>, <code>TOGGLE</code></td>
+<td>Enabled flag; left = off, right = on; never permit arbitrary integers; do not infer Boolean solely from the current value</td>
+</tr>
+<tr>
+<td><code>INT8</code>, <code>INT16</code>, <code>INT32</code>, Boolean range 0…1, with <code>False\|True</code> labels</td>
+<td><code>CHECKBOX</code>, <code>TOGGLE</code>, <code>RADIOBUTTONS</code>; default/number/slider/dropdown/combo presentations covered by the enum row</td>
+<td>Legacy Boolean macros normalize labelled values as Enum; verify logical off/on behavior and preserve each presentation</td>
+</tr>
+<tr>
+<td><code>BUTTON_FIXED16</code>, <code>FIXED32</code></td>
+<td><code>N_A</code>, <code>NUMBER</code>, <code>SLIDER</code>, <code>HIDDEN</code></td>
+<td>Signed fractional gain; correct storage scale/step; validate exact bounds</td>
+</tr>
+<tr>
+<td><code>BUTTON_INT32</code>, mailbox ID</td>
+<td><code>MAILBOX</code></td>
+<td>Existing mailbox in the configured level; validate against actual mailbox capacity rather than a magic 3999</td>
+</tr>
+<tr>
+<td><code>BUTTON_INT32</code>, packed RGB</td>
+<td><code>COLOR</code></td>
+<td>Colour swatch plus packed <code>0xRRGGBB</code>; validate 0…0xFFFFFF; no pretending an arbitrary integer widget is a finished colour picker</td>
+</tr>
+<tr>
+<td><code>BUTTON_STRING</code>, bounded single-line text</td>
+<td><code>N_A</code>, <code>NUMBER</code>, <code>HIDDEN</code></td>
+<td>Short label, empty value and maximum length; NUMBER includes the shipped decimal unsigned Seed with 0 and 4294967295 boundary cases; preserve text storage and its explicit validation rule; hidden value omitted from form</td>
+</tr>
+<tr>
+<td><code>BUTTON_STRING</code>, multiline text</td>
+<td><code>TEXTEDITOR</code></td>
+<td>Notes with line breaks; bounded text and appropriate phone keyboard</td>
+</tr>
+<tr>
+<td><code>BUTTON_STRING</code>, suggested labels with editable text</td>
+<td><code>COMBOBOX</code></td>
+<td>Suggested names plus a custom value; distinct from integer enum storage</td>
+</tr>
+<tr>
+<td><code>BUTTON_FILENAME</code>, <code>MESHNAME</code></td>
+<td><code>N_A</code>, <code>FILENAME</code>, <code>HIDDEN</code></td>
+<td>Existing cooked asset choices and filters; no host filesystem browser on TV</td>
+</tr>
+<tr>
+<td><code>BUTTON_STRING</code>, path-valued bounded text</td>
+<td><code>FILENAME</code></td>
+<td>Explicit path semantics/filter; resolves only allowed assets, not arbitrary device files</td>
+</tr>
+<tr>
+<td><code>BUTTON_OBJECT_REFERENCE</code>, <code>CAMERA_REFERENCE</code>, <code>LIGHT_REFERENCE</code>, <code>CLASS_REFERENCE</code></td>
+<td><code>N_A</code>, <code>COMBOBOX</code>, <code>HIDDEN</code></td>
+<td>Valid typed existing targets, null option where allowed, missing/deleted target; class reference remains a class ID</td>
+</tr>
+<tr>
+<td><code>BUTTON_XDATA</code> with <code>XDATA_IGNORE</code>, annotation/text only</td>
+<td><code>N_A</code>, <code>TEXTEDITOR</code>, <code>DROPMENU</code>; <code>COMBOBOX</code> as synthetic editable-suggestion coverage</td>
+<td>Legacy TYPEENTRYSTRING emits XData, not BUTTON_STRING; the shipped test String has DROPMENU and labels. Preserve string storage, labels and original hint; report unsupported choice presentation rather than silently turning it into an integer enum. Classify authoring-only versus runtime-retained text explicitly</td>
+</tr>
+<tr>
+<td><code>BUTTON_OBJECT_REFERENCE</code> with <code>VECTOR</code> modifier</td>
+<td><code>VECTOR \| N_A</code>; hidden companion for omission checks</td>
+<td>Match shipped Follow/Target reference descriptors. Preserve the typed target and modifier; this is not a scalar XYZ vector. Determine modifier semantics from exporter/host behavior and mark unsupported interpretation explicitly</td>
+</tr>
+<tr>
+<td>Fixed-point X/Y/Z component triplet</td>
+<td><code>VECTOR</code> flag with <code>N_A</code>, <code>NUMBER</code>, <code>SLIDER</code>; also hidden triplet</td>
+<td>One logical vector with component IDs; each component uses correct scale; preserve component/group metadata</td>
+</tr>
+<tr>
+<td><code>PROPERTY_SHEET</code>, <code>GROUP_START</code>, <code>GROUP_STOP</code></td>
+<td><code>N_A</code></td>
+<td>Sections and named groups, empty group, multiple sections, scrolling; structural entries have no editable scalar value</td>
+</tr>
+</tbody>
+</table>
+<p><code>VECTOR</code> is the modifier bit <code>0x80</code>, not a stand-alone scalar type. Inspect and
+verify actual triplet encoding before cooking that fixture: the legacy
+<code>TYPEENTRYVECTOR</code> descriptor macro is not sufficient evidence of correct X/Y/Z
+encoding. <code>N_A</code> requests the type's default presentation. Hidden is sensible
+for any retained value type; add hidden companions for the enum, Boolean,
+mailbox, colour and annotation examples too. Structural markers and compiler
+flags are not editable configuration fields. XData conversion/script chunks,
+camera-extraction directives, waveform/compiler flags and common-block markers
+are represented in an authoring audit, not fabricated runtime settings controls.</p>
+<p>Do not expand meaningless combinations such as a float colour, numeric filename
+slider, checkbox with five states or section header as a mailbox. Any additional
+legacy pairing found during schema/exporter auditing must be classified and
+added to the manifest, or given a concrete exclusion reason. The audit must
+account for every declared descriptor type and <code>showAs</code> code.</p>
+<h3>Coverage review and acceptance boundaries</h3>
+<p>Reviewed on 2026-10-06 against the descriptor enum/macros, checked-in OAD usage,
+shared normalizer and catalog cooker. The matrix is the coverage contract. Initial implementation now provides
+<code>wflevels/baseline/settings.oas</code>, <code>settings-gallery.oas</code>, their compiled OADs and
+<code>settings-coverage.json</code>: five representative default fields and 118 gallery
+fields, with all descriptor types/presentation codes classified. Source/compiled
+checks are implemented; complete interactive coverage and the shared settings
+host remain pending. The small mockup is representative, not the complete gallery.</p>
+<p>The manifest must classify all 29 declared button types and all 13 base
+<code>showAs</code> codes (0…12), plus the VECTOR modifier. The scalar, reference, text and
+structural types are covered above. Give explicit exclusions for
+<code>NOINSTANCES</code>, <code>NOMESH</code>, <code>SINGLEINSTANCE</code>, <code>TEMPLATE</code>, <code>EXTRACTCAMERA</code>, <code>ROOM</code>,
+<code>COMMONBLOCK</code>, <code>ENDCOMMON</code>, <code>EXTRACTCAMERANEW</code>, <code>EXTRACTLIGHT</code>, <code>SHORTCUT</code>,
+<code>BUTTON_EXTRACT_CAMERA</code> and <code>BUTTON_WAVEFORM</code>: compiler/export directives or
+authoring data, not fabricated instance settings. Check each actual occurrence;
+a declared but unused type remains an audit entry, not an invented shipped use.
+Converted XData actions likewise require individual exclusion reasons.</p>
+<p>A type/hint matrix alone is insufficient. Add these semantic variants without
+requiring a meaningless Cartesian product:</p>
+<ul>
+<li>Booleans with and without pipe labels; enums with negative/nonzero minima,
+  two/three/many choices, long labels and an invalid range/choice-count mismatch.
+  Distinguish closed integer COMBOBOX choices from editable string suggestions.</li>
+<li>Fixed16 and Fixed32 signed fractions, exact representable limits, smallest
+  representable steps and nonzero slider minima; test storage quantization and
+  the chosen UI step independently. Narrow storage stays supplemental until
+  supported by the actor packing path.</li>
+<li>Empty/maximum-length/overlength text, multiline line breaks and UTF-8 byte
+  limits versus phone character limits; readonly companions for editable value
+  families. A read-only display does not count as editable-widget acceptance.</li>
+<li>Visible, hidden and conditionally enabled fields, including dependencies
+  changed in a draft. Preserve enable expressions and report unsupported
+  evaluation/retention instead of claiming conditional parity.</li>
+<li>Typed null/valid/wrong-type/missing/deleted references, class IDs distinct
+  from actor IDs, allowed/disallowed asset choices and original file filters.
+  Current catalogs must explicitly report any metadata they discard.</li>
+<li>Repeated display labels with distinct identity keys/IDs, multiple sections,
+  empty/populated groups, all-choice sections, long help and scrolling. Verify
+  structure/order survives cooking and both instances remain independent.</li>
+<li>Known VECTOR-marked references, separately proposed scalar triplets, and
+  document VEC3/EULR/BOX3 transforms. The last category is an authoring/export
+  audit unless explicitly exposed by a supported runtime binding; do not
+  fabricate Euler/box OAD types.</li>
+</ul>
+<p>For each case record source OAS → compiled OAD → normalized schema → cooked
+catalog → effective instance value, or the exact stage and reason for exclusion.
+Visible editable, visible read-only, hidden omission, unsupported and
+synthetic/unimplemented are separate results. Declaring all codes accounted
+for is not the same as implementing all runtime widgets.</p>
+<h3>Visibility and relevance gate</h3>
+<p>Before using an Observed behavior entry as a runtime widget requirement, audit
+its actual descriptors and enable conditions. Separate known visible settings,
+always-hidden/generated values, authoring/compiler data and synthetic
+compatibility examples. See the <a href="../reference/2026-10-06-oas-oad-editor-rendering-audit.md#visibility-filtering-and-known-usage">known-usage visibility audit</a>.</p>
+<p>Always-hidden cases get omission and applicable retention/readback checks,
+not visible gallery rows or missing-widget claims. Compiler flags, common-block
+markers and generated slope coefficients do not become runtime settings merely
+to exercise renderer fallback code. Keep visible fixed-point, colour and
+reference examples: their known descriptors are not universally hidden.
+Evaluate conditional fields in eligible states before excluding them.</p>
+<p>Record unused meaningful type/hint pairs as synthetic coverage in the manifest;
+they do not establish a current gameplay requirement. Keep document transforms,
+VECTOR-marked references and proposed scalar-vector triplets distinct.
+Annotation examples require an explicit authoring-only versus runtime-retained
+classification; being skipped by wf-edit does not make them universally hidden.
+The complete audit still accounts for excluded types and hints with reasons.</p>
+<h3>Current support and planned gaps</h3>
+<p>See the <a href="../reference/2026-10-06-oas-oad-editor-rendering-audit.md">Blender / wf-edit / runtime rendering audit</a> for actual host behavior and simplified fallbacks.</p>
+<p>Current sources cover integer/fixed/text/enum/Boolean fields, sections,
+actions and generic validation; TV includes slider/radio rendering and phone
+includes a packed-RGB colour control. This is source capability, not acceptance
+of every matrix pair. A complete TV colour control and grouped vector widgets
+remain gaps. File/object references cook as read-only; XDATA_IGNORE annotations
+now cook as text with multiline validation when explicitly bound. Their runtime
+retention/exposure still needs a fixture. Hidden values are omitted by the
+current catalog cooker. Narrow-width OAD types exist in the reader, while standard legacy actor
+layout macros disable narrow storage for alignment reasons. Test them as
+supplemental catalog fixtures without silently changing actor packing.</p>
+<p>The baseline gallery must expose these gaps honestly. Show read-only values
+where meaningful and track dedicated widget/retention work as TODOs. Implement
+editable asset/reference/vector/colour support only through reviewed existing
+APIs or a separately approved engine proposal. Do not call the full matrix
+implemented merely because the form can display a numeric fallback.</p>
+<h3>Interaction, mockup and acceptance</h3>
+<p><img alt="Settings-gallery TV mockup" src="2026-10-05-world-foundry-baseline/settings-gallery.svg" /></p>
+<pre><code class="language-text">Sample Settings                       General | Numbers | Choices | Assets
+  Signed count                 -12             [A: numeric entry]
+  Fractional gain               0.75           [← / →: change]
+  Quality                       Medium         [← / →: change]
+  Enabled                       On             [← off / → on]
+  Tint                          ■ #42A5F5      [planned colour widget]
+  Direction                     X 1 / Y 0 / Z 0 [planned vector widget]
+  Target                        UnitCube       [read-only until supported]
+  Notes                         Baseline sample
+
+↑ / ↓ selects rows     ← / → changes choices     ← applies / closes
+</code></pre>
+<p>Opening the form consumes its opening press and keeps numeric entry closed.
+A fresh A press opens numeric entry only for a numeric/text field. For choices,
+toggles and sliders, arrows work immediately and do not also move focus into
+the section rail. Section navigation must retain a reachable explicit path;
+test an all-enum section as well as mixed rows. Phone controls mirror schema
+types, constraints, choices and the same authoritative draft.</p>
+<ul>
+<li>[ ] Create OAS/OAD fixtures and the complete pair-coverage manifest; record exclusions and support status explicitly.</li>
+<li>[ ] Verify shared normalization, field widths/scales, enum offsets, defaults and cooked readback for every pair.</li>
+<li>[ ] Confirm invalid type/presentation pairings fail or report unsupported status, rather than silently changing type.</li>
+<li>[ ] Test TV/phone apply, cancel, invalid values, bounds, release gating, enum arrows and scrolling across all sections.</li>
+<li>[ ] Verify two instances retain independent edits and stale/deleted targets are handled correctly.</li>
+<li>[ ] Record actual desktop/device captures and property snapshots; mockups remain labelled as mockups.</li>
+<li>[ ] Keep fixture costs out of the sparse default performance baseline, and measure the gallery as a separate preset.</li>
+</ul></body></html>

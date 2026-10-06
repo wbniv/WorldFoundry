@@ -2,6 +2,12 @@
 
 A running log of gotchas encountered building WF levels. Sorted roughly by "how long it takes to diagnose."
 
+For new scenes, use the [baseline toolkit](../wflevels/baseline/README.md)
+and its [coordinate guide](../wflevels/baseline/docs/coordinates-and-scale.md).
+Run `task baseline:check` to compare movement, collision and camera behavior
+with the [recorded desktop reference](diagnostics/baseline/default/README.md).
+The older level-specific investigations below retain their original context.
+
 ---
 
 ## Coordinate systems — game, editor, and screen

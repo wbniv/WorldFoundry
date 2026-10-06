@@ -1,0 +1,67 @@
+{
+  "name": "World Foundry baseline",
+  "floor_size": 200,
+  "floor_depth": 0.5,
+  "grid_minor": 1,
+  "grid_major": 10,
+  "spawn": [
+    0,
+    -5,
+    0.92
+  ],
+  "player_bounds": [
+    -0.3,
+    -0.3,
+    -0.9,
+    0.3,
+    0.3,
+    0.9
+  ],
+  "room_bounds": [
+    -120,
+    -120,
+    -20,
+    120,
+    120,
+    40
+  ],
+  "camera": {
+    "offset": [
+      -7,
+      0,
+      4
+    ],
+    "hither": 0.1,
+    "yon": 350,
+    "fov": 65
+  },
+  "physics": {
+    "mass": 1,
+    "gravity": 9.81,
+    "acceleration": 12,
+    "deceleration": 0.9,
+    "max_speed": 5,
+    "jump": 5
+  },
+  "mailboxes": {
+    "count": 160,
+    "scratch": 32,
+    "init": 120,
+    "previous_input": 121,
+    "camera_mode": 122
+  },
+  "presets": [
+    "default",
+    "diagnostics",
+    "settings-gallery"
+  ],
+  "controls": {
+    "directions": "native movement",
+    "A": "jump",
+    "B": "reset to spawn",
+    "C": "switch camera",
+    "remote_up_ok": "reset to spawn",
+    "remote_down_ok": "switch camera"
+  },
+  "spawn_heading": 0.25
+}

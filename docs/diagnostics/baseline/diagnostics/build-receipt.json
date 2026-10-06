@@ -1,0 +1,18 @@
+{
+  "preset": "diagnostics",
+  "blend": "/home/will/WorldFoundry-wbniv/wflevels/baseline/build/diagnostics.blend",
+  "blendSha256": "685817411f9f77d668c379c7bd71b394905b9718eeccd7a797472cc84ea29a61",
+  "configSha256": "9c8a7cb20aa26fef6851e56ecef22e6d4339889fa53877e36f3072da7bf360ee",
+  "standalone": "/home/will/WorldFoundry-wbniv/wflevels/baseline/build/diagnostics-standalone.iff",
+  "levelSha256": "004bc8738f847c9b9478ae25163473e4ab9a07dc58fd1da4aadf3e26110bc9f6",
+  "cdSha256": "b4a72b3268057d0aa84281af554494919520465a1758497b4fb0889cacc1616f",
+  "engineModifiedByBaseline": false,
+  "desktopExecutableSha256": "56b13f2f466653f8cd0b11ff9aaebc4ca8030fe400148ab84a440bbbe3bc0126",
+  "toolHashes": {
+    "wftools/iffcomp-rs/target/release/iffcomp": "c822b0a76412378ccbb20b282a0d0eb25daa7351975e019832b03dc1218e8e61",
+    "wftools/levcomp-rs/target/release/levcomp": "270c027f071064d8ede761da20f595015840e3a6b392ad7700dcc1882e364070",
+    "wftools/textile-rs/target/release/textile": "8ea399fd40da55d0626858dacc7e228cc70db05dd1f512c72762c52147266c6c",
+    "wftools/oas2oad-rs/target/release/oas2oad": "b9e99d0625f53579fd2a296fb99914b14b9720f59644cab8ed56727a42cfb38b",
+    "wftools/wf_attr_edit/target/release/catalog": "9c1c6f49bf287aa7e182672f3c577aa7b1009735f4bbbf1e55d724baa14cf9cc"
+  }
+}
