@@ -6,7 +6,7 @@ ROOT=Path(__file__).resolve().parents[1]
 @pytest.fixture(scope='module')
 def executable(tmp_path_factory):
     exe=tmp_path_factory.mktemp('plant-phone')/'host'
-    subprocess.run(['g++','-std=c++17','-O1','-pthread','-I'+str(ROOT/'wfsource/source'),str(ROOT/'tests/plant_phone_host.cc'),str(ROOT/'wfsource/source/hal/phonepad/phonepad.cc'),str(ROOT/'engine/runtime_properties.cpp'),str(ROOT/'engine/runtime_property_form.cpp'),str(ROOT/'wftools/wf_attr_edit/target/release/libwf_attr_edit.a'),'-ldl','-lpthread','-lm','-o',str(exe)],check=True)
+    subprocess.run(['g++','-std=c++17','-O1','-pthread','-I'+str(ROOT/'wfsource/source'),str(ROOT/'tests/plant_phone_host.cc'),str(ROOT/'wfsource/source/hal/phonepad/phonepad.cc'),str(ROOT/'engine/runtime_properties.cpp'),str(ROOT/'engine/runtime_property_form.cpp'),str(ROOT/'engine/runtime_property_host.cpp'),str(ROOT/'wftools/wf_attr_edit/target/release/libwf_attr_edit.a'),'-ldl','-lpthread','-lm','-o',str(exe)],check=True)
     return exe
 
 def test_complete_phone_settings_and_reconnection(executable,tmp_path):

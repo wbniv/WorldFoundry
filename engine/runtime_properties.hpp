@@ -26,6 +26,7 @@ public:
     Object* object(uint32_t actor);
     const Object* object(uint32_t actor) const;
     Object* schema(const std::string& name);
+    std::vector<uint32_t> editableObjects() const;
     void remove(uint32_t actor);
     bool clone(uint32_t source,uint32_t actor);
     bool set(uint32_t actor,uint32_t field,const std::string& value,std::string& error);
@@ -52,4 +53,5 @@ std::string json(const std::string& value);
 std::string snapshot(const Edit& edit,bool available,bool phone);
 bool decode(const std::string& value,std::string& result);
 Registry*& activeRegistry();
+uint64_t nextSession();
 }

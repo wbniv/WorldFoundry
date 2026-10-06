@@ -61,7 +61,7 @@ def attach(level,payload):
     ram_end=2056+old_size
     if d[ram_end:ram_end+4]!=b'ALGN':raise ValueError('RAM padding absent')
     # Rebuilding a level is normal; replacing our existing catalog is idempotent.
-    if old_size>=56 and d[ram_end-12:ram_end-8]==b'RPRP':
+    if old_size>=48 and d[ram_end-12:ram_end-8]==b'RPRP':
         offset,size=struct.unpack_from('<II',d,ram_end-8)
         d=d[:2048+offset]
         chunk=b'RPRP'+struct.pack('<I',len(payload))+payload

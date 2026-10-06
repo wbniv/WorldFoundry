@@ -52,7 +52,9 @@ remains pending.
 
 Native controls: Up/Down moves forward/backward; Left/Right turns; A jumps,
 B resets, C changes camera. A Chromecast remote uses Up+OK to reset and
-Down+OK to switch camera. The first-person shot is an inspection camera with
+Down+OK to switch camera. Hold A/OK alone for one second to open the shared
+settings object picker; choose either sample owner with Up/Down and OK. Back
+applies a valid form and closes it; Cancel discards the draft. The first-person shot is an inspection camera with
 no separate player-controller implementation. Camera obstruction behavior is
 the existing engine's behavior.
 
@@ -65,15 +67,15 @@ python3 wflevels/baseline/build.py --package-only \
 
 The first package freezes the input runtime under ignored `build/runtime.apk`.
 Later packages refuse a different runtime unless that snapshot is explicitly
-reviewed/replaced. Receipts record desktop, tool, level, APK and native-library
+reviewed/replaced with `--refresh-runtime`; previous snapshots are retained. Receipts record desktop, tool, level, APK and native-library
 hashes; packaged libraries are byte-verified. The output package is
 `org.worldfoundry.wf_game.baseline`, with its own development signing key kept
 under ignored `build/`. SDK discovery uses `ANDROID_HOME`, `ANDROID_SDK_ROOT`,
 then `~/android-sdk-local`. No signing keys or machine paths are portable config.
 
-Chromecast sessions must use the shared coordinator. The coordinator currently
-needs baseline app registration before it can accept `APP=baseline`; there is
-no direct ADB fallback. Device acceptance remains pending. Add the baseline to
+Chromecast sessions use the shared coordinator with `APP=baseline` and the
+reviewed `baseline-settings` validator. Device acceptance remains pending
+the corrected held-input/lifecycle harness deployment and reruns. Add the baseline to
 the main `cd.iff` only after matching native/device verification succeeds;
 preserve all existing level indices and its boot level.
 
@@ -86,8 +88,8 @@ Source/compiled coverage is distinct from interactive acceptance.
 [Saved verification receipts and captures](../../docs/diagnostics/baseline/README.md)
 record the tested build hashes.
 
-The catalogs are attached, but the current settings host only opens Planted Tank
-objects. Baseline form selection and migration of the remaining plant routing
-require the [shared engine integration](docs/generic-settings-integration.md).
+Both catalogs now open through the generic host used by Planted Tank. Plant
+simulation consumes committed values through schema callbacks, and its selector
+preview uses that same host. See the [shared integration and acceptance status](docs/generic-settings-integration.md).
 See the [baseline plan](../../docs/plans/2026-10-05-world-foundry-baseline.md)
 for acceptance and documentation migration gates.

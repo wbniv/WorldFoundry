@@ -14,19 +14,19 @@ int main(){
  for(auto& f:ch.faces)assert(f.a<ch.vertices.size()&&f.b<ch.vertices.size()&&f.c<ch.vertices.size());}
  }
  uint32_t n;assert(planted::parseSeed("4294967295",n)&&n==UINT32_MAX);for(auto s:{"4294967296","-1","","1e2","1.2"," 1","12345678901"})assert(!planted::parseSeed(s,n));assert(planted::parseSeed("0",n)&&n==0);
- auto& s=planted::state();s.active=true;planted::regenerate(713,false);s.speed=3;planted::tick(.1,0);assert(s.age==.1f);s.speed=0;planted::tick(.1,0);assert(s.age==.1f&&s.water==.2f);planted::open();planted::tick(.1,0);assert(s.water==.2f);auto session=s.session;
+ auto& s=planted::state();s.active=true;planted::regenerate(713,false);s.speed=3;planted::tick(.1,0);assert(s.age==.1f);s.speed=0;planted::tick(.1,0);assert(s.age==.1f&&s.water==.2f);planted::open();planted::tick(.1,0);assert(s.water==.2f);auto session=planted::form().edit.session;
  auto send=[&](const std::string& verb,const std::string& tail=""){planted::command("r:"+std::to_string(planted::form().edit.session)+":"+verb+(tail.empty()?"":":"+tail));};
- planted::command("r:0:set:1:42");assert(s.seed==713&&s.modal);
- send("set","1:4294967295");send("set","2:1");send("set","3:4");send("action","100");assert(s.seed==UINT32_MAX&&s.salt&&s.speed==4&&!s.modal);
+ planted::command("r:0:set:1:42");assert(s.seed==713&&wfprops::host().modal);
+ send("set","1:4294967295");send("set","2:1");send("set","3:4");send("action","100");assert(s.seed==UINT32_MAX&&s.salt&&s.speed==4&&!wfprops::host().modal);
  auto generation=s.generation;planted::command("r:"+std::to_string(session)+":action:100");assert(s.generation==generation);
- planted::input(0,.05);assert(planted::input(1,.05)==0);assert(planted::input(0,.05)==1);for(int i=0;i<25;i++)planted::input(1,.05);assert(s.modal);assert(planted::input(0,.05)==0);
- planted::cancel();planted::open();auto keptAge=s.age;auto keptGeneration=s.generation;send("set","3:1");assert(planted::apply());assert(s.age==keptAge&&s.generation==keptGeneration&&s.speed==1&&!s.modal);
- planted::open();send("set","1:42");send("set","2:0");assert(planted::apply());assert(s.seed==42&&!s.salt&&s.age==0&&!s.modal);
- planted::open();send("set","1:4294967296");assert(!planted::apply()&&s.modal);planted::cancel();planted::open();
+ planted::input(0,.05);assert(planted::input(1,.05)==0);assert(planted::input(0,.05)==1);for(int i=0;i<25;i++)planted::input(1,.05);assert(wfprops::host().modal);assert(planted::input(0,.05)==0);
+ planted::cancel();planted::open();auto keptAge=s.age;auto keptGeneration=s.generation;send("set","3:1");assert(planted::apply());assert(s.age==keptAge&&s.generation==keptGeneration&&s.speed==1&&!wfprops::host().modal);
+ planted::open();send("set","1:42");send("set","2:0");assert(planted::apply());assert(s.seed==42&&!s.salt&&s.age==0&&!wfprops::host().modal);
+ planted::open();send("set","1:4294967296");assert(!planted::apply()&&wfprops::host().modal);planted::cancel();planted::open();
  auto press=[&](uint32_t button){planted::uiInput(0);planted::uiInput(button);};press(1);assert(planted::form().drawer);press(1);assert(planted::form().value()=="1");press(1);assert(planted::form().value()=="11");
  press(1u<<14);assert(planted::form().key==0);press(1u<<13);assert(planted::form().key==1);press(1u<<12);assert(planted::form().key==4);press(1u<<11);assert(planted::form().key==1);
- assert(!planted::apply()&&s.modal&&!planted::form().drawer);
- s.phone=true;auto draft=planted::form().edit.draft;press(1);assert(planted::form().edit.draft==draft);s.phone=false;
+ assert(!planted::apply()&&wfprops::host().modal&&!planted::form().drawer);
+ wfprops::host().phone=true;auto draft=planted::form().edit.draft;press(1);assert(planted::form().edit.draft==draft);wfprops::host().phone=false;
  std::vector<PhonepadRect> rects;planted::buildUI(960,540,rects);assert(!rects.empty());for(auto r:rects)assert(r.x0>=0&&r.y0>=0&&r.x1<=960&&r.y1<=540);
- planted::leave();assert(!s.active&&!s.modal&&s.chunks[0].vertices.empty());std::cout<<"Plant runtime contracts passed\n";
+ planted::leave();assert(!s.active&&!wfprops::host().modal&&s.chunks[0].vertices.empty());std::cout<<"Plant runtime contracts passed\n";
 }

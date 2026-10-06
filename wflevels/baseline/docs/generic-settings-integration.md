@@ -2,7 +2,9 @@
 
 6 October 2026. Concrete engine proposal for the
 [generic OAS/OAD plan](../../../docs/plans/2026-10-06-runtime-oas-oad-object-editor.md).
-Engine edits await explicit permission under [AGENTS.md](../../../AGENTS.md).
+Engine changes explicitly authorized by Will on 6 October 2026 under
+[AGENTS.md](../../../AGENTS.md). The shared host and plant consumer migration are implemented. Device acceptance
+and the subsequent main-CD addition are in progress.
 
 The baseline already exports two independently addressed OAD catalog owners.
 Planted Tank already exports Seed, Water type and Growth speed through that
@@ -52,3 +54,42 @@ After matching baseline verification passes, add its standalone level to the
 main `cd.iff` without changing existing indices or the boot level, and verify
 launch from the rebuilt bundle. Commit and push the baseline and approved
 generic integration separately from unrelated work in this checkout.
+
+## Implemented integration and current verification
+
+`wfprops::Host` now binds each level catalog, enumerates eligible live owners in
+actor order, opens a picker for multiple owners and shares the same Form/session
+transaction with TV and phone controls. It owns modal pause, opening/closing
+input release, Apply/Cancel, owner generation checks and lifecycle cancellation.
+Plant simulation registers callbacks for its schema; seed/water changes and
+explicit regeneration rebuild plants, while speed-only Apply preserves growth.
+The aquarium selector uses the same host with its authored preview catalog.
+Baseline retains its small default form and full descriptor gallery preset.
+
+The catalog loader and attachment tool also accept the 48-byte FLAG-only RAM
+header used by baseline; the optional SLOT header is no longer assumed.
+
+Validation recorded in `docs/diagnostics/baseline/generic-settings/`:
+
+- Default desktop baseline: all 145 source, geometry and gameplay checks passed,
+  against standalone SHA-256
+  `4aca056094c048b61f2254aec7cb601c60b32a284958cd963c4b20b511d654e5`.
+- The isolated integration passed all eight host, catalog, plant simulation and
+  browser checks (`isolated-contracts-final.log`). This copy excludes unrelated
+  colour/native-text/diagnostic work in the shared checkout and verifies that
+  the integration can compile independently.
+- The actual full gallery catalog passed two-owner host validation/commit with
+  178 visible rows. Presentation gaps remain as described in the descriptor
+  audit; catalog attachment alone does not prove every control's presentation.
+- Cast1 default passed movement/release, TV selection, instance isolation,
+  invalid-value rejection, Apply readback and phone reconnect before the
+  observer disconnected at Home/resume. Cast2 stopped on an unsupported timed
+  Android input command. Both are harness failures requiring reruns, not full
+  device acceptance.
+- Coordinator fixes are committed in the standalone coordinator repository:
+  a bounded directional/OK hold helper and explicit observer reconnection.
+  Its 147 tests passed. The reviewed v3 release awaits interactive sudo
+  installation before final default/gallery and plant sessions on both devices.
+
+Do not add baseline to the main CD until those matching sessions pass. Keep
+existing level indices and boot behavior when appending it at index 7.

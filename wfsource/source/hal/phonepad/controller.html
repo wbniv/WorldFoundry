@@ -128,19 +128,20 @@ body.off .ctl{opacity:.35}
     $('msg').classList.add('show');
   }
 
-  let plantSession = -1, plantSync = false;
+  let propertySession = -1, propertySync = false;
   function propertySend(verb,tail){
-    if(!send('r:'+plantSession+':'+verb+(tail===undefined?'':':'+tail)))$('plant-error').textContent='Connection lost; continue on the TV';
+    if(!send('r:'+propertySession+':'+verb+(tail===undefined?'':':'+tail)))$('plant-error').textContent='Connection lost; continue on the TV';
   }
-  function plantMessage(t){
+  function propertiesMessage(t){
     let model;try{model=JSON.parse(t.slice(2));}catch(e){return;}
     if(!model||!Array.isArray(model.fields))return;
     $('plant-open').hidden=!model.available;document.body.classList.toggle('plant-available',model.available);
     $('plant-settings').hidden=!model.open;document.body.classList.toggle('plant-edit',model.open);
     $('plant-error').textContent=model.error||'';
-    if(!model.open){plantSync=false;return;}
-    const fresh=!plantSync||plantSession!==model.session;plantSession=model.session;plantSync=true;
+    if(!model.open){propertySync=false;return;}
+    const fresh=!propertySync||propertySession!==model.session;propertySession=model.session;propertySync=true;
     if(fresh){releaseAll();$('property-title').textContent=model.title;const root=$('property-fields');root.textContent='';
+      if(model.picker){model.objects.forEach(o=>{const button=document.createElement('button');button.textContent=o.title+' ['+o.actor+']';button.dataset.owner=String(o.actor);button.addEventListener('click',()=>propertySend('select',String(o.actor)));root.appendChild(button);});return;}
       model.fields.forEach(f=>{
         if(f.kind===7)return;
         if(f.kind===5||f.kind===6){const heading=document.createElement('h2');heading.textContent=f.label;root.appendChild(heading);return;}
@@ -151,7 +152,7 @@ body.off .ctl{opacity:.35}
         let input,output=null;const choices=f.choices?f.choices.split('|'):[];
         if(f.kind===2&&f.show!==2){input=document.createElement('select');choices.forEach((v,i)=>{const opt=document.createElement('option');opt.value=String(f.min+i);opt.textContent=v;input.appendChild(opt);});}
         else {input=document.createElement('input');input.type=f.kind===4?'checkbox':f.show===2?'range':'text';
-          if(input.type==='range'){input.min=String(f.min);input.max=String(f.max);input.step='1';output=document.createElement('output');label.appendChild(output);}
+          if(input.type==='range'){const scale=f.kind===1?(f.scale||1):1;input.min=String(f.min/scale);input.max=String(f.max/scale);input.step=String(1/scale);output=document.createElement('output');label.appendChild(output);}
           else if(input.type==='text'){input.maxLength=Math.min(65536,Math.max(1,f.maxLength));input.inputMode=f.kind===3?(f.rule===1?'numeric':'text'):'decimal';input.autocomplete='off';input.addEventListener('focus',()=>input.select());}}
         input.id='property-'+f.id;input.disabled=!!f.readonly;input.value=f.value;input.checked=f.value==='1';wrap.appendChild(input);
         const show=()=>{if(output)output.textContent=': '+(choices[Number(input.value)-f.min]||input.value);};show();
@@ -316,7 +317,7 @@ body.off .ctl{opacity:.35}
     ws = sock;
     sock.onopen = () => {
       if (ws !== sock) return;
-      plantSync=false;
+      propertySync=false;
       lastOpen = Date.now();
       setState('connected', 'Connected to the TV', 'ok');
       sentMask = -1; update(true);
@@ -326,7 +327,7 @@ body.off .ctl{opacity:.35}
     };
     sock.onmessage = (ev) => {
       const t = String(ev.data);
-      if(t.startsWith('r:'))plantMessage(t);
+      if(t.startsWith('r:'))propertiesMessage(t);
       if (t.startsWith('t:')) $('rtt').textContent = 'rtt ' + Math.max(0, Date.now() - Number(t.slice(2))) + ' ms';
     };
     sock.onclose = (ev) => {

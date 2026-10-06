@@ -100,7 +100,9 @@ def desktop():
         hold(2048,1.2);p=position();check('unit cube blocks native movement',p[1]<-.65,position=p)
         shot('cube-collision')
         for x,y in [(-90,-90),(90,-90),(-90,90),(90,90)]:
-            bridge.send(dict(op='scene:set_transform',idx=player,pos=[x,y,1.1]));settle(.7);p=position()
+            bridge.send(dict(op='scene:set_transform',idx=player,pos=[x,y,1.1]))
+            if not bridge.wait_for_mailbox(player,3009,x,timeout=8) or not bridge.wait_for_mailbox(player,3010,y,timeout=8):raise RuntimeError('Runtime did not acknowledge quadrant setup')
+            settle(.7);p=position()
             check('quadrant floor support '+str((x,y)),abs(p[0]-x)<.1 and abs(p[1]-y)<.1 and .85<p[2]<1.05,position=p)
         bridge.send(dict(op='scene:set_transform',idx=player,pos=[102,0,-9]));settle(.8)
         p=position();check('fall reset restores spawn',abs(p[0])<.05 and abs(p[1]+5)<.05,position=p)
@@ -120,4 +122,4 @@ if __name__=='__main__':
         if args.desktop:desktop()
     finally:
         OUT.mkdir(exist_ok=True)
-        (OUT/'verification.json').write_text(json.dumps(dict(desktop_requested=args.desktop,checks=RESULTS),indent=2)+'\n')
+        (OUT/'verification.json').write_text(json.dumps(dict(desktop_requested=args.desktop,desktopExecutableSha256=hashlib.sha256((ROOT/'engine/wf_game').read_bytes()).hexdigest(),standaloneSha256=hashlib.sha256((ROOT/'wflevels/baseline-standalone.iff').read_bytes()).hexdigest(),checks=RESULTS),indent=2)+'\n')

@@ -2,9 +2,9 @@
 #include <algorithm>
 #include <cstdlib>
 namespace wfprops {
-bool Form::begin(Registry& registry,uint32_t actor){
+bool Form::begin(Registry& registry,uint32_t actor,uint32_t openingButtons){
     if(!edit.begin(registry,actor))return false;
-    sections.clear();titles.clear();section=row=0;rail=adjust=drawer=false;previous=0;key=0;
+    sections.clear();titles.clear();section=row=0;rail=adjust=drawer=false;previous=openingButtons;key=0;
     auto* object=edit.object();
     for(size_t i=0;i<object->fields.size();++i){const auto& f=object->fields[i];
         if(f.kind==5){sections.emplace_back();titles.push_back(f.label);}

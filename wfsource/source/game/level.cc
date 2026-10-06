@@ -1,3 +1,4 @@
+#include "../../../engine/runtime_property_host.hpp"
 #include "runtime_profile.hp"
 //==============================================================================
 // level.cc:
@@ -428,7 +429,8 @@ Level::Level
 	_levelFile->ReadBytes( memoryConfigurationBytes, DiskFileCD::_SECTOR_SIZE );
     // Optional catalog locator in RAM padding; fixed actor/LVL layouts stay intact.
     const uint32 ramSize = plmc->cbRamChunk;
-    if(ramSize>=56 && ramSize+8<=DiskFileCD::_SECTOR_SIZE) {
+    // FLAG-only levels have 36 RAM bytes plus the 12-byte locator; SLOT is optional.
+    if(ramSize>=48 && ramSize+8<=DiskFileCD::_SECTOR_SIZE) {
         uint32 locator[3];std::memcpy(locator,memoryConfigurationBytes+ramSize-4,sizeof(locator));
         if(locator[0]==IFFTAG('R','P','R','P') && locator[1]>=2048 && locator[1]%2048==0 && locator[1]<=uint32(INT32_MAX-propertyRamStart)-locator[2] && locator[2]>=8 && locator[2]<=4*1024*1024 && locator[2]%2048==0) {
             const int32 resume=_levelFile->FilePos();
@@ -443,6 +445,7 @@ Level::Level
         }
     }
     wfprops::activeRegistry()=&_runtimeProperties;
+    wfprops::host().bind(&_runtimeProperties);
 	assert( plmc->tagRam == IFFTAG('R','A','M','\0') );
 	assert( plmc->tagObjects == IFFTAG('O','B','J','D') );
 	assert( plmc->tagPerm == IFFTAG('P','E','R','M') );
@@ -663,6 +666,7 @@ Level::Level
 
 Level::~Level()
 {
+    if(wfprops::host().registry()==&_runtimeProperties)wfprops::host().bind(nullptr);
     if(wfprops::activeRegistry()==&_runtimeProperties)wfprops::activeRegistry()=nullptr;
 	// HALLmalloc is a stack/bump allocator — Free must happen in strict
 	// reverse-allocation order or lmalloc.cc:308 asserts. The construction

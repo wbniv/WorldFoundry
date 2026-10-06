@@ -19,7 +19,7 @@ def test_real_core_edit_isolation_and_readback(catalog,tmp_path):
     second=M.catalog(ROOT/'wflevels/aquarium_plants/settings.oad',json.loads((ROOT/'wflevels/aquarium_plants/settings-bindings.json').read_text()),2)
     payload=catalog[:4]+struct.pack('<I',2)+catalog[8:]+second[8:]
     file=tmp_path/'properties';file.write_bytes(payload);binary=tmp_path/'check'
-    subprocess.run(['c++','-std=c++17','-I'+str(ROOT/'engine'),str(ROOT/'tests/object_property_core_test.cpp'),str(ROOT/'engine/runtime_properties.cpp'),str(ROOT/'engine/runtime_property_form.cpp'),str(ROOT/'wftools/wf_attr_edit/target/release/libwf_attr_edit.a'),'-ldl','-lpthread','-lm','-o',str(binary)],check=True)
+    subprocess.run(['c++','-std=c++17','-I'+str(ROOT/'engine'),str(ROOT/'tests/object_property_core_test.cpp'),str(ROOT/'engine/runtime_properties.cpp'),str(ROOT/'engine/runtime_property_form.cpp'),str(ROOT/'engine/runtime_property_host.cpp'),str(ROOT/'wftools/wf_attr_edit/target/release/libwf_attr_edit.a'),'-ldl','-lpthread','-lm','-o',str(binary)],check=True)
     subprocess.run([binary,file],check=True)
 
 def test_catalog_attachment_preserves_asset_bytes_and_is_idempotent(catalog):
@@ -36,3 +36,13 @@ def test_catalog_attachment_preserves_asset_bytes_and_is_idempotent(catalog):
 def test_missing_oad_field_rejected():
     with pytest.raises(ValueError):
         M.catalog(ROOT/'wflevels/aquarium_plants/settings.oad',{'fields':{'Invented':{'id':1}}},1)
+
+
+def test_catalog_replacement_on_flag_only_baseline_ram(catalog):
+    original=(ROOT/'wflevels/baseline-standalone.iff').read_bytes()
+    assert struct.unpack_from('<I',original,2052)[0]==48
+    result=M.attach(original,catalog)
+    assert struct.unpack_from('<I',result,2052)[0]==48
+    assert M.attach(result,catalog)==result
+    asset_end=4096+8+struct.unpack_from('<I',original,4100)[0]
+    assert result[4096:asset_end]==original[4096:asset_end]

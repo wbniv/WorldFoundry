@@ -9,7 +9,7 @@ struct Form {
     size_t section=0,row=0;bool rail=false,adjust=false,drawer=false,replaceText=false;
     int key=0;uint32_t previous=0;
     std::function<void(const std::string&)> action;
-    bool begin(Registry& registry,uint32_t actor);
+    bool begin(Registry& registry,uint32_t actor,uint32_t openingButtons=0);
     const Field* field() const;
     std::string value() const;
     void change(int direction);

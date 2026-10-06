@@ -40,11 +40,18 @@ bool Registry::load(const uint8_t* data,size_t size,std::string& error){
 Object* Registry::object(uint32_t actor){auto i=objects_.find(actor);return i==objects_.end()?nullptr:&i->second;}
 const Object* Registry::object(uint32_t actor) const {auto i=objects_.find(actor);return i==objects_.end()?nullptr:&i->second;}
 Object* Registry::schema(const std::string& name){for(auto& pair:objects_)if(pair.second.schema==name)return &pair.second;return nullptr;}
+std::vector<uint32_t> Registry::editableObjects() const {
+    std::vector<uint32_t> result;
+    for(const auto& pair:objects_)for(const auto& field:pair.second.fields)
+        if(field.stored() || field.kind==9){result.push_back(pair.first);break;}
+    return result;
+}
 void Registry::remove(uint32_t actor){objects_.erase(actor);}
 bool Registry::clone(uint32_t source,uint32_t actor){auto* initial=object(source);if(!initial||!actor)return false;Object copy=*initial;copy.actor=actor;copy.generation=++serial_;copy.revision=0;objects_[actor]=std::move(copy);return true;}
 void Registry::clear(){objects_.clear();++serial_;}
 bool Registry::set(uint32_t actor,uint32_t id,const std::string& v,std::string& error){auto* o=object(actor);const Field* f=o?o->field(id):nullptr;if(!f||f->readonly){error="Property is not editable";return false;}int s=validate(*f,v);if(s){error=validationMessage(s);return false;}if(o->values[id]!=v){o->values[id]=v;++o->revision;}error.clear();return true;}
-bool Edit::begin(Registry& r,uint32_t a){cancel();Object* o=r.object(a);if(!o)return false;static uint64_t next=0;session=++next;registry=&r;actor=a;generation=o->generation;revision=o->revision;draft=o->values;open=true;return true;}
+uint64_t nextSession(){static uint64_t next=0;return ++next;}
+bool Edit::begin(Registry& r,uint32_t a){cancel();Object* o=r.object(a);if(!o)return false;session=nextSession();registry=&r;actor=a;generation=o->generation;revision=o->revision;draft=o->values;open=true;return true;}
 Object* Edit::object() const {Object* o=registry?registry->object(actor):nullptr;return o&&o->generation==generation?o:nullptr;}
 bool Edit::set(uint32_t id,const std::string& value){auto* o=object();const Field* f=o?o->field(id):nullptr;if(!open||!f||f->readonly||value.size()>65536)return false;draft[id]=value;error.clear();return true;}
 bool Edit::validate(){auto* o=object();if(!open||!o||o->revision!=revision){error="Properties changed; reopen the editor";return false;}for(const auto& f:o->fields)if(f.stored()){auto i=draft.find(f.id);if(i==draft.end()){error="Missing property value";return false;}int s=wfprops::validate(f,i->second);if(s){error=f.label+": "+validationMessage(s);return false;}}error.clear();return true;}

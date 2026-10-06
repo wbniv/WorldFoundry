@@ -1,4 +1,5 @@
 #include <game/plant_ui.h>
+#include <game/runtime_property_ui.h>
 #include <game/level_menu.h>
 //=============================================================================
 // gfx/gl/display.cc: display hardware abstraction class, windows openGL specific code
@@ -1298,7 +1299,7 @@ Display::PageFlip()
 
 
     RendererBackendGet().EndFrame();
-    if(planted::state().active && levelmenu::Drawer()){int w=0,h=0;GetSurfaceSize(w,h);std::vector<PhonepadRect> rects;planted::buildUI(w,h,rects);levelmenu::Drawer()(rects.data(),int(rects.size()),w,h);}
+    if((planted::state().active||wfprops::host().modal) && levelmenu::Drawer()){int w=0,h=0;GetSurfaceSize(w,h);std::vector<PhonepadRect> rects;planted::buildUI(w,h,rects);levelmenu::Drawer()(rects.data(),int(rects.size()),w,h);}
 
 
 #if DESIGNER_CHEATS && defined(__LINUX__)
