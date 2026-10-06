@@ -27,15 +27,28 @@ independently compiling the shared host and plant consumer migration without
 unrelated colour/native-text/diagnostic enhancements in the shared checkout.
 The actual gallery catalog passed two-owner validation and commit in [gallery-host.log](gallery-host.log).
 
-Plant settings, native IME entry, seed precision, regeneration, reconnect and
-movement passed on cast2 (job `J-ff04d9b7fe6e`). Cast1 (job `J-9cce86e30842`)
-passed the settings assertions and three held directions, then stopped at Down:
-the goby had already settled onto the central rock before the test pressed Down.
-The [movement samples](acceptance/plant-chromecast-test-01/movement-samples.json)
-record identical starting/ending Z=1.365. The corrected test lifts immediately
-before Down and checks it starts above the rock. Cast1's remaining direction,
-release and lifecycle/exit acceptance awaits that harness deployment/rerun.
+Plant device acceptance is complete on both devices using the same frozen APK
+`aquarium-a2b7ecc8478f9809.apk` (SHA-256
+`a2b7ecc8478f98097a766efcbce0b4a1310c2e3ed1b1e408ea6e040daa02f4f5`).
+Cast2 passed 29 assertions in job `J-ff04d9b7fe6e`; cast1 passed 30 in
+`J-83fe8930e6d5`, including the additional Down clearance precondition.
+Both verify native text entry and Up without process loss, seed precision,
+seed/water regeneration, speed-only generation continuity, stale sessions,
+invalid drafts, Cancel, reconnect, all four held/released directions,
+same-process Home/resume and selector exit.
 
-Native entry now replaces the retained initial 0 before entering seed 1254.
-[v5 deployment](coordinator-deployment-v5.log) and [review](coordinator-review-v5.json)
-identify the installed release used by these sessions.
+Cast1's accepted [movement samples](acceptance/plant-chromecast-test-01/movement-samples.json)
+show Down from Z=3.015 to Z=1.367 and subsequent release settling. Its earlier
+run stopped because Down began on the rock at Z=1.365; this was corrected by
+lifting immediately before that probe and checking clearance.
+Native text entry replaces the initial 0 before entering seed 1254.
+[v5 deployment](coordinator-deployment-v5.log) identifies cast2's installed
+validator. Cast1's final validator uses the [v6 review](coordinator-review-v6.json)
+and [deployment transcript](coordinator-deployment-v6.log).
+The v6 suite passed 146 tests; its unrelated scheduler timing assertion passed
+on [rerun](coordinator-v6-timing-recheck.log). The preceding v5 suite passed all 147.
+
+This acceptance covers the shared generic settings integration and plant
+consumer migration. Every gallery descriptor's interactive presentation,
+optional motion/room-transition fixtures and slope traversal remain separately
+scoped work.

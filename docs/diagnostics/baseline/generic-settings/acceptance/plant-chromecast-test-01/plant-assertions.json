@@ -23,5 +23,10 @@
   "held_direction_21": "PASS",
   "fresh_position_sample_19": "PASS",
   "held_direction_19": "PASS",
-  "fresh_position_sample_20": "PASS"
+  "down_probe_starts_above_rock": "PASS",
+  "fresh_position_sample_20": "PASS",
+  "held_direction_20": "PASS",
+  "released_input_settles": "PASS",
+  "home_resume_same_process": "PASS",
+  "back_from_selector_exits": "PASS"
 }

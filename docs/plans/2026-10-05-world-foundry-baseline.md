@@ -27,7 +27,7 @@ Baseline is appended at main CD index 7, preserving the previous shell and seven
 The rebuilt bundle passed all 156 checks. The shared settings host and Planted Tank
 consumer migration are implemented under explicit engine authorization.
 [Acceptance evidence](../diagnostics/baseline/generic-settings/README.md)
-records hashes and the outstanding cast1 plant Down movement setup rerun.
+records matching build hashes and passing plant acceptance on both Chromecasts.
 
 ## Scene contract
 

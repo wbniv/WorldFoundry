@@ -4,7 +4,7 @@
 [generic OAS/OAD plan](../../../docs/plans/2026-10-06-runtime-oas-oad-object-editor.md).
 Engine changes explicitly authorized by Will on 6 October 2026 under
 [AGENTS.md](../../../AGENTS.md). The shared host and plant consumer migration are implemented. Baseline device acceptance and the main-CD addition are complete. Plant
-device acceptance passed on cast2; cast1 awaits the corrected Down test setup.
+device acceptance is also complete on both Chromecasts.
 
 The baseline already exports two independently addressed OAD catalog owners.
 Planted Tank already exports Seed, Water type and Growth speed through that
@@ -88,14 +88,16 @@ Validation recorded in `docs/diagnostics/baseline/generic-settings/`:
 - Baseline was appended at main CD index 7 after those sessions passed. All 156
   bundle/source/native checks passed. The existing shell and seven entries and
   bodies are byte-identical to the previous bundle; boot remains level 0.
-- Plant's full device run passed on cast2. Cast1 passed native text entry and
-  all settings assertions, then stopped at Down after settling onto the rock.
-  The movement test now lifts immediately before Down and verifies clearance.
-  Cast1's remaining direction/release/lifecycle/exit acceptance awaits that rerun.
+- Plant's full device run passed on both devices with the same frozen APK:
+  cast2 passed 29 assertions and cast1 passed 30 (including Down clearance).
+  Native text entry, seed precision, regeneration, speed-only continuity,
+  reconnect/Cancel, held/released movement, same-process Home/resume and selector
+  exit all passed. Cast1's earlier grounded Down setup was corrected in the
+  validator; no additional engine change was needed.
 - Coordinator fixes live in the standalone coordinator repository. The v4
   reviewed release is installed; baseline acceptance uses that release.
 
 [Final evidence and hashes](../../../docs/diagnostics/baseline/generic-settings/README.md)
-record the accepted baseline and outstanding plant check. Gallery catalog
+record the accepted baseline and plant checks. Gallery catalog
 coverage is comprehensive; interactive coverage of every descriptor presentation
 remains a separate acceptance requirement.
