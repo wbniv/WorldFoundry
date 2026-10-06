@@ -36,5 +36,20 @@
     "baselineIndex": 7,
     "bootLevel": 0
   },
-  "plantAcceptance": "pending native IME harness replacement of retained initial zero"
+  "plantAcceptance": [
+    {
+      "device": "chromecast-test-01",
+      "job": "J-9cce86e30842",
+      "assertionsPassed": 25,
+      "passed": false,
+      "failure": "Down started grounded on rock; corrected setup pending"
+    },
+    {
+      "device": "chromecast-test-02",
+      "job": "J-ff04d9b7fe6e",
+      "assertionsPassed": 29,
+      "passed": true,
+      "failure": null
+    }
+  ]
 }

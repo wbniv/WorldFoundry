@@ -1,0 +1,23 @@
+...............................F........................................ [ 48%]
+........................................................................ [ 97%]
+...                                                                      [100%]
+=================================== FAILURES ===================================
+______________ test_pool_eligibility_does_not_block_other_device _______________
+
+service = ({'allowed_uids': [1000], 'devices': [{'abis': ['arm32'], 'enrolled': True, 'health': 'ready', 'id': 'd1', ...}, {'abi...ce', 'serv...>, <wf_device.client.Client object at 0x774235e06e90>, <wf_device.client.Client object at 0x774235dd99a0>)
+
+    def test_pool_eligibility_does_not_block_other_device(service):
+        _,_,a,b=service
+        busy=submit(a,device='d1',duration=.6)
+        incompatible=submit(b,pool='test',require_abi='arm32',duration=.1)
+        runnable=submit(b,pool='test',require_abi='arm64',duration=.1)
+        x=wait(a,runnable);y=wait(a,busy);z=wait(a,incompatible)
+>       assert x['device']=='d2' and x['finished']<y['finished']
+E       AssertionError: assert ('d2' == 'd2'
+E         
+E           d2 and 1791278250.4514532 < 1791278250.3831108)
+
+tests/device_coordinator/test_coordinator.py:148: AssertionError
+=========================== short test summary info ============================
+FAILED tests/device_coordinator/test_coordinator.py::test_pool_eligibility_does_not_block_other_device
+1 failed, 146 passed in 54.80s

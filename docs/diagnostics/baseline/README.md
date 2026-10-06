@@ -7,5 +7,5 @@
 [Shared generic settings acceptance](generic-settings/README.md) records passing
 default/gallery checks on both Chromecasts and main CD integration at index 7.
 The shared host and plant consumer migration were explicitly authorized and
-implemented. Plant native keyboard device acceptance remains pending the test
-input correction described there.
+implemented. Plant device acceptance passed on cast2; cast1 awaits the corrected Down
+movement setup described there.

@@ -27,8 +27,15 @@ independently compiling the shared host and plant consumer migration without
 unrelated colour/native-text/diagnostic enhancements in the shared checkout.
 The actual gallery catalog passed two-owner validation and commit in [gallery-host.log](gallery-host.log).
 
-Plant device acceptance remains pending. The frozen aquarium APK includes the
-shared checkout's separate native IME work. Both sessions stopped because native
-text entry retained the initial seed 0, so typing 1254 produced 01254. The next
-reviewed validator deletes that initial digit before entering the test value.
-This does not change the generic host or plant simulation implementation.
+Plant settings, native IME entry, seed precision, regeneration, reconnect and
+movement passed on cast2 (job `J-ff04d9b7fe6e`). Cast1 (job `J-9cce86e30842`)
+passed the settings assertions and three held directions, then stopped at Down:
+the goby had already settled onto the central rock before the test pressed Down.
+The [movement samples](acceptance/plant-chromecast-test-01/movement-samples.json)
+record identical starting/ending Z=1.365. The corrected test lifts immediately
+before Down and checks it starts above the rock. Cast1's remaining direction,
+release and lifecycle/exit acceptance awaits that harness deployment/rerun.
+
+Native entry now replaces the retained initial 0 before entering seed 1254.
+[v5 deployment](coordinator-deployment-v5.log) and [review](coordinator-review-v5.json)
+identify the installed release used by these sessions.
