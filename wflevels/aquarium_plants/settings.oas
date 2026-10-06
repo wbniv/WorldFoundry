@@ -1,0 +1,11 @@
+@* Supplemental instance properties; attached to the Planted Tank Director.
+@* Legacy TYPEENTRYSTRING emits ignored XData; use the existing BUTTON_STRING
+@* descriptor for an explicitly bounded instance text value instead.
+@define TYPEENTRYBOUNDEDTEXT(name,count,help) { BUTTON_STRING,"@+name@+",0,count-1,0,count,"",SHOW_AS_NUMBER,-1,-1,help,{0,0,"@+name@+","1"}},
+TYPEHEADER(PlantedTankSettings)
+    PROPERTY_SHEET_HEADER(Plant growth,1)
+    TYPEENTRYBOUNDEDTEXT(Seed,11,"Random number seed from 0 to 4294967295")
+    TYPEENTRYINT32(Water type,,0,1,0,"Freshwater|Saltwater",SHOW_AS_RADIOBUTTONS,"Choose the aquatic plant habitat and resident")
+    TYPEENTRYINT32(Growth speed,,0,6,3,"Paused|0.25x|0.5x|1x|2x|4x|8x",SHOW_AS_SLIDER,"Changes growth rate without restarting the plants")
+    PROPERTY_SHEET_FOOTER
+TYPEFOOTER

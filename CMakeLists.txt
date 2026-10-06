@@ -870,7 +870,52 @@ list(REMOVE_ITEM WF_SOURCES ${WF_PLATFORM_SHELL_SOURCES})
 # ─── wfengine library target ──────────────────────────────────────────────────
 # Static library containing all engine code except the platform entry-point
 # shell. Linked by wf_game (below) and, in future, by the collaborative editor.
+# Small shared OAD value validator; independent of editor/debug feature flags.
+set(WF_PROPERTY_RUST_TARGET "")
+set(WF_PROPERTY_NDK_ARGS "")
+if(ANDROID)
+    if(CMAKE_ANDROID_ARCH_ABI STREQUAL "armeabi-v7a")
+        set(WF_PROPERTY_RUST_TARGET "armv7-linux-androideabi")
+    elseif(CMAKE_ANDROID_ARCH_ABI STREQUAL "arm64-v8a")
+        set(WF_PROPERTY_RUST_TARGET "aarch64-linux-android")
+    elseif(CMAKE_ANDROID_ARCH_ABI STREQUAL "x86_64")
+        set(WF_PROPERTY_RUST_TARGET "x86_64-linux-android")
+    else()
+        set(WF_PROPERTY_RUST_TARGET "i686-linux-android")
+    endif()
+    list(APPEND WF_PROPERTY_NDK_ARGS --ndk "${CMAKE_ANDROID_NDK}" --api "${ANDROID_PLATFORM_LEVEL}")
+elseif(EMSCRIPTEN)
+    set(WF_PROPERTY_RUST_TARGET "wasm32-unknown-emscripten")
+elseif(IOS)
+    if(CMAKE_OSX_SYSROOT MATCHES "simulator")
+        if(CMAKE_OSX_ARCHITECTURES STREQUAL "x86_64")
+            set(WF_PROPERTY_RUST_TARGET "x86_64-apple-ios")
+        else()
+            set(WF_PROPERTY_RUST_TARGET "aarch64-apple-ios-sim")
+        endif()
+    else()
+        set(WF_PROPERTY_RUST_TARGET "aarch64-apple-ios")
+    endif()
+endif()
+set(WF_PROPERTY_LIB "${CMAKE_CURRENT_BINARY_DIR}/runtime-properties/libwf_attr_edit.a")
+file(GLOB_RECURSE WF_PROPERTY_RUST_SOURCES CONFIGURE_DEPENDS
+    "${CMAKE_SOURCE_DIR}/wftools/wf_attr_edit/src/*.rs"
+    "${CMAKE_SOURCE_DIR}/wftools/wf_attr_schema/src/*.rs"
+    "${CMAKE_SOURCE_DIR}/wftools/wf_attr_validate/src/*.rs"
+    "${CMAKE_SOURCE_DIR}/wftools/wf_oad/src/*.rs")
+add_custom_command(OUTPUT "${WF_PROPERTY_LIB}"
+    COMMAND python3 "${CMAKE_SOURCE_DIR}/scripts/build-runtime-property-core.py"
+        --out "${WF_PROPERTY_LIB}" --target-dir "${CMAKE_CURRENT_BINARY_DIR}/runtime-properties/rust"
+        --target "${WF_PROPERTY_RUST_TARGET}" ${WF_PROPERTY_NDK_ARGS}
+    DEPENDS ${WF_PROPERTY_RUST_SOURCES} "${CMAKE_SOURCE_DIR}/scripts/build-runtime-property-core.py"
+    VERBATIM)
+add_custom_target(wf_property_core_build DEPENDS "${WF_PROPERTY_LIB}")
+add_library(wf_property_core STATIC IMPORTED GLOBAL)
+set_target_properties(wf_property_core PROPERTIES IMPORTED_LOCATION "${WF_PROPERTY_LIB}")
+add_dependencies(wf_property_core wf_property_core_build)
+list(APPEND WF_SOURCES "${CMAKE_SOURCE_DIR}/engine/runtime_properties.cpp" "${CMAKE_SOURCE_DIR}/engine/runtime_property_form.cpp")
 add_library(wfengine STATIC ${WF_SOURCES})
+target_link_libraries(wfengine PUBLIC wf_property_core)
 target_include_directories(wfengine PUBLIC ${WF_INCLUDES})
 target_compile_definitions(wfengine PUBLIC ${WF_DEFS})
 target_compile_options(wfengine PRIVATE

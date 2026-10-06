@@ -1,0 +1,13 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1000 450">
+<defs><marker id="a" markerWidth="8" markerHeight="8" refX="7" refY="4" orient="auto"><path d="M0 0L8 4L0 8" fill="#72c8c1"/></marker></defs>
+<rect width="1000" height="450" rx="18" fill="#102833"/>
+<g font-family="sans-serif" fill="#e4f0ee"><text x="34" y="40" font-size="24">Freshwater goby · swim, attach, graze</text>
+<rect x="34" y="70" width="220" height="330" rx="12" fill="#1b3e49"/>
+<text x="59" y="105" font-size="19">Remote directions</text>
+<g text-anchor="middle" font-size="27"><text x="144" y="155">↑</text><text x="91" y="205">←</text><text x="197" y="205">→</text><text x="144" y="255">↓</text></g>
+<g font-size="15"><text x="76" y="175">lift off / ascend</text><text x="58" y="230">swim left</text><text x="162" y="230">swim right</text><text x="70" y="279">descend / settle</text><text x="59" y="316">A: camera · hold: settings</text><text x="59" y="350">Release: brake and settle</text><text x="59" y="378">↶ existing back hierarchy</text></g>
+<g fill="#1b3e49" stroke="#72c8c1" stroke-width="2"><rect x="320" y="95" width="260" height="88" rx="10"/><rect x="670" y="95" width="260" height="88" rx="10"/><rect x="670" y="287" width="260" height="88" rx="10"/><rect x="320" y="287" width="260" height="88" rx="10"/></g>
+<g text-anchor="middle"><text x="450" y="126" font-size="21">Perched / grazing</text><text x="450" y="157" font-size="15">disc holds · tiny head nods</text><text x="800" y="126" font-size="21">Swimming</text><text x="800" y="157" font-size="15">ease velocity · tail follows travel</text><text x="800" y="318" font-size="21">Settling</text><text x="800" y="349" font-size="15">brake · gentle descent</text><text x="450" y="318" font-size="21">Attached</text><text x="450" y="349" font-size="15">surface clamp · 0.35 s settling</text></g>
+<g stroke="#72c8c1" stroke-width="2" fill="none" marker-end="url(#a)"><path d="M580 139H664"/><path d="M800 183V281"/><path d="M670 331H586"/><path d="M450 287V189"/></g>
+<g font-size="14"><text x="592" y="115">direction</text><text x="818" y="224">release</text><text x="818" y="246">or ↓</text><text x="590" y="314">contact</text><text x="329" y="236">settled</text><text x="318" y="418">Modal / regeneration: stop immediately; require held directions to be released.</text></g>
+</g></svg>

@@ -90,12 +90,10 @@ body.off .ctl{opacity:.35}
 <div id="foot"><span>sent to the TV:</span><span id="mask">0x0000</span><span id="hint"></span></div>
 <div id="msg"></div>
 <section id="plant-settings" hidden><div class="settings-inner">
-<h1><button id="plant-back" aria-label="Apply settings and close">←</button> Plant settings</h1><div id="plant-detail"></div>
-<label for="plant-mode">Water type</label><div class="water-toggle"><button type="button" data-water="0">Freshwater</button><button type="button" data-water="1">Saltwater</button><input id="plant-mode" type="hidden" value="0"></div>
-<label for="plant-seed">Seed</label><input id="plant-seed" type="text" inputmode="numeric" pattern="[0-9]*" maxlength="10" autocomplete="off" aria-describedby="plant-error">
-<label for="plant-speed">Growth speed: <output id="plant-rate">1×</output></label><input id="plant-speed" type="range" min="0" max="6" step="1" value="3">
-<div id="plant-error" role="status"></div><div class="actions"><span aria-hidden="true"></span><button id="plant-regen">Regenerate</button><button id="plant-random">New random seed</button><button id="plant-cancel">Cancel</button></div>
-<p>← applies settings and closes. A new seed or water type starts young colonies; changing only speed keeps the current plants.</p></div></section>
+<h1><button id="plant-back" aria-label="Apply properties and close">←</button> <span id="property-title">Properties</span></h1>
+<div id="property-fields"></div><div id="plant-error" role="status"></div>
+<div class="actions"><button id="plant-cancel">Cancel</button></div>
+<p>← applies changes and closes.</p></div></section>
 <div id="rotate">Turn your phone sideways to play.</div>
 <video id="keepawake" muted playsinline loop preload="auto"
   src="data:video/mp4;base64,AAAAIGZ0eXBpc29tAAACAGlzb21pc28yYXZjMW1wNDEAAAMqbW9vdgAAAGxtdmhkAAAAAAAAAAAAAAAAAAAD6AAAB9AAAQAAAQAAAAAAAAAAAAAAAAEAAAAAAAAAAAAAAAAAAAABAAAAAAAAAAAAAAAAAABAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAgAAAlV0cmFrAAAAXHRraGQAAAADAAAAAAAAAAAAAAABAAAAAAAAB9AAAAAAAAAAAAAAAAAAAAAAAAEAAAAAAAAAAAAAAAAAAAABAAAAAAAAAAAAAAAAAABAAAAAABAAAAAQAAAAAAAkZWR0cwAAABxlbHN0AAAAAAAAAAEAAAfQAAAAAAABAAAAAAHNbWRpYQAAACBtZGhkAAAAAAAAAAAAAAAAAABAAAAAgABVxAAAAAAALWhkbHIAAAAAAAAAAHZpZGUAAAAAAAAAAAAAAABWaWRlb0hhbmRsZXIAAAABeG1pbmYAAAAUdm1oZAAAAAEAAAAAAAAAAAAAACRkaW5mAAAAHGRyZWYAAAAAAAAAAQAAAAx1cmwgAAAAAQAAAThzdGJsAAAAuHN0c2QAAAAAAAAAAQAAAKhhdmMxAAAAAAAAAAEAAAAAAAAAAAAAAAAAAAAAABAAEABIAAAASAAAAAAAAAABFUxhdmM2Mi4xMS4xMDAgbGlieDI2NAAAAAAAAAAAAAAAGP//AAAALmF2Y0MBQsAK/+EAFmdCwArZHsBEAAADAAQAAAMACDxImSABAAVoy4PLIAAAABBwYXNwAAAAAQAAAAEAAAAUYnRydAAAAAAAAAoIAAAAAAAAABhzdHRzAAAAAAAAAAEAAAACAABAAAAAABRzdHNzAAAAAAAAAAEAAAABAAAAHHN0c2MAAAAAAAAAAQAAAAEAAAACAAAAAQAAABxzdHN6AAAAAAAAAAAAAAACAAACeAAAAAoAAAAUc3RjbwAAAAAAAAABAAADWgAAAGF1ZHRhAAAAWW1ldGEAAAAAAAAAIWhkbHIAAAAAAAAAAG1kaXJhcHBsAAAAAAAAAAAAAAAALGlsc3QAAAAkqXRvbwAAABxkYXRhAAAAAQAAAABMYXZmNjIuMy4xMDAAAAAIZnJlZQAAAoptZGF0AAACYgYF//9e3EXpvebZSLeWLNgg2SPu73gyNjQgLSBjb3JlIDE2NSAtIEguMjY0L01QRUctNCBBVkMgY29kZWMgLSBDb3B5bGVmdCAyMDAzLTIwMjUgLSBodHRwOi8vd3d3LnZpZGVvbGFuLm9yZy94MjY0Lmh0bWwgLSBvcHRpb25zOiBjYWJhYz0wIHJlZj0zIGRlYmxvY2s9MTowOjAgYW5hbHlzZT0weDE6MHgxMTEgbWU9aGV4IHN1Ym1lPTcgcHN5PTEgcHN5X3JkPTEuMDA6MC4wMCBtaXhlZF9yZWY9MSBtZV9yYW5nZT0xNiBjaHJvbWFfbWU9MSB0cmVsbGlzPTEgOHg4ZGN0PTAgY3FtPTAgZGVhZHpvbmU9MjEsMTEgZmFzdF9wc2tpcD0xIGNocm9tYV9xcF9vZmZzZXQ9LTIgdGhyZWFkcz0xIGxvb2thaGVhZF90aHJlYWRzPTEgc2xpY2VkX3RocmVhZHM9MCBucj0wIGRlY2ltYXRlPTEgaW50ZXJsYWNlZD0wIGJsdXJheV9jb21wYXQ9MCBjb25zdHJhaW5lZF9pbnRyYT0wIGJmcmFtZXM9MCB3ZWlnaHRwPTAga2V5aW50PTI1MCBrZXlpbnRfbWluPTEgc2NlbmVjdXQ9NDAgaW50cmFfcmVmcmVzaD0wIHJjX2xvb2thaGVhZD00MCByYz1jcmYgbWJ0cmVlPTEgY3JmPTIzLjAgcWNvbXA9MC42MCBxcG1pbj0wIHFwbWF4PTY5IHFwc3RlcD00IGlwX3JhdGlvPTEuNDAgYXE9MToxLjAwAIAAAAAOZYiEBb///w9FAAFPf4AAAAAGQZo4CvqA"></video>
@@ -130,35 +128,42 @@ body.off .ctl{opacity:.35}
     $('msg').classList.add('show');
   }
 
-  let plantSession = -1, plantCurrent = null, plantSync = false, plantLocalError='';
-  const growthRates = ['Paused','0.25×','0.5×','1×','2×','4×','8×'];
-  function plantRate(){ $('plant-rate').textContent=growthRates[Number($('plant-speed').value)]; }
-  function plantSend(action){
-    if(plantSession<0)return;plantLocalError='';
-    const seed=$('plant-seed').value.trim(),mode=$('plant-mode').value,speed=$('plant-speed').value;
-    if(['regen','apply'].includes(action)&&(!/^\d{1,10}$/.test(seed)||Number(seed)>4294967295)){ $('plant-error').textContent=plantLocalError='Enter a seed from 0 to 4294967295';return; }
-    if(action==='speed'&&plantCurrent&&(Number(seed)!==plantCurrent.seed||Number(mode)!==plantCurrent.mode)){ $('plant-error').textContent=plantLocalError='Use Regenerate to change water type or seed';return; }
-    if(!send('p:'+plantSession+':'+action+':'+(seed||'-')+':'+mode+':'+speed))$('plant-error').textContent='Connection lost; continue on the TV';
+  let plantSession = -1, plantSync = false;
+  function propertySend(verb,tail){
+    if(!send('r:'+plantSession+':'+verb+(tail===undefined?'':':'+tail)))$('plant-error').textContent='Connection lost; continue on the TV';
   }
   function plantMessage(t){
-    const p=t.split(':');if(p.length!==12)return;
-    const available=p[1]==='1',modal=p[2]==='1',session=Number(p[3]);
-    plantCurrent={seed:Number(p[4]),mode:Number(p[5]),speed:Number(p[6])};
-    $('plant-open').hidden=!available;document.body.classList.toggle('plant-available',available);
-    const fresh=session!==plantSession||!plantSync;plantSession=session;plantSync=true;
-    if(modal&&fresh){plantLocalError='';$('plant-seed').value=p[9]==='-'?'':p[9];$('plant-mode').value=p[10];waterToggle();$('plant-speed').value=p[11];plantRate();releaseAll();}
-    $('plant-settings').hidden=!modal;document.body.classList.toggle('plant-edit',modal);
-    $('plant-detail').textContent=(plantCurrent.mode?'Saltwater':'Freshwater')+' · seed '+p[4]+' · growth age '+p[7]+' s'+(modal?' · tank paused':'');
-    $('plant-error').textContent=plantLocalError||(p[8]==='1'?'Check the seed; use Regenerate for seed or water-type changes.':'');
-    if(!modal)plantSync=false;
+    let model;try{model=JSON.parse(t.slice(2));}catch(e){return;}
+    if(!model||!Array.isArray(model.fields))return;
+    $('plant-open').hidden=!model.available;document.body.classList.toggle('plant-available',model.available);
+    $('plant-settings').hidden=!model.open;document.body.classList.toggle('plant-edit',model.open);
+    $('plant-error').textContent=model.error||'';
+    if(!model.open){plantSync=false;return;}
+    const fresh=!plantSync||plantSession!==model.session;plantSession=model.session;plantSync=true;
+    if(fresh){releaseAll();$('property-title').textContent=model.title;const root=$('property-fields');root.textContent='';
+      model.fields.forEach(f=>{
+        if(f.kind===7)return;
+        if(f.kind===5||f.kind===6){const heading=document.createElement('h2');heading.textContent=f.label;root.appendChild(heading);return;}
+        const wrap=document.createElement('div');root.appendChild(wrap);
+        if(f.kind===10){wrap.style.height='48px';wrap.setAttribute('aria-hidden','true');return;}
+        if(f.kind===9){const button=document.createElement('button');button.textContent=f.label;button.addEventListener('click',()=>propertySend('action',String(f.id)));wrap.appendChild(button);return;}
+        const label=document.createElement('label');label.textContent=f.label;label.htmlFor='property-'+f.id;wrap.appendChild(label);
+        let input,output=null;const choices=f.choices?f.choices.split('|'):[];
+        if(f.kind===2&&f.show!==2){input=document.createElement('select');choices.forEach((v,i)=>{const opt=document.createElement('option');opt.value=String(f.min+i);opt.textContent=v;input.appendChild(opt);});}
+        else {input=document.createElement('input');input.type=f.kind===4?'checkbox':f.show===2?'range':'text';
+          if(input.type==='range'){input.min=String(f.min);input.max=String(f.max);input.step='1';output=document.createElement('output');label.appendChild(output);}
+          else if(input.type==='text'){input.maxLength=Math.min(65536,Math.max(1,f.maxLength));input.inputMode=f.kind===3?(f.rule===1?'numeric':'text'):'decimal';input.autocomplete='off';input.addEventListener('focus',()=>input.select());}}
+        input.id='property-'+f.id;input.disabled=!!f.readonly;input.value=f.value;input.checked=f.value==='1';wrap.appendChild(input);
+        const show=()=>{if(output)output.textContent=': '+(choices[Number(input.value)-f.min]||input.value);};show();
+        input.addEventListener('input',()=>{show();propertySend('set',f.id+':'+encodeURIComponent(input.type==='checkbox'?(input.checked?'1':'0'):input.value));});
+        if(f.help){const help=document.createElement('small');help.textContent=f.help;wrap.appendChild(help);}
+      });
+    }else model.fields.forEach(f=>{const input=$('property-'+f.id);if(input&&input!==document.activeElement){input.value=f.value;input.checked=f.value==='1';}});
   }
-  $('plant-open').addEventListener('click',()=>{releaseAll();send('p:open');});
-  $('plant-seed').addEventListener('input',()=>plantSend('draft'));
-  function waterToggle(){document.querySelectorAll('[data-water]').forEach(b=>b.setAttribute('aria-pressed',String(b.dataset.water===$('plant-mode').value)));}
-  document.querySelectorAll('[data-water]').forEach(b=>b.addEventListener('click',()=>{$('plant-mode').value=b.dataset.water;waterToggle();plantSend('draft');}));
-  $('plant-seed').addEventListener('focus',e=>e.target.select());waterToggle();
-  $('plant-speed').addEventListener('input',()=>{plantRate();plantSend('draft');});
-  for(const [id,action] of [['plant-back','apply'],['plant-regen','regen'],['plant-random','random'],['plant-cancel','cancel']])$(id).addEventListener('click',()=>plantSend(action));
+  $('plant-open').textContent='Properties';
+  $('plant-open').addEventListener('click',()=>{releaseAll();send('r:open');});
+  $('plant-back').addEventListener('click',()=>propertySend('apply'));
+  $('plant-cancel').addEventListener('click',()=>propertySend('cancel'));
   // ---- the mask -----------------------------------------------------------------------
   function computeMask() {
     if(document.body.classList.contains('plant-edit'))return 0;
@@ -321,7 +326,7 @@ body.off .ctl{opacity:.35}
     };
     sock.onmessage = (ev) => {
       const t = String(ev.data);
-      if(t.startsWith('p:'))plantMessage(t);
+      if(t.startsWith('r:'))plantMessage(t);
       if (t.startsWith('t:')) $('rtt').textContent = 'rtt ' + Math.max(0, Date.now() - Number(t.slice(2))) + ' ms';
     };
     sock.onclose = (ev) => {

@@ -424,7 +424,25 @@ Level::Level
 	assert( ValidPtr( _levelFile ) );
 	// kts assumes diskFile is seeked to begining of the level iff chunk on disk
 	// so this seek is done in game
+    const int32 propertyRamStart = _levelFile->FilePos();
 	_levelFile->ReadBytes( memoryConfigurationBytes, DiskFileCD::_SECTOR_SIZE );
+    // Optional catalog locator in RAM padding; fixed actor/LVL layouts stay intact.
+    const uint32 ramSize = plmc->cbRamChunk;
+    if(ramSize>=56 && ramSize+8<=DiskFileCD::_SECTOR_SIZE) {
+        uint32 locator[3];std::memcpy(locator,memoryConfigurationBytes+ramSize-4,sizeof(locator));
+        if(locator[0]==IFFTAG('R','P','R','P') && locator[1]>=2048 && locator[1]%2048==0 && locator[1]<=uint32(INT32_MAX-propertyRamStart)-locator[2] && locator[2]>=8 && locator[2]<=4*1024*1024 && locator[2]%2048==0) {
+            const int32 resume=_levelFile->FilePos();
+            std::vector<uint8_t> catalog(locator[2]);
+            _levelFile->SeekRandom(propertyRamStart+locator[1]);
+            _levelFile->ReadBytes(catalog.data(),locator[2]);
+            _levelFile->SeekRandom(resume);
+            uint32 payload=0;std::memcpy(&payload,catalog.data()+4,4);
+            std::string error;
+            if(std::memcmp(catalog.data(),"RPRP",4)||payload>catalog.size()-8||!_runtimeProperties.load(catalog.data()+8,payload,error))
+                std::fprintf(stderr,"PROPERTIES load failed: %s\n",error.c_str());
+        }
+    }
+    wfprops::activeRegistry()=&_runtimeProperties;
 	assert( plmc->tagRam == IFFTAG('R','A','M','\0') );
 	assert( plmc->tagObjects == IFFTAG('O','B','J','D') );
 	assert( plmc->tagPerm == IFFTAG('P','E','R','M') );
@@ -645,6 +663,7 @@ Level::Level
 
 Level::~Level()
 {
+    if(wfprops::activeRegistry()==&_runtimeProperties)wfprops::activeRegistry()=nullptr;
 	// HALLmalloc is a stack/bump allocator — Free must happen in strict
 	// reverse-allocation order or lmalloc.cc:308 asserts. The construction
 	// order in Level::Level (and its callees) is, on HALLmalloc:
@@ -1085,6 +1104,7 @@ Level::removePendingObjects()
 		assert( idxActor > 0 );
 		assert( ValidPtr( _actors[ idxActor ] ) );
 		_actors[ idxActor ] = NULL;
+        _runtimeProperties.remove(idxActor);
 
 		// remove from remove list
 		DBSTREAM2( clevel << " nulling entry " << actor << std::endl; )
@@ -1277,6 +1297,7 @@ Level::reset( )
 		if ( _actors[i] != NULL )
 			MEMORY_DELETE( *_memory, _actors[i], Actor );
 		_actors[i] =NULL;
+        _runtimeProperties.remove(i);
 	}
 
 	DBSTREAM1( cflow << "Level::reset(): initActiveRoom" << std::endl; )
@@ -1762,6 +1783,7 @@ Level::ConstructTemplateObject(int32 templateObjectIndex, int32 parentObjectInde
 
 		createdObject->setCurrentPos(position);
 		createdObject->setSpeed(velocity);
+        _runtimeProperties.clone(templateObjectIndex,createdObject->GetActorIndex());
 
 		// kts now bind geometry
 #pragma message ("KTS " __FILE__ ": need to make a dynamic memory allocator for temporary objects")

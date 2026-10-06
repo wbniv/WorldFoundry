@@ -814,7 +814,10 @@ else
     WF_BIN_NAME="wf_game"
 fi
 
-g++ "${SANITIZE_LINK[@]}" "${OBJS[@]}" "${JS_LINK_EXTRA[@]}" "${JOLT_LINK_EXTRA[@]}" "${STEAM_LINK_EXTRA[@]}" \
+compile_stub "$REPO_ROOT/engine/runtime_properties.cpp" "$OUT/runtime_properties.o" -O1
+compile_stub "$REPO_ROOT/engine/runtime_property_form.cpp" "$OUT/runtime_property_form.o" -O1
+python3 "$REPO_ROOT/scripts/build-runtime-property-core.py" --out "$OUT/libwf_attr_edit.a" --target-dir "$OUT/property-rust"
+g++ "${SANITIZE_LINK[@]}" "${OBJS[@]}" "${JS_LINK_EXTRA[@]}" "${JOLT_LINK_EXTRA[@]}" "${STEAM_LINK_EXTRA[@]}" "$OUT/libwf_attr_edit.a" \
     -lGL -lGLU -lX11 -lm -lpthread -ldl \
     -Wl,-z,noexecstack \
     -o "$SCRIPT_DIR/$WF_BIN_NAME"

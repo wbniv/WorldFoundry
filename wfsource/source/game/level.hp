@@ -63,6 +63,7 @@
 #include <oas/objectstartupdata.hp>
 #include "mailbox.hp"
 #include "actor.hp"
+#include "../../../engine/runtime_properties.hpp"
 
 //============================================================================
 // Class and Structure Prototypes
@@ -128,6 +129,7 @@ class Level
         ,Mailboxes* parentMailboxes
 	);
 	~Level();
+    wfprops::Registry& Properties() { return _runtimeProperties; }
 
 	// initialization methods
 	Actor* ConstructTemplateObject(int32 templateObjectIndex, int32 idxCreator, Vector3 position=Vector3::zero, Vector3 velocity=Vector3::zero);
@@ -284,6 +286,7 @@ private:
 				uint32 numActiveRoomSlots;
 	};
    LevelRoomCallbacks* _roomCallbacks;
+   wfprops::Registry _runtimeProperties;
    AssetCallbackRoom* _assetCallbackRoom;
 #if SW_DBSTREAM
 	friend std::ostream& operator <<( std::ostream& s, const Level& level );

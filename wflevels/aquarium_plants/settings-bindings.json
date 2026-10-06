@@ -1,0 +1,15 @@
+{
+  "version": 1,
+  "owner": "Director",
+  "title": "Planted Tank / Director",
+  "fields": {
+    "Seed": {"id": 1, "rule": "uint32-decimal", "initial": "0", "max_length": 10},
+    "Water type": {"id": 2},
+    "Growth speed": {"id": 3}
+  },
+  "actions": [
+    {"id": 100, "label": "Regenerate", "action": "regenerate"},
+    {"id": 101, "label": "New random seed", "action": "random-seed"},
+    {"id": 102, "label": "", "action": "spacer"}
+  ]
+}

@@ -680,15 +680,18 @@ void Server::HandleFrames(Conn& c, int64_t nowMs)
         const uint8_t rsv    = b0 & 0x70;
         const uint8_t opcode = b0 & 0x0F;
         const bool    masked = (b1 & 0x80) != 0;
-        const size_t  len    = b1 & 0x7F;
+        size_t len = b1 & 0x7F;
+        size_t header = 2;
         if (rsv)               { FailWs(c, 1002, "reserved bits set"); return; }
         if (!masked)           { FailWs(c, 1002, "unmasked client frame"); return; }
-        if (len > kMaxFramePayload) { FailWs(c, 1009, "frame too big"); return; }   // includes 126/127 (extended)
-        if (c.in.size() < 6 + len) return;
+        if(len==127){FailWs(c,1009,"frame too big");return;}
+        if(len==126){if(c.in.size()<4)return;len=size_t(uint8_t(c.in[2]))*256+uint8_t(c.in[3]);header=4;if(len<126){FailWs(c,1002,"noncanonical frame length");return;}}
+        if (len > 4096 || (opcode>=8&&len>125)) { FailWs(c, 1009, "frame too big"); return; }
+        if (c.in.size() < header + 4 + len) return;
         std::string payload(len, '\0');
         for (size_t i = 0; i < len; ++i)
-            payload[i] = char(uint8_t(c.in[6 + i]) ^ uint8_t(c.in[2 + (i & 3)]));
-        c.in.erase(0, 6 + len);
+            payload[i] = char(uint8_t(c.in[header+4+i]) ^ uint8_t(c.in[header+(i&3)]));
+        c.in.erase(0, header+4+len);
 
         if (!fin || opcode == 0) { FailWs(c, 1002, "fragmented frames are not accepted"); return; }
         switch (opcode)
@@ -747,7 +750,7 @@ void Server::HandleText(Conn& c, const std::string& text, int64_t nowMs)
         SendFrame(c, 1, text);
         return;
     }
-    if(text.size()>=2&&text[0]=='p'&&text[1]==':'){
+    if(text.size()>=2&&(text[0]=='p'||text[0]=='r')&&text[1]==':'){
         c.lastRxMs=nowMs;
         if(c.fd==phoneFd_&&command_)command_(text);
         return;
@@ -777,9 +780,10 @@ void Server::FailWs(Conn& c, uint16_t code, const char* why)
 
 void Server::SendFrame(Conn& c, uint8_t opcode, const std::string& payload)
 {
-    if (payload.size() > 125) return;   // server frames are tiny too
+    if(payload.size()>65535||(opcode>=8&&payload.size()>125))return;
     c.out += char(0x80 | opcode);
-    c.out += char(payload.size());
+    if(payload.size()<126)c.out+=char(payload.size());
+    else {c.out+=char(126);c.out+=char(payload.size()>>8);c.out+=char(payload.size()&255);}
     c.out += payload;
 }
 
@@ -832,7 +836,7 @@ void Server::CloseConn(Conn& c, const char* why)
 }  // namespace phonepad
 
 bool phonepad::Server::SendText(const std::string& text){
- if(text.size()>125||phoneFd_<0)return false;
+ if(text.size()>65535||phoneFd_<0)return false;
  for(auto& c:conns_)if(c.fd==phoneFd_){SendFrame(c,1,text);return true;}
  return false;
 }

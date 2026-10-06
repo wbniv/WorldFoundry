@@ -340,8 +340,15 @@ fn import_iff(
 // ── module entry point ────────────────────────────────────────────────────────
 
 /// World Foundry core library — OAD schema loading, validation, and export.
+#[pyfunction]
+fn validate_property_value(kind: u32, low: i32, high: i32, scale: u32, width: u32,
+                          max_length: u32, rule: u32, choices: &str, value: &str) -> i32 {
+    wf_attr_edit::check(kind, low, high, scale, width, max_length, rule, choices, value)
+}
+
 #[pymodule]
 fn wf_core(m: &Bound<'_, PyModule>) -> PyResult<()> {
+    m.add_function(wrap_pyfunction!(validate_property_value, m)?)?;
     m.add_function(wrap_pyfunction!(load_schema, m)?)?;
     m.add_function(wrap_pyfunction!(validate, m)?)?;
     m.add_function(wrap_pyfunction!(export_iff_txt, m)?)?;

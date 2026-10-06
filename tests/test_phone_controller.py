@@ -251,8 +251,8 @@ MALFORMED = {
     "continuation": (lambda ws: ws.frame(0, b"b:1"), 1002),
     "reserved bits": (lambda ws: ws.frame(1, b"b:1", rsv=4), 1002),
     "unknown opcode": (lambda ws: ws.frame(3, b"b:1"), 1002),
-    "65-byte payload": (lambda ws: ws.frame(1, b"z:" + b"x" * 63), 1009),
-    "16-bit length": (lambda ws: ws.frame(1, b"b:1" + b" " * 200), 1009),
+    "oversized property payload": (lambda ws: ws.frame(1, b"r:" + b"x" * 4095), 1009),
+    "invalid extended button payload": (lambda ws: ws.frame(1, b"b:1" + b" " * 200), 1007),
     "64-bit length": (lambda ws: ws.frame(1, b"b:1", length=1 << 40), 1009),
 }
 

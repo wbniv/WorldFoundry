@@ -1343,6 +1343,31 @@ zf_input_state zf_host_sys(zf_ctx* ctx, zf_syscall_id id, const char* /*last_wor
                         static_cast<Actor*>(object)->GetRenderActor().SetLionPose(phase,drive,turn,gape,unsigned(dark),unsigned(light));
                     }
                 }
+            } else if(custom>=50 && custom<=52) {
+                // Generic instance-property reads, never plant-specific state.
+                int position=custom==52?int(zf_pop(ctx)):0;
+                int field=int(zf_pop(ctx)),actor=int(zf_pop(ctx));
+                auto* registry=wfprops::activeRegistry();
+                auto* object=registry?registry->object(actor):nullptr;
+                const wfprops::Field* descriptor=object?object->field(field):nullptr;
+                const std::string* value=object?object->get(field):nullptr;
+                bool valid=theLevel && actor>0 && actor<theLevel->GetMaxObjectIndex() && theLevel->GetObject(actor) && descriptor && value;
+                if(custom==50) {
+                    double number=0;
+                    if(valid && descriptor->kind<3){number=std::strtod(value->c_str(),nullptr);valid=std::isfinite(number)&&number>=-32768&&number<32768;}
+                    else if(valid&&descriptor->kind==4)number=*value=="1"?1:0;
+                    else valid=false;
+                    zf_push(ctx,valid?number:0);zf_push(ctx,valid?1:0);
+                } else if(custom==51) {
+                    uint32_t number=0;
+                    valid=valid&&descriptor->kind==0;
+                    if(valid)number=uint32_t(std::strtoll(value->c_str(),nullptr,10));
+                    for(int k=0;k<4;k++)zf_push(ctx,valid?((number>>(8*k))&255):0);
+                    zf_push(ctx,valid?1:0);
+                } else {
+                    valid=valid&&descriptor->kind==3&&position>=0&&size_t(position)<value->size();
+                    zf_push(ctx,valid?uint8_t((*value)[position]):0);zf_push(ctx,valid?1:0);
+                }
             } else if (custom == 72) {
                 /* Neural-forth dispatch gate: syscall 200 = ZF_SYSCALL_USER + 72.
                  * Pops word-id from stack and routes to nf_dispatch().
@@ -1512,7 +1537,7 @@ void Init(MailboxesManager& mgr)
     if (r != ZF_OK)
         fprintf(stderr, "zforth: init failed (read-actor-mailbox): %d\n", r);
 
-    r = zf_eval(&g_ctx, ": profile-begin 169 sys ; : profile-end 170 sys ; : fish-deform 171 sys ; : fin-deform 172 sys ; : swim-deform 173 sys ; : jelly-deform 174 sys ; : plant-register 175 sys ; : plant-step 176 sys ; : lion-pose 177 sys ;");
+    r = zf_eval(&g_ctx, ": profile-begin 169 sys ; : profile-end 170 sys ; : fish-deform 171 sys ; : fin-deform 172 sys ; : swim-deform 173 sys ; : jelly-deform 174 sys ; : plant-register 175 sys ; : plant-step 176 sys ; : lion-pose 177 sys ; : property@ 178 sys ; : property-int-bytes@ 179 sys ; : property-text-byte@ 180 sys ;");
     if (r != ZF_OK) fprintf(stderr, "zforth: profiling/fish bridge init failed: %d\n", r);
 
     // FSN filesystem bridge words (custom 3-7 / sys 131-135)

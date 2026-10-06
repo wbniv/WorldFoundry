@@ -457,6 +457,7 @@ _Auto-added from plan "Out of scope"/"Deferred" sections at commit time. Triage 
 - [x] **(completed)** Record device results and push the focused commits. — _from [2026-10-02-jellyfish-biomechanics-poster.md](docs/plans/2026-10-02-jellyfish-biomechanics-poster.md)_  <!-- fp:c94b7d13e0db6ec3 -->
 - [done] **2026-10-03-aquatic-plant-clumps-and-poster** — PASS: runtime/settings/colour checks and current-build mature texture comparison; broader growth/sway and repeated-entry measurements remain in the plan. _from [2026-10-03-aquatic-plant-clumps-and-poster.md](docs/plans/2026-10-03-aquatic-plant-clumps-and-poster.md)_  <!-- fp:cae70851e3dcb53d -->
 - [done] **2026-10-04-chromecast-background-install** — PASS: all 50 isolated coordinator tests and verified background installation on both devices; hardware gameplay and playback continuity measurements remain pending in the plan. _from [2026-10-04-chromecast-background-install.md](docs/plans/2026-10-04-chromecast-background-install.md)_  <!-- fp:130d3b8788f021a0 -->
+- [verify] **2026-10-06-freshwater-rainbow-goby** — Verification section present but no PASS recorded — run + record the steps. _from [2026-10-06-freshwater-rainbow-goby.md](docs/plans/2026-10-06-freshwater-rainbow-goby.md)_  <!-- fp:8ad19c82e8fc7abc -->
 <!-- END auto-captured-deferrals -->
 
 

@@ -17,6 +17,7 @@ from mesh import Mesh
 import species
 from models import COLORS as ANIMAL_COLORS, JELLY_OPACITY, models
 from urchin import COLORS as URCHIN_COLORS, TEXTURE as URCHIN_TEXTURE, urchin, tube_foot, spine_specs, spine_mesh, PIVOT_SPINES, write_texture as write_urchin_texture
+import goby
 from planting import COLORS as PLANT_COLORS, planting
 from temple import COLORS as TEMPLE_COLORS, pavilion
 LEVEL=sys.argv[sys.argv.index('--')+1]
@@ -24,7 +25,9 @@ assert LEVEL in ('aquarium_betta','aquarium_jellyfish','aquarium_lionfish','aqua
 HERE=REPO/'wflevels'/LEVEL
 spec=importlib.util.spec_from_file_location('tank_config',HERE/'config.py')
 C=importlib.util.module_from_spec(spec); spec.loader.exec_module(C)
-if C.KIND=='plants':write_urchin_texture(HERE)
+if C.KIND=='plants':
+    write_urchin_texture(HERE)
+    goby.write_textures(HERE)
 PROFILE=os.environ.get('TANK_PROFILE','keyboard')
 assert PROFILE in ('keyboard','touch','remote')
 COUNT=int(os.environ.get('TANK_COUNT',str(C.COUNT)))
@@ -45,6 +48,7 @@ COLORS=dict(ANIMAL_COLORS,sand=(.75,.70,.55),frame=(.30,.55,.63),rim=(.53,.74,.7
 COLORS.update(TEMPLE_COLORS)
 COLORS.update(PLANT_COLORS)
 COLORS.update(URCHIN_COLORS)
+COLORS.update(goby.COLORS)
 if BETTA_FINS:COLORS.update(BETTA_COLORS)
 if C.KIND=='arowana':
     import arowana
@@ -88,6 +92,12 @@ def material(key):
             tex.image=bpy.data.images.load(str(HERE/URCHIN_TEXTURE),check_existing=True)
             mt.node_tree.links.new(tex.outputs['Color'],mt.node_tree.nodes.get('Principled BSDF').inputs['Base Color'])
             if key=='urchin_foot':mt['wf_opacity']=.78
+        if C.KIND=='plants' and key.startswith('goby_'):
+            mt['wf_prelit']=True
+            tex=mt.node_tree.nodes.new('ShaderNodeTexImage')
+            tex.image=bpy.data.images.load(str(HERE/(goby.BODY_TEXTURE if key=='goby_body' else goby.FIN_TEXTURE)),check_existing=True)
+            mt.node_tree.links.new(tex.outputs['Color'],mt.node_tree.nodes.get('Principled BSDF').inputs['Base Color'])
+            if key=='goby_fin':mt['wf_opacity']=goby.FIN_OPACITY;mt['wf_double_sided']=True
         MATERIALS[key] = mt
     return MATERIALS[key]
 
@@ -196,7 +206,7 @@ player['wf_Model Type']='Mesh'
 player['wf_Mesh Name']='sea_urchin.iff' if C.KIND=='plants' else 'player_hull.iff'
 player['wf_original_mesh_name']=player['wf_Mesh Name']
 player['wf_Mobility']='Physics'
-player['wf_Visibility Mailbox']=int(C.KIND=='plants')
+player['wf_Visibility Mailbox']=1160 if C.KIND=='plants' else 0
 player['wf_Script Controls Input']='True'
 box_fields(player,(-.20,-.15,-.15,.20,.15,.15))
 for key,value in {'Mass':1,'Falling Acceleration':0,'Running Acceleration':0,
@@ -216,9 +226,15 @@ for k in range(0 if C.KIND=='plants' else COUNT):
         group.append(obj)
     parts.append(group)
 
+goby_parts=[]
 urchin_feet=[]
 urchin_spines=[]
 if C.KIND=='plants':
+    for m in (goby.body(),goby.fins()):
+        obj=actor(m.name,m,C.SPAWN,mesh_name=m.name)
+        obj['wf_Visibility Mailbox']=1161
+        obj['wf_Moves Between Rooms']=True
+        goby_parts.append(obj)
     foot_data=blender_mesh(tube_foot())
     for k in range(8):
         angle=math.tau*k/8
@@ -226,6 +242,7 @@ if C.KIND=='plants':
         obj=actor(f'urchin-foot-{k}',foot_data,(C.SPAWN[0]+offset[0],C.SPAWN[1]+offset[1],C.SPAWN[2]),mesh_name='urchin_tube_foot')
         # Share the body atlas in PERM, leaving the runtime plant page unchanged.
         obj['wf_Moves Between Rooms']=True
+        obj['wf_Visibility Mailbox']=1160
         urchin_feet.append((obj,offset))
     specs=spine_specs()
     for k,index in enumerate(PIVOT_SPINES):
@@ -234,6 +251,7 @@ if C.KIND=='plants':
         obj=actor(f'urchin-spine-{k}',spine_mesh(index),tuple(C.SPAWN[j]+offset[j] for j in range(3)),mesh_name=f'urchin_spine_{k}')
         obj.rotation_euler=(0,rest_b*math.tau,rest_c*math.tau)
         obj['wf_Moves Between Rooms']=True
+        obj['wf_Visibility Mailbox']=1160
         urchin_spines.append((obj,index,offset,rest_b,rest_c))
 
 if FEEDING:
@@ -436,8 +454,15 @@ if C.KIND=='plants':
     core=plant_core
     if os.environ.get('PLANTED_TANK_DETAIL','runtime')=='runtime':
         core=core.replace("  JOYSTICK_BUTTON_A tk-edge tk-neutral tk@ not & if 1 tk-camera tk@ - tk-camera tk! then", "  \\ Camera taps and settings holds are handled by the native plant settings.")
+    core=core.replace(': tk-player-tick',': tk-urchin-player-tick')
+    header+=f': pg-salt {indices["Director"]} 2 property@ if else drop 0 then ;\n'
+    header+=': gb-ceiling 4.35 ; : gb-limit tk-limit-x ; : gb-floor tk-bottom ;\n'
+    core+=(COMMON/'goby_controller.fth').read_text()
+    core+=': tk-player-tick pg-salt if tk-urchin-player-tick else JOYSTICK_BUTTON_LEFT tk-held gb-left gb! JOYSTICK_BUTTON_RIGHT tk-held gb-right gb! JOYSTICK_BUTTON_UP tk-held gb-up gb! JOYSTICK_BUTTON_DOWN tk-held gb-down gb! 0 gb-blocked gb! gb-player-tick then ;\n'
+    # Player input does not need the Director's feet/spine pose definitions.
+    plant_player_core = core
     pose=setup=''
-    tick=": tk-director-tick\n tk-camera-tick\n INDEXOF_X_POS tk-player read-actor-mailbox INDEXOF_Y_POS tk-player read-actor-mailbox INDEXOF_Z_POS tk-player read-actor-mailbox uf-begin\n"
+    tick=": tk-director-tick\n pg-salt dup 1160 tk! not 1161 tk! tk-camera-tick\n pg-salt if INDEXOF_X_POS tk-player read-actor-mailbox INDEXOF_Y_POS tk-player read-actor-mailbox INDEXOF_Z_POS tk-player read-actor-mailbox uf-begin\n"
     for k,(obj,offset) in enumerate(urchin_feet):
         tick+=f' {num(offset[0])} {num(offset[1])} {num(.017+.0014*k)} {k} {indices[obj.name]} uf-foot\n'
     core+=(COMMON/'urchin_motion.fth').read_text()
@@ -445,6 +470,14 @@ if C.KIND=='plants':
     for k,(obj,index,offset,rest_b,rest_c) in enumerate(urchin_spines):
         tick+=f' {num(offset[0])} {num(offset[1])} {num(offset[2])} {num(rest_b)} {num(rest_c)} {num(4.1+k*.41)} {1 if k%2==0 else -1} {k} {indices[obj.name]} us-spine\n'
 
+    tick+=' else\n'
+    for obj in goby_parts:
+        index=indices[obj.name]
+        for axis in ('X','Y','Z'):
+            tick+=f' INDEXOF_{axis}_POS tk-player read-actor-mailbox INDEXOF_{axis}_POS {index} write-actor-mailbox\n'
+        tick+=f' 0 INDEXOF_ROTATION_A {index} write-actor-mailbox 0 INDEXOF_ROTATION_B {index} write-actor-mailbox gb-heading gb@ INDEXOF_ROTATION_C {index} write-actor-mailbox\n'
+        tick+=f' pg-water tk@ .8 * gb-vx gb@ abs .035 * .004 + 0 pg-water tk@ .8 * .008 {goby.SPAN[0]} {goby.SPAN[1]} {index} swim-deform\n'
+    tick+=' then\n'
     if os.environ.get('PLANTED_TANK_DETAIL','runtime')=='runtime':
         header+=': pg-init 747 ; : pg-water 748 ;\n'
         bindings=' '.join(f'{k} {indices[f"plant_chunk_{k:02d}"]} plant-register' for k in range(8))
@@ -452,7 +485,7 @@ if C.KIND=='plants':
         tick+=' pg-water tk@ tk-dt@ + pg-water tk! INDEXOF_DELTA_TIME tk@ pg-water tk@ plant-step\n'
     tick+=' ;\n'
 
-player_core=core.split('\\ Urchin contacts:')[0] if C.KIND=='plants' else core
+player_core=plant_player_core if C.KIND=='plants' else core
 player['wf_Script']=header+player_core+'\ntk-player-tick\n'
 bpy.data.objects['Director']['wf_Script']=header+core+pose+setup+feeding+tick+'\ntk-director-tick\n'
 if C.KIND=='arowana':

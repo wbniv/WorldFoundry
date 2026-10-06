@@ -1,0 +1,649 @@
+<!doctype html><html><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><title>Generic runtime OAS/OAD object editor</title><style>body{font:17px/1.6 system-ui;max-width:1100px;margin:40px auto;padding:0 26px;color:#21343b;background:#f5f7f6}h1,h2,h3{line-height:1.2}h2{margin-top:2em}a{color:#146b75}img{max-width:100%;height:auto}table{border-collapse:collapse;width:100%;font-size:15px}th,td{border:1px solid #c6d4d0;padding:10px;vertical-align:top;text-align:left}th{background:#e3ece7}pre{background:#102833;color:#e9f3ef;padding:20px;overflow:auto}code{font-size:.92em}</style></head><body><h1>Generic runtime OAS/OAD object editor</h1>
+<p>6 October 2026 · <strong>Implementation authorized and in progress.</strong></p>
+<p>Will permits minimal core changes for this approach, with their scope described.
+This plan replaces the plant level's custom settings form with an object
+property editor driven by OAS/OAD. Runtime code then reads the same edited
+properties. It supersedes the proposed plant-specific <code>plant-state</code> syscall.
+<strong>Do not pull wf-edit into the runtime.</strong> Use it as an implementation reference;
+share small schema/editing components where that is practical.</p>
+<h2>Intended behavior</h2>
+<p>Select an object with an attached OAD schema, inspect its current properties,
+edit eligible values on the TV or connected phone, and apply a validated change
+to that object. Forth and C++ read those effective instance values through one
+generic API. Other objects sharing the same original OAD blocks stay unchanged.</p>
+<p>The first production object is <strong>Planted Tank settings</strong>, attached to the tank's
+Director (or another explicitly authored settings owner), not a process-global
+anonymous form. Its Water type, Seed and Growth speed come from an attached
+supplemental OAS/OAD schema. This does not require inventing a native actor class
+or adding game-specific fields to every actor's common block.</p>
+<p>Edit <strong>instance values defined by OAS/OAD</strong>. The running game does not rewrite
+the <code>.oas</code> source or mutate the <code>.oad</code> schema's field definitions/ranges. Source
+files and packed level data remain authoring inputs; runtime changes are an
+instance overlay. Session-only edits are the initial default. Persisting/exporting
+overrides is a separate explicit action, not an automatic write to the repository.</p>
+<p><img alt="Architecture and shared code" src="2026-10-06-runtime-oas-oad-object-editor/architecture.svg" /></p>
+<h2>Per-level authoring</h2>
+<p>Each level can own its schemas under <code>wflevels/&lt;level&gt;/</code>. For example,
+<code>wflevels/aquarium_plants/settings.oas</code> defines the planted tank settings;
+its compiled OAD is normalized into that level's property catalog. Level-wide
+settings belong to an explicitly authored object such as the Director. Actor
+schemas may also be local to a level or reused between levels. No global actor
+schema changes are required for these supplemental properties.</p>
+<h2>Implementation evidence so far</h2>
+<ul>
+<li>Shared Rust OAD normalization and strict validation are implemented. Rust
+  validation tests and three packing/C++ transaction tests pass, including
+  exact unsigned seed text, per-instance isolation, stale revisions, keypad
+  navigation and stale phone sessions.</li>
+<li>The versioned catalog uses an optional RAM locator and a sector-aligned
+  appended chunk; existing asset bytes/offsets remain unchanged.</li>
+<li>Level-owned effective values and generic Forth read functions are implemented.
+  TV navigation and phone controls now consume field descriptors. Integration
+  and device validation are still in progress.</li>
+<li>The sanitizer-backed TV runtime harness and the real phone/browser integration
+  test pass. The latter checks reconnect, invalid seed handling, cancel and apply.
+  Core/catalog and goby tests pass (11 checks). An earlier APK passed a cast1
+  launch check; final verification of the latest goby/phone build is pending.</li>
+<li>Phone transport accepts bounded extended WebSocket frames for property forms
+  and commands; button input validation and control-frame limits remain enforced.</li>
+<li>Latest phone transport/browser regression suite: 55 checks passed. Both Android
+  ABIs build. The goby integration's first cast1 launch exposed a tail-cap polygon
+  below the fixed-point normal threshold. The asset now uses centre-fan caps;
+  eight goby tests pass with a minimum normal-size check. Corrected device
+  verification remains pending. No engine normal-calculation change was made.</li>
+<li>The next device check exposed incorrect rotation mailbox names in the new
+  goby pose script. They now use the published <code>INDEXOF_ROTATION_A/B/C</code> names.
+  Player scripts also omit Director-only contact/spine definitions. Tests now
+  compile both actual exported scripts within the same dictionary in float and
+  fixed-point configurations; the ten goby checks pass.</li>
+<li>Corrected cast1 verification passed: job <code>J-986002bc14ed</code>, APK SHA-256
+  <code>7bc63a1c8af8619a3e6e7faa2d3c5a7c8ec03b6513204bd39d31be32d187c533</code>.
+  The captured screen shows the freshwater goby, growing plants and seed HUD;
+  the runtime failure check passed. Evidence is under
+  <a href="2026-10-06-runtime-oas-oad-object-editor/evidence/verified-launch/receipt.json">verified-launch</a>.
+  This resolves the observed black screen; matched profiling and full device
+  settings/mode-switch validation remain outstanding.</li>
+<li>Shared code comprises the existing Rust schema reader/model/validator and the
+  new strict validation wrapper. Draft transactions/navigation live in the
+  reusable C++ runtime layer; they are not yet shared with Blender or wf-edit.</li>
+</ul>
+<h2>Existing implementations: what to reuse</h2>
+<p>This audit read the current checkout, not only old plans. Comments that describe
+wf-edit's panel as read-only are stale: its current API includes editing and a
+live bridge.</p>
+<table>
+<thead>
+<tr>
+<th>Code</th>
+<th>Current behavior</th>
+<th>Reuse / boundary</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><a href="../../wftools/wf_oad/src/lib.rs">wf_oad</a></td>
+<td>Rust reader for the legacy OAD header and descriptors</td>
+<td>Reuse at build/authoring time; preserve legacy codes/layout</td>
+</tr>
+<tr>
+<td><a href="../../wftools/wf_attr_schema/src/lib.rs">wf_attr_schema</a></td>
+<td>Normalized field keys/labels/help/groups, kinds, limits, defaults, widths and fixed-point scales</td>
+<td>Primary shared schema model; extend with a compact runtime projection</td>
+</tr>
+<tr>
+<td><a href="../../wftools/wf_attr_validate/src/lib.rs">wf_attr_validate</a></td>
+<td>Range, enum and text checks over schema values</td>
+<td>Share validation; add strict type/non-finite checks rather than relying on its present permissive mismatch handling</td>
+</tr>
+<tr>
+<td><a href="../../wftools/wf_attr_serialize/src/lib.rs">wf_attr_serialize</a></td>
+<td>Authoring attribute import/export</td>
+<td>Reuse for authoring round trips, not as the cooked level byte-layout oracle</td>
+</tr>
+<tr>
+<td><a href="../../wftools/wf_py/src/lib.rs">wf_py</a>, <a href="../../wftools/wf_blender/panels.py">Blender panel</a>, <a href="../../wftools/wf_blender/operators.py">operators</a></td>
+<td><code>wf_core</code> exposes Rust descriptors; Blender stores <code>wf_&lt;key&gt;</code> values and renders host widgets</td>
+<td>Reuse underlying schema/validation; preserve Blender widgets and storage</td>
+</tr>
+<tr>
+<td><a href="../../wftools/wf_blender/export_level.py">Blender exporter</a>, <a href="../../wftools/levcomp-rs/src/oad_loader.rs">levcomp OAD loader</a></td>
+<td>Resolve schemas, serialize object values, resolve references and common blocks</td>
+<td>Generate runtime descriptors/initial values alongside cooking; use actual compiler layout</td>
+</tr>
+<tr>
+<td><a href="../../engine/wf_edit/property_panel.cc">wf-edit panel</a>, <a href="../../engine/wf_edit/oad_reader.h">OAD adapter</a>, <a href="../../engine/wf_edit/engine_bridge.cc">engine bridge</a></td>
+<td>C++ OAD widget dispatch; CRDT document edits translated to live mutation</td>
+<td>Reference for dispatch, groups, commit/readback and errors. No ImGui/CRDT/application dependency in the game</td>
+</tr>
+<tr>
+<td><a href="../../engine/mutation/wfmut.hpp">wfmut</a>, <a href="../../engine/mutation/wfmut.cpp">implementation</a></td>
+<td>Existing field getters/setters, generated block offsets; debug/editor-only</td>
+<td>Reference/reuse small resolved-field adapters, not wholesale enablement in release</td>
+</tr>
+<tr>
+<td><a href="../../wfsource/source/oas/regen-headers.sh">OAS header generation</a></td>
+<td>Generates <code>kpropmap_generated.inc</code> and wf-edit name-to-path mapping</td>
+<td>Reuse qualified naming/offset generation where applicable; avoid a second handwritten property table</td>
+</tr>
+<tr>
+<td><a href="../../scripts/build-runtime-settings.py">Earlier settings extractor</a></td>
+<td>Enum-only OAD-to-JSON authoring proof</td>
+<td>Replace/extend using the shared reader/model; do not retain its fixed-offset parser as another authoritative implementation</td>
+</tr>
+<tr>
+<td>Legacy <a href="../../wftools/oaddump/oad.cc">oaddump</a>, iff2lvl/lvldump readers</td>
+<td>Historical C++ descriptor readers and compiled-level interpretation</td>
+<td>Compatibility references/fixtures, not additional runtime UI dependencies</td>
+</tr>
+</tbody>
+</table>
+<h3>Share functionality, keep host widgets separate</h3>
+<p>Share field descriptors, typed values, validation, draft/apply/cancel transactions,
+change detection and canonical error results. Keep ImGui rendering, Blender
+<code>bpy</code> controls, TV drawing and phone DOM controls in their respective hosts.
+Matching visual appearance is not required; matching field meaning and values is.</p>
+<p>Recommended proof: a small <strong><code>wf_attr_edit</code></strong> Rust component on the existing
+schema/validation libraries, with a narrow C ABI for the game and a Python
+binding through <code>wf_py</code>. It owns the draft reducer and validation. No CRDT,
+Python interpreter, Blender or editor application is linked into the game.
+The TV and phone use one native draft/session, rather than independently
+implementing validation and commit semantics in JavaScript.</p>
+<p>Runtime descriptors are already normalized at build time. The runtime need not
+parse a full authoring OAD or embed the old C++ dumper. Separate the normalized
+value/editor model from the OAD reader if that is necessary to avoid pulling the
+reader into the static runtime library. C ABI handles must be owned explicitly;
+no Rust panics cross the boundary. Measure the new static-library/binary cost.</p>
+<p><strong>Reuse gate:</strong> prove this shared core on one real enum, one fixed-point field
+and one text field, including Android cross-compilation. If that adds excessive
+build/dependency complexity, use a small C++ editor model and shared generated
+descriptors/conformance fixtures instead. Record which behavior is actually
+shared; do not claim shared source merely because two UIs look similar. Both
+routes keep wf-edit out of the runtime. Decide at phase 0 before core edits.</p>
+<h2>Runtime data and instance ownership</h2>
+<p>OAD is schema metadata. Cooked actor data is a separate layout: common-block
+markers become offsets, references are resolved, and some authoring fields emit
+no runtime bytes. The full descriptor cannot simply be treated as a struct
+offset table. <code>levcomp</code> and <code>wf_attr_serialize</code> also have different packing
+contexts; their sizes must not be interchanged.</p>
+<p>Generate a versioned compact catalog with schema identity, qualified field keys,
+runtime field handles, kind/width/scale, labels/help/groups, bounds/enum options,
+exposure/apply policy, and per-object initial values. Deduplicate schemas across
+instances; keep values and overrides independent per instance. Defaults apply
+only when no authored initial value is supplied.</p>
+<p>Package the catalog as an optional level asset/chunk (<strong>working name <code>RPRP</code></strong>).
+Phase 0 must identify the exact insertion and lookup point in the existing
+sector/TOC format; do not append arbitrary bytes or change fixed RAM layouts.
+Old bundles without this metadata continue to load and have no runtime form.
+Test existing cooking/decompilation/packing readers with the optional metadata.</p>
+<p>Level owns a property registry keyed by <code>(level epoch, object identity,
+instance generation)</code>. Registration checks the object exists and its schema
+matches. Removal/slot reuse cannot inherit the old object's values or draft.
+Use a supplemental schema attachment for new level settings; allow descriptors
+for existing class OAD properties through the same service.</p>
+<p>Use fully qualified field keys and generated handles, not UI labels or wf-edit's
+fuzzy name matching. Handle collisions/duplicate names are build errors. Numeric
+handles are local to a catalog version; saved overrides use qualified keys and
+schema version, not a handle from an older APK.</p>
+<h3>Why existing <code>wfmut</code> is insufficient as-is</h3>
+<p>Its field writes explicitly mutate potentially deduplicated/shared common pages.
+Its header provides no-op getters/setters when both debug and editor flags are
+off; Android forces those flags off. It also exposes a subset of fields, not
+the full typed authoring model. Enabling the debug/editor stack is not the
+production solution.</p>
+<p>For phase 1, use <strong>per-instance effective values</strong>, falling back to cooked
+initial values. Do not write through <code>const_cast</code> into shared pages. Native
+consumers that still dereference legacy blocks do <strong>not</strong> automatically see an
+overlay: migrate a consumer to the generic getter or supply an explicit live
+apply adapter. Present that distinction honestly in the editor.</p>
+<p><img alt="Commit and runtime read path" src="2026-10-06-runtime-oas-oad-object-editor/commit.svg" /></p>
+<h2>Edit, validate, apply, read</h2>
+<ol>
+<li>Open the object form and snapshot effective values/revision into a draft.</li>
+<li>TV/phone edit the same draft using field handles, retaining schema-derived
+   labels and choices. Reject obsolete object/session/revision commands.</li>
+<li>Apply validates the entire draft, including cross-field rules declared in
+   authored policy. Invalid input leaves the form open with an inline error.</li>
+<li>Commit the whole valid change once on the game thread. Preflight any effect
+   that can fail; an error must not leave part of the transaction applied.</li>
+<li>Increment revision and notify consumers of changed field handles. C++/Forth
+   reads see committed effective values; drafts do not leak into simulation.</li>
+<li>Cancel drops the draft; reopening reads committed values. Changes originating
+   outside the form require revision checking/rebase, rather than silent overwrite.</li>
+</ol>
+<p>The property service operates independently of pausing. For the plant form,
+preserve current pause behavior; its existing native modal already stops level
+updates. Clear held input at open/close/focus transitions and resume only after
+release. Back arrow applies/closes; validation errors keep it open. A activates
+a field or finishes slider adjustment. Keep a regular visible navigation grid.</p>
+<h2>Layout algorithm for arbitrary objects</h2>
+<p>Layout is generated from the attached schema and current viewport. The plant
+form is one use of this algorithm, not the template every other object must fit.
+Share the ordered form model, widget classification and focus identities between
+hosts; TV and phone render different arrangements of that model.</p>
+<h3>1. Build an ordered form tree</h3>
+<p>Walk OAD entries in source order. A <code>PROPERTY_SHEET</code> starts a section;
+<code>GROUP_START</code> / <code>GROUP_STOP</code> bracket a named group. Fields remain in their
+authored order inside the section/group. Fields before the first sheet go in a
+virtual General section. A schema with no sheets produces one simple form.
+Group markers and common-block delimiters are not mutable field values.</p>
+<p>Use display names with field-key fallback, schema help, <code>showAs</code>, field kind,
+enum choices and fixed-point scale. OAD <code>x</code>/<code>y</code> authoring-dialog coordinates do
+<strong>not</strong> place runtime widgets: they are tied to legacy editor dialogs and do not
+define a usable TV/phone layout. Runtime exposure policy filters fields once
+before layout; hidden fields stay hidden and inspect-only fields show a status.
+Missing optional help or labels does not make a field disappear.</p>
+<p>Section order follows OAD. On TV, the first section marked initially active
+is selected, otherwise the first section. Phone uses section default-open hints;
+General opens initially. Preserve the user's section/focus/scroll choices while
+the same object form is open. Malformed group nesting must produce a build-time
+diagnostic rather than a broken runtime layout.</p>
+<h3>2. Choose widgets and size rows</h3>
+<table>
+<thead>
+<tr>
+<th>Schema presentation</th>
+<th>Generated control</th>
+<th>Sizing / overflow</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>Checkbox / toggle boolean</td>
+<td>One labelled toggle</td>
+<td>One regular row</td>
+</tr>
+<tr>
+<td>Enum dropdown / combo</td>
+<td>Current choice; A opens a choice list</td>
+<td>Scroll long lists; preserve numeric index offset</td>
+</tr>
+<tr>
+<td>Radio choices</td>
+<td>Inline choices when the measured labels fit; otherwise choice list</td>
+<td>Widget editing uses left/right; no tiny squeezed buttons</td>
+</tr>
+<tr>
+<td>Slider numeric field</td>
+<td>Value plus slider</td>
+<td>Limits/step follow schema/policy; reserve a taller row</td>
+</tr>
+<tr>
+<td>Plain integer / fixed-point number</td>
+<td>Value field; A opens numeric entry</td>
+<td>Signed/decimal keypad appropriate to the actual type</td>
+</tr>
+<tr>
+<td>Bounded string</td>
+<td>Text preview; A opens text entry</td>
+<td>Wrap or abbreviate the preview; show full value in editor</td>
+</tr>
+<tr>
+<td>Multi-line text</td>
+<td>Taller text preview and dedicated editor</td>
+<td>Scroll text rather than expanding the entire form indefinitely</td>
+</tr>
+<tr>
+<td>Inspect-only reference / reload-required field</td>
+<td>Current value and short status</td>
+<td>Focusable for full value/help; editing only with a supported policy</td>
+</tr>
+</tbody>
+</table>
+<p>Measure labels with the host's font metrics. Long labels wrap and increase row
+height; values do not overwrite labels. Help appears for the focused field in a
+reserved area or detail view, instead of printing every paragraph between rows.
+Row sizing is based on legible controls, not total field count. Hundreds of fields
+must scroll, not cause smaller text and controls. Optional later search operates
+on stable field keys/labels; it is not required to make sections work initially.</p>
+<h3>3. TV: section rail and scrolling label/value rows</h3>
+<p>Use a bounded safe-area panel with an object/title header, a section rail when
+there are multiple sections, a scrolling field viewport and a persistent footer.
+Within the viewport, every regular row has the same label/value column boundary
+(approximately 40/60, clamped to measured minimum control widths). Groups occupy
+the full row width with headings; their fields use the same columns. There is
+one focusable field entry per row; no arbitrary nearest-coordinate navigation.</p>
+<p>At the reference 1920 × 1080 layout, start with 64-pixel minimum regular rows
+and 28-pixel labels, then scale against display density/safe area. Verify at
+720p and 1080p. Taller rows follow wrapped labels or sliders; scroll the focused
+row fully into view. Reduce optional help/sidebar space before shrinking text.
+If horizontal space is tight, sections become a single selector row above the
+fields rather than squeezing the rail and controls together.</p>
+<p>More sections than fit in the rail make the rail itself scroll. Large field lists
+use a clipped/virtualized viewport; only visible rows and a small overscan are
+drawn, while focus still traverses the complete ordered model. Keep footer actions
+visible. Plant-specific Regenerate/New random seed appear as authored actions
+after that section's fields; other objects need not have those actions. The empty
+former Apply speed space is an authored spacer for the plant form, not a button
+or a gap inserted into every object's editor.</p>
+<h3>4. Remote focus and editing modes</h3>
+<table>
+<thead>
+<tr>
+<th>Current focus / mode</th>
+<th>Direction / A behavior</th>
+<th>Back arrow</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>Field list, browsing</td>
+<td>Up/down: previous/next field or authored action; left: section rail; A: enter field editing</td>
+<td>Validate/apply form and close; errors retain form</td>
+</tr>
+<tr>
+<td>Section rail</td>
+<td>Up/down: previous/next section; right/A: its remembered field, otherwise first entry</td>
+<td>Same form apply/close behavior</td>
+</tr>
+<tr>
+<td>Slider / inline choice, editing</td>
+<td>Left/right changes the draft; A or up/down finishes editing, with up/down then moving to the adjacent row</td>
+<td>Validate/apply form and close, preserving existing plant Back behavior</td>
+</tr>
+<tr>
+<td>Choice popup</td>
+<td>Up/down selects; A accepts into draft</td>
+<td>Dismiss popup, retaining the prior choice</td>
+</tr>
+<tr>
+<td>Numeric/text entry drawer</td>
+<td>Directions follow its visible regular keypad/grid; A enters/accepts</td>
+<td>Return to form draft; no whole-form commit from the drawer</td>
+</tr>
+<tr>
+<td>Footer actions</td>
+<td>Left/right within the footer; up returns to remembered row; A activates</td>
+<td>Form apply/close behavior</td>
+</tr>
+</tbody>
+</table>
+<p>Up/down from the final row reaches the footer; the rail/row/footer regions have
+explicit edges and do not wrap. Keypad navigation is a regular grid. Opening a
+drawer pins the edited field's label/value in its header and owns input; its
+controls do not compete with field-list navigation. This avoids the old plant
+form's mixture of number buttons and unrelated settings in a coordinate search.</p>
+<p>Focus identity is <code>(section key, field key, subcontrol role)</code>, never a pixel
+coordinate or visible-row index. Reflow, scrolling and phone reconnect cannot
+silently retarget input to another field. If a focused field becomes unavailable,
+choose the next surviving entry in that section, then its previous entry, then
+the section header. No hidden/disabled control participates in navigation.</p>
+<h3>5. Phone: scrolling sections and native controls</h3>
+<p>Use one scrolling column with collapsible section headings and group headings.
+Fields occupy full-width rows; labels sit above their controls at narrow widths.
+Use native numeric/text keyboards, toggles, sliders and choice controls. A long
+enum uses a selection list rather than an expanding line of buttons. The object
+header and apply/close/cancel actions remain available without scrolling back
+through all fields. Validation scrolls the first erroneous field into view.</p>
+<p>The phone renders descriptors from the same ordered form tree. It does not
+derive a separate plant field order or validation rules. Changing section or
+scroll position changes presentation only; committed object values remain
+independent of whether that section is visible.</p>
+<p><img alt="Large-schema layout and navigation" src="2026-10-06-runtime-oas-oad-object-editor/layout.svg" /></p>
+<p><img alt="Multi-section object mockup" src="2026-10-06-runtime-oas-oad-object-editor/large-object-tv.svg" /></p>
+<h3>Layout acceptance checks</h3>
+<p>Use real OAD fixtures for Player, Light and a supplemental plant schema, plus a
+large synthetic schema (100 fields, 12 sections, long labels/help, 30 enum choices,
+mixed sliders/text, inspect-only and hidden fields). Verify deterministic section
+and field order, widget selection, regular remote traversal, scrolling, focus
+retention on reflow, nested entry/back behavior and errors in off-screen sections.
+Check 720p/1080p TV and narrow/full-height phone views. No test may depend on the
+plant form's exact number of fields or screen coordinates.</p>
+<h3>Types and apply policies</h3>
+<table>
+<thead>
+<tr>
+<th>Property kind</th>
+<th>Initial editing support</th>
+<th>Runtime representation / effect</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>Boolean / enum</td>
+<td>Toggle, choice list</td>
+<td>Typed bool/integer; options and index offset from OAD</td>
+</tr>
+<tr>
+<td>Int8/16/32</td>
+<td>Numeric field/keypad</td>
+<td>Exact signed integer, respecting actual width/range</td>
+</tr>
+<tr>
+<td>Fixed16/32</td>
+<td>Numeric field/slider</td>
+<td>Exact raw fixed-point plus schema scale (256 / 65536), finite checks</td>
+</tr>
+<tr>
+<td>Bounded text</td>
+<td>Text field/phone entry</td>
+<td>Owned UTF-8 text with validated byte limit</td>
+</tr>
+<tr>
+<td>Object reference</td>
+<td>Initially inspect-only; later validated picker</td>
+<td>Resolved instance identity, not a text label or raw pointer</td>
+</tr>
+<tr>
+<td>File/mesh/script reference</td>
+<td>Initially inspect-only</td>
+<td>Needs explicit asset/script reload adapter before live editing</td>
+</tr>
+<tr>
+<td>Groups / sheets / annotations</td>
+<td>Presentation/help</td>
+<td>No mutable runtime value for layout markers</td>
+</tr>
+<tr>
+<td>Mobility, collision shape, mailbox counts, constructor-only fields</td>
+<td>Inspect-only or explicitly marked reload-required</td>
+<td>A value change alone does not rebuild their native state</td>
+</tr>
+</tbody>
+</table>
+<p>Expose a policy for each editable field: <strong>script-observed</strong>, <strong>native live setter</strong>,
+or <strong>reload-required</strong>. Policies supply exposure, bindings and effect categories;
+they do not duplicate labels, ranges or enum options already in OAD. The first
+delivery supports script-observed settings and the plant adapter, not live
+reconstruction of every engine subsystem.</p>
+<h3>Runtime access proposal</h3>
+<p>Use a small typed C++ interface: <code>describe(object)</code>, <code>get(object, field)</code>,
+<code>beginEdit</code>, <code>setDraft</code>, <code>commit</code>, <code>cancel</code>, and revision/change notification.
+These are conceptual names; exact ABI is settled by the phase-0 proof.</p>
+<p>Forth gets generic property reads, not a plant-specific word. Build tooling emits
+field constants for authored scripts. Resolve descriptors once at load; do not
+parse names/schema JSON on every actor tick.</p>
+<pre><code class="language-forth">\ Proposed API and generated bindings; not implemented words.
+\ property@ ( actor field -- scalar ok )
+PlantedSettings PROP_WATER_TYPE property@
+if 0 = if goby-tick else urchin-tick then else drop then
+</code></pre>
+<p><code>property@</code> covers bool/enum and supported scalar values. Exact 32-bit integers
+cannot all travel through the current float-valued Forth/mailbox path. Add a
+generic byte-oriented integer read when needed (<code>property-int-bytes@</code>, four
+0–255 bytes plus success), and text-byte access for bounded text rather than
+returning unmanaged native pointers. Final word names/stack order require tests.
+Do not put a full unsigned seed, or an unsigned 16-bit half above 32767, into a
+single signed 16.16 mailbox. Optional mailbox mirrors are explicit typed bindings,
+not a second source of truth; use four bytes when exact 32-bit transport is needed.</p>
+<p>No new Forth setter is required to replace the UI initially: the generic edit
+service performs runtime writes. A later script setter can use the same validated
+transaction API if a level needs it.</p>
+<h2>Replace the plant form</h2>
+<table>
+<thead>
+<tr>
+<th>Authored property/action</th>
+<th>Generic form</th>
+<th>Consumer behavior</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>Water type</td>
+<td>OAD enum: Freshwater / Saltwater</td>
+<td>Commit regenerates the plant graph; Forth reads the same property to choose goby/urchin</td>
+</tr>
+<tr>
+<td>Growth speed</td>
+<td>OAD choices: Paused, 0.25×, 0.5×, 1×, 2×, 4×, 8×</td>
+<td>Speed-only commit keeps age and graph</td>
+</tr>
+<tr>
+<td>Seed</td>
+<td>OAD bounded decimal text; authored unsigned-32 validation policy</td>
+<td>Native adapter parses exactly 0–4294967295, preserving replay</td>
+</tr>
+<tr>
+<td>Regenerate</td>
+<td>Authored form action referencing the same property service</td>
+<td>Rebuild even if the seed/water values are unchanged</td>
+</tr>
+<tr>
+<td>New random seed</td>
+<td>Authored action sets a valid seed in the transaction</td>
+<td>Commits new seed and regenerates once</td>
+</tr>
+<tr>
+<td>Cancel / back arrow</td>
+<td>Generic form actions</td>
+<td>Cancel discards; back validates/applies/closes</td>
+</tr>
+</tbody>
+</table>
+<p>Use decimal text for the seed because existing OAD limits are signed i32; do not
+silently introduce a new legacy ButtonType or constrain the seed to signed range.
+The native plant simulation may retain age, water-motion clock, generated meshes
+and topology caches. Field definitions, draft speed/seed/water and the custom
+hardcoded widget layout move out of <code>planted::State</code> into the generic service.
+Any compatibility access to <code>s.salt</code>, <code>s.seed</code>, <code>s.speed</code> must be derived/synced
+from committed properties during migration, then removed where practical.</p>
+<p>The plant adapter defines effects (regenerate graph / update rate), not its own
+editor or schema. A settings object can be prepared in selector context and
+transferred by stable authored identity to its level instance; do not expose a
+fake live actor index before that instance exists. Preserve Right-to-settings
+from the highlighted selector and short-A/hold-A behavior in the level.</p>
+<p><img alt="TV form mockup" src="2026-10-06-runtime-oas-oad-object-editor/tv.svg" /></p>
+<p><img src="2026-10-06-runtime-oas-oad-object-editor/phone.svg" alt="Connected phone form mockup" width="330"></p>
+<p>The mockups show the generic renderer with plant schema content. Leave the former
+Apply speed button space empty. Growth speed is a slider/choice field; it needs
+no separate Apply speed action. When connected, the phone owns active editing,
+with TV status and back-arrow close/apply behavior preserved. Phone widgets must
+support the measured Chromium/WebView 91 minimum.</p>
+<h2>Proposed engine surface area</h2>
+<p>This is a bounded generic extension, not a one-line plant patch. Paths below are
+proposed; exact names can change in the phase-0 design review. No engine files
+have been edited for this plan.</p>
+<table>
+<thead>
+<tr>
+<th>Area / files</th>
+<th>Proposed changes</th>
+<th>Boundary</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>New <code>engine/runtime_properties.{hpp,cpp}</code></td>
+<td>Typed object registry, per-instance overlay, catalog access, transactions and consumer notifications; adapter to shared edit core</td>
+<td>No change to existing actor class layouts or direct shared-page writes</td>
+</tr>
+<tr>
+<td><code>wfsource/source/game/level.{hp,cc}</code></td>
+<td>Own registry; load optional metadata; register startup instances; lifecycle hooks for removal/spawn/slot reuse</td>
+<td>Old metadata-free levels retain existing behavior</td>
+</tr>
+<tr>
+<td><code>engine/stubs/scripting_zforth.cc</code></td>
+<td>Generic bounded typed property reads and bootstrap words</td>
+<td>No species-specific syscall; no arbitrary native-memory access</td>
+</tr>
+<tr>
+<td><code>CMakeLists.txt</code>, <code>engine/build_game.sh</code></td>
+<td>Build small runtime component and shared-core C ABI, with Android/iOS targets verified</td>
+<td>Do not enable <code>WF_ENABLE_EDITOR</code>, <code>WF_DEBUG_BRIDGE</code>, ImGui or CRDT in release</td>
+</tr>
+<tr>
+<td>New <code>game/runtime_property_ui.{h,cc}</code> and <code>game/game.cc</code>, <code>gfx/gl/display.cc</code></td>
+<td>Generic TV form presentation/focus/input; replace plant form dispatch and modal routing</td>
+<td>Reuse current rectangle/text/backend drawing; no renderer redesign</td>
+</tr>
+<tr>
+<td><code>hal/android/native_app_entry.cc</code>, <code>hal/phonepad/controller.html</code></td>
+<td>Transport generic describe/draft/commit/cancel and render schema widgets</td>
+<td>One authoritative native draft; no per-level hardcoded HTML fields</td>
+</tr>
+<tr>
+<td><code>game/plant_settings.h</code>, <code>plant_ui.{h,cc}</code>, small plant adapter</td>
+<td>Remove plant-specific draft/form definitions and route effects through generic properties</td>
+<td>Keep mesh growth/sway algorithms; delete obsolete form code after parity</td>
+</tr>
+<tr>
+<td>Existing <code>wfmut</code> / editor bridges</td>
+<td>Initially reference only; later optional adapter to the same value service</td>
+<td>No broad mutation refactor or editor integration bundled into this delivery</td>
+</tr>
+</tbody>
+</table>
+<p>Foundation touches one new core component, Level lifecycle, the Forth boundary
+and build wiring. UI replacement and plant consumption are separate, visible
+native changes; they count toward the agreed review scope too. Avoid changing
+<code>BaseObject</code>/<code>Actor</code> data layout by keeping the registry Level-owned. If a test
+shows a further native consumer change is necessary, identify that file/effect
+before expanding the implementation scope.</p>
+<p>Outside the engine: shared Rust editor component/C ABI, Python exposure, catalog
+generator/packing, supplemental plant OAS and bindings, level Forth/generator,
+fixtures and tests. A small Blender adoption is optional after the runtime
+works; wholesale replacement of either existing desktop editor is out of scope.</p>
+<h2>Phases and review gates</h2>
+<table>
+<thead>
+<tr>
+<th>Phase</th>
+<th>Deliverable</th>
+<th>Evidence / completion gate</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>0 — shared editor proof</td>
+<td>Real OAD → normalized catalog → shared draft reducer/validator; demonstrate fields through C ABI and existing Python adapter; settle optional asset packaging</td>
+<td>Semantic parity for enum offsets, widths, scales, groups, hidden fields; Android cross-build and dependency-size report. Review concrete core diff scope before implementation</td>
+</tr>
+<tr>
+<td>1 — instance edit/read foundation</td>
+<td>Load/register properties; edit/commit/readback on two objects sharing the same original common page; C++ + Forth read path</td>
+<td>One object changes, other does not; same-frame/read-next-tick contract; invalid types/ranges, exact integer/text transport, missing metadata and stale handles tested</td>
+</tr>
+<tr>
+<td>2 — generic TV/phone form</td>
+<td>Schema-driven sections/groups, measured scrolling rows, regular focus navigation, entry drawers, draft/apply/cancel and session protocol</td>
+<td>Large-schema layout matrix above; remote/phone parity, release handling, stale session rejection, error retention, nested Back and reconnect; WebView 91 verified</td>
+</tr>
+<tr>
+<td>3 — plant migration</td>
+<td>Remove hardcoded plant form; properties own seed/water/speed; selector preparation and plant effect adapter</td>
+<td>Existing settings behavior preserved; full unsigned seed range; one regeneration per commit; speed-only continuity; no duplicate field definitions</td>
+</tr>
+<tr>
+<td>4 — goby integration and measurement</td>
+<td>Forth reads Water type; selects textured goby versus urchin and resets active rig</td>
+<td>Actual Chromecast captures and matched device traces; ordinary APK restored and install receipt saved</td>
+</tr>
+</tbody>
+</table>
+<p>Tests exercise the actual shared validator/core and Forth bridge, not a parallel
+Python simulation of the intended implementation. Include cook/load/round-trip
+fixtures and the existing wfmut tests to ensure this work does not accidentally
+change legacy mutation semantics. Test instance lifetime and fallback reads.</p>
+<p>Measure on Chromecast: APK/native-library size delta, catalog bytes, RSS/PSS,
+load/commit/regeneration latency, idle/closed-form overhead, actor/Director CPU,
+render CPU and frame pacing. Use matched seed, water, growth age/rate and camera,
+three release runs plus separate CPU instrumentation where appropriate. Include
+a before/after delta table in the delivery report; desktop timing is not the
+game-performance baseline.</p>
+<p>Review this plan before implementation. The key decisions are the shared-core
+route and exact metadata packaging; the user-facing goal and instance readback
+contract are the same whichever small host adapter is chosen.</p>
+<p>Related: <a href="2026-10-05-runtime-settings-oas-oad-migration.md">previous C++ settings migration audit</a>,
+<a href="2026-10-06-freshwater-rainbow-goby.md">goby asset/control plan</a>,
+<a href="2026-05-19-engine-mutation-api.md">original mutation API plan</a>.</p></body></html>
