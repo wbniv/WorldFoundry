@@ -13,6 +13,26 @@ Format per entry:
 
 ---
 
+## Rotation mailboxes share Euler state across actors and commit only on yaw — 2026-10-06
+
+**Status:** OPEN. Root cause confirmed in the pinned production source; scoped runtime fix proposed, awaiting authorization.
+
+**Symptom:** Independent wing/limb pitch writes do not immediately update their actor's orientation. A later yaw write can apply another actor's pitch/roll to its recipient; yaw-only updates can also erase an actor's authored other axes. Surfaced during Finding Your Way iteration A's independently animated rigid parts. Actual repaired-runtime regression and device acceptance remain pending.
+
+**Root cause:** `Actor::WriteSystemMailbox` (`wfsource/source/game/actor.cc`) declares one function-wide `static Euler rotationEuler`. `EMAILBOX_ROTATION_A` and `EMAILBOX_ROTATION_B` modify the shared scratch value but never call `SetRotation`; `EMAILBOX_ROTATION_C` commits all three shared axes to the receiving actor. Reads use the target actor's physical orientation, so a pitch-only write need not agree with readback.
+
+**Origin:** `git blame` attributes the static variable and all three case bodies to first commit [`a2784f6eff294ee8da27052230216a8d28ddc364`](https://github.com/wbniv/WorldFoundry/commit/a2784f6eff294ee8da27052230216a8d28ddc364), dated 2010-05-01. The defect is therefore at least sixteen years old and qualifies for this pre-2026 log. A pre-2010 introduction date has not been established; the source comment's age is not a substitute for CVS evidence.
+
+**Why dormant:** Contiguous A/B/C writes to the same actor can make the final orientation appear correct. The new proof separately updates rigid-part pitch and player yaw, exposing both uncommitted axes and shared state. Historical use frequency and why earlier content did not report it are not established.
+
+**Fix:** Proposed: for each axis write, copy the receiving actor's current `PhysicalAttributes::Rotation()`, replace only that axis, and call `SetRotation` immediately. Preserve the other axes, mailbox IDs and revolution units; remove the shared static. A temporary level-side all-axis sequence can demonstrate art motion while the engine proposal is reviewed. Long-session animation phase wrapping is a separate level-script issue.
+
+**Diff:** No engine patch applied yet. The proposed implementation and old-code negative control are in the investigation plan; replace this note with the actual approved fix diff and commit when implemented.
+
+**Investigation:** [Finding Your Way rotation-mailbox runtime proposal](../../finding-your-way/docs/plans/2026-10-06-rotation-mailbox-runtime-fix.md). Required regression covers individual axes, all six write orders, authored nonzero orientations and interleaved actors, followed by desktop/both Android ABIs and actual Pixel/Chromecast captures.
+
+---
+
 ## `MEMORY_DELETE_ARRAY` hardcodes an 8‑byte array cookie — arm64's is 16 — 2026-09-20
 
 **Status:** FIXED [`18188fd1`](https://github.com/wbniv/WorldFoundry/commit/18188fd1) (`wfsource/source/memory/memory.hp` — new cookie-free `MEMORY_NEW_ARRAY`; `room.cc`, `rooms.cc` call sites).
