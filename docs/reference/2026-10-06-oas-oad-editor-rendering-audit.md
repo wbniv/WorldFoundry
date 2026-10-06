@@ -25,7 +25,7 @@ type/hint exactly. Copying either renderer wholesale would retain gaps.
 | Enum/dropdown | Button row; hints 4/5 with >3 choices use two-column grid | BeginCombo for all enums | Initially one label on TV, dropdown on phone unless slider |
 | Enum/radio | Selected/depressed buttons | Previously dropdown; new show=5 branch renders highlighted buttons | show=5 renders highlighted single-choice buttons on TV and phone, without circles; device verification pending |
 | Boolean | Checkbox-style operator; special two-choice enum handling | Checkbox | TV left/off, right/on; phone checkbox for Bool; enum radio is separate |
-| RGB colour | Hex label and colour picker | ColorEdit3 and hex | New UI: TV swatch/hex and three channel sliders; phone native colour picker plus R/G/B sliders. Existing packed integer storage; local tests pass, device acceptance pending |
+| RGB colour | Hex label and colour picker | ColorEdit3 and hex | Palette-first TV/phone UI with original/preview, recent colours, Custom HSV and exact RGB/hex entry. Packed integer storage unchanged; local tests pass; full device colour-edit acceptance pending |
 | Object reference | Searchable scene picker; missing-target warning | Editable reference text | Read-only reference; no typed target picker |
 | File/mesh reference | Path text plus filtered browser | Editable path; Browse disabled | Read-only; no cooked-asset picker |
 | Text | Blender text property | Text input; multiline/Notes path has documented caveats | Android native EditText/system IME for text and numbers; custom key grids removed. Phone native text keyboard. Standalone desktop runtime currently uses connected browser entry; physical text-event integration remains pending |
@@ -102,7 +102,7 @@ Equivalent values and constraints do not imply identical mutation capabilities.
 - [x] Implement RGB UI through the approved scope, preserving packed values and existing transactions; local UI/browser tests pass, actual device acceptance remains.
 - [ ] Design vector widgets through separately approved scope, preserving atomic typed edits.
 - [ ] Design cooked-asset and typed-reference pickers with lifetime checks; retain read-only fallbacks meanwhile.
-- [x] Replace custom Android text/numeric grids with the system editor/IME; native callbacks and phone text/Notes round trips pass local tests. Launch/resume passes on cast1; actual Gboard entry requires the reviewed coordinator update and rerun.
+- [x] Replace custom Android text/numeric grids with the system editor/IME; native callbacks and phone text/Notes round trips pass local tests. Launch/resume passes on cast1; the reviewed coordinator update is deployed, but actual Gboard entry is blocked by device connection/recovery failures.
 - [ ] Connect standalone desktop runtime text events/IME; existing browser text entry works. No custom on-screen keyboard fallback is requested.
 - [ ] Render TV group labels and verify section navigation with an all-enum section.
 - [ ] Separate hidden retention from visibility when effective readback is required.
@@ -120,3 +120,8 @@ Equivalent values and constraints do not imply identical mutation capabilities.
 
 Related: [runtime plan](../plans/2026-10-06-runtime-oas-oad-object-editor.md),
 [baseline gallery](../plans/2026-10-05-world-foundry-baseline.md).
+
+
+### Runtime colour picker replacement (2026-10-06)
+
+The runtime RGB control now uses the selected palette-first design, with Custom HSV editing and exact RGB/hex entry. Its `BUTTON_INT32 / SHOW_AS_COLOR` representation remains packed RGB; no alpha channel was added. Android text dialogs and phone fields have explicit contrast colours. See the [replacement plan and actual captures](../plans/2026-10-06-runtime-colour-picker.html) for verified behaviour and remaining Chromecast interaction/profiling acceptance. Existing wf-edit/Blender colour widgets are retained.

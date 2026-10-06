@@ -20,7 +20,7 @@
              ANativeActivity_onCreate inside libwf_game.so, which
              android_native_app_glue hooks to start our android_main. -->
         <activity
-            android:name="android.app.NativeActivity"
+            android:name="org.worldfoundry.wf_game.WorldFoundryActivity"
             android:label="@string/app_name"
             android:launchMode="singleTask"
             android:configChanges="orientation|keyboardHidden|screenSize|uiMode"
@@ -28,6 +28,12 @@
             android:exported="true">
             <meta-data android:name="android.app.lib_name"
                        android:value="wf_game" />
+        </activity>
+        <!-- Keep the established launcher/deployment component name. -->
+        <activity-alias android:name="android.app.NativeActivity"
+            android:targetActivity="org.worldfoundry.wf_game.WorldFoundryActivity"
+            android:exported="true">
+            <meta-data android:name="android.app.lib_name" android:value="wf_game" />
             <intent-filter>
                 <action android:name="android.intent.action.MAIN" />
                 <!-- Phone / tablet launcher -->
@@ -35,7 +41,7 @@
                 <!-- Google TV / Android TV launcher -->
                 <category android:name="android.intent.category.LEANBACK_LAUNCHER" />
             </intent-filter>
-        </activity>
+        </activity-alias>
 
         <!-- Second launcher icon: reads wf.log from the app's own
              external-files dir and displays it. Works even when the

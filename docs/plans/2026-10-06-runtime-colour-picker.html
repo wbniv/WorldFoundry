@@ -1,0 +1,229 @@
+<!doctype html><html lang="en"><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><title>Runtime colour picker — review choices</title><style>body{font:17px/1.65 system-ui,sans-serif;color:#dce8ed;background:#10222c;max-width:1120px;margin:32px auto;padding:0 24px}a{color:#88d9c5}h1,h2,h3{line-height:1.25}h2{margin-top:2em}img{display:block;max-width:100%;height:auto;margin:24px 0;border-radius:12px}table{border-collapse:collapse;width:100%;font-size:15px}td,th{border:1px solid #46606c;padding:10px;text-align:left;vertical-align:top}th{background:#203b48}code{color:#c5dfac}@media print{body{background:white;color:black;font-size:11pt}a{color:#234}h2,h3{break-after:avoid}img,table{break-inside:avoid}}</style><body><h1>Runtime colour picker: palette-first replacement</h1>
+<p>Date: 2026-10-06 · Status: Option C implemented and locally validated; TV text contrast verified on both devices; complete Chromecast palette interaction/profile acceptance remains pending.</p>
+<p>Replace the basic runtime RGB picker with a visual colour editor for all <code>BUTTON_INT32 / SHOW_AS_COLOR</code> fields. Will selected C and explicitly authorized the two TV engine UI files on 2026-10-06. The original proposals remain below for comparison. The chosen design should work with a TV remote, phone/tablet touch, and browser keyboard/mouse. It belongs to the generic OAS/OAD editor, rather than to the plant level.</p>
+<h2>Selected design and approval boundary</h2>
+<p>Will selected <strong>C — Palette first + custom shades</strong> on 2026-10-06. Implement the palette grid as the initial view, with selected/highlighted swatches, recent session colours and a Custom route to Option A’s saturation/value square and hue strip. Keep exact RGB/hex entry available.</p>
+<p>The proposed engine surface is limited to <code>wfsource/source/game/runtime_property_controls.h</code> (palette navigation, temporary colour state, HSV conversion, custom editing and confirmation/cancellation) and <code>wfsource/source/game/runtime_property_ui.cc</code> (palette, original/preview swatches, custom square/hue strip and mode-specific hints). Spectrum drawing would initially use bounded existing solid rectangles, with cached colour calculations; device profiling will decide whether that approach is acceptable. No renderer API, core property binding, storage format, or Forth bridge change is proposed. If existing text-entry callbacks need adjustment for RGB/hex, keep it within the UI helper and the existing host contract.</p>
+<p>The phone implementation changes <code>wfsource/source/hal/phonepad/controller.html</code> to the same palette/custom workflow with browser controls compatible with WebView 91. Tests and these documents accompany the changes. Any additional engine files or renderer changes require a fresh proposal. Permission for the two TV engine UI files was explicitly granted by Will (“i authorize”). The <a href="../../AGENTS.md">AGENTS.md</a> rule still applies to any additional engine surface. Android Java text-field contrast was also corrected after Will reported unreadable black text; this uses the existing dialog and IME.</p>
+<h2>Current behaviour</h2>
+<p>The TV presents a swatch, hexadecimal readout and three RGB bars. Left/right changes the selected channel by one; up/down selects a channel or Done. Choosing an unfamiliar colour means adjusting three numbers without seeing the available colours. The phone has a browser-native colour input plus RGB sliders, so its visual picker depends on the browser.</p>
+<p>Read-only audit locations: <code>wfsource/source/game/runtime_property_controls.h</code>, <code>runtime_property_ui.cc</code>, and <code>wfsource/source/hal/phonepad/controller.html</code>. The TV helper currently emits solid <code>PhonepadRect</code> rectangles and bitmap text; a smooth spectrum is not an existing primitive in that helper. wf-edit already uses ImGui <code>ColorEdit3</code>; Blender uses its own picker through <code>wf.pick_color</code>. Importing either whole editor into runtime is unnecessary.</p>
+<p>The stored value remains an integer <code>0x00RRGGBB</code>, transported as decimal. HSV is an editing representation, not a replacement storage format. No opacity control is included: this field has no alpha channel, even though the renderer supports translucency.</p>
+<h2>Research and what it suggests</h2>
+<table>
+<thead>
+<tr>
+<th>Reference</th>
+<th>Observed design</th>
+<th>Application to our picker</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><a href="https://learn.microsoft.com/en-us/windows/apps/develop/ui/controls/color-picker">Microsoft ColorPicker</a></td>
+<td>Spectrum, RGB/HSV/hex entry; square and ring variants; explicit flyout commit policy. Recommends a sufficiently large square or precise text entry.</td>
+<td>A large spectrum plus exact entry; explicitly distinguish preview from confirmation.</td>
+</tr>
+<tr>
+<td><a href="https://helpx.adobe.com/photoshop/desktop/adjust-color/choose-colors/choose-colors-with-the-adobe-color-picker.html">Adobe Photoshop picker</a></td>
+<td>Hue selection plus a two-dimensional saturation/brightness field; numeric RGB and hex entry.</td>
+<td>Separate hue from saturation/value rather than making users mix RGB channels for every colour.</td>
+</tr>
+<tr>
+<td><a href="https://help.figma.com/hc/en-us/articles/360041003774-Update-fills-using-the-color-picker">Figma picker</a></td>
+<td>Hue slider, multiple colour notations, and file/library colours alongside visual selection.</td>
+<td>Swatches and exact values complement the spectrum; keep advanced fields compact. Its opacity control does not map to our RGB-only field.</td>
+</tr>
+<tr>
+<td><a href="https://docs.blender.org/manual/en/4.4/interface/controls/templates/color_picker.html">Blender manual</a></td>
+<td>Documents circle/square variants and RGB/HSV/HSL/hex controls.</td>
+<td>A wheel is a familiar alternative for authoring users. The manual search excerpt was available; fetching the full page failed, so detailed Blender interaction parity remains unverified.</td>
+</tr>
+<tr>
+<td><a href="https://www.w3.org/WAI/ARIA/apg/patterns/slider/">W3C slider pattern</a></td>
+<td>Arrow adjustments, labelled controls, range/value announcements, keyboard endpoints.</td>
+<td>Use native range controls where practical on the web and meaningful numeric labels for custom controls. A two-dimensional field also needs accessible one-dimensional controls.</td>
+</tr>
+</tbody>
+</table>
+<p>These are design references, not comparative usability measurements on our devices. The recommendation below is an inference from their controls and our remote constraints.</p>
+<h2>Three choices</h2>
+<p>All mockups use the same selected RGB colour, <strong>#58A78C</strong> (88, 167, 140). They are static proposals, not screenshots or implemented controls. Phone mockups are intentionally displayed at document-sized widths.</p>
+<h3>A — Saturation/value square + hue strip (recommended)</h3>
+<p>Pick a hue on the strip; choose saturation horizontally and value vertically in the square. The square goes from white to the selected hue across its top, and to black at its bottom. Recent colours and exact RGB/hex entry remain available.</p>
+<p><img alt="Option A: TV and phone" src="2026-10-06-runtime-colour-picker/option-a.svg" /></p>
+<p>TV: A enters the square; ←/→ changes saturation and ↑/↓ changes value. A or ↶ leaves square-adjustment mode and returns to control navigation. The hue strip changes directly with ←/→ when focused. Short presses are fine steps; held input repeats and accelerates, stopping immediately on release. Exact RGB entries provide single-channel precision.</p>
+<p>Phone/tablet: drag in the square and along the hue strip. Desktop: pointer interaction or the separate Hue/Saturation/Value sliders under Details. This is the strongest general-purpose choice, provided the TV clearly displays whether arrows navigate or adjust.</p>
+<h3>B — Hue/saturation wheel + value strip</h3>
+<p>The wheel’s angle selects hue and its radius saturation; the separate value strip controls brightness. Centre is neutral; the rim is fully saturated. This is an HSV disc, not a hue-only ring with an unexplained empty centre.</p>
+<p><img alt="Option B: TV and phone" src="2026-10-06-runtime-colour-picker/option-b.svg" /></p>
+<p>TV: use the labelled Hue and Saturation bars below the wheel, plus Value. ←/→ adjusts the focused bar; ↑/↓ navigates between bars. The wheel visualises the result without requiring a remote-controlled circular cursor. Touch/pointer users can manipulate the wheel itself.</p>
+<p>This is the most visually playful option. The hue seam wraps naturally, but a radial surface gives less room to distinguish low-saturation colours. The remote and touch routes deliberately differ while producing the same RGB value.</p>
+<h3>C — Palette first + custom shades</h3>
+<p>A compact grid offers a starting palette and recent selections. Choosing a colour family opens lighter/darker and more/less saturated variants. Custom opens the full Option A editor; the palette never limits the stored RGB value.</p>
+<p><img alt="Option C: TV and phone" src="2026-10-06-runtime-colour-picker/option-c.svg" /></p>
+<p>TV: ordinary grid navigation; A selects a swatch into the picker preview. The selected swatch is highlighted with a check mark; focus has a separate outline. Custom remains reachable in the grid’s final row. Touch uses the same swatches.</p>
+<p>This is fastest for common choices and simplest on a remote, but adds an extra step for arbitrary colours. The default palette is generic, not a plant-specific list. Author-supplied palettes would be a separate schema proposal, not an implicit new OAS feature.</p>
+<table>
+<thead>
+<tr>
+<th>Choice</th>
+<th>Arbitrary colour</th>
+<th>TV remote</th>
+<th>Touch</th>
+<th>Implementation effort, relative</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>A: square + hue</td>
+<td>Direct; exact RGB/hex available</td>
+<td>Explicit square-adjustment mode</td>
+<td>Familiar drag surfaces</td>
+<td>Medium; spectrum drawing and conversion</td>
+</tr>
+<tr>
+<td>B: wheel + value</td>
+<td>Direct; exact RGB/hex available</td>
+<td>Three labelled bars</td>
+<td>Natural radial gesture</td>
+<td>Higher; radial rendering and hit testing</td>
+</tr>
+<tr>
+<td>C: palette + custom A</td>
+<td>Full range through Custom</td>
+<td>Easiest common selections</td>
+<td>Fast taps, custom when needed</td>
+<td>Medium plus A; swatches alone would be lower</td>
+</tr>
+</tbody>
+</table>
+<p><strong>Research recommendation was A; Will selected C, which includes A under Custom.</strong> Choose B for the wheel presentation, or C if quick remote choices matter most. Recent colours are held in memory for the app/browser session; they are not persisted or synchronised between hosts. No estimated FPS advantage is claimed for any design.</p>
+<h2>Shared interaction and data contract</h2>
+<p><img alt="Draft and confirmation diagram" src="2026-10-06-runtime-colour-picker/draft-flow.svg" /></p>
+<p>Opening the picker copies the field’s existing form draft into an original swatch and a temporary colour. Consume the opening A so it cannot immediately activate a control. Start in navigation mode; never open exact-entry keyboard automatically.</p>
+<p>Changing a control updates the temporary swatch and RGB/hex readouts. It does not apply the whole settings form or mutate the gameplay object. <strong>Use colour</strong> writes the temporary colour into the form draft and closes the picker. <strong>Cancel</strong>, or ↶ from picker navigation, restores the pre-picker field draft. From square adjustment, ↶ first returns to picker navigation. From a system keyboard, the existing keyboard/dialog back sequence runs first. The outer settings form keeps its established apply-and-close behaviour.</p>
+<p>The TV modal fully covers its own area on its first frame. Phone and TV share the existing form/session ownership and stale-command rejection. A phone colour edit must not silently overwrite an active TV edit: reuse the established ownership policy and show the resulting state. If that policy cannot support a private temporary colour, describe the small adapter change before implementation.</p>
+<p>Keep hue while saturation or value is zero, so passing through grey/black does not unexpectedly reset hue. Convert HSV to rounded/clamped RGB bytes only when needed; displaying an unchanged field must not rewrite its original packed value. Numeric RGB stays 0–255. Hex accepts six digits with an optional <code>#</code>, with validation before updating the draft. Use the existing system/native text entry facility, not a new keyboard grid.</p>
+<p>Focus markers use dark and light outlines; selection also has a check or label. Controls include names and values rather than conveying state only by colour. Browser range/text inputs provide a keyboard and assistive-technology route alongside the visual plane or wheel. Read-only fields show their swatch/value without enabling edits.</p>
+<h2>Implementation routes after choosing</h2>
+<table>
+<thead>
+<tr>
+<th>Area</th>
+<th>Intended reuse / change</th>
+<th>Boundary</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>Data and validation</td>
+<td>Existing SHOW_AS_COLOR binding, integer validation, form transaction and session protocol</td>
+<td>No new OAS/OAD type, alpha, colour space or Forth bridge</td>
+</tr>
+<tr>
+<td>Shared picker behaviour</td>
+<td>Small UI state/conversion helper; original/temporary values, channel parsing, navigation</td>
+<td>Share algorithms, not entire wf-edit/Blender widget libraries</td>
+</tr>
+<tr>
+<td>TV</td>
+<td>Replace basic drawer in <code>runtime_property_ui.cc</code> and input behaviour in <code>runtime_property_controls.h</code></td>
+<td>These are engine-tree files: discuss exact surface and obtain explicit engine permission before edits</td>
+</tr>
+<tr>
+<td>Spectrum rendering</td>
+<td>First investigate existing UI texture support read-only. A bounded rectangle grid is a fallback candidate; measure banding and draw cost before adopting it</td>
+<td>Do not add a gradient/texture renderer API without a separately approved concrete proposal</td>
+</tr>
+<tr>
+<td>Phone/tablet/web</td>
+<td>Replace browser-dependent main colour input with chosen visible control, CSS gradients/canvas and native range/text controls</td>
+<td>Chromium/WebView 91; keyboard uses existing input facilities</td>
+</tr>
+<tr>
+<td>wf-edit / Blender</td>
+<td>Audit existing visual behaviour; retain their established widgets initially</td>
+<td>Matching every authoring picker is not required to replace runtime UI; changes need their own agreed scope</td>
+</tr>
+</tbody>
+</table>
+<p>A browser-native colour input remains a possible implementation shortcut, but does not give a consistent TV/phone layout. It is not the recommended primary editor. Native Android text-entry support does not itself provide a colour-picker dialog.</p>
+<p>Do not depend on the web EyeDropper API: <a href="https://developer.chrome.com/docs/capabilities/web-apis/eyedropper">Chrome documents support beginning at version 95</a>, above our WebView 91 minimum. Sampling a shaded tank screenshot is also different from selecting the underlying property value. Screen sampling and wide-gamut/alpha editing are deferred.</p>
+<h2>Delivery phases and acceptance</h2>
+<ol>
+<li><strong>Choice complete: C.</strong> Palette first, with Custom opening A. Preserve the confirmation and back-arrow behaviour described above.</li>
+<li><strong>Engine surface agreed and authorized.</strong> The two TV UI files use existing solid-rectangle rendering; the spectrum is a cached 24×24 grid (576 cells), plus a 72-segment hue strip. No renderer API or property-schema changes were made for this picker.</li>
+<li><strong>Implement selected controls.</strong> Share conversion/state code where useful; keep existing property representation and session ownership. Update the generic editor plan and rendering audit with actual behaviour.</li>
+<li><strong>Verify locally and on both Chromecasts through the coordinator.</strong> Freeze APK before submission. Use an authored colour-field fixture, rather than assuming the plant settings already expose an RGB field.</li>
+</ol>
+<p>Acceptance covers packed-value identity on opening; black/white/grey and primary-colour boundaries; hue retention; exact hex/RGB entry; Cancel versus Use colour; held/released remote input; opening-A consumption; keyboard dismissal; first-frame modal coverage; read-only fields; stale phone sessions; and TV/phone equality of the resulting integer. Verify touch and browser keyboard controls as well as actual WebView 91 behaviour on cast2.</p>
+<p>Record picker-open latency, settings-overlay frame time, draw counts and memory at baseline and with the chosen picker on a Chromecast. Measure the solid-grid or texture approach rather than treating visual resolution as free. Compare closed-settings gameplay too, ensuring the picker does not keep generating spectrum work after it closes. Do not substitute fluctuating desktop FPS for device measurements.</p>
+<p>Related: <a href="2026-10-06-runtime-oas-oad-object-editor.md">generic runtime OAS/OAD editor plan</a> · <a href="../reference/2026-10-06-oas-oad-editor-rendering-audit.md">editor rendering audit</a>.</p>
+<h2>Implementation and evidence — 2026-10-06</h2>
+<p>C is implemented in the TV and phone UI: 16 swatches, up to six recent colours, separate original/preview swatches, explicit Use colour / Cancel, and Custom with HSV controls plus RGB/hex entry. TV square adjustment supports held-input repeat and release; its back arrow first leaves adjustment mode. Exact TV values use the existing Android system editor. Phone editing opens a full-screen panel above the form header; native browser text inputs and labelled sliders provide exact entry and keyboard access.</p>
+<p>The TV system editor explicitly uses a dark dialog context, light text, dark field background, readable hint/selection colours and light action labels. Phone text/textarea/select text, disabled text, caret, placeholder and selection colours are explicitly styled too. Default theme text colours are not relied upon.</p>
+<h3>Actual UI captures</h3>
+<p><img alt="TV palette rendered by the real UI helper" src="2026-10-06-runtime-colour-picker/evidence/tv-colour.svg" /></p>
+<p><img alt="TV Custom rendered by the real UI helper" src="2026-10-06-runtime-colour-picker/evidence/tv-custom-colour.svg" /></p>
+<p><img src="2026-10-06-runtime-colour-picker/evidence/colour-palette-phone.png" alt="Actual phone palette" style="max-width:390px"></p>
+<p><img src="2026-10-06-runtime-colour-picker/evidence/colour-custom-phone.png" alt="Actual phone Custom" style="max-width:390px"></p>
+<h3>Validation limits</h3>
+<p>The original native numeric validator failed on both devices at <code>native_numeric_text_applied_to_draft</code>. Captures confirm the text contrast fix. Retry logs show <code>wf_property_text: field=1 accepted=true bytes=1</code> before the injected digits arrive, followed by numeric keys being dropped by the game. The system editor completed during the validator’s Up probe; the validator should detect completion and reopen the field before injecting text. This is an inference from the event order, not a verified keyboard implementation detail. Keep the native IME; do not suppress its legitimate Done action just to satisfy an old test sequence.</p>
+<p>The first device fixture had one menu entry; the engine deliberately skipped the selector. Its <code>poke-resume</code> jobs completed but did <strong>not</strong> exercise the palette. They are lifecycle evidence only, not colour-picker acceptance. <code>build_device_fixture.py</code> now prepares a two-entry test pack from an actual authored <code>actor.oad / Background Color / SHOW_AS_COLOR</code> field, keeping shipped levels untouched. Its RGB property has no gameplay consumer; it is a UI fixture, not an implemented plant tint setting.</p>
+<p>Full Custom interaction and overlay performance measurements on the Chromecasts remain pending a reviewed coordinator validator capable of those interactions. Current fixed validators cannot arbitrarily drive this new picker. Local tests exercise conversion, private preview, cancellation, confirmation, native callbacks, stale callbacks and browser interaction. Device results must not be reported as complete palette editing or profiling without the corresponding captures and assertions.</p>
+<table>
+<thead>
+<tr>
+<th>Check</th>
+<th>Result</th>
+<th>Scope</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>Shared property / picker / browser tests</td>
+<td>8 passed</td>
+<td>Includes actual C++ UI and phone transport; conversion, preview isolation, confirmation/cancellation, exact input, stale callbacks and hold/release</td>
+</tr>
+<tr>
+<td>Phone controller regressions</td>
+<td>14 passed</td>
+<td>Held/released directional/button input, heartbeat, disconnect and takeover</td>
+</tr>
+<tr>
+<td>Android release build</td>
+<td>Passed, both ABIs</td>
+<td><code>armeabi-v7a</code> and <code>arm64-v8a</code></td>
+</tr>
+<tr>
+<td>TV text contrast</td>
+<td>Verified from captures on cast1 and cast2</td>
+<td>Explicit readable text in the system edit dialog; numeric validator sequence still fails after Up completes the editor</td>
+</tr>
+<tr>
+<td>Fixture lifecycle checks</td>
+<td>Both devices completed</td>
+<td>Captures showed gameplay, not palette: one-entry packs skip selector; the two-entry custom fixture does not satisfy the existing plant-only selector settings route</td>
+</tr>
+<tr>
+<td>Palette/Custom editing on Chromecast</td>
+<td>Pending</td>
+<td>Requires a reviewed coordinator validator to enter a level, hold A and drive the authored colour field, rather than relying on the existing selector shortcut</td>
+</tr>
+<tr>
+<td>Picker overlay performance</td>
+<td>Pending</td>
+<td>No FPS or latency claim from desktop timing or gameplay-only screenshots</td>
+</tr>
+</tbody>
+</table>
+<p>The second fixture likewise did not open the colour field: current selector settings are specifically tied to the Planted Tank preview registry. Its jobs <code>J-be5cd48f3730</code> / <code>J-220eefda3ae0</code> completed, but their captures must not count as palette acceptance. This limitation requires no additional engine change to implement the picker; the device validator needs to navigate the in-level generic editor.</p>
+<p>The intermediate install-only restoration jobs failed launcher artwork verification with “HOME launcher left foreground during artwork verification”, after installing the normal APK. Final restoration uses ordinary coordinator launch/resume checks; preserve the receipts and report their final status separately.</p>
+<h3>Release artifact and restoration</h3>
+<p>Final frozen release: <code>/tmp/wf-colour-picker-complete.apk</code>, SHA-256 <code>dd3f50a584a6ee582558bf4aa3b3a65184b6056d34fbfc2e9147463956b2a22d</code>. The standard build output is <code>android/app/build/outputs/apk/aquarium/release/worldfoundry-aquarium-release.apk</code>.</p>
+<p>Normal Aquarium restoration and launch/resume completed on both devices for the preceding build (<code>J-e8dbb35fdee5</code>, <code>J-9571d091dca8</code>). Final hue-strip styling was browser-tested (2 transport/browser tests passed) and packaged afterward. Final installed-build checks: batch <code>B-c86dce349442</code>, cast1 <code>J-d54a9c1e169a</code>, cast2 <code>J-42fbffc7fb41</code>; final receipts are saved under <code>evidence/final-app/</code>.</p>
+<p>Ordinary app test jobs close/restore their session afterward; these checks do not promise to leave Aquarium running. No dedicated-device reservation was created or released. No raw ADB was used.</p>
+<p><strong>Final installation/lifecycle result: both completed.</strong> Batch <code>B-c86dce349442</code> finished successfully on cast1 (<code>J-d54a9c1e169a</code>) and cast2 (<code>J-42fbffc7fb41</code>), using the frozen SHA-256 above. Both devices have the normal Aquarium pack again. This confirms installation, launch, basic input and Home/resume; it does not close the separately listed palette-edit/profiling checks.</p>
+<p><img alt="Readable native TV editor on cast1" src="2026-10-06-runtime-colour-picker/evidence/native-retry/chromecast-test-01/J-58b0227d4b12/native-numeric-keyboard-screenshot.png" /></p>
+<p><a href="2026-10-06-runtime-colour-picker/evidence/native-retry/chromecast-test-02/J-d0a71323fbf2/native-numeric-keyboard-screenshot.png">Matching readable editor capture on cast2</a>.</p></body></html>

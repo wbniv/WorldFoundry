@@ -1,15 +1,18 @@
 #include "runtime_property_ui.h"
+#include "runtime_property_controls.h"
 #include <algorithm>
 #include <cstdlib>
+#include <cmath>
 #include <hal/remote_back_arrow.h>
 #include "../../../engine/vendor/stb_easy_font.h"
 namespace propertyui {
+namespace { const bool registeredInput=[](){inputHandler()=&input;return true;}(); }
 void build(wfprops::Form& editor,bool phone,int w,int h,std::vector<PhonepadRect>& out){
  float sx=w/1920.f,sy=h/1080.f;
  auto rect=[&](float x,float y,float width,float height,uint32_t color){out.push_back({x*sx,y*sy,(x+width)*sx,(y+height)*sy,color});};
  auto text=[&](float x,float y,float scale,const std::string& str,uint32_t color=0xf1f2e4ffu){alignas(float) char buf[24000];int n=stb_easy_font_print(0,0,const_cast<char*>(str.c_str()),nullptr,buf,sizeof(buf));float* f=reinterpret_cast<float*>(buf);for(int i=0;i<n;i++){float* v=f+i*16;float x0=v[0],y0=v[1],x1=x0,y1=y0;for(int k=1;k<4;k++){x0=std::min(x0,v[k*4]);x1=std::max(x1,v[k*4]);y0=std::min(y0,v[k*4+1]);y1=std::max(y1,v[k*4+1]);}rect(x+x0*scale,y+y0*scale,(x1-x0)*scale,(y1-y0)*scale,color);}};
  rect(0,0,1920,1080,0x061014ffu);rect(180,110,1560,820,0x142d25ffu);
- auto& f=editor;auto* object=f.edit.object();if(!object)return;text(225,150,4,object->title);
+ syncText(editor,phone);auto& f=editor;auto* object=f.edit.object();if(!object)return;text(225,150,4,object->title);
  struct ArrowPainter {decltype(rect)& draw;void Rect(float x0,float y0,float x1,float y1,uint32_t c){draw(x0,y0,x1-x0,y1-y0,c);}} painter{rect};
  auto item=[&](bool focused,float x,float y,float width,float height,const std::string& label){rect(x,y,width,height,focused?0x497b51ffu:0x233e31ffu);text(x+18,y+18,3,label.substr(0,size_t(width/19)));};
  if(phone){text(225,350,4,"Edit properties on your connected phone");}
@@ -17,18 +20,61 @@ void build(wfprops::Form& editor,bool phone,int w,int h,std::vector<PhonepadRect
   size_t sectionStart=f.section>5?f.section-5:0;
   for(size_t i=sectionStart;i<f.titles.size()&&i<sectionStart+6;++i)item(f.rail&&i==f.section,225,240+(i-sectionStart)*85,330,68,f.titles[i]);
   if(f.section<f.sections.size()){
-   const auto& rows=f.sections[f.section];size_t first=f.row>5?f.row-5:0;
-   for(size_t i=first;i<rows.size()&&i<first+6;++i){const auto& field=object->fields[rows[i]];float y=240+(i-first)*85;if(field.kind==10)continue;
+   const auto& rows=f.sections[f.section];
+   auto options=[](const wfprops::Field& field){std::vector<std::string> labels;size_t start=0;while(start<=field.choices.size()){auto end=field.choices.find('|',start);labels.push_back(field.choices.substr(start,end==std::string::npos?end:end-start));if(end==std::string::npos)break;start=end+1;}return labels;};
+   auto columns=[&](const wfprops::Field& field){size_t longest=0;auto labels=options(field);for(const auto& label:labels)longest=std::max(longest,label.size());return std::max(1,std::min(int(labels.size()),int(1040/std::max(140.f,float(longest)*16+44))));};
+   auto height=[&](size_t i){const auto& field=object->fields[rows[i]];if(field.show==2&&field.kind<=2)return 128.f;if(field.kind==2&&field.show==5)return 62.f+48.f*std::min(3,int((options(field).size()+columns(field)-1)/columns(field)));return 85.f;};
+   size_t first=std::min(f.row,rows.empty()?size_t(0):rows.size()-1);float used=rows.empty()?0:height(first);while(first>0&&used+height(first-1)<=515){used+=height(--first);}
+   float y=240;
+   for(size_t i=first;i<rows.size();++i){const auto& field=object->fields[rows[i]];float rowHeight=height(i);if(y+rowHeight>765)break;if(field.kind==10){y+=rowHeight;continue;}
     auto v=f.edit.draft.find(field.id);std::string value=v==f.edit.draft.end()?"":v->second;
     if(field.kind==2){int index=std::atoi(value.c_str())-field.minimum;size_t from=0;for(int k=0;k<index;++k){size_t next=field.choices.find('|',from);if(next==std::string::npos)break;from=next+1;}size_t to=field.choices.find('|',from);value=field.choices.substr(from,to==std::string::npos?to:to-from);}
     if(field.kind==4)value=value=="1"?"On":"Off";
-    item(!f.rail&&i==f.row,600,y,1080,68,field.kind==9?field.label:field.label+": "+value+(field.readonly?" (read only)":""));
+    std::replace(value.begin(),value.end(),'\n',' ');std::replace(value.begin(),value.end(),'\r',' ');
+    if(colour(&field))value=hex(rgb(value));
+    bool radio=field.kind==2&&field.show==5;
+    item(!f.rail&&i==f.row,600,y,1080,rowHeight-12,field.kind==9?field.label:radio?field.label:field.label+": "+value+(field.readonly?" (read only)":""));
+    if(colour(&field))rect(1570,y+16,70,40,(rgb(v==f.edit.draft.end()?"0":v->second)<<8)|255u);
+    if(radio){auto labels=options(field);int cols=columns(field);int selected=std::atoi(v==f.edit.draft.end()?"0":v->second.c_str())-field.minimum;int firstOptionRow=std::max(0,selected/cols-2);float cell=1040.f/cols;
+     for(size_t k=size_t(firstOptionRow*cols);k<labels.size()&&k<size_t((firstOptionRow+3)*cols);++k){float x=620+(k%cols)*cell,oy=y+62+(int(k)/cols-firstOptionRow)*48;rect(x,oy-17,cell-12,36,int(k)==selected?0xe4efd9ffu:0x19382dffu);text(x+12,oy-11,2.5f,labels[k].substr(0,size_t((cell-35)/16)),int(k)==selected?0x132b26ffu:0xe4efd9ffu);}
+    }
+    if(field.show==2&&field.kind<=2){double scale=field.kind==1&&field.scale?field.scale:1;double low=field.minimum/scale,high=field.maximum/scale;double current=std::strtod(v==f.edit.draft.end()?"0":v->second.c_str(),nullptr);float fraction=high>low?float(std::max(0.0,std::min(1.0,(current-low)/(high-low)))):0;
+     const float left=630,width=1000,cy=y+62;rect(left,cy-2,width,4,0x8aab8affu);rect(left,cy-2,width*fraction,4,0xe4efd9ffu);
+     auto labels=field.kind==2?options(field):std::vector<std::string>{};if(labels.size()>1&&labels.size()<=9){for(size_t k=0;k<labels.size();++k){float x=left+width*k/(labels.size()-1);rect(x-1,cy-6,2,12,0xe4efd9ffu);float labelWidth=labels[k].size()*15.f;text(std::max(left,std::min(left+width-labelWidth,x-labelWidth/2)),y+91,2.5f,labels[k]);}}
+     else {text(left,y+91,2.5f,std::to_string(low));text(left+width-120,y+91,2.5f,std::to_string(high));}
+     rect(left+width*fraction-7,cy-12,14,24,field.readonly?0x8aab8affu:0xefce83ffu);
+    }
+    y+=rowHeight;
    }
    if(rows.size()>6)text(605,775,2.5f,std::to_string(f.row+1)+" / "+std::to_string(rows.size()));
   }
-  if(f.drawer){rect(940,205,720,640,0x102621ffu);const auto* field=f.field();text(975,235,3,field?field->label:"");text(975,295,3,f.value());const char* keys[]={"1","2","3","4","5","6","7","8","9","<","0","Clear","-",".","Done"};for(int i=0;i<15;++i)item(i==f.key,975+(i%3)*210,355+(i/3)*85,195,68,keys[i]);}
+  if(f.drawer){const auto* field=f.field();auto& ui=controls(f);
+   if(colour(field)){rect(600,205,1080,625,0x102621ffu);text(630,235,3,field->label);
+    auto outline=[&](float x,float y,float width,float height,uint32_t color){rect(x-4,y-4,width+8,4,color);rect(x-4,y+height,width+8,4,color);rect(x-4,y,4,height,color);rect(x+width,y,4,height,color);};
+    auto swatch=[&](float x,float y,float size,uint32_t packed,bool focus){rect(x,y,size,size,(packed<<8)|255u);if(packed==ui.preview){rect(x+8,y+8,24,24,0x102621ffu);text(x+13,y+13,2,"X");}if(focus)outline(x,y,size,size,0xffffffffu);};
+    text(1220,290,2.5f,"Original / Preview");rect(1220,325,170,90,(ui.original<<8)|255u);rect(1400,325,170,90,(ui.preview<<8)|255u);text(1220,450,3,hex(ui.preview));
+    text(1220,500,2.2f,"RGB "+std::to_string((ui.preview>>16)&255)+" / "+std::to_string((ui.preview>>8)&255)+" / "+std::to_string(ui.preview&255));
+    if(ui.page==0){for(int i=0;i<16;++i)swatch(645+(i%4)*130,290+(i/4)*100,80,palette()[i],ui.focus==i);
+     text(645,703,2.3f,"Recent");int n=int(recentColours().size());for(int i=0;i<n;++i)swatch(760+i*65,690,44,recentColours()[i],ui.focus==16+i);
+     int actions=16+n;item(ui.focus==actions,630,760,280,58,"Custom");item(ui.focus==actions+1,940,760,280,58,"Use colour");item(ui.focus==actions+2,1250,760,280,58,"Cancel");
+    }else if(ui.page==1){
+     // Bounded 24x24 grid uses the existing solid-rectangle overlay; no renderer API change.
+     static double spectrumHue=-1;static std::array<uint32_t,576> spectrum;
+     if(spectrumHue!=ui.hue){spectrumHue=ui.hue;for(int y=0;y<24;++y)for(int x=0;x<24;++x)spectrum[y*24+x]=(hsv(ui.hue,x/23.,1-y/23.)<<8)|255u;}
+     for(int y=0;y<24;++y)for(int x=0;x<24;++x)rect(640+x*16,290+y*16,16,16,spectrum[y*24+x]);
+     if(ui.focus==0)outline(640,290,384,384,ui.planeAdjust?0xefce83ffu:0xffffffffu);
+     float px=640+ui.saturation*384,py=290+(1-ui.value)*384;rect(px-8,py-8,16,16,0x000000ffu);rect(px-5,py-5,10,10,0xffffffffu);
+     item(ui.focus==1,630,700,420,70,"Hue: "+std::to_string(int(std::round(ui.hue))));for(int x=0;x<72;++x)rect(645+x*5.3f,745,5.4f,16,(hsv(x*5,1,1)<<8)|255u);rect(645+ui.hue/360*381-3,740,6,26,0xffffffffu);
+     item(ui.focus==2,1100,565,510,60,"RGB / Hex details");item(ui.focus==3,1100,640,510,60,"Use colour");item(ui.focus==4,1100,715,510,60,"Palette");
+     text(650,791,2,"S "+std::to_string(int(std::round(ui.saturation*100)))+"% / V "+std::to_string(int(std::round(ui.value*100)))+"%");
+    }else {const char* names[]={"Red","Green","Blue","Hex"};for(int i=0;i<4;++i)item(ui.focus==i,630,300+i*95,530, 70,names[i]+std::string(": ")+(i==3?hex(ui.preview):std::to_string((ui.preview>>((2-i)*8))&255)));item(ui.focus==4,630,700,530,65,"Custom colour");}
+    if(ui.nativeOpen){rect(620,270,1030,500,0x102621ffu);text(655,330,3,"Editing with the system keyboard");}
+   }else {rect(600,205,1080,300,0x102621ffu);text(630,235,3,field?field->label:"");text(630,330,3,"Editing with the system keyboard");}
+
+  }
  }
- text(225,840,2.7f,f.edit.error.empty()?(f.drawer?"Arrows: keypad   A: enter":f.adjust?"Left / right: adjust   A: finish":"Arrows: select   A: edit"):f.edit.error,0xffdd99ffu);
- remoteui::BackArrow(painter,1260,840,4,0xf1f2e4ffu);text(1310,840,2.7f,f.drawer?"Close keypad":"Apply / close");
+ const auto* focused=f.field();bool direct=!f.rail&&focused&&!focused->readonly&&(focused->kind==2||focused->kind==4||focused->show==2);
+ text(225,840,2.7f,f.edit.error.empty()?(f.drawer?(colour(focused)?(controls(f).planeAdjust?"Arrows: saturation / value   A: finish":controls(f).page==1?"Up / down: select   Left / right: hue":"Arrows: select   A: choose"):"Use the system text editor"):direct?"Up / down: select   Left / right: change":"Arrows: select   A: edit"):f.edit.error,0xffdd99ffu);
+ remoteui::BackArrow(painter,1260,840,4,0xf1f2e4ffu);text(1310,840,2.7f,f.drawer?(colour(focused)?(controls(f).planeAdjust?"Finish adjustment":"Cancel colour"):"Close editor"):"Apply / close");
 }
 }

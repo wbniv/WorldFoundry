@@ -1,0 +1,27 @@
+{
+  "apk": "/tmp/wf-colour-picker-complete.apk",
+  "sha256": "dd3f50a584a6ee582558bf4aa3b3a65184b6056d34fbfc2e9147463956b2a22d",
+  "sources": {
+    "wfsource/source/game/runtime_property_controls.h": "f5243325f9259697159ce34930a2ca7bd708497084dc6181ac927c3364e901f7",
+    "wfsource/source/game/runtime_property_ui.cc": "d3796e1456e18224b412a6854eb5130925c11679f7191ab3e25d849c2a0fd3de",
+    "wfsource/source/hal/phonepad/controller.html": "bfbe531a29a63897966e533c80823425d2ca30f4a2f09a6f5dec5b385c3af3a9",
+    "android/app/src/main/java/org/worldfoundry/wf_game/WorldFoundryActivity.java": "24247366ca63790f04ae3afc2df4e40ddab0f0d5f6396057e3596b853919e161"
+  },
+  "batch": "B-c86dce349442",
+  "jobs": {
+    "cast1": "J-d54a9c1e169a",
+    "cast2": "J-42fbffc7fb41"
+  },
+  "local_checks": {
+    "property_picker_browser": 8,
+    "phone_input": 14,
+    "final_phone_transport": 2
+  },
+  "device_palette_editing": "pending",
+  "device_profile": "pending",
+  "device_text_contrast": "verified from captures on both devices",
+  "final_install_lifecycle": {
+    "cast1": "completed",
+    "cast2": "completed"
+  }
+}

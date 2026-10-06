@@ -37,6 +37,29 @@ def test_missing_oad_field_rejected():
     with pytest.raises(ValueError):
         M.catalog(ROOT/'wflevels/aquarium_plants/settings.oad',{'fields':{'Invented':{'id':1}}},1)
 
+def test_colour_text_and_notes_ui(catalog,tmp_path):
+    path=tmp_path/'properties';path.write_bytes(catalog);exe=tmp_path/'controls'
+    subprocess.run(['c++','-std=c++17','-I'+str(ROOT/'wfsource/source'),str(ROOT/'tests/runtime_property_controls_test.cpp'),str(ROOT/'wfsource/source/game/runtime_property_ui.cc'),str(ROOT/'wfsource/source/game/runtime_settings_ui.cc'),str(ROOT/'engine/runtime_properties.cpp'),str(ROOT/'engine/runtime_property_form.cpp'),str(ROOT/'engine/runtime_property_host.cpp'),str(ROOT/'wftools/wf_attr_edit/target/release/libwf_attr_edit.a'),'-ldl','-lpthread','-lm','-o',str(exe)],check=True)
+    subprocess.run([exe,path,tmp_path],check=True)
+
+def test_explicit_notes_binding_uses_multiline_string(tmp_path):
+    key='Cave Logic Studios Notes|'
+    payload=M.catalog(ROOT/'wfsource/source/oas/actor.oad',{'fields':{key:{'id':205,'initial':'One\nTwo'}}},1)
+    # Verify the actual cooker's projection of a shipped ignored-XData Notes field.
+    path=tmp_path/'notes.rprp';path.write_bytes(payload)
+    cursor=8
+    cursor+=4 # actor ID
+    def skip_string():
+        nonlocal cursor
+        size=struct.unpack_from('<I',payload,cursor)[0];cursor+=4+size
+    skip_string();skip_string();count=struct.unpack_from('<I',payload,cursor)[0];cursor+=4
+    found=None
+    for _ in range(count):
+        values=struct.unpack_from('<IBBBBiiIII',payload,cursor);cursor+=28
+        if values[0]==205:found=values
+        for _ in range(6):skip_string()
+    assert found and found[1]==3 and found[3]==0 and found[4]==2 and found[-1]==4096
+
 
 def test_catalog_replacement_on_flag_only_baseline_ram(catalog):
     original=(ROOT/'wflevels/baseline-standalone.iff').read_bytes()

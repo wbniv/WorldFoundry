@@ -473,6 +473,26 @@ bool DrawValueWidget(wfcrdt::Doc& doc, int actor, PropField& f, int row)
         }
         case FieldKind::Enum: {
             int cur = EnumCurrent(f);
+            if (f.show_as == SHOW_AS_RADIOBUTTONS) {
+                const float available = ImGui::GetContentRegionAvail().x;
+                float used = 0;
+                for (std::size_t k = 0; k < f.options.size(); ++k) {
+                    float width = ImGui::CalcTextSize(f.options[k].c_str()).x + ImGui::GetStyle().FramePadding.x * 2;
+                    if (k && used + ImGui::GetStyle().ItemSpacing.x + width <= available) {
+                        ImGui::SameLine(); used += ImGui::GetStyle().ItemSpacing.x;
+                    } else used = 0;
+                    ImGui::PushID(static_cast<int>(k));
+                    if (static_cast<int>(k) == cur) ImGui::PushStyleColor(ImGuiCol_Button, ImGui::GetStyle().Colors[ImGuiCol_ButtonActive]);
+                    if (ImGui::Button(f.options[k].c_str()) && static_cast<int>(k) != cur) {
+                        std::string label = f.options[k];
+                        std::string idx = RespellNumber(f.data, FmtInt(static_cast<long>(k)));
+                        edited = Commit(doc, actor, f, f.data.empty() ? nullptr : &idx, &label);
+                    }
+                    if (static_cast<int>(k) == cur) ImGui::PopStyleColor();
+                    ImGui::PopID(); used += width;
+                }
+                break;
+            }
             const char* cur_label = (cur >= 0) ? f.options[cur].c_str()
                                                : (f.label.empty() ? "(unset)" : f.label.c_str());
             if (ImGui::BeginCombo("##enum", cur_label)) {

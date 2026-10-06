@@ -29,6 +29,7 @@
 #include <android/keycodes.h>
 #include <android/log.h>
 #include <android_native_app_glue.h>
+#include "property_text_input.h"
 
 #include <fcntl.h>
 #include <signal.h>
@@ -369,6 +370,14 @@ void HandleAppCmd(struct android_app* app, int32_t cmd)
             PhoneStop();            // listen only while resumed
             break;
 
+        case APP_CMD_LOST_FOCUS:
+        case APP_CMD_GAINED_FOCUS:
+            // A native text dialog/IME can consume the release of the opening
+            // key. Never carry that held game input across the UI transition.
+            gGamepadButtons = gTouchButtons = gPhoneButtons = 0;
+            Emit();
+            break;
+
         case APP_CMD_RESUME:
             WFLOG("APP_CMD_RESUME");
             HALNotifyResume();
@@ -541,6 +550,7 @@ WFAndroidPumpEvents()
         if (gApp->destroyRequested) { gExitLoop = true; break; }
     }
     PhonePoll();
+    androidtext::poll();
 }
 
 // The phone overlay's rectangles for a w x h surface, drawn by gfx/gl/android_window.cc after
@@ -559,6 +569,7 @@ extern "C" WF_ANDROID_EXPORT void
 android_main(struct android_app* app)
 {
     gApp = app;
+    androidtext::install(app->activity);
     OpenDiagnosticLog(app);
     InstallCrashHandlers();
     WFLOG("android_main: enter");

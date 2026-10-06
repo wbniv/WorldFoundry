@@ -11,7 +11,7 @@ import struct
 import subprocess
 
 ROOT=Path(__file__).resolve().parents[1]
-KINDS={'Int':0,'Float':1,'Enum':2,'Str':3,'Bool':4,'Section':5,'Group':6,'GroupEnd':7,'FileRef':8,'ObjRef':8,'Annotation':8}
+KINDS={'Int':0,'Float':1,'Enum':2,'Str':3,'Bool':4,'Section':5,'Group':6,'GroupEnd':7,'FileRef':8,'ObjRef':8,'Annotation':3}
 
 def string(value):
     b=str(value).encode('utf8')
@@ -35,10 +35,10 @@ def catalog(oad,bindings,actor):
             if not 1<=field_id<=32767 or field_id in used:raise ValueError('Invalid/duplicate field ID')
             used.add(field_id);seen.add(f['key'])
         default=str(f['default']/f['scale']) if f['kind']=='Float' else str(f['default'])
-        if f['kind']=='Str':default=''
+        if f['kind'] in ('Str','Annotation'):default=''
         f=dict(f,id=field_id,kind_id=kind,readonly=kind==8 or setting.get('readonly',False),
-               rule=1 if setting.get('rule')=='uint32-decimal' else 0,
-               max_length=setting.get('max_length',f['max'] if f['max']>0 else 256),
+               rule=1 if setting.get('rule')=='uint32-decimal' else 2 if f['kind']=='Annotation' or (f['kind']=='Str' and f['show']==11) or setting.get('multiline') else 0,
+               max_length=setting.get('max_length',4096 if f['kind']=='Annotation' else f['max'] if f['max']>0 else 256),
                initial=str(setting.get('initial',default)))
         fields.append(f)
     if seen!=set(bindings.get('fields',{})):raise ValueError('Bindings refer to missing/hidden OAD fields')

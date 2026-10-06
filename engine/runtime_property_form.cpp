@@ -17,7 +17,7 @@ bool Form::begin(Registry& registry,uint32_t actor,uint32_t openingButtons){
 const Field* Form::field() const {auto* o=edit.object();if(!o||section>=sections.size()||row>=sections[section].size())return nullptr;return &o->fields[sections[section][row]];}
 std::string Form::value() const {const auto* f=field();if(!f)return {};auto i=edit.draft.find(f->id);return i==edit.draft.end()?"":i->second;}
 void Form::change(int direction){const auto* f=field();if(!f||f->readonly)return;
-    if(f->kind==4){edit.set(f->id,value()=="1"?"0":"1");return;}
+    if(f->kind==4){edit.set(f->id,direction>0?"1":"0");return;}
     if(f->kind==2||f->kind==0){long long n=std::strtoll(value().c_str(),nullptr,10);n=std::max<long long>(f->minimum,std::min<long long>(f->maximum,n+direction));edit.set(f->id,std::to_string(n));}
     else if(f->kind==1){double scale=f->scale?f->scale:1;double n=std::strtod(value().c_str(),nullptr)+direction/scale;n=std::max(f->minimum/scale,std::min(f->maximum/scale,n));edit.set(f->id,std::to_string(n));}
 }
@@ -28,14 +28,15 @@ void Form::input(uint32_t buttons){uint32_t edge=buttons&~previous;previous=butt
         if(edge&1){const auto* f=field();if(!f)return;std::string text=value();if(key<9||key==10||key==12||key==13){if(replaceText){text.clear();replaceText=false;}char c=key<9?'1'+key:key==10?'0':key==12?'-':'.';if(text.size()<f->maxLength)text+=c;edit.set(f->id,text);}else if(key==9){if(!text.empty())text.pop_back();replaceText=false;edit.set(f->id,text);}else if(key==11){replaceText=false;edit.set(f->id,"");}else drawer=false;}
         return;
     }
-    if(adjust&&(edge&(left|right))){change(edge&right?1:-1);return;}
+    const auto* focused=field();
+    if(!rail&&focused&&!focused->readonly&&(adjust||focused->kind==2||focused->kind==4||focused->show==2)&&(edge&(left|right))){change(edge&right?1:-1);return;}
     if(edge&(up|down)){adjust=false;int delta=edge&down?1:-1;if(rail){section=size_t(std::max(0,std::min(int(sections.size())-1,int(section)+delta)));row=0;}else if(section<sections.size()){int next=int(row)+delta;while(next>=0&&next<int(sections[section].size())){auto* o=edit.object();if(o&&o->fields[sections[section][next]].kind!=10)break;next+=delta;}row=size_t(std::max(0,std::min(int(sections[section].size())-1,next)));}}
     if(edge&left)rail=true;if(edge&right)rail=false;
     if(!(edge&1))return;if(rail){rail=false;return;}const auto* f=field();if(!f||f->readonly)return;
     if(f->kind==9){if(action)action(f->key);return;}
     if(f->kind==10)return;
-    if(f->kind==4)change(1);
-    else if(f->kind==2||f->show==2)adjust=!adjust;
+    if(f->kind==4)edit.set(f->id,value()=="1"?"0":"1");
+    else if(f->kind==2||f->show==2)return;
     else {drawer=true;replaceText=true;key=0;}
 }
 bool Form::command(const std::string& text){

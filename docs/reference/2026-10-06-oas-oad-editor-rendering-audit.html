@@ -1,4 +1,4 @@
-<!doctype html><meta charset="utf-8"><title>OAS/OAD rendering audit</title><style>body{max-width:1200px;margin:35px auto;padding:20px;font:16px/1.6 system-ui}table{border-collapse:collapse}td,th{border:1px solid #bcc;padding:10px;vertical-align:top}a{color:#126b75}</style><h1>OAS/OAD editor rendering audit</h1>
+<!doctype html><meta charset="utf-8"><title>OAS/OAD rendering audit</title><style>body{max-width:1200px;margin:35px auto;padding:20px;font:16px/1.6 system-ui}table{border-collapse:collapse}td,th{border:1px solid #bcc;padding:10px;vertical-align:top}</style><h1>OAS/OAD editor rendering audit</h1>
 <p>Date: 2026-10-06. Source audit of Blender, wf-edit and the runtime form.</p>
 <h2>Finding</h2>
 <p>The runtime shares Rust schema normalization and strict scalar validation with
@@ -66,7 +66,7 @@ type/hint exactly. Copying either renderer wholesale would retain gaps.</p>
 <td>RGB colour</td>
 <td>Hex label and colour picker</td>
 <td>ColorEdit3 and hex</td>
-<td>New UI: TV swatch/hex and three channel sliders; phone native colour picker plus R/G/B sliders. Existing packed integer storage; local tests pass, device acceptance pending</td>
+<td>Palette-first TV/phone UI with original/preview, recent colours, Custom HSV and exact RGB/hex entry. Packed integer storage unchanged; local tests pass; full device colour-edit acceptance pending</td>
 </tr>
 <tr>
 <td>Object reference</td>
@@ -217,7 +217,7 @@ Equivalent values and constraints do not imply identical mutation capabilities.<
 <li>[x] Implement RGB UI through the approved scope, preserving packed values and existing transactions; local UI/browser tests pass, actual device acceptance remains.</li>
 <li>[ ] Design vector widgets through separately approved scope, preserving atomic typed edits.</li>
 <li>[ ] Design cooked-asset and typed-reference pickers with lifetime checks; retain read-only fallbacks meanwhile.</li>
-<li>[x] Replace custom Android text/numeric grids with the system editor/IME; native callbacks and phone text/Notes round trips pass local tests. Launch/resume passes on cast1; actual Gboard entry requires the reviewed coordinator update and rerun.</li>
+<li>[x] Replace custom Android text/numeric grids with the system editor/IME; native callbacks and phone text/Notes round trips pass local tests. Launch/resume passes on cast1; the reviewed coordinator update is deployed, but actual Gboard entry is blocked by device connection/recovery failures.</li>
 <li>[ ] Connect standalone desktop runtime text events/IME; existing browser text entry works. No custom on-screen keyboard fallback is requested.</li>
 <li>[ ] Render TV group labels and verify section navigation with an all-enum section.</li>
 <li>[ ] Separate hidden retention from visibility when effective readback is required.</li>
@@ -235,3 +235,5 @@ Equivalent values and constraints do not imply identical mutation capabilities.<
 </ul>
 <p>Related: <a href="../plans/2026-10-06-runtime-oas-oad-object-editor.md">runtime plan</a>,
 <a href="../plans/2026-10-05-world-foundry-baseline.md">baseline gallery</a>.</p>
+<h3>Runtime colour picker replacement (2026-10-06)</h3>
+<p>The runtime RGB control now uses the selected palette-first design, with Custom HSV editing and exact RGB/hex entry. Its <code>BUTTON_INT32 / SHOW_AS_COLOR</code> representation remains packed RGB; no alpha channel was added. Android text dialogs and phone fields have explicit contrast colours. See the <a href="../plans/2026-10-06-runtime-colour-picker.html">replacement plan and actual captures</a> for verified behaviour and remaining Chromecast interaction/profiling acceptance. Existing wf-edit/Blender colour widgets are retained.</p>
