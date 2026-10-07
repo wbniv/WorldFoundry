@@ -23,6 +23,7 @@
 //#include "anmswtch.hp"
 #define _SCALAR_CC
 #include <math/scalar.hp>
+#include <cstring>
 //#include <visual/brstrm.hp>
 #include <math/angle.hp>
 
@@ -212,7 +213,14 @@ binistream& operator >> ( binistream& binis, Scalar& scalar )
 	}
 #elif defined(SCALAR_TYPE_FLOAT) || defined(SCALAR_TYPE_DOUBLE)
 	if( binis.scalartype() == binios::float32 )
-		return binis >> (uint32&)scalar._value;
+	{
+		// Read the bits into a uint32 and copy them in: storing through (uint32&)scalar._value is a
+		// strict-aliasing violation that ThinLTO (Android Release) may reorder against later float reads.
+		uint32 bits;
+		binis >> bits;
+		memcpy( &scalar._value, &bits, sizeof( bits ) );
+		return binis;
+	}
 	else // need to convert fixed16_16 -> float32
 	{
       assert(0);

@@ -265,9 +265,9 @@ Scalar ScriptRouter::RunScript(const void* script, int objectIndex, int language
         if (!s_warned[language])
         {
             s_warned[language] = true;
-            cerror << "ScriptRouter: engine for language " << language
+            DBSTREAM1( cerror << "ScriptRouter: engine for language " << language
                    << " not compiled in; skipping script (warned once)"
-                   << std::endl;
+                   << std::endl; )
         }
         return Scalar::FromFloat(0.0f);
     }

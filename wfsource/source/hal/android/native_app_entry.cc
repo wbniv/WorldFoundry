@@ -23,6 +23,8 @@
 // Phase 3 step 4.
 //=============================================================================
 
+#include <dlfcn.h>
+#include <ucontext.h>
 #include <android/asset_manager.h>
 #include <android/configuration.h>
 #include <android/input.h>
@@ -34,6 +36,8 @@
 #include <fcntl.h>
 #include <signal.h>
 #include <sys/stat.h>
+#include <sys/syscall.h>
+#include <sys/uio.h>
 #include <unistd.h>
 
 #include <time.h>
@@ -82,11 +86,63 @@ bool                gExitLoop    = false;
 
 static const char* kWfLogName = "wf.log";
 
-void CrashSigHandler(int sig, siginfo_t* info, void* /*ucontext*/)
+// Print one code address as "module+offset", the form addr2line wants against
+// the unstripped library (the APK's copy is stripped). Not async-signal-safe
+// (dladdr, stdio); this runs once, on the way to a tombstone.
+void PrintCodeAddress(const char* label, void* pc)
+{
+    Dl_info di;
+    if (pc && dladdr(pc, &di) && di.dli_fname && di.dli_fbase)
+        std::fprintf(stderr, "  %s %p %s+0x%lx\n", label, pc, di.dli_fname,
+                     (unsigned long)((uintptr_t)pc - (uintptr_t)di.dli_fbase));
+    else
+        std::fprintf(stderr, "  %s %p\n", label, pc);
+}
+
+// Hex-dump 48 bytes behind a register value when that memory is readable. process_vm_readv on our
+// own pid returns EFAULT for an unmapped address instead of faulting again inside the handler.
+void DumpMemoryAt(const char* label, uintptr_t value)
+{
+    if (value < 0x10000)
+        return;
+    unsigned char bytes[48];
+    struct iovec local  = { bytes, sizeof(bytes) };
+    struct iovec remote = { reinterpret_cast<void*>(value), sizeof(bytes) };
+    if (syscall(__NR_process_vm_readv, getpid(), &local, 1, &remote, 1, 0) != (long)sizeof(bytes))
+        return;
+    std::fprintf(stderr, "  [%s]=%p:", label, reinterpret_cast<void*>(value));
+    for (unsigned i = 0; i < sizeof(bytes); ++i)
+        std::fprintf(stderr, "%s%02x", (i % 16 == 0) ? "\n    " : " ", bytes[i]);
+    std::fprintf(stderr, "\n");
+}
+
+void CrashSigHandler(int sig, siginfo_t* info, void* ucontext)
 {
     std::fprintf(stderr,
                  "\n!!! wf_game crashed: signal=%d si_code=%d si_addr=%p !!!\n",
                  sig, info ? info->si_code : 0, info ? info->si_addr : nullptr);
+    if (ucontext)
+    {
+        const ucontext_t* uc = static_cast<const ucontext_t*>(ucontext);
+#if defined(__arm__)
+        PrintCodeAddress("fault pc", reinterpret_cast<void*>(uc->uc_mcontext.arm_pc));
+        PrintCodeAddress("lr      ", reinterpret_cast<void*>(uc->uc_mcontext.arm_lr));
+        const unsigned long regs[] = { uc->uc_mcontext.arm_r0, uc->uc_mcontext.arm_r1, uc->uc_mcontext.arm_r2,
+            uc->uc_mcontext.arm_r3, uc->uc_mcontext.arm_r4, uc->uc_mcontext.arm_r5, uc->uc_mcontext.arm_r6,
+            uc->uc_mcontext.arm_r7, uc->uc_mcontext.arm_r8, uc->uc_mcontext.arm_r9, uc->uc_mcontext.arm_r10,
+            uc->uc_mcontext.arm_fp, uc->uc_mcontext.arm_ip, uc->uc_mcontext.arm_sp };
+        static const char* const names[] = { "r0", "r1", "r2", "r3", "r4", "r5", "r6", "r7", "r8", "r9", "r10", "fp", "ip", "sp" };
+        std::fprintf(stderr, "registers:");
+        for (unsigned i = 0; i < sizeof(regs) / sizeof(regs[0]); ++i)
+            std::fprintf(stderr, " %s=%08lx", names[i], regs[i]);
+        std::fprintf(stderr, "\n");
+        for (unsigned i = 0; i + 1 < sizeof(regs) / sizeof(regs[0]); ++i)   // every register but sp
+            DumpMemoryAt(names[i], static_cast<uintptr_t>(regs[i]));
+#elif defined(__aarch64__)
+        PrintCodeAddress("fault pc", reinterpret_cast<void*>(uc->uc_mcontext.pc));
+        PrintCodeAddress("lr      ", reinterpret_cast<void*>(uc->uc_mcontext.regs[30]));
+#endif
+    }
     std::fflush(stderr);
     // Let the OS finish the job with a tombstone.
     signal(sig, SIG_DFL);

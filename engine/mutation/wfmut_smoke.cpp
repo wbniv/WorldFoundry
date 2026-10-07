@@ -364,12 +364,23 @@ void run_field_tests(Level& level, ActorIdx player)
 // ── Spawn / Remove tests ────────────────────────────────────────────────────
 
 // Find the first idx in [1, list.Size()) that resolves to a valid template
-// via Level::HasTemplate. Returns 0 if no template is found in the level.
+// via Level::HasTemplate and whose class SpawnActor will accept. SpawnActor
+// rejects Room/Tool/StatPlat templates before it looks at parentIdx
+// (wfmut.cpp, 19e95a86), so a template of one of those classes would make SR0
+// see the class error instead of the parentIdx error it is testing for.
+// Returns 0 if no such template is found in the level.
 int find_first_template(Level& level)
 {
     BaseObjectList& list = level.GetObjectList();
     for (int i = 1; i < list.Size(); ++i) {
-        if (level.HasTemplate(i)) return i;
+        if (!level.HasTemplate(i)) continue;
+        if (const SObjectStartupData* td = level.FindTemplateObjectData(i)) {
+            const int32 kind = td->objectData->type;
+            if (kind == Actor::Room_KIND || kind == Actor::Tool_KIND ||
+                kind == Actor::StatPlat_KIND)
+                continue;
+        }
+        return i;
     }
     return 0;
 }

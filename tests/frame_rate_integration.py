@@ -118,13 +118,18 @@ def main():
             print("PASS: FPS remains available during simulation pause")
 
             # Existing system write policy must reject writes to the diagnostic slot.
-            send({"op": "reload_script", "idx": 5, "source":
-                  "\\ wf read-only FPS test\n1 INDEXOF_FRAMERATE write-mailbox\n"})
-            process.wait(timeout=10)
-            assert process.returncode != 0, "write to read-only FRAMERATE was accepted"
-            log.seek(0)
-            assert "Attempted to write to mailbox 1903" in log.read(), "unexpected engine failure"
-            print("PASS: writes to FRAMERATE follow the existing system mailbox rejection policy")
+            # The rejection is an AssertMsg (Level::WriteSystemMailbox), so it only aborts in builds
+            # with DO_ASSERTIONS; CMake sets WF_EXPECT_ASSERTS=0 for the Release (no-assert) engine.
+            if os.environ.get("WF_EXPECT_ASSERTS", "1") == "0":
+                print("SKIP: FRAMERATE write rejection is an assertion; this engine was built without them")
+            else:
+                send({"op": "reload_script", "idx": 5, "source":
+                      "\\ wf read-only FPS test\n1 INDEXOF_FRAMERATE write-mailbox\n"})
+                process.wait(timeout=10)
+                assert process.returncode != 0, "write to read-only FRAMERATE was accepted"
+                log.seek(0)
+                assert "Attempted to write to mailbox 1903" in log.read(), "unexpected engine failure"
+                print("PASS: writes to FRAMERATE follow the existing system mailbox rejection policy")
         except Exception:
             log.seek(0)
             print(log.read()[-6000:], file=sys.stderr)

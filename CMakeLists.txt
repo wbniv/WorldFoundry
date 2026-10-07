@@ -192,11 +192,38 @@ else()
                         RENDERER_GL RENDERER_PIPELINE_GL SCALAR_TYPE_FLOAT)
 endif()
 
-list(APPEND WF_DEFS
-    BUILDMODE_DEBUG DO_ASSERTIONS=1 DO_DEBUGGING_INFO=1
-    DO_IOSTREAMS=1 SW_DBSTREAM=1 DEBUG=1 DEBUG_VARIABLES=1
-    DO_VALIDATION=0 DO_TEST_CODE=0 DO_DEBUG_FILE_SYSTEM=0
-)
+# Debug-mode engine defines (asserts, Validate(), DBSTREAM, debug variables).
+# Every build type used to get them, so Android Release shipped an -O3 build
+# that still ran ~1,400 asserts, Validate() per room/light and DBSTREAM output
+# every frame (finding-your-way docs/plans/2026-10-07-v0.8-optimization.md,
+# finding 1 / proposal E1). Release and MinSizeRel now drop them; an empty
+# CMAKE_BUILD_TYPE (multi-config generators) and every other type keep them.
+# Override with -DWF_DEBUG_DEFINES=ON|OFF.
+if(CMAKE_BUILD_TYPE MATCHES "^(Release|MinSizeRel)$")
+    set(_wf_debug_defines_default OFF)
+else()
+    set(_wf_debug_defines_default ON)
+endif()
+option(WF_DEBUG_DEFINES "Compile the engine with asserts, Validate() and DBSTREAM output" ${_wf_debug_defines_default})
+if(WF_DEBUG_DEFINES)
+    list(APPEND WF_DEFS
+        BUILDMODE_DEBUG DO_ASSERTIONS=1 DO_DEBUGGING_INFO=1
+        DO_IOSTREAMS=1 SW_DBSTREAM=1 DEBUG=1 DEBUG_VARIABLES=1
+    )
+else()
+    # Release does no debug printing: SW_DBSTREAM=0 compiles every DBSTREAMn()
+    # away (including Actor::Print, which reopened levels.txt on every call and
+    # took ~10 % of a cast1 world frame). cpplib/libstrm.cc, cpplib/stdstrm.cc, cpplib/strmnull.cc and game/gamestrm.cc, which
+    # define the debug streams, #error at level 0 by design ("should not be
+    # included if DBSTREAM not set"), so both are dropped from the source list
+    # below. DO_IOSTREAMS stays on: it only gates operator<< overloads.
+    list(APPEND WF_DEFS
+        DO_ASSERTIONS=0 DO_DEBUGGING_INFO=0
+        DO_IOSTREAMS=1 SW_DBSTREAM=0 DEBUG=0 DEBUG_VARIABLES=0
+    )
+    message(STATUS "WF: release engine defines (no asserts, no DBSTREAM)")
+endif()
+list(APPEND WF_DEFS DO_VALIDATION=0 DO_TEST_CODE=0 DO_DEBUG_FILE_SYSTEM=0)
 
 if(WF_ASAN AND NOT ANDROID AND NOT IOS)
     # vptr is excluded: the whole project builds -fno-rtti (Jolt, wfengine,
@@ -368,6 +395,9 @@ endif()
 # build directory (Gradle's android/app/.cxx, build/, build-editor/) never saw a .cc
 # added later and the link failed with undefined symbols (2026-10-02, level_menu.cc).
 # This re-runs the glob on every build and regenerates when the file list changes.
+if(NOT WF_DEBUG_DEFINES)
+    list(APPEND WF_SKIP "cpplib/libstrm.cc" "cpplib/stdstrm.cc" "cpplib/strmnull.cc" "game/gamestrm.cc")
+endif()
 foreach(dir ${WF_DIRS})
     file(GLOB dir_srcs CONFIGURE_DEPENDS "${SRC}/${dir}/*.cc" "${SRC}/${dir}/*.mm")
     foreach(src ${dir_srcs})
@@ -1231,8 +1261,13 @@ if(NOT ANDROID AND NOT IOS AND NOT APPLE AND NOT EMSCRIPTEN)
                     $<TARGET_FILE:wf_game>)
             set_tests_properties(debug_listener_smb_transitions PROPERTIES
                 LABELS "gl" ENVIRONMENT "DISPLAY=:0" TIMEOUT 120)
+            if(WF_DEBUG_DEFINES)
+                set(_wf_expect_asserts 1)
+            else()
+                set(_wf_expect_asserts 0)
+            endif()
             set_tests_properties(frame_rate_mailbox frame_rate_mailbox_fixed_sim PROPERTIES
-                LABELS "gl" ENVIRONMENT "DISPLAY=:0" TIMEOUT 60)
+                LABELS "gl" ENVIRONMENT "DISPLAY=:0;WF_EXPECT_ASSERTS=${_wf_expect_asserts}" TIMEOUT 60)
         endif()
     endif()
     set(WF_TEST_LEVEL
@@ -1315,11 +1350,16 @@ if(NOT ANDROID AND NOT IOS AND NOT APPLE AND NOT EMSCRIPTEN)
     # "Subprocess aborted"). So wrap in a shell that greps the guard message
     # out of the (captured) output and exits 0 on match — the grep is the
     # test command, so the upstream abort doesn't fail it.
-    add_test(NAME wfmut_thread_guard
-        COMMAND sh -c "$<TARGET_FILE:wf_game> -L${WF_TEST_SMB_LEVEL} --wfmut-thread-test 2>&1 | grep -q 'must be called on the game thread'"
-        WORKING_DIRECTORY ${WF_TEST_RUN_DIR})
+    # The guard is an assertion, so there is nothing to catch in a no-assert (Release) engine.
+    set(_wf_gl_wfmut_tests wfmut_smoke wfmut_bridge)
+    if(WF_DEBUG_DEFINES)
+        add_test(NAME wfmut_thread_guard
+            COMMAND sh -c "$<TARGET_FILE:wf_game> -L${WF_TEST_SMB_LEVEL} --wfmut-thread-test 2>&1 | grep -q 'must be called on the game thread'"
+            WORKING_DIRECTORY ${WF_TEST_RUN_DIR})
+        list(APPEND _wf_gl_wfmut_tests wfmut_thread_guard)
+    endif()
 
-    set_tests_properties(wfmut_smoke wfmut_bridge wfmut_thread_guard
+    set_tests_properties(${_wf_gl_wfmut_tests}
         PROPERTIES LABELS "gl" ENVIRONMENT "DISPLAY=:0")
 endif()
 
