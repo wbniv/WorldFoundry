@@ -211,15 +211,17 @@ if(WF_DEBUG_DEFINES)
         DO_IOSTREAMS=1 SW_DBSTREAM=1 DEBUG=1 DEBUG_VARIABLES=1
     )
 else()
-    # SW_DBSTREAM=1 keeps only DBSTREAM1 (startup/shutdown, nothing in the game
-    # loop) and compiles DBSTREAM2..5 away. 0 does not build: cpplib/libstrm.cc
-    # #errors when no stream level is set. DO_IOSTREAMS stays on: it only gates
-    # operator<< overloads, so keeping it avoids an unrelated compile change.
+    # Release does no debug printing: SW_DBSTREAM=0 compiles every DBSTREAMn()
+    # away (including Actor::Print, which reopened levels.txt on every call and
+    # took ~10 % of a cast1 world frame). cpplib/libstrm.cc, cpplib/stdstrm.cc, cpplib/strmnull.cc and game/gamestrm.cc, which
+    # define the debug streams, #error at level 0 by design ("should not be
+    # included if DBSTREAM not set"), so both are dropped from the source list
+    # below. DO_IOSTREAMS stays on: it only gates operator<< overloads.
     list(APPEND WF_DEFS
         DO_ASSERTIONS=0 DO_DEBUGGING_INFO=0
-        DO_IOSTREAMS=1 SW_DBSTREAM=1 DEBUG=0 DEBUG_VARIABLES=0
+        DO_IOSTREAMS=1 SW_DBSTREAM=0 DEBUG=0 DEBUG_VARIABLES=0
     )
-    message(STATUS "WF: release engine defines (no asserts, DBSTREAM level 1)")
+    message(STATUS "WF: release engine defines (no asserts, no DBSTREAM)")
 endif()
 list(APPEND WF_DEFS DO_VALIDATION=0 DO_TEST_CODE=0 DO_DEBUG_FILE_SYSTEM=0)
 
@@ -393,6 +395,9 @@ endif()
 # build directory (Gradle's android/app/.cxx, build/, build-editor/) never saw a .cc
 # added later and the link failed with undefined symbols (2026-10-02, level_menu.cc).
 # This re-runs the glob on every build and regenerates when the file list changes.
+if(NOT WF_DEBUG_DEFINES)
+    list(APPEND WF_SKIP "cpplib/libstrm.cc" "cpplib/stdstrm.cc" "cpplib/strmnull.cc" "game/gamestrm.cc")
+endif()
 foreach(dir ${WF_DIRS})
     file(GLOB dir_srcs CONFIGURE_DEPENDS "${SRC}/${dir}/*.cc" "${SRC}/${dir}/*.mm")
     foreach(src ${dir_srcs})
