@@ -52,6 +52,17 @@ Camera::Camera( const SObjectStartupData* startupData ) :
 //	assert( _path );
 	_path = NULL;		// I want this to blow chunks if someone refers to it -- Phil
 
+	// Vector3 and Scalar have empty default constructors, so cameraPos starts as arena garbage until a
+	// camera handler's first predictPosition stores a real one. Level::updateSound reads it every frame,
+	// including the first, so start from zeros (a zero direction/up makes SoundDevice::tick keep the old
+	// listener orientation).
+	cameraPos.position = Vector3::zero;
+	cameraPos.direction = Vector3::zero;
+	cameraPos.up = Vector3::zero;
+	cameraPos.field = Scalar::zero;
+	cameraPos.hither = Scalar::zero;
+	cameraPos.yon = Scalar::zero;
+
 	// set camera defaults
 	Color color(Color::FromInt(getOad()->FoggingColor));
 	GetRenderCamera().SetFog( color, Scalar(getOad()->GetFoggingStartDistance()), Scalar(getOad()->GetFoggingCompleteDistance()) );
