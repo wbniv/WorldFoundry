@@ -21,6 +21,8 @@ import yaml
 REPO = os.path.normpath(os.path.join(os.path.dirname(os.path.abspath(__file__)), '..'))
 STEP = 'Close paths and fullscreen (⌘Q, red button, Esc, -fullscreen)'
 WORKFLOW = 'macos-desktop-debug'
+# Same steps and artifacts built Release (codemagic.yaml reuses them by YAML alias).
+RELEASE_TWIN = 'macos-desktop-release'
 SCRIPT = 'scripts/macos/close-paths-ci.sh'
 PROBE = 'scripts/macos/wf_ui_probe.swift'
 LEVEL = 'wflevels/snowgoons-blender/snowgoons-standalone.iff'
@@ -45,7 +47,7 @@ def _script_text():
 def test_step_only_in_macos_desktop_debug(config):
     assert _step(config['workflows'][WORKFLOW]) is not None
     for name, wf in config['workflows'].items():
-        if name != WORKFLOW:
+        if name not in (WORKFLOW, RELEASE_TWIN):
             assert _step(wf) is None, f'{name} must not carry the close-paths step'
 
 
@@ -78,7 +80,7 @@ def test_artifacts_listed_and_not_in_other_workflows(config):
         for a in ARTIFACTS:
             if a == 'cm-build.log':
                 continue  # other workflows may legitimately collect their own cm-build.log
-            assert (a in listed) == (name == WORKFLOW), f'{a} in {name}'
+            assert (a in listed) == (name in (WORKFLOW, RELEASE_TWIN)), f'{a} in {name}'
     assert 'cm-build.log' in config['workflows'][WORKFLOW]['artifacts']
 
 
@@ -197,3 +199,12 @@ def test_strict_check_fails_the_step(tmp_path):
     p = _run(tmp_path, strict='cmdq', cmdq='broken')
     assert p.returncode == 1
     assert 'STRICT: cmdq failed' in p.stdout
+
+
+def test_release_twin_is_the_debug_workflow_built_release(config):
+    debug, release = config['workflows'][WORKFLOW], config['workflows'][RELEASE_TWIN]
+    assert release['scripts'] == debug['scripts']
+    assert release['artifacts'] == debug['artifacts']
+    assert release['environment']['vars']['WF_BUILD_TYPE'] == 'Release'
+    configure = next(s['script'] for s in debug['scripts'] if s['name'].startswith('Configure CMake'))
+    assert '-DCMAKE_BUILD_TYPE="${WF_BUILD_TYPE:-Debug}"' in configure

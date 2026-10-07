@@ -21,6 +21,8 @@ import yaml
 REPO = os.path.normpath(os.path.join(os.path.dirname(os.path.abspath(__file__)), '..'))
 STEP = 'Compare aquarium capture with Linux reference (informational)'
 WORKFLOW = 'macos-desktop-debug'
+# Same steps and artifacts built Release (codemagic.yaml reuses them by YAML alias).
+RELEASE_TWIN = 'macos-desktop-release'
 REFERENCE = 'tests/fixtures/renderer/aquarium-linux-frame20.png'
 ARTIFACTS = ['macos-aquarium-frame20.png', 'macos-aquarium-comparison.log']
 
@@ -46,7 +48,7 @@ def _png(w, h, rgb):
 def test_step_only_in_macos_desktop_debug(config):
     assert _step(config['workflows'][WORKFLOW]) is not None
     for name, wf in config['workflows'].items():
-        if name != WORKFLOW:
+        if name not in (WORKFLOW, RELEASE_TWIN):
             assert _step(wf) is None, f'{name} must not carry the aquarium parity step'
 
 
@@ -79,7 +81,7 @@ def test_artifacts_listed_and_not_in_other_workflows(config):
     for name, wf in config['workflows'].items():
         listed = wf.get('artifacts', [])
         for a in ARTIFACTS:
-            assert (a in listed) == (name == WORKFLOW), f'{a} in {name}'
+            assert (a in listed) == (name in (WORKFLOW, RELEASE_TWIN)), f'{a} in {name}'
 
 
 def test_reference_is_a_full_640x480_png():

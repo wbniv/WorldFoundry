@@ -120,7 +120,9 @@ workflows:
     # Every step tees into cm-build.log (listed under artifacts:) — Codemagic
     # has no log API, so that file is the only way to read a red build from
     # the shell (~/.claude/skills/codemagic-build).
-    scripts:
+    # WF_BUILD_TYPE (unset = Debug) picks CMAKE_BUILD_TYPE and the xcodebuild
+    # configuration; ios-simulator-release reuses these steps with Release.
+    scripts: &ios_sim_scripts
       - name: Toolchain versions
         script: |
           set -euo pipefail
@@ -175,7 +177,7 @@ workflows:
             -DCMAKE_OSX_SYSROOT=iphonesimulator \
             -DCMAKE_OSX_ARCHITECTURES=arm64 \
             -DCMAKE_OSX_DEPLOYMENT_TARGET=13.0 \
-            -DCMAKE_BUILD_TYPE=Debug \
+            -DCMAKE_BUILD_TYPE="${WF_BUILD_TYPE:-Debug}" \
             -DCMAKE_XCODE_GENERATE_SCHEME=ON \
             .. 2>&1 | tee ../ios-configure.log
 
@@ -192,7 +194,7 @@ workflows:
           xcodebuild \
             -project wf_game.xcodeproj \
             -scheme wf_game \
-            -configuration Debug \
+            -configuration "${WF_BUILD_TYPE:-Debug}" \
             -sdk iphonesimulator \
             -destination 'generic/platform=iOS Simulator' \
             -IDEBuildingContinueBuildingAfterErrors=YES \
@@ -444,7 +446,7 @@ workflows:
           done
           exit "$rc"
 
-    artifacts:
+    artifacts: &ios_sim_artifacts
       - cm-build.log
       - ios-configure.log
       - xcodebuild.log
@@ -466,6 +468,30 @@ workflows:
       - build-ios-sim/**/*.app
       - build-ios-sim/CMakeFiles/**/*.log
       - build-ios-sim/CMakeFiles/CMakeConfigureLog.yaml
+
+  #------------------------------------------------------------------------------
+  # ios-simulator-release — the same steps and artifacts as ios-simulator-debug,
+  # built Release: CMakeLists.txt then turns WF_DEBUG_DEFINES off (no asserts,
+  # no DBSTREAM). Manual only. The codemagic-build driver cannot pass per-build
+  # variables, so the build type lives here.
+  #------------------------------------------------------------------------------
+  ios-simulator-release:
+    name: iOS Simulator (Release defines)
+    instance_type: mac_mini_m2
+    max_build_duration: 45
+    cache:
+      cache_paths:
+        - build-ios-sim
+        - engine/vendor/jolt-physics-5.5.0
+    environment:
+      xcode: latest
+      vars:
+        WF_BUILD_TYPE: Release
+    triggering:
+      events: []
+      cancel_previous_builds: true
+    scripts: *ios_sim_scripts
+    artifacts: *ios_sim_artifacts
 
   #------------------------------------------------------------------------------
   # android-apk-debug — debug APK (arm64-v8a) for phone + Google TV sideload.
@@ -605,7 +631,9 @@ workflows:
       events: []
       cancel_previous_builds: true
 
-    scripts:
+    # WF_BUILD_TYPE (unset = Debug) picks CMAKE_BUILD_TYPE; macos-desktop-release
+    # reuses these steps with Release.
+    scripts: &macos_desktop_scripts
       - name: Toolchain versions
         script: |
           set -euo pipefail
@@ -637,7 +665,7 @@ workflows:
           rm -rf build-macos/CMakeCache.txt build-macos/CMakeFiles
           cd build-macos
           cmake -G Ninja \
-            -DCMAKE_BUILD_TYPE=Debug \
+            -DCMAKE_BUILD_TYPE="${WF_BUILD_TYPE:-Debug}" \
             -DCMAKE_OSX_ARCHITECTURES=arm64 \
             -DWF_ASAN=OFF \
             .. 2>&1 | tee ../macos-configure.log
@@ -855,7 +883,7 @@ workflows:
             bash scripts/macos/close-paths-ci.sh \
             2>&1 | tee "$CM_BUILD_DIR/macos-close-paths.log"
 
-    artifacts:
+    artifacts: &macos_desktop_artifacts
       - macos-configure.log
       - macos-build.log
       - macos-smoke.log
@@ -893,3 +921,27 @@ workflows:
       # bundle carries cd.iff/level0.mid in Resources (CMakeLists.txt bundles
       # whatever assets exist at configure time) so a human can double-click it.
       - engine/wf_game.app
+
+  #------------------------------------------------------------------------------
+  # macos-desktop-release — the same steps and artifacts as macos-desktop-debug,
+  # built Release: CMakeLists.txt then turns WF_DEBUG_DEFINES off (no asserts,
+  # no DBSTREAM). Manual only. The codemagic-build driver cannot pass per-build
+  # variables, so the build type lives here.
+  #------------------------------------------------------------------------------
+  macos-desktop-release:
+    name: macOS Desktop (Release defines, headless)
+    instance_type: mac_mini_m2
+    max_build_duration: 60
+    cache:
+      cache_paths:
+        - build-macos
+        - engine/vendor/jolt-physics-5.5.0
+    environment:
+      xcode: latest
+      vars:
+        WF_BUILD_TYPE: Release
+    triggering:
+      events: []
+      cancel_previous_builds: true
+    scripts: *macos_desktop_scripts
+    artifacts: *macos_desktop_artifacts
