@@ -1211,8 +1211,13 @@ if(NOT ANDROID AND NOT IOS AND NOT APPLE AND NOT EMSCRIPTEN)
                     $<TARGET_FILE:wf_game>)
             set_tests_properties(debug_listener_smb_transitions PROPERTIES
                 LABELS "gl" ENVIRONMENT "DISPLAY=:0" TIMEOUT 120)
+            if(WF_DEBUG_DEFINES)
+                set(_wf_expect_asserts 1)
+            else()
+                set(_wf_expect_asserts 0)
+            endif()
             set_tests_properties(frame_rate_mailbox frame_rate_mailbox_fixed_sim PROPERTIES
-                LABELS "gl" ENVIRONMENT "DISPLAY=:0" TIMEOUT 60)
+                LABELS "gl" ENVIRONMENT "DISPLAY=:0;WF_EXPECT_ASSERTS=${_wf_expect_asserts}" TIMEOUT 60)
         endif()
     endif()
     set(WF_TEST_LEVEL
@@ -1295,11 +1300,16 @@ if(NOT ANDROID AND NOT IOS AND NOT APPLE AND NOT EMSCRIPTEN)
     # "Subprocess aborted"). So wrap in a shell that greps the guard message
     # out of the (captured) output and exits 0 on match — the grep is the
     # test command, so the upstream abort doesn't fail it.
-    add_test(NAME wfmut_thread_guard
-        COMMAND sh -c "$<TARGET_FILE:wf_game> -L${WF_TEST_SMB_LEVEL} --wfmut-thread-test 2>&1 | grep -q 'must be called on the game thread'"
-        WORKING_DIRECTORY ${WF_TEST_RUN_DIR})
+    # The guard is an assertion, so there is nothing to catch in a no-assert (Release) engine.
+    set(_wf_gl_wfmut_tests wfmut_smoke wfmut_bridge)
+    if(WF_DEBUG_DEFINES)
+        add_test(NAME wfmut_thread_guard
+            COMMAND sh -c "$<TARGET_FILE:wf_game> -L${WF_TEST_SMB_LEVEL} --wfmut-thread-test 2>&1 | grep -q 'must be called on the game thread'"
+            WORKING_DIRECTORY ${WF_TEST_RUN_DIR})
+        list(APPEND _wf_gl_wfmut_tests wfmut_thread_guard)
+    endif()
 
-    set_tests_properties(wfmut_smoke wfmut_bridge wfmut_thread_guard
+    set_tests_properties(${_wf_gl_wfmut_tests}
         PROPERTIES LABELS "gl" ENVIRONMENT "DISPLAY=:0")
 endif()
 
