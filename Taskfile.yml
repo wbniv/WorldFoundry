@@ -49,11 +49,26 @@ tasks:
     cmds:
       - bash scripts/creds-commit.sh {{.CLI_ARGS}}
 
+  vendor-unpack-archives:
+    desc: "Expand the gitignored vendored archives (Jolt) a fresh checkout or worktree needs to configure (idempotent, offline)"
+    cmds:
+      - test -d engine/vendor/jolt-physics-5.5.0 || tar -xzf engine/vendor/jolt-physics-5.5.0.tar.gz --one-top-level=engine/vendor/jolt-physics-5.5.0 --strip-components=1
+
   vendor-unpack:
     desc: "Unpack vendored source archives and init editor submodules (idempotent)"
+    deps: [vendor-unpack-archives]
     cmds:
       - git submodule update --init cmake/Corrosion wftools/y-crdt third_party/glfw third_party/imgui
-      - test -d engine/vendor/jolt-physics-5.5.0 || tar -xzf engine/vendor/jolt-physics-5.5.0.tar.gz --one-top-level=engine/vendor/jolt-physics-5.5.0 --strip-components=1
+
+  feature-start:
+    desc: "New worktree .worktrees/<NAME> on branch <NAME> with vendored archives expanded (usage: task feature-start NAME=slug [BASE=branch])"
+    cmds:
+      - bash scripts/feature.sh start NAME={{.NAME}}{{if .BASE}} BASE={{.BASE}}{{end}}
+
+  feature-list:
+    desc: "List git worktrees with branch and last commit"
+    cmds:
+      - bash scripts/feature.sh list
 
   build:
     desc: "Build wf_game (Forth + Jolt; canonical config)"
