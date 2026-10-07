@@ -22,6 +22,20 @@
 #define MEMPOOL_TRASHMEMORY DO_ASSERTIONS
 #define MEMPOOL_FILLVALUE 0xa5
 
+// AddressSanitizer: poison freed entries so a read of a freed message is reported at the reading
+// instruction with a stack trace. Pool entries come from a bump allocator, so ASan cannot see them
+// freed on its own. The first word of an entry is the free-list link and stays addressable; the rest
+// is poisoned on free and when the pool is created, and unpoisoned on allocate and destruct. Needs
+// _maxEntries, so it is only built with assertions on.
+#if defined(__SANITIZE_ADDRESS__) && DO_ASSERTIONS
+#include <sanitizer/asan_interface.h>
+#define MEMPOOL_ASAN_POISON(p, n)   ASAN_POISON_MEMORY_REGION((p), (n))
+#define MEMPOOL_ASAN_UNPOISON(p, n) ASAN_UNPOISON_MEMORY_REGION((p), (n))
+#else
+#define MEMPOOL_ASAN_POISON(p, n)   ((void)0)
+#define MEMPOOL_ASAN_UNPOISON(p, n) ((void)0)
+#endif
+
 //==============================================================================
 // create an entirly new memory pool
 
@@ -44,8 +58,8 @@ MemPoolConstruct(size_t size,int entries,Memory& memory)
 	assert(memPool);
 	AssertMemoryAllocation(memPool);
 	assert(((uintptr_t)memPool & WF_POINTER_ALIGN_MASK) == 0);
+	memPool->_size = size;				// not only for assertions: MemPoolFree's trash fill and the ASan poisoning use it
 #if DO_ASSERTIONS
-	memPool->_size = size;
 	memPool->_maxEntries = entries;
 	memPool->_currentEntries = 0;
 #endif
@@ -67,6 +81,9 @@ MemPoolConstruct(size_t size,int entries,Memory& memory)
 	 }
 	freeEntry->_next = NULL;
 
+	for(int entry=0;entry<entries;++entry)
+		MEMPOOL_ASAN_POISON(memPool->_buffer+entry*size+sizeof(_MemPoolFreeEntry), size-sizeof(_MemPoolFreeEntry));
+
 	VALIDATEMEMPOOL(memPool);
 	DBSTREAM2( cprogress << "Creating a memory pool at address " << memPool << " with " << entries << " entries, " << size << " bytes each\n");
 	return(memPool);
@@ -81,6 +98,7 @@ MemPoolDestruct(SMemPool* memPool)
 	VALIDATEMEMPOOL(memPool);
 	DBSTREAM2(cprogress <<  "Destroying a memory pool at address " << memPool ASSERTIONS( << " with " << memPool->_maxEntries << " entries" ) << ", " << memPool->_size << " bytes each\n");
 	assert(memPool->_currentEntries == 0);		// if allocations remain, there must be a problem
+	MEMPOOL_ASAN_UNPOISON(memPool->_buffer, memPool->_size*memPool->_maxEntries);
 	memPool->_parentMemory->Free(memPool->_buffer);
 	memPool->_parentMemory->Free(memPool);
 	return(NULL);
@@ -107,6 +125,7 @@ MemPoolAllocate(SMemPool* memPool, size_t size)
 #endif
 		void* mem = (void*)memPool->_firstFree._next;
 		memPool->_firstFree._next = memPool->_firstFree._next->_next;
+		MEMPOOL_ASAN_UNPOISON(mem, memPool->_size);
 		DBSTREAM5(cprogress <<  "Allocating an entry from Memory Pool " << memPool << " at address " << mem ASSERTIONS( << " for a total of " <<  memPool->_currentEntries << " entries") << endl;)
 		return(mem);
 	 }
@@ -162,6 +181,7 @@ MemPoolFree(SMemPool* memPool, void* mem)
 	_MemPoolFreeEntry* fe = (_MemPoolFreeEntry*)mem;
 	fe->_next = memPool->_firstFree._next;
 	memPool->_firstFree._next = fe;
+	MEMPOOL_ASAN_POISON((char*)mem+sizeof(_MemPoolFreeEntry), memPool->_size-sizeof(_MemPoolFreeEntry));
 	VALIDATEMEMPOOL(memPool);
 #else
 	free(mem);
