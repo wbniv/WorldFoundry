@@ -159,6 +159,12 @@ PhysicalAttributes::PhysicalAttributes(const Vector3& position,
    _joltBodyID = kJoltInvalidBodyID;
    _joltCharID = kJoltInvalidBodyID;
 #endif
+	// Actor::Actor builds its attributes through this constructor, not the default one. The two
+	// per-frame flags used to be cleared in Actor::Actor; when they moved here (CVS physical.hpi 1.18,
+	// 2003-06-12) only the default constructor was given the initialisation, so every Actor started
+	// with whatever its arena memory held and its first predictPosition/update pass read that.
+	_hasRunPredictPosition = false;
+	_hasRunUpdate = false;
    Construct(position,euler,minPoint,maxPoint,slopeA,slopeB,slopeC,slopeD);
 }
 
