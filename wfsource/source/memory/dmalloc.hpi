@@ -181,9 +181,7 @@ DMalloc::AllocatedChunk::AllocatedChunk(int32 size)
 {
 	assert(size > 0);
 	_size = size;
-#if DO_ASSERTIONS
-   	_cookie = ALLOCATED_COOKIE;
-#endif
+	_cookie = ALLOCATED_COOKIE;
 	Validate();
 }
 

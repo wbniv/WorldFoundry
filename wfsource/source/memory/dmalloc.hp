@@ -105,19 +105,19 @@ private:
 
 	private:
 		int32 _size;
-#if DO_ASSERTIONS
+		// Always present: the header size must not depend on DO_ASSERTIONS
+		// (see the static_assert below); only the checks of it do.
 		enum { ALLOCATED_COOKIE = 0xDEADBEEF /*'ALOC'*/ };
 		uint32 _cookie;
-#endif
 	};
 
 	// AllocatedChunk precedes every DMalloc allocation; the user pointer
 	// returned by Allocate() sits at chunk_base + sizeof(AllocatedChunk).
 	// For the user pointer to inherit the WF_POINTER_ALIGN-aligned chunk_base,
 	// sizeof(AllocatedChunk) must itself be a multiple of WF_POINTER_ALIGN.
-	// Catches the day someone ships DO_ASSERTIONS=0 (which drops _cookie and
-	// shrinks the header to 4 bytes, silently misaligning every user pointer
-	// on 64-bit).
+	// _cookie is kept in every build for this reason: dropping it under
+	// DO_ASSERTIONS=0 shrinks the header to 4 bytes and silently misaligns
+	// every user pointer on 64-bit.
 	static_assert(sizeof(AllocatedChunk) % WF_POINTER_ALIGN == 0,
 	              "DMalloc::AllocatedChunk size must be a multiple of WF_POINTER_ALIGN — "
 	              "otherwise the user-returned pointer loses alignment");
