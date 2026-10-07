@@ -13,6 +13,55 @@ Format per entry:
 
 ---
 
+## `List`/`SNode` overlay breaks strict aliasing — the camera's collision loop reprocessed a freed message — 2026-10-08
+
+**Status:** FIXED [`20a2e10a`](https://github.com/wbniv/WorldFoundry/commit/20a2e10a) (`wfsource/source/hal/_list.h` — `SNode` is `may_alias`).
+
+**Symptom:** `tour-g4-v0` on the Chromecast HD (Android armeabi-v7a, `-O3`, `DO_ASSERTIONS=0`) died with a null write in `NodeRemove` (`hal/_list.cc:128`) during the tour; asserts on, and v0.7, passed.
+
+**Root cause:** `List` is overlaid on its own head and tail nodes (`_head`, `_zero`, `_tail` read as `SNode`s), so `NodeRemove`'s stores through `SNode*` change `List::_head`, which `LISTEMPTY` and `ListRemoveHeadByType` read through `List`. That is a strict-aliasing violation. In `BungeeCameraHandler::predictPosition` (`game/movecam.cc:960`), `while (msgPort.GetMsgByType(SPECIAL_COLLISION, ...))`, the compiler loaded `self->_head` once before the loop (`ldr.w r8,[r0]` at `0x8967e`, every iteration restarting from `mov r3, r8`) and never re-tested emptiness, so the second iteration walked the node the first had freed (`_next` set, `_prev == 0`, `_type == 0x13`).
+
+**Why dormant:** The overlay and the list code are from the 2000-02-12 CVS import (rev 1.1, `kts`). The bug only appeared with assertions compiled out at `-O3` on Android, a configuration first built by the v0.8 release defines (E1); every earlier build and the asserts-on build passed. Why the asserts-on build is unaffected was not disassembled.
+
+**Fix:** Mark `SNode` `may_alias` (`WF_MAY_ALIAS`), so accesses through it alias any object. The rebuilt library reloads `_next`/`_head` every iteration (`ldr r6,[r0,#8]; cmp r6,r0` at `0x896e2`), and `tour-g4-v0` completes on cast1 (`J-4d803a23df20`, 1,779 frames, no crash; one run).
+
+**Diff** (`wfsource/source/hal/_list.h`):
+```diff
+-typedef struct _SNode					// base class, not usefull unless derived from
++#if defined(__GNUC__) || defined(__clang__)
++#define WF_MAY_ALIAS __attribute__((__may_alias__))
++#else
++#define WF_MAY_ALIAS
++#endif
++
++typedef struct WF_MAY_ALIAS _SNode					// base class, not usefull unless derived from
+```
+
+**Investigation:** [v0.8 optimization plan, g4 section](https://github.com/wbniv/finding-your-way/blob/main/docs/plans/2026-10-07-v0.8-optimization.md); a first reading (a freed pool entry still reachable) was not supported by an ASan run.
+
+---
+
+## Parameterised `PhysicalAttributes` constructor leaves `_hasRunPredictPosition`/`_hasRunUpdate` uninitialised — 2026-10-08
+
+**Status:** FIXED [`3ca1c555`](https://github.com/wbniv/WorldFoundry/commit/3ca1c555) (`wfsource/source/physics/physical.hpi`).
+
+**Symptom:** None observed. Found while investigating g4: every `Actor` is built through this constructor, so its two flags start as whatever its arena memory held. They did not cause g4 (fixing them alone left it crashing).
+
+**Root cause:** `Actor::Actor` builds its attributes through the parameterised constructor, but only the default constructor cleared the two per-frame flags. CVS `physical.hpi` 1.18 (2003-06-12) moved the clearing out of `Actor::Actor` and gave it to the default constructor alone.
+
+**Why dormant:** No symptom was ever tied to it; the effect of a stale flag was not measured.
+
+**Fix:** Set both flags false in the parameterised constructor. It did not affect g4.
+
+**Diff** (`wfsource/source/physics/physical.hpi`):
+```diff
++	_hasRunPredictPosition = false;
++	_hasRunUpdate = false;
+    Construct(position,euler,minPoint,maxPoint,slopeA,slopeB,slopeC,slopeD);
+```
+
+---
+
 ## Rotation mailboxes share Euler state across actors and commit only on yaw — 2026-10-06
 
 **Status:** OPEN. Root cause confirmed in the pinned production source; scoped runtime fix proposed, awaiting authorization.
