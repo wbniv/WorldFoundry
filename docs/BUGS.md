@@ -13,6 +13,37 @@ Format per entry:
 
 ---
 
+## `ChangeActiveRoom` binds Moves Between Rooms objects into room memory — the Player's render data overwritten after a room change — 2026‑10‑08
+
+**Status:** FIXED on branch `room-mbr-fix` [`2b893d48`](https://github.com/wbniv/WorldFoundry/commit/2b893d48) (not yet merged into `2026-new-level`; `room/actrooms.cc`, `baseobject/baseobject.{hp,cc}`, `game/actor.hp`).
+
+**Symptom:** Splitting the Parmenides slice into one engine Room per scene, the chapter crashed on its first return from Reason. A desktop fixture that walks temple → reason → temple exits with `SIGSEGV` around frame 826, at the reason → temple return; `gdb`: `#0 AnimationManagerActual::UpdateAnimation`, `#1 Actor::update`, `#2 UpdatePhysics`, `#3 Level::update`. The same path on today's two-room level runs clean.
+
+**Root cause:** `ActiveRooms::InitActiveRoom` (level start) binds every render object of an active room into that room's asset slot, **except** objects whose movement block has `MovesBetweenRooms`, which it binds into `VideoMemory::PERMANENT_SLOT`. `ActiveRooms::ChangeActiveRoom` (a room loaded mid-play) had no such check: it bound every render object of the newly loaded room, Moves Between Rooms objects included, into the new room's slot, and its unload loop unbound them again. In the split level the Player (flagged Moves Between Rooms) walked temple → reason: reason loaded with the Player inside, so the Player's render actor was allocated in reason's slot (slot 2). On the way back reason → temple, the temple was already loaded (reason lists it), so the Player was not rebound. Reason was then unloaded and god loaded into the same slot 2, overwriting the Player's render actor.
+
+**Why dormant:** the inconsistency is in the first CVS revision, `game/actrooms.cc` 1.1 (2000‑02‑12, `kts`, "Initial revision": `InitActiveRoom` checks `MovesBetweenRooms`, `ChangeActiveRoom` does not), unchanged through `game/actrooms.cc` 1.17, the 2003 move to `room/actrooms.cc` (1.1 to 1.4, 2010), and git's first commit `a2784f6e`; it cannot be dated more precisely than the import. Every shipped multi-room level keeps all its rooms mutually adjacent, so all rooms load at level start and no room is ever loaded mid-play: `ChangeActiveRoom`'s load loop never ran with real content until a level split one area into several rooms.
+
+**Fix:** in `ChangeActiveRoom`'s load loop, bind a Moves Between Rooms object into the permanent slot, and only if it is not already bound (new `BaseObject::AssetsBound()`, which `Actor` overrides as `_renderActor != NULL`); in the unload loop, leave such objects bound. Binding into the permanent slot on every room load would leak, because the permanent pool is never freed. Verified with the crash fixture: the pre-fix build `SIGSEGV`s, the fixed Release build runs 2,200 frames (`rc 0`), as do the split level's g0 and g1 loops; today's level is `rc 0` with both binaries. No ctest: no shipped level loads a room mid-play, so there is no practical harness; the fixture is the regression check.
+
+**Diff** (`wfsource/source/room/actrooms.cc`, load loop):
+```diff
+-		   				(*rendIter).BindAssets(_assetManager.GetAssetSlot(_levelRooms.GetSlotIndex(newRoomIndex)).GetSlotMemory());
++							assert(IsPhysicalObject(&(*rendIter)));
++							PhysicalObject& po = static_cast<PhysicalObject&>(*rendIter);
++							if(po.GetMovementBlockPtr()->MovesBetweenRooms)
++							{
++								if(!po.AssetsBound())
++									po.BindAssets(_assetManager.GetAssetSlot(VideoMemory::PERMANENT_SLOT).GetSlotMemory());
++							}
++							else
++								po.BindAssets(_assetManager.GetAssetSlot(_levelRooms.GetSlotIndex(newRoomIndex)).GetSlotMemory());
+```
+(unload loop: `UnBindAssets()` is skipped for Moves Between Rooms objects.)
+
+**Investigation:** [rooms split evaluation plan](https://github.com/wbniv/finding-your-way/blob/main/docs/plans/2026-10-08-rooms-split-eval.md), constraint 7 and the crash evidence.
+
+---
+
 ## `List`/`SNode` overlay breaks strict aliasing — the camera's collision loop reprocessed a freed message — 2026-10-08
 
 **Status:** FIXED [`20a2e10a`](https://github.com/wbniv/WorldFoundry/commit/20a2e10a) (`wfsource/source/hal/_list.h` — `SNode` is `may_alias`).
