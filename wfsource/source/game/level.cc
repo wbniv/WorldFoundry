@@ -1306,9 +1306,7 @@ Level::finishPositionWrites()
 	// Defer until outside actor iteration and after all script axis writes.
 	// Inactive source rooms must participate in membership repair, but their
 	// actors must not otherwise start running scripts or physics.
-	for (int room = 0; room < _theLevelRooms->NumberOfRooms(); ++room)
-		_theLevelRooms->GetRoom(room).UpdateRoomContents(ROOM_OBJECT_LIST_UPDATE,
-			GetMutableLevelRooms(), true);
+	_theLevelRooms->UpdateMovingObjects();
 	_theActiveRooms->BindUnboundMovingObjects();
 }
 

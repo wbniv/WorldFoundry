@@ -128,6 +128,13 @@ LevelRooms::FindContainingRoom(const PhysicalObject& object) const
 // this adds an object to whatever room it is in
 
 void
+LevelRooms::UpdateMovingObjects()
+{
+	for (int room = 0; room < _numRooms; ++room)
+		_rooms[room].UpdateRoomContents(ROOM_OBJECT_LIST_UPDATE, *this, true);
+}
+
+void
 LevelRooms::AddObjectToRoom( int32 objectIndex )
 {
 	Validate();

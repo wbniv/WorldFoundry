@@ -39,7 +39,8 @@ def vector(obj, key, values, tag):
     return field(obj,key,' '.join(f'{v:.16f}(1.15.16)' for v in values),tag)
 
 
-def generate(repo, tools, out, camera='fixed', autonomous=False, unloaded_actor=False):
+def generate(repo, tools, out, camera='fixed', autonomous=False, unloaded_actor=False, unloaded_autonomous=False):
+    assert not unloaded_autonomous or (unloaded_actor and not autonomous), 'unloaded autonomous mode requires --unloaded-actor and excludes --autonomous'
     out.mkdir(parents=True,exist_ok=True)
     source=repo/'wflevels/qbert_practice'
     text=(source/'qbert_practice.lev').read_text()
@@ -104,6 +105,23 @@ def generate(repo, tools, out, camera='fixed', autonomous=False, unloaded_actor=
                     '-5 INDEXOF_X_POS 20 write-actor-mailbox then\n'
                     '470 read-mailbox 471 write-mailbox then'))
                 obj=field(obj,'Script',json.dumps(script))
+                if unloaded_autonomous:
+                    emit=' '.join(f'{ord(c)} 0 sys' for c in 'T4_ACTOR ')
+                    sequence=[7,8,9,8,1,4,7,8,7,8,9,8]
+                    dispatch=' '.join(f'dup {index} = if {command} 470 write-mailbox then'
+                                      for index,command in enumerate(sequence))+' drop '
+                    prefix=('472 read-mailbox INDEXOF_DELTA_TIME read-mailbox + 472 write-mailbox\n'
+                        '472 read-mailbox 0.6 >= if 0 472 write-mailbox\n'
+                        '474 read-mailbox 1 = if '+emit+' '
+                        '473 read-mailbox 1 sys 471 read-mailbox 1 sys '
+                        'INDEXOF_X_POS read-mailbox 1 sys INDEXOF_X_POS 6 read-actor-mailbox 1 sys '
+                        'INDEXOF_X_POS 20 read-actor-mailbox 1 sys '
+                        '481 read-mailbox 483 read-mailbox - 1 sys '
+                        '480 read-mailbox 484 read-mailbox - 1 sys 10 0 sys then\n'
+                        '481 read-mailbox 483 write-mailbox 480 read-mailbox 484 write-mailbox\n'
+                        '473 read-mailbox dup 12 / 0 | 12 * - '+dispatch+
+                        '473 read-mailbox 1 + 473 write-mailbox 1 474 write-mailbox then\n')
+                    obj=field(obj,'Script',json.dumps(prefix+script))
         if key=='Director':
             # Four room objects precede Level, Camera, Director and this shot.
             # The integration test checks these indices in real engine output.
@@ -159,6 +177,7 @@ def generate(repo, tools, out, camera='fixed', autonomous=False, unloaded_actor=
         'camera':camera,
         'autonomous':autonomous,
         'unloaded_actor':unloaded_actor,
+        'unloaded_autonomous':unloaded_autonomous,
         'inactive_target_index':20 if unloaded_actor else None,
         'active_control_index':21 if unloaded_actor else None,
         'player_index':9,'camera_shot_index':8,'unloaded_marker_index':18,
@@ -179,4 +198,5 @@ if __name__=='__main__':
     parser.add_argument('--camera',choices=['fixed','follow'],default='fixed')
     parser.add_argument('--autonomous',action='store_true',help='Cycle teleports and print next-frame pose/scale assertions for coordinated device tests')
     parser.add_argument('--unloaded-actor',action='store_true',help='Add a permanent target in D and heartbeat control in A; Player command 7 moves the target into A')
-    args=parser.parse_args();generate(args.repo,args.tools,args.out,args.camera,args.autonomous,args.unloaded_actor)
+    parser.add_argument('--unloaded-autonomous',action='store_true',help='Cycle inactive-source actor moves and report per-interval heartbeats for device verification')
+    args=parser.parse_args();generate(args.repo,args.tools,args.out,args.camera,args.autonomous,args.unloaded_actor,args.unloaded_autonomous)

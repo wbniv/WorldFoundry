@@ -1,0 +1,59 @@
+[0/2] Re-checking globbed directories...
+[1/2] Re-running CMake...
+CMake Deprecation Warning at /home/will/android-sdk-local/ndk/26.2.11394342/build/cmake/android.toolchain.cmake:34 (cmake_minimum_required):
+  Compatibility with CMake < 3.10 will be removed from a future version of
+  CMake.
+
+  Update the VERSION argument <min> value.  Or, use the <min>...<max> syntax
+  to tell CMake that the project requires at least <min> but has been updated
+  to work with policies introduced by <max> or earlier.
+Call Stack (most recent call first):
+  /tmp/t4-android-armv7/CMakeFiles/4.2.3/CMakeSystem.cmake:6 (include)
+  CMakeLists.txt:2 (project)
+
+
+CMake Deprecation Warning at /home/will/android-sdk-local/ndk/26.2.11394342/build/cmake/android-legacy.toolchain.cmake:34 (cmake_minimum_required):
+  Compatibility with CMake < 3.10 will be removed from a future version of
+  CMake.
+
+  Update the VERSION argument <min> value.  Or, use the <min>...<max> syntax
+  to tell CMake that the project requires at least <min> but has been updated
+  to work with policies introduced by <max> or earlier.
+Call Stack (most recent call first):
+  /home/will/android-sdk-local/ndk/26.2.11394342/build/cmake/android.toolchain.cmake:54 (include)
+  /tmp/t4-android-armv7/CMakeFiles/4.2.3/CMakeSystem.cmake:6 (include)
+  CMakeLists.txt:2 (project)
+
+
+-- WF: release engine defines (no asserts, no DBSTREAM)
+-- Configuring done (0.1s)
+-- Generating done (0.1s)
+-- Build files have been written to: /tmp/t4-android-armv7
+[0/4] Re-checking globbed directories...
+[1/36] Building CXX object CMakeFiles/wfengine.dir/wfsource/source/room/actroit.cc.o
+[2/36] Building CXX object CMakeFiles/wfengine.dir/wfsource/source/room/room.cc.o
+[3/36] Building CXX object CMakeFiles/wfengine.dir/wfsource/source/room/rooms.cc.o
+[4/36] Building CXX object CMakeFiles/wfengine.dir/wfsource/source/room/actrooms.cc.o
+[5/36] Building CXX object CMakeFiles/wfengine.dir/wfsource/source/game/actbox.cc.o
+[6/36] Building CXX object CMakeFiles/wfengine.dir/wfsource/source/game/actboxor.cc.o
+[7/36] Building CXX object CMakeFiles/wfengine.dir/wfsource/source/game/camera.cc.o
+[8/36] Building CXX object CMakeFiles/wfengine.dir/wfsource/source/game/actor.cc.o
+[9/36] Building CXX object CMakeFiles/wfengine.dir/wfsource/source/game/camshot.cc.o
+[10/36] Building CXX object CMakeFiles/wfengine.dir/wfsource/source/game/destroyer.cc.o
+[11/36] Building CXX object CMakeFiles/wfengine.dir/wfsource/source/game/explode.cc.o
+[12/36] Building CXX object CMakeFiles/wfengine.dir/wfsource/source/game/generator.cc.o
+[13/36] Building CXX object CMakeFiles/wfengine.dir/wfsource/source/game/gold.cc.o
+[14/36] Building CXX object CMakeFiles/wfengine.dir/wfsource/source/game/level.cc.o
+FAILED: [code=1] CMakeFiles/wfengine.dir/wfsource/source/game/level.cc.o 
+/home/will/android-sdk-local/ndk/26.2.11394342/toolchains/llvm/prebuilt/linux-x86_64/bin/clang++ --target=armv7-none-linux-androideabi21 --sysroot=/home/will/android-sdk-local/ndk/26.2.11394342/toolchains/llvm/prebuilt/linux-x86_64/sysroot -DDEBUG=0 -DDEBUG_VARIABLES=0 -DDO_ASSERTIONS=0 -DDO_DEBUGGING_INFO=0 -DDO_DEBUG_FILE_SYSTEM=0 -DDO_IOSTREAMS=1 -DDO_TEST_CODE=0 -DDO_VALIDATION=0 -DNDEBUG -DPHYSICS_ENGINE_JOLT -DRENDERER_GLES -DRENDERER_PIPELINE_GLES -DSCALAR_TYPE_FLOAT -DSW_DBSTREAM=0 -DWF_FORTH_ENGINE_ZFORTH -DWF_NEURAL_FORTH -DWF_TARGET_ANDROID -DWF_WITH_FORTH -D__ANDROID__ -I/home/will/WorldFoundry-wbniv/.worktrees/teleport-audit/wfsource/source -I/home/will/WorldFoundry-wbniv/.worktrees/teleport-audit/wfsource/source/game -I/home/will/WorldFoundry-wbniv/.worktrees/teleport-audit/engine/include -I/home/will/WorldFoundry-wbniv/.worktrees/teleport-audit/engine/stubs -I/home/will/WorldFoundry-wbniv/.worktrees/teleport-audit/engine/mutation -I/home/will/WorldFoundry-wbniv/.worktrees/teleport-audit/engine/vendor/miniaudio-0.11.25 -I/home/will/WorldFoundry-wbniv/.worktrees/teleport-audit/engine/vendor/tsf -I/home/will/WorldFoundry-wbniv/.worktrees/teleport-audit/engine/vendor/zforth-41db72d1/src/zforth -I/home/will/WorldFoundry-wbniv/.worktrees/teleport-audit/engine/neural-forth -I/home/will/WorldFoundry-wbniv/.worktrees/teleport-audit/engine/vendor/jolt-physics-5.5.0 -I/home/will/android-sdk-local/ndk/26.2.11394342/sources/android/native_app_glue -g -DANDROID -fdata-sections -ffunction-sections -funwind-tables -fstack-protector-strong -no-canonical-prefixes -D_FORTIFY_SOURCE=2 -march=armv7-a -mthumb -Wformat -Werror=format-security   -O3 -DNDEBUG  -std=c++17 -fPIC -fpermissive -w -fno-rtti -D__GAME__=\"wf_game\" "-DERR_DEBUG(x)=" -O3 -flto=thin -ffunction-sections -fdata-sections -fvisibility=hidden -fno-exceptions -fno-unwind-tables -fno-asynchronous-unwind-tables -Wno-register -pthread -MD -MT CMakeFiles/wfengine.dir/wfsource/source/game/level.cc.o -MF CMakeFiles/wfengine.dir/wfsource/source/game/level.cc.o.d -o CMakeFiles/wfengine.dir/wfsource/source/game/level.cc.o -c /home/will/WorldFoundry-wbniv/.worktrees/teleport-audit/wfsource/source/game/level.cc
+/home/will/WorldFoundry-wbniv/.worktrees/teleport-audit/wfsource/source/game/level.cc:1310:3: error: 'this' argument to member function 'UpdateRoomContents' has type 'const Room', but function is not marked const
+                _theLevelRooms->GetRoom(room).UpdateRoomContents(ROOM_OBJECT_LIST_UPDATE,
+                ^~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+/home/will/WorldFoundry-wbniv/.worktrees/teleport-audit/wfsource/source/room/room.hp:88:7: note: 'UpdateRoomContents' declared here
+        void UpdateRoomContents(int updateIndex, LevelRooms& levelRooms, bool movingObjectsOnly = false);
+             ^
+1 error generated.
+[15/36] Building CXX object CMakeFiles/wfengine.dir/wfsource/source/game/game.cc.o
+[16/36] Building CXX object CMakeFiles/wfengine.dir/wfsource/source/game/light.cc.o
+[17/36] Building CXX object CMakeFiles/wfengine.dir/wfsource/source/game/mailbox.cc.o
+ninja: build stopped: subcommand failed.

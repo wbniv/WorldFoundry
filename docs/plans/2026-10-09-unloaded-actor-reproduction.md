@@ -40,7 +40,9 @@ Will requested the fix after reviewing the reproduction (2026-10-09).
 - [x] Register correctness regression, including exact next-frame updates.
 - [x] Verify old engine fails and fixed release passes.
 - [x] Assertions-enabled full suite: 24/24 passed.
-- [ ] Android/Chromecast verification of this case.
+- [x] Android/Chromecast verification: 117/114 intervals and verified cleanup.
+- [x] Correct Android const-accessor compile error; rerun all three native
+  teleport regressions and validate the autonomous fixture before upload.
 
 Implementation and evidence:
 [unloaded-actor-fix.md](../diagnostics/unloaded-actor-fix.md).

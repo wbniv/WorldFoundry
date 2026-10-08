@@ -55,13 +55,20 @@ engine through `tests/reproduce_unloaded_actor.py --expect-fixed`. It tests:
   reply while all seven mutation checks passed, and its isolated rerun passed.
 - [x] Assertions-enabled full suite: 24/24 tests passed, including all three
   teleport regressions and the mutation bridge checks.
-- [ ] Android/Chromecast verification of this specific case.
+- [x] Android/Chromecast verification: 117/114 intervals, nine full cycles on
+  each device; first never-loaded case verified and cleanup completed.
+  [Device review and raw evidence](unloaded-actor-android.md).
 
 Receipts, screenshots and logs live under [unloaded-actor/fixed/](unloaded-actor/fixed/).
 Final assertions binary SHA-256:
 `d31dd0ca221fcf71c056c4979fc4fb3a16ff063cf0c4919d88cae4385e1c863e`.
 Correctness fixture SHA-256:
 `14c6e203e4d05d8cbaad6869647bd8c671c324f34216b7d963f4190cb50684b8`.
+Android verification subsequently corrected a const-accessor call by moving
+the mutable loop into `LevelRooms::UpdateMovingObjects`. All three native
+teleport tests pass after that correction; the binary hash above refers to
+the earlier full-suite run. Device hashes and the corrected patch are retained
+in the [device review](unloaded-actor-android.md).
 The historical failing reproduction is preserved in
 [unloaded-actor-review.md](unloaded-actor-review.md).
 

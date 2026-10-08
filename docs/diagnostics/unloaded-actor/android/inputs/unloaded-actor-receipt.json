@@ -1,0 +1,26 @@
+{
+  "label": "unloaded-actor",
+  "apk": "/tmp/t4-unloaded-android-apks/unloaded-actor-aab35eb38ad006b2.apk",
+  "apk_sha256": "aab35eb38ad006b2a187f39fb96af6b77bf805484d88f81efb17364963c1d694",
+  "base_apk": "/home/will/finding-your-way-rooms/game/parmenides-slice/build-rooms/scene9/diag/g1v1-loop/parmenides-5e1911563e747939.apk",
+  "base_sha256": "5e1911563e747939ef0ca75bed337bb384646ec97f63c123d8e5a25070d5eac8",
+  "library": "/tmp/t4-android-armv7/libwf_game-unloaded-device.so",
+  "library_sha256": "1dd419570fad226d6c80f1ff66cc7271ac653a9da1bf7deb0c3687331474a566",
+  "unstripped_library_sha256": "ce05b41868f9ed939b37902d664988ee1686bc79ef843481fe2d575c7f83a830",
+  "stripped": "DWARF debug sections removed; dynamic symbols and code retained",
+  "abi": "armeabi-v7a",
+  "assertions": false,
+  "ubsan": false,
+  "base_commit": "280a1fb2d6b941eb971332d7d35d483a5090adfe",
+  "source_diff_sha256": "686e52dfc1ca8cf6cc8fbb30b74395803e2e1a50e53ac3d52bda8106dd04539c",
+  "cd_sha256": "f3962f83c188a65a5f27809c179ac63db06418c7f792b1ecb2d6bc4706949a5d",
+  "arguments": [
+    "--vram-width=5120",
+    "--vram-height=2048",
+    "--vram-slot-width=1024",
+    "--vram-slot-height=2048",
+    "--vram-perm-width=2048",
+    "--vram-perm-height=2048"
+  ],
+  "note": "Diagnostic only; audited 32-bit library and autonomous four-room cd.iff; base Android manifest/Java glue retained."
+}
