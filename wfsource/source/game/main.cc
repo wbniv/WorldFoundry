@@ -157,6 +157,7 @@ usage( int argc, char* argv[] )
 	std::cout << "\t--no-fps\tHide the default bottom-right frame-rate counter" << std::endl;
 	std::cout << "\t--static-mesh=0|1\tDraw meshes from static GPU buffers (default 1; env WF_STATIC_MESH)" << std::endl;
 	std::cout << "\t--static-mesh-cull=exact|fast\tStatic-mesh back-face test (default exact)" << std::endl;
+	std::cout << "\t--static-mesh-bake-budget=N\tFaces baked per frame at most (default 4000, 0 = no limit)" << std::endl;
 	std::cout << "\t-p<stream initial><stream output>, where:" << std::endl;
 	std::cout << "\t\t<stream initial> can be any of:" << std::endl;
 	std::cout << "\t\t\tw=warnings (defaults to standard err)" << std::endl;
@@ -287,6 +288,8 @@ ParseCommandLine(int argc, char** argv)
 			StaticMeshSetSwitch( argv[index][14] == '1' );
 		else if ( strcmp( argv[index], "--static-mesh-cull=exact" ) == 0 || strcmp( argv[index], "--static-mesh-cull=fast" ) == 0 )
 			StaticMeshSetFastCull( strcmp( argv[index] + 19, "fast" ) == 0 );
+		else if ( strncmp( argv[index], "--static-mesh-bake-budget=", 26 ) == 0 )
+			StaticMeshSetBakeBudget( atoi( argv[index] + 26 ) );
 		else if ( strcmp( argv[index]+1, "-script-profile" ) == 0 )
 		{
 			if ( WFScriptProfileEnable ) WFScriptProfileEnable();

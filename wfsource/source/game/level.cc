@@ -38,6 +38,7 @@
 #include "sim_constants.hp"   // kMaxSimDeltaSeconds
 #include <movement/movement.hp>
 #include <room/room.hp>
+#include <gfx/static_mesh.hp>
 #include <physics/collision.hp>
 #ifdef PHYSICS_ENGINE_JOLT
 #include <physics/jolt/jolt_backend.hp>
@@ -1417,6 +1418,7 @@ Level::RenderScene()
 		++roomIter;
 	}
 	_viewPort.Render();
+	StaticMeshSampleGauges();		// E3 byte gauges, inside the profiled frame
 	wf_profile::end(wf_profile::Render);
 	wf_profile::end_frame();
 	Validate();

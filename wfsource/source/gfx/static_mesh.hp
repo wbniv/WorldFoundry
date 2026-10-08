@@ -43,8 +43,21 @@ void StaticMeshAtlasChanged();
 // transient bake buffers, which are freed right after upload).
 size_t StaticMeshCpuBytes();
 
-// Once per frame, from the compositing backend's EndFrame: samples the
-// static-cpu-bytes gauge and runs the test hooks of WF_STATIC_MESH_TEST:
+// Bake budget: at most this many faces are baked per frame (default 4000;
+// `--static-mesh-bake-budget=N` or WF_STATIC_MESH_BAKE_BUDGET, 0 = no limit).
+// An object that does not fit streams that frame, as it would with the switch
+// off (identical pixels), and bakes on a later frame; the first bake of a frame
+// always proceeds, so a mesh larger than the budget still bakes. Spreads the
+// first-draw cost of a new scene over several frames instead of one spike.
+void StaticMeshSetBakeBudget(int faces);
+
+// Once per frame, inside the profiled frame (Level::RenderScene, before
+// wf_profile::end_frame): samples the static-gpu-bytes / static-cpu-bytes
+// gauges.
+void StaticMeshSampleGauges();
+
+// Once per frame, from the compositing backend's EndFrame: resets the bake
+// budget and runs the test hooks of WF_STATIC_MESH_TEST:
 //   atlas:N  bump the atlas generation every N frames (every bake is rebuilt;
 //            no shipped level loads or frees a room slot after level load)
 //   loss:N   at frame N, simulate an Android surface loss (GL names dropped,

@@ -187,7 +187,7 @@ public:
     void EndFrame() override
     {
         Drain(); _backend.EndFrame();
-        if (StaticMeshEndFrame())   // E3 gauge; true = test hook asks for a simulated surface loss
+        if (StaticMeshEndFrame())   // E3 per-frame reset; true = test hook asks for a simulated surface loss
             SimulateSurfaceLoss();
     }
     static void SimulateSurfaceLoss();
@@ -206,6 +206,7 @@ public:
     { return _backend.CreateStaticMesh(t, n); }
     void DestroyStaticMesh(RBStaticMeshHandle m) override { _backend.DestroyStaticMesh(m); }
     bool StaticMeshLive(RBStaticMeshHandle m) const override { return _backend.StaticMeshLive(m); }
+    void StaticMeshBytes(size_t& gpu, size_t& cpu) const override { _backend.StaticMeshBytes(gpu, cpu); }
     void DrawStaticTriangles(RBStaticMeshHandle m, const unsigned* t, int n,
                              const PixelMap* texture, bool prelit) override
     {

@@ -223,6 +223,10 @@ public:
     // effects on an opaque triangle (the compositing layer's opacity reset).
     virtual void DrawStaticTriangles(RBStaticMeshHandle /*mesh*/, const unsigned* /*triangles*/, int /*count*/,
                                      const PixelMap* /*texture*/, bool /*prelit*/) {}
+
+    // Bytes the backend holds for static meshes: GPU buffers, and main-RAM
+    // staging (the per-draw index list). For the frame counters.
+    virtual void StaticMeshBytes(size_t& gpu, size_t& cpu) const { gpu = 0; cpu = 0; }
 };
 
 // While a recorder is installed, RendererBackendGet() returns it instead of

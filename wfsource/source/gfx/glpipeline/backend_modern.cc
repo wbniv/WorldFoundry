@@ -581,11 +581,6 @@ public:
     void EndFrame() override
     {
         Flush();
-        // E3 gauges, sampled once per frame: GPU bytes held by static meshes,
-        // and the main-RAM index staging this backend keeps for them.
-        wf_profile::count(wf_profile::StaticGpuBytes, _staticGpuBytes);
-        wf_profile::count(wf_profile::StaticCpuBytes,
-                          _idx16.capacity() * sizeof(uint16_t) + _idx32.capacity() * sizeof(uint32_t));
         // glClear also honours the depth write mask on the next frame.
         glDepthMask(GL_TRUE);
         glDisable(GL_BLEND);
@@ -770,6 +765,12 @@ public:
             _staticGpuBytes -= mesh->vboBytes + mesh->iboBytes;
         }
         delete mesh;
+    }
+
+    void StaticMeshBytes(size_t& gpu, size_t& cpu) const override
+    {
+        gpu = _staticGpuBytes;
+        cpu = _idx16.capacity() * sizeof(uint16_t) + _idx32.capacity() * sizeof(uint32_t);
     }
 
     bool StaticMeshLive(RBStaticMeshHandle handle) const override

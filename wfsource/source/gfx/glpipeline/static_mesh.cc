@@ -69,6 +69,8 @@ namespace
 {
 	int sSwitchOverride = -1;			// -1 = not given on the command line
 	int sFastCullOverride = -1;
+	int sBakeBudgetOverride = -1;
+	int32 sBakedFacesThisFrame = 0;
 	unsigned sAtlasGeneration = 1;
 	size_t sCpuBytes = 0;
 
@@ -92,6 +94,18 @@ namespace
 			return e && strcmp(e, "fast") == 0;
 		}();
 		return fast;
+	}
+
+	int32
+	BakeBudget()
+	{
+		static const int32 budget = []() {
+			if(sBakeBudgetOverride >= 0)
+				return int32(sBakeBudgetOverride);
+			const char* e = getenv("WF_STATIC_MESH_BAKE_BUDGET");
+			return e ? int32(atoi(e)) : int32(4000);
+		}();
+		return budget;
 	}
 
 	bool
@@ -218,10 +232,25 @@ StaticMeshCpuBytes()
 	return sCpuBytes;
 }
 
+void
+StaticMeshSetBakeBudget(int faces)
+{
+	sBakeBudgetOverride = faces < 0 ? 0 : faces;
+}
+
+void
+StaticMeshSampleGauges()
+{
+	size_t gpu = 0, staging = 0;
+	RendererBackendGet().StaticMeshBytes(gpu, staging);
+	wf_profile::count(wf_profile::StaticGpuBytes, gpu);
+	wf_profile::count(wf_profile::StaticCpuBytes, sCpuBytes + staging);
+}
+
 bool
 StaticMeshEndFrame()
 {
-	wf_profile::count(wf_profile::StaticCpuBytes, sCpuBytes);
+	sBakedFacesThisFrame = 0;
 	static const char* test = getenv("WF_STATIC_MESH_TEST");
 	static unsigned long frame = 0;
 	++frame;
@@ -623,10 +652,20 @@ RenderObject3D::RenderStatic(const Matrix34& position)
 			}
 		}
 	}
-	if(!_staticBake && !BakeStatic())
+	if(!_staticBake)
 	{
-		wf_profile::count(wf_profile::StaticExcludedObjects);
-		return false;
+		const int32 budget = BakeBudget();
+		if(budget > 0 && sBakedFacesThisFrame > 0 && sBakedFacesThisFrame + _faceCount > budget)
+		{
+			wf_profile::count(wf_profile::StaticDeferredObjects);
+			return false;				// stream this frame, bake on a later one
+		}
+		sBakedFacesThisFrame += _faceCount;
+		if(!BakeStatic())
+		{
+			wf_profile::count(wf_profile::StaticExcludedObjects);
+			return false;
+		}
 	}
 	const StaticMeshBake& bake = *_staticBake;
 
