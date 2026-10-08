@@ -179,7 +179,11 @@ ActiveRooms::ChangeActiveRoom( int toRoom )
 
 						while(!rendIter.Empty())
 						{
-		   				(*rendIter).UnBindAssets();
+							// Moves Between Rooms objects live in the permanent slot (see the load
+							// loop below and InitActiveRoom); leaving a room must not unbind them.
+							assert(IsPhysicalObject(&(*rendIter)));
+							if(!static_cast<PhysicalObject&>(*rendIter).GetMovementBlockPtr()->MovesBetweenRooms)
+		   					(*rendIter).UnBindAssets();
 							++rendIter;
 						}
 						_fromActiveRooms[ idxActiveRoom ] = NULL;
@@ -216,7 +220,20 @@ ActiveRooms::ChangeActiveRoom( int toRoom )
 						BaseObjectIteratorWrapper rendIter = _activeRooms[idxActiveRoom]->ListIter(ROOM_OBJECT_LIST_RENDER);
 						while(!rendIter.Empty())
 						{
-		   				(*rendIter).BindAssets(_assetManager.GetAssetSlot(_levelRooms.GetSlotIndex(newRoomIndex)).GetSlotMemory());
+							assert(IsPhysicalObject(&(*rendIter)));
+							PhysicalObject& po = static_cast<PhysicalObject&>(*rendIter);
+							// As in InitActiveRoom: a Moves Between Rooms object binds into the
+							// permanent slot, never into this room's slot. Binding it here put its
+							// render actor in room memory; once the object moved on to a room that
+							// stayed active and this slot was reused, the render actor was overwritten
+							// (SIGSEGV in AnimationManagerActual::UpdateAnimation). Bind it once only.
+							if(po.GetMovementBlockPtr()->MovesBetweenRooms)
+							{
+								if(!po.AssetsBound())
+									po.BindAssets(_assetManager.GetAssetSlot(VideoMemory::PERMANENT_SLOT).GetSlotMemory());
+							}
+							else
+								po.BindAssets(_assetManager.GetAssetSlot(_levelRooms.GetSlotIndex(newRoomIndex)).GetSlotMemory());
 							++rendIter;
 						}
 						_activeRooms[ idxActiveRoom ]->BindAssets();

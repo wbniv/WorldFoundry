@@ -60,6 +60,7 @@ public:
    // if you do this be sure the call the overridden function so that each class down the chain can deal with their assets
 	virtual void BindAssets(Memory& memory);					// bind into current room
 	virtual void UnBindAssets();				// unbind, get rid of all transient assets
+	virtual bool AssetsBound() const;			// true while BindAssets' render data is live
 
 	// object type enumeration, created from OAD data
 	enum EActorKind

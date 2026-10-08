@@ -184,6 +184,7 @@ public:
 	// room transitions
 	virtual void BindAssets(Memory& memory);					// bind into current room
 	virtual void UnBindAssets();				// unbind, get rid of all transient assets
+	virtual bool AssetsBound() const { return _renderActor != NULL; }
 
 	// mesh
 	// C++ doesn't allow access to protected members of an object of type base class so I had to put this in so that Camera can get to it

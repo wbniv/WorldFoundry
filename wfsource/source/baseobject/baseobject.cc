@@ -93,6 +93,14 @@ BaseObject::UnBindAssets()
 
 //==============================================================================
 
+bool
+BaseObject::AssetsBound() const
+{
+	return false;
+}
+
+//==============================================================================
+
 void 
 BaseObjectIterator::Validate() const
 {
