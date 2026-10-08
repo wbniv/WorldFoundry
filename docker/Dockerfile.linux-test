@@ -1,0 +1,19 @@
+# Linux build-and-test image for World Foundry: the toolchain, the X11/GL headers
+# the Linux engine needs, and a private virtual display (Xvfb + Mesa llvmpipe), so
+# builds, ctest and the off-screen parity captures run in one reproducible place
+# instead of on a developer's host. Build it with `task linux-test-image`.
+FROM ubuntu:24.04
+
+ENV DEBIAN_FRONTEND=noninteractive
+RUN apt-get update \
+ && apt-get install -y --no-install-recommends \
+      build-essential cmake ninja-build pkg-config xxd git rsync ca-certificates \
+      python3 python3-numpy python3-pil python3-xlib \
+      libx11-dev libgl1-mesa-dev libglu1-mesa-dev \
+      xvfb x11-xkb-utils mesa-utils libgl1-mesa-dri libglx-mesa0 \
+ && rm -rf /var/lib/apt/lists/*
+
+# Software GL, so every run renders with the same rasteriser whatever the host GPU is.
+ENV LIBGL_ALWAYS_SOFTWARE=1 \
+    HOME=/tmp
+WORKDIR /src

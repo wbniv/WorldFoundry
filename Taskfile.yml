@@ -1879,3 +1879,23 @@ tasks:
     desc: "Level-menu tests: cdpack byte-identity and MENU chunk, the menu module under ASan/UBSan, scripted input, and the real engine on the desktop display (skipped without DISPLAY)"
     cmds:
       - python3 -m pytest tests/test_level_menu.py -v
+
+  linux-test-image:
+    desc: "Build the Linux build/test container image (toolchain, X11/GL headers, Xvfb, Mesa llvmpipe): docker/Dockerfile.linux-test. Builds and tests run in this container, not on the host."
+    cmds:
+      - docker build -f docker/Dockerfile.linux-test -t wf-linux-test:local docker
+
+  linux-container:
+    desc: "Run a command in the Linux test container (repo at /src, build-docker/ at /build): task linux-container -- ctest --test-dir /build/listener"
+    cmds:
+      - scripts/in-linux-container.sh {{.CLI_ARGS}}
+
+  test-debug-listener:
+    desc: "Build and run debug_listener_reconnect_test in the Linux container: DebugServer_Stop must return even when the listener's accept() is not woken (the macOS behaviour)"
+    cmds:
+      - scripts/in-linux-container.sh scripts/test-debug-listener.sh
+
+  test-debug-listener-negative:
+    desc: "Prove debug_listener_reconnect_test guards the fix: against a copy of debug_server.cc without the poll it must hang and be killed by its 10 s alarm (exit 142). Runs in the Linux container; the repo is not modified."
+    cmds:
+      - scripts/in-linux-container.sh scripts/test-debug-listener.sh --negative
