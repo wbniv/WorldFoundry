@@ -732,11 +732,31 @@ workflows:
           WF_GAME="$CM_BUILD_DIR/engine/wf_game.app/Contents/MacOS/wf_game"
           LEVEL="$CM_BUILD_DIR/wflevels/snowgoons-blender/snowgoons-standalone.iff"
           cd wfsource/source/game
+          # Watchdog: a hung wf_game otherwise burns the whole build timeout and
+          # publishes no artifacts (the 2026-10-08 Release twin did exactly that).
+          # After 300 s, sample the process (where is it stuck?), then kill it so
+          # the step fails and the logs and macos-hang-sample.txt are published.
+          # The watchdog's sleep must not hold the tee pipe open, so its fds are
+          # redirected and the subshell's children are reaped.
+          wf_run() {
+            "$@" &
+            local pid=$!
+            ( sleep 300 </dev/null >/dev/null 2>&1
+              echo "WATCHDOG: '$*' still running after 300 s; sampling, then killing pid $pid"
+              /usr/bin/sample "$pid" 5 -file "$CM_BUILD_DIR/macos-hang-sample.txt" >/dev/null 2>&1 || true
+              kill -9 "$pid" 2>/dev/null || true ) &
+            local wd=$!
+            local rc=0
+            wait "$pid" || rc=$?
+            pkill -P "$wd" 2>/dev/null || true
+            kill "$wd" 2>/dev/null || true
+            return "$rc"
+          }
           # Allocator self-check first — sub-second, no level/window/assets, and
           # it is the one check that is *about* this arm64 ABI (the compiler's
           # array cookie is 16 bytes here vs 8 on x86_64). Fails loudly and
           # early rather than as a cookie assert 30 frames in.
-          "$WF_GAME" --memory-test 2>&1 | tee "$CM_BUILD_DIR/macos-smoke.log"
+          wf_run "$WF_GAME" --memory-test 2>&1 | tee "$CM_BUILD_DIR/macos-smoke.log"
           # --capture-frame=N counts frames that reached the BACKEND, not engine
           # steps: Phase 1 measured 29 rendered frames for 30 steps (the render
           # block is gated on camera()->ValidView()). So capture at 20, safely
@@ -747,7 +767,7 @@ workflows:
           # not reproducible even on the same machine, let alone comparable with
           # a Linux capture — which is what plan steps 9 and 10 need. Verified
           # locally: two -rate20 runs produce byte-identical PNGs.
-          "$WF_GAME" --frame-step-smoke=30 --cycles=1 -L"$LEVEL" -rate20 \
+          wf_run "$WF_GAME" --frame-step-smoke=30 --cycles=1 -L"$LEVEL" -rate20 \
             --no-fps --capture-frame=20="$CM_BUILD_DIR/macos-frame20.png" \
             2>&1 | tee -a "$CM_BUILD_DIR/macos-smoke.log"
 
@@ -925,6 +945,7 @@ workflows:
       - macos-configure.log
       - macos-build.log
       - macos-smoke.log
+      - macos-hang-sample.txt
       - macos-framerate.log
       - macos-comparison.log
       # Phase 2's deliverable: a real Metal frame rendered with no window. This
