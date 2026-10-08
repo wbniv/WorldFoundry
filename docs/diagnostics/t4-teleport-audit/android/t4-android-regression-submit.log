@@ -1,0 +1,4 @@
+Accepted B-885c3c12bc09: pending; record
+chromecast-test-01: J-c24317f2ceae
+chromecast-test-02: J-eadb0ef85fcd
+Follow: task chromecast:watch BATCH=B-885c3c12bc09

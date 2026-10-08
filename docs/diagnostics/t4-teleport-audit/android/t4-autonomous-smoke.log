@@ -1,0 +1,148 @@
+material: texture=""  bTranslucent=0  bitdepth=16  flags_in=0x2
+material: texture=""  bTranslucent=0  bitdepth=16  flags_in=0x2
+audio: miniaudio v0.11.25 ready
+jolt: RegisterDefaultAllocator
+jolt: Factory
+jolt: RegisterTypes
+jolt: RunSelftest
+jolt: selftest ok (sphere fell to z=5.098)
+jolt: backend init
+jolt: backend ready (gravity -Z)
+jolt: init complete
+Level::Level: leveldata= 0x7b5b20133e28, object count  = 20
+PixelMap::Load: this = 0x7b5b1d527d48
+PixelMap::Load: this = 0x7b5b1d527d78
+[Actor] idx=6 class=13 commonOff=1664 NumberOfLocalMailboxes=0
+this = 0x7b5b1d52af38,setting _memory to 0x7b5b1d52ac20
+[Actor] idx=7 class=20 commonOff=2220 NumberOfLocalMailboxes=0
+[Actor] idx=8 class=16 commonOff=1664 NumberOfLocalMailboxes=0
+[Actor] idx=9 class=22 commonOff=2480 NumberOfLocalMailboxes=6
+[Actor] idx=10 class=3 commonOff=1664 NumberOfLocalMailboxes=0
+[Actor] idx=11 class=3 commonOff=1664 NumberOfLocalMailboxes=0
+[Actor] idx=12 class=6 commonOff=1664 NumberOfLocalMailboxes=0
+[Actor] idx=13 class=23 commonOff=1664 NumberOfLocalMailboxes=0
+[Actor] idx=14 class=6 commonOff=1664 NumberOfLocalMailboxes=0
+[Actor] idx=15 class=23 commonOff=1664 NumberOfLocalMailboxes=0
+[Actor] idx=16 class=6 commonOff=1664 NumberOfLocalMailboxes=0
+[Actor] idx=17 class=23 commonOff=1664 NumberOfLocalMailboxes=0
+[Actor] idx=18 class=6 commonOff=1664 NumberOfLocalMailboxes=0
+[Actor] idx=19 class=23 commonOff=1664 NumberOfLocalMailboxes=0
+PixelMap::Load: this = 0x7b5b1d527da8
+PixelMap::Load: this = 0x7b5b1d527dd8
+PixelMap::Load: this = 0x7b5b1d527e68
+PixelMap::Load: this = 0x7b5b1d527e98
+PixelMap::Load: this = 0x7b5b1d527e08
+PixelMap::Load: this = 0x7b5b1d527e38
+zforth: INDEXOF_CAMSHOT = 1921 (expect 1921)
+zforth: INDEXOF_CAMSHOT = 1921 (expect 1921)
+jolt: OptimizeBroadPhase done (0 static bodies)
+audio: MusicPlayer — soundfont not found: florestan-subset.sf2
+audio: sfx[0] not found: wflevels/qbert_practice/sfx/qbert_hop.wav
+audio: sfx[1] not found: wflevels/qbert_practice/sfx/qbert_land.wav
+audio: sfx[2] not found: wflevels/qbert_practice/sfx/qbert_fall.wav
+audio: sfx[3] not found: wflevels/qbert_practice/sfx/qbert_swear.wav
+audio: sfx[4] not found: wflevels/qbert_practice/sfx/qbert_round_clear.wav
+audio: sfx[5] not found: wflevels/qbert_practice/sfx/qbert_kill.wav
+audio: sfx[6] not found: wflevels/qbert_practice/sfx/qbert_disc.wav
+rest_api: listening on http://127.0.0.1:0
+[debug] listening on :7777
+T4_ARRIVAL 1 2 100 100 0.25 -1 
+PixelMap::Load: this = 0x7b5b1d527e08
+PixelMap::Load: this = 0x7b5b1d527e38
+T4_ARRIVAL 2 4 0 0 0.25 -1 
+PixelMap::Load: this = 0x7b5b1d527da8
+PixelMap::Load: this = 0x7b5b1d527dd8
+T4_ARRIVAL 3 1 300 300 0.25 -1 
+PixelMap::Load: this = 0x7b5b1d527da8
+PixelMap::Load: this = 0x7b5b1d527dd8
+PixelMap::Load: this = 0x7b5b1d527e68
+PixelMap::Load: this = 0x7b5b1d527e98
+T4_ARRIVAL 4 2 100 100 0.25 -1 
+PixelMap::Load: this = 0x7b5b1d527e08
+PixelMap::Load: this = 0x7b5b1d527e38
+T4_ARRIVAL 5 5 200 200 0.25 -1 
+PixelMap::Load: this = 0x7b5b1d527da8
+PixelMap::Load: this = 0x7b5b1d527dd8
+T4_ARRIVAL 6 1 300 300 0.25 -1 
+PixelMap::Load: this = 0x7b5b1d527da8
+PixelMap::Load: this = 0x7b5b1d527dd8
+PixelMap::Load: this = 0x7b5b1d527e68
+PixelMap::Load: this = 0x7b5b1d527e98
+PixelMap::Load: this = 0x7b5b1d527e08
+PixelMap::Load: this = 0x7b5b1d527e38
+T4_ARRIVAL 7 4 0 0 0.25 -1 
+T4_ARRIVAL 8 2 100 100 0.25 -1 
+PixelMap::Load: this = 0x7b5b1d527e08
+PixelMap::Load: this = 0x7b5b1d527e38
+T4_ARRIVAL 9 4 0 0 0.25 -1 
+PixelMap::Load: this = 0x7b5b1d527da8
+PixelMap::Load: this = 0x7b5b1d527dd8
+T4_ARRIVAL 10 1 300 300 0.25 -1 
+PixelMap::Load: this = 0x7b5b1d527da8
+PixelMap::Load: this = 0x7b5b1d527dd8
+PixelMap::Load: this = 0x7b5b1d527e68
+PixelMap::Load: this = 0x7b5b1d527e98
+T4_ARRIVAL 11 2 100 100 0.25 -1 
+PixelMap::Load: this = 0x7b5b1d527e08
+PixelMap::Load: this = 0x7b5b1d527e38
+T4_ARRIVAL 12 5 200 200 0.25 -1 
+PixelMap::Load: this = 0x7b5b1d527da8
+PixelMap::Load: this = 0x7b5b1d527dd8
+T4_ARRIVAL 13 1 300 300 0.25 -1 
+PixelMap::Load: this = 0x7b5b1d527da8
+PixelMap::Load: this = 0x7b5b1d527dd8
+PixelMap::Load: this = 0x7b5b1d527e68
+PixelMap::Load: this = 0x7b5b1d527e98
+PixelMap::Load: this = 0x7b5b1d527e08
+PixelMap::Load: this = 0x7b5b1d527e38
+T4_ARRIVAL 14 4 0 0 0.25 -1 
+T4_ARRIVAL 15 2 100 100 0.25 -1 
+PixelMap::Load: this = 0x7b5b1d527e08
+PixelMap::Load: this = 0x7b5b1d527e38
+T4_ARRIVAL 16 4 0 0 0.25 -1 
+PixelMap::Load: this = 0x7b5b1d527da8
+PixelMap::Load: this = 0x7b5b1d527dd8
+T4_ARRIVAL 17 1 300 300 0.25 -1 
+PixelMap::Load: this = 0x7b5b1d527da8
+PixelMap::Load: this = 0x7b5b1d527dd8
+PixelMap::Load: this = 0x7b5b1d527e68
+PixelMap::Load: this = 0x7b5b1d527e98
+T4_ARRIVAL 18 2 100 100 0.25 -1 
+PixelMap::Load: this = 0x7b5b1d527e08
+PixelMap::Load: this = 0x7b5b1d527e38
+T4_ARRIVAL 19 5 200 200 0.25 -1 
+PixelMap::Load: this = 0x7b5b1d527da8
+PixelMap::Load: this = 0x7b5b1d527dd8
+T4_ARRIVAL 20 1 300 300 0.25 -1 
+PixelMap::Load: this = 0x7b5b1d527da8
+PixelMap::Load: this = 0x7b5b1d527dd8
+PixelMap::Load: this = 0x7b5b1d527e68
+PixelMap::Load: this = 0x7b5b1d527e98
+PixelMap::Load: this = 0x7b5b1d527e08
+PixelMap::Load: this = 0x7b5b1d527e38
+T4_ARRIVAL 21 4 0 0 0.25 -1 
+T4_ARRIVAL 22 2 100 100 0.25 -1 
+PixelMap::Load: this = 0x7b5b1d527e08
+PixelMap::Load: this = 0x7b5b1d527e38
+T4_ARRIVAL 23 4 0 0 0.25 -1 
+PixelMap::Load: this = 0x7b5b1d527da8
+PixelMap::Load: this = 0x7b5b1d527dd8
+T4_ARRIVAL 24 1 300 300 0.25 -1 
+PixelMap::Load: this = 0x7b5b1d527da8
+PixelMap::Load: this = 0x7b5b1d527dd8
+PixelMap::Load: this = 0x7b5b1d527e68
+PixelMap::Load: this = 0x7b5b1d527e98
+T4_ARRIVAL 25 2 100 100 0.25 -1 
+PixelMap::Load: this = 0x7b5b1d527e08
+PixelMap::Load: this = 0x7b5b1d527e38
+T4_ARRIVAL 26 5 200 200 0.25 -1 
+PixelMap::Load: this = 0x7b5b1d527da8
+PixelMap::Load: this = 0x7b5b1d527dd8
+T4_ARRIVAL 27 1 300 300 0.25 -1 
+PixelMap::Load: this = 0x7b5b1d527da8
+PixelMap::Load: this = 0x7b5b1d527dd8
+PixelMap::Load: this = 0x7b5b1d527e68
+PixelMap::Load: this = 0x7b5b1d527e98
+PixelMap::Load: this = 0x7b5b1d527e08
+PixelMap::Load: this = 0x7b5b1d527e38
+T4_ARRIVAL 28 4 0 0 0.25 -1 

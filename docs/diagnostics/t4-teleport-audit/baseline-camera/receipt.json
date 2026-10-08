@@ -1,0 +1,26 @@
+{
+  "command": [
+    "stdbuf",
+    "-oL",
+    "-eL",
+    "/home/will/WorldFoundry-wbniv/.worktrees/teleport-audit/engine/wf_game",
+    "-L/tmp/t4-valid-follow-level/teleport_regression-standalone.iff",
+    "--windowed",
+    "--debug-print-actors",
+    "--debug-port",
+    "55619",
+    "--debug-bind",
+    "127.0.0.1"
+  ],
+  "arrivals": [
+    {
+      "lap": 1,
+      "command": 2,
+      "x": 100.0,
+      "camera_x": 23.724232,
+      "fps": 60.983829
+    }
+  ],
+  "exit_before_cleanup": null,
+  "cleanup_exit": -15
+}

@@ -13,6 +13,30 @@ Format per entry:
 
 ---
 
+## Departing room unbind uses the destination pointer — 2026-10-08
+
+**Status:** FIXED [`c92ca353`](https://github.com/wbniv/WorldFoundry/commit/c92ca353) (`teleport-audit`).
+
+**Symptom:** A cross-room teleport from a room with two neighbours to a disconnected room triggers UBSan: member call on null pointer of type `Room`.
+
+**Root cause:** `ActiveRooms::ChangeActiveRoom` clears `_fromActiveRooms[idxActiveRoom]`, then calls `UnBindAssets` through `_activeRooms[idxActiveRoom]`. The latter is already the destination table, whose entry can be a different room or null. Baseline `git blame` attributes both statements to imported commit `a2784f6e` (2010-05-01), before this catalogue's cutoff.
+
+**Why dormant:** Walking typically replaces one overlapping neighbourhood with another. In addition, `Room::UnBindAssets` is empty, so a null member call can survive without an obvious native crash despite being undefined behavior.
+
+**Fix:** Unbind the departing room before clearing its pointer.
+
+**Diff** (`wfsource/source/room/actrooms.cc`):
+```diff
+- _fromActiveRooms[idxActiveRoom] = NULL;
+- _activeRooms[idxActiveRoom]->UnBindAssets();
++ _fromActiveRooms[idxActiveRoom]->UnBindAssets();
++ _fromActiveRooms[idxActiveRoom] = NULL;
+```
+
+**Investigation:** [Cross-room teleport audit](teleport-audit.md), including the real-engine UBSan baseline and standalone regression.
+
+---
+
 ## `List`/`SNode` overlay breaks strict aliasing — the camera's collision loop reprocessed a freed message — 2026-10-08
 
 **Status:** FIXED [`20a2e10a`](https://github.com/wbniv/WorldFoundry/commit/20a2e10a) (`wfsource/source/hal/_list.h` — `SNode` is `may_alias`).

@@ -1,0 +1,2 @@
+{"log": "/tmp/t4-cast-regression/chromecast-test-01/J-c24317f2ceae/wf.log", "log_sha256": "70b90f20cf1c85d5c122bcda83030d49b7b965797fb10de3fd925777f7c1dd49", "arrivals": 151, "first_step": 1, "last_step": 151, "full_laps": 21, "camera_max_error": 0.0, "scale": 0.25, "passed": true}
+{"log": "/tmp/t4-cast-regression/chromecast-test-02/J-eadb0ef85fcd/wf.log", "log_sha256": "5881b389584d88bd1b3859cc1e05253298e6fd3df4ab46b4f9e6f8050f8b3da8", "arrivals": 146, "first_step": 1, "last_step": 146, "full_laps": 20, "camera_max_error": 0.0, "scale": 0.25, "passed": true}

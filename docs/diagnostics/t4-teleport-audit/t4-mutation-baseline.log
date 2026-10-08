@@ -1,0 +1,13 @@
+PASS: unloaded room D actor caches scale 0.25
+{"lap": 1, "command": 2, "x": 100.0, "camera_x": 23.556259, "fps": 60.396599}
+Engine evidence: /tmp/t4-mutation-baseline/engine.log
+Traceback (most recent call last):
+  File "/tmp/t4_test_teleports.py", line 140, in <module>
+    args=parser.parse_args();run(args)
+                             ~~~^^^^^^
+  File "/tmp/t4_test_teleports.py", line 82, in run
+    wait(lambda:abs(client.mailbox_values.get((6,3009),-999)-x)<.01,timeout=2)
+    ~~~~^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/tmp/t4_test_teleports.py", line 50, in wait
+    raise AssertionError('timeout waiting for teleport evidence')
+AssertionError: timeout waiting for teleport evidence

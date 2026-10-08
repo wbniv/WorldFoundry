@@ -1,0 +1,55 @@
+[  2%] Built target zforth
+[  2%] Built target wf_property_core_build
+[ 11%] Built target lua54
+[ 48%] Built target Jolt
+[ 49%] Building CXX object CMakeFiles/wfengine.dir/engine/mutation/wfmut.cpp.o
+In file included from /home/will/WorldFoundry-wbniv/.worktrees/teleport-audit/wfsource/source/game/level.hp:52,
+                 from /home/will/WorldFoundry-wbniv/.worktrees/teleport-audit/engine/mutation/wfmut.cpp:16:
+/home/will/WorldFoundry-wbniv/.worktrees/teleport-audit/wfsource/source/asset/assets.hp:130:94: note: ‘#pragma message: KTS /home/will/WorldFoundry-wbniv/.worktrees/teleport-audit/wfsource/source/asset/assets.hp: can only have 1024 assets until this kludge is removed ’
+  130 |  #pragma message ("KTS " __FILE__ ": can only have 1024 assets until this kludge is removed ")
+      |                                                                                              ^
+In file included from /home/will/WorldFoundry-wbniv/.worktrees/teleport-audit/wfsource/source/gfx/viewport.hp:103,
+                 from /home/will/WorldFoundry-wbniv/.worktrees/teleport-audit/wfsource/source/game/level.hp:57:
+/home/will/WorldFoundry-wbniv/.worktrees/teleport-audit/wfsource/source/gfx/viewport.hpi: In member function ‘void ViewPort::Render()’:
+/home/will/WorldFoundry-wbniv/.worktrees/teleport-audit/wfsource/source/gfx/viewport.hpi:114:67: note: ‘#pragma message: KTS /home/will/WorldFoundry-wbniv/.worktrees/teleport-audit/wfsource/source/gfx/viewport.hpi: write viewport gl render code’
+  114 | #pragma message ("KTS " __FILE__ ": write viewport gl render code")
+      |                                                                   ^
+In file included from /home/will/WorldFoundry-wbniv/.worktrees/teleport-audit/wfsource/source/gfx/rendmatt.hp:32,
+                 from /home/will/WorldFoundry-wbniv/.worktrees/teleport-audit/wfsource/source/game/level.hp:58:
+/home/will/WorldFoundry-wbniv/.worktrees/teleport-audit/wfsource/source/gfx/material.hp: At global scope:
+/home/will/WorldFoundry-wbniv/.worktrees/teleport-audit/wfsource/source/gfx/material.hp:194:135: note: ‘#pragma message: /home/will/WorldFoundry-wbniv/.worktrees/teleport-audit/wfsource/source/gfx/material.hp KTS: MAX_RENDERERS hard coded to 8 to prevent cyclic dependencies, consider moving renderers into Material’
+  194 | #pragma message(__FILE__ " KTS: MAX_RENDERERS hard coded to 8 to prevent cyclic dependencies, consider moving renderers into Material")
+      |                                                                                                                                       ^
+In file included from /home/will/WorldFoundry-wbniv/.worktrees/teleport-audit/wfsource/source/gfx/face.hp:67,
+                 from /home/will/WorldFoundry-wbniv/.worktrees/teleport-audit/wfsource/source/gfx/rendobj3.hp:39,
+                 from /home/will/WorldFoundry-wbniv/.worktrees/teleport-audit/wfsource/source/gfx/material.hpi:26,
+                 from /home/will/WorldFoundry-wbniv/.worktrees/teleport-audit/wfsource/source/gfx/material.hp:201:
+/home/will/WorldFoundry-wbniv/.worktrees/teleport-audit/wfsource/source/gfx/face.hpi:26:71: note: ‘#pragma message: KTS /home/will/WorldFoundry-wbniv/.worktrees/teleport-audit/wfsource/source/gfx/face.hpi: move this into the math directory’
+   26 | #pragma message ("KTS " __FILE__ ": move this into the math directory")
+      |                                                                       ^
+In file included from /home/will/WorldFoundry-wbniv/.worktrees/teleport-audit/wfsource/source/gfx/rendobj3.hp:44:
+/home/will/WorldFoundry-wbniv/.worktrees/teleport-audit/wfsource/source/gfx/handle.hp:12:73: note: ‘#pragma message: WBN: merge various ID/FOURCC classes into single one’
+   12 | #pragma message( "WBN: merge various ID/FOURCC classes into single one" )
+      |                                                                         ^
+In file included from /home/will/WorldFoundry-wbniv/.worktrees/teleport-audit/wfsource/source/movement/movementobject.hpi:31,
+                 from /home/will/WorldFoundry-wbniv/.worktrees/teleport-audit/wfsource/source/movement/movementobject.hp:117,
+                 from /home/will/WorldFoundry-wbniv/.worktrees/teleport-audit/wfsource/source/game/actor.hp:37,
+                 from /home/will/WorldFoundry-wbniv/.worktrees/teleport-audit/wfsource/source/game/level.hp:65:
+/home/will/WorldFoundry-wbniv/.worktrees/teleport-audit/wfsource/source/oas/movement.h:31:74: note: ‘#pragma message: Is there an automatic way to create this enum from oas?’
+   31 | #pragma message("Is there an automatic way to create this enum from oas?")
+      |                                                                          ^
+/home/will/WorldFoundry-wbniv/.worktrees/teleport-audit/wfsource/source/movement/movementobject.hpi: In constructor ‘MovementObject::MovementObject(const SObjectStartupData*, const void*, const CommonBlock&, const Clock&)’:
+/home/will/WorldFoundry-wbniv/.worktrees/teleport-audit/wfsource/source/movement/movementobject.hpi:54:114: note: ‘#pragma message: kts fix: pathed objects get their position set in game/actor.cc since we cant do it here (yet)’
+   54 | #pragma message ("kts fix: pathed objects get their position set in game/actor.cc since we cant do it here (yet)")
+      |                                                                                                                  ^
+/home/will/WorldFoundry-wbniv/.worktrees/teleport-audit/wfsource/source/game/actor.hp: At global scope:
+/home/will/WorldFoundry-wbniv/.worktrees/teleport-audit/wfsource/source/game/actor.hp:254:105: note: ‘#pragma message: /home/will/WorldFoundry-wbniv/.worktrees/teleport-audit/wfsource/source/game/actor.hp: I guess I should make protected accessor functions for these data members’
+  254 | #pragma message( __FILE__ ": I guess I should make protected accessor functions for these data members" )
+      |                                                                                                         ^
+/home/will/WorldFoundry-wbniv/.worktrees/teleport-audit/wfsource/source/game/level.hp:245:58: note: ‘#pragma message: /home/will/WorldFoundry-wbniv/.worktrees/teleport-audit/wfsource/source/game/level.hp: remove _idealMainCharacter’
+  245 | #pragma message( __FILE__ ": remove _idealMainCharacter" )
+      |                                                          ^
+[ 49%] Linking CXX static library libwfengine.a
+[ 98%] Built target wfengine
+[ 98%] Linking CXX executable /home/will/WorldFoundry-wbniv/.worktrees/teleport-audit/engine/wf_game
+[100%] Built target wf_game
