@@ -53,6 +53,10 @@
 #include <renderassets/lionfish_deform.h>
 // deal only in tri's
 
+struct StaticMeshBake;		// gfx/glpipeline/static_mesh.cc (E3 phase 1)
+struct RecordedFace;
+struct RBStaticTriangle;
+
 class RenderObject3D
 {
 public:
@@ -74,7 +78,11 @@ public:
     const std::vector<wf_render::LionRig>& GetLionRig() const { return _lionRig; }
 	bool SetRuntimeGeometry(int vertices, Vertex3D* vertexList, int faces, TriFace* faceList, bool textured=true);
 
-	Vertex3D* GetWrittableVertexList();	// should only be used by the animation system
+	// Should only be used by the animation system. Handing out writable
+	// vertices also takes the object off the static-mesh path for good: a
+	// deforming mesh would need a re-bake per frame, which costs more than
+	// streaming it.
+	Vertex3D* GetWrittableVertexList();
 	int GetVertexCount() const;	// should only be used by the animation system
 	int GetFaceCount() const;	// measurement only (E3 phase 0 mesh-stats report)
 	INLINE bool GetHandle(const HandleID thisHandle, Vector3& position) const;
@@ -104,6 +112,36 @@ private:
 
 	// constructor common code/helper functions
 	void _InitPrimList( Memory& );
+
+	// The per-face loop of Render (faces [firstFace, endFace)), unchanged from
+	// before E3: set each material run's state, call its renderer per face.
+	void StreamFaces(int firstFace, int endFace);
+
+	// E3 phase 1: static mesh buffers (gfx/glpipeline/static_mesh.cc). The
+	// object's triangles are recorded once from StreamFaces, uploaded once,
+	// and drawn each frame from the bake with only the cull done per face.
+	// Returns false when this object must be streamed instead.
+	bool RenderStatic(const Matrix34& position);
+	bool BakeStatic();
+	StaticMeshBake* BakeFromRecording(RBStaticTriangle* triangles, RecordedFace* faces);
+	int StaticBakeStale() const;		// 0 = valid; see static_mesh.cc
+	void StaticMeshDiscard();
+
+	// Why an object is not baked; STATIC_BAKEABLE means it may be.
+	enum StaticMeshState
+	{
+		STATIC_BAKEABLE = 0,
+		STATIC_DEFORMED,				// GetWrittableVertexList was called
+		STATIC_RUNTIME_GEOMETRY,		// SetRuntimeGeometry (plants) rewrites it in place
+		STATIC_SHARED_COPY,				// copy constructor: shares vertices/materials with another object
+		STATIC_UNBAKEABLE,				// state varies inside a material run, or the backend refused
+		STATIC_CHURN,					// invalidated repeatedly (materials re-applied per frame)
+		STATIC_NO_OPAQUE				// every run is translucent: nothing to bake
+	};
+	StaticMeshBake* _staticBake = NULL;
+	uint16 _staticVersion = 0;			// bumped whenever the primitives are rebuilt
+	uint8 _staticState = STATIC_BAKEABLE;
+	uint8 _staticInvalidations = 0;
 
 	// not to be called
 	RenderObject3D( const RenderObject3D& );

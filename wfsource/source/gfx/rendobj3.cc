@@ -70,6 +70,10 @@ RenderObject3D::RenderObject3D( Memory& memory, const RenderObject3D& obj3d )
 
 	_handleCount = obj3d._handleCount;
 	_handleList = obj3d._handleList;
+	// Shares vertices, faces and (usually) materials with obj3d, so a change
+	// made through either would not be seen by the other's bake. Particles
+	// are the user; they are short-lived, so a bake each would churn anyway.
+	_staticState = STATIC_SHARED_COPY;
 	_vertexCount = obj3d._vertexCount;
 	_vertexList = obj3d._vertexList;
     if(!_lionRig.empty()) {
@@ -119,6 +123,7 @@ RenderObject3D::Construct( Memory& memory, int vertexCount,Vertex3D* vertexList,
 
 RenderObject3D::~RenderObject3D()
 {
+	StaticMeshDiscard();	// frees the GPU buffers and bookkeeping of a bake
 }
 
 //============================================================================
@@ -126,6 +131,7 @@ RenderObject3D::~RenderObject3D()
 void
 RenderObject3D::ApplyMaterials(Material* materialList )
 {
+	++_staticVersion;		// primitives (colours, texture pages) are rebuilt: a bake is stale
 	_materialList = materialList;
 	for(int page=0;page<ORDER_TABLES;++page)
 		for(int index=0;index<_faceCount;++index)
@@ -365,6 +371,7 @@ bool RenderObject3D::SetRuntimeGeometry(int vertices, Vertex3D* vertexList, int 
 {
  if(vertices<1||vertices>=32000||faces<1||faces>=32000||!vertexList||!faceList)return false;
  for(int i=0;i<faces;i++)if(faceList[i].v1Index<0||faceList[i].v2Index<0||faceList[i].v3Index<0||faceList[i].v1Index>=vertices||faceList[i].v2Index>=vertices||faceList[i].v3Index>=vertices||faceList[i].materialIndex!=0)return false;
+ _staticState=STATIC_RUNTIME_GEOMETRY;	// its vertices are rewritten in place each frame
  _runtimePrimitives.resize(size_t(faces)*ORDER_TABLES);
  _vertexCount=vertices;_vertexList=vertexList;_faceCount=faces;_faceList=faceList;
  for(int page=0;page<ORDER_TABLES;page++)_primList[page]=_runtimePrimitives.data()+size_t(page)*faces;

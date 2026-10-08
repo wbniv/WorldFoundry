@@ -53,6 +53,7 @@ RenderObject3D::Validate() const
 INLINE Vertex3D*
 RenderObject3D::GetWrittableVertexList()	// should only be used by the animation system
 {
+	_staticState = STATIC_DEFORMED;		// the bake (if any) is dropped at the next Render
 	return(_vertexList);
 }
 

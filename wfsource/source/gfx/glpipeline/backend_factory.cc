@@ -15,6 +15,8 @@
 //============================================================================
 
 #include <gfx/renderer_backend.hp>
+#include <gfx/static_mesh.hp>
+#include <game/runtime_profile.hp>
 #include <math/matrix34.hp>
 #include <hal/halbase.h>
 #include <memory/lmalloc.hp>
@@ -182,12 +184,33 @@ public:
     void FlushTranslucency() override { Drain(); }
     void DrawOverlay(const PhonepadRect* rects, int count, int w, int h) override
     { Drain(); _backend.DrawOverlay(rects, count, w, h); }
-    void EndFrame() override { Drain(); _backend.EndFrame(); }
+    void EndFrame() override
+    {
+        Drain(); _backend.EndFrame();
+        wf_profile::count(wf_profile::StaticCpuBytes, StaticMeshCpuBytes());   // E3 gauge, once per frame
+    }
     RBTextureHandle CreateTexture(int w,int h,RBTextureFormat f,const void* p) override
     { return _backend.CreateTexture(w,h,f,p); }
     void DestroyTexture(RBTextureHandle h) override { Drain(); _backend.DestroyTexture(h); }
     bool ReloadProgram(const char* v,const char* f,std::string& log) override
     { Drain(); return _backend.ReloadProgram(v,f,log); }
+
+    // Static meshes (E3 phase 1). Only opaque runs are drawn this way (the
+    // caller streams translucent ones, which this layer still queues and
+    // sorts), so DrawStaticTriangles does what DrawTriangle does for an
+    // opaque triangle: reset the backend's opacity, then hand it on.
+    bool StaticMeshSupported() const override { return _backend.StaticMeshSupported(); }
+    RBStaticMeshHandle CreateStaticMesh(const RBStaticTriangle* t, int n) override
+    { return _backend.CreateStaticMesh(t, n); }
+    void DestroyStaticMesh(RBStaticMeshHandle m) override { _backend.DestroyStaticMesh(m); }
+    bool StaticMeshLive(RBStaticMeshHandle m) const override { return _backend.StaticMeshLive(m); }
+    void DrawStaticTriangles(RBStaticMeshHandle m, const unsigned* t, int n,
+                             const PixelMap* texture, bool prelit) override
+    {
+        AssertMsg(_opacity >= 1, "static mesh runs are opaque");
+        _backend.SetOpacity(1);
+        _backend.DrawStaticTriangles(m, t, n, texture, prelit);
+    }
 };
 
 #if defined(WF_TARGET_IOS) || defined(WF_TARGET_MACOS)
@@ -196,8 +219,18 @@ RendererBackend* MetalBackendInstance();
 RendererBackend* ModernBackendInstance();
 #endif
 
+// Set only while a static mesh is being baked (gfx/glpipeline/static_mesh.cc);
+// a single load and branch on the common path.
+static RendererBackend* sRecorder = NULL;
+
+void RendererBackendSetRecorder(RendererBackend* recorder)
+{
+    sRecorder = recorder;
+}
+
 RendererBackend& RendererBackendGet()
 {
+    if (sRecorder) return *sRecorder;
 #if defined(WF_TARGET_IOS) || defined(WF_TARGET_MACOS)
     static RendererBackend* s = MetalBackendInstance();
 #else

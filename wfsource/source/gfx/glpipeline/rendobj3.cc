@@ -64,11 +64,25 @@ RenderObject3D::Render(ViewPort& vp,const Matrix34& position)
 
   RendererBackendGet().SetModelView(position);
 
-	Primitive* primitive  = _primList[0];
+	// E3 phase 1: draw from the static bake when the switch is on, the backend
+	// supports it and this object can be baked (gfx/glpipeline/static_mesh.cc);
+	// otherwise the per-face streaming loop below, exactly as before.
+	if(RenderStatic(position))
+		return;
+	StreamFaces(0,_faceCount);
+//	cout << "RenderObject3D::Render: done" << std::endl;
+}
+
+//============================================================================
+
+void
+RenderObject3D::StreamFaces(int firstFace, int endFace)
+{
+	Primitive* primitive  = _primList[0] + firstFace;
 	pRenderObj3DFunc renderer;
 
-	globalRendererVariables.currentRenderFace = _faceList;
-	for(int faceIndex=0;faceIndex<_faceCount;)
+	globalRendererVariables.currentRenderFace = _faceList + firstFace;
+	for(int faceIndex=firstFace;faceIndex<endFace;)
 	{
 		DBSTREAM3( cdebug << "Drawing face " << faceIndex << std::endl; )
 
@@ -84,7 +98,7 @@ RenderObject3D::Render(ViewPort& vp,const Matrix34& position)
 		renderer = globalRendererVariables.currentRenderMaterial->Get3DRenderer();
 		int currentMaterial = globalRendererVariables.currentRenderFace->materialIndex;
 
-		while(faceIndex<_faceCount && currentMaterial == globalRendererVariables.currentRenderFace->materialIndex)
+		while(faceIndex<endFace && currentMaterial == globalRendererVariables.currentRenderFace->materialIndex)
 		{
 			globalRendererVariables.gteVect[0] = Vector3ToPS(_vertexList[globalRendererVariables.currentRenderFace->v1Index].position);
 			globalRendererVariables.gteVect[1] = Vector3ToPS(_vertexList[globalRendererVariables.currentRenderFace->v2Index].position);
@@ -102,7 +116,6 @@ RenderObject3D::Render(ViewPort& vp,const Matrix34& position)
 			globalRendererVariables.currentRenderFace++;
 		}
 	}
-//	cout << "RenderObject3D::Render: done" << std::endl;
 }
 
 //============================================================================

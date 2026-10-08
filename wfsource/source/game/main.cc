@@ -32,6 +32,7 @@
 #include <hal/lifecycle.h>
 #include <gfx/display.hp>
 #include <gfx/vmem.hp>
+#include <gfx/static_mesh.hp>
 
 #if defined(__LINUX__) || defined(__ANDROID__)
 	char szOadDir[ _MAX_PATH ];
@@ -154,6 +155,8 @@ usage( int argc, char* argv[] )
 	std::cout << "Usage : " << __GAME__ << " {switches} <level #>" << std::endl;
 	std::cout << "Switches:" << std::endl;
 	std::cout << "\t--no-fps\tHide the default bottom-right frame-rate counter" << std::endl;
+	std::cout << "\t--static-mesh=0|1\tDraw meshes from static GPU buffers (default 1; env WF_STATIC_MESH)" << std::endl;
+	std::cout << "\t--static-mesh-cull=exact|fast\tStatic-mesh back-face test (default exact)" << std::endl;
 	std::cout << "\t-p<stream initial><stream output>, where:" << std::endl;
 	std::cout << "\t\t<stream initial> can be any of:" << std::endl;
 	std::cout << "\t\t\tw=warnings (defaults to standard err)" << std::endl;
@@ -278,6 +281,12 @@ ParseCommandLine(int argc, char** argv)
 		{
 			wf_profile::enable();
 		}
+		// E3 static mesh buffers (gfx/static_mesh.hp): on by default; =0 streams
+		// every mesh through DrawTriangle as before. Wins over WF_STATIC_MESH.
+		else if ( strcmp( argv[index], "--static-mesh=0" ) == 0 || strcmp( argv[index], "--static-mesh=1" ) == 0 )
+			StaticMeshSetSwitch( argv[index][14] == '1' );
+		else if ( strcmp( argv[index], "--static-mesh-cull=exact" ) == 0 || strcmp( argv[index], "--static-mesh-cull=fast" ) == 0 )
+			StaticMeshSetFastCull( strcmp( argv[index] + 19, "fast" ) == 0 );
 		else if ( strcmp( argv[index]+1, "-script-profile" ) == 0 )
 		{
 			if ( WFScriptProfileEnable ) WFScriptProfileEnable();

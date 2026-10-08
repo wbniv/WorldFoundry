@@ -7,7 +7,8 @@
 // Thin per-triangle submission interface. Renderer TUs call
 // RendererBackendGet().DrawTriangle(...) — the modern backend
 // (gfx/glpipeline/backend_modern.cc) batches them into a VBO + shader path
-// that targets both GLES 3.0 and desktop GL 3.3 core.
+// that targets both GLES 3.0 and desktop GL 3.3 core. Static meshes (E3) add
+// a second, optional way in: CreateStaticMesh / DrawStaticTriangles below.
 //============================================================================
 
 #ifndef _RENDERER_BACKEND_HP
@@ -33,6 +34,26 @@ struct RBVertex
 // with no <cstdint> in a runtime header (coding-conventions §4). The one cast
 // either direction lives inside the backend that owns the representation.
 typedef void* RBTextureHandle;
+
+// ---- static meshes (E3 phase 1) --------------------------------------------
+// One triangle exactly as the streaming path would have handed it to
+// DrawTriangle, plus the per-vertex state the backend packs beside it (the
+// opacity and palette current at that call). A bake is an array of these in
+// face order; the backend packs and uploads them once and the CPU copy is
+// freed. Deliberately flat and free of pointers, so an exporter can emit the
+// same records later.
+struct RBStaticTriangle
+{
+    RBVertex v[3];
+    float nx, ny, nz;
+    float opacity;
+    unsigned paletteDark, paletteLight;
+    unsigned paletteEnabled;    // 0 or 1; unsigned so the record has no padding
+};
+
+// Opaque, backend-owned static mesh (vertex buffer plus whatever the backend
+// needs to draw subsets of it). NULL means "none".
+typedef void* RBStaticMeshHandle;
 
 // Pixel layout of the data handed to CreateTexture. Matches what PixelMap
 // actually stores, which is chosen by the SIXTEEN_BIT_VRAM build switch.
@@ -169,7 +190,46 @@ public:
         log_out = "backend has no shader program to reload";
         return false;
     }
+
+    // ---- static meshes (E3 phase 1, gfx/glpipeline/static_mesh.cc) --------
+    //
+    // A RenderObject3D whose geometry does not change is recorded once (the
+    // exact DrawTriangle calls the eight renderers make), uploaded once, and
+    // then drawn each frame by naming which of its faces survived the cull.
+    // Backends that do not implement this return false from
+    // StaticMeshSupported (the default), and the caller keeps using
+    // DrawTriangle, so Metal and the headless stub need no change.
+    virtual bool StaticMeshSupported() const { return false; }
+
+    // Packs and uploads `count` triangles. Returns NULL on failure or when
+    // unsupported; the caller then streams the mesh as before.
+    virtual RBStaticMeshHandle CreateStaticMesh(const RBStaticTriangle* /*triangles*/, int /*count*/)
+    { return NULL; }
+
+    // Releases a handle (NULL is a no-op). Safe after a lost context: the
+    // backend frees its bookkeeping without touching the dead GL objects.
+    virtual void DestroyStaticMesh(RBStaticMeshHandle /*mesh*/) {}
+
+    // False once the GPU objects behind a handle are gone (Android surface
+    // loss); the caller destroys it and bakes again.
+    virtual bool StaticMeshLive(RBStaticMeshHandle /*mesh*/) const { return false; }
+
+    // Draw the listed triangles (indices into the array given to
+    // CreateStaticMesh, in submission order) exactly as if each had been passed
+    // to DrawTriangle under the current state with this texture and prelit
+    // flag, and had survived the cull: same batching, same flushes, same
+    // uniforms. The caller has already culled; `count` may be 0, in which case
+    // nothing is queued but the call still has DrawTriangle's state side
+    // effects on an opaque triangle (the compositing layer's opacity reset).
+    virtual void DrawStaticTriangles(RBStaticMeshHandle /*mesh*/, const unsigned* /*triangles*/, int /*count*/,
+                                     const PixelMap* /*texture*/, bool /*prelit*/) {}
 };
+
+// While a recorder is installed, RendererBackendGet() returns it instead of
+// the real backend. Used only to bake a static mesh: the renderers then run
+// their normal code and the recorder keeps what they submit. NULL restores the
+// real backend.
+void RendererBackendSetRecorder(RendererBackend* recorder);
 
 // Must match camera.cc's MAX_LIGHTS.
 constexpr int RB_MAX_LIGHTS = 3;

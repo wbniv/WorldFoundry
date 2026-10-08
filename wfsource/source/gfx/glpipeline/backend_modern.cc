@@ -29,6 +29,7 @@
 #endif
 
 #include <gfx/renderer_backend.hp>
+#include <gfx/backface_cull.hp>
 #include <hal/phonepad/phonepad_overlay.h>
 #include <cstdint>   // uintptr_t for the RBTextureHandle cast
 #include <gfx/pixelmap.hp>
@@ -181,29 +182,72 @@ static void Mat4Multiply(const float a[16], const float b[16], float out[16])
     std::memcpy(out, r, sizeof(r));
 }
 
-// Convert Matrix34 (WF's 3x4) to GL 4x4 column-major.
-static void Matrix34ToFloat16(const Matrix34& matrix, float out[16])
+// Matrix34 (WF's 3x4) to GL 4x4 column-major is WfMatrix34ToGL in
+// gfx/backface_cull.hp, shared with the static-mesh cull so both see the same
+// bits.
+
+// One vertex as the shader sees it. Used by the streaming path (per triangle,
+// from the backend's current state) and by CreateStaticMesh (from the state
+// recorded with each triangle), so the two paths produce identical bytes.
+static void PackVert(Vert& dst, const RBVertex& v, float nx, float ny, float nz,
+                     float opacity, bool paletteEnabled, unsigned paletteDark, unsigned paletteLight)
 {
-    out[0]  = matrix[0][0].AsFloat();
-    out[1]  = matrix[0][1].AsFloat();
-    out[2]  = matrix[0][2].AsFloat();
-    out[3]  = 0.0f;
-
-    out[4]  = matrix[1][0].AsFloat();
-    out[5]  = matrix[1][1].AsFloat();
-    out[6]  = matrix[1][2].AsFloat();
-    out[7]  = 0.0f;
-
-    out[8]  = matrix[2][0].AsFloat();
-    out[9]  = matrix[2][1].AsFloat();
-    out[10] = matrix[2][2].AsFloat();
-    out[11] = 0.0f;
-
-    out[12] = matrix[3][0].AsFloat();
-    out[13] = matrix[3][1].AsFloat();
-    out[14] = matrix[3][2].AsFloat();
-    out[15] = 1.0f;
+    dst.x = v.x; dst.y = v.y; dst.z = v.z;
+    dst.r = v.r; dst.g = v.g; dst.b = v.b;
+    dst.u = v.u; dst.v = v.v;
+    dst.nx = nx; dst.ny = ny; dst.nz = nz;
+    dst.opacity = opacity;
+    for (int i=0;i<3;++i) {
+        const int shift=16-8*i;
+        dst.paletteDark[i]=float((paletteDark>>shift)&255)/255.f;
+        dst.paletteLight[i]=float((paletteLight>>shift)&255)/255.f;
+    }
+    dst.paletteDark[3]=paletteEnabled ? 1.f : 0.f;
 }
+
+// Vertex attribute layout for the currently bound VAO + GL_ARRAY_BUFFER.
+// Shared by the streaming VAO and every static-mesh VAO.
+static void SetupVertexAttribs()
+{
+    const GLsizei stride = sizeof(Vert);
+    glEnableVertexAttribArray(0);
+    glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, stride,
+                          (void*)offsetof(Vert, x));
+    glEnableVertexAttribArray(1);
+    glVertexAttribPointer(1, 3, GL_FLOAT, GL_FALSE, stride,
+                          (void*)offsetof(Vert, r));
+    glEnableVertexAttribArray(2);
+    glVertexAttribPointer(2, 2, GL_FLOAT, GL_FALSE, stride,
+                          (void*)offsetof(Vert, u));
+    glEnableVertexAttribArray(3);
+    glVertexAttribPointer(3, 3, GL_FLOAT, GL_FALSE, stride,
+                          (void*)offsetof(Vert, nx));
+    glEnableVertexAttribArray(4);
+    glVertexAttribPointer(4, 1, GL_FLOAT, GL_FALSE, stride,
+                          (void*)offsetof(Vert, opacity));
+
+    glEnableVertexAttribArray(5);
+    glVertexAttribPointer(5, 4, GL_FLOAT, GL_FALSE, stride,
+                          (void*)offsetof(Vert, paletteDark));
+    glEnableVertexAttribArray(6);
+    glVertexAttribPointer(6, 3, GL_FLOAT, GL_FALSE, stride,
+                          (void*)offsetof(Vert, paletteLight));
+}
+
+// A static mesh (E3 phase 1): one VBO of packed Verts (3 per triangle, in the
+// order given to CreateStaticMesh), one index buffer re-filled per draw with
+// the surviving triangles, and a VAO that binds both. `generation` is the GL
+// context generation it was created in: after an Android surface loss the
+// names are dead and the handle only frees its bookkeeping.
+struct StaticMeshGL
+{
+    GLuint vao = 0, vbo = 0, ibo = 0;
+    unsigned generation = 0;
+    int triangles = 0;
+    bool index32 = false;       // more than 65536 vertices
+    size_t vboBytes = 0;
+    size_t iboBytes = 0;        // largest index upload so far
+};
 
 // ---- shader compile helpers -------------------------------------------------
 
@@ -304,7 +348,7 @@ public:
     void SetModelView(const Matrix34& m) override
     {
         Flush();
-        Matrix34ToFloat16(m, _mv);
+        WfMatrix34ToGL(m, _mv);
         _mvpDirty = true;
     }
 
@@ -432,37 +476,31 @@ public:
         // Guard: tests/test_backface_cull_invariant.py.
         // See docs/plans/2026-06-13-planetarium-dome-view-engine-wide-backface-culling.md
         // and docs/level-design-troubleshooting.md "Mesh face normals & backface culling".
-        static const bool cullEnabled = []() {
-            const char* e = getenv("WF_CULL");
-            return !e || atoi(e) != 0;   // default ON; opt out with WF_CULL=0
-        }();
-        if (cullEnabled && !cullExempt)
+        //
+        // The test itself is WfFaceIsBackfacing (gfx/backface_cull.hp), shared
+        // with the static-mesh path so both make bit-identical decisions; the
+        // WF_CULL switch is WfBackfaceCullEnabled there (default ON; opt out
+        // with WF_CULL=0).
+        if (WfBackfaceCullEnabled() && !cullExempt
+            && WfFaceIsBackfacing(_mv, nx, ny, nz,
+                                  v0.x, v0.y, v0.z, v1.x, v1.y, v1.z, v2.x, v2.y, v2.z))
         {
-            const float nex = _mv[0]*nx + _mv[4]*ny + _mv[8]*nz;
-            const float ney = _mv[1]*nx + _mv[5]*ny + _mv[9]*nz;
-            const float nez = _mv[2]*nx + _mv[6]*ny + _mv[10]*nz;
-            const float cx = (v0.x + v1.x + v2.x) * (1.0f / 3.0f);
-            const float cy = (v0.y + v1.y + v2.y) * (1.0f / 3.0f);
-            const float cz = (v0.z + v1.z + v2.z) * (1.0f / 3.0f);
-            const float pex = _mv[0]*cx + _mv[4]*cy + _mv[8]*cz  + _mv[12];
-            const float pey = _mv[1]*cx + _mv[5]*cy + _mv[9]*cz  + _mv[13];
-            const float pez = _mv[2]*cx + _mv[6]*cy + _mv[10]*cz + _mv[14];
-            if (nex*pex + ney*pey + nez*pez > 0.0f)
-            {
-                wf_profile::count(wf_profile::FacesCulled);
-                return;   // back-facing — skip
-            }
+            wf_profile::count(wf_profile::FacesCulled);
+            return;   // back-facing — skip
         }
 
-        // Batch key = (texture, prelit). A LIGHTING_PRELIT run must be drawn
-        // with the lighting uniform off, which is per-draw state, so a change
-        // breaks the batch the same way a texture change does. Faces are
-        // material-sorted by RenderObject3D::Render, so this costs at most one
-        // extra draw call per material run, not one per triangle.
-        if ((texture != _curTexture || prelit != _curPrelit) && !_cpu.empty())
+        // Batch key = (texture, prelit, static mesh). A LIGHTING_PRELIT run
+        // must be drawn with the lighting uniform off, which is per-draw state,
+        // so a change breaks the batch the same way a texture change does.
+        // Faces are material-sorted by RenderObject3D::Render, so this costs at
+        // most one extra draw call per material run, not one per triangle. A
+        // pending static-mesh batch (DrawStaticTriangles) is a different source
+        // and breaks the batch too.
+        if ((texture != _curTexture || prelit != _curPrelit || _curMesh) && !BatchEmpty())
             Flush();
         _curTexture = texture;
         _curPrelit  = prelit;
+        _curMesh    = nullptr;
 
         Vert tri[3];
         Pack(tri[0], v0, nx, ny, nz);
@@ -543,6 +581,11 @@ public:
     void EndFrame() override
     {
         Flush();
+        // E3 gauges, sampled once per frame: GPU bytes held by static meshes,
+        // and the main-RAM index staging this backend keeps for them.
+        wf_profile::count(wf_profile::StaticGpuBytes, _staticGpuBytes);
+        wf_profile::count(wf_profile::StaticCpuBytes,
+                          _idx16.capacity() * sizeof(uint16_t) + _idx32.capacity() * sizeof(uint32_t));
         // glClear also honours the depth write mask on the next frame.
         glDepthMask(GL_TRUE);
         glDisable(GL_BLEND);
@@ -659,6 +702,113 @@ public:
         _uFogEnd     = -1;
         _cpu.clear();
         _curTexture  = nullptr;
+        // Static meshes: every GL name is dead. Bumping the generation makes
+        // StaticMeshLive false for all existing handles, so their owners bake
+        // again on next draw (from the resident RenderObject3D data, there is
+        // no CPU copy of the packed vertices to re-upload).
+        ++_contextGeneration;
+        _idx16.clear();
+        _idx32.clear();
+        _curMesh = nullptr;
+        _staticGpuBytes = 0;
+    }
+
+    // ---- static meshes (E3 phase 1) ----------------------------------------
+
+    bool StaticMeshSupported() const override { return true; }
+
+    RBStaticMeshHandle CreateStaticMesh(const RBStaticTriangle* triangles, int count) override
+    {
+        if (!triangles || count <= 0) return NULL;
+        // Transient: packed exactly as Pack would have, freed on return.
+        std::vector<Vert> verts(size_t(count) * 3);
+        for (int t = 0; t < count; ++t)
+        {
+            const RBStaticTriangle& tri = triangles[t];
+            for (int k = 0; k < 3; ++k)
+                PackVert(verts[size_t(t) * 3 + k], tri.v[k], tri.nx, tri.ny, tri.nz,
+                         tri.opacity, tri.paletteEnabled != 0, tri.paletteDark, tri.paletteLight);
+        }
+        StaticMeshGL* mesh = new StaticMeshGL;
+        mesh->generation = _contextGeneration;
+        mesh->triangles  = count;
+        mesh->index32    = size_t(count) * 3 > 65536;
+        mesh->vboBytes   = verts.size() * sizeof(Vert);
+        glGenVertexArrays(1, &mesh->vao);
+        glGenBuffers(1, &mesh->vbo);
+        glGenBuffers(1, &mesh->ibo);
+        if (!mesh->vao || !mesh->vbo || !mesh->ibo)
+        {
+            if (mesh->vao) glDeleteVertexArrays(1, &mesh->vao);
+            if (mesh->vbo) glDeleteBuffers(1, &mesh->vbo);
+            if (mesh->ibo) glDeleteBuffers(1, &mesh->ibo);
+            delete mesh;
+            return NULL;
+        }
+        glBindVertexArray(mesh->vao);
+        glBindBuffer(GL_ARRAY_BUFFER, mesh->vbo);
+        glBufferData(GL_ARRAY_BUFFER, GLsizeiptr(mesh->vboBytes), verts.data(), GL_STATIC_DRAW);
+        SetupVertexAttribs();
+        glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, mesh->ibo);   // recorded in the VAO
+        glBindVertexArray(0);
+        glBindBuffer(GL_ARRAY_BUFFER, 0);
+        glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, 0);
+        _staticGpuBytes += mesh->vboBytes;
+        return mesh;
+    }
+
+    void DestroyStaticMesh(RBStaticMeshHandle handle) override
+    {
+        StaticMeshGL* mesh = static_cast<StaticMeshGL*>(handle);
+        if (!mesh) return;
+        if (mesh == _curMesh) Flush();      // draw what is queued from it first
+        if (mesh->generation == _contextGeneration)
+        {
+            glDeleteVertexArrays(1, &mesh->vao);
+            glDeleteBuffers(1, &mesh->vbo);
+            glDeleteBuffers(1, &mesh->ibo);
+            _staticGpuBytes -= mesh->vboBytes + mesh->iboBytes;
+        }
+        delete mesh;
+    }
+
+    bool StaticMeshLive(RBStaticMeshHandle handle) const override
+    {
+        const StaticMeshGL* mesh = static_cast<const StaticMeshGL*>(handle);
+        return mesh && mesh->generation == _contextGeneration;
+    }
+
+    void DrawStaticTriangles(RBStaticMeshHandle handle, const unsigned* triangles, int count,
+                             const PixelMap* texture, bool prelit) override
+    {
+        if (count <= 0) return;             // all culled: DrawTriangle would queue nothing
+        StaticMeshGL* mesh = static_cast<StaticMeshGL*>(handle);
+        // Same batch key as DrawTriangle, with the mesh as part of it.
+        if ((texture != _curTexture || prelit != _curPrelit || mesh != _curMesh) && !BatchEmpty())
+            Flush();
+        _curTexture = texture;
+        _curPrelit  = prelit;
+        _curMesh    = mesh;
+        if (mesh->index32)
+        {
+            for (int i = 0; i < count; ++i)
+            {
+                const uint32_t base = uint32_t(triangles[i]) * 3;
+                _idx32.push_back(base);
+                _idx32.push_back(base + 1);
+                _idx32.push_back(base + 2);
+            }
+        }
+        else
+        {
+            for (int i = 0; i < count; ++i)
+            {
+                const uint16_t base = uint16_t(triangles[i] * 3);
+                _idx16.push_back(base);
+                _idx16.push_back(uint16_t(base + 1));
+                _idx16.push_back(uint16_t(base + 2));
+            }
+        }
     }
 
 private:
@@ -704,21 +854,21 @@ private:
     // LIGHTING_PRELIT material. Part of the batch key alongside _curTexture.
     bool  _curPrelit = false;
     std::vector<Vert> _cpu;
+    // Static-mesh batch (E3): when _curMesh is set the pending triangles are
+    // indices into its VBO (16-bit, or 32-bit for a mesh over 65536 vertices)
+    // instead of packed vertices in _cpu. Only one of the two is non-empty.
+    StaticMeshGL* _curMesh = nullptr;
+    std::vector<uint16_t> _idx16;
+    std::vector<uint32_t> _idx32;
+    unsigned _contextGeneration = 1;
+    size_t _staticGpuBytes = 0;
+
+    bool BatchEmpty() const { return _cpu.empty() && _idx16.empty() && _idx32.empty(); }
 
     void Pack(Vert& dst, const RBVertex& v,
                      float nx, float ny, float nz)
     {
-        dst.x = v.x; dst.y = v.y; dst.z = v.z;
-        dst.r = v.r; dst.g = v.g; dst.b = v.b;
-        dst.u = v.u; dst.v = v.v;
-        dst.nx = nx; dst.ny = ny; dst.nz = nz;
-        dst.opacity = _opacity;
-        for (int i=0;i<3;++i) {
-            const int shift=16-8*i;
-            dst.paletteDark[i]=float((_paletteDark>>shift)&255)/255.f;
-            dst.paletteLight[i]=float((_paletteLight>>shift)&255)/255.f;
-        }
-        dst.paletteDark[3]=_paletteEnabled ? 1.f : 0.f;
+        PackVert(dst, v, nx, ny, nz, _opacity, _paletteEnabled, _paletteDark, _paletteLight);
     }
 
     void FetchUniformLocations()
@@ -755,29 +905,7 @@ private:
         glBindVertexArray(_vao);
         glBindBuffer(GL_ARRAY_BUFFER, _vbo);
 
-        const GLsizei stride = sizeof(Vert);
-        glEnableVertexAttribArray(0);
-        glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, stride,
-                              (void*)offsetof(Vert, x));
-        glEnableVertexAttribArray(1);
-        glVertexAttribPointer(1, 3, GL_FLOAT, GL_FALSE, stride,
-                              (void*)offsetof(Vert, r));
-        glEnableVertexAttribArray(2);
-        glVertexAttribPointer(2, 2, GL_FLOAT, GL_FALSE, stride,
-                              (void*)offsetof(Vert, u));
-        glEnableVertexAttribArray(3);
-        glVertexAttribPointer(3, 3, GL_FLOAT, GL_FALSE, stride,
-                              (void*)offsetof(Vert, nx));
-        glEnableVertexAttribArray(4);
-        glVertexAttribPointer(4, 1, GL_FLOAT, GL_FALSE, stride,
-                              (void*)offsetof(Vert, opacity));
-
-        glEnableVertexAttribArray(5);
-        glVertexAttribPointer(5, 4, GL_FLOAT, GL_FALSE, stride,
-                              (void*)offsetof(Vert, paletteDark));
-        glEnableVertexAttribArray(6);
-        glVertexAttribPointer(6, 3, GL_FLOAT, GL_FALSE, stride,
-                              (void*)offsetof(Vert, paletteLight));
+        SetupVertexAttribs();
 
         glBindVertexArray(0);
         glBindBuffer(GL_ARRAY_BUFFER, 0);
@@ -794,10 +922,11 @@ private:
 
     void Flush()
     {
-        if (_cpu.empty())
+        if (BatchEmpty())
         {
             _curTexture = nullptr;
             _curPrelit  = false;
+            _curMesh    = nullptr;
             return;
         }
         LazyInit();
@@ -837,6 +966,35 @@ private:
             glUniform1i(_uUseTex, 0);
         }
 
+        if (_curMesh)
+        {
+            // Static mesh: the vertices are already on the GPU; upload only
+            // the surviving triangles' indices (orphaning the previous ones;
+            // WebGL2 has no buffer mapping) and draw them in submission order.
+            StaticMeshGL& mesh = *_curMesh;
+            const size_t count = mesh.index32 ? _idx32.size() : _idx16.size();
+            const size_t bytes = mesh.index32 ? count * sizeof(uint32_t) : count * sizeof(uint16_t);
+            glBindVertexArray(mesh.vao);
+            glBufferData(GL_ELEMENT_ARRAY_BUFFER, GLsizeiptr(bytes),
+                         mesh.index32 ? static_cast<const void*>(_idx32.data())
+                                      : static_cast<const void*>(_idx16.data()),
+                         GL_STREAM_DRAW);
+            if (bytes > mesh.iboBytes)
+            {
+                _staticGpuBytes += bytes - mesh.iboBytes;
+                mesh.iboBytes = bytes;
+            }
+            wf_profile::count(wf_profile::Draws);
+            wf_profile::count(wf_profile::Triangles, count / 3);
+            wf_profile::count(wf_profile::StaticDraws);
+            wf_profile::count(wf_profile::StaticIndexBytes, bytes);
+            glDrawElements(GL_TRIANGLES, GLsizei(count),
+                           mesh.index32 ? GL_UNSIGNED_INT : GL_UNSIGNED_SHORT, (void*)0);
+            _idx16.clear();
+            _idx32.clear();
+        }
+        else
+        {
         glBindVertexArray(_vao);
         glBindBuffer(GL_ARRAY_BUFFER, _vbo);
         glBufferData(GL_ARRAY_BUFFER,
@@ -848,6 +1006,7 @@ private:
         wf_profile::count(2);
         wf_profile::count(3,_cpu.size()/3);
         glDrawArrays(GL_TRIANGLES, 0, GLsizei(_cpu.size()));
+        }
 
         glBindVertexArray(0);
         glBindBuffer(GL_ARRAY_BUFFER, 0);
@@ -856,6 +1015,7 @@ private:
         _cpu.clear();
         _curTexture = nullptr;
         _curPrelit  = false;
+        _curMesh    = nullptr;
     }
 };
 
