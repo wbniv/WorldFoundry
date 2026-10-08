@@ -715,20 +715,11 @@ public:
     RBStaticMeshHandle CreateStaticMesh(const RBStaticTriangle* triangles, int count) override
     {
         if (!triangles || count <= 0) return NULL;
-        // Transient: packed exactly as Pack would have, freed on return.
-        std::vector<Vert> verts(size_t(count) * 3);
-        for (int t = 0; t < count; ++t)
-        {
-            const RBStaticTriangle& tri = triangles[t];
-            for (int k = 0; k < 3; ++k)
-                PackVert(verts[size_t(t) * 3 + k], tri.v[k], tri.nx, tri.ny, tri.nz,
-                         tri.opacity, tri.paletteEnabled != 0, tri.paletteDark, tri.paletteLight);
-        }
         StaticMeshGL* mesh = new StaticMeshGL;
         mesh->generation = _contextGeneration;
         mesh->triangles  = count;
         mesh->index32    = size_t(count) * 3 > 65536;
-        mesh->vboBytes   = verts.size() * sizeof(Vert);
+        mesh->vboBytes   = size_t(count) * 3 * sizeof(Vert);
         glGenVertexArrays(1, &mesh->vao);
         glGenBuffers(1, &mesh->vbo);
         glGenBuffers(1, &mesh->ibo);
@@ -742,7 +733,26 @@ public:
         }
         glBindVertexArray(mesh->vao);
         glBindBuffer(GL_ARRAY_BUFFER, mesh->vbo);
-        glBufferData(GL_ARRAY_BUFFER, GLsizeiptr(mesh->vboBytes), verts.data(), GL_STATIC_DRAW);
+        glBufferData(GL_ARRAY_BUFFER, GLsizeiptr(mesh->vboBytes), NULL, GL_STATIC_DRAW);
+        // Pack exactly as Pack would have, in chunks: the transient stays
+        // small (kChunk x 228 B = 58 KB) instead of a whole mesh (1.1 MB for
+        // the largest), so the allocator does not keep a large freed block
+        // around (cast1 native heap rose 1.2 MB with a whole-mesh vector).
+        enum { kChunk = 256 };
+        std::vector<Vert> chunk(size_t(kChunk) * 3);
+        for (int first = 0; first < count; first += kChunk)
+        {
+            const int n = (count - first < kChunk) ? count - first : kChunk;
+            for (int t = 0; t < n; ++t)
+            {
+                const RBStaticTriangle& tri = triangles[first + t];
+                for (int k = 0; k < 3; ++k)
+                    PackVert(chunk[size_t(t) * 3 + k], tri.v[k], tri.nx, tri.ny, tri.nz,
+                             tri.opacity, tri.paletteEnabled != 0, tri.paletteDark, tri.paletteLight);
+            }
+            glBufferSubData(GL_ARRAY_BUFFER, GLintptr(size_t(first) * 3 * sizeof(Vert)),
+                            GLsizeiptr(size_t(n) * 3 * sizeof(Vert)), chunk.data());
+        }
         SetupVertexAttribs();
         glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, mesh->ibo);   // recorded in the VAO
         glBindVertexArray(0);
