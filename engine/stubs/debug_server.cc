@@ -9,6 +9,7 @@
 #include <pigsys/pigsys.hp>     // sys_atexit
 
 #include <atomic>
+#include <cerrno>
 #include <condition_variable>
 #include <cstdio>
 #include <cstdlib>     // std::strtod — exception-safe under wfengine's -fno-exceptions
@@ -26,6 +27,7 @@
 #include <arpa/inet.h>
 #include <errno.h>
 #include <netinet/in.h>
+#include <poll.h>
 #include <sys/socket.h>
 #include <unistd.h>
 
@@ -509,6 +511,18 @@ static void handle_client(int fd)
 static void listener_loop(int fd)
 {
     while (gRunning) {
+        // shutdown() on a listening socket wakes a blocked accept() on Linux but
+        // not on macOS/BSD, where Stop would then wait for this thread forever.
+        // Poll with a short timeout so gRunning is re-checked either way.
+        struct pollfd pfd { fd, POLLIN, 0 };
+        const int ready = ::poll(&pfd, 1, 100);
+        if (ready == 0 || (ready < 0 && errno == EINTR))
+            continue;
+        if (ready < 0) {
+            if (gRunning)
+                std::fprintf(stderr, "[debug] poll() failed: %s\n", strerror(errno));
+            break;
+        }
         struct sockaddr_in client_addr {};
         socklen_t len = sizeof(client_addr);
         int cfd = ::accept(fd, (struct sockaddr*)&client_addr, &len);
@@ -588,7 +602,10 @@ void DebugServer_Stop()
         std::unique_lock<std::mutex> lk(gQueueMutex);
         if (!gRunning) return;
         gRunning = false;
-        if (gServerFd >= 0) ::shutdown(gServerFd, SHUT_RDWR);
+        // WF_DEBUG_NO_LISTENER_WAKE=1 imitates macOS, where this shutdown does not
+        // wake the listener's accept(); tests/debug_listener_reconnect_test.cc uses it.
+        if (gServerFd >= 0 && !std::getenv("WF_DEBUG_NO_LISTENER_WAKE"))
+            ::shutdown(gServerFd, SHUT_RDWR);
         for (int fd : gClients) ::shutdown(fd, SHUT_RDWR);
         // Wait releases the mutex, letting each owner close its own socket.
         // A new level cannot reuse descriptors or state until all workers exit.

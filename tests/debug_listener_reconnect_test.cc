@@ -80,5 +80,15 @@ int main()
         ::close(next);
         DebugServer_Stop(); // idempotent
     }
-    std::puts("PASS: 200 rapid restart cycles, blocked clients, pause reset, bind failure recovery");
+    // macOS/BSD does not wake a blocked accept() on shutdown(listen_fd), unlike
+    // Linux; Stop used to wait for that listener forever (the 2026-10-08 macOS
+    // Release smoke hung for 56 minutes in UnloadLevel). Imitate it here: with the
+    // wake-up skipped, Stop must still return. SIGALRM turns a hang into a failure.
+    ::setenv("WF_DEBUG_NO_LISTENER_WAKE", "1", 1);
+    ::alarm(10);
+    DebugServer_Start(port);
+    DebugServer_Stop();
+    ::alarm(0);
+    ::unsetenv("WF_DEBUG_NO_LISTENER_WAKE");
+    std::puts("PASS: 200 rapid restart cycles, blocked clients, pause reset, bind failure recovery, Stop without a listener wake-up");
 }
