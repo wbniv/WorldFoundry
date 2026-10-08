@@ -1,0 +1,21 @@
+[null @ 0x5f1193d54640] Application provided invalid, non monotonically increasing dts to muxer in stream 0: 1 >= 1
+    Last message repeated 1 times
+[null @ 0x5f1193d54640] Application provided invalid, non monotonically increasing dts to muxer in stream 0: 2 >= 2
+    Last message repeated 2 times
+[null @ 0x5f1193d54640] Application provided invalid, non monotonically increasing dts to muxer in stream 0: 3 >= 3
+    Last message repeated 1 times
+[null @ 0x5f1193d54640] Application provided invalid, non monotonically increasing dts to muxer in stream 0: 4 >= 4
+    Last message repeated 1 times
+[null @ 0x5f1193d54640] Application provided invalid, non monotonically increasing dts to muxer in stream 0: 5 >= 5
+    Last message repeated 2 times
+[null @ 0x5f1193d54640] Application provided invalid, non monotonically increasing dts to muxer in stream 0: 26 >= 26
+[null @ 0x5f1193d54640] Application provided invalid, non monotonically increasing dts to muxer in stream 0: 132 >= 132
+[null @ 0x5f1193d54640] Application provided invalid, non monotonically increasing dts to muxer in stream 0: 134 >= 134
+[null @ 0x5f1193d54640] Application provided invalid, non monotonically increasing dts to muxer in stream 0: 140 >= 140
+[null @ 0x5f1193d54640] Application provided invalid, non monotonically increasing dts to muxer in stream 0: 168 >= 168
+[null @ 0x5f1193d54640] Application provided invalid, non monotonically increasing dts to muxer in stream 0: 198 >= 198
+[null @ 0x5f1193d54640] Application provided invalid, non monotonically increasing dts to muxer in stream 0: 200 >= 200
+[null @ 0x5f1193d54640] Application provided invalid, non monotonically increasing dts to muxer in stream 0: 257 >= 257
+[null @ 0x5f1193d54640] Application provided invalid, non monotonically increasing dts to muxer in stream 0: 259 >= 259
+[null @ 0x5f1193d54640] Application provided invalid, non monotonically increasing dts to muxer in stream 0: 261 >= 261
+[null @ 0x5f1193d54640] Application provided invalid, non monotonically increasing dts to muxer in stream 0: 286 >= 286

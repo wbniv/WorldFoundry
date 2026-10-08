@@ -1,0 +1,45 @@
+diff --git a/wfsource/source/game/level.cc b/wfsource/source/game/level.cc
+index 4f62f529..b8d7488e 100755
+--- a/wfsource/source/game/level.cc
++++ b/wfsource/source/game/level.cc
+@@ -1306,9 +1306,7 @@ Level::finishPositionWrites()
+ 	// Defer until outside actor iteration and after all script axis writes.
+ 	// Inactive source rooms must participate in membership repair, but their
+ 	// actors must not otherwise start running scripts or physics.
+-	for (int room = 0; room < _theLevelRooms->NumberOfRooms(); ++room)
+-		_theLevelRooms->GetRoom(room).UpdateRoomContents(ROOM_OBJECT_LIST_UPDATE,
+-			GetMutableLevelRooms(), true);
++	_theLevelRooms->UpdateMovingObjects();
+ 	_theActiveRooms->BindUnboundMovingObjects();
+ }
+ 
+diff --git a/wfsource/source/room/rooms.cc b/wfsource/source/room/rooms.cc
+index a90ae122..d781399d 100644
+--- a/wfsource/source/room/rooms.cc
++++ b/wfsource/source/room/rooms.cc
+@@ -127,6 +127,13 @@ LevelRooms::FindContainingRoom(const PhysicalObject& object) const
+ //==============================================================================
+ // this adds an object to whatever room it is in
+ 
++void
++LevelRooms::UpdateMovingObjects()
++{
++	for (int room = 0; room < _numRooms; ++room)
++		_rooms[room].UpdateRoomContents(ROOM_OBJECT_LIST_UPDATE, *this, true);
++}
++
+ void
+ LevelRooms::AddObjectToRoom( int32 objectIndex )
+ {
+diff --git a/wfsource/source/room/rooms.hp b/wfsource/source/room/rooms.hp
+index c26f09ad..ababa427 100644
+--- a/wfsource/source/room/rooms.hp
++++ b/wfsource/source/room/rooms.hp
+@@ -67,6 +67,7 @@ public:
+ 	INLINE int GetSlotIndex(int roomIndex) const;
+ 
+ 	void AddObjectToRoom( int32 objectIndex );  				// don't call???
++	void UpdateMovingObjects(); // reconcile membership even in inactive rooms
+ 	void RemoveObjectFromRoom( int32 idxObject );  		// remove object from its room
+ 
+    Room* FindContainingRoom(const ColSpace& object, const Vector3& objpos) const;

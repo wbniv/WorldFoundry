@@ -1,0 +1,27 @@
+{
+  "label": "teleport-regression",
+  "apk": "/tmp/t4-android-apks/teleport-regression-0fa01b422c335947.apk",
+  "apk_sha256": "0fa01b422c335947272912906c9817d1899eb5eb0756a63b4687d7aed57c6303",
+  "base_apk": "/home/will/finding-your-way-rooms/game/parmenides-slice/build-rooms/scene9/diag/g1v1-loop/parmenides-5e1911563e747939.apk",
+  "base_sha256": "5e1911563e747939ef0ca75bed337bb384646ec97f63c123d8e5a25070d5eac8",
+  "library": "/tmp/t4-android-armv7/libwf_game-device.so",
+  "library_sha256": "0df2fc21ba5416265468c7e7415ffc3e5c1f57524ca3f2a9a1092cce12942c14",
+  "unstripped_library_sha256": "722498abf10007a30fb5d34b04d7816990809077c3704062db6aa77daf82074a",
+  "stripped": "DWARF debug sections removed; dynamic symbols and code retained",
+  "abi": "armeabi-v7a",
+  "assertions": false,
+  "ubsan": false,
+  "base_commit": "2b893d484a11cb7398d8ce482ad830cd31b82e22",
+  "source_diff_sha256": "90dc95590c05172f3d6a97f8b399c3ef430b98b80648e07282e8b3ccc0016574",
+  "cd_sha256": "69bda619aa73e05e57b1c031e8e61519c92d1968cd38b51d60e8ac2ffb8bbc6f",
+  "arguments": [
+    "--vram-width=5120",
+    "--vram-height=2048",
+    "--vram-slot-width=1024",
+    "--vram-slot-height=2048",
+    "--vram-perm-width=2048",
+    "--vram-perm-height=2048",
+    "--frame-profile"
+  ],
+  "note": "Diagnostic only; audited 32-bit library and autonomous four-room cd.iff; base Android manifest/Java glue retained."
+}

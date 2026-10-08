@@ -976,6 +976,8 @@ Level::update(Scalar deltaTime)
 	// make sure any pending room request gets fulfilled
 	assert( ValidPtr( _theActiveRooms ) );
 	_theActiveRooms->WaitRoomLoad( false );
+	finishPositionWrites();
+	finishWatchTeleport();
 
 	DBSTREAM2( cflow << "Level::update: updating current room selection" << std::endl; )
 	if ( _camera && _camera->GetWatchObject() )
@@ -1007,6 +1009,8 @@ Level::update(Scalar deltaTime)
 
 	DBSTREAM2( cflow << "Level::update: room contents" << std::endl; )
 	Validate();
+	finishPositionWrites();
+	finishWatchTeleport();
 	updateRoomContents();
 	// FIX - manually update director until we get priorities working in updates
 	// right now it is not a renderAndUpdate object
@@ -1017,6 +1021,8 @@ Level::update(Scalar deltaTime)
 		_director->predictPosition(LevelClock());
 		_director->update();
 	}
+	finishPositionWrites();
+	finishWatchTeleport();
 
 	DBSTREAM2( cflow << "Level::update: remove pending objects" << std::endl; )
 	// execute pending deletetions
@@ -1281,6 +1287,53 @@ Level::RenderScene()
 
 //==============================================================================
 // this is supposed to reset the level to its initial state
+
+void
+Level::NotifyPositionWrite(const PhysicalObject& object)
+{
+	if (object.GetMovementBlockPtr()->MovesBetweenRooms)
+		_movingPositionWritten = true;
+	if (_camera && _camera->GetWatchObject() == &object)
+		_positionWrittenWatch = &object;
+}
+
+void
+Level::finishPositionWrites()
+{
+	if (!_movingPositionWritten || !_theActiveRooms)
+		return;
+	_movingPositionWritten = false;
+	// Defer until outside actor iteration and after all script axis writes.
+	// Inactive source rooms must participate in membership repair, but their
+	// actors must not otherwise start running scripts or physics.
+	_theLevelRooms->UpdateMovingObjects();
+	_theActiveRooms->BindUnboundMovingObjects();
+}
+
+void
+Level::finishWatchTeleport()
+{
+	if (!_positionWrittenWatch || !_camera || !_theActiveRooms)
+		return;
+	const PhysicalObject* watch = _camera->GetWatchObject();
+	const PhysicalObject* written = _positionWrittenWatch;
+	_positionWrittenWatch = NULL;
+	if (!watch || watch != written || _theActiveRooms->GetActiveRoom(0)->CheckCollision(*watch))
+		return;
+	// Match UpdateRoom's all-room search; leave outside-room policy unchanged.
+	for (int room = 0; room < _theLevelRooms->NumberOfRooms(); ++room)
+	{
+		if (_theLevelRooms->GetRoom(room).CheckCollision(*watch))
+		{
+			_camera->SnapToShot();
+			// Migrate both actors while the departing rooms still have assets
+			// and are still visited. Only then replace the active room set.
+			updateRoomContents();
+			_theActiveRooms->UpdateRoom(watch);
+			return;
+		}
+	}
+}
 
 void
 Level::reset( )

@@ -1,0 +1,14 @@
+{"lap": 1, "command": 1, "x": 300.0, "fps": 60.034451}
+{"lap": 1, "command": 2, "x": 100.0, "fps": 59.95694}
+{"lap": 1, "command": 3, "x": 200.0, "fps": 59.54842}
+{"lap": 1, "command": 1, "x": 300.0, "fps": 60.270363}
+{"lap": 1, "command": 4, "x": 0.0, "fps": 59.978687}
+Engine evidence: /tmp/t4-baseline-teleports/engine.log
+Traceback (most recent call last):
+  File "/tmp/t4_test_teleports.py", line 85, in <module>
+    args=parser.parse_args();run(args)
+                             ~~~^^^^^^
+  File "/tmp/t4_test_teleports.py", line 64, in run
+    assert not re.search(r'ASSERTION FAILED|runtime error:|zforth error|SIGSEGV',text), 'engine diagnostics failed'
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+AssertionError: engine diagnostics failed

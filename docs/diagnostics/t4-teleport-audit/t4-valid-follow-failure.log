@@ -1,0 +1,13 @@
+PASS: unloaded room D actor caches scale 0.25
+{"lap": 1, "command": 2, "x": 100.0, "camera_x": 23.724232, "fps": 60.983829}
+Engine evidence: /tmp/t4-valid-follow-failure/engine.log
+Traceback (most recent call last):
+  File "/home/will/WorldFoundry-wbniv/.worktrees/teleport-audit/tests/verify_cross_room_teleports.py", line 125, in <module>
+    args=parser.parse_args();run(args)
+                             ~~~^^^^^^
+  File "/home/will/WorldFoundry-wbniv/.worktrees/teleport-audit/tests/verify_cross_room_teleports.py", line 79, in run
+    wait(lambda:abs(client.mailbox_values.get((6,3009),-999)-x)<30,timeout=2)
+    ~~~~^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/home/will/WorldFoundry-wbniv/.worktrees/teleport-audit/tests/verify_cross_room_teleports.py", line 50, in wait
+    raise AssertionError('timeout waiting for teleport evidence')
+AssertionError: timeout waiting for teleport evidence

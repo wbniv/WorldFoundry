@@ -56,6 +56,7 @@ public:
 	// recycled slot resolves to whatever now owns it (see the actor-identity /
 	// safe-handle follow-up in TODO.md).
 	static const PhysicalObject* ResolveTrackObject(int32 idxTrackObject);
+	void SnapToShot(MovementObject& movementObject);
 protected:
 	void SetCamera(PhysicalObject& physicalObject, const cameraPosition& destCam);         // will attempt to cast to Camera&
 	struct cameraData

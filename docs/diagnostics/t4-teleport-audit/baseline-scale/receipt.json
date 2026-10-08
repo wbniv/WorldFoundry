@@ -1,0 +1,18 @@
+{
+  "command": [
+    "stdbuf",
+    "-oL",
+    "-eL",
+    "/home/will/WorldFoundry-wbniv/.worktrees/teleport-audit/engine/wf_game",
+    "-L/tmp/t4-regression-level/teleport_regression-standalone.iff",
+    "--windowed",
+    "--debug-print-actors",
+    "--debug-port",
+    "58423",
+    "--debug-bind",
+    "127.0.0.1"
+  ],
+  "arrivals": [],
+  "exit_before_cleanup": null,
+  "cleanup_exit": -15
+}

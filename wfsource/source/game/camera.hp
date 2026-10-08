@@ -58,6 +58,7 @@ public:
 
 	// update functions
 	virtual void update();
+	void SnapToShot();
 
 	cameraPosition	cameraPos;
 

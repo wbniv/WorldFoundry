@@ -30,6 +30,7 @@ cmake_dependent_option(WF_NEURAL_FORTH
 set(WF_PHYSICS_ENGINE "jolt"    CACHE STRING "legacy | jolt")
 option(WF_REST_API        "REST API box PoC (HTTP runtime-mutation debug)" ON)
 option(WF_DEBUG_BRIDGE    "TCP/JSON debug bridge — level-design + AI-agent debugging (Blender live edit, etc.). Independent of WF_ENABLE_EDITOR." ON)
+option(WF_TELEPORT_UBSAN "Instrument room transitions for teleport regression diagnostics" OFF)
 option(WF_ENABLE_STEAM    "Steamworks SDK"                OFF)
 # AddressSanitizer + UBSan. Default **ON for host Debug builds** — Debug exists
 # to catch bugs, computers are fast, and the whole engine+editor lifecycle is
@@ -945,6 +946,14 @@ set_target_properties(wf_property_core PROPERTIES IMPORTED_LOCATION "${WF_PROPER
 add_dependencies(wf_property_core wf_property_core_build)
 list(APPEND WF_SOURCES "${CMAKE_SOURCE_DIR}/engine/runtime_properties.cpp" "${CMAKE_SOURCE_DIR}/engine/runtime_property_form.cpp" "${CMAKE_SOURCE_DIR}/engine/runtime_property_host.cpp")
 add_library(wfengine STATIC ${WF_SOURCES})
+if(WF_TELEPORT_UBSAN)
+    if(NOT CMAKE_CXX_COMPILER_ID MATCHES "GNU|Clang")
+        message(FATAL_ERROR "WF_TELEPORT_UBSAN requires GCC or Clang")
+    endif()
+    set_source_files_properties(${SRC}/room/actrooms.cc PROPERTIES
+        COMPILE_OPTIONS "-fsanitize=undefined;-fno-sanitize-recover=all")
+    target_link_options(wfengine INTERFACE -fsanitize=undefined)
+endif()
 target_link_libraries(wfengine PUBLIC wf_property_core)
 target_include_directories(wfengine PUBLIC ${WF_INCLUDES})
 target_compile_definitions(wfengine PUBLIC ${WF_DEFS})
@@ -1259,6 +1268,32 @@ if(NOT ANDROID AND NOT IOS AND NOT APPLE AND NOT EMSCRIPTEN)
                 COMMAND ${Python3_EXECUTABLE}
                     ${CMAKE_SOURCE_DIR}/tests/debug_listener_smb_transitions.py
                     $<TARGET_FILE:wf_game>)
+            add_test(NAME cross_room_teleports
+                COMMAND ${Python3_EXECUTABLE}
+                    ${CMAKE_SOURCE_DIR}/tests/verify_cross_room_teleports.py
+                    --binary $<TARGET_FILE:wf_game>
+                    --level ${CMAKE_SOURCE_DIR}/wflevels/teleport_regression-standalone.iff
+                    --out ${CMAKE_BINARY_DIR}/teleport-regression --laps 5
+                    --require-camera --audit-boundary)
+            set_tests_properties(cross_room_teleports PROPERTIES
+                LABELS "gl;teleport" ENVIRONMENT "DISPLAY=:0" TIMEOUT 60)
+            add_test(NAME cross_room_teleports_mutation
+                COMMAND ${Python3_EXECUTABLE}
+                    ${CMAKE_SOURCE_DIR}/tests/verify_cross_room_teleports.py
+                    --binary $<TARGET_FILE:wf_game>
+                    --level ${CMAKE_SOURCE_DIR}/wflevels/teleport_regression-standalone.iff
+                    --out ${CMAKE_BINARY_DIR}/teleport-regression-mutation --laps 5
+                    --mutation --require-camera --audit-boundary)
+            set_tests_properties(cross_room_teleports_mutation PROPERTIES
+                LABELS "gl;teleport" ENVIRONMENT "DISPLAY=:0" TIMEOUT 60)
+            add_test(NAME unloaded_actor_teleports
+                COMMAND ${Python3_EXECUTABLE}
+                    ${CMAKE_SOURCE_DIR}/tests/reproduce_unloaded_actor.py
+                    --binary $<TARGET_FILE:wf_game>
+                    --level ${CMAKE_SOURCE_DIR}/wflevels/unloaded_actor_regression-standalone.iff
+                    --out ${CMAKE_BINARY_DIR}/unloaded-actor-regression --expect-fixed)
+            set_tests_properties(unloaded_actor_teleports PROPERTIES
+                LABELS "gl;teleport" ENVIRONMENT "DISPLAY=:0" TIMEOUT 60)
             set_tests_properties(debug_listener_smb_transitions PROPERTIES
                 LABELS "gl" ENVIRONMENT "DISPLAY=:0" TIMEOUT 120)
             if(WF_DEBUG_DEFINES)

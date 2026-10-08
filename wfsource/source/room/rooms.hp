@@ -67,6 +67,7 @@ public:
 	INLINE int GetSlotIndex(int roomIndex) const;
 
 	void AddObjectToRoom( int32 objectIndex );  				// don't call???
+	void UpdateMovingObjects(); // reconcile membership even in inactive rooms
 	void RemoveObjectFromRoom( int32 idxObject );  		// remove object from its room
 
    Room* FindContainingRoom(const ColSpace& object, const Vector3& objpos) const;

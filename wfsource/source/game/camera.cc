@@ -120,6 +120,12 @@ Camera::ValidView() const
 //============================================================================
 
 void
+Camera::SnapToShot()
+{
+	static_cast<CameraHandler*>(&GetMovementManager().GetMovementHandler(*this))->SnapToShot(*this);
+}
+
+void
 Camera::update()
 {
 	DBSTREAM3( ccamera << "Camera::update:" << std::endl; )

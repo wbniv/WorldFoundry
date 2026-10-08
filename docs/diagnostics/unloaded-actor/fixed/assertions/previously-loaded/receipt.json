@@ -1,0 +1,144 @@
+{
+  "command": [
+    "stdbuf",
+    "-oL",
+    "-eL",
+    "/home/will/WorldFoundry-wbniv/.worktrees/teleport-audit/engine/wf_game",
+    "-L/home/will/WorldFoundry-wbniv/.worktrees/teleport-audit/wflevels/unloaded_actor_regression-standalone.iff",
+    "--windowed",
+    "--debug-print-actors",
+    "--debug-port",
+    "42551",
+    "--debug-bind",
+    "127.0.0.1"
+  ],
+  "warm_source": true,
+  "expect_fixed": true,
+  "binary_sha256": "d31dd0ca221fcf71c056c4979fc4fb3a16ff063cf0c4919d88cae4385e1c863e",
+  "fixture_sha256": "14c6e203e4d05d8cbaad6869647bd8c671c324f34216b7d963f4190cb50684b8",
+  "observations": [
+    {
+      "label": "before-script-move",
+      "9": {
+        "heartbeat": 29.0,
+        "x": 0.0
+      },
+      "20": {
+        "heartbeat": 7.0,
+        "x": 295.0
+      },
+      "21": {
+        "heartbeat": 22.0,
+        "x": -10.0
+      }
+    },
+    {
+      "label": "single-script-frame",
+      "9": {
+        "heartbeat": 33.0,
+        "x": 0.0
+      },
+      "20": {
+        "heartbeat": 7.0,
+        "x": -5.0
+      },
+      "21": {
+        "heartbeat": 26.0,
+        "x": -10.0
+      }
+    },
+    {
+      "label": "next-single-frame",
+      "9": {
+        "heartbeat": 34.0,
+        "x": 0.0
+      },
+      "20": {
+        "heartbeat": 8.0,
+        "x": -5.0
+      },
+      "21": {
+        "heartbeat": 27.0,
+        "x": -10.0
+      }
+    },
+    {
+      "label": "pose-written-into-A",
+      "9": {
+        "heartbeat": 39.0,
+        "x": 0.0
+      },
+      "20": {
+        "heartbeat": 13.0,
+        "x": -5.0
+      },
+      "21": {
+        "heartbeat": 32.0,
+        "x": -10.0
+      }
+    },
+    {
+      "label": "after-120-player-updates-in-A",
+      "9": {
+        "heartbeat": 159.0,
+        "x": 0.0
+      },
+      "20": {
+        "heartbeat": 133.0,
+        "x": -5.0
+      },
+      "21": {
+        "heartbeat": 152.0,
+        "x": -10.0
+      }
+    },
+    {
+      "label": "three-repeat-returns-without-visiting-D",
+      "9": {
+        "heartbeat": 278.0,
+        "x": 0.0
+      },
+      "20": {
+        "heartbeat": 186.0,
+        "x": -5.0
+      },
+      "21": {
+        "heartbeat": 271.0,
+        "x": -10.0
+      }
+    },
+    {
+      "label": "source-D-reactivated",
+      "9": {
+        "heartbeat": 294.0,
+        "x": 300.0
+      },
+      "20": {
+        "heartbeat": 187.0,
+        "x": -5.0
+      },
+      "21": {
+        "heartbeat": 272.0,
+        "x": -10.0
+      }
+    },
+    {
+      "label": "returned-to-A",
+      "9": {
+        "heartbeat": 330.0,
+        "x": 0.0
+      },
+      "20": {
+        "heartbeat": 222.0,
+        "x": -5.0
+      },
+      "21": {
+        "heartbeat": 307.0,
+        "x": -10.0
+      }
+    }
+  ],
+  "failure": null,
+  "exit_before_cleanup": null,
+  "cleanup_exit": -15
+}

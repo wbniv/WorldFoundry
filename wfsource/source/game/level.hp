@@ -163,6 +163,8 @@ class Level
 
 	// update and render methods
 	void update(Scalar deltaTime);
+	// Position mailboxes request teleport handling after the complete script.
+	void NotifyPositionWrite(const PhysicalObject& object);
     void RefreshHardwareInput();
 	void RenderScene();
 	inline bool done() const;                          // returns false when level ends
@@ -205,6 +207,10 @@ private:
 
 	// Checks for things that have moved between rooms
 	void updateRoomContents();
+	void finishWatchTeleport();
+	void finishPositionWrites();
+	bool _movingPositionWritten = false;
+	const PhysicalObject* _positionWrittenWatch = NULL;
 	void removePendingObjects();
 
 	// level data load methods

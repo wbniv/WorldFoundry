@@ -1,0 +1,264 @@
+{
+  "command": [
+    "stdbuf",
+    "-oL",
+    "-eL",
+    "/home/will/WorldFoundry-wbniv/.worktrees/teleport-audit/engine/wf_game",
+    "-L/home/will/WorldFoundry-wbniv/.worktrees/teleport-audit/wflevels/teleport_regression-standalone.iff",
+    "--windowed",
+    "--debug-print-actors",
+    "--debug-port",
+    "32945",
+    "--debug-bind",
+    "127.0.0.1"
+  ],
+  "arrivals": [
+    {
+      "lap": 1,
+      "command": 2,
+      "x": 100.0,
+      "camera_x": 100.0,
+      "fps": 61.953777
+    },
+    {
+      "lap": 1,
+      "command": 4,
+      "x": 0.0,
+      "camera_x": 0.0,
+      "fps": 59.296139
+    },
+    {
+      "lap": 1,
+      "command": 1,
+      "x": 300.0,
+      "camera_x": 300.0,
+      "fps": 60.976162
+    },
+    {
+      "lap": 1,
+      "command": 2,
+      "x": 100.0,
+      "camera_x": 100.0,
+      "fps": 60.145119
+    },
+    {
+      "lap": 1,
+      "command": 5,
+      "x": 200.0,
+      "camera_x": 200.0,
+      "fps": 60.26215
+    },
+    {
+      "lap": 1,
+      "command": 1,
+      "x": 300.0,
+      "camera_x": 300.0,
+      "fps": 60.02457
+    },
+    {
+      "lap": 1,
+      "command": 4,
+      "x": 0.0,
+      "camera_x": 0.0,
+      "fps": 59.998047
+    },
+    {
+      "lap": 2,
+      "command": 2,
+      "x": 100.0,
+      "camera_x": 100.0,
+      "fps": 57.043583
+    },
+    {
+      "lap": 2,
+      "command": 4,
+      "x": 0.0,
+      "camera_x": 0.0,
+      "fps": 59.749264
+    },
+    {
+      "lap": 2,
+      "command": 1,
+      "x": 300.0,
+      "camera_x": 300.0,
+      "fps": 60.174801
+    },
+    {
+      "lap": 2,
+      "command": 2,
+      "x": 100.0,
+      "camera_x": 100.0,
+      "fps": 60.461746
+    },
+    {
+      "lap": 2,
+      "command": 5,
+      "x": 200.0,
+      "camera_x": 200.0,
+      "fps": 60.117176
+    },
+    {
+      "lap": 2,
+      "command": 1,
+      "x": 300.0,
+      "camera_x": 300.0,
+      "fps": 60.586823
+    },
+    {
+      "lap": 2,
+      "command": 4,
+      "x": 0.0,
+      "camera_x": 0.0,
+      "fps": 60.877171
+    },
+    {
+      "lap": 3,
+      "command": 2,
+      "x": 100.0,
+      "camera_x": 100.0,
+      "fps": 61.930855
+    },
+    {
+      "lap": 3,
+      "command": 4,
+      "x": 0.0,
+      "camera_x": 0.0,
+      "fps": 62.890175
+    },
+    {
+      "lap": 3,
+      "command": 1,
+      "x": 300.0,
+      "camera_x": 300.0,
+      "fps": 60.501484
+    },
+    {
+      "lap": 3,
+      "command": 2,
+      "x": 100.0,
+      "camera_x": 100.0,
+      "fps": 56.528217
+    },
+    {
+      "lap": 3,
+      "command": 5,
+      "x": 200.0,
+      "camera_x": 200.0,
+      "fps": 60.002094
+    },
+    {
+      "lap": 3,
+      "command": 1,
+      "x": 300.0,
+      "camera_x": 300.0,
+      "fps": 58.973015
+    },
+    {
+      "lap": 3,
+      "command": 4,
+      "x": 0.0,
+      "camera_x": 0.0,
+      "fps": 58.368046
+    },
+    {
+      "lap": 4,
+      "command": 2,
+      "x": 100.0,
+      "camera_x": 100.0,
+      "fps": 57.613987
+    },
+    {
+      "lap": 4,
+      "command": 4,
+      "x": 0.0,
+      "camera_x": 0.0,
+      "fps": 58.296089
+    },
+    {
+      "lap": 4,
+      "command": 1,
+      "x": 300.0,
+      "camera_x": 300.0,
+      "fps": 61.916115
+    },
+    {
+      "lap": 4,
+      "command": 2,
+      "x": 100.0,
+      "camera_x": 100.0,
+      "fps": 60.498386
+    },
+    {
+      "lap": 4,
+      "command": 5,
+      "x": 200.0,
+      "camera_x": 200.0,
+      "fps": 60.272243
+    },
+    {
+      "lap": 4,
+      "command": 1,
+      "x": 300.0,
+      "camera_x": 300.0,
+      "fps": 60.955303
+    },
+    {
+      "lap": 4,
+      "command": 4,
+      "x": 0.0,
+      "camera_x": 0.0,
+      "fps": 58.948448
+    },
+    {
+      "lap": 5,
+      "command": 2,
+      "x": 100.0,
+      "camera_x": 100.0,
+      "fps": 61.376148
+    },
+    {
+      "lap": 5,
+      "command": 4,
+      "x": 0.0,
+      "camera_x": 0.0,
+      "fps": 58.272804
+    },
+    {
+      "lap": 5,
+      "command": 1,
+      "x": 300.0,
+      "camera_x": 300.0,
+      "fps": 58.033134
+    },
+    {
+      "lap": 5,
+      "command": 2,
+      "x": 100.0,
+      "camera_x": 100.0,
+      "fps": 61.577385
+    },
+    {
+      "lap": 5,
+      "command": 5,
+      "x": 200.0,
+      "camera_x": 200.0,
+      "fps": 59.941429
+    },
+    {
+      "lap": 5,
+      "command": 1,
+      "x": 300.0,
+      "camera_x": 300.0,
+      "fps": 57.365173
+    },
+    {
+      "lap": 5,
+      "command": 4,
+      "x": 0.0,
+      "camera_x": 0.0,
+      "fps": 61.038509
+    }
+  ],
+  "exit_before_cleanup": null,
+  "cleanup_exit": -15
+}
