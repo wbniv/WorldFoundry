@@ -95,6 +95,10 @@ workflows:
         # force to legacy physics was deleted in 92b325a2), so configure needs
         # the extracted tree. Caching it keeps the tar -xzf step off every run.
         - engine/vendor/jolt-physics-5.5.0
+        # Rust toolchain (rustup + cargo) installed by the 'Install Rust
+        # toolchain' step — keeps the rustup download + target add off every run.
+        - ~/.rustup
+        - ~/.cargo
 
     environment:
       xcode: latest
@@ -135,6 +139,21 @@ workflows:
           # Which simulator runtimes/devices this image ships — the last step
           # needs an iPhone AND an iPad on one iOS runtime.
           xcrun simctl list runtimes available
+
+      # The runtime property core (wftools/wf_attr_edit -> libwf_attr_edit.a)
+      # is built by scripts/build-runtime-property-core.py with cargo; the
+      # Codemagic Mac image ships no Rust toolchain.
+      - name: Install Rust toolchain
+        script: |
+          set -euo pipefail
+          exec > >(tee -a "$CM_BUILD_DIR/cm-build.log") 2>&1
+          if ! command -v cargo >/dev/null 2>&1 && [ ! -x "$HOME/.cargo/bin/cargo" ]; then
+            curl --proto '=https' --tlsv1.2 -sSf https://sh.rustup.rs | sh -s -- -y --profile minimal --no-modify-path
+          fi
+          export PATH="$HOME/.cargo/bin:$PATH"
+          rustup target add aarch64-apple-ios-sim
+          echo "PATH=$PATH" >> "$CM_ENV"
+          cargo --version
 
       - name: Extract Jolt vendor archive
         script: |
@@ -623,6 +642,10 @@ workflows:
         # it; the old -DWF_PHYSICS_ENGINE=legacy is gone from the configure step
         # below). Caching the extraction keeps the tar -xzf step off every run.
         - engine/vendor/jolt-physics-5.5.0
+        # Rust toolchain (rustup + cargo) installed by the 'Install Rust
+        # toolchain' step — keeps the rustup download + target add off every run.
+        - ~/.rustup
+        - ~/.cargo
 
     environment:
       xcode: latest
@@ -641,6 +664,19 @@ workflows:
           clang --version
           cmake --version
           ninja --version 2>/dev/null || brew install ninja
+
+      # The runtime property core (wftools/wf_attr_edit -> libwf_attr_edit.a)
+      # is built by scripts/build-runtime-property-core.py with cargo; the
+      # Codemagic Mac image ships no Rust toolchain.
+      - name: Install Rust toolchain
+        script: |
+          set -euo pipefail
+          if ! command -v cargo >/dev/null 2>&1 && [ ! -x "$HOME/.cargo/bin/cargo" ]; then
+            curl --proto '=https' --tlsv1.2 -sSf https://sh.rustup.rs | sh -s -- -y --profile minimal --no-modify-path
+          fi
+          export PATH="$HOME/.cargo/bin:$PATH"
+          echo "PATH=$PATH" >> "$CM_ENV"
+          cargo --version
 
       - name: Extract Jolt vendor archive
         script: |
