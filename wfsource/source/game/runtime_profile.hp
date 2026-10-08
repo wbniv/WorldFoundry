@@ -17,8 +17,17 @@ enum Section { Update, Actors, Director, Render, School, Pose, Animation, Total,
 // ModernRendererBackend: uploads/upload-bytes at its glBufferData, faces-
 // submitted/faces-culled at the top and the software back-face cull of
 // DrawTriangle.
+// The E3 phase 1 static-mesh counters follow (gfx/glpipeline/static_mesh.cc and
+// the backend): objects drawn from a bake, static draws (glDrawElements; also
+// counted in `draws`), faces the static path culled (also in `faces-culled`),
+// index bytes uploaded, bakes and their thread-CPU microseconds, the GPU and
+// main-RAM bytes the static path holds (sampled once per frame, so the mean is
+// the level held), and objects drawn by streaming because they are excluded
+// from baking. `uploads`/`upload-bytes` stay vertex uploads only.
 enum Counter { LevelObjects, RenderActors, Draws, Triangles, ActorMailboxWrites, FishDeformations,
-    Uploads, UploadBytes, FacesSubmitted, FacesCulled, CounterCount };
+    Uploads, UploadBytes, FacesSubmitted, FacesCulled,
+    StaticObjects, StaticDraws, StaticFacesCulled, StaticIndexBytes, StaticBakes, StaticBakeUs,
+    StaticGpuBytes, StaticCpuBytes, StaticExcludedObjects, CounterCount };
 struct State {
     bool enabled = false;
     std::array<double,Count> frame{};
@@ -26,6 +35,7 @@ struct State {
     std::vector<std::array<double,Count>> frames;
     std::array<unsigned long,CounterCount> counters{};
     std::array<unsigned long,CounterCount> totals{};
+    std::array<unsigned long,CounterCount> maxima{};
     std::chrono::steady_clock::time_point last;
 };
 inline State& state() { static State s; return s; }
@@ -48,7 +58,7 @@ inline void end_frame() {
     State& s=state(); if(!s.enabled) return;
     s.frame[Total]=s.frame[Update]+s.frame[Render];
     s.frames.push_back(s.frame);
-    for(int k=0;k<CounterCount;k++) s.totals[k]+=s.counters[k];
+    for(int k=0;k<CounterCount;k++) { s.totals[k]+=s.counters[k]; s.maxima[k]=std::max(s.maxima[k],s.counters[k]); }
     auto now=std::chrono::steady_clock::now();
     if(std::chrono::duration<double>(now-s.last).count()<5) return;
     fprintf(stderr,"frame-window: start-ns=%lld end-ns=%lld\n",
@@ -62,9 +72,13 @@ inline void end_frame() {
         fprintf(stderr,"frame-profile: %s frames=%zu mean=%.4f p50=%.4f p95=%.4f max=%.4f cpu-ms\n",names[k],values.size(),sum/values.size(),values[values.size()/2],values[(values.size()-1)*95/100],values.back());
     }
     const char* counterNames[CounterCount]={"level-objects","render-actors","draws","triangles","actor-mailbox-writes","fish-deformations",
-        "uploads","upload-bytes","faces-submitted","faces-culled"};
-    for(int k=0;k<CounterCount;k++) fprintf(stderr,"frame-count: %s frames=%zu mean=%.3f\n",counterNames[k],s.frames.size(),double(s.totals[k])/s.frames.size());
-    s.totals.fill(0); s.frames.clear(); s.last=now;
+        "uploads","upload-bytes","faces-submitted","faces-culled",
+        "static-objects","static-draws","static-faces-culled","static-index-bytes","static-bakes","static-bake-us",
+        "static-gpu-bytes","static-cpu-bytes","static-excluded-objects"};
+    // max= is the largest single-frame value in the window (appended after
+    // mean=, so existing `frames=N mean=X` parsers are unaffected).
+    for(int k=0;k<CounterCount;k++) fprintf(stderr,"frame-count: %s frames=%zu mean=%.3f max=%lu\n",counterNames[k],s.frames.size(),double(s.totals[k])/s.frames.size(),s.maxima[k]);
+    s.totals.fill(0); s.maxima.fill(0); s.frames.clear(); s.last=now;
 }
 }
 #endif
