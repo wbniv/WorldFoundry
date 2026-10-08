@@ -76,6 +76,7 @@ public:
 
 	Vertex3D* GetWrittableVertexList();	// should only be used by the animation system
 	int GetVertexCount() const;	// should only be used by the animation system
+	int GetFaceCount() const;	// measurement only (E3 phase 0 mesh-stats report)
 	INLINE bool GetHandle(const HandleID thisHandle, Vector3& position) const;
 
 	inline void Validate() const;

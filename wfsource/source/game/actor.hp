@@ -188,6 +188,8 @@ public:
 	// mesh
 	// C++ doesn't allow access to protected members of an object of type base class so I had to put this in so that Camera can get to it
 	inline RenderActor& GetRenderActor();			// don't use this!
+	// NULL when no assets are bound (room not active). Measurement only (E3 phase 0 stats); unlike GetRenderActor it never asserts.
+	const RenderActor* PeekRenderActor() const { return _renderActor; }
       
 	// handles
 	bool LocalHandleLocation( HandleID id, Vector3& dest ) const;

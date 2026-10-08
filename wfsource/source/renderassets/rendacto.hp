@@ -65,6 +65,9 @@ public:
 	virtual void Render(RenderCamera& renderCamera, const PhysicalObject& physicalObject, const Clock& currentTime) = 0;
 	virtual void SetAnimationCycle(int cycle) = 0;
 	virtual bool GetHandle(const HandleID thisHandle, Vector3& position) const = 0;
+	// The mesh this actor draws, or NULL when it has none. Measurement only
+	// (E3 phase 0 mesh-stats report); nothing in the render path calls it.
+	virtual const RenderObject3D* GetRenderObject() const { return NULL; }
 	// Per-face material color override; default no-op for actors without a 3D mesh.
 	// RenderActor3D overrides to delegate into RenderObject3D::SetMaterialColor.
 	// (qbert cube consolidation, 2026-05-10.)
@@ -116,6 +119,7 @@ public:
 	virtual void Render(RenderCamera& renderCamera, const PhysicalObject& physicalObject, const Clock& currentTime);
 	virtual void SetAnimationCycle(int cycle);
 	virtual bool GetHandle(const HandleID thisHandle, Vector3& position) const;
+	virtual const RenderObject3D* GetRenderObject() const { return &_object; }
 	virtual void SetMaterialColor(int materialIdx, const Color& color) { _object.SetMaterialColor(materialIdx, color); }
 	virtual void SetActorScale(const Vector3& scale) { _scale = scale; }
 	virtual void SetPlantGeometry(const plantgrowth::Chunk& chunk, float age, float phase, unsigned generation, bool sway, bool publish, bool textured);

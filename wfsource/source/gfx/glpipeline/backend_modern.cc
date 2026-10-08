@@ -404,6 +404,7 @@ public:
                       bool cullExempt,
                       bool prelit) override
     {
+        wf_profile::count(wf_profile::FacesSubmitted);   // E3 phase 0: before the cull
         // Software backface cull (winding-independent). The renderer never
         // enables GL_CULL_FACE, and mesh winding is inconsistent across asset
         // sources, so we cull from the already-correct per-face normal instead
@@ -447,7 +448,10 @@ public:
             const float pey = _mv[1]*cx + _mv[5]*cy + _mv[9]*cz  + _mv[13];
             const float pez = _mv[2]*cx + _mv[6]*cy + _mv[10]*cz + _mv[14];
             if (nex*pex + ney*pey + nez*pez > 0.0f)
+            {
+                wf_profile::count(wf_profile::FacesCulled);
                 return;   // back-facing — skip
+            }
         }
 
         // Batch key = (texture, prelit). A LIGHTING_PRELIT run must be drawn
@@ -839,6 +843,8 @@ private:
                      GLsizeiptr(_cpu.size() * sizeof(Vert)),
                      _cpu.data(),
                      GL_STREAM_DRAW);
+        wf_profile::count(wf_profile::Uploads);
+        wf_profile::count(wf_profile::UploadBytes,_cpu.size() * sizeof(Vert));
         wf_profile::count(2);
         wf_profile::count(3,_cpu.size()/3);
         glDrawArrays(GL_TRIANGLES, 0, GLsizei(_cpu.size()));
