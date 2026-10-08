@@ -95,6 +95,10 @@ workflows:
         # force to legacy physics was deleted in 92b325a2), so configure needs
         # the extracted tree. Caching it keeps the tar -xzf step off every run.
         - engine/vendor/jolt-physics-5.5.0
+        # Rust toolchain (rustup + cargo) installed by the 'Install Rust
+        # toolchain' step — keeps the rustup download + target add off every run.
+        - ~/.rustup
+        - ~/.cargo
 
     environment:
       xcode: latest
@@ -612,6 +616,10 @@ workflows:
         # it; the old -DWF_PHYSICS_ENGINE=legacy is gone from the configure step
         # below). Caching the extraction keeps the tar -xzf step off every run.
         - engine/vendor/jolt-physics-5.5.0
+        # Rust toolchain (rustup + cargo) installed by the 'Install Rust
+        # toolchain' step — keeps the rustup download + target add off every run.
+        - ~/.rustup
+        - ~/.cargo
 
     environment:
       xcode: latest
