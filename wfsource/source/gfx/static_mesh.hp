@@ -43,4 +43,13 @@ void StaticMeshAtlasChanged();
 // transient bake buffers, which are freed right after upload).
 size_t StaticMeshCpuBytes();
 
+// Once per frame, from the compositing backend's EndFrame: samples the
+// static-cpu-bytes gauge and runs the test hooks of WF_STATIC_MESH_TEST:
+//   atlas:N  bump the atlas generation every N frames (every bake is rebuilt;
+//            no shipped level loads or frees a room slot after level load)
+//   loss:N   at frame N, simulate an Android surface loss (GL names dropped,
+//            every static mesh re-baked on its next draw)
+// Returns true when the caller should simulate the surface loss now.
+bool StaticMeshEndFrame();
+
 #endif

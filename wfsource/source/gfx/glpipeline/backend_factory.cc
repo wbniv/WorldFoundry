@@ -187,8 +187,10 @@ public:
     void EndFrame() override
     {
         Drain(); _backend.EndFrame();
-        wf_profile::count(wf_profile::StaticCpuBytes, StaticMeshCpuBytes());   // E3 gauge, once per frame
+        if (StaticMeshEndFrame())   // E3 gauge; true = test hook asks for a simulated surface loss
+            SimulateSurfaceLoss();
     }
+    static void SimulateSurfaceLoss();
     RBTextureHandle CreateTexture(int w,int h,RBTextureFormat f,const void* p) override
     { return _backend.CreateTexture(w,h,f,p); }
     void DestroyTexture(RBTextureHandle h) override { Drain(); _backend.DestroyTexture(h); }
@@ -226,6 +228,17 @@ static RendererBackend* sRecorder = NULL;
 void RendererBackendSetRecorder(RendererBackend* recorder)
 {
     sRecorder = recorder;
+}
+
+// WF_STATIC_MESH_TEST=loss:N (gfx/static_mesh.hp): drop every GL name the GL
+// backend holds, as the Android surface-loss hook does, so the re-bake path can
+// be tested on desktop. The old objects leak in this test; the context lives.
+void CompositingBackend::SimulateSurfaceLoss()
+{
+#if !defined(WF_TARGET_IOS) && !defined(WF_TARGET_MACOS)
+    void ModernBackendSimulateSurfaceLoss();
+    ModernBackendSimulateSurfaceLoss();
+#endif
 }
 
 RendererBackend& RendererBackendGet()

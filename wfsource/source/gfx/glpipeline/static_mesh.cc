@@ -138,7 +138,10 @@ namespace
 		unsigned long objectDraws, triangles, triangleMismatches;
 		unsigned long cullFaces, cullExactMismatches;
 		unsigned long fastFaces, fastMismatches, nonSimilarDraws;
+		unsigned long atlasChanges, atlasRebakes, atlasRebakeChangedTriangles;
+	unsigned long simulatedLosses, liveBakesAtExit;
 	};
+	long sLiveBakes = 0;
 	CheckTotals sCheck = {};
 
 	void
@@ -146,10 +149,12 @@ namespace
 	{
 		fprintf(stderr, "static-mesh-check: object-draws=%lu triangles=%lu triangle-mismatches=%lu "
 		        "cull-faces=%lu cull-exact-mismatches=%lu fast-faces=%lu fast-mismatches=%lu "
-		        "non-similar-draws=%lu\n",
+		        "non-similar-draws=%lu atlas-changes=%lu atlas-rebakes=%lu atlas-rebake-changed-triangles=%lu "
+		        "simulated-losses=%lu live-bakes=%ld cpu-bytes=%zu\n",
 		        sCheck.objectDraws, sCheck.triangles, sCheck.triangleMismatches,
 		        sCheck.cullFaces, sCheck.cullExactMismatches, sCheck.fastFaces, sCheck.fastMismatches,
-		        sCheck.nonSimilarDraws);
+		        sCheck.nonSimilarDraws, sCheck.atlasChanges, sCheck.atlasRebakes, sCheck.atlasRebakeChangedTriangles,
+		        sCheck.simulatedLosses, sLiveBakes, sCpuBytes);
 	}
 
 	bool
@@ -204,12 +209,36 @@ void
 StaticMeshAtlasChanged()
 {
 	++sAtlasGeneration;
+	++sCheck.atlasChanges;
 }
 
 size_t
 StaticMeshCpuBytes()
 {
 	return sCpuBytes;
+}
+
+bool
+StaticMeshEndFrame()
+{
+	wf_profile::count(wf_profile::StaticCpuBytes, sCpuBytes);
+	static const char* test = getenv("WF_STATIC_MESH_TEST");
+	static unsigned long frame = 0;
+	++frame;
+	if(!test)
+		return false;
+	if(strncmp(test, "atlas:", 6) == 0)
+	{
+		const unsigned long every = strtoul(test + 6, NULL, 10);
+		if(every && frame % every == 0)
+			StaticMeshAtlasChanged();
+	}
+	else if(strncmp(test, "loss:", 5) == 0 && frame == strtoul(test + 5, NULL, 10))
+	{
+		++sCheck.simulatedLosses;
+		return true;
+	}
+	return false;
 }
 
 //============================================================================
@@ -370,6 +399,7 @@ RenderObject3D::BakeStatic()
 	bake->version = _staticVersion;
 	_staticBake = bake;
 	sCpuBytes += bake->bytes;
+	++sLiveBakes;
 
 	wf_profile::count(wf_profile::StaticBakes);
 	wf_profile::count(wf_profile::StaticBakeUs, (unsigned long)((wf_profile::cpu_ms() - started) * 1000.0 + 0.5));
@@ -515,6 +545,7 @@ RenderObject3D::StaticMeshDiscard()
 	_staticBake = NULL;
 	RendererBackendGet().DestroyStaticMesh(bake->mesh);
 	sCpuBytes -= bake->bytes;
+	--sLiveBakes;
 	free(bake->planeD);
 	free(bake->check);
 	free(bake);
@@ -567,6 +598,22 @@ RenderObject3D::RenderStatic(const Matrix34& position)
 		const int stale = StaticBakeStale();
 		if(stale != STALE_NONE)
 		{
+			if(CheckMode() && stale == STALE_ENVIRONMENT && _staticBake->atlasGeneration != sAtlasGeneration)
+			{
+				// Was this rebake needed? Record now and count the baked
+				// triangles a room change actually altered (e.g. UVs).
+				RBStaticTriangle* now = static_cast<RBStaticTriangle*>(TransientAllocate(size_t(_faceCount) * sizeof(RBStaticTriangle)));
+				RecordedFace* faces = static_cast<RecordedFace*>(TransientAllocate(size_t(_faceCount) * sizeof(RecordedFace)));
+				const bool recorded = RecordObject(*this, &RenderObject3D::StreamFaces, _faceCount, now, faces);
+				const StaticMeshBake& old = *_staticBake;
+				++sCheck.atlasRebakes;
+				for(int32 i = 0; i < old.groupCount; ++i)
+					for(int32 f = old.groups[i].firstFace; old.groups[i].firstTriangle >= 0 && f < old.groups[i].endFace; ++f)
+						if(!recorded || !SameTriangle(now[f], old.check[old.groups[i].firstTriangle + (f - old.groups[i].firstFace)]))
+							++sCheck.atlasRebakeChangedTriangles;
+				TransientFree(faces);		// LIFO
+				TransientFree(now);
+			}
 			StaticMeshDiscard();
 			if(stale == STALE_CONTENT && ++_staticInvalidations >= 2)
 			{

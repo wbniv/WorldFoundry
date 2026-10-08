@@ -1028,6 +1028,13 @@ RendererBackend* ModernBackendInstance()
     return &sModernBackend;
 }
 
+// Test hook (WF_STATIC_MESH_TEST=loss:N, via backend_factory.cc): the same
+// reset the Android surface-loss path does, on a context that stays alive.
+void ModernBackendSimulateSurfaceLoss()
+{
+    sModernBackend.OnSurfaceLost();
+}
+
 #if defined(__ANDROID__)
 // Called from gfx/gl/android_window.cc's WFAndroidEglTerm when the EGL
 // surface is torn down on pause/backgrounding. Resets all GL-object IDs so
