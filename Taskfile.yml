@@ -426,8 +426,20 @@ tasks:
         echo ""
         stdbuf -oL -eL ./build-editor-fast/wf-edit --url="{{.URL}}" {{.CLI_ARGS}} 2>&1 | tee /tmp/wf-join.log
 
+  emsdk-manager:
+    desc: "Clone the emsdk manager scripts at a pinned commit into engine/vendor/emsdk-6.0.0 (idempotent; not vendored in git)"
+    vars:
+      EMSDK_COMMIT: b44154299bdefe75ba287874bb63fc9806243771   # emscripten-core/emsdk, 2026-10-06
+    status:
+      - test -x engine/vendor/emsdk-6.0.0/emsdk
+    cmds:
+      - git clone --quiet https://github.com/emscripten-core/emsdk.git engine/vendor/emsdk-6.0.0
+      - git -C engine/vendor/emsdk-6.0.0 checkout --quiet --detach {{.EMSDK_COMMIT}}
+      - test "$(git -C engine/vendor/emsdk-6.0.0 rev-parse HEAD)" = "{{.EMSDK_COMMIT}}"
+
   setup-emsdk:
-    desc: "Install + activate the pinned Emscripten toolchain (6.0.0) into the vendored emsdk manager (idempotent)"
+    desc: "Install + activate the pinned Emscripten toolchain (6.0.0) with the pinned emsdk manager (idempotent)"
+    deps: [emsdk-manager]
     dir: engine/vendor/emsdk-6.0.0
     status:
       - test -x upstream/emscripten/emcc
