@@ -15,7 +15,7 @@ Format per entry:
 
 ## Room loading assumed no teleports: `ChangeActiveRoom` binds Moves Between Rooms objects into room memory — the Player's render data overwritten after a teleport (a design gap) — 2026‑10‑08
 
-**Status:** FIXED on branch `room-mbr-fix` [`2b893d48`](https://github.com/wbniv/WorldFoundry/commit/2b893d48) (not yet merged into `2026-new-level`; `room/actrooms.cc`, `baseobject/baseobject.{hp,cc}`, `game/actor.hp`).
+**Status:** FIXED [`2b893d48`](https://github.com/wbniv/WorldFoundry/commit/2b893d48) (merged into `2026-new-level` 2026‑10‑08; `room/actrooms.cc`, `baseobject/baseobject.{hp,cc}`, `game/actor.hp`).
 
 **Kind:** a design-type bug, not a coding slip (Will, 2026‑10‑08). The room system was designed for walking between adjacent rooms, where a room loads *ahead* of the player; teleporting was never explicitly supported or intended. `ChangeActiveRoom`'s load loop is consistent with that design. It breaks when a teleport loads a room with a Moves Between Rooms object already inside it. One caveat, from the code: even without teleports, a Moves Between Rooms object other than the Player that walks out of a freshly loaded room into a neighbour, and stays there while the first room unloads and its slot is reused, would take the same path. Whether any original level did that is unknown.
 
