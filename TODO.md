@@ -330,6 +330,8 @@
 
 _Auto-added from plan "Out of scope"/"Deferred" sections at commit time. Triage each into M1/M2/etc. and delete it here — it will not come back._
 
+- [ ] **(triage)** Motorising plan B, or any automation of it, and an interior blind behind plan B's glass. — _from [2026-09-30-condo-balcony-shade.md](docs/plans/2026-09-30-condo-balcony-shade.md)_  <!-- fp:fa0f38aea1b09077 -->
+- [ ] **(triage)** A level-model variant (§ 7d) for plan B until it is chosen. — _from [2026-09-30-condo-balcony-shade.md](docs/plans/2026-09-30-condo-balcony-shade.md)_  <!-- fp:b6a5adaec5a9de53 -->
 <!-- BEGIN auto-captured-deferrals (managed by audit-plan-deferrals.sh — triage these into the curated sections above; the fingerprint ledger means a deleted item is NOT re-added) -->
 - [ ] **(triage)** Template-name → constant authoring (investigation option 2) — separate follow-up when a — _from [2026-06-13-spawn-template-forth-primitive.md](docs/plans/2026-06-13-spawn-template-forth-primitive.md)_  <!-- fp:0b1c847938f2c12f -->
 - [ ] **(triage)** Approach A (pooled-generator fireball) — already shipped; this is the orthogonal Approach B. — _from [2026-06-13-spawn-template-forth-primitive.md](docs/plans/2026-06-13-spawn-template-forth-primitive.md)_  <!-- fp:19bd9323ca2fcfd2 -->
