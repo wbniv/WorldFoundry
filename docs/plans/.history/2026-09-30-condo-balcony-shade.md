@@ -1,5 +1,6 @@
 | Date | Change |
 |------|--------|
+| [2026-10-05](https://github.com/wbniv/WorldFoundry/commit/bcec65ac) | Make condo shade and glass translucent with black aluminum door frames |
 | [2026-10-03](https://github.com/wbniv/WorldFoundry/commit/10310efe) | Save pending plans, balcony RFQ materials, notes and transcripts |
 | [2026-09-30](https://github.com/wbniv/WorldFoundry/commit/1e4cf3e0) | RFQ packet: Zigbee motor is a price check only; plan is fixed-code RF + own bridge |
 | [2026-09-30](https://github.com/wbniv/WorldFoundry/commit/65bf4504) | RFQ packet: remote must be fixed code, not rolling/hopping code |
@@ -18,6 +19,10 @@
 | [2026-09-30](https://github.com/wbniv/WorldFoundry/commit/ce0a2fa6) | Plan condo 639 balcony zip screen (solar-strip motor) and 7 cm floor recess |
 
 <!--history-meta v1
+bcec65ac	author	Will Norris
+bcec65ac	added	3
+bcec65ac	deleted	0
+bcec65ac	files	1
 10310efe	author	Will Norris
 10310efe	added	3
 10310efe	deleted	1
