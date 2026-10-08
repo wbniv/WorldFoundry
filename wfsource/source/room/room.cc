@@ -267,7 +267,7 @@ Room::UnBindAssets()
 // KTS(how about if we check objects WHEN they move!, then this routine doesn't need to exist)
 
 void
-Room::UpdateRoomContents(int updateIndex, LevelRooms& levelRooms)
+Room::UpdateRoomContents(int updateIndex, LevelRooms& levelRooms, bool movingObjectsOnly)
 {
 	DBSTREAM2( croom << "Room::updateRoomContents" << std::endl; )
 
@@ -279,7 +279,7 @@ Room::UpdateRoomContents(int updateIndex, LevelRooms& levelRooms)
 		BaseObject* object = (*_masterObjectList)[*alIter];
       assert(IsPhysicalObject(object));
       PhysicalObject* po = static_cast<PhysicalObject*>(object);
-		if (!CheckCollision(*po))
+		if ((!movingObjectsOnly || po->GetMovementBlockPtr()->MovesBetweenRooms) && !CheckCollision(*po))
 		 {
 			int32 objectIndex = *alIter;
 			Vector3 pp = po->GetPhysicalAttributes().Position();
@@ -401,4 +401,3 @@ RoomCallbacks::~RoomCallbacks()
 }
 
 //==============================================================================
-

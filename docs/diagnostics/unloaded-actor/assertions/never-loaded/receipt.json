@@ -1,0 +1,98 @@
+{
+  "command": [
+    "stdbuf",
+    "-oL",
+    "-eL",
+    "/tmp/t4-final-wf-game-asserts",
+    "-L/tmp/t4-unloaded-fixture/teleport_regression-standalone.iff",
+    "--windowed",
+    "--debug-print-actors",
+    "--debug-port",
+    "41013",
+    "--debug-bind",
+    "127.0.0.1"
+  ],
+  "warm_source": false,
+  "binary_sha256": "223edefe044454f2813d73d6c62e4f70076ec3640d6450d532825a950556490d",
+  "fixture_sha256": "00f10e9b88c3189ad6735720929eb2e79d25814cd74e1605beea5e6689d443c4",
+  "observations": [
+    {
+      "label": "before-script-move",
+      "9": {
+        "heartbeat": 16.0,
+        "x": 0.0
+      },
+      "20": {
+        "heartbeat": 0.0,
+        "x": 295.0
+      },
+      "21": {
+        "heartbeat": 16.0,
+        "x": -10.0
+      }
+    },
+    {
+      "label": "pose-written-into-A",
+      "9": {
+        "heartbeat": 28.0,
+        "x": 0.0
+      },
+      "20": {
+        "heartbeat": 0.0,
+        "x": -5.0
+      },
+      "21": {
+        "heartbeat": 28.0,
+        "x": -10.0
+      }
+    },
+    {
+      "label": "after-120-player-updates-in-A",
+      "9": {
+        "heartbeat": 148.0,
+        "x": 0.0
+      },
+      "20": {
+        "heartbeat": 0.0,
+        "x": -5.0
+      },
+      "21": {
+        "heartbeat": 148.0,
+        "x": -10.0
+      }
+    },
+    {
+      "label": "source-D-reactivated",
+      "9": {
+        "heartbeat": 169.0,
+        "x": 300.0
+      },
+      "20": {
+        "heartbeat": 0.0,
+        "x": -5.0
+      },
+      "21": {
+        "heartbeat": 154.0,
+        "x": -10.0
+      }
+    },
+    {
+      "label": "returned-to-A",
+      "9": {
+        "heartbeat": 205.0,
+        "x": 0.0
+      },
+      "20": {
+        "heartbeat": 35.0,
+        "x": -5.0
+      },
+      "21": {
+        "heartbeat": 189.0,
+        "x": -10.0
+      }
+    }
+  ],
+  "failure": null,
+  "exit_before_cleanup": null,
+  "cleanup_exit": -15
+}

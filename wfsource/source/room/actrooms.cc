@@ -104,6 +104,21 @@ ActiveRooms::InitActiveRoom( int roomIndex, const LevelRooms& lRooms)
 //==============================================================================
 
 void
+ActiveRooms::BindUnboundMovingObjects()
+{
+	// A script can move an object from an unloaded room into an already active
+	// one. No room load occurs to bind it, so bind its permanent assets here.
+	BaseObjectIteratorWrapper iter = GetObjectIter(ROOM_OBJECT_LIST_RENDER);
+	while (!iter.Empty())
+	{
+		PhysicalObject& po = static_cast<PhysicalObject&>(*iter);
+		if (po.GetMovementBlockPtr()->MovesBetweenRooms && !po.AssetsBound())
+			po.BindAssets(_assetManager.GetAssetSlot(VideoMemory::PERMANENT_SLOT).GetSlotMemory());
+		++iter;
+	}
+}
+
+void
 ActiveRooms::ChangeActiveRoom( int toRoom )
 {
 	Validate();

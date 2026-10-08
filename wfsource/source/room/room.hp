@@ -85,7 +85,7 @@ public:
 	void UnBindAssets();
 
 	// functions which operate on objects in the room
-	void UpdateRoomContents(int updateIndex, LevelRooms& levelRooms);
+	void UpdateRoomContents(int updateIndex, LevelRooms& levelRooms, bool movingObjectsOnly = false);
 
 	// functions which operate on a single object
 	void AddObject(int32 objectIndex);

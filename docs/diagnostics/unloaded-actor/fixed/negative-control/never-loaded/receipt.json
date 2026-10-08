@@ -1,0 +1,69 @@
+{
+  "command": [
+    "stdbuf",
+    "-oL",
+    "-eL",
+    "/tmp/t4-before-unloaded-fix",
+    "-L/home/will/WorldFoundry-wbniv/.worktrees/teleport-audit/wflevels/unloaded_actor_regression-standalone.iff",
+    "--windowed",
+    "--debug-print-actors",
+    "--debug-port",
+    "47393",
+    "--debug-bind",
+    "127.0.0.1"
+  ],
+  "warm_source": false,
+  "expect_fixed": true,
+  "binary_sha256": "fb5141010e1537f464a7eefb1d1412d612ae775e11006f59f852b53a83d2dd91",
+  "fixture_sha256": "14c6e203e4d05d8cbaad6869647bd8c671c324f34216b7d963f4190cb50684b8",
+  "observations": [
+    {
+      "label": "before-script-move",
+      "9": {
+        "heartbeat": 24.0,
+        "x": 0.0
+      },
+      "20": {
+        "heartbeat": 0.0,
+        "x": 295.0
+      },
+      "21": {
+        "heartbeat": 24.0,
+        "x": -10.0
+      }
+    },
+    {
+      "label": "pose-written-into-A",
+      "9": {
+        "heartbeat": 35.0,
+        "x": 0.0
+      },
+      "20": {
+        "heartbeat": 0.0,
+        "x": -5.0
+      },
+      "21": {
+        "heartbeat": 35.0,
+        "x": -10.0
+      }
+    },
+    {
+      "label": "after-120-player-updates-in-A",
+      "9": {
+        "heartbeat": 155.0,
+        "x": 0.0
+      },
+      "20": {
+        "heartbeat": 0.0,
+        "x": -5.0
+      },
+      "21": {
+        "heartbeat": 155.0,
+        "x": -10.0
+      }
+    }
+  ],
+  "failure": "AssertionError('target did not promptly start updating')",
+  "exit_before_cleanup": null,
+  "cleanup_exit": -15
+}

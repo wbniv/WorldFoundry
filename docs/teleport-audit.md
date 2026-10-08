@@ -55,7 +55,18 @@ Camera policy is resolved: jump immediately on teleport.
 
 `ESCALATE: Teleports outside all rooms and ambiguous overlapping destinations need an explicit gameplay policy before changing their behavior.` `UpdateRoom` retains the old active set when no destination matches; `AddObjectToRoom` instead requests removal. The current room wins when it still contains the actor; otherwise the first matching room wins. These are code findings, not new runtime reproductions.
 
-`ESCALATE: Supporting arbitrary actors moved from unloaded rooms, non-MBR relocation, empty-room archives or arbitrary room graphs requires a broader architecture decision.` Active-only membership iteration, compiler asset ownership, positional room TOC lookup and static slot-map assertions provide the evidence. Those paths remain outside the supported contract of these targeted fixes.
+`ESCALATE: Non-MBR relocation, empty-room archives or arbitrary room graphs require a broader architecture decision.` Compiler asset ownership, positional room TOC lookup and static slot-map assertions provide the evidence. Those paths remain outside the supported contract of these targeted fixes.
+
+The unloaded-source actor case is now reproduced (2026-10-09), including a legal
+Moves Between Rooms actor previously bound before its source room unloads.
+Script position writes succeed, but updates and rendering remain stalled until
+the source room becomes active again. Assertions logs confirm stale room 3
+membership at a physical position inside room A. See the
+[reproduction review and raw evidence](diagnostics/unloaded-actor-review.md).
+Will subsequently authorized the MBR inactive-source repair. It now reconciles
+membership at safe script boundaries and binds never-loaded actors entering an
+active room, with an exact next-frame regression. See the
+[fix review](diagnostics/unloaded-actor-fix.md).
 
 Player velocity/contact resets remain unchanged. Destination collision is not rerun after scripts in the same frame; normal collision detection resumes next frame. An immediate same-frame physics guarantee would require a separate decision and reproduction.
 

@@ -39,7 +39,7 @@ def vector(obj, key, values, tag):
     return field(obj,key,' '.join(f'{v:.16f}(1.15.16)' for v in values),tag)
 
 
-def generate(repo, tools, out, camera='fixed', autonomous=False):
+def generate(repo, tools, out, camera='fixed', autonomous=False, unloaded_actor=False):
     out.mkdir(parents=True,exist_ok=True)
     source=repo/'wflevels/qbert_practice'
     text=(source/'qbert_practice.lev').read_text()
@@ -94,6 +94,16 @@ def generate(repo, tools, out, camera='fixed', autonomous=False):
                     '473 read-mailbox 1 + 473 write-mailbox 1 474 write-mailbox then\n')
                 script=prefix+script
             obj=field(obj,'Script',json.dumps(script))
+            if unloaded_actor:
+                script=('480 read-mailbox 1 + 480 write-mailbox\n'+script.replace(
+                    '470 read-mailbox 471 write-mailbox then',
+                    '470 read-mailbox 7 = if -5 INDEXOF_X_POS 20 write-actor-mailbox '
+                    '0 INDEXOF_Y_POS 20 write-actor-mailbox 7 INDEXOF_Z_POS 20 write-actor-mailbox then\n'
+                    '470 read-mailbox 8 = if 295 INDEXOF_X_POS 20 write-actor-mailbox then\n'
+                    '470 read-mailbox 9 = if 295 INDEXOF_X_POS 20 write-actor-mailbox '
+                    '-5 INDEXOF_X_POS 20 write-actor-mailbox then\n'
+                    '470 read-mailbox 471 write-mailbox then'))
+                obj=field(obj,'Script',json.dumps(script))
         if key=='Director':
             # Four room objects precede Level, Camera, Director and this shot.
             # The integration test checks these indices in real engine output.
@@ -117,6 +127,15 @@ def generate(repo, tools, out, camera='fixed', autonomous=False):
         entries.append(marker)
         light=name(objects['Light01'],f'Light{index}')
         entries.append(vector(light,'Position',(index*100,0,15),'VEC3'))
+    if unloaded_actor:
+        for label,x,heartbeat in [('InactiveTarget',295,481),('ActiveControl',-10,482)]:
+            helper=name(objects['redball_0'],label)
+            helper=vector(helper,'Position',(x,0,7),'VEC3')
+            helper=field(helper,'Mobility','"Anchored"','I32')
+            helper=field(helper,'Moves Between Rooms','1l','I32')
+            helper=field(helper,'Visibility Mailbox','1l','I32')
+            helper=field(helper,'Script',json.dumps(f'{heartbeat} read-mailbox 1 + {heartbeat} write-mailbox\n'))
+            entries.append(helper)
     level='teleport_regression'
     (out/(level+'.lev')).write_text("{ 'LVL'\n"+''.join("\n\t{ 'OBJ'"+o for o in entries)+'\n}\n')
     for mesh in ['player.iff','redball.iff']:shutil.copy2(source/mesh,out/mesh)
@@ -139,6 +158,9 @@ def generate(repo, tools, out, camera='fixed', autonomous=False):
     receipt={'rooms':{'A':['B','C'],'B':['A'],'C':['A'],'D':[]},
         'camera':camera,
         'autonomous':autonomous,
+        'unloaded_actor':unloaded_actor,
+        'inactive_target_index':20 if unloaded_actor else None,
+        'active_control_index':21 if unloaded_actor else None,
         'player_index':9,'camera_shot_index':8,'unloaded_marker_index':18,
         'inputs':{str(p.relative_to(repo)):hashlib.sha256(p.read_bytes()).hexdigest()
                   for p in [source/'qbert_practice.lev',source/'player.iff',source/'redball.iff']},
@@ -156,4 +178,5 @@ if __name__=='__main__':
     parser.add_argument('--out',type=Path,required=True)
     parser.add_argument('--camera',choices=['fixed','follow'],default='fixed')
     parser.add_argument('--autonomous',action='store_true',help='Cycle teleports and print next-frame pose/scale assertions for coordinated device tests')
-    args=parser.parse_args();generate(args.repo,args.tools,args.out,args.camera,args.autonomous)
+    parser.add_argument('--unloaded-actor',action='store_true',help='Add a permanent target in D and heartbeat control in A; Player command 7 moves the target into A')
+    args=parser.parse_args();generate(args.repo,args.tools,args.out,args.camera,args.autonomous,args.unloaded_actor)

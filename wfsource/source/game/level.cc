@@ -976,6 +976,7 @@ Level::update(Scalar deltaTime)
 	// make sure any pending room request gets fulfilled
 	assert( ValidPtr( _theActiveRooms ) );
 	_theActiveRooms->WaitRoomLoad( false );
+	finishPositionWrites();
 	finishWatchTeleport();
 
 	DBSTREAM2( cflow << "Level::update: updating current room selection" << std::endl; )
@@ -1008,6 +1009,7 @@ Level::update(Scalar deltaTime)
 
 	DBSTREAM2( cflow << "Level::update: room contents" << std::endl; )
 	Validate();
+	finishPositionWrites();
 	finishWatchTeleport();
 	updateRoomContents();
 	// FIX - manually update director until we get priorities working in updates
@@ -1019,6 +1021,7 @@ Level::update(Scalar deltaTime)
 		_director->predictPosition(LevelClock());
 		_director->update();
 	}
+	finishPositionWrites();
 	finishWatchTeleport();
 
 	DBSTREAM2( cflow << "Level::update: remove pending objects" << std::endl; )
@@ -1288,8 +1291,25 @@ Level::RenderScene()
 void
 Level::NotifyPositionWrite(const PhysicalObject& object)
 {
+	if (object.GetMovementBlockPtr()->MovesBetweenRooms)
+		_movingPositionWritten = true;
 	if (_camera && _camera->GetWatchObject() == &object)
 		_positionWrittenWatch = &object;
+}
+
+void
+Level::finishPositionWrites()
+{
+	if (!_movingPositionWritten || !_theActiveRooms)
+		return;
+	_movingPositionWritten = false;
+	// Defer until outside actor iteration and after all script axis writes.
+	// Inactive source rooms must participate in membership repair, but their
+	// actors must not otherwise start running scripts or physics.
+	for (int room = 0; room < _theLevelRooms->NumberOfRooms(); ++room)
+		_theLevelRooms->GetRoom(room).UpdateRoomContents(ROOM_OBJECT_LIST_UPDATE,
+			GetMutableLevelRooms(), true);
+	_theActiveRooms->BindUnboundMovingObjects();
 }
 
 void

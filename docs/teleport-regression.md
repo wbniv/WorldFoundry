@@ -27,6 +27,15 @@ cp /tmp/teleport-fixture/teleport_regression-standalone.iff wflevels/teleport_re
 
 The generator records source, tool and output hashes. `--camera fixed` isolates room-memory and scale behavior from camera movement; use that variant for the historical unbind/null and scale-only reproductions. A scale-only run uses `--laps 0` without `--require-camera` or `--audit-boundary`.
 
-The contract tested here is a watched, MBR Player moving between valid rooms, with a camera shot authored to follow its destination. Ordinary physics walking retains its current camera behavior. This anchored fixture does not establish all dynamic-body collisions or arbitrary actor relocation. See [the audit review](teleport-audit.md) for evidence and unresolved boundaries.
+The original fixture tests a watched, MBR Player moving between valid rooms,
+with a camera shot authored to follow its destination. The additional
+`unloaded_actor_teleports` CTest uses `unloaded_actor_regression-standalone.iff`
+to verify non-watched MBR actors moved by an active script from inactive rooms:
+membership repair, deferred asset binding, exact next-frame updates, inactive
+destination scheduling and repeated returns. See the
+[fix and evidence](diagnostics/unloaded-actor-fix.md). Ordinary physics walking
+retains its current camera behavior. These anchored fixtures do not establish
+all dynamic-body collisions or non-MBR relocation. See
+[the audit review](teleport-audit.md) for evidence and unresolved boundaries.
 
 For coordinator-owned device testing, generate with `--camera follow --autonomous`. That variant cycles the same seven teleport commands without a debug client and reports actual Player/camera positions and scale on the next actor update. `tests/verify_teleport_device_evidence.py` validates the downloaded coordinator logs offline; it does not access devices. The command-driven fixture remains unchanged. [Android Release verification](diagnostics/t4-teleport-audit/android-review.md) passed on both 32-bit Chromecasts.

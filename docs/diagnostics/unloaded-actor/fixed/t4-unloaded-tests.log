@@ -1,0 +1,34 @@
+Test project /home/will/WorldFoundry-wbniv/.worktrees/teleport-audit/build-teleport
+    Start  8: cross_room_teleports
+1/5 Test  #8: cross_room_teleports .............   Passed    5.97 sec
+    Start  9: cross_room_teleports_mutation
+2/5 Test  #9: cross_room_teleports_mutation ....   Passed    5.99 sec
+    Start 10: unloaded_actor_teleports
+3/5 Test #10: unloaded_actor_teleports .........   Passed   12.21 sec
+    Start 21: wfmut_smoke
+4/5 Test #21: wfmut_smoke ......................   Passed    0.28 sec
+    Start 22: wfmut_bridge
+5/5 Test #22: wfmut_bridge .....................***Failed    8.35 sec
+  [FAIL] ping → pong
+  [PASS] scene:set_transform applies (wfmut::SetActorPos)
+  [PASS] scene:set_prop movebloc.MaxGroundSpeed no error
+  [PASS] scene:set_prop bad field → wfmut error relayed
+  [PASS] set_mailbox + watch broadcast (wfmut::SetMailbox, F14)
+  [PASS] undo_step no error (wfmut path)
+  [PASS] revert_all → reverted (wfmut transform+prop restore)
+  [PASS] screenshot captured
+=== wfmut bridge regression: 7 passed, 1 failed ===
+    screenshot: /home/will/WorldFoundry-wbniv/.worktrees/teleport-audit/tests/screenshots/wfmut_bridge_regression.png
+
+
+80% tests passed, 1 tests failed out of 5
+
+Label Time Summary:
+gl          =  32.80 sec*proc (5 tests)
+teleport    =  24.16 sec*proc (3 tests)
+
+Total Test time (real) =  32.82 sec
+
+The following tests FAILED:
+	 22 - wfmut_bridge (Failed)                             gl
+Errors while running CTest

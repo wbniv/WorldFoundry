@@ -1,0 +1,57 @@
+Test project /home/will/WorldFoundry-wbniv/.worktrees/teleport-audit/build-teleport
+      Start  1: texture_atlas_address
+ 1/24 Test  #1: texture_atlas_address ............   Passed    0.01 sec
+      Start  2: debug_listener_reconnect
+ 2/24 Test  #2: debug_listener_reconnect .........   Passed    0.20 sec
+      Start  3: frame_rate_sampler
+ 3/24 Test  #3: frame_rate_sampler ...............   Passed    0.00 sec
+      Start  4: fps_overlay_layout
+ 4/24 Test  #4: fps_overlay_layout ...............   Passed    0.00 sec
+      Start  5: frame_rate_mailbox
+ 5/24 Test  #5: frame_rate_mailbox ...............   Passed    1.03 sec
+      Start  6: frame_rate_mailbox_fixed_sim
+ 6/24 Test  #6: frame_rate_mailbox_fixed_sim .....   Passed    1.08 sec
+      Start  7: debug_listener_smb_transitions
+ 7/24 Test  #7: debug_listener_smb_transitions ...   Passed   38.35 sec
+      Start  8: cross_room_teleports
+ 8/24 Test  #8: cross_room_teleports .............   Passed    5.82 sec
+      Start  9: cross_room_teleports_mutation
+ 9/24 Test  #9: cross_room_teleports_mutation ....   Passed    5.90 sec
+      Start 10: unloaded_actor_teleports
+10/24 Test #10: unloaded_actor_teleports .........   Passed   12.47 sec
+      Start 11: memory_pool_arrays
+11/24 Test #11: memory_pool_arrays ...............   Passed    0.05 sec
+      Start 12: wf_game_smoke_cycle1
+12/24 Test #12: wf_game_smoke_cycle1 .............   Passed    0.80 sec
+      Start 13: wf_game_smoke_cycle2
+13/24 Test #13: wf_game_smoke_cycle2 .............   Passed    1.35 sec
+      Start 14: wf_game_smoke_snow_cycle1
+14/24 Test #14: wf_game_smoke_snow_cycle1 ........   Passed    0.73 sec
+      Start 15: wf_game_smoke_snow_cycle2
+15/24 Test #15: wf_game_smoke_snow_cycle2 ........   Passed    1.26 sec
+      Start 16: wf_host_gl_e2e_cycle1
+16/24 Test #16: wf_host_gl_e2e_cycle1 ............   Passed    0.76 sec
+      Start 17: wf_host_gl_e2e_cycle2
+17/24 Test #17: wf_host_gl_e2e_cycle2 ............   Passed    1.33 sec
+      Start 18: frame_rate_host_no_swap
+18/24 Test #18: frame_rate_host_no_swap ..........   Passed    3.02 sec
+      Start 19: wf_host_gl_e2e_snow_cycle1
+19/24 Test #19: wf_host_gl_e2e_snow_cycle1 .......   Passed    0.76 sec
+      Start 20: wf_host_gl_e2e_snow_cycle2
+20/24 Test #20: wf_host_gl_e2e_snow_cycle2 .......   Passed    1.30 sec
+      Start 21: wfmut_smoke
+21/24 Test #21: wfmut_smoke ......................   Passed    0.26 sec
+      Start 22: wfmut_bridge
+22/24 Test #22: wfmut_bridge .....................   Passed    3.19 sec
+      Start 23: wfmut_thread_guard
+23/24 Test #23: wfmut_thread_guard ...............   Passed    0.18 sec
+      Start 24: neural_forth_unit
+24/24 Test #24: neural_forth_unit ................   Passed    0.02 sec
+
+100% tests passed, 0 tests failed out of 24
+
+Label Time Summary:
+gl          =  75.45 sec*proc (14 tests)
+teleport    =  24.19 sec*proc (3 tests)
+
+Total Test time (real) =  79.89 sec

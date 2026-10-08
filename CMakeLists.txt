@@ -1286,6 +1286,14 @@ if(NOT ANDROID AND NOT IOS AND NOT APPLE AND NOT EMSCRIPTEN)
                     --mutation --require-camera --audit-boundary)
             set_tests_properties(cross_room_teleports_mutation PROPERTIES
                 LABELS "gl;teleport" ENVIRONMENT "DISPLAY=:0" TIMEOUT 60)
+            add_test(NAME unloaded_actor_teleports
+                COMMAND ${Python3_EXECUTABLE}
+                    ${CMAKE_SOURCE_DIR}/tests/reproduce_unloaded_actor.py
+                    --binary $<TARGET_FILE:wf_game>
+                    --level ${CMAKE_SOURCE_DIR}/wflevels/unloaded_actor_regression-standalone.iff
+                    --out ${CMAKE_BINARY_DIR}/unloaded-actor-regression --expect-fixed)
+            set_tests_properties(unloaded_actor_teleports PROPERTIES
+                LABELS "gl;teleport" ENVIRONMENT "DISPLAY=:0" TIMEOUT 60)
             set_tests_properties(debug_listener_smb_transitions PROPERTIES
                 LABELS "gl" ENVIRONMENT "DISPLAY=:0" TIMEOUT 120)
             if(WF_DEBUG_DEFINES)
