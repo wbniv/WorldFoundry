@@ -11,7 +11,9 @@
   }
   function move() {
     if (!playing() || paused || !held.size) return;
-    const key = [...held.keys()].at(-1), button = document.querySelector(`[data-dir="${directions[key]}"]`);
+    // Support older TV WebViews that do not provide Array.at().
+    const keys = [...held.keys()];
+    const key = keys[keys.length - 1], button = document.querySelector(`[data-dir="${directions[key]}"]`);
     button.dispatchEvent(new PointerEvent('pointerdown'));
     button.dispatchEvent(new PointerEvent('pointerup'));
   }

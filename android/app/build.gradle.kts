@@ -74,6 +74,18 @@ android {
     }
 
     buildTypes {
+        create("diagnostic") {
+            initWith(getByName("release"))
+            signingConfig = signingConfigs.getByName("debug")
+            isDebuggable = true
+            versionNameSuffix = "-diagnostic"
+            matchingFallbacks += "release"
+            externalNativeBuild {
+                cmake {
+                    arguments += listOf("-DCMAKE_BUILD_TYPE=Release", "-DWF_RUNTIME_DIAGNOSTICS=ON")
+                }
+            }
+        }
         getByName("debug") {
             // AGP's default: CMake passes -DCMAKE_BUILD_TYPE=Debug, which in
             // our CMakeLists maps to -O0 -g for the wf_game target.

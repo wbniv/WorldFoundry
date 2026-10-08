@@ -1,0 +1,54 @@
+.F                                                                       [100%]
+=================================== FAILURES ===================================
+__________________ test_generic_colour_and_text_transactions ___________________
+
+executable = PosixPath('/tmp/pytest-of-will/pytest-121/plant-phone0/host')
+tmp_path = PosixPath('/tmp/pytest-of-will/pytest-121/test_generic_colour_and_text_t0')
+
+    def test_generic_colour_and_text_transactions(executable,tmp_path):
+        """Packed RGB and UTF-8 travel through the actual native edit transaction."""
+        from playwright.sync_api import sync_playwright,expect
+        process=subprocess.Popen([str(executable),str(ROOT/'wfsource/source/hal/phonepad/controller.html'),str(ROOT/'android/app/src/aquarium/assets/layout.json'),'controls'],stdout=subprocess.PIPE,text=True)
+        try:
+            port=int(process.stdout.readline());url=f'http://127.0.0.1:{port}/?k=123456'
+            with sync_playwright() as p:
+                browser=p.chromium.launch(headless=True)
+                page=browser.new_page(viewport={'width':390,'height':844})
+                page.goto(url);page.locator('#plant-open').click()
+                picker=page.locator('#property-201 input[type=color]')
+>               expect(picker).to_have_value('#58878c')
+E               AssertionError: Locator expected to have Value '#58878c'
+E               Actual value: None
+E               Error: element(s) not found 
+E               Call log:
+E                 - Expect "to_have_value" with timeout 5000ms
+E                 - waiting for locator("#property-201 input[type=color]")
+E               
+E               Aria snapshot:
+E               - text: Connected to the TV
+E               - button "Properties"
+E               - 'button "Buzz: on"'
+E               - text: "A B sent to the TV: 0x0000 Stick steers the clownfish, like the remote's D-pad."
+E               - heading "Apply properties and close Generic control fixtures" [level=1]:
+E                 - button "Apply properties and close": ←
+E                 - text: Generic control fixtures
+E               - group "Tint":
+E                 - text: Tint
+E                 - 'button "Choose colour · #58878C"'
+E               - text: Name
+E               - textbox "Name": River garden
+E               - group "Locked tint":
+E                 - text: Locked tint
+E                 - 'button "Choose colour · #58878C" [disabled]'
+E               - text: Locked name
+E               - textbox "Locked name" [disabled]: River garden
+E               - text: Notes
+E               - textbox "Notes": First line Second line
+E               - status
+E               - button "Cancel"
+E               - paragraph: ← applies changes and closes.
+
+tests/test_plant_phone.py:53: AssertionError
+=========================== short test summary info ============================
+FAILED tests/test_plant_phone.py::test_generic_colour_and_text_transactions
+1 failed, 1 passed in 21.02s

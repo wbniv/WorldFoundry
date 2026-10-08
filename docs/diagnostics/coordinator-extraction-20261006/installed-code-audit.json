@@ -1,0 +1,134 @@
+{
+  "release": "0.1.0",
+  "checks": {
+    "scripts/wf_device/__init__.py": {
+      "sha256_matches_review": true,
+      "root_owned": true,
+      "writable_by_group_or_other": false,
+      "mode": "0o644"
+    },
+    "scripts/wf_device/__main__.py": {
+      "sha256_matches_review": true,
+      "root_owned": true,
+      "writable_by_group_or_other": false,
+      "mode": "0o644"
+    },
+    "scripts/wf_device/capture.py": {
+      "sha256_matches_review": true,
+      "root_owned": true,
+      "writable_by_group_or_other": false,
+      "mode": "0o644"
+    },
+    "scripts/wf_device/cli.py": {
+      "sha256_matches_review": true,
+      "root_owned": true,
+      "writable_by_group_or_other": false,
+      "mode": "0o644"
+    },
+    "scripts/wf_device/client.py": {
+      "sha256_matches_review": true,
+      "root_owned": true,
+      "writable_by_group_or_other": false,
+      "mode": "0o644"
+    },
+    "scripts/wf_device/dashboard.py": {
+      "sha256_matches_review": true,
+      "root_owned": true,
+      "writable_by_group_or_other": false,
+      "mode": "0o644"
+    },
+    "scripts/wf_device/diagnostics.py": {
+      "sha256_matches_review": true,
+      "root_owned": true,
+      "writable_by_group_or_other": false,
+      "mode": "0o644"
+    },
+    "scripts/wf_device/discovery.py": {
+      "sha256_matches_review": true,
+      "root_owned": true,
+      "writable_by_group_or_other": false,
+      "mode": "0o644"
+    },
+    "scripts/wf_device/image_assertions.py": {
+      "sha256_matches_review": true,
+      "root_owned": true,
+      "writable_by_group_or_other": false,
+      "mode": "0o644"
+    },
+    "scripts/wf_device/integration.py": {
+      "sha256_matches_review": true,
+      "root_owned": true,
+      "writable_by_group_or_other": false,
+      "mode": "0o644"
+    },
+    "scripts/wf_device/launcher.py": {
+      "sha256_matches_review": true,
+      "root_owned": true,
+      "writable_by_group_or_other": false,
+      "mode": "0o644"
+    },
+    "scripts/wf_device/plant_checks.py": {
+      "sha256_matches_review": true,
+      "root_owned": true,
+      "writable_by_group_or_other": false,
+      "mode": "0o644"
+    },
+    "scripts/wf_device/prime_checks.py": {
+      "sha256_matches_review": true,
+      "root_owned": true,
+      "writable_by_group_or_other": false,
+      "mode": "0o644"
+    },
+    "scripts/wf_device/service.py": {
+      "sha256_matches_review": true,
+      "root_owned": true,
+      "writable_by_group_or_other": false,
+      "mode": "0o644"
+    },
+    "scripts/wf_device/store.py": {
+      "sha256_matches_review": true,
+      "root_owned": true,
+      "writable_by_group_or_other": false,
+      "mode": "0o644"
+    },
+    "scripts/wf_device/workflows.py": {
+      "sha256_matches_review": true,
+      "root_owned": true,
+      "writable_by_group_or_other": false,
+      "mode": "0o644"
+    },
+    "scripts/chromecast.py": {
+      "sha256_matches_review": true,
+      "root_owned": true,
+      "writable_by_group_or_other": false,
+      "mode": "0o644"
+    },
+    "scripts/wf_device/resources/capture-helper.jar": {
+      "sha256_matches_review": true,
+      "root_owned": true,
+      "writable_by_group_or_other": false,
+      "mode": "0o644"
+    },
+    "deploy/upgrade.py": {
+      "sha256_matches_review": true,
+      "root_owned": true,
+      "writable_by_group_or_other": false,
+      "mode": "0o644"
+    },
+    "bin/chromecast": {
+      "sha256_matches_review": true,
+      "root_owned": true,
+      "writable_by_group_or_other": false,
+      "mode": "0o755"
+    },
+    "config/refresh-network.py": {
+      "sha256_matches_review": true,
+      "root_owned": true,
+      "writable_by_group_or_other": false,
+      "mode": "0o644"
+    }
+  },
+  "pending": [
+    "IPv4/IPv6/container/runtime bypass verification"
+  ]
+}

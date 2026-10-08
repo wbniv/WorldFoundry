@@ -1,7 +1,7 @@
 <!doctype html><meta charset="utf-8"><title>Freshwater rainbow goby</title><style>body{font:17px/1.55 system-ui;max-width:1050px;margin:40px auto;padding:0 24px;color:#20313a;background:#f3f6f5}img{max-width:100%;height:auto}table{border-collapse:collapse;width:100%}td,th{border:1px solid #ccd6d6;padding:10px;text-align:left}pre{background:#102833;color:#e4f0ee;padding:18px;overflow:auto}a{color:#166b76}</style><h1>Freshwater rainbow goby in Planted Tank</h1>
 <p>6 October 2026. Selected by Will: rainbow goby for freshwater, with different
 controls from the sea urchin. Engine edits require a separate explicit approval.</p>
-<p><a href="../reference/rainbow-goby-biomechanics-poster/poster.html">A3 portrait research poster</a> · <a href="../reference/rainbow-goby-biomechanics-poster/poster.pdf">Printable PDF</a></p><h2>Result</h2>
+<h2>Result</h2>
 <p>Freshwater has one playable adult male <strong>Stiphodon ornatus</strong>. Saltwater retains
 the sea urchin. Changing water type in the existing settings regenerates plants
 and switches the resident, clears held input and resets locomotion. Seed and
@@ -10,6 +10,20 @@ the existing back-arrow hierarchy.</p>
 <p>This is a planted aquarium with rounded grazing stones, rather than a claim to
 reproduce a rocky stream. <a href="../reference/rainbow-goby-research.md">Independent research and sources</a>
 were saved before this plan and prototype.</p>
+<p><a href="../reference/rainbow-goby-biomechanics-poster/poster.html">A3 portrait research poster</a>
+· <a href="../reference/rainbow-goby-biomechanics-poster/rainbow-goby-biomechanics-a3.pdf">Printable PDF</a>.</p>
+<h3>Grazing rocks — implemented 6 October</h3>
+<p>Three rounded rocks are now visible in freshwater, with a deterministic 256²
+mottled stone/biofilm texture. Broad top surfaces support a stable grazing pose.
+The goby's authored Forth support profile uses the same rock dimensions as the
+meshes, along its fixed swim plane. Saltwater hides these freshwater perches.
+This adds three visual actors and 384 source triangles, without additional
+physics bodies or engine changes. Four 256² animal/rock textures share the
+existing 512² permanent page.</p>
+<p>The cast1 launch check passed (<code>J-f5bfc4b9d263</code>); its log reports the goby settled
+at Z=1.365 on the centre stone. Twelve goby tests pass, including support heights,
+settling and compilation of the actual exported scripts in both configurations.</p>
+<p><img alt="Cast1: three grazing stones and goby perched on the centre rock" src="2026-10-06-freshwater-rainbow-goby/evidence/grazing-rocks/screenshot.png" /></p>
 <p><img alt="Authored goby geometry and textures" src="2026-10-06-freshwater-rainbow-goby/goby-mesh-preview.png" /></p>
 <p>This is a source-mesh preview, not a device capture. The prototype is two meshes
 (body and fins), with two deterministic 256² maps. Fins use existing material

@@ -1,0 +1,64 @@
+> Task :app:preBuild UP-TO-DATE
+> Task :app:preAquariumDiagnosticBuild UP-TO-DATE
+> Task :app:mergeAquariumDiagnosticNativeDebugMetadata NO-SOURCE
+> Task :app:javaPreCompileAquariumDiagnostic UP-TO-DATE
+> Task :app:checkAquariumDiagnosticAarMetadata UP-TO-DATE
+> Task :app:generateAquariumDiagnosticResValues UP-TO-DATE
+> Task :app:mapAquariumDiagnosticSourceSetPaths UP-TO-DATE
+> Task :app:generateAquariumDiagnosticResources UP-TO-DATE
+> Task :app:mergeAquariumDiagnosticResources UP-TO-DATE
+> Task :app:packageAquariumDiagnosticResources UP-TO-DATE
+> Task :app:parseAquariumDiagnosticLocalResources UP-TO-DATE
+> Task :app:createAquariumDiagnosticCompatibleScreenManifests UP-TO-DATE
+> Task :app:extractDeepLinksAquariumDiagnostic UP-TO-DATE
+> Task :app:processAquariumDiagnosticMainManifest UP-TO-DATE
+> Task :app:processAquariumDiagnosticManifest UP-TO-DATE
+> Task :app:processAquariumDiagnosticManifestForPackage UP-TO-DATE
+> Task :app:processAquariumDiagnosticResources UP-TO-DATE
+
+> Task :app:compileAquariumDiagnosticJavaWithJavac
+Java compiler version 21 has deprecated support for compiling with source/target version 8.
+Try one of the following options:
+    1. [Recommended] Use Java toolchain with a lower language version
+    2. Set a higher source/target version
+    3. Use a lower version of the JDK running the build (if you're not using Java toolchain)
+For more details on how to configure these settings, see https://developer.android.com/build/jdks.
+To suppress this warning, set android.javaCompile.suppressSourceTargetDeprecationWarning=true in gradle.properties.
+warning: [options] source value 8 is obsolete and will be removed in a future release
+warning: [options] target value 8 is obsolete and will be removed in a future release
+warning: [options] To suppress warnings about obsolete options, use -Xlint:-options.
+Note: /home/will/WorldFoundry-wbniv/android/app/src/main/java/org/worldfoundry/wf_game/WorldFoundryActivity.java uses or overrides a deprecated API.
+Note: Recompile with -Xlint:deprecation for details.
+3 warnings
+
+> Task :app:mergeAquariumDiagnosticShaders UP-TO-DATE
+> Task :app:compileAquariumDiagnosticShaders NO-SOURCE
+> Task :app:generateAquariumDiagnosticAssets UP-TO-DATE
+> Task :app:mergeAquariumDiagnosticAssets
+> Task :app:processAquariumDiagnosticJavaRes NO-SOURCE
+> Task :app:mergeAquariumDiagnosticJavaResource UP-TO-DATE
+> Task :app:checkAquariumDiagnosticDuplicateClasses UP-TO-DATE
+> Task :app:desugarAquariumDiagnosticFileDependencies UP-TO-DATE
+> Task :app:compressAquariumDiagnosticAssets
+> Task :app:mergeAquariumDiagnosticStartupProfile UP-TO-DATE
+> Task :app:mergeExtDexAquariumDiagnostic UP-TO-DATE
+> Task :app:mergeLibDexAquariumDiagnostic UP-TO-DATE
+> Task :app:dexBuilderAquariumDiagnostic
+> Task :app:preQbertDiagnosticBuild UP-TO-DATE
+> Task :app:configureCMakeRelease[arm64-v8a]-2
+> Task :app:mergeProjectDexAquariumDiagnostic
+> Task :app:buildCMakeRelease[arm64-v8a]-2
+> Task :app:configureCMakeRelease[armeabi-v7a]-2
+> Task :app:buildCMakeRelease[armeabi-v7a]-2
+> Task :app:mergeAquariumDiagnosticJniLibFolders UP-TO-DATE
+> Task :app:mergeAquariumDiagnosticNativeLibs UP-TO-DATE
+> Task :app:stripAquariumDiagnosticDebugSymbols UP-TO-DATE
+> Task :app:validateSigningAquariumDiagnostic UP-TO-DATE
+> Task :app:writeAquariumDiagnosticAppMetadata UP-TO-DATE
+> Task :app:writeAquariumDiagnosticSigningConfigVersions UP-TO-DATE
+> Task :app:packageAquariumDiagnostic
+> Task :app:createAquariumDiagnosticApkListingFileRedirect UP-TO-DATE
+> Task :app:assembleAquariumDiagnostic
+
+BUILD SUCCESSFUL in 3s
+38 actionable tasks: 10 executed, 28 up-to-date

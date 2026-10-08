@@ -101,19 +101,18 @@ def test_verified_rows_rest_on_opened_sources_with_a_url(resolved):
                 assert D.SOURCES[s]['url'], f"{r['id']}: verified row without a source URL ({s})"
 
 
-def test_the_briefed_status_of_each_source():
-    """The orchestrator's list of what was actually opened; a change here is a decision, not a refactor."""
+def test_the_checked_status_of_each_source():
+    """2026-10-06 source audit; unsupported amplitude/wavelength became authored choices."""
     opened = {k for k, v in D.SOURCES.items() if v['opened']}
-    assert opened == {'S1', 'S3', 'S4', 'S5'}      # Knight, Wu, Marcoux, Hale
-    for key in ('S2', 'S6', 'S7', 'S8', 'S9'):
-        assert not D.SOURCES[key]['opened']
+    assert opened == {'S1', 'S2', 'S3', 'S4', 'S5', 'S6', 'S7', 'S8'}
+    assert 'S9' not in D.SOURCES
     assert 'cetacean' not in ' '.join(v['cite'].lower() for v in D.SOURCES.values())   # Rohr & Fish is not a source
 
 
 def test_no_invented_urls():
     """A URL may only appear if the repo already holds it (plans, code comments, docs)."""
     corpus = ''
-    for pattern in ('docs/plans/*.md', 'docs/*.md'):
+    for pattern in ('docs/plans/*.md', 'docs/*.md', 'docs/reference/*.md'):
         for f in REPO.glob(pattern):
             corpus += f.read_text(encoding='utf-8', errors='ignore')
     for f in AQ.glob('*.py'):
@@ -127,17 +126,18 @@ def test_chips_agree_with_the_code_comments(resolved):
     assert D.label_problems(resolved) == []
 
 
-def test_the_label_check_has_teeth(resolved):
+def test_the_label_check_has_teeth(resolved, monkeypatch):
     """A doctored chip must be reported: an unopened source called verified, a code-comment
-    `unverified` called ours-only, and a verified label the code never gave."""
+    `ours` called verified, and a verified label the code never gave."""
+    monkeypatch.setitem(D.SOURCES, 'S6', dict(D.SOURCES['S6'], opened=False))
     bad = [dict(r) for r in resolved]
     for r in bad:
         if r['id'] == 'f_cap':
             r['status'] = 'verified'                   # code says ours; source is the game
         if r['id'] == 'a_over_l':
-            r['status'] = 'ours'                       # code says unverified only
+            r['status'] = 'verified'                   # code says ours; source is the game
         if r['id'] == 'const_cycle':
-            r['status'] = 'verified'                   # Li et al. was not opened
+            r['status'] = 'verified'                   # simulate an unopened source
     problems = ' | '.join(D.label_problems(bad))
     assert 'f_cap' in problems and 'a_over_l' in problems and 'const_cycle' in problems
 
@@ -208,7 +208,9 @@ def test_the_strouhal_window_is_verified_and_the_game_value_is_ours(resolved):
     by = {r['id']: r for r in resolved}
     assert by['st_window']['value'] == (0.2, 0.4) and by['st_window']['status'] == 'verified'
     assert by['st_game']['status'] == 'ours' and 0.2 <= by['st_game']['value'] <= 0.4
-    assert by['a_over_l']['status'] == 'unverified' and by['wavelength']['status'] == 'unverified'
+    assert by['a_over_l']['status'] == by['wavelength']['status'] == 'ours'
+    assert by['const_cycle']['status'] == 'other-species'
+    assert by['st_trout']['value'] == (0.19, 0.23)
 
 
 # ── the table equals the data sheet ──────────────────────────────────────────
@@ -374,7 +376,7 @@ def test_html_is_self_contained(html_text):
 
 def test_missing_links_are_marked(html_text):
     n_missing = sum(1 for s in D.SOURCES.values() if not s['url'])
-    assert n_missing >= 1
+    assert n_missing == 0  # all eight remaining references have checked links
     assert html_text.count('class="missing"') == n_missing
 
 
@@ -406,7 +408,7 @@ needs_pdf = pytest.mark.skipif(not HAVE_PDF_TOOLS, reason='needs google-chrome a
 
 @needs_pdf
 def test_pdf_is_one_a3_page(built):
-    out = subprocess.run(['pdfinfo', str(built / 'poster.pdf')], capture_output=True, text=True, check=True).stdout
+    out = subprocess.run(['pdfinfo', str(built / 'clownfish-biomechanics-a3.pdf')], capture_output=True, text=True, check=True).stdout
     assert re.search(r'^Pages:\s+1$', out, re.M)
     w, h = map(float, re.search(r'Page size:\s+([\d.]+) x ([\d.]+) pts', out).groups())
     assert w == pytest.approx(841.9, abs=1.0) and h == pytest.approx(1190.6, abs=1.0)     # Chrome rounds 420 mm to 1191.1 pt
@@ -416,7 +418,7 @@ def test_pdf_is_one_a3_page(built):
 def test_pdf_fonts_are_embedded(built):
     if not shutil.which('pdffonts'):
         pytest.skip('no pdffonts')
-    out = subprocess.run(['pdffonts', str(built / 'poster.pdf')], capture_output=True, text=True, check=True).stdout.splitlines()[2:]
+    out = subprocess.run(['pdffonts', str(built / 'clownfish-biomechanics-a3.pdf')], capture_output=True, text=True, check=True).stdout.splitlines()[2:]
     assert out
     for line in out:
         cols = line.split()
@@ -427,7 +429,7 @@ def test_pdf_fonts_are_embedded(built):
 @needs_pdf
 def test_pdf_links_are_the_sources_and_nothing_else(built):
     from pypdf import PdfReader
-    reader = PdfReader(str(built / 'poster.pdf'))
+    reader = PdfReader(str(built / 'clownfish-biomechanics-a3.pdf'))
     uris = []
     for a in reader.pages[0].get('/Annots') or []:
         obj = a.get_object()
@@ -448,7 +450,7 @@ def test_pdf_type_is_at_least_8pt(built):
             a = math.hypot(tm[0], tm[1]) * math.hypot(cm[0], cm[1])
             sizes.append(font_size * a)
 
-    PdfReader(str(built / 'poster.pdf')).pages[0].extract_text(visitor_text=visit)
+    PdfReader(str(built / 'clownfish-biomechanics-a3.pdf')).pages[0].extract_text(visitor_text=visit)
     assert len(sizes) > 200
     assert min(sizes) >= 8.0 - 0.05, min(sizes)
 
@@ -475,4 +477,4 @@ def _edge_strips_are_blank(pdf, workdir, mm=5, dpi=150):
 def test_pdf_page_edges_are_blank(built, tmp_path):
     """Nothing may be drawn in the outer 5 mm of the page. (A hero fish icon once overflowed the header and left
     a 0.7 mm sliver of its nose at the right edge of the PDF, invisible in the HTML but there in the print.)"""
-    assert _edge_strips_are_blank(built / 'poster.pdf', tmp_path) == []
+    assert _edge_strips_are_blank(built / 'clownfish-biomechanics-a3.pdf', tmp_path) == []

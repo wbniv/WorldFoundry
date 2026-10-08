@@ -20,7 +20,7 @@ with sync_playwright() as p:
     assert not review['overflowing'], review
     assert review['footerBottom'] <= review['height'], review
     page.locator('.page').screenshot(path=str(HERE/'poster.png'))
-    page.pdf(path=str(HERE/'poster.pdf'), prefer_css_page_size=True,
+    page.pdf(path=str(HERE/'rainbow-goby-biomechanics-a3.pdf'), prefer_css_page_size=True,
              print_background=True, display_header_footer=False)
     browser.close()
     print(review)

@@ -19,7 +19,7 @@ Apply the aquarium ×10 world-scale convention consistently: **40 × 30 × 12 wo
 ## Review artifacts
 
 - [Tank mockups and diagrams](2026-10-02-asian-arowana/index.html)
-- [Actual A3 poster](../reference/asian-arowana-poster/poster.html) · [print PDF](../reference/asian-arowana-poster/poster.pdf) · [PNG preview](../reference/asian-arowana-poster/poster.png)
+- [Actual A3 poster](../reference/asian-arowana-poster/poster.html) · [print PDF](../reference/asian-arowana-poster/asian-arowana-a3.pdf) · [PNG preview](../reference/asian-arowana-poster/poster.png)
 - [Poster sources, licensing and reproduction](../reference/asian-arowana-poster/README.md)
 
 The following tank images are original concept illustrations, not game screenshots or exported mesh renders. The poster contains two actual licensed photographs, an original anatomy diagram, a map built from Natural Earth data, and a clearly identified proposed motion diagram.

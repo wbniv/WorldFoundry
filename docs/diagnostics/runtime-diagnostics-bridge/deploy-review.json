@@ -1,0 +1,14 @@
+{
+  "service.py": {
+    "old": "327b47bddb1637a98238f6028314c2f5a9bc07f469e40a2da969febf73f1879d",
+    "new": "dbe0f21f0b164b91cd9e0073426c10752900c408f6f9e8e729a59dcd624dbee1"
+  },
+  "workflows.py": {
+    "old": "f8ebf686524d8ffaa576298a8b43356e9676ed12fd0a4a74e29b615c5c3f085e",
+    "new": "9562ac3ce5c2df93617d06cbb9f5dc806423041edca385396d55d653c3feefe3"
+  },
+  "diagnostics.py": {
+    "old": null,
+    "new": "290615e36ee53bc4347c4e0fb20cde697ad84c63647d9c9855ac3439d06c5d62"
+  }
+}

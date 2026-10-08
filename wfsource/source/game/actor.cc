@@ -1,3 +1,4 @@
+#include "../../../engine/runtime_diagnostics.hpp"
 //=============================================================================
 // Actor.cc:
 // Copyright ( c ) 1994,1995,1996,1997,1999,2000,2001,2002,2003 World Foundry Group  
@@ -678,6 +679,7 @@ Actor::Actor( const SObjectStartupData* startupData ) :
 	assert( ValidPtr( _oadData ) );
 
 	_idxActor = startupData->idxActor;
+	wfdiag::ActorCreated(this);
 
 	const _ObjectOnDisk* objdata = startupData->objectData;
 	assert( ValidPtr( objdata ) );
@@ -848,6 +850,7 @@ Actor::Actor( const SObjectStartupData* startupData ) :
 
 Actor::~Actor()
 {
+	wfdiag::ActorDeleted(this);
 	DBSTREAM3( cactor << "Actor destructor" << std::endl; )
 
 	DBSTREAM3( cactor << "Actor destructor: unloading assets" << std::endl; )
@@ -1899,6 +1902,23 @@ ActorMailboxes::~ActorMailboxes()
 Scalar 
 ActorMailboxes::ReadMailbox(int32 mailbox) const
 {
+#ifdef WF_RUNTIME_DIAGNOSTICS
+    switch(mailbox) {
+        case EMAILBOX_HARDWARE_JOYSTICK1: case EMAILBOX_HARDWARE_JOYSTICK1_RAW:
+        case EMAILBOX_HARDWARE_JOYSTICK1_RAW_JUSTPRESSED:
+        case EMAILBOX_HARDWARE_JOYSTICK2: case EMAILBOX_HARDWARE_JOYSTICK2_RAW:
+        case EMAILBOX_HARDWARE_JOYSTICK2_RAW_JUSTPRESSED:
+        case EMAILBOX_HARDWARE_JOYSTICK3: case EMAILBOX_HARDWARE_JOYSTICK3_RAW:
+        case EMAILBOX_HARDWARE_JOYSTICK3_RAW_JUSTPRESSED:
+        case EMAILBOX_HARDWARE_JOYSTICK4: case EMAILBOX_HARDWARE_JOYSTICK4_RAW:
+        case EMAILBOX_HARDWARE_JOYSTICK4_RAW_JUSTPRESSED:
+        case EMAILBOX_JOYSTICK_ARE_PRESSED: case EMAILBOX_JOYSTICK_JUST_PRESSED:
+        case EMAILBOX_JOYSTICK_JUST_RELEASED:
+            wfdiag::InputRead(_actor.GetActorIndex(),wfdiag::ActorGeneration(&_actor),mailbox);
+            break;
+        default: break;
+    }
+#endif
     if(mailbox >= EMAILBOX_LOCAL_SYSTEM_START && mailbox < EMAILBOX_LOCAL_SYSTEM_MAX)
         return _actor.ReadSystemMailbox(mailbox);
     else
@@ -1933,4 +1953,3 @@ Actor::NonStatPlatData::NonStatPlatData(SMemPool * memPool, const _Movement* mov
 }
 
 //==============================================================================
-

@@ -1,0 +1,9 @@
+{
+  "before": [
+    "    mResumedActivity: ActivityRecord{35d4014 u0 org.worldfoundry.wf_game.aquarium/android.app.NativeActivity t51}"
+  ],
+  "after": [
+    "    mResumedActivity: ActivityRecord{35d4014 u0 org.worldfoundry.wf_game.aquarium/android.app.NativeActivity t51}"
+  ],
+  "foreground_unchanged": true
+}

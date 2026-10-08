@@ -6,7 +6,7 @@
 Writes, into DIR (default: next to this script):
   data.json    the resolved data sheet (values read from the game's code)
   poster.html  self-contained: inline CSS and inline SVG, no external reference
-  poster.pdf   one A3 page, live links, fonts embedded (headless Chrome from poster.html)
+  clownfish-biomechanics-a3.pdf   one A3 page, live links, fonts embedded (headless Chrome from poster.html)
   poster.png   150 dpi preview of the PDF (pdftoppm)
 
 Every curve is computed here from the formulas in the plan and from the constants in
@@ -232,7 +232,7 @@ def diag_a(k):
     s.append(T(16, 102, 'A(s) = (A/2)·(0.1 + 0.9 s²),   λ = L', 12, 'start', MUTED, 400, mono=True))
     s.append(T(16, 120, 's = 0 at the nose, 1 at the tail tip', 11.5, 'start', MUTED))
     c1, w1 = chip(16, 152, 'ours', 'envelope shape: drawing only')
-    c2, w2 = chip(16, 176, 'unverified', 'A ≈ 0.2 L, λ ≈ L: widely cited')
+    c2, w2 = chip(16, 176, 'ours', 'A = 0.2 L, λ = L: authored')
     return ''.join(s) + c1 + c2, W, H
 
 
@@ -246,8 +246,8 @@ def diag_b(k):
     a = k.a_over_l
     s = [f'<rect width="{W}" height="{H}" fill="#fff"/>']
     s.append(T(10, 16, 'f = St · U / A ,  A = 0.2 L   ⇒   f = 5 · St · U/L', 12, 'start', INK, 600, mono=True))
-    c1, w1 = chip(10, 38, 'verified', 'St 0.2–0.4 in fish')
-    c2, w2 = chip(10 + w1 + 8, 38, 'unverified', 'A = 0.2 L')
+    c1, w1 = chip(10, 38, 'verified', 'efficient St 0.2–0.4')
+    c2, w2 = chip(10 + w1 + 8, 38, 'ours', 'A = 0.2 L')
     c3, w3 = chip(10 + w1 + w2 + 16, 38, 'ours', 'St = 0.3, cap')
     s.append(c1 + c2 + c3)
     s.append(axes(x0, y0, w, h, UMAX, FMAX, range(0, 8), range(0, 15, 2), 'swimming speed U (body lengths / s)', 'tail beat f (Hz)'))
@@ -417,19 +417,19 @@ def diag_e(k):
     s.append(T(10, 36, f'R = V / (2π · ω), V = {k.V:.3f} m/s, ω = {k.C.YAW_WMAX:g} rev/s', 11, 'start', MUTED))
     s.append(T(10, 180, 'path of the body centre; arrows = heading', 11, 'start', MUTED))
     base = 296
-    labs = ('1 straight', '2 C-bend', '3 counter-bend', '4 glide')
-    s.append(T(base - 16, 20, 'escape C-start: four stages', 12, 'start', INK, 700))
+    labs = ('before start', '1 C-bend', '2 return flip', '3 swim/coast')
+    s.append(T(base - 16, 20, 'C-start: before + three stages', 12, 'start', INK, 700))
     for i, lab in enumerate(labs):
         x = base + i * 62
         curv = (0.0, 2.6, -1.7, 0.0)[i]
         s.append(f'<path d="M {x} 38 Q {x + 22 * curv:.1f} 68 {x} 98" fill="none" stroke="#ff8a2a" stroke-width="9" stroke-linecap="round"/>')
         s.append(f'<circle cx="{x}" cy="38" r="4.5" fill="{INK}"/>')
         s.append(T(x, 118 + (i % 2) * 14, lab, 11, 'middle', INK, 600))
-    s.append(T(base - 16, 154, 'stage 1 bends the body into a C; larger', 11, 'start', INK))
-    s.append(T(base - 16, 168, 'fish bend slower but cover more distance.', 11, 'start', INK))
+    s.append(T(base - 16, 154, 'stage 1: C-bend; stage 2: propulsion;', 11, 'start', INK))
+    s.append(T(base - 16, 168, 'stage 3: continued swimming or coasting.', 11, 'start', INK))
     s.append(T(base - 16, 182, 'Definitions, not a clownfish figure.', 11, 'start', INK))
     c1, w1 = chip(10, 201, 'ours', 'R: game measurement')
-    c2, w2 = chip(10 + w1 + 8, 201, 'unverified', 'C-start: Domenici & Blake')
+    c2, w2 = chip(10 + w1 + 8, 201, 'verified', 'C-start: Domenici & Blake')
     s.append(c1 + c2)
     return ''.join(s), W, H
 
@@ -471,7 +471,7 @@ def diag_f(k):
         if i < len(labels) - 1:
             s.append(arrow(bx + bw / 2, y + 22, bx + bw / 2, y + 27, MUTED, 1.4))
     c1, w1 = chip(10, 201, 'ours', 'every box: the game')
-    c2, w2 = chip(10 + w1 + 8, 201, 'unverified', 'layering idea: Tu & Terzopoulos')
+    c2, w2 = chip(10 + w1 + 8, 201, 'verified', 'layering idea: Tu & Terzopoulos')
     s.append(c1 + c2)
     return ''.join(s), W, H
 
@@ -532,7 +532,7 @@ def diag_g(k):
 
 
 PANELS = {
-    'A': ('Body wave: amplitude grows from head to tail; wavelength ≈ one body length', diag_a),
+    'A': ('Illustrative body wave: authored envelope and wavelength', diag_a),
     'B': ('Tail-beat frequency follows speed (Strouhal number)', diag_b),
     'C': ('Burst-and-coast: the gait the game gives the fish', diag_c),
     'D': ('Pectoral fins: beat rate and gait', diag_d),
@@ -581,18 +581,16 @@ SHORT = {
     'S6': 'Li et al. 2021, Commun. Biol. 4:40',
     'S7': 'Domenici & Blake 1997, fast-starts',
     'S8': 'Tu & Terzopoulos 1994',
-    'S9': 'A ≈ 0.2 L, λ ≈ L: no primary source',
 }
 BACKS = {
-    'S1': 'St 0.2–0.4 in fish; trout 0.19–0.22',
-    'S2': 'via S1 only',
+    'S1': 'summary; primary results in S2',
+    'S2': 'trout best fits: 0.19 → 0.22/0.23',
     'S3': 'koi: drag ≈ 4 : 1; ≈ 45 % saved',
     'S4': 'A. ocellaris pectoral 2.4 → 4.6 /s, surge',
     'S5': 'damselfish, not clownfish: gait switch',
-    'S6': 'constant cycle idea: not opened',
-    'S7': 'C-start definitions: not opened',
-    'S8': 'layering idea only: not opened',
-    'S9': 'widely cited; no source opened',
+    'S6': 'red-nose tetras: nearly constant bout',
+    'S7': 'C-start stages; our diagram is schematic',
+    'S8': 'architecture only; paper uses muscles',
 }
 
 
@@ -609,13 +607,12 @@ def footer_html():
     keys = list(D.SOURCES)
     cols = [''.join(item(k) for k in keys[i:i + 3]) for i in (0, 3, 6)]
     how = ('<p><b>How to read the chips</b></p>'
-           f'<p>{chip_html("verified")} opened; the number is on the page<br>'
-           f'{chip_html("unverified")} widely cited, or not opened<br>'
+           f'<p>{chip_html("verified")} claim checked in the source<br>'
            f'{chip_html("ours")} a game tunable or our own maths<br>'
            f'{chip_html("other-species")} another species: a hint only</p>'
            '<p class="sub">“ours” values come from the game’s code at build time. '
-           f'Not used: Rohr &amp; Fish 2004 (cetaceans). Data dated {D.DATA_DATE}.</p>')
-    return ('<section class="panel foot" id="panel-src"><div class="bar"><b>Sources</b> · live links in the PDF; what could not be verified is marked</div>'
+           f'Not used: Rohr &amp; Fish 2004 (cetaceans). Data dated {D.DATA_DATE}. Sources checked {D.SOURCE_CHECKED_DATE}.</p>')
+    return ('<section class="panel foot" id="panel-src"><div class="bar"><b>Sources</b> · checked research; game and diagram choices labelled</div>'
             f'<div class="cols">{"".join(f"<ul class=srcl>{c}</ul>" for c in cols)}<div class="how">{how}</div></div></section>')
 
 
@@ -749,9 +746,9 @@ def main(argv=None):
     print(f'wrote {html_path} ({html_path.stat().st_size // 1024} KB), {len(resolved)} rows')
     if args.html_only:
         return 0
-    render_pdf(html_path, out / 'poster.pdf')
-    render_png(out / 'poster.pdf', out / 'poster.png')
-    print(f'wrote {out / "poster.pdf"}, {out / "poster.png"}')
+    render_pdf(html_path, out / 'clownfish-biomechanics-a3.pdf')
+    render_png(out / 'clownfish-biomechanics-a3.pdf', out / 'poster.png')
+    print(f'wrote {out / "clownfish-biomechanics-a3.pdf"}, {out / "poster.png"}')
     return 0
 
 

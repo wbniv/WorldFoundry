@@ -1,0 +1,103 @@
+--------- beginning of main
+10-05 07:36:37.065 14791 14791 W _game.bomberma: Using default instruction set features for ARM CPU variant (cortex-a9) using conservative defaults
+10-05 07:36:37.071 14791 14791 E _game.bomberma: Not starting debugger since process cannot load the jdwp agent.
+10-05 07:36:37.075 14791 14791 D ProcessState: Binder ioctl to enable oneway spam detection failed: Invalid argument
+10-05 07:36:37.157 14791 14791 D CompatibilityChangeReporter: Compat change id reported: 171979766; UID 10000; state: ENABLED
+10-05 07:36:37.177 14791 14791 D nativeloader: Configuring classloader-namespace for other apk /data/app/~~7hDPaXhmZ0qsuu1CPnjmNQ==/org.worldfoundry.wf_game.bomberman-zBKpNYia92EpDx_u8FQX9A==/base.apk. target_sdk_version=34, uses_libraries=, library_path=/data/app/~~7hDPaXhmZ0qsuu1CPnjmNQ==/org.worldfoundry.wf_game.bomberman-zBKpNYia92EpDx_u8FQX9A==/lib/arm, permitted_path=/data:/mnt/expand:/data/user/0/org.worldfoundry.wf_game.bomberman
+10-05 07:36:37.184 14791 14791 V GraphicsEnvironment: ANGLE Developer option for 'org.worldfoundry.wf_game.bomberman' set to: 'default'
+10-05 07:36:37.185 14791 14791 V GraphicsEnvironment: Neither updatable production driver nor prerelease driver is supported.
+10-05 07:36:37.187 14791 14791 D NetworkSecurityConfig: No Network Security Config specified, using platform default
+10-05 07:36:37.187 14791 14791 D NetworkSecurityConfig: No Network Security Config specified, using platform default
+10-05 07:36:37.222 14791 14791 I WebViewFactory: Loading com.google.android.webview version 91.0.4472.114 (code 447211480)
+10-05 07:36:37.232 14791 14791 D nativeloader: Configuring classloader-namespace for other apk /data/app/~~xAQOqumK3u1FhJaQ23lvnQ==/com.google.android.trichromelibrary_447211480-yXmZsUEVlCjYV20LnveUNQ==/TrichromeLibrary.apk. target_sdk_version=31, uses_libraries=ALL, library_path=/data/app/~~JpSMs4C9qX6d7YhJqzd5HA==/com.google.android.webview-DHpBh1WzeV0QsLv_lHziXw==/lib/arm:/data/app/~~JpSMs4C9qX6d7YhJqzd5HA==/com.google.android.webview-DHpBh1WzeV0QsLv_lHziXw==/WebViewGoogle.apk!/lib/armeabi-v7a:/data/app/~~xAQOqumK3u1FhJaQ23lvnQ==/com.google.android.trichromelibrary_447211480-yXmZsUEVlCjYV20LnveUNQ==/TrichromeLibrary.apk!/lib/armeabi-v7a, permitted_path=/data:/mnt/expand
+10-05 07:36:37.232 14791 14791 D nativeloader: Extending system_exposed_libraries: libaudio_proxy.google.so
+10-05 07:36:37.239 14791 14791 D nativeloader: Configuring classloader-namespace for other apk /data/app/~~JpSMs4C9qX6d7YhJqzd5HA==/com.google.android.webview-DHpBh1WzeV0QsLv_lHziXw==/WebViewGoogle.apk. target_sdk_version=31, uses_libraries=, library_path=/data/app/~~JpSMs4C9qX6d7YhJqzd5HA==/com.google.android.webview-DHpBh1WzeV0QsLv_lHziXw==/lib/arm:/data/app/~~JpSMs4C9qX6d7YhJqzd5HA==/com.google.android.webview-DHpBh1WzeV0QsLv_lHziXw==/WebViewGoogle.apk!/lib/armeabi-v7a:/data/app/~~xAQOqumK3u1FhJaQ23lvnQ==/com.google.android.trichromelibrary_447211480-yXmZsUEVlCjYV20LnveUNQ==/TrichromeLibrary.apk!/lib/armeabi-v7a, permitted_path=/data:/mnt/expand
+10-05 07:36:37.412 14791 14791 I cr_LibraryLoader: Loaded native library version number "91.0.4472.114"
+10-05 07:36:37.414 14791 14791 I cr_CachingUmaRecorder: Flushed 6 samples from 6 histograms.
+10-05 07:36:37.579 14791 14833 W chromium: [WARNING:dns_config_service_android.cc(153)] Failed to read DnsConfig.
+10-05 07:36:37.675 14791 14791 D CompatibilityChangeReporter: Compat change id reported: 171228096; UID 10000; state: ENABLED
+10-05 07:36:37.811 14791 14839 W cr_media: Requires BLUETOOTH permission
+10-05 07:36:37.820 14791 14851 W libc    : Access denied finding property "vendor.mali.platform.config"
+10-05 07:36:37.820 14791 14851 W libc    : Access denied finding property "vendor.mali.debug.config"
+10-05 07:36:37.820 14791 14851 W libc    : Access denied finding property "vendor.mali.cctx_memory_class_unnamed"
+10-05 07:36:37.820 14791 14851 W libc    : Access denied finding property "vendor.mali.cctx_memory_class_default_heap"
+10-05 07:36:37.821 14791 14851 W libc    : Access denied finding property "vendor.mali.cctx_memory_class_base_internal"
+10-05 07:36:37.821 14791 14851 W libc    : Access denied finding property "vendor.mali.cctx_memory_class_framepool"
+10-05 07:36:37.821 14791 14851 W libc    : Access denied finding property "vendor.mali.cctx_memory_class_tiler"
+10-05 07:36:37.821 14791 14851 W libc    : Access denied finding property "vendor.mali.cctx_memory_class_program"
+10-05 07:36:37.821 14791 14851 W libc    : Access denied finding property "vendor.mali.cctx_memory_class_egl_color_plane"
+10-05 07:36:37.821 14791 14851 W libc    : Access denied finding property "vendor.mali.cctx_memory_class_egl_color_plane_imported"
+10-05 07:36:37.821 14791 14851 W libc    : Access denied finding property "vendor.mali.cctx_memory_class_vao"
+10-05 07:36:37.821 14791 14851 W libc    : Access denied finding property "vendor.mali.cctx_memory_class_img"
+10-05 07:36:37.821 14791 14851 W libc    : Access denied finding property "vendor.mali.cctx_memory_class_internal_surface"
+10-05 07:36:37.821 14791 14851 W libc    : Access denied finding property "vendor.mali.cctx_memory_class_buf"
+10-05 07:36:37.821 14791 14851 W libc    : Access denied finding property "vendor.mali.cctx_memory_class_crc"
+10-05 07:36:37.822 14791 14851 W libc    : Access denied finding property "vendor.mali.cctx_memory_class_cpom_hmem"
+10-05 07:36:37.822 14791 14851 W libc    : Access denied finding property "vendor.mali.cctx_memory_class_cpom_rsd"
+10-05 07:36:37.822 14791 14851 W libc    : Access denied finding property "vendor.mali.cctx_memory_class_cpom_mbs2"
+10-05 07:36:37.822 14791 14851 W libc    : Access denied finding property "vendor.mali.cctx_memory_class_cpom_static"
+10-05 07:36:37.822 14791 14851 W libc    : Access denied finding property "vendor.mali.cctx_memory_class_cframe_hmem"
+10-05 07:36:37.822 14791 14851 W libc    : Access denied finding property "vendor.mali.cctx_memory_class_cframe_sample_pos"
+10-05 07:36:37.822 14791 14851 W libc    : Access denied finding property "vendor.mali.cctx_memory_class_cframe_discard"
+10-05 07:36:37.822 14791 14851 W libc    : Access denied finding property "vendor.mali.cctx_memory_class_cframe_tess_geom"
+10-05 07:36:37.822 14791 14851 W libc    : Access denied finding property "vendor.mali.cctx_memory_class_cobj_hmem"
+10-05 07:36:37.822 14791 14851 W libc    : Access denied finding property "vendor.mali.cctx_memory_class_cmar_hmem"
+10-05 07:36:37.822 14791 14851 W libc    : Access denied finding property "vendor.mali.cctx_memory_class_cmar_prof_dump"
+10-05 07:36:37.822 14791 14851 W libc    : Access denied finding property "vendor.mali.cctx_memory_class_cblend_hmem"
+10-05 07:36:37.823 14791 14851 W libc    : Access denied finding property "vendor.mali.cctx_memory_class_gles_hmem"
+10-05 07:36:37.823 14791 14851 W libc    : Access denied finding property "vendor.mali.cctx_memory_class_gles_query"
+10-05 07:36:37.823 14791 14851 W libc    : Access denied finding property "vendor.mali.cctx_memory_class_gles_query_host"
+10-05 07:36:37.823 14791 14851 W libc    : Access denied finding property "vendor.mali.cctx_memory_class_gles_multiview"
+10-05 07:36:37.823 14791 14851 W libc    : Access denied finding property "vendor.mali.cctx_memory_class_cdeps_hmem"
+10-05 07:36:37.823 14791 14851 W libc    : Access denied finding property "vendor.mali.cctx_memory_class_cmem_suballoc"
+10-05 07:36:37.823 14791 14851 W libc    : Access denied finding property "vendor.mali.cctx_memory_class_cmem_hoard"
+10-05 07:36:37.823 14791 14851 W libc    : Access denied finding property "vendor.mali.cctx_memory_class_cmem_registry"
+10-05 07:36:37.824 14791 14851 W libc    : Access denied finding property "vendor.mali.cctx_memory_class_cl_payload"
+10-05 07:36:37.824 14791 14851 W libc    : Access denied finding property "vendor.mali.cctx_memory_class_cl_wlm_tls"
+10-05 07:36:37.824 14791 14851 W libc    : Access denied finding property "vendor.mali.cctx_memory_class_cl_hmem"
+10-05 07:36:37.824 14791 14851 W libc    : Access denied finding property "vendor.mali.cctx_memory_class_cl_svm"
+10-05 07:36:37.824 14791 14851 W libc    : Access denied finding property "vendor.mali.cctx_memory_class_cl_protected"
+10-05 07:36:37.824 14791 14851 W libc    : Access denied finding property "vendor.mali.cctx_memory_class_cinstr"
+10-05 07:36:37.824 14791 14851 W libc    : Access denied finding property "vendor.mali.cctx_memory_class_gfx_device_memory_cpu_uncached"
+10-05 07:36:37.824 14791 14851 W libc    : Access denied finding property "vendor.mali.cctx_memory_class_gfx_device_memory_cpu_cached"
+10-05 07:36:37.824 14791 14851 W libc    : Access denied finding property "vendor.mali.cctx_memory_class_gfx_device_memory_transient"
+10-05 07:36:37.824 14791 14851 W libc    : Access denied finding property "vendor.mali.cctx_memory_class_gfx_device_memory_protected"
+10-05 07:36:37.825 14791 14851 W libc    : Access denied finding property "vendor.mali.cctx_memory_class_gfx_device_external"
+10-05 07:36:37.825 14791 14851 W libc    : Access denied finding property "vendor.mali.cctx_memory_class_gfx_device_external_swapchain"
+10-05 07:36:37.825 14791 14851 W libc    : Access denied finding property "vendor.mali.cctx_memory_class_gfx_device_internal"
+10-05 07:36:37.825 14791 14851 W libc    : Access denied finding property "vendor.mali.cctx_memory_class_gfx_device_internal_host"
+10-05 07:36:37.825 14791 14851 W libc    : Access denied finding property "vendor.mali.cctx_memory_class_gfx_device_internal_protected"
+10-05 07:36:37.825 14791 14851 W libc    : Access denied finding property "vendor.mali.cctx_memory_class_gfx_device_internal_transient"
+10-05 07:36:37.825 14791 14851 W libc    : Access denied finding property "vendor.mali.cctx_memory_class_gfx_descriptor_pool"
+10-05 07:36:37.825 14791 14851 W libc    : Access denied finding property "vendor.mali.cctx_memory_class_gfx_command_allocator"
+10-05 07:36:37.825 14791 14851 W libc    : Access denied finding property "vendor.mali.cctx_memory_class_gfx_command_allocator_host"
+10-05 07:36:37.825 14791 14851 W libc    : Access denied finding property "vendor.mali.cctx_memory_class_gfx_command_allocator_protected"
+10-05 07:36:37.825 14791 14851 W libc    : Access denied finding property "vendor.mali.cctx_memory_class_vk_bound_buffer"
+10-05 07:36:37.826 14791 14851 W libc    : Access denied finding property "vendor.mali.cctx_memory_class_vk_bound_image"
+10-05 07:36:37.826 14791 14851 W libc    : Access denied finding property "vendor.mali.cctx_memory_class_cmar_signal"
+10-05 07:36:37.826 14791 14851 W libc    : Access denied finding property "vendor.mali.cctx_memory_class_cmar_flush_chain"
+10-05 07:36:37.826 14791 14851 W libc    : Access denied finding property "vendor.mali.cctx_memory_class_cmar_metadata_list"
+10-05 07:36:37.826 14791 14851 W libc    : Access denied finding property "vendor.mali.cctx_memory_class_jit"
+10-05 07:36:37.826 14791 14851 W libc    : Access denied finding property "vendor.mali.cctx_memory_class_mmu"
+10-05 07:36:37.826 14791 14851 W libc    : Access denied finding property "vendor.mali.osu_protected_memory_heap_name"
+10-05 07:36:37.826 14791 14851 W libc    : Access denied finding property "vendor.mali.osu_ion_protected_memory_heap_name"
+10-05 07:36:37.826 14791 14851 W libc    : Access denied finding property "vendor.mali.platform_agt_frequency_khz"
+10-05 07:36:37.827 14791 14851 W libc    : Access denied finding property "vendor.mali.hal_dump_dir"
+10-05 07:36:37.827 14791 14851 W libc    : Access denied finding property "vendor.mali.platform.config"
+10-05 07:36:37.827 14791 14851 W libc    : Access denied finding property "vendor.mali.debug.config"
+10-05 07:36:37.836 14791 14851 D hw-ProcessState: Binder ioctl to enable oneway spam detection failed: Invalid argument
+10-05 07:36:37.986 14791 14806 W libc    : Access denied finding property "ro.vendor.arm.gralloc.no_afbc_usage_mask"
+10-05 07:36:37.987 14791 14806 W libc    : Access denied finding property "ro.vendor.arm.gralloc.no_afbc_usage_flags"
+10-05 07:36:37.987 14791 14806 W libc    : Access denied finding property "ro.vendor.arm.gralloc.shared_access_usage_mask"
+10-05 07:36:37.987 14791 14806 W libc    : Access denied finding property "ro.vendor.arm.gralloc.shared_access_usage_flags"
+10-05 07:36:37.987 14791 14806 W libc    : Access denied finding property "ro.vendor.arm.gralloc.force_back_buffer_usage_mask"
+10-05 07:36:37.987 14791 14806 W libc    : Access denied finding property "ro.vendor.arm.gralloc.force_back_buffer_usage_flags"
+10-05 07:36:37.987 14791 14806 W libc    : Access denied finding property "ro.vendor.arm.gralloc.afrc_rgba_usage_mask"
+10-05 07:36:37.987 14791 14806 W libc    : Access denied finding property "ro.vendor.arm.gralloc.afrc_rgba_usage_flags"
+10-05 07:36:37.987 14791 14806 W libc    : Access denied finding property "ro.vendor.arm.gralloc.afrc_luma_usage_mask"
+10-05 07:36:37.987 14791 14806 W libc    : Access denied finding property "ro.vendor.arm.gralloc.afrc_chroma_usage_mask"
+10-05 07:36:37.987 14791 14806 W libc    : Access denied finding property "ro.vendor.arm.gralloc.afrc_luma_usage_flags"
+10-05 07:36:37.987 14791 14806 W libc    : Access denied finding property "ro.vendor.arm.gralloc.afrc_chroma_usage_flags"
+10-05 07:36:38.010 14791 14871 E ion     : ioctl c0044901 failed with code -1: Invalid argument
+10-05 07:36:38.011 14791 14806 D hw-ProcessState: Binder ioctl to enable oneway spam detection failed: Invalid argument
+10-05 07:36:38.416 14791 14791 I BombermanTV: BM_TV_READY

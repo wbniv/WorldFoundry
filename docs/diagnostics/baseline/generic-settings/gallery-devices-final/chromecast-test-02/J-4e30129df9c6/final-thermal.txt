@@ -1,0 +1,32 @@
+IsStatusOverride: false
+ThermalEventListeners:
+	callbacks: 2
+	killed: false
+	broadcasts count: -1
+ThermalStatusListeners:
+	callbacks: 3
+	killed: false
+	broadcasts count: -1
+Thermal Status: 0
+Cached temperatures:
+	Temperature{mValue=31.147001, mType=3, mName=board_soc_thermal, mStatus=0}
+	Temperature{mValue=29.997002, mType=3, mName=board_ddr_thermal, mStatus=0}
+	Temperature{mValue=34.800003, mType=0, mName=soc_ddr_thermal, mStatus=0}
+	Temperature{mValue=34.300003, mType=0, mName=soc_pll_thermal, mStatus=0}
+	Temperature{mValue=29.491001, mType=3, mName=board_wifi_thermal, mStatus=0}
+HAL Ready: true
+HAL connection:
+	ThermalHAL 2.0 connected: yes
+Current temperatures from HAL:
+	Temperature{mValue=48.518, mType=3, mName=board_ddr_thermal, mStatus=0}
+	Temperature{mValue=50.177002, mType=3, mName=board_soc_thermal, mStatus=0}
+	Temperature{mValue=48.242, mType=3, mName=board_wifi_thermal, mStatus=0}
+	Temperature{mValue=54.300003, mType=0, mName=soc_ddr_thermal, mStatus=0}
+	Temperature{mValue=53.000004, mType=0, mName=soc_pll_thermal, mStatus=0}
+Current cooling devices from HAL:
+Temperature static thresholds from HAL:
+	{.type = SKIN, .name = board_ddr_thermal, .hotThrottlingThresholds = [NaN, 78.0, 80.0, 83.0, 84.0, 86.0, 90.0], .coldThrottlingThresholds = [NaN, NaN, NaN, NaN, NaN, NaN, NaN], .vrThrottlingThreshold = 0.0}
+	{.type = SKIN, .name = board_soc_thermal, .hotThrottlingThresholds = [NaN, 78.0, 80.0, 83.0, 84.0, 86.0, 90.0], .coldThrottlingThresholds = [NaN, NaN, NaN, NaN, NaN, NaN, NaN], .vrThrottlingThreshold = 0.0}
+	{.type = SKIN, .name = board_wifi_thermal, .hotThrottlingThresholds = [NaN, 78.0, 80.0, 83.0, 84.0, 86.0, 90.0], .coldThrottlingThresholds = [NaN, NaN, NaN, NaN, NaN, NaN, NaN], .vrThrottlingThreshold = 0.0}
+	{.type = CPU, .name = soc_ddr_thermal, .hotThrottlingThresholds = [NaN, 88.0, 91.0, 94.0, 97.0, 100.0, 115.0], .coldThrottlingThresholds = [NaN, NaN, NaN, NaN, NaN, NaN, NaN], .vrThrottlingThreshold = 0.0}
+	{.type = CPU, .name = soc_pll_thermal, .hotThrottlingThresholds = [NaN, 88.0, 91.0, 94.0, 97.0, 100.0, 115.0], .coldThrottlingThresholds = [NaN, NaN, NaN, NaN, NaN, NaN, NaN], .vrThrottlingThreshold = 0.0}

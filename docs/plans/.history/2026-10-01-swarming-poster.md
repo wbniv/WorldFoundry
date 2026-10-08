@@ -1,5 +1,6 @@
 | Date | Change |
 |------|--------|
+| [2026-10-02](https://github.com/wbniv/WorldFoundry/commit/e0f5f707) | The poster's outputs are named schooling-poster.{html,pdf,png} |
 | [2026-10-02](https://github.com/wbniv/WorldFoundry/commit/0eb61f10) | Chromecast: the dart startle seen on the device; a new demo clip with a dart in it; the Chromecast timing at 3,324 B (7.3 ms) |
 | [2026-10-02](https://github.com/wbniv/WorldFoundry/commit/8b23b54d) | The dart startles the school: a fast start (heading flipped at once, 2.5x speed for 0.6 s) for every follower within 5 body lengths |
 | [2026-10-01](https://github.com/wbniv/WorldFoundry/commit/dd7b6e4a) | Swarming poster: audited against what is true now |
@@ -13,6 +14,11 @@
 | [2026-10-01](https://github.com/wbniv/WorldFoundry/commit/2460bd2a) | Swarming: the Couzin zone model as a Forth core (school.fth, 2179 B, 6.2 ms/11 fish on the Chromecast), tested against numpy, and an A3 poster |
 
 <!--history-meta v1
+e0f5f707	author	Will Norris
+e0f5f707	added	3
+e0f5f707	deleted	3
+e0f5f707	files	1
+e0f5f707	body	Renamed (as the user did by hand): the generator, the Taskfile task's sources and generates, the test that checks the committed HTML is current, and the plan's references.\n\nCo-Authored-By: Claude Sonnet 5.5 <noreply@anthropic.com>\nClaude-Session: https://claude.ai/code/session_01NNPhRbrqjqMDkScPvTE9yC
 0eb61f10	author	Will Norris
 0eb61f10	added	12
 0eb61f10	deleted	12

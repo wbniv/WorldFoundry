@@ -27,7 +27,7 @@ visual detection and escape from actual approaching predators remain.
 
 ## Poster and review visuals
 
-[A3 portrait PDF](../reference/lionfish-biomechanics-poster/poster.pdf) ·
+[A3 portrait PDF](../reference/lionfish-biomechanics-poster/lionfish-biomechanics-a3.pdf) ·
 [browser poster](../reference/lionfish-biomechanics-poster/poster.html) ·
 [print preview](../reference/lionfish-biomechanics-poster/poster.png) ·
 [editable generator](../reference/lionfish-biomechanics-poster/make_poster.py).

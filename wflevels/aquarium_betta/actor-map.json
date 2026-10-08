@@ -120,6 +120,8 @@
       0
     ]
   ],
+  "urchin_contacts": null,
+  "urchin_spines": null,
   "movement": {
     "states": {
       "pitch": 700,
@@ -154,6 +156,7 @@
     "kind": "steer-and-swim",
     "jelly_states": null
   },
+  "lionfish_rig": null,
   "animal": "betta",
   "spawn": [
     0,

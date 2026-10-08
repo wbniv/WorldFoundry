@@ -115,7 +115,7 @@ Steps are the spec; the output is the evidence. Run 2026‑09‑30 in the worktr
 ```
 task: [poster-clownfish-biomechanics] python3 docs/reference/clownfish-biomechanics-poster/make_poster.py
 wrote /home/will/WorldFoundry-wbniv/.claude/worktrees/agent-a5f6e991caf1f8c8c/docs/reference/clownfish-biomechanics-poster/poster.html (92 KB), 46 rows
-wrote /home/will/WorldFoundry-wbniv/.claude/worktrees/agent-a5f6e991caf1f8c8c/docs/reference/clownfish-biomechanics-poster/poster.pdf, /home/will/WorldFoundry-wbniv/.claude/worktrees/agent-a5f6e991caf1f8c8c/docs/reference/clownfish-biomechanics-poster/poster.png
+wrote /home/will/WorldFoundry-wbniv/.claude/worktrees/agent-a5f6e991caf1f8c8c/docs/reference/clownfish-biomechanics-poster/clownfish-biomechanics-a3.pdf, /home/will/WorldFoundry-wbniv/.claude/worktrees/agent-a5f6e991caf1f8c8c/docs/reference/clownfish-biomechanics-poster/poster.png
 exit=0
 --- second run
 task: Task "poster-clownfish-biomechanics" is up to date

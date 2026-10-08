@@ -8,11 +8,39 @@ import math
 from pathlib import Path
 from mesh import Mesh
 
-COLORS = dict(goby_body=(1, 1, 1), goby_fin=(1, 1, 1))
+COLORS = dict(goby_body=(1, 1, 1), goby_fin=(1, 1, 1), goby_rock=(1, 1, 1))
 BODY_TEXTURE = 'goby_body.tga'
 FIN_TEXTURE = 'goby_fins.tga'
+ROCK_TEXTURE = 'goby_rock.tga'
 SPAN = (-.46, .34)
 FIN_OPACITY = .62
+
+
+def grazing_rock(rx, ry, height):
+    """Rounded shoulders and a broad, level biofilm perch; no physics actor."""
+    m = GobyMesh('goby_grazing_rock')
+    rings = [[(rx*r*math.cos(math.tau*k/16),
+               ry*r*math.sin(math.tau*k/16), z*height)
+              for k in range(16)] for r,z in [(1,0),(1,.15),(.85,.65),(.62,1)]]
+    def face(points):
+        m.face(points, 'goby_rock', [(.5+p[0]/(2*rx), .5+p[1]/(2*ry)) for p in points])
+    for a,b in zip(rings,rings[1:]):
+        for k in range(16):
+            face([a[k],a[(k+1)%16],b[(k+1)%16],b[k]])
+    for k in range(16):
+        face([(0,0,height),rings[-1][k],rings[-1][(k+1)%16]])
+        face([(0,0,0),rings[0][(k+1)%16],rings[0][k]])
+    return m
+
+
+def perch_forth(rocks, sand, base):
+    """Support profile for the goby's fixed swim plane; shared authored dimensions."""
+    out=[': gb-floor', str(base)]
+    for x,y,rx,ry,h in rocks:
+        out += [f'INDEXOF_X_POS gb@ {x} - abs {rx} / dup 1 < if',
+                f'dup .62 <= if drop 1 else dup .85 <= if .62 - .23 / .35 * 1 swap - else .85 - .15 / .50 * .65 swap - then then',
+                f'{h} * {sand+.08} + max else drop then']
+    return ' '.join(out)+' ;\n'
 
 
 class GobyMesh(Mesh):
@@ -179,3 +207,14 @@ def write_textures(folder):
                 rgb = [c+grain for c in rgb]
                 image.putpixel((x,y),tuple(round(max(0,min(255,c))) for c in rgb))
         image.save(folder/filename)
+    rock = Image.new('RGB', (256,256))
+    for y in range(256):
+        for x in range(256):
+            radius=math.hypot((x-128)/128,(y-128)/128)
+            fleck=((x*37+y*71+x*y*13)%29-14)*1.5
+            soft=10*math.sin(x*.13+math.sin(y*.09))+6*math.sin(y*.23)
+            film=max(0,min(1,(.78-radius)*4))*(.6+.4*math.sin(x*.17)*math.sin(y*.12))
+            grey=[121+fleck+soft,126+fleck+soft,117+fleck+soft]
+            algae=[78+fleck,115+fleck,52+fleck]
+            rock.putpixel((x,y),tuple(round(max(0,min(255,a*(1-film)+b*film))) for a,b in zip(grey,algae)))
+    rock.save(folder/ROCK_TEXTURE)

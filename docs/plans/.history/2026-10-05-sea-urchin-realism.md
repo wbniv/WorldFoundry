@@ -1,11 +1,16 @@
 | Date | Change |
 |------|--------|
+| [2026-10-05](https://github.com/wbniv/WorldFoundry/commit/170970de) | Update sea urchin plan with phase commits and remaining verification |
 | [2026-10-05](https://github.com/wbniv/WorldFoundry/commit/6bf7793c) | Implement sea urchin phase 3 basal spine pivots and publish device comparison |
 | [2026-10-05](https://github.com/wbniv/WorldFoundry/commit/775f883c) | Implement sea urchin phase 2 anchored crawl and record Chromecast deltas |
 | [2026-10-05](https://github.com/wbniv/WorldFoundry/commit/12cc5c97) | Implement sea urchin phase 1 textured model and profile its cost |
 | [2026-10-05](https://github.com/wbniv/WorldFoundry/commit/6186420c) | Record sea urchin research and phase 0 Chromecast baseline |
 
 <!--history-meta v1
+170970de	author	Will Norris
+170970de	added	20
+170970de	deleted	0
+170970de	files	1
 6bf7793c	author	Will Norris
 6bf7793c	added	31
 6bf7793c	deleted	9

@@ -34,6 +34,7 @@ from types import SimpleNamespace
 HERE = Path(__file__).resolve().parent
 REPO = HERE.parents[2]
 AQ = REPO / 'wflevels' / 'aquarium'
+SOURCE_CHECKED_DATE = '2026-10-06'
 DATA_DATE = '2026-09-30'          # ISO; the poster prints it with non-breaking hyphens
 NB = ' '                     # non-breaking space between a number and its unit
 
@@ -43,17 +44,20 @@ STATUS_TEXT = {'verified': 'verified', 'unverified': 'unverified', 'ours': 'ours
 
 # ── Sources ──────────────────────────────────────────────────────────────────
 # `opened` = someone opened the source's own page and checked the number (the brief's list).
-# URLs are only ones already in the repo (the poster plan, the aquarium plan); `url: None`
+# Source checks and locators: docs/reference/2026-10-06-aquarium-poster-reference-verification.md.
+# `url: None`
 # means the repo has none, and the poster prints the citation as text with a "link missing" marker.
 SOURCES = {
     'S1': dict(
         cite='Knight 2014, JEB 217:2224, summarising Nudds, John, Keen & Shiels 2014, JEB 217:2244–2249',
         title='Swimming fish stick to same Strouhal number',
         url='https://journals.biologists.com/jeb/article/217/13/2224/12210/Swimming-fish-stick-to-same-Strouhal-number',
-        opened=True, backs='Strouhal window 0.2–0.4 in fish; trout 0.19–0.22'),
+        opened=True, backs='proposed efficient Strouhal range 0.2–0.4; summary of control trout 0.19–0.22'),
     'S2': dict(
-        cite='Nudds, John, Keen & Shiels 2014, JEB 217:2244–2249 (the primary paper behind S1; seen only through S1)',
-        title=None, url=None, opened=False, backs='the study S1 summarises'),
+        cite='Nudds, John, Keen & Shiels 2014, JEB 217:2244–2249',
+        title='Rainbow trout provide the first experimental evidence for adherence to a distinct Strouhal number during animal oscillatory propulsion',
+        url='https://journals.biologists.com/jeb/article/217/13/2244/12227/Rainbow-trout-provide-the-first-experimental',
+        opened=True, backs='Results and Fig. 1: best-fit trout St 0.19 to 0.22 (control), 0.23 (warm); proposed efficient range 0.2–0.4'),
     'S3': dict(
         cite='Wu, Yang & Zeng 2007, JEB 210(12):2181–2191',
         title='Kinematics, hydrodynamics and energetic advantages of burst-and-coast swimming of koi carps',
@@ -71,22 +75,19 @@ SOURCES = {
         opened=True, backs='damselfish, 12 species, no clownfish: gait switch at 1.87–4.95 BL/s (a hint only)'),
     'S6': dict(
         cite='Li, Ashraf, François, Kolomenskiy, Lechenault, Godoy-Diana & Thiria 2021, Commun. Biol. 4:40',
-        title=None,
-        url='https://arxiv.org/abs/2002.09176',
-        opened=False, backs='fish keep the cycle constant and change the burst share (as reported, not opened)'),
+        title='Burst-and-coast swimmers optimize gait by adapting unique intrinsic cycle',
+        url='https://pmc.ncbi.nlm.nih.gov/articles/PMC7809443/',
+        opened=True, backs='red-nose tetras: nearly constant bout duration and changing burst share; Results, Fig. 2'),
     'S7': dict(
         cite='Domenici & Blake 1997, The kinematics and performance of fish fast-start swimming',
-        title=None,
-        url='https://www.researchgate.net/publication/13904905_The_Kinematics_and_Performance_of_Fish_Fast-Start_Swimming',
-        opened=False, backs='turning angle, turning radius, C-start and S-start definitions'),
+        title='The kinematics and performance of fish fast-start swimming',
+        url='https://biomimetic.pbworks.com/f/The%2Bkinematics%2Band%2Bperformance%2BofDomenici.pdf',
+        opened=True, backs='p. 1165: preparatory C-bend, propulsive stroke and variable subsequent swimming/coasting; diagram is our schematic'),
     'S8': dict(
         cite='Tu & Terzopoulos 1994, Artificial Fishes: Physics, Locomotion, Perception, Behavior',
-        title=None,
-        url='https://faculty.cc.gatech.edu/~turk/bio_sim/articles/fish_terzopoulos.pdf',
-        opened=False, backs='the layering idea only: motor (kinematic wave) under steering (behaviour)'),
-    'S9': dict(
-        cite='A ≈ 0.2 L and λ ≈ L: widely cited; no primary source was identified or opened',
-        title=None, url=None, opened=False, backs='tail excursion and wavelength'),
+        title='Artificial Fishes: Physics, Locomotion, Perception, Behavior',
+        url='https://web.cs.ucla.edu/~dt/papers/siggraph94/siggraph94.pdf',
+        opened=True, backs='Fig. 1 and sections 2.2–2.3: behavior, perception and muscle-driven physical motor controllers; our kinematic rig differs'),
 }
 GAME = 'game'   # the source key of an "ours" row: the game's own code, not a paper
 
@@ -230,17 +231,17 @@ def rows(k):
     add(_row('cruise', 'Scale', 'Cruise speed V', 'ours', G, C.SWIM_SPEED, 'm/s', _u(C.SWIM_SPEED, 'm/s'),
              AC + 'SWIM_SPEED', note=f'= {_u(k.V_bl, "BL/s", 3)}; Phase 1: 12 in/s × scale'))
     # -- tail and Strouhal
-    add(_row('st_window', 'Tail', 'Strouhal, fish', 'verified', ['S1'], (0.2, 0.4), '',
+    add(_row('st_window', 'Tail', 'Efficient St range', 'verified', ['S2'], (0.2, 0.4), '',
              '0.2–0.4', CF + 'fish-strouhal', factor=None, note='label reference only: the code comment on fish-strouhal labels this window verified'))
-    add(_row('st_trout', 'Tail', 'Strouhal, trout', 'verified', ['S1'], (0.19, 0.22), '',
-             '0.19 → 0.22', note='rainbow trout, rising with speed'))
+    add(_row('st_trout', 'Tail', 'Strouhal, trout', 'verified', ['S2'], (0.19, 0.23), '',
+             '0.19 → 0.22/0.23', note='best-fit rainbow trout: 0.68 to 1.11 m/s; control/warm treatments'))
     add(_row('st_game', 'Tail', 'Strouhal, game', 'ours', G, k.st, '', _g(k.st),
              CF + 'fish-strouhal', note='0.3, the middle of the verified window'))
-    add(_row('a_over_l', 'Tail', 'Tail excursion A/L', 'unverified', ['S9'], k.a_over_l, '',
+    add(_row('a_over_l', 'Tail', 'Tail excursion A/L', 'ours', G, k.a_over_l, '',
              f'{_g(k.a_over_l, 2)} peak to peak', CF + 'fish-tail-app', factor=1.0 / k.L,
-             note='A = 0.2 L is widely cited; the code labels it unverified'))
-    add(_row('wavelength', 'Tail', 'Wavelength λ/L', 'unverified', ['S9'], 1.0, '', '≈ 1',
-             note='widely cited; the rig only swings a tail hinge and does not use it', poster_only=True))
+             note='authored tail excursion; no verified clownfish measurement identified'))
+    add(_row('wavelength', 'Tail', 'Wavelength λ/L', 'ours', G, 1.0, '', '≈ 1',
+             note='authored illustration; the rig only swings a tail hinge and does not use wavelength', poster_only=True))
     add(_row('envelope', 'Tail', 'Envelope A(s)', 'ours', G, None, '',
              '0.1 + 0.9 s²', note='poster illustration only: the rig has a tail hinge, not a wave; A(s) = (A/2)·(0.1 + 0.9 s²)',
              poster_only=True))
@@ -260,10 +261,10 @@ def rows(k):
              note='Cd 0.242 against 0.060, koi carp'))
     add(_row('energy', 'Gait', 'Energy saved (koi)', 'verified', ['S3'], 45.0, '%',
              f'≈ 45{NB}%', note='nearly 45 % against steady swimming, koi carp'))
-    add(_row('const_cycle', 'Gait', 'Constant cycle idea', 'unverified', ['S6'], None, '',
-             'qualitative', note='cycle kept constant, burst share sets speed: as reported for Li et al. 2021; not opened'))
+    add(_row('const_cycle', 'Gait', 'Nearly constant bout', 'other-species', ['S6'], None, '',
+             'red-nose tetras', note='Li et al. 2021 Results and Fig. 2: nearly constant bout duration, changing burst share; no clownfish timing claim'))
     add(_row('cycle', 'Gait', 'Gait cycle', 'ours', G, C.GAIT_CYCLE, 's', _u(C.GAIT_CYCLE, 's'),
-             AC + 'GAIT_CYCLE', note='the code comment says "unverified; ours"'))
+             AC + 'GAIT_CYCLE', note='authored 0.5-second game cycle, not a measured clownfish timing'))
     add(_row('duty', 'Gait', 'Burst share', 'ours', G, C.GAIT_DUTY * 100, '%',
              _u(C.GAIT_DUTY * 100, '%'), AC + 'GAIT_DUTY', factor=100.0))
     add(_row('burst_v', 'Gait', 'Burst speed target', 'ours', G, C.BURST_SPEED, 'm/s',
@@ -320,10 +321,10 @@ def rows(k):
     add(_row('tail_env', 'Steering', 'Tail envelope time', 'ours', G, Tn('fish-tail-env-t'), 's',
              _u(Tn('fish-tail-env-t'), 's'), CF + 'fish-tail-env-t'))
     # -- definitions
-    add(_row('cstart', 'Method', 'C-start stages', 'unverified', ['S7'], None, '', 'definitions',
-             note='not opened; the plan called it verified, the brief does not'))
-    add(_row('layering', 'Method', 'Layering idea', 'unverified', ['S8'], None, '', 'idea only',
-             note='motor under steering; not opened; used for the idea, never for a number'))
+    add(_row('cstart', 'Method', 'C-start stages', 'verified', ['S7'], None, '', 'definitions',
+             note='Domenici & Blake 1997 p. 1165; drawing is a schematic, not a clownfish trace'))
+    add(_row('layering', 'Method', 'Layering idea', 'verified', ['S8'], None, '', 'idea only',
+             note='Tu & Terzopoulos Fig. 1: behavior/perception/motor architecture; muscle-driven physical model, unlike our kinematic rig'))
     return R
 
 
@@ -401,7 +402,7 @@ def to_json(resolved):
             labels=sorted(r['code']['labels']), how=r['code']['how'], at=f"{r['code']['file']}:{r['code']['line']}")
         rowsj.append(d)
     srcs = {k: dict(v, url=v['url']) for k, v in SOURCES.items()}
-    return json.dumps(dict(date=DATA_DATE, statuses=list(STATUSES), sources=srcs, rows=rowsj),
+    return json.dumps(dict(date=DATA_DATE, sources_checked=SOURCE_CHECKED_DATE, statuses=list(STATUSES), sources=srcs, rows=rowsj),
                       ensure_ascii=False, indent=1) + '\n'
 
 

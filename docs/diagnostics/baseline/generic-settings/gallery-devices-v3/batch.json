@@ -1,0 +1,62 @@
+{
+  "id": "B-9c3ef4c9b674",
+  "owner": "fcf55d9829c4dcde80f1638e",
+  "targets": [
+    "chromecast-test-01",
+    "chromecast-test-02"
+  ],
+  "created": 1791272057.9124823,
+  "jobs": [
+    {
+      "id": "J-f2c7b9de6f3c",
+      "owner": "fcf55d9829c4dcde80f1638e",
+      "accepted": 1791272057.9126906,
+      "state": "failed",
+      "phase": "failed",
+      "request": {
+        "app": "baseline",
+        "apk": "b1f91d72ddcf33f55514d76e598979a261e1248347e92bc48506804292127393.apk",
+        "duration": 2.0,
+        "validator": "baseline-settings",
+        "workflow": "check",
+        "device": "chromecast-test-01"
+      },
+      "device": "chromecast-test-01",
+      "generation": 227,
+      "cancel": 0,
+      "error": "Diagnostic process identity changed",
+      "started": 1791272122.8218513,
+      "finished": 1791272186.9789617,
+      "worker_pid": 1375275,
+      "recovery_resolved": 0,
+      "installation": null,
+      "target": "chromecast-test-01"
+    },
+    {
+      "id": "J-0bae3128bfc4",
+      "owner": "fcf55d9829c4dcde80f1638e",
+      "accepted": 1791272057.912902,
+      "state": "failed",
+      "phase": "failed",
+      "request": {
+        "app": "baseline",
+        "apk": "b1f91d72ddcf33f55514d76e598979a261e1248347e92bc48506804292127393.apk",
+        "duration": 2.0,
+        "validator": "baseline-settings",
+        "workflow": "check",
+        "device": "chromecast-test-02"
+      },
+      "device": "chromecast-test-02",
+      "generation": 82,
+      "cancel": 0,
+      "error": "Diagnostic process identity changed",
+      "started": 1791272115.3920617,
+      "finished": 1791272173.1599002,
+      "worker_pid": 1375156,
+      "recovery_resolved": 0,
+      "installation": null,
+      "target": "chromecast-test-02"
+    }
+  ],
+  "state": "failed"
+}

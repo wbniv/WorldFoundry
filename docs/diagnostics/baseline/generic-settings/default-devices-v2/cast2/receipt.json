@@ -1,0 +1,407 @@
+{
+  "job": {
+    "id": "J-f0d06a125ee7",
+    "owner": "fcf55d9829c4dcde80f1638e",
+    "accepted": 1791271264.3087423,
+    "state": "running",
+    "phase": "restoring",
+    "request": {
+      "app": "baseline",
+      "apk": "bce22bdf00057ae3fc3782ac543ed9ca0448469144fcae49307588336ab75044.apk",
+      "duration": 2.0,
+      "validator": "baseline-settings",
+      "workflow": "check",
+      "device": "chromecast-test-02"
+    },
+    "device": "chromecast-test-02",
+    "generation": 74,
+    "cancel": 0,
+    "error": null,
+    "started": 1791271264.4094644,
+    "finished": null,
+    "worker_pid": 1363301,
+    "recovery_resolved": 0,
+    "installation": null
+  },
+  "device": {
+    "id": "chromecast-test-02",
+    "serial": "26031HFDD67QH7",
+    "name": "Project Room",
+    "model": "Chromecast",
+    "device": "sabrina",
+    "android": "12",
+    "sdk": "31",
+    "abis": [
+      "armeabi-v7a",
+      "armeabi"
+    ],
+    "transport": "legacy-tcp",
+    "endpoint": "192.168.4.56:5555",
+    "pools": [
+      "chromecast-test"
+    ],
+    "health": "ready",
+    "enrolled": true,
+    "ipv6_addresses": [
+      "fd5d:59ce:7438:1:5067:dd88:3e0c:6a5c",
+      "fd5d:59ce:7438:1:2555:eb86:7321:678",
+      "fe80::7156:9529:ebee:236b"
+    ],
+    "cast_udn": "5e305387-266b-84a6-639e-50805d1f06c2",
+    "generation": 74,
+    "last_seen": 1791271265.1981661,
+    "boot_id": "7e3574a7-c2fa-4d99-b99f-09ff64981e94",
+    "reservation": null
+  },
+  "result": "failed",
+  "error": "ADB failed: \nException occurred while executing 'keycombination':\njava.lang.IllegalArgumentException: Unknown keycode: -t\n\tat com.android.server.input.InputShellCommand.runKeyCombination(InputShellCommand.java:479)\n\tat com.android.server.input.InputShellCommand.onCommand(InputShellCommand.java:204)\n\tat com.android.modules.utils.BasicShellCommandHandler.exec(BasicShellCommandHandler.java:97)\n\tat android.os.ShellCommand.exec(ShellCommand.java:38)\n\tat com.android.server.input.InputManagerService.onShellCommand(InputManagerService.java:3478)\n\tat android.os.Binder.shellCommand(Binder.java:950)\n\tat android.os.Binder.onTransact(Binder.java:834)\n\tat android.hardware.input.IInputManager$Stub.onTransact(IInputManager.java:1125)\n\tat android.os.Binder.execTransactInternal(Binder.java:1184)\n\tat android.os.Binder.execTransact(Binder.java:1143)\n",
+  "cleanup_verified": true,
+  "restoration": "home-fallback: previous app launcher unavailable",
+  "commands": [
+    {
+      "args": [
+        "connect",
+        "192.168.4.56:5555"
+      ],
+      "start": 1791271265.1086082,
+      "end": 1791271265.143774,
+      "returncode": 0
+    },
+    {
+      "args": [
+        "shell",
+        "getprop ro.serialno"
+      ],
+      "start": 1791271265.145062,
+      "end": 1791271265.1981385,
+      "returncode": 0
+    },
+    {
+      "args": [
+        "shell",
+        "cat /proc/sys/kernel/random/boot_id"
+      ],
+      "start": 1791271265.1994848,
+      "end": 1791271265.2501922,
+      "returncode": 0
+    },
+    {
+      "args": [
+        "shell",
+        "getprop ro.product.model"
+      ],
+      "start": 1791271265.251544,
+      "end": 1791271265.2917309,
+      "returncode": 0
+    },
+    {
+      "args": [
+        "shell",
+        "getprop ro.build.version.release"
+      ],
+      "start": 1791271265.2930942,
+      "end": 1791271265.3386104,
+      "returncode": 0
+    },
+    {
+      "args": [
+        "shell",
+        "getprop ro.build.version.sdk"
+      ],
+      "start": 1791271265.3400826,
+      "end": 1791271265.3849115,
+      "returncode": 0
+    },
+    {
+      "args": [
+        "shell",
+        "getprop ro.product.device"
+      ],
+      "start": 1791271265.3863268,
+      "end": 1791271265.430565,
+      "returncode": 0
+    },
+    {
+      "args": [
+        "shell",
+        "getprop ro.product.cpu.abilist"
+      ],
+      "start": 1791271265.4317954,
+      "end": 1791271265.4778278,
+      "returncode": 0
+    },
+    {
+      "args": [
+        "shell",
+        "ip -6 addr show wlan0"
+      ],
+      "start": 1791271265.4790597,
+      "end": 1791271265.5260603,
+      "returncode": 0
+    },
+    {
+      "args": [
+        "shell",
+        "dumpsys activity activities"
+      ],
+      "start": 1791271265.5546906,
+      "end": 1791271265.627989,
+      "returncode": 0
+    },
+    {
+      "args": [
+        "install",
+        "-r",
+        "/var/lib/wf-device-coordinator/inputs/bce22bdf00057ae3fc3782ac543ed9ca0448469144fcae49307588336ab75044.apk"
+      ],
+      "start": 1791271265.6870246,
+      "end": 1791271271.9958816,
+      "returncode": 0
+    },
+    {
+      "args": [
+        "shell",
+        "pm path org.worldfoundry.wf_game.baseline"
+      ],
+      "start": 1791271271.997237,
+      "end": 1791271272.1103315,
+      "returncode": 0
+    },
+    {
+      "args": [
+        "shell",
+        "sha256sum '/data/app/~~OxWIuGS3LfITmEDqkLaFJg==/org.worldfoundry.wf_game.baseline-YKaeCJFEMRq9mKDcCDeLDg==/base.apk'"
+      ],
+      "start": 1791271272.1117005,
+      "end": 1791271272.2122662,
+      "returncode": 0
+    },
+    {
+      "args": [
+        "shell",
+        "am force-stop org.worldfoundry.wf_game.baseline"
+      ],
+      "start": 1791271272.2355149,
+      "end": 1791271272.3914201,
+      "returncode": 0
+    },
+    {
+      "args": [
+        "shell",
+        "input keyevent KEYCODE_WAKEUP"
+      ],
+      "start": 1791271272.392726,
+      "end": 1791271272.4815774,
+      "returncode": 0
+    },
+    {
+      "args": [
+        "shell",
+        "am start -W -n org.worldfoundry.wf_game.baseline/android.app.NativeActivity"
+      ],
+      "start": 1791271272.6331556,
+      "end": 1791271273.266125,
+      "returncode": 0
+    },
+    {
+      "args": [
+        "shell",
+        "dumpsys activity activities"
+      ],
+      "start": 1791271278.2686749,
+      "end": 1791271278.5037491,
+      "returncode": 0
+    },
+    {
+      "args": [
+        "shell",
+        "pidof org.worldfoundry.wf_game.baseline"
+      ],
+      "start": 1791271278.50548,
+      "end": 1791271278.573442,
+      "returncode": 0
+    },
+    {
+      "args": [
+        "shell",
+        "input keyevent KEYCODE_BACK"
+      ],
+      "start": 1791271278.574995,
+      "end": 1791271278.708496,
+      "returncode": 0
+    },
+    {
+      "args": [
+        "shell",
+        "dumpsys activity activities"
+      ],
+      "start": 1791271279.8600874,
+      "end": 1791271280.0247483,
+      "returncode": 0
+    },
+    {
+      "args": [
+        "shell",
+        "dumpsys activity activities"
+      ],
+      "start": 1791271280.0277567,
+      "end": 1791271280.095754,
+      "returncode": 0
+    },
+    {
+      "args": [
+        "shell",
+        "pidof org.worldfoundry.wf_game.baseline"
+      ],
+      "start": 1791271280.0975385,
+      "end": 1791271280.1598318,
+      "returncode": 0
+    },
+    {
+      "args": [
+        "shell",
+        "dumpsys activity activities"
+      ],
+      "start": 1791271282.1625776,
+      "end": 1791271282.2803357,
+      "returncode": 0
+    },
+    {
+      "args": [
+        "shell",
+        "pidof org.worldfoundry.wf_game.baseline"
+      ],
+      "start": 1791271282.2821493,
+      "end": 1791271282.3448255,
+      "returncode": 0
+    },
+    {
+      "args": [
+        "exec-out",
+        "screencap",
+        "-p"
+      ],
+      "start": 1791271282.3462558,
+      "end": 1791271283.6184125,
+      "returncode": 0
+    },
+    {
+      "args": [
+        "shell",
+        "pidof org.worldfoundry.wf_game.baseline"
+      ],
+      "start": 1791271283.619906,
+      "end": 1791271283.6797085,
+      "returncode": 0
+    },
+    {
+      "args": [
+        "logcat",
+        "-d",
+        "-v",
+        "threadtime",
+        "--pid=21547"
+      ],
+      "start": 1791271283.6809008,
+      "end": 1791271283.7998037,
+      "returncode": 0
+    },
+    {
+      "args": [
+        "shell",
+        "tail -c 4000000 /sdcard/Android/data/org.worldfoundry.wf_game.baseline/files/wf.log"
+      ],
+      "start": 1791271283.8020751,
+      "end": 1791271283.9638286,
+      "returncode": 0
+    },
+    {
+      "args": [
+        "shell",
+        "dumpsys meminfo org.worldfoundry.wf_game.baseline"
+      ],
+      "start": 1791271283.9664614,
+      "end": 1791271284.2787669,
+      "returncode": 0
+    },
+    {
+      "args": [
+        "shell",
+        "dumpsys thermalservice"
+      ],
+      "start": 1791271284.2801175,
+      "end": 1791271284.3432767,
+      "returncode": 0
+    },
+    {
+      "args": [
+        "forward",
+        "tcp:0",
+        "tcp:7777"
+      ],
+      "start": 1791271284.3748045,
+      "end": 1791271284.3784647,
+      "returncode": 0
+    },
+    {
+      "args": [
+        "shell",
+        "input keycombination -t 2200 19 59"
+      ],
+      "start": 1791271284.4190676,
+      "end": 1791271284.4945276,
+      "returncode": 255
+    },
+    {
+      "args": [
+        "forward",
+        "--remove",
+        "tcp:41471"
+      ],
+      "start": 1791271284.4959214,
+      "end": 1791271284.5004082,
+      "returncode": 0
+    },
+    {
+      "args": [
+        "shell",
+        "am force-stop org.worldfoundry.wf_game.baseline"
+      ],
+      "start": 1791271284.526329,
+      "end": 1791271284.6577525,
+      "returncode": 0
+    },
+    {
+      "args": [
+        "shell",
+        "am start -W -a android.intent.action.MAIN -c android.intent.category.LEANBACK_LAUNCHER -p com.google.android.apps.tv.launcherx"
+      ],
+      "start": 1791271284.659157,
+      "end": 1791271284.7960622,
+      "returncode": 0
+    },
+    {
+      "args": [
+        "shell",
+        "input keyevent KEYCODE_HOME"
+      ],
+      "start": 1791271284.7974656,
+      "end": 1791271284.921068,
+      "returncode": 0
+    },
+    {
+      "args": [
+        "shell",
+        "pidof org.worldfoundry.wf_game.baseline"
+      ],
+      "start": 1791271285.073183,
+      "end": 1791271285.1449227,
+      "returncode": 1
+    }
+  ],
+  "finished": 1791271285.1458106,
+  "launcher": null,
+  "concurrent_jobs": [
+    "J-5c193f400a91"
+  ]
+}

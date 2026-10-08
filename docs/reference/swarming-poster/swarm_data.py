@@ -15,17 +15,18 @@ from pathlib import Path
 
 HERE = Path(__file__).resolve().parent
 DATA_DATE = "2026-10-01"
+SOURCE_CHECKED_DATE = "2026-10-06"
 STATUS_TEXT = {"verified": "verified", "unverified": "unverified", "ours": "ours", "other-species": "other species"}
 
 SOURCES = {
     "S1": dict(short="Couzin et al. 2002, J. Theor. Biol.", url="https://jmvidal.cse.sc.edu/library/couzin02a.pdf", opened=True,
                backs="zone model, states, metrics, Fig. 3"),
-    "S2": dict(short="Couzin et al. 2005, Nature", url="https://www.nature.com/articles/nature03236", opened=False,
-               backs="informed minority guides a group"),
-    "S3": dict(short="Pitcher 1983, via Wikipedia", url="https://en.wikipedia.org/wiki/Shoaling_and_schooling", opened=False,
-               backs="shoal to school: a continuum"),
-    "S4": dict(short="Ocellaris clownfish (Florida Museum)", url="https://www.floridamuseum.ufl.edu/discover-fish/species-profiles/clown-anemonefish/", opened=False,
-               backs="site-attached: not schooling fish"),
+    "S2": dict(short="Couzin et al. 2005, Nature", url="https://slevin.princeton.edu/publications/effective-leadership-and-decision-making-animal-groups-move", opened=True,
+               backs="simple model: informed minority guides a group"),
+    "S3": dict(short="Pitcher 1998, Shoaling and Schooling", url="https://www.researchgate.net/publication/299389540_Shoaling_and_Schooling_in_Fishes", opened=True,
+               backs="schooling: coordinated swimming within a shoal"),
+    "S4": dict(short="Madduppa et al. 2014, PLOS ONE", url="https://journals.plos.org/plosone/article?id=10.1371/journal.pone.0090648", opened=True,
+               backs="adults in anemone-associated social groups"),
     "S5": dict(short="the aquarium level and this repository", url=None, opened=True,
                backs="tank, fish, zForth, our runs"),
 }
@@ -72,9 +73,9 @@ def rows():
     add("states", "Collective states", "swarm, torus, dynamic parallel, highly parallel", "verified", ["S1"])
     add("hyst", "Hysteresis (collective memory)", "reported by the paper", "verified", ["S1"])
     add("hyst_us", "Hysteresis in our sweep", "not reproduced (too coarse)", "ours", [GAME])
-    add("lead", "Informed minority steers a group", "small fraction suffices", "unverified", ["S2"])
-    add("cont", "Shoal to school", "a continuum", "unverified", ["S3"])
-    add("clown", "Real ocellaris clownfish", "not schooling fish", "unverified", ["S4"])
+    add("lead", "Informed minority steers a group", "small fraction in a model", "verified", ["S2"])
+    add("cont", "Schooling within a shoal", "coordinated swimming", "verified", ["S3"])
+    add("clown", "Real ocellaris clownfish", "anemone-associated groups", "verified", ["S4"])
     add("wl", "Leader weight w", "3 in the game; 1, 3, 6 tried in the tank runs; not tuned", "ours", [GAME])
     add("s_us", "Our speed and turn rate", "2 BL/s and 120°/s", "ours", [GAME])
     add("turn_paper", "A 90° turn at the paper’s s, θ", f"{pd:.2f} BL ahead, radius {pr:.1f} BL", "ours", [GAME])

@@ -1,5 +1,7 @@
 #include "plant_ui.h"
+#include "../../../engine/runtime_diagnostics.hpp"
 #include "runtime_property_ui.h"
+#include "runtime_property_controls.h"
 #include <hal/remote_back_arrow.h>
 #include "../../../engine/vendor/stb_easy_font.h"
 namespace planted {

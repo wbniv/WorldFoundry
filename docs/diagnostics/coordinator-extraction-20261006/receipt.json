@@ -1,0 +1,62 @@
+{
+  "repository": "https://github.com/wbniv/chromecast-coordinator",
+  "private": true,
+  "local_checkout": "/home/will/chromecast-coordinator",
+  "tested_commit": "58ba990994521e169fc110fb202377ac9634a1aa",
+  "local_tests": 124,
+  "producer_maintenance_tests": 16,
+  "ci": {
+    "python": [
+      "3.11",
+      "3.14"
+    ],
+    "conclusion": "success",
+    "url": "https://github.com/wbniv/chromecast-coordinator/actions/runs/37416588898"
+  },
+  "release": {
+    "directory": "/tmp/chromecast-coordinator-release-20261006-v2",
+    "review": "/tmp/chromecast-coordinator-review-20261006-v2.json",
+    "bundle_sha256": "fab95863eb80e96b13dcfa9c06e6057ea191f0e4184e6715c24cbf44efa0be87"
+  },
+  "cutover": "0.1.0 completed in place; state/config backup retained",
+  "device_state": {
+    "chromecast-test-01": "ready/unowned",
+    "chromecast-test-02": "needs-local-setup/unowned"
+  },
+  "pending": [
+    "0.1.1 terminal deployment and diagnostic rerun/overhead",
+    "host bypass verification",
+    "licensing/publication review"
+  ],
+  "latest_tested_commit": "dd800e9",
+  "local_tests_latest": 133,
+  "consumer_tests": 13,
+  "ci_latest": {
+    "python": [
+      "3.11",
+      "3.14"
+    ],
+    "conclusion": "success",
+    "url": "https://github.com/wbniv/chromecast-coordinator/actions/runs/37418273003"
+  },
+  "backup": "/var/lib/wf-device-coordinator/backups/standalone-20261006-121134-1254238",
+  "source_migration": "Shared runtime/deployment/tests removed; producer shims and build defaults remain",
+  "device_checks": {
+    "cast1_settings": {
+      "job": "J-7ff76b85c414",
+      "assertions_passed": 26
+    },
+    "cast1_record": {
+      "job": "J-15766bae682e",
+      "result": "completed"
+    },
+    "cast2_capture": {
+      "job": "J-a5d0b7e94d93",
+      "result": "completed; asleep screen is black"
+    },
+    "cast2_webview": {
+      "job": "J-e49d7c635079",
+      "result": "completed; directions/release, recall, Home/resume, exit passed"
+    }
+  }
+}

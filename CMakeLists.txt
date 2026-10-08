@@ -30,6 +30,10 @@ cmake_dependent_option(WF_NEURAL_FORTH
 set(WF_PHYSICS_ENGINE "jolt"    CACHE STRING "legacy | jolt")
 option(WF_REST_API        "REST API box PoC (HTTP runtime-mutation debug)" ON)
 option(WF_DEBUG_BRIDGE    "TCP/JSON debug bridge — level-design + AI-agent debugging (Blender live edit, etc.). Independent of WF_ENABLE_EDITOR." ON)
+option(WF_RUNTIME_DIAGNOSTICS "Read-only loopback runtime diagnostics (explicit diagnostic builds only)" OFF)
+if(WF_RUNTIME_DIAGNOSTICS AND (IOS OR EMSCRIPTEN))
+    message(FATAL_ERROR "Runtime diagnostics currently support native desktop and Android only")
+endif()
 option(WF_ENABLE_STEAM    "Steamworks SDK"                OFF)
 # AddressSanitizer + UBSan. Default **ON for host Debug builds** — Debug exists
 # to catch bugs, computers are fast, and the whole engine+editor lifecycle is
@@ -80,6 +84,9 @@ if(ANDROID OR IOS)
     set(WF_PILOT_ENGINE  "none"   CACHE STRING "" FORCE)  # mobile = Forth-only scripting
     set(WF_REST_API      OFF      CACHE BOOL   "" FORCE)
     set(WF_DEBUG_BRIDGE  OFF      CACHE BOOL   "" FORCE)
+    if(ANDROID AND WF_RUNTIME_DIAGNOSTICS)
+        set(WF_DEBUG_BRIDGE ON CACHE BOOL "Android read-only diagnostic bridge" FORCE)
+    endif()
     set(WF_ENABLE_STEAM  OFF      CACHE BOOL   "" FORCE)
     set(WF_ENABLE_EDITOR OFF      CACHE BOOL   "" FORCE)
 elseif(EMSCRIPTEN)
@@ -783,6 +790,15 @@ if(WF_DEBUG_BRIDGE)
     list(APPEND WF_SOURCES ${STUB_SRC}/debug_server.cc)
     list(APPEND WF_DEFS WF_DEBUG_BRIDGE)
 endif()
+if(WF_RUNTIME_DIAGNOSTICS)
+    set(WF_DEBUG_BRIDGE ON CACHE BOOL "Diagnostic bridge" FORCE)
+    # The diagnostic adapter implements the existing server interface, without
+    # linking the desktop mutation/editor implementation into diagnostic APKs.
+    list(REMOVE_ITEM WF_SOURCES ${STUB_SRC}/debug_server.cc)
+    list(APPEND WF_SOURCES ${STUB_SRC}/runtime_diagnostics_adapter.cc
+         ${CMAKE_SOURCE_DIR}/engine/runtime_diagnostics.cpp)
+    list(APPEND WF_DEFS WF_DEBUG_BRIDGE WF_RUNTIME_DIAGNOSTICS)
+endif()
 
 # ─── Editor stack umbrella define ─────────────────────────────────────────────
 # WF_ENABLE_EDITOR is its own #ifdef gate for editor-app code (CRDT, replay,
@@ -798,7 +814,7 @@ endif()
 #   - editor's CRDT bridge (when WF_ENABLE_EDITOR is on)
 # So we compile wfmut sources at the UNION: bridge ON OR editor ON.
 # See docs/plans/2026-05-19-engine-mutation-api.md.
-if(WF_DEBUG_BRIDGE OR WF_ENABLE_EDITOR)
+if((WF_DEBUG_BRIDGE AND NOT WF_RUNTIME_DIAGNOSTICS) OR WF_ENABLE_EDITOR)
     set(OAS_INC_DIR ${CMAKE_SOURCE_DIR}/wfsource/source/oas)
     set(KPROPMAP_OUT ${CMAKE_SOURCE_DIR}/engine/mutation/kpropmap_generated.inc)
     set(NAMEPATH_OUT ${CMAKE_SOURCE_DIR}/engine/wf_edit/name_to_path_generated.inc)
@@ -1216,7 +1232,7 @@ if(NOT ANDROID AND NOT IOS AND NOT APPLE AND NOT EMSCRIPTEN)
     target_link_libraries(texture_atlas_address_test PRIVATE wfengine)
     target_compile_options(texture_atlas_address_test PRIVATE -fno-rtti -fpermissive)
     add_test(NAME texture_atlas_address COMMAND texture_atlas_address_test)
-    if(WF_DEBUG_BRIDGE)
+    if(WF_DEBUG_BRIDGE AND NOT WF_RUNTIME_DIAGNOSTICS)
         add_executable(debug_listener_reconnect_test tests/debug_listener_reconnect_test.cc)
         target_link_libraries(debug_listener_reconnect_test PRIVATE wfengine)
         target_compile_options(debug_listener_reconnect_test PRIVATE -fno-rtti)
@@ -1244,7 +1260,7 @@ if(NOT ANDROID AND NOT IOS AND NOT APPLE AND NOT EMSCRIPTEN)
         endif()
         add_test(NAME frame_rate_optional_forth COMMAND frame_rate_forth_probe)
     endif()
-    if(WF_DEBUG_BRIDGE AND WF_FORTH_ENGINE STREQUAL "zforth")
+    if(WF_DEBUG_BRIDGE AND NOT WF_RUNTIME_DIAGNOSTICS AND WF_FORTH_ENGINE STREQUAL "zforth")
         find_package(Python3 COMPONENTS Interpreter)
         if(Python3_Interpreter_FOUND)
             add_test(NAME frame_rate_mailbox

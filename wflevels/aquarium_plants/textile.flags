@@ -1,4 +1,4 @@
-# Three distinct 256-square animal textures share the permanent page.
+# Four distinct 256-square animal/rock textures share the permanent page.
 # Runtime CLI already reserves a 512-square permanent slot.
 PERMPAGEX=512
 PERMPAGEY=512

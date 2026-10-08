@@ -108,3 +108,10 @@ The density pass actually has 26,112 triangles, above its nominal 8k–16k targe
 The normal eight-tank release was restored after all profiling and its installed hash verified: [restore receipt](2026-10-03-aquarium-dense-planted-tank/profiles/restored.json), [selector screenshot](2026-10-03-aquarium-dense-planted-tank/profiles/restored-selector.png), [installed plant view](2026-10-03-aquarium-dense-planted-tank/profiles/restored-plants.png). Native captures show controls and wide/close views; 40 relevant plant, movement, menu, Android packaging and back-navigation checks pass.
 
 This is a geometry/density trial, not the final naturalistic composition. User feedback identifies the regular rows as too linear. Preserve the measurement reference while replacing rows with connected colonies and then adding separately profiled root-pinned sway under the successor plan.
+
+## OAS/OAD settings follow-up
+
+See [entity settings migration TODOs](2026-10-05-runtime-settings-oas-oad-migration.md).
+The Planted Tank is the existing C++ settings owner identified by the audit;
+the new anemone settings must use authored definitions and the reusable bridge.
+Conversions remain pending and engine changes require separate approval.

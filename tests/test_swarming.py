@@ -182,6 +182,7 @@ def test_the_paper_row_values():
 def test_no_invented_urls():
     """Every URL on the poster already appears in the plans (the research section of the schooling plan)."""
     plans = (REPO / "docs" / "plans" / "2026-10-01-aquarium-schooling.md").read_text()
+    plans += (REPO / "docs/reference/2026-10-06-aquarium-poster-reference-verification.md").read_text()
     for k, s in D.SOURCES.items():
         if s["url"]:
             assert s["url"] in plans, (k, s["url"])
@@ -230,8 +231,8 @@ def test_the_poster_prints_the_measured_numbers(html_text):
 
 def test_the_poster_says_what_it_does_not_claim(html_text):
     t = html_text.replace(" ", " ")
-    assert "Not claimed" in t and "hysteresis" in t
-    assert "the school is tuned" in t, "the poster must say the school is in the game but untuned"
+    assert "Sweep too coarse for hysteresis" in t
+    assert "lead untuned" in t, "the poster must preserve the tuning limitation"
     assert "not wired in yet" not in t and "does not startle" not in t and "not called yet" not in t, "the school and the dart startle ARE in the game now: those sentences went stale"
 
 

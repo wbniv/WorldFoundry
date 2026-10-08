@@ -1,6 +1,6 @@
 # Rainbow goby — portrait A3
 
-Open [poster.html](poster.html); print [poster.pdf](poster.pdf). The PDF is one
+Open [poster.html](poster.html); print [rainbow-goby-biomechanics-a3.pdf](rainbow-goby-biomechanics-a3.pdf). The PDF is one
 297 × 420 mm page. [poster.png](poster.png) is the preview.
 
 The original vector drawings and text follow the existing aquarium research

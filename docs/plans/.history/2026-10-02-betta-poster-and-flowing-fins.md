@@ -1,10 +1,15 @@
 | Date | Change |
 |------|--------|
+| [2026-10-03](https://github.com/wbniv/WorldFoundry/commit/3903bba0) | Lower Aquarium icon betta away from clownfish |
 | [2026-10-03](https://github.com/wbniv/WorldFoundry/commit/f48708c3) | Keep Aquarium fish clear of badge and version Android icon updates |
 | [2026-10-03](https://github.com/wbniv/WorldFoundry/commit/a05b76db) | Fix pairing Back priority, show remote arrows, refresh Aquarium icon |
 | [2026-10-02](https://github.com/wbniv/WorldFoundry/commit/9cef6dde) | Integrate aquarium tanks, feeding, and flowing betta fins |
 
 <!--history-meta v1
+3903bba0	author	Will Norris
+3903bba0	added	9
+3903bba0	deleted	0
+3903bba0	files	1
 f48708c3	author	Will Norris
 f48708c3	added	20
 f48708c3	deleted	0

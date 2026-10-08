@@ -1,0 +1,56 @@
+{
+  "id": "B-210e509926e3",
+  "owner": "00bf1d9240cfcc8926fd05b5",
+  "targets": [
+    "chromecast-test-01",
+    "chromecast-test-02"
+  ],
+  "created": 1791193581.4322236,
+  "jobs": [
+    {
+      "id": "J-839a9b825b6c",
+      "owner": "00bf1d9240cfcc8926fd05b5",
+      "accepted": 1791193581.4324298,
+      "state": "completed",
+      "phase": "completed",
+      "request": {
+        "method": "uiautomation",
+        "workflow": "capture",
+        "device": "chromecast-test-01"
+      },
+      "device": "chromecast-test-01",
+      "generation": 96,
+      "cancel": 0,
+      "error": null,
+      "started": 1791193581.4819229,
+      "finished": 1791193586.875953,
+      "worker_pid": 688037,
+      "recovery_resolved": 0,
+      "installation": null,
+      "target": "chromecast-test-01"
+    },
+    {
+      "id": "J-226154ec82eb",
+      "owner": "00bf1d9240cfcc8926fd05b5",
+      "accepted": 1791193581.4326077,
+      "state": "completed",
+      "phase": "completed",
+      "request": {
+        "method": "uiautomation",
+        "workflow": "capture",
+        "device": "chromecast-test-02"
+      },
+      "device": "chromecast-test-02",
+      "generation": 52,
+      "cancel": 0,
+      "error": null,
+      "started": 1791193581.4821355,
+      "finished": 1791193587.3475885,
+      "worker_pid": 688038,
+      "recovery_resolved": 0,
+      "installation": null,
+      "target": "chromecast-test-02"
+    }
+  ],
+  "state": "completed"
+}

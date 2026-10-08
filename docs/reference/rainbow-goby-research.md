@@ -56,7 +56,7 @@ cyan fin margin. Live specimens vary; this is one chosen appearance.
 ## A3 poster
 
 [Portrait A3 poster](rainbow-goby-biomechanics-poster/poster.html) ·
-[Printable PDF](rainbow-goby-biomechanics-poster/poster.pdf).
+[Printable PDF](rainbow-goby-biomechanics-poster/rainbow-goby-biomechanics-a3.pdf).
 Original diagrams cover anatomy, biofilm habitat, pelvic attachment and a proposed
 perch/swim/settle/graze animation loop. Biological observations are cited;
 controls, motion envelopes and Forth fragments are identified as game choices.

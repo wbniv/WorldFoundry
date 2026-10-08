@@ -1,0 +1,95 @@
+{
+  "schema": 1,
+  "protocol_version": 1,
+  "revision": "14bab10f98983f710b35d2aba86727b44121cf1f-baseline-settings",
+  "files": {
+    "scripts/wf_device/__init__.py": {
+      "old": "b722b04302d926cff735edb54ba91e84087ed6d55671f292bf7a019f161b6657",
+      "new": "b722b04302d926cff735edb54ba91e84087ed6d55671f292bf7a019f161b6657"
+    },
+    "scripts/wf_device/__main__.py": {
+      "old": "0dd072ac4488f65bf8c5864ce7a52efa1498fe3fe980353e07f148507de7c735",
+      "new": "0dd072ac4488f65bf8c5864ce7a52efa1498fe3fe980353e07f148507de7c735"
+    },
+    "scripts/wf_device/baseline_checks.py": {
+      "old": null,
+      "new": "b1d6eb6e855357aad8c8b621749691e475d068d285dbaaff25164cc04f5af37d"
+    },
+    "scripts/wf_device/capture.py": {
+      "old": "26d3bb9531b63fdf03ad1bad2f133a8d1fcf7e491bc91c9e8885e140a167297e",
+      "new": "26d3bb9531b63fdf03ad1bad2f133a8d1fcf7e491bc91c9e8885e140a167297e"
+    },
+    "scripts/wf_device/cli.py": {
+      "old": "83a330370d8d2ae4f055e41e4501819356cc09ba29b368345e03545a80be1f3c",
+      "new": "83a330370d8d2ae4f055e41e4501819356cc09ba29b368345e03545a80be1f3c"
+    },
+    "scripts/wf_device/client.py": {
+      "old": "b380ff24beb81d591c18a69bdb05b4da8a466c1b49cd06f8672fe490c5ccd20c",
+      "new": "b380ff24beb81d591c18a69bdb05b4da8a466c1b49cd06f8672fe490c5ccd20c"
+    },
+    "scripts/wf_device/dashboard.py": {
+      "old": "13b5f89ae3aa3738cfd71dc83783d36569e71a1259315c113441e1adc8ede0b8",
+      "new": "13b5f89ae3aa3738cfd71dc83783d36569e71a1259315c113441e1adc8ede0b8"
+    },
+    "scripts/wf_device/diagnostics.py": {
+      "old": "d877e667067c3a7458bb191b9573581dc89a6742eef0da3f6bba7fe5295278be",
+      "new": "d877e667067c3a7458bb191b9573581dc89a6742eef0da3f6bba7fe5295278be"
+    },
+    "scripts/wf_device/discovery.py": {
+      "old": "fbf461b52eeefb9adb6bca453e735624d06cf10745ce5fb2654fa02236dfb183",
+      "new": "fbf461b52eeefb9adb6bca453e735624d06cf10745ce5fb2654fa02236dfb183"
+    },
+    "scripts/wf_device/image_assertions.py": {
+      "old": "d0d6d7a93708bf6461bda2bcfde4a88d7f5208486244e6867f61af3801303be2",
+      "new": "d0d6d7a93708bf6461bda2bcfde4a88d7f5208486244e6867f61af3801303be2"
+    },
+    "scripts/wf_device/integration.py": {
+      "old": "e0ee94bb34e655f1a3af5b1c36edafa50fbc292c2e8b3e8e04297632e7829b57",
+      "new": "e0ee94bb34e655f1a3af5b1c36edafa50fbc292c2e8b3e8e04297632e7829b57"
+    },
+    "scripts/wf_device/launcher.py": {
+      "old": "dc65ab5838faaf25bee14539f19795dc782ad525e8daf878eb996afca14cfe6b",
+      "new": "dc65ab5838faaf25bee14539f19795dc782ad525e8daf878eb996afca14cfe6b"
+    },
+    "scripts/wf_device/plant_checks.py": {
+      "old": "4e1f194c6e0261d389e553804fd58c61b8a95181c54942b8f60181a6b072fbc9",
+      "new": "4e1f194c6e0261d389e553804fd58c61b8a95181c54942b8f60181a6b072fbc9"
+    },
+    "scripts/wf_device/prime_checks.py": {
+      "old": "c1075e620a16f9670757e42798f20e8ae10e1c42e64abe4a252b578c6526d9d6",
+      "new": "c1075e620a16f9670757e42798f20e8ae10e1c42e64abe4a252b578c6526d9d6"
+    },
+    "scripts/wf_device/service.py": {
+      "old": "f911ee1aa38812ed8911b0a338fbdf6ddc5f414d63a0ecd95a9a132842d3bf34",
+      "new": "c3d8a8757f2858efa1d2eff5d801e012201b5d29b3739eb06232b6791111ab28"
+    },
+    "scripts/wf_device/store.py": {
+      "old": "dae7214fdc2c734b2192239d0d0f651f2416fee00001cb8c3541db9a9e805302",
+      "new": "dae7214fdc2c734b2192239d0d0f651f2416fee00001cb8c3541db9a9e805302"
+    },
+    "scripts/wf_device/workflows.py": {
+      "old": "a5dc802fdff871383b9e18adc7afcb1a025428738a73e3c606f6fc0244899417",
+      "new": "97982c7a3f6f8fc36ad45a0192902d8f96b11081ac9518f4ef724c7e602858fd"
+    },
+    "scripts/chromecast.py": {
+      "old": "d7793cdbbfed765f64243601f254b7ac9dbb359cd4781adb67903ed09013da4d",
+      "new": "d7793cdbbfed765f64243601f254b7ac9dbb359cd4781adb67903ed09013da4d"
+    },
+    "scripts/wf_device/resources/capture-helper.jar": {
+      "old": "11f364bddf8e27c5ea84700802c84526b1b13e0246d687a65e66a31b1e9534a6",
+      "new": "11f364bddf8e27c5ea84700802c84526b1b13e0246d687a65e66a31b1e9534a6"
+    },
+    "deploy/upgrade.py": {
+      "old": "b36859a187f7440f4979ff699dd1ab20f66a4a70b2902b127802069ca6075937",
+      "new": "b36859a187f7440f4979ff699dd1ab20f66a4a70b2902b127802069ca6075937"
+    },
+    "bin/chromecast": {
+      "old": "1ba46f5d93fad5c1fcf7a7baba963bf9257e4d6b439663e34c36238c4d7153aa",
+      "new": "1ba46f5d93fad5c1fcf7a7baba963bf9257e4d6b439663e34c36238c4d7153aa"
+    },
+    "config/refresh-network.py": {
+      "old": "37836a601e26187f4c8b6fd67a3dc0650f056333eef5e4460a18687aa5666120",
+      "new": "37836a601e26187f4c8b6fd67a3dc0650f056333eef5e4460a18687aa5666120"
+    }
+  }
+}

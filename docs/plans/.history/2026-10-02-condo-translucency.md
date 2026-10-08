@@ -1,11 +1,16 @@
 | Date | Change |
 |------|--------|
+| [2026-10-05](https://github.com/wbniv/WorldFoundry/commit/874683a9) | Match condo podium to unit floorplans and mount door hardware on frames |
 | [2026-10-05](https://github.com/wbniv/WorldFoundry/commit/bcec65ac) | Make condo shade and glass translucent with black aluminum door frames |
 | [2026-10-03](https://github.com/wbniv/WorldFoundry/commit/16a77ebc) | Explain texture alpha tradeoffs and link translucency implementation commits |
 | [2026-10-03](https://github.com/wbniv/WorldFoundry/commit/50982a16) | Document translucency implementation commits and shrimp render evidence |
 | [2026-10-03](https://github.com/wbniv/WorldFoundry/commit/10310efe) | Save pending plans, balcony RFQ materials, notes and transcripts |
 
 <!--history-meta v1
+874683a9	author	Will Norris
+874683a9	added	7
+874683a9	deleted	1
+874683a9	files	1
 bcec65ac	author	Will Norris
 bcec65ac	added	51
 bcec65ac	deleted	12

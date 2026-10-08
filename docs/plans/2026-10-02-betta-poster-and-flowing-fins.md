@@ -2,7 +2,7 @@
 
 Date: 2026-10-02. Status: **Implemented, profiled and verified on Chromecast HD; final release includes corrected Back help text.**
 
-Will subsequently requested the finished poster now. [Open the A3 poster](../reference/betta-history-and-biomechanics-poster/poster.html) · [print PDF](../reference/betta-history-and-biomechanics-poster/poster.pdf) · [render/model evidence and sources](../reference/betta-history-and-biomechanics-poster/README.md). The original 40,060-triangle studio study remains archived; the current poster uses the actual runtime geometry and native-equivalent fin pose.
+Will subsequently requested the finished poster now. [Open the A3 poster](../reference/betta-history-and-biomechanics-poster/poster.html) · [print PDF](../reference/betta-history-and-biomechanics-poster/betta-history-and-biomechanics-a3.pdf) · [render/model evidence and sources](../reference/betta-history-and-biomechanics-poster/README.md). The original 40,060-triangle studio study remains archived; the current poster uses the actual runtime geometry and native-equivalent fin pose.
 
 Will wants the betta to have the ornate, flowing fins of a real ornamental fish, with substantially more polygons and separate meshes. This plan combines an educational poster with a visual and motion upgrade to the Calm Betta tank. Every fin in this upgrade uses **closed opaque geometry and materials**, with no translucency dependency. The existing Thai pavilion stays architectural, with an empty hall and **no Buddha or statues**. Planted Tank and its slow sea urchin are a separate level.
 

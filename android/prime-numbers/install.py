@@ -10,6 +10,9 @@ import sys
 import time
 
 ROOT = Path(__file__).resolve().parents[2]
+sys.path.insert(0,str(ROOT/'scripts'))
+from wf_device.client import Client
+from coordinator_producer import require_capabilities
 APP = ROOT/'android/prime-numbers'
 OUT = ROOT/'docs/diagnostics/prime-numbers-chromecast'
 
@@ -151,21 +154,14 @@ def main(argv=None):
     receipt = json.loads((APP/'build/build-receipt.json').read_text())
     if hashlib.sha256(Path(receipt['apk']).read_bytes()).hexdigest() != receipt['sha256']:
         raise RuntimeError('Frozen APK hash does not match the build receipt')
-    review = json.loads((APP/'deploy-review.json').read_text())
-    for name, hashes in review.items():
-        if hashlib.sha256((ROOT/'scripts/wf_device'/name).read_bytes()).hexdigest() != hashes['new']:
-            raise RuntimeError('Reviewed adapter source changed: ' + name)
-    deployed = Path('/opt/wf-device-coordinator/scripts/wf_device')
-    ready = all((deployed/name).exists() and hashlib.sha256((deployed/name).read_bytes()).hexdigest() == hashes['new']
-                for name, hashes in review.items())
     with report.open('a') as log:
-        if not ready:
-            if not sys.stdin.isatty():
-                raise RuntimeError('Registration needs administrator authentication. Run this installer in your terminal; never send a password in chat.')
-            code, _ = run(['sudo', sys.executable, ROOT/'android/bomberman/deploy-coordinator.py',
-                           '--review', APP/'deploy-review.json'], log)
-            if code:
-                return code
+        try:
+            require_capabilities(Client(),'install')
+            require_capabilities(Client(),'check','prime-study')
+        except RuntimeError as error:
+            print(str(error),file=sys.stderr,flush=True)
+            log.write(str(error)+'\n')
+            return 1
         for operation in ('devices', 'queue'):
             code, _ = run(['task', 'chromecast:' + operation], log)
             if code:

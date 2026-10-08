@@ -2,21 +2,9 @@
 import argparse
 import json
 from pathlib import Path
-from .client import Client
+from .client import Client, device_id
 
 ROOT=Path(__file__).resolve().parents[2]
-
-
-def device_id(client,selector):
-    devices=client.call('devices')
-    matches=[d['id'] for d in devices if selector in {d['id'],d['serial'],d.get('endpoint'),d.get('endpoint','').rsplit(':',1)[0]}
-             or (selector and d['serial'] in selector)]
-    if not selector:
-        if len(devices)==1:return devices[0]['id']
-        raise ValueError('Multiple Chromecasts registered: specify --serial or DEVICE')
-    if len(matches)!=1:
-        raise ValueError('Selector does not identify one registered Chromecast')
-    return matches[0]
 
 
 def profile(argv=None,jellyfish=False):

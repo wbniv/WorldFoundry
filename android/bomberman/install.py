@@ -1,9 +1,8 @@
 #!/usr/bin/env python3
-"""Finish background-only installation, authenticating sudo locally if required."""
+"""Submit background-only installations through the standalone coordinator."""
 import hashlib
 import json
 from pathlib import Path
-import subprocess
 import sys
 
 ROOT=Path(__file__).resolve().parents[2]
@@ -11,6 +10,7 @@ OUT=ROOT/'docs/diagnostics/bomberman-chromecast'
 OUT.mkdir(parents=True,exist_ok=True)
 sys.path.insert(0,str(ROOT/'scripts'))
 from wf_device.client import Client
+from coordinator_producer import require_capabilities
 
 def main():
     report=OUT/'installation.log'
@@ -18,24 +18,12 @@ def main():
     print('Checking coordinator capabilities',flush=True)
     try:
         client=Client()
-        capabilities=client.call('capabilities')
+        require_capabilities(client,'install')
     except RuntimeError as error:
-        stopped=isinstance(error.__cause__,(FileNotFoundError,ConnectionRefusedError))
-        if str(error) != 'Unknown operation' and not stopped:
-            raise
-        if stopped:
-            print('Coordinator socket unavailable; resuming reviewed service deployment',flush=True)
-        capabilities={'workflows': [], 'maintenance_drain': False}
-    if 'install' not in capabilities['workflows'] or not capabilities.get('maintenance_drain'):
-        # Authentication happens in the user's terminal, never in a chat message.
         with report.open('a') as log:
-            with subprocess.Popen(['sudo',sys.executable,str(ROOT/'android/bomberman/deploy-coordinator.py')],stdout=subprocess.PIPE,stderr=subprocess.STDOUT,text=True) as process:
-                for line in process.stdout:
-                    print(line,end='',flush=True);log.write(line);log.flush()
-                result=process.wait()
-        if result:
-            return result
-        client=Client()
+            log.write(str(error)+'\n')
+        print(str(error),file=sys.stderr,flush=True)
+        return 1
     receipt=json.loads((ROOT/'android/bomberman/build/build-receipt.json').read_text())
     assert hashlib.sha256(Path(receipt['apk']).read_bytes()).hexdigest()==receipt['sha256']
     print('Submitting background-only APK installations; each device waits only for its own session',flush=True)

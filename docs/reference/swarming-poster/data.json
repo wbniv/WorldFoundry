@@ -101,17 +101,17 @@
  {
   "id": "lead",
   "quantity": "Informed minority steers a group",
-  "value": "small fraction suffices",
-  "status": "unverified",
+  "value": "small fraction in a model",
+  "status": "verified",
   "sources": [
    "S2"
   ]
  },
  {
   "id": "cont",
-  "quantity": "Shoal to school",
-  "value": "a continuum",
-  "status": "unverified",
+  "quantity": "Schooling within a shoal",
+  "value": "coordinated swimming",
+  "status": "verified",
   "sources": [
    "S3"
   ]
@@ -119,8 +119,8 @@
  {
   "id": "clown",
   "quantity": "Real ocellaris clownfish",
-  "value": "not schooling fish",
-  "status": "unverified",
+  "value": "anemone-associated groups",
+  "status": "verified",
   "sources": [
    "S4"
   ]
