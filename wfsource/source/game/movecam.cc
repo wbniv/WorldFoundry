@@ -407,6 +407,34 @@ SetCameraParametersFromShot(const Actor* tempcamShotActor,cameraPosition& outPos
 
 //============================================================================
 
+void
+CameraHandler::SnapToShot(MovementObject& movementObject)
+{
+	if (gEditorCameraOverride.load(std::memory_order_relaxed))
+		return;
+	cameraData& cd = GetCameraMovementData(movementObject);
+	int32 shotIndex = theLevel->GetMailboxes().ReadMailbox(EMAILBOX_CAMSHOT).WholePart();
+	if (!shotIndex)
+		shotIndex = cd.idxOldCamShotActor;
+	const Actor* shot = shotIndex > 0 && shotIndex < theLevel->GetMaxObjectIndex()
+		? theLevel->getActor(shotIndex) : NULL;
+	if (!shot || shot->kind() != BaseObject::CamShot_KIND)
+		return;
+	cameraPosition destination;
+	cd.idxTrackObject = SetCameraParametersFromShot(shot, destination, theLevel->GetObjectList());
+	cd.idxOldCamShotActor = shotIndex;
+	cd.idxCamShotActor = shotIndex;
+	cd.oldCameraPosition = destination.position;
+	cd.direction = destination.direction;
+	cd.validView = true;
+	cd.collisionDirections = 0;
+	PhysicalAttributes& pa = movementObject.GetWritablePhysicalAttributes();
+	pa.SetPredictedPosition(destination.position);
+	pa.SetLinVelocity(Vector3::zero);
+	SetCamera(movementObject, destination);
+	static_cast<Camera&>(movementObject).cameraPos = destination;
+}
+
 CameraHandler::cameraData&
 CameraHandler::GetCameraMovementData(MovementObject& movementObject)
 {

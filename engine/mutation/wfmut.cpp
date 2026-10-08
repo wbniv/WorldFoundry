@@ -127,6 +127,7 @@ bool SetActorPos(Level& level, ActorIdx idx, const Vector3& pos)
     // surfaces inside setCurrentPos itself in DBSTREAM1 builds — we treat
     // that as a warning, not a failure, and still return true.
     actor->setCurrentPos(pos);
+    level.NotifyPositionWrite(*actor);
     ok();
     return true;
 }

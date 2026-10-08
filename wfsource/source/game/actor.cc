@@ -1473,6 +1473,7 @@ Actor::WriteSystemMailbox( int boxnum, Scalar value )
                     JoltCharacterSetPosition(charID, tVect);
             }
 #endif
+            theLevel->NotifyPositionWrite(*this);
             break;
         }
         case EMAILBOX_Y_POS:
@@ -1489,6 +1490,7 @@ Actor::WriteSystemMailbox( int boxnum, Scalar value )
                     JoltCharacterSetPosition(charID, tVect);
             }
 #endif
+            theLevel->NotifyPositionWrite(*this);
             break;
         }
         case EMAILBOX_Z_POS:
@@ -1505,6 +1507,7 @@ Actor::WriteSystemMailbox( int boxnum, Scalar value )
                     JoltCharacterSetPosition(charID, tVect);
             }
 #endif
+            theLevel->NotifyPositionWrite(*this);
             break;
         }
         case EMAILBOX_ROTATION_A:
@@ -1632,7 +1635,9 @@ Actor::WriteSystemMailbox( int boxnum, Scalar value )
             if (boxnum == EMAILBOX_X_SCALE) _scaleX = value;
             else if (boxnum == EMAILBOX_Y_SCALE) _scaleY = value;
             else                                  _scaleZ = value;
-            if (ValidPtr(_renderActor))
+            // An unloaded room intentionally has no render actor. Retain the
+            // cached scale for BindAssets without diagnosing that normal state.
+            if (_renderActor && ValidPtr(_renderActor))
                 _renderActor->SetActorScale(Vector3(_scaleX, _scaleY, _scaleZ));
             break;
         }
@@ -1933,4 +1938,3 @@ Actor::NonStatPlatData::NonStatPlatData(SMemPool * memPool, const _Movement* mov
 }
 
 //==============================================================================
-

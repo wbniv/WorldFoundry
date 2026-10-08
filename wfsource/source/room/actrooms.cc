@@ -186,9 +186,10 @@ ActiveRooms::ChangeActiveRoom( int toRoom )
 		   					(*rendIter).UnBindAssets();
 							++rendIter;
 						}
+						// The destination array may have fewer neighbours, or a different
+						// room at this index. Unbind the departing room before clearing it.
+						_fromActiveRooms[ idxActiveRoom ]->UnBindAssets();
 						_fromActiveRooms[ idxActiveRoom ] = NULL;
-
-						_activeRooms[ idxActiveRoom ]->UnBindAssets();
 						break;
 					}
 				}
@@ -459,4 +460,3 @@ ActiveRooms::DetectCollision(const Clock& currentTime)
 }
 
 //==============================================================================
-
