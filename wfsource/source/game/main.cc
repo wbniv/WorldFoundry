@@ -570,7 +570,7 @@ PIGSMain( int argc, char* * argv )
 		                     << " frames × " << gFrameStepCycles << " cycles)" << std::endl; )
 		game->SmokeRunFrameStep( gFrameStepSmokeCount, gFrameStepCycles );
 	}
-#if defined(WF_DEBUG_BRIDGE) || defined(WF_ENABLE_EDITOR)
+#if (defined(WF_DEBUG_BRIDGE) && !defined(WF_RUNTIME_DIAGNOSTICS)) || defined(WF_ENABLE_EDITOR)
 	else if (gWfmutSmoke)
 	{
 		DBSTREAM1( cprogress << "main::wfmut smoke" << std::endl; )

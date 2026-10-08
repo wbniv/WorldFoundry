@@ -17,6 +17,14 @@
 
 #include <cstdint>
 
+#ifdef WF_RUNTIME_DIAGNOSTICS
+class Level;
+void DebugServer_DiagnosticLevel(int level);
+void DebugServer_DiagnosticBegin(bool simulation, const char* mode, int cursor=-1);
+void DebugServer_DiagnosticSimulation();
+void DebugServer_DiagnosticPump(Level* level, bool suspended=false);
+#endif
+
 #ifdef WF_DEBUG_BRIDGE
 
 class Level;

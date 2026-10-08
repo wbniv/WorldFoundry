@@ -1,0 +1,20 @@
+{
+  "revision": "14bab10",
+  "tests_passed": 136,
+  "private": true,
+  "release": "/tmp/chromecast-coordinator-release-011-refresh",
+  "review": "/tmp/chromecast-coordinator-review-011-refresh.json",
+  "drift": [
+    "scripts/wf_device/plant_checks.py"
+  ],
+  "installed_changed_file_matches_current_source": true,
+  "review_check": "passed",
+  "deployment": "completed",
+  "backup": "/var/lib/wf-device-coordinator/backups/standalone-20261006-133404-1324408",
+  "installed_review_check": "passed after deployment",
+  "diagnostic_job": "J-fbd9502170cd",
+  "diagnostic_result": "failed: expected form after long OK, observed keypad",
+  "direction_checks": "all four press/release, actor consumer and movement assertions passed",
+  "cast2_recovery_job": "J-8614a8111f41",
+  "cast2_recovery_result": "completed"
+}

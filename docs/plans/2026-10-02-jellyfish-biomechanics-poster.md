@@ -14,7 +14,7 @@ Will requested jellyfish-motion research and an A3 poster, then specified that t
 
 ## Completed update — 2026-10-03
 
-[Open the updated poster](../reference/jellyfish-biomechanics-poster/poster.html) · [one-page A3 PDF](../reference/jellyfish-biomechanics-poster/poster.pdf) · [PNG preview](../reference/jellyfish-biomechanics-poster/poster.png).
+[Open the updated poster](../reference/jellyfish-biomechanics-poster/poster.html) · [one-page A3 PDF](../reference/jellyfish-biomechanics-poster/jellyfish-biomechanics-a3.pdf) · [PNG preview](../reference/jellyfish-biomechanics-poster/poster.png).
 
 Added two real renderings: Blender 5.0.1/Cycles (48 samples) imports the exported bell and arms, while the updated game panel shows the actual six-jelly tank on Chromecast HD/GLES. The earlier desktop OpenGL capture is retained in the evidence folder. The original six biology diagrams and research boundaries remain. The print source embeds every image and needs no network assets.
 

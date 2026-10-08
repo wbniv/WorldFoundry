@@ -1,3 +1,4 @@
+#include "../../../../engine/runtime_diagnostics.hpp"
 #include <game/plant_settings.h>
 //=============================================================================
 // hal/android/native_app_entry.cc: android_main + NativeActivity glue
@@ -30,6 +31,8 @@
 #include <android/input.h>
 #include <android/keycodes.h>
 #include <android/log.h>
+#include <android/native_activity.h>
+#include <android/window.h>
 #include <android_native_app_glue.h>
 #include "property_text_input.h"
 
@@ -55,6 +58,7 @@
 #include <game/level_menu.h>   // Back: selected level -> selector -> exit
 #include <hal/phonepad/phonepad.h>
 #include <hal/phonepad/phonepad_overlay.h>
+#include <hal/android/touch_controls.h>
 
 extern "C" void _HALSetJoystickButtons(joystickButtonsF joystickButtons);
 
@@ -186,6 +190,7 @@ void OpenDiagnosticLog(struct android_app* app)
 // states are merged here and flushed to _HALSetJoystickButtons.
 joystickButtonsF    gGamepadButtons = 0;
 joystickButtonsF    gTouchButtons   = 0;
+androidtouch::State gTouchState;
 joystickButtonsF    gPhoneButtons   = 0;   // the phone controller (hal/phonepad), below
 
 // True when running on Google TV / Android TV (leanback). On TV there's no
@@ -198,6 +203,9 @@ constexpr uint32_t kActionBits = EJ_BUTTONF_A | EJ_BUTTONF_B;
 
 void Emit()
 {
+    wfdiag::Receive("hardware", gGamepadButtons);
+    wfdiag::Receive("touch", gTouchButtons);
+    wfdiag::Receive("phone", gPhoneButtons);
     _HALSetJoystickButtons(gGamepadButtons | gTouchButtons | gPhoneButtons);
 }
 
@@ -238,18 +246,24 @@ bool ReadAsset(const char* name, std::string* out)
 
 void PhoneInit()
 {
+    if (!gIsTvMode) { gPhoneEnabled=false; WFLOG("phone controller: off (local touchscreen)"); return; }
     gPhoneEnabled = ReadAsset("layout.json", &gPhoneLayout) && ReadAsset("controller.html", &gPhonePage);
     if (!gPhoneEnabled) { WFLOG("phone controller: off (no assets/layout.json)"); return; }
     gPhonePin = phonepad::MakePin();          // one PIN per launch, kept across pause/resume
     if (gPhonePin.empty()) { gPhoneEnabled = false; WFLOGE("phone controller: off (no random source)"); return; }
     gPhone.SetLog(PhoneLog);
-    gPhone.SetCommandHandler([](const std::string& text){wfprops::host().command(text);});
+    gPhone.SetCommandHandler([](const std::string& text){
+        uint64_t receipt=wfdiag::Receive("phone-command",0,0,0,1);
+        wfdiag::Route("phone-form","property-command-dispatched",receipt);
+        wfprops::host().command(text);
+        wfdiag::Consume("phone-form","property-command-dispatched",0,receipt);
+    });
 }
 
 // Listen on the Wi-Fi address (never 0.0.0.0, never a public address).
 void PhoneStart()
 {
-    if (!gPhoneEnabled || gPhone.Running()) return;
+    if (!gIsTvMode || !gPhoneEnabled || gPhone.Running()) return;
     gPhoneRetryMs = NowMs() + 3000;
     uint32_t addr = 0;
     if (!phonepad::DiscoverLanAddress(&addr))
@@ -322,63 +336,34 @@ void PhonePoll()
 constexpr float kJoystickThreshold = 0.5f;
 
 // ---- Touch hit-test ---------------------------------------------------------
-// Simple fixed-pixel layout (no rendering yet — the modern backend picks up
-// overlay drawing in a follow-up). Coords are raw surface pixels, origin
-// top-left, +Y down.
-//
-// Bottom-left quadrant: d-pad cross, 200 px × 200 px.
-//   LEFT  (0..66, h-133..h-66)
-//   RIGHT (133..200, h-133..h-66)
-//   UP    (66..133, h-200..h-133)
-//   DOWN  (66..133, h-66..h)
-//
-// Bottom-right corner: action buttons.
-//   A     (w-120..w-0,   h-120..h-0)
-//   B     (w-240..w-120, h-120..h-0)
+// Use the same density-aware, inset-safe geometry as the rendered HUD.
+// Motion coordinates are surface pixels with origin at the top left.
 
-uint32_t HitTestTouch(float x, float y)
+androidtouch::Layout TouchLayout(int w,int h)
 {
-    const int w = _halWindowWidth;
-    const int h = _halWindowHeight;
-    if (w <= 0 || h <= 0) return 0;
-
-    // D-pad (bottom-left).
-    if (x >= 0.0f   && x < 200.0f &&
-        y >= h-200  && y < h)
-    {
-        if (x < 66.0f   && y >= h-133 && y <  h-66)   return EJ_BUTTONF_LEFT;
-        if (x >= 133.0f && y >= h-133 && y <  h-66)   return EJ_BUTTONF_RIGHT;
-        if (x >= 66.0f  && x < 133.0f && y <  h-133)  return EJ_BUTTONF_UP;
-        if (x >= 66.0f  && x < 133.0f && y >= h-66)   return EJ_BUTTONF_DOWN;
+    float density=1;
+    if(gApp&&gApp->config) {
+        const int dpi=AConfiguration_getDensity(gApp->config);
+        if(dpi>0&&dpi<1000)density=float(dpi)/160;
     }
-
-    // A button (far bottom-right).
-    if (x >= w-120 && x <  w   && y >= h-120 && y < h)
-        return EJ_BUTTONF_A;
-
-    // B button (inside of A).
-    if (x >= w-240 && x <  w-120 && y >= h-120 && y < h)
-        return EJ_BUTTONF_B;
-
-    return 0;
+    float inset=0;
+    if(gApp&&gApp->contentRect.bottom>0&&gApp->contentRect.bottom<=_halWindowHeight)
+        inset=float(_halWindowHeight-gApp->contentRect.bottom);
+    return androidtouch::layout(w,h,density,inset);
 }
 
 void RecomputeTouchState(AInputEvent* event, bool clearOnUp)
 {
-    if (clearOnUp)
-    {
-        gTouchButtons = 0;
-        return;
-    }
-    joystickButtonsF active = 0;
-    const size_t n = AMotionEvent_getPointerCount(event);
-    for (size_t i = 0; i < n; ++i)
-    {
-        const float x = AMotionEvent_getX(event, i);
-        const float y = AMotionEvent_getY(event, i);
-        active |= HitTestTouch(x, y);
-    }
-    gTouchButtons = active;
+    if(clearOnUp) {gTouchState.clear();gTouchButtons=0;return;}
+    const size_t n=AMotionEvent_getPointerCount(event);
+    const int raw=AMotionEvent_getAction(event),action=raw&AMOTION_EVENT_ACTION_MASK;
+    const int changed=(raw&AMOTION_EVENT_ACTION_POINTER_INDEX_MASK)>>AMOTION_EVENT_ACTION_POINTER_INDEX_SHIFT;
+    std::vector<androidtouch::Point> points;
+    for(size_t i=0;i<n;++i)points.push_back({AMotionEvent_getX(event,i),AMotionEvent_getY(event,i),AMotionEvent_getPointerId(event,i)});
+    const auto phase=(action==AMOTION_EVENT_ACTION_DOWN||action==AMOTION_EVENT_ACTION_POINTER_DOWN)
+        ? androidtouch::Action::Down : action==AMOTION_EVENT_ACTION_POINTER_UP
+        ? androidtouch::Action::Up : androidtouch::Action::Move;
+    gTouchButtons=gTouchState.update(TouchLayout(_halWindowWidth,_halWindowHeight),points.data(),points.size(),phase,changed);
 }
 
 uint32_t MapKeyCode(int32_t code)
@@ -420,8 +405,12 @@ void HandleAppCmd(struct android_app* app, int32_t cmd)
 
         case APP_CMD_PAUSE:
             WFLOG("APP_CMD_PAUSE");
+            gGamepadButtons=gTouchButtons=gPhoneButtons=0;gTouchState.clear();Emit();
             wfprops::host().suspend();
             HALNotifySuspend();
+            wfdiag::Focus(false);
+            wfdiag::Receive("lifecycle", 0, 0, 0, cmd);
+            wfdiag::Consume("android", "focus-loss", 0);
             gPhoneResumed = false;
             PhoneStop();            // listen only while resumed
             break;
@@ -431,12 +420,16 @@ void HandleAppCmd(struct android_app* app, int32_t cmd)
             // A native text dialog/IME can consume the release of the opening
             // key. Never carry that held game input across the UI transition.
             gGamepadButtons = gTouchButtons = gPhoneButtons = 0;
+            gTouchState.clear();
             Emit();
             break;
 
         case APP_CMD_RESUME:
             WFLOG("APP_CMD_RESUME");
             HALNotifyResume();
+            wfdiag::Focus(true);
+            wfdiag::Receive("lifecycle", 0, 0, 0, cmd);
+            wfdiag::Consume("android", "focus-resume", 0);
             gPhoneResumed = true;
             PhoneStart();
             break;
@@ -446,6 +439,8 @@ void HandleAppCmd(struct android_app* app, int32_t cmd)
             {
                 const int32_t uiMode = AConfiguration_getUiModeType(app->config);
                 gIsTvMode = (uiMode == ACONFIGURATION_UI_MODE_TYPE_TELEVISION);
+                if(!gIsTvMode) { PhoneStop(); gPhoneEnabled=false; }
+                else if(!gPhoneEnabled) { PhoneInit(); if(gPhoneResumed)PhoneStart(); }
                 WFAndroidSetHudEnabled(gIsTvMode ? 0 : 1);
                 WFLOG("APP_CMD_CONFIG_CHANGED: uiMode=%d (tv=%d)",
                       uiMode, gIsTvMode ? 1 : 0);
@@ -471,13 +466,19 @@ int32_t HandleInputEvent(struct android_app* /*app*/, AInputEvent* event)
         const int32_t keyCode = AKeyEvent_getKeyCode(event);
         const int32_t action  = AKeyEvent_getAction(event);
         const uint32_t mask   = MapKeyCode(keyCode);
+        const uint32_t held = action == AKEY_EVENT_ACTION_DOWN ? (gGamepadButtons | mask)
+                            : action == AKEY_EVENT_ACTION_UP ? (gGamepadButtons & ~mask) : gGamepadButtons;
+        const uint64_t receipt = wfdiag::Receive("hardware", held,
+            action == AKEY_EVENT_ACTION_DOWN ? mask : 0,
+            action == AKEY_EVENT_ACTION_UP ? mask : 0, keyCode);
         // One line per key edge (not per auto-repeat), so logcat shows whether a remote key
         // arrived and what it mapped to: "key code=23 action=0 mask=0x...".
         // Back dismisses the visible phone panel before navigating the game.
         // Consume the entire press, including repeats, and hide once on release.
-        if(keyCode==AKEYCODE_BACK&&wfprops::host().modal){if(action==AKEY_EVENT_ACTION_UP)wfprops::host().back();return 1;}
+        if(keyCode==AKEYCODE_BACK&&wfprops::host().modal){wfdiag::Consume(wfprops::host().form.drawer?"keypad":"form","back-intercepted",held,receipt);if(action==AKEY_EVENT_ACTION_UP)wfprops::host().back();return 1;}
         if (keyCode == AKEYCODE_BACK && gPhoneOverlay.PanelVisible(NowMs()))
         {
+            wfdiag::Consume("phone-panel", "back-intercepted", held, receipt);
             if (action == AKEY_EVENT_ACTION_UP) gPhoneOverlay.OnBack(NowMs());
             if (AKeyEvent_getRepeatCount(event) == 0)
                 WFLOG("key code=%d action=%d (Back: hides the phone panel)", keyCode, action);
@@ -486,6 +487,7 @@ int32_t HandleInputEvent(struct android_app* /*app*/, AInputEvent* event)
         // With no panel, Back returns from a level; on its selector Back exits.
         if (keyCode == AKEYCODE_BACK && levelmenu::MenuRunning())
         {
+            wfdiag::Consume(levelmenu::SelectorVisible()?"selector":"game", "back-navigation", held, receipt);
             if (action == AKEY_EVENT_ACTION_UP)
             {
                 if (levelmenu::SelectorVisible())
@@ -505,7 +507,7 @@ int32_t HandleInputEvent(struct android_app* /*app*/, AInputEvent* event)
         if (AKeyEvent_getRepeatCount(event) == 0)
             WFLOG("key code=%d action=%d mask=0x%x%s", keyCode, action, mask,
                   mask ? "" : " (unmapped, dropped)");
-        if (mask == 0) return 0;
+        if (mask == 0) {wfdiag::Consume("android", "unmapped", held, receipt);return 0;}
 
         if (action == AKEY_EVENT_ACTION_DOWN)      gGamepadButtons |=  mask;
         else if (action == AKEY_EVENT_ACTION_UP)   gGamepadButtons &= ~mask;
@@ -547,7 +549,10 @@ int32_t HandleInputEvent(struct android_app* /*app*/, AInputEvent* event)
             const int32_t action = raw & AMOTION_EVENT_ACTION_MASK;
             const bool    clear  = (action == AMOTION_EVENT_ACTION_UP
                                  || action == AMOTION_EVENT_ACTION_CANCEL);
+            const joystickButtonsF previous=gTouchButtons;
             RecomputeTouchState(event, clear);
+            if(previous!=gTouchButtons||action!=AMOTION_EVENT_ACTION_MOVE)
+                WFLOG("local touch mask=0x%x action=%d",unsigned(gTouchButtons),action);
             Emit();
             return 1;
         }
@@ -557,6 +562,14 @@ int32_t HandleInputEvent(struct android_app* /*app*/, AInputEvent* event)
 }
 
 }  // namespace
+
+extern "C" WF_ANDROID_EXPORT void
+WFAndroidTouchLayout(int w,int h,androidtouch::Layout* layout,uint32_t* held,float* stickX,float* stickY)
+{
+    *layout=TouchLayout(w,h);
+    *held=gTouchButtons;
+    *stickX=gTouchState.position.x;*stickY=gTouchState.position.y;
+}
 
 // Read by hal/android/asset_accessor_aasset.cc when creating the accessor
 // during _PlatformSpecificInit.
@@ -625,6 +638,9 @@ extern "C" WF_ANDROID_EXPORT void
 android_main(struct android_app* app)
 {
     gApp = app;
+    // Keep a visible game session awake without changing device lock policy.
+    // Android releases this window-scoped hold when the activity is hidden.
+    ANativeActivity_setWindowFlags(app->activity, AWINDOW_FLAG_KEEP_SCREEN_ON, 0);
     androidtext::install(app->activity);
     OpenDiagnosticLog(app);
     InstallCrashHandlers();
@@ -638,7 +654,6 @@ android_main(struct android_app* app)
     if (app->activity && app->activity->assetManager)
         gAssetMgr = app->activity->assetManager;
     WFLOG("android_main: assetMgr=%p", (void*)gAssetMgr);
-    PhoneInit();
 
     if (app->config)
     {
@@ -647,6 +662,8 @@ android_main(struct android_app* app)
         WFAndroidSetHudEnabled(gIsTvMode ? 0 : 1);
         WFLOG("android_main: uiMode=%d (tv=%d)", uiMode, gIsTvMode ? 1 : 0);
     }
+
+    PhoneInit();
 
     // Block until the first surface arrives so EGL is live before the
     // engine tries to draw.

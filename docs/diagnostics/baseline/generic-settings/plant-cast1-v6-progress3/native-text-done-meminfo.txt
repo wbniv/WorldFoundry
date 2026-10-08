@@ -1,0 +1,51 @@
+Applications Memory Usage (in Kilobytes):
+Uptime: 382037244 Realtime: 382037244
+
+** MEMINFO in pid 24762 [org.worldfoundry.wf_game.aquarium] **
+                   Pss  Private  Private  SwapPss      Rss     Heap     Heap     Heap
+                 Total    Dirty    Clean    Dirty    Total     Size    Alloc     Free
+                ------   ------   ------   ------   ------   ------   ------   ------
+  Native Heap    22966    22888        0     1758    23552   118092   102962    15129
+  Dalvik Heap     6271      696     5436       42     6720     4637     2319     2318
+ Dalvik Other      489      420       52       28      868                           
+        Stack      392      392        0      164      396                           
+       Ashmem       36        0        0        0      100                           
+    Other dev       13        0        8        0      224                           
+     .so mmap    13623      168    10916      125    28656                           
+    .jar mmap     4335        0     1484        0    16116                           
+    .apk mmap     1103        0      912        0     1596                           
+    .ttf mmap      260        0      224        0      296                           
+    .dex mmap      129        0       48        4      584                           
+    .oat mmap     1373        0      444        0     7180                           
+    .art mmap     4183      516     2400      258    13032                           
+   Other mmap       20        8        0        0      608                           
+    GL mtrack    87280    87280        0        0    87280                           
+      Unknown      277      228       20      258      364                           
+        TOTAL   145387   112596    21944     2637   187572   122729   105281    17447
+ 
+ App Summary
+                       Pss(KB)                        Rss(KB)
+                        ------                         ------
+           Java Heap:     3612                          19752
+         Native Heap:    22888                          23552
+                Code:    14196                          54436
+               Stack:      392                            396
+            Graphics:    87280                          87280
+       Private Other:     6172
+              System:    10847
+             Unknown:                                    2156
+ 
+           TOTAL PSS:   145387            TOTAL RSS:   187572       TOTAL SWAP PSS:     2637
+ 
+ Objects
+               Views:       34         ViewRootImpl:        2
+         AppContexts:        5           Activities:        1
+              Assets:       20        AssetManagers:        0
+       Local Binders:       24        Proxy Binders:       43
+       Parcel memory:        6         Parcel count:       27
+    Death Recipients:        0             WebViews:        0
+ 
+ SQL
+         MEMORY_USED:        0
+  PAGECACHE_OVERFLOW:        0          MALLOC_SIZE:        0
+ 

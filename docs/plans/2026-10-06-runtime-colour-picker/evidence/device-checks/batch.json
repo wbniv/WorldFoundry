@@ -1,0 +1,60 @@
+{
+  "id": "B-55bab8d8e752",
+  "owner": "50834354a173f73472469f04",
+  "targets": [
+    "chromecast-test-01",
+    "chromecast-test-02"
+  ],
+  "created": 1791270790.2805514,
+  "jobs": [
+    {
+      "id": "J-fea49df1c0e9",
+      "owner": "50834354a173f73472469f04",
+      "accepted": 1791270790.2808018,
+      "state": "failed",
+      "phase": "failed",
+      "request": {
+        "app": "aquarium",
+        "apk": "a2dce291f9ed6b611abba96d3d83de94a4d0fbca8fa03671619a00e09fadec37.apk",
+        "validator": "plant-settings",
+        "workflow": "check",
+        "device": "chromecast-test-01"
+      },
+      "device": "chromecast-test-01",
+      "generation": 216,
+      "cancel": 0,
+      "error": "Plant settings assertion failed: native_numeric_text_applied_to_draft",
+      "started": 1791270790.3109882,
+      "finished": 1791270842.3835447,
+      "worker_pid": 1358794,
+      "recovery_resolved": 0,
+      "installation": null,
+      "target": "chromecast-test-01"
+    },
+    {
+      "id": "J-045f2a89a16b",
+      "owner": "50834354a173f73472469f04",
+      "accepted": 1791270790.2810357,
+      "state": "failed",
+      "phase": "failed",
+      "request": {
+        "app": "aquarium",
+        "apk": "a2dce291f9ed6b611abba96d3d83de94a4d0fbca8fa03671619a00e09fadec37.apk",
+        "validator": "plant-settings",
+        "workflow": "check",
+        "device": "chromecast-test-02"
+      },
+      "device": "chromecast-test-02",
+      "generation": 71,
+      "cancel": 0,
+      "error": "Plant settings assertion failed: native_numeric_text_applied_to_draft",
+      "started": 1791270790.3112187,
+      "finished": 1791270837.3053093,
+      "worker_pid": 1358795,
+      "recovery_resolved": 0,
+      "installation": null,
+      "target": "chromecast-test-02"
+    }
+  ],
+  "state": "failed"
+}

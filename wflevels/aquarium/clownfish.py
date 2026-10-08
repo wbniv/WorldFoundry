@@ -129,13 +129,13 @@ TUNABLES = [
     ('fish-tail-idle-amp', 0.050,   'rev', 'idle sculling (ours)'),
     ('fish-tail-idle-hz',  1.4,     'Hz',  'idle sculling (ours)'),
     # Swimming tail (aquarium Phase 4). Strouhal St = f·A/U with A the peak-to-peak tail-tip
-    # excursion: fish sit in 0.2–0.4 (verified: Knight 2014, JEB 217:2224, summarising Nudds et al.
-    # 2014, JEB 217:2244: trout 0.19–0.22). A = 0.2 L is widely cited, unverified. So f = St·U/A
+    # excursion: proposed efficient range 0.2–0.4 (verified: Knight 2014, JEB 217:2224, summarising Nudds et al.
+    # 2014, JEB 217:2244: trout best fits 0.19–0.22/0.23). A = 0.2 L is ours, authored. So f = St·U/A
     # follows the ACTUAL speed U; the half-amplitude angle is set in Clownfish.__init__ from the
     # tail's pivot-to-tip length (A/2 = 0.1 L). The tail only beats during a burst (fish-burst):
     # it coasts straight (burst-and-coast, Wu, Yang & Zeng 2007, JEB 210:2181, verified).
-    ('fish-strouhal',      0.30,    '',    'St (0.2–0.4 verified for fish; 0.3 ours)'),
-    ('fish-tail-app',      0.1778,  'm',   'A = 0.2 L peak-to-peak tail-tip excursion (widely cited, unverified)'),
+    ('fish-strouhal',      0.30,    '',    'St (proposed efficient range 0.2–0.4 verified; 0.3 ours)'),
+    ('fish-tail-app',      0.1778,  'm',   'A = 0.2 L peak-to-peak tail-tip excursion (ours, authored)'),
     ('fish-tail-swim-amp', 0.0,     'rev', 'set from A/2 and the tail length in __init__'),
     ('fish-tail-hz-max',   6.0,     'Hz',  'cap: a beat must stay well under the 10 Hz Nyquist rate at -rate20 (ours)'),
     ('fish-tail-env-t',    0.06,    's',   'tail envelope: on at a burst, straight within ~0.2 s of a coast (ours)'),

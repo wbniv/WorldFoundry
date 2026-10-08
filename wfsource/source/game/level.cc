@@ -1,4 +1,5 @@
 #include "../../../engine/runtime_property_host.hpp"
+#include "../../../engine/runtime_diagnostics.hpp"
 #include "runtime_profile.hp"
 //==============================================================================
 // level.cc:
@@ -918,6 +919,7 @@ Level::update(Scalar deltaTime)
 		_hardwareInput3->update();
 	if(_hardwareInput4)
 		_hardwareInput4->update();
+	wfdiag::Route("game", "hardware-sampled-at-level-update");
 
 #if defined(JOYSTICK_RECORDER)
 	DBSTREAM2( cflow << "dumping joystick recorder data" << std::endl; )

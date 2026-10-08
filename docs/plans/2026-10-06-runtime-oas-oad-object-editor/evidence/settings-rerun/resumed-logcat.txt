@@ -1,0 +1,248 @@
+--------- beginning of main
+10-06 10:31:27.918  6969  6969 I f_game.aquarium: Using CollectorTypeCMC GC.
+10-06 10:31:27.942  6969  6969 E f_game.aquarium: Not starting debugger since process cannot load the jdwp agent.
+10-06 10:31:28.005  6969  6969 D CompatibilityChangeReporter: Compat change id reported: 171979766; UID 10147; state: ENABLED
+10-06 10:31:28.006  6969  6969 D CompatibilityChangeReporter: Compat change id reported: 242716250; UID 10147; state: ENABLED
+10-06 10:31:28.045  6969  6969 D nativeloader: Configuring clns-4 for other apk /data/app/~~DEUznMjXWOcJTvIX2rO69A==/org.worldfoundry.wf_game.aquarium-ETxbBYrlwArAux4EsgMBAw==/base.apk. target_sdk_version=34, uses_libraries=, library_path=/data/app/~~DEUznMjXWOcJTvIX2rO69A==/org.worldfoundry.wf_game.aquarium-ETxbBYrlwArAux4EsgMBAw==/lib/arm:/data/app/~~DEUznMjXWOcJTvIX2rO69A==/org.worldfoundry.wf_game.aquarium-ETxbBYrlwArAux4EsgMBAw==/base.apk!/lib/armeabi-v7a, permitted_path=/data:/mnt/expand:/data/user/0/org.worldfoundry.wf_game.aquarium
+10-06 10:31:28.079  6969  6969 V GraphicsEnvironment: Currently set values for:
+10-06 10:31:28.079  6969  6969 V GraphicsEnvironment:   angle_gl_driver_selection_pkgs=[]
+10-06 10:31:28.079  6969  6969 V GraphicsEnvironment:   angle_gl_driver_selection_values=[]
+10-06 10:31:28.080  6969  6969 V GraphicsEnvironment: ANGLE GameManagerService for org.worldfoundry.wf_game.aquarium: false
+10-06 10:31:28.082  6969  6969 V GraphicsEnvironment: org.worldfoundry.wf_game.aquarium is not listed in per-application setting
+10-06 10:31:28.082  6969  6969 V GraphicsEnvironment: Neither updatable production driver nor prerelease driver is supported.
+10-06 10:31:28.270  6969  6991 I wf_game : diagnostic log: /storage/emulated/0/Android/data/org.worldfoundry.wf_game.aquarium/files/wf.log
+10-06 10:31:28.270  6969  6991 I wf_game : android_main: enter
+10-06 10:31:28.270  6969  6991 I wf_game : android_main: assetMgr=0xee08c600
+10-06 10:31:28.271  6969  6991 I wf_game : android_main: uiMode=4 (tv=1)
+10-06 10:31:28.271  6969  6991 I wf_game : android_main: waiting for APP_CMD_INIT_WINDOW
+10-06 10:31:28.275  6969  6969 D CompatibilityChangeReporter: Compat change id reported: 210923482; UID 10147; state: ENABLED
+10-06 10:31:28.277  6969  6991 I wf_game : APP_CMD_RESUME
+10-06 10:31:28.279  6969  6991 I wf_game : phonepad: listening on 192.168.4.43:8765
+10-06 10:31:28.279  6969  6991 I wf_game : phone controller: open http://192.168.4.43:8765/?k=463102 (PIN 463102)
+10-06 10:31:28.284  6969  6969 D CompatibilityChangeReporter: Compat change id reported: 237531167; UID 10147; state: DISABLED
+10-06 10:31:28.359  6969  6991 I wf_game : APP_CMD_INIT_WINDOW
+10-06 10:31:28.371  6969  6991 W libc    : Access denied finding property "vendor.mali.platform.config"
+10-06 10:31:28.385  6969  6991 I mali    : Successfully parsed 1 environment variable(s) from /vendor/etc/mali_platform.config.
+10-06 10:31:28.392  6969  6991 W libc    : Access denied finding property "vendor.mali.debug.config"
+10-06 10:31:28.396  6969  6991 W libc    : Access denied finding property "vendor.mali.base_max_nr_instances"
+10-06 10:31:28.402  6969  6991 W libc    : Access denied finding property "vendor.mali.cctx_memory_class_unnamed"
+10-06 10:31:28.402  6969  6991 W libc    : Access denied finding property "vendor.mali.cctx_memory_class_default_heap"
+10-06 10:31:28.402  6969  6991 W libc    : Access denied finding property "vendor.mali.cctx_memory_class_base_internal"
+10-06 10:31:28.402  6969  6991 W libc    : Access denied finding property "vendor.mali.cctx_memory_class_framepool"
+10-06 10:31:28.402  6969  6991 W libc    : Access denied finding property "vendor.mali.cctx_memory_class_tiler"
+10-06 10:31:28.402  6969  6991 W libc    : Access denied finding property "vendor.mali.cctx_memory_class_program"
+10-06 10:31:28.403  6969  6991 W libc    : Access denied finding property "vendor.mali.cctx_memory_class_egl_color_plane"
+10-06 10:31:28.403  6969  6991 W libc    : Access denied finding property "vendor.mali.cctx_memory_class_egl_color_plane_imported"
+10-06 10:31:28.403  6969  6991 W libc    : Access denied finding property "vendor.mali.cctx_memory_class_vao"
+10-06 10:31:28.403  6969  6991 W libc    : Access denied finding property "vendor.mali.cctx_memory_class_img"
+10-06 10:31:28.403  6969  6991 W libc    : Access denied finding property "vendor.mali.cctx_memory_class_internal_surface"
+10-06 10:31:28.403  6969  6991 W libc    : Access denied finding property "vendor.mali.cctx_memory_class_buf"
+10-06 10:31:28.403  6969  6991 W libc    : Access denied finding property "vendor.mali.cctx_memory_class_crc"
+10-06 10:31:28.403  6969  6991 W libc    : Access denied finding property "vendor.mali.cctx_memory_class_cpom_hmem"
+10-06 10:31:28.404  6969  6991 W libc    : Access denied finding property "vendor.mali.cctx_memory_class_cpom_rsd"
+10-06 10:31:28.405  6969  6991 W libc    : Access denied finding property "vendor.mali.cctx_memory_class_cpom_mbs2"
+10-06 10:31:28.405  6969  6991 W libc    : Access denied finding property "vendor.mali.cctx_memory_class_cpom_static"
+10-06 10:31:28.405  6969  6991 W libc    : Access denied finding property "vendor.mali.cctx_memory_class_cframe_hmem"
+10-06 10:31:28.405  6969  6991 W libc    : Access denied finding property "vendor.mali.cctx_memory_class_cframe_sample_pos"
+10-06 10:31:28.405  6969  6991 W libc    : Access denied finding property "vendor.mali.cctx_memory_class_cframe_discard"
+10-06 10:31:28.406  6969  6991 W libc    : Access denied finding property "vendor.mali.cctx_memory_class_cframe_tess_geom"
+10-06 10:31:28.406  6969  6991 W libc    : Access denied finding property "vendor.mali.cctx_memory_class_cobj_hmem"
+10-06 10:31:28.406  6969  6991 W libc    : Access denied finding property "vendor.mali.cctx_memory_class_cmar_hmem"
+10-06 10:31:28.406  6969  6991 W libc    : Access denied finding property "vendor.mali.cctx_memory_class_cmar_prof_dump"
+10-06 10:31:28.406  6969  6991 W libc    : Access denied finding property "vendor.mali.cctx_memory_class_cblend_hmem"
+10-06 10:31:28.406  6969  6991 W libc    : Access denied finding property "vendor.mali.cctx_memory_class_gles_hmem"
+10-06 10:31:28.406  6969  6991 W libc    : Access denied finding property "vendor.mali.cctx_memory_class_gles_query"
+10-06 10:31:28.406  6969  6991 W libc    : Access denied finding property "vendor.mali.cctx_memory_class_gles_query_host"
+10-06 10:31:28.406  6969  6991 W libc    : Access denied finding property "vendor.mali.cctx_memory_class_gles_multiview"
+10-06 10:31:28.406  6969  6991 W libc    : Access denied finding property "vendor.mali.cctx_memory_class_cdeps_hmem"
+10-06 10:31:28.407  6969  6991 W libc    : Access denied finding property "vendor.mali.cctx_memory_class_cmem_suballoc"
+10-06 10:31:28.407  6969  6991 W libc    : Access denied finding property "vendor.mali.cctx_memory_class_cmem_hoard"
+10-06 10:31:28.407  6969  6991 W libc    : Access denied finding property "vendor.mali.cctx_memory_class_cmem_registry"
+10-06 10:31:28.407  6969  6991 W libc    : Access denied finding property "vendor.mali.cctx_memory_class_cl_payload"
+10-06 10:31:28.407  6969  6991 W libc    : Access denied finding property "vendor.mali.cctx_memory_class_cl_wlm_tls"
+10-06 10:31:28.407  6969  6991 W libc    : Access denied finding property "vendor.mali.cctx_memory_class_cl_hmem"
+10-06 10:31:28.407  6969  6991 W libc    : Access denied finding property "vendor.mali.cctx_memory_class_cl_svm"
+10-06 10:31:28.407  6969  6991 W libc    : Access denied finding property "vendor.mali.cctx_memory_class_cl_protected"
+10-06 10:31:28.407  6969  6991 W libc    : Access denied finding property "vendor.mali.cctx_memory_class_cinstr"
+10-06 10:31:28.407  6969  6991 W libc    : Access denied finding property "vendor.mali.cctx_memory_class_gfx_device_memory_cpu_uncached"
+10-06 10:31:28.407  6969  6991 W libc    : Access denied finding property "vendor.mali.cctx_memory_class_gfx_device_memory_cpu_cached"
+10-06 10:31:28.407  6969  6991 W libc    : Access denied finding property "vendor.mali.cctx_memory_class_gfx_device_memory_transient"
+10-06 10:31:28.408  6969  6991 W libc    : Access denied finding property "vendor.mali.cctx_memory_class_gfx_device_memory_protected"
+10-06 10:31:28.408  6969  6991 W libc    : Access denied finding property "vendor.mali.cctx_memory_class_gfx_device_external"
+10-06 10:31:28.409  6969  6991 W libc    : Access denied finding property "vendor.mali.cctx_memory_class_gfx_device_external_swapchain"
+10-06 10:31:28.409  6969  6991 W libc    : Access denied finding property "vendor.mali.cctx_memory_class_gfx_device_internal"
+10-06 10:31:28.409  6969  6991 W libc    : Access denied finding property "vendor.mali.cctx_memory_class_gfx_device_internal_tls"
+10-06 10:31:28.409  6969  6991 W libc    : Access denied finding property "vendor.mali.cctx_memory_class_gfx_device_internal_host"
+10-06 10:31:28.410  6969  6991 W libc    : Access denied finding property "vendor.mali.cctx_memory_class_gfx_device_internal_protected"
+10-06 10:31:28.410  6969  6991 W libc    : Access denied finding property "vendor.mali.cctx_memory_class_gfx_device_internal_transient"
+10-06 10:31:28.410  6969  6991 W libc    : Access denied finding property "vendor.mali.cctx_memory_class_gfx_descriptor_pool"
+10-06 10:31:28.411  6969  6991 W libc    : Access denied finding property "vendor.mali.cctx_memory_class_gfx_command_allocator"
+10-06 10:31:28.411  6969  6991 W libc    : Access denied finding property "vendor.mali.cctx_memory_class_gfx_command_allocator_host"
+10-06 10:31:28.412  6969  6991 W libc    : Access denied finding property "vendor.mali.cctx_memory_class_gfx_command_allocator_protected"
+10-06 10:31:28.412  6969  6991 W libc    : Access denied finding property "vendor.mali.cctx_memory_class_gfx_graph_internal_host"
+10-06 10:31:28.412  6969  6991 W libc    : Access denied finding property "vendor.mali.cctx_memory_class_gfx_graph_internal_device"
+10-06 10:31:28.412  6969  6991 W libc    : Access denied finding property "vendor.mali.cctx_memory_class_gfx_graph_internal_device_transient"
+10-06 10:31:28.412  6969  6991 W libc    : Access denied finding property "vendor.mali.cctx_memory_class_vk_bound_buffer"
+10-06 10:31:28.412  6969  6991 W libc    : Access denied finding property "vendor.mali.cctx_memory_class_vk_bound_image"
+10-06 10:31:28.412  6969  6991 W libc    : Access denied finding property "vendor.mali.cctx_memory_class_cmar_signal"
+10-06 10:31:28.412  6969  6991 W libc    : Access denied finding property "vendor.mali.cctx_memory_class_cmar_flush_chain"
+10-06 10:31:28.412  6969  6991 W libc    : Access denied finding property "vendor.mali.cctx_memory_class_cmar_metadata_list"
+10-06 10:31:28.412  6969  6991 W libc    : Access denied finding property "vendor.mali.cctx_memory_class_jit"
+10-06 10:31:28.412  6969  6991 W libc    : Access denied finding property "vendor.mali.cctx_memory_class_mmu"
+10-06 10:31:28.413  6969  6991 W libc    : Access denied finding property "vendor.mali.osu_protected_memory_heap_name"
+10-06 10:31:28.413  6969  6991 W libc    : Access denied finding property "vendor.mali.osu_ion_protected_memory_heap_name"
+10-06 10:31:28.413  6969  6991 W libc    : Access denied finding property "vendor.mali.platform_agt_frequency_khz"
+10-06 10:31:28.413  6969  6991 W libc    : Access denied finding property "vendor.mali.hal_dump_dir"
+10-06 10:31:28.414  6969  6991 W libc    : Access denied finding property "vendor.mali.platform.config"
+10-06 10:31:28.415  6969  6991 I mali    : Successfully parsed 1 environment variable(s) from /vendor/etc/mali_platform.config.
+10-06 10:31:28.415  6969  6991 W libc    : Access denied finding property "vendor.mali.debug.config"
+10-06 10:31:28.430  6969  6991 W libc    : Access denied finding property "ro.vendor.arm.egl.configs.yuyv.hal_format"
+10-06 10:31:28.430  6969  6991 W libc    : Access denied finding property "ro.vendor.arm.egl.configs.yuyv.recordable"
+10-06 10:31:28.430  6969  6991 W libc    : Access denied finding property "ro.vendor.arm.egl.configs.yuyv.dataspaces_to_exclude"
+10-06 10:31:28.430  6969  6991 W libc    : Access denied finding property "ro.vendor.arm.egl.configs.nv12.hal_format"
+10-06 10:31:28.431  6969  6991 W libc    : Access denied finding property "ro.vendor.arm.egl.configs.nv12.recordable"
+10-06 10:31:28.431  6969  6991 W libc    : Access denied finding property "ro.vendor.arm.egl.configs.nv12.dataspaces_to_exclude"
+10-06 10:31:28.431  6969  6991 W libc    : Access denied finding property "ro.vendor.arm.egl.configs.nv21.hal_format"
+10-06 10:31:28.431  6969  6991 W libc    : Access denied finding property "ro.vendor.arm.egl.configs.nv21.recordable"
+10-06 10:31:28.431  6969  6991 W libc    : Access denied finding property "ro.vendor.arm.egl.configs.nv21.dataspaces_to_exclude"
+10-06 10:31:28.431  6969  6991 W libc    : Access denied finding property "ro.vendor.arm.egl.configs.nv16.hal_format"
+10-06 10:31:28.431  6969  6991 W libc    : Access denied finding property "ro.vendor.arm.egl.configs.nv16.recordable"
+10-06 10:31:28.431  6969  6991 W libc    : Access denied finding property "ro.vendor.arm.egl.configs.nv16.dataspaces_to_exclude"
+10-06 10:31:28.431  6969  6991 W libc    : Access denied finding property "ro.vendor.arm.egl.configs.yuv420.hal_format"
+10-06 10:31:28.431  6969  6991 W libc    : Access denied finding property "ro.vendor.arm.egl.configs.yuv420.recordable"
+10-06 10:31:28.431  6969  6991 W libc    : Access denied finding property "ro.vendor.arm.egl.configs.yuv420.dataspaces_to_exclude"
+10-06 10:31:28.431  6969  6991 W libc    : Access denied finding property "ro.vendor.arm.egl.configs.yvu420.hal_format"
+10-06 10:31:28.431  6969  6991 W libc    : Access denied finding property "ro.vendor.arm.egl.configs.yvu420.recordable"
+10-06 10:31:28.432  6969  6991 W libc    : Access denied finding property "ro.vendor.arm.egl.configs.yvu420.dataspaces_to_exclude"
+10-06 10:31:28.432  6969  6991 W libc    : Access denied finding property "ro.vendor.arm.egl.configs.y410.hal_format"
+10-06 10:31:28.432  6969  6991 W libc    : Access denied finding property "ro.vendor.arm.egl.configs.y410.recordable"
+10-06 10:31:28.432  6969  6991 W libc    : Access denied finding property "ro.vendor.arm.egl.configs.y410.dataspaces_to_exclude"
+10-06 10:31:28.432  6969  6991 W libc    : Access denied finding property "ro.vendor.arm.egl.configs.y210.hal_format"
+10-06 10:31:28.432  6969  6991 W libc    : Access denied finding property "ro.vendor.arm.egl.configs.y210.recordable"
+10-06 10:31:28.432  6969  6991 W libc    : Access denied finding property "ro.vendor.arm.egl.configs.y210.dataspaces_to_exclude"
+10-06 10:31:28.432  6969  6991 W libc    : Access denied finding property "ro.vendor.arm.egl.configs.y0l2.hal_format"
+10-06 10:31:28.432  6969  6991 W libc    : Access denied finding property "ro.vendor.arm.egl.configs.y0l2.recordable"
+10-06 10:31:28.432  6969  6991 W libc    : Access denied finding property "ro.vendor.arm.egl.configs.y0l2.dataspaces_to_exclude"
+10-06 10:31:28.432  6969  6991 W libc    : Access denied finding property "ro.vendor.arm.egl.configs.p210.hal_format"
+10-06 10:31:28.432  6969  6991 W libc    : Access denied finding property "ro.vendor.arm.egl.configs.p210.recordable"
+10-06 10:31:28.432  6969  6991 W libc    : Access denied finding property "ro.vendor.arm.egl.configs.p210.dataspaces_to_exclude"
+10-06 10:31:28.433  6969  6991 W libc    : Access denied finding property "ro.vendor.arm.egl.configs.p010.hal_format"
+10-06 10:31:28.433  6969  6991 W libc    : Access denied finding property "ro.vendor.arm.egl.configs.p010.recordable"
+10-06 10:31:28.433  6969  6991 W libc    : Access denied finding property "ro.vendor.arm.egl.configs.p010.dataspaces_to_exclude"
+10-06 10:31:28.471  6969  6991 I wf_game : EGL surface ready: 1920x1080 (context reused)
+10-06 10:31:28.471  6969  6991 I wf_game : android_main: EGL ready, entering HALStart
+10-06 10:31:28.472  6969  6991 I wf_game : android_main: wf_args.txt gave 6 argument(s)
+10-06 10:31:28.476  6969  6991 I AAudio  : AAudioStreamBuilder_openStream() called ----------------------------------------
+10-06 10:31:28.476  6969  6991 I AudioStreamBuilder: rate   =      0, channels  = 0, channelMask = 0, format   = 5, sharing = SH, dir = OUTPUT
+10-06 10:31:28.477  6969  6991 I AudioStreamBuilder: device =      0, sessionId = -1, perfMode = 12, callback: ON with frames = 0
+10-06 10:31:28.477  6969  6991 I AudioStreamBuilder: usage  =      0, contentType = 0, inputPreset = 0, allowedCapturePolicy = 0
+10-06 10:31:28.477  6969  6991 I AudioStreamBuilder: privacy sensitive = false, opPackageName = (null), attributionTag = (null)
+10-06 10:31:28.492  6969  6991 D f_game.aquarium: PlayerBase::PlayerBase()
+10-06 10:31:28.562  6969  6991 D AudioStreamInternal_Client: configureDataInformation() original HW burst = 384, minMicros = 1000 => SW burst = 384
+10-06 10:31:28.562  6969  6991 D IsochronousClockModel: setFramesPerBurst() - mFramesPerBurst = 384 - mBurstPeriodNanos = 8000000
+10-06 10:31:28.563  6969  6991 D AAudioStream: setState(s#1) from 0 to 2
+10-06 10:31:28.563  6969  6991 I AAudioFlowGraph: configure() source format = 0x00000005, channels = 2, sink format = 0x00000005, channels = 2, useMonoBlend = 0, audioBalance = 0.000000, isExclusive 0
+10-06 10:31:28.566  6969  6991 I AAudio  : AAudioStreamBuilder_openStream() returns 0 = AAUDIO_OK for s#1 ----------------
+10-06 10:31:28.567  6969  6991 D AAudio  : AAudioStream_requestStart(s#1) called --------------
+10-06 10:31:28.567  6969  6991 D AAudioStream: setState(s#1) from 2 to 3
+10-06 10:31:28.613  6969  6991 D AAudio  : AAudioStream_requestStart(s#1) returned 0 ---------
+10-06 10:31:28.616  6969  7006 D AudioStreamInternalPlay_Client: callbackLoop() entering >>>>>>>>>>>>>>>
+10-06 10:31:28.616  6969  7006 D AudioStreamInternal_Client: onEventFromServer - got AAUDIO_SERVICE_EVENT_STARTED
+10-06 10:31:28.616  6969  7006 D AAudioStream: setState(s#1) from 3 to 4
+10-06 10:31:28.684  6969  6991 I wf_game : level-menu: showing 8 entries ("WF Aquarium"), cursor on 0
+10-06 10:31:33.986  6969  6991 I wf_game : key code=4 action=0 (Back: hides the phone panel)
+10-06 10:31:34.046  6969  6991 I wf_game : key code=4 action=1 (Back: hides the phone panel)
+10-06 10:31:42.066  6969  6981 I f_game.aquarium: Explicit concurrent mark compact GC freed 2995(1017KB) AllocSpace objects, 3(60KB) LOS objects, 49% free, 2159KB/4318KB, paused 274us,1.398ms total 32.550ms
+10-06 10:31:42.772  6969  6991 I wf_game : key code=20 action=0 mask=0x1000
+10-06 10:31:42.774  6969  6991 I wf_game : level-menu: cursor on 1 (Blue Shrimp)
+10-06 10:31:42.806  6969  6991 I wf_game : key code=20 action=1 mask=0x1000
+10-06 10:31:43.339  6969  6991 I wf_game : key code=20 action=0 mask=0x1000
+10-06 10:31:43.341  6969  6991 I wf_game : level-menu: cursor on 2 (Calm Betta)
+10-06 10:31:43.374  6969  6991 I wf_game : key code=20 action=1 mask=0x1000
+10-06 10:31:43.957  6969  6991 I wf_game : key code=20 action=0 mask=0x1000
+10-06 10:31:43.959  6969  6991 I wf_game : level-menu: cursor on 3 (Jellyfish)
+10-06 10:31:43.990  6969  6991 I wf_game : key code=20 action=1 mask=0x1000
+10-06 10:31:44.574  6969  6991 I wf_game : key code=20 action=0 mask=0x1000
+10-06 10:31:44.576  6969  6991 I wf_game : level-menu: cursor on 4 (Lionfish)
+10-06 10:31:44.609  6969  6991 I wf_game : key code=20 action=1 mask=0x1000
+10-06 10:31:45.174  6969  6991 I wf_game : key code=20 action=0 mask=0x1000
+10-06 10:31:45.176  6969  6991 I wf_game : level-menu: cursor on 5 (Planted Tank)
+10-06 10:31:45.209  6969  6991 I wf_game : key code=20 action=1 mask=0x1000
+10-06 10:31:45.808  6969  6991 I wf_game : key code=22 action=0 mask=0x2000
+10-06 10:31:45.842  6969  6991 I wf_game : key code=22 action=1 mask=0x2000
+10-06 10:31:49.353  6969  6981 I f_game.aquarium: Explicit concurrent mark compact GC freed 3185(176KB) AllocSpace objects, 1(20KB) LOS objects, 49% free, 2143KB/4286KB, paused 229us,1.151ms total 21.391ms
+10-06 10:31:49.696  6969  6991 I wf_game : key code=23 action=0 mask=0x1
+10-06 10:31:49.714  6969  6991 I wf_game : key code=23 action=1 mask=0x1
+10-06 10:31:50.513  6969  6991 I wf_game : key code=23 action=0 mask=0x1
+10-06 10:31:50.531  6969  6991 I wf_game : key code=23 action=1 mask=0x1
+10-06 10:31:51.131  6969  6991 I wf_game : key code=22 action=0 mask=0x2000
+10-06 10:31:51.166  6969  6991 I wf_game : key code=22 action=1 mask=0x2000
+10-06 10:31:51.751  6969  6991 I wf_game : key code=23 action=0 mask=0x1
+10-06 10:31:51.766  6969  6991 I wf_game : key code=23 action=1 mask=0x1
+10-06 10:31:52.365  6969  6991 I wf_game : key code=20 action=0 mask=0x1000
+10-06 10:31:52.400  6969  6991 I wf_game : key code=20 action=1 mask=0x1000
+10-06 10:31:52.867  6969  6991 I wf_game : key code=23 action=0 mask=0x1
+10-06 10:31:52.884  6969  6991 I wf_game : key code=23 action=1 mask=0x1
+10-06 10:31:53.467  6969  6991 I wf_game : key code=21 action=0 mask=0x4000
+10-06 10:31:53.499  6969  6991 I wf_game : key code=21 action=1 mask=0x4000
+10-06 10:31:54.084  6969  6991 I wf_game : key code=23 action=0 mask=0x1
+10-06 10:31:54.119  6969  6991 I wf_game : key code=23 action=1 mask=0x1
+10-06 10:31:57.976  6969  6981 I f_game.aquarium: Explicit concurrent mark compact GC freed 2836(160KB) AllocSpace objects, 1(20KB) LOS objects, 49% free, 2143KB/4286KB, paused 274us,1.247ms total 20.614ms
+10-06 10:31:58.522  6969  6991 I wf_game : phonepad: connection from 192.168.4.21:49362
+10-06 10:31:58.523  6969  6991 I wf_game : phonepad: phone connected from 192.168.4.21:49362
+10-06 10:31:58.655  6969  6991 I wf_game : phonepad: phone 192.168.4.21:49362 disconnected: every button released
+10-06 10:32:03.318  6969  6981 I f_game.aquarium: Explicit concurrent mark compact GC freed 2802(160KB) AllocSpace objects, 1(20KB) LOS objects, 49% free, 2143KB/4286KB, paused 270us,1.116ms total 19.984ms
+10-06 10:32:03.796  6969  6991 I wf_game : phonepad: connection from 192.168.4.21:47650
+10-06 10:32:03.796  6969  6991 I wf_game : phonepad: phone connected from 192.168.4.21:47650
+10-06 10:32:03.947  6969  6991 I wf_game : phonepad: phone 192.168.4.21:47650 disconnected: every button released
+10-06 10:32:09.230  6969  6981 I f_game.aquarium: Explicit concurrent mark compact GC freed 2799(160KB) AllocSpace objects, 1(20KB) LOS objects, 49% free, 2143KB/4286KB, paused 249us,1.210ms total 20.661ms
+10-06 10:32:09.683  6969  6991 I wf_game : phonepad: connection from 192.168.4.21:47658
+10-06 10:32:09.684  6969  6991 I wf_game : phonepad: phone connected from 192.168.4.21:47658
+10-06 10:32:09.869  6969  6991 I wf_game : phonepad: phone 192.168.4.21:47658 disconnected: every button released
+10-06 10:32:10.901  6969  6991 I wf_game : key code=23 action=0 mask=0x1
+10-06 10:32:10.935  6969  6991 I wf_game : key code=23 action=1 mask=0x1
+10-06 10:32:10.937  6969  6991 I wf_game : level-menu: LEVEL_TO_RUN=5 (Planted Tank)
+10-06 10:32:10.937  6969  6991 I wf_game : level-menu: level 5 starts
+10-06 10:32:17.093  6969  6981 I f_game.aquarium: Explicit concurrent mark compact GC freed 2797(160KB) AllocSpace objects, 1(20KB) LOS objects, 49% free, 2143KB/4286KB, paused 547us,1.263ms total 21.436ms
+10-06 10:32:18.167  6969  6991 I wf_game : key code=23 action=0 mask=0x1
+10-06 10:32:18.231  6969  6991 I wf_game : key code=59 action=0 mask=0x0 (unmapped, dropped)
+10-06 10:32:19.570  6969  6991 I wf_game : key code=23 action=1 mask=0x1
+10-06 10:32:19.641  6969  6991 I wf_game : key code=59 action=1 mask=0x0 (unmapped, dropped)
+10-06 10:32:23.266  6969  6981 I f_game.aquarium: Explicit concurrent mark compact GC freed 2803(160KB) AllocSpace objects, 1(20KB) LOS objects, 49% free, 2143KB/4286KB, paused 278us,1.317ms total 19.374ms
+10-06 10:32:23.870  6969  6991 I wf_game : phonepad: connection from 192.168.4.21:50450
+10-06 10:32:23.870  6969  6991 I wf_game : phonepad: phone connected from 192.168.4.21:50450
+10-06 10:32:30.319  6969  6981 I f_game.aquarium: Explicit concurrent mark compact GC freed 2791(128KB) AllocSpace objects, 1(20KB) LOS objects, 49% free, 2143KB/4286KB, paused 287us,1.893ms total 22.099ms
+10-06 10:32:41.304  6969  6981 I f_game.aquarium: Explicit concurrent mark compact GC freed 2792(128KB) AllocSpace objects, 1(20KB) LOS objects, 49% free, 2143KB/4286KB, paused 257us,1.189ms total 20.061ms
+10-06 10:32:43.055  6969  6991 I wf_game : phonepad: closed 192.168.4.21:50450: read error
+10-06 10:32:46.566  6969  6981 I f_game.aquarium: Explicit concurrent mark compact GC freed 2791(128KB) AllocSpace objects, 1(20KB) LOS objects, 49% free, 2143KB/4286KB, paused 268us,1.118ms total 19.318ms
+10-06 10:32:47.014  6969  6991 I wf_game : phonepad: connection from 192.168.4.21:49218
+10-06 10:32:47.015  6969  6991 I wf_game : phonepad: phone connected from 192.168.4.21:49218
+10-06 10:32:51.516  6969  6991 I wf_game : phonepad: closed 192.168.4.21:49218: read error
+10-06 10:32:52.507  6969  6991 I wf_game : key code=23 action=0 mask=0x1
+10-06 10:32:52.620  6969  6991 I wf_game : key code=23 action=1 mask=0x1
+10-06 10:32:56.787  6969  6981 I f_game.aquarium: Explicit concurrent mark compact GC freed 2795(160KB) AllocSpace objects, 1(20KB) LOS objects, 49% free, 2143KB/4286KB, paused 237us,1.108ms total 18.504ms
+10-06 10:32:58.421  6969  6991 I wf_game : key code=22 action=0 mask=0x2000
+10-06 10:32:58.586  6969  6991 I wf_game : key code=59 action=0 mask=0x0 (unmapped, dropped)
+10-06 10:33:01.438  6969  6991 I wf_game : key code=22 action=1 mask=0x2000
+10-06 10:33:01.586  6969  6991 I wf_game : key code=59 action=1 mask=0x0 (unmapped, dropped)
+10-06 10:33:05.063  6969  6981 I f_game.aquarium: Explicit concurrent mark compact GC freed 2799(160KB) AllocSpace objects, 1(20KB) LOS objects, 49% free, 2143KB/4286KB, paused 292us,1.140ms total 18.810ms
+10-06 10:33:06.179  6969  6991 I wf_game : key code=21 action=0 mask=0x4000
+10-06 10:33:06.329  6969  6991 I wf_game : key code=59 action=0 mask=0x0 (unmapped, dropped)
+10-06 10:33:09.157  6969  6991 I wf_game : key code=21 action=1 mask=0x4000
+10-06 10:33:09.244  6969  6991 I wf_game : key code=59 action=1 mask=0x0 (unmapped, dropped)
+10-06 10:33:13.217  6969  6981 I f_game.aquarium: Explicit concurrent mark compact GC freed 2701(160KB) AllocSpace objects, 1(20KB) LOS objects, 49% free, 2143KB/4286KB, paused 281us,1.165ms total 23.277ms
+10-06 10:33:14.304  6969  6991 I wf_game : key code=19 action=0 mask=0x800
+10-06 10:33:14.467  6969  6991 I wf_game : key code=59 action=0 mask=0x0 (unmapped, dropped)
+10-06 10:33:17.324  6969  6991 I wf_game : key code=19 action=1 mask=0x800
+10-06 10:33:17.476  6969  6991 I wf_game : key code=59 action=1 mask=0x0 (unmapped, dropped)
+10-06 10:33:21.365  6969  6981 I f_game.aquarium: Explicit concurrent mark compact GC freed 2700(160KB) AllocSpace objects, 1(20KB) LOS objects, 49% free, 2143KB/4286KB, paused 220us,1.380ms total 20.652ms
+10-06 10:33:22.405  6969  6991 I wf_game : key code=20 action=0 mask=0x1000
+10-06 10:33:22.558  6969  6991 I wf_game : key code=59 action=0 mask=0x0 (unmapped, dropped)
+10-06 10:33:25.493  6969  6991 I wf_game : key code=20 action=1 mask=0x1000
+10-06 10:33:25.646  6969  6991 I wf_game : key code=59 action=1 mask=0x0 (unmapped, dropped)
+10-06 10:33:29.981  6969  6981 I f_game.aquarium: Explicit concurrent mark compact GC freed 2700(160KB) AllocSpace objects, 1(20KB) LOS objects, 49% free, 2143KB/4286KB, paused 236us,1.456ms total 18.877ms
+10-06 10:33:36.244  6969  6991 I wf_game : APP_CMD_PAUSE
+10-06 10:33:36.245  6969  6991 I wf_game : phonepad: stopped
+10-06 10:33:37.049  6969  6991 I wf_game : APP_CMD_RESUME
+10-06 10:33:37.053  6969  6991 I wf_game : phonepad: listening on 192.168.4.43:8765
+10-06 10:33:37.053  6969  6991 I wf_game : phone controller: open http://192.168.4.43:8765/?k=463102 (PIN 463102)

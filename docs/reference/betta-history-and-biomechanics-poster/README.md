@@ -1,6 +1,6 @@
 # Betta — the art of flowing fins
 
-Finished A3 portrait poster: [HTML](poster.html), [PDF](poster.pdf), [PNG](poster.png). Includes original side and oblique 3D fish renders, four published locality labels on a geographic map, history, habitat, paternal care and fin-motion schematics.
+Finished A3 portrait poster: [HTML](poster.html), [PDF](betta-history-and-biomechanics-a3.pdf), [PNG](poster.png). Includes original side and oblique 3D fish renders, four published locality labels on a geographic map, history, habitat, paternal care and fin-motion schematics.
 
 ## Fish render and its limits
 
@@ -23,7 +23,7 @@ The geographic basemap uses Natural Earth 1:110m data, shared with the adjacent 
 
 Run `blender --background --python wflevels/aquarium_betta/render_detailed.py` for the runtime views, editable scene and pose manifest. Cycles CPU, 24 samples, 3200 × 1900 pixels. The script reads the runtime geometry and reproduces its root-weighted native fin deformation, leaving game files unchanged. `render_fish.py` reproduces only the archived studio study.
 
-Then run `python3 docs/reference/betta-history-and-biomechanics-poster/make_poster.py`. It embeds both PNGs, writes the map and native diagrams and produces offline `poster.html`. Print with Chrome using a fresh profile, no PDF headers/footers and the CSS A3 size. Generate `poster.png` with `pdftoppm -r 150 -png -singlefile poster.pdf poster`.
+Then run `python3 docs/reference/betta-history-and-biomechanics-poster/make_poster.py`. It embeds both PNGs, writes the map and native diagrams and produces offline `poster.html`. Print with Chrome using a fresh profile, no PDF headers/footers and the CSS A3 size. Generate `poster.png` with `pdftoppm -r 150 -png -singlefile betta-history-and-biomechanics-a3.pdf poster`.
 
 - [x] Two genuine Blender model renders included; editable assets and triangle counts retained.
 - [x] History, habitat, locality evidence and motion provenance cited.

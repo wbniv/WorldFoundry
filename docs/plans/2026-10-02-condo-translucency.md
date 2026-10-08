@@ -94,7 +94,7 @@ The desktop debug/ASan timing estimate is approximately **108.8 ms/frame** and i
 
 ### Limits and follow-up
 
-This is centroid-sorted alpha compositing. Intersecting triangles or cyclic overlaps can still produce incorrect local ordering; it is not order-independent transparency. Curved shells may accumulate tint where their existing mesh pieces overlap, and visual tuning remains reviewable in the [A3 poster](../reference/blue-shrimp-poster/poster.pdf). The original Blue Dream materials remain opaque in this rollout because Will requested that half the colony retain the original appearance.
+This is centroid-sorted alpha compositing. Intersecting triangles or cyclic overlaps can still produce incorrect local ordering; it is not order-independent transparency. Curved shells may accumulate tint where their existing mesh pieces overlap, and visual tuning remains reviewable in the [A3 poster](../reference/blue-shrimp-poster/blue-shrimp-a3.pdf). The original Blue Dream materials remain opaque in this rollout because Will requested that half the colony retain the original appearance.
 
 The shared mechanism now also drives the condo glass and cassette shade. The condo integration and evidence are recorded below. Refraction, reflection, blur and continuous texture-alpha export also remain outside this change.
 

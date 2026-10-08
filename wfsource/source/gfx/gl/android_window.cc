@@ -23,6 +23,10 @@
 
 #include <hal/android/wf_android_export.hp>
 #include <hal/phonepad/phonepad_overlay.h>
+#include <hal/android/touch_controls.h>
+#include "../../../../engine/vendor/stb_easy_font.h"
+
+extern "C" void WFAndroidTouchLayout(int,int,androidtouch::Layout*,uint32_t*,float*,float*);
 
 #include <cstdio>
 #include <cstdlib>
@@ -327,6 +331,18 @@ void PushHudRect(std::vector<HudVert>& v,
     v.push_back({nx0, ny1, r, g, b, a});
 }
 
+void PushHudDisc(std::vector<HudVert>& v,float cx,float cy,float radius,
+                 float w,float h,float r,float g,float b,float a)
+{
+    const float nx=cx/w*2-1,ny=1-cy/h*2;
+    for(int i=0;i<48;++i) {
+        const float angle=i*6.2831853f/48,next=(i+1)*6.2831853f/48;
+        v.push_back({nx,ny,r,g,b,a});
+        v.push_back({(cx+std::cos(angle)*radius)/w*2-1,1-(cy+std::sin(angle)*radius)/h*2,r,g,b,a});
+        v.push_back({(cx+std::cos(next)*radius)/w*2-1,1-(cy+std::sin(next)*radius)/h*2,r,g,b,a});
+    }
+}
+
 }  // namespace
 
 // native_app_entry.cc calls this after AConfiguration_getUiModeType — suppress
@@ -351,20 +367,37 @@ WFAndroidDrawHUD()
     const float fw = float(w);
     const float fh = float(h);
 
-    // D-pad cross + A + B — same pixel regions the hit test uses.
+    // Rendering and input use the same density-aware control geometry.
     std::vector<HudVert> verts;
-    verts.reserve(6 * 6);
-
-    // D-pad: four directional buttons. Slightly brighter gray; 50% alpha.
-    const float gR = 0.6f, gG = 0.6f, gB = 0.6f, gA = 0.5f;
-    PushHudRect(verts, 0,    h-133, 66,  h-66,  fw, fh, gR, gG, gB, gA);  // LEFT
-    PushHudRect(verts, 133,  h-133, 200, h-66,  fw, fh, gR, gG, gB, gA);  // RIGHT
-    PushHudRect(verts, 66,   h-200, 133, h-133, fw, fh, gR, gG, gB, gA);  // UP
-    PushHudRect(verts, 66,   h-66,  133, h,     fw, fh, gR, gG, gB, gA);  // DOWN
-
-    // Action buttons. A=red (primary); B=blue.
-    PushHudRect(verts, w-120, h-120, w,     h, fw, fh, 0.80f, 0.25f, 0.25f, 0.55f);
-    PushHudRect(verts, w-240, h-120, w-120, h, fw, fh, 0.25f, 0.35f, 0.85f, 0.55f);
+    androidtouch::Layout layout;uint32_t held=0;float stickX=0,stickY=0;
+    WFAndroidTouchLayout(w,h,&layout,&held,&stickX,&stickY);
+    if(!layout.valid)return;
+    const float radius=androidtouch::stickRadius(layout),cx=(layout.pad.x0+layout.pad.x1)/2,cy=(layout.pad.y0+layout.pad.y1)/2;
+    PushHudDisc(verts,cx,cy,radius,fw,fh,.42f,.50f,.62f,.65f);
+    PushHudDisc(verts,cx,cy,radius-layout.cell*.03f,fw,fh,.05f,.075f,.125f,.55f);
+    const bool moving=(held&(androidtouch::Up|androidtouch::Down|androidtouch::Left|androidtouch::Right))!=0;
+    const float knobRadius=layout.cell*.6f,travel=radius-knobRadius;
+    PushHudDisc(verts,cx+stickX*travel,cy+stickY*travel,knobRadius,fw,fh,
+                moving?.42f:.22f,moving?.62f:.32f,moving?.85f:.46f,.85f);
+    for(int i=4;i<8;++i) {
+        const auto& control=layout.controls[i];
+        const auto& r=control.rect;
+        const bool action=control.bit<=androidtouch::D;
+        const float alpha=(held&control.bit)?0.85f:0.55f;
+        PushHudRect(verts,r.x0,r.y0,r.x1,r.y1,fw,fh,
+                    action?0.20f:0.38f,action?0.28f:0.38f,action?0.43f:0.38f,alpha);
+        float text[256];
+        const int count=stb_easy_font_print(0,0,(char*)control.label,nullptr,text,sizeof(text));
+        const float scale=(r.x1-r.x0)/16;
+        const float x=(r.x0+r.x1-stb_easy_font_width((char*)control.label)*scale)/2;
+        const float y=(r.y0+r.y1-8*scale)/2;
+        for(int q=0;q<count;++q) {
+            const float* v=text+q*16;
+            float x0=v[0],x1=v[0],y0=v[1],y1=v[1];
+            for(int k=1;k<4;++k){x0=std::min(x0,v[k*4]);x1=std::max(x1,v[k*4]);y0=std::min(y0,v[k*4+1]);y1=std::max(y1,v[k*4+1]);}
+            PushHudRect(verts,x+x0*scale,y+y0*scale,x+x1*scale,y+y1*scale,fw,fh,1,1,1,0.95f);
+        }
+    }
 
     // Save minimal GL state we'll touch.
     GLboolean prevBlend   = glIsEnabled(GL_BLEND);

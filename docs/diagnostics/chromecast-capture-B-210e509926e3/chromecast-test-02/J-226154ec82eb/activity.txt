@@ -1,0 +1,446 @@
+ACTIVITY MANAGER ACTIVITIES (dumpsys activity activities)
+Display #0 (activities from top to bottom):
+  RootTask #108: type=home mode=fullscreen
+  isSleeping=false
+  mBounds=Rect(0, 0 - 0, 0)
+  mCreatedByOrganizer=false
+    mResumedActivity: ActivityRecord{148ac95 u0 com.google.android.apps.tv.launcherx/.home.HomeActivity t109}
+    * Task{d617b14 #109 type=home A=10046:com.google.android.apps.tv.launcherx U=0 rootTaskId=108 visible=true mode=fullscreen translucent=false sz=1}
+      mBounds=Rect(0, 0 - 0, 0)
+      mMinWidth=-1 mMinHeight=-1
+      userId=0 effectiveUid=u0a46 mCallingUid=0 mUserSetupComplete=true mCallingPackage=null mCallingFeatureId=null
+      affinity=10046:com.google.android.apps.tv.launcherx
+      intent={act=android.intent.action.MAIN cat=[android.intent.category.HOME] flg=0x10800100 cmp=com.google.android.apps.tv.launcherx/.home.HomeActivity}
+      mActivityComponent=com.google.android.apps.tv.launcherx/.home.HomeActivity
+      autoRemoveRecents=false isPersistable=false activityType=2
+      rootWasReset=false mNeverRelinquishIdentity=true mReuseTask=false mLockTaskAuth=LOCK_TASK_AUTH_PINNABLE
+      Activities=[ActivityRecord{148ac95 u0 com.google.android.apps.tv.launcherx/.home.HomeActivity t109}]
+      askedCompatMode=false inRecents=true isAvailable=true
+      taskId=109 rootTaskId=108
+      hasChildPipActivity=false
+      mHasBeenVisible=true
+      mResizeMode=RESIZE_MODE_UNRESIZEABLE mSupportsPictureInPicture=false isResizeable=false
+      lastActiveTime=39579636 (inactive for 38s)
+      * Hist #0: ActivityRecord{148ac95 u0 com.google.android.apps.tv.launcherx/.home.HomeActivity t109}
+          packageName=com.google.android.apps.tv.launcherx processName=com.google.android.apps.tv.launcherx
+          launchedFromUid=0 launchedFromPackage=null launchedFromFeature=null userId=0
+          app=ProcessRecord{c758809 13557:com.google.android.apps.tv.launcherx/u0a46}
+          Intent { act=android.intent.action.MAIN cat=[android.intent.category.HOME] flg=0x10800100 cmp=com.google.android.apps.tv.launcherx/.home.HomeActivity (has extras) }
+          rootOfTask=true task=Task{d617b14 #109 type=home A=10046:com.google.android.apps.tv.launcherx U=0 rootTaskId=108 visible=true mode=fullscreen translucent=false sz=1}
+          taskAffinity=10046:com.google.android.apps.tv.launcherx
+          mActivityComponent=com.google.android.apps.tv.launcherx/.home.HomeActivity
+          baseDir=/data/app/~~vINra8dzRIJXwBG6yRhjbQ==/com.google.android.apps.tv.launcherx-7s4np4KJB_cewBBbUpyJRw==/base.apk
+          dataDir=/data/user/0/com.google.android.apps.tv.launcherx
+          splitDir=[/data/app/~~vINra8dzRIJXwBG6yRhjbQ==/com.google.android.apps.tv.launcherx-7s4np4KJB_cewBBbUpyJRw==/split_config.armeabi_v7a.apk, /data/app/~~vINra8dzRIJXwBG6yRhjbQ==/com.google.android.apps.tv.launcherx-7s4np4KJB_cewBBbUpyJRw==/split_config.en.apk, /data/app/~~vINra8dzRIJXwBG6yRhjbQ==/com.google.android.apps.tv.launcherx-7s4np4KJB_cewBBbUpyJRw==/split_config.xhdpi.apk]
+          stateNotNeeded=true componentSpecified=false mActivityType=home
+          compat={320dpi always-compat} labelRes=0x7f1401bf icon=0x7f100001 theme=0x7f15021b
+          mLastReportedConfigurations:
+            mGlobalConfig={1.0 ?mcc?mnc [en_US] ldltr sw540dp w960dp h540dp 320dpi lrg long land television night -touch -keyb/v/h dpad/v winConfig={ mBounds=Rect(0, 0 - 1920, 1080) mAppBounds=Rect(0, 0 - 1920, 1080) mMaxBounds=Rect(0, 0 - 1920, 1080) mWindowingMode=fullscreen mDisplayWindowingMode=fullscreen mActivityType=undefined mAlwaysOnTop=undefined mRotation=ROTATION_0} s.6 fontWeightAdjustment=0}
+            mOverrideConfig={1.0 ?mcc?mnc [en_US] ldltr sw540dp w960dp h540dp 320dpi lrg long land television night -touch -keyb/v/h dpad/v winConfig={ mBounds=Rect(0, 0 - 1920, 1080) mAppBounds=Rect(0, 0 - 1920, 1080) mMaxBounds=Rect(0, 0 - 1920, 1080) mWindowingMode=fullscreen mDisplayWindowingMode=fullscreen mActivityType=home mAlwaysOnTop=undefined mRotation=ROTATION_0} s.3 fontWeightAdjustment=0}
+          CurrentConfiguration={1.0 ?mcc?mnc [en_US] ldltr sw540dp w960dp h540dp 320dpi lrg long land television night -touch -keyb/v/h dpad/v winConfig={ mBounds=Rect(0, 0 - 1920, 1080) mAppBounds=Rect(0, 0 - 1920, 1080) mMaxBounds=Rect(0, 0 - 1920, 1080) mWindowingMode=fullscreen mDisplayWindowingMode=fullscreen mActivityType=home mAlwaysOnTop=undefined mRotation=ROTATION_0} s.12 fontWeightAdjustment=0}
+          RequestedOverrideConfiguration={0.0 ?mcc?mnc ?localeList ?layoutDir ?swdp ?wdp ?hdp ?density ?lsize ?long ?ldr ?wideColorGamut ?orien ?uimode ?night ?touch ?keyb/?/? ?nav/? winConfig={ mBounds=Rect(0, 0 - 0, 0) mAppBounds=null mMaxBounds=Rect(0, 0 - 0, 0) mWindowingMode=undefined mDisplayWindowingMode=undefined mActivityType=home mAlwaysOnTop=undefined mRotation=undefined} ?fontWeightAdjustment}
+          taskDescription: label="null" icon=null iconResource=/0 iconFilename=null primaryColor=ff37474f
+            backgroundColor=ff0e0e0f statusBarColor=ff263238 navigationBarColor=ff000000
+           backgroundColorFloating=ff424242
+          launchFailed=false launchCount=0 lastLaunchTime=-6m27s237ms
+          mHaveState=false mIcicle=null
+          state=RESUMED stopped=false delayedResume=false finishing=false
+          keysPaused=false inHistory=true idle=true mStartingWindowState=STARTING_WINDOW_NOT_SHOWN
+          occludesParent=true noDisplay=false immersive=false launchMode=2
+          frozenBeforeDestroy=false forceNewConfig=false
+          mActivityType=home
+          windows=[Window{c4cc068 u0 com.google.android.apps.tv.launcherx/com.google.android.apps.tv.launcherx.home.HomeActivity}]
+          windowType=2 hasVisible=true
+          mOccludesParent=true
+          mOrientation=SCREEN_ORIENTATION_UNSPECIFIED
+          mVisibleRequested=true mVisible=true mClientVisible=true reportedDrawn=true reportedVisible=true
+          mNumInterestingWindows=1 mNumDrawnWindows=1 allDrawn=true lastAllDrawn=true)
+          startingData=null firstWindowDrawn=true mIsExiting=false
+          nowVisible=true lastVisibleTime=-33s375ms
+          resizeMode=RESIZE_MODE_UNRESIZEABLE
+          mLastReportedMultiWindowMode=false mLastReportedPictureInPictureMode=false
+          supportsSizeChanges=SIZE_CHANGES_UNSUPPORTED_METADATA
+          configChanges=0x73
+          neverSandboxDisplayApis=false
+          alwaysSandboxDisplayApis=false
+          areBoundsLetterboxed=false
+
+  RootTask #39: type=standard mode=fullscreen
+  isSleeping=false
+  mBounds=Rect(0, 0 - 0, 0)
+  mCreatedByOrganizer=false
+    mLastPausedActivity: ActivityRecord{3c4d29c u0 com.google.android.youtube.tv/com.google.android.apps.youtube.tv.activity.MainActivity t39}
+    * Task{e1f551d #39 type=standard A=10092:com.google.android.youtube.tv.main U=0 visible=false mode=fullscreen translucent=true sz=1}
+      mBounds=Rect(0, 0 - 0, 0)
+      mMinWidth=-1 mMinHeight=-1
+      userId=0 effectiveUid=u0a92 mCallingUid=u0a92 mUserSetupComplete=true mCallingPackage=com.google.android.youtube.tv mCallingFeatureId=null
+      affinity=10092:com.google.android.youtube.tv.main
+      intent={act=com.google.android.gms.cast.tv.action.LAUNCH dat=https://www.youtube.com/tv?c2n=1 flg=0x15000000 pkg=com.google.android.youtube.tv cmp=com.google.android.youtube.tv/com.google.android.apps.youtube.tv.activity.MainActivity}
+      mActivityComponent=com.google.android.youtube.tv/com.google.android.apps.youtube.tv.activity.MainActivity
+      autoRemoveRecents=false isPersistable=true activityType=1
+      rootWasReset=false mNeverRelinquishIdentity=true mReuseTask=false mLockTaskAuth=LOCK_TASK_AUTH_PINNABLE
+      Activities=[ActivityRecord{3c4d29c u0 com.google.android.youtube.tv/com.google.android.apps.youtube.tv.activity.MainActivity t39}]
+      askedCompatMode=false inRecents=true isAvailable=true
+      mRootProcess=ProcessRecord{1b46524 8831:com.google.android.youtube.tv/u0a92}
+      taskId=39 rootTaskId=39
+      hasChildPipActivity=false
+      mHasBeenVisible=true
+      mResizeMode=RESIZE_MODE_RESIZEABLE_VIA_SDK_VERSION mSupportsPictureInPicture=false isResizeable=true
+      lastActiveTime=39231218 (inactive for 387s)
+      * Hist #0: ActivityRecord{3c4d29c u0 com.google.android.youtube.tv/com.google.android.apps.youtube.tv.activity.MainActivity t39}
+          packageName=com.google.android.youtube.tv processName=com.google.android.youtube.tv
+          launchedFromUid=10092 launchedFromPackage=com.google.android.youtube.tv launchedFromFeature=null userId=0
+          app=ProcessRecord{1b46524 8831:com.google.android.youtube.tv/u0a92}
+          Intent { act=com.google.android.gms.cast.tv.action.LAUNCH dat=https://www.youtube.com/tv?c2n=1 flg=0x15000000 pkg=com.google.android.youtube.tv cmp=com.google.android.youtube.tv/com.google.android.apps.youtube.tv.activity.MainActivity (has extras) }
+          rootOfTask=true task=Task{e1f551d #39 type=standard A=10092:com.google.android.youtube.tv.main U=0 visible=false mode=fullscreen translucent=true sz=1}
+          taskAffinity=10092:com.google.android.youtube.tv.main
+          mActivityComponent=com.google.android.youtube.tv/com.google.android.apps.youtube.tv.activity.MainActivity
+          baseDir=/data/app/~~c6xsAB7qEL1qElIX-bKQ4Q==/com.google.android.youtube.tv-KntC7JOrnwUU6gdDSXKXqw==/base.apk
+          dataDir=/data/user/0/com.google.android.youtube.tv
+          splitDir=[/data/app/~~c6xsAB7qEL1qElIX-bKQ4Q==/com.google.android.youtube.tv-KntC7JOrnwUU6gdDSXKXqw==/split_config.armeabi_v7a.apk]
+          stateNotNeeded=false componentSpecified=false mActivityType=standard
+          compat={320dpi always-compat} labelRes=0x7f140038 icon=0x7f110001 theme=0x7f150188
+          mLastReportedConfigurations:
+            mGlobalConfig={1.0 ?mcc?mnc [en_US] ldltr sw540dp w960dp h540dp 320dpi lrg long land television night -touch -keyb/v/h dpad/v winConfig={ mBounds=Rect(0, 0 - 1920, 1080) mAppBounds=Rect(0, 0 - 1920, 1080) mMaxBounds=Rect(0, 0 - 1920, 1080) mWindowingMode=fullscreen mDisplayWindowingMode=fullscreen mActivityType=undefined mAlwaysOnTop=undefined mRotation=ROTATION_0} s.6 fontWeightAdjustment=0}
+            mOverrideConfig={1.0 ?mcc?mnc [en_US] ldltr sw540dp w960dp h540dp 320dpi lrg long land television night -touch -keyb/v/h dpad/v winConfig={ mBounds=Rect(0, 0 - 1920, 1080) mAppBounds=Rect(0, 0 - 1920, 1080) mMaxBounds=Rect(0, 0 - 1920, 1080) mWindowingMode=fullscreen mDisplayWindowingMode=fullscreen mActivityType=standard mAlwaysOnTop=undefined mRotation=ROTATION_0} s.2 fontWeightAdjustment=0}
+          CurrentConfiguration={1.0 ?mcc?mnc [en_US] ldltr sw540dp w960dp h540dp 320dpi lrg long land television night -touch -keyb/v/h dpad/v winConfig={ mBounds=Rect(0, 0 - 1920, 1080) mAppBounds=Rect(0, 0 - 1920, 1080) mMaxBounds=Rect(0, 0 - 1920, 1080) mWindowingMode=fullscreen mDisplayWindowingMode=fullscreen mActivityType=standard mAlwaysOnTop=undefined mRotation=ROTATION_0} s.16 fontWeightAdjustment=0}
+          taskDescription: label="null" icon=null iconResource=/0 iconFilename=null primaryColor=ff282828
+            backgroundColor=ff303030 statusBarColor=ff000000 navigationBarColor=ff000000
+           backgroundColorFloating=ff424242
+          launchFailed=false launchCount=0 lastLaunchTime=-10h11m56s118ms
+          mHaveState=true mIcicle=Bundle[mParcelledData.dataSize=256]
+          state=STOPPED stopped=true delayedResume=false finishing=false
+          keysPaused=false inHistory=true idle=true mStartingWindowState=STARTING_WINDOW_REMOVED
+          occludesParent=true noDisplay=false immersive=false launchMode=2
+          frozenBeforeDestroy=false forceNewConfig=false
+          mActivityType=standard
+          windows=[Window{9a152d7 u0 com.google.android.youtube.tv/com.google.android.apps.youtube.tv.activity.MainActivity}]
+          windowType=2 hasVisible=true
+          mOccludesParent=true
+          mOrientation=SCREEN_ORIENTATION_SENSOR_LANDSCAPE
+          mVisibleRequested=false mVisible=false mClientVisible=false reportedDrawn=false reportedVisible=false
+          mAppStopped=true
+          mNumInterestingWindows=1 mNumDrawnWindows=1 allDrawn=true lastAllDrawn=true)
+          startingData=null firstWindowDrawn=true mIsExiting=false
+          nowVisible=false lastVisibleTime=-7m10s841ms
+          resizeMode=RESIZE_MODE_RESIZEABLE_VIA_SDK_VERSION
+          mLastReportedMultiWindowMode=false mLastReportedPictureInPictureMode=false
+          supportsSizeChanges=SIZE_CHANGES_UNSUPPORTED_METADATA
+          configChanges=0x6f3
+          neverSandboxDisplayApis=false
+          alwaysSandboxDisplayApis=false
+          areBoundsLetterboxed=false
+
+  RootTask #106: type=standard mode=fullscreen
+  isSleeping=false
+  mBounds=Rect(0, 0 - 0, 0)
+  mCreatedByOrganizer=false
+    mLastPausedActivity: ActivityRecord{3cb25d3 u0 com.google.android.apps.tv.launcherx/.home.HomeActivity t106}
+    * Task{3006e86 #106 type=standard A=10046:com.google.android.apps.tv.launcherx U=0 visible=false mode=fullscreen translucent=true sz=1}
+      mBounds=Rect(0, 0 - 0, 0)
+      mMinWidth=-1 mMinHeight=-1
+      userId=0 effectiveUid=u0a46 mCallingUid=2000 mUserSetupComplete=true mCallingPackage=com.android.shell mCallingFeatureId=null
+      affinity=10046:com.google.android.apps.tv.launcherx
+      intent={flg=0x10800000 cmp=com.google.android.apps.tv.launcherx/.home.HomeActivity}
+      mActivityComponent=com.google.android.apps.tv.launcherx/.home.HomeActivity
+      rootWasReset=false mNeverRelinquishIdentity=true mReuseTask=false mLockTaskAuth=LOCK_TASK_AUTH_PINNABLE
+      Activities=[ActivityRecord{3cb25d3 u0 com.google.android.apps.tv.launcherx/.home.HomeActivity t106}]
+      askedCompatMode=false inRecents=true isAvailable=true
+      taskId=106 rootTaskId=106
+      hasChildPipActivity=false
+      mHasBeenVisible=true
+      mResizeMode=RESIZE_MODE_RESIZEABLE_VIA_SDK_VERSION mSupportsPictureInPicture=false isResizeable=true
+      lastActiveTime=39187091 (inactive for 431s)
+      * Hist #0: ActivityRecord{3cb25d3 u0 com.google.android.apps.tv.launcherx/.home.HomeActivity t106}
+          packageName=com.google.android.apps.tv.launcherx processName=com.google.android.apps.tv.launcherx
+          launchedFromUid=2000 launchedFromPackage=com.android.shell launchedFromFeature=null userId=0
+          app=ProcessRecord{c758809 13557:com.google.android.apps.tv.launcherx/u0a46}
+          Intent { flg=0x10800000 cmp=com.google.android.apps.tv.launcherx/.home.HomeActivity }
+          rootOfTask=true task=Task{3006e86 #106 type=standard A=10046:com.google.android.apps.tv.launcherx U=0 visible=false mode=fullscreen translucent=true sz=1}
+          taskAffinity=10046:com.google.android.apps.tv.launcherx
+          mActivityComponent=com.google.android.apps.tv.launcherx/.home.HomeActivity
+          baseDir=/data/app/~~vINra8dzRIJXwBG6yRhjbQ==/com.google.android.apps.tv.launcherx-7s4np4KJB_cewBBbUpyJRw==/base.apk
+          dataDir=/data/user/0/com.google.android.apps.tv.launcherx
+          splitDir=[/data/app/~~vINra8dzRIJXwBG6yRhjbQ==/com.google.android.apps.tv.launcherx-7s4np4KJB_cewBBbUpyJRw==/split_config.armeabi_v7a.apk, /data/app/~~vINra8dzRIJXwBG6yRhjbQ==/com.google.android.apps.tv.launcherx-7s4np4KJB_cewBBbUpyJRw==/split_config.en.apk, /data/app/~~vINra8dzRIJXwBG6yRhjbQ==/com.google.android.apps.tv.launcherx-7s4np4KJB_cewBBbUpyJRw==/split_config.xhdpi.apk]
+          stateNotNeeded=true componentSpecified=false mActivityType=standard
+          compat={320dpi always-compat} labelRes=0x7f1401bf icon=0x7f100001 theme=0x7f15021b
+          mLastReportedConfigurations:
+            mGlobalConfig={1.0 ?mcc?mnc [en_US] ldltr sw540dp w960dp h540dp 320dpi lrg long land television night -touch -keyb/v/h dpad/v winConfig={ mBounds=Rect(0, 0 - 1920, 1080) mAppBounds=Rect(0, 0 - 1920, 1080) mMaxBounds=Rect(0, 0 - 1920, 1080) mWindowingMode=fullscreen mDisplayWindowingMode=fullscreen mActivityType=undefined mAlwaysOnTop=undefined mRotation=ROTATION_0} s.6 fontWeightAdjustment=0}
+            mOverrideConfig={1.0 ?mcc?mnc [en_US] ldltr sw540dp w960dp h540dp 320dpi lrg long land television night -touch -keyb/v/h dpad/v winConfig={ mBounds=Rect(0, 0 - 1920, 1080) mAppBounds=Rect(0, 0 - 1920, 1080) mMaxBounds=Rect(0, 0 - 1920, 1080) mWindowingMode=fullscreen mDisplayWindowingMode=fullscreen mActivityType=standard mAlwaysOnTop=undefined mRotation=ROTATION_0} s.2 fontWeightAdjustment=0}
+          CurrentConfiguration={1.0 ?mcc?mnc [en_US] ldltr sw540dp w960dp h540dp 320dpi lrg long land television night -touch -keyb/v/h dpad/v winConfig={ mBounds=Rect(0, 0 - 1920, 1080) mAppBounds=Rect(0, 0 - 1920, 1080) mMaxBounds=Rect(0, 0 - 1920, 1080) mWindowingMode=fullscreen mDisplayWindowingMode=fullscreen mActivityType=standard mAlwaysOnTop=undefined mRotation=ROTATION_0} s.2 fontWeightAdjustment=0}
+          taskDescription: label="null" icon=null iconResource=/0 iconFilename=null primaryColor=ff37474f
+            backgroundColor=ff0e0e0f statusBarColor=ff263238 navigationBarColor=ff000000
+           backgroundColorFloating=ff424242
+          launchFailed=false launchCount=0 lastLaunchTime=-7m33s84ms
+          mHaveState=true mIcicle=Bundle[EMPTY_PARCEL]
+          state=STOPPED stopped=true delayedResume=false finishing=false
+          keysPaused=false inHistory=true idle=true mStartingWindowState=STARTING_WINDOW_REMOVED
+          occludesParent=true noDisplay=false immersive=false launchMode=2
+          frozenBeforeDestroy=false forceNewConfig=false
+          mActivityType=standard
+          windows=[Window{f00410a u0 com.google.android.apps.tv.launcherx/com.google.android.apps.tv.launcherx.home.HomeActivity}]
+          windowType=2 hasVisible=true
+          mOccludesParent=true
+          mOrientation=SCREEN_ORIENTATION_UNSPECIFIED
+          mVisibleRequested=false mVisible=false mClientVisible=false reportedDrawn=false reportedVisible=false
+          mAppStopped=true
+          mNumInterestingWindows=1 mNumDrawnWindows=1 allDrawn=true lastAllDrawn=true)
+          startingData=null firstWindowDrawn=true mIsExiting=false
+          nowVisible=false lastVisibleTime=-7m31s829ms
+          resizeMode=RESIZE_MODE_RESIZEABLE_VIA_SDK_VERSION
+          mLastReportedMultiWindowMode=false mLastReportedPictureInPictureMode=false
+          supportsSizeChanges=SIZE_CHANGES_UNSUPPORTED_METADATA
+          configChanges=0x73
+          neverSandboxDisplayApis=false
+          alwaysSandboxDisplayApis=false
+          areBoundsLetterboxed=false
+
+  RootTask #56: type=standard mode=fullscreen
+  isSleeping=false
+  mBounds=Rect(0, 0 - 0, 0)
+  mCreatedByOrganizer=false
+    mLastPausedActivity: ActivityRecord{b4c84c4 u0 org.worldfoundry.wf_game.condo/android.app.NativeActivity t56}
+    * Task{b256263 #56 type=standard A=10004:org.worldfoundry.wf_game.condo U=0 visible=false mode=fullscreen translucent=true sz=1}
+      mBounds=Rect(0, 0 - 0, 0)
+      mMinWidth=-1 mMinHeight=-1
+      userId=0 effectiveUid=u0a4 mCallingUid=u0a46 mUserSetupComplete=true mCallingPackage=com.google.android.apps.tv.launcherx mCallingFeatureId=null
+      affinity=10004:org.worldfoundry.wf_game.condo
+      intent={act=android.intent.action.MAIN cat=[android.intent.category.LEANBACK_LAUNCHER] flg=0x10000000 pkg=org.worldfoundry.wf_game.condo cmp=org.worldfoundry.wf_game.condo/android.app.NativeActivity}
+      mActivityComponent=org.worldfoundry.wf_game.condo/android.app.NativeActivity
+      autoRemoveRecents=false isPersistable=true activityType=1
+      rootWasReset=false mNeverRelinquishIdentity=true mReuseTask=false mLockTaskAuth=LOCK_TASK_AUTH_PINNABLE
+      Activities=[ActivityRecord{b4c84c4 u0 org.worldfoundry.wf_game.condo/android.app.NativeActivity t56}]
+      askedCompatMode=false inRecents=true isAvailable=true
+      mRootProcess=ProcessRecord{a2472e2 17471:org.worldfoundry.wf_game.condo/u0a4}
+      taskId=56 rootTaskId=56
+      hasChildPipActivity=false
+      mHasBeenVisible=true
+      mResizeMode=RESIZE_MODE_RESIZEABLE_VIA_SDK_VERSION mSupportsPictureInPicture=false isResizeable=true
+      lastActiveTime=12678721 (inactive for 26939s)
+      * Hist #0: ActivityRecord{b4c84c4 u0 org.worldfoundry.wf_game.condo/android.app.NativeActivity t56}
+          packageName=org.worldfoundry.wf_game.condo processName=org.worldfoundry.wf_game.condo
+          launchedFromUid=10046 launchedFromPackage=com.google.android.apps.tv.launcherx launchedFromFeature=null userId=0
+          app=ProcessRecord{a2472e2 17471:org.worldfoundry.wf_game.condo/u0a4}
+          Intent { act=android.intent.action.MAIN cat=[android.intent.category.LEANBACK_LAUNCHER] flg=0x10000000 pkg=org.worldfoundry.wf_game.condo cmp=org.worldfoundry.wf_game.condo/android.app.NativeActivity (has extras) }
+          rootOfTask=true task=Task{b256263 #56 type=standard A=10004:org.worldfoundry.wf_game.condo U=0 visible=false mode=fullscreen translucent=true sz=1}
+          taskAffinity=10004:org.worldfoundry.wf_game.condo
+          mActivityComponent=org.worldfoundry.wf_game.condo/android.app.NativeActivity
+          baseDir=/data/app/~~OgQxVaV7spjMY2MCjnQELg==/org.worldfoundry.wf_game.condo-iOf-aLKqU9HXPeTAx3HXEQ==/base.apk
+          dataDir=/data/user/0/org.worldfoundry.wf_game.condo
+          stateNotNeeded=false componentSpecified=false mActivityType=standard
+          compat={320dpi always-compat} labelRes=0x7f060000 icon=0x7f050000 theme=0x0
+          mLastReportedConfigurations:
+            mGlobalConfig={1.0 ?mcc?mnc [en_US] ldltr sw540dp w960dp h540dp 320dpi lrg long land television night -touch -keyb/v/h dpad/v winConfig={ mBounds=Rect(0, 0 - 1920, 1080) mAppBounds=Rect(0, 0 - 1920, 1080) mMaxBounds=Rect(0, 0 - 1920, 1080) mWindowingMode=fullscreen mDisplayWindowingMode=fullscreen mActivityType=undefined mAlwaysOnTop=undefined mRotation=ROTATION_0} s.6 fontWeightAdjustment=0}
+            mOverrideConfig={1.0 ?mcc?mnc [en_US] ldltr sw540dp w960dp h540dp 320dpi lrg long land television night -touch -keyb/v/h dpad/v winConfig={ mBounds=Rect(0, 0 - 1920, 1080) mAppBounds=Rect(0, 0 - 1920, 1080) mMaxBounds=Rect(0, 0 - 1920, 1080) mWindowingMode=fullscreen mDisplayWindowingMode=fullscreen mActivityType=standard mAlwaysOnTop=undefined mRotation=ROTATION_0} s.2 fontWeightAdjustment=0}
+          CurrentConfiguration={1.0 ?mcc?mnc [en_US] ldltr sw540dp w960dp h540dp 320dpi lrg long land television night -touch -keyb/v/h dpad/v winConfig={ mBounds=Rect(0, 0 - 1920, 1080) mAppBounds=Rect(0, 0 - 1920, 1080) mMaxBounds=Rect(0, 0 - 1920, 1080) mWindowingMode=fullscreen mDisplayWindowingMode=fullscreen mActivityType=standard mAlwaysOnTop=undefined mRotation=ROTATION_0} s.8 fontWeightAdjustment=0}
+          taskDescription: label="null" icon=null iconResource=/0 iconFilename=null primaryColor=ff191c1e
+            backgroundColor=fff0f0f3 statusBarColor=ff191c1e navigationBarColor=ff000000
+           backgroundColorFloating=fff0f0f3
+          launchFailed=false launchCount=0 lastLaunchTime=-8h36m11s730ms
+          mHaveState=true mIcicle=Bundle[mParcelledData.dataSize=624]
+          state=STOPPED stopped=true delayedResume=false finishing=false
+          keysPaused=false inHistory=true idle=true mStartingWindowState=STARTING_WINDOW_REMOVED
+          occludesParent=true noDisplay=false immersive=false launchMode=2
+          frozenBeforeDestroy=false forceNewConfig=false
+          mActivityType=standard
+          windows=[Window{3bca6f4 u0 org.worldfoundry.wf_game.condo/android.app.NativeActivity}]
+          windowType=2 hasVisible=true
+          mOccludesParent=true
+          mOrientation=SCREEN_ORIENTATION_LANDSCAPE
+          mVisibleRequested=false mVisible=false mClientVisible=false reportedDrawn=false reportedVisible=false
+          mAppStopped=true
+          mNumInterestingWindows=1 mNumDrawnWindows=1 allDrawn=true lastAllDrawn=true)
+          startingData=null firstWindowDrawn=true mIsExiting=false
+          nowVisible=false lastVisibleTime=-8h11m50s161ms
+          resizeMode=RESIZE_MODE_RESIZEABLE_VIA_SDK_VERSION
+          mLastReportedMultiWindowMode=false mLastReportedPictureInPictureMode=false
+          supportsSizeChanges=SIZE_CHANGES_UNSUPPORTED_METADATA
+          configChanges=0x6a3
+          neverSandboxDisplayApis=false
+          alwaysSandboxDisplayApis=false
+          areBoundsLetterboxed=false
+
+  Resumed activities in task display areas (from top to bottom):
+    Resumed: ActivityRecord{148ac95 u0 com.google.android.apps.tv.launcherx/.home.HomeActivity t109}
+
+  ResumedActivity: ActivityRecord{148ac95 u0 com.google.android.apps.tv.launcherx/.home.HomeActivity t109}
+
+ActivityTaskSupervisor state:
+  topDisplayFocusedRootTask=Task{b79afbd #108 type=home ?? U=0 visible=true mode=fullscreen translucent=false sz=1}
+  overrideConfig={1.0 ?mcc?mnc [en_US] ldltr sw540dp w960dp h540dp 320dpi lrg long land television night -touch -keyb/v/h dpad/v winConfig={ mBounds=Rect(0, 0 - 1920, 1080) mAppBounds=Rect(0, 0 - 1920, 1080) mMaxBounds=Rect(0, 0 - 1920, 1080) mWindowingMode=fullscreen mDisplayWindowingMode=fullscreen mActivityType=undefined mAlwaysOnTop=undefined mRotation=ROTATION_0} s.6 fontWeightAdjustment=0}
+  Display: mDisplayId=0 rootTasks=4
+    init=3840x2160 320dpi base=1920x1080 320dpi cur=1920x1080 app=1920x1080 rng=1080x1080-1920x1920
+    deferred=false mLayoutNeeded=false mTouchExcludeRegion=SkRegion((0,0,1920,1080))
+
+  mLayoutSeq=2517
+  mCurrentFocus=Window{c4cc068 u0 com.google.android.apps.tv.launcherx/com.google.android.apps.tv.launcherx.home.HomeActivity}
+  mFocusedApp=ActivityRecord{148ac95 u0 com.google.android.apps.tv.launcherx/.home.HomeActivity t109}
+
+  displayId=0
+  mWallpaperTarget=null
+  mLastWallpaperX=0.0 mLastWallpaperY=0.5
+
+  Display areas in top down Z order:
+    * Leaf:36:36
+    * HideDisplayCutout:32:35
+      * OneHanded:32:35
+        * FullscreenMagnification:33:35
+          * Leaf:33:35
+        * Leaf:32:32
+    * WindowedMagnification:0:31
+      * HideDisplayCutout:26:31
+        * OneHanded:26:31
+          * FullscreenMagnification:29:31
+            * Leaf:29:31
+          * Leaf:28:28
+          * FullscreenMagnification:26:27
+            * Leaf:26:27
+      * Leaf:24:25
+      * HideDisplayCutout:20:23
+        * OneHanded:20:23
+          * FullscreenMagnification:20:23
+            * Leaf:20:23
+      * OneHanded:19:19
+        * FullscreenMagnification:19:19
+          * Leaf:19:19
+      * HideDisplayCutout:18:18
+        * OneHanded:18:18
+          * FullscreenMagnification:18:18
+            * Leaf:18:18
+      * OneHanded:17:17
+        * FullscreenMagnification:17:17
+          * Leaf:17:17
+      * HideDisplayCutout:0:16
+        * OneHanded:2:16
+          * ImePlaceholder:15:16
+            * ImeContainer
+          * FullscreenMagnification:2:14
+            * Leaf:3:14
+            * DefaultTaskDisplayArea
+        * OneHandedBackgroundPanel:0:1
+          * OneHanded:0:1
+            * FullscreenMagnification:0:1
+              * Leaf:0:1
+
+  Task display areas in top down Z order:
+    TaskDisplayArea DefaultTaskDisplayArea
+      mPreferredTopFocusableRootTask=Task{b79afbd #108 type=home ?? U=0 visible=true mode=fullscreen translucent=false sz=1}
+      mLastFocusedRootTask=Task{b79afbd #108 type=home ?? U=0 visible=true mode=fullscreen translucent=false sz=1}
+      Application tokens in top down Z order:
+      * Task{b79afbd #108 type=home ?? U=0 visible=true mode=fullscreen translucent=false sz=1}
+        bounds=[0,0][1920,1080]
+        * Task{d617b14 #109 type=home A=10046:com.google.android.apps.tv.launcherx U=0 rootTaskId=108 visible=true mode=fullscreen translucent=false sz=1}
+          bounds=[0,0][1920,1080]
+          * ActivityRecord{148ac95 u0 com.google.android.apps.tv.launcherx/.home.HomeActivity t109}
+      * Task{e1f551d #39 type=standard A=10092:com.google.android.youtube.tv.main U=0 visible=false mode=fullscreen translucent=true sz=1}
+        bounds=[0,0][1920,1080]
+        * ActivityRecord{3c4d29c u0 com.google.android.youtube.tv/com.google.android.apps.youtube.tv.activity.MainActivity t39}
+      * Task{3006e86 #106 type=standard A=10046:com.google.android.apps.tv.launcherx U=0 visible=false mode=fullscreen translucent=true sz=1}
+        bounds=[0,0][1920,1080]
+        * ActivityRecord{3cb25d3 u0 com.google.android.apps.tv.launcherx/.home.HomeActivity t106}
+      * Task{b256263 #56 type=standard A=10004:org.worldfoundry.wf_game.condo U=0 visible=false mode=fullscreen translucent=true sz=1}
+        bounds=[0,0][1920,1080]
+        * ActivityRecord{b4c84c4 u0 org.worldfoundry.wf_game.condo/android.app.NativeActivity t56}
+
+  no ScreenRotationAnimation 
+
+  rootHomeTask=Task=108
+
+  PinnedTaskController
+    mIsImeShowing=false
+    mImeHeight=0
+    mAspectRatio=-1.0
+    mMinAspectRatio=0.41841003
+    mMaxAspectRatio=2.39
+    mActions=[]
+
+  DisplayFrames w=1920 h=1080 r=0
+
+  DisplayPolicy
+    mCarDockEnablesAccelerometer=true mDeskDockEnablesAccelerometer=true
+    mDockMode=EXTRA_DOCK_STATE_UNDOCKED mLidState=LID_ABSENT
+    mAwake=true mScreenOnEarly=true mScreenOnFully=true
+    mKeyguardDrawComplete=true mWindowManagerDrawComplete=true
+    mHdmiPlugged=false
+    mLastBehavior=DEFAULT
+    mShowingDream=false mDreamingLockscreen=false
+    isKeyguardShowing=false
+    mFocusedWindow=Window{c4cc068 u0 com.google.android.apps.tv.launcherx/com.google.android.apps.tv.launcherx.home.HomeActivity}
+    mTopFullscreenOpaqueWindowState=Window{c4cc068 u0 com.google.android.apps.tv.launcherx/com.google.android.apps.tv.launcherx.home.HomeActivity}
+    mTopFullscreenOpaqueOrDimmingWindowState=Window{c4cc068 u0 com.google.android.apps.tv.launcherx/com.google.android.apps.tv.launcherx.home.HomeActivity}
+    mTopIsFullscreen=false
+    mForceStatusBar=false mAllowLockscreenWhenOn=false
+    mRemoteInsetsControllerControlsSystemBars=false
+    Looper state:
+      Looper (android.ui, tid 19) {7522a4f}
+        (Total messages: 0, polling=true, quitting=false)
+
+  DisplayRotation
+    mCurrentAppOrientation=SCREEN_ORIENTATION_UNSPECIFIED
+    mLastOrientation=-1
+    mRotation=0 mDeferredRotationPauseCount=0
+    mLandscapeRotation=ROTATION_0 mSeascapeRotation=ROTATION_180
+    mPortraitRotation=ROTATION_270 mUpsideDownRotation=ROTATION_90
+    mSupportAutoRotation=true
+    WindowOrientationListener
+      mEnabled=false
+      mCurrentRotation=ROTATION_0
+      mSensorType=null
+      mSensor=null
+      mRate=2
+
+    mCarDockRotation=-1 mDeskDockRotation=-1
+    mUserRotationMode=USER_ROTATION_LOCKED mUserRotation=ROTATION_0 mCameraRotationMode=0 mAllowAllRotations=unknown
+    mDemoHdmiRotation=ROTATION_0 mDemoHdmiRotationLock=false mUndockedHdmiRotation=-1
+    mLidOpenRotation=-1
+    mFixedToUserRotation=true
+
+
+  WindowInsetsStateController
+    InsetsState
+      mDisplayFrame=Rect(0, 0 - 1920, 1080)
+      mDisplayCutout=DisplayCutout{insets=Rect(0, 0 - 0, 0) waterfall=Insets{left=0, top=0, right=0, bottom=0} boundingRect={Bounds=[Rect(0, 0 - 0, 0), Rect(0, 0 - 0, 0), Rect(0, 0 - 0, 0), Rect(0, 0 - 0, 0)]} cutoutPathParserInfo={CutoutPathParserInfo{displayWidth=0 displayHeight=0 density={0.0} cutoutSpec={} rotation={0} scale={0.0}}}}
+      mRoundedCorners=RoundedCorners{[RoundedCorner{position=TopLeft, radius=0, center=Point(0, 0)}, RoundedCorner{position=TopRight, radius=0, center=Point(0, 0)}, RoundedCorner{position=BottomRight, radius=0, center=Point(0, 0)}, RoundedCorner{position=BottomLeft, radius=0, center=Point(0, 0)}]}
+      mPrivacyIndicatorBounds=PrivacyIndicatorBounds {static bounds=Rect(1770, 0 - 1920, 96) rotation=0}
+        InsetsSource type=ITYPE_IME frame=[0,0][0,0] visible=false
+    Control map:
+      ITYPE_IME -> Window{c4cc068 u0 com.google.android.apps.tv.launcherx/com.google.android.apps.tv.launcherx.home.HomeActivity}
+    InsetsSourceProviders:
+      ImeInsetsSourceProvider
+        mSource=InsetsSource type=ITYPE_IME frame=[0,0][0,0] visible=false
+        mControl=InsetsSourceControl type=ITYPE_IME mLeash=Surface(name=Surface(name=a9a092b InputMethod)/@0x8b4a9a0 - animation-leash of insets_animation)/@0x8bd8c95 mSurfacePosition=Point(0, 0) mInsetsHint=Insets{left=0, top=0, right=0, bottom=0} mSkipAnimationOnce=false
+        mIsLeashReadyForDispatching=true mImeOverrideFrame=[0,0][0,0]
+        mWin=Window{a9a092b u0 InputMethod}
+        mAdapter=ControlAdapter mCapturedLeash=Surface(name=Surface(name=a9a092b InputMethod)/@0x8b4a9a0 - animation-leash of insets_animation)/@0x8bd8c95
+        mControlTarget=Window{c4cc068 u0 com.google.android.apps.tv.launcherx/com.google.android.apps.tv.launcherx.home.HomeActivity}
+        mImeShowing=false
+
+  KeyguardController:
+    mKeyguardShowing=false
+    mAodShowing=false
+    mKeyguardGoingAway=false
+    Occluded=false DismissingKeyguardActivity=null TurnScreenOnActivity=null at display=0
+    mDismissalRequested=false
+
+  LockTaskController:
+    mLockTaskModeState=NONE
+    mLockTaskModeTasks=
+    mLockTaskPackages (userId:packages)=
+      u0:[]
+      u10:[]
+
+  mCurTaskIdForUser={0=115}
+  mUserRootTaskInFront={}
+  mVisibilityTransactionDepth=0
+  isHomeRecentsComponent=false
+
+  TaskOrganizerController:
+      android.window.ITaskOrganizer$Stub$Proxy@600f6e5 uid=10045:
+        (fullscreen) Task{9865565 #2 type=home A=1000:com.android.tv.settings U=0 visible=false mode=fullscreen translucent=true sz=0}
+        (fullscreen) Task{e1f551d #39 type=standard A=10092:com.google.android.youtube.tv.main U=0 visible=false mode=fullscreen translucent=true sz=1}
+        (fullscreen) Task{b256263 #56 type=standard A=10004:org.worldfoundry.wf_game.condo U=0 visible=false mode=fullscreen translucent=true sz=1}
+        (fullscreen) Task{3006e86 #106 type=standard A=10046:com.google.android.apps.tv.launcherx U=0 visible=false mode=fullscreen translucent=true sz=1}
+        (fullscreen) Task{b79afbd #108 type=home ?? U=0 visible=true mode=fullscreen translucent=false sz=1}
+
+  VisibleActivityProcess:[ ProcessRecord{c758809 13557:com.google.android.apps.tv.launcherx/u0a46}]
+  NumNonAppVisibleWindowByUid:[]

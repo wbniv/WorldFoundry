@@ -1,0 +1,2706 @@
+POWER MANAGER (dumpsys power)
+
+Power Manager State:
+  Settings power_manager_constants:
+    no_cached_wake_locks=true
+  mDirty=0x0
+  mWakefulness=Awake
+  mWakefulnessChanging=false
+  mIsPowered=true
+  mPlugType=1
+  mBatteryLevel=50
+  mDreamsBatteryLevelDrain=0
+  mDockState=0
+  mStayOn=true
+  mProximityPositive=false
+  mBootCompleted=true
+  mSystemReady=true
+  mEnhancedDischargeTimeElapsed=0
+  mLastEnhancedDischargeTimeUpdatedElapsed=0
+  mEnhancedDischargePredictionIsPersonalized=false
+  mHalAutoSuspendModeEnabled=false
+  mHalInteractiveModeEnabled=true
+  mWakeLockSummary=0x0
+  mNotifyLongScheduled=+11s165ms
+  mNotifyLongDispatched=-48s860ms
+  mNotifyLongNextCheck=(none)
+  mRequestWaitForNegativeProximity=false
+  mInterceptedPowerKeyForProximity=false
+  mSandmanScheduled=false
+  mBatteryLevelLow=false
+  mLightDeviceIdleMode=false
+  mDeviceIdleMode=false
+  mDeviceIdleWhitelist=[2000, 10021, 10026, 10048, 10052, 10058, 10115]
+  mDeviceIdleTempWhitelist=[]
+  mLowPowerStandbyActive=false
+  mLastWakeTime=296621382 (61595022 ms ago)
+  mLastSleepTime=0 (358216404 ms ago)
+  mLastSleepReason=application
+  mLastGlobalWakeTimeRealtime=296621384 (61595022 ms ago)
+  mLastGlobalSleepTimeRealtime=0 (358216406 ms ago)
+  mLastInteractivePowerHintTime=358210665 (5741 ms ago)
+  mLastScreenBrightnessBoostTime=0 (358216406 ms ago)
+  mScreenBrightnessBoostInProgress=false
+  mHoldingWakeLockSuspendBlocker=false
+  mHoldingDisplaySuspendBlocker=true
+  mLastFlipTime=0
+  mIsFaceDown=false
+
+Settings and Configuration:
+  mDecoupleHalAutoSuspendModeFromDisplayConfig=false
+  mDecoupleHalInteractiveModeFromDisplayConfig=false
+  mWakeUpWhenPluggedOrUnpluggedConfig=false
+  mWakeUpWhenPluggedOrUnpluggedInTheaterModeConfig=false
+  mTheaterModeEnabled=false
+  mKeepDreamingWhenUnplugging=false
+  mSuspendWhenScreenOffDueToProximityConfig=false
+  mDreamsSupportedConfig=true
+  mDreamsEnabledByDefaultConfig=true
+  mDreamsActivatedOnSleepByDefaultConfig=true
+  mDreamsActivatedOnDockByDefaultConfig=true
+  mDreamsEnabledOnBatteryConfig=false
+  mDreamsBatteryLevelMinimumWhenPoweredConfig=-1
+  mDreamsBatteryLevelMinimumWhenNotPoweredConfig=15
+  mDreamsBatteryLevelDrainCutoffConfig=5
+  mDreamsEnabledSetting=true
+  mDreamsActivateOnSleepSetting=true
+  mDreamsActivateOnDockSetting=true
+  mDozeAfterScreenOff=true
+  mMinimumScreenOffTimeoutConfig=10000
+  mMaximumScreenDimDurationConfig=7000
+  mMaximumScreenDimRatioConfig=0.20000005
+  mAttentiveTimeoutConfig=-1
+  mAttentiveTimeoutSetting=-1
+  mAttentiveWarningDurationConfig=30000
+  mScreenOffTimeoutSetting=600000
+  mSleepTimeoutSetting=1800000
+  mMaximumScreenOffTimeoutFromDeviceAdmin=9223372036854775807 (enforced=false)
+  mStayOnWhilePluggedInSetting=3
+  mScreenBrightnessOverrideFromWindowManager=NaN
+  mUserActivityTimeoutOverrideFromWindowManager=-1
+  mUserInactiveOverrideFromWindowManager=false
+  mDozeScreenStateOverrideFromDreamManager=0
+  mDrawWakeLockOverrideFromSidekick=false
+  mDozeScreenBrightnessOverrideFromDreamManager=-1
+  mScreenBrightnessMinimum=0.035433073
+  mScreenBrightnessMaximum=1.0
+  mScreenBrightnessDefault=0.39763778
+  mDoubleTapWakeEnabled=false
+  mForegroundProfile=0
+  mUserId=0
+
+Attentive timeout: -1 ms
+Sleep timeout: 1800000 ms
+Screen off timeout: 600000 ms
+Screen dim duration: 7000 ms
+
+UID states (changing=false changed=false):
+  UID 1000:   ACTIVE  count=0 state=0
+  UID 1002:   ACTIVE  count=0 state=0
+  UID 1068:   ACTIVE  count=0 state=0
+  UID 1073:   ACTIVE  count=0 state=0
+  UID u0a20: INACTIVE  count=0 state=19
+  UID u0a27:   ACTIVE  count=0 state=3
+  UID u0a44:   ACTIVE  count=0 state=4
+  UID u0a45:   ACTIVE  count=0 state=3
+  UID u0a47: INACTIVE  count=0 state=19
+  UID u0a48:   ACTIVE  count=0 state=3
+  UID u0a50:   ACTIVE  count=0 state=4
+  UID u0a52:   ACTIVE  count=0 state=2
+  UID u0a56: INACTIVE  count=0 state=19
+  UID u0a57:   ACTIVE  count=0 state=3
+  UID u0a58:   ACTIVE  count=0 state=3
+  UID u0a67: INACTIVE  count=0 state=19
+  UID u0a70:   ACTIVE  count=0 state=0
+  UID u0a75: INACTIVE  count=0 state=19
+  UID u0a77:   ACTIVE  count=0 state=5
+  UID u0a95: INACTIVE  count=0 state=19
+  UID u0a109:   ACTIVE  count=0 state=0
+  UID u0a155: INACTIVE  count=0 state=18
+  UID u0i51: INACTIVE  count=0 state=19
+
+Looper state:
+  Looper (PowerManagerService, tid 47) {86b00a3}
+    Message 0: { when=+11s151ms what=4 target=android.os.Handler }
+    Message 1: { when=+9m47s250ms what=1 target=android.os.Handler }
+    (Total messages: 2, polling=true, quitting=false)
+
+Wake Locks: size=0
+
+Suspend Blockers: size=5
+  PowerManagerService.Booting: ref count=0 []
+  PowerManagerService.WakeLocks: ref count=0 []
+  PowerManagerService.Display: ref count=1 [holding display: (01-01 07:00:20.738)]
+  PowerManagerService.Broadcasts: ref count=0 []
+  PowerManagerService.WirelessChargerDetector: ref count=0 []
+
+Display Power: com.android.server.power.PowerManagerService$1@d31fa0
+
+Battery saving stats:
+  Battery Saver is currently: OFF
+    Times full enabled: 0
+    Times adaptive enabled: 0
+  
+  Drain stats:
+                     Battery saver OFF                          ON
+  NonDoze NonIntr:      0m      0mAh(  0%)      0.0mAh/h          0m      0mAh(  0%)      0.0mAh/h
+             Intr:      0m      0mAh(  0%)      0.0mAh/h          0m      0mAh(  0%)      0.0mAh/h
+  Deep    NonIntr:      0m      0mAh(  0%)      0.0mAh/h          0m      0mAh(  0%)      0.0mAh/h
+             Intr:      0m      0mAh(  0%)      0.0mAh/h          0m      0mAh(  0%)      0.0mAh/h
+  Light   NonIntr:      0m      0mAh(  0%)      0.0mAh/h          0m      0mAh(  0%)      0.0mAh/h
+             Intr:      0m      0mAh(  0%)      0.0mAh/h          0m      0mAh(  0%)      0.0mAh/h
+
+Battery saver policy (*NOTE* they only apply when battery saver is ON):
+  Settings: battery_saver_constants
+    value: 
+  Settings: (overlay)
+    value: 
+  DeviceConfig: battery_saver
+    location_mode: 
+  mAccessibilityEnabled=false
+  mAutomotiveProjectionActive=false
+  mPolicyLevel=0
+  
+  Policy 'default full'
+    advertise_is_enabled=true
+    disable_vibration=true
+    disable_animation=false
+    defer_full_backup=true
+    defer_keyvalue_backup=true
+    enable_firewall=true
+    enable_datasaver=false
+    disable_launch_boost=true
+    enable_brightness_adjustment=false
+    adjust_brightness_factor=0.5
+    location_mode=3
+    force_all_apps_standby=true
+    force_background_check=true
+    disable_optional_sensors=true
+    disable_aod=true
+    soundtrigger_mode=1
+    enable_quick_doze=true
+    enable_night_mode=true
+  
+  Policy 'current full'
+    advertise_is_enabled=true
+    disable_vibration=true
+    disable_animation=false
+    defer_full_backup=true
+    defer_keyvalue_backup=true
+    enable_firewall=true
+    enable_datasaver=false
+    disable_launch_boost=true
+    enable_brightness_adjustment=false
+    adjust_brightness_factor=0.5
+    location_mode=3
+    force_all_apps_standby=true
+    force_background_check=true
+    disable_optional_sensors=true
+    disable_aod=true
+    soundtrigger_mode=1
+    enable_quick_doze=true
+    enable_night_mode=true
+  
+  Policy 'default adaptive'
+    advertise_is_enabled=false
+    disable_vibration=false
+    disable_animation=false
+    defer_full_backup=false
+    defer_keyvalue_backup=false
+    enable_firewall=false
+    enable_datasaver=false
+    disable_launch_boost=false
+    enable_brightness_adjustment=false
+    adjust_brightness_factor=1.0
+    location_mode=0
+    force_all_apps_standby=false
+    force_background_check=false
+    disable_optional_sensors=false
+    disable_aod=false
+    soundtrigger_mode=0
+    enable_quick_doze=false
+    enable_night_mode=false
+  
+  Policy 'current adaptive'
+    advertise_is_enabled=false
+    disable_vibration=false
+    disable_animation=false
+    defer_full_backup=false
+    defer_keyvalue_backup=false
+    enable_firewall=false
+    enable_datasaver=false
+    disable_launch_boost=false
+    enable_brightness_adjustment=false
+    adjust_brightness_factor=1.0
+    location_mode=0
+    force_all_apps_standby=false
+    force_background_check=false
+    disable_optional_sensors=false
+    disable_aod=false
+    soundtrigger_mode=0
+    enable_quick_doze=false
+    enable_night_mode=false
+  
+  Policy 'effective'
+    advertise_is_enabled=false
+    disable_vibration=false
+    disable_animation=false
+    defer_full_backup=false
+    defer_keyvalue_backup=false
+    enable_firewall=false
+    enable_datasaver=false
+    disable_launch_boost=false
+    enable_brightness_adjustment=false
+    adjust_brightness_factor=1.0
+    location_mode=0
+    force_all_apps_standby=false
+    force_background_check=false
+    disable_optional_sensors=false
+    disable_aod=false
+    soundtrigger_mode=0
+    enable_quick_doze=false
+    enable_night_mode=false
+
+Battery saver state machine:
+  Enabled=false
+    full=false
+    adaptive=false
+  mState=1
+  mLastChangedIntReason=0
+  mLastChangedStrReason=null
+  mBootCompleted=true
+  mSettingsLoaded=true
+  mBatteryStatusSet=true
+  mIsPowered=true
+  mBatteryLevel=50
+  mIsBatteryLevelLow=false
+  mSettingAutomaticBatterySaver=0
+  mSettingBatterySaverEnabled=false
+  mSettingBatterySaverEnabledSticky=false
+  mSettingBatterySaverStickyAutoDisableEnabled=true
+  mSettingBatterySaverStickyAutoDisableThreshold=90
+  mSettingBatterySaverTriggerThreshold=0
+  mBatterySaverStickyBehaviourDisabled=false
+  mDynamicPowerSavingsDefaultDisableThreshold=80
+  mDynamicPowerSavingsDisableThreshold=80
+  mDynamicPowerSavingsEnableBatterySaver=false
+  mLastAdaptiveBatterySaverChangedExternallyElapsed=0
+AttentionDetector:
+ mIsSettingEnabled=false
+ mMaxExtensionMillis=900000
+ mPreDimCheckDurationMillis=2000
+ mEffectivePostDimTimeout=0
+ mLastUserActivityTime(excludingAttention)=358210665
+ mAttentionServiceSupported=false
+ mRequested=false
+
+Profile power states: size=0
+Display Group User Activity:
+  displayGroupId=0
+  userActivitySummary=0x1
+  lastUserActivityTime=358210665 (5768 ms ago)
+  lastUserActivityTimeNoChangeLights=335358287 (22858146 ms ago)
+  mWakeLockSummary=0x0
+
+Wireless Charger Detector State:
+  mGravitySensor=null
+  mPoweredWirelessly=false
+  mAtRest=false
+  mRestX=0.0, mRestY=0.0, mRestZ=0.0
+  mDetectionInProgress=false
+  mDetectionStartTime=0 (never)
+  mMustUpdateRestPosition=false
+  mTotalSamples=0
+  mMovingSamples=0
+  mFirstSampleX=0.0, mFirstSampleY=0.0, mFirstSampleZ=0.0
+  mLastSampleX=0.0, mLastSampleY=0.0, mLastSampleZ=0.0
+Wake Lock Log
+  10-06 06:28:00.002 - 1000 - ACQ *alarm* (partial)
+  10-06 06:28:00.003 - 1000 - REL *alarm*
+  10-06 06:29:00.003 - 1000 - ACQ *alarm* (partial)
+  10-06 06:29:00.006 - 1000 - REL *alarm*
+  10-06 06:29:03.150 - 1000 - ACQ *alarm* (partial)
+  10-06 06:29:03.151 - 10058 - ACQ CMWakeLock (partial)
+  10-06 06:29:03.154 - 1000 - ACQ *job*/a/c.a.s.SmartStorageMaintIdler#2808 (partial)
+  10-06 06:29:03.154 - 1000 - REL *alarm*
+  10-06 06:29:03.155 - 1000 - ACQ *job*/a/c.a.s.SmartStorageMaintIdler#2808 (partial)
+  10-06 06:29:03.162 - 10058 - REL CMWakeLock
+  10-06 06:29:03.162 - 1000 - REL *job*/a/c.a.s.SmartStorageMaintIdler#2808
+  10-06 06:29:03.194 - 1000 - REL *job*/a/c.a.s.SmartStorageMaintIdler#2808
+  10-06 06:29:44.716 - 10058 - ACQ GCM_READ (partial)
+  10-06 06:29:44.717 - 10058 - ACQ GCM_WORK (partial)
+  10-06 06:29:44.719 - 10058 - REL GCM_READ
+  10-06 06:29:44.728 - 10058 - REL GCM_WORK
+  10-06 06:29:52.891 - 10058 - ACQ GCM_READ (partial)
+  10-06 06:29:52.894 - 10058 - ACQ GCM_WORK (partial)
+  10-06 06:29:52.896 - 10058 - REL GCM_READ
+  10-06 06:29:52.910 - 10058 - ACQ GOOGLE_C2DM (partial)
+  10-06 06:29:52.924 - 10058 - REL GCM_WORK
+  10-06 06:29:52.927 - 10058 - ACQ GCM_WORK (partial)
+  10-06 06:29:52.932 - 10058 - REL GCM_WORK
+  10-06 06:29:52.945 - 10048 - ACQ androidx.core:wake:com.google.android.apps.mediashell/.ChromecastGcmListenerService (partial)
+  10-06 06:29:52.948 - 10048 - REL androidx.core:wake:com.google.android.apps.mediashell/.ChromecastGcmListenerService
+  10-06 06:29:52.948 - 10058 - REL GOOGLE_C2DM
+  10-06 06:30:00.004 - 1000 - ACQ *alarm* (partial)
+  10-06 06:30:00.005 - 1000 - REL *alarm*
+  10-06 06:30:20.128 - 1000 - ACQ *alarm* (partial)
+  10-06 06:30:20.130 - 10058 - ACQ NetworkLocationScanner (partial)
+  10-06 06:30:20.134 - 10058 - ACQ CallbackRunner (partial)
+  10-06 06:30:20.135 - 1000 - REL *alarm*
+  10-06 06:30:20.158 - 10058 - REL CallbackRunner
+  10-06 06:30:24.027 - 10058 - REL NetworkLocationScanner
+  10-06 06:30:24.032 - 10058 - ACQ NetworkLocationLocator (partial)
+  10-06 06:30:24.081 - 10058 - ACQ PendingIntentClient (partial)
+  10-06 06:30:24.087 - 10058 - REL PendingIntentClient
+  10-06 06:30:24.089 - 10058 - ACQ GCoreFlp (partial)
+  10-06 06:30:24.098 - 10058 - ACQ CallbackRunner (partial)
+  10-06 06:30:24.104 - 10058 - REL GCoreFlp
+  10-06 06:30:24.104 - 10058 - REL NetworkLocationLocator
+  10-06 06:30:24.106 - 1000 - ACQ *location* (partial)
+  10-06 06:30:24.108 - 10058 - REL CallbackRunner
+  10-06 06:30:24.109 - 1000 - REL *location*
+  10-06 06:31:00.003 - 1000 - ACQ *alarm* (partial)
+  10-06 06:31:00.004 - 1000 - REL *alarm*
+  10-06 06:31:00.011 - 1000 - ACQ *alarm* (partial)
+  10-06 06:31:00.012 - 1000 - REL *alarm*
+  10-06 06:32:00.001 - 1000 - ACQ *alarm* (partial)
+  10-06 06:32:00.002 - 1000 - REL *alarm*
+  10-06 06:32:11.026 - 10058 - ACQ GCM_READ (partial)
+  10-06 06:32:11.028 - 10058 - ACQ GCM_WORK (partial)
+  10-06 06:32:11.029 - 10058 - REL GCM_READ
+  10-06 06:32:11.044 - 10058 - ACQ GOOGLE_C2DM (partial)
+  10-06 06:32:11.055 - 10058 - REL GCM_WORK
+  10-06 06:32:11.079 - 10058 - ACQ IntentOp:c.g.a.g/.c.PersistentIntentOperationService (partial)
+  10-06 06:32:11.087 - 10058 - REL GOOGLE_C2DM
+  10-06 06:32:11.091 - 10058 - ACQ IntentOp:.g.GcmInternalReceiverIntentOperation (partial)
+  10-06 06:32:11.094 - 10058 - REL IntentOp:c.g.a.g/.c.PersistentIntentOperationService
+  10-06 06:32:11.096 - 10058 - REL IntentOp:.g.GcmInternalReceiverIntentOperation
+  10-06 06:32:27.566 - 1000 - ACQ *alarm* (partial)
+  10-06 06:32:27.585 - 1000 - REL *alarm*
+  10-06 06:32:27.603 - 10058 - ACQ *gms_scheduler*:internal (partial)
+  10-06 06:32:27.636 - 10058 - ACQ *gms_scheduler*/c.g.a.g/.a.a.b.a.GcmTaskService (partial)
+  10-06 06:32:27.664 - 10058 - REL *gms_scheduler*:internal
+  10-06 06:32:27.688 - 10058 - REL *gms_scheduler*/c.g.a.g/.a.a.b.a.GcmTaskService
+  10-06 06:32:27.700 - 10058 - ACQ *gms_scheduler*:internal (partial)
+  10-06 06:32:27.714 - 10058 - REL *gms_scheduler*:internal
+  10-06 06:32:27.717 - 10058 - ACQ *gms_scheduler*:internal (partial)
+  10-06 06:32:27.769 - 10058 - ACQ *gms_scheduler*/c.g.a.g/.c.u.QosUploaderService (partial)
+  10-06 06:32:27.830 - 10058 - ACQ *gms_scheduler*/c.g.a.g/.s.s.TelecomTaskService (partial)
+  10-06 06:32:27.849 - 10058 - REL *gms_scheduler*:internal
+  10-06 06:32:27.901 - 10058 - REL *gms_scheduler*/c.g.a.g/.s.s.TelecomTaskService
+  10-06 06:32:27.908 - 10058 - ACQ *gms_scheduler*:internal (partial)
+  10-06 06:32:27.961 - 10058 - ACQ *gms_scheduler*/c.g.a.g/c.g.a.c.s.ContextManagerLogsUploadBoundService (partial)
+  10-06 06:32:27.964 - 10058 - REL *gms_scheduler*:internal
+  10-06 06:32:27.979 - 10058 - ACQ CMWakeLock (partial)
+  10-06 06:32:27.981 - 10058 - REL *gms_scheduler*/c.g.a.g/c.g.a.c.s.ContextManagerLogsUploadBoundService
+  10-06 06:32:27.983 - 10058 - ACQ *gms_scheduler*:internal (partial)
+  10-06 06:32:27.990 - 10058 - REL *gms_scheduler*:internal
+  10-06 06:32:27.995 - 10058 - ACQ *gms_scheduler*:internal (partial)
+  10-06 06:32:28.027 - 10058 - REL *gms_scheduler*:internal
+  10-06 06:32:28.061 - 10058 - REL CMWakeLock
+  10-06 06:32:28.691 - 10058 - REL *gms_scheduler*/c.g.a.g/.c.u.QosUploaderService
+  10-06 06:32:28.696 - 10058 - ACQ *gms_scheduler*:internal (partial)
+  10-06 06:32:28.704 - 10058 - REL *gms_scheduler*:internal
+  10-06 06:32:28.708 - 10058 - ACQ *gms_scheduler*:internal (partial)
+  10-06 06:32:28.721 - 10058 - REL *gms_scheduler*:internal
+  10-06 06:33:00.003 - 1000 - ACQ *alarm* (partial)
+  10-06 06:33:00.003 - 1000 - REL *alarm*
+  10-06 06:34:00.004 - 1000 - ACQ *alarm* (partial)
+  10-06 06:34:00.005 - 1000 - REL *alarm*
+  10-06 06:35:00.003 - 1000 - ACQ *alarm* (partial)
+  10-06 06:35:00.004 - 1000 - REL *alarm*
+  10-06 06:35:50.610 - 1000 - ACQ *alarm* (partial)
+  10-06 06:35:50.624 - 1000 - ACQ *job*/@.w.s.g.a.a.t.d/a.w.i.b.s.SystemJobService#54 (partial)
+  10-06 06:35:50.625 - 1000 - REL *alarm*
+  10-06 06:35:50.628 - 1000 - ACQ *job*/@.w.s.g.a.a.t.d/a.w.i.b.s.SystemJobService#54 (partial)
+  10-06 06:35:50.665 - 1000 - REL *job*/@.w.s.g.a.a.t.d/a.w.i.b.s.SystemJobService#54
+  10-06 06:35:50.667 - 1000 - ACQ *job*/@.w.s.g.a.k/a.w.i.b.s.SystemJobService#79 (partial)
+  10-06 06:35:50.670 - 1000 - ACQ *job*/@.w.s.g.a.k/a.w.i.b.s.SystemJobService#79 (partial)
+  10-06 06:35:50.680 - 10058 - ACQ *gms_scheduler*:internal (partial)
+  10-06 06:35:50.683 - 1000 - REL *job*/@.w.s.g.a.k/a.w.i.b.s.SystemJobService#79
+  10-06 06:35:50.684 - 1000 - ACQ *job*/@.w.s.g.a.k/a.w.i.b.s.SystemJobService#443 (partial)
+  10-06 06:35:50.686 - 1000 - ACQ *job*/@.w.s.g.a.k/a.w.i.b.s.SystemJobService#443 (partial)
+  10-06 06:35:50.695 - 1000 - REL *job*/@.w.s.g.a.k/a.w.i.b.s.SystemJobService#443
+  10-06 06:35:50.738 - 10058 - ACQ *gms_scheduler*/c.g.a.g/.g.s.BackgroundSyncGmsTaskService (partial)
+  10-06 06:35:50.784 - 10058 - ACQ *gms_scheduler*/c.g.a.g/.c.s.ObservationGenerationTask (partial)
+  10-06 06:35:50.790 - 10058 - REL *gms_scheduler*:internal
+  10-06 06:35:50.831 - 10058 - REL *gms_scheduler*/c.g.a.g/.g.s.BackgroundSyncGmsTaskService
+  10-06 06:35:50.833 - 10058 - ACQ *gms_scheduler*:internal (partial)
+  10-06 06:35:50.854 - 10058 - REL *gms_scheduler*:internal
+  10-06 06:35:50.856 - 10058 - ACQ *gms_scheduler*:internal (partial)
+  10-06 06:35:50.915 - 10058 - ACQ *gms_scheduler*/c.g.a.g/.c.u.QosUploaderService (partial)
+  10-06 06:35:50.956 - 10058 - REL *gms_scheduler*:internal
+  10-06 06:35:51.263 - 10058 - REL *gms_scheduler*/c.g.a.g/.c.s.ObservationGenerationTask
+  10-06 06:35:51.280 - 10058 - ACQ *gms_scheduler*:internal (partial)
+  10-06 06:35:51.356 - 10058 - REL *gms_scheduler*:internal
+  10-06 06:35:51.358 - 10058 - ACQ *gms_scheduler*:internal (partial)
+  10-06 06:35:51.375 - 10058 - REL *gms_scheduler*:internal
+  10-06 06:35:51.378 - 10058 - REL *gms_scheduler*/c.g.a.g/.c.u.QosUploaderService
+  10-06 06:35:51.384 - 10058 - ACQ *gms_scheduler*:internal (partial)
+  10-06 06:35:51.406 - 10058 - REL *gms_scheduler*:internal
+  10-06 06:35:51.514 - 1000 - REL *job*/@.w.s.g.a.k/a.w.i.b.s.SystemJobService#79
+  10-06 06:35:51.950 - 1000 - ACQ *job*/@.w.s.g.a.a.t.d/a.w.i.b.s.SystemJobService#54 (partial)
+  10-06 06:35:51.951 - 1000 - ACQ *job*/@.w.s.g.a.a.t.d/a.w.i.b.s.SystemJobService#54 (partial)
+  10-06 06:35:51.954 - 1000 - REL *job*/@.w.s.g.a.a.t.d/a.w.i.b.s.SystemJobService#54
+  10-06 06:35:51.955 - 1000 - REL *job*/@.w.s.g.a.a.t.d/a.w.i.b.s.SystemJobService#54
+  10-06 06:35:51.991 - 1000 - REL *job*/@.w.s.g.a.a.t.d/a.w.i.b.s.SystemJobService#54
+  10-06 06:35:53.079 - 1000 - REL *job*/@.w.s.g.a.k/a.w.i.b.s.SystemJobService#443
+  10-06 06:36:00.007 - 1000 - ACQ *alarm* (partial)
+  10-06 06:36:00.009 - 1000 - REL *alarm*
+  10-06 06:36:41.264 - 1000 - ACQ *alarm* (partial)
+  10-06 06:36:41.271 - 1000 - ACQ *job*/c.a.v/c.g.a.f.s.p.m.PhoneskyJobServiceMain#9083 (partial)
+  10-06 06:36:41.273 - 1000 - ACQ *job*/c.a.v/c.g.a.f.s.p.m.PhoneskyJobServiceMain#9083 (partial)
+  10-06 06:36:41.287 - 1000 - REL *alarm*
+  10-06 06:36:41.290 - 1000 - REL *job*/c.a.v/c.g.a.f.s.p.m.PhoneskyJobServiceMain#9083
+  10-06 06:36:41.291 - 1000 - ACQ *job*/c.g.a.k/c.g.a.a.t.f.FcmRegistrationJobService#14 (partial)
+  10-06 06:36:41.294 - 1000 - ACQ *job*/c.g.a.k/c.g.a.a.t.f.FcmRegistrationJobService#14 (partial)
+  10-06 06:36:41.298 - 10058 - ACQ *gms_scheduler*:internal (partial)
+  10-06 06:36:41.312 - 1000 - REL *job*/c.g.a.k/c.g.a.a.t.f.FcmRegistrationJobService#14
+  10-06 06:36:41.366 - 10058 - ACQ *gms_scheduler*/c.g.a.g/.c.c.ConfigService (partial)
+  10-06 06:36:41.374 - 1000 - REL *job*/c.g.a.k/c.g.a.a.t.f.FcmRegistrationJobService#14
+  10-06 06:36:41.399 - 10058 - REL *gms_scheduler*:internal
+  10-06 06:36:41.572 - 1000 - ACQ *job*/@.w.s.g.a.k/a.w.i.b.s.SystemJobService#447 (partial)
+  10-06 06:36:41.574 - 1000 - ACQ *job*/@.w.s.g.a.k/a.w.i.b.s.SystemJobService#447 (partial)
+  10-06 06:36:41.581 - 1000 - REL *job*/@.w.s.g.a.k/a.w.i.b.s.SystemJobService#447
+  10-06 06:36:42.298 - 1000 - REL *job*/c.a.v/c.g.a.f.s.p.m.PhoneskyJobServiceMain#9083
+  10-06 06:36:42.576 - 1000 - REL *job*/@.w.s.g.a.k/a.w.i.b.s.SystemJobService#447
+  10-06 06:36:42.769 - 10058 - REL *gms_scheduler*/c.g.a.g/.c.c.ConfigService
+  10-06 06:36:42.772 - 10058 - ACQ *gms_scheduler*:internal (partial)
+  10-06 06:36:42.785 - 10058 - REL *gms_scheduler*:internal
+  10-06 06:36:42.789 - 10058 - ACQ *gms_scheduler*:internal (partial)
+  10-06 06:36:42.805 - 10058 - REL *gms_scheduler*:internal
+  10-06 06:37:00.002 - 1000 - ACQ *alarm* (partial)
+  10-06 06:37:00.003 - 1000 - REL *alarm*
+  10-06 06:37:00.006 - 1000 - ACQ *alarm* (partial)
+  10-06 06:37:00.007 - 1000 - REL *alarm*
+  10-06 06:37:01.332 - 10058 - ACQ GCM_READ (partial)
+  10-06 06:37:01.335 - 10058 - ACQ GCM_WORK (partial)
+  10-06 06:37:01.337 - 10058 - REL GCM_READ
+  10-06 06:37:01.349 - 10058 - REL GCM_WORK
+  10-06 06:38:00.002 - 1000 - ACQ *alarm* (partial)
+  10-06 06:38:00.002 - 1000 - REL *alarm*
+  10-06 06:38:00.004 - 1000 - ACQ *alarm* (partial)
+  10-06 06:38:00.007 - 1000 - REL *alarm*
+  10-06 06:38:23.252 - 10058 - ACQ GCM_READ (partial)
+  10-06 06:38:23.255 - 10058 - ACQ GCM_WORK (partial)
+  10-06 06:38:23.257 - 10058 - REL GCM_READ
+  10-06 06:38:23.275 - 10058 - ACQ GOOGLE_C2DM (partial)
+  10-06 06:38:23.291 - 10058 - REL GCM_WORK
+  10-06 06:38:23.293 - 10058 - ACQ GCM_WORK (partial)
+  10-06 06:38:23.307 - 10058 - REL GCM_WORK
+  10-06 06:38:23.313 - 10058 - ACQ IntentOp:c.g.a.g/.c.PersistentIntentOperationService (partial)
+  10-06 06:38:23.325 - 10058 - REL GOOGLE_C2DM
+  10-06 06:38:23.333 - 10058 - ACQ IntentOp:.g.GcmInternalReceiverIntentOperation (partial)
+  10-06 06:38:23.335 - 10058 - REL IntentOp:c.g.a.g/.c.PersistentIntentOperationService
+  10-06 06:38:23.337 - 10058 - REL IntentOp:.g.GcmInternalReceiverIntentOperation
+  10-06 06:39:00.003 - 1000 - ACQ *alarm* (partial)
+  10-06 06:39:00.005 - 1000 - REL *alarm*
+  10-06 06:39:31.350 - 10058 - ACQ GCM_READ (partial)
+  10-06 06:39:31.353 - 10058 - ACQ GCM_WORK (partial)
+  10-06 06:39:31.355 - 10058 - REL GCM_READ
+  10-06 06:39:31.370 - 10058 - ACQ GOOGLE_C2DM (partial)
+  10-06 06:39:31.383 - 10058 - REL GCM_WORK
+  10-06 06:39:31.468 - 10058 - REL GOOGLE_C2DM
+  10-06 06:39:51.009 - 10058 - ACQ GCM_READ (partial)
+  10-06 06:39:51.011 - 10058 - ACQ GCM_WORK (partial)
+  10-06 06:39:51.012 - 10058 - REL GCM_READ
+  10-06 06:39:51.018 - 10058 - ACQ GOOGLE_C2DM (partial)
+  10-06 06:39:51.037 - 10058 - REL GCM_WORK
+  10-06 06:39:51.046 - 10058 - ACQ GCM_WORK (partial)
+  10-06 06:39:51.062 - 10058 - REL GCM_WORK
+  10-06 06:39:51.076 - 10058 - REL GOOGLE_C2DM
+  10-06 06:40:00.003 - 1000 - ACQ *alarm* (partial)
+  10-06 06:40:00.004 - 1000 - REL *alarm*
+  10-06 06:41:00.005 - 1000 - ACQ *alarm* (partial)
+  10-06 06:41:00.006 - 1000 - REL *alarm*
+  10-06 06:41:51.025 - 10058 - ACQ GCM_READ (partial)
+  10-06 06:41:51.031 - 10058 - ACQ GCM_WORK (partial)
+  10-06 06:41:51.033 - 10058 - REL GCM_READ
+  10-06 06:41:51.049 - 10058 - ACQ GOOGLE_C2DM (partial)
+  10-06 06:41:51.062 - 10058 - REL GCM_WORK
+  10-06 06:41:51.109 - 10058 - REL GOOGLE_C2DM
+  10-06 06:42:00.003 - 1000 - ACQ *alarm* (partial)
+  10-06 06:42:00.003 - 1000 - REL *alarm*
+  10-06 06:42:10.992 - 10058 - ACQ GCM_READ (partial)
+  10-06 06:42:10.994 - 10058 - ACQ GCM_WORK (partial)
+  10-06 06:42:10.995 - 10058 - REL GCM_READ
+  10-06 06:42:10.999 - 10058 - ACQ GOOGLE_C2DM (partial)
+  10-06 06:42:11.021 - 10058 - REL GCM_WORK
+  10-06 06:42:11.029 - 10058 - ACQ GCM_WORK (partial)
+  10-06 06:42:11.033 - 10058 - REL GCM_WORK
+  10-06 06:42:11.060 - 10058 - REL GOOGLE_C2DM
+  10-06 06:43:00.002 - 1000 - ACQ *alarm* (partial)
+  10-06 06:43:00.003 - 1000 - REL *alarm*
+  10-06 06:43:10.997 - 10058 - ACQ GCM_READ (partial)
+  10-06 06:43:10.999 - 10058 - ACQ GCM_WORK (partial)
+  10-06 06:43:11.002 - 10058 - REL GCM_READ
+  10-06 06:43:11.013 - 10058 - ACQ GOOGLE_C2DM (partial)
+  10-06 06:43:11.030 - 10058 - REL GCM_WORK
+  10-06 06:43:11.125 - 10058 - REL GOOGLE_C2DM
+  10-06 06:43:30.863 - 10058 - ACQ GCM_READ (partial)
+  10-06 06:43:30.865 - 10058 - ACQ GCM_WORK (partial)
+  10-06 06:43:30.866 - 10058 - REL GCM_READ
+  10-06 06:43:30.871 - 10058 - ACQ GOOGLE_C2DM (partial)
+  10-06 06:43:30.902 - 10058 - REL GCM_WORK
+  10-06 06:43:30.916 - 10058 - ACQ GCM_WORK (partial)
+  10-06 06:43:30.927 - 10058 - REL GCM_WORK
+  10-06 06:43:30.941 - 10058 - REL GOOGLE_C2DM
+  10-06 06:44:00.004 - 1000 - ACQ *alarm* (partial)
+  10-06 06:44:00.011 - 1000 - REL *alarm*
+  10-06 06:44:36.700 - 1000 - ACQ *alarm* (partial)
+  10-06 06:44:36.701 - 1000 - REL *alarm*
+  10-06 06:44:36.703 - 1000 - ACQ *job*/a/c.a.s.n.NotificationHistoryJobService#237039804 (partial)
+  10-06 06:44:36.703 - 1000 - ACQ *job*/a/c.a.s.n.NotificationHistoryJobService#237039804 (partial)
+  10-06 06:44:36.707 - 1000 - REL *job*/a/c.a.s.n.NotificationHistoryJobService#237039804
+  10-06 06:44:36.709 - 1000 - REL *job*/a/c.a.s.n.NotificationHistoryJobService#237039804
+  10-06 06:45:00.004 - 1000 - ACQ *alarm* (partial)
+  10-06 06:45:00.004 - 1000 - REL *alarm*
+  10-06 06:46:00.005 - 1000 - ACQ *alarm* (partial)
+  10-06 06:46:00.005 - 1000 - REL *alarm*
+  10-06 06:47:00.003 - 1000 - ACQ *alarm* (partial)
+  10-06 06:47:00.004 - 1000 - REL *alarm*
+  10-06 06:48:00.004 - 1000 - ACQ *alarm* (partial)
+  10-06 06:48:00.004 - 1000 - REL *alarm*
+  10-06 06:48:11.132 - 10058 - ACQ GCM_READ (partial)
+  10-06 06:48:11.137 - 10058 - ACQ GCM_WORK (partial)
+  10-06 06:48:11.141 - 10058 - REL GCM_READ
+  10-06 06:48:11.164 - 10058 - ACQ GOOGLE_C2DM (partial)
+  10-06 06:48:11.178 - 10058 - REL GCM_WORK
+  10-06 06:48:11.225 - 10058 - REL GOOGLE_C2DM
+  10-06 06:48:30.999 - 10058 - ACQ GCM_READ (partial)
+  10-06 06:48:31.001 - 10058 - ACQ GCM_WORK (partial)
+  10-06 06:48:31.002 - 10058 - REL GCM_READ
+  10-06 06:48:31.009 - 10058 - ACQ GOOGLE_C2DM (partial)
+  10-06 06:48:31.022 - 10058 - REL GCM_WORK
+  10-06 06:48:31.027 - 10058 - ACQ GCM_WORK (partial)
+  10-06 06:48:31.033 - 10058 - REL GCM_WORK
+  10-06 06:48:31.067 - 10058 - REL GOOGLE_C2DM
+  10-06 06:49:00.006 - 1000 - ACQ *alarm* (partial)
+  10-06 06:49:00.008 - 1000 - REL *alarm*
+  10-06 06:50:00.004 - 1000 - ACQ *alarm* (partial)
+  10-06 06:50:00.005 - 1000 - REL *alarm*
+  10-06 06:50:51.390 - 10058 - ACQ GCM_READ (partial)
+  10-06 06:50:51.393 - 10058 - ACQ GCM_WORK (partial)
+  10-06 06:50:51.401 - 10058 - REL GCM_READ
+  10-06 06:50:51.409 - 10058 - ACQ GOOGLE_C2DM (partial)
+  10-06 06:50:51.423 - 10058 - REL GCM_WORK
+  10-06 06:50:51.548 - 10058 - REL GOOGLE_C2DM
+  10-06 06:51:00.006 - 1000 - ACQ *alarm* (partial)
+  10-06 06:51:00.007 - 1000 - REL *alarm*
+  10-06 06:51:11.050 - 10058 - ACQ GCM_READ (partial)
+  10-06 06:51:11.053 - 10058 - ACQ GCM_WORK (partial)
+  10-06 06:51:11.054 - 10058 - REL GCM_READ
+  10-06 06:51:11.059 - 10058 - ACQ GOOGLE_C2DM (partial)
+  10-06 06:51:11.090 - 10058 - REL GCM_WORK
+  10-06 06:51:11.092 - 10058 - ACQ GCM_WORK (partial)
+  10-06 06:51:11.103 - 10058 - REL GCM_WORK
+  10-06 06:51:11.118 - 10058 - REL GOOGLE_C2DM
+  10-06 06:52:00.003 - 1000 - ACQ *alarm* (partial)
+  10-06 06:52:00.004 - 1000 - REL *alarm*
+  10-06 06:53:00.003 - 1000 - ACQ *alarm* (partial)
+  10-06 06:53:00.004 - 1000 - REL *alarm*
+  10-06 06:53:51.511 - 10058 - ACQ GCM_READ (partial)
+  10-06 06:53:51.515 - 10058 - ACQ GCM_WORK (partial)
+  10-06 06:53:51.516 - 10058 - REL GCM_READ
+  10-06 06:53:51.544 - 10058 - ACQ GOOGLE_C2DM (partial)
+  10-06 06:53:51.552 - 10058 - REL GCM_WORK
+  10-06 06:53:51.583 - 10058 - ACQ IntentOp:c.g.a.g/.c.PersistentIntentOperationService (partial)
+  10-06 06:53:51.592 - 10058 - REL GOOGLE_C2DM
+  10-06 06:53:51.596 - 10058 - ACQ IntentOp:.g.GcmInternalReceiverIntentOperation (partial)
+  10-06 06:53:51.599 - 10058 - REL IntentOp:c.g.a.g/.c.PersistentIntentOperationService
+  10-06 06:53:51.601 - 10058 - REL IntentOp:.g.GcmInternalReceiverIntentOperation
+  10-06 06:54:00.005 - 1000 - ACQ *alarm* (partial)
+  10-06 06:54:00.005 - 1000 - REL *alarm*
+  10-06 06:55:00.003 - 1000 - ACQ *alarm* (partial)
+  10-06 06:55:00.004 - 1000 - REL *alarm*
+  10-06 06:55:31.046 - 10058 - ACQ GCM_READ (partial)
+  10-06 06:55:31.048 - 10058 - ACQ GCM_WORK (partial)
+  10-06 06:55:31.049 - 10058 - REL GCM_READ
+  10-06 06:55:31.053 - 10058 - ACQ GOOGLE_C2DM (partial)
+  10-06 06:55:31.085 - 10058 - REL GCM_WORK
+  10-06 06:55:31.087 - 10058 - ACQ GCM_WORK (partial)
+  10-06 06:55:31.092 - 10058 - ACQ *gms_scheduler*:internal (partial)
+  10-06 06:55:31.093 - 10058 - REL GCM_WORK
+  10-06 06:55:31.155 - 10058 - ACQ *gms_scheduler*/c.g.a.g/.c.s.r.GmsRestartPersistentService (partial)
+  10-06 06:55:31.161 - 10058 - REL GOOGLE_C2DM
+  10-06 06:55:31.195 - 10058 - REL *gms_scheduler*:internal
+  10-06 06:55:31.197 - 10058 - ACQ *gms_scheduler*:internal (partial)
+  10-06 06:55:31.205 - 10058 - REL *gms_scheduler*:internal
+  10-06 06:55:31.221 - 10058 - REL *gms_scheduler*/c.g.a.g/.c.s.r.GmsRestartPersistentService
+  10-06 06:55:31.231 - 10058 - ACQ *gms_scheduler*:internal (partial)
+  10-06 06:55:31.244 - 10058 - REL *gms_scheduler*:internal
+  10-06 06:55:31.249 - 10058 - ACQ *gms_scheduler*:internal (partial)
+  10-06 06:55:31.258 - 10058 - REL *gms_scheduler*:internal
+  10-06 06:55:34.139 - 1000 - ACQ *location* (partial)
+  10-06 06:55:34.145 - 10058 - ACQ CMWakeLock (partial)
+  10-06 06:55:34.312 - 10058 - ACQ GOOGLE_C2DM (partial)
+  10-06 06:55:34.366 - 10058 - REL CMWakeLock
+  10-06 06:55:34.370 - 10058 - ACQ GCM_CONN_ALARM (partial)
+  10-06 06:55:34.373 - 10058 - ACQ GCM_WORK (partial)
+  10-06 06:55:34.398 - 10058 - REL GCM_WORK
+  10-06 06:55:34.430 - 1000 - REL *location*
+  10-06 06:55:34.521 - 10058 - ACQ IntentOp:.c.b.BackgroundBroadcastReceiverSupport$PersistentReceiverIntentOperation (partial)
+  10-06 06:55:34.532 - 10058 - ACQ IntentOp:.c.b.BackgroundBroadcastReceiverSupport$PersistentReceiverIntentOperation (partial)
+  10-06 06:55:34.540 - 10058 - ACQ CMWakeLock (partial)
+  10-06 06:55:34.557 - 10058 - ACQ IntentOp:.c.b.BackgroundBroadcastReceiverSupport$PersistentReceiverIntentOperation (partial)
+  10-06 06:55:34.558 - 10058 - REL CMWakeLock
+  10-06 06:55:34.566 - 10058 - REL GOOGLE_C2DM
+  10-06 06:55:34.586 - 10058 - REL IntentOp:.c.b.BackgroundBroadcastReceiverSupport$PersistentReceiverIntentOperation
+  10-06 06:55:34.606 - 10058 - REL IntentOp:.c.b.BackgroundBroadcastReceiverSupport$PersistentReceiverIntentOperation
+  10-06 06:55:34.620 - 10058 - REL IntentOp:.c.b.BackgroundBroadcastReceiverSupport$PersistentReceiverIntentOperation
+  10-06 06:55:34.773 - 10058 - ACQ CallbackRunner (partial)
+  10-06 06:55:34.917 - 10058 - ACQ GCM_WORK (partial)
+  10-06 06:55:35.015 - 10058 - REL CallbackRunner
+  10-06 06:55:35.018 - 10058 - ACQ NetworkLocationLocator (partial)
+  10-06 06:55:35.023 - 10058 - REL NetworkLocationLocator
+  10-06 06:55:35.028 - 10058 - ACQ CallbackRunner (partial)
+  10-06 06:55:35.029 - 10058 - REL GCM_WORK
+  10-06 06:55:35.035 - 10058 - REL CallbackRunner
+  10-06 06:55:35.183 - 10058 - ACQ GCM_READ (partial)
+  10-06 06:55:35.187 - 10058 - ACQ GCM_WORK (partial)
+  10-06 06:55:35.208 - 10058 - REL GCM_READ
+  10-06 06:55:35.216 - 10058 - ACQ GCM_READ (partial)
+  10-06 06:55:35.222 - 10058 - REL GCM_READ
+  10-06 06:55:35.238 - 10058 - REL GCM_CONN_ALARM
+  10-06 06:55:35.261 - 10058 - REL GCM_WORK
+  10-06 06:55:36.468 - 10058 - ACQ CallbackRunner (partial)
+  10-06 06:55:36.469 - 10058 - ACQ NetworkLocationLocator (partial)
+  10-06 06:55:36.472 - 10058 - REL CallbackRunner
+  10-06 06:55:36.474 - 10058 - REL NetworkLocationLocator
+  10-06 06:55:36.484 - 10058 - ACQ CallbackRunner (partial)
+  10-06 06:55:36.485 - 10058 - REL CallbackRunner
+  10-06 06:55:36.491 - 10058 - ACQ NetworkLocationScanner (partial)
+  10-06 06:55:36.502 - 10058 - ACQ CallbackRunner (partial)
+  10-06 06:55:36.508 - 10058 - REL CallbackRunner
+  10-06 06:55:40.086 - 10058 - REL NetworkLocationScanner
+  10-06 06:55:40.094 - 10058 - ACQ NetworkLocationLocator (partial)
+  10-06 06:55:40.163 - 10058 - ACQ PendingIntentClient (partial)
+  10-06 06:55:40.171 - 10058 - REL PendingIntentClient
+  10-06 06:55:40.179 - 10058 - ACQ GCoreFlp (partial)
+  10-06 06:55:40.181 - 10058 - ACQ CallbackRunner (partial)
+  10-06 06:55:40.187 - 10058 - REL NetworkLocationLocator
+  10-06 06:55:40.190 - 10058 - REL CallbackRunner
+  10-06 06:55:40.192 - 1000 - ACQ *location* (partial)
+  10-06 06:55:40.193 - 1000 - REL *location*
+  10-06 06:55:40.234 - 1000 - ACQ *location* (partial)
+  10-06 06:55:40.236 - 1000 - REL *location*
+  10-06 06:55:40.238 - 10058 - REL GCoreFlp
+  10-06 06:55:50.912 - 10058 - ACQ GCM_READ (partial)
+  10-06 06:55:50.915 - 10058 - ACQ GCM_WORK (partial)
+  10-06 06:55:50.916 - 10058 - REL GCM_READ
+  10-06 06:55:50.922 - 10058 - ACQ GOOGLE_C2DM (partial)
+  10-06 06:55:50.942 - 10058 - REL GCM_WORK
+  10-06 06:55:50.948 - 10058 - ACQ GCM_WORK (partial)
+  10-06 06:55:50.953 - 10058 - REL GCM_WORK
+  10-06 06:55:50.992 - 10058 - REL GOOGLE_C2DM
+  10-06 06:56:00.003 - 1000 - ACQ *alarm* (partial)
+  10-06 06:56:00.004 - 1000 - REL *alarm*
+  10-06 06:57:00.003 - 1000 - ACQ *alarm* (partial)
+  10-06 06:57:00.004 - 1000 - REL *alarm*
+  10-06 06:58:00.003 - 1000 - ACQ *alarm* (partial)
+  10-06 06:58:00.003 - 1000 - REL *alarm*
+  10-06 06:59:00.003 - 1000 - ACQ *alarm* (partial)
+  10-06 06:59:00.006 - 1000 - REL *alarm*
+  10-06 06:59:41.218 - 10058 - ACQ GCM_READ (partial)
+  10-06 06:59:41.219 - 10058 - ACQ GCM_WORK (partial)
+  10-06 06:59:41.220 - 10058 - REL GCM_READ
+  10-06 06:59:41.233 - 10058 - REL GCM_WORK
+  10-06 06:59:54.728 - 10058 - ACQ GCM_READ (partial)
+  10-06 06:59:54.731 - 10058 - ACQ GCM_WORK (partial)
+  10-06 06:59:54.732 - 10058 - REL GCM_READ
+  10-06 06:59:54.750 - 10058 - ACQ GOOGLE_C2DM (partial)
+  10-06 06:59:54.766 - 10058 - REL GCM_WORK
+  10-06 06:59:54.767 - 10058 - ACQ GCM_WORK (partial)
+  10-06 06:59:54.773 - 10058 - REL GCM_WORK
+  10-06 06:59:54.791 - 10048 - ACQ androidx.core:wake:com.google.android.apps.mediashell/.ChromecastGcmListenerService (partial)
+  10-06 06:59:54.798 - 10048 - REL androidx.core:wake:com.google.android.apps.mediashell/.ChromecastGcmListenerService
+  10-06 06:59:54.798 - 10058 - REL GOOGLE_C2DM
+  10-06 07:00:00.002 - 1000 - ACQ *alarm* (partial)
+  10-06 07:00:00.038 - 1000 - REL *alarm*
+  10-06 07:00:11.315 - 10058 - ACQ GCM_READ (partial)
+  10-06 07:00:11.318 - 10058 - ACQ GCM_WORK (partial)
+  10-06 07:00:11.321 - 10058 - REL GCM_READ
+  10-06 07:00:11.328 - 10058 - ACQ GOOGLE_C2DM (partial)
+  10-06 07:00:11.347 - 10058 - REL GCM_WORK
+  10-06 07:00:11.476 - 10058 - REL GOOGLE_C2DM
+  10-06 07:00:31.283 - 10058 - ACQ GCM_READ (partial)
+  10-06 07:00:31.287 - 10058 - ACQ GCM_WORK (partial)
+  10-06 07:00:31.288 - 10058 - REL GCM_READ
+  10-06 07:00:31.293 - 10058 - ACQ GOOGLE_C2DM (partial)
+  10-06 07:00:31.311 - 10058 - REL GCM_WORK
+  10-06 07:00:31.313 - 10058 - ACQ GCM_WORK (partial)
+  10-06 07:00:31.318 - 10058 - REL GCM_WORK
+  10-06 07:00:31.352 - 10058 - REL GOOGLE_C2DM
+  10-06 07:01:00.004 - 1000 - ACQ *alarm* (partial)
+  10-06 07:01:00.006 - 1000 - REL *alarm*
+  10-06 07:01:50.950 - 10058 - ACQ GCM_READ (partial)
+  10-06 07:01:50.952 - 10058 - ACQ GCM_WORK (partial)
+  10-06 07:01:50.954 - 10058 - REL GCM_READ
+  10-06 07:01:50.978 - 10058 - ACQ GOOGLE_C2DM (partial)
+  10-06 07:01:50.988 - 10058 - REL GCM_WORK
+  10-06 07:01:51.092 - 10058 - REL GOOGLE_C2DM
+  10-06 07:02:00.008 - 1000 - ACQ *alarm* (partial)
+  10-06 07:02:00.010 - 1000 - REL *alarm*
+  10-06 07:02:11.021 - 10058 - ACQ GCM_READ (partial)
+  10-06 07:02:11.025 - 10058 - ACQ GCM_WORK (partial)
+  10-06 07:02:11.027 - 10058 - REL GCM_READ
+  10-06 07:02:11.033 - 10058 - ACQ GOOGLE_C2DM (partial)
+  10-06 07:02:11.052 - 10058 - REL GCM_WORK
+  10-06 07:02:11.054 - 10058 - ACQ GCM_WORK (partial)
+  10-06 07:02:11.084 - 10058 - REL GCM_WORK
+  10-06 07:02:11.085 - 10058 - REL GOOGLE_C2DM
+  10-06 07:02:19.987 - 1000 - ACQ NetworkStats (partial)
+  10-06 07:02:20.046 - 1000 - REL NetworkStats
+  10-06 07:02:30.888 - 10058 - ACQ GCM_READ (partial)
+  10-06 07:02:30.891 - 10058 - ACQ GCM_WORK (partial)
+  10-06 07:02:30.892 - 10058 - REL GCM_READ
+  10-06 07:02:30.913 - 10058 - ACQ GOOGLE_C2DM (partial)
+  10-06 07:02:30.922 - 10058 - REL GCM_WORK
+  10-06 07:02:30.969 - 10058 - REL GOOGLE_C2DM
+  10-06 07:02:50.958 - 10058 - ACQ GCM_READ (partial)
+  10-06 07:02:50.960 - 10058 - ACQ GCM_WORK (partial)
+  10-06 07:02:50.964 - 10058 - REL GCM_READ
+  10-06 07:02:50.967 - 10058 - ACQ GOOGLE_C2DM (partial)
+  10-06 07:02:50.986 - 10058 - REL GCM_WORK
+  10-06 07:02:50.989 - 10058 - ACQ GCM_WORK (partial)
+  10-06 07:02:50.995 - 10058 - REL GCM_WORK
+  10-06 07:02:51.023 - 10058 - REL GOOGLE_C2DM
+  10-06 07:03:00.002 - 1000 - ACQ *alarm* (partial)
+  10-06 07:03:00.004 - 1000 - REL *alarm*
+  10-06 07:03:11.027 - 10058 - ACQ GCM_READ (partial)
+  10-06 07:03:11.030 - 10058 - ACQ GCM_WORK (partial)
+  10-06 07:03:11.031 - 10058 - REL GCM_READ
+  10-06 07:03:11.047 - 10058 - ACQ GOOGLE_C2DM (partial)
+  10-06 07:03:11.066 - 10058 - REL GCM_WORK
+  10-06 07:03:11.111 - 10058 - REL GOOGLE_C2DM
+  10-06 07:03:30.892 - 10058 - ACQ GCM_READ (partial)
+  10-06 07:03:30.894 - 10058 - ACQ GCM_WORK (partial)
+  10-06 07:03:30.895 - 10058 - REL GCM_READ
+  10-06 07:03:30.899 - 10058 - ACQ GOOGLE_C2DM (partial)
+  10-06 07:03:30.916 - 10058 - REL GCM_WORK
+  10-06 07:03:30.919 - 10058 - ACQ GCM_WORK (partial)
+  10-06 07:03:30.930 - 10058 - REL GCM_WORK
+  10-06 07:03:30.962 - 10058 - REL GOOGLE_C2DM
+  10-06 07:04:00.007 - 1000 - ACQ *alarm* (partial)
+  10-06 07:04:00.008 - 1000 - REL *alarm*
+  10-06 07:04:11.033 - 10058 - ACQ GCM_READ (partial)
+  10-06 07:04:11.037 - 10058 - ACQ GCM_WORK (partial)
+  10-06 07:04:11.038 - 10058 - REL GCM_READ
+  10-06 07:04:11.057 - 10058 - ACQ GOOGLE_C2DM (partial)
+  10-06 07:04:11.071 - 10058 - REL GCM_WORK
+  10-06 07:04:11.150 - 10058 - REL GOOGLE_C2DM
+  10-06 07:04:31.001 - 10058 - ACQ GCM_READ (partial)
+  10-06 07:04:31.002 - 10058 - ACQ GCM_WORK (partial)
+  10-06 07:04:31.003 - 10058 - REL GCM_READ
+  10-06 07:04:31.007 - 10058 - ACQ GOOGLE_C2DM (partial)
+  10-06 07:04:31.027 - 10058 - REL GCM_WORK
+  10-06 07:04:31.028 - 10058 - ACQ GCM_WORK (partial)
+  10-06 07:04:31.037 - 10058 - REL GCM_WORK
+  10-06 07:04:31.066 - 10058 - REL GOOGLE_C2DM
+  10-06 07:05:00.003 - 1000 - ACQ *alarm* (partial)
+  10-06 07:05:00.004 - 1000 - REL *alarm*
+  10-06 07:06:00.004 - 1000 - ACQ *alarm* (partial)
+  10-06 07:06:00.007 - 1000 - REL *alarm*
+  10-06 07:07:00.003 - 1000 - ACQ *alarm* (partial)
+  10-06 07:07:00.004 - 1000 - REL *alarm*
+  10-06 07:07:30.920 - 10058 - ACQ GCM_READ (partial)
+  10-06 07:07:30.923 - 10058 - ACQ GCM_WORK (partial)
+  10-06 07:07:30.924 - 10058 - REL GCM_READ
+  10-06 07:07:30.945 - 10058 - ACQ GOOGLE_C2DM (partial)
+  10-06 07:07:30.959 - 10058 - REL GCM_WORK
+  10-06 07:07:31.020 - 10058 - REL GOOGLE_C2DM
+  10-06 07:08:00.005 - 1000 - ACQ *alarm* (partial)
+  10-06 07:08:00.006 - 1000 - REL *alarm*
+  10-06 07:08:31.130 - 10058 - ACQ GCM_READ (partial)
+  10-06 07:08:31.131 - 10058 - ACQ GCM_WORK (partial)
+  10-06 07:08:31.132 - 10058 - REL GCM_READ
+  10-06 07:08:31.138 - 10058 - ACQ GOOGLE_C2DM (partial)
+  10-06 07:08:31.165 - 10058 - REL GCM_WORK
+  10-06 07:08:31.167 - 10058 - ACQ GCM_WORK (partial)
+  10-06 07:08:31.172 - 10058 - REL GCM_WORK
+  10-06 07:08:31.259 - 10058 - REL GOOGLE_C2DM
+  10-06 07:09:00.006 - 1000 - ACQ *alarm* (partial)
+  10-06 07:09:00.010 - 1000 - REL *alarm*
+  10-06 07:09:51.005 - 10058 - ACQ GCM_READ (partial)
+  10-06 07:09:51.008 - 10058 - ACQ GCM_WORK (partial)
+  10-06 07:09:51.011 - 10058 - REL GCM_READ
+  10-06 07:09:51.040 - 10058 - ACQ GOOGLE_C2DM (partial)
+  10-06 07:09:51.054 - 10058 - REL GCM_WORK
+  10-06 07:09:51.115 - 10058 - REL GOOGLE_C2DM
+  10-06 07:10:00.002 - 1000 - ACQ *alarm* (partial)
+  10-06 07:10:00.003 - 1000 - REL *alarm*
+  10-06 07:10:10.897 - 10058 - ACQ GCM_READ (partial)
+  10-06 07:10:10.899 - 10058 - ACQ GCM_WORK (partial)
+  10-06 07:10:10.900 - 10058 - REL GCM_READ
+  10-06 07:10:10.905 - 10058 - ACQ GOOGLE_C2DM (partial)
+  10-06 07:10:10.920 - 10058 - REL GCM_WORK
+  10-06 07:10:10.923 - 10058 - ACQ GCM_WORK (partial)
+  10-06 07:10:10.929 - 10058 - REL GCM_WORK
+  10-06 07:10:10.967 - 10058 - REL GOOGLE_C2DM
+  10-06 07:11:00.006 - 1000 - ACQ *alarm* (partial)
+  10-06 07:11:00.006 - 1000 - REL *alarm*
+  10-06 07:11:30.948 - 10058 - ACQ GCM_READ (partial)
+  10-06 07:11:30.950 - 10058 - ACQ GCM_WORK (partial)
+  10-06 07:11:30.952 - 10058 - REL GCM_READ
+  10-06 07:11:30.973 - 10058 - ACQ GOOGLE_C2DM (partial)
+  10-06 07:11:30.987 - 10058 - REL GCM_WORK
+  10-06 07:11:31.105 - 10058 - REL GOOGLE_C2DM
+  10-06 07:11:50.914 - 10058 - ACQ GCM_READ (partial)
+  10-06 07:11:50.917 - 10058 - ACQ GCM_WORK (partial)
+  10-06 07:11:50.918 - 10058 - REL GCM_READ
+  10-06 07:11:50.927 - 10058 - ACQ GOOGLE_C2DM (partial)
+  10-06 07:11:50.939 - 10058 - REL GCM_WORK
+  10-06 07:11:50.941 - 10058 - ACQ GCM_WORK (partial)
+  10-06 07:11:50.950 - 10058 - REL GCM_WORK
+  10-06 07:11:50.986 - 10058 - REL GOOGLE_C2DM
+  10-06 07:12:00.003 - 1000 - ACQ *alarm* (partial)
+  10-06 07:12:00.004 - 1000 - REL *alarm*
+  10-06 07:12:31.053 - 10058 - ACQ GCM_READ (partial)
+  10-06 07:12:31.055 - 10058 - ACQ GCM_WORK (partial)
+  10-06 07:12:31.056 - 10058 - REL GCM_READ
+  10-06 07:12:31.071 - 10058 - ACQ GOOGLE_C2DM (partial)
+  10-06 07:12:31.089 - 10058 - REL GCM_WORK
+  10-06 07:12:31.131 - 10058 - REL GOOGLE_C2DM
+  10-06 07:13:00.002 - 1000 - ACQ *alarm* (partial)
+  10-06 07:13:00.004 - 1000 - REL *alarm*
+  10-06 07:13:31.061 - 10058 - ACQ GCM_READ (partial)
+  10-06 07:13:31.063 - 10058 - ACQ GCM_WORK (partial)
+  10-06 07:13:31.064 - 10058 - REL GCM_READ
+  10-06 07:13:31.067 - 10058 - ACQ GOOGLE_C2DM (partial)
+  10-06 07:13:31.089 - 10058 - REL GCM_WORK
+  10-06 07:13:31.091 - 10058 - ACQ GCM_WORK (partial)
+  10-06 07:13:31.095 - 10058 - REL GCM_WORK
+  10-06 07:13:31.182 - 10058 - REL GOOGLE_C2DM
+  10-06 07:13:42.179 - 1000 - ACQ *alarm* (partial)
+  10-06 07:13:42.181 - 1000 - ACQ NetworkStats (partial)
+  10-06 07:13:42.220 - 1000 - REL NetworkStats
+  10-06 07:13:42.225 - 1000 - REL *alarm*
+  10-06 07:13:42.233 - 1000 - ACQ *job*/@.w.s.g.a.k/a.w.i.b.s.SystemJobService#78 (partial)
+  10-06 07:13:42.240 - 1000 - ACQ *job*/@.w.s.g.a.k/a.w.i.b.s.SystemJobService#78 (partial)
+  10-06 07:13:42.256 - 1000 - REL *job*/@.w.s.g.a.k/a.w.i.b.s.SystemJobService#78
+  10-06 07:13:42.257 - 1000 - ACQ *job*/@.w.s.g.a.k/a.w.i.b.s.SystemJobService#81 (partial)
+  10-06 07:13:42.260 - 1000 - ACQ *job*/@.w.s.g.a.k/a.w.i.b.s.SystemJobService#81 (partial)
+  10-06 07:13:42.263 - 1000 - REL *job*/@.w.s.g.a.k/a.w.i.b.s.SystemJobService#81
+  10-06 07:13:42.264 - 1000 - ACQ *job*/@.w.s.g.a.k/a.w.i.b.s.SystemJobService#80 (partial)
+  10-06 07:13:42.268 - 1000 - ACQ *job*/@.w.s.g.a.k/a.w.i.b.s.SystemJobService#80 (partial)
+  10-06 07:13:42.271 - 1000 - REL *job*/@.w.s.g.a.k/a.w.i.b.s.SystemJobService#80
+  10-06 07:13:42.271 - 1000 - ACQ *job*/a/c.a.s.n.NotificationHistoryJobService#237039804 (partial)
+  10-06 07:13:42.272 - 1000 - ACQ *job*/a/c.a.s.n.NotificationHistoryJobService#237039804 (partial)
+  10-06 07:13:42.275 - 1000 - REL *job*/a/c.a.s.n.NotificationHistoryJobService#237039804
+  10-06 07:13:42.297 - 1000 - REL *job*/a/c.a.s.n.NotificationHistoryJobService#237039804
+  10-06 07:13:42.592 - 1000 - REL *job*/@.w.s.g.a.k/a.w.i.b.s.SystemJobService#81
+  10-06 07:13:42.604 - 1000 - REL *job*/@.w.s.g.a.k/a.w.i.b.s.SystemJobService#78
+  10-06 07:13:42.627 - 1000 - REL *job*/@.w.s.g.a.k/a.w.i.b.s.SystemJobService#80
+  10-06 07:13:42.997 - 1000 - ACQ com.android.server.stats.StatsManagerService (partial)
+  10-06 07:13:43.023 - 1000 - REL com.android.server.stats.StatsManagerService
+  10-06 07:13:51.658 - 1000 - ACQ com.android.server.stats.StatsManagerService (partial)
+  10-06 07:13:51.673 - 1000 - REL com.android.server.stats.StatsManagerService
+  10-06 07:14:00.003 - 1000 - ACQ *alarm* (partial)
+  10-06 07:14:00.004 - 1000 - REL *alarm*
+  10-06 07:15:00.004 - 1000 - ACQ *alarm* (partial)
+  10-06 07:15:00.004 - 1000 - REL *alarm*
+  10-06 07:16:00.005 - 1000 - ACQ *alarm* (partial)
+  10-06 07:16:00.006 - 1000 - REL *alarm*
+  10-06 07:16:30.977 - 10058 - ACQ GCM_READ (partial)
+  10-06 07:16:30.979 - 10058 - ACQ GCM_WORK (partial)
+  10-06 07:16:30.980 - 10058 - REL GCM_READ
+  10-06 07:16:30.997 - 10058 - ACQ GOOGLE_C2DM (partial)
+  10-06 07:16:31.017 - 10058 - REL GCM_WORK
+  10-06 07:16:31.125 - 10058 - REL GOOGLE_C2DM
+  10-06 07:17:00.005 - 1000 - ACQ *alarm* (partial)
+  10-06 07:17:00.006 - 1000 - REL *alarm*
+  10-06 07:17:10.915 - 10058 - ACQ GCM_READ (partial)
+  10-06 07:17:10.918 - 10058 - ACQ GCM_WORK (partial)
+  10-06 07:17:10.920 - 10058 - REL GCM_READ
+  10-06 07:17:10.926 - 10058 - ACQ GOOGLE_C2DM (partial)
+  10-06 07:17:10.949 - 10058 - REL GCM_WORK
+  10-06 07:17:10.951 - 10058 - ACQ GCM_WORK (partial)
+  10-06 07:17:10.954 - 10058 - REL GCM_WORK
+  10-06 07:17:10.994 - 10058 - REL GOOGLE_C2DM
+  10-06 07:17:30.898 - 10058 - ACQ GCM_READ (partial)
+  10-06 07:17:30.901 - 10058 - ACQ GCM_WORK (partial)
+  10-06 07:17:30.902 - 10058 - REL GCM_READ
+  10-06 07:17:30.912 - 10058 - ACQ GOOGLE_C2DM (partial)
+  10-06 07:17:30.926 - 10058 - REL GCM_WORK
+  10-06 07:17:30.969 - 10058 - REL GOOGLE_C2DM
+  10-06 07:17:51.260 - 10058 - ACQ GCM_READ (partial)
+  10-06 07:17:51.261 - 10058 - ACQ GCM_WORK (partial)
+  10-06 07:17:51.262 - 10058 - REL GCM_READ
+  10-06 07:17:51.269 - 10058 - ACQ GOOGLE_C2DM (partial)
+  10-06 07:17:51.291 - 10058 - REL GCM_WORK
+  10-06 07:17:51.293 - 10058 - ACQ GCM_WORK (partial)
+  10-06 07:17:51.299 - 10058 - REL GCM_WORK
+  10-06 07:17:51.327 - 10058 - REL GOOGLE_C2DM
+  10-06 07:18:00.003 - 1000 - ACQ *alarm* (partial)
+  10-06 07:18:00.004 - 1000 - REL *alarm*
+  10-06 07:18:11.126 - 10058 - ACQ GCM_READ (partial)
+  10-06 07:18:11.130 - 10058 - ACQ GCM_WORK (partial)
+  10-06 07:18:11.131 - 10058 - REL GCM_READ
+  10-06 07:18:11.147 - 10058 - ACQ GOOGLE_C2DM (partial)
+  10-06 07:18:11.164 - 10058 - REL GCM_WORK
+  10-06 07:18:11.212 - 10058 - REL GOOGLE_C2DM
+  10-06 07:18:51.573 - 10058 - ACQ GCM_READ (partial)
+  10-06 07:18:51.578 - 10058 - ACQ GCM_WORK (partial)
+  10-06 07:18:51.581 - 10058 - REL GCM_READ
+  10-06 07:18:51.587 - 10058 - ACQ GOOGLE_C2DM (partial)
+  10-06 07:18:51.603 - 10058 - REL GCM_WORK
+  10-06 07:18:51.606 - 10058 - ACQ GCM_WORK (partial)
+  10-06 07:18:51.620 - 10058 - REL GCM_WORK
+  10-06 07:18:51.697 - 10058 - REL GOOGLE_C2DM
+  10-06 07:19:00.004 - 1000 - ACQ *alarm* (partial)
+  10-06 07:19:00.005 - 1000 - REL *alarm*
+  10-06 07:19:51.581 - 10058 - ACQ GCM_READ (partial)
+  10-06 07:19:51.583 - 10058 - ACQ GCM_WORK (partial)
+  10-06 07:19:51.586 - 10058 - REL GCM_READ
+  10-06 07:19:51.597 - 10058 - ACQ GOOGLE_C2DM (partial)
+  10-06 07:19:51.610 - 10058 - REL GCM_WORK
+  10-06 07:19:51.648 - 10058 - REL GOOGLE_C2DM
+  10-06 07:20:00.003 - 1000 - ACQ *alarm* (partial)
+  10-06 07:20:00.003 - 1000 - REL *alarm*
+  10-06 07:20:10.935 - 10058 - ACQ GCM_READ (partial)
+  10-06 07:20:10.937 - 10058 - ACQ GCM_WORK (partial)
+  10-06 07:20:10.940 - 10058 - REL GCM_READ
+  10-06 07:20:10.946 - 10058 - ACQ GOOGLE_C2DM (partial)
+  10-06 07:20:10.963 - 10058 - REL GCM_WORK
+  10-06 07:20:10.966 - 10058 - ACQ GCM_WORK (partial)
+  10-06 07:20:10.974 - 10058 - REL GCM_WORK
+  10-06 07:20:11.015 - 10058 - REL GOOGLE_C2DM
+  10-06 07:20:55.612 - 1000 - ACQ *alarm* (partial)
+  10-06 07:20:55.613 - 1000 - ACQ com.android.server.stats.StatsCompanionService$PullingAlarmListener (partial)
+  10-06 07:20:55.614 - 1000 - REL *alarm*
+  10-06 07:20:55.625 - 1000 - ACQ NetworkStats (partial)
+  10-06 07:20:55.651 - 1000 - REL NetworkStats
+  10-06 07:20:55.762 - 1000 - REL com.android.server.stats.StatsCompanionService$PullingAlarmListener
+  10-06 07:21:00.001 - 1000 - ACQ *alarm* (partial)
+  10-06 07:21:00.004 - 1000 - REL *alarm*
+  10-06 07:21:09.287 - 1000 - ACQ *alarm* (partial)
+  10-06 07:21:09.327 - 1000 - ACQ *job*/c.a.p.c/.CalendarProviderJobService#26416350 (partial)
+  10-06 07:21:09.328 - 1000 - ACQ *job*/c.a.p.c/.CalendarProviderJobService#26416350 (partial)
+  10-06 07:21:09.338 - 1000 - REL *job*/c.a.p.c/.CalendarProviderJobService#26416350
+  10-06 07:21:09.341 - 1000 - REL *alarm*
+  10-06 07:21:09.412 - 1000 - REL *job*/c.a.p.c/.CalendarProviderJobService#26416350
+  10-06 07:21:30.915 - 10058 - ACQ GCM_READ (partial)
+  10-06 07:21:30.916 - 10058 - ACQ GCM_WORK (partial)
+  10-06 07:21:30.917 - 10058 - REL GCM_READ
+  10-06 07:21:30.939 - 10058 - ACQ GOOGLE_C2DM (partial)
+  10-06 07:21:30.952 - 10058 - REL GCM_WORK
+  10-06 07:21:31.002 - 10058 - REL GOOGLE_C2DM
+  10-06 07:21:51.082 - 10058 - ACQ GCM_READ (partial)
+  10-06 07:21:51.084 - 10058 - ACQ GCM_WORK (partial)
+  10-06 07:21:51.085 - 10058 - REL GCM_READ
+  10-06 07:21:51.091 - 10058 - ACQ GOOGLE_C2DM (partial)
+  10-06 07:21:51.116 - 10058 - REL GCM_WORK
+  10-06 07:21:51.117 - 10058 - ACQ GCM_WORK (partial)
+  10-06 07:21:51.125 - 10058 - REL GCM_WORK
+  10-06 07:21:51.168 - 10058 - REL GOOGLE_C2DM
+  10-06 07:22:00.002 - 1000 - ACQ *alarm* (partial)
+  10-06 07:22:00.003 - 1000 - REL *alarm*
+  10-06 07:23:00.004 - 1000 - ACQ *alarm* (partial)
+  10-06 07:23:00.004 - 1000 - REL *alarm*
+  10-06 07:24:00.002 - 1000 - ACQ *alarm* (partial)
+  10-06 07:24:00.003 - 1000 - REL *alarm*
+  10-06 07:25:00.002 - 1000 - ACQ *alarm* (partial)
+  10-06 07:25:00.002 - 1000 - REL *alarm*
+  10-06 07:25:00.005 - 1000 - ACQ *alarm* (partial)
+  10-06 07:25:00.006 - 1000 - REL *alarm*
+  10-06 07:25:40.005 - 1000 - ACQ *alarm* (partial)
+  10-06 07:25:40.027 - 10058 - ACQ NetworkLocationScanner (partial)
+  10-06 07:25:40.056 - 10058 - ACQ CallbackRunner (partial)
+  10-06 07:25:40.060 - 1000 - REL *alarm*
+  10-06 07:25:40.068 - 10058 - REL CallbackRunner
+  10-06 07:25:40.075 - 10058 - REL NetworkLocationScanner
+  10-06 07:25:40.088 - 10058 - ACQ NetworkLocationLocator (partial)
+  10-06 07:25:40.144 - 10058 - ACQ PendingIntentClient (partial)
+  10-06 07:25:40.155 - 10058 - REL PendingIntentClient
+  10-06 07:25:40.159 - 10058 - ACQ GCoreFlp (partial)
+  10-06 07:25:40.168 - 10058 - ACQ CallbackRunner (partial)
+  10-06 07:25:40.177 - 10058 - REL NetworkLocationLocator
+  10-06 07:25:40.180 - 10058 - REL CallbackRunner
+  10-06 07:25:40.192 - 1000 - ACQ *location* (partial)
+  10-06 07:25:40.194 - 1000 - REL *location*
+  10-06 07:25:40.197 - 1000 - ACQ *location* (partial)
+  10-06 07:25:40.198 - 1000 - REL *location*
+  10-06 07:25:40.204 - 10058 - REL GCoreFlp
+  10-06 07:25:41.687 - 10058 - ACQ GCM_READ (partial)
+  10-06 07:25:41.690 - 10058 - ACQ GCM_WORK (partial)
+  10-06 07:25:41.692 - 10058 - REL GCM_READ
+  10-06 07:25:41.703 - 10058 - REL GCM_WORK
+  10-06 07:25:41.711 - 10058 - ACQ *gms_scheduler*:internal (partial)
+  10-06 07:25:41.787 - 10058 - ACQ *gms_scheduler*/c.g.a.g/.c.s.r.GmsRestartGmsService (partial)
+  10-06 07:25:41.867 - 10058 - ACQ *gms_scheduler*/c.g.a.g/.c.u.QosUploaderService (partial)
+  10-06 07:25:41.906 - 10058 - REL *gms_scheduler*:internal
+  10-06 07:25:41.909 - 10058 - ACQ *gms_scheduler*:internal (partial)
+  10-06 07:25:41.932 - 10058 - REL *gms_scheduler*:internal
+  10-06 07:25:41.934 - 10058 - REL *gms_scheduler*/c.g.a.g/.c.s.r.GmsRestartGmsService
+  10-06 07:25:41.938 - 10058 - ACQ *gms_scheduler*:internal (partial)
+  10-06 07:25:41.981 - 10058 - REL *gms_scheduler*:internal
+  10-06 07:25:41.983 - 10058 - ACQ *gms_scheduler*:internal (partial)
+  10-06 07:25:42.020 - 10058 - ACQ *gms_scheduler*/c.g.a.g/.c.u.QosUploaderService (partial)
+  10-06 07:25:42.049 - 10058 - REL *gms_scheduler*:internal
+  10-06 07:25:43.192 - 10058 - REL *gms_scheduler*/c.g.a.g/.c.u.QosUploaderService
+  10-06 07:25:43.194 - 10058 - ACQ *gms_scheduler*:internal (partial)
+  10-06 07:25:43.204 - 10058 - REL *gms_scheduler*:internal
+  10-06 07:25:43.206 - 10058 - ACQ *gms_scheduler*:internal (partial)
+  10-06 07:25:43.247 - 10058 - ACQ *gms_scheduler*/c.g.a.g/.c.u.QosUploaderService (partial)
+  10-06 07:25:43.293 - 10058 - REL *gms_scheduler*:internal
+  10-06 07:25:43.294 - 10058 - REL *gms_scheduler*/c.g.a.g/.c.u.QosUploaderService
+  10-06 07:25:43.296 - 10058 - ACQ *gms_scheduler*:internal (partial)
+  10-06 07:25:43.297 - 10058 - REL *gms_scheduler*/c.g.a.g/.c.u.QosUploaderService
+  10-06 07:25:43.311 - 10058 - REL *gms_scheduler*:internal
+  10-06 07:25:43.313 - 10058 - ACQ *gms_scheduler*:internal (partial)
+  10-06 07:25:43.330 - 10058 - REL *gms_scheduler*:internal
+  10-06 07:25:43.332 - 10058 - ACQ *gms_scheduler*:internal (partial)
+  10-06 07:25:43.341 - 10058 - REL *gms_scheduler*:internal
+  10-06 07:26:00.005 - 1000 - ACQ *alarm* (partial)
+  10-06 07:26:00.006 - 1000 - REL *alarm*
+  10-06 07:27:00.008 - 1000 - ACQ *alarm* (partial)
+  10-06 07:27:00.009 - 1000 - REL *alarm*
+  10-06 07:27:11.082 - 10058 - ACQ GCM_READ (partial)
+  10-06 07:27:11.084 - 10058 - ACQ GCM_WORK (partial)
+  10-06 07:27:11.085 - 10058 - REL GCM_READ
+  10-06 07:27:11.101 - 10058 - ACQ GOOGLE_C2DM (partial)
+  10-06 07:27:11.121 - 10058 - REL GCM_WORK
+  10-06 07:27:11.126 - 10058 - ACQ GCM_WORK (partial)
+  10-06 07:27:11.133 - 10058 - REL GCM_WORK
+  10-06 07:27:11.191 - 10058 - REL GOOGLE_C2DM
+  10-06 07:27:14.649 - 1000 - ACQ *alarm* (partial)
+  10-06 07:27:14.652 - 1000 - ACQ NetworkStats (partial)
+  10-06 07:27:14.656 - 1000 - ACQ *job*/c.g.a.k/c.g.a.a.t.s.p.UpdateFeatureIdsJobService#20 (partial)
+  10-06 07:27:14.656 - 1000 - ACQ *job*/c.g.a.k/c.g.a.a.t.s.p.UpdateFeatureIdsJobService#20 (partial)
+  10-06 07:27:14.666 - 1000 - REL *job*/c.g.a.k/c.g.a.a.t.s.p.UpdateFeatureIdsJobService#20
+  10-06 07:27:14.666 - 1000 - ACQ *job*/a/c.a.s.n.NotificationHistoryJobService#237039804 (partial)
+  10-06 07:27:14.667 - 1000 - ACQ *job*/a/c.a.s.n.NotificationHistoryJobService#237039804 (partial)
+  10-06 07:27:14.670 - 1000 - REL *job*/a/c.a.s.n.NotificationHistoryJobService#237039804
+  10-06 07:27:14.672 - 1000 - REL *job*/a/c.a.s.n.NotificationHistoryJobService#237039804
+  10-06 07:27:14.684 - 1000 - REL *job*/c.g.a.k/c.g.a.a.t.s.p.UpdateFeatureIdsJobService#20
+  10-06 07:27:14.713 - 1000 - REL NetworkStats
+  10-06 07:27:14.717 - 1000 - REL *alarm*
+  10-06 07:27:30.948 - 10058 - ACQ GCM_READ (partial)
+  10-06 07:27:30.951 - 10058 - ACQ GCM_WORK (partial)
+  10-06 07:27:30.952 - 10058 - REL GCM_READ
+  10-06 07:27:30.959 - 10058 - ACQ GOOGLE_C2DM (partial)
+  10-06 07:27:30.975 - 10058 - REL GCM_WORK
+  10-06 07:27:31.024 - 10058 - REL GOOGLE_C2DM
+  10-06 07:28:00.001 - 1000 - ACQ *alarm* (partial)
+  10-06 07:28:00.005 - 1000 - REL *alarm*
+  10-06 07:28:30.954 - 10058 - ACQ GCM_READ (partial)
+  10-06 07:28:30.956 - 10058 - ACQ GCM_WORK (partial)
+  10-06 07:28:30.959 - 10058 - REL GCM_READ
+  10-06 07:28:30.965 - 10058 - ACQ GOOGLE_C2DM (partial)
+  10-06 07:28:30.992 - 10058 - REL GCM_WORK
+  10-06 07:28:31.067 - 10058 - REL GOOGLE_C2DM
+  10-06 07:28:50.886 - 10058 - ACQ GCM_READ (partial)
+  10-06 07:28:50.887 - 10058 - ACQ GCM_WORK (partial)
+  10-06 07:28:50.888 - 10058 - REL GCM_READ
+  10-06 07:28:50.898 - 10058 - ACQ GOOGLE_C2DM (partial)
+  10-06 07:28:50.911 - 10058 - REL GCM_WORK
+  10-06 07:28:50.952 - 10058 - REL GOOGLE_C2DM
+  10-06 07:29:00.004 - 1000 - ACQ *alarm* (partial)
+  10-06 07:29:00.004 - 1000 - REL *alarm*
+  10-06 07:29:56.254 - 10058 - ACQ GCM_READ (partial)
+  10-06 07:29:56.259 - 10058 - ACQ GCM_WORK (partial)
+  10-06 07:29:56.261 - 10058 - REL GCM_READ
+  10-06 07:29:56.267 - 10058 - ACQ GOOGLE_C2DM (partial)
+  10-06 07:29:56.286 - 10058 - REL GCM_WORK
+  10-06 07:29:56.288 - 10058 - ACQ GCM_WORK (partial)
+  10-06 07:29:56.303 - 10058 - REL GCM_WORK
+  10-06 07:29:56.320 - 10048 - ACQ androidx.core:wake:com.google.android.apps.mediashell/.ChromecastGcmListenerService (partial)
+  10-06 07:29:56.324 - 10058 - REL GOOGLE_C2DM
+  10-06 07:29:56.332 - 10048 - REL androidx.core:wake:com.google.android.apps.mediashell/.ChromecastGcmListenerService
+  10-06 07:30:00.002 - 1000 - ACQ *alarm* (partial)
+  10-06 07:30:00.003 - 1000 - REL *alarm*
+  10-06 07:30:24.594 - 1000 - ACQ *alarm* (partial)
+  10-06 07:30:24.594 - 1000 - REL *alarm*
+  10-06 07:30:24.596 - 1000 - ACQ *job*/a/c.a.s.SmartStorageMaintIdler#2808 (partial)
+  10-06 07:30:24.597 - 1000 - ACQ *job*/a/c.a.s.SmartStorageMaintIdler#2808 (partial)
+  10-06 07:30:24.600 - 1000 - REL *job*/a/c.a.s.SmartStorageMaintIdler#2808
+  10-06 07:30:24.636 - 1000 - REL *job*/a/c.a.s.SmartStorageMaintIdler#2808
+  10-06 07:30:31.071 - 10058 - ACQ GCM_READ (partial)
+  10-06 07:30:31.075 - 10058 - ACQ GCM_WORK (partial)
+  10-06 07:30:31.077 - 10058 - REL GCM_READ
+  10-06 07:30:31.105 - 10058 - ACQ GOOGLE_C2DM (partial)
+  10-06 07:30:31.120 - 10058 - REL GCM_WORK
+  10-06 07:30:31.173 - 10058 - REL GOOGLE_C2DM
+  10-06 07:31:00.001 - 1000 - ACQ *alarm* (partial)
+  10-06 07:31:00.004 - 1000 - REL *alarm*
+  10-06 07:31:32.511 - 10058 - ACQ GCM_READ (partial)
+  10-06 07:31:32.514 - 10058 - ACQ GCM_WORK (partial)
+  10-06 07:31:32.516 - 10058 - REL GCM_READ
+  10-06 07:31:32.524 - 10058 - ACQ GOOGLE_C2DM (partial)
+  10-06 07:31:32.557 - 10058 - REL GCM_WORK
+  10-06 07:31:32.558 - 10058 - ACQ GCM_WORK (partial)
+  10-06 07:31:32.565 - 10058 - REL GCM_WORK
+  10-06 07:31:32.646 - 10058 - REL GOOGLE_C2DM
+  10-06 07:32:00.002 - 1000 - ACQ *alarm* (partial)
+  10-06 07:32:00.002 - 1000 - REL *alarm*
+  10-06 07:32:12.039 - 10058 - ACQ GCM_READ (partial)
+  10-06 07:32:12.043 - 10058 - ACQ GCM_WORK (partial)
+  10-06 07:32:12.044 - 10058 - REL GCM_READ
+  10-06 07:32:12.057 - 10058 - ACQ GOOGLE_C2DM (partial)
+  10-06 07:32:12.072 - 10058 - REL GCM_WORK
+  10-06 07:32:12.133 - 10058 - REL GOOGLE_C2DM
+  10-06 07:32:31.083 - 10058 - ACQ GCM_READ (partial)
+  10-06 07:32:31.084 - 10058 - ACQ GCM_WORK (partial)
+  10-06 07:32:31.086 - 10058 - REL GCM_READ
+  10-06 07:32:31.091 - 10058 - ACQ GOOGLE_C2DM (partial)
+  10-06 07:32:31.106 - 10058 - REL GCM_WORK
+  10-06 07:32:31.107 - 10058 - ACQ GCM_WORK (partial)
+  10-06 07:32:31.115 - 10058 - REL GCM_WORK
+  10-06 07:32:31.146 - 10058 - REL GOOGLE_C2DM
+  10-06 07:33:00.003 - 1000 - ACQ *alarm* (partial)
+  10-06 07:33:00.005 - 1000 - REL *alarm*
+  10-06 07:33:01.854 - 1000 - ACQ *alarm* (partial)
+  10-06 07:33:01.862 - 1000 - ACQ *job*/@.w.s.g.a.k/a.w.i.b.s.SystemJobService#445 (partial)
+  10-06 07:33:01.864 - 1000 - ACQ *job*/@.w.s.g.a.k/a.w.i.b.s.SystemJobService#445 (partial)
+  10-06 07:33:01.885 - 1000 - REL *alarm*
+  10-06 07:33:01.885 - 1000 - REL *job*/@.w.s.g.a.k/a.w.i.b.s.SystemJobService#445
+  10-06 07:33:01.888 - 10058 - ACQ *gms_scheduler*:internal (partial)
+  10-06 07:33:01.931 - 10058 - ACQ *gms_scheduler*/c.g.a.g/.a.a.b.a.GcmTaskService (partial)
+  10-06 07:33:01.958 - 10058 - REL *gms_scheduler*:internal
+  10-06 07:33:01.980 - 10057 - ACQ SyncManager: Scheduling in parallel (partial)
+  10-06 07:33:01.996 - 10058 - REL *gms_scheduler*/c.g.a.g/.a.a.b.a.GcmTaskService
+  10-06 07:33:01.998 - 10058 - ACQ *gms_scheduler*:internal (partial)
+  10-06 07:33:02.018 - 10057 - ACQ SyncManager: Syncing (partial)
+  10-06 07:33:02.020 - 10058 - REL *gms_scheduler*:internal
+  10-06 07:33:02.021 - 10058 - ACQ *gms_scheduler*:internal (partial)
+  10-06 07:33:02.033 - 10058 - REL *gms_scheduler*:internal
+  10-06 07:33:02.160 - 10057 - REL SyncManager: Syncing
+  10-06 07:33:02.185 - 1000 - REL *job*/@.w.s.g.a.k/a.w.i.b.s.SystemJobService#445
+  10-06 07:33:02.312 - 10057 - REL SyncManager: Scheduling in parallel
+  10-06 07:33:31.191 - 10058 - ACQ GCM_READ (partial)
+  10-06 07:33:31.193 - 10058 - ACQ GCM_WORK (partial)
+  10-06 07:33:31.194 - 10058 - REL GCM_READ
+  10-06 07:33:31.220 - 10058 - ACQ GOOGLE_C2DM (partial)
+  10-06 07:33:31.234 - 10058 - REL GCM_WORK
+  10-06 07:33:31.333 - 10058 - REL GOOGLE_C2DM
+  10-06 07:33:50.983 - 10058 - ACQ GCM_READ (partial)
+  10-06 07:33:50.984 - 10058 - ACQ GCM_WORK (partial)
+  10-06 07:33:50.986 - 10058 - REL GCM_READ
+  10-06 07:33:50.992 - 10058 - ACQ GOOGLE_C2DM (partial)
+  10-06 07:33:51.014 - 10058 - REL GCM_WORK
+  10-06 07:33:51.016 - 10058 - ACQ GCM_WORK (partial)
+  10-06 07:33:51.020 - 10058 - REL GCM_WORK
+  10-06 07:33:51.055 - 10058 - REL GOOGLE_C2DM
+  10-06 07:34:00.004 - 1000 - ACQ *alarm* (partial)
+  10-06 07:34:00.005 - 1000 - REL *alarm*
+  10-06 07:35:00.004 - 1000 - ACQ *alarm* (partial)
+  10-06 07:35:00.005 - 1000 - REL *alarm*
+  10-06 07:35:11.544 - 10058 - ACQ GCM_READ (partial)
+  10-06 07:35:11.546 - 10058 - ACQ GCM_WORK (partial)
+  10-06 07:35:11.548 - 10058 - REL GCM_READ
+  10-06 07:35:11.566 - 10058 - ACQ GOOGLE_C2DM (partial)
+  10-06 07:35:11.575 - 10058 - REL GCM_WORK
+  10-06 07:35:11.684 - 10058 - REL GOOGLE_C2DM
+  10-06 07:35:31.820 - 10058 - ACQ GCM_READ (partial)
+  10-06 07:35:31.822 - 10058 - ACQ GCM_WORK (partial)
+  10-06 07:35:31.824 - 10058 - REL GCM_READ
+  10-06 07:35:31.835 - 10058 - ACQ GOOGLE_C2DM (partial)
+  10-06 07:35:31.855 - 10058 - REL GCM_WORK
+  10-06 07:35:31.856 - 10058 - ACQ GCM_WORK (partial)
+  10-06 07:35:31.865 - 10058 - REL GCM_WORK
+  10-06 07:35:31.891 - 10058 - REL GOOGLE_C2DM
+  10-06 07:36:00.003 - 1000 - ACQ *alarm* (partial)
+  10-06 07:36:00.004 - 1000 - REL *alarm*
+  10-06 07:36:00.011 - 1000 - ACQ *alarm* (partial)
+  10-06 07:36:00.012 - 1000 - REL *alarm*
+  10-06 07:37:00.005 - 1000 - ACQ *alarm* (partial)
+  10-06 07:37:00.006 - 1000 - REL *alarm*
+  10-06 07:37:31.323 - 10058 - ACQ GCM_READ (partial)
+  10-06 07:37:31.325 - 10058 - ACQ GCM_WORK (partial)
+  10-06 07:37:31.326 - 10058 - REL GCM_READ
+  10-06 07:37:31.346 - 10058 - ACQ GOOGLE_C2DM (partial)
+  10-06 07:37:31.359 - 10058 - REL GCM_WORK
+  10-06 07:37:31.469 - 10058 - REL GOOGLE_C2DM
+  10-06 07:37:51.186 - 10058 - ACQ GCM_READ (partial)
+  10-06 07:37:51.188 - 10058 - ACQ GCM_WORK (partial)
+  10-06 07:37:51.189 - 10058 - REL GCM_READ
+  10-06 07:37:51.194 - 10058 - ACQ GOOGLE_C2DM (partial)
+  10-06 07:37:51.208 - 10058 - REL GCM_WORK
+  10-06 07:37:51.214 - 10058 - ACQ GCM_WORK (partial)
+  10-06 07:37:51.220 - 10058 - REL GCM_WORK
+  10-06 07:37:51.253 - 10058 - REL GOOGLE_C2DM
+  10-06 07:38:00.003 - 1000 - ACQ *alarm* (partial)
+  10-06 07:38:00.004 - 1000 - REL *alarm*
+  10-06 07:38:51.398 - 10058 - ACQ GCM_READ (partial)
+  10-06 07:38:51.399 - 10058 - ACQ GCM_WORK (partial)
+  10-06 07:38:51.400 - 10058 - REL GCM_READ
+  10-06 07:38:51.418 - 10058 - ACQ GOOGLE_C2DM (partial)
+  10-06 07:38:51.431 - 10058 - REL GCM_WORK
+  10-06 07:38:51.484 - 10058 - REL GOOGLE_C2DM
+  10-06 07:39:00.003 - 1000 - ACQ *alarm* (partial)
+  10-06 07:39:00.004 - 1000 - REL *alarm*
+  10-06 07:39:11.060 - 10058 - ACQ GCM_READ (partial)
+  10-06 07:39:11.062 - 10058 - ACQ GCM_WORK (partial)
+  10-06 07:39:11.063 - 10058 - REL GCM_READ
+  10-06 07:39:11.068 - 10058 - ACQ GOOGLE_C2DM (partial)
+  10-06 07:39:11.087 - 10058 - REL GCM_WORK
+  10-06 07:39:11.091 - 10058 - ACQ GCM_WORK (partial)
+  10-06 07:39:11.108 - 10058 - REL GCM_WORK
+  10-06 07:39:11.126 - 10058 - REL GOOGLE_C2DM
+  10-06 07:40:00.004 - 1000 - ACQ *alarm* (partial)
+  10-06 07:40:00.005 - 1000 - REL *alarm*
+  10-06 07:40:51.103 - 10058 - ACQ GCM_READ (partial)
+  10-06 07:40:51.105 - 10058 - ACQ GCM_WORK (partial)
+  10-06 07:40:51.106 - 10058 - REL GCM_READ
+  10-06 07:40:51.123 - 10058 - ACQ GOOGLE_C2DM (partial)
+  10-06 07:40:51.139 - 10058 - REL GCM_WORK
+  10-06 07:40:51.258 - 10058 - REL GOOGLE_C2DM
+  10-06 07:41:00.003 - 1000 - ACQ *alarm* (partial)
+  10-06 07:41:00.003 - 1000 - REL *alarm*
+  10-06 07:41:11.176 - 10058 - ACQ GCM_READ (partial)
+  10-06 07:41:11.177 - 10058 - ACQ GCM_WORK (partial)
+  10-06 07:41:11.178 - 10058 - REL GCM_READ
+  10-06 07:41:11.188 - 10058 - ACQ GOOGLE_C2DM (partial)
+  10-06 07:41:11.201 - 10058 - REL GCM_WORK
+  10-06 07:41:11.203 - 10058 - ACQ GCM_WORK (partial)
+  10-06 07:41:11.208 - 10058 - REL GCM_WORK
+  10-06 07:41:11.241 - 10058 - REL GOOGLE_C2DM
+  10-06 07:42:00.002 - 1000 - ACQ *alarm* (partial)
+  10-06 07:42:00.003 - 1000 - REL *alarm*
+  10-06 07:42:11.181 - 10058 - ACQ GCM_READ (partial)
+  10-06 07:42:11.184 - 10058 - ACQ GCM_WORK (partial)
+  10-06 07:42:11.185 - 10058 - REL GCM_READ
+  10-06 07:42:11.225 - 10058 - ACQ GOOGLE_C2DM (partial)
+  10-06 07:42:11.238 - 10058 - REL GCM_WORK
+  10-06 07:42:11.339 - 10058 - REL GOOGLE_C2DM
+  10-06 07:42:51.119 - 10058 - ACQ GCM_READ (partial)
+  10-06 07:42:51.122 - 10058 - ACQ GCM_WORK (partial)
+  10-06 07:42:51.124 - 10058 - REL GCM_READ
+  10-06 07:42:51.129 - 10058 - ACQ GOOGLE_C2DM (partial)
+  10-06 07:42:51.150 - 10058 - REL GCM_WORK
+  10-06 07:42:51.151 - 10058 - ACQ GCM_WORK (partial)
+  10-06 07:42:51.157 - 10058 - REL GCM_WORK
+  10-06 07:42:51.203 - 10058 - REL GOOGLE_C2DM
+  10-06 07:43:00.002 - 1000 - ACQ *alarm* (partial)
+  10-06 07:43:00.005 - 1000 - REL *alarm*
+  10-06 07:43:11.088 - 10058 - ACQ GCM_READ (partial)
+  10-06 07:43:11.090 - 10058 - ACQ GCM_WORK (partial)
+  10-06 07:43:11.091 - 10058 - REL GCM_READ
+  10-06 07:43:11.105 - 10058 - ACQ GOOGLE_C2DM (partial)
+  10-06 07:43:11.116 - 10058 - REL GCM_WORK
+  10-06 07:43:11.160 - 10058 - REL GOOGLE_C2DM
+  10-06 07:43:31.156 - 10058 - ACQ GCM_READ (partial)
+  10-06 07:43:31.159 - 10058 - ACQ GCM_WORK (partial)
+  10-06 07:43:31.161 - 10058 - REL GCM_READ
+  10-06 07:43:31.167 - 10058 - ACQ GOOGLE_C2DM (partial)
+  10-06 07:43:31.186 - 10058 - REL GCM_WORK
+  10-06 07:43:31.188 - 10058 - ACQ GCM_WORK (partial)
+  10-06 07:43:31.192 - 10058 - REL GCM_WORK
+  10-06 07:43:31.226 - 10058 - REL GOOGLE_C2DM
+  10-06 07:44:00.003 - 1000 - ACQ *alarm* (partial)
+  10-06 07:44:00.007 - 1000 - REL *alarm*
+  10-06 07:45:00.002 - 1000 - ACQ *alarm* (partial)
+  10-06 07:45:00.003 - 1000 - REL *alarm*
+  10-06 07:46:00.002 - 1000 - ACQ *alarm* (partial)
+  10-06 07:46:00.003 - 1000 - REL *alarm*
+  10-06 07:46:00.011 - 1000 - ACQ *alarm* (partial)
+  10-06 07:46:00.011 - 1000 - REL *alarm*
+  10-06 07:46:31.174 - 10058 - ACQ GCM_READ (partial)
+  10-06 07:46:31.177 - 10058 - ACQ GCM_WORK (partial)
+  10-06 07:46:31.178 - 10058 - REL GCM_READ
+  10-06 07:46:31.198 - 10058 - ACQ GOOGLE_C2DM (partial)
+  10-06 07:46:31.219 - 10058 - REL GCM_WORK
+  10-06 07:46:31.261 - 10058 - REL GOOGLE_C2DM
+  10-06 07:46:51.246 - 10058 - ACQ GCM_READ (partial)
+  10-06 07:46:51.247 - 10058 - ACQ GCM_WORK (partial)
+  10-06 07:46:51.248 - 10058 - REL GCM_READ
+  10-06 07:46:51.251 - 10058 - ACQ GOOGLE_C2DM (partial)
+  10-06 07:46:51.266 - 10058 - REL GCM_WORK
+  10-06 07:46:51.268 - 10058 - ACQ GCM_WORK (partial)
+  10-06 07:46:51.278 - 10058 - REL GCM_WORK
+  10-06 07:46:51.306 - 10058 - REL GOOGLE_C2DM
+  10-06 07:47:00.004 - 1000 - ACQ *alarm* (partial)
+  10-06 07:47:00.004 - 1000 - REL *alarm*
+  10-06 07:47:21.253 - 1000 - ACQ *alarm* (partial)
+  10-06 07:47:21.254 - 1000 - REL *alarm*
+  10-06 07:47:21.258 - 1000 - ACQ *job*/a/c.a.s.n.NotificationHistoryJobService#237039804 (partial)
+  10-06 07:47:21.259 - 1000 - ACQ *job*/a/c.a.s.n.NotificationHistoryJobService#237039804 (partial)
+  10-06 07:47:21.262 - 1000 - REL *job*/a/c.a.s.n.NotificationHistoryJobService#237039804
+  10-06 07:47:21.263 - 1000 - REL *job*/a/c.a.s.n.NotificationHistoryJobService#237039804
+  10-06 07:48:00.006 - 1000 - ACQ *alarm* (partial)
+  10-06 07:48:00.006 - 1000 - REL *alarm*
+  10-06 07:49:00.004 - 1000 - ACQ *alarm* (partial)
+  10-06 07:49:00.007 - 1000 - REL *alarm*
+  10-06 07:50:00.004 - 1000 - ACQ *alarm* (partial)
+  10-06 07:50:00.005 - 1000 - REL *alarm*
+  10-06 07:50:42.465 - 10058 - ACQ GCM_READ (partial)
+  10-06 07:50:42.467 - 10058 - ACQ GCM_WORK (partial)
+  10-06 07:50:42.468 - 10058 - REL GCM_READ
+  10-06 07:50:42.479 - 10058 - REL GCM_WORK
+  10-06 07:51:00.003 - 1000 - ACQ *alarm* (partial)
+  10-06 07:51:00.004 - 1000 - REL *alarm*
+  10-06 07:52:00.005 - 1000 - ACQ *alarm* (partial)
+  10-06 07:52:00.006 - 1000 - REL *alarm*
+  10-06 07:53:00.002 - 1000 - ACQ *alarm* (partial)
+  10-06 07:53:00.004 - 1000 - REL *alarm*
+  10-06 07:54:00.004 - 1000 - ACQ *alarm* (partial)
+  10-06 07:54:00.005 - 1000 - REL *alarm*
+  10-06 07:55:00.005 - 1000 - ACQ *alarm* (partial)
+  10-06 07:55:00.006 - 1000 - REL *alarm*
+  10-06 07:55:32.567 - 10058 - ACQ GCM_READ (partial)
+  10-06 07:55:32.569 - 10058 - ACQ GCM_WORK (partial)
+  10-06 07:55:32.570 - 10058 - REL GCM_READ
+  10-06 07:55:32.582 - 10058 - REL GCM_WORK
+  10-06 07:55:40.057 - 1000 - ACQ *alarm* (partial)
+  10-06 07:55:40.063 - 10058 - ACQ NetworkLocationScanner (partial)
+  10-06 07:55:40.070 - 10058 - ACQ CallbackRunner (partial)
+  10-06 07:55:40.071 - 1000 - REL *alarm*
+  10-06 07:55:40.074 - 10058 - REL CallbackRunner
+  10-06 07:55:43.858 - 10058 - REL NetworkLocationScanner
+  10-06 07:55:43.865 - 10058 - ACQ NetworkLocationLocator (partial)
+  10-06 07:55:43.905 - 10058 - ACQ PendingIntentClient (partial)
+  10-06 07:55:43.912 - 10058 - REL PendingIntentClient
+  10-06 07:55:43.913 - 10058 - ACQ GCoreFlp (partial)
+  10-06 07:55:43.922 - 10058 - ACQ CallbackRunner (partial)
+  10-06 07:55:43.925 - 10058 - REL NetworkLocationLocator
+  10-06 07:55:43.927 - 1000 - ACQ *location* (partial)
+  10-06 07:55:43.928 - 10058 - REL CallbackRunner
+  10-06 07:55:43.931 - 1000 - REL *location*
+  10-06 07:55:43.931 - 10058 - REL GCoreFlp
+  10-06 07:55:43.933 - 1000 - ACQ *location* (partial)
+  10-06 07:55:43.933 - 1000 - REL *location*
+  10-06 07:56:00.002 - 1000 - ACQ *alarm* (partial)
+  10-06 07:56:00.002 - 1000 - REL *alarm*
+  10-06 07:57:00.007 - 1000 - ACQ *alarm* (partial)
+  10-06 07:57:00.008 - 1000 - REL *alarm*
+  10-06 07:58:00.003 - 1000 - ACQ *alarm* (partial)
+  10-06 07:58:00.003 - 1000 - REL *alarm*
+  10-06 07:59:00.005 - 1000 - ACQ *alarm* (partial)
+  10-06 07:59:00.006 - 1000 - REL *alarm*
+  10-06 07:59:20.610 - 10058 - ACQ GCM_READ (partial)
+  10-06 07:59:20.612 - 10058 - ACQ GCM_WORK (partial)
+  10-06 07:59:20.613 - 10058 - REL GCM_READ
+  10-06 07:59:20.636 - 10058 - ACQ GOOGLE_C2DM (partial)
+  10-06 07:59:20.650 - 10058 - REL GCM_WORK
+  10-06 07:59:20.652 - 10058 - ACQ *gms_scheduler*:internal (partial)
+  10-06 07:59:20.653 - 10058 - ACQ GCM_WORK (partial)
+  10-06 07:59:20.667 - 10058 - REL GCM_WORK
+  10-06 07:59:20.697 - 10058 - ACQ *gms_scheduler*/c.g.a.g/.c.u.QosUploaderService (partial)
+  10-06 07:59:20.772 - 10058 - REL GOOGLE_C2DM
+  10-06 07:59:20.782 - 10058 - ACQ *gms_scheduler*/c.g.a.g/c.g.a.c.s.ContextManagerLogsUploadBoundService (partial)
+  10-06 07:59:20.785 - 10058 - REL *gms_scheduler*:internal
+  10-06 07:59:20.787 - 10058 - ACQ *gms_scheduler*:internal (partial)
+  10-06 07:59:20.803 - 10058 - ACQ CMWakeLock (partial)
+  10-06 07:59:20.806 - 10058 - REL *gms_scheduler*:internal
+  10-06 07:59:20.808 - 10058 - REL *gms_scheduler*/c.g.a.g/c.g.a.c.s.ContextManagerLogsUploadBoundService
+  10-06 07:59:20.811 - 10058 - ACQ *gms_scheduler*:internal (partial)
+  10-06 07:59:20.830 - 10058 - REL *gms_scheduler*:internal
+  10-06 07:59:20.832 - 10058 - ACQ *gms_scheduler*:internal (partial)
+  10-06 07:59:20.843 - 10058 - REL CMWakeLock
+  10-06 07:59:20.870 - 10058 - ACQ *gms_scheduler*/c.g.a.g/.c.u.QosUploaderService (partial)
+  10-06 07:59:20.903 - 10058 - REL *gms_scheduler*:internal
+  10-06 07:59:21.450 - 10058 - REL *gms_scheduler*/c.g.a.g/.c.u.QosUploaderService
+  10-06 07:59:21.452 - 10058 - ACQ *gms_scheduler*:internal (partial)
+  10-06 07:59:21.458 - 10058 - REL *gms_scheduler*:internal
+  10-06 07:59:21.460 - 10058 - ACQ *gms_scheduler*:internal (partial)
+  10-06 07:59:21.470 - 10058 - REL *gms_scheduler*:internal
+  10-06 07:59:21.475 - 10058 - REL *gms_scheduler*/c.g.a.g/.c.u.QosUploaderService
+  10-06 07:59:21.480 - 10058 - ACQ *gms_scheduler*:internal (partial)
+  10-06 07:59:21.486 - 10058 - REL *gms_scheduler*:internal
+  10-06 07:59:21.488 - 10058 - ACQ *gms_scheduler*:internal (partial)
+  10-06 07:59:21.500 - 10058 - REL *gms_scheduler*:internal
+  10-06 07:59:31.260 - 10058 - ACQ GCM_READ (partial)
+  10-06 07:59:31.261 - 10058 - ACQ GCM_WORK (partial)
+  10-06 07:59:31.262 - 10058 - REL GCM_READ
+  10-06 07:59:31.271 - 10058 - ACQ GOOGLE_C2DM (partial)
+  10-06 07:59:31.285 - 10058 - REL GCM_WORK
+  10-06 07:59:31.325 - 10058 - REL GOOGLE_C2DM
+  10-06 07:59:57.679 - 10058 - ACQ GCM_READ (partial)
+  10-06 07:59:57.681 - 10058 - ACQ GCM_WORK (partial)
+  10-06 07:59:57.682 - 10058 - REL GCM_READ
+  10-06 07:59:57.686 - 10058 - ACQ GOOGLE_C2DM (partial)
+  10-06 07:59:57.706 - 10058 - REL GCM_WORK
+  10-06 07:59:57.708 - 10058 - ACQ GCM_WORK (partial)
+  10-06 07:59:57.718 - 10058 - REL GCM_WORK
+  10-06 07:59:57.725 - 10048 - ACQ androidx.core:wake:com.google.android.apps.mediashell/.ChromecastGcmListenerService (partial)
+  10-06 07:59:57.731 - 10058 - REL GOOGLE_C2DM
+  10-06 07:59:57.739 - 10048 - REL androidx.core:wake:com.google.android.apps.mediashell/.ChromecastGcmListenerService
+  10-06 08:00:00.003 - 1000 - ACQ *alarm* (partial)
+  10-06 08:00:00.004 - 1000 - REL *alarm*
+  10-06 08:01:00.002 - 1000 - ACQ *alarm* (partial)
+  10-06 08:01:00.003 - 1000 - REL *alarm*
+  10-06 08:01:20.628 - 10058 - ACQ GCM_READ (partial)
+  10-06 08:01:20.630 - 10058 - ACQ GCM_WORK (partial)
+  10-06 08:01:20.632 - 10058 - REL GCM_READ
+  10-06 08:01:20.647 - 10058 - ACQ GOOGLE_C2DM (partial)
+  10-06 08:01:20.660 - 10058 - REL GCM_WORK
+  10-06 08:01:20.786 - 10058 - REL GOOGLE_C2DM
+  10-06 08:01:32.096 - 10058 - ACQ GCM_READ (partial)
+  10-06 08:01:32.098 - 10058 - ACQ GCM_WORK (partial)
+  10-06 08:01:32.099 - 10058 - REL GCM_READ
+  10-06 08:01:32.104 - 10058 - ACQ GOOGLE_C2DM (partial)
+  10-06 08:01:32.118 - 10058 - REL GCM_WORK
+  10-06 08:01:32.121 - 10058 - ACQ GCM_WORK (partial)
+  10-06 08:01:32.126 - 10058 - REL GCM_WORK
+  10-06 08:01:32.154 - 10058 - REL GOOGLE_C2DM
+  10-06 08:02:00.003 - 1000 - ACQ *alarm* (partial)
+  10-06 08:02:00.004 - 1000 - REL *alarm*
+  10-06 08:03:00.003 - 1000 - ACQ *alarm* (partial)
+  10-06 08:03:00.004 - 1000 - REL *alarm*
+  10-06 08:04:00.006 - 1000 - ACQ *alarm* (partial)
+  10-06 08:04:00.011 - 1000 - REL *alarm*
+  10-06 08:05:00.004 - 1000 - ACQ *alarm* (partial)
+  10-06 08:05:00.004 - 1000 - REL *alarm*
+  10-06 08:06:00.002 - 1000 - ACQ *alarm* (partial)
+  10-06 08:06:00.006 - 1000 - REL *alarm*
+  10-06 08:06:00.013 - 1000 - ACQ *alarm* (partial)
+  10-06 08:06:00.014 - 1000 - REL *alarm*
+  10-06 08:07:00.004 - 1000 - ACQ *alarm* (partial)
+  10-06 08:07:00.005 - 1000 - REL *alarm*
+  10-06 08:07:32.128 - 1000 - ACQ *alarm* (partial)
+  10-06 08:07:32.132 - 10058 - ACQ GCM_WORK (partial)
+  10-06 08:07:32.137 - 1000 - REL *alarm*
+  10-06 08:07:32.138 - 10058 - ACQ GCM_HB_ALARM (partial)
+  10-06 08:07:32.142 - 10058 - REL GCM_HB_ALARM
+  10-06 08:07:32.143 - 10058 - REL GCM_WORK
+  10-06 08:08:00.002 - 1000 - ACQ *alarm* (partial)
+  10-06 08:08:00.003 - 1000 - REL *alarm*
+  10-06 08:08:00.374 - 1000 - ACQ NetworkStats (partial)
+  10-06 08:08:00.429 - 1000 - REL NetworkStats
+  10-06 08:08:32.142 - 1000 - ACQ *alarm* (partial)
+  10-06 08:08:32.144 - 10058 - ACQ GCM_WORK (partial)
+  10-06 08:08:32.146 - 1000 - REL *alarm*
+  10-06 08:08:32.151 - 10058 - ACQ GCM_READ (partial)
+  10-06 08:08:32.152 - 10058 - REL GCM_READ
+  10-06 08:08:32.171 - 10058 - ACQ GCM_CONN_ALARM (partial)
+  10-06 08:08:32.179 - 10058 - REL GCM_WORK
+  10-06 08:08:32.334 - 10058 - ACQ GCM_WORK (partial)
+  10-06 08:08:32.349 - 10058 - REL GCM_WORK
+  10-06 08:08:32.350 - 10058 - ACQ GCM_WORK (partial)
+  10-06 08:08:32.354 - 10058 - REL GCM_WORK
+  10-06 08:08:32.453 - 10058 - ACQ GCM_READ (partial)
+  10-06 08:08:32.455 - 10058 - ACQ GCM_WORK (partial)
+  10-06 08:08:32.456 - 10058 - REL GCM_READ
+  10-06 08:08:32.461 - 10058 - ACQ GCM_READ (partial)
+  10-06 08:08:32.467 - 10058 - REL GCM_READ
+  10-06 08:08:32.478 - 10058 - REL GCM_CONN_ALARM
+  10-06 08:08:32.492 - 10058 - REL GCM_WORK
+  10-06 08:09:00.004 - 1000 - ACQ *alarm* (partial)
+  10-06 08:09:00.005 - 1000 - REL *alarm*
+  10-06 08:09:53.496 - 1000 - ACQ *alarm* (partial)
+  10-06 08:09:53.497 - 1000 - ACQ NetworkStats (partial)
+  10-06 08:09:53.513 - 1000 - ACQ *job*/c.g.a.p/.InstalledAppJobService#4096 (partial)
+  10-06 08:09:53.514 - 1000 - ACQ *job*/c.g.a.p/.InstalledAppJobService#4096 (partial)
+  10-06 08:09:53.526 - 1000 - REL *job*/c.g.a.p/.InstalledAppJobService#4096
+  10-06 08:09:53.527 - 1000 - ACQ *job*/@.w.s.g.a.k/a.w.i.b.s.SystemJobService#450 (partial)
+  10-06 08:09:53.529 - 1000 - ACQ *job*/@.w.s.g.a.k/a.w.i.b.s.SystemJobService#450 (partial)
+  10-06 08:09:53.534 - 1000 - REL NetworkStats
+  10-06 08:09:53.543 - 1000 - REL *job*/@.w.s.g.a.k/a.w.i.b.s.SystemJobService#450
+  10-06 08:09:53.543 - 1000 - ACQ *job*/a/c.a.s.n.NotificationHistoryJobService#237039804 (partial)
+  10-06 08:09:53.546 - 1000 - ACQ *job*/a/c.a.s.n.NotificationHistoryJobService#237039804 (partial)
+  10-06 08:09:53.548 - 1000 - REL *job*/a/c.a.s.n.NotificationHistoryJobService#237039804
+  10-06 08:09:53.549 - 1000 - REL *alarm*
+  10-06 08:09:53.553 - 1000 - REL *job*/a/c.a.s.n.NotificationHistoryJobService#237039804
+  10-06 08:09:53.579 - 1000 - REL *job*/c.g.a.p/.InstalledAppJobService#4096
+  10-06 08:09:53.617 - 10057 - ACQ SyncManager: Scheduling in parallel (partial)
+  10-06 08:09:53.630 - 10057 - ACQ SyncManager: Syncing (partial)
+  10-06 08:09:53.824 - 10057 - REL SyncManager: Syncing
+  10-06 08:09:53.881 - 1000 - REL *job*/@.w.s.g.a.k/a.w.i.b.s.SystemJobService#450
+  10-06 08:09:54.377 - 10057 - REL SyncManager: Scheduling in parallel
+  10-06 08:10:00.002 - 1000 - ACQ *alarm* (partial)
+  10-06 08:10:00.003 - 1000 - REL *alarm*
+  10-06 08:11:00.002 - 1000 - ACQ *alarm* (partial)
+  10-06 08:11:00.005 - 1000 - REL *alarm*
+  10-06 08:12:00.003 - 1000 - ACQ *alarm* (partial)
+  10-06 08:12:00.003 - 1000 - REL *alarm*
+  10-06 08:12:02.671 - 1000 - ACQ *alarm* (partial)
+  10-06 08:12:02.672 - 1000 - REL *alarm*
+  10-06 08:13:00.002 - 1000 - ACQ *alarm* (partial)
+  10-06 08:13:00.004 - 1000 - REL *alarm*
+  10-06 08:13:22.955 - 10058 - ACQ GCM_READ (partial)
+  10-06 08:13:22.958 - 10058 - ACQ GCM_WORK (partial)
+  10-06 08:13:22.959 - 10058 - REL GCM_READ
+  10-06 08:13:22.967 - 10058 - REL GCM_WORK
+  10-06 08:14:00.003 - 1000 - ACQ *alarm* (partial)
+  10-06 08:14:00.004 - 1000 - REL *alarm*
+  10-06 08:15:00.005 - 1000 - ACQ *alarm* (partial)
+  10-06 08:15:00.005 - 1000 - REL *alarm*
+  10-06 08:15:40.692 - 10058 - ACQ GCM_READ (partial)
+  10-06 08:15:40.693 - 10058 - ACQ GCM_WORK (partial)
+  10-06 08:15:40.694 - 10058 - REL GCM_READ
+  10-06 08:15:40.698 - 10058 - ACQ GOOGLE_C2DM (partial)
+  10-06 08:15:40.719 - 10058 - REL GCM_WORK
+  10-06 08:15:40.726 - 10058 - ACQ GCM_WORK (partial)
+  10-06 08:15:40.731 - 10058 - REL GCM_WORK
+  10-06 08:15:40.816 - 10058 - REL GOOGLE_C2DM
+  10-06 08:15:51.132 - 10058 - ACQ GCM_READ (partial)
+  10-06 08:15:51.134 - 10058 - ACQ GCM_WORK (partial)
+  10-06 08:15:51.135 - 10058 - REL GCM_READ
+  10-06 08:15:51.151 - 10058 - ACQ GOOGLE_C2DM (partial)
+  10-06 08:15:51.162 - 10058 - REL GCM_WORK
+  10-06 08:15:51.202 - 10058 - REL GOOGLE_C2DM
+  10-06 08:16:00.002 - 1000 - ACQ *alarm* (partial)
+  10-06 08:16:00.011 - 1000 - REL *alarm*
+  10-06 08:17:00.001 - 1000 - ACQ *alarm* (partial)
+  10-06 08:17:00.002 - 1000 - REL *alarm*
+  10-06 08:18:00.002 - 1000 - ACQ *alarm* (partial)
+  10-06 08:18:00.003 - 1000 - REL *alarm*
+  10-06 08:19:00.004 - 1000 - ACQ *alarm* (partial)
+  10-06 08:19:00.007 - 1000 - REL *alarm*
+  10-06 08:20:00.001 - 1000 - ACQ *alarm* (partial)
+  10-06 08:20:00.003 - 1000 - REL *alarm*
+  10-06 08:20:55.613 - 1000 - ACQ *alarm* (partial)
+  10-06 08:20:55.614 - 1000 - ACQ com.android.server.stats.StatsCompanionService$PullingAlarmListener (partial)
+  10-06 08:20:55.615 - 1000 - REL *alarm*
+  10-06 08:20:55.619 - 1000 - ACQ NetworkStats (partial)
+  10-06 08:20:55.650 - 1000 - REL NetworkStats
+  10-06 08:20:55.753 - 1000 - REL com.android.server.stats.StatsCompanionService$PullingAlarmListener
+  10-06 08:21:00.001 - 1000 - ACQ *alarm* (partial)
+  10-06 08:21:00.003 - 1000 - REL *alarm*
+  10-06 08:21:00.009 - 1000 - ACQ *alarm* (partial)
+  10-06 08:21:00.010 - 1000 - REL *alarm*
+  10-06 08:21:27.139 - 1000 - ACQ *alarm* (partial)
+  10-06 08:21:27.141 - 1000 - REL *alarm*
+  10-06 08:21:51.149 - 1000 - ACQ *alarm* (partial)
+  10-06 08:21:51.151 - 10058 - ACQ GCM_WORK (partial)
+  10-06 08:21:51.153 - 1000 - REL *alarm*
+  10-06 08:21:51.154 - 10058 - ACQ GCM_HB_ALARM (partial)
+  10-06 08:21:51.160 - 10058 - REL GCM_HB_ALARM
+  10-06 08:21:51.161 - 10058 - REL GCM_WORK
+  10-06 08:22:00.002 - 1000 - ACQ *alarm* (partial)
+  10-06 08:22:00.003 - 1000 - REL *alarm*
+  10-06 08:22:51.159 - 1000 - ACQ *alarm* (partial)
+  10-06 08:22:51.160 - 10058 - ACQ GCM_WORK (partial)
+  10-06 08:22:51.163 - 1000 - REL *alarm*
+  10-06 08:22:51.168 - 10058 - ACQ GCM_READ (partial)
+  10-06 08:22:51.170 - 10058 - REL GCM_READ
+  10-06 08:22:51.174 - 10058 - ACQ GCM_CONN_ALARM (partial)
+  10-06 08:22:51.179 - 10058 - REL GCM_WORK
+  10-06 08:22:51.431 - 10058 - ACQ GCM_WORK (partial)
+  10-06 08:22:51.440 - 10058 - REL GCM_WORK
+  10-06 08:22:51.444 - 10058 - ACQ GCM_WORK (partial)
+  10-06 08:22:51.448 - 10058 - REL GCM_WORK
+  10-06 08:22:51.504 - 10058 - ACQ GCM_READ (partial)
+  10-06 08:22:51.506 - 10058 - ACQ GCM_WORK (partial)
+  10-06 08:22:51.507 - 10058 - REL GCM_READ
+  10-06 08:22:51.510 - 10058 - ACQ GCM_READ (partial)
+  10-06 08:22:51.512 - 10058 - REL GCM_READ
+  10-06 08:22:51.521 - 10058 - REL GCM_CONN_ALARM
+  10-06 08:22:51.528 - 10058 - REL GCM_WORK
+  10-06 08:23:00.002 - 1000 - ACQ *alarm* (partial)
+  10-06 08:23:00.003 - 1000 - REL *alarm*
+  10-06 08:23:31.318 - 10058 - ACQ GCM_READ (partial)
+  10-06 08:23:31.320 - 10058 - ACQ GCM_WORK (partial)
+  10-06 08:23:31.322 - 10058 - REL GCM_READ
+  10-06 08:23:31.332 - 10058 - ACQ GOOGLE_C2DM (partial)
+  10-06 08:23:31.347 - 10058 - REL GCM_WORK
+  10-06 08:23:31.350 - 10058 - ACQ GCM_WORK (partial)
+  10-06 08:23:31.353 - 10058 - REL GCM_WORK
+  10-06 08:23:31.463 - 10058 - REL GOOGLE_C2DM
+  10-06 08:23:51.183 - 10058 - ACQ GCM_READ (partial)
+  10-06 08:23:51.184 - 10058 - ACQ GCM_WORK (partial)
+  10-06 08:23:51.186 - 10058 - REL GCM_READ
+  10-06 08:23:51.196 - 10058 - ACQ GOOGLE_C2DM (partial)
+  10-06 08:23:51.207 - 10058 - REL GCM_WORK
+  10-06 08:23:51.246 - 10058 - REL GOOGLE_C2DM
+  10-06 08:24:00.004 - 1000 - ACQ *alarm* (partial)
+  10-06 08:24:00.006 - 1000 - REL *alarm*
+  10-06 08:25:00.002 - 1000 - ACQ *alarm* (partial)
+  10-06 08:25:00.003 - 1000 - REL *alarm*
+  10-06 08:25:43.787 - 1000 - ACQ *alarm* (partial)
+  10-06 08:25:43.789 - 10058 - ACQ NetworkLocationScanner (partial)
+  10-06 08:25:43.794 - 10058 - ACQ CallbackRunner (partial)
+  10-06 08:25:43.798 - 1000 - REL *alarm*
+  10-06 08:25:43.801 - 10058 - REL CallbackRunner
+  10-06 08:25:47.403 - 10058 - REL NetworkLocationScanner
+  10-06 08:25:47.406 - 10058 - ACQ NetworkLocationLocator (partial)
+  10-06 08:25:47.452 - 10058 - ACQ PendingIntentClient (partial)
+  10-06 08:25:47.456 - 10058 - REL PendingIntentClient
+  10-06 08:25:47.457 - 10058 - ACQ GCoreFlp (partial)
+  10-06 08:25:47.467 - 10058 - ACQ CallbackRunner (partial)
+  10-06 08:25:47.470 - 10058 - REL NetworkLocationLocator
+  10-06 08:25:47.472 - 10058 - REL CallbackRunner
+  10-06 08:25:47.472 - 10058 - REL GCoreFlp
+  10-06 08:25:47.477 - 1000 - ACQ *location* (partial)
+  10-06 08:25:47.478 - 1000 - REL *location*
+  10-06 08:25:47.481 - 1000 - ACQ *location* (partial)
+  10-06 08:25:47.483 - 1000 - REL *location*
+  10-06 08:26:00.001 - 1000 - ACQ *alarm* (partial)
+  10-06 08:26:00.002 - 1000 - REL *alarm*
+  10-06 08:26:00.005 - 1000 - ACQ *alarm* (partial)
+  10-06 08:26:00.005 - 1000 - REL *alarm*
+  10-06 08:27:00.004 - 1000 - ACQ *alarm* (partial)
+  10-06 08:27:00.004 - 1000 - REL *alarm*
+  10-06 08:28:00.003 - 1000 - ACQ *alarm* (partial)
+  10-06 08:28:00.004 - 1000 - REL *alarm*
+  10-06 08:28:41.284 - 10058 - ACQ GCM_READ (partial)
+  10-06 08:28:41.287 - 10058 - ACQ GCM_WORK (partial)
+  10-06 08:28:41.288 - 10058 - REL GCM_READ
+  10-06 08:28:41.295 - 10058 - REL GCM_WORK
+  10-06 08:28:41.297 - 10058 - ACQ *gms_scheduler*:internal (partial)
+  10-06 08:28:41.328 - 10058 - ACQ *gms_scheduler*/c.g.a.g/.c.u.QosUploaderService (partial)
+  10-06 08:28:41.379 - 10058 - ACQ *gms_scheduler*/c.g.a.g/.m.s.MdiSyncBackgroundTaskService (partial)
+  10-06 08:28:41.423 - 10058 - REL *gms_scheduler*:internal
+  10-06 08:28:41.424 - 10058 - REL *gms_scheduler*/c.g.a.g/.c.u.QosUploaderService
+  10-06 08:28:41.426 - 10058 - ACQ *gms_scheduler*:internal (partial)
+  10-06 08:28:41.437 - 10058 - REL *gms_scheduler*:internal
+  10-06 08:28:41.439 - 10058 - ACQ *gms_scheduler*:internal (partial)
+  10-06 08:28:41.479 - 10058 - ACQ *gms_scheduler*/c.g.a.g/.m.s.MdiSyncBackgroundTaskService (partial)
+  10-06 08:28:41.517 - 10058 - REL *gms_scheduler*:internal
+  10-06 08:28:42.080 - 10058 - REL *gms_scheduler*/c.g.a.g/.m.s.MdiSyncBackgroundTaskService
+  10-06 08:28:42.082 - 10058 - ACQ *gms_scheduler*:internal (partial)
+  10-06 08:28:42.092 - 10058 - REL *gms_scheduler*:internal
+  10-06 08:28:42.094 - 10058 - ACQ *gms_scheduler*:internal (partial)
+  10-06 08:28:42.130 - 10058 - ACQ *gms_scheduler*/c.g.a.g/.c.u.QosUploaderService (partial)
+  10-06 08:28:42.160 - 10058 - REL *gms_scheduler*:internal
+  10-06 08:28:42.314 - 10058 - REL *gms_scheduler*/c.g.a.g/.m.s.MdiSyncBackgroundTaskService
+  10-06 08:28:42.317 - 10058 - ACQ *gms_scheduler*:internal (partial)
+  10-06 08:28:42.324 - 10058 - REL *gms_scheduler*:internal
+  10-06 08:28:42.326 - 10058 - ACQ *gms_scheduler*:internal (partial)
+  10-06 08:28:42.340 - 10058 - REL *gms_scheduler*:internal
+  10-06 08:28:43.992 - 10058 - REL *gms_scheduler*/c.g.a.g/.c.u.QosUploaderService
+  10-06 08:28:43.996 - 10058 - ACQ *gms_scheduler*:internal (partial)
+  10-06 08:28:44.005 - 10058 - REL *gms_scheduler*:internal
+  10-06 08:28:44.010 - 10058 - ACQ *gms_scheduler*:internal (partial)
+  10-06 08:28:44.018 - 10058 - REL *gms_scheduler*:internal
+  10-06 08:29:00.003 - 1000 - ACQ *alarm* (partial)
+  10-06 08:29:00.004 - 1000 - REL *alarm*
+  10-06 08:29:42.200 - 1000 - ACQ *alarm* (partial)
+  10-06 08:29:42.201 - 1000 - ACQ NetworkStats (partial)
+  10-06 08:29:42.204 - 1000 - ACQ *job*/c.g.a.k/c.g.a.a.t.s.p.UpdateFeatureIdsJobService#20 (partial)
+  10-06 08:29:42.205 - 1000 - ACQ *job*/c.g.a.k/c.g.a.a.t.s.p.UpdateFeatureIdsJobService#20 (partial)
+  10-06 08:29:42.211 - 1000 - REL *job*/c.g.a.k/c.g.a.a.t.s.p.UpdateFeatureIdsJobService#20
+  10-06 08:29:42.212 - 1000 - ACQ *job*/a/c.a.s.n.NotificationHistoryJobService#237039804 (partial)
+  10-06 08:29:42.213 - 1000 - ACQ *job*/a/c.a.s.n.NotificationHistoryJobService#237039804 (partial)
+  10-06 08:29:42.216 - 1000 - REL *job*/a/c.a.s.n.NotificationHistoryJobService#237039804
+  10-06 08:29:42.220 - 1000 - REL *job*/c.g.a.k/c.g.a.a.t.s.p.UpdateFeatureIdsJobService#20
+  10-06 08:29:42.224 - 1000 - REL *job*/a/c.a.s.n.NotificationHistoryJobService#237039804
+  10-06 08:29:42.241 - 1000 - REL NetworkStats
+  10-06 08:29:42.245 - 1000 - REL *alarm*
+  10-06 08:29:59.004 - 10058 - ACQ GCM_READ (partial)
+  10-06 08:29:59.006 - 10058 - ACQ GCM_WORK (partial)
+  10-06 08:29:59.007 - 10058 - REL GCM_READ
+  10-06 08:29:59.023 - 10058 - ACQ GOOGLE_C2DM (partial)
+  10-06 08:29:59.040 - 10058 - REL GCM_WORK
+  10-06 08:29:59.044 - 10058 - ACQ GCM_WORK (partial)
+  10-06 08:29:59.054 - 10058 - REL GCM_WORK
+  10-06 08:29:59.064 - 10048 - ACQ androidx.core:wake:com.google.android.apps.mediashell/.ChromecastGcmListenerService (partial)
+  10-06 08:29:59.067 - 10058 - REL GOOGLE_C2DM
+  10-06 08:29:59.069 - 10048 - REL androidx.core:wake:com.google.android.apps.mediashell/.ChromecastGcmListenerService
+  10-06 08:30:00.002 - 1000 - ACQ *alarm* (partial)
+  10-06 08:30:00.003 - 1000 - REL *alarm*
+  10-06 08:30:52.255 - 10058 - ACQ GCM_READ (partial)
+  10-06 08:30:52.258 - 10058 - ACQ GCM_WORK (partial)
+  10-06 08:30:52.259 - 10058 - REL GCM_READ
+  10-06 08:30:52.277 - 10058 - ACQ GOOGLE_C2DM (partial)
+  10-06 08:30:52.291 - 10058 - REL GCM_WORK
+  10-06 08:30:52.336 - 10058 - REL GOOGLE_C2DM
+  10-06 08:30:56.460 - 1000 - ACQ *alarm* (partial)
+  10-06 08:30:56.461 - 1000 - REL *alarm*
+  10-06 08:30:56.463 - 1000 - ACQ *job*/a/c.a.s.SmartStorageMaintIdler#2808 (partial)
+  10-06 08:30:56.464 - 1000 - ACQ *job*/a/c.a.s.SmartStorageMaintIdler#2808 (partial)
+  10-06 08:30:56.466 - 1000 - REL *job*/a/c.a.s.SmartStorageMaintIdler#2808
+  10-06 08:30:56.486 - 1000 - REL *job*/a/c.a.s.SmartStorageMaintIdler#2808
+  10-06 08:31:00.002 - 1000 - ACQ *alarm* (partial)
+  10-06 08:31:00.002 - 1000 - REL *alarm*
+  10-06 08:31:11.095 - 10058 - ACQ GCM_READ (partial)
+  10-06 08:31:11.097 - 10058 - ACQ GCM_WORK (partial)
+  10-06 08:31:11.099 - 10058 - REL GCM_READ
+  10-06 08:31:11.106 - 10058 - ACQ GOOGLE_C2DM (partial)
+  10-06 08:31:11.120 - 10058 - REL GCM_WORK
+  10-06 08:31:11.123 - 10058 - ACQ GCM_WORK (partial)
+  10-06 08:31:11.130 - 10058 - REL GCM_WORK
+  10-06 08:31:11.163 - 10058 - REL GOOGLE_C2DM
+  10-06 08:32:00.003 - 1000 - ACQ *alarm* (partial)
+  10-06 08:32:00.004 - 1000 - REL *alarm*
+  10-06 08:33:00.001 - 1000 - ACQ *alarm* (partial)
+  10-06 08:33:00.002 - 1000 - REL *alarm*
+  10-06 08:33:00.004 - 1000 - ACQ *alarm* (partial)
+  10-06 08:33:00.005 - 1000 - REL *alarm*
+  10-06 08:33:51.253 - 10058 - ACQ GCM_READ (partial)
+  10-06 08:33:51.255 - 10058 - ACQ GCM_WORK (partial)
+  10-06 08:33:51.256 - 10058 - REL GCM_READ
+  10-06 08:33:51.270 - 10058 - ACQ GOOGLE_C2DM (partial)
+  10-06 08:33:51.284 - 10058 - REL GCM_WORK
+  10-06 08:33:51.382 - 10058 - REL GOOGLE_C2DM
+  10-06 08:34:00.002 - 1000 - ACQ *alarm* (partial)
+  10-06 08:34:00.003 - 1000 - REL *alarm*
+  10-06 08:34:11.423 - 10058 - ACQ GCM_READ (partial)
+  10-06 08:34:11.425 - 10058 - ACQ GCM_WORK (partial)
+  10-06 08:34:11.426 - 10058 - REL GCM_READ
+  10-06 08:34:11.431 - 10058 - ACQ GOOGLE_C2DM (partial)
+  10-06 08:34:11.454 - 10058 - REL GCM_WORK
+  10-06 08:34:11.457 - 10058 - ACQ GCM_WORK (partial)
+  10-06 08:34:11.474 - 10058 - REL GCM_WORK
+  10-06 08:34:11.491 - 10058 - REL GOOGLE_C2DM
+  10-06 08:34:31.287 - 10058 - ACQ GCM_READ (partial)
+  10-06 08:34:31.292 - 10058 - ACQ GCM_WORK (partial)
+  10-06 08:34:31.293 - 10058 - REL GCM_READ
+  10-06 08:34:31.305 - 10058 - ACQ GOOGLE_C2DM (partial)
+  10-06 08:34:31.316 - 10058 - REL GCM_WORK
+  10-06 08:34:31.361 - 10058 - REL GOOGLE_C2DM
+  10-06 08:34:51.151 - 10058 - ACQ GCM_READ (partial)
+  10-06 08:34:51.153 - 10058 - ACQ GCM_WORK (partial)
+  10-06 08:34:51.153 - 10058 - REL GCM_READ
+  10-06 08:34:51.159 - 10058 - ACQ GOOGLE_C2DM (partial)
+  10-06 08:34:51.175 - 10058 - REL GCM_WORK
+  10-06 08:34:51.177 - 10058 - ACQ GCM_WORK (partial)
+  10-06 08:34:51.193 - 10058 - REL GCM_WORK
+  10-06 08:34:51.218 - 10058 - REL GOOGLE_C2DM
+  10-06 08:35:00.003 - 1000 - ACQ *alarm* (partial)
+  10-06 08:35:00.004 - 1000 - REL *alarm*
+  10-06 08:36:00.003 - 1000 - ACQ *alarm* (partial)
+  10-06 08:36:00.009 - 1000 - REL *alarm*
+  10-06 08:36:15.490 - 1000 - ACQ *alarm* (partial)
+  10-06 08:36:15.499 - 1000 - REL *alarm*
+  10-06 08:36:15.515 - 10058 - ACQ *gms_scheduler*:internal (partial)
+  10-06 08:36:15.552 - 10058 - ACQ *gms_scheduler*/c.g.a.g/.a.a.b.a.GcmTaskService (partial)
+  10-06 08:36:15.582 - 10058 - REL *gms_scheduler*:internal
+  10-06 08:36:16.206 - 10058 - REL *gms_scheduler*/c.g.a.g/.a.a.b.a.GcmTaskService
+  10-06 08:36:16.210 - 10058 - ACQ *gms_scheduler*:internal (partial)
+  10-06 08:36:16.222 - 10058 - REL *gms_scheduler*:internal
+  10-06 08:36:16.225 - 10058 - ACQ *gms_scheduler*:internal (partial)
+  10-06 08:36:16.262 - 10058 - ACQ *gms_scheduler*/c.g.a.g/.c.u.QosUploaderService (partial)
+  10-06 08:36:16.297 - 10058 - REL *gms_scheduler*:internal
+  10-06 08:36:16.603 - 10058 - REL *gms_scheduler*/c.g.a.g/.c.u.QosUploaderService
+  10-06 08:36:16.607 - 10058 - ACQ *gms_scheduler*:internal (partial)
+  10-06 08:36:16.614 - 10058 - REL *gms_scheduler*:internal
+  10-06 08:36:16.616 - 10058 - ACQ *gms_scheduler*:internal (partial)
+  10-06 08:36:16.625 - 10058 - REL *gms_scheduler*:internal
+  10-06 08:37:00.002 - 1000 - ACQ *alarm* (partial)
+  10-06 08:37:00.003 - 1000 - REL *alarm*
+  10-06 08:37:51.275 - 10058 - ACQ GCM_READ (partial)
+  10-06 08:37:51.277 - 10058 - ACQ GCM_WORK (partial)
+  10-06 08:37:51.278 - 10058 - REL GCM_READ
+  10-06 08:37:51.293 - 10058 - ACQ GOOGLE_C2DM (partial)
+  10-06 08:37:51.303 - 10058 - REL GCM_WORK
+  10-06 08:37:51.359 - 10058 - REL GOOGLE_C2DM
+  10-06 08:38:00.005 - 1000 - ACQ *alarm* (partial)
+  10-06 08:38:00.005 - 1000 - REL *alarm*
+  10-06 08:38:11.345 - 10058 - ACQ GCM_READ (partial)
+  10-06 08:38:11.349 - 10058 - ACQ GCM_WORK (partial)
+  10-06 08:38:11.350 - 10058 - REL GCM_READ
+  10-06 08:38:11.354 - 10058 - ACQ GOOGLE_C2DM (partial)
+  10-06 08:38:11.367 - 10058 - REL GCM_WORK
+  10-06 08:38:11.368 - 10058 - ACQ GCM_WORK (partial)
+  10-06 08:38:11.382 - 10058 - REL GCM_WORK
+  10-06 08:38:11.417 - 10058 - REL GOOGLE_C2DM
+  10-06 08:39:00.002 - 1000 - ACQ *alarm* (partial)
+  10-06 08:39:00.005 - 1000 - REL *alarm*
+  10-06 08:40:00.002 - 1000 - ACQ *alarm* (partial)
+  10-06 08:40:00.003 - 1000 - REL *alarm*
+  10-06 08:41:00.002 - 1000 - ACQ *alarm* (partial)
+  10-06 08:41:00.004 - 1000 - REL *alarm*
+  10-06 08:42:00.002 - 1000 - ACQ *alarm* (partial)
+  10-06 08:42:00.003 - 1000 - REL *alarm*
+  10-06 08:43:00.004 - 1000 - ACQ *alarm* (partial)
+  10-06 08:43:00.004 - 1000 - REL *alarm*
+  10-06 08:44:00.003 - 1000 - ACQ *alarm* (partial)
+  10-06 08:44:00.003 - 1000 - REL *alarm*
+  10-06 08:45:00.002 - 1000 - ACQ *alarm* (partial)
+  10-06 08:45:00.003 - 1000 - REL *alarm*
+  10-06 08:45:11.382 - 1000 - ACQ *alarm* (partial)
+  10-06 08:45:11.384 - 10058 - ACQ GCM_WORK (partial)
+  10-06 08:45:11.386 - 10058 - ACQ GCM_HB_ALARM (partial)
+  10-06 08:45:11.387 - 1000 - REL *alarm*
+  10-06 08:45:11.392 - 10058 - REL GCM_HB_ALARM
+  10-06 08:45:11.393 - 10058 - REL GCM_WORK
+  10-06 08:46:00.001 - 1000 - ACQ *alarm* (partial)
+  10-06 08:46:00.002 - 1000 - REL *alarm*
+  10-06 08:46:11.391 - 1000 - ACQ *alarm* (partial)
+  10-06 08:46:11.392 - 10058 - ACQ GCM_WORK (partial)
+  10-06 08:46:11.394 - 1000 - REL *alarm*
+  10-06 08:46:11.398 - 10058 - ACQ GCM_READ (partial)
+  10-06 08:46:11.400 - 10058 - REL GCM_READ
+  10-06 08:46:11.402 - 10058 - ACQ GCM_CONN_ALARM (partial)
+  10-06 08:46:11.408 - 10058 - REL GCM_WORK
+  10-06 08:46:11.510 - 10058 - ACQ GCM_WORK (partial)
+  10-06 08:46:11.515 - 10058 - REL GCM_WORK
+  10-06 08:46:11.517 - 10058 - ACQ GCM_WORK (partial)
+  10-06 08:46:11.521 - 10058 - REL GCM_WORK
+  10-06 08:46:11.671 - 10058 - ACQ GCM_READ (partial)
+  10-06 08:46:11.673 - 10058 - ACQ GCM_WORK (partial)
+  10-06 08:46:11.674 - 10058 - REL GCM_READ
+  10-06 08:46:11.676 - 10058 - ACQ GCM_READ (partial)
+  10-06 08:46:11.678 - 10058 - REL GCM_READ
+  10-06 08:46:11.688 - 10058 - REL GCM_CONN_ALARM
+  10-06 08:46:11.696 - 10058 - REL GCM_WORK
+  10-06 08:46:12.423 - 10058 - ACQ GCM_READ (partial)
+  10-06 08:46:12.429 - 10058 - ACQ GCM_WORK (partial)
+  10-06 08:46:12.430 - 10058 - REL GCM_READ
+  10-06 08:46:12.431 - 10058 - ACQ GCM_READ (partial)
+  10-06 08:46:12.433 - 10058 - REL GCM_READ
+  10-06 08:46:12.437 - 10058 - ACQ GOOGLE_C2DM (partial)
+  10-06 08:46:12.467 - 10058 - ACQ GOOGLE_C2DM (partial)
+  10-06 08:46:12.489 - 10058 - REL GCM_WORK
+  10-06 08:46:12.553 - 10058 - REL GOOGLE_C2DM
+  10-06 08:46:12.566 - 10058 - REL GOOGLE_C2DM
+  10-06 08:46:20.613 - 10058 - ACQ GCM_READ (partial)
+  10-06 08:46:20.615 - 10058 - ACQ GCM_WORK (partial)
+  10-06 08:46:20.616 - 10058 - REL GCM_READ
+  10-06 08:46:20.624 - 10058 - ACQ GOOGLE_C2DM (partial)
+  10-06 08:46:20.635 - 10058 - REL GCM_WORK
+  10-06 08:46:20.638 - 10058 - ACQ GCM_WORK (partial)
+  10-06 08:46:20.643 - 10058 - REL GCM_WORK
+  10-06 08:46:20.677 - 10058 - REL GOOGLE_C2DM
+  10-06 08:46:51.538 - 10058 - ACQ GCM_READ (partial)
+  10-06 08:46:51.541 - 10058 - ACQ GCM_WORK (partial)
+  10-06 08:46:51.542 - 10058 - REL GCM_READ
+  10-06 08:46:51.553 - 10058 - ACQ GOOGLE_C2DM (partial)
+  10-06 08:46:51.564 - 10058 - REL GCM_WORK
+  10-06 08:46:51.604 - 10058 - REL GOOGLE_C2DM
+  10-06 08:47:00.009 - 1000 - ACQ *alarm* (partial)
+  10-06 08:47:00.011 - 1000 - REL *alarm*
+  10-06 08:48:00.001 - 1000 - ACQ *alarm* (partial)
+  10-06 08:48:00.003 - 1000 - REL *alarm*
+  10-06 08:48:55.303 - 1000 - ACQ *alarm* (partial)
+  10-06 08:48:55.304 - 1000 - REL *alarm*
+  10-06 08:48:55.306 - 1000 - ACQ *job*/a/c.a.s.n.NotificationHistoryJobService#237039804 (partial)
+  10-06 08:48:55.307 - 1000 - ACQ *job*/a/c.a.s.n.NotificationHistoryJobService#237039804 (partial)
+  10-06 08:48:55.309 - 1000 - REL *job*/a/c.a.s.n.NotificationHistoryJobService#237039804
+  10-06 08:48:55.310 - 1000 - REL *job*/a/c.a.s.n.NotificationHistoryJobService#237039804
+  10-06 08:49:00.004 - 1000 - ACQ *alarm* (partial)
+  10-06 08:49:00.005 - 1000 - REL *alarm*
+  10-06 08:50:00.002 - 1000 - ACQ *alarm* (partial)
+  10-06 08:50:00.002 - 1000 - REL *alarm*
+  10-06 08:51:00.002 - 1000 - ACQ *alarm* (partial)
+  10-06 08:51:00.002 - 1000 - REL *alarm*
+  10-06 08:52:00.003 - 1000 - ACQ *alarm* (partial)
+  10-06 08:52:00.003 - 1000 - REL *alarm*
+  10-06 08:52:51.554 - 1000 - ACQ *alarm* (partial)
+  10-06 08:52:51.556 - 10058 - ACQ GCM_WORK (partial)
+  10-06 08:52:51.558 - 1000 - REL *alarm*
+  10-06 08:52:51.559 - 10058 - ACQ GCM_HB_ALARM (partial)
+  10-06 08:52:51.566 - 10058 - REL GCM_HB_ALARM
+  10-06 08:52:51.567 - 10058 - REL GCM_WORK
+  10-06 08:53:00.001 - 1000 - ACQ *alarm* (partial)
+  10-06 08:53:00.002 - 1000 - REL *alarm*
+  10-06 08:53:00.004 - 1000 - ACQ *alarm* (partial)
+  10-06 08:53:00.005 - 1000 - REL *alarm*
+  10-06 08:53:51.565 - 1000 - ACQ *alarm* (partial)
+  10-06 08:53:51.566 - 10058 - ACQ GCM_WORK (partial)
+  10-06 08:53:51.568 - 1000 - REL *alarm*
+  10-06 08:53:51.572 - 10058 - ACQ GCM_READ (partial)
+  10-06 08:53:51.573 - 10058 - REL GCM_READ
+  10-06 08:53:51.575 - 10058 - ACQ GCM_CONN_ALARM (partial)
+  10-06 08:53:51.581 - 10058 - REL GCM_WORK
+  10-06 08:53:52.043 - 10058 - ACQ GCM_WORK (partial)
+  10-06 08:53:52.053 - 10058 - REL GCM_WORK
+  10-06 08:53:52.055 - 10058 - ACQ GCM_WORK (partial)
+  10-06 08:53:52.058 - 10058 - REL GCM_WORK
+  10-06 08:53:52.170 - 10058 - ACQ GCM_READ (partial)
+  10-06 08:53:52.172 - 10058 - ACQ GCM_WORK (partial)
+  10-06 08:53:52.173 - 10058 - REL GCM_READ
+  10-06 08:53:52.175 - 10058 - ACQ GCM_READ (partial)
+  10-06 08:53:52.179 - 10058 - REL GCM_READ
+  10-06 08:53:52.186 - 10058 - REL GCM_CONN_ALARM
+  10-06 08:53:52.197 - 10058 - REL GCM_WORK
+  10-06 08:53:52.822 - 10058 - ACQ GCM_READ (partial)
+  10-06 08:53:52.824 - 10058 - ACQ GCM_WORK (partial)
+  10-06 08:53:52.825 - 10058 - REL GCM_READ
+  10-06 08:53:52.827 - 10058 - ACQ GCM_READ (partial)
+  10-06 08:53:52.828 - 10058 - REL GCM_READ
+  10-06 08:53:52.829 - 10058 - ACQ GOOGLE_C2DM (partial)
+  10-06 08:53:52.845 - 10058 - ACQ GOOGLE_C2DM (partial)
+  10-06 08:53:52.874 - 10058 - REL GCM_WORK
+  10-06 08:53:52.944 - 10058 - REL GOOGLE_C2DM
+  10-06 08:53:52.960 - 10058 - REL GOOGLE_C2DM
+  10-06 08:54:00.003 - 1000 - ACQ *alarm* (partial)
+  10-06 08:54:00.005 - 1000 - REL *alarm*
+  10-06 08:55:00.002 - 1000 - ACQ *alarm* (partial)
+  10-06 08:55:00.003 - 1000 - REL *alarm*
+  10-06 08:55:47.352 - 1000 - ACQ *alarm* (partial)
+  10-06 08:55:47.352 - 10058 - ACQ NetworkLocationScanner (partial)
+  10-06 08:55:47.355 - 10058 - ACQ CallbackRunner (partial)
+  10-06 08:55:47.356 - 1000 - REL *alarm*
+  10-06 08:55:47.360 - 10058 - REL CallbackRunner
+  10-06 08:55:50.874 - 10058 - REL NetworkLocationScanner
+  10-06 08:55:50.877 - 10058 - ACQ NetworkLocationLocator (partial)
+  10-06 08:55:50.913 - 10058 - ACQ PendingIntentClient (partial)
+  10-06 08:55:50.919 - 10058 - ACQ GCoreFlp (partial)
+  10-06 08:55:50.920 - 10058 - REL PendingIntentClient
+  10-06 08:55:50.932 - 10058 - ACQ CallbackRunner (partial)
+  10-06 08:55:50.935 - 1000 - ACQ *location* (partial)
+  10-06 08:55:50.935 - 10058 - REL NetworkLocationLocator
+  10-06 08:55:50.936 - 10058 - REL CallbackRunner
+  10-06 08:55:50.939 - 1000 - REL *location*
+  10-06 08:55:50.940 - 10058 - REL GCoreFlp
+  10-06 08:55:50.945 - 1000 - ACQ *location* (partial)
+  10-06 08:55:50.946 - 1000 - REL *location*
+  10-06 08:55:51.503 - 10058 - ACQ GCM_READ (partial)
+  10-06 08:55:51.506 - 10058 - ACQ GCM_WORK (partial)
+  10-06 08:55:51.507 - 10058 - REL GCM_READ
+  10-06 08:55:51.524 - 10058 - ACQ GOOGLE_C2DM (partial)
+  10-06 08:55:51.534 - 10058 - REL GCM_WORK
+  10-06 08:55:51.540 - 10058 - ACQ *gms_scheduler*:internal (partial)
+  10-06 08:55:51.542 - 10058 - ACQ GCM_WORK (partial)
+  10-06 08:55:51.548 - 10058 - REL GCM_WORK
+  10-06 08:55:51.596 - 10058 - REL GOOGLE_C2DM
+  10-06 08:55:51.602 - 10058 - ACQ *gms_scheduler*/c.g.a.g/.a.s.UpdateAdIdReconciliationService (partial)
+  10-06 08:55:51.631 - 10058 - ACQ *gms_scheduler*/c.g.a.g/.g.HeartbeatAlarm$ConnectionInfoPersistService (partial)
+  10-06 08:55:51.668 - 10058 - REL *gms_scheduler*:internal
+  10-06 08:55:51.670 - 10058 - REL *gms_scheduler*/c.g.a.g/.a.s.UpdateAdIdReconciliationService
+  10-06 08:55:51.673 - 10058 - ACQ *gms_scheduler*:internal (partial)
+  10-06 08:55:51.692 - 10058 - REL *gms_scheduler*:internal
+  10-06 08:55:51.693 - 10058 - ACQ *gms_scheduler*:internal (partial)
+  10-06 08:55:51.703 - 10058 - REL *gms_scheduler*:internal
+  10-06 08:55:51.740 - 10058 - REL *gms_scheduler*/c.g.a.g/.g.HeartbeatAlarm$ConnectionInfoPersistService
+  10-06 08:55:51.743 - 10058 - ACQ *gms_scheduler*:internal (partial)
+  10-06 08:55:51.750 - 10058 - REL *gms_scheduler*:internal
+  10-06 08:55:51.753 - 10058 - ACQ *gms_scheduler*:internal (partial)
+  10-06 08:55:51.761 - 10058 - REL *gms_scheduler*:internal
+  10-06 08:56:00.001 - 1000 - ACQ *alarm* (partial)
+  10-06 08:56:00.002 - 1000 - REL *alarm*
+  10-06 08:56:31.228 - 10058 - ACQ GCM_READ (partial)
+  10-06 08:56:31.232 - 10058 - ACQ GCM_WORK (partial)
+  10-06 08:56:31.234 - 10058 - REL GCM_READ
+  10-06 08:56:31.256 - 10058 - ACQ GOOGLE_C2DM (partial)
+  10-06 08:56:31.267 - 10058 - REL GCM_WORK
+  10-06 08:56:31.321 - 10058 - REL GOOGLE_C2DM
+  10-06 08:57:00.002 - 1000 - ACQ *alarm* (partial)
+  10-06 08:57:00.003 - 1000 - REL *alarm*
+  10-06 08:58:00.002 - 1000 - ACQ *alarm* (partial)
+  10-06 08:58:00.003 - 1000 - REL *alarm*
+  10-06 08:58:00.006 - 1000 - ACQ *alarm* (partial)
+  10-06 08:58:00.006 - 1000 - REL *alarm*
+  10-06 08:58:47.181 - 10052 - ACQ SyncManager: Scheduling in parallel (partial)
+  10-06 08:58:47.184 - 10052 - ACQ SyncManager: Syncing (partial)
+  10-06 08:58:47.198 - 10052 - REL SyncManager: Syncing
+  10-06 08:58:47.317 - 10052 - REL SyncManager: Scheduling in parallel
+  10-06 08:59:00.010 - 1000 - ACQ *alarm* (partial)
+  10-06 08:59:00.011 - 1000 - REL *alarm*
+  10-06 09:00:00.002 - 1000 - ACQ *alarm* (partial)
+  10-06 09:00:00.003 - 1000 - REL *alarm*
+  10-06 09:00:00.635 - 10058 - ACQ GCM_READ (partial)
+  10-06 09:00:00.636 - 10058 - ACQ GCM_WORK (partial)
+  10-06 09:00:00.638 - 10058 - REL GCM_READ
+  10-06 09:00:00.641 - 10058 - ACQ GOOGLE_C2DM (partial)
+  10-06 09:00:00.660 - 10058 - REL GCM_WORK
+  10-06 09:00:00.673 - 10058 - ACQ GCM_WORK (partial)
+  10-06 09:00:00.675 - 10048 - ACQ androidx.core:wake:com.google.android.apps.mediashell/.ChromecastGcmListenerService (partial)
+  10-06 09:00:00.679 - 10058 - REL GOOGLE_C2DM
+  10-06 09:00:00.681 - 10048 - REL androidx.core:wake:com.google.android.apps.mediashell/.ChromecastGcmListenerService
+  10-06 09:00:00.685 - 10058 - REL GCM_WORK
+  10-06 09:00:11.489 - 10058 - ACQ GCM_READ (partial)
+  10-06 09:00:11.492 - 10058 - ACQ GCM_WORK (partial)
+  10-06 09:00:11.493 - 10058 - REL GCM_READ
+  10-06 09:00:11.503 - 10058 - ACQ GOOGLE_C2DM (partial)
+  10-06 09:00:11.515 - 10058 - REL GCM_WORK
+  10-06 09:00:11.604 - 10058 - REL GOOGLE_C2DM
+  10-06 09:00:30.944 - 1000 - ACQ *alarm* (partial)
+  10-06 09:00:30.949 - 1000 - ACQ NetworkStats (partial)
+  10-06 09:00:30.953 - 1000 - ACQ *job*/@.w.s.g.a.t/a.w.i.b.s.SystemJobService#73 (partial)
+  10-06 09:00:30.957 - 1000 - ACQ *job*/@.w.s.g.a.t/a.w.i.b.s.SystemJobService#73 (partial)
+  10-06 09:00:30.968 - 1000 - REL *job*/@.w.s.g.a.t/a.w.i.b.s.SystemJobService#73
+  10-06 09:00:31.026 - 1000 - REL NetworkStats
+  10-06 09:00:31.032 - 1000 - REL *alarm*
+  10-06 09:00:31.234 - 10067 - ACQ SyncManager: Scheduling in parallel (partial)
+  10-06 09:00:31.248 - 10067 - ACQ SyncManager: Syncing (partial)
+  10-06 09:00:31.337 - 10067 - REL SyncManager: Syncing
+  10-06 09:00:32.096 - 1000 - REL *job*/@.w.s.g.a.t/a.w.i.b.s.SystemJobService#73
+  10-06 09:00:32.103 - 10067 - REL SyncManager: Scheduling in parallel
+  10-06 09:01:00.002 - 1000 - ACQ *alarm* (partial)
+  10-06 09:01:00.003 - 1000 - REL *alarm*
+  10-06 09:01:11.294 - 10058 - ACQ GCM_READ (partial)
+  10-06 09:01:11.295 - 10058 - ACQ GCM_WORK (partial)
+  10-06 09:01:11.297 - 10058 - REL GCM_READ
+  10-06 09:01:11.302 - 10058 - ACQ GOOGLE_C2DM (partial)
+  10-06 09:01:11.316 - 10058 - REL GCM_WORK
+  10-06 09:01:11.318 - 10058 - ACQ GCM_WORK (partial)
+  10-06 09:01:11.326 - 10058 - REL GCM_WORK
+  10-06 09:01:11.364 - 10058 - REL GOOGLE_C2DM
+  10-06 09:01:31.157 - 10058 - ACQ GCM_READ (partial)
+  10-06 09:01:31.158 - 10058 - ACQ GCM_WORK (partial)
+  10-06 09:01:31.159 - 10058 - REL GCM_READ
+  10-06 09:01:31.168 - 10058 - ACQ GOOGLE_C2DM (partial)
+  10-06 09:01:31.180 - 10058 - REL GCM_WORK
+  10-06 09:01:31.216 - 10058 - REL GOOGLE_C2DM
+  10-06 09:01:44.433 - 1000 - ACQ *alarm* (partial)
+  10-06 09:01:44.434 - 1000 - REL *alarm*
+  10-06 09:01:44.436 - 1000 - ACQ *job*/a/c.a.s.n.NotificationHistoryJobService#237039804 (partial)
+  10-06 09:01:44.437 - 1000 - ACQ *job*/a/c.a.s.n.NotificationHistoryJobService#237039804 (partial)
+  10-06 09:01:44.440 - 1000 - REL *job*/a/c.a.s.n.NotificationHistoryJobService#237039804
+  10-06 09:01:44.443 - 1000 - REL *job*/a/c.a.s.n.NotificationHistoryJobService#237039804
+  10-06 09:02:00.002 - 1000 - ACQ *alarm* (partial)
+  10-06 09:02:00.004 - 1000 - REL *alarm*
+  10-06 09:02:49.907 - 10058 - ACQ GCM_READ (partial)
+  10-06 09:02:49.910 - 10058 - ACQ GCM_WORK (partial)
+  10-06 09:02:49.911 - 10058 - REL GCM_READ
+  10-06 09:02:49.914 - 10058 - ACQ GOOGLE_C2DM (partial)
+  10-06 09:02:49.941 - 10058 - REL GCM_WORK
+  10-06 09:02:49.943 - 10058 - ACQ GCM_WORK (partial)
+  10-06 09:02:49.951 - 10058 - REL GCM_WORK
+  10-06 09:02:49.984 - 10058 - REL GOOGLE_C2DM
+  10-06 09:03:00.002 - 1000 - ACQ *alarm* (partial)
+  10-06 09:03:00.003 - 1000 - REL *alarm*
+  10-06 09:04:00.002 - 1000 - ACQ *alarm* (partial)
+  10-06 09:04:00.003 - 1000 - REL *alarm*
+  10-06 09:05:00.002 - 1000 - ACQ *alarm* (partial)
+  10-06 09:05:00.007 - 1000 - REL *alarm*
+  10-06 09:05:11.419 - 10058 - ACQ GCM_READ (partial)
+  10-06 09:05:11.421 - 10058 - ACQ GCM_WORK (partial)
+  10-06 09:05:11.422 - 10058 - REL GCM_READ
+  10-06 09:05:11.436 - 10058 - ACQ GOOGLE_C2DM (partial)
+  10-06 09:05:11.448 - 10058 - REL GCM_WORK
+  10-06 09:05:11.550 - 10058 - REL GOOGLE_C2DM
+  10-06 09:05:31.286 - 10058 - ACQ GCM_READ (partial)
+  10-06 09:05:31.287 - 10058 - ACQ GCM_WORK (partial)
+  10-06 09:05:31.288 - 10058 - REL GCM_READ
+  10-06 09:05:31.291 - 10058 - ACQ GOOGLE_C2DM (partial)
+  10-06 09:05:31.310 - 10058 - REL GCM_WORK
+  10-06 09:05:31.311 - 10058 - ACQ GCM_WORK (partial)
+  10-06 09:05:31.316 - 10058 - REL GCM_WORK
+  10-06 09:05:31.358 - 10058 - REL GOOGLE_C2DM
+  10-06 09:05:51.356 - 10058 - ACQ GCM_READ (partial)
+  10-06 09:05:51.357 - 10058 - ACQ GCM_WORK (partial)
+  10-06 09:05:51.358 - 10058 - REL GCM_READ
+  10-06 09:05:51.373 - 10058 - ACQ GOOGLE_C2DM (partial)
+  10-06 09:05:51.383 - 10058 - REL GCM_WORK
+  10-06 09:05:51.423 - 10058 - REL GOOGLE_C2DM
+  10-06 09:06:00.002 - 1000 - ACQ *alarm* (partial)
+  10-06 09:06:00.003 - 1000 - REL *alarm*
+  10-06 09:06:11.224 - 10058 - ACQ GCM_READ (partial)
+  10-06 09:06:11.226 - 10058 - ACQ GCM_WORK (partial)
+  10-06 09:06:11.227 - 10058 - REL GCM_READ
+  10-06 09:06:11.230 - 10058 - ACQ GOOGLE_C2DM (partial)
+  10-06 09:06:11.245 - 10058 - REL GCM_WORK
+  10-06 09:06:11.255 - 10058 - ACQ GCM_WORK (partial)
+  10-06 09:06:11.259 - 10058 - REL GCM_WORK
+  10-06 09:06:11.284 - 10058 - REL GOOGLE_C2DM
+  10-06 09:07:00.002 - 1000 - ACQ *alarm* (partial)
+  10-06 09:07:00.008 - 1000 - REL *alarm*
+  10-06 09:08:00.001 - 1000 - ACQ *alarm* (partial)
+  10-06 09:08:00.003 - 1000 - REL *alarm*
+  10-06 09:09:00.004 - 1000 - ACQ *alarm* (partial)
+  10-06 09:09:00.004 - 1000 - REL *alarm*
+  10-06 09:10:00.002 - 1000 - ACQ *alarm* (partial)
+  10-06 09:10:00.003 - 1000 - REL *alarm*
+  10-06 09:10:01.622 - 10058 - ACQ GCM_READ (partial)
+  10-06 09:10:01.624 - 10058 - ACQ GCM_WORK (partial)
+  10-06 09:10:01.624 - 10058 - REL GCM_READ
+  10-06 09:10:01.633 - 10058 - REL GCM_WORK
+  10-06 09:11:00.002 - 1000 - ACQ *alarm* (partial)
+  10-06 09:11:00.003 - 1000 - REL *alarm*
+  10-06 09:12:00.001 - 1000 - ACQ *alarm* (partial)
+  10-06 09:12:00.002 - 1000 - REL *alarm*
+  10-06 09:13:00.003 - 1000 - ACQ *alarm* (partial)
+  10-06 09:13:00.003 - 1000 - REL *alarm*
+  10-06 09:13:51.922 - 10058 - ACQ GCM_READ (partial)
+  10-06 09:13:51.924 - 10058 - ACQ GCM_WORK (partial)
+  10-06 09:13:51.925 - 10058 - REL GCM_READ
+  10-06 09:13:51.935 - 10058 - REL GCM_WORK
+  10-06 09:14:00.002 - 1000 - ACQ *alarm* (partial)
+  10-06 09:14:00.003 - 1000 - REL *alarm*
+  10-06 09:15:00.002 - 1000 - ACQ *alarm* (partial)
+  10-06 09:15:00.003 - 1000 - REL *alarm*
+  10-06 09:15:58.696 - 10058 - ACQ GCM_READ (partial)
+  10-06 09:15:58.697 - 10058 - ACQ GCM_WORK (partial)
+  10-06 09:15:58.699 - 10058 - REL GCM_READ
+  10-06 09:15:58.713 - 10058 - ACQ GOOGLE_C2DM (partial)
+  10-06 09:15:58.728 - 10058 - REL GCM_WORK
+  10-06 09:15:58.734 - 10058 - ACQ GCM_WORK (partial)
+  10-06 09:15:58.740 - 10058 - REL GCM_WORK
+  10-06 09:15:58.777 - 10058 - REL GOOGLE_C2DM
+  10-06 09:16:00.002 - 1000 - ACQ *alarm* (partial)
+  10-06 09:16:00.003 - 1000 - REL *alarm*
+  10-06 09:16:31.257 - 10058 - ACQ GCM_READ (partial)
+  10-06 09:16:31.259 - 10058 - ACQ GCM_WORK (partial)
+  10-06 09:16:31.260 - 10058 - REL GCM_READ
+  10-06 09:16:31.273 - 10058 - ACQ GOOGLE_C2DM (partial)
+  10-06 09:16:31.288 - 10058 - REL GCM_WORK
+  10-06 09:16:31.363 - 10058 - REL GOOGLE_C2DM
+  10-06 09:16:51.634 - 10058 - ACQ GCM_READ (partial)
+  10-06 09:16:51.636 - 10058 - ACQ GCM_WORK (partial)
+  10-06 09:16:51.637 - 10058 - REL GCM_READ
+  10-06 09:16:51.642 - 10058 - ACQ GOOGLE_C2DM (partial)
+  10-06 09:16:51.653 - 10058 - REL GCM_WORK
+  10-06 09:16:51.655 - 10058 - ACQ GCM_WORK (partial)
+  10-06 09:16:51.663 - 10058 - REL GCM_WORK
+  10-06 09:16:51.696 - 10058 - REL GOOGLE_C2DM
+  10-06 09:17:00.002 - 1000 - ACQ *alarm* (partial)
+  10-06 09:17:00.003 - 1000 - REL *alarm*
+  10-06 09:18:00.001 - 1000 - ACQ *alarm* (partial)
+  10-06 09:18:00.002 - 1000 - REL *alarm*
+  10-06 09:19:00.004 - 1000 - ACQ *alarm* (partial)
+  10-06 09:19:00.006 - 1000 - REL *alarm*
+  10-06 09:19:51.449 - 10058 - ACQ GCM_READ (partial)
+  10-06 09:19:51.450 - 10058 - ACQ GCM_WORK (partial)
+  10-06 09:19:51.452 - 10058 - REL GCM_READ
+  10-06 09:19:51.466 - 10058 - ACQ GOOGLE_C2DM (partial)
+  10-06 09:19:51.479 - 10058 - REL GCM_WORK
+  10-06 09:19:51.530 - 10058 - REL GOOGLE_C2DM
+  10-06 09:20:00.001 - 1000 - ACQ *alarm* (partial)
+  10-06 09:20:00.005 - 1000 - REL *alarm*
+  10-06 09:20:55.612 - 1000 - ACQ *alarm* (partial)
+  10-06 09:20:55.612 - 1000 - ACQ com.android.server.stats.StatsCompanionService$PullingAlarmListener (partial)
+  10-06 09:20:55.613 - 1000 - REL *alarm*
+  10-06 09:20:55.615 - 1000 - ACQ NetworkStats (partial)
+  10-06 09:20:55.633 - 1000 - REL NetworkStats
+  10-06 09:20:55.714 - 1000 - REL com.android.server.stats.StatsCompanionService$PullingAlarmListener
+  10-06 09:21:00.001 - 1000 - ACQ *alarm* (partial)
+  10-06 09:21:00.003 - 1000 - REL *alarm*
+  10-06 09:21:11.248 - 10058 - ACQ GCM_READ (partial)
+  10-06 09:21:11.251 - 10058 - ACQ GCM_WORK (partial)
+  10-06 09:21:11.252 - 10058 - REL GCM_READ
+  10-06 09:21:11.257 - 10058 - ACQ GOOGLE_C2DM (partial)
+  10-06 09:21:11.275 - 10058 - REL GCM_WORK
+  10-06 09:21:11.278 - 10058 - ACQ GCM_WORK (partial)
+  10-06 09:21:11.296 - 10058 - REL GCM_WORK
+  10-06 09:21:11.328 - 10058 - REL GOOGLE_C2DM
+  10-06 09:21:31.289 - 10058 - ACQ GCM_READ (partial)
+  10-06 09:21:31.291 - 10058 - ACQ GCM_WORK (partial)
+  10-06 09:21:31.292 - 10058 - REL GCM_READ
+  10-06 09:21:31.303 - 10058 - ACQ GOOGLE_C2DM (partial)
+  10-06 09:21:31.314 - 10058 - REL GCM_WORK
+  10-06 09:21:31.354 - 10058 - REL GOOGLE_C2DM
+  10-06 09:22:00.003 - 1000 - ACQ *alarm* (partial)
+  10-06 09:22:00.004 - 1000 - REL *alarm*
+  10-06 09:22:11.225 - 10058 - ACQ GCM_READ (partial)
+  10-06 09:22:11.233 - 10058 - ACQ GCM_WORK (partial)
+  10-06 09:22:11.234 - 10058 - REL GCM_READ
+  10-06 09:22:11.239 - 10058 - ACQ GOOGLE_C2DM (partial)
+  10-06 09:22:11.255 - 10058 - REL GCM_WORK
+  10-06 09:22:11.256 - 10058 - ACQ GCM_WORK (partial)
+  10-06 09:22:11.265 - 10058 - REL GCM_WORK
+  10-06 09:22:11.339 - 10058 - REL GOOGLE_C2DM
+  10-06 09:22:51.367 - 10058 - ACQ GCM_READ (partial)
+  10-06 09:22:51.369 - 10058 - ACQ GCM_WORK (partial)
+  10-06 09:22:51.372 - 10058 - REL GCM_READ
+  10-06 09:22:51.394 - 10058 - ACQ GOOGLE_C2DM (partial)
+  10-06 09:22:51.411 - 10058 - REL GCM_WORK
+  10-06 09:22:51.459 - 10058 - REL GOOGLE_C2DM
+  10-06 09:23:00.002 - 1000 - ACQ *alarm* (partial)
+  10-06 09:23:00.003 - 1000 - REL *alarm*
+  10-06 09:24:00.005 - 1000 - ACQ *alarm* (partial)
+  10-06 09:24:00.006 - 1000 - REL *alarm*
+  10-06 09:25:00.003 - 1000 - ACQ *alarm* (partial)
+  10-06 09:25:00.003 - 1000 - REL *alarm*
+  10-06 09:25:11.245 - 10058 - ACQ GCM_READ (partial)
+  10-06 09:25:11.247 - 10058 - ACQ GCM_WORK (partial)
+  10-06 09:25:11.248 - 10058 - REL GCM_READ
+  10-06 09:25:11.252 - 10058 - ACQ GOOGLE_C2DM (partial)
+  10-06 09:25:11.268 - 10058 - REL GCM_WORK
+  10-06 09:25:11.270 - 10058 - ACQ GCM_WORK (partial)
+  10-06 09:25:11.283 - 10058 - REL GCM_WORK
+  10-06 09:25:11.306 - 10058 - REL GOOGLE_C2DM
+  10-06 09:25:31.138 - 10058 - ACQ GCM_READ (partial)
+  10-06 09:25:31.139 - 10058 - ACQ GCM_WORK (partial)
+  10-06 09:25:31.140 - 10058 - REL GCM_READ
+  10-06 09:25:31.156 - 10058 - ACQ GOOGLE_C2DM (partial)
+  10-06 09:25:31.170 - 10058 - REL GCM_WORK
+  10-06 09:25:31.208 - 10058 - REL GOOGLE_C2DM
+  10-06 09:25:50.826 - 1000 - ACQ *alarm* (partial)
+  10-06 09:25:50.828 - 10058 - ACQ NetworkLocationScanner (partial)
+  10-06 09:25:50.831 - 10058 - ACQ CallbackRunner (partial)
+  10-06 09:25:50.832 - 1000 - REL *alarm*
+  10-06 09:25:50.838 - 10058 - REL CallbackRunner
+  10-06 09:25:54.556 - 10058 - REL NetworkLocationScanner
+  10-06 09:25:54.561 - 10058 - ACQ NetworkLocationLocator (partial)
+  10-06 09:25:54.601 - 10058 - ACQ PendingIntentClient (partial)
+  10-06 09:25:54.607 - 10058 - REL PendingIntentClient
+  10-06 09:25:54.608 - 10058 - ACQ GCoreFlp (partial)
+  10-06 09:25:54.618 - 10058 - REL GCoreFlp
+  10-06 09:25:54.620 - 1000 - ACQ *location* (partial)
+  10-06 09:25:54.624 - 10058 - ACQ CallbackRunner (partial)
+  10-06 09:25:54.624 - 1000 - REL *location*
+  10-06 09:25:54.627 - 10058 - REL NetworkLocationLocator
+  10-06 09:25:54.628 - 1000 - ACQ *location* (partial)
+  10-06 09:25:54.628 - 1000 - REL *location*
+  10-06 09:25:54.629 - 10058 - REL CallbackRunner
+  10-06 09:26:00.003 - 1000 - ACQ *alarm* (partial)
+  10-06 09:26:00.003 - 1000 - REL *alarm*
+  10-06 09:27:00.004 - 1000 - ACQ *alarm* (partial)
+  10-06 09:27:00.005 - 1000 - REL *alarm*
+  10-06 09:27:09.721 - 10058 - ACQ GCM_READ (partial)
+  10-06 09:27:09.723 - 10058 - ACQ GCM_WORK (partial)
+  10-06 09:27:09.723 - 10058 - REL GCM_READ
+  10-06 09:27:09.729 - 10058 - ACQ GOOGLE_C2DM (partial)
+  10-06 09:27:09.743 - 10058 - ACQ *gms_scheduler*:internal (partial)
+  10-06 09:27:09.756 - 10058 - REL GCM_WORK
+  10-06 09:27:09.759 - 10058 - ACQ GCM_WORK (partial)
+  10-06 09:27:09.765 - 10058 - REL GCM_WORK
+  10-06 09:27:09.798 - 10058 - ACQ *gms_scheduler*/c.g.a.g/.c.u.QosUploaderService (partial)
+  10-06 09:27:09.851 - 10058 - ACQ *gms_scheduler*/c.g.a.g/c.g.a.c.s.ContextManagerLogsUploadBoundService (partial)
+  10-06 09:27:09.866 - 10058 - REL *gms_scheduler*:internal
+  10-06 09:27:09.869 - 10058 - ACQ *gms_scheduler*:internal (partial)
+  10-06 09:27:09.874 - 10058 - REL GOOGLE_C2DM
+  10-06 09:27:09.884 - 10058 - ACQ CMWakeLock (partial)
+  10-06 09:27:09.885 - 10058 - REL *gms_scheduler*:internal
+  10-06 09:27:09.887 - 10058 - REL *gms_scheduler*/c.g.a.g/c.g.a.c.s.ContextManagerLogsUploadBoundService
+  10-06 09:27:09.889 - 10058 - ACQ *gms_scheduler*:internal (partial)
+  10-06 09:27:09.905 - 10058 - REL CMWakeLock
+  10-06 09:27:09.911 - 10058 - REL *gms_scheduler*:internal
+  10-06 09:27:09.912 - 10058 - ACQ *gms_scheduler*:internal (partial)
+  10-06 09:27:09.967 - 10058 - ACQ *gms_scheduler*/c.g.a.g/.c.u.QosUploaderService (partial)
+  10-06 09:27:09.995 - 10058 - REL *gms_scheduler*:internal
+  10-06 09:27:13.459 - 10058 - REL *gms_scheduler*/c.g.a.g/.c.u.QosUploaderService
+  10-06 09:27:13.461 - 10058 - ACQ *gms_scheduler*:internal (partial)
+  10-06 09:27:13.469 - 10058 - REL *gms_scheduler*:internal
+  10-06 09:27:13.471 - 10058 - ACQ *gms_scheduler*:internal (partial)
+  10-06 09:27:13.505 - 10058 - ACQ *gms_scheduler*/c.g.a.g/.c.u.QosUploaderService (partial)
+  10-06 09:27:13.537 - 10058 - REL *gms_scheduler*:internal
+  10-06 09:27:13.539 - 10058 - REL *gms_scheduler*/c.g.a.g/.c.u.QosUploaderService
+  10-06 09:27:13.541 - 10058 - ACQ *gms_scheduler*:internal (partial)
+  10-06 09:27:13.550 - 10058 - REL *gms_scheduler*:internal
+  10-06 09:27:13.555 - 10058 - ACQ *gms_scheduler*:internal (partial)
+  10-06 09:27:13.610 - 10058 - ACQ *gms_scheduler*/c.g.a.g/.p.s.s.PhenotypeConfigurator (partial)
+  10-06 09:27:13.643 - 10058 - REL *gms_scheduler*:internal
+  10-06 09:27:13.652 - 10058 - REL *gms_scheduler*/c.g.a.g/.c.u.QosUploaderService
+  10-06 09:27:13.656 - 10058 - ACQ *gms_scheduler*:internal (partial)
+  10-06 09:27:13.667 - 10058 - REL *gms_scheduler*:internal
+  10-06 09:27:13.673 - 10058 - ACQ *gms_scheduler*:internal (partial)
+  10-06 09:27:13.683 - 10058 - REL *gms_scheduler*:internal
+  10-06 09:27:18.182 - 10058 - REL *gms_scheduler*/c.g.a.g/.p.s.s.PhenotypeConfigurator
+  10-06 09:27:18.197 - 10058 - ACQ *gms_scheduler*:internal (partial)
+  10-06 09:27:18.245 - 10058 - REL *gms_scheduler*:internal
+  10-06 09:27:18.250 - 10058 - ACQ *gms_scheduler*:internal (partial)
+  10-06 09:27:18.274 - 10058 - REL *gms_scheduler*:internal
+  10-06 09:27:20.292 - 10058 - ACQ IntentOp:.a.a.AuthInitIntentOperation (partial)
+  10-06 09:27:20.468 - 10058 - REL IntentOp:.a.a.AuthInitIntentOperation
+  10-06 09:27:20.537 - 10058 - ACQ IntentOp:.a.f.FrpUpdateIntentOperation (partial)
+  10-06 09:27:20.632 - 10058 - REL IntentOp:.a.f.FrpUpdateIntentOperation
+  10-06 09:27:23.673 - 1000 - ACQ *alarm* (partial)
+  10-06 09:27:23.676 - 1000 - ACQ NetworkStats (partial)
+  10-06 09:27:23.690 - 1000 - ACQ *job*/c.g.a.k/c.g.a.a.t.s.p.UpdateFeatureIdsJobService#20 (partial)
+  10-06 09:27:23.693 - 1000 - ACQ *job*/c.g.a.k/c.g.a.a.t.s.p.UpdateFeatureIdsJobService#20 (partial)
+  10-06 09:27:23.704 - 1000 - REL *job*/c.g.a.k/c.g.a.a.t.s.p.UpdateFeatureIdsJobService#20
+  10-06 09:27:23.711 - 1000 - ACQ *job*/a/c.a.s.n.NotificationHistoryJobService#237039804 (partial)
+  10-06 09:27:23.712 - 1000 - ACQ *job*/a/c.a.s.n.NotificationHistoryJobService#237039804 (partial)
+  10-06 09:27:23.716 - 1000 - REL *job*/a/c.a.s.n.NotificationHistoryJobService#237039804
+  10-06 09:27:23.719 - 1000 - REL *job*/c.g.a.k/c.g.a.a.t.s.p.UpdateFeatureIdsJobService#20
+  10-06 09:27:23.729 - 1000 - REL *job*/a/c.a.s.n.NotificationHistoryJobService#237039804
+  10-06 09:27:23.737 - 1000 - REL NetworkStats
+  10-06 09:27:23.743 - 1000 - REL *alarm*
+  10-06 09:28:00.003 - 1000 - ACQ *alarm* (partial)
+  10-06 09:28:00.003 - 1000 - REL *alarm*
+  10-06 09:29:00.003 - 1000 - ACQ *alarm* (partial)
+  10-06 09:29:00.003 - 1000 - REL *alarm*
+  10-06 09:30:00.001 - 1000 - ACQ *alarm* (partial)
+  10-06 09:30:00.005 - 1000 - REL *alarm*
+  10-06 09:30:01.242 - 10058 - ACQ GCM_READ (partial)
+  10-06 09:30:01.244 - 10058 - ACQ GCM_WORK (partial)
+  10-06 09:30:01.245 - 10058 - REL GCM_READ
+  10-06 09:30:01.261 - 10058 - ACQ GOOGLE_C2DM (partial)
+  10-06 09:30:01.284 - 10058 - REL GCM_WORK
+  10-06 09:30:01.304 - 10048 - ACQ androidx.core:wake:com.google.android.apps.mediashell/.ChromecastGcmListenerService (partial)
+  10-06 09:30:01.309 - 10048 - REL androidx.core:wake:com.google.android.apps.mediashell/.ChromecastGcmListenerService
+  10-06 09:30:01.310 - 10058 - REL GOOGLE_C2DM
+  10-06 09:31:00.002 - 1000 - ACQ *alarm* (partial)
+  10-06 09:31:00.003 - 1000 - REL *alarm*
+  10-06 09:31:45.622 - 10058 - ACQ CallbackRunner (partial)
+  10-06 09:31:45.856 - 10058 - REL CallbackRunner
+  10-06 09:31:45.881 - 1000 - ACQ *job*/a/c.a.s.SmartStorageMaintIdler#2808 (partial)
+  10-06 09:31:45.924 - 1000 - ACQ *job*/a/c.a.s.SmartStorageMaintIdler#2808 (partial)
+  10-06 09:31:46.011 - 1000 - REL *job*/a/c.a.s.SmartStorageMaintIdler#2808
+  10-06 09:31:46.023 - 1000 - ACQ *job*/c.g.a.c.c/a.w.i.b.s.SystemJobService#83 (partial)
+  10-06 09:31:46.031 - 1000 - ACQ *job*/c.g.a.c.c/a.w.i.b.s.SystemJobService#83 (partial)
+  10-06 09:31:46.065 - 1000 - REL *job*/c.g.a.c.c/a.w.i.b.s.SystemJobService#83
+  10-06 09:31:46.114 - 1000 - REL *job*/a/c.a.s.SmartStorageMaintIdler#2808
+  10-06 09:31:46.290 - 1000 - REL *job*/c.g.a.c.c/a.w.i.b.s.SystemJobService#83
+  10-06 09:31:47.997 - 10058 - ACQ IntentOp:.c.b.BackgroundBroadcastReceiverSupport$PersistentReceiverIntentOperation (partial)
+  10-06 09:31:48.003 - 10058 - REL IntentOp:.c.b.BackgroundBroadcastReceiverSupport$PersistentReceiverIntentOperation
+  10-06 09:32:00.005 - 1000 - ACQ *alarm* (partial)
+  10-06 09:32:00.006 - 1000 - REL *alarm*
+  10-06 09:32:08.076 - 10058 - ACQ IntentOp:.c.b.BackgroundBroadcastReceiverSupport$PersistentReceiverIntentOperation (partial)
+  10-06 09:32:08.081 - 10058 - REL IntentOp:.c.b.BackgroundBroadcastReceiverSupport$PersistentReceiverIntentOperation
+  10-06 09:33:00.002 - 1000 - ACQ *alarm* (partial)
+  10-06 09:33:00.003 - 1000 - REL *alarm*
+  10-06 09:33:10.787 - 10058 - ACQ GCM_READ (partial)
+  10-06 09:33:10.789 - 10058 - ACQ GCM_WORK (partial)
+  10-06 09:33:10.791 - 10058 - REL GCM_READ
+  10-06 09:33:10.797 - 10058 - ACQ GOOGLE_C2DM (partial)
+  10-06 09:33:10.824 - 10058 - REL GCM_WORK
+  10-06 09:33:10.826 - 10058 - ACQ GCM_WORK (partial)
+  10-06 09:33:10.830 - 10058 - REL GCM_WORK
+  10-06 09:33:10.874 - 10058 - REL GOOGLE_C2DM
+  10-06 09:33:31.296 - 10058 - ACQ GCM_READ (partial)
+  10-06 09:33:31.299 - 10058 - ACQ GCM_WORK (partial)
+  10-06 09:33:31.300 - 10058 - REL GCM_READ
+  10-06 09:33:31.318 - 10058 - ACQ GOOGLE_C2DM (partial)
+  10-06 09:33:31.329 - 10058 - REL GCM_WORK
+  10-06 09:33:31.425 - 10058 - REL GOOGLE_C2DM
+  10-06 09:33:51.745 - 10058 - ACQ GCM_READ (partial)
+  10-06 09:33:51.747 - 10058 - ACQ GCM_WORK (partial)
+  10-06 09:33:51.749 - 10058 - REL GCM_READ
+  10-06 09:33:51.760 - 10058 - ACQ GOOGLE_C2DM (partial)
+  10-06 09:33:51.775 - 10058 - REL GCM_WORK
+  10-06 09:33:51.776 - 10058 - ACQ GCM_WORK (partial)
+  10-06 09:33:51.788 - 10058 - REL GCM_WORK
+  10-06 09:33:51.856 - 10058 - REL GOOGLE_C2DM
+  10-06 09:34:00.004 - 1000 - ACQ *alarm* (partial)
+  10-06 09:34:00.006 - 1000 - REL *alarm*
+  10-06 09:34:11.407 - 10058 - ACQ GCM_READ (partial)
+  10-06 09:34:11.408 - 10058 - ACQ GCM_WORK (partial)
+  10-06 09:34:11.409 - 10058 - REL GCM_READ
+  10-06 09:34:11.423 - 10058 - ACQ GOOGLE_C2DM (partial)
+  10-06 09:34:11.438 - 10058 - REL GCM_WORK
+  10-06 09:34:11.485 - 10058 - REL GOOGLE_C2DM
+  10-06 09:35:00.004 - 1000 - ACQ *alarm* (partial)
+  10-06 09:35:00.005 - 1000 - REL *alarm*
+  10-06 09:35:10.903 - 10058 - ACQ GCM_READ (partial)
+  10-06 09:35:10.904 - 10058 - ACQ GCM_WORK (partial)
+  10-06 09:35:10.905 - 10058 - REL GCM_READ
+  10-06 09:35:10.916 - 10058 - ACQ GOOGLE_C2DM (partial)
+  10-06 09:35:10.935 - 10058 - REL GCM_WORK
+  10-06 09:35:10.937 - 10058 - ACQ GCM_WORK (partial)
+  10-06 09:35:10.946 - 10058 - REL GCM_WORK
+  10-06 09:35:10.948 - 10052 - ACQ GnpBroadcastReceiver (partial)
+  10-06 09:35:11.048 - 10052 - REL GnpBroadcastReceiver
+  10-06 09:35:11.064 - 10058 - REL GOOGLE_C2DM
+  10-06 09:35:50.634 - 10058 - ACQ GCM_READ (partial)
+  10-06 09:35:50.637 - 10058 - ACQ GCM_WORK (partial)
+  10-06 09:35:50.638 - 10058 - REL GCM_READ
+  10-06 09:35:50.658 - 10058 - ACQ GOOGLE_C2DM (partial)
+  10-06 09:35:50.667 - 10058 - REL GCM_WORK
+  10-06 09:35:50.721 - 10058 - REL GOOGLE_C2DM
+  10-06 09:36:00.003 - 1000 - ACQ *alarm* (partial)
+  10-06 09:36:00.005 - 1000 - REL *alarm*
+  10-06 09:36:11.523 - 10058 - ACQ GCM_READ (partial)
+  10-06 09:36:11.525 - 10058 - ACQ GCM_WORK (partial)
+  10-06 09:36:11.527 - 10058 - REL GCM_READ
+  10-06 09:36:11.536 - 10058 - ACQ GOOGLE_C2DM (partial)
+  10-06 09:36:11.559 - 10058 - REL GCM_WORK
+  10-06 09:36:11.561 - 10058 - ACQ GCM_WORK (partial)
+  10-06 09:36:11.564 - 10058 - REL GCM_WORK
+  10-06 09:36:11.626 - 10058 - REL GOOGLE_C2DM
+  10-06 09:37:00.005 - 1000 - ACQ *alarm* (partial)
+  10-06 09:37:00.008 - 1000 - REL *alarm*
+  10-06 09:37:12.124 - 1000 - ACQ NetworkStats (partial)
+  10-06 09:37:12.174 - 1000 - REL NetworkStats
+  10-06 09:37:14.344 - 1000 - ACQ ArtService (partial)
+  10-06 09:37:15.433 - 1000 - REL ArtService
+  10-06 09:37:16.143 - 10058 - ACQ IntentOp:.c.b.BackgroundBroadcastReceiverSupport$PersistentReceiverIntentOperation (partial)
+  10-06 09:37:16.192 - 10058 - ACQ IntentOp:.c.b.BackgroundBroadcastReceiverSupport$GmsReceiverIntentOperation (partial)
+  10-06 09:37:16.246 - 10058 - REL IntentOp:.c.b.BackgroundBroadcastReceiverSupport$PersistentReceiverIntentOperation
+  10-06 09:37:16.256 - 10058 - ACQ IntentOp:.c.b.BackgroundBroadcastReceiverSupport$PersistentReceiverIntentOperation (partial)
+  10-06 09:37:16.284 - 10058 - REL IntentOp:.c.b.BackgroundBroadcastReceiverSupport$PersistentReceiverIntentOperation
+  10-06 09:37:16.346 - 10058 - REL IntentOp:.c.b.BackgroundBroadcastReceiverSupport$GmsReceiverIntentOperation
+  10-06 09:37:16.363 - 10058 - ACQ IntentOp:.c.b.BackgroundBroadcastReceiverSupport$PersistentReceiverIntentOperation (partial)
+  10-06 09:37:16.411 - 10058 - REL IntentOp:.c.b.BackgroundBroadcastReceiverSupport$PersistentReceiverIntentOperation
+  10-06 09:37:17.317 - 1000 - ACQ *launch* (partial)
+  10-06 09:37:17.880 - 1000 - REL *launch*
+  10-06 09:37:18.085 - 1041 - ACQ AudioMix (partial)
+  10-06 09:37:18.180 - 10058 - ACQ Icing (partial)
+  10-06 09:37:18.327 - 1041 - ACQ MmapPlayback (partial)
+  10-06 09:37:18.374 - 1041 - REL MmapPlayback
+  10-06 09:37:18.374 - 1041 - ACQ MmapPlayback (partial)
+  10-06 09:37:18.580 - 10058 - ACQ IntentOp:.c.b.BackgroundBroadcastReceiverSupport$GmsReceiverIntentOperation (partial)
+  10-06 09:37:18.592 - 10058 - REL IntentOp:.c.b.BackgroundBroadcastReceiverSupport$GmsReceiverIntentOperation
+  10-06 09:37:21.086 - 1041 - REL AudioMix
+  10-06 09:37:21.480 - 10058 - REL Icing
+  10-06 09:37:22.232 - 10058 - ACQ *gms_scheduler*:internal (partial)
+  10-06 09:37:22.285 - 10058 - ACQ *gms_scheduler*/c.g.a.g/.i.p.IcingInternalCorporaUpdateService (partial)
+  10-06 09:37:22.341 - 10058 - ACQ *gms_scheduler*/c.g.a.g/.a.a.b.a.GcmTaskService (partial)
+  10-06 09:37:22.371 - 10058 - REL *gms_scheduler*:internal
+  10-06 09:37:22.387 - 10058 - REL *gms_scheduler*/c.g.a.g/.i.p.IcingInternalCorporaUpdateService
+  10-06 09:37:22.389 - 10058 - ACQ *gms_scheduler*:internal (partial)
+  10-06 09:37:22.410 - 10058 - REL *gms_scheduler*:internal
+  10-06 09:37:22.418 - 10058 - REL *gms_scheduler*/c.g.a.g/.a.a.b.a.GcmTaskService
+  10-06 09:37:22.420 - 10058 - ACQ *gms_scheduler*:internal (partial)
+  10-06 09:37:22.467 - 10058 - ACQ *gms_scheduler*/c.g.a.g/.c.u.QosUploaderService (partial)
+  10-06 09:37:22.512 - 10058 - REL *gms_scheduler*:internal
+  10-06 09:37:22.514 - 10058 - ACQ *gms_scheduler*:internal (partial)
+  10-06 09:37:22.524 - 10058 - REL *gms_scheduler*:internal
+  10-06 09:37:24.088 - 10058 - REL *gms_scheduler*/c.g.a.g/.c.u.QosUploaderService
+  10-06 09:37:24.091 - 10058 - ACQ *gms_scheduler*:internal (partial)
+  10-06 09:37:24.100 - 10058 - REL *gms_scheduler*:internal
+  10-06 09:37:24.102 - 10058 - ACQ *gms_scheduler*:internal (partial)
+  10-06 09:37:24.112 - 10058 - REL *gms_scheduler*:internal
+  10-06 09:37:31.070 - 1000 - ACQ NetworkStats (partial)
+  10-06 09:37:31.120 - 1000 - REL NetworkStats
+  10-06 09:37:39.366 - 1000 - ACQ NetworkStats (partial)
+  10-06 09:37:39.440 - 1000 - REL NetworkStats
+  10-06 09:37:39.763 - 1000 - ACQ *job*/c.a.v/c.g.a.f.s.p.m.PhoneskyJobServiceMain#9104 (partial)
+  10-06 09:37:39.773 - 1000 - ACQ *job*/c.a.v/c.g.a.f.s.p.m.PhoneskyJobServiceMain#9104 (partial)
+  10-06 09:37:39.794 - 1000 - REL *job*/c.a.v/c.g.a.f.s.p.m.PhoneskyJobServiceMain#9104
+  10-06 09:37:39.806 - 1041 - REL MmapPlayback
+  10-06 09:37:39.806 - 1041 - ACQ MmapPlayback (partial)
+  10-06 09:37:39.811 - 1041 - REL MmapPlayback
+  10-06 09:37:41.204 - 1000 - ACQ *job*/@.w.s.g.a.k/a.w.i.b.s.SystemJobService#452 (partial)
+  10-06 09:37:41.214 - 1000 - ACQ *job*/@.w.s.g.a.k/a.w.i.b.s.SystemJobService#452 (partial)
+  10-06 09:37:41.254 - 1000 - REL *job*/@.w.s.g.a.k/a.w.i.b.s.SystemJobService#452
+  10-06 09:37:41.258 - 1000 - REL *job*/c.a.v/c.g.a.f.s.p.m.PhoneskyJobServiceMain#9104
+  10-06 09:37:41.510 - 1000 - ACQ *job*/c.a.v/c.g.a.f.s.p.m.PhoneskyJobServiceMain#9108 (partial)
+  10-06 09:37:41.512 - 1000 - ACQ *job*/c.a.v/c.g.a.f.s.p.m.PhoneskyJobServiceMain#9108 (partial)
+  10-06 09:37:41.522 - 1000 - REL *job*/c.a.v/c.g.a.f.s.p.m.PhoneskyJobServiceMain#9108
+  10-06 09:37:41.914 - 10057 - ACQ SyncManager: Scheduling in parallel (partial)
+  10-06 09:37:41.984 - 10057 - ACQ SyncManager: Syncing (partial)
+  10-06 09:37:42.035 - 10057 - REL SyncManager: Syncing
+  10-06 09:37:42.063 - 1000 - REL *job*/@.w.s.g.a.k/a.w.i.b.s.SystemJobService#452
+  10-06 09:37:42.569 - 10057 - REL SyncManager: Scheduling in parallel
+  10-06 09:37:44.523 - 1000 - REL *job*/c.a.v/c.g.a.f.s.p.m.PhoneskyJobServiceMain#9108
+  10-06 09:37:53.232 - 1041 - ACQ AudioMix (partial)
+  10-06 09:37:53.233 - 1041 - REL AudioMix
+  10-06 09:37:53.233 - 1041 - ACQ AudioMix (partial)
+  10-06 09:37:53.497 - 1041 - REL AudioMix
+  10-06 09:37:53.497 - 1041 - ACQ AudioMix (partial)
+  10-06 09:37:53.938 - 1041 - REL AudioMix
+  10-06 09:37:53.938 - 1041 - ACQ AudioMix (partial)
+  10-06 09:37:54.146 - 1041 - REL AudioMix
+  10-06 09:37:54.146 - 1041 - ACQ AudioMix (partial)
+  10-06 09:37:54.620 - 1041 - REL AudioMix
+  10-06 09:37:54.620 - 1041 - ACQ AudioMix (partial)
+  10-06 09:37:54.827 - 1041 - REL AudioMix
+  10-06 09:37:54.827 - 1041 - ACQ AudioMix (partial)
+  10-06 09:37:54.907 - 1041 - REL AudioMix
+  10-06 09:37:54.907 - 1041 - ACQ AudioMix (partial)
+  10-06 09:37:55.129 - 1041 - REL AudioMix
+  10-06 09:37:55.130 - 1041 - ACQ AudioMix (partial)
+  10-06 09:37:58.001 - 1041 - REL AudioMix
+  10-06 09:37:58.992 - 1000 - ACQ NetworkStats (partial)
+  10-06 09:37:59.035 - 1000 - REL NetworkStats
+  10-06 09:38:00.015 - 1000 - ACQ *alarm* (partial)
+  10-06 09:38:00.017 - 1000 - REL *alarm*
+  10-06 09:38:18.382 - 1000 - ACQ *alarm* (partial)
+  10-06 09:38:18.391 - 1000 - REL *alarm*
+  10-06 09:38:31.829 - 10058 - ACQ GCM_READ (partial)
+  10-06 09:38:31.856 - 10058 - ACQ GCM_WORK (partial)
+  10-06 09:38:31.858 - 10058 - REL GCM_READ
+  10-06 09:38:31.903 - 10058 - ACQ GOOGLE_C2DM (partial)
+  10-06 09:38:31.923 - 10058 - REL GCM_WORK
+  10-06 09:38:32.027 - 10058 - REL GOOGLE_C2DM
+  10-06 09:38:51.881 - 10058 - ACQ GCM_READ (partial)
+  10-06 09:38:51.882 - 10058 - ACQ GCM_WORK (partial)
+  10-06 09:38:51.883 - 10058 - REL GCM_READ
+  10-06 09:38:51.895 - 10058 - ACQ GOOGLE_C2DM (partial)
+  10-06 09:38:51.920 - 10058 - REL GCM_WORK
+  10-06 09:38:51.922 - 10058 - ACQ GCM_WORK (partial)
+  10-06 09:38:51.925 - 10058 - REL GCM_WORK
+  10-06 09:38:51.947 - 10058 - REL GOOGLE_C2DM
+  10-06 09:39:00.004 - 1000 - ACQ *alarm* (partial)
+  10-06 09:39:00.007 - 1000 - REL *alarm*
+  10-06 09:39:42.979 - 10058 - ACQ GCM_READ (partial)
+  10-06 09:39:42.980 - 10058 - ACQ GCM_WORK (partial)
+  10-06 09:39:42.982 - 10058 - REL GCM_READ
+  10-06 09:39:43.002 - 10058 - ACQ GOOGLE_C2DM (partial)
+  10-06 09:39:43.017 - 10058 - REL GCM_WORK
+  10-06 09:39:43.047 - 10052 - ACQ GnpBroadcastReceiver (partial)
+  10-06 09:39:43.109 - 1000 - ACQ *alarm* (partial)
+  10-06 09:39:43.111 - 1000 - REL *alarm*
+  10-06 09:39:43.135 - 10052 - REL GnpBroadcastReceiver
+  10-06 09:39:43.142 - 10058 - REL GOOGLE_C2DM
+  10-06 09:40:00.006 - 1000 - ACQ *alarm* (partial)
+  10-06 09:40:00.007 - 1000 - REL *alarm*
+  10-06 09:41:00.004 - 1000 - ACQ *alarm* (partial)
+  10-06 09:41:00.006 - 1000 - REL *alarm*
+  10-06 09:41:31.525 - 10058 - ACQ GCM_READ (partial)
+  10-06 09:41:31.527 - 10058 - ACQ GCM_WORK (partial)
+  10-06 09:41:31.528 - 10058 - REL GCM_READ
+  10-06 09:41:31.532 - 10058 - ACQ GOOGLE_C2DM (partial)
+  10-06 09:41:31.550 - 10058 - REL GCM_WORK
+  10-06 09:41:31.552 - 10058 - ACQ GCM_WORK (partial)
+  10-06 09:41:31.556 - 10058 - REL GCM_WORK
+  10-06 09:41:31.629 - 10058 - REL GOOGLE_C2DM
+  10-06 09:41:51.397 - 10058 - ACQ GCM_READ (partial)
+  10-06 09:41:51.399 - 10058 - ACQ GCM_WORK (partial)
+  10-06 09:41:51.399 - 10058 - REL GCM_READ
+  10-06 09:41:51.415 - 10058 - ACQ GOOGLE_C2DM (partial)
+  10-06 09:41:51.423 - 10058 - REL GCM_WORK
+  10-06 09:41:51.455 - 10058 - REL GOOGLE_C2DM
+  10-06 09:42:00.008 - 1000 - ACQ *alarm* (partial)
+  10-06 09:42:00.013 - 1000 - REL *alarm*
+  10-06 09:42:20.306 - 1000 - ACQ *alarm* (partial)
+  10-06 09:42:20.311 - 1000 - REL *alarm*
+  10-06 09:42:20.313 - 1000 - ACQ *job*/a/c.a.s.n.NotificationHistoryJobService#237039804 (partial)
+  10-06 09:42:20.314 - 1000 - ACQ *job*/a/c.a.s.n.NotificationHistoryJobService#237039804 (partial)
+  10-06 09:42:20.316 - 1000 - REL *job*/a/c.a.s.n.NotificationHistoryJobService#237039804
+  10-06 09:42:20.319 - 1000 - REL *job*/a/c.a.s.n.NotificationHistoryJobService#237039804
+  10-06 09:42:51.505 - 10058 - ACQ GCM_READ (partial)
+  10-06 09:42:51.506 - 10058 - ACQ GCM_WORK (partial)
+  10-06 09:42:51.507 - 10058 - REL GCM_READ
+  10-06 09:42:51.510 - 10058 - ACQ GOOGLE_C2DM (partial)
+  10-06 09:42:51.532 - 10058 - REL GCM_WORK
+  10-06 09:42:51.533 - 10058 - ACQ GCM_WORK (partial)
+  10-06 09:42:51.538 - 10058 - REL GCM_WORK
+  10-06 09:42:51.567 - 10058 - REL GOOGLE_C2DM
+  10-06 09:43:00.004 - 1000 - ACQ *alarm* (partial)
+  10-06 09:43:00.007 - 1000 - REL *alarm*
+  10-06 09:43:11.366 - 10058 - ACQ GCM_READ (partial)
+  10-06 09:43:11.368 - 10058 - ACQ GCM_WORK (partial)
+  10-06 09:43:11.368 - 10058 - REL GCM_READ
+  10-06 09:43:11.387 - 10058 - ACQ GOOGLE_C2DM (partial)
+  10-06 09:43:11.407 - 10058 - REL GCM_WORK
+  10-06 09:43:11.438 - 10058 - REL GOOGLE_C2DM
+  10-06 09:43:51.913 - 10058 - ACQ GCM_READ (partial)
+  10-06 09:43:51.914 - 10058 - ACQ GCM_WORK (partial)
+  10-06 09:43:51.915 - 10058 - REL GCM_READ
+  10-06 09:43:51.920 - 10058 - ACQ GOOGLE_C2DM (partial)
+  10-06 09:43:51.946 - 10058 - REL GCM_WORK
+  10-06 09:43:51.949 - 10058 - ACQ GCM_WORK (partial)
+  10-06 09:43:51.953 - 10058 - REL GCM_WORK
+  10-06 09:43:52.009 - 10058 - REL GOOGLE_C2DM
+  10-06 09:44:00.004 - 1000 - ACQ *alarm* (partial)
+  10-06 09:44:00.007 - 1000 - REL *alarm*
+  10-06 09:44:11.794 - 10058 - ACQ GCM_READ (partial)
+  10-06 09:44:11.800 - 10058 - ACQ GCM_WORK (partial)
+  10-06 09:44:11.802 - 10058 - REL GCM_READ
+  10-06 09:44:11.811 - 10058 - ACQ GOOGLE_C2DM (partial)
+  10-06 09:44:11.825 - 10058 - REL GCM_WORK
+  10-06 09:44:11.852 - 10058 - REL GOOGLE_C2DM
+  10-06 09:45:00.003 - 1000 - ACQ *alarm* (partial)
+  10-06 09:45:00.013 - 1000 - REL *alarm*
+  10-06 09:46:00.006 - 1000 - ACQ *alarm* (partial)
+  10-06 09:46:00.007 - 1000 - REL *alarm*
+  10-06 09:46:46.727 - 1000 - ACQ NetworkStats (partial)
+  10-06 09:46:46.786 - 1000 - REL NetworkStats
+  10-06 09:46:48.456 - 1000 - ACQ ArtService (partial)
+  10-06 09:46:49.282 - 1000 - REL ArtService
+  10-06 09:46:50.078 - 10058 - ACQ IntentOp:.c.b.BackgroundBroadcastReceiverSupport$GmsReceiverIntentOperation (partial)
+  10-06 09:46:50.081 - 10058 - ACQ IntentOp:.c.b.BackgroundBroadcastReceiverSupport$PersistentReceiverIntentOperation (partial)
+  10-06 09:46:50.085 - 10058 - ACQ IntentOp:.c.b.BackgroundBroadcastReceiverSupport$PersistentReceiverIntentOperation (partial)
+  10-06 09:46:50.090 - 10058 - ACQ IntentOp:.c.b.BackgroundBroadcastReceiverSupport$PersistentReceiverIntentOperation (partial)
+  10-06 09:46:50.094 - 10058 - ACQ IntentOp:.c.b.BackgroundBroadcastReceiverSupport$GmsReceiverIntentOperation (partial)
+  10-06 09:46:50.123 - 10058 - REL IntentOp:.c.b.BackgroundBroadcastReceiverSupport$GmsReceiverIntentOperation
+  10-06 09:46:50.124 - 10058 - REL IntentOp:.c.b.BackgroundBroadcastReceiverSupport$PersistentReceiverIntentOperation
+  10-06 09:46:50.160 - 10058 - REL IntentOp:.c.b.BackgroundBroadcastReceiverSupport$GmsReceiverIntentOperation
+  10-06 09:46:50.169 - 10058 - REL IntentOp:.c.b.BackgroundBroadcastReceiverSupport$PersistentReceiverIntentOperation
+  10-06 09:46:50.197 - 10058 - REL IntentOp:.c.b.BackgroundBroadcastReceiverSupport$PersistentReceiverIntentOperation
+  10-06 09:46:50.333 - 10058 - ACQ Icing (partial)
+  10-06 09:46:50.524 - 10058 - REL Icing
+  10-06 09:46:50.712 - 10058 - ACQ Icing (partial)
+  10-06 09:46:50.781 - 1000 - ACQ *launch* (partial)
+  10-06 09:46:50.955 - 10058 - REL Icing
+  10-06 09:46:51.315 - 10058 - ACQ Icing (partial)
+  10-06 09:46:51.336 - 10058 - REL Icing
+  10-06 09:46:51.336 - 1000 - REL *launch*
+  10-06 09:46:51.393 - 10058 - ACQ Icing (partial)
+  10-06 09:46:51.447 - 1041 - ACQ AudioMix (partial)
+  10-06 09:46:51.504 - 1041 - ACQ MmapPlayback (partial)
+  10-06 09:46:51.535 - 1041 - REL MmapPlayback
+  10-06 09:46:51.535 - 1041 - ACQ MmapPlayback (partial)
+  10-06 09:46:51.671 - 10058 - REL Icing
+  10-06 09:46:54.467 - 1041 - REL AudioMix
+  10-06 09:47:00.000 - 1000 - ACQ *alarm* (partial)
+  10-06 09:47:00.001 - 1000 - REL *alarm*
+  10-06 09:47:00.998 - 1041 - REL MmapPlayback
+  10-06 09:47:00.999 - 1041 - ACQ MmapPlayback (partial)
+  10-06 09:47:01.009 - 1041 - REL MmapPlayback
+  10-06 09:47:11.600 - 1041 - ACQ AudioMix (partial)
+  10-06 09:47:11.751 - 1041 - REL AudioMix
+  10-06 09:47:11.752 - 1041 - ACQ AudioMix (partial)
+  10-06 09:47:12.587 - 1000 - ACQ NetworkStats (partial)
+  10-06 09:47:12.643 - 1000 - REL NetworkStats
+  10-06 09:47:16.039 - 1000 - ACQ *alarm* (partial)
+  10-06 09:47:16.042 - 1000 - REL *alarm*
+  10-06 09:47:16.043 - 1000 - ACQ *job*/c.a.v/c.g.a.f.s.p.m.PhoneskyJobServiceMain#9115 (partial)
+  10-06 09:47:16.047 - 1000 - ACQ *job*/c.a.v/c.g.a.f.s.p.m.PhoneskyJobServiceMain#9115 (partial)
+  10-06 09:47:16.056 - 1000 - REL *job*/c.a.v/c.g.a.f.s.p.m.PhoneskyJobServiceMain#9115
+  10-06 09:47:18.033 - 1000 - REL *job*/c.a.v/c.g.a.f.s.p.m.PhoneskyJobServiceMain#9115
+  10-06 09:47:26.938 - 1041 - REL AudioMix
+  10-06 09:47:26.938 - 1041 - ACQ AudioMix (partial)
+  10-06 09:47:29.824 - 1041 - REL AudioMix
+  10-06 09:47:58.040 - 1041 - ACQ AudioMix (partial)
+  10-06 09:47:58.129 - 1041 - REL AudioMix
+  10-06 09:47:58.130 - 1041 - ACQ AudioMix (partial)
+  10-06 09:47:59.221 - 1000 - ACQ NetworkStats (partial)
+  10-06 09:47:59.271 - 1000 - REL NetworkStats
+  10-06 09:48:00.001 - 1000 - ACQ *alarm* (partial)
+  10-06 09:48:00.001 - 1000 - REL *alarm*
+  10-06 09:48:02.092 - 10058 - ACQ GCM_READ (partial)
+  10-06 09:48:02.110 - 10058 - ACQ GCM_WORK (partial)
+  10-06 09:48:02.112 - 10058 - REL GCM_READ
+  10-06 09:48:02.156 - 10058 - REL GCM_WORK
+  10-06 09:48:03.792 - 1000 - ACQ *job*/c.a.v/c.g.a.f.i.m.LogFlushJob#165064389 (partial)
+  10-06 09:48:03.793 - 1000 - ACQ *job*/c.a.v/c.g.a.f.i.m.LogFlushJob#165064389 (partial)
+  10-06 09:48:03.799 - 1000 - REL *job*/c.a.v/c.g.a.f.i.m.LogFlushJob#165064389
+  10-06 09:48:03.890 - 1000 - REL *job*/c.a.v/c.g.a.f.i.m.LogFlushJob#165064389
+  10-06 09:48:08.535 - 1000 - ACQ *alarm* (partial)
+  10-06 09:48:08.540 - 1000 - REL *alarm*
+  10-06 09:48:13.324 - 1041 - REL AudioMix
+  10-06 09:48:13.325 - 1041 - ACQ AudioMix (partial)
+  10-06 09:48:16.208 - 1041 - REL AudioMix
+  10-06 09:48:16.841 - 1041 - ACQ AudioMix (partial)
+  10-06 09:48:16.892 - 1041 - REL AudioMix
+  10-06 09:48:16.892 - 1041 - ACQ AudioMix (partial)
+  10-06 09:48:17.975 - 1000 - ACQ NetworkStats (partial)
+  10-06 09:48:18.030 - 1000 - REL NetworkStats
+  10-06 09:48:32.094 - 1041 - REL AudioMix
+  10-06 09:48:32.095 - 1041 - ACQ AudioMix (partial)
+  10-06 09:48:34.980 - 1041 - REL AudioMix
+  10-06 09:49:00.004 - 1000 - ACQ *alarm* (partial)
+  10-06 09:49:00.005 - 1000 - REL *alarm*
+  10-06 09:49:03.075 - 1041 - ACQ AudioMix (partial)
+  10-06 09:49:03.139 - 1041 - REL AudioMix
+  10-06 09:49:03.139 - 1041 - ACQ AudioMix (partial)
+  10-06 09:49:03.183 - 10058 - ACQ GCM_READ (partial)
+  10-06 09:49:03.196 - 10058 - ACQ GCM_WORK (partial)
+  10-06 09:49:03.198 - 10058 - REL GCM_READ
+  10-06 09:49:03.243 - 10058 - ACQ GOOGLE_C2DM (partial)
+  10-06 09:49:03.298 - 10058 - REL GCM_WORK
+  10-06 09:49:03.308 - 10058 - ACQ GCM_WORK (partial)
+  10-06 09:49:03.310 - 10052 - ACQ GnpBroadcastReceiver (partial)
+  10-06 09:49:03.315 - 10058 - REL GCM_WORK
+  10-06 09:49:03.460 - 10052 - REL GnpBroadcastReceiver
+  10-06 09:49:03.481 - 10058 - REL GOOGLE_C2DM
+  10-06 09:49:04.212 - 1000 - ACQ NetworkStats (partial)
+  10-06 09:49:04.249 - 1000 - REL NetworkStats
+  10-06 09:49:07.788 - 1000 - ACQ NetworkStats (partial)
+  10-06 09:49:07.817 - 1000 - REL NetworkStats
+  10-06 09:49:09.254 - 1000 - ACQ ArtService (partial)
+  10-06 09:49:09.254 - 1000 - REL ArtService
+  10-06 09:49:09.969 - 10058 - ACQ IntentOp:.c.b.BackgroundBroadcastReceiverSupport$GmsReceiverIntentOperation (partial)
+  10-06 09:49:09.981 - 10058 - ACQ IntentOp:.c.b.BackgroundBroadcastReceiverSupport$PersistentReceiverIntentOperation (partial)
+  10-06 09:49:10.014 - 10058 - ACQ IntentOp:.c.b.BackgroundBroadcastReceiverSupport$GmsReceiverIntentOperation (partial)
+  10-06 09:49:10.014 - 10058 - ACQ IntentOp:.c.b.BackgroundBroadcastReceiverSupport$PersistentReceiverIntentOperation (partial)
+  10-06 09:49:10.024 - 10058 - ACQ IntentOp:.c.b.BackgroundBroadcastReceiverSupport$PersistentReceiverIntentOperation (partial)
+  10-06 09:49:10.026 - 10058 - REL IntentOp:.c.b.BackgroundBroadcastReceiverSupport$PersistentReceiverIntentOperation
+  10-06 09:49:10.066 - 10058 - REL IntentOp:.c.b.BackgroundBroadcastReceiverSupport$PersistentReceiverIntentOperation
+  10-06 09:49:10.115 - 10058 - REL IntentOp:.c.b.BackgroundBroadcastReceiverSupport$PersistentReceiverIntentOperation
+  10-06 09:49:10.146 - 10058 - REL IntentOp:.c.b.BackgroundBroadcastReceiverSupport$GmsReceiverIntentOperation
+  10-06 09:49:10.205 - 10058 - REL IntentOp:.c.b.BackgroundBroadcastReceiverSupport$GmsReceiverIntentOperation
+  10-06 09:49:10.579 - 10058 - ACQ Icing (partial)
+  10-06 09:49:10.786 - 1000 - ACQ *launch* (partial)
+  10-06 09:49:11.065 - 1041 - REL AudioMix
+  10-06 09:49:11.065 - 1041 - ACQ AudioMix (partial)
+  10-06 09:49:11.157 - 10058 - REL Icing
+  10-06 09:49:11.299 - 10058 - ACQ Icing (partial)
+  10-06 09:49:11.339 - 10058 - REL Icing
+  10-06 09:49:11.381 - 10058 - ACQ Icing (partial)
+  10-06 09:49:11.494 - 1000 - REL *launch*
+  10-06 09:49:11.671 - 1041 - ACQ MmapPlayback (partial)
+  10-06 09:49:11.674 - 10058 - REL Icing
+  10-06 09:49:11.694 - 1041 - REL MmapPlayback
+  10-06 09:49:11.695 - 1041 - ACQ MmapPlayback (partial)
+  10-06 09:49:13.937 - 1041 - REL AudioMix
+  10-06 09:49:36.126 - 1000 - ACQ *alarm* (partial)
+  10-06 09:49:36.128 - 1000 - REL *alarm*
+  10-06 09:49:36.128 - 1000 - ACQ *job*/c.a.v/c.g.a.f.s.p.m.PhoneskyJobServiceMain#9118 (partial)
+  10-06 09:49:36.153 - 1000 - ACQ *job*/c.a.v/c.g.a.f.s.p.m.PhoneskyJobServiceMain#9118 (partial)
+  10-06 09:49:36.162 - 1000 - REL *job*/c.a.v/c.g.a.f.s.p.m.PhoneskyJobServiceMain#9118
+  10-06 09:49:41.214 - 1000 - REL *job*/c.a.v/c.g.a.f.s.p.m.PhoneskyJobServiceMain#9118
+  10-06 09:50:00.018 - 1000 - ACQ *alarm* (partial)
+  10-06 09:50:00.023 - 1000 - REL *alarm*
+  10-06 09:50:11.727 - 1000 - ACQ *alarm* (partial)
+  10-06 09:50:11.749 - 1000 - REL *alarm*
+  10-06 09:50:28.175 - 1000 - ACQ NetworkStats (partial)
+  10-06 09:50:28.314 - 1000 - REL NetworkStats
+  10-06 09:50:49.737 - 1000 - ACQ *job*/c.g.a.p.m.m/c.a.p.m.MediaService#-300 (partial)
+  10-06 09:50:49.739 - 1000 - ACQ *job*/c.g.a.p.m.m/c.a.p.m.MediaService#-300 (partial)
+  10-06 09:50:49.742 - 1000 - REL *job*/c.g.a.p.m.m/c.a.p.m.MediaService#-300
+  10-06 09:50:49.842 - 1000 - REL *job*/c.g.a.p.m.m/c.a.p.m.MediaService#-300
+  10-06 09:50:53.724 - 1000 - ACQ NetworkStats (partial)
+  10-06 09:50:53.800 - 1000 - REL NetworkStats
+  10-06 09:50:54.399 - 1041 - REL MmapPlayback
+  10-06 09:50:54.399 - 1041 - ACQ MmapPlayback (partial)
+  10-06 09:50:54.405 - 1041 - REL MmapPlayback
+  10-06 09:51:00.002 - 1000 - ACQ *alarm* (partial)
+  10-06 09:51:00.003 - 1000 - REL *alarm*
+  -
+  Events: 2360, Time-Resets: 482
+  Buffer, Bytes used: 10238
+FaceDownDetector:
+  mFaceDown=false
+  mActive=true
+  mLastFlipTime=0
+  mSensorMaxLatencyMicros=2000000
+  mUserInteractionBackoffMillis=60000
+  mPreviousResultTime=0
+  mPreviousResultType=1
+  mMillisSaved=0
+  mZAccelerationThreshold=-9.5
+  mAccelerationThreshold=0.2
+  mTimeThreshold=PT1S
+AmbientDisplaySuppressionController:
+ ambientDisplaySuppressed=false
+ mSuppressionTokens={}
+
+Low Power Standby Controller:
+  mIsActive=false
+  mIsEnabled=false
+  mSupportedConfig=false
+  mEnabledByDefaultConfig=false
+  mStandbyTimeoutConfig=0
+  mEnableCustomPolicy=false
+  Allowed UIDs=[]
+  
+  UID allowed reasons:

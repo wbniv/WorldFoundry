@@ -1,0 +1,7 @@
+@* Supplemental authoring schema for runtime settings; not a registered actor.
+@* Labels/default/ranges are owned here; a build-time binding selects exposure.
+TYPEHEADER(AnemoneSettings)
+    PROPERTY_SHEET_HEADER(Controls,1)
+    TYPEENTRYINT32(Control Focus,,0,1,0,"Clownfish|Anemone",SHOW_AS_DROPMENU,"Choose which animal receives directional and action input")
+    PROPERTY_SHEET_FOOTER
+TYPEFOOTER

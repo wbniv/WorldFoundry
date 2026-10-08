@@ -41,6 +41,7 @@
 #include <audio/sfx_library.hp>
 #include "rest_api.hp"
 #include "debug_server.hp"
+#include "../../../engine/runtime_diagnostics.hpp"
 #include "editor_hook.h"
 #include "wfmut_smoke.hpp"
 #include "physics_jolt.hp"
@@ -126,6 +127,10 @@ WFGame::WFGame( const int nStartingLevel )
 	_viewPort = new (HALLmalloc) ViewPort( *_display, 3001, Scalar( 320, 0 ), Scalar( 240, 0 ), HALLmalloc, 2000 );
 	assert( ValidPtr( _viewPort ) );
 	DBSTREAM3( cprogress << "WFGame::WFGame done" << std::endl; )
+#ifdef WF_RUNTIME_DIAGNOSTICS
+	extern int gDebugPort;
+	DebugServer_Start(gDebugPort);
+#endif
 #if defined( DO_CD_IFF )
 	extern const char* gLevelOverridePath;
 	if ( gLevelOverridePath == nullptr )
@@ -145,6 +150,9 @@ WFGame::WFGame( const int nStartingLevel )
 
 WFGame::~WFGame()
 {
+#ifdef WF_RUNTIME_DIAGNOSTICS
+	DebugServer_Stop();
+#endif
 	DBSTREAM1( cprogress << "WFGame::~WFGame" << std::endl; )
 
 	// Hosts (editor, replay driver) must call UnloadLevel before destructing.
@@ -338,6 +346,9 @@ WFGame::RunGameScript()				// runs the whole game, returns when game (really) ov
 void
 WFGame::LoadLevel(_DiskFile* levelFile)
 {
+#ifdef WF_RUNTIME_DIAGNOSTICS
+	DebugServer_DiagnosticLevel(_desiredLevelNum);
+#endif
     _frameRate.Reset();
     DBSTREAM3( cprogress << "WFGame::LoadLevel (sizeof level = " << sizeof(Level) << std::endl; )
     assert(!_curLevel);
@@ -398,7 +409,9 @@ WFGame::UnloadLevel()
 	_display->PageFlip();
 
 	RestApi_Stop();
+#ifndef WF_RUNTIME_DIAGNOSTICS
 	DebugServer_Stop();
+#endif
 	if (gMusicPlayer) gMusicPlayer->stop();
 	SfxLibrary::Clear();
 
@@ -469,7 +482,7 @@ WFGame::SmokeRunFrameStep(int frames, int cycles)
 
 //-----------------------------------------------------------------------------
 
-#if defined(WF_DEBUG_BRIDGE) || defined(WF_ENABLE_EDITOR)
+#if (defined(WF_DEBUG_BRIDGE) && !defined(WF_RUNTIME_DIAGNOSTICS)) || defined(WF_ENABLE_EDITOR)
 int
 WFGame::RunWfmutSmoke()
 {
@@ -594,12 +607,18 @@ WFGame::StepFrame(bool do_swap, Scalar* out_dt)
 		// is always false there.
 		HALPumpSuspendedEvents();
         wfprops::host().suspend();
+#ifdef WF_RUNTIME_DIAGNOSTICS
+		DebugServer_DiagnosticPump(_curLevel, true);
+#endif
 		usleep(16000);
 		if (out_dt) *out_dt = Scalar::zero;
 		return FrameResult::Suspended;
 	}
 
 	_frameRate.BeginFrame(FrameRateSampler::Clock::now(), HALLifecycleGeneration());
+#ifdef WF_RUNTIME_DIAGNOSTICS
+	DebugServer_DiagnosticBegin(false, "game");
+#endif
 	CheckFrameRateMailbox(*_curLevel, DiagnosticFrameRate(), HALLifecycleGeneration());
 	RestApi_DrainQueue();
 	DebugServer_DrainQueue(*_curLevel);
@@ -634,8 +653,13 @@ WFGame::StepFrame(bool do_swap, Scalar* out_dt)
     auto buttons=uint32_t(_curLevel->GetMailboxes().ReadMailbox(1909).AsFloat());
     if(settings.gesture(buttons,_deltaTime.AsFloat())&&planted::state().active){auto& mb=_curLevel->GetMailboxes();mb.WriteMailbox(625,Scalar::one-mb.ReadMailbox(625));}
     propertyui::inputHost(buttons);
-	if ( !DebugServer_IsPaused() && !settings.modal && !settings.waitingForRelease() )
+
+	if ( !DebugServer_IsPaused() && !settings.modal && !settings.waitingForRelease() ) {
+#ifdef WF_RUNTIME_DIAGNOSTICS
+		DebugServer_DiagnosticSimulation();
+#endif
 		_curLevel->update(_deltaTime);
+	}
 	DBSTREAM2( cflow << "WFGame::update: render scene" << std::endl; )
 
 	if(_curLevel->camera() && _curLevel->camera()->ValidView())
@@ -658,6 +682,9 @@ WFGame::StepFrame(bool do_swap, Scalar* out_dt)
 #endif
 
 	DebugServer_BroadcastState(*_curLevel);
+#ifdef WF_RUNTIME_DIAGNOSTICS
+	DebugServer_DiagnosticPump(_curLevel);
+#endif
 	DebugServer_BroadcastPerf(_deltaTime.AsFloat() * 1000.0f,
 	                          _curLevel->GetObjectList().Size());
 	DebugServer_BroadcastMailboxes(*_curLevel);
@@ -877,6 +904,9 @@ WFGame::RunLevelMenu()
 	_levelMenuActive = true;
 	SetMenuRunning(true);
 	SetSelectorVisible(true);
+#ifdef WF_RUNTIME_DIAGNOSTICS
+	DebugServer_DiagnosticLevel(-1);
+#endif
 	Menu menu(bundle, _levelMenuCursor, PlatformHint());
 	levelmenu::Log("showing %zu entries (\"%s\"), cursor on %d",
 	        bundle.entries.size(), bundle.title.c_str(), menu.Cursor());
@@ -903,6 +933,9 @@ WFGame::RunLevelMenu()
 		{
 			HALPumpSuspendedEvents();
         wfprops::host().suspend();
+#ifdef WF_RUNTIME_DIAGNOSTICS
+			DebugServer_DiagnosticPump(nullptr, true);
+#endif
 			usleep(16000);
 			continue;
 		}
@@ -915,6 +948,9 @@ WFGame::RunLevelMenu()
 		}
 		else
 			buttons = uint32_t(JoystickGetButtonsF(stick));
+#ifdef WF_RUNTIME_DIAGNOSTICS
+        DebugServer_DiagnosticBegin(false, "selector", menu.Cursor());
+#endif
         if(ConsumeReturnRequest()){if(wfprops::host().modal)wfprops::host().back();else HALRequestClose();}
         auto& ps=planted::state();ps.selector=bundle.entries[size_t(menu.Cursor())].name=="Planted Tank";
         if(ps.selector){planted::registerSettings();wfprops::host().bind(&planted::previewProperties());}
@@ -924,7 +960,13 @@ WFGame::RunLevelMenu()
         wfprops::host().gesture(buttons,0);
         propertyui::inputHost(buttons);
         if(ps.pending){menu.Update(kButtonA,nowMs);menu.Update(0,nowMs+1);ps.pending=false;}
-        else if(!wfprops::host().modal&&!wfprops::host().waitingForRelease())menu.Update(buttons, nowMs);
+        else if(!wfprops::host().modal&&!wfprops::host().waitingForRelease()){
+            menu.Update(buttons, nowMs);
+            wfdiag::Consume("selector", menu.WaitingForRelease()?"waiting-for-release":"menu-update", buttons);
+        }
+#ifdef WF_RUNTIME_DIAGNOSTICS
+        DebugServer_DiagnosticPump(nullptr);
+#endif
 		if (menu.Cursor() != lastCursor)
 		{
 			lastCursor = menu.Cursor();

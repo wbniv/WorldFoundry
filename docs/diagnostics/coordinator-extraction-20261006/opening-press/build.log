@@ -1,0 +1,49 @@
+> Task :app:preBuild UP-TO-DATE
+> Task :app:preAquariumDiagnosticBuild UP-TO-DATE
+> Task :app:mergeAquariumDiagnosticNativeDebugMetadata NO-SOURCE
+> Task :app:javaPreCompileAquariumDiagnostic UP-TO-DATE
+> Task :app:checkAquariumDiagnosticAarMetadata UP-TO-DATE
+> Task :app:generateAquariumDiagnosticResValues UP-TO-DATE
+> Task :app:mapAquariumDiagnosticSourceSetPaths UP-TO-DATE
+> Task :app:generateAquariumDiagnosticResources UP-TO-DATE
+> Task :app:mergeAquariumDiagnosticResources UP-TO-DATE
+> Task :app:packageAquariumDiagnosticResources UP-TO-DATE
+> Task :app:parseAquariumDiagnosticLocalResources UP-TO-DATE
+> Task :app:createAquariumDiagnosticCompatibleScreenManifests UP-TO-DATE
+> Task :app:extractDeepLinksAquariumDiagnostic UP-TO-DATE
+> Task :app:processAquariumDiagnosticMainManifest UP-TO-DATE
+> Task :app:processAquariumDiagnosticManifest UP-TO-DATE
+> Task :app:processAquariumDiagnosticManifestForPackage UP-TO-DATE
+> Task :app:processAquariumDiagnosticResources UP-TO-DATE
+> Task :app:compileAquariumDiagnosticJavaWithJavac UP-TO-DATE
+> Task :app:mergeAquariumDiagnosticShaders UP-TO-DATE
+> Task :app:compileAquariumDiagnosticShaders NO-SOURCE
+> Task :app:generateAquariumDiagnosticAssets UP-TO-DATE
+> Task :app:mergeAquariumDiagnosticAssets UP-TO-DATE
+> Task :app:compressAquariumDiagnosticAssets UP-TO-DATE
+> Task :app:processAquariumDiagnosticJavaRes NO-SOURCE
+> Task :app:mergeAquariumDiagnosticJavaResource UP-TO-DATE
+> Task :app:checkAquariumDiagnosticDuplicateClasses UP-TO-DATE
+> Task :app:desugarAquariumDiagnosticFileDependencies UP-TO-DATE
+> Task :app:mergeAquariumDiagnosticStartupProfile UP-TO-DATE
+> Task :app:mergeExtDexAquariumDiagnostic UP-TO-DATE
+> Task :app:mergeLibDexAquariumDiagnostic UP-TO-DATE
+> Task :app:dexBuilderAquariumDiagnostic UP-TO-DATE
+> Task :app:mergeProjectDexAquariumDiagnostic UP-TO-DATE
+> Task :app:preQbertDiagnosticBuild UP-TO-DATE
+> Task :app:configureCMakeRelease[arm64-v8a]-2
+> Task :app:buildCMakeRelease[arm64-v8a]-2
+> Task :app:configureCMakeRelease[armeabi-v7a]-2
+> Task :app:buildCMakeRelease[armeabi-v7a]-2
+> Task :app:mergeAquariumDiagnosticJniLibFolders UP-TO-DATE
+> Task :app:mergeAquariumDiagnosticNativeLibs UP-TO-DATE
+> Task :app:stripAquariumDiagnosticDebugSymbols UP-TO-DATE
+> Task :app:validateSigningAquariumDiagnostic UP-TO-DATE
+> Task :app:writeAquariumDiagnosticAppMetadata UP-TO-DATE
+> Task :app:writeAquariumDiagnosticSigningConfigVersions UP-TO-DATE
+> Task :app:packageAquariumDiagnostic UP-TO-DATE
+> Task :app:createAquariumDiagnosticApkListingFileRedirect UP-TO-DATE
+> Task :app:assembleAquariumDiagnostic UP-TO-DATE
+
+BUILD SUCCESSFUL in 2s
+38 actionable tasks: 4 executed, 34 up-to-date

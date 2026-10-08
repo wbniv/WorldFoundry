@@ -9,6 +9,14 @@ prepare a concrete proposal describing the required engine changes and obtain
 permission before editing engine code. Continue authorized asset/script/tooling
 work independently when possible. This applies to every platform/backend.
 
+For JavaScript/CSS shipped in TV WebViews, support Chromium/WebView 91 as the
+current minimum: cast2 was measured at 91.0.4472.114 on 2026-10-05. Do not infer
+browser API support from Android version, target SDK or desktop browser tests.
+Avoid unguarded post-91 APIs (including Array/String/TypedArray `.at()`); use
+compatible operations or tested feature-detected fallbacks. Consult
+[the WebView compatibility reference](docs/reference/chromecast-webview-compatibility.md)
+and test actual gameplay on cast2, including held/released directional input.
+
 When asking Will to run a diagnostic command, save its output to a file (prefer
 `docs/diagnostics/`), print the destination, and read it directly afterward.
 Do not require Will to copy large terminal output into the conversation.

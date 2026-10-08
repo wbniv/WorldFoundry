@@ -1,0 +1,49 @@
+--- a/tests/device_coordinator/test_plant_settings.py
++++ b/tests/device_coordinator/test_plant_settings.py
+@@ -82,3 +82,46 @@
+     assert len([c for c in calls if c[0]=='key'])==1
+     assert len([c for c in calls if c[0]=='shell'])==(0 if prompt_present else 1)
+     assert (tmp_path/'panel-dismissal-logcat.txt').exists()==(not prompt_present)
++
++
++@pytest.mark.parametrize('shown',[True,False])
++def test_native_ime_branch_uses_system_editor(tmp_path,monkeypatch,shown):
++    from wf_device.plant_checks import check_plants
++    class ProbeComplete(Exception):pass
++    class FakeAdapter:
++        package='org.example.aquarium'
++        def __init__(self):
++            self.store=SimpleNamespace(root=tmp_path);self.req={'apk':'native.apk'};self.out=tmp_path/'out';self.out.mkdir()
++            self.form=False;self.native=False;self.ime=False;self.seed='713';self.entered=None;self.calls=[]
++        def shell(self,*args):
++            self.calls.append(args)
++            if args[0]=='pidof':return '123'
++            if args==('dumpsys','input_method'):return 'mInputShown='+str(shown).lower()
++            if args[:2]==('input','text'):self.entered=args[2]
++            return ''
++        def key(self,key):
++            if key=='KEYCODE_DPAD_RIGHT':self.form=True
++            elif key=='KEYCODE_DPAD_CENTER' and self.form:self.native=self.ime=True
++            elif key=='KEYCODE_ENTER':self.seed=self.entered;self.native=self.ime=False
++            elif key=='KEYCODE_BACK':
++                if self.ime:self.ime=False
++                elif self.native:self.native=False
++                else:self.form=False
++        def wait(self,_):pass
++        def capture(self,name):
++            if name=='freshwater-rock-perch-':raise ProbeComplete()
++    class FakePhone:
++        def __init__(self,a):self.a=a
++        def model(self):return {'open':self.a.form,'fields':[{'id':1,'kind':3,'value':self.a.seed}]}
++        def close(self):pass
++    (tmp_path/'inputs').mkdir()
++    with zipfile.ZipFile(tmp_path/'inputs/native.apk','w') as bundle:bundle.writestr('assets/runtime-property-ui.json','{"systemTextInput":true}')
++    monkeypatch.setattr('wf_device.plant_checks.Phone',FakePhone)
++    adapter=FakeAdapter()
++    with pytest.raises(ProbeComplete if shown else RuntimeError):check_plants(adapter)
++    checks=json.loads((adapter.out/'plant-assertions.json').read_text())
++    if shown:
++        assert checks==dict.fromkeys(['android_system_ime_shown','native_numeric_text_applied_to_draft','back_closes_native_editor_before_form','back_applies_and_closes_form'],'PASS')
++        assert ('input','text','1254') in adapter.calls
++    else:
++        assert checks=={} and adapter.entered is None

@@ -1,5 +1,6 @@
 {
  "date": "2026-09-30",
+ "sources_checked": "2026-10-06",
  "statuses": [
   "verified",
   "unverified",
@@ -12,14 +13,14 @@
    "title": "Swimming fish stick to same Strouhal number",
    "url": "https://journals.biologists.com/jeb/article/217/13/2224/12210/Swimming-fish-stick-to-same-Strouhal-number",
    "opened": true,
-   "backs": "Strouhal window 0.2–0.4 in fish; trout 0.19–0.22"
+   "backs": "proposed efficient Strouhal range 0.2–0.4; summary of control trout 0.19–0.22"
   },
   "S2": {
-   "cite": "Nudds, John, Keen & Shiels 2014, JEB 217:2244–2249 (the primary paper behind S1; seen only through S1)",
-   "title": null,
-   "url": null,
-   "opened": false,
-   "backs": "the study S1 summarises"
+   "cite": "Nudds, John, Keen & Shiels 2014, JEB 217:2244–2249",
+   "title": "Rainbow trout provide the first experimental evidence for adherence to a distinct Strouhal number during animal oscillatory propulsion",
+   "url": "https://journals.biologists.com/jeb/article/217/13/2244/12227/Rainbow-trout-provide-the-first-experimental",
+   "opened": true,
+   "backs": "Results and Fig. 1: best-fit trout St 0.19 to 0.22 (control), 0.23 (warm); proposed efficient range 0.2–0.4"
   },
   "S3": {
    "cite": "Wu, Yang & Zeng 2007, JEB 210(12):2181–2191",
@@ -44,31 +45,24 @@
   },
   "S6": {
    "cite": "Li, Ashraf, François, Kolomenskiy, Lechenault, Godoy-Diana & Thiria 2021, Commun. Biol. 4:40",
-   "title": null,
-   "url": "https://arxiv.org/abs/2002.09176",
-   "opened": false,
-   "backs": "fish keep the cycle constant and change the burst share (as reported, not opened)"
+   "title": "Burst-and-coast swimmers optimize gait by adapting unique intrinsic cycle",
+   "url": "https://pmc.ncbi.nlm.nih.gov/articles/PMC7809443/",
+   "opened": true,
+   "backs": "red-nose tetras: nearly constant bout duration and changing burst share; Results, Fig. 2"
   },
   "S7": {
    "cite": "Domenici & Blake 1997, The kinematics and performance of fish fast-start swimming",
-   "title": null,
-   "url": "https://www.researchgate.net/publication/13904905_The_Kinematics_and_Performance_of_Fish_Fast-Start_Swimming",
-   "opened": false,
-   "backs": "turning angle, turning radius, C-start and S-start definitions"
+   "title": "The kinematics and performance of fish fast-start swimming",
+   "url": "https://biomimetic.pbworks.com/f/The%2Bkinematics%2Band%2Bperformance%2BofDomenici.pdf",
+   "opened": true,
+   "backs": "p. 1165: preparatory C-bend, propulsive stroke and variable subsequent swimming/coasting; diagram is our schematic"
   },
   "S8": {
    "cite": "Tu & Terzopoulos 1994, Artificial Fishes: Physics, Locomotion, Perception, Behavior",
-   "title": null,
-   "url": "https://faculty.cc.gatech.edu/~turk/bio_sim/articles/fish_terzopoulos.pdf",
-   "opened": false,
-   "backs": "the layering idea only: motor (kinematic wave) under steering (behaviour)"
-  },
-  "S9": {
-   "cite": "A ≈ 0.2 L and λ ≈ L: widely cited; no primary source was identified or opened",
-   "title": null,
-   "url": null,
-   "opened": false,
-   "backs": "tail excursion and wavelength"
+   "title": "Artificial Fishes: Physics, Locomotion, Perception, Behavior",
+   "url": "https://web.cs.ucla.edu/~dt/papers/siggraph94/siggraph94.pdf",
+   "opened": true,
+   "backs": "Fig. 1 and sections 2.2–2.3: behavior, perception and muscle-driven physical motor controllers; our kinematic rig differs"
   }
  },
  "rows": [
@@ -138,10 +132,10 @@
   {
    "id": "st_window",
    "group": "Tail",
-   "quantity": "Strouhal, fish",
+   "quantity": "Efficient St range",
    "status": "verified",
    "sources": [
-    "S1"
+    "S2"
    ],
    "value": [
     0.2,
@@ -168,17 +162,17 @@
    "quantity": "Strouhal, trout",
    "status": "verified",
    "sources": [
-    "S1"
+    "S2"
    ],
    "value": [
     0.19,
-    0.22
+    0.23
    ],
    "unit": "",
-   "disp": "0.19 → 0.22",
+   "disp": "0.19 → 0.22/0.23",
    "symbol": null,
    "factor": 1.0,
-   "note": "rainbow trout, rising with speed",
+   "note": "best-fit rainbow trout: 0.68 to 1.11 m/s; control/warm treatments",
    "poster_only": false,
    "code_label": null
   },
@@ -210,20 +204,20 @@
    "id": "a_over_l",
    "group": "Tail",
    "quantity": "Tail excursion A/L",
-   "status": "unverified",
+   "status": "ours",
    "sources": [
-    "S9"
+    "game"
    ],
    "value": 0.20000000000000004,
    "unit": "",
    "disp": "0.2 peak to peak",
    "symbol": "clownfish.TUNABLES:fish-tail-app",
    "factor": 1.124859392575928,
-   "note": "A = 0.2 L is widely cited; the code labels it unverified",
+   "note": "authored tail excursion; no verified clownfish measurement identified",
    "poster_only": false,
    "code_label": {
     "labels": [
-     "unverified"
+     "ours"
     ],
     "how": "own",
     "at": "clownfish.py:138"
@@ -233,16 +227,16 @@
    "id": "wavelength",
    "group": "Tail",
    "quantity": "Wavelength λ/L",
-   "status": "unverified",
+   "status": "ours",
    "sources": [
-    "S9"
+    "game"
    ],
    "value": 1.0,
    "unit": "",
    "disp": "≈ 1",
    "symbol": null,
    "factor": 1.0,
-   "note": "widely cited; the rig only swings a tail hinge and does not use it",
+   "note": "authored illustration; the rig only swings a tail hinge and does not use wavelength",
    "poster_only": true,
    "code_label": null
   },
@@ -408,17 +402,17 @@
   {
    "id": "const_cycle",
    "group": "Gait",
-   "quantity": "Constant cycle idea",
-   "status": "unverified",
+   "quantity": "Nearly constant bout",
+   "status": "other-species",
    "sources": [
     "S6"
    ],
    "value": null,
    "unit": "",
-   "disp": "qualitative",
+   "disp": "red-nose tetras",
    "symbol": null,
    "factor": 1.0,
-   "note": "cycle kept constant, burst share sets speed: as reported for Li et al. 2021; not opened",
+   "note": "Li et al. 2021 Results and Fig. 2: nearly constant bout duration, changing burst share; no clownfish timing claim",
    "poster_only": false,
    "code_label": null
   },
@@ -435,15 +429,14 @@
    "disp": "0.5 s",
    "symbol": "aquarium_constants.GAIT_CYCLE",
    "factor": 1.0,
-   "note": "the code comment says \"unverified; ours\"",
+   "note": "authored 0.5-second game cycle, not a measured clownfish timing",
    "poster_only": false,
    "code_label": {
     "labels": [
-     "ours",
-     "unverified"
+     "ours"
     ],
     "how": "own",
-    "at": "aquarium_constants.py:102"
+    "at": "aquarium_constants.py:103"
    }
   },
   {
@@ -466,7 +459,7 @@
      "ours"
     ],
     "how": "own",
-    "at": "aquarium_constants.py:103"
+    "at": "aquarium_constants.py:104"
    }
   },
   {
@@ -488,8 +481,8 @@
     "labels": [
      "ours"
     ],
-    "how": "inherited L103",
-    "at": "aquarium_constants.py:104"
+    "how": "inherited L104",
+    "at": "aquarium_constants.py:105"
    }
   },
   {
@@ -512,7 +505,7 @@
      "ours"
     ],
     "how": "own",
-    "at": "aquarium_constants.py:105"
+    "at": "aquarium_constants.py:106"
    }
   },
   {
@@ -535,7 +528,7 @@
      "ours"
     ],
     "how": "own",
-    "at": "aquarium_constants.py:106"
+    "at": "aquarium_constants.py:107"
    }
   },
   {
@@ -557,8 +550,8 @@
     "labels": [
      "ours"
     ],
-    "how": "inherited L106",
-    "at": "aquarium_constants.py:107"
+    "how": "inherited L107",
+    "at": "aquarium_constants.py:108"
    }
   },
   {
@@ -715,8 +708,8 @@
     "labels": [
      "ours"
     ],
-    "how": "inherited L109",
-    "at": "aquarium_constants.py:110"
+    "how": "inherited L110",
+    "at": "aquarium_constants.py:111"
    }
   },
   {
@@ -738,8 +731,8 @@
     "labels": [
      "ours"
     ],
-    "how": "inherited L109",
-    "at": "aquarium_constants.py:110"
+    "how": "inherited L110",
+    "at": "aquarium_constants.py:111"
    }
   },
   {
@@ -761,8 +754,8 @@
     "labels": [
      "ours"
     ],
-    "how": "inherited L109",
-    "at": "aquarium_constants.py:110"
+    "how": "inherited L110",
+    "at": "aquarium_constants.py:111"
    }
   },
   {
@@ -784,8 +777,8 @@
     "labels": [
      "ours"
     ],
-    "how": "inherited L109",
-    "at": "aquarium_constants.py:111"
+    "how": "inherited L110",
+    "at": "aquarium_constants.py:112"
    }
   },
   {
@@ -807,8 +800,8 @@
     "labels": [
      "ours"
     ],
-    "how": "inherited L109",
-    "at": "aquarium_constants.py:111"
+    "how": "inherited L110",
+    "at": "aquarium_constants.py:112"
    }
   },
   {
@@ -830,8 +823,8 @@
     "labels": [
      "ours"
     ],
-    "how": "inherited L109",
-    "at": "aquarium_constants.py:111"
+    "how": "inherited L110",
+    "at": "aquarium_constants.py:112"
    }
   },
   {
@@ -853,8 +846,8 @@
     "labels": [
      "ours"
     ],
-    "how": "inherited L109",
-    "at": "aquarium_constants.py:112"
+    "how": "inherited L110",
+    "at": "aquarium_constants.py:113"
    }
   },
   {
@@ -876,8 +869,8 @@
     "labels": [
      "ours"
     ],
-    "how": "inherited L109",
-    "at": "aquarium_constants.py:113"
+    "how": "inherited L110",
+    "at": "aquarium_constants.py:114"
    }
   },
   {
@@ -899,8 +892,8 @@
     "labels": [
      "ours"
     ],
-    "how": "inherited L109",
-    "at": "aquarium_constants.py:114"
+    "how": "inherited L110",
+    "at": "aquarium_constants.py:115"
    }
   },
   {
@@ -922,8 +915,8 @@
     "labels": [
      "ours"
     ],
-    "how": "inherited L109",
-    "at": "aquarium_constants.py:116"
+    "how": "inherited L110",
+    "at": "aquarium_constants.py:117"
    }
   },
   {
@@ -945,8 +938,8 @@
     "labels": [
      "ours"
     ],
-    "how": "inherited L109",
-    "at": "aquarium_constants.py:117"
+    "how": "inherited L110",
+    "at": "aquarium_constants.py:118"
    }
   },
   {
@@ -1043,7 +1036,7 @@
    "id": "cstart",
    "group": "Method",
    "quantity": "C-start stages",
-   "status": "unverified",
+   "status": "verified",
    "sources": [
     "S7"
    ],
@@ -1052,7 +1045,7 @@
    "disp": "definitions",
    "symbol": null,
    "factor": 1.0,
-   "note": "not opened; the plan called it verified, the brief does not",
+   "note": "Domenici & Blake 1997 p. 1165; drawing is a schematic, not a clownfish trace",
    "poster_only": false,
    "code_label": null
   },
@@ -1060,7 +1053,7 @@
    "id": "layering",
    "group": "Method",
    "quantity": "Layering idea",
-   "status": "unverified",
+   "status": "verified",
    "sources": [
     "S8"
    ],
@@ -1069,7 +1062,7 @@
    "disp": "idea only",
    "symbol": null,
    "factor": 1.0,
-   "note": "motor under steering; not opened; used for the idea, never for a number",
+   "note": "Tu & Terzopoulos Fig. 1: behavior/perception/motor architecture; muscle-driven physical model, unlike our kinematic rig",
    "poster_only": false,
    "code_label": null
   }

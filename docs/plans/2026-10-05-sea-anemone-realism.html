@@ -1,0 +1,440 @@
+<!doctype html><html lang="en"><meta charset="utf-8"><title>2026-10-05-sea-anemone-realism</title><style>body{font:17px/1.55 system-ui,sans-serif;color:#183b43;max-width:1060px;margin:35px auto;padding:0 28px;background:#fafaf5}img{max-width:100%;max-height:560px}table{border-collapse:collapse;width:100%;font-size:14px;display:block;overflow:auto}td,th{border:1px solid #bbc9c4;padding:9px;text-align:left;vertical-align:top}th{background:#e4eee8}pre{background:#e4eee8;padding:18px;overflow:auto}a{color:#126d80}h1,h2{line-height:1.2}h2{margin-top:40px}</style><body><h1>Sea anemone: substrate controls, living mesh, texture and animation</h1>
+<p>Status: <strong>implementation in progress; assets generated; engine scope awaiting approval</strong>.
+Prepared 5 October 2026. No engine files have been edited; runtime integration is pending.</p>
+<p>The biological research was saved first in the independent
+<a href="../reference/sea-anemone-research.md">sea-anemone research document</a>.
+This plan derives design decisions from that evidence. Physical speeds and
+species-specific animation timing have not been established; every numerical
+starting point below is a <strong>game trial setting</strong>, not a biological measurement.</p>
+<h2>Poster and review mockups</h2>
+<p><a href="../reference/sea-anemone-biomechanics-poster/sea-anemone-biomechanics-a3.pdf">A3 portrait poster PDF</a> ·
+<a href="../reference/sea-anemone-biomechanics-poster/poster.html">browser poster</a> ·
+<a href="../reference/sea-anemone-biomechanics-poster/poster.png">PNG preview</a> ·
+<a href="../reference/sea-anemone-biomechanics-poster/make_poster.py">editable poster/diagram generator</a>.
+The poster is 297 × 420 mm. All artwork is original schematic illustration,
+not a photograph, a finished game asset or a captured runtime result.</p>
+<p><img alt="Bubble-tip anatomy and crown concept" src="2026-10-05-sea-anemone-realism/anatomy.svg" /></p>
+<h2>Current implementation and concrete problems</h2>
+<p><code>wflevels/aquarium/blender_create_aquarium.py</code> identifies the animal as
+<strong>Entacmaea quadricolor</strong> and makes a pedal disc, column, oral disc and
+<strong>18 tentacles</strong>. Each tentacle is a three-segment flat strip ending in a
+small sphere. Two separated rows provide fish occlusion; six tentacle clumps
+are independent visible actors, plus the static body. Materials supply
+pink/brown face colors instead of a dedicated surface texture.</p>
+<p><code>aquarium_constants.py</code> provides six independent periods from <strong>3.05–4.75 s</strong>,
+with about <strong>4–5.5°</strong> lateral and <strong>1.2–1.5°</strong> depth rotation.
+<code>aquarium_swim.fth</code> rotates whole clumps around their average root.
+Tentacles therefore remain rigid within each group; roots do not individually
+stay fixed. Those settings describe the existing game, not researched biology.</p>
+<p>The current controllable animal is the <strong>clownfish</strong>. Keyboard/gamepad arrows
+steer, A darts and B/C control depth; the phone uses A for Swim/Depth and B
+for dart. There is no existing player-controlled anemone to claim as fixed.
+Add a clearly labelled anemone control focus while keeping the fish available.</p>
+<p>Historical generator comments record 14.7 ms/frame for a 27-tentacle variant
+versus 9.1 ms with box stand-ins; bulb faces dominated that variant's geometry.
+These old figures are context only, not today's baseline or device comparison.
+Freeze and remeasure the current build before making performance claims.</p>
+<h2>Biology translated into behavior</h2>
+<table>
+<thead>
+<tr>
+<th>Saved evidence</th>
+<th>Proposed change</th>
+<th>Interpretation limit</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>Bubble-tip adults relocate in aquarium observations.</td>
+<td>Substrate-bound crawling with attached and settled states.</td>
+<td>No established real crawling speed; gameplay acceleration must be labelled.</td>
+</tr>
+<tr>
+<td>Pedal-disc adhesion and locomotion vary by species.</td>
+<td>Deforming foot edge, gradual load shift and reattachment.</td>
+<td>A visual approximation until species-specific close-up footage is reviewed.</td>
+</tr>
+<tr>
+<td>Aiptasia field tentacles bend and flutter with ambient water.</td>
+<td>Shared gentle flow plus local lag, length variation and curvature.</td>
+<td>Another species and a conference abstract; do not copy amplitudes numerically.</td>
+</tr>
+<tr>
+<td>Active muscles enable shortening and retraction.</td>
+<td>A withdrawal envelope and slower re-expansion, plus sparse local contraction.</td>
+<td>Exact response times remain trial settings.</td>
+</tr>
+<tr>
+<td>Bubble-tips have dense, variable, sometimes translucent tentacles.</td>
+<td>Uneven crown; a mix of slender and swollen blunt tips; textured tissue.</td>
+<td>Avoid making tip inflation a button-driven reflex without evidence.</td>
+</tr>
+<tr>
+<td>Stomphia has predator-triggered swimming.</td>
+<td>Explain it in the poster; defer it from this species' controls.</td>
+<td>Escape swimming is not a bubble-tip locomotion default.</td>
+</tr>
+</tbody>
+</table>
+<p>The research document contains the source links and evidence qualifications.
+Collect continuous bubble-tip footage of gentle flow, crawling and withdrawal
+before calibrating motion. Record time-lapse acceleration and scale references.</p>
+<h2>Controls and camera</h2>
+<p><img alt="Proposed tank overlay and control focus" src="2026-10-05-sea-anemone-realism/controls-mockup.svg" /></p>
+<p>Declare a compact OAS/OAD enum <strong>Control: Clownfish / Anemone</strong>, with its
+labels/default authored in the schema and its live value held in a mailbox
+consumed by Forth. Reuse a data-driven runtime settings interface and mirror
+it on a connected phone. Entering the tank still selects Clownfish by default.
+Expose settings through the existing pack controls/help interface; inspect the
+actual remote button mapping before final binding, and publish one consistent
+legend on TV and phone. Avoid appropriating a held input or phone button used
+for depth without a visible focus change.</p>
+<table>
+<thead>
+<tr>
+<th>Input in Anemone focus</th>
+<th>Behavior</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>D-pad left/right</td>
+<td>Crawl left/right along the surface tangent.</td>
+</tr>
+<tr>
+<td>D-pad up/down</td>
+<td>Crawl away from/toward the glass along the valid rock surface; no vertical swimming.</td>
+</tr>
+<tr>
+<td>Diagonal</td>
+<td>Normalize intent so diagonal movement is no faster.</td>
+</tr>
+<tr>
+<td>No direction</td>
+<td>Settle attachment and stop translational movement smoothly.</td>
+</tr>
+<tr>
+<td>Hold A / phone primary action</td>
+<td>Withdraw crown and shorten exposed column; inhibit crawl while withdrawn.</td>
+</tr>
+<tr>
+<td>Release A</td>
+<td>Re-expand smoothly. Holding or key-repeat does not restart the transition.</td>
+</tr>
+<tr>
+<td>Settings focus choice</td>
+<td>Transfer control; cancel held input and retain the anemone's settled location.</td>
+</tr>
+<tr>
+<td>Back arrow ↶</td>
+<td>Close an overlay first; otherwise return to the tank selector. On the selector, exit the app.</td>
+</tr>
+</tbody>
+</table>
+<p>Use an edge-driven focus transition and held/released action state. Test remote,
+keyboard/gamepad and phone independently, including disconnect/reconnect and
+returning from a settings overlay. Use standard back-arrow art in the final
+legend. The mockup's arrow is schematic.</p>
+<p>The rock must offer enough connected traversable surface for meaningful movement.
+Extend the existing flat perch into a rounded creviced rock shelf as necessary.
+Represent legal attachment patches with a small baked surface graph in asset data;
+interpolate position/normal along an edge, constrain the foot footprint, and
+reject gaps, sand and tank glass. The bubble-tip reference requires stable hard
+substrate. At a boundary, settle; do not glide through the rock or float over sand.
+Steer intent should be relative to the displayed camera, with consistent front/
+close-up orientation. Keep the clownfish's hosting target and camera zone attached
+to the anemone's moving crown, retaining camera hysteresis.</p>
+<p>Trial control responsiveness: show intent immediately, ease actual translation
+in/out over <strong>0.25–0.5 s</strong>, and cap speed initially at <strong>0.03 crown diameters/s</strong>.
+This is accelerated, legible game locomotion, subject to footage and user review.
+Do not present it as the natural rate. Start withdrawal at <strong>0.35–0.7 s</strong> and
+recovery at <strong>1.5–3 s</strong>, also unmeasured trial settings. Gentle clownfish hosting
+contact should not repeatedly trigger full withdrawal.</p>
+<h2>Mesh and texture</h2>
+<p><img alt="Tube topology, continuous tip and texture study" src="2026-10-05-sea-anemone-realism/mesh-texture.svg" /></p>
+<p>Author a continuous column/oral disc/foot and an irregular radial crown of curved
+tubes, rather than two straight rows. Preserve front/back depth occlusion so the
+fish can nestle among tentacles. Recess the column/foot in a crevice. Add a subtle
+mouth slit with restrained disc folds; do not add the column bumps absent from
+this species' morphology.</p>
+<p>First art trial: <strong>48 tentacles</strong>, roughly <strong>6 radial sides × 8 length spans</strong>
+per tentacle (about 96 side triangles each), plus tips and a <strong>600–1,000 triangle</strong>
+body. Aim around <strong>5–6k triangles</strong> total; export actual counts, including seams
+and caps. This is a review budget, not a mandate to maximize polygons. Compare
+24/48/72 crowns at the same scale. Increase longitudinal spans only where curved
+silhouette improves. Mix lengths, lean, tip swelling and small seeded variations;
+use smooth rounded transitions and blunt ends. Preserve a recognizable mouth
+region without opening an artificial fish corridor through the whole crown.</p>
+<p>Aim for <strong>one visual mesh/actor</strong> for the whole anemone and one inexpensive
+collision representation or existing body collider. No actor per tentacle.
+Single mesh does not necessarily mean one draw call: separate opaque tissue and
+translucent groups must be inventoried and profiled.</p>
+<p>Use one shared <strong>256² RGBA atlas</strong> initially. Separate UV islands for column,
+oral disc, tentacle shafts and tips; pad seams; keep deformation metadata separate
+from texture UVs. Paint irregular low-contrast longitudinal striation, fine
+speckles, tissue gradients and selective light mottling near bulbs. Support a
+restrained rose/brown palette first, then green/tan variants with the same UVs.
+Textures describe the surface; geometry supplies curved silhouettes.</p>
+<p>Existing translucency is available. Start mostly opaque, with selective subtle
+translucency in thin tentacle tissue after the opaque version is verified. Test
+against fish, water and glass from both cameras. Avoid washing the whole crown
+white, alpha sorting pops or bright fringe halos. Validate the texture binding,
+material indices, atlas packing and retained alpha on the actual Chromecasts.
+A 512² look comparison is optional only if 256² demonstrably loses visible detail;
+no assumed FPS benefit. Retain 256² as the initial target.</p>
+<h2>Animation model</h2>
+<p><img alt="Foot locomotion phases" src="2026-10-05-sea-anemone-realism/pedal-locomotion.svg" /></p>
+<p><img alt="Shared flow and local tentacle response" src="2026-10-05-sea-anemone-realism/tentacle-motion.svg" /></p>
+<p><img alt="Fixed roots, flexible tips and active shortening" src="2026-10-05-sea-anemone-realism/curve-response.svg" /></p>
+<p>Store rest curves and compact per-tentacle descriptors: root, length, radial
+orientation, stiffness/lag variation and tip form. The column/foot use separate
+weights. A single global flow signal supplies a slow mean direction plus gentle
+oscillation; local phase lag and modest deterministic variation break perfect
+synchrony. Neighboring tentacles should visibly share the same water.</p>
+<p>For normalized root-to-tip coordinate <code>u</code>, begin with bending weight <code>u²</code>.
+Deform the centerline and rebuild tube frames from its tangent, so cross-sections
+stay coherent. Approximate length preservation; avoid tip orbiting rigid clumps,
+root drift, cumulative stretching or sudden wrapping. Add bounded low-rate active
+shortening to a few tentacles independently. Withdrawal folds/shortens the crown
+into the crevice and reduces exposed column height; recovery restores the rest
+form smoothly. Do not drive bulb inflation with the same wave signal.</p>
+<p>Trial ambient flow: <strong>0.03–0.08 tentacle lengths</strong> tip excursion, <strong>4–8 s</strong> broad
+cycle, with longer tentacles responding more visibly. These are calm game trial
+settings; stronger wave-whipping belongs to the poster's comparative biology.
+All envelopes use elapsed time, interpolate across simulation ticks, and resume
+without jumps after pause, frame loss or menu return.</p>
+<p>Illustrative Forth math, not a complete controller or promised new engine API:</p>
+<pre><code class="language-forth">\ Root-to-tip weighting; u is normalized 0..1
+: tip-weight ( u -- w ) dup * ;
+\ dt &gt;= 0; tau &gt; 0. Avoid lag overshoot on a long tick.
+: lag-step ( x target dt tau -- x' )
+  / 1 min 0 max &gt;r over - r&gt; * + ;
+</code></pre>
+<p><img alt="State overview" src="2026-10-05-sea-anemone-realism/state-diagram.svg" /></p>
+<p>State precedence is <strong>withdrawal &gt; recovery &gt; crawling &gt; settled</strong>. Recovery can
+be interrupted by a new hold; the new envelope starts from the current pose.
+Motion intent and attachment state are separate: input can change while the foot
+remains constrained. Turning at a boundary must not reset an animation timer.
+The displayed state diagram is an overview, not a strictly linear transition list.</p>
+<h2>Engine permission and implementation route</h2>
+<p>The standing rule in AGENTS.md requires discussion and explicit permission before
+any World Foundry engine edits. This plan grants none. Implementation work can
+start with generators, asset descriptors, textures, Forth state/controls and
+mockups independently.</p>
+<p>Read-only investigation found existing <code>fish-deform</code>, <code>fin-deform</code>, <code>swim-deform</code>,
+<code>jelly-deform</code>, <code>plant-register</code>, <code>plant-step</code> and <code>lion-pose</code> bindings in
+<code>engine/stubs/scripting_zforth.cc</code>. Their presence does <strong>not</strong> establish that
+any one of them supports a rooted radial anemone crown and crawling foot.
+Before choosing a route, inspect their actual weight conventions and constraints.
+Do not repurpose plant topology or lionfish regions in a way that breaks those
+levels, and do not assume a skeletal animation importer exists.</p>
+<p>Preferred end state: one compact pose publication for one visual actor; cached
+rest geometry; batched native deformation if existing facilities truly fit.
+If they do not, prepare a separate concrete engine proposal listing files,
+pose ABI, asset metadata, rest-cache invalidation, root/collision invariants,
+backend coverage and profiling scope. Obtain permission <strong>before editing engine
+code</strong>. New Forth words are proposals until that approval and implementation.
+A six-group asset/controller prototype is acceptable as a measured intermediate,
+but must be labelled as such; it does not satisfy the final flexible-crown goal.</p>
+<h2>Phases and profiling</h2>
+<table>
+<thead>
+<tr>
+<th>Phase</th>
+<th>Deliverable</th>
+<th>Compare with</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>0 · Baseline</td>
+<td>Freeze current APK/assets; count actors, vertices, triangles, materials and mailbox calls. Capture wide and close-up motion.</td>
+<td>Current six-clump anemone.</td>
+</tr>
+<tr>
+<td>1 · Shape and texture</td>
+<td>24/48/72 crown art study; select shape; 256² texture and material verification. Keep a frozen rest-pose profiling variant.</td>
+<td>Baseline, isolating mesh/texture cost.</td>
+</tr>
+<tr>
+<td>2 · Living crown</td>
+<td>Shared flow, local curvature/lag, bounded active contractions and withdrawal/recovery.</td>
+<td>Phase 1, isolating deformation cost.</td>
+</tr>
+<tr>
+<td>3 · Controls and crawling</td>
+<td>Focus UI/phone parity, traversable rock patches, attachment animation and camera/host target updates.</td>
+<td>Phase 2, isolating control/locomotion cost.</td>
+</tr>
+<tr>
+<td>4 · Polish</td>
+<td>Translucency comparison, palettes, roots/collision fixes and density review.</td>
+<td>Phase 3, retain only visible improvements worth their cost.</td>
+</tr>
+</tbody>
+</table>
+<p>Profile on <strong>both chromecast-test-01 and chromecast-test-02</strong> through the coordinator.
+Freeze one APK per variant; preserve hashes, device/version, viewport, thermal
+state, scene seed, camera, duration and raw results. Warm up 30 s, record at least
+60 s; collect three samples per comparison when thermal state is comparable.
+Use matched wide/close-up scenes: idle, hosted clownfish, sustained crawl and
+repeated withdrawal/recovery. Include controls overlay and translucent overlap
+captures. Do not interpret a CPU recording or encoded-video rate as rendering FPS.</p>
+<table>
+<thead>
+<tr>
+<th>Variant/device/scene</th>
+<th>Actors</th>
+<th>Triangles</th>
+<th>Draw calls</th>
+<th>Mailbox calls/tick</th>
+<th>Script ms</th>
+<th>Animation ms</th>
+<th>Render ms</th>
+<th>Frame p50/p95/p99 ms</th>
+<th>RSS/texture bytes</th>
+<th>Δ vs baseline</th>
+<th>Δ vs previous</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>Phase 0</td>
+<td>pending</td>
+<td>pending</td>
+<td>pending</td>
+<td>pending</td>
+<td>pending</td>
+<td>pending</td>
+<td>pending</td>
+<td>pending</td>
+<td>pending</td>
+<td>—</td>
+<td>—</td>
+</tr>
+<tr>
+<td>Phase 1</td>
+<td>pending</td>
+<td>pending</td>
+<td>pending</td>
+<td>pending</td>
+<td>pending</td>
+<td>pending</td>
+<td>pending</td>
+<td>pending</td>
+<td>pending</td>
+<td>pending</td>
+<td>pending</td>
+</tr>
+<tr>
+<td>Phase 2</td>
+<td>pending</td>
+<td>pending</td>
+<td>pending</td>
+<td>pending</td>
+<td>pending</td>
+<td>pending</td>
+<td>pending</td>
+<td>pending</td>
+<td>pending</td>
+<td>pending</td>
+<td>pending</td>
+</tr>
+<tr>
+<td>Phase 3</td>
+<td>pending</td>
+<td>pending</td>
+<td>pending</td>
+<td>pending</td>
+<td>pending</td>
+<td>pending</td>
+<td>pending</td>
+<td>pending</td>
+<td>pending</td>
+<td>pending</td>
+<td>pending</td>
+</tr>
+<tr>
+<td>Phase 4</td>
+<td>pending</td>
+<td>pending</td>
+<td>pending</td>
+<td>pending</td>
+<td>pending</td>
+<td>pending</td>
+<td>pending</td>
+<td>pending</td>
+<td>pending</td>
+<td>pending</td>
+<td>pending</td>
+</tr>
+</tbody>
+</table>
+<p>Expand rows for each device/scene; report absolute and percentage deltas.
+Unavailable counters stay explicitly unavailable, not zero. Keep both visual
+quality comparisons and performance outcomes; triangle count alone is not a
+performance diagnosis. Actor time, mailbox calls, deformation and transparency
+cost need separate evidence.</p>
+<h2>Acceptance and files to update</h2>
+<ul>
+<li>Crown roots stay fixed relative to the oral disc while tips curve; no synchronized rigid clusters.</li>
+<li>Fish can host within the crown, with correct depth occlusion and no tentacle collision stair-stepping.</li>
+<li>Crawling stays on connected rock, with foot contact and no penetration; release settles cleanly.</li>
+<li>A hold/release is continuous and does not retrigger on repeat; changing focus clears held input.</li>
+<li>Camera/hosting target follows relocation without flickering between shots.</li>
+<li>Texture looks like pigmented living tissue, with visible detail at close-up and correct alpha.</li>
+<li>TV, phone and gamepad mappings are documented and verified, including actual held/released D-pad input on cast2.</li>
+<li>Back arrow closes overlays, then returns to selector; selector back exits. Help uses arrow artwork.</li>
+<li>Both-device profiles and deltas accompany each phase; no claimed measurements until saved.</li>
+</ul>
+<p>Likely implementation files: <code>wflevels/aquarium/blender_create_aquarium.py</code>,
+<code>aquarium_constants.py</code>, <code>aquarium_swim.fth</code>, <code>run_aquarium_checks.py</code>, new anemone
+asset/texture authoring files and the existing pack's selector/phone interface.
+Determine the exact UI owner before editing shared files; preserve unrelated work.
+Regenerate/export level resources through the established tooling. Update this
+plan, the poster and research qualifications as new footage/measurements arrive.
+Any engine files belong exclusively to a separately discussed, approved proposal.</p>
+<h2>Implementation in progress</h2>
+<p>The 48-tentacle single-mesh authoring asset is generated: <strong>3,420 vertices,
+5,756 triangles, one 256² tissue atlas</strong>. Geometry/reference-pose checks: <strong>10 passed</strong>.
+These are authoring previews, not runtime evidence.</p>
+<p><img alt="Actual authored mesh: rest pose" src="2026-10-05-sea-anemone-realism/assets/rest.png" /></p>
+<p><a href="2026-10-05-sea-anemone-realism/assets/flow-left.png">Flow left</a> ·
+<a href="2026-10-05-sea-anemone-realism/assets/flow-right.png">Flow right</a> ·
+<a href="2026-10-05-sea-anemone-realism/assets/withdrawn.png">Withdrawal</a> ·
+<a href="2026-10-05-sea-anemone-realism/assets/anemone.blend">Editable Blender asset</a>.</p>
+<p>The existing deformation APIs do not support this asset's rooted radial crown
+and independent texture coordinates. The concrete
+<a href="2026-10-05-sea-anemone-realism/engine-integration-proposal.md">engine integration proposal</a>
+is awaiting explicit approval under the standing engine-edit rule.
+Asset and Forth work continues independently. The settings proposal is being
+revised to use an OAS/OAD declaration and script state, rather than dedicated
+anemone C++ settings. Existing schema dropdowns are editor controls; a reusable
+runtime TV/phone bridge remains to be specified and separately approved.</p>
+<p>The standalone Forth control core now passes its own behavior checks: <strong>23
+combined asset/controller/schema-authoring tests passed</strong>. It covers surface bounds, normalized
+diagonals, hold/release withdrawal, focus-change input suppression and long ticks.
+<a href="2026-10-05-sea-anemone-realism/authoring-tests.txt">Saved check output</a>.</p>
+<h2>OAS/OAD settings follow-up</h2>
+<p>See <a href="2026-10-05-runtime-settings-oas-oad-migration.md">entity settings migration TODOs</a>.
+The Planted Tank is the existing C++ settings owner identified by the audit;
+the new anemone settings must use authored definitions and the reusable bridge.
+Conversions remain pending and engine changes require separate approval.</p>
+<h2>Saved baseline · 5 October 2026</h2>
+<p>Coordinator job <strong>J-5cd67c4fff20</strong> profiled the frozen current eight-tank APK
+in the clownfish scene: 30 s warmup, three 60 s idle runs. The recorded median
+is <strong>29.970 FPS</strong>, with <strong>33.367 ms p95</strong> presented-frame interval on
+chromecast-test-01. These are frame-presentation measurements, not CPU stage
+timings or proof of the limiting stage. No new anemone asset was installed.</p>
+<p><a href="2026-10-05-sea-anemone-realism/baseline-summary.json">Baseline summary and APK hash</a> ·
+<a href="2026-10-05-sea-anemone-realism/baseline/chromecast-test-01/summary.json">Raw evidence</a>.
+Chromecast 2 currently reports <strong>needs-local-setup</strong> and has not been measured.
+Later-phase comparisons and all deltas remain pending.</p>
+<h2>Reusable deformation revision</h2>
+<p>Will requested reuse by other actors. The
+<a href="2026-10-05-sea-anemone-realism/generic-deformation-proposal.md">generic deformation design</a>
+now replaces the proposed species-specific ARIG/anemone-pose route. It shares
+rest-mesh caching and evaluation, with authored rooted curves, weighted transforms
+and travelling-wave groups. OAS/OAD defines parameters; Forth publishes behavior
+channels once per actor; independent asset metadata defines geometry weights.
+Engine implementation remains pending an approved revised scope.</p></body></html>

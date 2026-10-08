@@ -95,7 +95,7 @@ def material(key):
         if C.KIND=='plants' and key.startswith('goby_'):
             mt['wf_prelit']=True
             tex=mt.node_tree.nodes.new('ShaderNodeTexImage')
-            tex.image=bpy.data.images.load(str(HERE/(goby.BODY_TEXTURE if key=='goby_body' else goby.FIN_TEXTURE)),check_existing=True)
+            tex.image=bpy.data.images.load(str(HERE/({'goby_body':goby.BODY_TEXTURE,'goby_fin':goby.FIN_TEXTURE,'goby_rock':goby.ROCK_TEXTURE}[key])),check_existing=True)
             mt.node_tree.links.new(tex.outputs['Color'],mt.node_tree.nodes.get('Principled BSDF').inputs['Base Color'])
             if key=='goby_fin':mt['wf_opacity']=goby.FIN_OPACITY;mt['wf_double_sided']=True
         MATERIALS[key] = mt
@@ -281,6 +281,10 @@ for lo,hi in [((-HX,-HY,HEIGHT),(HX,-HY+.08,HEIGHT+.1)),((-HX,HY-.08,HEIGHT),(HX
 actor('rim',rim)
 static_box('floor',(-HX+WALL,-HY+WALL,WALL),(HX-WALL,HY-WALL,SAND),'backdrop' if C.KIND in ('jellyfish','arowana') else 'sand')
 if C.KIND=='plants':
+    for k,(x,y,rx,ry,h) in enumerate(C.ROCKS):
+        obj=actor(f'goby-grazing-rock-{k}',goby.grazing_rock(rx,ry,h),(x,y,SAND))
+        obj['wf_Visibility Mailbox']=1161
+        obj['wf_Moves Between Rooms']=True
     for mesh in planting(SAND):
         obj=actor(mesh.name,mesh)
         box_fields(obj,(-5.95,-1.45,SAND,5.95,1.45,WATER))
@@ -456,7 +460,8 @@ if C.KIND=='plants':
         core=core.replace("  JOYSTICK_BUTTON_A tk-edge tk-neutral tk@ not & if 1 tk-camera tk@ - tk-camera tk! then", "  \\ Camera taps and settings holds are handled by the native plant settings.")
     core=core.replace(': tk-player-tick',': tk-urchin-player-tick')
     header+=f': pg-salt {indices["Director"]} 2 property@ if else drop 0 then ;\n'
-    header+=': gb-ceiling 4.35 ; : gb-limit tk-limit-x ; : gb-floor tk-bottom ;\n'
+    header+=': gb-ceiling 4.35 ; : gb-limit tk-limit-x ;\n'
+    core+=': gb@ read-mailbox ;\n'+goby.perch_forth(C.ROCKS,SAND,C.BOTTOM)
     core+=(COMMON/'goby_controller.fth').read_text()
     core+=': tk-player-tick pg-salt if tk-urchin-player-tick else JOYSTICK_BUTTON_LEFT tk-held gb-left gb! JOYSTICK_BUTTON_RIGHT tk-held gb-right gb! JOYSTICK_BUTTON_UP tk-held gb-up gb! JOYSTICK_BUTTON_DOWN tk-held gb-down gb! 0 gb-blocked gb! gb-player-tick then ;\n'
     # Player input does not need the Director's feet/spine pose definitions.

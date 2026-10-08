@@ -1,0 +1,60 @@
+{
+  "id": "B-794fc2ead1bb",
+  "owner": "50834354a173f73472469f04",
+  "targets": [
+    "chromecast-test-01",
+    "chromecast-test-02"
+  ],
+  "created": 1791271740.5479417,
+  "jobs": [
+    {
+      "id": "J-be5cd48f3730",
+      "owner": "50834354a173f73472469f04",
+      "accepted": 1791271740.548318,
+      "state": "completed",
+      "phase": "completed",
+      "request": {
+        "app": "aquarium",
+        "apk": "bdc90a9d38fa5f6d32b87b0bfffbb2f25a7d8efe273f2a187f5dee7be4c78340.apk",
+        "validator": "poke-resume",
+        "workflow": "check",
+        "device": "chromecast-test-01"
+      },
+      "device": "chromecast-test-01",
+      "generation": 224,
+      "cancel": 0,
+      "error": null,
+      "started": 1791271740.5897355,
+      "finished": 1791271780.977038,
+      "worker_pid": 1369029,
+      "recovery_resolved": 0,
+      "installation": null,
+      "target": "chromecast-test-01"
+    },
+    {
+      "id": "J-220eefda3ae0",
+      "owner": "50834354a173f73472469f04",
+      "accepted": 1791271740.5486681,
+      "state": "completed",
+      "phase": "completed",
+      "request": {
+        "app": "aquarium",
+        "apk": "bdc90a9d38fa5f6d32b87b0bfffbb2f25a7d8efe273f2a187f5dee7be4c78340.apk",
+        "validator": "poke-resume",
+        "workflow": "check",
+        "device": "chromecast-test-02"
+      },
+      "device": "chromecast-test-02",
+      "generation": 79,
+      "cancel": 0,
+      "error": null,
+      "started": 1791271740.5899684,
+      "finished": 1791271776.1400912,
+      "worker_pid": 1369030,
+      "recovery_resolved": 0,
+      "installation": null,
+      "target": "chromecast-test-02"
+    }
+  ],
+  "state": "completed"
+}

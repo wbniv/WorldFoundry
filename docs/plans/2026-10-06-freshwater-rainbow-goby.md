@@ -16,7 +16,23 @@ reproduce a rocky stream. [Independent research and sources](../reference/rainbo
 were saved before this plan and prototype.
 
 [A3 portrait research poster](../reference/rainbow-goby-biomechanics-poster/poster.html)
-· [Printable PDF](../reference/rainbow-goby-biomechanics-poster/poster.pdf).
+· [Printable PDF](../reference/rainbow-goby-biomechanics-poster/rainbow-goby-biomechanics-a3.pdf).
+
+### Grazing rocks — implemented 6 October
+
+Three rounded rocks are now visible in freshwater, with a deterministic 256²
+mottled stone/biofilm texture. Broad top surfaces support a stable grazing pose.
+The goby's authored Forth support profile uses the same rock dimensions as the
+meshes, along its fixed swim plane. Saltwater hides these freshwater perches.
+This adds three visual actors and 384 source triangles, without additional
+physics bodies or engine changes. Four 256² animal/rock textures share the
+existing 512² permanent page.
+
+The cast1 launch check passed (`J-f5bfc4b9d263`); its log reports the goby settled
+at Z=1.365 on the centre stone. Twelve goby tests pass, including support heights,
+settling and compilation of the actual exported scripts in both configurations.
+
+![Cast1: three grazing stones and goby perched on the centre rock](2026-10-06-freshwater-rainbow-goby/evidence/grazing-rocks/screenshot.png)
 
 ![Authored goby geometry and textures](2026-10-06-freshwater-rainbow-goby/goby-mesh-preview.png)
 

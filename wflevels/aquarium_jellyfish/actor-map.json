@@ -87,6 +87,8 @@
       0
     ]
   ],
+  "urchin_contacts": null,
+  "urchin_spines": null,
   "movement": {
     "states": {
       "pitch": 700,
@@ -142,6 +144,7 @@
       "suppress": 749
     }
   },
+  "lionfish_rig": null,
   "animal": "jellyfish",
   "spawn": [
     0,

@@ -1,6 +1,6 @@
 # Asian Arowana — A3 poster
 
-Actual poster: [HTML](poster.html), [PDF](poster.pdf), [PNG preview](poster.png). A3 portrait: 297 × 420 mm. The poster is a finished research/design artifact; its swimming panel explicitly describes proposed game motion, not measured species kinematics.
+Actual poster: [HTML](poster.html), [PDF](asian-arowana-a3.pdf), [PNG preview](poster.png). A3 portrait: 297 × 420 mm. The poster is a finished research/design artifact; its swimming panel explicitly describes proposed game motion, not measured species kinematics.
 
 ## Photos and permission
 
@@ -29,7 +29,7 @@ Sources checked 2 October 2026:
 
 Run `python3 docs/reference/asian-arowana-poster/make_poster.py` from any directory. It embeds the downloaded originals in `poster.html`, writes vector map/anatomy/motion diagrams and builds the plan mockup gallery. Printing is separate so the generator itself needs no browser/network access.
 
-Print `poster.html` using headless Chrome with `--no-pdf-header-footer`, `--print-to-pdf=<absolute poster.pdf path>` and a fresh profile. Then run `pdftoppm -r 150 -png -singlefile poster.pdf poster` for the preview. Inspect PDF page count, A3 dimensions and the rendered page; inspect the browser for element overflow and failed images.
+Print `poster.html` using headless Chrome with `--no-pdf-header-footer`, `--print-to-pdf=<absolute asian-arowana-a3.pdf path>` and a fresh profile. Then run `pdftoppm -r 150 -png -singlefile asian-arowana-a3.pdf poster` for the preview. Inspect PDF page count, A3 dimensions and the rendered page; inspect the browser for element overflow and failed images.
 
 - [x] Sources, image authors and licenses recorded.
 - [x] Photos downloaded at original resolution; HTML embeds them for offline viewing.

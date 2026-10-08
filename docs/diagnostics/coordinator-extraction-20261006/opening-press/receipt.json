@@ -1,0 +1,10 @@
+{
+  "host_tests_passed": 6,
+  "cast1_job": "J-d60e572a8cf5",
+  "opening_gesture": "passed: form, held 0, paused true",
+  "directional_checks": "all four passed",
+  "remaining_failure": "legacy keypad_input_acknowledged assertion on system-text-input APK",
+  "forward_removed": true,
+  "cast2_job": "J-b92c0ef39416",
+  "cast2_result": "blocked before opening gesture: Android 12 rejects input keycombination -t"
+}

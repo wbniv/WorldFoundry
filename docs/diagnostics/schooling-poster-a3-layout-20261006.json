@@ -1,0 +1,38 @@
+{
+  "pages": 1,
+  "a3_points": [
+    841.91998,
+    1191.12
+  ],
+  "body_min_pt": 10.0,
+  "code_min_pt": 8.25,
+  "mathematical_subscripts_min_pt": 8.33,
+  "complete_code_words": [
+    "sch-pair",
+    "sch-want",
+    "sch-turn",
+    "sch-follow"
+  ],
+  "code_line_breaks": "match source, comments omitted",
+  "layout": "two columns",
+  "page_fit": "ok",
+  "code_fit": "ok",
+  "overflow_px": -3.7,
+  "preview_pixels": [
+    3508,
+    4963
+  ],
+  "preview_dpi": [
+    299.9994,
+    299.9994
+  ],
+  "embedded_fonts": true,
+  "source_links": [
+    "https://jmvidal.cse.sc.edu/library/couzin02a.pdf",
+    "https://slevin.princeton.edu/publications/effective-leadership-and-decision-making-animal-groups-move",
+    "https://www.researchgate.net/publication/299389540_Shoaling_and_Schooling_in_Fishes",
+    "https://journals.plos.org/plosone/article?id=10.1371/journal.pone.0090648"
+  ],
+  "blank_outer_edges": true,
+  "sha256": "43cb3fc731f67c752acbf4d93cb1c18a744ae5ef983f99923024bd985299dcf2"
+}

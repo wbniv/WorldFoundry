@@ -6,7 +6,7 @@ This plan owns the shrimp: appearance, shell geometry, shared rig, colony assign
 
 ## A3 poster
 
-[Open the A3 portrait poster](../reference/blue-shrimp-poster/poster.html) · [Print-ready PDF](../reference/blue-shrimp-poster/poster.pdf)
+[Open the A3 portrait poster](../reference/blue-shrimp-poster/poster.html) · [Print-ready PDF](../reference/blue-shrimp-poster/blue-shrimp-a3.pdf)
 
 The poster includes four real render panels (each morph in Blender and in-game), both colour morphs, simplified anatomy, natural grazing/swimming context, the mixed-tank composition and a five-part rig diagram. Biological facts carry source numbers; colony counts, material opacity and animation treatments are labelled as proposed game choices. No simulation frequency or speed is presented as a measured biological result.
 

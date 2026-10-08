@@ -97,9 +97,10 @@ GROUND_CLEARANCE = 0.15
 #    "verified" = opened and checked, "unverified", or "ours" (tuned by looking at captures).
 L_M = m(FISH_LEN)                                       # 0.889 m at ×10
 # Gait: burst-and-coast (Wu, Yang & Zeng 2007, JEB 210:2181, verified: koi; drag while coasting
-# ≈ 1/4 of bursting, ~45 % energy saved). Fish keep the CYCLE constant and change the burst share to
-# set the speed (Li et al. 2021, Commun. Biol. 4:40: as reported by the orchestrator, not opened).
-GAIT_CYCLE = 0.5                                        # s per burst+coast cycle (unverified; ours)
+# ≈ 1/4 of bursting, ~45 % energy saved). Red-nose tetras maintain nearly constant bout duration
+# while changing burst share (Li et al. 2021, Commun. Biol. 4:40, Results/Fig. 2, checked 2026-10-06).
+# This supports a gait idea in another species; our timing below is authored, not a clownfish measurement.
+GAIT_CYCLE = 0.5                                        # s per burst+coast cycle (ours, authored)
 GAIT_DUTY = 0.4                                         # burst share at cruise (ours)
 BURST_SPEED = 1.309 * SWIM_SPEED                        # 3.99 m/s: burst target; the mean is SWIM_SPEED
 TAU_ACCEL = 0.10                                        # s, speed-up during a burst (ours)

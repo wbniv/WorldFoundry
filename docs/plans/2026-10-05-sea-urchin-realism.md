@@ -8,7 +8,7 @@ Improve the planted tank's sea urchin so it crawls with visible traction, has a 
 
 Research was saved before creating the poster and this plan: [independent research document](../reference/sea-urchin-research.md). Sources, study species and access limitations are recorded there.
 
-[Open portrait A3 poster](../reference/sea-urchin-biomechanics-poster/poster.html) · [printable PDF](../reference/sea-urchin-biomechanics-poster/poster.pdf) · [PNG preview](../reference/sea-urchin-biomechanics-poster/poster.png) · [editable generator](../reference/sea-urchin-biomechanics-poster/make_poster.py).
+[Open portrait A3 poster](../reference/sea-urchin-biomechanics-poster/poster.html) · [printable PDF](../reference/sea-urchin-biomechanics-poster/sea-urchin-biomechanics-a3.pdf) · [PNG preview](../reference/sea-urchin-biomechanics-poster/poster.png) · [editable generator](../reference/sea-urchin-biomechanics-poster/make_poster.py).
 
 ![A3 poster preview](../reference/sea-urchin-biomechanics-poster/poster.png)
 

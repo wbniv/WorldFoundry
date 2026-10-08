@@ -1,0 +1,62 @@
+{
+  "id": "B-f472b7381e21",
+  "owner": "50834354a173f73472469f04",
+  "targets": [
+    "chromecast-test-01",
+    "chromecast-test-02"
+  ],
+  "created": 1791265552.9102345,
+  "jobs": [
+    {
+      "id": "J-dec31a3f31b5",
+      "owner": "50834354a173f73472469f04",
+      "accepted": 1791265552.9106407,
+      "state": "needs-local-setup",
+      "phase": "needs-local-setup",
+      "request": {
+        "app": "aquarium",
+        "apk": "53423d846f8aa03edff9918de3d082bf869a892e67f3ecfc7cf4b2320aed6825.apk",
+        "duration": 3.0,
+        "validator": "plant-settings",
+        "workflow": "check",
+        "device": "chromecast-test-01"
+      },
+      "device": "chromecast-test-01",
+      "generation": 194,
+      "cancel": 0,
+      "error": "No unique advertised connection for expected serial; enable Wireless debugging on the TV",
+      "started": 1791265552.9805272,
+      "finished": 1791265558.821154,
+      "worker_pid": 1280782,
+      "recovery_resolved": 0,
+      "installation": null,
+      "target": "chromecast-test-01"
+    },
+    {
+      "id": "J-0079ed755a7a",
+      "owner": "50834354a173f73472469f04",
+      "accepted": 1791265552.911561,
+      "state": "recovery-required",
+      "phase": "recovery-required",
+      "request": {
+        "app": "aquarium",
+        "apk": "53423d846f8aa03edff9918de3d082bf869a892e67f3ecfc7cf4b2320aed6825.apk",
+        "duration": 3.0,
+        "validator": "plant-settings",
+        "workflow": "check",
+        "device": "chromecast-test-02"
+      },
+      "device": "chromecast-test-02",
+      "generation": 60,
+      "cancel": 0,
+      "error": "ADB failed: * daemon not running; starting now at localfilesystem:/var/lib/wf-device-coordinator/adb.sock\n* daemon started successfully\nadb: device '192.168.4.56:5555' not found\n",
+      "started": 1791265552.980964,
+      "finished": 1791265577.6474664,
+      "worker_pid": 1280783,
+      "recovery_resolved": 0,
+      "installation": null,
+      "target": "chromecast-test-02"
+    }
+  ],
+  "state": "failed"
+}

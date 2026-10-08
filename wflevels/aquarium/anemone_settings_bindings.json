@@ -1,0 +1,7 @@
+{
+  "version": 1,
+  "title": "Tank controls",
+  "fields": [
+    {"field": "Control Focus", "mailbox": 729}
+  ]
+}

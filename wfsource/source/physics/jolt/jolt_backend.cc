@@ -286,12 +286,17 @@ uint32_t JoltBodyCreateStaticMesh(const Vector3& pos,
     if (!gPhysicsSystem) return kJoltInvalidBodyID;
 
     JPH::Vec3 worldOffset = ToJph(pos);
+    // TODO: Reimplement these temporary log guards using upstream diagnostic
+    // conventions (DBSTREAM/SW_DBSTREAM collision channel and Jolt trace integration).
+#if DO_DEBUGGING_INFO
     std::fprintf(stderr, "jolt: mesh actor_pos=(%.3f,%.3f,%.3f)\n",
                  pos.X().AsFloat(), pos.Y().AsFloat(), pos.Z().AsFloat());
+#endif
 
     // Use MeshShape — correctly handles flat and sloped surfaces.
     // Vertices are in actor-local space; body is placed at actor world position.
     // Add both windings so the surface is two-sided (ball can approach from either side).
+#if DO_DEBUGGING_INFO
     for (int i = 0; i < vertCount; ++i) {
         std::fprintf(stderr, "jolt: mesh v%d local=(%.3f,%.3f,%.3f) world=(%.3f,%.3f,%.3f)\n",
                      i, verts[i].x, verts[i].y, verts[i].z,
@@ -299,6 +304,7 @@ uint32_t JoltBodyCreateStaticMesh(const Vector3& pos,
                      verts[i].y + worldOffset.GetY(),
                      verts[i].z + worldOffset.GetZ());
     }
+#endif
 
     JPH::TriangleList triangles;
     triangles.reserve((size_t)(faceCount * 2));
@@ -338,8 +344,10 @@ uint32_t JoltBodyCreateStaticMesh(const Vector3& pos,
             kJoltBodyPoolMax);
         return kJoltInvalidBodyID;
     }
+#if DO_DEBUGGING_INFO
     std::fprintf(stderr, "jolt: body MESH_STATIC verts=%d faces=%d id=%u\n",
                  vertCount, faceCount, id.GetIndexAndSequenceNumber());
+#endif
 
     uint32_t handle = AllocEntry();
     BodyEntry& e = gBodies[handle];

@@ -617,6 +617,15 @@ tasks:
       - ./gradlew assembleDebug
       - echo "APKs → android/app/build/outputs/apk/{snowgoons,aquarium,condo,smb,qbert}/debug/worldfoundry-{snowgoons,aquarium,condo,smb,qbert}-debug.apk"
 
+  build-apk-diagnostic:
+    desc: "Build the opt-in Aquarium read-only runtime diagnostic APK (release optimization)"
+    dir: android
+    env:
+      ANDROID_HOME: /usr/lib/android-sdk
+    cmds:
+      - ./gradlew assembleAquariumDiagnostic
+      - echo "APK → android/app/build/outputs/apk/aquarium/diagnostic/worldfoundry-aquarium-diagnostic.apk"
+
   install-apk:
     desc: "Install + start one app's release APK on a device (APP=aquarium|snowgoons|condo|smb|qbert, default aquarium; -- <ip> for network ADB), evidence → ~/tmp/android-device-run/ (scripts/android-device-run.sh)"
     vars:
@@ -625,9 +634,9 @@ tasks:
       - bash scripts/android-device-run.sh --release --app {{.APP}} {{.CLI_ARGS}}
 
   chromecast:install:
-    desc: "Install/update the protected coordinator; saves an installation log (requires sudo)"
+    desc: "Compatibility alias for reviewed upgrades in the standalone coordinator project"
     cmds:
-      - sudo python3 scripts/install-device-coordinator.py --reload-timeout 60 {{.CLI_ARGS}}
+      - python3 scripts/coordinator-admin.py {{.CLI_ARGS}}
 
   chromecast:devices:
     desc: "Coordinated Chromecast devices"
@@ -656,6 +665,8 @@ tasks:
       WF_CC_ADDRESS: '{{.ADDRESS | default ""}}'
       WF_CC_METHOD: '{{.METHOD | default ""}}'
       WF_CC_REASON: '{{.REASON | default ""}}'
+      WF_CC_FREQUENCY: '{{.FREQUENCY | default ""}}'
+      WF_CC_CALLGRAPH: '{{.CALLGRAPH | default ""}}'
     cmds:
       - python3 scripts/chromecast.py task devices
 
@@ -738,6 +749,13 @@ tasks:
     env: *chromecast_env
     cmds:
       - python3 scripts/chromecast.py task profile
+
+  chromecast:simpleperf:
+    desc: "Coordinated simpleperf CPU profile of a profileable app (FREQUENCY, CALLGRAPH=none|dwarf)"
+    silent: true
+    env: *chromecast_env
+    cmds:
+      - python3 scripts/chromecast.py task simpleperf
 
   chromecast:capture:
     desc: "Capture the current Chromecast display without launch, input or installation"
@@ -1504,12 +1522,12 @@ tasks:
     generates:
       - docs/reference/clownfish-biomechanics-poster/data.json
       - docs/reference/clownfish-biomechanics-poster/poster.html
-      - docs/reference/clownfish-biomechanics-poster/poster.pdf
+      - docs/reference/clownfish-biomechanics-poster/clownfish-biomechanics-a3.pdf
       - docs/reference/clownfish-biomechanics-poster/poster.png
     status:
       # the checksum on `sources` decides staleness; this only catches a deleted or empty output
       - test -s docs/reference/clownfish-biomechanics-poster/poster.html
-      - test -s docs/reference/clownfish-biomechanics-poster/poster.pdf
+      - test -s docs/reference/clownfish-biomechanics-poster/clownfish-biomechanics-a3.pdf
       - test -s docs/reference/clownfish-biomechanics-poster/poster.png
 
   test-poster-clownfish-biomechanics:

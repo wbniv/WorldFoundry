@@ -1,0 +1,12 @@
+--- a/android/app/src/main/java/org/worldfoundry/wf_game/WorldFoundryActivity.java
++++ b/android/app/src/main/java/org/worldfoundry/wf_game/WorldFoundryActivity.java
+@@ -13,6 +13,9 @@
+ 
+ /** Android owns text input, selection and IME; native code owns the draft. */
+ public class WorldFoundryActivity extends NativeActivity {
++    // Register the native library with this class loader for textResult JNI calls.
++    static { System.loadLibrary("wf_game"); }
++
+     private AlertDialog textDialog;
+     private EditText textField;
+     private long textSession;

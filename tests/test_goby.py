@@ -70,6 +70,27 @@ def test_cooked_plant_scripts_compile(host, tmp_path):
     assert h.size() < 65536
 
 
+def test_rounded_grazing_rocks_and_support_profile(host):
+    rocks=[(-2.65,-.85,1,.55,.45),(0,-.85,.95,.58,.65),(2.65,-.85,1.1,.62,.38)]
+    for x,y,rx,ry,height in rocks:
+        mesh=goby.grazing_rock(rx,ry,height)
+        assert max(v[2] for v in mesh.vertices)==height
+        assert len(mesh.uvs)==len(mesh.vertices)
+        assert len(mesh.faces)==80
+    h=host
+    assert h.eval(goby.perch_forth(rocks,.635,.865))=='ok'
+    # Forth binds calls at compile time, as the generator does after the profile.
+    assert h.load(ROOT/'wflevels/aquarium_tanks/goby_controller.fth')=='ok'
+    for x,expected in [(0,1.365),(-2.65,1.165),(2.65,1.095),(4,.865)]:
+        h.write(3009,x)
+        assert h.eval('gb-floor 1170 write-mailbox')=='ok'
+        assert h.read(1170)==pytest.approx(expected,abs=2/65536)
+    h.write(3009,0);h.write(3011,3);h.write(1146,1)
+    step(h,300)
+    assert h.read(3011)==pytest.approx(1.365,abs=.003)
+    assert h.read(1146)==3
+
+
 @pytest.fixture(params=['float','fixed'])
 def host(request,binaries):
     zf.BIN = binaries[request.param]

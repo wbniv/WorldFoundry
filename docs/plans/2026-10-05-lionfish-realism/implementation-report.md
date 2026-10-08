@@ -119,7 +119,7 @@ The retired fixed-function renderer has no palette shader. Unflagged materials
 retain the original sampling path. The other seven standalone tank payloads
 are byte-identical to the baseline.
 
-[Updated A3 portrait poster](../../reference/lionfish-biomechanics-poster/poster.pdf)
+[Updated A3 portrait poster](../../reference/lionfish-biomechanics-poster/lionfish-biomechanics-a3.pdf)
 includes the actual engine capture, implementation constants, the Forth
 interface and cited research; it is one 297 × 420 mm page.
 

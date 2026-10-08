@@ -87,6 +87,7 @@ public:
     // first call are ignored until released (so a held key cannot pick a level).
     void Update(uint32_t buttons, int64_t nowMs);
 
+    bool WaitingForRelease() const { return phase_ == Phase::WaitRelease; }
     bool Chosen() const { return phase_ != Phase::Choosing; }   // A pressed
     bool Done() const   { return phase_ == Phase::Done; }       // ...and released: start the level
     int  Cursor() const { return cursor_; }

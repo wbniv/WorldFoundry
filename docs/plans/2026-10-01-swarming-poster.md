@@ -1,6 +1,6 @@
 # An A3 poster for swarming, and the Forth core it prints
 
-Status: **built and verified** (2026‑10‑01); the numbers on it are measured, and what is **not** measured is printed on the poster itself.
+Status: **built and verified** (2026‑10‑01), **printed** (2026‑10‑06); the numbers on it are measured, and what is **not** measured is printed on the poster itself.
 
 - [x] Phase A: research the model (Couzin et al. 2002, read from the PDF) and write it as a numpy reference
 - [x] Phase B: the Forth core, `wflevels/aquarium/school.fth`, tested against the reference in the engine's own zForth
@@ -13,7 +13,7 @@ Status: **built and verified** (2026‑10‑01); the numbers on it are measured,
 
 The user asked for **an A3 poster for swarming, similar to the fish poster**, and then: **"how big is the forth implementation? update plan: include all (or the core part of it) on the poster"**, and **"update plan: add diagrams!!!"**.
 
-The Forth implementation did not exist when the second question was asked, so the honest answer was "nothing yet". It was written, run, and measured so the poster could print real numbers. The poster is [`docs/reference/swarming-poster/poster.pdf`](../reference/swarming-poster/poster.pdf) ([PNG](../reference/swarming-poster/poster.png), [HTML](../reference/swarming-poster/poster.html)), built from the same kind of data sheet as the [clownfish biomechanics poster](2026-09-30-clownfish-biomechanics-poster.md) and sharing its helpers.
+The Forth implementation did not exist when the second question was asked, so the honest answer was "nothing yet". It was written, run, and measured so the poster could print real numbers. The poster is [`schooling-poster.pdf`](../reference/swarming-poster/schooling-poster.pdf) ([PNG](../reference/swarming-poster/schooling-poster.png), [HTML](../reference/swarming-poster/schooling-poster.html)), built from the same kind of data sheet as the [clownfish biomechanics poster](2026-09-30-clownfish-biomechanics-poster.md) and sharing its helpers.
 
 [![The poster at 57 %](2026-10-01-swarming-poster/poster.png)](2026-10-01-swarming-poster/poster.html)
 
@@ -249,3 +249,16 @@ None: local computation, one NDK cross-compile, one short run on the Chromecast 
 |---|---|---|
 | Reading the paper, choosing what to claim, the Forth core, the measurements, the poster | T5 | done inline: every claim depends on what was actually found |
 | Re-running `task swarming-measure` after a change | T1 | a known recipe |
+
+
+## A3 print layout preference — 2026-10-06
+
+Will preferred the previous layout after reviewing the two-column redesign, so the original panel arrangement and textual evidence chips are restored. Keep the subtitle “Why fish swarm, circle and swim together,” the corrected source references, one A3 page and the higher-resolution 300 DPI PNG preview. `make_swarm_poster.py` generates the current layout directly again.
+
+The two-column redesign's [validation record](../diagnostics/schooling-poster-a3-layout-20261006.json) is historical, not a description of the current print copy. Current print hashes and page fit are recorded in the [reference verification report](../diagnostics/aquarium-poster-reference-verification-20261006.json).
+
+## Physical print feedback — 2026-10-06
+
+Will printed the A3 schooling poster. The paper felt too glossy; the shop offers only that paper. For the next print, find a different shop offering **A3 matte or uncoated, plain non-glossy stock**, and confirm stock availability before visiting. The paper finish is a print-shop constraint, not a requested change to the poster layout. No physical-print legibility assessment was reported.
+
+Both layouts remain available for comparison: [original](../reference/swarming-poster/layout-comparison/schooling-original-a3.pdf) and [two-column](../reference/swarming-poster/layout-comparison/schooling-two-column-a3.pdf). The original layout remains the preferred version.

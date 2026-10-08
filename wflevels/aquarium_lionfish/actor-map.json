@@ -77,6 +77,8 @@
       0
     ]
   ],
+  "urchin_contacts": null,
+  "urchin_spines": null,
   "movement": {
     "states": {
       "pitch": 700,

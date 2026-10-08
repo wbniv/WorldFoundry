@@ -1,0 +1,1570 @@
+//=============================================================================
+// Actor.cc:
+// Copyright ( c ) 1994,95,96,97,99 World Foundry Group  
+// Part of the World Foundry 3D video game engine/production environment
+// for more information about World Foundry, see www.worldfoundry.org
+//==============================================================================
+// This program is free software; you can redistribute it and/or
+// modify it under the terms of the GNU General Public License
+// Version 2 as published by the Free Software Foundation
+//
+// This program is distributed in the hope that it will be useful,
+// but WITHOUT ANY WARRANTY; without even the implied warranty of
+// MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+// GNU General Public License for more details.
+//
+// You should have received a copy of the GNU General Public License
+// along with this program; if not, write to the Free Software
+// Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.
+// or see www.fsf.org
+
+// ===========================================================================
+// Description: Actor is the base classs for game world objects.
+// Original Author: Ann Mei Chang
+// Completely re-written by: Various
+// ===========================================================================
+
+#include "global.hp"
+#include "actor.hp"
+
+#include <particle/emitter.hp>
+
+#include "level.hp"
+#include "movement.hp"
+#include "animmang.hp"
+#include "tool.hp"
+#include "inputai.hp"
+#include "gamestrm.hp"
+#include "shield.hp"
+#include "missile.hp"				// kludge for owner field
+#include "shadow.hp"
+#include "camera.hp"
+#include "mailbox.hp"
+#include "rooms.hp"
+
+#include "oas/oad.h"
+#include "oas/mesh.ht"
+#include "oas/enemy.ht"
+#include "oas/gold.ht"
+#include "oas/spike.ht"
+#include "oas/activate.ht"
+
+#include "movecam.hp"
+#include "movefoll.hp"
+
+class Tool;
+
+const Scalar Actor::INDESTRUCTIBLE_HP = Scalar( 32767 );	// grrr, Scalar::max isn't constructed yet
+
+#include <streams/binstrm.hp>
+#include <iff/iffread.hp>
+
+#if defined( __WIN__ )				// only here so play cd kludge will work, remove
+#include <windows.h>
+#endif
+
+#if defined (__PSX__)
+#	include	<libcd.h>
+#	if defined( SOUND )
+#		include <libspu.h>
+#		include <libsnd.h>
+#	endif
+#endif
+
+#if defined( SOUND )
+#	include <climits>
+#endif
+
+// ===========================================================================
+
+static InputNull theNullInput;
+static QInputDigital theNullInputDigital( &theNullInput, int(0) );
+
+extern bool gCDEnabled;
+
+extern PathHandler			thePathHandler;
+extern DelayCameraHandler	theDelayCameraHandler;
+extern FollowHandler		theFollowHandler;
+
+//============================================================================
+
+#if SW_DBSTREAM
+#include <pigsys/genfh.hp>
+#include "velgame.hp"
+
+ostream&
+Actor::_print( ostream& s ) const
+{
+	char szActor[ _MAX_PATH ];
+	strcpy( szActor, "unknown" );
+
+#pragma message( __FILE__ ": recode to use genfh.hp macros" )
+#if !defined(__PSX__)
+
+	static char* actorNames[2000];
+	static int actorCount = 0;
+	if (!actorNames[0])
+	{
+		int levelNum = theGame->GetLevelNum() + 1;
+		char szLevelsTxt[ _MAX_PATH ];
+
+		extern char szOadDir[];
+		sprintf( szLevelsTxt, "%s\\..\\levels.txt", szOadDir );
+		FILE* levelList = fopen(szLevelsTxt, "rt");
+		if(levelList)
+		{
+			char szLevelDir[ 256 ];
+			// read level name
+			while(levelNum--)
+				fgets(szLevelDir,sizeof(szLevelDir),levelList);
+			assert(strlen(szLevelDir));
+			szLevelDir[strlen(szLevelDir)-1] = 0;
+
+			char szObjectsId[ _MAX_PATH ];
+			//assert( getenv( "OAD_DIR" ) );
+			assert( *szOadDir );
+			sprintf( szObjectsId, "%s\\..\\%s\\objects.id", szOadDir, szLevelDir );
+			FILE* fp = fopen( szObjectsId, "rt" );
+			if ( fp )
+			{
+				AssertMsg( ValidPtr( fp ), "Unable to open file " << szObjectsId );
+
+				while ( !feof( fp ) )
+				{
+					char szLine[ 256 ];
+					char _szActor[ 64 ];
+					int idxActor=0;
+
+					fgets( szLine, sizeof( szLine ), fp );
+					if (sscanf( szLine, "( define %s %d )\n", _szActor, &idxActor ) == 2)
+					{
+						AssertMsg(actorCount == idxActor,"ActorCount = " << actorCount << ", idxActor = " << idxActor);
+						actorNames[idxActor] = strdup(_szActor);
+						assert(actorNames[idxActor]);
+						actorCount++;
+					}
+				}
+				fclose( fp );
+			}
+		}
+	}
+	if ( actorNames[ 0 ] && ( GetActorIndex() <= actorCount && actorNames[ GetActorIndex() ] ) )
+		strcpy( szActor, actorNames[ GetActorIndex() ] );
+
+#endif
+
+	s << "Actor #" << GetActorIndex() << " (" << szActor << ')';
+	if ( (NumberOfLocalMailboxes() > 0) && ValidPtr(_localMailboxes) )
+	{
+		s << " Mailboxes = [ ";
+		for ( int i=0; i<NumberOfLocalMailboxes(); ++i )
+			s << _localMailboxes[i] << ' ';
+		s << ']';
+	}
+
+	return s;
+}
+
+
+ostream&
+Actor::printDetailed( ostream& s ) const
+{
+	s << *this;
+//	s << " currentPos=" << currentPos();
+//	s << " physicalAttributes=" << GetPhysicalAttributes();
+
+	return s;
+}
+
+#endif // SW_DBSTREAM
+
+//============================================================================
+
+const Actor*
+Actor::Activated( struct _Activation* actbox, int32* objList ) const
+{
+	Actor* colActor = NULL;
+
+	switch ( actbox->ActivatedBy )
+	{
+		case 0:
+		{	// All Actors
+			DBSTREAM1( cactor << "Checking actors in room " << GetRoom() << endl; )
+
+			Room& theRoom = (Room&)theLevel->GetLevelRooms().GetRoom( GetRoom() );
+			ActorListIter alIter = theRoom.GetCollisionIter();
+
+			while ( !alIter.Empty() )
+			{
+				colActor = theLevel->getActor(*alIter);
+				DBSTREAM1( cactor << endl << "checking against actor #" << theLevel->GetActorIndex( colActor ); )
+				assert( ValidPtr( colActor ) );
+				const PhysicalAttributes& pa = colActor->GetPhysicalAttributes();
+
+				if ( pa.CheckCollision( GetPhysicalAttributes() ) )
+					return colActor;
+
+				++alIter;
+			}
+			break;
+		}
+
+		case 1:
+		{	// by Actor
+			AssertMsg( actbox->ActivatedByActor != -1, *this << " activated non-existant actor" << endl );
+			colActor = theLevel->getActor( actbox->ActivatedByActor );
+			if ( colActor )
+			{
+				//AssertMsg( colActor, *this << " activated by actor " << *colActor << " activated non-existant actor" << endl );
+				const PhysicalAttributes& pa = colActor->GetPhysicalAttributes();
+				if ( pa.CheckCollision( GetPhysicalAttributes() ) )
+					return colActor;
+			}
+			break;
+		}
+
+		case 2:
+		{	// by Class
+			DBSTREAM1( cactor << "(ActBox::class) Checking actors in room " << GetRoom() <<
+				"with class = " << actbox->ActivatedByClass << endl; )
+
+			Room& theRoom = (Room&)theLevel->GetLevelRooms().GetRoom( GetRoom() );
+			ActorListIter alIter = theRoom.GetCollisionIter();
+
+			while ( !alIter.Empty() )
+			{
+				colActor = theLevel->getActor(*alIter);
+				assert( ValidPtr( colActor ) );
+				if ( actbox->ActivatedByClass == colActor->kind() )
+				{
+					DBSTREAM3( cactor << endl << "checking against actor #" << theLevel->GetActorIndex( colActor ); )
+					const PhysicalAttributes& pa = colActor->GetPhysicalAttributes();
+
+					if ( pa.CheckCollision( GetPhysicalAttributes() ) )
+						return colActor;
+				}
+
+			++alIter;
+			}
+
+		break;
+        }
+
+		case 3:
+        {       // Object List
+			(void)objList;
+			DBSTREAM1( cerror << "Activation by object list unimplemented" << endl; )
+			DBSTREAM1( cerror << " invoked by object #" << theLevel->GetActorIndex( this ) << endl; )
+			assert( 0 );	// Untested
+			DBSTREAM3( cactor << "(ActBox::ObjectList) actors" << endl; )
+			break;
+        }
+
+		default:
+			assert( 0 );
+		}
+
+	return NULL;
+}
+
+//=============================================================================
+
+void
+Actor::_InitScript( const SObjectStartupData* startupData )
+{
+	_nonStatPlat->_script = NULL;
+	if ( GetCommonPtr()->Script != -1 )
+	{
+		DBSTREAM1( cdebug << "GetCommonPtr()->Script = " << GetCommonPtr()->Script << endl; )
+		AISCRIPT* pAiScript = (AISCRIPT*)(((char*)startupData->commonBlockBase) + GetCommonPtr()->Script );
+		AssertMsg( ValidPtr( pAiScript ), "actor = " << *this );
+		_nonStatPlat->_script = new (*startupData->memory) InputAI( this, pAiScript );
+		assert( ValidPtr( _nonStatPlat->_script ) );
+	}
+}
+
+//============================================================================
+
+void
+Actor::_InitInput( const SObjectStartupData* startupData)
+{
+	if ( GetCommonPtr()->ScriptControlsInput )
+	{
+		_inputScript = new (*startupData->memory) InputScript;
+		assert( ValidPtr( _inputScript ) );
+		_nonStatPlat->_input = new (*startupData->memory) QInputDigital( _inputScript, *startupData->memory );
+		assert( ValidPtr( _nonStatPlat->_input ));
+	}
+	else
+	{
+		_inputScript = NULL;
+		assert( ValidPtr( &theNullInputDigital ) );
+		_nonStatPlat->_input = &theNullInputDigital;
+		assert( ValidPtr( _nonStatPlat->_input ));
+	}
+	assert( ValidPtr( _nonStatPlat->_input ) );
+}
+
+//============================================================================
+
+void
+Actor::_InitShadow()
+{
+	int32 idxShadow = GetShadowPagePtr()->ShadowObjectTemplate;
+	if ( idxShadow > 0 )
+	{	// Create shadow
+		Shadow* pShadow = (Shadow*)theLevel->ConstructTemplateObject( idxShadow, _idxActor );
+		assert( ValidPtr( pShadow ) );
+		assert( pShadow->kind() == Shadow_KIND );
+		pShadow->SetShadowedObject( _idxActor );
+		theLevel->AddActor( pShadow, currentPos() );
+	}
+}
+
+//============================================================================
+
+void
+Actor::_InitTools()
+{
+	const _Toolset* pToolset = GetToolsetPtr();
+	assert( ValidPtr( pToolset ) );
+	int* pidxTools = (int*)( &pToolset->ToolA );
+	assert( ValidPtr( pidxTools ) );
+
+	if ( _nonStatPlat->_nTools )
+	{
+//		// temp
+//		_nonStatPlat->_tool = new ( theLevel->GetMemory() )( Tool*[ _MAX_TOOLS ] );
+//		assert( ValidPtr( _nonStatPlat->_tool ) );
+
+		for ( int idxTool=0; idxTool<_MAX_TOOLS; ++idxTool )
+		{
+			Tool* pTool = NULL;
+			if ( pidxTools[ idxTool ] != -1 )
+			{
+				pTool = (Tool*)theLevel->ConstructTemplateObject( pidxTools[ idxTool ], GetActorIndex() );
+				assert( ValidPtr( pTool ) );
+	 			assert( pTool->kind() == Tool_KIND );
+				pTool->PickedUpBy( GetActorIndex() );
+				theLevel->AddActor( pTool );
+			}
+			_nonStatPlat->_tool[ idxTool ] = pTool;
+		}
+	}
+}
+
+//============================================================================
+
+void
+Actor::_InitTools( const SObjectStartupData* startupData )
+{
+}
+
+//============================================================================
+
+void
+Actor::BindAssets(Memory& memory)
+{
+	assert( ValidPtr( GetMeshPagePtr() ) );
+	switch( GetMeshPagePtr()->ModelType )
+	{
+		case MODEL_TYPE_NONE:
+#if defined(SHOW_COLLISION_AS_BOXES)
+			if(GetCommonPtr()->Mass != Scalar::zero)
+			{
+				Vector3 min(_physicalAttributes.GetColSpace().Min());
+				Vector3 max(_physicalAttributes.GetColSpace().Max());
+				_renderActor = new (memory) RenderActor3DBox(memory,min,max);
+				_physicalAttributes.SetRotationA(Angle::zero);
+				_physicalAttributes.SetRotationB(Angle::zero);
+				_physicalAttributes.SetRotationC(Angle::zero);
+			}
+			else
+#endif	                                // SHOW_COLLISION_AS_BOXES
+			_renderActor = &NULLRenderActor;
+			break;
+
+		case MODEL_TYPE_BOX:
+		{
+			Vector3 min(_physicalAttributes.GetColSpace().Min());
+			Vector3 max(_physicalAttributes.GetColSpace().Max());
+			_renderActor = new (memory) RenderActor3DBox(memory,min,max);
+			_physicalAttributes.SetRotationA(Angle::zero);
+			_physicalAttributes.SetRotationB(Angle::zero);
+			_physicalAttributes.SetRotationC(Angle::zero);
+			break;
+		}
+
+		case MODEL_TYPE_MESH:
+		{
+#if defined(SHOW_GEOMETRY_AS_BOXES)  || defined(SHOW_COLLISION_AS_BOXES)				// don't show geometry, show boxes instead
+			if(GetCommonPtr()->Mass != Scalar::zero)
+			{
+				Vector3 min(_physicalAttributes.GetColSpace().Min());
+				Vector3 max(_physicalAttributes.GetColSpace().Max());
+				_renderActor = new (memory) RenderActor3DBox(memory,min,max);
+				_physicalAttributes.SetRotationA(Angle::zero);
+				_physicalAttributes.SetRotationB(Angle::zero);
+				_physicalAttributes.SetRotationC(Angle::zero);
+			}
+			else
+				_renderActor = &NULLRenderActor;
+#else
+			// load model from disk
+			packedAssetID assetID( GetMeshName() );
+			DBSTREAM3( cout << "lookup up asset stream for asset id " << assetID << endl; )
+			binistream binis = theLevel->GetAssetManager().GetAssetStream(assetID);
+			assert(binis.good());
+#pragma message ("KTS: this sux, how should I notice redundant models, and how do I not have to new everything?")
+			_renderActor = new (memory) RenderActor3DAnimates(memory,binis,assetID.ID());
+			assert(ValidPtr(_renderActor));
+#endif				                    // SHOW_GEOMETRY_AS_BOXES
+			break;
+		}
+
+		case MODEL_TYPE_SCARECROW:
+		{
+#if 1
+			packedAssetID meshName( GetMeshName() );
+			DBSTREAM3( cout << "lookup up asset stream for asset id " << meshName << endl; )
+			binistream binis = theLevel->GetAssetManager().GetAssetStream( meshName );
+			assert( binis.good() );
+			packedAssetID assetID = GetMeshName();
+			Vector3 min(_physicalAttributes.GetColSpace().Min());
+			Vector3 max(_physicalAttributes.GetColSpace().Max());
+			_renderActor = new (memory) RenderActorScarecrow( memory, binis, assetID.ID(), min, max );
+#else
+			_renderActor = new (memory) RenderActorScarecrow( memory );
+#endif
+			assert( ValidPtr( _renderActor ) );
+			break;
+		}
+
+		case MODEL_TYPE_LIGHT:
+			_renderActor = &NULLRenderActor;
+			break;
+
+		case MODEL_TYPE_MATTE:
+			_renderActor = new (memory) RenderActorMatte( memory );
+			break;
+
+		case MODEL_TYPE_EMITTER:
+		{
+			Emitter::EmitterParameters ep;
+			ep.nParticles = GetMeshPagePtr()->nParticles;
+			ep.generationType = GetMeshPagePtr()->generationType;
+			ep.period = GetMeshPagePtr()->period;
+			ep.startDelay = GetMeshPagePtr()->timeDelay;
+			ep.yArc = GetMeshPagePtr()->yArc;
+			ep.zArc = GetMeshPagePtr()->zArc;
+			ep.initialSphereRadius = GetMeshPagePtr()->initialSphereRadius;
+			ep.sphereExpansionRate = GetMeshPagePtr()->sphereExpansionRate;
+			ep.position = _physicalAttributes.Position();
+			ep.rotation = _physicalAttributes.Rotation();
+
+			Emitter::ParticleParameters pp;
+			pp.initialVelocity = GetMeshPagePtr()->initialVelocity;
+			pp.initialRotation = Euler( Angle::Revolution( GetMeshPagePtr()->initialAngleA ), Angle::Revolution( GetMeshPagePtr()->initialAngleB ), Angle::Revolution( GetMeshPagePtr()->initialAngleC ) );
+			pp.deltaRotation = Euler( Angle::Revolution( GetMeshPagePtr()->deltaAngleA ), Angle::Revolution( GetMeshPagePtr()->deltaAngleB ), Angle::Revolution( GetMeshPagePtr()->deltaAngleC ) );
+			pp.lifeTime = GetMeshPagePtr()->lifeTime;
+			pp.initialAlpha = GetMeshPagePtr()->initialAlpha;
+			pp.alphaDecrement = GetMeshPagePtr()->alphaDecrement;
+			//pp.templateObject = GetMeshPagePtr()->
+
+			packedAssetID assetID( GetMeshName() );
+			DBSTREAM3( cout << "lookup up asset stream for asset id " << assetID << endl; )
+			binistream binis = theLevel->GetAssetManager().GetAssetStream( assetID );
+			assert( binis.good() );
+			pp.templateObject = new ( memory ) RenderObject3D( memory, binis , assetID.ID() );
+			assert( ValidPtr( pp.templateObject ) );
+
+			//_renderActor = &NULLRenderActor;
+			_renderActor = new ( memory ) RenderActorEmitter( memory, *GetMeshPagePtr(), ep, pp );
+			break;
+		}
+
+		default:
+			assert(0);
+	}
+
+	assert(ValidPtr(_renderActor));
+	_renderActor->Validate();
+	DBSTREAM3(casset << "BindAssets: actor:" << *this << ",now has a renderActor =" << _renderActor << endl; )
+
+}
+
+//============================================================================
+
+void
+Actor::UnBindAssets()
+{
+	DBSTREAM3(casset << " UnBindAssets: actor:" << *this << ",has a renderActor =" << _renderActor << endl; )
+	if(_renderActor && _renderActor != &NULLRenderActor)
+		_renderActor->~RenderActor();
+	_renderActor = NULL;
+	DBSTREAM3(casset << " UnBindAssets: done" << endl; )
+}
+
+//============================================================================
+
+const Tool*
+Actor::GetTool( int idxTool ) const
+{
+	assert( idxTool < _MAX_TOOLS );
+	return (const Tool*)_nonStatPlat->_tool[ idxTool ];
+}
+
+Tool*
+Actor::GetTool( int idxTool )
+{
+	assert( idxTool < _MAX_TOOLS );
+	return _nonStatPlat->_tool[ idxTool ];
+}
+
+
+
+Actor::Actor()
+{
+}
+
+const Actor::NonStatPlatData Actor::_statPlatData;
+
+Actor::Actor( const SObjectStartupData* startupData )
+{
+	DBSTREAM3( cactor << "Actor::Actor:" << endl; )
+	assert( ValidPtr( startupData ) );
+
+	_idxActor = startupData->idxActor;
+
+	_nRoom = startupData->roomNum;
+
+	_oadData = (void*)( startupData->objectData + 1 );
+	assert( ValidPtr( _oadData ) );
+
+	const _ObjectOnDisk* objdata = startupData->objectData;
+	assert( ValidPtr( objdata ) );
+	_physicalAttributes.SetColSpace( &startupData->objectData->coarse,
+									 Vector3( Scalar( objdata->x ), Scalar( objdata->y ), Scalar( objdata->z ) ),
+									 GetCommonPtr()->slopeA,
+									 GetCommonPtr()->slopeB,
+									 GetCommonPtr()->slopeC,
+									 GetCommonPtr()->slopeD );
+	_physicalAttributes.SetLinVelocity( Vector3::zero );
+	_physicalAttributes.SetPredictedPosition( _physicalAttributes.Position() );
+	_physicalAttributes.SetRotationA(Angle::Revolution(Scalar(0,objdata->rotation.a)));
+	_physicalAttributes.SetRotationB(Angle::Revolution(Scalar(0,objdata->rotation.b)));
+	_physicalAttributes.SetRotationC(Angle::Revolution(Scalar(0,objdata->rotation.c)));
+	_physicalAttributes.ValidateCollisionSpace();
+
+	_hasRunPredictPosition = false;
+	_hasRunUpdate = false;
+//	_hasGeneratedShadow = false;
+	_lastVisibility = false;
+	_visibility = false;
+
+	_renderActor = NULL;
+
+	DBSTREAM3( cactor << "Created new Actor #" << _idxActor );
+	DBSTREAM3( cactor << ", Physical Attributes: " << endl );
+	DBSTREAM3( cactor << _physicalAttributes << endl; )
+
+	// non-statplat data
+	if ( objdata->type == Actor::StatPlat_KIND )
+	{
+		_nonStatPlat = const_cast<NonStatPlatData*>( &_statPlatData );
+
+		AssertMsg( GetCommonPtr()->Script == -1, *this << " -- No scripts allowed on StatPlat's" );
+		AssertMsg( !GetCommonPtr()->ScriptControlsInput, *this <<" -- No scripts [and therefore no Script Controls Input] on StatPlat's" );
+		AssertMsg( NumberOfLocalMailboxes() == 0, *this << " -- No local mailboxes allowed on StatPlat's" );
+		AssertMsg( GetMoveBlocPtr()->Mobility == MOBILITY_ANCHORED, *this << " -- StatPlat's must be anchored -- Mobility is " << GetMoveBlocPtr()->Mobility );
+	}
+	else
+	{
+		_nonStatPlat = new (theLevel->GetMemory()) NonStatPlatData;
+		assert( ValidPtr( _nonStatPlat ) );
+
+		_hitPoints = Scalar( GetCommonPtr()->hp );
+		_shield = NULL;
+
+		_InitInput( startupData );
+
+		_InitScript( startupData );
+
+		_currentMovementHandler = NULL;
+		_movementHandlerData = NULL;		// filled in by _currentMovementHandler->init()
+		//InitMovementHandler();
+		//InitMovementHandlerData( theLevel->GetMemory() );
+
+#pragma message( __FILE__ ": probably should have movepath handler initializer do this" )
+		if ( GetMoveBlocPtr()->Mobility == MOBILITY_PATH )
+		{
+			assert( ValidPtr( startupData->path ) );
+			DBSTREAM3( cactor << "  Has path data" << endl; )
+			_path = new (*startupData->memory) Path(startupData->path);
+			assert( ValidPtr( _path ) );
+			setCurrentPos( _path->Position(theLevel->getWallClock()) );
+		}
+		else
+			_path = NULL;
+
+
+		if ( NumberOfLocalMailboxes() )
+		{
+			_localMailboxes = new (*startupData->memory) Scalar[ NumberOfLocalMailboxes() ];
+			assert( ValidPtr( _localMailboxes ) );
+			for ( int index=0; index<NumberOfLocalMailboxes(); ++index )
+				_localMailboxes[ index ] = Scalar::zero;
+		}
+		else
+			_localMailboxes = NULL;
+
+		_animManager = &NullAnimationManager::theNullAnimationManager;
+
+		// setup the tools
+		const _Toolset* pToolset = GetToolsetPtr();
+		assert( ValidPtr( pToolset ) );
+		int* pidxTools = (int*)( &pToolset->ToolA );
+		assert( ValidPtr( pidxTools ) );
+
+		_nonStatPlat->_nTools = 0;
+		for ( int idxTool=0; idxTool<_MAX_TOOLS; ++idxTool )
+		{
+			if ( pidxTools[ idxTool ] != -1 )
+				++_nonStatPlat->_nTools;
+		}
+	}
+
+	AssertMsg( _hitPoints > Scalar::zero, *this << " has an invalid hit point setting of " << _hitPoints );
+
+	if ( HasMesh() )
+		AssertMsg( ( GetMeshPagePtr()->ModelType == MODEL_TYPE_BOX )
+//		|| ( GetMeshPagePtr()->ModelType == MODEL_TYPE_NONE )
+		|| ( GetMeshPagePtr()->ModelType == MODEL_TYPE_SCARECROW )
+		|| ( GetMeshPagePtr()->ModelType == MODEL_TYPE_MESH ),
+		*this );
+
+	DBSTREAM3( cactor << "Actor::Actor: Done" << endl; )
+}
+
+//==============================================================================
+
+Actor::~Actor()
+{
+	DBSTREAM3( cactor << "Actor destructor" << endl; )
+
+	DBSTREAM3( cactor << "Actor destructor: unloading assets" << endl; )
+	UnBindAssets();
+	DBSTREAM3( cactor << "Actor destructor: unlinking tools" << endl; )
+
+	assert( ValidPtr( _animManager ) );
+#pragma message( __FILE__ ": should override delete for this class and move this if in it -- clients can then just use delete _animManager" )
+	// delete this Actor's instance of AnimManager, unless it's using the global NullAnimManager
+	if ( _animManager != &NullAnimationManager::theNullAnimationManager )
+	{
+		DBSTREAM3( cactor << "Actor " << _idxActor << " destructor: deleting animManager" << endl; )
+		assert( ValidPtr(_animManager) );
+		MEMORY_DELETE( theLevel->GetMemory(), _animManager, AnimationManagerBase);
+	}
+
+	// Delete this Actor's movement handler data struct, if it has one
+	if ( _movementHandlerData )
+	{
+		DBSTREAM3( cactor << "Actor " << _idxActor << " destructor: deleting _movementHandlerData" << endl; )
+		assert( ValidPtr(_movementHandlerData) );
+		MEMORY_DELETE(theLevel->GetMemory(), _movementHandlerData, MovementHandlerData);
+	}
+
+	// if there is a model attached to the root, make sure to get rid of it
+	// (typically this is a VisualBox)
+
+	DBSTREAM3( cactor << "Actor destructor: delete coarse space" << endl; )
+
+	DBSTREAM3( cactor << "Actor destructor: Cleaning out MsgPort queue" << endl; )
+	int16 msgType;
+	int32 msgData;
+	while ( _nonStatPlat->_msgPort.GetMsg( msgType, msgData ) )
+		;
+
+	if ( _nonStatPlat->_script )
+	{
+		DBSTREAM3( cactor << "Actor destructor: Deleting AI Script" << endl; )
+		MEMORY_DELETE( theLevel->GetMemory(), _nonStatPlat->_script, InputAI);
+	}
+
+	DBSTREAM3( cactor << "Actor destructor done" << endl; )
+}
+
+//==============================================================================
+
+void
+Actor::InitMovementHandler()
+{
+	if ( !_currentMovementHandler )
+	{
+		assert(ValidPtr(GetMoveBlocPtr()));
+		DBSTREAM3( cactor << *this; )
+
+#if 0
+		if ( kind() == StatPlat_KIND )
+		{
+			DBSTREAM3( cactor << " has been assigned theNullHandler" << endl; )
+			_currentMovementHandler = &theNullHandler;
+		}
+		else
+#endif
+		{
+			switch (GetMoveBlocPtr()->Mobility)
+			{
+				case MOBILITY_ANCHORED:
+					DBSTREAM3( cactor << " has been assigned theNullHandler" << endl; )
+					_currentMovementHandler = &theNullHandler;
+					break;
+
+				case MOBILITY_PHYSICS:
+					DBSTREAM3( cactor << " has been assigned theAirHandler" << endl; )
+					_currentMovementHandler = &theAirHandler;
+					break;
+
+				case MOBILITY_PATH:
+					DBSTREAM3( cactor << " has been assigned thePathHandler" << endl; )
+					_currentMovementHandler = &thePathHandler;
+					break;
+
+				case MOBILITY_CAMERA:
+					DBSTREAM3( cactor << " has been assigned theDelayCameraHandler" << endl; )
+					_currentMovementHandler = &theDelayCameraHandler;
+					break;
+
+				case MOBILITY_FOLLOW:
+					DBSTREAM3( cactor << " has been assigned theFollowHandler" << endl; )
+					_currentMovementHandler = &theFollowHandler;
+					break;
+
+				default:
+					AssertMsg(0, *this << " has unknown Mobility of " << GetMoveBlocPtr()->Mobility);
+					break;
+			}
+
+#if 0	// old way, replaced with above code
+
+
+		DBSTREAM3( cactor << "  Selecting handler" << endl; )
+		assert(ValidPtr(_currentMovementTable));
+		int handlerIndex;
+		for ( handlerIndex = 0; _currentMovementTable[handlerIndex]->check(this) == false; ++handlerIndex )
+		{
+			assert(ValidPtr(_currentMovementTable[handlerIndex]));
+#ifdef __PSX__
+			assert(ValidPtr(_currentMovementTable[handlerIndex]->check));
+#endif
+			assert(handlerIndex < 20);									// kts arbitrary #, assume there are no more than 20 handlers in a table
+			;
+		}
+		_currentMovementHandler = _currentMovementTable[ handlerIndex ];
+		DBSTREAM3( cactor << "  Initializing handler index = " << handlerIndex << endl; )
+
+#endif	// 0
+
+    		AssertMsg( ValidPtr(_currentMovementHandler), *this );
+
+			_movementHandlerData = NULL;	// Handler's init() will fill this in
+    		_currentMovementHandler->init(this);
+		}
+	}
+}
+
+
+//==============================================================================
+
+void
+Actor::predictPosition()
+{
+	if (!_hasRunPredictPosition)
+	{
+		_hasRunPredictPosition = true;
+
+		if ( !_currentMovementHandler )
+			InitMovementHandler();
+
+		AssertMsg( _nonStatPlat->_input, *this );
+//		_nonStatPlat->_input->update();  // Moved this to DoneWithPhysics()
+		AssertMsg( _currentMovementHandler, *this );
+		_currentMovementHandler->predictPosition( this );
+	}
+}
+
+//==============================================================================
+
+bool
+Actor::isVisible() const
+{
+	assert(ValidPtr(GetMeshPagePtr()));
+	return GetMailbox( GetMeshPagePtr()->VisibilityMailbox ).AsBool();
+}
+
+//==============================================================================
+
+Vector3
+Actor::currentDir() const
+{
+    return Vector3( _physicalAttributes.RotationC().Cos(), _physicalAttributes.RotationC().Sin(), Scalar::zero );
+}
+
+//==============================================================================
+
+void
+Actor::update()
+{
+#if 0
+#if SHADOW
+	if ( !_hasGeneratedShadow )
+	{	// Initialize shadow if requested
+		int32 idShadow = GetShadowPagePtr()->ShadowObjectTemplate;
+		if ( idShadow > 0 )
+		{	// Create shadow
+			Actor* pCreatedActor = theLevel->ConstructTemplateObject(idShadow,_idxActor);
+//			const SObjectStartupData* startupData = theLevel->findTemplateActorData( idShadow );
+//			assert( ValidPtr( startupData ) );
+//			Actor* pCreatedActor = ConstructTemplateObject( startupData->objectData->type, startupData );
+			assert( pCreatedActor->kind() == Shadow_KIND );
+			Shadow* _pShadow = (Shadow*)pCreatedActor;
+			assert( ValidPtr( _pShadow ) );
+			_pShadow->SetShadowedObject( _idxActor );
+			theLevel->AddActor( _pShadow );
+			_hasGeneratedShadow = true;
+		}
+	}
+#endif
+#endif
+
+	assert(!_hasRunUpdate);		// bail if this actor has already been updated
+//	cerror << "actor::update: ran actor #" << theLevel->GetActorIndex(this) << endl;
+
+	_hasRunUpdate = true;	// set flag so we won't be updated again this frame
+	theLevel->SetMailbox( EMAILBOX_NUM_COLLISIONS, Scalar::zero );
+
+	if ( !_currentMovementHandler )
+		InitMovementHandler();
+
+	int32 msgData;
+	while( _nonStatPlat->_msgPort.GetMsgByType( MsgPort::DELTA_HEALTH, msgData ) )
+	{
+		AssertMsg( msgData, "Unexpected delta health of zero in " << *this << endl );
+		if ( _hitPoints != INDESTRUCTIBLE_HP )
+			deltaHealth( Scalar( msgData ) );
+	}
+
+#pragma message( __FILE__ ": should we do mailboxes and/or messages for sound effects?" )
+//	while( _nonStatPlat->_msgPort.GetMsgByType( MsgPort::PLAY_SOUND_EFFECT, msgData ) )
+//  	{
+//		DBSTREAM1( cdebug << "Playing sound # " << msgData << endl; )
+//	}
+
+	assert( ValidPtr( _currentMovementHandler ) );
+	_currentMovementHandler->update( this );
+
+	// kts added 1/3/97 3:06PM
+	AssertMsg( ValidPtr(_animManager), "Actor #" << _idxActor << ": _animManager = " << _animManager );
+	_animManager->UpdateAnimation(*this);
+
+	// Our own anim cycle choice may be overridden by an explicit message (move this to animManager?)
+	if (_nonStatPlat->_msgPort.GetMsgByType(MsgPort::SET_ANIM_CYCLE, msgData))
+		_animManager->SetAnimCycle(*this, msgData);
+
+	// Just like SET_ANIM_CYCLE, but sets override timer
+	if (_nonStatPlat->_msgPort.GetMsgByType(MsgPort::OVERRIDE_ANIM_CYCLE, msgData))
+		_animManager->OverrideAnimCycle(*this, msgData);
+
+	// CamShot doesn't have anim (is this OK?  are there others?)
+	assert( ValidPtr( GetMeshPagePtr() ) );
+
+	if ( _nonStatPlat->_nTools )
+	{
+		for ( int idxTool=0; idxTool < _MAX_TOOLS; ++idxTool )
+		{
+			Tool* pTool = GetTool( idxTool );
+			if ( pTool )
+			{
+				//cout << "tool " << idxTool << " = " << *pTool << endl;
+				pTool->trigger( *_nonStatPlat->_input );
+			}
+		}
+	}
+
+	if ( _nonStatPlat->_script )
+		_nonStatPlat->_script->read();
+
+//#if DEBUG
+//	if ( !_nonStatPlat->_msgPort.Empty() )
+//		cerror << "Message hog is " << pLevel->GetActorIndex( this ) << endl;
+//#endif
+//	assert(_nonStatPlat->_msgPort.Empty());
+}
+
+//==============================================================================
+
+void
+Actor::deltaHealth( Scalar nHealth )
+{
+	assert( nHealth != Scalar::zero );
+	assert( _hitPoints != INDESTRUCTIBLE_HP );
+	if ( nHealth < Scalar::zero )
+	{
+		if ( _shield )
+		{
+			if ( _shield->isInvulnerable() )
+				return;
+			else if ( (*_shield)() > 0 )
+			{
+				--(*_shield);
+				return;
+			}
+		}
+	}
+
+	_hitPoints += nHealth;
+	if ( _hitPoints > Scalar::zero )
+	{	// TO DO: Switch to the "taking damage" movement handler/animation
+//		assert( ValidPtr( anim ) );
+		_animManager->SetAnimCycle( *this, AnimationManager::HIT_CHEST_SOFT );
+		SetStunTime(SCALAR_CONSTANT(2.0));				// be stunned for 2 seconds
+//			anim->setAnimationCycle(Animation::PUSHED, theLevel->getWallClock());
+//			groundData->stunnedUntil = theLevel->getWallClock + GetMoveBlocPtr()->StunDuration;
+	}
+	else
+	{
+		assert( nHealth <= Scalar::zero );
+		_hitPoints = Scalar::zero;
+		die();
+	}
+}
+
+//==============================================================================
+
+void
+Actor::die()
+{
+	theLevel->SetMailbox( GetCommonPtr()->WriteToMailboxOnDeath, Scalar::one );
+
+	// TO DO: Set to the "die" movement handler/animation
+//	assert( ValidPtr( anim ) );
+//	anim->SetAnimationCycle( _Animation::EXPLODE_FRONT );
+	_animManager->SetAnimCycle( *this, AnimationManager::EXPLODE_FRONT );
+	theLevel->SetPendingRemove( this );
+}
+
+//==============================================================================
+
+void
+Actor::reset()
+{
+	_InitShadow();
+	_InitTools();
+}
+
+//============================================================================
+
+bool
+Actor::CanRender() const
+{
+	assert( ValidPtr( GetMeshPagePtr() ) );
+
+#if defined(SHOW_COLLISION_AS_BOXES)
+	return( 1 );
+#else
+	return( GetMeshPagePtr()->ModelType != MODEL_TYPE_NONE );
+#endif
+}
+
+//==============================================================================
+
+bool
+Actor::CanUpdate() const
+{
+	return true;
+}
+
+//==============================================================================
+
+void
+Actor::DoneWithPhysics()
+{
+	DBSTREAM5( cflow << "Actor::DoneWithPhysics: " << *this << endl; )
+
+	_physicalAttributes.SetOldLinVelocity(_physicalAttributes.LinVelocity());
+	_physicalAttributes.SetPosition(_physicalAttributes.PredictedPosition());
+
+	_hasRunUpdate = false;				// clear these flags for next frame
+	_hasRunPredictPosition = false;
+
+	DBSTREAM5( cflow << "Actor::DoneWithPhysics: UpdateInput" << endl; )
+	assert(ValidPtr(_nonStatPlat->_input));
+	_nonStatPlat->_input->update();	// Moved this here so that both PredictPosition() and Update()
+						// agree about isPressed vs. justPressed
+	DBSTREAM5( cflow << "Actor::DoneWithPhysics: done" << endl; )
+}
+
+//==============================================================================
+
+void
+Actor::prepareToRender()
+{
+}
+
+//==============================================================================
+// If the handle exists, true is returned and dest is filled with the location
+// of a handle relative to the root of the Actor (currently this is placed at
+// the center of the collision box).  Otherwise, false is returned.
+
+bool
+Actor::LocalHandleLocation( HandleID id, Vector3& dest ) const
+{
+	return _renderActor->GetHandle(id, dest);
+}
+
+//==============================================================================
+// If the handle exists, true is returned and dest is filled with the location
+// of a handle in global coordinates (the coordinate frame of the level).
+// Otherwise, false is returned.
+
+bool
+Actor::GlobalHandleLocation( HandleID id, Vector3& dest ) const
+{
+	bool bHandleFound;
+	if ( bHandleFound = _renderActor->GetHandle(id, dest) )
+		dest += currentPos();
+
+	return bHandleFound;
+}
+
+//==============================================================================
+
+bool
+Actor::sendMsg(const int16 msgType, const int32 msgData)
+{
+	bool bSuccess = _nonStatPlat->_msgPort.PutMsg( msgType, msgData );
+	assert( bSuccess );
+	DBSTREAM3( cactor << "Actor #" << _idxActor << " sent message: " << (MsgPort::MSG_TYPE)msgType << " with data: " << hex << msgData << dec << endl; )
+	return bSuccess;
+}
+
+//==============================================================================
+
+void
+Actor::spawnPoof() const
+{
+	if ( GetCommonPtr()->Poof != - 1)
+	{
+		DBSTREAM3(clevel << "Spawning poof "; )
+
+		Actor* createdObject = theLevel->ConstructTemplateObject( GetCommonPtr()->Poof, _idxActor );
+		assert( ValidPtr( createdObject ) );
+
+		DBSTREAM3(clevel << "at position " << currentPos() << endl; )
+
+//		theLevel->AddActor( createdObject, currentPos() );
+		theLevel->AddActor( createdObject, GetPredictedPosition() );
+		createdObject->GetWritablePhysicalAttributes().SetRotationA(_physicalAttributes.RotationA());
+		createdObject->GetWritablePhysicalAttributes().SetRotationB(_physicalAttributes.RotationB());
+		createdObject->GetWritablePhysicalAttributes().SetRotationC(_physicalAttributes.RotationC());
+	}
+}
+
+//==============================================================================
+
+Scalar
+Actor::GetDistanceTo( const Actor *actor ) const
+{
+	assert( ValidPtr( actor) );
+
+	Vector3 myPos( currentPos() );
+	Vector3 hisPos( actor->currentPos() );
+
+	// find ABS deltas
+	Scalar maxC( (hisPos.X() - myPos.X()).Abs() );
+	Scalar medC( (hisPos.Y() - myPos.Y()).Abs() );
+	Scalar minC( (hisPos.Z() - myPos.Z()).Abs() );
+
+	// Sort to find max (med and min need not be sorted)
+	if (maxC < medC)
+		maxC.Swap(medC);
+	if (maxC < minC)
+		maxC.Swap(minC);
+
+	// return maxC + 1/4(medC) + 1/4(minC)
+	medC += minC;	// combine med and min values (to only divide once)
+	return (maxC + ((medC + minC) / SCALAR_CONSTANT(4) ));
+#pragma message ("KTS: use the distance function in vector3 instead!")
+}
+
+//==============================================================================
+
+int32
+Actor::getPower() const
+{
+	assert(ValidPtr(_shield));
+	return( (*_shield)() );
+}
+
+//==============================================================================
+
+#undef ERROR
+#define ERROR( __msg__ )			{ DBSTREAM1( cerr << "ERROR: " << __msg__ << endl; ) sys_exit( -1); }
+#undef UNIMPLEMENTED
+#define UNIMPLEMENTED( __msg__ )	{ DBSTREAM1( cerr << "UNIMPLEMENTED: " << __msg__ << endl; ) sys_exit( -1 ); }
+
+Scalar
+Actor::GetMailbox( int boxnum ) const
+{
+	assert( boxnum >= 0);
+	assert( boxnum < 65536);		    // kts arbitrary
+	if ( boxnum < EMAILBOX_LOCAL_START )
+		return theLevel->GetMailbox( boxnum );
+
+	if ( boxnum < EMAILBOX_LOCAL_SYSTEM_START )
+	{
+		assert( EMAILBOX_LOCAL_START <= boxnum && boxnum < EMAILBOX_LOCAL_MAX );
+		AssertMsg( _localMailboxes, *this << " referred to local mailbox " << boxnum << ", but has none" );
+		AssertMsg((boxnum - EMAILBOX_LOCAL_USER_START) < NumberOfLocalMailboxes(), *this << " refered to mailbox # " << boxnum << ", which it doesn't have");
+		return _localMailboxes[ boxnum - EMAILBOX_LOCAL_USER_START ];
+	}
+
+	if ( boxnum < EMAILBOX_SCRATCH_START )
+	{
+		assert( EMAILBOX_LOCAL_SYSTEM_START <= boxnum && boxnum < EMAILBOX_LOCAL_SYSTEM_MAX );
+		switch ( boxnum )
+		{
+			case EMAILBOX_HITPOINTS:
+				return _hitPoints;
+
+//			case EMAILBOX_GOLD:
+//				return Scalar( numGold(), 0 );
+
+			case EMAILBOX_SHIELD:
+				return Scalar( getPower(), 0 );
+
+			case EMAILBOX_LOCAL_MIDI:
+				UNIMPLEMENTED( "read local midi" );
+
+			case EMAILBOX_ALIVE:
+				return Scalar::one;
+
+			case EMAILBOX_ACTOR_INDEX:
+				return Scalar( GetActorIndex(), 0 );
+
+			case EMAILBOX_JOYSTICK_ARE_PRESSED:
+				return Scalar( _nonStatPlat->_input->arePressed(), 0 );
+
+			case EMAILBOX_JOYSTICK_JUST_PRESSED:
+				return Scalar( _nonStatPlat->_input->justPressed(), 0 );
+
+			case EMAILBOX_JOYSTICK_JUST_RELEASED:
+				return Scalar( _nonStatPlat->_input->justReleased(), 0 );
+
+			case EMAILBOX_X_POS:
+				return currentPos().X();
+
+			case EMAILBOX_Y_POS:
+				return currentPos().Y();
+
+			case EMAILBOX_Z_POS:
+				return currentPos().Z();
+
+			case EMAILBOX_ROTATION_A:
+				return GetPhysicalAttributes().RotationA().AsScalar();
+
+			case EMAILBOX_ROTATION_B:
+				return GetPhysicalAttributes().RotationB().AsScalar();
+
+			case EMAILBOX_ROTATION_C:
+				return GetPhysicalAttributes().RotationC().AsScalar();
+
+			case EMAILBOX_DELTA_YAW:
+			{
+				UNIMPLEMENTED( "DELTA_YAW mailbox is write-only!" );
+				return Scalar::zero;
+			}
+
+			case EMAILBOX_DELTA_PITCH:
+			{
+				UNIMPLEMENTED( "DELTA_PITCH mailbox is write-only!" );
+				return Scalar::zero;
+			}
+
+			case EMAILBOX_DELTA_ROLL:
+			{
+				UNIMPLEMENTED( "DELTA_ROLL mailbox is write-only!" );
+				return Scalar::zero;
+			}
+
+			case EMAILBOX_KEYFRAME:
+			{
+				UNIMPLEMENTED( "read keyframe mailbox" );
+				return Scalar::zero;
+			}
+
+			case EMAILBOX_ROOM:
+				return Scalar( GetRoom(), 0 );
+
+			case EMAILBOX_SPEED:
+				return GetPhysicalAttributes().LinVelocity().Length();
+
+			case EMAILBOX_XSPEED:
+				return GetPhysicalAttributes().LinVelocity().X();
+
+			case EMAILBOX_YSPEED:
+				return GetPhysicalAttributes().LinVelocity().Y();
+
+			case EMAILBOX_ZSPEED:
+				return GetPhysicalAttributes().LinVelocity().Z();
+
+			case  EMAILBOX_GENERATOR:
+			{
+				assert( kind() == Actor::Missile_KIND);
+				Missile* that = (Missile*)this;
+				return Scalar( that->GetOwner(), 0 );
+			}
+
+			case EMAILBOX_KIND:
+				return Scalar( kind(), 0 );
+
+//			case EMAILBOX_ANIMATION_INDEX:
+//				return _animationIndex;
+//			case EMAILBOX_ANIMATION_DATA:
+//			{
+//				ValidatePtr( anim );
+//				return long( anim->GetAnimationData( _animationIndex ) );
+//				assert(EMAILBOX_ANIMATION_INDEX < 65536);			// kts temp
+//				cout << "animation index = " << EMAILBOX_ANIMATION_INDEX << endl;
+//				return long( anim->GetAnimationData( GetMailbox(EMAILBOX_ANIMATION_INDEX) >> 16 ) );
+//				return Scalar::zero;
+//			}
+
+			// Line-of-sight (vector vs. box collision checking)
+			case EMAILBOX_LOS_RESULT:
+			{
+				Vector3 endpoint2( _localMailboxes[ EMAILBOX_LOS_X - EMAILBOX_LOCAL_USER_START ],
+								   _localMailboxes[ EMAILBOX_LOS_Y - EMAILBOX_LOCAL_USER_START ],
+								   _localMailboxes[ EMAILBOX_LOS_Z - EMAILBOX_LOCAL_USER_START ]);
+
+				Actor* closestActor = NULL;
+
+				//  Now check all renderable Actors in rooms 0, 1, and 2 for collision with the handle
+				Room& theRoom = (Room&)theLevel->GetLevelRooms().GetRoom( GetRoom() );
+				ActorListIter alIter = theRoom.GetCollisionIter();
+				Actor* colActor;
+
+				while ( !alIter.Empty() )
+				{
+					colActor = theLevel->getActor(*alIter);
+					assert( ValidPtr( colActor ) );
+					if ( colActor->CanRender() )
+					{
+						const PhysicalAttributes& colAttr = colActor->GetPhysicalAttributes();
+						if ( colAttr.CheckCollision( endpoint2 ) )
+						{
+							// Is this Actor closest to endpoint2?
+							if ( (colActor->currentPos() - endpoint2).Length() < (closestActor->currentPos() - endpoint2).Length() )
+								closestActor = colActor;
+						}
+					}
+					++alIter;
+				}
+
+				return closestActor ? Scalar( theLevel->GetActorIndex( closestActor ), 0 ) : Scalar::zero;
+			}
+
+			default:
+				if ( boxnum < EMAILBOX_LOCAL_MAX )
+					AssertMsg( 0, *this << ":GetMailbox(): Write-only local system mailbox " << boxnum << endl );
+				else
+					AssertMsg( 0, *this << ":GetMailbox(): Unknown local system mailbox " << boxnum << endl );
+				return Scalar::zero;
+		}
+	}
+
+	AssertMsg( boxnum < EMAILBOX_MAILBOX_MAX, *this << " refered to scratch mailbox # " << boxnum << ", which doesn't exist" );
+	// must be scratch or persistent, forward to level
+	return theLevel->GetMailbox( boxnum );
+}
+
+//=============================================================================
+
+void
+Actor::SetMailbox( int boxnum, Scalar value )
+{
+	if ( boxnum < EMAILBOX_LOCAL_START || boxnum >= EMAILBOX_SCRATCH_START )
+		theLevel->SetMailbox( boxnum, value );
+	else
+	{
+		DBSTREAM2( clevel << "local mailbox " << boxnum << " set to " << value << endl; )
+		assert( EMAILBOX_LOCAL_START <= boxnum);
+		assert( boxnum < EMAILBOX_LOCAL_MAX );
+
+		if ( boxnum < EMAILBOX_LOCAL_SYSTEM_START )
+		{
+			assert( (EMAILBOX_LOCAL_USER_START <= boxnum) && (boxnum < EMAILBOX_LOCAL_USER_MAX) );
+			AssertMsg( boxnum < EMAILBOX_LOCAL_USER_START + NumberOfLocalMailboxes(),
+				*this << ": Referenced unallocated local mailbox " << boxnum << endl );
+			_localMailboxes[ boxnum - EMAILBOX_LOCAL_USER_START ] = value;
+		}
+		else
+		{
+			assert( EMAILBOX_LOCAL_SYSTEM_START <= boxnum && boxnum < EMAILBOX_LOCAL_SYSTEM_MAX );
+
+			switch ( boxnum )
+			{
+				case EMAILBOX_HITPOINTS:
+					AssertMsg( _hitPoints != INDESTRUCTIBLE_HP, "Attempted to modify hitpoints for " << *this << ", but is set to indestructible" );
+					_hitPoints = value;
+					break;
+
+//				case EMAILBOX_GOLD:
+//					DBSTREAM3( cstats << "Adding " << value.WholePart() << " pieces of gold" << endl; )
+//					addGold( value.WholePart() );
+//					break;
+
+				case EMAILBOX_SHIELD:
+					break;
+
+				case EMAILBOX_LOCAL_MIDI:
+					break;
+
+				case EMAILBOX_ALIVE:
+					if ( value == Scalar::zero )
+						theLevel->SetPendingRemove( this );
+					break;
+
+				case EMAILBOX_ACTOR_INDEX:
+					ERROR( "Cannot set \"actor index\" mailbox" );
+					break;
+
+				case EMAILBOX_JOYSTICK_ARE_PRESSED:
+					assert( ValidPtr( _nonStatPlat->_input ) );
+					assert( _nonStatPlat->_input != &theNullInputDigital );
+					_nonStatPlat->_input->setButtons( joystickButtonsF( value.WholePart() ) );
+					break;
+
+				case EMAILBOX_JOYSTICK_JUST_PRESSED:
+					ERROR( "Cannot set \"just pressed\" mailbox" );
+					break;
+
+				case EMAILBOX_JOYSTICK_JUST_RELEASED:
+					ERROR( "Cannot set \"just released\" mailbox" );
+					break;
+
+				case EMAILBOX_X_POS:
+				{
+//					AssertMsg(GetCommonPtr()->Mass == Scalar::zero, " in actor " << *this);			// can only move objects with no mass so we don't fuck up the physics system
+					Vector3 tVect = _physicalAttributes.Position();
+					tVect.SetX(value);
+					_physicalAttributes.SetPosition(tVect);
+					_physicalAttributes.SetPredictedPosition(tVect);
+					break;
+				}
+				case EMAILBOX_Y_POS:
+				{
+//					AssertMsg(GetCommonPtr()->Mass == Scalar::zero, " in actor " << *this);			// can only move objects with no mass so we don't fuck up the physics system
+					Vector3 tVect = _physicalAttributes.Position();
+					tVect.SetY(value);
+					_physicalAttributes.SetPosition(tVect);
+					_physicalAttributes.SetPredictedPosition(tVect);
+					break;
+				}
+				case EMAILBOX_Z_POS:
+				{
+//					AssertMsg(GetCommonPtr()->Mass == Scalar::zero, " in actor " << *this);			// can only move objects with no mass so we don't fuck up the physics system
+					Vector3 tVect = _physicalAttributes.Position();
+					tVect.SetZ(value);
+					_physicalAttributes.SetPosition(tVect);
+					_physicalAttributes.SetPredictedPosition(tVect);
+					break;
+				}
+				case EMAILBOX_ROTATION_A:
+				{
+					Angle rot( Angle::Revolution( value ) );
+					DBSTREAM4( cstats << "actor got rotation a of " << rot << endl; )
+					_physicalAttributes.SetRotationA( rot );
+					break;
+				}
+
+				case EMAILBOX_ROTATION_B:
+				{
+					Angle rot( Angle::Revolution( value ) );
+					DBSTREAM4( cstats << "actor got rotation b of " << rot << endl; )
+					_physicalAttributes.SetRotationB( rot );
+					break;
+				}
+
+				case EMAILBOX_ROTATION_C:
+				{
+					Angle rot( Angle::Revolution( value ) );
+					DBSTREAM4( cstats << "actor got rotation c of " << rot << endl; )
+					_physicalAttributes.SetRotationC( rot );
+					break;
+				}
+
+				case EMAILBOX_DELTA_YAW:
+				{
+					Matrix34 localMatrix(_physicalAttributes.orientation(), Vector3::zero);
+					Vector3 lookUp( Vector3::unitZ * localMatrix );
+					_physicalAttributes.RotateAboutAxis( lookUp, Angle::Revolution(value) );
+					break;
+				}
+
+				case EMAILBOX_DELTA_PITCH:
+				{
+					Matrix34 localMatrix(_physicalAttributes.orientation(), Vector3::zero);
+					Vector3 lookLeft( Vector3::unitY * localMatrix );
+					_physicalAttributes.RotateAboutAxis( lookLeft, Angle::Revolution(value) );
+					break;
+				}
+
+				case EMAILBOX_DELTA_ROLL:
+				{
+					Matrix34 localMatrix(_physicalAttributes.orientation(), Vector3::zero);
+					Vector3 lookAt( Vector3::unitX * localMatrix );
+					_physicalAttributes.RotateAboutAxis( lookAt, Angle::Revolution(value) );
+					break;
+				}
+
+				case EMAILBOX_KEYFRAME:
+					UNIMPLEMENTED( "set keyframe" );
+					break;
+
+				case EMAILBOX_ROOM:
+					ERROR( "Cannot set \"room\" mailbox" );
+					break;
+
+				case EMAILBOX_CD_TRACK:
+				{
+#if defined( __WIN__ )
+#include <cdda/cd.hp>
+					extern HWND worldFoundryhWnd;
+					assert( worldFoundryhWnd );
+					// kts 7/14/99 7:34AM doesn't link right now
+					//playCDTrack( worldFoundryhWnd, value.WholePart() );
+#endif
+					break;
+				}
+
+				case EMAILBOX_SOUND:
+				{
+					int32 soundEffect = value.WholePart();
+					DBSTREAM1( cdebug << "Playing sound # " << soundEffect << endl; )
+					RangeCheck( soundEffect, 0, 128 );
+					AssertMsg( theLevel->_sfx[ soundEffect ], "No sound effect loaded into slot #" << soundEffect );
+					theLevel->_sfx[ soundEffect ]->play();
+					break;
+				}
+
+				case EMAILBOX_XSPEED:
+					_physicalAttributes.SetLinVelocityX( value );
+					break;
+
+				case EMAILBOX_YSPEED:
+					_physicalAttributes.SetLinVelocityY( value );
+					break;
+
+				case EMAILBOX_ZSPEED:
+					_physicalAttributes.SetLinVelocityZ( value );
+					break;
+
+				case EMAILBOX_INPUT :
+				{
+#pragma message( __FILE__ ": can _input be used instead of _inputScript? Then _inputScript wouldn't need to be stored in class Actor" )
+					AssertMsg( ValidPtr( _inputScript ),
+						*this << " tried to set input with a script, but \"Script Controls Input\" wasn't set" << endl );
+					_inputScript->setButtons( value.WholePart() );
+					break;
+				}
+
+//				case EMAILBOX_ANIMATION_INDEX:
+//				{
+//					_animationIndex = value >> 16;
+//					break;
+//				}
+//				case EMAILBOX_ANIMATION_DATA:
+//				{
+//					ValidatePtr( anim );
+//	//					anim->SetAnimationData( _animationIndex, (void *)value );
+//					anim->SetAnimationData( GetMailbox(EMAILBOX_ANIMATION_INDEX) >> 16, (void *)value );
+//					break;
+//				}
+
+				case EMAILBOX_QUERY_HANDLE:
+				{
+					DBSTREAM3(
+						char id[ 5 ];
+						*((int32*)id) = value.AsLong();
+						id[ 4 ] = '\0';
+						cmailbox << "Query handle: " << id << endl;
+					);
+
+					Vector3 vHandle;
+					ASSERTIONS(bool bSuccess = ) GlobalHandleLocation( HandleID(value.AsLong()), vHandle );
+					AssertMsg( bSuccess, "Actor " << *this << ": Can't find handle <" << id << ">" );
+					SetMailbox( EMAILBOX_HANDLE_X, vHandle.X() );
+					SetMailbox( EMAILBOX_HANDLE_Y, vHandle.Y() );
+					SetMailbox( EMAILBOX_HANDLE_Z, vHandle.Z() );
+					break;
+				}
+
+				default:
+					AssertMsg( 0, *this << ": (set) Unknown local system mailbox " << boxnum << endl );
+					break;
+			}
+		}
+	}
+}
+
+//==============================================================================
+// This method can be called from the update() method of any Actor subclass
+// that wants to receive special collsions.  It checks to make sure the
+// collision is still valid, returning the msgData if still valid or NULL
+// (in msgData) if not.  The bool return is true if there were any messages
+// waiting, false otherwise.
+
+bool
+Actor::GetSpecialCollisionMessage(int32& msgData)
+{
+	if ( _nonStatPlat->_msgPort.GetMsgByType( MsgPort::SPECIAL_COLLISION, msgData ) )
+	{
+		// re-check this collision to make sure it's still valid
+		const PhysicalAttributes& colAttr = ((Actor*)msgData)->GetPhysicalAttributes();
+		if ( !(_physicalAttributes.CheckCollision(colAttr)) )
+			msgData = 0;
+		return true;
+	}
+	else
+		return false;
+}
+
+//=============================================================================
+
+#undef _hitPoints
+#undef _shield
+//#undef _path
+#undef _inputScript
+#undef _input
+#undef _script
+#undef _currentMovementHandler
+#undef _movementHandlerData
+#undef _localMailboxes
+#undef _animManager
+
+#pragma message( "Put assertions in PutMsg() so that no messages are being sent to StatPlat's" )
+Actor::NonStatPlatData::NonStatPlatData() :
+	_hitPoints( Actor::INDESTRUCTIBLE_HP ),
+	_shield( NULL ),
+//	_path( NULL ),
+	_inputScript( NULL ),
+	_input( &theNullInputDigital ),
+	_script( NULL ),
+	_currentMovementHandler( &theNullHandler ),
+	_movementHandlerData( NULL ),
+	_localMailboxes( NULL ),
+	_animManager( &NullAnimationManager::theNullAnimationManager ),
+	_nTools( 0 )
+{
+}

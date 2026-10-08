@@ -1,0 +1,164 @@
+--- actor.cc CVS 1.18
++++ actor.cc CVS 1.19
+@@ -373,9 +373,7 @@
+ 				Vector3 min(_physicalAttributes.GetColSpace().Min());
+ 				Vector3 max(_physicalAttributes.GetColSpace().Max());
+ 				_renderActor = new (memory) RenderActor3DBox(memory,min,max);
+-				_physicalAttributes.SetRotationA(Angle::zero);
+-				_physicalAttributes.SetRotationB(Angle::zero);
+-				_physicalAttributes.SetRotationC(Angle::zero);
++				_physicalAttributes.Rotation(Euler::zero);
+ 			}
+ 			else
+ #endif	                                // SHOW_COLLISION_AS_BOXES
+@@ -387,9 +385,7 @@
+ 			Vector3 min(_physicalAttributes.GetColSpace().Min());
+ 			Vector3 max(_physicalAttributes.GetColSpace().Max());
+ 			_renderActor = new (memory) RenderActor3DBox(memory,min,max);
+-			_physicalAttributes.SetRotationA(Angle::zero);
+-			_physicalAttributes.SetRotationB(Angle::zero);
+-			_physicalAttributes.SetRotationC(Angle::zero);
++			_physicalAttributes.Rotation(Euler::zero);
+ 			break;
+ 		}
+ 
+@@ -401,9 +397,7 @@
+ 				Vector3 min(_physicalAttributes.GetColSpace().Min());
+ 				Vector3 max(_physicalAttributes.GetColSpace().Max());
+ 				_renderActor = new (memory) RenderActor3DBox(memory,min,max);
+-				_physicalAttributes.SetRotationA(Angle::zero);
+-				_physicalAttributes.SetRotationB(Angle::zero);
+-				_physicalAttributes.SetRotationC(Angle::zero);
++				_physicalAttributes.Rotation(Euler::zero);
+ 			}
+ 			else
+ 				_renderActor = &NULLRenderActor;
+@@ -548,9 +542,12 @@
+ 									 GetCommonBlockPtr()->GetslopeD() );
+ 	_physicalAttributes.SetLinVelocity( Vector3::zero );
+ 	_physicalAttributes.SetPredictedPosition( _physicalAttributes.Position() );
+-	_physicalAttributes.SetRotationA(Angle::Revolution(Scalar(0,objdata->rotation.a)));
+-	_physicalAttributes.SetRotationB(Angle::Revolution(Scalar(0,objdata->rotation.b)));
+-	_physicalAttributes.SetRotationC(Angle::Revolution(Scalar(0,objdata->rotation.c)));
++
++	Euler euler(Angle::Revolution(Scalar(0,objdata->rotation.a)),Angle::Revolution(Scalar(0,objdata->rotation.b)),Angle::Revolution(Scalar(0,objdata->rotation.c)));
++   _physicalAttributes.Rotation(euler);
++//    _physicalAttributes.SetRotationA(Angle::Revolution(Scalar(0,objdata->rotation.a)));
++//    _physicalAttributes.SetRotationB(Angle::Revolution(Scalar(0,objdata->rotation.b)));
++//    _physicalAttributes.SetRotationC(Angle::Revolution(Scalar(0,objdata->rotation.c)));
+ 	_physicalAttributes.ValidateCollisionSpace();
+ 
+ 	_hasRunPredictPosition = false;
+@@ -805,7 +802,7 @@
+ Vector3
+ Actor::currentDir() const
+ {
+-    return Vector3( _physicalAttributes.RotationC().Cos(), _physicalAttributes.RotationC().Sin(), Scalar::zero );
++    return Vector3( _physicalAttributes.Rotation().GetC().Cos(), _physicalAttributes.Rotation().GetC().Sin(), Scalar::zero );
+ }
+ 
+ //==============================================================================
+@@ -1082,9 +1079,7 @@
+ 
+ //		theLevel->AddActor( createdObject, currentPos() );
+ 		theLevel->AddActor( createdObject, GetPredictedPosition() );
+-		createdObject->GetWritablePhysicalAttributes().SetRotationA(_physicalAttributes.RotationA());
+-		createdObject->GetWritablePhysicalAttributes().SetRotationB(_physicalAttributes.RotationB());
+-		createdObject->GetWritablePhysicalAttributes().SetRotationC(_physicalAttributes.RotationC());
++		createdObject->GetWritablePhysicalAttributes().Rotation(_physicalAttributes.Rotation());
+ 	}
+ }
+ 
+@@ -1187,13 +1182,13 @@
+ 				return currentPos().Z();
+ 
+ 			case EMAILBOX_ROTATION_A:
+-				return GetPhysicalAttributes().RotationA().AsRevolution();
++				return GetPhysicalAttributes().Rotation().GetA().AsRevolution();
+ 
+ 			case EMAILBOX_ROTATION_B:
+-				return GetPhysicalAttributes().RotationB().AsRevolution();
++				return GetPhysicalAttributes().Rotation().GetB().AsRevolution();
+ 
+ 			case EMAILBOX_ROTATION_C:
+-				return GetPhysicalAttributes().RotationC().AsRevolution();
++				return GetPhysicalAttributes().Rotation().GetC().AsRevolution();
+ 
+ 			case EMAILBOX_DELTA_YAW:
+ 			{
+@@ -1315,6 +1310,8 @@
+ void
+ Actor::SetMailbox( int boxnum, Scalar value )
+ {
++    static Euler rotationEuler;         // kts major kludge, what we really need is a wider interface to the scripting language
++
+   //  cerr << "write-mailbox[" << boxnum << "]=[" << value << "]\t";
+ 	if ( boxnum < EMAILBOX_LOCAL_START || boxnum >= EMAILBOX_SCRATCH_START )
+ 		theLevel->SetMailbox( boxnum, value );
+@@ -1402,7 +1399,8 @@
+ 				{
+ 					Angle rot( Angle::Revolution( value ) );
+ 					DBSTREAM4( cstats << "actor got rotation a of " << rot << std::endl; )
+-					_physicalAttributes.SetRotationA( rot );
++               rotationEuler.SetA(rot);
++					//_physicalAttributes.SetRotationA( rot );
+ 					break;
+ 				}
+ 
+@@ -1410,7 +1408,8 @@
+ 				{
+ 					Angle rot( Angle::Revolution( value ) );
+ 					DBSTREAM4( cstats << "actor got rotation b of " << rot << std::endl; )
+-					_physicalAttributes.SetRotationB( rot );
++               rotationEuler.SetB(rot);
++					//_physicalAttributes.SetRotationB( rot );
+ 					break;
+ 				}
+ 
+@@ -1418,13 +1417,15 @@
+ 				{
+ 					Angle rot( Angle::Revolution( value ) );
+ 					DBSTREAM4( cstats << "actor got rotation c of " << rot << std::endl; )
+-					_physicalAttributes.SetRotationC( rot );
++               rotationEuler.SetC(rot);
++					_physicalAttributes.Rotation( rotationEuler );
++					//_physicalAttributes.SetRotationC( rot );
+ 					break;
+ 				}
+ 
+ 				case EMAILBOX_DELTA_YAW:
+ 				{
+-					Matrix34 localMatrix(_physicalAttributes.orientation(), Vector3::zero);
++					Matrix34 localMatrix(_physicalAttributes.Rotation(), Vector3::zero);
+ 					Vector3 lookUp( Vector3::unitZ * localMatrix );
+ 					_physicalAttributes.RotateAboutAxis( lookUp, Angle::Revolution(value) );
+ 					break;
+@@ -1432,7 +1433,7 @@
+ 
+ 				case EMAILBOX_DELTA_PITCH:
+ 				{
+-					Matrix34 localMatrix(_physicalAttributes.orientation(), Vector3::zero);
++					Matrix34 localMatrix(_physicalAttributes.Rotation(), Vector3::zero);
+ 					Vector3 lookLeft( Vector3::unitY * localMatrix );
+ 					_physicalAttributes.RotateAboutAxis( lookLeft, Angle::Revolution(value) );
+ 					break;
+@@ -1440,7 +1441,7 @@
+ 
+ 				case EMAILBOX_DELTA_ROLL:
+ 				{
+-					Matrix34 localMatrix(_physicalAttributes.orientation(), Vector3::zero);
++					Matrix34 localMatrix(_physicalAttributes.Rotation(), Vector3::zero);
+ 					Vector3 lookAt( Vector3::unitX * localMatrix );
+ 					_physicalAttributes.RotateAboutAxis( lookAt, Angle::Revolution(value) );
+ 					break;
+@@ -1458,8 +1459,8 @@
+ 				{
+ #if defined( __WIN__ )
+ #include <cdda/cd.hp>
+-					//extern HWND worldFoundryhWnd;
+-					//assert( worldFoundryhWnd );
++					extern HWND worldFoundryhWnd;
++					assert( worldFoundryhWnd );
+ 					// kts 7/14/99 7:34AM doesn't link right now
+ 					//playCDTrack( worldFoundryhWnd, value.WholePart() );
+ #endif

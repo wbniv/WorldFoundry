@@ -35,6 +35,9 @@
 		$3fff00al { 'STR' "urchin_spine_5.iff" }  // IFF PERM fff:00a
 		$3fff00bl { 'STR' "urchin_spine_6.iff" }  // IFF PERM fff:00b
 		$3fff00cl { 'STR' "urchin_spine_7.iff" }  // IFF PERM fff:00c
+		$3fff00dl { 'STR' "goby_grazing_rock_0.iff" }  // IFF PERM fff:00d
+		$3fff00el { 'STR' "goby_grazing_rock_1.iff" }  // IFF PERM fff:00e
+		$3fff00fl { 'STR' "goby_grazing_rock_2.iff" }  // IFF PERM fff:00f
 		$3000001l { 'STR' "tank_base.iff" }  // IFF RM0 000:001
 		$3000002l { 'STR' "water_back.iff" }  // IFF RM0 000:002
 		$3000003l { 'STR' "back_air.iff" }  // IFF RM0 000:003
@@ -74,6 +77,9 @@
 		{ 'ASS' $3fff00al [ "urchin_spine_5.iff" ] }  // IFF PERM fff:00a
 		{ 'ASS' $3fff00bl [ "urchin_spine_6.iff" ] }  // IFF PERM fff:00b
 		{ 'ASS' $3fff00cl [ "urchin_spine_7.iff" ] }  // IFF PERM fff:00c
+		{ 'ASS' $3fff00dl [ "goby_grazing_rock_0.iff" ] }  // IFF PERM fff:00d
+		{ 'ASS' $3fff00el [ "goby_grazing_rock_1.iff" ] }  // IFF PERM fff:00e
+		{ 'ASS' $3fff00fl [ "goby_grazing_rock_2.iff" ] }  // IFF PERM fff:00f
 	}
 	{ 'ALGN' .align(2048) }
 	{ 'RM0'

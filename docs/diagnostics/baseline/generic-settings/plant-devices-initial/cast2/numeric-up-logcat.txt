@@ -1,0 +1,203 @@
+--------- beginning of main
+10-06 13:57:46.768 18789 18789 W f_game.aquariu: Using default instruction set features for ARM CPU variant (cortex-a9) using conservative defaults
+10-06 13:57:46.774 18789 18789 E f_game.aquariu: Not starting debugger since process cannot load the jdwp agent.
+10-06 13:57:46.778 18789 18789 D ProcessState: Binder ioctl to enable oneway spam detection failed: Invalid argument
+10-06 13:57:46.800 18789 18789 D CompatibilityChangeReporter: Compat change id reported: 171979766; UID 10101; state: ENABLED
+10-06 13:57:46.815 18789 18789 D nativeloader: Configuring classloader-namespace for other apk /data/app/~~hi5k1eebvkffMTw5ay3BWg==/org.worldfoundry.wf_game.aquarium-huoxx5UJ1Sy6J4f5pznM9g==/base.apk. target_sdk_version=34, uses_libraries=, library_path=/data/app/~~hi5k1eebvkffMTw5ay3BWg==/org.worldfoundry.wf_game.aquarium-huoxx5UJ1Sy6J4f5pznM9g==/lib/arm:/data/app/~~hi5k1eebvkffMTw5ay3BWg==/org.worldfoundry.wf_game.aquarium-huoxx5UJ1Sy6J4f5pznM9g==/base.apk!/lib/armeabi-v7a, permitted_path=/data:/mnt/expand:/data/user/0/org.worldfoundry.wf_game.aquarium
+10-06 13:57:46.822 18789 18789 V GraphicsEnvironment: ANGLE Developer option for 'org.worldfoundry.wf_game.aquarium' set to: 'default'
+10-06 13:57:46.822 18789 18789 V GraphicsEnvironment: Neither updatable production driver nor prerelease driver is supported.
+10-06 13:57:46.824 18789 18789 D NetworkSecurityConfig: No Network Security Config specified, using platform default
+10-06 13:57:46.824 18789 18789 D NetworkSecurityConfig: No Network Security Config specified, using platform default
+10-06 13:57:46.989 18789 18809 I wf_game : diagnostic log: /storage/emulated/0/Android/data/org.worldfoundry.wf_game.aquarium/files/wf.log
+10-06 13:57:46.989 18789 18809 I wf_game : android_main: enter
+10-06 13:57:46.989 18789 18809 I wf_game : android_main: assetMgr=0xeb3d5c00
+10-06 13:57:46.990 18789 18809 I wf_game : android_main: uiMode=4 (tv=1)
+10-06 13:57:46.990 18789 18809 I wf_game : android_main: waiting for APP_CMD_INIT_WINDOW
+10-06 13:57:46.998 18789 18809 I wf_game : APP_CMD_RESUME
+10-06 13:57:47.019 18789 18809 I wf_game : phonepad: listening on 192.168.4.56:8765
+10-06 13:57:47.019 18789 18809 I wf_game : phone controller: open http://192.168.4.56:8765/?k=307396 (PIN 307396)
+10-06 13:57:47.045 18789 18809 I wf_game : APP_CMD_INIT_WINDOW
+10-06 13:57:47.046 18789 18809 W libc    : Access denied finding property "vendor.mali.platform.config"
+10-06 13:57:47.046 18789 18809 W libc    : Access denied finding property "vendor.mali.debug.config"
+10-06 13:57:47.047 18789 18809 W libc    : Access denied finding property "vendor.mali.cctx_memory_class_unnamed"
+10-06 13:57:47.047 18789 18809 W libc    : Access denied finding property "vendor.mali.cctx_memory_class_default_heap"
+10-06 13:57:47.047 18789 18809 W libc    : Access denied finding property "vendor.mali.cctx_memory_class_base_internal"
+10-06 13:57:47.047 18789 18809 W libc    : Access denied finding property "vendor.mali.cctx_memory_class_framepool"
+10-06 13:57:47.047 18789 18809 W libc    : Access denied finding property "vendor.mali.cctx_memory_class_tiler"
+10-06 13:57:47.047 18789 18809 W libc    : Access denied finding property "vendor.mali.cctx_memory_class_program"
+10-06 13:57:47.047 18789 18809 W libc    : Access denied finding property "vendor.mali.cctx_memory_class_egl_color_plane"
+10-06 13:57:47.047 18789 18809 W libc    : Access denied finding property "vendor.mali.cctx_memory_class_egl_color_plane_imported"
+10-06 13:57:47.047 18789 18809 W libc    : Access denied finding property "vendor.mali.cctx_memory_class_vao"
+10-06 13:57:47.048 18789 18809 W libc    : Access denied finding property "vendor.mali.cctx_memory_class_img"
+10-06 13:57:47.048 18789 18809 W libc    : Access denied finding property "vendor.mali.cctx_memory_class_internal_surface"
+10-06 13:57:47.048 18789 18809 W libc    : Access denied finding property "vendor.mali.cctx_memory_class_buf"
+10-06 13:57:47.048 18789 18809 W libc    : Access denied finding property "vendor.mali.cctx_memory_class_crc"
+10-06 13:57:47.048 18789 18809 W libc    : Access denied finding property "vendor.mali.cctx_memory_class_cpom_hmem"
+10-06 13:57:47.048 18789 18809 W libc    : Access denied finding property "vendor.mali.cctx_memory_class_cpom_rsd"
+10-06 13:57:47.048 18789 18809 W libc    : Access denied finding property "vendor.mali.cctx_memory_class_cpom_mbs2"
+10-06 13:57:47.048 18789 18809 W libc    : Access denied finding property "vendor.mali.cctx_memory_class_cpom_static"
+10-06 13:57:47.048 18789 18809 W libc    : Access denied finding property "vendor.mali.cctx_memory_class_cframe_hmem"
+10-06 13:57:47.048 18789 18809 W libc    : Access denied finding property "vendor.mali.cctx_memory_class_cframe_sample_pos"
+10-06 13:57:47.048 18789 18809 W libc    : Access denied finding property "vendor.mali.cctx_memory_class_cframe_discard"
+10-06 13:57:47.048 18789 18809 W libc    : Access denied finding property "vendor.mali.cctx_memory_class_cframe_tess_geom"
+10-06 13:57:47.049 18789 18809 W libc    : Access denied finding property "vendor.mali.cctx_memory_class_cobj_hmem"
+10-06 13:57:47.049 18789 18809 W libc    : Access denied finding property "vendor.mali.cctx_memory_class_cmar_hmem"
+10-06 13:57:47.049 18789 18809 W libc    : Access denied finding property "vendor.mali.cctx_memory_class_cmar_prof_dump"
+10-06 13:57:47.049 18789 18809 W libc    : Access denied finding property "vendor.mali.cctx_memory_class_cblend_hmem"
+10-06 13:57:47.049 18789 18809 W libc    : Access denied finding property "vendor.mali.cctx_memory_class_gles_hmem"
+10-06 13:57:47.049 18789 18809 W libc    : Access denied finding property "vendor.mali.cctx_memory_class_gles_query"
+10-06 13:57:47.049 18789 18809 W libc    : Access denied finding property "vendor.mali.cctx_memory_class_gles_query_host"
+10-06 13:57:47.049 18789 18809 W libc    : Access denied finding property "vendor.mali.cctx_memory_class_gles_multiview"
+10-06 13:57:47.049 18789 18809 W libc    : Access denied finding property "vendor.mali.cctx_memory_class_cdeps_hmem"
+10-06 13:57:47.049 18789 18809 W libc    : Access denied finding property "vendor.mali.cctx_memory_class_cmem_suballoc"
+10-06 13:57:47.049 18789 18809 W libc    : Access denied finding property "vendor.mali.cctx_memory_class_cmem_hoard"
+10-06 13:57:47.049 18789 18809 W libc    : Access denied finding property "vendor.mali.cctx_memory_class_cmem_registry"
+10-06 13:57:47.050 18789 18809 W libc    : Access denied finding property "vendor.mali.cctx_memory_class_cl_payload"
+10-06 13:57:47.050 18789 18809 W libc    : Access denied finding property "vendor.mali.cctx_memory_class_cl_wlm_tls"
+10-06 13:57:47.050 18789 18809 W libc    : Access denied finding property "vendor.mali.cctx_memory_class_cl_hmem"
+10-06 13:57:47.050 18789 18809 W libc    : Access denied finding property "vendor.mali.cctx_memory_class_cl_svm"
+10-06 13:57:47.050 18789 18809 W libc    : Access denied finding property "vendor.mali.cctx_memory_class_cl_protected"
+10-06 13:57:47.050 18789 18809 W libc    : Access denied finding property "vendor.mali.cctx_memory_class_cinstr"
+10-06 13:57:47.050 18789 18809 W libc    : Access denied finding property "vendor.mali.cctx_memory_class_gfx_device_memory_cpu_uncached"
+10-06 13:57:47.050 18789 18809 W libc    : Access denied finding property "vendor.mali.cctx_memory_class_gfx_device_memory_cpu_cached"
+10-06 13:57:47.050 18789 18809 W libc    : Access denied finding property "vendor.mali.cctx_memory_class_gfx_device_memory_transient"
+10-06 13:57:47.050 18789 18809 W libc    : Access denied finding property "vendor.mali.cctx_memory_class_gfx_device_memory_protected"
+10-06 13:57:47.050 18789 18809 W libc    : Access denied finding property "vendor.mali.cctx_memory_class_gfx_device_external"
+10-06 13:57:47.051 18789 18809 W libc    : Access denied finding property "vendor.mali.cctx_memory_class_gfx_device_external_swapchain"
+10-06 13:57:47.051 18789 18809 W libc    : Access denied finding property "vendor.mali.cctx_memory_class_gfx_device_internal"
+10-06 13:57:47.051 18789 18809 W libc    : Access denied finding property "vendor.mali.cctx_memory_class_gfx_device_internal_host"
+10-06 13:57:47.051 18789 18809 W libc    : Access denied finding property "vendor.mali.cctx_memory_class_gfx_device_internal_protected"
+10-06 13:57:47.051 18789 18809 W libc    : Access denied finding property "vendor.mali.cctx_memory_class_gfx_device_internal_transient"
+10-06 13:57:47.051 18789 18809 W libc    : Access denied finding property "vendor.mali.cctx_memory_class_gfx_descriptor_pool"
+10-06 13:57:47.051 18789 18809 W libc    : Access denied finding property "vendor.mali.cctx_memory_class_gfx_command_allocator"
+10-06 13:57:47.051 18789 18809 W libc    : Access denied finding property "vendor.mali.cctx_memory_class_gfx_command_allocator_host"
+10-06 13:57:47.051 18789 18809 W libc    : Access denied finding property "vendor.mali.cctx_memory_class_gfx_command_allocator_protected"
+10-06 13:57:47.051 18789 18809 W libc    : Access denied finding property "vendor.mali.cctx_memory_class_vk_bound_buffer"
+10-06 13:57:47.051 18789 18809 W libc    : Access denied finding property "vendor.mali.cctx_memory_class_vk_bound_image"
+10-06 13:57:47.051 18789 18809 W libc    : Access denied finding property "vendor.mali.cctx_memory_class_cmar_signal"
+10-06 13:57:47.052 18789 18809 W libc    : Access denied finding property "vendor.mali.cctx_memory_class_cmar_flush_chain"
+10-06 13:57:47.052 18789 18809 W libc    : Access denied finding property "vendor.mali.cctx_memory_class_cmar_metadata_list"
+10-06 13:57:47.052 18789 18809 W libc    : Access denied finding property "vendor.mali.cctx_memory_class_jit"
+10-06 13:57:47.052 18789 18809 W libc    : Access denied finding property "vendor.mali.cctx_memory_class_mmu"
+10-06 13:57:47.052 18789 18809 W libc    : Access denied finding property "vendor.mali.osu_protected_memory_heap_name"
+10-06 13:57:47.052 18789 18809 W libc    : Access denied finding property "vendor.mali.osu_ion_protected_memory_heap_name"
+10-06 13:57:47.052 18789 18809 W libc    : Access denied finding property "vendor.mali.platform_agt_frequency_khz"
+10-06 13:57:47.052 18789 18809 W libc    : Access denied finding property "vendor.mali.hal_dump_dir"
+10-06 13:57:47.053 18789 18809 W libc    : Access denied finding property "vendor.mali.platform.config"
+10-06 13:57:47.053 18789 18809 W libc    : Access denied finding property "vendor.mali.debug.config"
+10-06 13:57:47.058 18789 18809 D hw-ProcessState: Binder ioctl to enable oneway spam detection failed: Invalid argument
+10-06 13:57:47.064 18789 18809 W libc    : Access denied finding property "ro.vendor.arm.gralloc.no_afbc_usage_mask"
+10-06 13:57:47.064 18789 18809 W libc    : Access denied finding property "ro.vendor.arm.gralloc.no_afbc_usage_flags"
+10-06 13:57:47.064 18789 18809 W libc    : Access denied finding property "ro.vendor.arm.gralloc.shared_access_usage_mask"
+10-06 13:57:47.065 18789 18809 W libc    : Access denied finding property "ro.vendor.arm.gralloc.shared_access_usage_flags"
+10-06 13:57:47.065 18789 18809 W libc    : Access denied finding property "ro.vendor.arm.gralloc.force_back_buffer_usage_mask"
+10-06 13:57:47.065 18789 18809 W libc    : Access denied finding property "ro.vendor.arm.gralloc.force_back_buffer_usage_flags"
+10-06 13:57:47.065 18789 18809 W libc    : Access denied finding property "ro.vendor.arm.gralloc.afrc_rgba_usage_mask"
+10-06 13:57:47.065 18789 18809 W libc    : Access denied finding property "ro.vendor.arm.gralloc.afrc_rgba_usage_flags"
+10-06 13:57:47.065 18789 18809 W libc    : Access denied finding property "ro.vendor.arm.gralloc.afrc_luma_usage_mask"
+10-06 13:57:47.065 18789 18809 W libc    : Access denied finding property "ro.vendor.arm.gralloc.afrc_chroma_usage_mask"
+10-06 13:57:47.065 18789 18809 W libc    : Access denied finding property "ro.vendor.arm.gralloc.afrc_luma_usage_flags"
+10-06 13:57:47.065 18789 18809 W libc    : Access denied finding property "ro.vendor.arm.gralloc.afrc_chroma_usage_flags"
+10-06 13:57:47.068 18789 18809 I wf_game : EGL surface ready: 1920x1080 (context reused)
+10-06 13:57:47.068 18789 18809 I wf_game : android_main: EGL ready, entering HALStart
+10-06 13:57:47.068 18789 18809 I wf_game : android_main: wf_args.txt gave 6 argument(s)
+10-06 13:57:47.070 18789 18809 I AAudio  : AAudioStreamBuilder_openStream() called ----------------------------------------
+10-06 13:57:47.070 18789 18809 I AudioStreamBuilder: rate   =      0, channels  = 0, format   = 5, sharing = SH, dir = OUTPUT
+10-06 13:57:47.070 18789 18809 I AudioStreamBuilder: device =      0, sessionId = -1, perfMode = 12, callback: ON with frames = 0
+10-06 13:57:47.070 18789 18809 I AudioStreamBuilder: usage  =      0, contentType = 0, inputPreset = 0, allowedCapturePolicy = 0
+10-06 13:57:47.070 18789 18809 I AudioStreamBuilder: privacy sensitive = false
+10-06 13:57:47.070 18789 18809 I AudioStreamBuilder: opPackageName = (null)
+10-06 13:57:47.070 18789 18809 I AudioStreamBuilder: attributionTag = (null)
+10-06 13:57:47.070 18789 18809 D f_game.aquariu: PlayerBase::PlayerBase()
+10-06 13:57:47.083 18789 18809 D AudioStreamInternal_Client: open() original HW burst = 384, minMicros = 1000 => SW burst = 384
+10-06 13:57:47.083 18789 18809 D AAudioStream: setState(s#1) from 0 to 2
+10-06 13:57:47.083 18789 18809 I AAudioFlowGraph: configure() source format = 0x00000005, channels = 2, sink format = 0x00000005, channels = 2
+10-06 13:57:47.088 18789 18809 I AAudio  : AAudioStreamBuilder_openStream() returns 0 = AAUDIO_OK for s#1 ----------------
+10-06 13:57:47.089 18789 18809 D AAudio  : AAudioStream_requestStart(s#1) called --------------
+10-06 13:57:47.089 18789 18809 D AAudioStream: setState(s#1) from 2 to 3
+10-06 13:57:47.108 18789 18809 D AAudio  : AAudioStream_requestStart(s#1) returned 0 ---------
+10-06 13:57:47.112 18789 18824 D AudioStreamInternalPlay_Client: callbackLoop() entering >>>>>>>>>>>>>>>
+10-06 13:57:47.112 18789 18824 D AudioStreamInternal_Client: onEventFromServer - got AAUDIO_SERVICE_EVENT_STARTED
+10-06 13:57:47.112 18789 18824 D AAudioStream: setState(s#1) from 3 to 4
+10-06 13:57:47.161 18789 18809 I wf_game : level-menu: showing 8 entries ("WF Aquarium"), cursor on 0
+10-06 13:57:47.175 18789 18809 E ion     : ioctl c0044901 failed with code -1: Invalid argument
+10-06 13:57:47.176 18789 18809 D hw-ProcessState: Binder ioctl to enable oneway spam detection failed: Invalid argument
+10-06 13:57:52.521 18789 18809 I wf_game : key code=4 action=0 (Back: hides the phone panel)
+10-06 13:57:52.555 18789 18809 I wf_game : key code=4 action=1 (Back: hides the phone panel)
+10-06 13:57:58.938 18789 18820 I f_game.aquariu: Explicit concurrent copying GC freed 336(49KB) AllocSpace objects, 0(0B) LOS objects, 49% free, 1982KB/3965KB, paused 96us total 11.269ms
+10-06 13:57:59.311 18789 18809 I wf_game : key code=20 action=0 mask=0x1000
+10-06 13:57:59.313 18789 18809 I wf_game : level-menu: cursor on 1 (Blue Shrimp)
+10-06 13:57:59.345 18789 18809 I wf_game : key code=20 action=1 mask=0x1000
+10-06 13:57:59.945 18789 18809 I wf_game : key code=20 action=0 mask=0x1000
+10-06 13:57:59.947 18789 18809 I wf_game : level-menu: cursor on 2 (Calm Betta)
+10-06 13:57:59.979 18789 18809 I wf_game : key code=20 action=1 mask=0x1000
+10-06 13:58:00.546 18789 18809 I wf_game : key code=20 action=0 mask=0x1000
+10-06 13:58:00.547 18789 18809 I wf_game : level-menu: cursor on 3 (Jellyfish)
+10-06 13:58:00.579 18789 18809 I wf_game : key code=20 action=1 mask=0x1000
+10-06 13:58:01.163 18789 18809 I wf_game : key code=20 action=0 mask=0x1000
+10-06 13:58:01.165 18789 18809 I wf_game : level-menu: cursor on 4 (Lionfish)
+10-06 13:58:01.197 18789 18809 I wf_game : key code=20 action=1 mask=0x1000
+10-06 13:58:01.781 18789 18809 I wf_game : key code=20 action=0 mask=0x1000
+10-06 13:58:01.783 18789 18809 I wf_game : level-menu: cursor on 5 (Planted Tank)
+10-06 13:58:01.814 18789 18809 I wf_game : key code=20 action=1 mask=0x1000
+10-06 13:58:02.398 18789 18809 I wf_game : key code=22 action=0 mask=0x2000
+10-06 13:58:02.432 18789 18809 I wf_game : key code=22 action=1 mask=0x2000
+10-06 13:58:05.763 18789 18820 I f_game.aquariu: Explicit concurrent copying GC freed 4108(175KB) AllocSpace objects, 1(20KB) LOS objects, 49% free, 1982KB/3965KB, paused 87us total 9.728ms
+10-06 13:58:06.286 18789 18809 I wf_game : key code=23 action=0 mask=0x1
+10-06 13:58:06.442 18789 18789 D CompatibilityChangeReporter: Compat change id reported: 171228096; UID 10101; state: ENABLED
+10-06 13:58:06.572 18789 18809 I wf_game : key code=23 action=1 mask=0x1
+10-06 13:58:06.693 18789 18789 W InputMethodManager: Ignoring showSoftInput() as view=android.widget.EditText{f42d911 VFED..CL. .F...... 0,0-992,97 aid=1073741824} is not served.
+10-06 13:58:06.739 18789 18789 D CompatibilityChangeReporter: Compat change id reported: 163400105; UID 10101; state: ENABLED
+10-06 13:58:06.996 18789 18789 D InsetsController: show(ime(), fromIme=true)
+10-06 13:58:10.981 18789 18802 I f_game.aquariu: Explicit concurrent copying GC freed 7343(349KB) AllocSpace objects, 4(80KB) LOS objects, 49% free, 2165KB/4330KB, paused 99us total 13.335ms
+10-06 13:58:11.755 18789 18789 E f_game.aquariu: No implementation found for void org.worldfoundry.wf_game.WorldFoundryActivity.textResult(long, int, byte[], boolean) (tried Java_org_worldfoundry_wf_1game_WorldFoundryActivity_textResult and Java_org_worldfoundry_wf_1game_WorldFoundryActivity_textResult__JI_3BZ)
+10-06 13:58:11.755 18789 18789 D AndroidRuntime: Shutting down VM
+--------- beginning of crash
+10-06 13:58:11.757 18789 18789 E AndroidRuntime: FATAL EXCEPTION: main
+10-06 13:58:11.757 18789 18789 E AndroidRuntime: Process: org.worldfoundry.wf_game.aquarium, PID: 18789
+10-06 13:58:11.757 18789 18789 E AndroidRuntime: java.lang.UnsatisfiedLinkError: No implementation found for void org.worldfoundry.wf_game.WorldFoundryActivity.textResult(long, int, byte[], boolean) (tried Java_org_worldfoundry_wf_1game_WorldFoundryActivity_textResult and Java_org_worldfoundry_wf_1game_WorldFoundryActivity_textResult__JI_3BZ)
+10-06 13:58:11.757 18789 18789 E AndroidRuntime: 	at org.worldfoundry.wf_game.WorldFoundryActivity.textResult(Native Method)
+10-06 13:58:11.757 18789 18789 E AndroidRuntime: 	at org.worldfoundry.wf_game.WorldFoundryActivity.finishText(WorldFoundryActivity.java:89)
+10-06 13:58:11.757 18789 18789 E AndroidRuntime: 	at org.worldfoundry.wf_game.WorldFoundryActivity.finishText(WorldFoundryActivity.java:78)
+10-06 13:58:11.757 18789 18789 E AndroidRuntime: 	at org.worldfoundry.wf_game.WorldFoundryActivity.lambda$showPropertyText$0$org-worldfoundry-wf_game-WorldFoundryActivity(WorldFoundryActivity.java:53)
+10-06 13:58:11.757 18789 18789 E AndroidRuntime: 	at org.worldfoundry.wf_game.WorldFoundryActivity$$ExternalSyntheticLambda2.onEditorAction(D8$$SyntheticClass:0)
+10-06 13:58:11.757 18789 18789 E AndroidRuntime: 	at android.widget.TextView.doKeyDown(TextView.java:8446)
+10-06 13:58:11.757 18789 18789 E AndroidRuntime: 	at android.widget.TextView.onKeyDown(TextView.java:8331)
+10-06 13:58:11.757 18789 18789 E AndroidRuntime: 	at android.view.KeyEvent.dispatch(KeyEvent.java:2867)
+10-06 13:58:11.757 18789 18789 E AndroidRuntime: 	at android.view.View.dispatchKeyEvent(View.java:14478)
+10-06 13:58:11.757 18789 18789 E AndroidRuntime: 	at android.view.ViewGroup.dispatchKeyEvent(ViewGroup.java:1964)
+10-06 13:58:11.757 18789 18789 E AndroidRuntime: 	at android.view.ViewGroup.dispatchKeyEvent(ViewGroup.java:1964)
+10-06 13:58:11.757 18789 18789 E AndroidRuntime: 	at android.view.ViewGroup.dispatchKeyEvent(ViewGroup.java:1964)
+10-06 13:58:11.757 18789 18789 E AndroidRuntime: 	at android.view.ViewGroup.dispatchKeyEvent(ViewGroup.java:1964)
+10-06 13:58:11.757 18789 18789 E AndroidRuntime: 	at android.view.ViewGroup.dispatchKeyEvent(ViewGroup.java:1964)
+10-06 13:58:11.757 18789 18789 E AndroidRuntime: 	at android.view.ViewGroup.dispatchKeyEvent(ViewGroup.java:1964)
+10-06 13:58:11.757 18789 18789 E AndroidRuntime: 	at com.android.internal.policy.DecorView.superDispatchKeyEvent(DecorView.java:490)
+10-06 13:58:11.757 18789 18789 E AndroidRuntime: 	at com.android.internal.policy.PhoneWindow.superDispatchKeyEvent(PhoneWindow.java:1880)
+10-06 13:58:11.757 18789 18789 E AndroidRuntime: 	at android.app.Dialog.dispatchKeyEvent(Dialog.java:828)
+10-06 13:58:11.757 18789 18789 E AndroidRuntime: 	at com.android.internal.policy.DecorView.dispatchKeyEvent(DecorView.java:404)
+10-06 13:58:11.757 18789 18789 E AndroidRuntime: 	at android.view.ViewRootImpl$ViewPostImeInputStage.processKeyEvent(ViewRootImpl.java:6278)
+10-06 13:58:11.757 18789 18789 E AndroidRuntime: 	at android.view.ViewRootImpl$ViewPostImeInputStage.onProcess(ViewRootImpl.java:6144)
+10-06 13:58:11.757 18789 18789 E AndroidRuntime: 	at android.view.ViewRootImpl$InputStage.deliver(ViewRootImpl.java:5626)
+10-06 13:58:11.757 18789 18789 E AndroidRuntime: 	at android.view.ViewRootImpl$InputStage.onDeliverToNext(ViewRootImpl.java:5683)
+10-06 13:58:11.757 18789 18789 E AndroidRuntime: 	at android.view.ViewRootImpl$InputStage.forward(ViewRootImpl.java:5649)
+10-06 13:58:11.757 18789 18789 E AndroidRuntime: 	at android.view.ViewRootImpl$AsyncInputStage.forward(ViewRootImpl.java:5814)
+10-06 13:58:11.757 18789 18789 E AndroidRuntime: 	at android.view.ViewRootImpl$InputStage.apply(ViewRootImpl.java:5657)
+10-06 13:58:11.757 18789 18789 E AndroidRuntime: 	at android.view.ViewRootImpl$AsyncInputStage.apply(ViewRootImpl.java:5871)
+10-06 13:58:11.757 18789 18789 E AndroidRuntime: 	at android.view.ViewRootImpl$InputStage.deliver(ViewRootImpl.java:5630)
+10-06 13:58:11.757 18789 18789 E AndroidRuntime: 	at android.view.ViewRootImpl$InputStage.onDeliverToNext(ViewRootImpl.java:5683)
+10-06 13:58:11.757 18789 18789 E AndroidRuntime: 	at android.view.ViewRootImpl$InputStage.forward(ViewRootImpl.java:5649)
+10-06 13:58:11.757 18789 18789 E AndroidRuntime: 	at android.view.ViewRootImpl$InputStage.apply(ViewRootImpl.java:5657)
+10-06 13:58:11.757 18789 18789 E AndroidRuntime: 	at android.view.ViewRootImpl$InputStage.deliver(ViewRootImpl.java:5630)
+10-06 13:58:11.757 18789 18789 E AndroidRuntime: 	at android.view.ViewRootImpl.deliverInputEvent(ViewRootImpl.java:8562)
+10-06 13:58:11.757 18789 18789 E AndroidRuntime: 	at android.view.ViewRootImpl.doProcessInputEvents(ViewRootImpl.java:8513)
+10-06 13:58:11.757 18789 18789 E AndroidRuntime: 	at android.view.ViewRootImpl.enqueueInputEvent(ViewRootImpl.java:8482)
+10-06 13:58:11.757 18789 18789 E AndroidRuntime: 	at android.view.ViewRootImpl$ViewRootHandler.handleMessageImpl(ViewRootImpl.java:5391)
+10-06 13:58:11.757 18789 18789 E AndroidRuntime: 	at android.view.ViewRootImpl$ViewRootHandler.handleMessage(ViewRootImpl.java:5263)
+10-06 13:58:11.757 18789 18789 E AndroidRuntime: 	at android.os.Handler.dispatchMessage(Handler.java:106)
+10-06 13:58:11.757 18789 18789 E AndroidRuntime: 	at android.os.Looper.loopOnce(Looper.java:201)
+10-06 13:58:11.757 18789 18789 E AndroidRuntime: 	at android.os.Looper.loop(Looper.java:288)
+10-06 13:58:11.757 18789 18789 E AndroidRuntime: 	at android.app.ActivityThread.main(ActivityThread.java:7839)
+10-06 13:58:11.757 18789 18789 E AndroidRuntime: 	at java.lang.reflect.Method.invoke(Native Method)
+10-06 13:58:11.757 18789 18789 E AndroidRuntime: 	at com.android.internal.os.RuntimeInit$MethodAndArgsCaller.run(RuntimeInit.java:548)
+10-06 13:58:11.757 18789 18789 E AndroidRuntime: 	at com.android.internal.os.ZygoteInit.main(ZygoteInit.java:1003)
+10-06 13:58:11.783 18789 18789 I Process : Sending signal. PID: 18789 SIG: 9
