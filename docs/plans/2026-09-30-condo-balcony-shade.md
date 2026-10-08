@@ -3,6 +3,8 @@
 **Rendering update, 2026-10-05:** the translucent integration preserves the original collision strips and parking motion, but replaces their visible overlapping sides with coplanar optical sheets that shorten using render-only Z scale. Fabric opacity is 0.32. The motion/geometry discussion below records the original opaque implementation; see [current implementation and runtime captures](2026-10-02-condo-translucency.md#condo-integration--2026-10-05).
 
 
+**Plan B requested, 2026‑10‑08 (Will):** a glazed aluminium folding window whose panes fold out of the way completely, as a fallback much closer to a traditional window installation. Specified in [A2. Plan B](#a2-plan-b-glazed-aluminium-folding-window-that-stacks-clear), with its own [mockup](2026-09-30-condo-balcony-shade/elevation-plan-b.html) and Open questions 11–14. Plan A remains the primary design.
+
 ## Context
 
 The back balcony of 639 is an open opening onto the west (Bangkok afternoon sun, monsoon rain, gusts, 6th floor ≈ 16 m up). Will wants a **motorised outdoor zip screen in a cassette, mounted under the concrete ledge (beam) of the opening**, with the **solar-strip motor option** (battery motor charged by a thin photovoltaic strip — no mains wiring to the balcony).
@@ -62,6 +64,48 @@ Product class: **outdoor zip screen, cassette (head box) on the soffit, inside-r
 
 **Anchoring.** Side guides bolt into the concrete reveals (the vertical side faces of the opening); the cassette hangs from the soffit. Both need flat, plumb faces — see Open questions.
 
+### A2. Plan B: glazed aluminium folding window that stacks clear
+
+**Requested by Will, 2026‑10‑08.** A fallback to the zip screen that is much closer to a traditional window installation: a custom-made aluminium frame fixed into the same 268 × 111 cm opening, glazed, whose panes fold or slide out of the way completely so the opening is as clear as possible when open. Plan A stays the primary design. Plan B is to be quoted beside it; choosing between them is Will's decision after quotes and the site measurement (Open question 11).
+
+**What plan B changes.** It is a window, not a shade. Closed, it is a sealed glazed wall: it stops rain and pigeons as plan A's fabric does, and it keeps the view through glass. Open, the panes stack at one end instead of rolling into a cassette, so a stack a few tens of centimetres wide stays in the opening. It is worked by hand. There is no motor, no remote, no rain sensor and nothing to back up during a power cut, so when Will is abroad it is left closed. Plan A's automatic close on rain (Open question 8) has no equivalent, and needs none: a raised shade can be caught by a shower, a closed window cannot.
+
+Product class: **top-hung aluminium bi-fold window (บานเฟี้ยม), four panels, all folding inward and stacking against the south wall, tempered solar-control glass, gasketed, with a drained sill on the pony-wall cap.**
+
+Why this system and not the others that clear an opening:
+
+| System | How it clears the opening | Left in the 268 cm opening when open | Closed | Verdict |
+|---|---|---|---|---|
+| **Framed bi-fold**, 4 × 67 cm, one-way | hinged panels fold like an accordion and hang from the head track | the folded stack: about four sash thicknesses plus hardware along the track (assumed 8 cm each, so ≈ 32 cm; the shop's profile decides), projecting about one panel width (≈ 65 cm, the sash inside the jamb frames) inward | a gasketed window; an access leaf can open on its own | **Recommended.** A standard product in Bangkok aluminium shops. 650–700 mm is the recommended panel width, and 4 × 67 cm fits it exactly |
+| **Frameless slide-and-turn** (all-glass balcony glazing: Lumon, Solarlux SL 25, Sunflex SF25) | each pane slides to the end and turns 90°, parking in a thin stack | a stack of bare panes, 2–3 cm each, so ≈ 15 cm for five | 6–12 mm toughened panes with no vertical frames, but with **2–3 mm gaps between the panes**, which Lumon describes as the balcony's ventilation | The best view open and closed, but the gaps make it balcony glazing, not a sealed window: wind-driven rain gets through, which fails the 99 % rain rule unless a shop proves otherwise. A specialist import; Bangkok availability and price unknown |
+| Framed slide-and-stack (multi-track) | panels slide to one end and stack face to face | one full panel width, 67–90 cm | sealed | Rejected: a panel always blocks part of the view; Sunflex says the same of its linear sliders |
+| Pocket slider | panels slide into a wall pocket | nothing | sealed | Rejected: no pocket is possible. The south jamb is the guest-bedroom wall and the north jamb is a 10 cm stub |
+| Two- or three-track slider | panels slide over each other | a half or a third of the opening | sealed | Rejected |
+
+Specification to quote against. The measurements are plan A's; nothing is remeasured here.
+
+| Parameter | Recommendation | Why |
+|---|---|---|
+| Frame | custom aluminium frame to the clear opening, measured at three heights; head fixed to the concrete ledge soffit, jambs to the reveals, sill on the pony-wall cap | The same anchoring faces as plan A; the ledge is concrete and carries the hung load |
+| Panels | **4 × 67 cm**, one-way, folding **inward**, stacking against the **south** wall | 650–700 mm per panel is the recommended bi-fold width. The south jamb is a full wall with 2 m of flat face; the north jamb is a 10 cm stub, so no stack can go there. Inward keeps everything inside the wall line, keeps the parked stack out of the wind at 16 m, and keeps it off the Daikin unit, which hangs outboard at the south end |
+| Alternative layout | 3 × 89 cm, or 3 + 1 with a single north leaf | Fewer frames in view when closed and a natural access leaf, at the cost of a wider stack projection (≈ 86 cm) and heavier panels. Price both |
+| Access leaf | one panel that opens on its own for airflow with the rest closed | A closed glazed west-facing box gets hot, and a cracked leaf is the only ventilation plan B has. Even-count one-way systems do not all offer one; ask |
+| Hanging | **top-hung** on the head track with a sill guide, not bottom-rolling | The ledge can carry the load, and a top track does not clog with balcony grit |
+| Sill | drained sill with weep holes, sealed to a flat, level cap. **The cap is 10 cm thick**, so the frame's sill depth must fit it or a sub-sill is needed | This is where rain gets in. The same 0–10 mm flatness problem as plan A's bottom bar |
+| Glass | tempered safety glass, 6 mm minimum, with a **solar-control tint or low-E** coating but still clear enough to see out; laminated if the shop or the condo requires it at this height | A sealed west face in Bangkok sun, and Will wants to see out when closed |
+| Water tightness | ask for the water-tightness class, the test behind it, and how the sill drains | A gasketed window should beat the 99 % rain rule; make the shop say so |
+| Wind | ask for the design wind load or the glass sizing basis for a 6th-floor west face; parked panels must latch in the stack | Closed panes take the full gust, and a half-open panel is the failure case |
+| Operation | manual: no motor, RF, Zigbee, rain sensor, mains or backup power | Nothing to automate; left closed when Will is abroad |
+| Finish | powder-coated aluminium in a colour the condo's façade rules allow | Visible from outside |
+
+**Ballpark cost, not a quote.** One Bangkok shop's 2026 market guide puts bi-fold windows at 10,000–12,500 THB per m² for a 1.2 mm profile with 6 mm float glass, plus 800–1,500 THB per m² for installation. The opening is 2.97 m², so about 30,000–37,000 THB of materials and 2,400–4,500 THB of labour, before tempered or solar-control glass and heavier profiles. Plan A has no comparable figure in this plan.
+
+**Weight, estimated.** 2.97 m² of 6 mm glass is about 45 kg; with frames, roughly 60–70 kg hangs from the soffit. An ordinary anchor job into the concrete ledge, which the shop checks.
+
+**Level model.** None for plan B until it is chosen. If it is, § 7d gets a sibling for hinged panels (Out of scope).
+
+Sources: [Nuline bifold windows](https://nulinewindows.com.au/bifold-windows) (650–700 mm panels, up to 900 mm; inward or outward), [Vetrina bi-fold guide](https://www.vetrinawindows.com/articles/aluminum-bi-fold-doors-sizes-panel-counts-slider-comparison) (top-hung vs bottom-rolling, stacking to one or both sides, traffic leaf), [Lumon retractable glazing](https://lumon.com/us/professionals/glazing-solutions/lumon-glazing/) (6–12 mm toughened panes, 2–3 mm gaps, folds inside, can be secured against wind), [Sunflex slide-and-turn](https://www.sunflex-aluminiumsystems.com/products/slide-and-turn-systems) (SF25: 8–12 mm tempered glass; linear sliders leave part of the opening occupied), [Solarlux SL 25](https://solarlux.com/en/systems/balcony-glazing-sl-25.html), [SGQ 2026 aluminium window price guide](https://smartglassquality.com/2026/04/07/aluminium-window-guide/) and [installation labour](https://smartglassquality.com/2026/04/16/aluminum-door-window-price/) (Thai).
+
 ### B. Level model (`blender_create_condo.py`)
 
 The source `.blend` is read-only, so all of this is a new section (**§ 7d**) in `wflevels/condo_639_640/blender_create_condo.py`, following the pattern of § 7c (telescoping glass doors) and gated by `CONDO_SHADE=0` to switch it off.
@@ -90,6 +134,10 @@ Rejected: a two-state visibility swap (open/closed with no travel) — cheap but
 
 **Section** — the 7 cm floor step, pony wall, cassette under the soffit, beam, and a sun-altitude slider to judge what the west-facing strip sees. [Open the interactive mockup](2026-09-30-condo-balcony-shade/section.html).
 
+[![Plan B elevation and plan](2026-09-30-condo-balcony-shade/elevation-plan-b.png)](2026-09-30-condo-balcony-shade/elevation-plan-b.html)
+
+**Plan B: elevation and plan** — the four-panel bi-fold closed, with the access leaf open, half folded and stacked against the south wall; a plan-view strip shows the inward stack under the ledge, and a toggle switches to 3 × 89 cm. The stack assumes 8 cm per sash. [Open the interactive mockup](2026-09-30-condo-balcony-shade/elevation-plan-b.html).
+
 The in-engine states are captured in Verification 5 and 6 (`-rate20 --capture-frame` on scratch builds of this level with a spawn / camera / start-closedness override; the shipped level loads open):
 
 | open (raised) | half | closed |
@@ -117,9 +165,16 @@ Answers of 2026‑09‑30 are folded in; what is left has a default that the bui
 9. **RF and Zigbee.** The motor needs an RF remote at least, and it must be **fixed code**, not a **rolling-code (hopping-code)** remote: a universal RF-to-Zigbee bridge can learn and replay a fixed code, but a rolling code changes with every press, so a copied press stops working (Will, 2026‑09‑30; Bluetooth does not help). A motor with Zigbee built in would be simplest but is expected to cost thousands of THB more than Will's own bridge, so it is asked about for price only; the plan is a fixed-code RF remote and a home-built RF-to-Zigbee bridge. Ask every shop for the frequency, the brand or protocol, and fixed vs rolling code. As I understand it, many cheap tubular-motor remotes at 433 MHz are fixed code and Somfy RTS is rolling code, but check each shop's actual remote; I have not verified any model.
 10. **Level model: should the parts above the cap collide? (dormant: decide when a POV camera returns)** The ledge, cassette, guides, slats and bar are ordinary statplats (Mass 75), as B.6 says. The player can reach none of them, but the balcony POV camera can. At the zone entry (player y −1.50…−1.20) its bbox overlaps them and it climbs; in the 4 s probe it had not settled back in 4 of 8 samples at those two positions. Today's level (`CONDO_SHADE=0`) settles in every sample, and with `CONDO_SHADE_OVERHEAD_MASS=0` so does this one, 20 of 20 (Verification 6). Mass 0 is how this level already keeps the skydome, site buildings and podium out of the camera's way. **Default: statplat Mass, as written in B.6. Recommended: 0.** Since the automatic POV cameras are off by default (Verification 6), no shipped camera comes near these parts: the doll-house shot sits 9 m up, and the manual inspection camera stays at 35° or more and 4 m or more from the player, above 3.2 m. So the question only matters for the "something better later" POV.
 
+11. **Plan A or plan B?** Will's call after quotes and the site measurement. Plan A keeps the whole opening clear when raised and closes itself on rain; plan B gives a sealed glass wall with a clear view when closed, no electrics and no backup power, but leaves a stack in the opening and must be worked by hand. Default until decided: plan A, with plan B quoted beside it.
+12. **Does the condo allow glazing the balcony opening?** A fixed glazed frame is a bigger façade change than a shade under the ledge, and some Bangkok condos forbid enclosing balconies. The LINE draft in the RFQ packet covers the zip screen only; a plan-B version is needed before any order.
+13. **Does a bi-fold sill fit the 10 cm cap?** Sill depths vary by profile. If it does not fit, a sub-sill or a cap extension is needed, and that changes the water path. Check at the shop's site measurement.
+14. **Access leaf and layout.** 4 × 67 cm one-way with no access leaf, or a layout that gives one (3 × 89 cm, or 3 + 1)? It depends on what the shop's system supports and on how hot the closed box gets.
+
 ## Out of scope
 
 - Choosing a supplier or price; this plan fixes the spec, not the purchase.
+- Motorising plan B, or any automation of it, and an interior blind behind plan B's glass.
+- A level-model variant (§ 7d) for plan B until it is chosen.
 - Shading the *interior* side or the other patio room (x 5.40–7.80, full-height wall).
 - Weather in the level (rain, wind on the fabric).
 - Adding the balcony's real slab thickness, drainage falls or waterproofing lip under the 7 cm recess.
@@ -461,3 +516,6 @@ Run 2026‑09‑30 on the default build (shade on, grass on, `CONDO_POV_TRIGGERS
 
     **Not run** — on site, before ordering.
 
+9. **Plan B, on site, before ordering:** the step-8 measurements, plus the cap's width and flatness along its length for the sill, the soffit's flatness over the 268 cm for the head track, a clear 70 cm of the south wall face beside the jamb for the inward stack, and the juristic person's answer on glazing the opening (Open question 12).
+
+    **Not run**: on site, before ordering.
