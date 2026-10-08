@@ -29,6 +29,7 @@
 #endif
 
 #include <gfx/renderer_backend.hp>
+#include <gfx/static_mesh.hp>
 #include <gfx/backface_cull.hp>
 #include <hal/phonepad/phonepad_overlay.h>
 #include <cstdint>   // uintptr_t for the RBTextureHandle cast
@@ -235,8 +236,10 @@ static void SetupVertexAttribs()
 }
 
 // A static mesh (E3 phase 1): one VBO of packed Verts (3 per triangle, in the
-// order given to CreateStaticMesh), one index buffer re-filled per draw with
-// the surviving triangles, and a VAO that binds both. `generation` is the GL
+// order given to CreateStaticMesh), and a VAO that binds it and an index buffer
+// re-filled per draw with the surviving triangles. Normally all mesh VAOs
+// share the backend's index buffer; the measurement switch restores per-mesh
+// ownership. `generation` is the GL
 // context generation it was created in: after an Android surface loss the
 // names are dead and the handle only frees its bookkeeping.
 struct StaticMeshGL
@@ -245,6 +248,7 @@ struct StaticMeshGL
     unsigned generation = 0;
     int triangles = 0;
     bool index32 = false;       // more than 65536 vertices
+    bool sharedIndex = false;  // backend owns ibo; mesh only holds a reference
     size_t vboBytes = 0;
     size_t iboBytes = 0;        // largest index upload so far
 };
@@ -706,6 +710,9 @@ public:
         _idx32.clear();
         _curMesh = nullptr;
         _staticGpuBytes = 0;
+        _sharedIbo = 0;
+        _sharedIboBytes = 0;
+        _sharedMeshCount = 0;
     }
 
     // ---- static meshes (E3 phase 1) ----------------------------------------
@@ -720,14 +727,29 @@ public:
         mesh->triangles  = count;
         mesh->index32    = size_t(count) * 3 > 65536;
         mesh->vboBytes   = size_t(count) * 3 * sizeof(Vert);
+        mesh->sharedIndex = StaticMeshSharedIndex();
         glGenVertexArrays(1, &mesh->vao);
         glGenBuffers(1, &mesh->vbo);
-        glGenBuffers(1, &mesh->ibo);
+        if (mesh->sharedIndex)
+        {
+            if (!_sharedIbo) glGenBuffers(1, &_sharedIbo);
+            mesh->ibo = _sharedIbo;
+        }
+        else
+            glGenBuffers(1, &mesh->ibo);
         if (!mesh->vao || !mesh->vbo || !mesh->ibo)
         {
             if (mesh->vao) glDeleteVertexArrays(1, &mesh->vao);
             if (mesh->vbo) glDeleteBuffers(1, &mesh->vbo);
-            if (mesh->ibo) glDeleteBuffers(1, &mesh->ibo);
+            if (mesh->sharedIndex)
+            {
+                if (!_sharedMeshCount && _sharedIbo)
+                {
+                    glDeleteBuffers(1, &_sharedIbo);
+                    _sharedIbo = 0;
+                }
+            }
+            else if (mesh->ibo) glDeleteBuffers(1, &mesh->ibo);
             delete mesh;
             return NULL;
         }
@@ -759,6 +781,7 @@ public:
         glBindBuffer(GL_ARRAY_BUFFER, 0);
         glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, 0);
         _staticGpuBytes += mesh->vboBytes;
+        if (mesh->sharedIndex) ++_sharedMeshCount;
         return mesh;
     }
 
@@ -771,8 +794,24 @@ public:
         {
             glDeleteVertexArrays(1, &mesh->vao);
             glDeleteBuffers(1, &mesh->vbo);
-            glDeleteBuffers(1, &mesh->ibo);
-            _staticGpuBytes -= mesh->vboBytes + mesh->iboBytes;
+            _staticGpuBytes -= mesh->vboBytes;
+            if (mesh->sharedIndex)
+            {
+                // Other live mesh VAOs still refer to this buffer. Release it
+                // only with the last mesh of this context generation.
+                if (--_sharedMeshCount == 0)
+                {
+                    glDeleteBuffers(1, &_sharedIbo);
+                    _sharedIbo = 0;
+                    _staticGpuBytes -= _sharedIboBytes;
+                    _sharedIboBytes = 0;
+                }
+            }
+            else
+            {
+                glDeleteBuffers(1, &mesh->ibo);
+                _staticGpuBytes -= mesh->iboBytes;
+            }
         }
         delete mesh;
     }
@@ -873,6 +912,9 @@ private:
     std::vector<uint32_t> _idx32;
     unsigned _contextGeneration = 1;
     size_t _staticGpuBytes = 0;
+    GLuint _sharedIbo = 0;
+    size_t _sharedIboBytes = 0;  // largest upload, counted once across all VAOs
+    unsigned _sharedMeshCount = 0;
 
     bool BatchEmpty() const { return _cpu.empty() && _idx16.empty() && _idx32.empty(); }
 
@@ -990,10 +1032,14 @@ private:
                          mesh.index32 ? static_cast<const void*>(_idx32.data())
                                       : static_cast<const void*>(_idx16.data()),
                          GL_STREAM_DRAW);
-            if (bytes > mesh.iboBytes)
+            // glBufferData orphans the old storage before each draw. Sharing
+            // the name does not overwrite indices consumed by earlier draws,
+            // including when the next mesh uses a different index width.
+            size_t& iboBytes = mesh.sharedIndex ? _sharedIboBytes : mesh.iboBytes;
+            if (bytes > iboBytes)
             {
-                _staticGpuBytes += bytes - mesh.iboBytes;
-                mesh.iboBytes = bytes;
+                _staticGpuBytes += bytes - iboBytes;
+                iboBytes = bytes;
             }
             wf_profile::count(wf_profile::Draws);
             wf_profile::count(wf_profile::Triangles, count / 3);

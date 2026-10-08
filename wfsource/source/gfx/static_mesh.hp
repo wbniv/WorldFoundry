@@ -33,6 +33,10 @@
 void StaticMeshSetSwitch(bool on);		// --static-mesh=0|1
 bool StaticMeshEnabled();
 void StaticMeshSetFastCull(bool fast);	// --static-mesh-cull=fast|exact
+// Memory experiment: share one index buffer across mesh VAOs (default on).
+// =0 restores the phase-1 per-mesh buffers for same-binary measurements.
+void StaticMeshSetSharedIndex(bool on);
+bool StaticMeshSharedIndex();
 
 // Texture placement in VRAM may have changed (a room's asset slot was loaded or
 // freed). Baked UVs come from that placement (CalcUV), so every bake made

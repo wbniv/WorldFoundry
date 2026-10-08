@@ -1303,6 +1303,14 @@ if(NOT ANDROID AND NOT IOS AND NOT APPLE AND NOT EMSCRIPTEN)
         COMMAND $<TARGET_FILE:wf_game> --frame-step-smoke=30 --cycles=2 -L${WF_TEST_SNOW_LEVEL}
         WORKING_DIRECTORY ${WF_TEST_RUN_DIR})
 
+    # E3 index ownership: mixed index widths and deletion across context loss.
+    add_executable(wf_static_mesh_index_gl_test tests/static_mesh_index_gl.cc)
+    target_link_libraries(wf_static_mesh_index_gl_test PRIVATE wfengine)
+    target_compile_options(wf_static_mesh_index_gl_test PRIVATE -fpermissive -w -fno-rtti)
+    add_test(NAME mesh_index_shared COMMAND wf_static_mesh_index_gl_test 1)
+    add_test(NAME mesh_index_per_mesh COMMAND wf_static_mesh_index_gl_test 0)
+    set_tests_properties(mesh_index_shared mesh_index_per_mesh PROPERTIES LABELS "gl")
+
     # E3 static mesh buffers (gfx/glpipeline/static_mesh.cc): with
     # WF_STATIC_MESH_CHECK=1 every bake is re-recorded at every draw and every
     # cull decision is compared with DrawTriangle's. mesh_bake: the recording

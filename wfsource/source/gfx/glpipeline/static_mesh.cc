@@ -69,6 +69,7 @@ namespace
 {
 	int sSwitchOverride = -1;			// -1 = not given on the command line
 	int sFastCullOverride = -1;
+	int sSharedIndexOverride = -1;
 	int sBakeBudgetOverride = -1;
 	int32 sBakedFacesThisFrame = 0;
 	unsigned sAtlasGeneration = 1;
@@ -217,6 +218,20 @@ void
 StaticMeshSetFastCull(bool fast)
 {
 	sFastCullOverride = fast ? 1 : 0;
+}
+
+void
+StaticMeshSetSharedIndex(bool on)
+{
+	sSharedIndexOverride = on ? 1 : 0;
+}
+
+bool
+StaticMeshSharedIndex()
+{
+	static const bool shared = sSharedIndexOverride >= 0
+		? sSharedIndexOverride != 0 : EnvFlag("WF_STATIC_MESH_SHARED_INDEX", true);
+	return shared;
 }
 
 void
