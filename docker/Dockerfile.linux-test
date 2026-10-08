@@ -13,6 +13,20 @@ RUN apt-get update \
       xvfb x11-xkb-utils mesa-utils libgl1-mesa-dri libglx-mesa0 \
  && rm -rf /var/lib/apt/lists/*
 
+# Rust builds libwf_attr_edit.a (the runtime property core; offline, no crates).
+# Ubuntu 24.04's packaged cargo (1.75) cannot read this repo's Cargo.lock, so use a
+# pinned rustup toolchain (1.85.1, the version the wasm editor build already pins).
+# Its own layer, so changing it does not redo the apt layer above. The toolchain
+# lives in /opt (readable by any user); CARGO_HOME is per-run scratch.
+ENV RUSTUP_HOME=/opt/rustup
+RUN python3 -c "import urllib.request as u; u.urlretrieve('https://static.rust-lang.org/rustup/dist/x86_64-unknown-linux-gnu/rustup-init', '/tmp/rustup-init')" \
+ && chmod +x /tmp/rustup-init \
+ && CARGO_HOME=/opt/cargo /tmp/rustup-init -y --profile minimal --default-toolchain 1.85.1 --no-modify-path \
+ && rm /tmp/rustup-init \
+ && chmod -R a+rX /opt/rustup /opt/cargo
+ENV PATH=/opt/cargo/bin:$PATH \
+    CARGO_HOME=/tmp/cargo
+
 # Software GL, so every run renders with the same rasteriser whatever the host GPU is.
 ENV LIBGL_ALWAYS_SOFTWARE=1 \
     HOME=/tmp

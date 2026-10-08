@@ -25,7 +25,9 @@ esac
 root="$(cd "$(dirname "${BASH_SOURCE[0]}")/.." && pwd)"
 image="wf-linux-test:local"
 if ! docker image inspect "$image" >/dev/null 2>&1; then
-    docker build -f "$root/docker/Dockerfile.linux-test" -t "$image" "$root/docker" >&2
+    # Host networking for the build: package downloads then do not depend on Docker's bridge
+    # and its firewall rules (a stale ufw/iptables setup breaks the bridge's outbound traffic).
+    docker build --network=host -f "$root/docker/Dockerfile.linux-test" -t "$image" "$root/docker" >&2
 fi
 mkdir -p "$root/build-docker"
 cpus=()

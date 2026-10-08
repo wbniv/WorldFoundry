@@ -29,7 +29,7 @@ if [ "$negative" = 1 ]; then
     src=/tmp/src-negative
     build=/build/listener-negative
     rm -rf "$src"
-    rsync -a --exclude .git --exclude '.worktrees' --exclude '.claude' --exclude 'build*' --exclude 'cmake-build-*' /src/ "$src/"
+    rsync -a --exclude '/.git' --exclude '/.worktrees' --exclude '/.claude' --exclude '/build*' --exclude '/cmake-build-*' /src/ "$src/"
     grep -q '::poll(&pfd, 1, 100)' "$src/engine/stubs/debug_server.cc" || { echo "poll line not found: fix not present?" >&2; exit 1; }
     sed -i 's/const int ready = ::poll(&pfd, 1, 100);/const int ready = 1; (void)pfd;/' "$src/engine/stubs/debug_server.cc"
     grep -q 'const int ready = 1' "$src/engine/stubs/debug_server.cc"
@@ -44,7 +44,11 @@ fi
 
 cmake -S "$src" -B "$build" -G Ninja -DCMAKE_BUILD_TYPE=Release -DWF_ASAN=OFF >"$build.configure.log" 2>&1 \
     || { tail -20 "$build.configure.log"; exit 1; }
-cmake --build "$build" --target debug_listener_reconnect_test 2>&1 | tail -3
+if ! cmake --build "$build" --target debug_listener_reconnect_test >"$build.build.log" 2>&1; then
+    grep -m1 -A14 '^FAILED' "$build.build.log" || tail -20 "$build.build.log"
+    exit 1
+fi
+tail -1 "$build.build.log"
 
 cd "$build"
 start=$(date +%s)

@@ -1883,7 +1883,7 @@ tasks:
   linux-test-image:
     desc: "Build the Linux build/test container image (toolchain, X11/GL headers, Xvfb, Mesa llvmpipe): docker/Dockerfile.linux-test. Builds and tests run in this container, not on the host."
     cmds:
-      - docker build -f docker/Dockerfile.linux-test -t wf-linux-test:local docker
+      - docker build --network=host -f docker/Dockerfile.linux-test -t wf-linux-test:local docker
 
   linux-container:
     desc: "Run a command in the Linux test container (repo at /src, build-docker/ at /build): task linux-container -- ctest --test-dir /build/listener"
