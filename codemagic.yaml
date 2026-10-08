@@ -502,6 +502,8 @@ workflows:
       cache_paths:
         - build-ios-sim
         - engine/vendor/jolt-physics-5.5.0
+        - ~/.rustup
+        - ~/.cargo
     environment:
       xcode: latest
       vars:
@@ -972,6 +974,8 @@ workflows:
       cache_paths:
         - build-macos
         - engine/vendor/jolt-physics-5.5.0
+        - ~/.rustup
+        - ~/.cargo
     environment:
       xcode: latest
       vars:
