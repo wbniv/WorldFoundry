@@ -1,0 +1,189 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<title>Mockup — 639 balcony plan B, folding glazed window</title>
+<style>
+  :root { --bg:#fff; --fg:#1f2328; --muted:#656d76; --line:#d1d9e0; --panel:#f6f8fa; --accent:#0969da;
+          --conc:#c9c6bf; --conc2:#a9a59c; --frame:#3d4550; --frame2:#5b6472; --glass:#9fd0ea; --glass2:#79b6d6; --sky:#cfe6f5; --grass:#4d7a3a; }
+  @media (prefers-color-scheme: dark) {
+    :root { --bg:#0d1117; --fg:#e6edf3; --muted:#9198a1; --line:#30363d; --panel:#161b22; --accent:#4493f8;
+            --conc:#4a4843; --conc2:#63615a; --frame:#8b95a3; --frame2:#a9b2bf; --glass:#2f6f8f; --glass2:#245a76; --sky:#1d3347; --grass:#2f4f24; }
+  }
+  * { box-sizing:border-box; }
+  body { margin:0; width:1440px; height:900px; overflow:hidden; background:var(--bg); color:var(--fg);
+         font:15px/1.5 ui-sans-serif,system-ui,-apple-system,"Segoe UI",sans-serif; }
+  header { display:flex; align-items:center; gap:12px; padding:14px 24px; border-bottom:1px solid var(--line); background:var(--panel); }
+  header h1 { margin:0; font-size:16px; font-weight:600; }
+  header .tag { margin-left:auto; font:600 11px ui-monospace,Menlo,monospace; letter-spacing:.04em; color:var(--muted);
+                border:1px solid var(--line); border-radius:10px; padding:2px 8px; }
+  main { display:grid; grid-template-columns:930px 1fr; height:843px; }
+  .draw { padding:8px 0 0 10px; border-right:1px solid var(--line); }
+  .side { padding:18px 26px; overflow:hidden; }
+  h2 { font-size:14px; margin:0 0 6px; text-transform:uppercase; letter-spacing:.05em; color:var(--muted); }
+  table { border-collapse:collapse; width:100%; font-size:13.5px; margin-bottom:14px; }
+  td { padding:3px 6px; border-bottom:1px solid var(--line); vertical-align:top; }
+  td:first-child { color:var(--muted); width:48%; }
+  .btns { display:flex; flex-wrap:wrap; gap:8px; margin:6px 0 14px; }
+  button { font:600 13px inherit; padding:6px 12px; border:1px solid var(--line); background:var(--panel); color:var(--fg);
+           border-radius:6px; cursor:pointer; }
+  button[aria-pressed="true"] { background:var(--accent); color:#fff; border-color:var(--accent); }
+  .note { font-size:13px; color:var(--muted); margin:0 0 8px; }
+  ul { margin:0 0 10px 18px; padding:0; font-size:13.5px; }
+  li { margin-bottom:4px; }
+  svg text { font:12px ui-sans-serif,system-ui,sans-serif; fill:var(--fg); }
+  svg .dim { stroke:var(--muted); stroke-width:1; fill:none; }
+  svg .dimt { fill:var(--muted); font-size:11.5px; }
+  svg .lab { font-size:11px; fill:var(--muted); }
+</style>
+</head>
+<body>
+<header><h1>639 back balcony — plan B: aluminium bi-fold glazed window, elevation from inside looking west, and plan</h1><span class="tag">MOCKUP — NOT SHIPPED</span></header>
+<main>
+<div class="draw">
+<svg id="s" width="920" height="830" viewBox="0 0 920 830"></svg>
+</div>
+<div class="side">
+  <h2>State</h2>
+  <div class="btns" id="states">
+    <button data-s="closed">Closed</button><button data-s="leaf">Access leaf open</button><button data-s="half">Half folded</button><button data-s="open" aria-pressed="true">Stacked (open)</button>
+  </div>
+  <h2>Layout</h2>
+  <div class="btns" id="layouts">
+    <button data-n="4" aria-pressed="true">4 panels × 67 cm</button><button data-n="3">3 panels × 89 cm</button>
+  </div>
+  <h2>Dimensions (cm, from the recessed balcony floor)</h2>
+  <table>
+    <tr><td>Clear opening</td><td>268 wide × 111 high</td></tr>
+    <tr><td>Pony-wall cap (sill)</td><td>at 111, 10 thick</td></tr>
+    <tr><td>Head track</td><td>under the ledge soffit at 222</td></tr>
+    <tr><td>Panels</td><td id="d-panels">4 × 67, one-way, fold inward</td></tr>
+    <tr><td>Stack when open</td><td id="d-stack">≈ 32 along the opening, 67 into the patio</td></tr>
+    <tr><td>Clear view when open</td><td id="d-clear">≈ 236 of 268 (88 %)</td></tr>
+    <tr><td>Stack side</td><td>south wall (left), the only full-height jamb</td></tr>
+    <tr><td>Sash thickness in the stack</td><td>8 each, assumed; the shop's profile decides</td></tr>
+  </table>
+  <h2>What the drawing shows</h2>
+  <ul>
+    <li><b>Elevation (top):</b> the framed panels in the 268 × 111 opening. Folding panels foreshorten; the parked stack is what is left of the view.</li>
+    <li><b>Plan (bottom):</b> looking down on the pony wall. Panels fold like an accordion into the patio and park against the south wall. The ledge overhangs 25 cm on the balcony side above them.</li>
+    <li>Top-hung: the stack hangs from the head track above the cap; nothing rolls on the grass.</li>
+  </ul>
+  <p class="note">Drawn at 2.0 px/cm (elevation) and 1.2 px/cm (plan). Plan A's zip screen is in <code>elevation.html</code>; this is the fallback Will asked for on 2026‑10‑08.</p>
+</div>
+</main>
+<script>
+const S = 2.0, X0 = 90, YB = 596;                 // elevation: px per cm, left edge of opening, balcony-floor line
+const W = 268, PONY = 111, HEAD = 222, BEAM = 64, FR = 5, T = 8;   // FR frame width (cm), T sash thickness in the stack (cm)
+const Y = z => YB - z * S, X = x => X0 + x * S;
+const s = document.getElementById('s');
+function el(t, a, txt) { const e = document.createElementNS('http://www.w3.org/2000/svg', t);
+  for (const k in a) e.setAttribute(k, a[k]); if (txt) e.textContent = txt; s.appendChild(e); return e; }
+function dimV(x, z0, z1, label) { el('line', {class:'dim', x1:x, y1:Y(z0), x2:x, y2:Y(z1)});
+  el('line', {class:'dim', x1:x-5, y1:Y(z0), x2:x+5, y2:Y(z0)}); el('line', {class:'dim', x1:x-5, y1:Y(z1), x2:x+5, y2:Y(z1)});
+  el('text', {class:'dimt', x:x-8, y:Y((z0+z1)/2)+4, 'text-anchor':'end'}, label); }
+let n = 4, state = 'open';
+{ const h = location.hash.replace('#', '');          // #closed / #leaf / #half / #open, optionally -3 for three panels
+  const [st, nn] = h.split('-'); if (['closed','leaf','half','open'].includes(st)) state = st; if (nn === '3') n = 3; }
+function thetas() {                                 // fold angle per panel, degrees; 0 closed, 90 edge-on in the stack
+  const a = new Array(n).fill(0);
+  if (state === 'half') a.fill(45);
+  if (state === 'open') a.fill(90);
+  if (state === 'leaf') a[n-1] = 70;                // the north leaf swings alone; the rest stays closed
+  return a;
+}
+function draw() {
+  s.innerHTML = '';
+  const w = W / n, th = thetas();
+  // ---- elevation ----
+  el('rect', {x:X(0), y:Y(HEAD), width:W*S, height:(HEAD-PONY)*S, fill:'var(--sky)'});
+  el('rect', {x:X(-24), y:Y(PONY), width:(W+48)*S, height:PONY*S, fill:'var(--conc)', stroke:'var(--conc2)'});
+  el('rect', {x:X(-24), y:Y(HEAD+BEAM), width:(W+48)*S, height:BEAM*S, fill:'var(--conc)', stroke:'var(--conc2)'});
+  el('rect', {x:X(-24), y:Y(HEAD), width:24*S, height:(HEAD-PONY)*S, fill:'var(--conc)', stroke:'var(--conc2)'});
+  el('rect', {x:X(W),  y:Y(HEAD), width:24*S, height:(HEAD-PONY)*S, fill:'var(--conc)', stroke:'var(--conc2)'});
+  el('text', {x:X(-22), y:Y(PONY/2)}, 'pony wall');
+  el('text', {x:X(-22), y:Y(HEAD+BEAM/2)+4}, 'concrete ledge: 64 tall, 35 deep');
+  el('text', {class:'lab', x:X(-22), y:Y(HEAD-6)+4}, 'south');
+  el('text', {class:'lab', x:X(W+4), y:Y(HEAD-6)+4}, 'north');
+  // outer frame: head, sill, jambs
+  el('rect', {x:X(0), y:Y(HEAD), width:W*S, height:FR*S, fill:'var(--frame)'});
+  el('rect', {x:X(0), y:Y(PONY+FR), width:W*S, height:FR*S, fill:'var(--frame)'});
+  el('rect', {x:X(0), y:Y(HEAD), width:FR*S, height:(HEAD-PONY)*S, fill:'var(--frame)'});
+  el('rect', {x:X(W-FR), y:Y(HEAD), width:FR*S, height:(HEAD-PONY)*S, fill:'var(--frame)'});
+  // panels, left to right from the stack side; each one's projected width shrinks as it folds
+  let cx = FR, top = HEAD - FR, bot = PONY + FR;
+  const inner = W - 2*FR, wi = inner / n;
+  for (let i = 0; i < n; i++) {
+    const r = th[i] * Math.PI / 180, pw = wi * Math.cos(r) + T * Math.sin(r);
+    const odd = (i % 2 === 1) && th[i] > 0;
+    el('rect', {x:X(cx), y:Y(top), width:pw*S, height:(top-bot)*S, fill: odd ? 'var(--frame2)' : 'var(--frame)'});
+    const gw = Math.max(pw - 2*FR, 0);
+    if (gw > 0) el('rect', {x:X(cx+FR), y:Y(top-FR), width:gw*S, height:(top-bot-2*FR)*S,
+                            fill: odd ? 'var(--glass2)' : 'var(--glass)', opacity:.85});
+    cx += pw;
+  }
+  const stackW = cx - FR, clear = W - 2*FR - stackW;
+  if (state === 'open') {                           // stack / clear dimension, just above the head frame on the ledge face
+    const yd = Y(HEAD) - 10;
+    el('line', {class:'dim', x1:X(FR), y1:yd, x2:X(cx), y2:yd}); el('line', {class:'dim', x1:X(cx), y1:yd-5, x2:X(cx), y2:yd+5});
+    el('text', {class:'dimt', x:X(cx)+6, y:yd-4}, `stack ≈ ${Math.round(stackW)}`);
+    el('line', {class:'dim', x1:X(cx), y1:yd, x2:X(W-FR), y2:yd});
+    el('text', {class:'dimt', x:X(W-FR)-4, y:yd-4, 'text-anchor':'end'}, `clear ≈ ${Math.round(clear)} of 268`);
+  }
+  // dimensions
+  el('line', {class:'dim', x1:X(0), y1:Y(HEAD+BEAM)-22, x2:X(W), y2:Y(HEAD+BEAM)-22});
+  el('line', {class:'dim', x1:X(0), y1:Y(HEAD+BEAM)-28, x2:X(0), y2:Y(HEAD+BEAM)-16});
+  el('line', {class:'dim', x1:X(W), y1:Y(HEAD+BEAM)-28, x2:X(W), y2:Y(HEAD+BEAM)-16});
+  el('text', {class:'dimt', x:X(W/2), y:Y(HEAD+BEAM)-28, 'text-anchor':'middle'}, '268 clear opening');
+  const dx = X(W+24) + 40;
+  dimV(dx, 0, PONY, '111'); dimV(dx, PONY, HEAD, '111'); dimV(dx, HEAD, HEAD+BEAM, '64');
+  el('line', {class:'dim', x1:X(-24), y1:YB, x2:X(W+30), y2:YB, 'stroke-width':2, stroke:'var(--fg)'});
+  el('text', {class:'dimt', x:X(-24), y:YB+16}, 'balcony floor (7 cm below the interior floor); panels hang above the cap');
+  el('text', {x:X(0)+12, y:Y(PONY)+24, style:'font-size:11px'}, 'drained sill on the 10 cm cap');
+  el('text', {x:X(W/2), y:Y(HEAD-2)+4, 'text-anchor':'middle', style:'fill:#fff;font-size:11px'}, 'head track under the soffit (top-hung)');
+  // ---- plan view (looking down), south at the left, patio below the wall ----
+  const P = 1.2, PX0 = 90, PY = 662;                // px per cm, left edge of opening, pony wall outer face line
+  const PX = x => PX0 + x * P, PYf = d => PY + d * P;   // d = cm inward from the outer face (down the page)
+  el('text', {class:'lab', x:PX(-22), y:PY-26}, 'PLAN (looking down): outside is above the wall, the patio below; south at the left');
+  el('rect', {x:PX(-24), y:PYf(0), width:(W+48)*P, height:10*P, fill:'var(--conc)', stroke:'var(--conc2)'});   // pony wall cap
+  el('rect', {x:PX(-24), y:PYf(10), width:24*P, height:120*P, fill:'var(--conc)', stroke:'var(--conc2)'});     // south wall
+  el('rect', {x:PX(W), y:PYf(10), width:12*P, height:12*P, fill:'var(--conc)', stroke:'var(--conc2)'});        // north jamb stub
+  el('rect', {x:PX(-24), y:PYf(0), width:(W+48)*P, height:35*P, fill:'none', stroke:'var(--conc2)', 'stroke-dasharray':'4 3'}); // ledge above
+  el('text', {class:'lab', x:PX(W+16), y:PYf(30)}, 'ledge above (dashed), 35 deep');
+  el('rect', {x:PX(0), y:PYf(10), width:W*P, height:120*P, fill:'var(--grass)', opacity:.25});
+  el('text', {class:'lab', x:PX(W/2), y:PYf(124), 'text-anchor':'middle'}, 'recessed patio, artificial grass (about 2 m deep; drawn to 130)');
+  // accordion: panels fold inward (down the page) from the south end
+  const pts = []; let px = FR, py = 5;              // panel line sits in the middle of the 10 cm cap
+  pts.push([px, py]);
+  const nAcc = (state === 'leaf') ? n - 1 : n;      // the lone north leaf is hinged on the jamb, not on the accordion
+  for (let i = 0; i < nAcc; i++) {
+    const r = th[i] * Math.PI / 180, sgn = (i % 2 === 0) ? 1 : -1;
+    px += wi * Math.cos(r); py += sgn * wi * Math.sin(r);
+    pts.push([px, py]);
+  }
+  el('polyline', {points: pts.map(p => `${PX(p[0])},${PYf(p[1])}`).join(' '), fill:'none', stroke:'var(--frame)', 'stroke-width':4, 'stroke-linejoin':'round'});
+  if (state === 'leaf') {                           // free edge swings inward; hinge stays at the north jamb
+    const r = th[n-1] * Math.PI / 180, hx = W - FR;
+    el('line', {x1:PX(hx), y1:PYf(5), x2:PX(hx - wi*Math.cos(r)), y2:PYf(5 + wi*Math.sin(r)), stroke:'var(--frame2)', 'stroke-width':4, 'stroke-linecap':'round'});
+    el('text', {class:'dimt', x:PX(hx - wi*Math.cos(r)) - 6, y:PYf(5 + wi*Math.sin(r)) + 14, 'text-anchor':'end'}, 'access leaf, hinged on the north jamb');
+  }
+  if (state === 'open') {
+    el('line', {class:'dim', x1:PX(FR), y1:PYf(wi+14), x2:PX(FR+stackW), y2:PYf(wi+14)});
+    el('text', {class:'dimt', x:PX(FR+stackW)+8, y:PYf(wi+18)}, `stack ≈ ${Math.round(stackW)} along the wall, ${Math.round(wi)} into the patio`);
+  } else if (state === 'closed') {
+    el('text', {class:'dimt', x:PX(W/2), y:PYf(-6), 'text-anchor':'middle'}, 'closed: one gasketed glazed line on the cap');
+  }
+  // side table
+  document.getElementById('d-panels').textContent = `${n} × ${Math.round(w)}, one-way, fold inward`;
+  const openStack = n * T;
+  document.getElementById('d-stack').textContent = `≈ ${openStack} along the opening, ${Math.round(wi)} into the patio`;
+  document.getElementById('d-clear').textContent = `≈ ${Math.round(W - 2*FR - openStack)} of 268 (${Math.round((W - 2*FR - openStack) / W * 100)} %)`;
+}
+draw();
+document.querySelectorAll('#states button').forEach(b => b.onclick = () => { state = b.dataset.s;
+  document.querySelectorAll('#states button').forEach(o => o.setAttribute('aria-pressed', o === b)); draw(); });
+document.querySelectorAll('#layouts button').forEach(b => b.onclick = () => { n = +b.dataset.n;
+  document.querySelectorAll('#layouts button').forEach(o => o.setAttribute('aria-pressed', o === b)); draw(); });
+</script>
+</body>
+</html>
