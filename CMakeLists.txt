@@ -1354,6 +1354,12 @@ if(NOT ANDROID AND NOT IOS AND NOT APPLE AND NOT EMSCRIPTEN)
         COMMAND $<TARGET_FILE:wf_game> --frame-step-smoke=30 --cycles=2 -L${WF_TEST_SNOW_LEVEL}
         WORKING_DIRECTORY ${WF_TEST_RUN_DIR})
 
+    add_executable(wf_opaque_material_gl_test tests/opaque_material_gl.cc)
+    target_link_libraries(wf_opaque_material_gl_test PRIVATE wfengine)
+    target_compile_options(wf_opaque_material_gl_test PRIVATE -fpermissive -w -fno-rtti)
+    add_test(NAME opaque_material_programs COMMAND wf_opaque_material_gl_test)
+    set_tests_properties(opaque_material_programs PROPERTIES LABELS "gl")
+
     # E3 index ownership: mixed index widths and deletion across context loss.
     add_executable(wf_static_mesh_index_gl_test tests/static_mesh_index_gl.cc)
     target_link_libraries(wf_static_mesh_index_gl_test PRIVATE wfengine)
