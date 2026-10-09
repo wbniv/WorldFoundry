@@ -51,9 +51,13 @@ try:
  assert values(s)[1000]=='1';key('Down');key('Right');s=snap('draft-fixed');assert values(s,True)[1001]=='1'
  key('Down');key('Right');s=snap('draft-rate');assert values(s,True)[1002]=='21'
  key('BackSpace');s=wait('applied',lambda s:s['game']['modal']=='none');assert values(s)[1000]=='0' and values(s)[1001]=='1' and values(s)[1002]=='21'
+ first=s;time.sleep(.5);second=snap('fixed-clock-measured');steps=second['simulation_step']-first['simulation_step'];assert steps>0
+ assert abs(second['game']['simulation_delta']-1/21)<.00001
+ assert abs(second['game']['simulation_time']-first['game']['simulation_time']-steps/21)<.002
  key('space',1.4);wait('second-picker',lambda s:s['game']['modal']=='object-picker');key('Down');key('space');s=wait('second-owner',lambda s:s['game']['modal']=='form');assert values(s)[1000]=='0' and values(s)[1002]=='21'
  key('Left');key('Down');key('Right');key('Right');key('Down');key('Left');key('Down');key('Down');key('Right');key('Down');key('Right');key('BackSpace')
- s=wait('profilers-applied',lambda s:s['game']['modal']=='none');assert values(s)[1000]=='1' and values(s)[1001]=='0' and values(s)[1003]=='1' and values(s)[1004]=='1';time.sleep(7)
+ s=wait('profilers-applied',lambda s:s['game']['modal']=='none');assert values(s)[1000]=='1' and values(s)[1001]=='0' and values(s)[1003]=='1' and values(s)[1004]=='1';time.sleep(7);second=snap('realtime-clock-measured')
+ elapsed=second['game']['simulation_time']-s['game']['simulation_time'];wall=(second['monotonic_us']-s['monotonic_us'])/1000000;assert .5<elapsed/wall<1.5
  print('Production runtime Apply, FPS state, fixed/real-time clock selection, two-owner readback and profiler output passed')
 finally:
  if f:f.close()

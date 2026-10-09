@@ -86,6 +86,8 @@ void DebugServer_DiagnosticPump(Level* level,bool suspended){
     const auto& settings=wfprops::host();state.suspended=suspended;state.paused=suspended||settings.modal||settings.waitingForRelease()||state.mode=="selector";
     state.modal=settings.modal?(settings.picker?"object-picker":settings.phone?"phone-form":settings.form.drawer?"keypad":"form"):"none";
     state.session=settings.modal?settings.session():0;
+    state.clockAvailable=level!=nullptr;
+    if(level){state.simulationTime=level->LevelClock()().AsFloat();state.simulationDelta=level->LevelClock().Delta().AsFloat();}
     wfdiag::Pump(state,[&](const wfdiag::Request& request){return capture(level,request);});
 }
 #endif

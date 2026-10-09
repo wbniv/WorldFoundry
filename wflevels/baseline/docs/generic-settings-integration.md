@@ -183,3 +183,24 @@ The existing device plant-settings validator assumes exactly three fields and
 has not been updated for the expanded catalog, so these profiles do not claim
 that validator's live settings coverage. No renderer, allocator, window or
 listener reconstruction was added.
+
+Runtime Options acceptance follow-up (2026-10-09): the existing diagnostic
+accessor now reports the actual `LevelClock` time/delta on the game thread,
+without permitting mutation. Seventeen diagnostic transport tests passed. The
+production desktop UI check measures fixed-clock advancement at 21 Hz and
+real-time restoration independently of property values; both passed. Desktop
+and Android builds passed. Refreshed diagnostic APK
+`baseline-151186bac852a28d.apk` passed all 20 existing baseline checks on cast2
+(`J-befe34cb3fdf`), including actual clock readback. This remains general
+settings validation, not completed live Runtime Options device acceptance.
+
+Coordinator commit `762032a` prepares a fixed `baseline-runtime-options`
+validator on the installed-service revision. It exercises TV Back-to-Apply,
+phone Apply/Cancel, two-owner readback, 20/37 Hz actual-clock advancement,
+real-time restoration and emitted profiler output, with FPS on/off captures for
+visual review. Focused validator/transport tests (51) and validator/service
+integration tests (61) passed. The frozen release and hash review are
+`/tmp/chromecast-runtime-options-release` and
+`/tmp/chromecast-runtime-options-review.json`. Preflight passes; deployment
+changes only registration, dispatch and the new validator. Live acceptance
+awaits the reviewed administrator upgrade; no direct-control fallback is used.

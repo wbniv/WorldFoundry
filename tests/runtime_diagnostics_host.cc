@@ -33,6 +33,7 @@ int main() {
         }
         if(!freeze) {
             ++state.frame;if(!state.paused&&!state.suspended)++state.step;
+            state.clockAvailable=true;state.simulationDelta=.05f;state.simulationTime=state.step*.05f;
             wfdiag::Pump(state,[&](const wfdiag::Request& r){
                 wfdiag::Snapshot s;
                 if(r.actor&&(!exists||wfdiag::ActorGeneration(&actor)!=r.actorGeneration))s.error=exists?"stale-actor":"actor-unavailable";
