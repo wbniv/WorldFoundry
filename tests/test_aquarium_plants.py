@@ -1,6 +1,7 @@
 """Geometry and packaging contracts for the Planted Tank and its sea urchin."""
 import json
 import math
+import re
 from pathlib import Path
 import sys
 ROOT=Path(__file__).resolve().parents[1]
@@ -49,8 +50,12 @@ def test_dense_grouping_and_real_mesh_limits():
     here=ROOT/'wflevels/aquarium_plants'
     mapping=json.loads((here/'actor-map.json').read_text())
     groups=[name for name in mapping['indices'] if name.startswith('plant_')]
-    assert len(groups)==8 and len(mapping['indices'])==46
+    assert set(groups)=={f'plant_chunk_{i:02d}' for i in range(8)}
     text=(here/'aquarium_plants.lev').read_text()
+    # Hidden residents and non-rendered support actors still have exported indices.
+    names=re.findall(r"\{ 'OBJ'\s*\{ 'NAME' \"([^\"]+)\" \}",text)
+    assert names and len(names)==len(set(names))
+    assert mapping['indices']=={name:i+1 for i,name in enumerate(names)}
     assert all(f'{name}.iff' in text for name in groups)
     total=0
     for name in groups:

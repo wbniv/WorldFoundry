@@ -83,6 +83,7 @@ extern ostream_withassign cuser;
 // Function Prototypes
 // ------------------------------------------------------------------------
 
+std::string DescribeStandardStream(std::ostream& stream);
 void RedirectStream( ostream_withassign& stream, const char * string );
 void RedirectStandardStream( const char * str );
 

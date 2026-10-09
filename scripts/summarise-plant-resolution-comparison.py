@@ -51,7 +51,11 @@ for variant in recipe['variants']:
             path = run/stem
             return path.read_text() if path.exists() else gzip.open(str(path)+'.gz','rt').read()
         log = read_log('wf.log').rsplit('=== wf_game android_main',1)[-1]
-        assert '--plant-seed=713' in log and '--plant-age=150' in log, name
+        if identities[name].get('plant_catalog'):
+            assert re.search(r'PLANTS settings-source=RPRP seed=713 water='+identities[name]['plant_catalog']['settings']['water']+r' age=150(?:\.0*)? speed=0 textures=1 sway=0',log), name
+        else:
+            # Archived measurements retain their original CLI/native identities.
+            assert '--plant-seed=713' in log and '--plant-age=150' in log, name
         thermal = read_log('thermal.txt')
         thermal_statuses += [int(x) for x in re.findall(r'Thermal Status:\s*(\d+)',thermal)]
         current = thermal.split('Current temperatures from HAL:',1)[-1].split('Current cooling devices',1)[0]

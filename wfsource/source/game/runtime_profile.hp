@@ -51,6 +51,7 @@ inline double cpu_ms() {
 }
 inline bool enabled() { return state().enabled; }
 inline void enable() { state().enabled=true; state().last=std::chrono::steady_clock::now(); }
+inline void enableFresh() { auto& s=state(); s.frame.fill(0); s.started.fill(0); s.frames.clear(); s.counters.fill(0); s.totals.fill(0); s.maxima.fill(0); enable(); }
 inline void begin_frame() { if(state().enabled) { state().frame.fill(0); state().counters.fill(0); } }
 inline void count(int k,unsigned long n=1) { if(state().enabled && k>=0 && k<CounterCount) state().counters[k]+=n; }
 inline void begin(int k) { if(state().enabled && k>=0 && k<Count) state().started[k]=cpu_ms(); }

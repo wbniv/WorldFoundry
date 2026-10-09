@@ -19,6 +19,475 @@
       "id": 70,
       "initial": "Baseline",
       "max_length": 31
+    },
+    "runtime_show_fps": {
+      "id": 1000,
+      "readonly": true,
+      "initial": "1"
+    },
+    "runtime_fixed_clock": {
+      "id": 1001,
+      "readonly": true,
+      "initial": "0"
+    },
+    "runtime_clock_hz": {
+      "id": 1002,
+      "readonly": true,
+      "initial": "20"
+    },
+    "runtime_frame_profile": {
+      "id": 1003,
+      "readonly": true,
+      "initial": "0"
+    },
+    "runtime_script_profile": {
+      "id": 1004,
+      "readonly": true,
+      "initial": "0"
+    },
+    "runtime_static_mesh": {
+      "id": 1005,
+      "readonly": true,
+      "initial": "unavailable",
+      "max_length": 255
+    },
+    "runtime_static_cull": {
+      "id": 1006,
+      "readonly": true,
+      "initial": "unavailable",
+      "max_length": 255
+    },
+    "runtime_shared_index": {
+      "id": 1007,
+      "readonly": true,
+      "initial": "unavailable",
+      "max_length": 255
+    },
+    "runtime_bake_budget": {
+      "id": 1008,
+      "readonly": true,
+      "initial": "unavailable",
+      "max_length": 255
+    },
+    "runtime_width": {
+      "id": 1010,
+      "readonly": true,
+      "initial": "unavailable",
+      "max_length": 255
+    },
+    "runtime_height": {
+      "id": 1011,
+      "readonly": true,
+      "initial": "unavailable",
+      "max_length": 255
+    },
+    "runtime_xpos": {
+      "id": 1012,
+      "readonly": true,
+      "initial": "unavailable",
+      "max_length": 255
+    },
+    "runtime_ypos": {
+      "id": 1013,
+      "readonly": true,
+      "initial": "unavailable",
+      "max_length": 255
+    },
+    "runtime_fullscreen": {
+      "id": 1014,
+      "readonly": true,
+      "initial": "unavailable",
+      "max_length": 255
+    },
+    "runtime_windowed": {
+      "id": 1015,
+      "readonly": true,
+      "initial": "unavailable",
+      "max_length": 255
+    },
+    "runtime_vram_width": {
+      "id": 1020,
+      "readonly": true,
+      "initial": "unavailable",
+      "max_length": 255
+    },
+    "runtime_vram_height": {
+      "id": 1021,
+      "readonly": true,
+      "initial": "unavailable",
+      "max_length": 255
+    },
+    "runtime_slot_width": {
+      "id": 1022,
+      "readonly": true,
+      "initial": "unavailable",
+      "max_length": 255
+    },
+    "runtime_slot_height": {
+      "id": 1023,
+      "readonly": true,
+      "initial": "unavailable",
+      "max_length": 255
+    },
+    "runtime_perm_width": {
+      "id": 1024,
+      "readonly": true,
+      "initial": "unavailable",
+      "max_length": 255
+    },
+    "runtime_perm_height": {
+      "id": 1025,
+      "readonly": true,
+      "initial": "unavailable",
+      "max_length": 255
+    },
+    "runtime_halmem": {
+      "id": 1026,
+      "readonly": true,
+      "initial": "unavailable",
+      "max_length": 255
+    },
+    "runtime_scratchmem": {
+      "id": 1027,
+      "readonly": true,
+      "initial": "unavailable",
+      "max_length": 255
+    },
+    "runtime_psxmem": {
+      "id": 1028,
+      "readonly": true,
+      "initial": "unavailable",
+      "max_length": 255
+    },
+    "runtime_debug_port": {
+      "id": 1030,
+      "readonly": true,
+      "initial": "unavailable",
+      "max_length": 255
+    },
+    "runtime_debug_bind": {
+      "id": 1031,
+      "readonly": true,
+      "initial": "unavailable",
+      "max_length": 255
+    },
+    "runtime_level_path": {
+      "id": 1040,
+      "readonly": true,
+      "initial": "unavailable",
+      "max_length": 255
+    },
+    "runtime_level_number": {
+      "id": 1041,
+      "readonly": true,
+      "initial": "unavailable",
+      "max_length": 255
+    },
+    "runtime_editor": {
+      "id": 1042,
+      "readonly": true,
+      "initial": "unavailable",
+      "max_length": 255
+    },
+    "runtime_smoke_frames": {
+      "id": 1043,
+      "readonly": true,
+      "initial": "unavailable",
+      "max_length": 255
+    },
+    "runtime_cycles": {
+      "id": 1044,
+      "readonly": true,
+      "initial": "unavailable",
+      "max_length": 255
+    },
+    "runtime_no_swap": {
+      "id": 1045,
+      "readonly": true,
+      "initial": "unavailable",
+      "max_length": 255
+    },
+    "runtime_rate_checks": {
+      "id": 1046,
+      "readonly": true,
+      "initial": "unavailable",
+      "max_length": 255
+    },
+    "runtime_capture_frame": {
+      "id": 1047,
+      "readonly": true,
+      "initial": "unavailable",
+      "max_length": 255
+    },
+    "runtime_menu_input": {
+      "id": 1048,
+      "readonly": true,
+      "initial": "unavailable",
+      "max_length": 255
+    },
+    "runtime_memory_test": {
+      "id": 1049,
+      "readonly": true,
+      "initial": "unavailable",
+      "max_length": 255
+    },
+    "runtime_mutation_smoke": {
+      "id": 1050,
+      "readonly": true,
+      "initial": "unavailable",
+      "max_length": 255
+    },
+    "runtime_mutation_thread": {
+      "id": 1051,
+      "readonly": true,
+      "initial": "unavailable",
+      "max_length": 255
+    },
+    "runtime_print_actors": {
+      "id": 1052,
+      "readonly": true,
+      "initial": "unavailable",
+      "max_length": 255
+    },
+    "runtime_record_video": {
+      "id": 1053,
+      "readonly": true,
+      "initial": "unavailable",
+      "max_length": 255
+    },
+    "runtime_joy": {
+      "id": 1054,
+      "readonly": true,
+      "initial": "unavailable",
+      "max_length": 255
+    },
+    "runtime_profile_load": {
+      "id": 1055,
+      "readonly": true,
+      "initial": "unavailable",
+      "max_length": 255
+    },
+    "runtime_profile_loop": {
+      "id": 1056,
+      "readonly": true,
+      "initial": "unavailable",
+      "max_length": 255
+    },
+    "runtime_breaktime": {
+      "id": 1057,
+      "readonly": true,
+      "initial": "unavailable",
+      "max_length": 255
+    },
+    "runtime_linear_malloc": {
+      "id": 1058,
+      "readonly": true,
+      "initial": "unavailable",
+      "max_length": 255
+    },
+    "runtime_zbuffer": {
+      "id": 1059,
+      "readonly": true,
+      "initial": "unavailable",
+      "max_length": 255
+    },
+    "runtime_zsort": {
+      "id": 1060,
+      "readonly": true,
+      "initial": "unavailable",
+      "max_length": 255
+    },
+    "runtime_legacy_fps": {
+      "id": 1061,
+      "readonly": true,
+      "initial": "unavailable",
+      "max_length": 255
+    },
+    "runtime_help": {
+      "id": 1062,
+      "readonly": true,
+      "initial": "unavailable",
+      "max_length": 255
+    },
+    "runtime_legacy_0": {
+      "id": 1080,
+      "readonly": true,
+      "initial": "unavailable",
+      "max_length": 255
+    },
+    "runtime_legacy_1": {
+      "id": 1081,
+      "readonly": true,
+      "initial": "unavailable",
+      "max_length": 255
+    },
+    "runtime_legacy_2": {
+      "id": 1082,
+      "readonly": true,
+      "initial": "unavailable",
+      "max_length": 255
+    },
+    "runtime_legacy_3": {
+      "id": 1083,
+      "readonly": true,
+      "initial": "unavailable",
+      "max_length": 255
+    },
+    "runtime_legacy_4": {
+      "id": 1084,
+      "readonly": true,
+      "initial": "unavailable",
+      "max_length": 255
+    },
+    "runtime_legacy_5": {
+      "id": 1085,
+      "readonly": true,
+      "initial": "unavailable",
+      "max_length": 255
+    },
+    "runtime_stream_p_w": {
+      "id": 1100,
+      "readonly": true,
+      "initial": "unavailable",
+      "max_length": 255
+    },
+    "runtime_stream_p_e": {
+      "id": 1101,
+      "readonly": true,
+      "initial": "unavailable",
+      "max_length": 255
+    },
+    "runtime_stream_p_f": {
+      "id": 1102,
+      "readonly": true,
+      "initial": "unavailable",
+      "max_length": 255
+    },
+    "runtime_stream_p_s": {
+      "id": 1103,
+      "readonly": true,
+      "initial": "unavailable",
+      "max_length": 255
+    },
+    "runtime_stream_p_p": {
+      "id": 1104,
+      "readonly": true,
+      "initial": "unavailable",
+      "max_length": 255
+    },
+    "runtime_stream_p_d": {
+      "id": 1105,
+      "readonly": true,
+      "initial": "unavailable",
+      "max_length": 255
+    },
+    "runtime_stream_p_u": {
+      "id": 1106,
+      "readonly": true,
+      "initial": "unavailable",
+      "max_length": 255
+    },
+    "runtime_stream_s_a": {
+      "id": 1107,
+      "readonly": true,
+      "initial": "unavailable",
+      "max_length": 255
+    },
+    "runtime_stream_s_f": {
+      "id": 1108,
+      "readonly": true,
+      "initial": "unavailable",
+      "max_length": 255
+    },
+    "runtime_stream_s_l": {
+      "id": 1109,
+      "readonly": true,
+      "initial": "unavailable",
+      "max_length": 255
+    },
+    "runtime_stream_s_t": {
+      "id": 1110,
+      "readonly": true,
+      "initial": "unavailable",
+      "max_length": 255
+    },
+    "runtime_stream_s_e": {
+      "id": 1111,
+      "readonly": true,
+      "initial": "unavailable",
+      "max_length": 255
+    },
+    "runtime_stream_s_n": {
+      "id": 1112,
+      "readonly": true,
+      "initial": "unavailable",
+      "max_length": 255
+    },
+    "runtime_stream_l_a": {
+      "id": 1113,
+      "readonly": true,
+      "initial": "unavailable",
+      "max_length": 255
+    },
+    "runtime_stream_l_A": {
+      "id": 1114,
+      "readonly": true,
+      "initial": "unavailable",
+      "max_length": 255
+    },
+    "runtime_stream_l_g": {
+      "id": 1115,
+      "readonly": true,
+      "initial": "unavailable",
+      "max_length": 255
+    },
+    "runtime_stream_l_i": {
+      "id": 1116,
+      "readonly": true,
+      "initial": "unavailable",
+      "max_length": 255
+    },
+    "runtime_stream_l_I": {
+      "id": 1117,
+      "readonly": true,
+      "initial": "unavailable",
+      "max_length": 255
+    },
+    "runtime_stream_l_m": {
+      "id": 1118,
+      "readonly": true,
+      "initial": "unavailable",
+      "max_length": 255
+    },
+    "runtime_stream_l_M": {
+      "id": 1119,
+      "readonly": true,
+      "initial": "unavailable",
+      "max_length": 255
+    },
+    "runtime_stream_l_c": {
+      "id": 1120,
+      "readonly": true,
+      "initial": "unavailable",
+      "max_length": 255
+    },
+    "runtime_stream_l_r": {
+      "id": 1121,
+      "readonly": true,
+      "initial": "unavailable",
+      "max_length": 255
+    },
+    "runtime_stream_l_R": {
+      "id": 1122,
+      "readonly": true,
+      "initial": "unavailable",
+      "max_length": 255
+    },
+    "runtime_stream_l_s": {
+      "id": 1123,
+      "readonly": true,
+      "initial": "unavailable",
+      "max_length": 255
     }
   }
 }
