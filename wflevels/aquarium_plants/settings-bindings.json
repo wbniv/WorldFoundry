@@ -5,7 +5,11 @@
   "fields": {
     "Seed": {"id": 1, "rule": "uint32-decimal", "initial": "0", "max_length": 10},
     "Water type": {"id": 2},
-    "Growth speed": {"id": 3}
+    "Growth speed": {"id": 3},
+    "Initial age": {"id": 4, "readonly": true},
+    "Textures": {"id": 5},
+    "Sway": {"id": 6},
+    "Random seed on entry": {"id": 7, "readonly": true}
   },
   "actions": [
     {"id": 100, "label": "Regenerate", "action": "regenerate"},

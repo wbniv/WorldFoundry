@@ -146,3 +146,18 @@ def test_actual_actor_read_is_distinct_from_routing(host):
         assert e['reason']=='actor-input-read' and e['consumed']
         assert e['consumers']==[{'actor':1,'generation':before['player']['generation'],'mailbox':1909}]
     finally:c.close()
+
+
+def test_clock_readback_tracks_simulation_steps(host):
+    c=Client(host)
+    try:
+        first=c.snapshot()
+        second=c.snapshot(level_generation=first['level_generation'],after_simulation_step=first['simulation_step'])
+        assert second['game']['simulation_delta']==pytest.approx(.05)
+        steps=second['simulation_step']-first['simulation_step']
+        assert second['game']['simulation_time']-first['game']['simulation_time']==pytest.approx(steps*.05,abs=.00001)
+        host.command('pause 1')
+        paused=c.snapshot()
+        later=c.snapshot(level_generation=paused['level_generation'],after_frame=paused['frame'])
+        assert later['game']['simulation_time']==paused['game']['simulation_time']
+    finally:c.close()

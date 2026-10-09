@@ -11,6 +11,7 @@ import time
 ROOT=Path(__file__).resolve().parents[1]
 sys.path.insert(0,str(ROOT/'tests'))
 from debug_bridge_client import BridgeClient
+from plant_settings_catalog import configure_level
 
 def main():
     p=argparse.ArgumentParser(description=__doc__)
@@ -20,9 +21,12 @@ def main():
     a=p.parse_args();a.out=a.out.resolve();a.out.mkdir(parents=True,exist_ok=True)
     mapping=json.loads((ROOT/'wflevels/aquarium_plants/actor-map.json').read_text())
     idx=mapping['indices'];player=idx['Player'];director=idx['Director']
+    fixture=a.out/'configured-level.iff'
+    data,receipt=configure_level((ROOT/'wflevels/aquarium_plants-standalone.iff').read_bytes(),dict(seed=713,water='saltwater',age=150,speed=0))
+    fixture.write_bytes(data);(a.out/'plant-catalog.json').write_text(json.dumps(receipt,indent=2)+'\n')
     env=dict(os.environ,LD_LIBRARY_PATH=str(ROOT/'engine/libs'),WF_REST_PORT=str(a.port+1000))
     with (a.out/'runtime.log').open('w') as log:
-        proc=subprocess.Popen([str(ROOT/'engine/wf_game'),'-L'+str(ROOT/'wflevels/aquarium_plants-standalone.iff'),'-rate20','--debug-port',str(a.port),'--debug-bind','127.0.0.1','--plant-seed=713','--plant-water=saltwater','--plant-age=150','--plant-speed=0'],cwd=ROOT/'wflevels/aquarium_plants',env=env,stdout=log,stderr=subprocess.STDOUT)
+        proc=subprocess.Popen([str(ROOT/'engine/wf_game'),'-L'+str(fixture),'-rate20','--debug-port',str(a.port),'--debug-bind','127.0.0.1'],cwd=ROOT/'wflevels/aquarium_plants',env=env,stdout=log,stderr=subprocess.STDOUT)
         cli=None
         try:
             cli=BridgeClient(port=a.port,timeout=25);cli.send({'op':'pause'});cli.inject_input('joystick1_raw',0,duration_frames=-1)

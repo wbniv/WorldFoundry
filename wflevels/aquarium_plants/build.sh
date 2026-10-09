@@ -10,7 +10,7 @@ cargo build --release --offline --manifest-path wftools/oas2oad-rs/Cargo.toml
 wftools/oas2oad-rs/target/release/oas2oad \
   --types="$TANK_ROOT/wfsource/source/oas/types3ds.s" \
   --prep="$TANK_ROOT/wftools/prep/prep" \
-  -o wflevels/aquarium_plants/settings.oad wflevels/aquarium_plants/settings.oas
+  -o "$TANK_ROOT/wflevels/aquarium_plants/settings.oad" "$TANK_ROOT/wflevels/aquarium_plants/settings.oas"
 python3 scripts/build-object-properties.py \
   --oad wflevels/aquarium_plants/settings.oad \
   --bindings wflevels/aquarium_plants/settings-bindings.json \

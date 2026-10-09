@@ -134,7 +134,9 @@ static const char* kFS =
     "    if (u_use_tex != 0) {\n"
     "        float is_white = step(0.99, min(v_color.r, min(v_color.g, v_color.b)));\n"
     "        vec4 texel = texture(u_tex, v_uv);\n"
+    "#ifndef WF_OPAQUE\n"
     "        if (u_alpha_cutout != 0 && (is_white > 0.5 || (u_use_tex & 2) != 0) && texel.a < 0.5) discard;\n"
+    "#endif\n"
     "        vec3 albedo = v_palette_dark.a > 0.5 ? mix(v_palette_dark.rgb, v_palette_light, clamp((texel.r - 0.08) / 0.85, 0.0, 1.0)) : ((u_use_tex & 2) != 0 ? texel.rgb * v_color : mix(v_color, texel.rgb, is_white));\n"
     "        c = vec4(albedo * v_lit, 1.0);\n"
     "    }\n"
@@ -748,7 +750,13 @@ public:
 
         glDeleteProgram(_prog);
         _prog = p;
-        FetchUniformLocations();
+        // Custom source may intentionally discard or define different uniforms.
+        // Never substitute a built-in specialization for a successful reload.
+        if (_opaqueProg) glDeleteProgram(_opaqueProg);
+        _opaqueProg = 0;
+        _opaqueUniforms = ProgramUniforms{};
+        _customProgram = true;
+        _uniforms = FetchUniformLocations(_prog);
         return true;
     }
 
@@ -763,18 +771,10 @@ public:
         _vao         = 0;
         _vbo         = 0;
         _prog        = 0;
-        _uMvp        = -1;
-        _uMv         = -1;
-        _uTex        = -1;
-        _uUseTex     = -1;
-        _uLighting   = -1;
-        _uAmbient    = -1;
-        _uLightDir   = -1;
-        _uLightColor = -1;
-        _uFog        = -1;
-        _uFogColor   = -1;
-        _uFogStart   = -1;
-        _uFogEnd     = -1;
+        _opaqueProg = 0;
+        _uniforms = ProgramUniforms{};
+        _opaqueUniforms = ProgramUniforms{};
+        _customProgram = false;
         _cpu.clear();
         _curTexture  = nullptr;
         // Static meshes: every GL name is dead. Bumping the generation makes
@@ -943,21 +943,17 @@ private:
     GLuint _vao      = 0;
     GLuint _vbo      = 0;
     GLuint _prog     = 0;
-    GLint  _uMvp        = -1;
-    GLint  _uMv         = -1;
-    GLint  _uTex        = -1;
-    GLint  _uUseTex     = -1;
+    struct ProgramUniforms
+    {
+        GLint mvp=-1, mv=-1, tex=-1, useTex=-1, alphaCutout=-1;
+        GLint lighting=-1, ambient=-1, lightDir=-1, lightColor=-1;
+        GLint fog=-1, fogColor=-1, fogStart=-1, fogEnd=-1;
+    };
+    ProgramUniforms _uniforms, _opaqueUniforms;
+    GLuint _opaqueProg = 0;
+    bool _customProgram = false;
     bool _paletteEnabled=false; unsigned _paletteDark=0,_paletteLight=0xffffff;
-    GLint  _uAlphaCutout = -1;
     float _opacity = 1.0f;
-    GLint  _uLighting   = -1;
-    GLint  _uAmbient    = -1;
-    GLint  _uLightDir   = -1;
-    GLint  _uLightColor = -1;
-    GLint  _uFog        = -1;
-    GLint  _uFogColor   = -1;
-    GLint  _uFogStart   = -1;
-    GLint  _uFogEnd     = -1;
 
     float _proj[16];
     float _mv[16];
@@ -1003,21 +999,23 @@ private:
         PackVert(dst, v, nx, ny, nz, _opacity, _paletteEnabled, _paletteDark, _paletteLight);
     }
 
-    void FetchUniformLocations()
+    static ProgramUniforms FetchUniformLocations(GLuint program)
     {
-        _uMvp        = glGetUniformLocation(_prog, "u_mvp");
-        _uMv         = glGetUniformLocation(_prog, "u_mv");
-        _uTex        = glGetUniformLocation(_prog, "u_tex");
-        _uUseTex     = glGetUniformLocation(_prog, "u_use_tex");
-        _uAlphaCutout = glGetUniformLocation(_prog, "u_alpha_cutout");
-        _uLighting   = glGetUniformLocation(_prog, "u_lighting");
-        _uAmbient    = glGetUniformLocation(_prog, "u_ambient");
-        _uLightDir   = glGetUniformLocation(_prog, "u_light_dir");
-        _uLightColor = glGetUniformLocation(_prog, "u_light_color");
-        _uFog        = glGetUniformLocation(_prog, "u_fog");
-        _uFogColor   = glGetUniformLocation(_prog, "u_fog_color");
-        _uFogStart   = glGetUniformLocation(_prog, "u_fog_start");
-        _uFogEnd     = glGetUniformLocation(_prog, "u_fog_end");
+        ProgramUniforms uniforms;
+        uniforms.mvp        = glGetUniformLocation(program, "u_mvp");
+        uniforms.mv         = glGetUniformLocation(program, "u_mv");
+        uniforms.tex        = glGetUniformLocation(program, "u_tex");
+        uniforms.useTex     = glGetUniformLocation(program, "u_use_tex");
+        uniforms.alphaCutout = glGetUniformLocation(program, "u_alpha_cutout");
+        uniforms.lighting   = glGetUniformLocation(program, "u_lighting");
+        uniforms.ambient    = glGetUniformLocation(program, "u_ambient");
+        uniforms.lightDir   = glGetUniformLocation(program, "u_light_dir");
+        uniforms.lightColor = glGetUniformLocation(program, "u_light_color");
+        uniforms.fog        = glGetUniformLocation(program, "u_fog");
+        uniforms.fogColor   = glGetUniformLocation(program, "u_fog_color");
+        uniforms.fogStart   = glGetUniformLocation(program, "u_fog_start");
+        uniforms.fogEnd     = glGetUniformLocation(program, "u_fog_end");
+        return uniforms;
     }
 
     void LazyInit()
@@ -1030,7 +1028,7 @@ private:
         glDeleteShader(vs);
         glDeleteShader(fs);
 
-        FetchUniformLocations();
+        _uniforms = FetchUniformLocations(_prog);
 
         glGenVertexArrays(1, &_vao);
         glGenBuffers(1, &_vbo);
@@ -1043,6 +1041,20 @@ private:
         glBindBuffer(GL_ARRAY_BUFFER, 0);
 
         _inited = true;
+    }
+
+    void InitOpaqueProgram()
+    {
+        if (_opaqueProg) return;
+        // Compile out discard entirely; a runtime false branch can still make
+        // the executable coverage-changing on tile-based GPUs.
+        const std::string opaqueFS = std::string("#define WF_OPAQUE 1\n") + kFS;
+        GLuint vs = CompileShader(GL_VERTEX_SHADER, kVS);
+        GLuint fs = CompileShader(GL_FRAGMENT_SHADER, opaqueFS.c_str());
+        _opaqueProg = LinkProgram(vs, fs);
+        glDeleteShader(vs);
+        glDeleteShader(fs);
+        _opaqueUniforms = FetchUniformLocations(_opaqueProg);
     }
 
     void UpdateMvp()
@@ -1064,7 +1076,10 @@ private:
         LazyInit();
         UpdateMvp();
 
-        glUseProgram(_prog);
+        const bool opaque = !_customProgram && _opacity >= 1.0f && !_alphaCutout;
+        if (opaque) InitOpaqueProgram();
+        glUseProgram(opaque ? _opaqueProg : _prog);
+        const ProgramUniforms& uniforms = opaque ? _opaqueUniforms : _uniforms;
         if (_opacity < 1.0f) {
             glEnable(GL_BLEND);
             glBlendFuncSeparate(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA, GL_ONE, GL_ONE_MINUS_SRC_ALPHA);
@@ -1073,29 +1088,29 @@ private:
             glDisable(GL_BLEND);
             glDepthMask(GL_TRUE);
         }
-        glUniformMatrix4fv(_uMvp, 1, GL_FALSE, _mvp);
-        glUniformMatrix4fv(_uMv,  1, GL_FALSE, _mv);
+        glUniformMatrix4fv(uniforms.mvp, 1, GL_FALSE, _mvp);
+        glUniformMatrix4fv(uniforms.mv,  1, GL_FALSE, _mv);
         // A prelit batch is unlit by definition: its vertex colors are final.
-        glUniform1i(_uLighting, (_lightingEnabled && !_curPrelit) ? 1 : 0);
-        glUniform3fv(_uAmbient, 1, _ambient);
-        glUniform3fv(_uLightDir,   RB_MAX_LIGHTS, &_lightDir[0][0]);
-        glUniform3fv(_uLightColor, RB_MAX_LIGHTS, &_lightColor[0][0]);
-        glUniform1i(_uFog, _fogEnabled ? 1 : 0);
-        glUniform3fv(_uFogColor, 1, _fogColor);
-        glUniform1f(_uFogStart, _fogStart);
-        glUniform1f(_uFogEnd,   _fogEnd);
+        glUniform1i(uniforms.lighting, (_lightingEnabled && !_curPrelit) ? 1 : 0);
+        glUniform3fv(uniforms.ambient, 1, _ambient);
+        glUniform3fv(uniforms.lightDir,   RB_MAX_LIGHTS, &_lightDir[0][0]);
+        glUniform3fv(uniforms.lightColor, RB_MAX_LIGHTS, &_lightColor[0][0]);
+        glUniform1i(uniforms.fog, _fogEnabled ? 1 : 0);
+        glUniform3fv(uniforms.fogColor, 1, _fogColor);
+        glUniform1f(uniforms.fogStart, _fogStart);
+        glUniform1f(uniforms.fogEnd,   _fogEnd);
 
         if (_curTexture)
         {
             glActiveTexture(GL_TEXTURE0);
             _curTexture->SetGLTexture();
-            glUniform1i(_uTex, 0);
-            glUniform1i(_uUseTex, _modulateTexture ? 3 : 1);
-            glUniform1i(_uAlphaCutout, _alphaCutout ? 1 : 0);
+            glUniform1i(uniforms.tex, 0);
+            glUniform1i(uniforms.useTex, _modulateTexture ? 3 : 1);
+            glUniform1i(uniforms.alphaCutout, _alphaCutout ? 1 : 0);
         }
         else
         {
-            glUniform1i(_uUseTex, 0);
+            glUniform1i(uniforms.useTex, 0);
         }
 
         if (_curMesh)

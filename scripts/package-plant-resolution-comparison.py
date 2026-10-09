@@ -9,6 +9,7 @@ import shutil
 import subprocess
 import zipfile
 from PIL import Image
+from plant_settings_catalog import configure_cd,configure_level,require_catalog_runtime,reject_removed_arguments
 
 ROOT = Path(__file__).resolve().parents[1]
 p = argparse.ArgumentParser(description=__doc__)
@@ -22,6 +23,10 @@ normal = a.out / 'normal.apk'
 shutil.copyfile(a.apk, normal)
 sha = lambda data: hashlib.sha256(data).hexdigest()
 with zipfile.ZipFile(normal) as base:
+    require_catalog_runtime(base)
+    if 'assets/wf_args.txt' in base.namelist():reject_removed_arguments(base.read('assets/wf_args.txt').decode())
+    runtime_args = base.read('assets/wf_args.txt').decode() if 'assets/wf_args.txt' in base.namelist() else ''
+    permanent_size = Image.open(ROOT/'wflevels/aquarium_plants/Perm.tga').size
     native = {n: sha(base.read(n)) for n in base.namelist() if n.startswith('lib/')}
     assert base.read('assets/cd.iff') == (ROOT/'wflevels/aquarium-menu-cd.iff').read_bytes()
     identities = []
@@ -51,7 +56,7 @@ with zipfile.ZipFile(normal) as base:
         atlas.save(level/'leaf_surfaces.tga')
         subprocess.run([str(ROOT/'wftools/textile-rs/target/release/textile'),
             '-ini=aquarium_plants.ini', '-Tlinux', '-transparent=0,0,0',
-            f'-pagex={size}', f'-pagey={size}', '-permpagex=256', '-permpagey=256',
+            f'-pagex={size}', f'-pagey={size}', f'-permpagex={permanent_size[0]}', f'-permpagey={permanent_size[1]}',
             '-palx=256', '-paly=8', '-alignx=w', '-aligny=h', '-flipyout', '-powerof2size'], cwd=level, check=True)
         assert Image.open(level/'Room0.tga').size == (size, size)
         for source in (ROOT/'wflevels/aquarium_plants').glob('*.iff'):
@@ -60,6 +65,8 @@ with zipfile.ZipFile(normal) as base:
         for stem in ('aquarium_plants', 'aquarium_plants-standalone'):
             subprocess.run([str(ROOT/'wftools/iffcomp-rs/target/release/iffcomp'), '-binary',
                 f'-o=../{stem}.iff', f'{stem}.iff.txt'], cwd=level, check=True)
+        standalone=parent/'aquarium_plants-standalone.iff'
+        standalone.write_bytes(configure_level(standalone.read_bytes(),{})[0])
         if size == 256:
             assert (parent/'aquarium_plants-standalone.iff').read_bytes() == (ROOT/'wflevels/aquarium_plants-standalone.iff').read_bytes(), '256 control differs from production'
         manifest = parent/'menu.manifest'
@@ -81,7 +88,8 @@ with zipfile.ZipFile(normal) as base:
         for water in ('freshwater', 'saltwater'):
             for cpu in (False, True):
                 name = f'{water}-{size}'+('-cpu' if cpu else '')
-                args = f'--plant-seed=713\n--plant-water={water}\n--plant-age=150\n--plant-speed=0\n--plant-sway=0\n'+('--frame-profile\n' if cpu else '')
+                fixture_cd,plant_catalog=configure_cd(cd.read_bytes(),dict(seed=713,water=water,age=150,speed=0,sway=False))
+                args = runtime_args + ('--frame-profile\n' if cpu else '')
                 if size == 512:
                     args += '--vram-slot-width=512\n--vram-slot-height=512\n--vram-height=1024\n'
                 unsigned, aligned, apk = (a.out/(name+suffix) for suffix in ('-unsigned.apk','-aligned.apk','.apk'))
@@ -89,7 +97,7 @@ with zipfile.ZipFile(normal) as base:
                     for item in base.infolist():
                         if item.filename.startswith('META-INF/') or item.filename in ('assets/cd.iff','assets/wf_args.txt'): continue
                         dst.writestr(copy(item), base.read(item.filename))
-                    dst.writestr('assets/cd.iff', cd.read_bytes(), compress_type=zipfile.ZIP_DEFLATED)
+                    dst.writestr('assets/cd.iff', fixture_cd, compress_type=zipfile.ZIP_DEFLATED)
                     dst.writestr('assets/wf_args.txt', args)
                 bt = Path('/home/will/android-sdk-local/build-tools/34.0.0')
                 subprocess.run([str(bt/'zipalign'), '-f', '-p', '4', str(unsigned), str(aligned)], check=True)
@@ -97,7 +105,7 @@ with zipfile.ZipFile(normal) as base:
                 unsigned.unlink(); aligned.unlink()
                 with zipfile.ZipFile(apk) as signed:
                     assert {n:sha(signed.read(n)) for n in native} == native
-                identities.append(dict(name=name, apk_sha256=sha(apk.read_bytes()), native=native, args=args, cd_sha256=sha(cd.read_bytes())))
+                identities.append(dict(name=name, apk_sha256=sha(apk.read_bytes()), native=native, args=args,plant_catalog=plant_catalog, cd_sha256=sha(fixture_cd)))
     (a.out/'identities.json').write_text(json.dumps(identities, indent=2)+'\n')
     (a.out/'pages.json').write_text(json.dumps(pages, indent=2)+'\n')
     labels = [v['name'] for v in identities]
