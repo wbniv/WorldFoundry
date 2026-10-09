@@ -257,10 +257,12 @@ static bool InitWithExistingContext()
 //==============================================================================
 
 bool
-InitWindow( int /*xPos*/, int /*yPos*/, int /*xSize*/, int /*ySize*/ )
+InitWindow( int /*xPos*/, int /*yPos*/, int xSize, int ySize )
 {
     if (GetHostGLContext().valid)
         return InitWithExistingContext();
+    // The glyph pass uses presented pixels: the drawable must match its reported size.
+    wfInitialWindowWidth=xSize;wfInitialWindowHeight=ySize;
     OpenMainWindow( "World Foundry");
     return true;
 }

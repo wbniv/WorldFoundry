@@ -70,6 +70,7 @@
 //============================================================================
 
 class Camera;
+namespace bitmaptext { class Presenter; }
 class Path;
 class Level;
 class Director;
@@ -167,6 +168,7 @@ class Level
 	void NotifyPositionWrite(const PhysicalObject& object);
     void RefreshHardwareInput();
 	void RenderScene();
+    void RenderBitmapText(int width,int height);
 	inline bool done() const;                          // returns false when level ends
 	void reset( );
 
@@ -220,6 +222,8 @@ private:
 	WFGame&							_game;     // parent game instance (de-globaled from theGame, 2026-05-18)
 	ViewPort&						_viewPort;
 	// data members initialized in constructor body
+    bitmaptext::Presenter* _bitmapPresenter=NULL;
+    void* _bitmapBundle=NULL;
 	void*							_levelOnDiskMemory;  // actual _levelData allcation address
 	_LevelOnDisk *					_levelData;
    const CommonBlock*      _commonBlock;

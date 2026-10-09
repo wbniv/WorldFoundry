@@ -184,6 +184,13 @@ public:
     void FlushTranslucency() override { Drain(); }
     void DrawOverlay(const PhonepadRect* rects, int count, int w, int h) override
     { Drain(); _backend.DrawOverlay(rects, count, w, h); }
+    bool BitmapTextSupported() const override { return _backend.BitmapTextSupported(); }
+    unsigned TextureGeneration() const override { return _backend.TextureGeneration(); }
+    void CaptureTextView() override { _backend.CaptureTextView(); }
+    bool ProjectTextAnchor(float x,float y,float z,int w,int h,float& px,float& py,float& depth) const override
+    { return _backend.ProjectTextAnchor(x,y,z,w,h,px,py,depth); }
+    void DrawGlyphs(const bitmaptext::Quad* q,int n,int w,int h,RBTextureHandle t,bool depth,float x,float y,float z) override
+    { Drain(); _backend.DrawGlyphs(q,n,w,h,t,depth,x,y,z); }
     void EndFrame() override
     {
         Drain(); _backend.EndFrame();

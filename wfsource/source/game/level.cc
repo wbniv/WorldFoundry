@@ -1,6 +1,7 @@
 #include "../../../engine/runtime_property_host.hpp"
 #include "../../../engine/runtime_diagnostics.hpp"
 #include "runtime_profile.hp"
+#include "bitmap_presenter.hp"
 #include <algorithm>
 #include <cstdio>
 #include <map>
@@ -611,6 +612,24 @@ Level::Level
 	Memory* newMemory = new (HALLmalloc) DMalloc(HALLmalloc,plmc->cbObjectsDRam,MEMORY_NAMED("Level DMalloc"));
 	assert( ValidPtr( newMemory ) );
 	_memory.Set(newMemory,&HALLmalloc);
+    // Optional pre-rendered glyph catalog in RAM padding. The locator is not
+    // part of actor/LVL structures and leaves the RPRP tail locator intact.
+    for(unsigned off=44;off+12<=ramSize+8&&off+12<=2048;off+=4){
+        uint32 locator[3];std::memcpy(locator,memoryConfigurationBytes+off,12);
+        if(locator[0]!=IFFTAG('D','L','O','G'))continue;
+        if(_bitmapPresenter||locator[1]<2048||locator[1]%2048||locator[2]<8||locator[2]>16*1024*1024||locator[2]%2048||locator[1]>uint32(INT32_MAX-propertyRamStart)-locator[2]){
+            std::fprintf(stderr,"BITMAP_TEXT invalid DLOG locator\n");std::abort();
+        }
+        _bitmapBundle=_memory->Allocate(locator[2] ASSERTIONS(COMMA __FILE__ COMMA __LINE__));
+        const int32 resume=_levelFile->FilePos();_levelFile->SeekRandom(propertyRamStart+locator[1]);
+        _levelFile->ReadBytes(_bitmapBundle,locator[2]);_levelFile->SeekRandom(resume);
+        uint32 payload=0;std::memcpy(&payload,(char*)_bitmapBundle+4,4);
+        if(std::memcmp(_bitmapBundle,"DLOG",4)||payload>locator[2]-8){std::fprintf(stderr,"BITMAP_TEXT invalid DLOG payload\n");std::abort();}
+        _bitmapPresenter=new (*_memory) bitmaptext::Presenter;
+        const char* error=NULL;
+        if(!_bitmapPresenter->Load((char*)_bitmapBundle+8,payload,error)){std::fprintf(stderr,"BITMAP_TEXT load failed: %s\n",error);std::abort();}
+    }
+
 
 	int index;
 
@@ -811,6 +830,9 @@ Level::Level
 
 Level::~Level()
 {
+    if(_bitmapPresenter){_bitmapPresenter->~Presenter();_memory->Free(_bitmapPresenter);_bitmapPresenter=NULL;}
+    if(_bitmapBundle){_memory->Free(_bitmapBundle);_bitmapBundle=NULL;}
+
     if(wfprops::host().registry()==&_runtimeProperties)wfprops::host().bind(nullptr);
     if(wfprops::activeRegistry()==&_runtimeProperties)wfprops::activeRegistry()=nullptr;
 	// HALLmalloc is a stack/bump allocator — Free must happen in strict
@@ -1321,6 +1343,7 @@ void
 Level::RenderScene()
 {
     wf_profile::begin(wf_profile::Render);
+    if(_bitmapPresenter)_bitmapPresenter->BeginLabels();
 	DBSTREAM1( cdebug << "Level::RenderScene" << std::endl; )
 	Validate();
 	_theActiveRooms->Validate();
@@ -1414,10 +1437,17 @@ Level::RenderScene()
 			if ( actor && actor->isVisible() )
 			{
                 wf_profile::count(1);
+                bool bitmapLabel=false;
+                if(_bitmapPresenter){
+                    int width=0,height=0;Display::GetActive()->GetSurfaceSize(width,height);
+                    const Vector3& p=actor->GetPhysicalAttributes().Position();
+                    bitmapLabel=_bitmapPresenter->CaptureLabel(actor->GetActorIndex(),p.X().AsFloat(),p.Y().AsFloat(),p.Z().AsFloat()+0.2f,width,height);
+                }
+
 #if defined(USE_TEST_CAMERA)
-				actor->GetRenderActor().Render(testCamera,*actor);
+				if(!bitmapLabel) actor->GetRenderActor().Render(testCamera,*actor);
 #else
-				_camera->Render(*actor,LevelClock());
+				if(!bitmapLabel) _camera->Render(*actor,LevelClock());
 #endif
 			}
 			++poIter;
@@ -1434,6 +1464,11 @@ Level::RenderScene()
 
 //==============================================================================
 // this is supposed to reset the level to its initial state
+
+void Level::RenderBitmapText(int width,int height)
+{
+    Validate();if(_bitmapPresenter)_bitmapPresenter->Draw(GetMailboxes(),width,height);Validate();
+}
 
 void
 Level::NotifyPositionWrite(const PhysicalObject& object)

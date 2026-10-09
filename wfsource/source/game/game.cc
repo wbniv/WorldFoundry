@@ -667,6 +667,8 @@ WFGame::StepFrame(bool do_swap, Scalar* out_dt)
 		_display->RenderBegin();
 		_curLevel->RenderScene();
 		RestApi_RenderBoxes();
+        int textWidth=0,textHeight=0;_display->GetSurfaceSize(textWidth,textHeight);
+        _curLevel->RenderBitmapText(textWidth,textHeight);
 		if (fpscounter::enabled)
 		{
 			int w = 0, h = 0;

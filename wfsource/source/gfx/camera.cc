@@ -217,6 +217,7 @@ RenderCamera::RenderBegin()
    // the backend transforms light directions by the active modelview so the
    // shader can consume them in eye space.
    RendererBackendGet().SetModelView(_invertedPosition);
+   RendererBackendGet().CaptureTextView();
 
    ConvertToGLColor(_ambientColor, lightColor);
    RendererBackendGet().SetAmbient(lightColor[0], lightColor[1], lightColor[2]);

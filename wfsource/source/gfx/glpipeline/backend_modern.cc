@@ -29,6 +29,7 @@
 #endif
 
 #include <gfx/renderer_backend.hp>
+#include <game/bitmap_text.hp>
 #include <gfx/static_mesh.hp>
 #include <gfx/backface_cull.hp>
 #include <hal/phonepad/phonepad_overlay.h>
@@ -37,6 +38,7 @@
 #include <math/matrix34.hp>
 
 #include <cmath>
+#include <algorithm>
 #include <cstdio>
 #include <cstdlib>
 #include <cstring>
@@ -582,6 +584,71 @@ public:
         if (blend) glEnable(GL_BLEND); else glDisable(GL_BLEND);
     }
 
+    bool BitmapTextSupported() const override { return true; }
+    unsigned TextureGeneration() const override { return _contextGeneration; }
+    void CaptureTextView() override { std::memcpy(_textView,_mv,sizeof(_mv)); }
+    bool ProjectTextAnchor(float x,float y,float z,int width,int height,float& px,float& py,float& depth) const override
+    {
+        float view[4], clip[4]; const float point[4]={x,y,z,1};
+        for(int r=0;r<4;++r){view[r]=0;for(int c=0;c<4;++c)view[r]+=_textView[c*4+r]*point[c];}
+        for(int r=0;r<4;++r){clip[r]=0;for(int c=0;c<4;++c)clip[r]+=_proj[c*4+r]*view[c];}
+        if(clip[3]<=0)return false;
+        const float nx=clip[0]/clip[3],ny=clip[1]/clip[3];depth=clip[2]/clip[3];
+        if(depth < -1 || depth > 1 || nx < -1 || nx > 1 || ny < -1 || ny > 1)return false;
+        px=std::floor((nx+1)*width*0.5f+0.5f);py=std::floor((1-ny)*height*0.5f+0.5f);return true;
+    }
+    void DrawGlyphs(const bitmaptext::Quad* quads,int count,int width,int height,RBTextureHandle texture,
+                    bool testDepth,float anchorX,float anchorY,float anchorDepth) override
+    {
+        if(!texture||count<=0||width<=0||height<=0)return;
+        Flush();
+        GLint viewport[4],program,vao,buffer,active,tex,srcRGB,dstRGB,srcAlpha,dstAlpha;
+        GLboolean depthMask;glGetIntegerv(GL_VIEWPORT,viewport);glGetIntegerv(GL_CURRENT_PROGRAM,&program);
+        glGetIntegerv(GL_VERTEX_ARRAY_BINDING,&vao);glGetIntegerv(GL_ARRAY_BUFFER_BINDING,&buffer);
+        glGetIntegerv(GL_ACTIVE_TEXTURE,&active);glActiveTexture(GL_TEXTURE0);glGetIntegerv(GL_TEXTURE_BINDING_2D,&tex);
+        glGetIntegerv(GL_BLEND_SRC_RGB,&srcRGB);glGetIntegerv(GL_BLEND_DST_RGB,&dstRGB);
+        glGetIntegerv(GL_BLEND_SRC_ALPHA,&srcAlpha);glGetIntegerv(GL_BLEND_DST_ALPHA,&dstAlpha);
+        glGetBooleanv(GL_DEPTH_WRITEMASK,&depthMask);
+        const bool depth=glIsEnabled(GL_DEPTH_TEST),blend=glIsEnabled(GL_BLEND),cull=glIsEnabled(GL_CULL_FACE),scissor=glIsEnabled(GL_SCISSOR_TEST);
+        if(!_glyphProgram){
+            const char* vertex="layout(location=0) in vec3 a_pos;\nlayout(location=1) in vec2 a_uv;\nlayout(location=2) in vec4 a_color;\nuniform vec2 u_surface;\nuniform vec3 u_anchor;\nout vec2 v_uv;\nout vec4 v_color;\nvoid main(){vec2 p=a_pos.xy+u_anchor.xy;gl_Position=vec4(2.0*p.x/u_surface.x-1.0,1.0-2.0*p.y/u_surface.y,u_anchor.z,1.0);v_uv=a_uv;v_color=a_color;}\n";
+            const char* fragment="in vec2 v_uv;\nin vec4 v_color;\nuniform sampler2D u_tex;\nout vec4 frag;\nvoid main(){float a=texture(u_tex,v_uv).r;if(a==0.0)discard;frag=vec4(v_color.rgb,v_color.a*a);}\n";
+            GLuint vs=CompileShader(GL_VERTEX_SHADER,vertex),fs=CompileShader(GL_FRAGMENT_SHADER,fragment);
+            _glyphProgram=LinkProgram(vs,fs);glDeleteShader(vs);glDeleteShader(fs);
+            glGenVertexArrays(1,&_glyphVao);glGenBuffers(1,&_glyphBuffer);
+            glBindVertexArray(_glyphVao);glBindBuffer(GL_ARRAY_BUFFER,_glyphBuffer);
+            glBufferData(GL_ARRAY_BUFFER,256*6*9*sizeof(float),NULL,GL_STREAM_DRAW);
+            for(int i=0;i<3;++i)glEnableVertexAttribArray(i);
+            glVertexAttribPointer(0,3,GL_FLOAT,GL_FALSE,9*sizeof(float),(void*)0);
+            glVertexAttribPointer(1,2,GL_FLOAT,GL_FALSE,9*sizeof(float),(void*)(3*sizeof(float)));
+            glVertexAttribPointer(2,4,GL_FLOAT,GL_FALSE,9*sizeof(float),(void*)(5*sizeof(float)));
+        }
+        glViewport(0,0,width,height);glUseProgram(_glyphProgram);glBindVertexArray(_glyphVao);glBindBuffer(GL_ARRAY_BUFFER,_glyphBuffer);
+        glUniform2f(glGetUniformLocation(_glyphProgram,"u_surface"),float(width),float(height));
+        glUniform3f(glGetUniformLocation(_glyphProgram,"u_anchor"),anchorX,anchorY,anchorDepth);
+        glUniform1i(glGetUniformLocation(_glyphProgram,"u_tex"),0);glBindTexture(GL_TEXTURE_2D,(GLuint)(uintptr_t)texture);
+        glEnable(GL_BLEND);glBlendFunc(GL_SRC_ALPHA,GL_ONE_MINUS_SRC_ALPHA);glDepthMask(GL_FALSE);
+        if(testDepth)glEnable(GL_DEPTH_TEST);else glDisable(GL_DEPTH_TEST);
+        glDisable(GL_CULL_FACE);glDisable(GL_SCISSOR_TEST);
+        float vertices[256*6*9];const int corner[6]={0,1,2,0,2,3};
+        for(int start=0;start<count;start+=256){const int n=std::min(256,count-start);
+            for(int q=0;q<n;++q){const auto& g=quads[start+q];
+                for(int v=0;v<6;++v){int c=corner[v];float* p=vertices+(q*6+v)*9;
+                    p[0]=(c==1||c==2)?g.x1:g.x0;p[1]=c>=2?g.y1:g.y0;p[2]=0;
+                    p[3]=(c==1||c==2)?g.u1:g.u0;p[4]=c>=2?g.v1:g.v0;
+                    p[5]=float(g.rgba>>24)/255;p[6]=float((g.rgba>>16)&255)/255;p[7]=float((g.rgba>>8)&255)/255;p[8]=float(g.rgba&255)/255;
+                }
+            }
+            glBufferSubData(GL_ARRAY_BUFFER,0,n*6*9*sizeof(float),vertices);glDrawArrays(GL_TRIANGLES,0,n*6);
+        }
+        glBindTexture(GL_TEXTURE_2D,tex);glActiveTexture(active);glUseProgram(program);glBindVertexArray(vao);glBindBuffer(GL_ARRAY_BUFFER,buffer);
+        glViewport(viewport[0],viewport[1],viewport[2],viewport[3]);glDepthMask(depthMask);glBlendFuncSeparate(srcRGB,dstRGB,srcAlpha,dstAlpha);
+        if(depth)glEnable(GL_DEPTH_TEST);else glDisable(GL_DEPTH_TEST);
+        if(blend)glEnable(GL_BLEND);else glDisable(GL_BLEND);
+        if(cull)glEnable(GL_CULL_FACE);else glDisable(GL_CULL_FACE);
+        if(scissor)glEnable(GL_SCISSOR_TEST);else glDisable(GL_SCISSOR_TEST);
+    }
+
     void EndFrame() override
     {
         Flush();
@@ -599,6 +666,15 @@ public:
                                   RBTextureFormat format,
                                   const void* pixels) override
     {
+        if(format==RB_TEX_COVERAGE8){
+            GLint binding,alignment;glGetIntegerv(GL_TEXTURE_BINDING_2D,&binding);glGetIntegerv(GL_UNPACK_ALIGNMENT,&alignment);
+            GLuint name=0;glGenTextures(1,&name);if(!name)return NULL;
+            glBindTexture(GL_TEXTURE_2D,name);glPixelStorei(GL_UNPACK_ALIGNMENT,1);
+            glTexParameteri(GL_TEXTURE_2D,GL_TEXTURE_WRAP_S,GL_CLAMP_TO_EDGE);glTexParameteri(GL_TEXTURE_2D,GL_TEXTURE_WRAP_T,GL_CLAMP_TO_EDGE);
+            glTexParameteri(GL_TEXTURE_2D,GL_TEXTURE_MIN_FILTER,GL_NEAREST);glTexParameteri(GL_TEXTURE_2D,GL_TEXTURE_MAG_FILTER,GL_NEAREST);
+            glTexImage2D(GL_TEXTURE_2D,0,GL_R8,width,height,0,GL_RED,GL_UNSIGNED_BYTE,pixels);
+            glPixelStorei(GL_UNPACK_ALIGNMENT,alignment);glBindTexture(GL_TEXTURE_2D,binding);return (RBTextureHandle)(uintptr_t)name;
+        }
         GLuint name = 0;
         glGenTextures(1, &name);
         if (!name)
@@ -705,6 +781,7 @@ public:
         // StaticMeshLive false for all existing handles, so their owners bake
         // again on next draw (from the resident RenderObject3D data, there is
         // no CPU copy of the packed vertices to re-upload).
+        _glyphProgram=_glyphVao=_glyphBuffer=0;
         ++_contextGeneration;
         _idx16.clear();
         _idx32.clear();
@@ -911,6 +988,8 @@ private:
     std::vector<uint16_t> _idx16;
     std::vector<uint32_t> _idx32;
     unsigned _contextGeneration = 1;
+    GLuint _glyphProgram=0, _glyphVao=0, _glyphBuffer=0;
+    float _textView[16] = {};
     size_t _staticGpuBytes = 0;
     GLuint _sharedIbo = 0;
     size_t _sharedIboBytes = 0;  // largest upload, counted once across all VAOs

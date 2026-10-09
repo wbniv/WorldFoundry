@@ -43,6 +43,7 @@
 #import <QuartzCore/CAMetalLayer.h>
 
 #include <gfx/renderer_backend.hp>
+#include <game/bitmap_text.hp>
 #include <hal/phonepad/phonepad_overlay.h>
 #include <gfx/pixelmap.hp>
 #include <gfx/metal/metal_offscreen.h>
@@ -193,7 +194,8 @@ fragment float4 wf_fs(VertexOut v                  [[stage_in]],
     if (u.fog != 0) {
         c.rgb = mix(u.fog_color, c.rgb, v.fog_factor);
     }
-    c.a = v.opacity;
+    c.a = u.use_tex == 4 ? v.opacity * tex.sample(smp,v.uv).r : v.opacity;
+    if(u.use_tex == 4){c.rgb=v.color;if(c.a==0.0)discard_fragment();}
     return c;
 }
 )MSL";
@@ -495,6 +497,36 @@ public:
         _overlay = false;
     }
 
+    bool BitmapTextSupported() const override { return true; }
+    void CaptureTextView() override { std::memcpy(_textView,_mv,sizeof(_mv)); }
+    bool ProjectTextAnchor(float x,float y,float z,int width,int height,float& px,float& py,float& depth) const override
+    {
+        float view[4],clip[4];const float point[4]={x,y,z,1};
+        for(int r=0;r<4;++r){view[r]=0;for(int c=0;c<4;++c)view[r]+=_textView[c*4+r]*point[c];}
+        for(int r=0;r<4;++r){clip[r]=0;for(int c=0;c<4;++c)clip[r]+=_proj[c*4+r]*view[c];}
+        if(clip[3]<=0)return false;float nx=clip[0]/clip[3],ny=clip[1]/clip[3];depth=clip[2]/clip[3];
+        if(depth<0||depth>1||nx < -1||nx>1||ny < -1||ny>1)return false;
+        px=std::floor((nx+1)*width*.5f+.5f);py=std::floor((1-ny)*height*.5f+.5f);return true;
+    }
+    void DrawGlyphs(const bitmaptext::Quad* quads,int count,int width,int height,RBTextureHandle texture,
+                    bool testDepth,float anchorX,float anchorY,float anchorDepth) override
+    {
+        if(!texture||count<=0||width<=0||height<=0)return;Flush();
+        float projection[16],modelview[16];std::memcpy(projection,_proj,sizeof(_proj));std::memcpy(modelview,_mv,sizeof(_mv));
+        const bool lighting=_lightingEnabled,fog=_fogEnabled,overlay=_overlay,palette=_paletteEnabled;
+        const float opacity=_opacity;Mat4Identity(_proj);Mat4Identity(_mv);_mvpDirty=true;
+        _lightingEnabled=_fogEnabled=_paletteEnabled=false;_overlay=!testDepth;_bitmapPass=true;_bitmapHandle=texture;
+        for(int i=0;i<count;++i){const auto& q=quads[i];_opacity=float(q.rgba&255)/255;
+            float r=float(q.rgba>>24)/255,g=float((q.rgba>>16)&255)/255,b=float((q.rgba>>8)&255)/255;
+            float left=2*(q.x0+anchorX)/width-1,right=2*(q.x1+anchorX)/width-1,top=1-2*(q.y0+anchorY)/height,bottom=1-2*(q.y1+anchorY)/height;
+            RBVertex a{left,top,anchorDepth,r,g,b,q.u0,q.v0},v{right,top,anchorDepth,r,g,b,q.u1,q.v0},c{right,bottom,anchorDepth,r,g,b,q.u1,q.v1},d{left,bottom,anchorDepth,r,g,b,q.u0,q.v1};
+            DrawTriangle(a,v,c,0,0,1,NULL,true,true);DrawTriangle(a,c,d,0,0,1,NULL,true,true);
+            if(i%256==255)Flush();
+        }
+        Flush();_bitmapPass=false;_bitmapHandle=NULL;std::memcpy(_proj,projection,sizeof(_proj));std::memcpy(_mv,modelview,sizeof(_mv));
+        _mvpDirty=true;_lightingEnabled=lighting;_fogEnabled=fog;_overlay=overlay;_paletteEnabled=palette;_opacity=opacity;
+    }
+
     void EndFrame() override
     {
         Flush();
@@ -527,13 +559,13 @@ public:
         // RB_TEX_RGB5 is the SIXTEEN_BIT_VRAM path, which feeds 3 bytes/texel.
         // Metal has no 24-bit format, and this build does not use it, so refuse
         // loudly rather than silently sample garbage if it is ever switched on.
-        if (format != RB_TEX_RGBA8) {
+        if (format != RB_TEX_RGBA8 && format != RB_TEX_COVERAGE8) {
             NSLog(@"wf_game: MetalBackend: RB_TEX_RGB5 not implemented");
             return NULL;
         }
 
         MTLTextureDescriptor* td = [MTLTextureDescriptor
-            texture2DDescriptorWithPixelFormat:MTLPixelFormatRGBA8Unorm
+            texture2DDescriptorWithPixelFormat:(format==RB_TEX_COVERAGE8?MTLPixelFormatR8Unorm:MTLPixelFormatRGBA8Unorm)
                                          width:(NSUInteger)width
                                         height:(NSUInteger)height
                                      mipmapped:NO];
@@ -551,7 +583,7 @@ public:
         [tex replaceRegion:MTLRegionMake2D(0, 0, (NSUInteger)width, (NSUInteger)height)
                mipmapLevel:0
                  withBytes:pixels
-               bytesPerRow:(NSUInteger)width * 4];
+               bytesPerRow:(NSUInteger)width * (format==RB_TEX_COVERAGE8?1:4)];
 
         // +1 from `new...`, handed to the caller. PixelMap owns it from here and
         // releases it through DestroyTexture; TexToHandle balances that
@@ -587,6 +619,10 @@ private:
     id<MTLDepthStencilState> _blendDepth = nil;
     id<MTLDepthStencilState> _overlayDepth = nil;
     bool _overlay = false;
+    bool _bitmapPass=false;
+    RBTextureHandle _bitmapHandle=NULL;
+    float _textView[16]={};
+    id<MTLSamplerState> _glyphSampler=nil;
     float _opacity = 1.0f;
     bool _modulateTexture = false;
     bool _paletteEnabled=false; unsigned _paletteDark=0,_paletteLight=0xffffff;
@@ -735,6 +771,9 @@ private:
         sd.sAddressMode = MTLSamplerAddressModeRepeat;
         sd.tAddressMode = MTLSamplerAddressModeRepeat;
         _sampler = [_device newSamplerStateWithDescriptor:sd];
+        sd.minFilter=sd.magFilter=MTLSamplerMinMagFilterNearest;
+        sd.sAddressMode=sd.tAddressMode=MTLSamplerAddressModeClampToEdge;
+        _glyphSampler=[_device newSamplerStateWithDescriptor:sd];
 
         // 1x1 opaque white, bound whenever a batch has no texture. The
         // fragment function declares texture(0) as a required argument, and
@@ -788,7 +827,8 @@ private:
         // GPU texture. GetTextureHandle() follows the _parent chain, so a
         // sub-pixelmap correctly reports its atlas parent's texture.
         _boundTexture = _curTexture ? _curTexture->GetTextureHandle() : NULL;
-        u.use_tex     = _boundTexture ? (_modulateTexture ? 3 : 1) : 0;
+        if(_bitmapPass)_boundTexture=_bitmapHandle;
+        u.use_tex = _bitmapPass ? 4 : (_boundTexture ? (_modulateTexture ? 3 : 1) : 0);
         u._pad        = 0;
     }
 
@@ -846,16 +886,16 @@ private:
             return;
         }
 
-        [_encoder setRenderPipelineState:(_opacity < 1.0f ? _blendPipeline : _pipeline)];
+        [_encoder setRenderPipelineState:(_bitmapPass||_opacity < 1.0f ? _blendPipeline : _pipeline)];
         if (_depthState)
-            [_encoder setDepthStencilState:(_overlay ? _overlayDepth : (_opacity < 1.0f ? _blendDepth : _depthState))];
+            [_encoder setDepthStencilState:(_overlay ? _overlayDepth : (_bitmapPass||_opacity < 1.0f ? _blendDepth : _depthState))];
         // One batch = one texture (DrawTriangle flushes on a texture change),
         // so a single bind per flush is correct.
         // Always bind something at texture(0) — see _whiteTexture in LazyInit.
         [_encoder setFragmentTexture:(u.use_tex ? HandleToTex(_boundTexture)
                                                 : _whiteTexture)
                              atIndex:0];
-        [_encoder setFragmentSamplerState:_sampler atIndex:0];
+        [_encoder setFragmentSamplerState:(_bitmapPass ? _glyphSampler : _sampler) atIndex:0];
         [_encoder setVertexBuffer:vbuf offset:0 atIndex:0];
         [_encoder setVertexBytes:&u
                            length:sizeof(Uniforms)
