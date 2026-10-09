@@ -779,6 +779,36 @@
       "readonly": true,
       "initial": "unavailable",
       "max_length": 255
+    },
+    "memory_object_heap_bytes": {
+      "id": 2000,
+      "readonly": true,
+      "initial": "400000"
+    },
+    "memory_permanent_asset_bytes": {
+      "id": 2001,
+      "readonly": true,
+      "initial": "2000000"
+    },
+    "memory_room_asset_bytes": {
+      "id": 2002,
+      "readonly": true,
+      "initial": "4000000"
+    },
+    "memory_active_room_slots": {
+      "id": 2003,
+      "readonly": true,
+      "initial": "3"
+    },
+    "memory_doom_stick": {
+      "id": 2004,
+      "readonly": true,
+      "initial": "1"
+    },
+    "memory_bungee_camera": {
+      "id": 2005,
+      "readonly": true,
+      "initial": "1"
     }
   }
 }

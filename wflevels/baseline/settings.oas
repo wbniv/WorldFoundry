@@ -118,4 +118,14 @@ GROUP_START(Debug streams)
 {5,"runtime_stream_l_s",0,255,0,256,"",0,-1,-1,"-ls<output>. SW_DBSTREAM; targets n, s, e, f<path>; monochrome unavailable",{0,0,"ls scripting languages","1"}},
 GROUP_STOP()
 PROPERTY_SHEET_FOOTER
+PROPERTY_SHEET_HEADER(Level Memory,0)
+GROUP_START(Load-time configuration)
+{4,"memory_object_heap_bytes",1,2147483647,400000,0,"",2,-1,-1,"Applied at level load. Read-only now; rebuild/reload to change.",{0,0,"Object heap bytes","1"}},
+{4,"memory_permanent_asset_bytes",1,2147483647,2000000,0,"",2,-1,-1,"Applied at level load. Read-only now; rebuild/reload to change.",{0,0,"Permanent asset bytes","1"}},
+{4,"memory_room_asset_bytes",1,2147483647,4000000,0,"",2,-1,-1,"Applied at level load. Read-only now; rebuild/reload to change.",{0,0,"Room asset bytes per slot","1"}},
+{4,"memory_active_room_slots",1,9,3,0,"",2,-1,-1,"Applied at level load. Read-only now; rebuild/reload to change. Asset residency slots; independent of render policy.",{0,0,"Active room asset slots","1"}},
+{4,"memory_doom_stick",0,1,1,0,"",8,-1,-1,"Applied at level load. Read-only now; rebuild/reload to change.",{0,0,"Doom-style joystick","1"}},
+{4,"memory_bungee_camera",0,1,1,0,"",8,-1,-1,"Applied at level load. Read-only now; rebuild/reload to change.",{0,0,"Bungee camera","1"}},
+GROUP_STOP()
+PROPERTY_SHEET_FOOTER
 TYPEFOOTER
