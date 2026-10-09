@@ -18,7 +18,7 @@ namespace bitmaptext
 static const char* const kControls="SELECT: continue   LEFT / C: close   UP / DOWN: text size";
 void Presenter::Fatal(const char* error)const{fprintf(stderr,"BITMAP_TEXT: %s\n",error);abort();}
 void Presenter::Validate()const{_catalog.Validate();_body.Validate();assert(_signCount>=0&&_signCount<=MAX_LABELS);}
-bool Presenter::Load(const void* data,size_t bytes,const char*& error){Validate();if(!_catalog.Load(data,bytes,error))return false;if(_catalog.LabelCount()>MAX_LABELS){error="too many bitmap labels";return false;}if(!RendererBackendGet().BitmapTextSupported()){error="renderer does not support native-pixel bitmap text";return false;}Validate();return true;}
+bool Presenter::Load(const void* data,size_t bytes,const char*& error){Validate();if(!_catalog.Load(data,bytes,error))return false;if(_catalog.SelectVariant(0,28)<0||_catalog.SelectVariant(1,24)<0){error="chapter text requires Regular and SemiBold variants";return false;}if(_catalog.Pixels()[0]!=255){error="missing reserved solid backdrop texel";return false;}if(_catalog.LabelCount()>MAX_LABELS){error="too many bitmap labels";return false;}if(!RendererBackendGet().BitmapTextSupported()){error="renderer does not support native-pixel bitmap text";return false;}Validate();return true;}
 Presenter::~Presenter(){Validate();auto& rb=RendererBackendGet();if(_texture&&_generation==rb.TextureGeneration())rb.DestroyTexture(_texture);}
 void Presenter::BeginLabels(){Validate();for(int i=0;i<_signCount;++i)_signs[i].visible=false;}
 void Presenter::BuildSigns(int height){

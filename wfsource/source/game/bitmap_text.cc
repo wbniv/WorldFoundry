@@ -35,7 +35,7 @@ void Catalog::Validate() const { assert(!_bytes||(_size>=64&&_width>0&&_height>0
 bool Catalog::Load(const void* bytes,size_t size,const char*& error) {
     _bytes=NULL; error=NULL;
     const unsigned char* p=(const unsigned char*)bytes;
-    if(size<64||size>16*1024*1024||memcmp(p,"WFGA",4)||Read(p+4)!=1){error="invalid glyph bundle header/version";return false;}
+    if(!p||size<64||size>16*1024*1024||memcmp(p,"WFGA",4)||Read(p+4)!=1){error="invalid glyph bundle header/version";return false;}
     _width=Read(p+8);_height=Read(p+12);_variants=Read(p+16);_glyphs=Read(p+20);_kerns=Read(p+24);_texts=Read(p+28);_labels=Read(p+32);
     if(_width<1||_width>4096||_height<1||_height>4096||_variants<1||_variants>64||_glyphs<1||_glyphs>16384||_kerns<0||_kerns>131072||_texts<0||_texts>4096||_labels<0||_labels>1024){error="glyph bundle counts outside bounds";return false;}
     for(int i=0;i<7;++i)if(Read(p+36+i*4)<0||Read(p+36+i*4)>1900){error="invalid glyph mailbox binding";return false;}
@@ -56,9 +56,15 @@ bool Catalog::Load(const void* bytes,size_t size,const char*& error) {
     for(int table=0;table<2;++table){if(table)_labelOffset=int(cursor);int count=table?_labels:_texts;int previousID=0;
         for(int i=0;i<count;++i){const int header=table?16:12;if(cursor+header>size){error="truncated text record";return false;}
             int id=Read(p+cursor),a=Read(p+cursor+4),b=Read(p+cursor+(table?12:8));if(table&&(Read(p+cursor+8)<0||Read(p+cursor+8)>255)){error="invalid label realm";return false;}cursor+=header;
+            // Bound individual fields before addition: malformed lengths must
+            // be rejected without signed overflow or crossing string boundaries.
+            if(id<=previousID||a<0||b<0||a>65536||b>65536||(table&&a>2047)){error="invalid text/label bounds";return false;}
             int length=table?b:a+b;
-            if(id<=previousID||a<0||b<0||a>65536||b>65536||length<0||size_t(length)>size-cursor||(table&&a>2047)){error="invalid text/label bounds";return false;}previousID=id;
-            int offset=0,cp;while(offset<length)if(!Decode((const char*)p+cursor,length,offset,cp)){error="invalid UTF-8 text";return false;}
+            if(size_t(length)>size-cursor){error="truncated text/label payload";return false;}previousID=id;
+            for(int part=0;part<(table?1:2);++part){
+                int start=table||part==0?0:a,bytesInPart=table?b:part==0?a:b;
+                int offset=0,cp;while(offset<bytesInPart)if(!Decode((const char*)p+cursor+start,bytesInPart,offset,cp)){error="invalid UTF-8 text";return false;}
+            }
             cursor+=length;
         }
     }

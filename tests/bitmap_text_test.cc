@@ -31,9 +31,10 @@ int main(int argc,char** argv){
                 recovered+=WithoutSpace(text.body+line.begin,line.end-line.begin);previousEnd=line.end;
             }
             Check(recovered==WithoutSpace(text.body,text.bodyBytes),"exact text coverage without dropped/duplicated letters");
+            bitmaptext::Layout reflow;
+            Check(reflow.Wrap(catalog,variant,text.body,text.bodyBytes,width+173,error),"reflow succeeds");
             for(int capacity:{1,3,8})for(int page=0;page<layout.PageCount(capacity);++page){
                 int anchor=layout.Anchor(page,capacity);Check(layout.PageForAnchor(anchor,capacity)==page,"page anchor round trip");
-                bitmaptext::Layout reflow;Check(reflow.Wrap(catalog,variant,text.body,text.bodyBytes,width+173,error),"reflow succeeds");
                 int newPage=reflow.PageForAnchor(anchor,capacity),first=newPage*capacity;
                 Check(reflow.GetLine(first).begin<=anchor,"reflow keeps prior passage visible");
             }
@@ -49,13 +50,23 @@ int main(int argc,char** argv){
         }
     }
     Check(texts>100,"complete chapter loaded");
+    Check(!catalog.Load(nullptr,bytes.size(),error),"null bundle storage rejected");
+    Check(catalog.Load(bytes.data(),bytes.size(),error),"valid catalog reload after rejected storage");
     bitmaptext::Layout split;std::string longToken(200,'W');int variant=catalog.SelectVariant(0,42);
     Check(split.Wrap(catalog,variant,longToken.data(),longToken.size(),80,error),"long token splits safely");Check(split.LineCount()>1,"long token actually wraps");
     Check(!split.Wrap(catalog,variant,"W",1,1,error),"unfittable glyph rejected instead of scaling");
     Check(!split.Wrap(catalog,variant,"\xF0\x80\x80\x80",4,200,error),"overlong UTF-8 rejected");
     Check(!split.Wrap(catalog,variant,"\xED\xA0\x80",3,200,error),"UTF-8 surrogate rejected");
     Check(!split.Wrap(catalog,variant,"\xF0\x9F\x99\x82",4,200,error),"unsupported glyph rejected");
-    auto corrupt=bytes;corrupt[8]=0;corrupt[9]=0;Check(!catalog.Load(corrupt.data(),corrupt.size(),error),"zero atlas width rejected");
+    auto read32=[&](int offset){return unsigned(bytes[offset])|(unsigned(bytes[offset+1])<<8)|(unsigned(bytes[offset+2])<<16)|(unsigned(bytes[offset+3])<<24);};
+    const int firstText=64+int(read32(16))*24+int(read32(20))*36+int(read32(24))*16;
+    auto corrupt=bytes;
+    for(int field:{4,8}){corrupt[firstText+field]=255;corrupt[firstText+field+1]=255;corrupt[firstText+field+2]=255;corrupt[firstText+field+3]=127;}
+    Check(!catalog.Load(corrupt.data(),corrupt.size(),error),"oversized text lengths rejected without overflow");
+    corrupt=bytes;const int titleBytes=int(read32(firstText+4));
+    corrupt[firstText+12+titleBytes-1]=0xC3;corrupt[firstText+12+titleBytes]=0xA9;
+    Check(!catalog.Load(corrupt.data(),corrupt.size(),error),"UTF-8 cannot straddle title/body boundary");
+    corrupt=bytes;corrupt[8]=0;corrupt[9]=0;Check(!catalog.Load(corrupt.data(),corrupt.size(),error),"zero atlas width rejected");
     corrupt=bytes;corrupt.pop_back();Check(!catalog.Load(corrupt.data(),corrupt.size(),error),"truncated atlas pixels rejected");
-    std::printf("PASS %d checks; %d semantic beats; native-size geometry and source-anchor reflow\n",checks,texts);
+    std::printf("PASS %d checks; %d catalog records; native-size geometry and source-anchor reflow\n",checks,texts);
 }
