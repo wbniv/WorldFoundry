@@ -43,7 +43,7 @@ Object* Registry::schema(const std::string& name){for(auto& pair:objects_)if(pai
 std::vector<uint32_t> Registry::editableObjects() const {
     std::vector<uint32_t> result;
     for(const auto& pair:objects_)for(const auto& field:pair.second.fields)
-        if(field.stored() || field.kind==9){result.push_back(pair.first);break;}
+        if(!field.readonly && (field.stored() || field.kind==9)){result.push_back(pair.first);break;}
     return result;
 }
 void Registry::remove(uint32_t actor){objects_.erase(actor);}

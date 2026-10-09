@@ -33,5 +33,29 @@ int main(int argc,char** argv){
  assert(host.open());registry.remove(22);host.command("r:"+std::to_string(host.session())+":select:11");assert(!host.modal);
  host.openOwner(11);assert(registry.set(11,40,"1",error));assert(!host.apply());host.close();
  assert(host.open());assert(!host.picker);host.close();host.bind(nullptr);assert(!host.available());
+ // Load-time settings remain queryable without taking the level's held OK.
+ wfprops::Registry readonlyRegistry=registry;
+ auto* readonlyOwner=readonlyRegistry.object(11);
+ for(auto& field:readonlyOwner->fields)field.readonly=1;
+ wfprops::Host readonlyHost;readonlyHost.bind(&readonlyRegistry);readonlyHost.gesture(0,.05);
+ assert(readonlyRegistry.editableObjects().empty()&&!readonlyHost.available());
+ assert(*readonlyOwner->get(40)=="1");
+ for(int i=0;i<25;++i)readonlyHost.gesture(1,.05);
+ assert(!readonlyHost.modal&&!readonlyHost.open());readonlyHost.gesture(0,.05);
+ // One editable field restores the gesture; other fields stay ghosted.
+ for(auto& field:readonlyOwner->fields)if(field.id==40)field.readonly=0;
+ assert((readonlyRegistry.editableObjects()==std::vector<uint32_t>{11}));
+ for(int i=0;i<25;++i)readonlyHost.gesture(1,.05);
+ assert(readonlyHost.modal&&!readonlyHost.picker);
+ for(const auto& field:readonlyHost.form.edit.object()->fields)
+     if(field.id!=40)assert(field.readonly);
+ readonlyHost.close();readonlyHost.gesture(0,.05);
+ // An enabled action is sufficient, but a ghosted action is not.
+ for(auto& field:readonlyOwner->fields)field.readonly=1;
+ wfprops::Field action;action.kind=9;action.key="apply";action.label="Apply";
+ readonlyOwner->fields.push_back(action);
+ assert(readonlyHost.available()&&readonlyHost.open());readonlyHost.close();
+ readonlyOwner->fields.back().readonly=1;
+ assert(!readonlyHost.available()&&!readonlyHost.open());
  std::cout<<"Generic host: selection, isolation, input release, stale sessions, deletion, revision and teardown passed\n";
 }
