@@ -1,6 +1,12 @@
 #include "../../../engine/runtime_property_host.hpp"
 #include "../../../engine/runtime_diagnostics.hpp"
 #include "runtime_profile.hp"
+#include <algorithm>
+#include <cstdio>
+#include <map>
+#include <set>
+#include <string>
+#include <vector>
 //==============================================================================
 // level.cc:
 // Copyright ( c ) 1994,1995,1996,1997,1998,1999,2000,2001,2002,2003 World Foundry Group.  
@@ -33,6 +39,7 @@
 #include "sim_constants.hp"   // kMaxSimDeltaSeconds
 #include <movement/movement.hp>
 #include <room/room.hp>
+#include <gfx/static_mesh.hp>
 #include <physics/collision.hp>
 #ifdef PHYSICS_ENGINE_JOLT
 #include <physics/jolt/jolt_backend.hp>
@@ -330,6 +337,142 @@ WorldFoundryMailboxesManager::LookupMailboxes(int objectIndex)
     }
     return _mailboxes;
 }
+
+//==============================================================================
+// E3 phase 0 measurement: one-time static report of what the level draws and how
+// its objects are spread over the Rooms. Printed to stderr once, at the end of
+// loading, and only under --frame-profile; nothing runs per frame. Mesh data
+// exists only for objects whose room is active at that moment (the asset slots
+// of other rooms are not loaded), so the mesh-stats cover the rooms bound at
+// load; room-stats list every room regardless.
+
+namespace {
+
+struct MeshAssetStats
+{
+	int vertices, faces, instances, firstActor;
+};
+
+void
+ReportLevelLoadStats(const LevelRooms& levelRooms)
+{
+	if(!wf_profile::enabled())
+		return;
+
+	const int kBytesPerBakedVertex = 76;		// ModernRendererBackend::Vert, 19 floats
+	std::set<const Actor*> seen;
+	std::map<int32,MeshAssetStats> meshes;		// keyed by mesh asset id
+	long instances = 0, procedural = 0, proceduralFaces = 0, unbound = 0;
+	long totalFaces = 0, totalVertices = 0;
+
+	for(int roomIndex = 0; roomIndex < levelRooms.NumberOfRooms(); ++roomIndex)
+	{
+		BaseObjectIteratorWrapper iter = levelRooms.GetRoom(roomIndex).ListIter(ROOM_OBJECT_LIST_RENDER);
+		while(!iter.Empty())
+		{
+			const Actor* actor = static_cast<const Actor*>(&(*iter));
+			++iter;
+			if(!seen.insert(actor).second)
+				continue;						// an actor can be listed in several rooms
+			const RenderActor* renderActor = actor->PeekRenderActor();
+			if(!renderActor)
+			{
+				++unbound;
+				continue;
+			}
+			const RenderObject3D* object = renderActor->GetRenderObject();
+			if(!object)
+				continue;
+			const int faces = object->GetFaceCount(), vertices = object->GetVertexCount();
+			++instances;
+			totalFaces += faces;
+			totalVertices += vertices;
+			const int modelType = actor->GetMeshBlockPtr()->ModelType;
+			if(modelType == MODEL_TYPE_MESH || modelType == MODEL_TYPE_SCARECROW)
+			{
+				MeshAssetStats& m = meshes[actor->GetMeshName()];
+				if(m.instances == 0)
+				{
+					m.vertices = vertices;
+					m.faces = faces;
+					m.firstActor = actor->GetActorIndex();
+				}
+				++m.instances;
+			}
+			else
+			{
+				++procedural;						// box: its vertices are built per instance
+				proceduralFaces += faces;
+			}
+		}
+	}
+
+	long uniqueFaces = 0, uniqueVertices = 0;
+	std::vector<std::pair<int32,MeshAssetStats> > bySize(meshes.begin(), meshes.end());
+	for(size_t i = 0; i < bySize.size(); ++i)
+	{
+		uniqueFaces += bySize[i].second.faces;
+		uniqueVertices += bySize[i].second.vertices;
+	}
+	std::stable_sort(bySize.begin(), bySize.end(),
+		[](const std::pair<int32,MeshAssetStats>& a, const std::pair<int32,MeshAssetStats>& b) { return a.second.faces > b.second.faces; });
+
+	fprintf(stderr,"mesh-stats: render-objects=%ld asset-mesh-objects=%ld procedural-objects=%ld unbound-render-actors=%ld rooms=%d\n",
+		instances, instances - procedural, procedural, unbound, levelRooms.NumberOfRooms());
+	fprintf(stderr,"mesh-stats: unique-meshes=%zu (by mesh asset id; every object loads its own copy of the data)\n", meshes.size());
+	fprintf(stderr,"mesh-stats: total-faces=%ld total-vertices=%ld (all render objects, procedural included: %ld faces)\n",
+		totalFaces, totalVertices, proceduralFaces);
+	fprintf(stderr,"mesh-stats: unique-faces=%ld unique-vertices=%ld (asset meshes counted once)\n", uniqueFaces, uniqueVertices);
+	fprintf(stderr,"mesh-stats: baked-bytes-all-objects=%ld baked-bytes-unique-meshes=%ld (faces x 3 unshared vertices x %d B)\n",
+		totalFaces * 3 * kBytesPerBakedVertex, uniqueFaces * 3 * kBytesPerBakedVertex, kBytesPerBakedVertex);
+	for(size_t i = 0; i < bySize.size() && i < 10; ++i)
+		fprintf(stderr,"mesh-stats: top%zu mesh-id=0x%08x faces=%d vertices=%d instances=%d first-object=%d\n",
+			i + 1, unsigned(bySize[i].first), bySize[i].second.faces, bySize[i].second.vertices,
+			bySize[i].second.instances, bySize[i].second.firstActor);
+
+	// objects per room: one line per Room. total = distinct objects in any list;
+	// bound-meshes / bound-faces = the render objects loaded for it right now.
+	for(int roomIndex = 0; roomIndex < levelRooms.NumberOfRooms(); ++roomIndex)
+	{
+		const Room& room = levelRooms.GetRoom(roomIndex);
+		static const char* const listNames[] = {"collide","render","update","light","activation"};
+		static const int listIds[] = {ROOM_OBJECT_LIST_COLLIDE, ROOM_OBJECT_LIST_RENDER, ROOM_OBJECT_LIST_UPDATE, ROOM_OBJECT_LIST_LIGHT, ROOM_OBJECT_LIST_ACTIVATION_BOX};
+		std::set<const BaseObject*> distinct;
+		int counts[5] = {0,0,0,0,0};
+		int boundMeshes = 0;
+		long boundFaces = 0;
+		for(int list = 0; list < 5; ++list)
+		{
+			BaseObjectIteratorWrapper iter = room.ListIter(listIds[list]);
+			while(!iter.Empty())
+			{
+				++counts[list];
+				distinct.insert(&(*iter));
+				if(listIds[list] == ROOM_OBJECT_LIST_RENDER)
+				{
+					const RenderActor* renderActor = static_cast<const Actor*>(&(*iter))->PeekRenderActor();
+					const RenderObject3D* object = renderActor ? renderActor->GetRenderObject() : NULL;
+					if(object)
+					{
+						++boundMeshes;
+						boundFaces += object->GetFaceCount();
+					}
+				}
+				++iter;
+			}
+		}
+		std::string adjacent;
+		for(int a = 1; a < MAX_ACTIVE_ROOMS; ++a)		// [0] is the room itself
+			if(const Room* adj = room.GetAdjacentRoom(a))
+				adjacent += (adjacent.empty() ? "" : ",") + std::to_string(adj->GetRoomIndex());
+		fprintf(stderr,"room-stats: room=%d total=%zu", room.GetRoomIndex(), distinct.size());
+		for(int list = 0; list < 5; ++list)
+			fprintf(stderr," %s=%d", listNames[list], counts[list]);
+		fprintf(stderr," bound-meshes=%d bound-faces=%ld adjacent=%s\n", boundMeshes, boundFaces, adjacent.empty() ? "-" : adjacent.c_str());
+	}
+}
+
+}	// namespace
 
 //==============================================================================
 
@@ -660,6 +803,7 @@ Level::Level
 	// so CharacterVirtual queries can find them.
 	JoltOptimizeBroadPhase();
 #endif
+	ReportLevelLoadStats(*_theLevelRooms);
 }
 
 //==============================================================================
@@ -1282,6 +1426,7 @@ Level::RenderScene()
 		++roomIter;
 	}
 	_viewPort.Render();
+	StaticMeshSampleGauges();		// E3 byte gauges, inside the profiled frame
 	wf_profile::end(wf_profile::Render);
 	wf_profile::end_frame();
 	Validate();

@@ -26,6 +26,7 @@
 #include <cpplib/libstrm.hp>
 #include "assets.hp"
 #include "assslot.hp"
+#include <gfx/static_mesh.hp>
 
 //=============================================================================
 
@@ -219,6 +220,7 @@ AssetManager::LoadRoomSlot(int roomIndex, int slotNum)
 	_assets[slotNum] = new (_memory) AssetSlot(slotNum, roomIndex,roomStream, maxAsset, (void*)&_assetMemory[_cbPermMemory + _cbRoomMemory*slotNum],_cbRoomMemory,_videoMemory);
 	assert(ValidPtr(_assets[slotNum]));
 	HALLmalloc.Free(streamBuffer);
+	StaticMeshAtlasChanged();	// this room's textures now occupy the slot's VRAM: baked UVs may be stale
 }
 
 //==============================================================================
@@ -233,6 +235,7 @@ AssetManager::FreeRoomSlot(int slotNum)
 
   	MEMORY_DELETE(_memory,_assets[slotNum],AssetSlot);
 	_assets[slotNum] = NULL;
+	StaticMeshAtlasChanged();	// the slot's VRAM is free for another room's textures
 }
 
 //==============================================================================

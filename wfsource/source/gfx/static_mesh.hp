@@ -1,0 +1,72 @@
+//=============================================================================
+// gfx/static_mesh.hp: E3 static mesh buffers — switch, atlas generation, stats
+// Copyright ( c ) 2026 World Foundry Group
+// Part of the World Foundry 3D video game engine/production environment
+// for more information about World Foundry, see www.worldfoundry.org
+//==============================================================================
+// The bake and draw live in gfx/glpipeline/static_mesh.cc as RenderObject3D
+// members; this header is what the rest of the engine needs to see.
+//
+// Switch: on by default. `--static-mesh=0|1` on the command line (Android:
+// wf_args.txt) wins over `WF_STATIC_MESH=0|1` in the environment. Off means
+// every RenderObject3D streams through DrawTriangle exactly as before E3.
+// Read once, at the first draw.
+//
+// Cull: `--static-mesh-cull=exact|fast` (or WF_STATIC_MESH_CULL) picks the
+// static path's back-face test. `exact` (the default) is the streaming test,
+// bit for bit. `fast` is the precomputed s^2 d + N.w form (gfx/backface_cull.hp)
+// and costs one float per baked face; it is for measurement, see the E3 phase 1
+// results before making it a default.
+//
+// Self-check: WF_STATIC_MESH_CHECK=1 keeps a CPU copy of every bake, re-records
+// each baked object at every draw, and counts (1) recorded triangles that
+// differ from the bake, (2) faces whose static-path cull decision differs from
+// the one DrawTriangle would make, (3) faces where the fast form disagrees with
+// the exact one. One `static-mesh-check:` line goes to stderr at exit.
+//============================================================================
+
+#ifndef _STATIC_MESH_HP
+#define _STATIC_MESH_HP
+
+#include <cstddef>
+
+void StaticMeshSetSwitch(bool on);		// --static-mesh=0|1
+bool StaticMeshEnabled();
+void StaticMeshSetFastCull(bool fast);	// --static-mesh-cull=fast|exact
+// Memory experiment: share one index buffer across mesh VAOs (default on).
+// =0 restores the phase-1 per-mesh buffers for same-binary measurements.
+void StaticMeshSetSharedIndex(bool on);
+bool StaticMeshSharedIndex();
+
+// Texture placement in VRAM may have changed (a room's asset slot was loaded or
+// freed). Baked UVs come from that placement (CalcUV), so every bake made
+// before the call is rebuilt on its next draw.
+void StaticMeshAtlasChanged();
+
+// Main-RAM bytes the static path holds (bake bookkeeping and scratch; not the
+// transient bake buffers, which are freed right after upload).
+size_t StaticMeshCpuBytes();
+
+// Bake budget: at most this many faces are baked per frame (default 4000;
+// `--static-mesh-bake-budget=N` or WF_STATIC_MESH_BAKE_BUDGET, 0 = no limit).
+// An object that does not fit streams that frame, as it would with the switch
+// off (identical pixels), and bakes on a later frame; the first bake of a frame
+// always proceeds, so a mesh larger than the budget still bakes. Spreads the
+// first-draw cost of a new scene over several frames instead of one spike.
+void StaticMeshSetBakeBudget(int faces);
+
+// Once per frame, inside the profiled frame (Level::RenderScene, before
+// wf_profile::end_frame): samples the static-gpu-bytes / static-cpu-bytes
+// gauges.
+void StaticMeshSampleGauges();
+
+// Once per frame, from the compositing backend's EndFrame: resets the bake
+// budget and runs the test hooks of WF_STATIC_MESH_TEST:
+//   atlas:N  bump the atlas generation every N frames (every bake is rebuilt;
+//            no shipped level loads or frees a room slot after level load)
+//   loss:N   at frame N, simulate an Android surface loss (GL names dropped,
+//            every static mesh re-baked on its next draw)
+// Returns true when the caller should simulate the surface loss now.
+bool StaticMeshEndFrame();
+
+#endif

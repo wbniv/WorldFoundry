@@ -1354,6 +1354,34 @@ if(NOT ANDROID AND NOT IOS AND NOT APPLE AND NOT EMSCRIPTEN)
         COMMAND $<TARGET_FILE:wf_game> --frame-step-smoke=30 --cycles=2 -L${WF_TEST_SNOW_LEVEL}
         WORKING_DIRECTORY ${WF_TEST_RUN_DIR})
 
+    # E3 index ownership: mixed index widths and deletion across context loss.
+    add_executable(wf_static_mesh_index_gl_test tests/static_mesh_index_gl.cc)
+    target_link_libraries(wf_static_mesh_index_gl_test PRIVATE wfengine)
+    target_compile_options(wf_static_mesh_index_gl_test PRIVATE -fpermissive -w -fno-rtti)
+    add_test(NAME mesh_index_shared COMMAND wf_static_mesh_index_gl_test 1)
+    add_test(NAME mesh_index_per_mesh COMMAND wf_static_mesh_index_gl_test 0)
+    set_tests_properties(mesh_index_shared mesh_index_per_mesh PROPERTIES LABELS "gl")
+
+    # E3 static mesh buffers (gfx/glpipeline/static_mesh.cc): with
+    # WF_STATIC_MESH_CHECK=1 every bake is re-recorded at every draw and every
+    # cull decision is compared with DrawTriangle's. mesh_bake: the recording
+    # is identical under every frame's matrix; mesh_cull: zero differing
+    # decisions. qbert_practice and snowgoons are two of the five levels whose
+    # normals and windings disagree, and qbert squashes actors non-uniformly.
+    find_package(Python3 COMPONENTS Interpreter)
+    if(Python3_Interpreter_FOUND)
+        add_test(NAME mesh_bake
+            COMMAND ${Python3_EXECUTABLE} ${CMAKE_SOURCE_DIR}/tests/static_mesh_check.py
+                --binary $<TARGET_FILE:wf_game> --check bake --frames 120
+                --level ${WF_TEST_LEVEL} --level ${WF_TEST_SNOW_LEVEL}
+            WORKING_DIRECTORY ${WF_TEST_RUN_DIR})
+        add_test(NAME mesh_cull
+            COMMAND ${Python3_EXECUTABLE} ${CMAKE_SOURCE_DIR}/tests/static_mesh_check.py
+                --binary $<TARGET_FILE:wf_game> --check cull --frames 120
+                --level ${WF_TEST_LEVEL} --level ${WF_TEST_SNOW_LEVEL}
+            WORKING_DIRECTORY ${WF_TEST_RUN_DIR})
+    endif()
+
     add_test(NAME wf_host_gl_e2e_cycle1
         COMMAND $<TARGET_FILE:wf_host_gl_e2e_test> --frames=30 --cycles=1 --level=${WF_TEST_LEVEL}
         WORKING_DIRECTORY ${WF_TEST_RUN_DIR})

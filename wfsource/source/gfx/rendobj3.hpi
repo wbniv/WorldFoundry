@@ -53,6 +53,7 @@ RenderObject3D::Validate() const
 INLINE Vertex3D*
 RenderObject3D::GetWrittableVertexList()	// should only be used by the animation system
 {
+	_staticState = STATIC_DEFORMED;		// the bake (if any) is dropped at the next Render
 	return(_vertexList);
 }
 
@@ -62,6 +63,14 @@ INLINE int
 RenderObject3D::GetVertexCount() const	// should only be used by the animation system
 {
 	return(_vertexCount);
+}
+
+//=============================================================================
+
+INLINE int
+RenderObject3D::GetFaceCount() const	// measurement only (E3 phase 0 mesh-stats report)
+{
+	return(_faceCount);
 }
 
 //============================================================================
