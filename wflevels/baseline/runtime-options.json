@@ -1166,12 +1166,12 @@
     }
   ],
   "exclusions": {
-    "--plant-seed=": "Plant CLI removal planned; retain value through authored plant settings, never a baseline CLI row",
-    "--plant-age=": "Plant CLI removal planned; retain value through authored plant settings, never a baseline CLI row",
-    "--plant-speed=": "Plant CLI removal planned; retain value through authored plant settings, never a baseline CLI row",
-    "--plant-texture=": "Plant CLI removal planned; retain value through authored plant settings, never a baseline CLI row",
-    "--plant-sway=": "Plant CLI removal planned; retain value through authored plant settings, never a baseline CLI row",
-    "--plant-water=": "Plant CLI removal planned; retain value through authored plant settings, never a baseline CLI row"
+    "--plant-seed=": "Removed engine CLI; value retained in authored plant RPRP settings, never a baseline CLI row",
+    "--plant-age=": "Removed engine CLI; value retained in authored plant RPRP settings, never a baseline CLI row",
+    "--plant-speed=": "Removed engine CLI; value retained in authored plant RPRP settings, never a baseline CLI row",
+    "--plant-texture=": "Removed engine CLI; value retained in authored plant RPRP settings, never a baseline CLI row",
+    "--plant-sway=": "Removed engine CLI; value retained in authored plant RPRP settings, never a baseline CLI row",
+    "--plant-water=": "Removed engine CLI; value retained in authored plant RPRP settings, never a baseline CLI row"
   },
   "status": "Consumer snapshots effective values and activates supported fields at open"
 }

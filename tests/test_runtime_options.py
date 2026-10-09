@@ -28,6 +28,7 @@ def test_active_long_parser_switches_accounted_for():
     for literal in re.findall(r'"(-[a-z][a-z-]*(?:=)?)',source):
         # Patterns matched against argv+1 retain the second dash.
         found.add(literal if literal.startswith('--') else '-'+literal)
+    found.discard("--plant-")  # Explicit rejection of removed options, not a parser capability.
     cli={c for f in inventory() for c in f['cli']}
     cli.update(json.loads((ROOT/'wflevels/baseline/runtime-options.json').read_text())['exclusions'])
     assert found<=cli, found-cli

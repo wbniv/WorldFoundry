@@ -142,7 +142,41 @@ level-clock advancement measurements and live debug-stream effects also remain
 unverified. The conditional debug-stream adapter and accessor compiled in the
 debug configuration; current CMake builds disable file-stream output.
 
-The six plant switches are excluded from this sheet. Their parser and plant
-consumer are unchanged: conversion to authored settings still requires explicit
-permission beyond the previously authorized baseline engine scope. No renderer,
-allocator, window or listener reconstruction was added.
+Will explicitly authorized the plant CLI removal. All six parser interfaces are
+removed; stale invocations fail with an explicit migration message. The plant
+consumer reads the cooked `PlantedTankSettings` catalog on entry, retaining seed,
+water, speed, bounded initial age, textures and sway. Random entry remains the
+default; deterministic fixtures explicitly disable it. Age and random-entry
+policy are authored read-only fields. Speed and render flags apply live without
+resetting growth; seed/water changes regenerate at age zero. A separate geometry
+revision refreshes cached meshes when texture/sway changes without resetting the
+simulation. The existing renderer API and generic host are reused.
+
+The profile, sea-urchin and atlas recipes cook per-fixture catalogs, preserve
+other owners/assets and native-library identities, and record hashes. The
+256-pixel atlas control exactly matches the production standalone level; the
+permanent page uses production dimensions rather than an obsolete 256 assumption.
+38 matched profile APKs and eight 256/128 comparison APKs packaged successfully.
+Twenty focused cooked-catalog/Runtime Options tests and three plant sanitizer/
+phone-browser tests passed. Coverage includes seed zero/UINT32_MAX, both water
+types, age bounds, random entry, live flags/speed, regeneration, Apply/Cancel,
+read-only forgery rejection and stale CLI errors. The broader aquarium test has
+a pre-existing actor-count mismatch (expects 46; the committed map contains 51).
+
+Desktop and Android armeabi-v7a builds compiled with the conversion. Coordinator
+profile `J-fbe79303e2b0` on cast1 logged the exact RPRP-selected seed 713,
+saltwater, age 150, speed 0, textures/sway enabled. Captures show the mature
+saltwater tank and movement under held/released directional input. Evidence is
+under `build/evidence/plant-cast1-saltwater`; previous sessions in the appended
+log are historical, not results of this run. Cast2 completed contrasting profiles
+`J-b6c0a943a456` (freshwater, textures/sway disabled), `J-1bf1cb367058`
+(UINT32_MAX seed, saltwater, textures enabled/sway disabled), and
+`J-49b5d1752636` (seed 713, saltwater, textures/sway enabled). All logged the
+intended RPRP-selected values; captures show the corresponding resident and
+textured/untextured plants, and traces include held/released directional input.
+The first cast2 saltwater attempt exited before measurement; the same frozen APK
+passed on retry. No assertion follows the selected-values log in successful runs.
+The existing device plant-settings validator assumes exactly three fields and
+has not been updated for the expanded catalog, so these profiles do not claim
+that validator's live settings coverage. No renderer, allocator, window or
+listener reconstruction was added.

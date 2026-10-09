@@ -268,13 +268,10 @@ ParseCommandLine(int argc, char** argv)
 			++index;
 			DBSTREAM1( cprogress << "Debug bridge bind: " << gDebugBind << std::endl; )
 		}
-		else if ( strncmp(argv[index], "--plant-seed=",13)==0 ) { uint32_t n;if(planted::parseSeed(argv[index]+13,n)){planted::state().profileSeed=n;planted::state().fixedSeed=true;} }
-        else if ( strncmp(argv[index], "--plant-age=",12)==0 ) {planted::state().profileAge=std::max(0.f,std::min(240.f,float(atof(argv[index]+12))));}
-        else if ( strncmp(argv[index], "--plant-speed=",14)==0 ) {planted::state().profileSpeed=std::max(0,std::min(6,atoi(argv[index]+14)));}
-        else if ( strcmp(argv[index], "--plant-texture=0")==0 ) {planted::state().profileTexture=false;}
-        else if ( strcmp(argv[index], "--plant-sway=0")==0 ) {planted::state().profileSway=false;}
-        else if ( strcmp(argv[index], "--plant-water=saltwater")==0 ) {planted::state().profileWater=1;}
-        else if ( strcmp(argv[index], "--plant-water=freshwater")==0 ) {planted::state().profileWater=0;}
+        else if ( strncmp(argv[index], "--plant-",8)==0 ) {
+            std::fprintf(stderr,"wf_game: removed plant CLI override: %s; cook plant settings into the level RPRP catalog\n",argv[index]);
+            std::exit(2);
+        }
 		else if ( strcmp( argv[index]+1, "-no-fps" ) == 0 )
 		{
 			fpscounter::enabled = false;

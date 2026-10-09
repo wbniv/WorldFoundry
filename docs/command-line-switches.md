@@ -149,7 +149,25 @@ read-only rows. They show effective values where an accessor exists and
 parser spellings, capabilities and adapters. It includes legacy options as
 unavailable and excludes the six plant launch overrides from the baseline sheet.
 
-Plant CLI removal and conversion to authored plant settings are tracked in the
-reviewed baseline plan. The parser remains unchanged pending the separately
-required plant engine authorization; exclusion from this sheet does not mean
-those switches have been removed.
+The six `--plant-seed`, `--plant-age`, `--plant-speed`, `--plant-texture`,
+`--plant-sway` and `--plant-water` interfaces are removed. Stale `--plant-*`
+arguments fail with an explicit migration error. No replacement launch aliases
+or plant environment overrides are provided.
+
+Plant values now come from the level's cooked `PlantedTankSettings` RPRP catalog:
+Seed (ID 1, uint32), Water type (2), Growth speed (3, indices 0–6), Initial age
+(4, 0–240 seconds), Textures (5), Sway (6), and Random seed on entry (7).
+Initial age and random-entry policy are authored, read-only entry settings.
+Defaults retain random entry, age zero, freshwater, 1x growth, textures and sway.
+Providing a fixture seed disables random entry unless explicitly requested.
+Seed or water changes on Apply regenerate at age zero. Speed, texture and sway
+changes apply live without resetting growth; Cancel retains committed values.
+Regenerate and New random seed retain their existing behavior.
+
+Profiling and atlas-comparison recipes use
+[scripts/plant_settings_catalog.py](../scripts/plant_settings_catalog.py) to cook
+these values through OAS → OAD → RPRP, retaining unrelated owners and geometry.
+Receipts include authored settings and catalog/level/CD/APK hashes, and packaging
+checks native-library identities. Rebuild the runtime before packaging: recipes
+reject libraries without the plant catalog consumer and stale plant arguments.
+Ordinary VRAM and profiler arguments remain separate and are preserved.

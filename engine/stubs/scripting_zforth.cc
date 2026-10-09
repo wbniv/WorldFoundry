@@ -1328,7 +1328,7 @@ zf_input_state zf_host_sys(zf_ctx* ctx, zf_syscall_id id, const char* /*last_wor
                     int actor=s.actors[i];if(actor<=0||actor>=theLevel->GetMaxObjectIndex())continue;
                     BaseObject* obj=theLevel->GetObject(actor);if(obj&&IsActor(obj)){
                         wf_profile::Scope p(wf_profile::Animation);
-                        static_cast<Actor*>(obj)->GetRenderActor().SetPlantGeometry(s.chunks[i],s.age,s.water,s.generation,s.sway,unsigned(i)==s.topologySlot,s.profileTexture);
+                        static_cast<Actor*>(obj)->GetRenderActor().SetPlantGeometry(s.chunks[i],s.age,s.water,s.geometryGeneration,s.sway,unsigned(i)==s.topologySlot,s.textures);
                     }
                 }
                 s.topologySlot=(s.topologySlot+1)%8;
