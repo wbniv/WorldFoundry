@@ -1,6 +1,7 @@
 #!/usr/bin/env python3
 """Package matched plant snapshots using one native binary, with archived identities."""
 import argparse,hashlib,json,subprocess,zipfile
+from plant_settings_catalog import configure_cd,require_catalog_runtime,reject_removed_arguments
 from pathlib import Path
 ROOT=Path(__file__).resolve().parents[1]
 p=argparse.ArgumentParser(description=__doc__);p.add_argument('--apk',type=Path,required=True);p.add_argument('--out',type=Path,required=True);a=p.parse_args();a.out.mkdir(parents=True,exist_ok=True)
@@ -19,29 +20,32 @@ manifest.write_text('\n'.join(lines)+'\n')
 old_cd=a.out/'old-static-menu.iff'
 subprocess.run([str(ROOT/'wftools/cdpack-rs/target/release/cdpack'),str(ROOT/'wfsource/source/game/shell-menu.fth'),'--manifest',str(manifest),'-o',str(old_cd)],check=True)
 old=old_cd.read_bytes()
-with zipfile.ZipFile(a.apk) as frozen:current=frozen.read('assets/cd.iff')
+with zipfile.ZipFile(a.apk) as frozen:
+ require_catalog_runtime(frozen);current=frozen.read('assets/cd.iff')
+ runtime_args=frozen.read('assets/wf_args.txt').decode() if 'assets/wf_args.txt' in frozen.namelist() else ''
+ reject_removed_arguments(runtime_args)
 buildtools=Path('/home/will/android-sdk-local/build-tools/34.0.0')
-cases=[dict(name='old-static',args='',cd=old)]
+cases=[dict(name='old-static',cd=old)]
 for mode in ['freshwater','saltwater']:
  for age,label in [(0,'young'),(30,'spreading'),(150,'mature')]:
-  cases.append(dict(name=mode+'-'+label+'-static',args=f'--plant-seed=713\n--plant-water={mode}\n--plant-age={age}\n--plant-speed=0\n--plant-sway=0\n',cd=current))
- cases.append(dict(name=mode+'-mature-sway',args=f'--plant-seed=713\n--plant-water={mode}\n--plant-age=150\n--plant-speed=0\n',cd=current))
- cases.append(dict(name=mode+'-growing',args=f'--plant-seed=713\n--plant-water={mode}\n--plant-age=30\n--plant-speed=0\n',cd=current,growth_speed=3))
+  cases.append(dict(name=mode+'-'+label+'-static',settings=dict(seed=713,water=mode,age=age,speed=0,sway=False),cd=current))
+ cases.append(dict(name=mode+'-mature-sway',settings=dict(seed=713,water=mode,age=150,speed=0),cd=current))
+ cases.append(dict(name=mode+'-growing',settings=dict(seed=713,water=mode,age=30,speed=0),cd=current,growth_speed=3))
 for mode in ['freshwater','saltwater']:
- for seed in [0,4294967295]:cases.append(dict(name=f'{mode}-seed-{seed}',args=f'--plant-seed={seed}\n--plant-water={mode}\n--plant-age=150\n--plant-speed=0\n--plant-sway=0\n',cd=current))
-
-# Paired controls share both the native library and the textured level payload.
+ for seed in [0,4294967295]:cases.append(dict(name=f'{mode}-seed-{seed}',settings=dict(seed=seed,water=mode,age=150,speed=0,sway=False),cd=current))
 for mode in ['freshwater','saltwater']:
  for label in ['mature-static','mature-sway']:
   original=next(c for c in cases if c['name']==mode+'-'+label)
-  cases.append(dict(original,name=original['name']+'-shaded',args=original['args']+'--plant-texture=0\n'))
+  cases.append(dict(original,name=original['name']+'-shaded',settings=dict(original['settings'],textures=False)))
+for case in cases:
+ if 'settings' in case:case['cd'],case['plant_catalog']=configure_cd(case['cd'],case['settings'])
 receipts=[]
 with zipfile.ZipFile(a.apk) as base:
  native={n:hashlib.sha256(base.read(n)).hexdigest() for n in base.namelist() if n.startswith('lib/')}
  for case in cases:
   for cpu in [False,True]:
    name=case['name']+('-cpu' if cpu else '');unsigned=a.out/(name+'-unsigned.apk');aligned=a.out/(name+'-aligned.apk');apk=a.out/(name+'.apk')
-   args=case['args']+('--frame-profile\n' if cpu else '')
+   args=runtime_args+('--frame-profile\n' if cpu else '')
    with zipfile.ZipFile(unsigned,'w') as dst:
     for item in base.infolist():
      if item.filename.startswith('META-INF/') or item.filename in ['assets/cd.iff','assets/wf_args.txt']:continue
@@ -53,5 +57,5 @@ with zipfile.ZipFile(a.apk) as base:
    subprocess.run([str(buildtools/'apksigner'),'sign','--ks',str(Path.home()/'.android/debug.keystore'),'--ks-pass','pass:android','--key-pass','pass:android','--out',str(apk),str(aligned)],check=True)
    unsigned.unlink();aligned.unlink()
    with zipfile.ZipFile(apk) as signed:assert all(hashlib.sha256(signed.read(n)).hexdigest()==h for n,h in native.items())
-   receipts.append(dict(name=name,apk_sha256=hashlib.sha256(apk.read_bytes()).hexdigest(),cd_sha256=hashlib.sha256(case['cd']).hexdigest(),args=args,growth_speed=case.get('growth_speed'),native=native))
+   receipts.append(dict(name=name,apk_sha256=hashlib.sha256(apk.read_bytes()).hexdigest(),cd_sha256=hashlib.sha256(case['cd']).hexdigest(),args=args,plant_catalog=case.get('plant_catalog'),growth_speed=case.get('growth_speed'),native=native))
 (a.out/'identities.json').write_text(json.dumps(receipts,indent=2)+'\n');print('Packaged',len(receipts),'matched APKs',flush=True)

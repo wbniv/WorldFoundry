@@ -35,6 +35,8 @@ struct State {
     uint64_t levelGeneration=0, frame=0, step=0;
     int64_t monotonicUs=0;
     int level=-1;
+    bool clockAvailable=false;
+    float simulationTime=0, simulationDelta=0;
     bool focus=true, paused=false, suspended=false;
     std::string mode="loading", modal="none";
     uint64_t session=0;

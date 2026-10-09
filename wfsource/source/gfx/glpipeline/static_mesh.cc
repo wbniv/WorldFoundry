@@ -214,6 +214,9 @@ StaticMeshEnabled()
 	return enabled;
 }
 
+bool StaticMeshFastCullEnabled() { return FastCull(); }
+int StaticMeshBakeBudget() { return BakeBudget(); }
+
 void
 StaticMeshSetFastCull(bool fast)
 {

@@ -77,6 +77,8 @@ std::string encode(const Reply& r) {
         j["game"]={{"level",r.state.level},{"mode",r.state.mode},{"focus",r.input.focus},
             {"paused",r.state.paused},{"suspended",r.state.suspended},
             {"modal",r.state.modal},{"session",r.state.session},{"cursor",r.state.cursor}};
+        j["game"]["simulation_time"]=r.state.clockAvailable?Json(r.state.simulationTime):Json(nullptr);
+        j["game"]["simulation_delta"]=r.state.clockAvailable?Json(r.state.simulationDelta):Json(nullptr);
         j["player"]=actorJson(r.snapshot.player);j["selected"]=actorJson(r.snapshot.selected);
         const auto& p=r.snapshot.properties;
         j["properties"]=nullptr;

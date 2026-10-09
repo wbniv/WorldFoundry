@@ -14,7 +14,7 @@ void build(wfprops::Form& editor,bool phone,int w,int h,std::vector<PhonepadRect
  rect(0,0,1920,1080,0x061014ffu);rect(180,110,1560,820,0x142d25ffu);
  syncText(editor,phone);auto& f=editor;auto* object=f.edit.object();if(!object)return;text(225,150,4,object->title);
  struct ArrowPainter {decltype(rect)& draw;void Rect(float x0,float y0,float x1,float y1,uint32_t c){draw(x0,y0,x1-x0,y1-y0,c);}} painter{rect};
- auto item=[&](bool focused,float x,float y,float width,float height,const std::string& label){rect(x,y,width,height,focused?0x497b51ffu:0x233e31ffu);text(x+18,y+18,3,label.substr(0,size_t(width/19)));};
+ auto item=[&](bool focused,float x,float y,float width,float height,const std::string& label,bool ghost=false){rect(x,y,width,height,focused?0x497b51ffu:ghost?0x1c302affu:0x233e31ffu);text(x+18,y+18,3,label.substr(0,size_t(width/19)),ghost?0x9eb1a7ffu:0xf1f2e4ffu);};
  if(phone){text(225,350,4,"Edit properties on your connected phone");}
  else {
   size_t sectionStart=f.section>5?f.section-5:0;
@@ -23,17 +23,20 @@ void build(wfprops::Form& editor,bool phone,int w,int h,std::vector<PhonepadRect
    const auto& rows=f.sections[f.section];
    auto options=[](const wfprops::Field& field){std::vector<std::string> labels;size_t start=0;while(start<=field.choices.size()){auto end=field.choices.find('|',start);labels.push_back(field.choices.substr(start,end==std::string::npos?end:end-start));if(end==std::string::npos)break;start=end+1;}return labels;};
    auto columns=[&](const wfprops::Field& field){size_t longest=0;auto labels=options(field);for(const auto& label:labels)longest=std::max(longest,label.size());return std::max(1,std::min(int(labels.size()),int(1040/std::max(140.f,float(longest)*16+44))));};
-   auto height=[&](size_t i){const auto& field=object->fields[rows[i]];if(field.show==2&&field.kind<=2)return 128.f;if(field.kind==2&&field.show==5)return 62.f+48.f*std::min(3,int((options(field).size()+columns(field)-1)/columns(field)));return 85.f;};
+   auto category=[&](size_t i){std::string group;for(size_t k=0;k<rows[i];++k){const auto& marker=object->fields[k];if(marker.kind==6)group=marker.label;else if(marker.kind==5||marker.kind==7)group.clear();}return group;};
+   auto groupHeight=[&](size_t i){return !category(i).empty()&&(i==0||category(i)!=category(i-1))?30.f:0.f;};
+   auto height=[&](size_t i){const auto& field=object->fields[rows[i]];float base=85.f;if(field.show==2&&field.kind<=2)base=128.f;else if(field.kind==2&&field.show==5)base=62.f+48.f*std::min(3,int((options(field).size()+columns(field)-1)/columns(field)));return base+groupHeight(i);};
    size_t first=std::min(f.row,rows.empty()?size_t(0):rows.size()-1);float used=rows.empty()?0:height(first);while(first>0&&used+height(first-1)<=515){used+=height(--first);}
    float y=240;
    for(size_t i=first;i<rows.size();++i){const auto& field=object->fields[rows[i]];float rowHeight=height(i);if(y+rowHeight>765)break;if(field.kind==10){y+=rowHeight;continue;}
+    float heading=groupHeight(i);if(heading>0){text(605,y+2,2.5f,category(i),0xcbd4baffu);y+=heading;rowHeight-=heading;}
     auto v=f.edit.draft.find(field.id);std::string value=v==f.edit.draft.end()?"":v->second;
     if(field.kind==2){int index=std::atoi(value.c_str())-field.minimum;size_t from=0;for(int k=0;k<index;++k){size_t next=field.choices.find('|',from);if(next==std::string::npos)break;from=next+1;}size_t to=field.choices.find('|',from);value=field.choices.substr(from,to==std::string::npos?to:to-from);}
     if(field.kind==4)value=value=="1"?"On":"Off";
     std::replace(value.begin(),value.end(),'\n',' ');std::replace(value.begin(),value.end(),'\r',' ');
     if(colour(&field))value=hex(rgb(value));
     bool radio=field.kind==2&&field.show==5;
-    item(!f.rail&&i==f.row,600,y,1080,rowHeight-12,field.kind==9?field.label:radio?field.label:field.label+": "+value+(field.readonly?" (read only)":""));
+    item(!f.rail&&i==f.row,600,y,1080,rowHeight-12,field.kind==9?field.label:radio?field.label:field.label+": "+value+(field.readonly?" (read only)":""),field.readonly);
     if(colour(&field))rect(1570,y+16,70,40,(rgb(v==f.edit.draft.end()?"0":v->second)<<8)|255u);
     if(radio){auto labels=options(field);int cols=columns(field);int selected=std::atoi(v==f.edit.draft.end()?"0":v->second.c_str())-field.minimum;int firstOptionRow=std::max(0,selected/cols-2);float cell=1040.f/cols;
      for(size_t k=size_t(firstOptionRow*cols);k<labels.size()&&k<size_t((firstOptionRow+3)*cols);++k){float x=620+(k%cols)*cell,oy=y+62+(int(k)/cols-firstOptionRow)*48;rect(x,oy-17,cell-12,36,int(k)==selected?0xe4efd9ffu:0x19382dffu);text(x+12,oy-11,2.5f,labels[k].substr(0,size_t((cell-35)/16)),int(k)==selected?0x132b26ffu:0xe4efd9ffu);}
@@ -73,8 +76,14 @@ void build(wfprops::Form& editor,bool phone,int w,int h,std::vector<PhonepadRect
 
   }
  }
- const auto* focused=f.field();bool direct=!f.rail&&focused&&!focused->readonly&&(focused->kind==2||focused->kind==4||focused->show==2);
- text(225,840,2.7f,f.edit.error.empty()?(f.drawer?(colour(focused)?(controls(f).planeAdjust?"Arrows: hue / saturation   A: finish":controls(f).page==1?"Up / down: select   Left / right: value":"Arrows: select   A: choose"):"Use the system text editor"):direct?"Up / down: select   Left / right: change":"Arrows: select   A: edit"):f.edit.error,0xffdd99ffu);
+ const auto* focused=f.field();
+ if(!phone&&!f.drawer&&!f.rail&&focused&&!focused->help.empty()){
+   std::string help=focused->help;std::replace(help.begin(),help.end(),'\n',' ');
+   // Wrap at words; reserve two lines above the persistent Apply/Cancel footer.
+   for(int line=0;line<2&&!help.empty();++line){size_t length=std::min(size_t(84),help.size());if(length<help.size()){auto split=help.rfind(' ',length);if(split!=std::string::npos&&split>0)length=split;}text(600,791+line*22,2,help.substr(0,length),0xb6c7baffu);help.erase(0,length);while(!help.empty()&&help[0]==' ')help.erase(0,1);}
+ }
+ bool direct=!f.rail&&focused&&!focused->readonly&&(focused->kind==2||focused->kind==4||focused->show==2);
+ text(225,840,2.7f,f.edit.error.empty()?(f.drawer?(colour(focused)?(controls(f).planeAdjust?"Arrows: hue / saturation   A: finish":controls(f).page==1?"Up / down: select   Left / right: value":"Arrows: select   A: choose"):"Use the system text editor"):direct?"Up / down: select   Left / right: change":focused&&focused->readonly?"Read only: arrows select   Left: sections":"Arrows: select   A: edit"):f.edit.error,0xffdd99ffu);
  remoteui::BackArrow(painter,1260,840,4,0xf1f2e4ffu);text(1310,840,2.7f,f.drawer?(colour(focused)?(controls(f).planeAdjust?"Finish adjustment":"Cancel colour"):"Close editor"):"Apply / close");
 }
 }

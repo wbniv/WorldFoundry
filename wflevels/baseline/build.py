@@ -54,6 +54,7 @@ def build(preset,blend=None):
     snapshot=OUT/(preset+'-standalone.iff');shutil.copyfile(level,snapshot)
     run(ROOT/'wftools/cdpack-rs/target/release/cdpack',ROOT/'wfsource/source/game/shell.fth',snapshot,'-o',OUT/'cd.iff')
     receipt=dict(preset=preset,blend=str(blend),blendSha256=digest(blend),configSha256=digest(HERE/'baseline.json'),standalone=str(snapshot),levelSha256=digest(snapshot),cdSha256=digest(OUT/'cd.iff'),levelBuildChangesEngine=False,desktopExecutableSha256=digest(ROOT/'engine/wf_game'),toolHashes={str(p.relative_to(ROOT)):digest(p) for p in [ROOT/'wftools/iffcomp-rs/target/release/iffcomp',ROOT/'wftools/levcomp-rs/target/release/levcomp',ROOT/'wftools/textile-rs/target/release/textile',ROOT/'wftools/oas2oad-rs/target/release/oas2oad',ROOT/'wftools/wf_attr_edit/target/release/catalog']})
+    receipt['runtimeOptions']={str(p.relative_to(ROOT)):digest(p) for p in [HERE/'runtime_options_fixture.py',HERE/'runtime-options.json',HERE/(name+'.oas'),HERE/(name+'.oad'),HERE/(name+'-bindings.json'),OUT/'settings.rprp']}
     (OUT/'build-receipt.json').write_text(json.dumps(receipt,indent=2)+'\n')
     print('Built:',snapshot,'sha256',receipt['levelSha256'])
     return receipt

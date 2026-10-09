@@ -126,4 +126,109 @@ PROPERTY_SHEET_HEADER(Empty section,0)
 GROUP_START(Empty group)
 GROUP_STOP()
 PROPERTY_SHEET_FOOTER
+PROPERTY_SHEET_HEADER(Runtime Options,0)
+GROUP_START(Timing and profiling)
+{4,"runtime_show_fps",0,1,1,0,"",8,-1,-1,"--no-fps. Live; apply through runtime consumer",{0,0,"Show FPS","1"}},
+{4,"runtime_fixed_clock",0,1,0,0,"",8,-1,-1,"-rateN / -rate. Live; apply through runtime consumer",{0,0,"Fixed simulation clock","1"}},
+{4,"runtime_clock_hz",1,1000,20,0,"",2,-1,-1,"-rateN. Live; apply through runtime consumer",{0,0,"Simulation rate (Hz)","1"}},
+{4,"runtime_frame_profile",0,1,0,0,"",8,-1,-1,"--frame-profile. Enable only; apply through runtime consumer",{0,0,"Frame profiling","1"}},
+{4,"runtime_script_profile",0,1,0,0,"",8,-1,-1,"--script-profile. Conditional enable only; apply through runtime consumer",{0,0,"Script profiling","1"}},
+GROUP_STOP()
+GROUP_START(Renderer)
+{5,"runtime_static_mesh",0,255,0,256,"",0,-1,-1,"--static-mesh=. Cached on first use; live rebuild is unavailable",{0,0,"Static meshes","1"}},
+{5,"runtime_static_cull",0,255,0,256,"",0,-1,-1,"--static-mesh-cull=. Cached on first use; live culling change is unavailable",{0,0,"Static mesh culling","1"}},
+{5,"runtime_shared_index",0,255,0,256,"",0,-1,-1,"--static-mesh-shared-index=. Cached on first use; live ownership migration is unavailable",{0,0,"Shared static indices","1"}},
+{5,"runtime_bake_budget",0,255,0,256,"",0,-1,-1,"--static-mesh-bake-budget=. Cached on first use; live change is unavailable",{0,0,"Static bake budget","1"}},
+GROUP_STOP()
+GROUP_START(Surface)
+{5,"runtime_width",0,255,0,256,"",0,-1,-1,"-width=. Surface creation only",{0,0,"Surface width","1"}},
+{5,"runtime_height",0,255,0,256,"",0,-1,-1,"-height=. Surface creation only",{0,0,"Surface height","1"}},
+{5,"runtime_xpos",0,255,0,256,"",0,-1,-1,"-xpos=. Desktop startup placement; unavailable on TV/mobile",{0,0,"Window X position","1"}},
+{5,"runtime_ypos",0,255,0,256,"",0,-1,-1,"-ypos=. Desktop startup placement; unavailable on TV/mobile",{0,0,"Window Y position","1"}},
+{5,"runtime_fullscreen",0,255,0,256,"",0,-1,-1,"-fullscreen / -window. Startup request; no live window-mode adapter",{0,0,"Fullscreen request","1"}},
+{5,"runtime_windowed",0,255,0,256,"",0,-1,-1,"--windowed. Separate parsed request; platform-dependent startup behavior",{0,0,"Windowed request","1"}},
+GROUP_STOP()
+GROUP_START(Allocation)
+{5,"runtime_vram_width",0,255,0,256,"",0,-1,-1,"--vram-width=. Resident texture layout cannot change here",{0,0,"VRAM width","1"}},
+{5,"runtime_vram_height",0,255,0,256,"",0,-1,-1,"--vram-height=. Resident texture layout cannot change here",{0,0,"VRAM height","1"}},
+{5,"runtime_slot_width",0,255,0,256,"",0,-1,-1,"--vram-slot-width=. Resident texture layout cannot change here",{0,0,"Transient texture width","1"}},
+{5,"runtime_slot_height",0,255,0,256,"",0,-1,-1,"--vram-slot-height=. Resident texture layout cannot change here",{0,0,"Transient texture height","1"}},
+{5,"runtime_perm_width",0,255,0,256,"",0,-1,-1,"--vram-perm-width=. Resident texture layout cannot change here",{0,0,"Permanent texture width","1"}},
+{5,"runtime_perm_height",0,255,0,256,"",0,-1,-1,"--vram-perm-height=. Resident texture layout cannot change here",{0,0,"Permanent texture height","1"}},
+{5,"runtime_halmem",0,255,0,256,"",0,-1,-1,"-halmem=. DESIGNER_CHEATS; allocated before level load",{0,0,"HAL arena bytes","1"}},
+{5,"runtime_scratchmem",0,255,0,256,"",0,-1,-1,"-scratchmem=. DESIGNER_CHEATS; allocated before level load",{0,0,"Scratch arena bytes","1"}},
+{5,"runtime_psxmem",0,255,0,256,"",0,-1,-1,"-psxmem. Startup allocator preset; has no independent effective value",{0,0,"PSX memory preset","1"}},
+GROUP_STOP()
+GROUP_START(Connection)
+{5,"runtime_debug_port",0,255,0,256,"",0,-1,-1,"--debug-port. Requires bridge capability; no live listener rebind",{0,0,"Debug listener port","1"}},
+{5,"runtime_debug_bind",0,255,0,256,"",0,-1,-1,"--debug-bind. Requires bridge capability; no live listener rebind",{0,0,"Debug listener address","1"}},
+GROUP_STOP()
+GROUP_START(Launch and diagnostics)
+{5,"runtime_level_path",0,255,0,256,"",0,-1,-1,"-L. Currently loaded level; no live reload adapter",{0,0,"Standalone level","1"}},
+{5,"runtime_level_number",0,255,0,256,"",0,-1,-1,"level#. Launch selection; not a switch or live transition",{0,0,"CD launch level","1"}},
+{5,"runtime_editor",0,255,0,256,"",0,-1,-1,"--editor. WF_ENABLE_EDITOR; startup execution path",{0,0,"Editor execution mode","1"}},
+{5,"runtime_smoke_frames",0,255,0,256,"",0,-1,-1,"--frame-step-smoke=. Startup stepping harness",{0,0,"Smoke-test frames","1"}},
+{5,"runtime_cycles",0,255,0,256,"",0,-1,-1,"--cycles=. Startup stepping harness",{0,0,"Smoke-test cycles","1"}},
+{5,"runtime_no_swap",0,255,0,256,"",0,-1,-1,"--frame-step-no-swap. Startup stepping harness",{0,0,"Smoke-test no swap","1"}},
+{5,"runtime_rate_checks",0,255,0,256,"",0,-1,-1,"--frame-rate-checks. Stepping harness probes",{0,0,"Frame-rate probes","1"}},
+{5,"runtime_capture_frame",0,255,0,256,"",0,-1,-1,"--capture-frame=. Conditional writer; no live capture scheduling adapter",{0,0,"Scheduled frame capture","1"}},
+{5,"runtime_menu_input",0,255,0,256,"",0,-1,-1,"--menu-input=. Startup automation queue; live replacement is unavailable",{0,0,"Startup menu input","1"}},
+{5,"runtime_memory_test",0,255,0,256,"",0,-1,-1,"--memory-test. Startup test exits before loading a level",{0,0,"Memory test","1"}},
+{5,"runtime_mutation_smoke",0,255,0,256,"",0,-1,-1,"--wfmut-smoke. Startup test mode",{0,0,"Mutation smoke test","1"}},
+{5,"runtime_mutation_thread",0,255,0,256,"",0,-1,-1,"--wfmut-thread-test. Startup death test; never run from Apply",{0,0,"Mutation thread death test","1"}},
+{5,"runtime_print_actors",0,255,0,256,"",0,-1,-1,"--debug-print-actors. DO_TEST_CODE; startup actor dump",{0,0,"Print actors at load","1"}},
+{5,"runtime_record_video",0,255,0,256,"",0,-1,-1,"-record_video. DESIGNER_CHEATS; startup writer lifecycle",{0,0,"Video recording","1"}},
+{5,"runtime_joy",0,255,0,256,"",0,-1,-1,"-joy. JOYSTICK_RECORDER; startup reader lifecycle",{0,0,"Joystick playback","1"}},
+GROUP_STOP()
+GROUP_START(Legacy / unavailable)
+{5,"runtime_profile_load",0,255,0,256,"",0,-1,-1,"-profmemload. DO_PROFILE; parsed flag has no effective reader",{0,0,"Legacy load profiler","1"}},
+{5,"runtime_profile_loop",0,255,0,256,"",0,-1,-1,"-profmainloop. DO_PROFILE; parsed flag has no effective reader",{0,0,"Legacy loop profiler","1"}},
+GROUP_STOP()
+GROUP_START(Launch and diagnostics)
+{5,"runtime_breaktime",0,255,0,256,"",0,-1,-1,"-breaktime=. DO_DEBUGGING_INFO; intentional diagnostic action requires separate review",{0,0,"Debugger break time","1"}},
+GROUP_STOP()
+GROUP_START(Legacy / unavailable)
+{5,"runtime_linear_malloc",0,255,0,256,"",0,-1,-1,"-lmalloc. DEBUG; parsed flag has no effective reader",{0,0,"Legacy linear allocator","1"}},
+{5,"runtime_zbuffer",0,255,0,256,"",0,-1,-1,"-zb. Parsed flag has no effective renderer reader",{0,0,"Legacy Z buffer","1"}},
+{5,"runtime_zsort",0,255,0,256,"",0,-1,-1,"-zs. Parsed flag has no effective renderer reader",{0,0,"Legacy Z sort","1"}},
+{5,"runtime_legacy_fps",0,255,0,256,"",0,-1,-1,"-f. DESIGNER_CHEATS; parsed flag has no effective reader",{0,0,"Legacy frame-rate print","1"}},
+GROUP_STOP()
+GROUP_START(Launch and diagnostics)
+{5,"runtime_help",0,255,0,256,"",0,-1,-1,"-h / -help / --help. SW_DBSTREAM; launch operation exits",{0,0,"Help and exit","1"}},
+GROUP_STOP()
+GROUP_START(Legacy / unavailable)
+{5,"runtime_legacy_0",0,255,0,256,"",0,-1,-1,"-l N. Documented legacy option; no active parser branch",{0,0,"-l N","1"}},
+{5,"runtime_legacy_1",0,255,0,256,"",0,-1,-1,"-nologo. Documented legacy option; no active parser branch",{0,0,"-nologo","1"}},
+{5,"runtime_legacy_2",0,255,0,256,"",0,-1,-1,"-sound. Documented legacy option; no active parser branch",{0,0,"-sound","1"}},
+{5,"runtime_legacy_3",0,255,0,256,"",0,-1,-1,"-cd. Documented legacy option; no active parser branch",{0,0,"-cd","1"}},
+{5,"runtime_legacy_4",0,255,0,256,"",0,-1,-1,"-record_tga. Documented legacy option; no active parser branch",{0,0,"-record_tga","1"}},
+{5,"runtime_legacy_5",0,255,0,256,"",0,-1,-1,"-paranoid. Documented legacy option; no active parser branch",{0,0,"-paranoid","1"}},
+GROUP_STOP()
+GROUP_START(Debug streams)
+{5,"runtime_stream_p_w",0,255,0,256,"",0,-1,-1,"-pw<output>. SW_DBSTREAM; targets n, s, e, f<path>; monochrome unavailable",{0,0,"pw warnings","1"}},
+{5,"runtime_stream_p_e",0,255,0,256,"",0,-1,-1,"-pe<output>. SW_DBSTREAM; targets n, s, e, f<path>; monochrome unavailable",{0,0,"pe errors","1"}},
+{5,"runtime_stream_p_f",0,255,0,256,"",0,-1,-1,"-pf<output>. SW_DBSTREAM; targets n, s, e, f<path>; monochrome unavailable",{0,0,"pf fatal","1"}},
+{5,"runtime_stream_p_s",0,255,0,256,"",0,-1,-1,"-ps<output>. SW_DBSTREAM; targets n, s, e, f<path>; monochrome unavailable",{0,0,"ps statistics","1"}},
+{5,"runtime_stream_p_p",0,255,0,256,"",0,-1,-1,"-pp<output>. SW_DBSTREAM; targets n, s, e, f<path>; monochrome unavailable",{0,0,"pp progress","1"}},
+{5,"runtime_stream_p_d",0,255,0,256,"",0,-1,-1,"-pd<output>. SW_DBSTREAM; targets n, s, e, f<path>; monochrome unavailable",{0,0,"pd debugging","1"}},
+{5,"runtime_stream_p_u",0,255,0,256,"",0,-1,-1,"-pu<output>. SW_DBSTREAM; targets n, s, e, f<path>; monochrome unavailable",{0,0,"pu user","1"}},
+{5,"runtime_stream_s_a",0,255,0,256,"",0,-1,-1,"-sa<output>. SW_DBSTREAM; targets n, s, e, f<path>; monochrome unavailable",{0,0,"sa actor system","1"}},
+{5,"runtime_stream_s_f",0,255,0,256,"",0,-1,-1,"-sf<output>. SW_DBSTREAM; targets n, s, e, f<path>; monochrome unavailable",{0,0,"sf game flow","1"}},
+{5,"runtime_stream_s_l",0,255,0,256,"",0,-1,-1,"-sl<output>. SW_DBSTREAM; targets n, s, e, f<path>; monochrome unavailable",{0,0,"sl Level system","1"}},
+{5,"runtime_stream_s_t",0,255,0,256,"",0,-1,-1,"-st<output>. SW_DBSTREAM; targets n, s, e, f<path>; monochrome unavailable",{0,0,"st tool set code","1"}},
+{5,"runtime_stream_s_e",0,255,0,256,"",0,-1,-1,"-se<output>. SW_DBSTREAM; targets n, s, e, f<path>; monochrome unavailable",{0,0,"se camera code","1"}},
+{5,"runtime_stream_s_n",0,255,0,256,"",0,-1,-1,"-sn<output>. SW_DBSTREAM; targets n, s, e, f<path>; monochrome unavailable",{0,0,"sn Frame Info","1"}},
+{5,"runtime_stream_l_a",0,255,0,256,"",0,-1,-1,"-la<output>. SW_DBSTREAM; targets n, s, e, f<path>; monochrome unavailable",{0,0,"la animation/path system","1"}},
+{5,"runtime_stream_l_A",0,255,0,256,"",0,-1,-1,"-lA<output>. SW_DBSTREAM; targets n, s, e, f<path>; monochrome unavailable",{0,0,"lA Asset ID system","1"}},
+{5,"runtime_stream_l_g",0,255,0,256,"",0,-1,-1,"-lg<output>. SW_DBSTREAM; targets n, s, e, f<path>; monochrome unavailable",{0,0,"lg graphics system","1"}},
+{5,"runtime_stream_l_i",0,255,0,256,"",0,-1,-1,"-li<output>. SW_DBSTREAM; targets n, s, e, f<path>; monochrome unavailable",{0,0,"li iff reader library","1"}},
+{5,"runtime_stream_l_I",0,255,0,256,"",0,-1,-1,"-lI<output>. SW_DBSTREAM; targets n, s, e, f<path>; monochrome unavailable",{0,0,"lI mailbox system","1"}},
+{5,"runtime_stream_l_m",0,255,0,256,"",0,-1,-1,"-lm<output>. SW_DBSTREAM; targets n, s, e, f<path>; monochrome unavailable",{0,0,"lm memory system","1"}},
+{5,"runtime_stream_l_M",0,255,0,256,"",0,-1,-1,"-lM<output>. SW_DBSTREAM; targets n, s, e, f<path>; monochrome unavailable",{0,0,"lM movement handlers","1"}},
+{5,"runtime_stream_l_c",0,255,0,256,"",0,-1,-1,"-lc<output>. SW_DBSTREAM; targets n, s, e, f<path>; monochrome unavailable",{0,0,"lc collision system","1"}},
+{5,"runtime_stream_l_r",0,255,0,256,"",0,-1,-1,"-lr<output>. SW_DBSTREAM; targets n, s, e, f<path>; monochrome unavailable",{0,0,"lr room system","1"}},
+{5,"runtime_stream_l_R",0,255,0,256,"",0,-1,-1,"-lR<output>. SW_DBSTREAM; targets n, s, e, f<path>; monochrome unavailable",{0,0,"lR room slot assets","1"}},
+{5,"runtime_stream_l_s",0,255,0,256,"",0,-1,-1,"-ls<output>. SW_DBSTREAM; targets n, s, e, f<path>; monochrome unavailable",{0,0,"ls scripting languages","1"}},
+GROUP_STOP()
+PROPERTY_SHEET_FOOTER
 TYPEFOOTER
