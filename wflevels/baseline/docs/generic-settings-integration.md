@@ -134,12 +134,11 @@ cast1 `J-e74c40420a95`, cast2 `J-cc3f36457c7e`. Evidence is retained under the
 ignored build directory; actual models expose the runtime controls as editable
 and renderer/surface/allocation rows as read-only. That validator exercises
 settings transactions, held/released directions, reconnect and Home/resume. It
-does not toggle runtime controls, so live device effects remain an acceptance
-follow-up. Desktop testing confirms FPS state, fixed delta at 21 Hz, return to
+did not toggle runtime controls; the completed live follow-up is recorded below. Desktop testing confirms FPS state, fixed delta at 21 Hz, return to
 real time, both-owner readback and actual frame/script profile output. X11 front
-buffer captures retained the menu image and are not visual FPS evidence. Direct
-level-clock advancement measurements and live debug-stream effects also remain
-unverified. The conditional debug-stream adapter and accessor compiled in the
+buffer captures retained the menu image and are not visual FPS evidence. Those initial runs did not measure actual
+level-clock advancement; the clock follow-up below closes that gap. Live
+debug-stream effects remain unverified. The conditional debug-stream adapter and accessor compiled in the
 debug configuration; current CMake builds disable file-stream output.
 
 Will explicitly authorized the plant CLI removal. All six parser interfaces are
@@ -204,3 +203,23 @@ integration tests (61) passed. The frozen release and hash review are
 `/tmp/chromecast-runtime-options-review.json`. Preflight passes; deployment
 changes only registration, dispatch and the new validator. Live acceptance
 awaits the reviewed administrator upgrade; no direct-control fallback is used.
+
+Live Runtime Options acceptance completed after the approved coordinator
+upgrade. Deployment transcript confirms a protected backup, readiness and queue
+resume with reservations/device identities retained. Batch `B-1ac2837c00a6`
+completed on cast1 (`J-1f309176abf2`) and cast2 (`J-a036dbb309da`), with all 17
+assertions passing on each. TV Back applied FPS; phone drafts had no effect,
+Cancel retained state, both owners read process-global values, sample fields
+remained unchanged, active profilers became read-only, and both emitted actual
+frame/script profiling output.
+
+Independent level-clock measurements matched 20/37 Hz: cast1 advanced 26 steps
+by 1.299980 seconds at 20 Hz and 24 by 0.648651 at 37 Hz; cast2 advanced 48
+steps by 2.399963 and 1.297302 seconds respectively. Real-time restoration also
+passed. FPS capture review confirms visible → absent → visible; the bottom-right
+glyph region has 405/0/333 white pixels on cast1 and 387/0/396 on cast2. Evidence
+is retained privately under `build/evidence/runtime-options-cast1` and `-cast2`.
+The prior general baseline validator covered held/released directional input and
+lifecycle behavior on both devices. Live debug-stream effects remain untested;
+the conditional adapter compiled, and the tested CMake builds disable file
+output. Current-room production/visual integration remains a separate gate.
