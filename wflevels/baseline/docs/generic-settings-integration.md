@@ -160,8 +160,11 @@ permanent page uses production dimensions rather than an obsolete 256 assumption
 Twenty focused cooked-catalog/Runtime Options tests and three plant sanitizer/
 phone-browser tests passed. Coverage includes seed zero/UINT32_MAX, both water
 types, age bounds, random entry, live flags/speed, regeneration, Apply/Cancel,
-read-only forgery rejection and stale CLI errors. The broader aquarium test has
-a pre-existing actor-count mismatch (expects 46; the committed map contains 51).
+read-only forgery rejection and stale CLI errors. The initial broader aquarium run found a stale 46-actor assertion: two goby
+meshes and three grazing rocks increased the exported inventory to 51. Runtime
+visibility mailboxes select residents and rocks by water type without removing
+their actor indices. The test now checks all exported names/indices against the
+actor map and requires exactly eight plant groups. All five aquarium tests pass.
 
 Desktop and Android armeabi-v7a builds compiled with the conversion. Coordinator
 profile `J-fbe79303e2b0` on cast1 logged the exact RPRP-selected seed 713,
