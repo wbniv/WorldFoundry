@@ -1,3 +1,4 @@
+#include "../../../engine/runtime_options.hpp"
 #include "../../../engine/runtime_property_host.hpp"
 #include "../../../engine/runtime_diagnostics.hpp"
 #include "runtime_profile.hp"
@@ -590,6 +591,7 @@ Level::Level
     }
     wfprops::activeRegistry()=&_runtimeProperties;
     wfprops::host().bind(&_runtimeProperties);
+    wfoptions::registerBaseline(_runtimeProperties);
 	assert( plmc->tagRam == IFFTAG('R','A','M','\0') );
 	assert( plmc->tagObjects == IFFTAG('O','B','J','D') );
 	assert( plmc->tagPerm == IFFTAG('P','E','R','M') );

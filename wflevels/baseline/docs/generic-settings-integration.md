@@ -101,3 +101,48 @@ Validation recorded in `docs/diagnostics/baseline/generic-settings/`:
 record the accepted baseline and plant checks. Gallery catalog
 coverage is comprehensive; interactive coverage of every descriptor presentation
 remains a separate acceptance requirement.
+
+
+## Runtime Options implementation (2026-10-09)
+
+The isolated `baseline-runtime-options` branch adds one Runtime Options sheet to
+both authored presets, preserving existing sample IDs and values. The existing
+RPRP cooker and shared host remain the transport and transaction boundary.
+`engine/runtime_options.hpp` synchronizes process values across both owners,
+rejects stale snapshots and read-only mutations, and prepares fallible resources
+before application. `game/runtime_options.cc` supplies effective readback and
+adapters for FPS, fixed/real-time simulation clock, enable-only profilers and
+conditional debug streams. TV rows now show category labels, dimmed read-only
+controls and focused help; the existing phone form already supports these.
+
+Build with the existing `wflevels/baseline/build.py`. The generated
+`runtime-options.json` records field IDs, CLI inventory and capability policies;
+the build receipt hashes the source, OAS/OAD, bindings and cooked catalog.
+`pytest -q tests/test_runtime_options.py` covers real cooked catalogs and host
+transactions, including failure preparation, unchanged Apply, two-owner state,
+ordinary sample isolation, numeric bounds, stale globals/sessions and diagnostic
+fallback/typing restoration. Production desktop acceptance is reproducible with
+`python3 scripts/check-baseline-runtime-desktop.py --out /path/to/evidence`
+after a diagnostic desktop build and default level build. It uses the engine's
+own X11 window and the read-only diagnostic bridge, then checks applied values
+and emitted profiling output. It requires Python Xlib and an X11 session.
+
+Desktop and Android armeabi-v7a builds compiled. The final frozen APK is
+`baseline-9e6c852ce3bb8f8c.apk`. Both dedicated Chromecasts passed the existing
+20-assertion `baseline-settings` validator in batch `B-2004eb07c1a0`:
+cast1 `J-e74c40420a95`, cast2 `J-cc3f36457c7e`. Evidence is retained under the
+ignored build directory; actual models expose the runtime controls as editable
+and renderer/surface/allocation rows as read-only. That validator exercises
+settings transactions, held/released directions, reconnect and Home/resume. It
+does not toggle runtime controls, so live device effects remain an acceptance
+follow-up. Desktop testing confirms FPS state, fixed delta at 21 Hz, return to
+real time, both-owner readback and actual frame/script profile output. X11 front
+buffer captures retained the menu image and are not visual FPS evidence. Direct
+level-clock advancement measurements and live debug-stream effects also remain
+unverified. The conditional debug-stream adapter and accessor compiled in the
+debug configuration; current CMake builds disable file-stream output.
+
+The six plant switches are excluded from this sheet. Their parser and plant
+consumer are unchanged: conversion to authored settings still requires explicit
+permission beyond the previously authorized baseline engine scope. No renderer,
+allocator, window or listener reconstruction was added.

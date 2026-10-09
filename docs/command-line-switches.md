@@ -10,24 +10,24 @@ wf_game {switches} [level#]
 
 | Switch | Condition | Description |
 |--------|-----------|-------------|
-| `-h` | debug builds | Print this help and exit |
-| `-l N` | always | Start at level N |
+| `-h`, `-help`, `--help` | `SW_DBSTREAM` | Print help and exit |
+| `-l N` | unavailable | Legacy documented spelling; use positional `level#` |
 | `-L<path>` | always | Override level file path |
-| `-zb` | always | Z-buffered rendering |
-| `-zs` | always | Z-sorted rendering |
+| `-zb` | parsed legacy flag | No active renderer reader; unavailable in Runtime Options |
+| `-zs` | parsed legacy flag | No active renderer reader; unavailable in Runtime Options |
 | `--no-fps` | always | Hide the default bottom-right frame-rate number (one decimal place) |
 | `-rateN` | always | Simulate fixed frame rate of N Hz |
-| `-nologo` | always | Skip company logo screens |
-| `-sound` | debug | Enable sound |
-| `-cd` | debug | Enable CD |
+| `-nologo` | unavailable | Legacy documentation; no active parser branch |
+| `-sound` | unavailable | Legacy documentation; no active parser branch |
+| `-cd` | unavailable | Legacy documentation; no active parser branch |
 | `-lmalloc` | debug | Use linear malloc instead of C runtime malloc |
-| `-record_tga` | `DESIGNER_CHEATS` | Save every frame as `frame#.tga` in cwd |
+| `-record_tga` | unavailable | Legacy documentation; no active parser branch |
 | `-f` | `DESIGNER_CHEATS` | Print frame rate |
 | `-joy<filename>` | `JOYSTICK_RECORDER` | Play back joystick input from file |
 | `-profmemload` | `DO_PROFILE` | Profile memory usage during load |
 | `-profmainloop` | `DO_PROFILE` | Profile CPU usage during main loop |
 | `-breaktime=<t>` | `DO_DEBUGGING_INFO` | Break into debugger at wall-clock time `t` |
-| `-paranoid` | always | Insanely slow error checks |
+| `-paranoid` | unavailable | Legacy documentation; no active parser branch |
 | `-width=N` / `-height=N` | Linux (X11), web | Window size in pixels — and, with `-record_video` / `WF_GAME_SCREENSHOT_PPM`, the capture size (default 640 × 480). Parsed by the platform layer (`hal/linux/platform_init.cc`); since 2026‑09‑19 the game parser recognises them too (before that `-height=` was mistaken for `-h` and exited with usage). |
 | `-xpos=N` / `-ypos=N` | Linux (X11) | Window position |
 | `-fullscreen` / `-window` | Linux (X11) | Fullscreen at the screen's size (`_NET_WM_STATE_FULLSCREEN`; `-width/-height` still override the capture size) / windowed |
@@ -125,3 +125,31 @@ Each takes the form `-X<initial><output>` where:
 ## `wf-edit` (editor) switches
 
 The `wf-edit` editor has its own switches, distinct from the engine's above: `--level=<name>`, `--leveltree=<name>`, `--room=<id>` (join a voice + video call), `--frames <N>` and `--screenshot <path>` (headless — **these take a space, not `=`**), and `--select=<N>`. See the [wf-edit user manual](wf-edit-manual.md#running-wf-edit) for the full option table plus the headless automation env-vars.
+
+## Baseline Runtime Options
+
+The default and settings-gallery baseline catalogs include one Runtime Options
+sheet for each sample owner. The engine reads the cooked RPRP catalog and
+snapshots process state when the editor opens. Both owners share runtime values;
+ordinary sample values remain per instance. Apply changes supported values,
+Cancel discards them, and stale process snapshots are rejected.
+
+Show FPS and the fixed simulation clock are live controls. The rate is bounded
+from 1 to 1000 Hz and uses the existing slider; presentation rate is independent.
+Frame and script profiling can be enabled once when supported. An active
+profiler becomes read-only because stopping is not implemented. Debug-stream
+redirection is conditional on SW_DBSTREAM; available targets are null, stdout,
+stderr, and files only when DO_DEBUG_FILE_SYSTEM is enabled. Preparation errors
+retain existing sinks. Current CMake configurations disable debug file output.
+
+Renderer, surface, allocator, connection and launch options are focusable
+read-only rows. They show effective values where an accessor exists and
+"unavailable" otherwise, with focused help explaining the limit. The generated
+[option inventory](../wflevels/baseline/runtime-options.json) lists stable IDs,
+parser spellings, capabilities and adapters. It includes legacy options as
+unavailable and excludes the six plant launch overrides from the baseline sheet.
+
+Plant CLI removal and conversion to authored plant settings are tracked in the
+reviewed baseline plan. The parser remains unchanged pending the separately
+required plant engine authorization; exclusion from this sheet does not mean
+those switches have been removed.

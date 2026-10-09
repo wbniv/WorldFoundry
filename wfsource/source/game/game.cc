@@ -1,3 +1,4 @@
+#include "../../../engine/runtime_options.hpp"
 #include <game/plant_ui.h>
 #include <game/runtime_property_ui.h>
 //==============================================================================
@@ -648,6 +649,8 @@ WFGame::StepFrame(bool do_swap, Scalar* out_dt)
 	assert( ValidPtr(_curLevel ));
 	_curLevel->Validate();
 	DBSTREAM2( cflow << "WFGame::update: curLevel->Update" << std::endl; )
+    int optionsWidth=0,optionsHeight=0;_display->GetSurfaceSize(optionsWidth,optionsHeight);
+    wfoptions::surfaceSize(optionsWidth,optionsHeight);
 	auto& settings=wfprops::host();
     if(settings.modal||settings.waitingForRelease())_curLevel->RefreshHardwareInput();
     auto buttons=uint32_t(_curLevel->GetMailboxes().ReadMailbox(1909).AsFloat());

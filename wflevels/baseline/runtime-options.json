@@ -1,0 +1,1177 @@
+{
+  "version": 1,
+  "id_range": [
+    1000,
+    1199
+  ],
+  "runtime_input": "RPRP",
+  "fields": [
+    {
+      "id": 1000,
+      "key": "runtime_show_fps",
+      "label": "Show FPS",
+      "cli": [
+        "--no-fps"
+      ],
+      "value_type": "bool",
+      "policy": "Live",
+      "group": "Timing and profiling",
+      "accessor": "fpscounter::enabled",
+      "adapter": "overlay",
+      "reason": ""
+    },
+    {
+      "id": 1001,
+      "key": "runtime_fixed_clock",
+      "label": "Fixed simulation clock",
+      "cli": [
+        "-rateN",
+        "-rate"
+      ],
+      "value_type": "bool",
+      "policy": "Live",
+      "group": "Timing and profiling",
+      "accessor": "FakeFrameRate",
+      "adapter": "clock",
+      "reason": ""
+    },
+    {
+      "id": 1002,
+      "key": "runtime_clock_hz",
+      "label": "Simulation rate (Hz)",
+      "cli": [
+        "-rateN"
+      ],
+      "value_type": "int",
+      "policy": "Live",
+      "group": "Timing and profiling",
+      "accessor": "FakeFrameRate",
+      "adapter": "clock",
+      "reason": ""
+    },
+    {
+      "id": 1003,
+      "key": "runtime_frame_profile",
+      "label": "Frame profiling",
+      "cli": [
+        "--frame-profile"
+      ],
+      "value_type": "bool",
+      "policy": "Enable only",
+      "group": "Timing and profiling",
+      "accessor": "wf_profile::enabled()",
+      "adapter": "frame_profile",
+      "reason": ""
+    },
+    {
+      "id": 1004,
+      "key": "runtime_script_profile",
+      "label": "Script profiling",
+      "cli": [
+        "--script-profile"
+      ],
+      "value_type": "bool",
+      "policy": "Conditional enable only",
+      "group": "Timing and profiling",
+      "accessor": "WFScriptProfileEnabled()",
+      "adapter": "script_profile",
+      "reason": ""
+    },
+    {
+      "id": 1005,
+      "key": "runtime_static_mesh",
+      "label": "Static meshes",
+      "cli": [
+        "--static-mesh="
+      ],
+      "value_type": "diagnostic",
+      "policy": "Ghost",
+      "group": "Renderer",
+      "accessor": "static_mesh",
+      "adapter": null,
+      "reason": "Cached on first use; live rebuild is unavailable"
+    },
+    {
+      "id": 1006,
+      "key": "runtime_static_cull",
+      "label": "Static mesh culling",
+      "cli": [
+        "--static-mesh-cull="
+      ],
+      "value_type": "diagnostic",
+      "policy": "Ghost",
+      "group": "Renderer",
+      "accessor": "static_cull",
+      "adapter": null,
+      "reason": "Cached on first use; live culling change is unavailable"
+    },
+    {
+      "id": 1007,
+      "key": "runtime_shared_index",
+      "label": "Shared static indices",
+      "cli": [
+        "--static-mesh-shared-index="
+      ],
+      "value_type": "diagnostic",
+      "policy": "Ghost",
+      "group": "Renderer",
+      "accessor": "shared_index",
+      "adapter": null,
+      "reason": "Cached on first use; live ownership migration is unavailable"
+    },
+    {
+      "id": 1008,
+      "key": "runtime_bake_budget",
+      "label": "Static bake budget",
+      "cli": [
+        "--static-mesh-bake-budget="
+      ],
+      "value_type": "diagnostic",
+      "policy": "Ghost",
+      "group": "Renderer",
+      "accessor": "bake_budget",
+      "adapter": null,
+      "reason": "Cached on first use; live change is unavailable"
+    },
+    {
+      "id": 1010,
+      "key": "runtime_width",
+      "label": "Surface width",
+      "cli": [
+        "-width="
+      ],
+      "value_type": "diagnostic",
+      "policy": "Ghost",
+      "group": "Surface",
+      "accessor": "width",
+      "adapter": null,
+      "reason": "Surface creation only"
+    },
+    {
+      "id": 1011,
+      "key": "runtime_height",
+      "label": "Surface height",
+      "cli": [
+        "-height="
+      ],
+      "value_type": "diagnostic",
+      "policy": "Ghost",
+      "group": "Surface",
+      "accessor": "height",
+      "adapter": null,
+      "reason": "Surface creation only"
+    },
+    {
+      "id": 1012,
+      "key": "runtime_xpos",
+      "label": "Window X position",
+      "cli": [
+        "-xpos="
+      ],
+      "value_type": "diagnostic",
+      "policy": "Ghost",
+      "group": "Surface",
+      "accessor": "xpos",
+      "adapter": null,
+      "reason": "Desktop startup placement; unavailable on TV/mobile"
+    },
+    {
+      "id": 1013,
+      "key": "runtime_ypos",
+      "label": "Window Y position",
+      "cli": [
+        "-ypos="
+      ],
+      "value_type": "diagnostic",
+      "policy": "Ghost",
+      "group": "Surface",
+      "accessor": "ypos",
+      "adapter": null,
+      "reason": "Desktop startup placement; unavailable on TV/mobile"
+    },
+    {
+      "id": 1014,
+      "key": "runtime_fullscreen",
+      "label": "Fullscreen request",
+      "cli": [
+        "-fullscreen",
+        "-window"
+      ],
+      "value_type": "diagnostic",
+      "policy": "Ghost",
+      "group": "Surface",
+      "accessor": "fullscreen",
+      "adapter": null,
+      "reason": "Startup request; no live window-mode adapter"
+    },
+    {
+      "id": 1015,
+      "key": "runtime_windowed",
+      "label": "Windowed request",
+      "cli": [
+        "--windowed"
+      ],
+      "value_type": "diagnostic",
+      "policy": "Ghost",
+      "group": "Surface",
+      "accessor": "windowed",
+      "adapter": null,
+      "reason": "Separate parsed request; platform-dependent startup behavior"
+    },
+    {
+      "id": 1020,
+      "key": "runtime_vram_width",
+      "label": "VRAM width",
+      "cli": [
+        "--vram-width="
+      ],
+      "value_type": "diagnostic",
+      "policy": "Ghost",
+      "group": "Allocation",
+      "accessor": "vram_width",
+      "adapter": null,
+      "reason": "Resident texture layout cannot change here"
+    },
+    {
+      "id": 1021,
+      "key": "runtime_vram_height",
+      "label": "VRAM height",
+      "cli": [
+        "--vram-height="
+      ],
+      "value_type": "diagnostic",
+      "policy": "Ghost",
+      "group": "Allocation",
+      "accessor": "vram_height",
+      "adapter": null,
+      "reason": "Resident texture layout cannot change here"
+    },
+    {
+      "id": 1022,
+      "key": "runtime_slot_width",
+      "label": "Transient texture width",
+      "cli": [
+        "--vram-slot-width="
+      ],
+      "value_type": "diagnostic",
+      "policy": "Ghost",
+      "group": "Allocation",
+      "accessor": "slot_width",
+      "adapter": null,
+      "reason": "Resident texture layout cannot change here"
+    },
+    {
+      "id": 1023,
+      "key": "runtime_slot_height",
+      "label": "Transient texture height",
+      "cli": [
+        "--vram-slot-height="
+      ],
+      "value_type": "diagnostic",
+      "policy": "Ghost",
+      "group": "Allocation",
+      "accessor": "slot_height",
+      "adapter": null,
+      "reason": "Resident texture layout cannot change here"
+    },
+    {
+      "id": 1024,
+      "key": "runtime_perm_width",
+      "label": "Permanent texture width",
+      "cli": [
+        "--vram-perm-width="
+      ],
+      "value_type": "diagnostic",
+      "policy": "Ghost",
+      "group": "Allocation",
+      "accessor": "perm_width",
+      "adapter": null,
+      "reason": "Resident texture layout cannot change here"
+    },
+    {
+      "id": 1025,
+      "key": "runtime_perm_height",
+      "label": "Permanent texture height",
+      "cli": [
+        "--vram-perm-height="
+      ],
+      "value_type": "diagnostic",
+      "policy": "Ghost",
+      "group": "Allocation",
+      "accessor": "perm_height",
+      "adapter": null,
+      "reason": "Resident texture layout cannot change here"
+    },
+    {
+      "id": 1026,
+      "key": "runtime_halmem",
+      "label": "HAL arena bytes",
+      "cli": [
+        "-halmem="
+      ],
+      "value_type": "diagnostic",
+      "policy": "Ghost",
+      "group": "Allocation",
+      "accessor": "halmem",
+      "adapter": null,
+      "reason": "DESIGNER_CHEATS; allocated before level load"
+    },
+    {
+      "id": 1027,
+      "key": "runtime_scratchmem",
+      "label": "Scratch arena bytes",
+      "cli": [
+        "-scratchmem="
+      ],
+      "value_type": "diagnostic",
+      "policy": "Ghost",
+      "group": "Allocation",
+      "accessor": "scratchmem",
+      "adapter": null,
+      "reason": "DESIGNER_CHEATS; allocated before level load"
+    },
+    {
+      "id": 1028,
+      "key": "runtime_psxmem",
+      "label": "PSX memory preset",
+      "cli": [
+        "-psxmem"
+      ],
+      "value_type": "diagnostic",
+      "policy": "Ghost",
+      "group": "Allocation",
+      "accessor": "psxmem",
+      "adapter": null,
+      "reason": "Startup allocator preset; has no independent effective value"
+    },
+    {
+      "id": 1030,
+      "key": "runtime_debug_port",
+      "label": "Debug listener port",
+      "cli": [
+        "--debug-port"
+      ],
+      "value_type": "diagnostic",
+      "policy": "Ghost",
+      "group": "Connection",
+      "accessor": "debug_port",
+      "adapter": null,
+      "reason": "Requires bridge capability; no live listener rebind"
+    },
+    {
+      "id": 1031,
+      "key": "runtime_debug_bind",
+      "label": "Debug listener address",
+      "cli": [
+        "--debug-bind"
+      ],
+      "value_type": "diagnostic",
+      "policy": "Ghost",
+      "group": "Connection",
+      "accessor": "debug_bind",
+      "adapter": null,
+      "reason": "Requires bridge capability; no live listener rebind"
+    },
+    {
+      "id": 1040,
+      "key": "runtime_level_path",
+      "label": "Standalone level",
+      "cli": [
+        "-L"
+      ],
+      "value_type": "diagnostic",
+      "policy": "Ghost",
+      "group": "Launch and diagnostics",
+      "accessor": "level_path",
+      "adapter": null,
+      "reason": "Currently loaded level; no live reload adapter"
+    },
+    {
+      "id": 1041,
+      "key": "runtime_level_number",
+      "label": "CD launch level",
+      "cli": [
+        "level#"
+      ],
+      "value_type": "diagnostic",
+      "policy": "Ghost",
+      "group": "Launch and diagnostics",
+      "accessor": "level_number",
+      "adapter": null,
+      "reason": "Launch selection; not a switch or live transition"
+    },
+    {
+      "id": 1042,
+      "key": "runtime_editor",
+      "label": "Editor execution mode",
+      "cli": [
+        "--editor"
+      ],
+      "value_type": "diagnostic",
+      "policy": "Ghost",
+      "group": "Launch and diagnostics",
+      "accessor": "editor",
+      "adapter": null,
+      "reason": "WF_ENABLE_EDITOR; startup execution path"
+    },
+    {
+      "id": 1043,
+      "key": "runtime_smoke_frames",
+      "label": "Smoke-test frames",
+      "cli": [
+        "--frame-step-smoke="
+      ],
+      "value_type": "diagnostic",
+      "policy": "Ghost",
+      "group": "Launch and diagnostics",
+      "accessor": "smoke_frames",
+      "adapter": null,
+      "reason": "Startup stepping harness"
+    },
+    {
+      "id": 1044,
+      "key": "runtime_cycles",
+      "label": "Smoke-test cycles",
+      "cli": [
+        "--cycles="
+      ],
+      "value_type": "diagnostic",
+      "policy": "Ghost",
+      "group": "Launch and diagnostics",
+      "accessor": "cycles",
+      "adapter": null,
+      "reason": "Startup stepping harness"
+    },
+    {
+      "id": 1045,
+      "key": "runtime_no_swap",
+      "label": "Smoke-test no swap",
+      "cli": [
+        "--frame-step-no-swap"
+      ],
+      "value_type": "diagnostic",
+      "policy": "Ghost",
+      "group": "Launch and diagnostics",
+      "accessor": "no_swap",
+      "adapter": null,
+      "reason": "Startup stepping harness"
+    },
+    {
+      "id": 1046,
+      "key": "runtime_rate_checks",
+      "label": "Frame-rate probes",
+      "cli": [
+        "--frame-rate-checks"
+      ],
+      "value_type": "diagnostic",
+      "policy": "Ghost",
+      "group": "Launch and diagnostics",
+      "accessor": "rate_checks",
+      "adapter": null,
+      "reason": "Stepping harness probes"
+    },
+    {
+      "id": 1047,
+      "key": "runtime_capture_frame",
+      "label": "Scheduled frame capture",
+      "cli": [
+        "--capture-frame="
+      ],
+      "value_type": "diagnostic",
+      "policy": "Ghost",
+      "group": "Launch and diagnostics",
+      "accessor": "capture_frame",
+      "adapter": null,
+      "reason": "Conditional writer; no live capture scheduling adapter"
+    },
+    {
+      "id": 1048,
+      "key": "runtime_menu_input",
+      "label": "Startup menu input",
+      "cli": [
+        "--menu-input="
+      ],
+      "value_type": "diagnostic",
+      "policy": "Ghost",
+      "group": "Launch and diagnostics",
+      "accessor": "menu_input",
+      "adapter": null,
+      "reason": "Startup automation queue; live replacement is unavailable"
+    },
+    {
+      "id": 1049,
+      "key": "runtime_memory_test",
+      "label": "Memory test",
+      "cli": [
+        "--memory-test"
+      ],
+      "value_type": "diagnostic",
+      "policy": "Ghost",
+      "group": "Launch and diagnostics",
+      "accessor": "memory_test",
+      "adapter": null,
+      "reason": "Startup test exits before loading a level"
+    },
+    {
+      "id": 1050,
+      "key": "runtime_mutation_smoke",
+      "label": "Mutation smoke test",
+      "cli": [
+        "--wfmut-smoke"
+      ],
+      "value_type": "diagnostic",
+      "policy": "Ghost",
+      "group": "Launch and diagnostics",
+      "accessor": "mutation_smoke",
+      "adapter": null,
+      "reason": "Startup test mode"
+    },
+    {
+      "id": 1051,
+      "key": "runtime_mutation_thread",
+      "label": "Mutation thread death test",
+      "cli": [
+        "--wfmut-thread-test"
+      ],
+      "value_type": "diagnostic",
+      "policy": "Ghost",
+      "group": "Launch and diagnostics",
+      "accessor": "mutation_thread",
+      "adapter": null,
+      "reason": "Startup death test; never run from Apply"
+    },
+    {
+      "id": 1052,
+      "key": "runtime_print_actors",
+      "label": "Print actors at load",
+      "cli": [
+        "--debug-print-actors"
+      ],
+      "value_type": "diagnostic",
+      "policy": "Ghost",
+      "group": "Launch and diagnostics",
+      "accessor": "print_actors",
+      "adapter": null,
+      "reason": "DO_TEST_CODE; startup actor dump"
+    },
+    {
+      "id": 1053,
+      "key": "runtime_record_video",
+      "label": "Video recording",
+      "cli": [
+        "-record_video"
+      ],
+      "value_type": "diagnostic",
+      "policy": "Ghost",
+      "group": "Launch and diagnostics",
+      "accessor": "record_video",
+      "adapter": null,
+      "reason": "DESIGNER_CHEATS; startup writer lifecycle"
+    },
+    {
+      "id": 1054,
+      "key": "runtime_joy",
+      "label": "Joystick playback",
+      "cli": [
+        "-joy"
+      ],
+      "value_type": "diagnostic",
+      "policy": "Ghost",
+      "group": "Launch and diagnostics",
+      "accessor": "joy",
+      "adapter": null,
+      "reason": "JOYSTICK_RECORDER; startup reader lifecycle"
+    },
+    {
+      "id": 1055,
+      "key": "runtime_profile_load",
+      "label": "Legacy load profiler",
+      "cli": [
+        "-profmemload"
+      ],
+      "value_type": "diagnostic",
+      "policy": "Ghost",
+      "group": "Legacy / unavailable",
+      "accessor": "profile_load",
+      "adapter": null,
+      "reason": "DO_PROFILE; parsed flag has no effective reader"
+    },
+    {
+      "id": 1056,
+      "key": "runtime_profile_loop",
+      "label": "Legacy loop profiler",
+      "cli": [
+        "-profmainloop"
+      ],
+      "value_type": "diagnostic",
+      "policy": "Ghost",
+      "group": "Legacy / unavailable",
+      "accessor": "profile_loop",
+      "adapter": null,
+      "reason": "DO_PROFILE; parsed flag has no effective reader"
+    },
+    {
+      "id": 1057,
+      "key": "runtime_breaktime",
+      "label": "Debugger break time",
+      "cli": [
+        "-breaktime="
+      ],
+      "value_type": "diagnostic",
+      "policy": "Ghost",
+      "group": "Launch and diagnostics",
+      "accessor": "breaktime",
+      "adapter": null,
+      "reason": "DO_DEBUGGING_INFO; intentional diagnostic action requires separate review"
+    },
+    {
+      "id": 1058,
+      "key": "runtime_linear_malloc",
+      "label": "Legacy linear allocator",
+      "cli": [
+        "-lmalloc"
+      ],
+      "value_type": "diagnostic",
+      "policy": "Ghost",
+      "group": "Legacy / unavailable",
+      "accessor": "linear_malloc",
+      "adapter": null,
+      "reason": "DEBUG; parsed flag has no effective reader"
+    },
+    {
+      "id": 1059,
+      "key": "runtime_zbuffer",
+      "label": "Legacy Z buffer",
+      "cli": [
+        "-zb"
+      ],
+      "value_type": "diagnostic",
+      "policy": "Ghost",
+      "group": "Legacy / unavailable",
+      "accessor": "zbuffer",
+      "adapter": null,
+      "reason": "Parsed flag has no effective renderer reader"
+    },
+    {
+      "id": 1060,
+      "key": "runtime_zsort",
+      "label": "Legacy Z sort",
+      "cli": [
+        "-zs"
+      ],
+      "value_type": "diagnostic",
+      "policy": "Ghost",
+      "group": "Legacy / unavailable",
+      "accessor": "zsort",
+      "adapter": null,
+      "reason": "Parsed flag has no effective renderer reader"
+    },
+    {
+      "id": 1061,
+      "key": "runtime_legacy_fps",
+      "label": "Legacy frame-rate print",
+      "cli": [
+        "-f"
+      ],
+      "value_type": "diagnostic",
+      "policy": "Ghost",
+      "group": "Legacy / unavailable",
+      "accessor": "legacy_fps",
+      "adapter": null,
+      "reason": "DESIGNER_CHEATS; parsed flag has no effective reader"
+    },
+    {
+      "id": 1062,
+      "key": "runtime_help",
+      "label": "Help and exit",
+      "cli": [
+        "-h",
+        "-help",
+        "--help"
+      ],
+      "value_type": "diagnostic",
+      "policy": "Ghost",
+      "group": "Launch and diagnostics",
+      "accessor": "help",
+      "adapter": null,
+      "reason": "SW_DBSTREAM; launch operation exits"
+    },
+    {
+      "id": 1080,
+      "key": "runtime_legacy_0",
+      "label": "-l N",
+      "cli": [
+        "-l N"
+      ],
+      "value_type": "diagnostic",
+      "policy": "Ghost",
+      "group": "Legacy / unavailable",
+      "accessor": null,
+      "adapter": null,
+      "reason": "Documented legacy option; no active parser branch"
+    },
+    {
+      "id": 1081,
+      "key": "runtime_legacy_1",
+      "label": "-nologo",
+      "cli": [
+        "-nologo"
+      ],
+      "value_type": "diagnostic",
+      "policy": "Ghost",
+      "group": "Legacy / unavailable",
+      "accessor": null,
+      "adapter": null,
+      "reason": "Documented legacy option; no active parser branch"
+    },
+    {
+      "id": 1082,
+      "key": "runtime_legacy_2",
+      "label": "-sound",
+      "cli": [
+        "-sound"
+      ],
+      "value_type": "diagnostic",
+      "policy": "Ghost",
+      "group": "Legacy / unavailable",
+      "accessor": null,
+      "adapter": null,
+      "reason": "Documented legacy option; no active parser branch"
+    },
+    {
+      "id": 1083,
+      "key": "runtime_legacy_3",
+      "label": "-cd",
+      "cli": [
+        "-cd"
+      ],
+      "value_type": "diagnostic",
+      "policy": "Ghost",
+      "group": "Legacy / unavailable",
+      "accessor": null,
+      "adapter": null,
+      "reason": "Documented legacy option; no active parser branch"
+    },
+    {
+      "id": 1084,
+      "key": "runtime_legacy_4",
+      "label": "-record_tga",
+      "cli": [
+        "-record_tga"
+      ],
+      "value_type": "diagnostic",
+      "policy": "Ghost",
+      "group": "Legacy / unavailable",
+      "accessor": null,
+      "adapter": null,
+      "reason": "Documented legacy option; no active parser branch"
+    },
+    {
+      "id": 1085,
+      "key": "runtime_legacy_5",
+      "label": "-paranoid",
+      "cli": [
+        "-paranoid"
+      ],
+      "value_type": "diagnostic",
+      "policy": "Ghost",
+      "group": "Legacy / unavailable",
+      "accessor": null,
+      "adapter": null,
+      "reason": "Documented legacy option; no active parser branch"
+    },
+    {
+      "id": 1100,
+      "key": "runtime_stream_p_w",
+      "label": "pw warnings",
+      "cli": [
+        "-pw<output>"
+      ],
+      "value_type": "stream",
+      "policy": "Conditional live",
+      "group": "Debug streams",
+      "accessor": "cwarn",
+      "adapter": "stream",
+      "reason": "SW_DBSTREAM; targets n, s, e, f<path>; monochrome unavailable",
+      "family": "p",
+      "channel": "w"
+    },
+    {
+      "id": 1101,
+      "key": "runtime_stream_p_e",
+      "label": "pe errors",
+      "cli": [
+        "-pe<output>"
+      ],
+      "value_type": "stream",
+      "policy": "Conditional live",
+      "group": "Debug streams",
+      "accessor": "cerror",
+      "adapter": "stream",
+      "reason": "SW_DBSTREAM; targets n, s, e, f<path>; monochrome unavailable",
+      "family": "p",
+      "channel": "e"
+    },
+    {
+      "id": 1102,
+      "key": "runtime_stream_p_f",
+      "label": "pf fatal",
+      "cli": [
+        "-pf<output>"
+      ],
+      "value_type": "stream",
+      "policy": "Conditional live",
+      "group": "Debug streams",
+      "accessor": "cfatal",
+      "adapter": "stream",
+      "reason": "SW_DBSTREAM; targets n, s, e, f<path>; monochrome unavailable",
+      "family": "p",
+      "channel": "f"
+    },
+    {
+      "id": 1103,
+      "key": "runtime_stream_p_s",
+      "label": "ps statistics",
+      "cli": [
+        "-ps<output>"
+      ],
+      "value_type": "stream",
+      "policy": "Conditional live",
+      "group": "Debug streams",
+      "accessor": "cstats",
+      "adapter": "stream",
+      "reason": "SW_DBSTREAM; targets n, s, e, f<path>; monochrome unavailable",
+      "family": "p",
+      "channel": "s"
+    },
+    {
+      "id": 1104,
+      "key": "runtime_stream_p_p",
+      "label": "pp progress",
+      "cli": [
+        "-pp<output>"
+      ],
+      "value_type": "stream",
+      "policy": "Conditional live",
+      "group": "Debug streams",
+      "accessor": "cprogress",
+      "adapter": "stream",
+      "reason": "SW_DBSTREAM; targets n, s, e, f<path>; monochrome unavailable",
+      "family": "p",
+      "channel": "p"
+    },
+    {
+      "id": 1105,
+      "key": "runtime_stream_p_d",
+      "label": "pd debugging",
+      "cli": [
+        "-pd<output>"
+      ],
+      "value_type": "stream",
+      "policy": "Conditional live",
+      "group": "Debug streams",
+      "accessor": "cdebug",
+      "adapter": "stream",
+      "reason": "SW_DBSTREAM; targets n, s, e, f<path>; monochrome unavailable",
+      "family": "p",
+      "channel": "d"
+    },
+    {
+      "id": 1106,
+      "key": "runtime_stream_p_u",
+      "label": "pu user",
+      "cli": [
+        "-pu<output>"
+      ],
+      "value_type": "stream",
+      "policy": "Conditional live",
+      "group": "Debug streams",
+      "accessor": "cuser",
+      "adapter": "stream",
+      "reason": "SW_DBSTREAM; targets n, s, e, f<path>; monochrome unavailable",
+      "family": "p",
+      "channel": "u"
+    },
+    {
+      "id": 1107,
+      "key": "runtime_stream_s_a",
+      "label": "sa actor system",
+      "cli": [
+        "-sa<output>"
+      ],
+      "value_type": "stream",
+      "policy": "Conditional live",
+      "group": "Debug streams",
+      "accessor": "cactor",
+      "adapter": "stream",
+      "reason": "SW_DBSTREAM; targets n, s, e, f<path>; monochrome unavailable",
+      "family": "s",
+      "channel": "a"
+    },
+    {
+      "id": 1108,
+      "key": "runtime_stream_s_f",
+      "label": "sf game flow",
+      "cli": [
+        "-sf<output>"
+      ],
+      "value_type": "stream",
+      "policy": "Conditional live",
+      "group": "Debug streams",
+      "accessor": "cflow",
+      "adapter": "stream",
+      "reason": "SW_DBSTREAM; targets n, s, e, f<path>; monochrome unavailable",
+      "family": "s",
+      "channel": "f"
+    },
+    {
+      "id": 1109,
+      "key": "runtime_stream_s_l",
+      "label": "sl Level system",
+      "cli": [
+        "-sl<output>"
+      ],
+      "value_type": "stream",
+      "policy": "Conditional live",
+      "group": "Debug streams",
+      "accessor": "clevel",
+      "adapter": "stream",
+      "reason": "SW_DBSTREAM; targets n, s, e, f<path>; monochrome unavailable",
+      "family": "s",
+      "channel": "l"
+    },
+    {
+      "id": 1110,
+      "key": "runtime_stream_s_t",
+      "label": "st tool set code",
+      "cli": [
+        "-st<output>"
+      ],
+      "value_type": "stream",
+      "policy": "Conditional live",
+      "group": "Debug streams",
+      "accessor": "ctool",
+      "adapter": "stream",
+      "reason": "SW_DBSTREAM; targets n, s, e, f<path>; monochrome unavailable",
+      "family": "s",
+      "channel": "t"
+    },
+    {
+      "id": 1111,
+      "key": "runtime_stream_s_e",
+      "label": "se camera code",
+      "cli": [
+        "-se<output>"
+      ],
+      "value_type": "stream",
+      "policy": "Conditional live",
+      "group": "Debug streams",
+      "accessor": "ccamera",
+      "adapter": "stream",
+      "reason": "SW_DBSTREAM; targets n, s, e, f<path>; monochrome unavailable",
+      "family": "s",
+      "channel": "e"
+    },
+    {
+      "id": 1112,
+      "key": "runtime_stream_s_n",
+      "label": "sn Frame Info",
+      "cli": [
+        "-sn<output>"
+      ],
+      "value_type": "stream",
+      "policy": "Conditional live",
+      "group": "Debug streams",
+      "accessor": "cframeinfo",
+      "adapter": "stream",
+      "reason": "SW_DBSTREAM; targets n, s, e, f<path>; monochrome unavailable",
+      "family": "s",
+      "channel": "n"
+    },
+    {
+      "id": 1113,
+      "key": "runtime_stream_l_a",
+      "label": "la animation/path system",
+      "cli": [
+        "-la<output>"
+      ],
+      "value_type": "stream",
+      "policy": "Conditional live",
+      "group": "Debug streams",
+      "accessor": "canim",
+      "adapter": "stream",
+      "reason": "SW_DBSTREAM; targets n, s, e, f<path>; monochrome unavailable",
+      "family": "l",
+      "channel": "a"
+    },
+    {
+      "id": 1114,
+      "key": "runtime_stream_l_A",
+      "label": "lA Asset ID system",
+      "cli": [
+        "-lA<output>"
+      ],
+      "value_type": "stream",
+      "policy": "Conditional live",
+      "group": "Debug streams",
+      "accessor": "casset",
+      "adapter": "stream",
+      "reason": "SW_DBSTREAM; targets n, s, e, f<path>; monochrome unavailable",
+      "family": "l",
+      "channel": "A"
+    },
+    {
+      "id": 1115,
+      "key": "runtime_stream_l_g",
+      "label": "lg graphics system",
+      "cli": [
+        "-lg<output>"
+      ],
+      "value_type": "stream",
+      "policy": "Conditional live",
+      "group": "Debug streams",
+      "accessor": "cgfx",
+      "adapter": "stream",
+      "reason": "SW_DBSTREAM; targets n, s, e, f<path>; monochrome unavailable",
+      "family": "l",
+      "channel": "g"
+    },
+    {
+      "id": 1116,
+      "key": "runtime_stream_l_i",
+      "label": "li iff reader library",
+      "cli": [
+        "-li<output>"
+      ],
+      "value_type": "stream",
+      "policy": "Conditional live",
+      "group": "Debug streams",
+      "accessor": "ciff",
+      "adapter": "stream",
+      "reason": "SW_DBSTREAM; targets n, s, e, f<path>; monochrome unavailable",
+      "family": "l",
+      "channel": "i"
+    },
+    {
+      "id": 1117,
+      "key": "runtime_stream_l_I",
+      "label": "lI mailbox system",
+      "cli": [
+        "-lI<output>"
+      ],
+      "value_type": "stream",
+      "policy": "Conditional live",
+      "group": "Debug streams",
+      "accessor": "cmailbox",
+      "adapter": "stream",
+      "reason": "SW_DBSTREAM; targets n, s, e, f<path>; monochrome unavailable",
+      "family": "l",
+      "channel": "I"
+    },
+    {
+      "id": 1118,
+      "key": "runtime_stream_l_m",
+      "label": "lm memory system",
+      "cli": [
+        "-lm<output>"
+      ],
+      "value_type": "stream",
+      "policy": "Conditional live",
+      "group": "Debug streams",
+      "accessor": "cmem",
+      "adapter": "stream",
+      "reason": "SW_DBSTREAM; targets n, s, e, f<path>; monochrome unavailable",
+      "family": "l",
+      "channel": "m"
+    },
+    {
+      "id": 1119,
+      "key": "runtime_stream_l_M",
+      "label": "lM movement handlers",
+      "cli": [
+        "-lM<output>"
+      ],
+      "value_type": "stream",
+      "policy": "Conditional live",
+      "group": "Debug streams",
+      "accessor": "cmovement",
+      "adapter": "stream",
+      "reason": "SW_DBSTREAM; targets n, s, e, f<path>; monochrome unavailable",
+      "family": "l",
+      "channel": "M"
+    },
+    {
+      "id": 1120,
+      "key": "runtime_stream_l_c",
+      "label": "lc collision system",
+      "cli": [
+        "-lc<output>"
+      ],
+      "value_type": "stream",
+      "policy": "Conditional live",
+      "group": "Debug streams",
+      "accessor": "ccollision",
+      "adapter": "stream",
+      "reason": "SW_DBSTREAM; targets n, s, e, f<path>; monochrome unavailable",
+      "family": "l",
+      "channel": "c"
+    },
+    {
+      "id": 1121,
+      "key": "runtime_stream_l_r",
+      "label": "lr room system",
+      "cli": [
+        "-lr<output>"
+      ],
+      "value_type": "stream",
+      "policy": "Conditional live",
+      "group": "Debug streams",
+      "accessor": "croom",
+      "adapter": "stream",
+      "reason": "SW_DBSTREAM; targets n, s, e, f<path>; monochrome unavailable",
+      "family": "l",
+      "channel": "r"
+    },
+    {
+      "id": 1122,
+      "key": "runtime_stream_l_R",
+      "label": "lR room slot assets",
+      "cli": [
+        "-lR<output>"
+      ],
+      "value_type": "stream",
+      "policy": "Conditional live",
+      "group": "Debug streams",
+      "accessor": "croomslots",
+      "adapter": "stream",
+      "reason": "SW_DBSTREAM; targets n, s, e, f<path>; monochrome unavailable",
+      "family": "l",
+      "channel": "R"
+    },
+    {
+      "id": 1123,
+      "key": "runtime_stream_l_s",
+      "label": "ls scripting languages",
+      "cli": [
+        "-ls<output>"
+      ],
+      "value_type": "stream",
+      "policy": "Conditional live",
+      "group": "Debug streams",
+      "accessor": "cscripting",
+      "adapter": "stream",
+      "reason": "SW_DBSTREAM; targets n, s, e, f<path>; monochrome unavailable",
+      "family": "l",
+      "channel": "s"
+    }
+  ],
+  "exclusions": {
+    "--plant-seed=": "Plant CLI removal planned; retain value through authored plant settings, never a baseline CLI row",
+    "--plant-age=": "Plant CLI removal planned; retain value through authored plant settings, never a baseline CLI row",
+    "--plant-speed=": "Plant CLI removal planned; retain value through authored plant settings, never a baseline CLI row",
+    "--plant-texture=": "Plant CLI removal planned; retain value through authored plant settings, never a baseline CLI row",
+    "--plant-sway=": "Plant CLI removal planned; retain value through authored plant settings, never a baseline CLI row",
+    "--plant-water=": "Plant CLI removal planned; retain value through authored plant settings, never a baseline CLI row"
+  },
+  "status": "Consumer snapshots effective values and activates supported fields at open"
+}

@@ -180,3 +180,12 @@ RedirectStandardStream( const char * str )
 }
 
 //==============================================================================
+
+// Read actual stream-buffer ownership, including startup file redirects.
+std::string DescribeStandardStream(std::ostream& stream) {
+    if(stream.rdbuf()==cnull.rdbuf())return "n";
+    if(stream.rdbuf()==std::cout.rdbuf())return "s";
+    if(stream.rdbuf()==std::cerr.rdbuf())return "e";
+    for(int i=0;i<gNumStreams;++i)if(stream.rdbuf()==gStreams[i]->rdbuf())return std::string("f")+gStreamNames[i];
+    return "unavailable";
+}

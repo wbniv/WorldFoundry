@@ -81,7 +81,8 @@ static std::unordered_map<int, ProfAcc> g_profAcc;
 static std::chrono::steady_clock::time_point g_profLast;
 static long   g_profMbCalls = 0;         // read-mailbox / write-mailbox calls, and the time spent inside them
 static double g_profMbMs    = 0;
-extern "C" void WFScriptProfileEnable() { g_profOn = true; g_profLast = std::chrono::steady_clock::now(); }
+extern "C" bool WFScriptProfileEnabled() { return g_profOn; }
+extern "C" void WFScriptProfileEnable() { if(g_profOn)return; g_profAcc.clear(); g_profMbCalls=0; g_profMbMs=0; g_profOn = true; g_profLast = std::chrono::steady_clock::now(); }
 static void ProfNote(int actor, double ms)
 {
     ProfAcc& a = g_profAcc[actor];
