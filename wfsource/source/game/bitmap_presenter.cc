@@ -78,7 +78,7 @@ void Presenter::Draw(Mailboxes& mb,int width,int height){
         fprintf(stderr,"BITMAP_TEXT beat=%d surface=%dx%d body_px=%d page_capacity=%d pages=%d atlas=%dx%d R8\n",beat,width,height,body.pixels,_capacity,_body.PageCount(_capacity),_catalog.Width(),_catalog.Height());
     }
     const int pages=_body.PageCount(_capacity);if(page<0||page>=pages)Fatal("display page outside current beat");
-    mb.WriteMailbox(_catalog.Binding(2),Scalar(page));mb.WriteMailbox(_catalog.Binding(3),Scalar(pages));
+    mb.WriteMailbox(_catalog.Binding(2),Scalar(float(page)));mb.WriteMailbox(_catalog.Binding(3),Scalar(float(pages)));
     if(_page!=page){
         _page=page;_quadCount=0;Variant body=_catalog.GetVariant(_bodyVariant),heading=_catalog.GetVariant(_headingVariant),control=_catalog.GetVariant(_controlVariant);
         if(!_heading.Draw(_catalog,_headingVariant,_text.title,_text.titleBytes,0,_heading.LineCount(),_bodyX,_headingY,heading.lineStep,0,0xECD7A2FFu,_quads,_quadCount,Layout::MAX_QUADS,error)||!_body.Draw(_catalog,_bodyVariant,_text.body,_text.bodyBytes,page*_capacity,_capacity,_bodyX,_bodyY,body.lineStep,0,0xF3EEE3FFu,_quads,_quadCount,Layout::MAX_QUADS,error)||!_controls.Draw(_catalog,_controlVariant,kControls,int(strlen(kControls)),0,_controls.LineCount(),_bodyX,_controlY,control.lineStep,0,0xC8BEA6FFu,_quads,_quadCount,Layout::MAX_QUADS,error))Fatal(error);
@@ -91,7 +91,7 @@ void Presenter::Draw(Mailboxes& mb,int width,int height){
     // Keep the opaque reading surface during the existing camera-ready delay.
     if(mb.ReadMailbox(_catalog.Binding(1)).WholePart()){
         rb.DrawGlyphs(_quads,_quadCount,width,height,_texture,false);
-        mb.WriteMailbox(_catalog.Binding(5),Scalar(beat));
+        mb.WriteMailbox(_catalog.Binding(5),Scalar(float(beat)));
     }else mb.WriteMailbox(_catalog.Binding(5),Scalar::zero);
     Validate();
 }
