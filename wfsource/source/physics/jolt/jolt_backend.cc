@@ -7,10 +7,15 @@
 
 #include <physics/jolt/jolt_backend.hp>
 #include <physics/jolt/jolt_math.hp>
+#include <streams/dbstrm.hp>
+#include <cpplib/libstrm.hp>
 
 #include <vector>
 #include <memory>
+#if SW_DBSTREAM
+#include <cstdarg>
 #include <cstdio>
+#endif
 #include <cassert>
 #include <limits>
 
@@ -188,14 +193,13 @@ static JPH::BodyID CreateJoltBodyImpl(const Vector3& pos, const Euler& rot,
                          ? JPH::EActivation::DontActivate
                          : JPH::EActivation::Activate;
     JPH::BodyID id = gBodyInterface->CreateAndAddBody(cfg, act);
-    const char* mtName = (motionType == JPH::EMotionType::Static)  ? "STATIC"
-                       : (motionType == JPH::EMotionType::Kinematic) ? "KINEMATIC"
-                       : "DYNAMIC";
-    std::fprintf(stderr, "jolt: body %s pos=(%.2f,%.2f,%.2f) half=(%.2f,%.2f,%.2f) id=%u\n",
-        mtName,
-        bodyPos.GetX(), bodyPos.GetY(), bodyPos.GetZ(),
-        halfExt.GetX(), halfExt.GetY(), halfExt.GetZ(),
-        id.GetIndexAndSequenceNumber());
+    DBSTREAM3( ccollision << "jolt: body "
+        << ((motionType == JPH::EMotionType::Static)    ? "STATIC"
+          : (motionType == JPH::EMotionType::Kinematic) ? "KINEMATIC"
+          : "DYNAMIC")
+        << " pos=(" << bodyPos.GetX() << "," << bodyPos.GetY() << "," << bodyPos.GetZ()
+        << ") half=(" << halfExt.GetX() << "," << halfExt.GetY() << "," << halfExt.GetZ()
+        << ") id=" << id.GetIndexAndSequenceNumber() << std::endl; )
     return id;
 }
 
@@ -232,9 +236,8 @@ uint32_t JoltBodyCreate(const Vector3& pos, const Euler& rot,
     // upgraded to DYNAMIC.
     JPH::BodyID id = CreateJoltBodyKinematic(pos, rot, minPt, maxPt);
     if (id.IsInvalid()) {
-        std::fprintf(stderr,
-            "jolt: body pool exhausted (max=%u); returning kJoltInvalidBodyID for JoltBodyCreate\n",
-            kJoltBodyPoolMax);
+        DBSTREAM1( cerror << "jolt: body pool exhausted (max=" << kJoltBodyPoolMax
+            << "); returning kJoltInvalidBodyID for JoltBodyCreate" << std::endl; )
         return kJoltInvalidBodyID;
     }
     uint32_t handle = AllocEntry();
@@ -255,7 +258,7 @@ void JoltBodySetDynamic(uint32_t handle)
                                    JPH::EActivation::Activate);
     // Move to the MOVING broadphase layer so it collides with STATIC bodies.
     gBodyInterface->SetObjectLayer(e.joltID, WFPhysLayers::DYNAMIC);
-    std::fprintf(stderr, "jolt: body %u → dynamic\n", handle);
+    DBSTREAM3( ccollision << "jolt: body " << handle << " → dynamic" << std::endl; )
 }
 
 uint32_t JoltBodyCreateStatic(const Vector3& pos, const Euler& rot,
@@ -264,9 +267,8 @@ uint32_t JoltBodyCreateStatic(const Vector3& pos, const Euler& rot,
     if (!gPhysicsSystem) return kJoltInvalidBodyID;
     JPH::BodyID id = CreateJoltBody(pos, rot, minPt, maxPt, /*isStatic=*/true);
     if (id.IsInvalid()) {
-        std::fprintf(stderr,
-            "jolt: body pool exhausted (max=%u); returning kJoltInvalidBodyID for JoltBodyCreateStatic\n",
-            kJoltBodyPoolMax);
+        DBSTREAM1( cerror << "jolt: body pool exhausted (max=" << kJoltBodyPoolMax
+            << "); returning kJoltInvalidBodyID for JoltBodyCreateStatic" << std::endl; )
         return kJoltInvalidBodyID;
     }
     uint32_t handle = AllocEntry();
@@ -286,25 +288,20 @@ uint32_t JoltBodyCreateStaticMesh(const Vector3& pos,
     if (!gPhysicsSystem) return kJoltInvalidBodyID;
 
     JPH::Vec3 worldOffset = ToJph(pos);
-    // TODO: Reimplement these temporary log guards using upstream diagnostic
-    // conventions (DBSTREAM/SW_DBSTREAM collision channel and Jolt trace integration).
-#if DO_DEBUGGING_INFO
-    std::fprintf(stderr, "jolt: mesh actor_pos=(%.3f,%.3f,%.3f)\n",
-                 pos.X().AsFloat(), pos.Y().AsFloat(), pos.Z().AsFloat());
-#endif
+    DBSTREAM3( ccollision << "jolt: mesh actor_pos=(" << pos.X().AsFloat()
+        << "," << pos.Y().AsFloat() << "," << pos.Z().AsFloat() << ")" << std::endl; )
 
     // Use MeshShape — correctly handles flat and sloped surfaces.
     // Vertices are in actor-local space; body is placed at actor world position.
     // Add both windings so the surface is two-sided (ball can approach from either side).
-#if DO_DEBUGGING_INFO
-    for (int i = 0; i < vertCount; ++i) {
-        std::fprintf(stderr, "jolt: mesh v%d local=(%.3f,%.3f,%.3f) world=(%.3f,%.3f,%.3f)\n",
-                     i, verts[i].x, verts[i].y, verts[i].z,
-                     verts[i].x + worldOffset.GetX(),
-                     verts[i].y + worldOffset.GetY(),
-                     verts[i].z + worldOffset.GetZ());
-    }
-#endif
+    DBSTREAM5(
+        for (int i = 0; i < vertCount; ++i)
+            ccollision << "jolt: mesh v" << i
+                << " local=(" << verts[i].x << "," << verts[i].y << "," << verts[i].z
+                << ") world=(" << verts[i].x + worldOffset.GetX()
+                << "," << verts[i].y + worldOffset.GetY()
+                << "," << verts[i].z + worldOffset.GetZ() << ")" << std::endl;
+    )
 
     JPH::TriangleList triangles;
     triangles.reserve((size_t)(faceCount * 2));
@@ -326,8 +323,8 @@ uint32_t JoltBodyCreateStaticMesh(const Vector3& pos,
     JPH::MeshShapeSettings meshSettings(triangles);
     JPH::Shape::ShapeResult result = meshSettings.Create();
     if (result.HasError()) {
-        std::fprintf(stderr, "jolt: MeshShape error: %s — falling back to bbox\n",
-                     result.GetError().c_str());
+        DBSTREAM1( cerror << "jolt: MeshShape error: " << result.GetError().c_str()
+            << " — falling back to bbox" << std::endl; )
         return kJoltInvalidBodyID;
     }
 
@@ -339,15 +336,12 @@ uint32_t JoltBodyCreateStaticMesh(const Vector3& pos,
 
     JPH::BodyID id = gBodyInterface->CreateAndAddBody(cfg, JPH::EActivation::DontActivate);
     if (id.IsInvalid()) {
-        std::fprintf(stderr,
-            "jolt: body pool exhausted (max=%u); returning kJoltInvalidBodyID for JoltBodyCreateStaticMesh\n",
-            kJoltBodyPoolMax);
+        DBSTREAM1( cerror << "jolt: body pool exhausted (max=" << kJoltBodyPoolMax
+            << "); returning kJoltInvalidBodyID for JoltBodyCreateStaticMesh" << std::endl; )
         return kJoltInvalidBodyID;
     }
-#if DO_DEBUGGING_INFO
-    std::fprintf(stderr, "jolt: body MESH_STATIC verts=%d faces=%d id=%u\n",
-                 vertCount, faceCount, id.GetIndexAndSequenceNumber());
-#endif
+    DBSTREAM3( ccollision << "jolt: body MESH_STATIC verts=" << vertCount
+        << " faces=" << faceCount << " id=" << id.GetIndexAndSequenceNumber() << std::endl; )
 
     uint32_t handle = AllocEntry();
     BodyEntry& e = gBodies[handle];
@@ -454,9 +448,6 @@ void JoltWorldStep(float dt)
 
     // Refresh vehicle position/rotation caches.
     UpdateVehicleCaches();
-
-    // Substep telemetry: uncomment to debug scheduler stability.
-    // if (nSteps > 0) std::fprintf(stderr, "jolt: step x%d (acc=%.4f)\n", nSteps, gAccumulator);
 }
 
 // ---------------------------------------------------------------------------
@@ -602,9 +593,8 @@ uint32_t JoltCharacterCreate(const Vector3& pos, const Euler& rot,
     {
         minPt = Vector3(Scalar(-0.5f), Scalar(-0.5f), Scalar( 0.0f));
         maxPt = Vector3(Scalar( 0.5f), Scalar( 0.5f), Scalar( 1.5f));
-        std::fprintf(stderr,
-            "jolt: character using physics-default ColSpace (1.0x1.0x1.5, feet-at-origin)"
-            " — per-actor ColSpace authoring not yet wired (TODO)\n");
+        DBSTREAM3( cwarn << "jolt: character using physics-default ColSpace (1.0x1.0x1.5, feet-at-origin)"
+            " — per-actor ColSpace authoring not yet wired (TODO)" << std::endl; )
     }
 
     Vector3 half = (maxPt - minPt) * Scalar(0.5f);
@@ -669,9 +659,10 @@ uint32_t JoltCharacterCreate(const Vector3& pos, const Euler& rot,
     // is registered later via JoltCharacterSetActor (we don't have it here).
     e.listener = std::unique_ptr<WFCharContactListener>(new WFCharContactListener());
     e.character->SetListener(e.listener.get());
-    std::fprintf(stderr, "jolt: character %u created at (%.2f, %.2f, %.2f) ctr=(%.2f,%.2f,%.2f)\n",
-                 handle, pos.X().AsFloat(), pos.Y().AsFloat(), pos.Z().AsFloat(),
-                 ctr.X().AsFloat(), ctr.Y().AsFloat(), ctr.Z().AsFloat());
+    DBSTREAM3( ccollision << "jolt: character " << handle << " created at ("
+        << pos.X().AsFloat() << ", " << pos.Y().AsFloat() << ", " << pos.Z().AsFloat()
+        << ") ctr=(" << ctr.X().AsFloat() << "," << ctr.Y().AsFloat() << "," << ctr.Z().AsFloat()
+        << ")" << std::endl; )
 
     // Exclude "zone volume" StatPlats from this character's collision. WF
     // levels sometimes wrap the play area in a large box StatPlat that's
@@ -706,8 +697,8 @@ uint32_t JoltCharacterCreate(const Vector3& pos, const Euler& rot,
                 mn.GetZ() <= charMinZ && mx.GetZ() >= charMaxZ)
             {
                 e.excludeBodies.push_back(be.joltID);
-                std::fprintf(stderr, "jolt: character %u ignoring zone body id=%u\n",
-                             handle, be.joltID.GetIndexAndSequenceNumber());
+                DBSTREAM4( ccollision << "jolt: character " << handle << " ignoring zone body id="
+                    << be.joltID.GetIndexAndSequenceNumber() << std::endl; )
             }
         }
     }
@@ -810,12 +801,6 @@ void JoltCharacterUpdate(uint32_t handle, float dt)
     }
 
     e.posCache = newPos;
-
-    // Log ball position every 30 ticks (~1 s at 30 fps).
-    static uint32_t sTick = 0;
-    if (handle == 0 && (++sTick % 30) == 0)
-        std::fprintf(stderr, "ball pos: (%.3f, %.3f, %.3f)\n",
-            newPos.X().AsFloat(), newPos.Y().AsFloat(), newPos.Z().AsFloat());
 }
 
 bool JoltCharacterIsOnGround(uint32_t handle)
@@ -884,7 +869,10 @@ uint32_t JoltVehicleCreate(const Vector3& pos, const Euler& rot,
     bodySettings.mFriction           = 0.6f;
 
     JPH::Body* body = gBodyInterface->CreateBody(bodySettings);
-    if (!body) { fprintf(stderr,"[jolt_vehicle] body create failed\n"); return kJoltInvalidBodyID; }
+    if (!body) {
+        DBSTREAM1( cerror << "[jolt_vehicle] body create failed" << std::endl; )
+        return kJoltInvalidBodyID;
+    }
     gBodyInterface->AddBody(body->GetID(), JPH::EActivation::Activate);
 
     // VehicleConstraint settings.
@@ -995,17 +983,30 @@ static void UpdateVehicleCaches()
 // Init / shutdown — called by JoltRuntimeInit / JoltRuntimeShutdown (physics_jolt.cc)
 // These are called from the existing lifecycle in scripting_stub.cc.
 
+#if SW_DBSTREAM
+// JPH::Trace hook. A named function rather than a lambda: GCC cannot convert
+// a C-variadic lambda to a function pointer.
+static void JoltTraceToStream(const char* inFMT, ...)
+{
+    char buf[512];
+    va_list args;
+    va_start(args, inFMT);
+    std::vsnprintf(buf, sizeof(buf), inFMT, args);
+    va_end(args);
+    DBSTREAM3( ccollision << "jolt: " << buf << std::endl; )
+}
+#endif
+
 void JoltOptimizeBroadPhase()
 {
     if (!gPhysicsSystem) return;
     gPhysicsSystem->OptimizeBroadPhase();
-    std::fprintf(stderr, "jolt: OptimizeBroadPhase done (%zu static bodies)\n",
-        []{
-            size_t n = 0;
-            for (const BodyEntry& e : gBodies)
-                if (e.occupied) ++n;
-            return n;
-        }());
+    DBSTREAM1(
+        size_t n = 0;
+        for (const BodyEntry& e : gBodies)
+            if (e.occupied) ++n;
+        ccollision << "jolt: OptimizeBroadPhase done (" << n << " static bodies)" << std::endl;
+    )
 }
 
 void JoltBackendInit()
@@ -1024,7 +1025,12 @@ void JoltBackendInit()
     gBodyInterface = &gPhysicsSystem->GetBodyInterface();
     gAccumulator   = 0.0f;
     gBodies.clear();
-    std::fprintf(stderr, "jolt: backend ready (gravity -Z)\n");
+#if SW_DBSTREAM
+    // Route Jolt's own trace output onto the collision stream (debug only;
+    // Release keeps Jolt's no-op default).
+    JPH::Trace = JoltTraceToStream;
+#endif
+    DBSTREAM1( ccollision << "jolt: backend ready (gravity -Z)" << std::endl; )
 }
 
 void JoltBackendShutdown()
