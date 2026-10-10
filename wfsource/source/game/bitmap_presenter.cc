@@ -23,7 +23,7 @@ Presenter::~Presenter(){Validate();auto& rb=RendererBackendGet();if(_texture&&_g
 void Presenter::BeginLabels(){Validate();for(int i=0;i<_signCount;++i)_signs[i].visible=false;}
 void Presenter::BuildSigns(int height){
     Validate();if(height==_signHeight)return;_signHeight=height;_signCount=_catalog.LabelCount();
-    const int variant=_catalog.SelectVariant(1,height<900?18:24);int count=0;const char* error=NULL;Layout layout;
+    const int variant=_catalog.SelectVariant(1,height<900?18:24);int count=0;const char* error=NULL;Layout& layout=_scratchLayout;
     for(int i=0;i<_signCount;++i){Label label=_catalog.GetLabel(i);if(!layout.Wrap(_catalog,variant,label.text,label.bytes,10000,error))Fatal(error);
         if(layout.LineCount()!=1)Fatal("world sign must fit one line");int first=count;
         if(count>=MAX_LABEL_GLYPHS)Fatal("too many world sign quads");
@@ -64,7 +64,7 @@ void Presenter::Draw(Mailboxes& mb,int width,int height){
         _bodyVariant=_catalog.SelectVariant(0,bodyPixels);_headingVariant=_catalog.SelectVariant(1,headingPixels);_controlVariant=_catalog.SelectVariant(0,controlPixels);
         Variant body=_catalog.GetVariant(_bodyVariant),heading=_catalog.GetVariant(_headingVariant),control=_catalog.GetVariant(_controlVariant);
         _bodyX=int(width*0.04f+0.5f);int margin=int(height*0.04f+0.5f),usable=width-2*_bodyX;
-        Layout progress;const char* maximum="256 / 256";
+        Layout& progress=_scratchLayout;const char* maximum="256 / 256";
         if(!progress.Wrap(_catalog,_controlVariant,maximum,int(strlen(maximum)),usable,error))Fatal(error);
         const int progressWidth=int(ceilf(progress.GetLine(0).width))+control.pixels;
         if(!_heading.Wrap(_catalog,_headingVariant,_text.title,_text.titleBytes,usable-progressWidth,error)||!_controls.Wrap(_catalog,_controlVariant,kControls,int(strlen(kControls)),usable,error)||!_body.Wrap(_catalog,_bodyVariant,_text.body,_text.bodyBytes,usable,error))Fatal(error);
@@ -83,7 +83,7 @@ void Presenter::Draw(Mailboxes& mb,int width,int height){
         _page=page;_quadCount=0;Variant body=_catalog.GetVariant(_bodyVariant),heading=_catalog.GetVariant(_headingVariant),control=_catalog.GetVariant(_controlVariant);
         if(!_heading.Draw(_catalog,_headingVariant,_text.title,_text.titleBytes,0,_heading.LineCount(),_bodyX,_headingY,heading.lineStep,0,0xECD7A2FFu,_quads,_quadCount,Layout::MAX_QUADS,error)||!_body.Draw(_catalog,_bodyVariant,_text.body,_text.bodyBytes,page*_capacity,_capacity,_bodyX,_bodyY,body.lineStep,0,0xF3EEE3FFu,_quads,_quadCount,Layout::MAX_QUADS,error)||!_controls.Draw(_catalog,_controlVariant,kControls,int(strlen(kControls)),0,_controls.LineCount(),_bodyX,_controlY,control.lineStep,0,0xC8BEA6FFu,_quads,_quadCount,Layout::MAX_QUADS,error))Fatal(error);
         char progress[32];std::snprintf(progress,sizeof(progress),"%d / %d",page+1,pages);
-        Layout progressLayout;if(!progressLayout.Wrap(_catalog,_controlVariant,progress,int(strlen(progress)),width,error))Fatal(error);
+        Layout& progressLayout=_scratchLayout;if(!progressLayout.Wrap(_catalog,_controlVariant,progress,int(strlen(progress)),width,error))Fatal(error);
         int progressX=width-_bodyX-int(ceilf(progressLayout.GetLine(0).width));
         if(!progressLayout.Draw(_catalog,_controlVariant,progress,int(strlen(progress)),0,1,progressX,_headingY,control.lineStep,0,0xC8BEA6FFu,_quads,_quadCount,Layout::MAX_QUADS,error))Fatal(error);
     }

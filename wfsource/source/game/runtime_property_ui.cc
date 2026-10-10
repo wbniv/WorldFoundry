@@ -10,7 +10,7 @@ namespace { const bool registeredInput=[](){inputHandler()=&input;return true;}(
 void build(wfprops::Form& editor,bool phone,int w,int h,std::vector<PhonepadRect>& out){
  float sx=w/1920.f,sy=h/1080.f;
  auto rect=[&](float x,float y,float width,float height,uint32_t color){out.push_back({x*sx,y*sy,(x+width)*sx,(y+height)*sy,color});};
- auto text=[&](float x,float y,float scale,const std::string& str,uint32_t color=0xf1f2e4ffu){alignas(float) char buf[24000];int n=stb_easy_font_print(0,0,const_cast<char*>(str.c_str()),nullptr,buf,sizeof(buf));float* f=reinterpret_cast<float*>(buf);for(int i=0;i<n;i++){float* v=f+i*16;float x0=v[0],y0=v[1],x1=x0,y1=y0;for(int k=1;k<4;k++){x0=std::min(x0,v[k*4]);x1=std::max(x1,v[k*4]);y0=std::min(y0,v[k*4+1]);y1=std::max(y1,v[k*4+1]);}rect(x+x0*scale,y+y0*scale,(x1-x0)*scale,(y1-y0)*scale,color);}};
+ auto text=[&](float x,float y,float scale,const std::string& str,uint32_t color=0xf1f2e4ffu){auto& buf=editor.textVertices;int n=stb_easy_font_print(0,0,const_cast<char*>(str.c_str()),nullptr,buf,sizeof(buf));float* f=buf;for(int i=0;i<n;i++){float* v=f+i*16;float x0=v[0],y0=v[1],x1=x0,y1=y0;for(int k=1;k<4;k++){x0=std::min(x0,v[k*4]);x1=std::max(x1,v[k*4]);y0=std::min(y0,v[k*4+1]);y1=std::max(y1,v[k*4+1]);}rect(x+x0*scale,y+y0*scale,(x1-x0)*scale,(y1-y0)*scale,color);}};
  rect(0,0,1920,1080,0x061014ffu);rect(180,110,1560,820,0x142d25ffu);
  syncText(editor,phone);auto& f=editor;auto* object=f.edit.object();if(!object)return;text(225,150,4,object->title);
  struct ArrowPainter {decltype(rect)& draw;void Rect(float x0,float y0,float x1,float y1,uint32_t c){draw(x0,y0,x1-x0,y1-y0,c);}} painter{rect};

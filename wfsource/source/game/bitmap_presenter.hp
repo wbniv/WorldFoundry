@@ -24,6 +24,8 @@ public:
 private:
     Catalog _catalog;
     Layout _body, _heading, _controls;
+    // Sequential sign/progress work, separate from cached reader layouts.
+    Layout _scratchLayout;
     Quad _quads[Layout::MAX_QUADS];
     enum { MAX_LABELS=128, MAX_LABEL_GLYPHS=2048 };
     struct Sign { int actor, first, count; float x,y,depth; bool visible; };

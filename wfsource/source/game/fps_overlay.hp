@@ -44,6 +44,7 @@ private:
 	int _width = 0, _height = 0;
 	enum { MAX_QUADS = 128 };
 	PhonepadRect _rects[MAX_QUADS + 1];
+	float _vertices[MAX_QUADS * 16];
 	int _count = 0;
 };
 }

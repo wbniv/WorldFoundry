@@ -3,6 +3,9 @@
 namespace wfprops {
 // Focus uses authored sections and rows, never screen-coordinate proximity.
 struct Form {
+    // Reused by form, object picker and planting HUD in their serial draw path.
+    // Owner storage also keeps standalone UI tests independent of HAL startup.
+    float textVertices[6000];
     Edit edit;
     std::vector<std::vector<size_t>> sections;
     std::vector<std::string> titles;

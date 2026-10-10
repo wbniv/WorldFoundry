@@ -30,6 +30,7 @@
 
 #include <gfx/renderer_backend.hp>
 #include <game/bitmap_text.hp>
+#include <hal/halbase.h>
 #include <gfx/static_mesh.hp>
 #include <gfx/backface_cull.hp>
 #include <hal/phonepad/phonepad_overlay.h>
@@ -604,6 +605,7 @@ public:
     {
         if(!texture||count<=0||width<=0||height<=0)return;
         Flush();
+        enum { BATCH_QUADS=256, VERTICES_PER_QUAD=6, FLOATS_PER_VERTEX=9 };
         GLint viewport[4],program,vao,buffer,active,tex,srcRGB,dstRGB,srcAlpha,dstAlpha;
         GLboolean depthMask;glGetIntegerv(GL_VIEWPORT,viewport);glGetIntegerv(GL_CURRENT_PROGRAM,&program);
         glGetIntegerv(GL_VERTEX_ARRAY_BINDING,&vao);glGetIntegerv(GL_ARRAY_BUFFER_BINDING,&buffer);
@@ -619,7 +621,7 @@ public:
             _glyphProgram=LinkProgram(vs,fs);glDeleteShader(vs);glDeleteShader(fs);
             glGenVertexArrays(1,&_glyphVao);glGenBuffers(1,&_glyphBuffer);
             glBindVertexArray(_glyphVao);glBindBuffer(GL_ARRAY_BUFFER,_glyphBuffer);
-            glBufferData(GL_ARRAY_BUFFER,256*6*9*sizeof(float),NULL,GL_STREAM_DRAW);
+            glBufferData(GL_ARRAY_BUFFER,BATCH_QUADS*VERTICES_PER_QUAD*FLOATS_PER_VERTEX*sizeof(float),NULL,GL_STREAM_DRAW);
             for(int i=0;i<3;++i)glEnableVertexAttribArray(i);
             glVertexAttribPointer(0,3,GL_FLOAT,GL_FALSE,9*sizeof(float),(void*)0);
             glVertexAttribPointer(1,2,GL_FLOAT,GL_FALSE,9*sizeof(float),(void*)(3*sizeof(float)));
@@ -632,17 +634,22 @@ public:
         glEnable(GL_BLEND);glBlendFunc(GL_SRC_ALPHA,GL_ONE_MINUS_SRC_ALPHA);glDepthMask(GL_FALSE);
         if(testDepth)glEnable(GL_DEPTH_TEST);else glDisable(GL_DEPTH_TEST);
         glDisable(GL_CULL_FACE);glDisable(GL_SCISSOR_TEST);
-        float vertices[256*6*9];const int corner[6]={0,1,2,0,2,3};
-        for(int start=0;start<count;start+=256){const int n=std::min(256,count-start);
+        // Borrow only one batch from the existing frame scratch arena. Uploads
+        // consume this span synchronously; no pointer survives the call.
+        const size_t scratchBytes=std::min(count,int(BATCH_QUADS))*VERTICES_PER_QUAD*FLOATS_PER_VERTEX*sizeof(float);
+        float* vertices=static_cast<float*>(HALScratchLmalloc.Allocate(scratchBytes ASSERTIONS(COMMA __FILE__ COMMA __LINE__)));
+        const int corner[VERTICES_PER_QUAD]={0,1,2,0,2,3};
+        for(int start=0;start<count;start+=BATCH_QUADS){const int n=std::min(int(BATCH_QUADS),count-start);
             for(int q=0;q<n;++q){const auto& g=quads[start+q];
-                for(int v=0;v<6;++v){int c=corner[v];float* p=vertices+(q*6+v)*9;
+                for(int v=0;v<VERTICES_PER_QUAD;++v){int c=corner[v];float* p=vertices+(q*VERTICES_PER_QUAD+v)*FLOATS_PER_VERTEX;
                     p[0]=(c==1||c==2)?g.x1:g.x0;p[1]=c>=2?g.y1:g.y0;p[2]=0;
                     p[3]=(c==1||c==2)?g.u1:g.u0;p[4]=c>=2?g.v1:g.v0;
                     p[5]=float(g.rgba>>24)/255;p[6]=float((g.rgba>>16)&255)/255;p[7]=float((g.rgba>>8)&255)/255;p[8]=float(g.rgba&255)/255;
                 }
             }
-            glBufferSubData(GL_ARRAY_BUFFER,0,n*6*9*sizeof(float),vertices);glDrawArrays(GL_TRIANGLES,0,n*6);
+            glBufferSubData(GL_ARRAY_BUFFER,0,n*VERTICES_PER_QUAD*FLOATS_PER_VERTEX*sizeof(float),vertices);glDrawArrays(GL_TRIANGLES,0,n*VERTICES_PER_QUAD);
         }
+        HALScratchLmalloc.Free(vertices);
         glBindTexture(GL_TEXTURE_2D,tex);glActiveTexture(active);glUseProgram(program);glBindVertexArray(vao);glBindBuffer(GL_ARRAY_BUFFER,buffer);
         glViewport(viewport[0],viewport[1],viewport[2],viewport[3]);glDepthMask(depthMask);glBlendFuncSeparate(srcRGB,dstRGB,srcAlpha,dstAlpha);
         if(depth)glEnable(GL_DEPTH_TEST);else glDisable(GL_DEPTH_TEST);

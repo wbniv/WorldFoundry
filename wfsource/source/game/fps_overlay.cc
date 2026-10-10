@@ -54,7 +54,7 @@ int Overlay::Build(Scalar fps, int width, int height)
 	const float bottom = float(height) * 0.97f;
 
 	// stb writes float positions: retain float alignment on 32-bit ARM.
-	float vertices[MAX_QUADS * 16];
+	auto& vertices = _vertices;
 	const int count = stb_easy_font_print(0, 0, text, NULL, vertices, sizeof(vertices));
 	assert(count > 0);
 	float left = vertices[0], top = vertices[1];
