@@ -627,6 +627,9 @@ WFAndroidPumpEvents()
 extern "C" WF_ANDROID_EXPORT int
 WFAndroidPhoneOverlayRects(int w, int h, const PhonepadRect** rects, int* changed)
 {
+    // The panel says "Use your phone as the controller": meaningless on the phone itself, so it is
+    // drawn only on a TV with the controller running, whatever else set an endpoint.
+    if (!gIsTvMode || !gPhoneEnabled) { gPhoneRects.clear(); *changed = 0; *rects = gPhoneRects.data(); return 0; }
     *changed = gPhoneOverlay.Build(w, h, NowMs(), &gPhoneRects) ? 1 : 0;
     *rects   = gPhoneRects.data();
     return int(gPhoneRects.size());
