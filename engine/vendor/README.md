@@ -44,6 +44,15 @@ as source and is linked in at build time.
 - `tsf/tml.h` — `93257db259e0efb2ea2037d7157841bec8cb4a2d7986286e43c8090705326546` (fetched from schellingb/TinySoundFont main 2026-04-17)
 - `qrcodegen-3c6d0b3c/qrcodegen.c` (commit `3c6d0b3cefb4e049dc337e82237c9644399716a8`) — `6a2b9cc65176f2345dde260c74b6d352627e8a0a6385d086ae0e9c5d0913c70c`; `qrcodegen.h` — `e82df4bff37d18b5863b9e7486fe6bda1b6cda8c3b9ecebfec473907265cb589` (unmodified; the TV overlay's QR code for the phone controller, docs/plans/2026-09-30-aquarium-chromecast.md Phase E3)
 
+## Web toolchain SHA256 (Emscripten 6.0.0, not committed)
+
+`task emsdk-manager` + `task setup-emsdk` install these into the ignored `engine/vendor/emsdk-6.0.0/`; emsdk itself checks no checksum. Linux x86_64 only; measured 2026-10-10. The machine-readable copy, offline installer and mirror design are in finding-your-way: `game/parmenides-slice/web/web-deps.json`, `web_deps.py` and `docs/plans/2026-10-10-web-build-dependency-mirror.md` (its test fails if this list drifts).
+
+- emsdk manager — commit `b44154299bdefe75ba287874bb63fc9806243771` ([emscripten-core/emsdk](https://github.com/emscripten-core/emsdk))
+- `772bb4648be4a897ca062d6adc65bc70223d2703-wasm-binaries.tar.xz` (Emscripten 6.0.0 = releases hash `772bb464…`: LLVM, Binaryen, Emscripten; 269,920,796 bytes) — `b5ed0963521f1d35b8967f20b1776327980bcfd5133166b40e018f27f2380e89` ([upstream](https://storage.googleapis.com/webassembly/emscripten-releases-builds/linux/772bb4648be4a897ca062d6adc65bc70223d2703/wasm-binaries.tar.xz); GCS md5 `omQfiKFSwcJyytIFMJLuYw==` matches)
+- `node-v24.19.0-linux-x64.tar.xz` (31,633,904 bytes) — `14b342e71204f811bde6153be8e04b62aef63c236fef92b55f9c83154b409647` ([upstream](https://storage.googleapis.com/webassembly/emscripten-releases-builds/deps/node-v24.19.0-linux-x64.tar.xz); equals nodejs.org `SHASUMS256.txt`)
+- Installed tree digest (`upstream/` + `node/`, excluding `upstream/emscripten/cache` and `__pycache__`; 14,768 files; 1.6 GiB installed in total) — `cf44d4c4492f15d0ae8cc172c44ba0c8dfce489f642884eedc2677a923faba04`
+
 ## Runtime assets (not committed)
 
 | File | Notes |

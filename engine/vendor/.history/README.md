@@ -1,5 +1,6 @@
 | Date | Change |
 |------|--------|
+| [2026-10-01](https://github.com/wbniv/WorldFoundry/commit/ab919ab8) | Phone as a gamepad, E3: the QR code on the TV overlay (vendored Nayuki qrcodegen, MIT) |
 | [2026-10-01](https://github.com/wbniv/WorldFoundry/commit/8776018f) | Soundfont: a reproducible recipe (task soundfont) replaces the never-committed florestan-subset.sf2 |
 | [2026-04-17](https://github.com/wbniv/WorldFoundry/commit/e183d834) | feat(audio): Phase 2 — MIDI via TinySoundFont + MusicPlayer |
 | [2026-04-17](https://github.com/wbniv/WorldFoundry/commit/f4dc979b) | feat(audio): Phase 1 — vendor miniaudio, SoundDevice/SoundBuffer, startup beep |
@@ -13,6 +14,11 @@
 | [2026-04-14](https://github.com/wbniv/WorldFoundry/commit/8384f902) | JavaScript on the // sigil: QuickJS + JerryScript engines |
 
 <!--history-meta v1
+ab919ab8	author	Will Norris
+ab919ab8	added	2
+ab919ab8	deleted	0
+ab919ab8	files	1
+ab919ab8	body	The overlay encodes the full URL with this launch's PIN (http://<ip>:8765/?k=<pin>) at run time and\ndraws it left of the address and PIN: black modules on white, a 4-module quiet zone, about 600 px at\n1080p on whole pixels (16 px modules for the usual 29-module code). The text URL and PIN stay as the\nfallback. engine/vendor/qrcodegen-3c6d0b3c: the C version at commit 3c6d0b3c, unmodified, licence and\nSHA-256 recorded in engine/vendor/README.md; compiled into the Android library and the Linux test host.\n\nTests (no new dependency): tests/qr_decode.py, a small reader written from ISO/IEC 18004 (format BCH,\nunmasking, zigzag, block de-interleave, byte mode, Reed-Solomon check), proved on segno's codes; the\nengine's code reads back to the URL, matches segno's function patterns and has correct RS bytes; the\noverlay's composited frame samples back to exactly that code with its quiet zone at 1080p and 720p.\nA transposed code fails 10 of them. On the Chromecast HD the code read back from the real screenshot\ngives http://192.168.4.38:8765/?k=299223. Brought forward from E3 at the user's request.\n\nCo-Authored-By: Claude Opus 5.5 <noreply@anthropic.com>\nClaude-Session: https://claude.ai/code/session_01DxMP4jUNjCjDz8E9DWzXcM
 8776018f	author	Will Norris
 8776018f	added	4
 8776018f	deleted	1
