@@ -68,6 +68,15 @@ ConvertTimeToScalar(const struct timeval& tv)
 
 //==============================================================================
 
+// Process-wide single active Display, mirroring gfx/gl/display.cc. Set in the
+// ctor, cleared in the dtor. Backs Display::GetActive() (level.cc's bitmap
+// label presenter needs it since 1d90c3be).
+static Display* gActiveDisplay = nullptr;
+
+Display* Display::GetActive() { return gActiveDisplay; }
+
+//==============================================================================
+
 Display::Display(int /*orderTableSize*/,
                  int xPos, int yPos, int xSize, int ySize,
                  Memory& memory, bool /*interlace*/)
@@ -89,6 +98,7 @@ Display::Display(int /*orderTableSize*/,
     s_projW = s_projH = 0;
     IosUpdateProjection(xSize, ySize);
 
+    gActiveDisplay = this;
     ResetTime();
 }
 
@@ -97,6 +107,7 @@ Display::Display(int /*orderTableSize*/,
 Display::~Display()
 {
     Validate();
+    if (gActiveDisplay == this) gActiveDisplay = nullptr;
 }
 
 void Display::GetSurfaceSize(int& w, int& h) const
