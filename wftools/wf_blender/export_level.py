@@ -443,6 +443,44 @@ def _write_iff_chunk(tag: str, payload: bytes) -> bytes:
     return tag_bytes + struct.pack('<I', size) + payload + b'\x00' * pad
 
 
+def _srgb_byte(linear: float) -> int:
+    """Linear 0..1 -> display-space byte, the space the engine multiplies in."""
+    x = min(1.0, max(0.0, linear))
+    x = 12.92 * x if x <= 0.0031308 else 1.055 * (x ** (1 / 2.4)) - 0.055
+    return int(round(min(1.0, max(0.0, x)) * 255))
+
+
+def _vertex_colour_reader(blobj, bm):
+    """Return fn(loop) -> 0x00RRGGBB for the active colour attribute, or None.
+
+    Opt-in: only meshes whose object sets `wf_vertex_colors` export colours;
+    every other mesh keeps the constant white VRTX colour, byte for byte.
+    Byte colour layers are already sRGB-encoded in bmesh; float layers are
+    linear and are encoded here, so both reach the engine in display space.
+    """
+    mesh = blobj.data
+    if not blobj.get('wf_vertex_colors', False):
+        return None
+    attr = mesh.color_attributes.active_color
+    if attr is None:
+        raise ValueError(f"{blobj.name}: wf_vertex_colors set but the mesh has no colour attribute")
+    on_corner = attr.domain == 'CORNER'
+    is_float = attr.data_type == 'FLOAT_COLOR'
+    layers = bm.loops.layers if on_corner else bm.verts.layers
+    layer = (layers.float_color if is_float else layers.color).get(attr.name)
+    if layer is None:
+        raise ValueError(f"{blobj.name}: colour attribute {attr.name!r} is not a point or corner colour")
+
+    def read(loop):
+        rgba = loop[layer] if on_corner else loop.vert[layer]
+        if is_float:
+            r, g, b = (_srgb_byte(c) for c in rgba[:3])
+        else:
+            r, g, b = (int(round(min(1.0, max(0.0, c)) * 255)) for c in rgba[:3])
+        return (r << 16) | (g << 8) | b
+    return read
+
+
 def _write_mesh_iff(blobj, filepath: str) -> bool:
     """
     Write a Blender mesh object as a World Foundry MODL binary .iff.
@@ -477,6 +515,7 @@ def _write_mesh_iff(blobj, filepath: str) -> bool:
     _bmesh.ops.triangulate(bm, faces=bm.faces)
 
     uv_layer = bm.loops.layers.uv.active
+    read_colour = _vertex_colour_reader(blobj, bm)
 
     bm.verts.ensure_lookup_table()
     bm.faces.ensure_lookup_table()
@@ -486,7 +525,7 @@ def _write_mesh_iff(blobj, filepath: str) -> bool:
     # vertex — without splitting, seam edges pick up the wrong UV from whichever
     # loop was visited first.
     split_rig = []
-    split_verts = []          # list of (co, u, v)
+    split_verts = []          # list of (co, u, v, colour)
     split_map   = {}          # (orig_vi, u_key, v_key) → new_vi
 
     face_triples = []         # list of (new_v1, new_v2, new_v3, mat_idx)
@@ -503,10 +542,11 @@ def _write_mesh_iff(blobj, filepath: str) -> bool:
             # Quantise to fixed-point to avoid spurious splits from float noise
             u_key = int(round(u * 65536))
             v_key = int(round(v * 65536))
-            key = (orig_vi, u_key, v_key)
+            colour = read_colour(loop) if read_colour else 0xFFFFFF
+            key = (orig_vi, u_key, v_key, colour)
             if key not in split_map:
                 split_map[key] = len(split_verts)
-                split_verts.append((bm.verts[orig_vi].co.copy(), u, v))
+                split_verts.append((bm.verts[orig_vi].co.copy(), u, v, colour))
                 split_rig.append(rig[orig_vi] if rig is not None else ())
             tri.append(split_map[key])
         face_triples.append((tri[2], tri[1], tri[0], face.material_index))   # Blender hand → WF hand
@@ -521,9 +561,9 @@ def _write_mesh_iff(blobj, filepath: str) -> bool:
     # vertices by their fixed-point (position, uv) so identical verts merge and
     # the order is canonical; remap + sort faces. Geometry/rendering unchanged;
     # the bytes are now reproducible.
-    def _vkey(co, u, v):
+    def _vkey(co, u, v, colour):
         return (int(round(co.x * 65536)), int(round(co.y * 65536)), int(round(co.z * 65536)),
-                int(round(u * 65536)), int(round(v * 65536)))
+                int(round(u * 65536)), int(round(v * 65536)), colour)
     # Metadata is part of identity: coincident roots with different rig roles
     # must not merge even when their position and UV are identical.
     keys=[_vkey(*v)+meta for v,meta in zip(split_verts,split_rig)]
@@ -543,10 +583,10 @@ def _write_mesh_iff(blobj, filepath: str) -> bool:
 
     # Build VRTX payload
     vrtx = bytearray()
-    for co, u, v in split_verts:
+    for co, u, v, colour in split_verts:
         wf_x, wf_y, wf_z = bl_to_wf(co.x, co.y, co.z)
         vrtx += struct.pack('<iiIiii',
-                            int(u * 65536), int(v * 65536), 0xFFFFFF,
+                            int(u * 65536), int(v * 65536), colour,
                             int(wf_x * 65536), int(wf_y * 65536), int(wf_z * 65536))
 
     # Build FACE payload
@@ -585,6 +625,8 @@ def _write_mesh_iff(blobj, filepath: str) -> bool:
             tex=str(mat.get('wf_palette_texture',''))
             if not tex: raise ValueError('Palette material missing shared texture')
             flags |= 2|64
+        # Per-vertex colour reaches the primitive only on Gouraud materials.
+        if mat.get('wf_gouraud', False): flags |= 1
         if mat.get('wf_double_sided', False): flags |= 8
         if mat.get('wf_prelit', False): flags |= 4
         if mat.get('wf_alpha_cutout', False): flags |= 16
