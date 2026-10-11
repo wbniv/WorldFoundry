@@ -133,12 +133,11 @@ static const char* kFS =
     "{\n"
     "    vec4 c = vec4(v_color * v_lit, 1.0);\n"
     "    if (u_use_tex != 0) {\n"
-    "        float is_white = step(0.99, min(v_color.r, min(v_color.g, v_color.b)));\n"
     "        vec4 texel = texture(u_tex, v_uv);\n"
     "#ifndef WF_OPAQUE\n"
-    "        if (u_alpha_cutout != 0 && (is_white > 0.5 || (u_use_tex & 2) != 0) && texel.a < 0.5) discard;\n"
+    "        if (u_alpha_cutout != 0 && texel.a < 0.5) discard;\n"
     "#endif\n"
-    "        vec3 albedo = v_palette_dark.a > 0.5 ? mix(v_palette_dark.rgb, v_palette_light, clamp((texel.r - 0.08) / 0.85, 0.0, 1.0)) : ((u_use_tex & 2) != 0 ? texel.rgb * v_color : mix(v_color, texel.rgb, is_white));\n"
+    "        vec3 albedo = v_palette_dark.a > 0.5 ? mix(v_palette_dark.rgb, v_palette_light, clamp((texel.r - 0.08) / 0.85, 0.0, 1.0)) : texel.rgb * v_color;\n"
     "        c = vec4(albedo * v_lit, 1.0);\n"
     "    }\n"
     "    if (u_fog != 0) c.rgb = mix(u_fog_color, c.rgb, v_fog_factor);\n"
@@ -427,13 +426,6 @@ public:
         // is per vertex; only switching the blend/depth policy needs a flush.
         if ((_opacity < 1.0f) != (opacity < 1.0f)) Flush();
         _opacity = opacity;
-    }
-
-    void SetTextureModulation(bool enabled) override
-    {
-        if (_modulateTexture == enabled) return;
-        Flush();
-        _modulateTexture = enabled;
     }
 
     void SetAlphaCutout(bool enabled) override
@@ -973,7 +965,6 @@ private:
     float _lightColor[RB_MAX_LIGHTS][3];
 
     bool _alphaCutout = false;
-    bool _modulateTexture = false;
     bool  _fogEnabled = false;
     float _fogColor[3] = { 0.0f, 0.0f, 0.0f };
     float _fogStart = 1.0f;
@@ -1112,7 +1103,7 @@ private:
             glActiveTexture(GL_TEXTURE0);
             _curTexture->SetGLTexture();
             glUniform1i(uniforms.tex, 0);
-            glUniform1i(uniforms.useTex, _modulateTexture ? 3 : 1);
+            glUniform1i(uniforms.useTex, 1);
             glUniform1i(uniforms.alphaCutout, _alphaCutout ? 1 : 0);
         }
         else

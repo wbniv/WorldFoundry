@@ -179,16 +179,12 @@ fragment float4 wf_fs(VertexOut v                  [[stage_in]],
                       sampler          smp         [[sampler(0)]])
 {
     float4 c = float4(v.color * v.lit, 1.0);
-    // Phase 3: REPLACE-IF-WHITE, character for character the rule in
-    // backend_modern.cc's kFS. WF's convention is that a white vertex colour
-    // means "this face is textured" and any other colour means "flat coloured,
-    // ignore the texture" — so it is a mix() selected by whiteness, NOT a
-    // modulate. Modulating (the obvious guess) happens to agree on white faces
-    // and silently darkens every coloured-but-textured face.
+    // Textured faces are albedo x vertex colour, the same rule as backend_modern.cc's
+    // kFS. White-vertex-colour faces are unchanged. (The former replace-if-white
+    // rule, which ignored the texture on any coloured face, was removed.)
     if (u.use_tex != 0) {
-        float is_white = step(0.99, min(v.color.r, min(v.color.g, v.color.b)));
-        float3 sample=tex.sample(smp,v.uv).rgb;
-        float3 albedo=v.palette_dark.a>0.5 ? mix(v.palette_dark.xyz,v.palette_light,clamp((sample.r-.08)/.85,0.0,1.0)) : ((u.use_tex & 2)!=0 ? sample*v.color : mix(v.color,sample,is_white));
+                float3 sample=tex.sample(smp,v.uv).rgb;
+        float3 albedo=v.palette_dark.a>0.5 ? mix(v.palette_dark.xyz,v.palette_light,clamp((sample.r-.08)/.85,0.0,1.0)) : sample*v.color;
         c=float4(albedo*v.lit,1.0);
     }
     if (u.fog != 0) {
@@ -375,13 +371,6 @@ public:
         Flush();
         _fogColor[0] = r; _fogColor[1] = g; _fogColor[2] = b;
         _fogStart = start; _fogEnd = end;
-    }
-
-    void SetTextureModulation(bool enabled) override
-    {
-        if (_modulateTexture == enabled) return;
-        Flush();
-        _modulateTexture = enabled;
     }
 
     void SetTexturePalette(bool e,unsigned dark,unsigned light) override
@@ -624,7 +613,6 @@ private:
     float _textView[16]={};
     id<MTLSamplerState> _glyphSampler=nil;
     float _opacity = 1.0f;
-    bool _modulateTexture = false;
     bool _paletteEnabled=false; unsigned _paletteDark=0,_paletteLight=0xffffff;
     id<MTLDepthStencilState>   _depthState      = nil;
     id<MTLRenderCommandEncoder> _encoder        = nil;
@@ -828,7 +816,7 @@ private:
         // sub-pixelmap correctly reports its atlas parent's texture.
         _boundTexture = _curTexture ? _curTexture->GetTextureHandle() : NULL;
         if(_bitmapPass)_boundTexture=_bitmapHandle;
-        u.use_tex = _bitmapPass ? 4 : (_boundTexture ? (_modulateTexture ? 3 : 1) : 0);
+        u.use_tex = _bitmapPass ? 4 : (_boundTexture ? 1 : 0);
         u._pad        = 0;
     }
 

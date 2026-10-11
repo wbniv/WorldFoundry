@@ -295,7 +295,7 @@ StaticMeshEndFrame()
 struct RecordedFace
 {
 	const PixelMap* texture;
-	uint8 cullExempt, prelit, alphaCutout, modulate;
+	uint8 cullExempt, prelit, alphaCutout;
 };
 
 namespace
@@ -318,7 +318,6 @@ namespace
 		void SetFog(float, float, float, float, float) override {}
 		void SetFogEnabled(bool) override {}
 		void SetAlphaCutout(bool enabled) override { _alphaCutout = enabled; }
-		void SetTextureModulation(bool enabled) override { _modulate = enabled; }
 		void SetTexturePalette(bool enabled, unsigned dark, unsigned light) override
 		{ _paletteEnabled = enabled; _paletteDark = dark; _paletteLight = light; }
 		void SetOpacity(float opacity) override { _opacity = opacity; }
@@ -350,7 +349,6 @@ namespace
 			f.cullExempt = cullExempt;
 			f.prelit = prelit;
 			f.alphaCutout = _alphaCutout;
-			f.modulate = _modulate;
 			++_count;
 		}
 
@@ -362,7 +360,7 @@ namespace
 		int _count = 0;
 		bool _overflowed = false;
 		float _opacity = 1.0f;
-		bool _alphaCutout = false, _modulate = false, _paletteEnabled = false;
+		bool _alphaCutout = false, _paletteEnabled = false;
 		unsigned _paletteDark = 0, _paletteLight = 0xffffff;
 	};
 }
@@ -519,7 +517,6 @@ RenderObject3D::BakeFromRecording(RBStaticTriangle* triangles, RecordedFace* fac
 		const RecordedFace& face = faces[f];
 		consistent = consistent && face.texture == first.texture && face.prelit == first.prelit
 			&& face.cullExempt == first.cullExempt && face.alphaCutout == first.alphaCutout
-			&& face.modulate == first.modulate
 			&& SameBits(triangles[f].opacity, g.opacity)
 			&& triangles[f].paletteDark == g.paletteDark && triangles[f].paletteLight == g.paletteLight
 			&& triangles[f].paletteEnabled == g.paletteEnabled;
@@ -761,7 +758,6 @@ RenderObject3D::RenderStatic(const Matrix34& position)
 		const Material& mat = _materialList[g.materialIndex];
 		mat.Validate();
 		backend.SetAlphaCutout(mat.IsAlphaCutout());
-		backend.SetTextureModulation((mat.GetMaterialFlags() & Material::TEXTURE_MODULATE) != 0);
 		backend.SetTexturePalette((mat.GetMaterialFlags() & Material::TEXTURE_PALETTE) != 0, mat.PaletteDark(), mat.PaletteLight());
 		// The renderers set this before every triangle; one call per run leaves
 		// the compositing layer in the same state.

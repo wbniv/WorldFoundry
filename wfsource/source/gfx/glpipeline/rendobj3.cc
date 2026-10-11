@@ -92,7 +92,6 @@ RenderObject3D::StreamFaces(int firstFace, int endFace)
 		assert( globalRendererVariables.currentRenderMaterial );
 		globalRendererVariables.currentRenderMaterial->Validate();
 		RendererBackendGet().SetAlphaCutout(globalRendererVariables.currentRenderMaterial->IsAlphaCutout());
-        RendererBackendGet().SetTextureModulation((globalRendererVariables.currentRenderMaterial->GetMaterialFlags() & Material::TEXTURE_MODULATE) != 0);
         const Material& mat=*globalRendererVariables.currentRenderMaterial;
         RendererBackendGet().SetTexturePalette((mat.GetMaterialFlags() & Material::TEXTURE_PALETTE)!=0, mat.PaletteDark(),mat.PaletteLight());
 		renderer = globalRendererVariables.currentRenderMaterial->Get3DRenderer();

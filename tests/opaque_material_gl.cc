@@ -67,7 +67,6 @@ int main(int argc, char** argv)
     auto clear = [&]() { glDepthMask(GL_TRUE); glClearColor(0,0,1,1); glClearDepth(1); glClear(GL_COLOR_BUFFER_BIT|GL_DEPTH_BUFFER_BIT); };
     auto draw = [&](float opacity, bool cutout, const PixelMap* texture, float r, float g, float b) {
         backend->SetOpacity(opacity); backend->SetAlphaCutout(cutout);
-        backend->SetTextureModulation(true);
         const RBStaticTriangle t=Triangle(-.9f,r,g,b);
         backend->DrawTriangle(t.v[0],t.v[1],t.v[2],0,0,1,texture,true,false);
     };

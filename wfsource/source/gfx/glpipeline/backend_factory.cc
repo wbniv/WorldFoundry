@@ -36,7 +36,7 @@ class CompositingBackend : public RendererBackend
         float ambient[3];
         float light[RB_MAX_LIGHTS][6];
         float fog[5];
-        int32 lighting, fogEnabled, cutout, textureModulation, paletteEnabled;
+        int32 lighting, fogEnabled, cutout, paletteEnabled;
         unsigned paletteDark, paletteLight;
     };
     struct Triangle {
@@ -87,7 +87,6 @@ class CompositingBackend : public RendererBackend
         _backend.SetFog(state.fog[0],state.fog[1],state.fog[2],state.fog[3],state.fog[4]);
         _backend.SetFogEnabled(state.fogEnabled != 0);
         _backend.SetAlphaCutout(state.cutout != 0);
-        _backend.SetTextureModulation(state.textureModulation != 0);
         _backend.SetTexturePalette(state.paletteEnabled!=0,state.paletteDark,state.paletteLight);
     }
     static int Compare(const void* a, const void* b)
@@ -156,8 +155,6 @@ public:
     }
     void SetFogEnabled(bool e) override { _state.fogEnabled=e; _backend.SetFogEnabled(e); }
     void SetAlphaCutout(bool e) override { _state.cutout=e; _backend.SetAlphaCutout(e); }
-    void SetTextureModulation(bool e) override
-    { _state.textureModulation=e; _backend.SetTextureModulation(e); }
     void SetTexturePalette(bool e,unsigned d,unsigned l) override
     { _state.paletteEnabled=e; _state.paletteDark=d; _state.paletteLight=l; _backend.SetTexturePalette(e,d,l); }
     void SetOpacity(float opacity) override

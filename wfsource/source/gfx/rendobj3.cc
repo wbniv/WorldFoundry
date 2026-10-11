@@ -376,7 +376,7 @@ bool RenderObject3D::SetRuntimeGeometry(int vertices, Vertex3D* vertexList, int 
  _vertexCount=vertices;_vertexList=vertexList;_faceCount=faces;_faceList=faceList;
  for(int page=0;page<ORDER_TABLES;page++)_primList[page]=_runtimePrimitives.data()+size_t(page)*faces;
  // Preserve the exported texture binding when replacing runtime geometry.
- _materialList[0].SetMaterialFlags(Material::GOURAUD_SHADED|(textured?Material::TEXTURE_MODULATE:0)|(textured?(_materialList[0].GetMaterialFlags()&Material::TEXTURE_MAPPED):0)|Material::LIGHTING_PRELIT);
+ _materialList[0].SetMaterialFlags(Material::GOURAUD_SHADED|(textured?(_materialList[0].GetMaterialFlags()&Material::TEXTURE_MAPPED):0)|Material::LIGHTING_PRELIT);
  ApplyMaterials(_materialList);return true;
 }
 
