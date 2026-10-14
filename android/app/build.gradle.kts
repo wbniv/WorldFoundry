@@ -15,7 +15,7 @@ android {
         applicationId = "org.worldfoundry.wf_game"
         minSdk        = 21
         targetSdk     = 34
-        versionCode   = 5
+        versionCode   = 7   // above 6: the Chromecast already holds an aquarium build with code 6 (2026-10-10)
         versionName   = "0.5"
 
         ndk {

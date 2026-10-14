@@ -164,3 +164,16 @@ def test_qr_logo_switch_is_read_from_wf_args_and_kept_from_the_engine():
     for app in ("aquarium", "condo"):
         args = SRC / app / "assets" / "wf_args.txt"
         assert not args.exists() or "qr_logo=" not in args.read_text(), "the default (planet) is committed"
+
+
+def test_phone_overlay_is_tv_only():
+    """Regression: 'Use your phone as the controller' appeared on the phone running WF Aquarium. Every route to
+    the panel (server start, overlay rects) is gated on TV mode, which is the uiMode TELEVISION config."""
+    src = ENTRY.read_text()
+    assert "gIsTvMode = (uiMode == ACONFIGURATION_UI_MODE_TYPE_TELEVISION)" in src
+    init = src[src.index("void PhoneInit()"):src.index("void PhoneStart()")]
+    assert init.index("if (!gIsTvMode)") < init.index("ReadAsset("), "PhoneInit must bail before enabling"
+    start = src[src.index("void PhoneStart()"):src.index("void PhoneStop()")]
+    assert "!gIsTvMode" in start.splitlines()[2], "PhoneStart must refuse off a TV"
+    rects = src[src.index("WFAndroidPhoneOverlayRects(int w"):]
+    assert rects.index("!gIsTvMode") < rects.index("gPhoneOverlay.Build"), "no panel geometry off a TV"

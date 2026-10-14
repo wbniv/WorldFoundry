@@ -1,3 +1,4 @@
+#include "../../../../engine/gpu_profile.hpp"
 #include <game/plant_ui.h>
 #include <game/runtime_property_ui.h>
 #include <game/level_menu.h>
@@ -901,6 +902,11 @@ Display::ResetTime()                    // used to reset delta timer for PageFli
 void
 Display::RenderBegin()
 {
+#if defined(__ANDROID__)
+    int gpuWidth=0,gpuHeight=0;
+    GetSurfaceSize(gpuWidth,gpuHeight);
+    wf_gpu::beginGpu(gpuWidth,gpuHeight);
+#endif
    Validate();
    AssertGLOK();
    AssertMsg( _drawPage == 0 || _drawPage == 1, "_drawPage = " << _drawPage );
