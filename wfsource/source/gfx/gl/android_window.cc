@@ -18,6 +18,7 @@
 
 #include <EGL/egl.h>
 #include <GLES3/gl3.h>
+#include "../../../../engine/gpu_profile_android.hpp"
 #include <android/log.h>
 #include <android/native_window.h>
 
@@ -160,6 +161,7 @@ WFAndroidEglInit(ANativeWindow* window)
         // fresh context.
         if (err == EGL_CONTEXT_LOST)
         {
+            wf_gpu::reset(true);
             WFLOG("EGL_CONTEXT_LOST — rebuilding");
             extern void WFAndroidNotifySurfaceLost();
             WFAndroidNotifySurfaceLost();
@@ -563,7 +565,10 @@ void AndroidSwapBuffers()
     {
         WFAndroidDrawHUD();
         WFAndroidDrawPhoneOverlay();
+        wf_gpu::endGpu();
+        const double start = wf_gpu::enabled() ? wf_gpu::wallMs() : 0;
         eglSwapBuffers(gEglDisplay, gEglSurface);
+        if (wf_gpu::enabled()) wf_gpu::swapSample(wf_gpu::wallMs() - start);
     }
 }
 

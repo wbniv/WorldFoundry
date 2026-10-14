@@ -1,3 +1,4 @@
+#include "../../../engine/gpu_profile.hpp"
 #include "../../../engine/runtime_options.hpp"
 #include <game/plant_ui.h>
 #include <game/runtime_property_ui.h>
@@ -616,6 +617,7 @@ WFGame::StepFrame(bool do_swap, Scalar* out_dt)
 		return FrameResult::Suspended;
 	}
 
+	wf_gpu::beginFrame();
 	_frameRate.BeginFrame(FrameRateSampler::Clock::now(), HALLifecycleGeneration());
 #ifdef WF_RUNTIME_DIAGNOSTICS
 	DebugServer_DiagnosticBegin(false, "game");
@@ -789,6 +791,7 @@ WFGame::StepFrame(bool do_swap, Scalar* out_dt)
 		}
 #endif
 	_deltaTime = do_swap ? _display->PageFlip() : _display->MeasureDelta();
+	wf_gpu::endFrame();
 	if (HALIsSuspended())
 		_frameRate.Reset();
 	else
