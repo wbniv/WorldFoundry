@@ -25,6 +25,7 @@
 //============================================================================
 
 #include <hal/hal.h>
+#include <cstdio>
 #include <gfx/rendobj3.hp>
 #include <math/vector3.hp>
 #include <iff/iffread.hp>
@@ -65,6 +66,7 @@ RenderObject3D::RenderObject3D( Memory& memory, const RenderObject3D& obj3d )
 #pragma message( __FILE__ ": use reference counting" )
 
     _lionRig=obj3d._lionRig;
+	_dfrm=obj3d._dfrm;
 	_materialList = obj3d._materialList;
 	_materialCount = obj3d._materialCount;
 
@@ -84,6 +86,13 @@ RenderObject3D::RenderObject3D( Memory& memory, const RenderObject3D& obj3d )
     }
 	_faceCount = obj3d._faceCount;
 	_faceList = obj3d._faceList;
+	if(_dfrm) {
+		// DFRM writes positions and face normals: each copy needs its own.
+		_vertexList=new(memory) Vertex3D[_vertexCount];
+		for(int i=0;i<_vertexCount;i++) _vertexList[i]=obj3d._vertexList[i];
+		_faceList=new(memory) TriFace[_faceCount+1];
+		for(int i=0;i<=_faceCount;i++) _faceList[i]=obj3d._faceList[i];
+	}
 
 #if defined(USE_ORDER_TABLES)
 	_InitPrimList( memory );
@@ -244,6 +253,18 @@ RenderObject3D::RenderObject3D(Memory& memory, binistream& input,int32 userData,
                     rig.push_back({unsigned(v[0]),v[1]/65536.f,v[2]/65536.f,v[3]/65536.f,v[4]/65536.f});
                 }
                 if(valid) _lionRig.swap(rig);
+                break;
+            }
+            case IFFTAG('D','F','R','M'):
+            {
+                // DFRM v1 (renderassets/dfrm_deform.h). Same rule as LRIG: invalid
+                // optional metadata is discarded, never partially applied.
+                std::vector<uint8> bytes(chunkIter->BytesLeft());
+                if(!bytes.empty()) chunkIter->ReadBytes(bytes.data(),int(bytes.size()));
+                auto data=std::make_shared<wf_render::DfrmData>();
+                const char* reason="";
+                if(!_dfrm && wf_render::ParseDfrm(bytes.data(),bytes.size(),vertexCount,*data,reason)) _dfrm=data;
+                else std::fprintf(stderr,"DFRM: chunk dropped, mesh keeps its rest pose (%s)\n",_dfrm?"duplicate chunk":reason);
                 break;
             }
             case IFFTAG('O','P','A','C'):

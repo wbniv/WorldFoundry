@@ -443,6 +443,112 @@ def _write_iff_chunk(tag: str, payload: bytes) -> bytes:
     return tag_bytes + struct.pack('<I', size) + payload + b'\x00' * pad
 
 
+def _dfrm_module():
+    try:
+        from . import dfrm_chunk
+    except ImportError:          # loaded outside the add-on package (tests, scripts)
+        import dfrm_chunk
+    return dfrm_chunk
+
+
+def _dfrm_limits(pbone, name):
+    """(ventral, dorsal, lateral, twist) degrees from a Limit Rotation constraint or wf_limits."""
+    con = next((c for c in pbone.constraints if c.type == 'LIMIT_ROTATION'), None)
+    if con is not None:
+        import math
+        if not (con.use_limit_x and con.use_limit_y and con.use_limit_z):
+            raise ValueError(f'DFRM bone {name}: Limit Rotation must limit X, Y and Z')
+        return (math.degrees(con.max_x), -math.degrees(con.min_x),
+                math.degrees(max(abs(con.min_z), abs(con.max_z))),
+                math.degrees(max(abs(con.min_y), abs(con.max_y))))
+    if 'wf_limits' in pbone:
+        return tuple(float(v) for v in pbone['wf_limits'])
+    raise ValueError(f'DFRM bone {name} needs a Limit Rotation constraint or wf_limits')
+
+
+def _collect_dfrm_rig(blobj):
+    """Gather the DFRM inputs for one mesh: chain, transforms, weights, clips.
+
+    The armature is the mesh's Armature modifier target (or its armature
+    parent). Chain bones are tail_00, tail_01, ... in order; transform bones
+    are head, eye_l and eye_r when present. Every action on the armature (its
+    active action and NLA strips) is sampled at 30 fps; clip ids are 1-based
+    in name order. See dfrm_chunk.py for the axis conventions.
+    """
+    import math
+    dfrm = _dfrm_module()
+    arm = next((m.object for m in blobj.modifiers if m.type == 'ARMATURE' and m.object), None)
+    if arm is None and blobj.parent is not None and blobj.parent.type == 'ARMATURE':
+        arm = blobj.parent
+    if arm is None:
+        raise ValueError('DFRM rig needs an Armature modifier or an armature parent')
+    to_mesh = blobj.matrix_world.inverted() @ arm.matrix_world
+    rot = to_mesh.to_3x3()
+    bones = arm.data.bones
+    chain_names = []
+    while f'tail_{len(chain_names):02d}' in bones:
+        chain_names.append(f'tail_{len(chain_names):02d}')
+    if not chain_names:
+        raise ValueError('DFRM rig has no tail_00 bone')
+    transform_names = [n for n in ('head', 'eye_l', 'eye_r') if n in bones]
+    chain = []
+    for name in chain_names:
+        b = bones[name]
+        axes = rot @ b.matrix_local.to_3x3()
+        bone = {'head': tuple(to_mesh @ b.head_local), 'tail': tuple(to_mesh @ b.tail_local),
+                'z_axis': tuple(axes.col[2]), 'limits': _dfrm_limits(arm.pose.bones[name], name)}
+        if 'wf_half_width' in b:
+            bone['half_width'] = float(b['wf_half_width'])
+        chain.append(bone)
+    transforms = []
+    for name in transform_names:
+        b, pb = bones[name], arm.pose.bones[name]
+        con = next((c for c in pb.constraints if c.type == 'LIMIT_ROTATION' and c.use_limit_x), None)
+        lo, hi = (math.degrees(con.min_x), math.degrees(con.max_x)) if con else (-180.0, 180.0)
+        transforms.append({'pivot': tuple(to_mesh @ b.head_local),
+                           'axis': tuple((rot @ b.matrix_local.to_3x3()).col[0]), 'lo': lo, 'hi': hi})
+    groups = {g.index: g.name for g in blobj.vertex_groups}
+    weights = [{groups[g.group]: g.weight for g in v.groups if g.group in groups} for v in blobj.data.vertices]
+    bindings = dfrm.bind_vertices(weights, chain_names, transform_names)
+
+    clips = []
+    ad = arm.animation_data
+    actions = set()
+    if ad is not None:
+        if ad.action is not None:
+            actions.add(ad.action)
+        for track in ad.nla_tracks:
+            actions.update(st.action for st in track.strips if st.action is not None)
+    if actions:
+        scene = bpy.context.scene
+        fps = scene.render.fps / scene.render.fps_base
+        saved = (ad.action, ad.use_nla, scene.frame_current, scene.frame_subframe)
+        ad.use_nla = False
+        try:
+            for action in sorted(actions, key=lambda a: a.name):
+                ad.action = action
+                loop = bool(action.get('wf_loop', getattr(action, 'use_cyclic', False)))
+                start, end = action.frame_range
+                count = max(1, int(round((end - start) / fps * dfrm.FPS)) + (0 if loop else 1))
+                frames = []
+                for k in range(count):
+                    frame = start + k * fps / dfrm.FPS
+                    scene.frame_set(int(math.floor(frame)), subframe=frame - math.floor(frame))
+                    row = []
+                    for name in chain_names:
+                        m = arm.pose.bones[name].matrix_basis.to_3x3()
+                        row.extend(dfrm.decompose([list(r) for r in m]))
+                    for name in transform_names:
+                        m = arm.pose.bones[name].matrix_basis.to_3x3()
+                        row.append(dfrm.angle_about_x([list(r) for r in m]))
+                    frames.append(row)
+                clips.append({'name': action.name, 'loop': loop, 'frames': frames})
+        finally:
+            ad.action, ad.use_nla = saved[0], saved[1]
+            scene.frame_set(saved[2], subframe=saved[3])
+    return {'chain': chain, 'transforms': transforms, 'bindings': bindings, 'clips': clips}
+
+
 def _write_mesh_iff(blobj, filepath: str) -> bool:
     """
     Write a Blender mesh object as a World Foundry MODL binary .iff.
@@ -470,6 +576,12 @@ def _write_mesh_iff(blobj, filepath: str) -> bool:
             if not 0<=region<10 or not 0<=weight<=1 or not all(math.isfinite(v) for v in pivot):
                 raise ValueError('Invalid lionfish rig point metadata')
             rig.append((region,round(weight*65536),*(round(v*65536) for v in pivot)))
+
+    # DFRM v1 (seahorse tail): per-vertex binding is part of the vertex identity,
+    # like LRIG; offsets are computed from the final positions after the merge.
+    dfrm_rig = _collect_dfrm_rig(blobj) if blobj.get('wf_dfrm_rig', False) else None
+    dfrm_meta = ([(k, i, round(w * 65536)) for k, i, w in dfrm_rig['bindings']]
+                 if dfrm_rig is not None else None)
 
     # Triangulate into a temporary bmesh
     bm = _bmesh.new()
@@ -507,7 +619,8 @@ def _write_mesh_iff(blobj, filepath: str) -> bool:
             if key not in split_map:
                 split_map[key] = len(split_verts)
                 split_verts.append((bm.verts[orig_vi].co.copy(), u, v))
-                split_rig.append(rig[orig_vi] if rig is not None else ())
+                split_rig.append((rig[orig_vi] if rig is not None else ()) +
+                                 (dfrm_meta[orig_vi] if dfrm_meta is not None else ()))
             tri.append(split_map[key])
         face_triples.append((tri[2], tri[1], tri[0], face.material_index))   # Blender hand → WF hand
 
@@ -615,13 +728,19 @@ def _write_mesh_iff(blobj, filepath: str) -> bool:
     lrig=b''
     if rig is not None:
         payload=struct.pack('<II',1,len(split_rig))
-        payload+=b''.join(struct.pack('<Iiiii',*meta) for meta in split_rig)
+        payload+=b''.join(struct.pack('<Iiiii',*meta[:5]) for meta in split_rig)
         lrig=_write_iff_chunk('LRIG',payload)
+    dfrm_chunk_bytes=b''
+    if dfrm_rig is not None:
+        bindings=[(meta[-3],meta[-2],meta[-1]/65536) for meta in split_rig]
+        positions=[tuple(bl_to_wf(co.x,co.y,co.z)) for co,_u,_v in split_verts]
+        dfrm_chunk_bytes=_write_iff_chunk('DFRM',_dfrm_module().build_chunk(
+            dfrm_rig['chain'],positions,bindings,dfrm_rig['transforms'],dfrm_rig['clips']))
     # Assemble MODL
     inner = (
         _write_iff_chunk('VRTX', bytes(vrtx)) + lrig +
         _write_iff_chunk('MATL', matl) + opac +
-        _write_iff_chunk('FACE', bytes(face_data))
+        _write_iff_chunk('FACE', bytes(face_data)) + dfrm_chunk_bytes
     )
     modl = _write_iff_chunk('MODL', inner)
 
