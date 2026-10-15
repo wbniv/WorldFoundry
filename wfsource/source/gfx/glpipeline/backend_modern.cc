@@ -126,19 +126,22 @@ static const char* kFS =
     "out vec4 frag;\n"
     "uniform sampler2D u_tex;\n"
     "uniform int u_use_tex;\n"
+    "#ifndef WF_TEX_MODE\n"
+    "#define WF_TEX_MODE u_use_tex\n"
+    "#endif\n"
     "uniform int u_alpha_cutout;\n"
     "uniform int u_fog;\n"
     "uniform vec3 u_fog_color;\n"
     "void main()\n"
     "{\n"
     "    vec4 c = vec4(v_color * v_lit, 1.0);\n"
-    "    if (u_use_tex != 0) {\n"
+    "    if (WF_TEX_MODE != 0) {\n"
     "        float is_white = step(0.99, min(v_color.r, min(v_color.g, v_color.b)));\n"
     "        vec4 texel = texture(u_tex, v_uv);\n"
     "#ifndef WF_OPAQUE\n"
-    "        if (u_alpha_cutout != 0 && (is_white > 0.5 || (u_use_tex & 2) != 0) && texel.a < 0.5) discard;\n"
+    "        if (u_alpha_cutout != 0 && (is_white > 0.5 || (WF_TEX_MODE & 2) != 0) && texel.a < 0.5) discard;\n"
     "#endif\n"
-    "        vec3 albedo = v_palette_dark.a > 0.5 ? mix(v_palette_dark.rgb, v_palette_light, clamp((texel.r - 0.08) / 0.85, 0.0, 1.0)) : ((u_use_tex & 2) != 0 ? texel.rgb * v_color : mix(v_color, texel.rgb, is_white));\n"
+    "        vec3 albedo = v_palette_dark.a > 0.5 ? mix(v_palette_dark.rgb, v_palette_light, clamp((texel.r - 0.08) / 0.85, 0.0, 1.0)) : ((WF_TEX_MODE & 2) != 0 ? texel.rgb * v_color : mix(v_color, texel.rgb, is_white));\n"
     "        c = vec4(albedo * v_lit, 1.0);\n"
     "    }\n"
     "    if (u_fog != 0) c.rgb = mix(u_fog_color, c.rgb, v_fog_factor);\n"
@@ -762,6 +765,9 @@ public:
         if (_opaqueProg) glDeleteProgram(_opaqueProg);
         _opaqueProg = 0;
         _opaqueUniforms = ProgramUniforms{};
+        if (_opaqueTexProg) glDeleteProgram(_opaqueTexProg);
+        _opaqueTexProg = 0;
+        _opaqueTexUniforms = ProgramUniforms{};
         _customProgram = true;
         _uniforms = FetchUniformLocations(_prog);
         return true;
@@ -779,8 +785,10 @@ public:
         _vbo         = 0;
         _prog        = 0;
         _opaqueProg = 0;
+        _opaqueTexProg = 0;
         _uniforms = ProgramUniforms{};
         _opaqueUniforms = ProgramUniforms{};
+        _opaqueTexUniforms = ProgramUniforms{};
         _customProgram = false;
         _cpu.clear();
         _curTexture  = nullptr;
@@ -956,8 +964,9 @@ private:
         GLint lighting=-1, ambient=-1, lightDir=-1, lightColor=-1;
         GLint fog=-1, fogColor=-1, fogStart=-1, fogEnd=-1;
     };
-    ProgramUniforms _uniforms, _opaqueUniforms;
+    ProgramUniforms _uniforms, _opaqueUniforms, _opaqueTexUniforms;
     GLuint _opaqueProg = 0;
+    GLuint _opaqueTexProg = 0;
     bool _customProgram = false;
     bool _paletteEnabled=false; unsigned _paletteDark=0,_paletteLight=0xffffff;
     float _opacity = 1.0f;
@@ -1064,6 +1073,20 @@ private:
         _opaqueUniforms = FetchUniformLocations(_opaqueProg);
     }
 
+    void InitOpaqueTexProgram()
+    {
+        if (_opaqueTexProg) return;
+        // Textured opaque batches with normal modulation always pass
+        // u_use_tex=1; specialize that uniform while retaining the color math.
+        const std::string source = std::string("#define WF_OPAQUE 1\n#define WF_TEX_MODE 1\n") + kFS;
+        GLuint vs = CompileShader(GL_VERTEX_SHADER, kVS);
+        GLuint fs = CompileShader(GL_FRAGMENT_SHADER, source.c_str());
+        _opaqueTexProg = LinkProgram(vs, fs);
+        glDeleteShader(vs);
+        glDeleteShader(fs);
+        _opaqueTexUniforms = FetchUniformLocations(_opaqueTexProg);
+    }
+
     void UpdateMvp()
     {
         if (!_mvpDirty) return;
@@ -1084,9 +1107,11 @@ private:
         UpdateMvp();
 
         const bool opaque = !_customProgram && _opacity >= 1.0f && !_alphaCutout;
-        if (opaque) InitOpaqueProgram();
-        glUseProgram(opaque ? _opaqueProg : _prog);
-        const ProgramUniforms& uniforms = opaque ? _opaqueUniforms : _uniforms;
+        const bool opaqueTex = opaque && _curTexture && !_modulateTexture;
+        if (opaqueTex) InitOpaqueTexProgram();
+        else if (opaque) InitOpaqueProgram();
+        glUseProgram(opaqueTex ? _opaqueTexProg : opaque ? _opaqueProg : _prog);
+        const ProgramUniforms& uniforms = opaqueTex ? _opaqueTexUniforms : opaque ? _opaqueUniforms : _uniforms;
         if (_opacity < 1.0f) {
             glEnable(GL_BLEND);
             glBlendFuncSeparate(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA, GL_ONE, GL_ONE_MINUS_SRC_ALPHA);
