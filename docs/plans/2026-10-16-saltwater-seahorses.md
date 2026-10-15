@@ -1,6 +1,6 @@
-# Saltwater seahorses: a pair with expressive tails, and an A3 poster
+# Saltwater seahorses: two pairs with expressive tails, and an A3 poster
 
-16 October 2026 · **Plan — Phase 0 in progress.** Decided by Will on 2026‑10‑16: **D1** (engine edits for Phase 1: yes), **D3** (4 seahorses) and **D5** (1024² texture page). Still open: D2, D4 and D6. Engine edits beyond Phase 1 need their own permission ([`AGENTS.md:11-12`](../../AGENTS.md)).
+16 October 2026 · **Plan — Phase 0 in progress.** **All six decisions are made** (Will, 2026‑10‑16): D1 engine edits for Phase 1 (yes), D2 *H. reidi*, D3 4 seahorses, D4 authored hitching posts, D5 1024² texture page, D6 Deformer phase 2 after the seahorses ship. Engine edits beyond Phase 1 need their own permission ([`AGENTS.md:11-12`](../../AGENTS.md)).
 
 **TODO entries, ready for a Fable session to add** (this session ran on Opus, and the `rank-requires-fable` hook allows only Fable to write tiers):
 `- [T4] **Saltwater seahorses: H. reidi pairs with 35-joint prehensile tails, plus A3 poster.** Rank T4: the tail needs a generic deformer slot and a new engine rig (permission + design), and a wrong rig format is expensive to undo. [plan](docs/plans/2026-10-16-saltwater-seahorses.md)`
@@ -29,11 +29,11 @@ What is true today:
 | # | Decision | Recommendation | Alternative and its cost |
 |---|---|---|---|
 | D1 | Engine change for the tail | **Decided (Will, 2026‑10‑16): yes.** **Allow Phase 1:** move the five existing deformers behind one generic slot, then implement `DFRM` v1 as its sixth kind (rooted curve + weighted transform, plus clip playback). These are the two operators the generic-deformation proposal says to build first. The specification is in Phase 1 | (a) Rigid ring chain, no engine edit: 35 ring actors per seahorse, joint maths in Forth. Est. 7–9 ms per seahorse on Chromecast 1, about 3× the deformer. (b) Vertex clips in the engine's animation system. These still need at least four engine edits, can't grip, and take about 13 MB per seahorse. See the comparison under Phase 1 |
-| D2 | Species | ***Hippocampus reidi*** (longsnout): captive-bred, and its tail grasping is published (whole tail grips, more motion toward the tip) | *H. erectus*: similar size, but this research found no grasping data for it |
+| D2 | Species | **Decided (Will, 2026‑10‑16).** ***Hippocampus reidi*** (longsnout): captive-bred, and its tail grasping is published (whole tail grips, more motion toward the tip) | *H. erectus*: similar size, but this research found no grasping data for it |
 | D3 | How many | **Decided (Will, 2026‑10‑16): 4 seahorses (2 pairs) by default.** The setting keeps None / 1 pair / 2 pairs, for the Phase 4 measurements and for players | Fixed count, no setting |
-| D4 | What they grip | **Authored hitching posts** (two branches, saltwater only, geometry known to Forth) | Live plants: Forth cannot read stem positions (`plant-register`/`plant-step` only), so this needs a C++ query, another engine edit |
+| D4 | What they grip | **Decided (Will, 2026‑10‑16).** **Authored hitching posts** (two branches, saltwater only, geometry known to Forth) | Live plants: Forth cannot read stem positions (`plant-register`/`plant-step` only), so this needs a C++ query, another engine edit |
 | D5 | Texture space | **Decided (Will, 2026‑10‑16): 1024².** **Grow the aquarium app's permanent page** past 512² via `wf_args.txt` (the condo app already runs 1024²); measure memory | Untextured vertex colours: no memory cost, much less convincing |
-| D6 | Deformer phase 2 | **Schedule it after the seahorses ship**, as its own permission and TODO entry | Leave the five species formulas behind the E0 slot indefinitely: this works, but each new animal then needs new C++ |
+| D6 | Deformer phase 2 | **Decided (Will, 2026‑10‑16).** **Schedule it after the seahorses ship**, as its own permission and TODO entry | Leave the five species formulas behind the E0 slot indefinitely: this works, but each new animal then needs new C++ |
 
 ## Phase 0 — research and the A3 poster
 
