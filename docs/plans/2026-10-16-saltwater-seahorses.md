@@ -240,7 +240,7 @@ flowchart LR
 4. **Wrap override (contact).** Over the wrapped region, from the tip toward the start sample, each joint angle becomes ring length ÷ (holdfast radius + half-width), blended by the fractional front. A vertical post first turns the five lead-in rings to horizontal, then coils with lateral bend (see "The tail").
 5. **Clamp** every angle to its sample's limits, and record whether any joint clamped.
 6. **Forward kinematics.** Each frame is the previous frame times flex · lateral · twist, using rotation matrices propagated down the chain. Angles are never re-derived from Euler angles, so the frame can't flip. Re-orthonormalise every 8 samples.
-7. **Vertices.** A curve-bound vertex is placed at its sample's position plus its stored offset rotated by the sample frame (rigid per ring, so nothing between rings can squash). Transform-bound vertices rotate about their pivot. Vertices with no influence keep their rest position.
+7. **Vertices.** A curve-bound vertex is placed at its sample's position plus its stored offset rotated by the sample frame (rigid per ring, so nothing between rings can squash). Transform-bound vertices rotate about their pivot. Vertices with no influence keep their rest position. **Face normals:** each deformed face gets its rest normal rotated by its sample frame (exact under rigid binding). The renderer culls and lights with normals computed once at load ([`rendobj3.cc:286`](../../wfsource/source/gfx/rendobj3.cc)), so without this a coiled ring would be culled as if it still faced its rest direction. That would show as holes.
 8. **Write back** the wrap centre and tail-tip position (body-local) and a status code.
 
 **Cost:** about 35 × 60 + 900 × 18 ≈ 18,000 floating-point operations per seahorse per frame. That is small next to drawing the seahorse; Phase 4 measures it.
@@ -271,7 +271,7 @@ A typical frame needs **0–4 writes per seahorse**: wrap progress during a gras
 - **Static meshes.** A `DFRM` actor uses the writable vertex list, so it streams (`STATIC_DEFORMED`), as the fish do. The posts and the tank stay baked.
 - **Hidden seahorses.** The Director skips `dfrm-pose` while a seahorse is invisible, so freshwater costs nothing.
 - **Number formats.** All current targets use float scalars ([`CMakeLists.txt:180-200`](../../CMakeLists.txt)). The evaluator computes in float and converts through `Scalar`, like the other deformers.
-- **Normals.** If the mesh carries vertex normals, they rotate with the sample frame; otherwise the existing per-face path applies. Phase 1 checks which the aquarium meshes use.
+- **Normals.** Back-face culling is software-only and uses each face's stored normal, against the deformed centroid ([`backface_cull.hp`](../../wfsource/source/gfx/backface_cull.hp)). So `DFRM` must update face normals every frame (step 7). The packed per-vertex `a_normal` is built from those face normals when drawing, so lighting follows. The five existing kinds keep stale rest normals today; fixing them changes their output, so it's a follow-up (Out of scope), not part of the E0 move.
 
 ### E5 — failures
 
@@ -287,6 +287,7 @@ A golden test, `deformer_golden`, compares the five existing kinds bit for bit a
 - **Geometry:** arc length is preserved within 0.1 %, frames stay orthonormal within 1e‑5 through two full coils, and no axis flips sign.
 - **Clips:** linear interpolation, looping wrap and one-shot hold; crossfade endpoints equal clip A and clip B exactly.
 - **Wrap centre:** within 0.5 mm of the analytic circle.
+- **Normals:** after a 180° coil, every coiled face's normal equals its rotated rest normal within 1e‑4, and no face visible to the camera is reported back-facing.
 - **Loader:** a wrong vertex count, an unknown version or an out-of-range index each fall back to the rest pose.
 - **Exclusivity:** refused when lion or fin weights exist.
 
@@ -426,6 +427,7 @@ Ranks are suggestions; a Fable session ranks the TODO entry.
 - **A playable seahorse.** The urchin stays the saltwater player; seahorses are autonomous residents.
 - **Gripping live plants.** It needs a C++ stem-position query and sway tracking; the posts come first (D4).
 - **Real prey particles and feeding.** Strikes target ambient drifting particles only.
+- **Stale face normals in the five existing deformers.** They move vertices but keep rest-pose face normals (`rendobj3.cc:286`), so culling and lighting lag the deformation. The fix changes their output, so it needs re-recorded golden fixtures and a visual check per tank. Do it with Deformer phase 2 or as its own fix.
 - **Breeding, pouch pumping and fry.**
 - **Morph targets and the sea anemone.** The anemone stays set aside, but it can resume on the same evaluator after Deformer phase 2. The travelling-wave operator is part of Deformer phase 2, not this plan's Phase 1.
 - **More than 2 pairs.** The tank's biological ceiling is 4 pairs. The setting stops at 2.

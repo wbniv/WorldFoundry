@@ -30,7 +30,7 @@ Which should World Foundry's animated meshes use, now and later?
 
    Among today's animals only the parked sea anemone needs one of these: a tree of 48 tentacles on a contracting disc.
 4. **Deformer phase 2 should not start before a joint-rig spike.** That phase re-expresses fish, fin, swim, lion and jelly as `DFRM` operators. The same bodies could instead be joint chains driven by procedural wave generators, which is how most engines animate fish. A short spike, measured on Chromecast, should decide which representation D6 uses.
-5. **GPU skinning is the one place a rig could be clearly cheaper on the Chromecast.** It keeps vertices in static buffers and drops the per-frame upload. It touches both render backends and the CPU culling path, so it needs its own measured experiment.
+5. **GPU skinning is the one place a rig could be clearly cheaper on the Chromecast.** It keeps vertices in static buffers and drops the per-frame upload. It touches both render backends and the CPU culling path, so it needs its own [measured experiment](../plans/2026-10-16-gpu-skinning-chromecast-experiment.md).
 
 ## How each works
 
@@ -106,9 +106,45 @@ The two pipelines share the middle: both compute a frame per joint (per curve sa
 - **GPU skinning would remove the upload.** Both Chromecasts report a **Mali-G31 with OpenGL ES 3.2** (device logs in `docs/diagnostics/`). The modern vertex shader uses 7 attributes ([`backend_modern.cc:68-74`](../../wfsource/source/gfx/glpipeline/backend_modern.cc)), and GLES 3 guarantees at least 16, so joint indices and weights fit. Thirty-five joints as 3 × vec4 each is 105 uniform vectors, under the guaranteed 256.
 
 **GPU skinning also has three real obstacles:**
-1. The static path culls back faces on the CPU, using each face's stored normal ([`static_mesh.cc:729-733`](../../wfsource/source/gfx/glpipeline/static_mesh.cc)). Skinned faces move, so those mesh draws would need GL culling instead.
+1. Back-face culling runs on the CPU from rest-pose normals, and the static path also bakes plane distances. Skinned faces move, so those decisions go wrong. See the next section.
 2. The Metal backend ([`backend_metal.mm`](../../wfsource/source/gfx/metal/backend_metal.mm)) needs the same shader change for macOS and iOS.
 3. Visibility culling needs conservative bounds, because the CPU never sees the skinned positions.
+
+## Back-face culling, and why moving vertices collides with it
+
+**How culling works today.**
+- **Where:** World Foundry never enables `GL_CULL_FACE`. Winding is inconsistent across the engine: the `rendacto.cc` cube is clockwise seen from inside, Blender boxes are counter-clockwise from outside, and the matte is ad hoc. A hardware cull would erase surfaces that are hard to enumerate ([back-face culling plan](../plans/2026-06-13-planetarium-dome-view-engine-wide-backface-culling.md), "Why software"). So since 2026‑09‑21 every triangle passes a **software** test, written once ([`backface_cull.hp`](../../wfsource/source/gfx/backface_cull.hp)):
+  - rotate the face's stored normal into eye space;
+  - move the triangle's centroid into eye space;
+  - the face is back-facing when their dot product is > 0.
+
+  A `DOUBLE_SIDED` material is exempt.
+- **Where the normal comes from:** each face's normal is computed **once, when the mesh loads**, from the rest positions ([`rendobj3.cc:286`](../../wfsource/source/gfx/rendobj3.cc)). Every poly renderer then passes that stored normal to `DrawTriangle`, e.g. [`rendftl.cc:74-81`](../../wfsource/source/gfx/glpipeline/rendftl.cc). The same normal also drives the flat lighting.
+- **The static path goes further.** For each material group of a baked mesh, it tests every face and writes the survivors' triangle numbers into an index list, which is uploaded for that draw ([`static_mesh.cc:773-809`](../../wfsource/source/gfx/glpipeline/static_mesh.cc)). Its fast form doesn't even read positions. It uses each face's plane distance, *normal · centroid*, which is **baked once** when the mesh is baked (`:557`).
+
+**Why GPU skinning collides with this.** With GPU skinning the vertices move only inside the vertex shader. The CPU still holds the rest pose, so every culling decision is made for a shape that isn't on screen:
+1. **Holes.** A face that was back-facing at rest but has turned toward the camera is culled. Example: the inside of a seahorse tail ring that has coiled 180°.
+2. **Wasted faces.** A face that turned away is still drawn. The depth test hides it on a closed mesh, but it costs fill.
+3. **Silhouette flicker.** Faces near edge-on flip between the two, frame to frame.
+4. **Wrong lighting.** The vertex's packed normal (`a_normal`) is a rest normal unless the shader rotates it by the joint matrix too.
+
+Three more parts of the static path assume fixed geometry:
+- **translucent runs** are never baked; they stream through a sorted queue, which needs CPU positions;
+- the bake's **check mode** compares recorded against baked triangles;
+- **visibility culling** uses rest bounds.
+
+A skinned mesh must be exempt from the first two and needs conservative bounds for the third.
+
+**Ways out, simplest first:**
+1. **Don't cull skinned meshes.** Mark their groups cull-exempt and draw the whole static index buffer. That removes the per-draw index upload too. The cost is rasterising back faces, about 2× the fragments of a closed mesh. For a 16 cm seahorse on a TV that is likely small, but it should be measured on the Mali-G31.
+2. **Hardware culling only for skinned draws.** This is safe only for meshes whose winding our own exporter guarantees (counter-clockwise outward). The cull state has to join the backend's batch key, and Metal needs `setCullMode` too.
+3. **Conservative CPU culling per joint.** Cull a joint's faces only when they face away in every pose the joint can reach. This is complex and fragile. Not recommended.
+
+**The CPU deformers have the same problem today.** The five existing deformers move vertices but never update face normals. Their cull and lighting therefore use rest normals against deformed centroids. For a fish's small sideways sway the error is small, but a coiled seahorse tail would show holes. Two consequences:
+- **`DFRM` (Phase 1):** it now rotates each deformed face's rest normal by its ring's frame every frame. Rigid per-ring binding makes that exact, at one 3 × 3 multiply per face. This was added to the plan and sent to the Phase 1 agent on 2026‑10‑16.
+- **The five existing kinds:** fixing them changes their output, which would break the bit-exact golden fixtures of the E0 move. So it's a separate follow-up, with deliberately re-recorded fixtures.
+
+A joint rig on the CPU would need the same per-face normal update. On the GPU it needs the shader-side normal rotation and one of the three options above.
 
 ## What building joint rigs would take
 

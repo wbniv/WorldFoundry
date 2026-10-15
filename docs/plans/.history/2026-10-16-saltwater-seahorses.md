@@ -1,8 +1,14 @@
 | Date | Change |
 |------|--------|
+| [2026-10-16](https://github.com/wbniv/WorldFoundry/commit/01d360f3) | Record seahorse plan decisions D2, D4, D6 and index the plan |
 | [2026-10-16](https://github.com/wbniv/WorldFoundry/commit/623a8ca3) | Plan saltwater seahorses with 35-joint tails and a generic deformer |
 
 <!--history-meta v1
+01d360f3	author	Will Norris
+01d360f3	added	5
+01d360f3	deleted	5
+01d360f3	files	1
+01d360f3	body	Will accepted the remaining recommendations on 2026-10-16: H. reidi,\nauthored hitching posts, and Deformer phase 2 after the seahorses ship.\nRetitle for the 2-pair default and add the plan's row to the index.\n\nCo-Authored-By: Claude Opus 5.5 <noreply@anthropic.com>\nClaude-Session: https://claude.ai/code/session_01T3gB59hNsFhWnCTTKHc1yk
 623a8ca3	author	Will Norris
 623a8ca3	added	446
 623a8ca3	deleted	0
