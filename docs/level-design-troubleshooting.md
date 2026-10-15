@@ -741,8 +741,8 @@ vertex-baked shading.
 texture alpha. Use `wf_alpha_cutout` for holes, then check the exported material
 and an actual runtime frame. `wf_opacity < 1` blends the whole material; it does
 not provide a separate blend amount for each texel.
-These effects remain supported if the proposed Cast1 opaque-texture speedup is
-integrated, but their draws use the existing general shader. Large overlapping
+These effects remain supported with the Cast1 opaque-texture speedup, but their
+draws use the existing general shader. Large overlapping
 surfaces can cost more; a sparse-use FPS cost has not been measured. See
 [Materials and Cast1 performance](level-building.md#materials-and-cast1-performance)
 for the modeler-facing tradeoff and current exporter controls.
