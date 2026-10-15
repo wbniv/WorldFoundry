@@ -13,6 +13,7 @@
 #include <renderassets/swim_deform.h>
 #include <renderassets/jelly_deform.h>
 #include <renderassets/lionfish_deform.h>
+#include <renderassets/dfrm_deform.h>
 
 #include <algorithm>
 #include <cmath>
@@ -212,6 +213,64 @@ private:
     std::vector<wf_render::LionRest> _rest;
 };
 
+// DFRM v1: rooted curve with clips, knots and wrap, plus weighted transforms
+// (renderassets/dfrm_deform.h). Channels are the control block's input cells
+// 0..32; the caller publishes Outputs() and the status to cells 33..39.
+// Positions and face normals are written only for a complete pose (E5).
+class DfrmDeformer : public MeshDeformer {
+public:
+    DeformKind Kind() const override { return DeformKind::Dfrm; }
+    int MaxChannels() const override { return wf_render::DfrmBlockSize; }
+    DeformStatus Check(const float*, int n) const override
+    {
+        return n >= wf_render::DfrmInputCount ? DeformStatus::Ok : DeformStatus::BadInput;
+    }
+    DeformStatus Bind(const DeformTarget& t, const float*, int) override
+    {
+        const wf_render::DfrmData* data = t.object.GetDfrm();
+        if (!data) return DeformStatus::NoMetadata;
+        TriFace* faces = t.object.GetWritableFaceList();
+        const int faceCount = t.object.GetFaceCount();
+        std::vector<float> rest(3 * size_t(t.count)), normals(3 * size_t(faceCount));
+        std::vector<int> indices(3 * size_t(faceCount));
+        for (int i = 0; i < t.count; ++i) {
+            const Vector3& p = t.vertices[i].position;
+            rest[3*i] = p.X().AsFloat(); rest[3*i+1] = p.Y().AsFloat(); rest[3*i+2] = p.Z().AsFloat();
+        }
+        for (int f = 0; f < faceCount; ++f) {
+            indices[3*f] = faces[f].v1Index; indices[3*f+1] = faces[f].v2Index; indices[3*f+2] = faces[f].v3Index;
+            normals[3*f] = faces[f].normal.X().AsFloat(); normals[3*f+1] = faces[f].normal.Y().AsFloat();
+            normals[3*f+2] = faces[f].normal.Z().AsFloat();
+        }
+        if (!_evaluator.Bind(*data, rest.data(), t.count, indices.data(), normals.data(), faceCount))
+            return DeformStatus::NoMetadata;
+        return DeformStatus::Ok;
+    }
+    DeformStatus Pose(const DeformTarget& t, const float* c, int n) override
+    {
+        const int status = _evaluator.Evaluate(c, n, t.time);
+        if (status != wf_render::DfrmOk && status != wf_render::DfrmClamped) return DeformStatus(status);
+        const std::vector<float>& p = _evaluator.Positions();
+        for (int i = 0; i < t.count; ++i)
+            t.vertices[i].position = Vector3(Scalar(p[3*i]), Scalar(p[3*i+1]), Scalar(p[3*i+2]));
+        TriFace* faces = t.object.GetWritableFaceList();
+        const std::vector<float>& nrm = _evaluator.FaceNormals();
+        const int faceCount = t.object.GetFaceCount();
+        for (int f = 0; f < faceCount; ++f)
+            if (_evaluator.FaceNormalDriven(f))
+                faces[f].normal = Vector3ToPS12(Vector3(Scalar(nrm[3*f]), Scalar(nrm[3*f+1]), Scalar(nrm[3*f+2])));
+        return DeformStatus(status);
+    }
+    int Outputs(float* out, int max) const override
+    {
+        const int count = std::min(max, 6);
+        for (int i = 0; i < count; ++i) out[i] = _evaluator.Outputs()[i];
+        return count;
+    }
+private:
+    wf_render::DfrmEvaluator _evaluator;
+};
+
 } // namespace
 
 std::unique_ptr<MeshDeformer> MakeDeformer(DeformKind kind)
@@ -222,6 +281,7 @@ std::unique_ptr<MeshDeformer> MakeDeformer(DeformKind kind)
         case DeformKind::Swim:  return std::unique_ptr<MeshDeformer>(new SwimDeformer);
         case DeformKind::Jelly: return std::unique_ptr<MeshDeformer>(new JellyDeformer);
         case DeformKind::Lion:  return std::unique_ptr<MeshDeformer>(new LionDeformer);
+        case DeformKind::Dfrm:  return std::unique_ptr<MeshDeformer>(new DfrmDeformer);
         default:                return nullptr;
     }
 }

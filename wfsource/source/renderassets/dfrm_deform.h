@@ -1,5 +1,5 @@
 //============================================================================
-// dfrm_deform.h: the DFRM v1 mesh chunk.
+// dfrm_deform.h: the DFRM v1 mesh chunk and its evaluator.
 //
 // A rooted curve (a chain of rigid samples, one per tail ring) with clip
 // playback, an additive Hermite knot layer and a holdfast wrap, plus weighted
@@ -73,6 +73,44 @@ struct DfrmData {
 // Validates everything; on failure returns false, leaves out untouched and
 // sets reason. v1 accepts exactly one curve (the block drives one curve).
 bool ParseDfrm(const void* bytes, size_t size, int vertexCount, DfrmData& out, const char*& reason);
+
+class DfrmEvaluator {
+public:
+    // rest: 3 floats per vertex (the mesh as loaded). faces: 3 vertex indices
+    // per face; restNormals: 3 floats per face. False if counts do not match.
+    bool Bind(const DfrmData& data, const float* rest, int vertexCount,
+              const int* faces, const float* restNormals, int faceCount);
+    // One frame. block holds n >= DfrmInputCount cells. On DfrmOk or
+    // DfrmClamped, Positions(), FaceNormals() and Outputs() hold the new pose;
+    // on any other status they keep the previous one (no partial pose).
+    int Evaluate(const float* block, int n, double now);
+
+    const std::vector<float>& Positions() const { return _positions; }
+    const std::vector<float>& FaceNormals() const { return _normals; }
+    bool FaceNormalDriven(int face) const { return _faceMode[face] != FaceStatic; }
+    const float* Outputs() const { return _outputs; }       // wrap centre xyz, tip xyz
+    // Inspection for tests: the last evaluated chain.
+    const std::vector<float>& Joints() const { return _joints; }   // 3 x (samples + 1)
+    const std::vector<float>& Frames() const { return _frames; }   // 9 per sample: d, v, s
+    const std::vector<float>& Angles() const { return _angles; }   // 3 per sample, degrees, clamped
+    float RootPitch() const { return _rootPitch; }
+
+private:
+    enum FaceMode : uint8_t { FaceStatic, FaceSample, FaceTransform, FaceRecompute };
+    const DfrmData* _data = nullptr;
+    std::vector<float> _rest, _positions, _restNormals, _normals;
+    std::vector<int> _faces;
+    std::vector<uint8_t> _faceMode;
+    std::vector<uint16_t> _faceIndex;      // sample or transform of a rigid face
+    std::vector<float> _faceCoeff;         // FaceSample: rest normal in the rest (d, v, s)
+    std::vector<float> _joints, _frames, _angles, _scratch, _xf;
+    float _outputs[6] = {0, 0, 0, 0, 0, 0};
+    float _rootPitch = 0;
+};
+
+// The mockup's non-uniform cubic Hermite with Catmull-Rom tangents over knot
+// positions (tail-rig.html interp()). Exposed for tests.
+float DfrmHermite(const int* knots, const float* values, int count, float x);
 
 } // namespace wf_render
 
