@@ -1241,6 +1241,15 @@ if(NOT ANDROID AND NOT IOS AND NOT APPLE AND NOT EMSCRIPTEN)
     target_link_libraries(texture_atlas_address_test PRIVATE wfengine)
     target_compile_options(texture_atlas_address_test PRIVATE -fno-rtti -fpermissive)
     add_test(NAME texture_atlas_address COMMAND texture_atlas_address_test)
+    # The five species deformers on the real aquarium meshes, compared bit for
+    # bit with fixtures recorded before the E0 generic-slot move
+    # (docs/plans/2026-10-16-saltwater-seahorses.md). Re-record only on purpose:
+    # deformer_golden_test <repo> <fixtures> --record
+    add_executable(deformer_golden_test tests/deformer_golden.cc)
+    target_link_libraries(deformer_golden_test PRIVATE wfengine)
+    target_compile_options(deformer_golden_test PRIVATE -fno-rtti -fpermissive)
+    add_test(NAME deformer_golden COMMAND deformer_golden_test
+        ${CMAKE_SOURCE_DIR} ${CMAKE_SOURCE_DIR}/tests/fixtures/deformer_golden)
     if(WF_DEBUG_BRIDGE AND NOT WF_RUNTIME_DIAGNOSTICS)
         add_executable(debug_listener_reconnect_test tests/debug_listener_reconnect_test.cc)
         target_link_libraries(debug_listener_reconnect_test PRIVATE wfengine)

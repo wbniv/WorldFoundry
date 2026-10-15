@@ -85,6 +85,9 @@ public:
 	Vertex3D* GetWrittableVertexList();
 	int GetVertexCount() const;	// should only be used by the animation system
 	int GetFaceCount() const;	// measurement only (E3 phase 0 mesh-stats report)
+	// Read-only material access for tests (deformer_golden records lion palettes).
+	int GetMaterialCount() const { return _materialCount; }
+	const Material& GetMaterial(int index) const { return _materialList[index]; }
 	INLINE bool GetHandle(const HandleID thisHandle, Vector3& position) const;
 
 	inline void Validate() const;
