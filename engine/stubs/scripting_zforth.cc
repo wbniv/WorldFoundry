@@ -1274,7 +1274,8 @@ zf_input_state zf_host_sys(zf_ctx* ctx, zf_syscall_id id, const char* /*last_wor
                     if(object && IsActor(object)) {
                         wf_profile::Scope animationProfile(wf_profile::Animation);
                         wf_profile::count(5);
-                        static_cast<Actor*>(object)->GetRenderActor().SetFishDeformation(phase,amplitude);
+                        const float channels[]={phase,amplitude};
+                        static_cast<Actor*>(object)->GetRenderActor().Deform(DeformKind::Fish,channels,2);
                     }
                 }
             } else if (custom == 44) {
@@ -1286,7 +1287,8 @@ zf_input_state zf_host_sys(zf_ctx* ctx, zf_syscall_id id, const char* /*last_wor
                     if(object && IsActor(object)) {
                         wf_profile::Scope animationProfile(wf_profile::Animation);
                         wf_profile::count(5);
-                        static_cast<Actor*>(object)->GetRenderActor().SetFinDeformation(phase,amplitude,sweep,spread);
+                        const float channels[]={phase,amplitude,sweep,spread};
+                        static_cast<Actor*>(object)->GetRenderActor().Deform(DeformKind::Fin,channels,4);
                     }
                 }
             } else if (custom == 45) {
@@ -1300,8 +1302,8 @@ zf_input_state zf_host_sys(zf_ctx* ctx, zf_syscall_id id, const char* /*last_wor
                     if(object && IsActor(object)) {
                         wf_profile::Scope animationProfile(wf_profile::Animation);
                         wf_profile::count(5);
-                        static_cast<Actor*>(object)->GetRenderActor().SetSwimDeformation(
-                            phase,amplitude,bend,finPhase,finAmplitude,minX,maxX);
+                        const float channels[]={phase,amplitude,bend,finPhase,finAmplitude,minX,maxX};
+                        static_cast<Actor*>(object)->GetRenderActor().Deform(DeformKind::Swim,channels,7);
                     }
                 }
             } else if (custom == 46) {
@@ -1314,7 +1316,8 @@ zf_input_state zf_host_sys(zf_ctx* ctx, zf_syscall_id id, const char* /*last_wor
                     if(object && IsActor(object)) {
                         wf_profile::Scope animationProfile(wf_profile::Animation);
                         wf_profile::count(5);
-                        static_cast<Actor*>(object)->GetRenderActor().SetJellyDeformation(contraction,phase,pitchLag,rollLag);
+                        const float channels[]={contraction,phase,pitchLag,rollLag};
+                        static_cast<Actor*>(object)->GetRenderActor().Deform(DeformKind::Jelly,channels,4);
                     }
                 }
             } else if(custom==47) {
@@ -1341,7 +1344,8 @@ zf_input_state zf_host_sys(zf_ctx* ctx, zf_syscall_id id, const char* /*last_wor
                     BaseObject* object=theLevel->GetObject(actor);
                     if(object&&IsActor(object)) {
                         wf_profile::Scope profile(wf_profile::Animation);wf_profile::count(5);
-                        static_cast<Actor*>(object)->GetRenderActor().SetLionPose(phase,drive,turn,gape,unsigned(dark),unsigned(light));
+                        const float channels[]={phase,drive,turn,gape,float(unsigned(dark)),float(unsigned(light))};
+                        static_cast<Actor*>(object)->GetRenderActor().Deform(DeformKind::Lion,channels,6);
                     }
                 }
             } else if(custom>=50 && custom<=52) {
@@ -1369,6 +1373,43 @@ zf_input_state zf_host_sys(zf_ctx* ctx, zf_syscall_id id, const char* /*last_wor
                     valid=valid&&descriptor->kind==3&&position>=0&&size_t(position)<value->size();
                     zf_push(ctx,valid?uint8_t((*value)[position]):0);zf_push(ctx,valid?1:0);
                 }
+            } else if (custom == 53 || custom == 54) {
+                // deform       (181) ( c0 .. cn-1 n kind actor -- status ): n <= 8 channels on the stack.
+                // deform-block (182) ( block n kind actor -- status ): n consecutive mailboxes from block.
+                // Status is a DeformStatus (renderassets/mesh_deformer.h); DFRM also writes it to
+                // block + 39 and its wrap centre and tail tip to block + 33..38.
+                // docs/plans/2026-10-16-saltwater-seahorses.md, E0 and E3.
+                const int actor=int(zf_pop(ctx)),kind=int(zf_pop(ctx)),n=int(zf_pop(ctx));
+                const int maxChannels=custom==53?8:40;
+                float channels[40]={0};
+                int block=-1;
+                DeformStatus status=DeformStatus::BadInput;
+                if(n>=0&&n<=maxChannels) {
+                    if(custom==53) for(int i=n-1;i>=0;--i) channels[i]=float(zf_pop(ctx));
+                    else block=int(zf_pop(ctx));
+                    if(custom==54&&g_mgr&&block>0) {
+                        Mailboxes& mb=g_mgr->LookupMailboxes(g_curObj);
+                        for(int i=0;i<n;++i) channels[i]=mb.ReadMailbox(block+i).AsFloat();
+                    }
+                    if(kind>=int(DeformKind::Fish)&&kind<=int(DeformKind::Dfrm)&&(custom==53||(g_mgr&&block>0))&&
+                        theLevel&&actor>0&&actor<theLevel->GetMaxObjectIndex()) {
+                        BaseObject* object=theLevel->GetObject(actor);
+                        if(object&&IsActor(object)) {
+                            wf_profile::Scope animationProfile(wf_profile::Animation);
+                            wf_profile::count(5);
+                            RenderActor& render=static_cast<Actor*>(object)->GetRenderActor();
+                            status=render.Deform(DeformKind(kind),channels,n,theLevel->LevelClock().Current().AsFloat());
+                            if(custom==54&&kind==int(DeformKind::Dfrm)) {
+                                Mailboxes& mb=g_mgr->LookupMailboxes(g_curObj);
+                                float outputs[6];
+                                if(render.DeformOutputs(outputs,6)==6)
+                                    for(int i=0;i<6;++i) mb.WriteMailbox(block+33+i,Scalar::FromFloat(outputs[i]));
+                                mb.WriteMailbox(block+39,Scalar::FromFloat(float(int(status))));
+                            }
+                        }
+                    }
+                }
+                zf_push(ctx,(zf_cell)float(int(status)));
             } else if (custom == 72) {
                 /* Neural-forth dispatch gate: syscall 200 = ZF_SYSCALL_USER + 72.
                  * Pops word-id from stack and routes to nf_dispatch().
@@ -1538,7 +1579,7 @@ void Init(MailboxesManager& mgr)
     if (r != ZF_OK)
         fprintf(stderr, "zforth: init failed (read-actor-mailbox): %d\n", r);
 
-    r = zf_eval(&g_ctx, ": profile-begin 169 sys ; : profile-end 170 sys ; : fish-deform 171 sys ; : fin-deform 172 sys ; : swim-deform 173 sys ; : jelly-deform 174 sys ; : plant-register 175 sys ; : plant-step 176 sys ; : lion-pose 177 sys ; : property@ 178 sys ; : property-int-bytes@ 179 sys ; : property-text-byte@ 180 sys ;");
+    r = zf_eval(&g_ctx, ": profile-begin 169 sys ; : profile-end 170 sys ; : fish-deform 171 sys ; : fin-deform 172 sys ; : swim-deform 173 sys ; : jelly-deform 174 sys ; : plant-register 175 sys ; : plant-step 176 sys ; : lion-pose 177 sys ; : property@ 178 sys ; : property-int-bytes@ 179 sys ; : property-text-byte@ 180 sys ; : deform 181 sys ; : deform-block 182 sys ; : dfrm-pose >r 33 6 r> deform-block ;");
     if (r != ZF_OK) fprintf(stderr, "zforth: profiling/fish bridge init failed: %d\n", r);
 
     // FSN filesystem bridge words (custom 3-7 / sys 131-135)
