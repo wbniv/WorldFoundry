@@ -58,7 +58,7 @@ Agent-driven launch/input/capture must always remain inside owned sessions.
 ## Current evidence
 
 Both APK variants build and pass signature verification. The installed service
-recognizes APP=patchwork. Physical job **J-f62e22b4423d** completed on Chromecast
+recognizes APP=patchwork. Physical job **J‑f62e22b4423d** completed on Chromecast
 HD / Android 14 through normal pool allocation, using the frozen HTTPS build
 `75bd2d3026fab66e83e523f7421aef766be2876824eefb703eb90772fda99b70`.
 Two simulated controllers inside the TV session played all 18 turns, all three
@@ -85,7 +85,7 @@ All 36 platform tests and 48 selected coordinator tests pass.
 Temporary test origin: `https://collections-timing-riding-computing.trycloudflare.com`.
 It is valid only while the development server and tunnel are running; it is not
 production hosting. The interactive APK targets this URL. The initial interactive check lost foreground before its launch validation.
-Retry **J-bbb786952d30** passed ordinary launch, remote keys and Home/resume
+Retry **J‑bbb786952d30** passed ordinary launch, remote keys and Home/resume
 with the same process; cleanup is verified. The interactive build remains
 installed and can be opened as Quilt Night from the TV launcher.
 
@@ -97,11 +97,11 @@ production packaging, HTTPS configuration and artwork remain separate work.
 ## State-by-state layout review
 
 [Open the screenshot gallery](../../../../docs/diagnostics/patchwork-tv-review/index.html).
-Job J-2104f8e72e64 recorded a complete six-player game with long names. Its
+Job J‑2104f8e72e64 recorded a complete six-player game with long names. Its
 106 extracted physical frames cover all gameplay phases, every turn, readiness
 changes, both intermediate round-result screens, all 36 player scoring steps
 and final standings. The 150-second owned recording completed, including
-cleanup; J-59b39dae068a restored and checked the ordinary interactive APK.
+cleanup; J‑59b39dae068a restored and checked the ordinary interactive APK.
 
 The browser capture retains actual public state snapshots. Replaying 106 states
 in linen/night/paper gives 318 layouts with zero fit failures at 960×540.

@@ -1,5 +1,11 @@
 # Shared Chromecast testing
 
+In human-readable prose, tables and rendered job labels, write coordinator
+job IDs with a nonbreaking hyphen (U+2011), for example `J‑0692359b671d`,
+so the ID cannot split across lines. Preserve ASCII `J-` in commands,
+machine-readable data, filenames, paths and URLs because those bytes are part
+of the executable identifier or reference.
+
 ## Engine changes require explicit permission
 
 Will requires discussion and explicit permission before modifying any World

@@ -14,6 +14,7 @@ internals at the bottom. For per-symptom debugging recipes, see
    - [Headless Blender export fallback](#headless-blender-export-fallback)
    - [Build & Run](#build--run)
 3. [Authoring conventions](#authoring-conventions)
+   - [Materials and Cast1 performance](#materials-and-cast1-performance)
    - [Blender Viewport Display by Object Type](#blender-viewport-display-by-object-type)
 4. [Engine systems you wire from a level](#engine-systems-you-wire-from-a-level)
    - [Composing actors — sensors + visuals](#composing-actors--sensors--visuals-reach-for-this-before-a-new-class) — prefer composition over new classes; `ActBox` trigger volumes; catalog of live primitives
@@ -228,6 +229,31 @@ For runtime use Taskfile entries: `task run-level -- wflevels/<level>.iff` (no b
 ---
 
 ## Authoring conventions
+
+### Materials and Cast1 performance
+
+The modern renderer supports painted textures, palette recoloring, lighting,
+fog, prelit materials, texture × vertex-color modulation, alpha cutouts and
+translucency. A proposed opaque-texture shader specialization was measured on
+Chromecast HD (Cast1) with a Parmenides v0.9.3 scene: its mode-1-heavy Being
+window rose from 35.76 FPS to 59.74/59.94 FPS in two matched runs. The change
+is **not yet integrated**. It keeps the existing programs, so special material
+effects remain available; the measured speedup applies only to fully opaque,
+non-modulated textured draws. See the [experiment and scope](https://github.com/wbniv/finding-your-way/blob/28c4ad0/docs/diagnostics/parmenides/v093-gpu-atlas-2026-10-14/README.md).
+
+| Material choice | Renderer behavior and authoring consequence |
+| --- | --- |
+| Opaque painted texture with white vertex color; `wf_texture_palette`; normal lighting, fog or `wf_prelit` | Eligible for the proposed fast path. Palette recoloring is supported there. |
+| Texture multiplied by non-white vertex colors for tint or baked shadow (`TEXTURE_MODULATE`) | Uses texture mode 3 and the existing opaque program, so those pixels miss this particular gain. Without modulation, the legacy mode-1 rule uses the texture only on white vertices; non-white vertices produce flat color instead of textured shading. |
+| `wf_alpha_cutout` for texture holes; `wf_opacity < 1` for whole-material blending | Uses the existing general program. Texture alpha by itself does not cut holes in an opaque mode-1 surface; opacity below 1 does not give each texel a different blend amount. Large or overlapping cutout/translucent sheets can also increase pixel work. |
+
+The current `wf_blender` exporter writes white vertex colors and does not emit
+`TEXTURE_MODULATE`; Blender-authored texture × vertex-color shading therefore
+needs exporter support before use. It already exports `wf_texture_palette`,
+`wf_prelit`, `wf_alpha_cutout` and `wf_opacity`. Use the effect a scene needs,
+then profile a representative camera view on the target device. The whole-scene
+FPS gain above does not establish a cost per special material: screen coverage,
+overlap and shader switches determine how much of it a sparse effect gives up.
 
 ### Blender Viewport Display by Object Type
 

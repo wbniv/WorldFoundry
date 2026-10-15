@@ -83,7 +83,7 @@ CTest regressions and Chromecast verification for the supported teleport paths.
 
 **Why dormant:** The list code is from the 2000-02-12 CVS import (rev 1.1, `kts`), written for toolchains that, as far as I know, did not exploit the aliasing violation (not checked). The bug needs the compiler to inline the whole chain and hoist the load, which `-O3` did on the Chromecast. Android Release builds before v0.8 compiled with assertions on, and `VALIDATELIST` (`hal/_list.h:135`, only when `DO_ASSERTIONS`) reads `_head`/`_tail` through `VALIDATEPTR` at the top of every list operation, which looks like a barrier that forces a reload; the asserts-on build was **not** disassembled, so that is the likely explanation, not a confirmed one. The desktop asserts-off build ran the same level without crashing: whether the load is hoisted depends on inlining and register pressure, which differ by compiler and target, so the failure looked layout-sensitive (the trash-fill and message-tracker experiments "fixed" it only by changing the generated code). The v0.8 release defines (E1) first built that configuration for Android.
 
-**Fix:** Mark `SNode` `may_alias` (`WF_MAY_ALIAS`), so accesses through it alias any object. The rebuilt library reloads `_next`/`_head` every iteration (`ldr r6,[r0,#8]; cmp r6,r0` at `0x896e2`), and `tour-g4-v0` completes on cast1 (`J-4d803a23df20`, 1,779 frames, no crash; one run).
+**Fix:** Mark `SNode` `may_alias` (`WF_MAY_ALIAS`), so accesses through it alias any object. The rebuilt library reloads `_next`/`_head` every iteration (`ldr r6,[r0,#8]; cmp r6,r0` at `0x896e2`), and `tour-g4-v0` completes on cast1 (`J‑4d803a23df20`, 1,779 frames, no crash; one run).
 
 **Diff** (`wfsource/source/hal/_list.h`):
 ```diff

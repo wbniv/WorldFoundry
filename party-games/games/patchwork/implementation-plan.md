@@ -52,12 +52,12 @@ uses independently generated shapes; physical card inventory is still unverified
 
 | Hardware validation | Evidence | Result |
 | --- | --- | --- |
-| Two-player full game and final ceremony | [J-f62e22b4423d receipt](../../../docs/diagnostics/patchwork-tv-J-f62e22b4423d/receipt.json) | Complete 18-turn game and verified cleanup |
-| Ordinary launch, remote keys and Home/resume | [J-bbb786952d30 receipt](../../../docs/diagnostics/patchwork-tv-J-bbb786952d30/receipt.json) | Same process retained; cleanup verified |
-| Six-player full game and state recording | [J-2104f8e72e64 receipt](../../../docs/diagnostics/patchwork-tv-J-2104f8e72e64/receipt.json), [video](../../../docs/diagnostics/patchwork-tv-J-2104f8e72e64/capture.mp4), [frame manifest](../../../docs/diagnostics/patchwork-tv-J-2104f8e72e64/frames/manifest.json) | 106 physical frames; all phases, 18 turns, 36 player scoring steps and final standings; cleanup verified |
-| Ordinary play build restored after recording | [Submission/result](../../../docs/diagnostics/patchwork-tv-restore-interactive.txt) | J-59b39dae068a completed and released allocation |
-| Autoplay Task with post-turn board overviews | [J-6fe48e975a56 receipt](../../../docs/diagnostics/patchwork-tv-task-boards-verification/game/receipt.json), [turn logs](../../../docs/diagnostics/patchwork-tv-task-boards-verification/game/logcat.txt) | All 18 turn overviews and final ceremony completed; ordinary app restored by J-cf1176c5554a |
-| Shared regular/autoplay turn phase | [J-c95d141e2cb1 receipt](../../../docs/diagnostics/patchwork-shared-turn-results-tv/game/receipt.json), [turn logs](../../../docs/diagnostics/patchwork-shared-turn-results-tv/game/logcat.txt), [regular game captures](../../../docs/diagnostics/patchwork-regular-turn-results-gallery/), [ordinary-build restoration](../../../docs/diagnostics/patchwork-shared-turn-results-tv/restored/receipt.json) | Six-player Chromecast game completed all 18 server-authoritative `TURN_RESULTS` pauses and final ceremony; ordinary build restored and checked by J-21e56167ef71; ordinary browser game verifies host Continue and refresh recovery |
+| Two-player full game and final ceremony | [J‑f62e22b4423d receipt](../../../docs/diagnostics/patchwork-tv-J-f62e22b4423d/receipt.json) | Complete 18-turn game and verified cleanup |
+| Ordinary launch, remote keys and Home/resume | [J‑bbb786952d30 receipt](../../../docs/diagnostics/patchwork-tv-J-bbb786952d30/receipt.json) | Same process retained; cleanup verified |
+| Six-player full game and state recording | [J‑2104f8e72e64 receipt](../../../docs/diagnostics/patchwork-tv-J-2104f8e72e64/receipt.json), [video](../../../docs/diagnostics/patchwork-tv-J-2104f8e72e64/capture.mp4), [frame manifest](../../../docs/diagnostics/patchwork-tv-J-2104f8e72e64/frames/manifest.json) | 106 physical frames; all phases, 18 turns, 36 player scoring steps and final standings; cleanup verified |
+| Ordinary play build restored after recording | [Submission/result](../../../docs/diagnostics/patchwork-tv-restore-interactive.txt) | J‑59b39dae068a completed and released allocation |
+| Autoplay Task with post-turn board overviews | [J‑6fe48e975a56 receipt](../../../docs/diagnostics/patchwork-tv-task-boards-verification/game/receipt.json), [turn logs](../../../docs/diagnostics/patchwork-tv-task-boards-verification/game/logcat.txt) | All 18 turn overviews and final ceremony completed; ordinary app restored by J‑cf1176c5554a |
+| Shared regular/autoplay turn phase | [J‑c95d141e2cb1 receipt](../../../docs/diagnostics/patchwork-shared-turn-results-tv/game/receipt.json), [turn logs](../../../docs/diagnostics/patchwork-shared-turn-results-tv/game/logcat.txt), [regular game captures](../../../docs/diagnostics/patchwork-regular-turn-results-gallery/), [ordinary-build restoration](../../../docs/diagnostics/patchwork-shared-turn-results-tv/restored/receipt.json) | Six-player Chromecast game completed all 18 server-authoritative `TURN_RESULTS` pauses and final ceremony; ordinary build restored and checked by J‑21e56167ef71; ordinary browser game verifies host Continue and refresh recovery |
 | Repeatable browser playthrough Task | [Playthrough log](../../../docs/diagnostics/patchwork-task-playthrough-verification/playthrough.log) | Full phone/TV game passed; isolated server stopped afterward |
 | Six-player layout regression in all three skins | [Fit report](test/evidence/tv-states-reviewed/report.json), [check output](../../../docs/diagnostics/patchwork-tv-state-replay.txt) | 106 states × 3 skins = 318 layouts; zero fit failures at 960×540 |
 
@@ -477,7 +477,7 @@ one-player snapshots, passes, stale commands, host changes and disconnects.
 The [gallery](../../../docs/diagnostics/patchwork-tv-review/index.html#end-of-turn)
 includes six committed-board previews and all 18 regular-game turn captures.
 
-The additional six-player physical recording job `J-2c3998a36d75` completed
+The additional six-player physical recording job `J‑2c3998a36d75` completed
 and its video is archived in `docs/diagnostics/patchwork-shared-turn-results-record`.
 That capture starts after the first turn. A complete six-player 1080p browser
 recording, including all 18 shared turn summaries and final scoring, is archived

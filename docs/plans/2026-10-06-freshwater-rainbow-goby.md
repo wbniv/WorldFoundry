@@ -28,7 +28,7 @@ This adds three visual actors and 384 source triangles, without additional
 physics bodies or engine changes. Four 256² animal/rock textures share the
 existing 512² permanent page.
 
-The cast1 launch check passed (`J-f5bfc4b9d263`); its log reports the goby settled
+The cast1 launch check passed (`J‑f5bfc4b9d263`); its log reports the goby settled
 at Z=1.365 on the centre stone. Twelve goby tests pass, including support heights,
 settling and compilation of the actual exported scripts in both configurations.
 

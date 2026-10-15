@@ -24,7 +24,7 @@ flowchart TD
 
 ## Why the current command waits
 
-`android/bomberman/install.py` checks the protected service for install support before submitting APK jobs. If support is absent, it invokes `android/bomberman/deploy-coordinator.py`. That deployment helper waits for all running **and queued** jobs to disappear before stopping and replacing the service. The repeated messages about `J-cfbb812fc1ff` describe that service upgrade wait, rather than an APK installation waiting on video playback.
+`android/bomberman/install.py` checks the protected service for install support before submitting APK jobs. If support is absent, it invokes `android/bomberman/deploy-coordinator.py`. That deployment helper waits for all running **and queued** jobs to disappear before stopping and replacing the service. The repeated messages about `J‑cfbb812fc1ff` describe that service upgrade wait, rather than an APK installation waiting on video playback.
 
 At inspection on 2026-10-04, device 01 was measuring that job and device 02 was reserved by Will for watching TV. The source tree already contains the background workflow in `service.py`, reservation eligibility in `store.py`, and the install-only adapter in `workflows.py`. The immediate work is to verify and deploy those changes, improve the upgrade path, and make the installer report the distinction clearly.
 
@@ -123,7 +123,7 @@ Will's corrected installer run recorded successful capability verification and q
 
 | Device | Job and evidence | Foreground preserved |
 |---|---|---|
-| Chromecast 01 | [J-ac7fa776da28 receipt](../diagnostics/bomberman-chromecast/J-ac7fa776da28/receipt.json) | Google TV launcher |
-| Chromecast 02 | [J-905b237085a2 receipt](../diagnostics/bomberman-chromecast/J-905b237085a2/receipt.json) | YouTube TV activity |
+| Chromecast 01 | [J‑ac7fa776da28 receipt](../diagnostics/bomberman-chromecast/J-ac7fa776da28/receipt.json) | Google TV launcher |
+| Chromecast 02 | [J‑905b237085a2 receipt](../diagnostics/bomberman-chromecast/J-905b237085a2/receipt.json) | YouTube TV activity |
 
 Both receipts report `completed`, `cleanup_verified: true`, and background cleanup without launch or input. Device 02's receipt records device 01's concurrent installation, demonstrating independent sessions across devices. Foreground snapshots match before and after each install. The [final queue snapshot](../diagnostics/coordinator-background-install-final-queue.txt) shows both devices ready, no active or queued jobs, and device 02 still reserved by `interactive` for `Watching TV`. Foreground equality verifies activity preservation; uninterrupted video playback was not independently measured. Interactive Bomberman gameplay remains untested on hardware.
