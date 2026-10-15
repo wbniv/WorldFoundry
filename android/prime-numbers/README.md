@@ -103,7 +103,7 @@ evidence were committed as `525b1d29`.
   reference-only Study, Recall marks/results, and lifecycle state.
 - The twelve installer recovery/retry tests and four coordinator admission
   tests passed; [test output](../../docs/diagnostics/prime-numbers-chromecast/reference-only/tooling-tests.txt).
-- Chromecast 1 check `J-9638f51a96ce` installed the exact frozen APK and passed
+- Chromecast 1 check `J‑9638f51a96ce` installed the exact frozen APK and passed
   Study, all four held/released directions, Recall, Home/resume, and Back exit;
   [assertions](../../docs/diagnostics/prime-numbers-chromecast/J-9638f51a96ce/prime-assertions.json).
   Reviewed captures show the [Study chart after OK](../../docs/diagnostics/prime-numbers-chromecast/J-9638f51a96ce/study-reference-screenshot.png)

@@ -111,7 +111,7 @@ not finished artwork packs.
 ## Chromecast testing
 
 A complete [TV state screenshot gallery](../../../docs/diagnostics/patchwork-tv-review/index.html)
-contains 106 frames from physical Chromecast job J-2104f8e72e64 and 318 browser
+contains 106 frames from physical Chromecast job J‑2104f8e72e64 and 318 browser
 state/skin previews. The six-player long-name check exposed overflow in the
 lobby, readiness, round results and standings; these layouts now fit the HD
 TV's 960×540 CSS viewport. Browser replay checks text bounds and footer overlap

@@ -727,6 +727,28 @@ Full root-cause analysis: [docs/investigations/2026-05-16-textile-rs-rgba555-ded
 
 ---
 
+## Texture turns flat after adding vertex color, or alpha has no effect
+
+**Textured mesh turns flat on tinted vertices:** The legacy texture mode uses
+the sampled texture only when vertex color is white. A non-white vertex color
+replaces it with flat color. Texture × vertex-color tinting needs
+`TEXTURE_MODULATE` (mode 3); the current Blender exporter writes white vertex
+colors and does not emit that flag, so it cannot author this effect yet. Paint
+the shading into the texture or plan the exporter change before relying on
+vertex-baked shading.
+
+**Transparent texels appear opaque:** An ordinary opaque material ignores
+texture alpha. Use `wf_alpha_cutout` for holes, then check the exported material
+and an actual runtime frame. `wf_opacity < 1` blends the whole material; it does
+not provide a separate blend amount for each texel.
+These effects remain supported if the proposed Cast1 opaque-texture speedup is
+integrated, but their draws use the existing general shader. Large overlapping
+surfaces can cost more; a sparse-use FPS cost has not been measured. See
+[Materials and Cast1 performance](level-building.md#materials-and-cast1-performance)
+for the modeler-facing tradeoff and current exporter controls.
+
+---
+
 ## Mesh face normals & backface culling
 
 > **UPDATED 2026‑09‑21 — software backface culling is ON BY DEFAULT (`WF_CULL=0` opts out).**

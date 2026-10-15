@@ -137,7 +137,7 @@ The service persists a batch and child jobs transactionally, normalizes `DEVICE`
 
 Process tests cover successful parallel batches, retry tokens, atomic rejection/reservation updates, reserved children, cancellation, restart persistence, stale artwork reset/recheck, missing-tile failures and superseded checks. Initial expanded suite: **83 passed**; subsequent launcher recovery tests: **23 passed** in the targeted suites. Full regression suite subsequently passed **86 tests**; the final suite including black-capture fallback tests passed **88 tests** (`pytest -q tests/device_coordinator`, 26.73 seconds).
 
-Reference extraction was checked against the actual Bomberman and Aquarium APKs. On Chromecast 01's existing launcher capture, the Cat-Boom! circular tile matches its frozen APK reference with mean absolute error 11.42, RMS 21.10 and worst-region error 19.10 (48px comparison). This validates that example's image comparison, not the full installation/navigation workflow. Chromecast 02's observational capture was black, so it provides no artwork acceptance evidence. Preflight jobs `J-00fc00d7af56` and `J-32df463794da` completed without input and left both devices ready.
+Reference extraction was checked against the actual Bomberman and Aquarium APKs. On Chromecast 01's existing launcher capture, the Cat-Boom! circular tile matches its frozen APK reference with mean absolute error 11.42, RMS 21.10 and worst-region error 19.10 (48px comparison). This validates that example's image comparison, not the full installation/navigation workflow. Chromecast 02's observational capture was black, so it provides no artwork acceptance evidence. Preflight jobs `J‑00fc00d7af56` and `J‑32df463794da` completed without input and left both devices ready.
 
 Administrator deployment was attempted with `sudo -n python3 android/bomberman/deploy-coordinator.py`; the host required interactive authentication. No service files were changed by that attempt. Run the reviewed deployment from a terminal, then complete both-device acceptance through the coordinator. Do not claim these source changes are deployed before capability and real-device checks pass.
 
@@ -147,9 +147,9 @@ Will ran the protected installer and reviewed adapter deployment from his termin
 
 | Batch | Chromecast 01 | Chromecast 02 | Result |
 |---|---|---|---|
-| `B-680f108a0702` — normal Cat-Boom! install | `J-2b5a71828a95`: checksum and visible icon passed | `J-6e5ee4d7f0ed`: checksum and visible icon passed | Both succeeded independently. |
-| `B-dfae27f7dea8` — artwork-only trial | `J-b90ed22b116d`: stale cat tile detected as inconclusive; verification failed | `J-c6b1e9005c21`: stale cat tile rejected; launcher restart then data reset; new trial tile verified | Partial failure exposed a real classification defect; the successful child retained its result. |
-| `B-29d91b215624` — normal APK restoration | `J-48b01b19fc82`: normal APK and cat tile verified | `J-a9096e12bf4a`: normal APK checksum passed; cached trial tile remained, verification failed | Both normal APKs restored; device 02 still requires visible-icon recovery. |
+| `B-680f108a0702` — normal Cat-Boom! install | `J‑2b5a71828a95`: checksum and visible icon passed | `J‑6e5ee4d7f0ed`: checksum and visible icon passed | Both succeeded independently. |
+| `B-dfae27f7dea8` — artwork-only trial | `J‑b90ed22b116d`: stale cat tile detected as inconclusive; verification failed | `J‑c6b1e9005c21`: stale cat tile rejected; launcher restart then data reset; new trial tile verified | Partial failure exposed a real classification defect; the successful child retained its result. |
+| `B-29d91b215624` — normal APK restoration | `J‑48b01b19fc82`: normal APK and cat tile verified | `J‑a9096e12bf4a`: normal APK checksum passed; cached trial tile remained, verification failed | Both normal APKs restored; device 02 still requires visible-icon recovery. |
 
 The temporary trial changed only the banner/icon PNGs. Its manifest and `classes.dex` were byte-identical to the normal APK, with the same signature and version code. The normal APK hash is `71d079d9c146a20cbdf4529df84bd61f87432915e687fa47f6d665e8c1cafd40`; the trial hash is `8027b8e5abe3bf7bb16350d3ba4112a934adb805e0290070f69301fddcdce312`.
 
@@ -165,7 +165,7 @@ Full regression suite with the brightness-classification fix: **PASS: 89 tests p
 
 ## Final acceptance and restoration
 
-Will deployed the reviewed brightness fix, and protected adapter hashes match the tested source. Batch **`B-6b2f26d99587`** completed on both devices: `J-c0967ed1190e` (01) and `J-fcf47177949b` (02). Both installed APK checksums match the normal Cat-Boom! build, and both displayed cat icons passed the screenshot/reference comparison.
+Will deployed the reviewed brightness fix, and protected adapter hashes match the tested source. Batch **`B-6b2f26d99587`** completed on both devices: `J‑c0967ed1190e` (01) and `J‑fcf47177949b` (02). Both installed APK checksums match the normal Cat-Boom! build, and both displayed cat icons passed the screenshot/reference comparison.
 
 Chromecast 02 initially retained the bright trial artwork after normal APK installation. The fixed checker recorded it as a mismatch (gain 1.370, MAE 58.82, RMS 73.82), tried a launcher restart, then reset launcher data and rechecked. The normal cat tile then passed (gain 0.822, MAE 11.29, RMS 13.19). This is direct device evidence that installation repairs a stale launcher tile instead of treating APK bytes as proof of visible icon freshness. [Final per-device evidence](../diagnostics/chromecast-multi-device/restore-verified/batch.json).
 

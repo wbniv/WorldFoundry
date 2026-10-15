@@ -130,7 +130,7 @@ and emitted profiling output. It requires Python Xlib and an X11 session.
 Desktop and Android armeabi-v7a builds compiled. The final frozen APK is
 `baseline-9e6c852ce3bb8f8c.apk`. Both dedicated Chromecasts passed the existing
 20-assertion `baseline-settings` validator in batch `B-2004eb07c1a0`:
-cast1 `J-e74c40420a95`, cast2 `J-cc3f36457c7e`. Evidence is retained under the
+cast1 `J‑e74c40420a95`, cast2 `J‑cc3f36457c7e`. Evidence is retained under the
 ignored build directory; actual models expose the runtime controls as editable
 and renderer/surface/allocation rows as read-only. That validator exercises
 settings transactions, held/released directions, reconnect and Home/resume. It
@@ -166,14 +166,14 @@ their actor indices. The test now checks all exported names/indices against the
 actor map and requires exactly eight plant groups. All five aquarium tests pass.
 
 Desktop and Android armeabi-v7a builds compiled with the conversion. Coordinator
-profile `J-fbe79303e2b0` on cast1 logged the exact RPRP-selected seed 713,
+profile `J‑fbe79303e2b0` on cast1 logged the exact RPRP-selected seed 713,
 saltwater, age 150, speed 0, textures/sway enabled. Captures show the mature
 saltwater tank and movement under held/released directional input. Evidence is
 under `build/evidence/plant-cast1-saltwater`; previous sessions in the appended
 log are historical, not results of this run. Cast2 completed contrasting profiles
-`J-b6c0a943a456` (freshwater, textures/sway disabled), `J-1bf1cb367058`
+`J‑b6c0a943a456` (freshwater, textures/sway disabled), `J‑1bf1cb367058`
 (UINT32_MAX seed, saltwater, textures enabled/sway disabled), and
-`J-49b5d1752636` (seed 713, saltwater, textures/sway enabled). All logged the
+`J‑49b5d1752636` (seed 713, saltwater, textures/sway enabled). All logged the
 intended RPRP-selected values; captures show the corresponding resident and
 textured/untextured plants, and traces include held/released directional input.
 The first cast2 saltwater attempt exited before measurement; the same frozen APK
@@ -190,7 +190,7 @@ production desktop UI check measures fixed-clock advancement at 21 Hz and
 real-time restoration independently of property values; both passed. Desktop
 and Android builds passed. Refreshed diagnostic APK
 `baseline-151186bac852a28d.apk` passed all 20 existing baseline checks on cast2
-(`J-befe34cb3fdf`), including actual clock readback. This remains general
+(`J‑befe34cb3fdf`), including actual clock readback. This remains general
 settings validation, not completed live Runtime Options device acceptance.
 
 Coordinator commit `762032a` prepares a fixed `baseline-runtime-options`
@@ -207,7 +207,7 @@ awaits the reviewed administrator upgrade; no direct-control fallback is used.
 Live Runtime Options acceptance completed after the approved coordinator
 upgrade. Deployment transcript confirms a protected backup, readiness and queue
 resume with reservations/device identities retained. Batch `B-1ac2837c00a6`
-completed on cast1 (`J-1f309176abf2`) and cast2 (`J-a036dbb309da`), with all 17
+completed on cast1 (`J‑1f309176abf2`) and cast2 (`J‑a036dbb309da`), with all 17
 assertions passing on each. TV Back applied FPS; phone drafts had no effect,
 Cancel retained state, both owners read process-global values, sample fields
 remained unchanged, active profilers became read-only, and both emitted actual

@@ -14,8 +14,8 @@ Batch `B-885c3c12bc09`, APK SHA-256 `0fa01b422c335947272912906c9817d1899eb5eb075
 
 | Device | Android / ABI | Coordinator job | Recorded arrivals | Complete seven-step tours | Largest camera X error | Result |
 | --- | --- | --- | --- | --- | --- | --- |
-| Chromecast 01, HD | 14 / armeabi-v7a | `J-c24317f2ceae` | 151 | 21 | 0 | PASS |
-| Chromecast 02 | 12 / armeabi-v7a | `J-eadb0ef85fcd` | 146 | 20 | 0 | PASS |
+| Chromecast 01, HD | 14 / armeabi-v7a | `J‑c24317f2ceae` | 151 | 21 | 0 | PASS |
+| Chromecast 02 | 12 / armeabi-v7a | `J‑eadb0ef85fcd` | 146 | 20 | 0 | PASS |
 
 The autonomous Forth fixture cycles the desktop regression's seven commands every 0.5 game seconds. It reports on the next actor update, after teleport completion. Every record includes a monotonic step, command, actual Player X, actual camera X, cached unloaded-marker scale and a boolean assertion. The host validator checks every expected destination, camera position, scale 0.25, command sequence and contiguous record count. It also rejects runtime/script/pointer diagnostics.
 
@@ -29,7 +29,7 @@ See [raw batch evidence](android/regression/batch.json), [arrival validation](an
 
 Batch `B-7a616ae227c9`, APK SHA-256 `dcd09d9ac4eb55d80398e1850e6f47e373f0f39de0366c073f90962c6b1dec1e`.
 
-The existing scene9 g1/view1 loop runs the chapter's own `fy-teleport` through Truth, God and Being and returns to repeat. Requested coordinator recordings are 135 seconds on each device. Jobs: `J-e01b28ace7cd` (01), `J-819e6fd27240` (02).
+The existing scene9 g1/view1 loop runs the chapter's own `fy-teleport` through Truth, God and Being and returns to repeat. Requested coordinator recordings are 135 seconds on each device. Jobs: `J‑e01b28ace7cd` (01), `J‑819e6fd27240` (02).
 
 - [x] Both chapter jobs complete with clean coordinator cleanup and captured logs.
 - [x] Decode both recordings and inspect realm changes and repeat visits.

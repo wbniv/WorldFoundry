@@ -36,7 +36,7 @@ removed before the fix. After the fix, Chromium and WebKit pass at 960×540 and
 1920×1080, plus 960×540 with `.at()` removed: all four directions, hold/release,
 bombs, pause/resume and layout. [Browser results](../diagnostics/bomberman-cast2-input/browser-verification.txt).
 
-**PASS:** coordinator recording `J-342b1f1daa37` on cast2 captures actual Android
+**PASS:** coordinator recording `J‑342b1f1daa37` on cast2 captures actual Android
 directional input moving the cat from column 1 to column 4. No JavaScript errors
 appear in the [device log](../diagnostics/bomberman-cast2-input/after/logcat.txt).
 Compare [before right input](../diagnostics/bomberman-cast2-input/before-right.png)
@@ -48,7 +48,7 @@ verification. The final frozen APK includes only a comment clarification beyond
 the successfully recorded movement implementation.
 
 **PASS:** final APK `e420c5da610d5386` installed and its actual launcher artwork
-verified on cast2 in `J-65b75ee182b5`; cleanup completed and device health is ready.
+verified on cast2 in `J‑65b75ee182b5`; cleanup completed and device health is ready.
 [Final receipt](../diagnostics/bomberman-cast2-input/install-verified/receipt.json).
 An earlier install completed its APK stage but failed foreground restoration;
 coordinator reconnect recovered the device before this successful retry.

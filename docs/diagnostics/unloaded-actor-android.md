@@ -6,8 +6,8 @@ actor whose source room has never loaded.
 
 | Device | Job | Verified intervals | Complete 12-phase cycles | Active / inactive target intervals |
 |---|---|---:|---:|---:|
-| Chromecast HD / Android 14 | `J-dc0208160ed7` | 117 | 9 | 59 / 58 |
-| Project Room / Android 12 | `J-459777d97f8a` | 114 | 9 | 57 / 57 |
+| Chromecast HD / Android 14 | `J‑dc0208160ed7` | 117 | 9 | 59 / 58 |
+| Project Room / Android 12 | `J‑459777d97f8a` | 114 | 9 | 57 / 57 |
 
 Batch: `B-da4fa007e9ab`. Both jobs completed, both receipts have
 `cleanup_verified: true`, and the final queue shows ready, unowned devices and

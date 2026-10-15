@@ -53,20 +53,20 @@ review `/tmp/chromecast-coordinator-review-011-refresh.json` passed; release
 Terminal deployment completed at 13:34; post-deployment review passed and the
 queue resumed. Protected backup:
 `/var/lib/wf-device-coordinator/backups/standalone-20261006-133404-1324408`.
-The diagnostic rerun `J-fbd9502170cd` passed all four directional press/release,
+The diagnostic rerun `J‑fbd9502170cd` passed all four directional press/release,
 actor-consumer and movement checks, then failed because long OK produced
 `keypad` while the validator expected `form`. The modal transition remains an
 acceptance failure; evidence is saved under `refreshed-011/runtime-check`.
-Cast2 owned recovery `J-8614a8111f41` completed successfully.
+Cast2 owned recovery `J‑8614a8111f41` completed successfully.
 
 The rebuilt diagnostic APK `801cebf080a6a3f8561be5eb416a7b174968b0d04d981fb93fae79cac47d81e9`
 contains the existing opening-button fix. Six host tests pass; cast1 check
-`J-d60e572a8cf5` confirms long OK opens only the form, with held input clear and
+`J‑d60e572a8cf5` confirms long OK opens only the form, with held input clear and
 simulation paused. All directional checks pass. The later legacy
 `keypad_input_acknowledged` assertion fails on this system-text-input APK;
 the diagnostic validator must gain native-editor acceptance before the complete
 check can pass. Forwarding cleanup passed. Evidence: `opening-press/cast1`.
-Cast2 `J-b92c0ef39416` stopped before the opening gesture because Android 12
+Cast2 `J‑b92c0ef39416` stopped before the opening gesture because Android 12
 rejects `input keycombination -t`; this validator needs an owned compatible
 held-input implementation before cast2 acceptance. Evidence: `opening-press/cast2`.
 
@@ -417,12 +417,12 @@ Standalone commit `f1f1c52` passes all 139 installed-package tests. Fresh releas
 `/tmp/chromecast-coordinator-release-numeric-up` and review
 `/tmp/chromecast-coordinator-review-numeric-up.json` pass preflight. Deployment
 completed with protected backup `standalone-20261006-135354-1341004`.
-Jobs `J-c40d759cc60b` and `J-8c28af8e8ec5` both reproduce
+Jobs `J‑c40d759cc60b` and `J‑8c28af8e8ec5` both reproduce
 `UnsatisfiedLinkError` calling `WorldFoundryActivity.textResult` after Up. Both
 APK ABIs export the JNI method. A proposed activity static initializer loads
 `wf_game` into the Java class loader; the patch compiles against Android 34 but
 was explicitly approved and applied. Diagnostic and ordinary APK builds pass.
-Fixed diagnostic jobs `J-2b93477c9b6c` (cast1) and `J-484dfebcef68` (cast2)
+Fixed diagnostic jobs `J‑2b93477c9b6c` (cast1) and `J‑484dfebcef68` (cast2)
 both pass `numeric_up_keeps_process`, with identical process IDs before/after Up
 and no JNI errors/fatal exceptions. The first cast2 fixed attempt failed startup
 foreground validation; its retry reached and passed the probe. The later seed

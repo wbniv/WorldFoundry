@@ -303,7 +303,7 @@ Conversions remain pending and engine changes require separate approval.
 
 ## Saved baseline · 5 October 2026
 
-Coordinator job **J-5cd67c4fff20** profiled the frozen current eight-tank APK
+Coordinator job **J‑5cd67c4fff20** profiled the frozen current eight-tank APK
 in the clownfish scene: 30 s warmup, three 60 s idle runs. The recorded median
 is **29.970 FPS**, with **33.367 ms p95** presented-frame interval on
 chromecast-test-01. These are frame-presentation measurements, not CPU stage

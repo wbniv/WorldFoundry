@@ -30,8 +30,8 @@ The actual gallery catalog passed two-owner validation and commit in [gallery-ho
 Plant device acceptance is complete on both devices using the same frozen APK
 `aquarium-a2b7ecc8478f9809.apk` (SHA-256
 `a2b7ecc8478f98097a766efcbce0b4a1310c2e3ed1b1e408ea6e040daa02f4f5`).
-Cast2 passed 29 assertions in job `J-ff04d9b7fe6e`; cast1 passed 30 in
-`J-83fe8930e6d5`, including the additional Down clearance precondition.
+Cast2 passed 29 assertions in job `J‑ff04d9b7fe6e`; cast1 passed 30 in
+`J‑83fe8930e6d5`, including the additional Down clearance precondition.
 Both verify native text entry and Up without process loss, seed precision,
 seed/water regeneration, speed-only generation continuity, stale sessions,
 invalid drafts, Cancel, reconnect, all four held/released directions,

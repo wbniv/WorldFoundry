@@ -66,7 +66,7 @@ schema changes are required for these supplemental properties.
   Player scripts also omit Director-only contact/spine definitions. Tests now
   compile both actual exported scripts within the same dictionary in float and
   fixed-point configurations; the ten goby checks pass.
-- Corrected cast1 verification passed: job `J-986002bc14ed`, APK SHA-256
+- Corrected cast1 verification passed: job `J‑986002bc14ed`, APK SHA-256
   `7bc63a1c8af8619a3e6e7faa2d3c5a7c8ec03b6513204bd39d31be32d187c533`.
   The captured screen shows the freshwater goby, growing plants and seed HUD;
   the runtime failure check passed. Evidence is under
@@ -76,7 +76,7 @@ schema changes are required for these supplemental properties.
 - Shared code comprises the existing Rust schema reader/model/validator and the
   new strict validation wrapper. Draft transactions/navigation live in the
   reusable C++ runtime layer; they are not yet shared with Blender or wf-edit.
-- Cast1 settings job `J-31cfa0e8c8f3` passed keypad navigation, both back-arrow
+- Cast1 settings job `J‑31cfa0e8c8f3` passed keypad navigation, both back-arrow
   steps, phone apply/cancel, invalid seed rejection, reconnect, stale-session
   rejection and freshwater/saltwater regeneration. The goby settles on the new
   central grazing rock. [Assertions and captures](2026-10-06-runtime-oas-oad-object-editor/evidence/settings-check/plant-assertions.json)
@@ -87,7 +87,7 @@ schema changes are required for these supplemental properties.
   Eight coordinator regression tests pass. Deployment and a device rerun are
   pending; movement, release, Home/resume and selector exit remain unverified
   by this run. No engine code was changed for this test correction.
-- Rerun `J-bafa5af55376` passed all four directions with fresh samples,
+- Rerun `J‑bafa5af55376` passed all four directions with fresh samples,
   released-input settling and Home/resume in the same process. Settings checks
   passed again. [Movement measurements](2026-10-06-runtime-oas-oad-object-editor/evidence/settings-rerun/movement-samples.json)
   are saved. Final exit failed because the validator omitted a back-arrow step:
@@ -101,7 +101,7 @@ schema changes are required for these supplemental properties.
   source-hash check to stop before deployment. The existing deployed service
   already supports the plant validator. Both deployed/source hashes for the
   single-file review are verified, and eight coordinator regression tests pass.
-- Final cast1 job `J-9ae18edfc74a` completed successfully with cleanup verified.
+- Final cast1 job `J‑9ae18edfc74a` completed successfully with cleanup verified.
   All **26 assertions pass**, including settings, all four held directions with
   fresh samples, release settling, Home/resume and exit from the selector.
   The selector screenshot was reviewed and shows Planted Tank selected after
@@ -171,7 +171,7 @@ a registered text editor use the connected browser route; standalone desktop
 physical-keyboard/IME integration remains unimplemented.
 
 Current evidence: seven property/UI/phone tests and the sanitizer-backed plant
-host pass; both Android release ABIs build. Cast1 job `J-254663bfc68a` passes
+host pass; both Android release ABIs build. Cast1 job `J‑254663bfc68a` passes
 launch/input/Home/resume using APK
 `53423d846f8aa03edff9918de3d082bf869a892e67f3ecfc7cf4b2320aed6825`.
 [Receipt](2026-10-06-runtime-oas-oad-object-editor/evidence/native-ime/launch-resume/receipt.json).
@@ -197,12 +197,12 @@ task -d ~/chromecast-coordinator coordinator:deploy CLI_ARGS='--review /home/wil
 ```
 
 The subsequent two-device check `B-f472b7381e21` could not complete Gboard
-acceptance. Cast1 `J-dec31a3f31b5` failed connection discovery before launch;
+acceptance. Cast1 `J‑dec31a3f31b5` failed connection discovery before launch;
 its coordinator readd also required local Wireless debugging setup. Cast2
-`J-0079ed755a7a` installed/launched and captured the properties form, then lost
+`J‑0079ed755a7a` installed/launched and captured the properties form, then lost
 its ADB daemon/device connection before opening the keyboard; cleanup was gated
 as recovery-required. Its first readd found the previous worker's kernel lock
-still held; a second readd attempt `J-3366f47f8413` reported the same held-lock condition. These are test-transport/recovery failures, not a passed IME check.
+still held; a second readd attempt `J‑3366f47f8413` reported the same held-lock condition. These are test-transport/recovery failures, not a passed IME check.
 [Cast1 receipt](2026-10-06-runtime-oas-oad-object-editor/evidence/native-ime/device-batch/chromecast-test-01/J-dec31a3f31b5/receipt.json),
 [cast2 receipt](2026-10-06-runtime-oas-oad-object-editor/evidence/native-ime/device-batch/chromecast-test-02/J-0079ed755a7a/receipt.json).
 Restore coordinator device connections, then rerun the same frozen APK and save
@@ -285,7 +285,7 @@ test evidence**, not Chromecast or physical-phone acceptance.
 
 Phone follow-up checks also pass after reconnect and at tablet width. Both
 Android release ABIs build ([build log](2026-10-06-runtime-oas-oad-object-editor/evidence/colour-text-notes/android-build.log)).
-Cast1 settings regression job `J-77cad3b00e9f` uses frozen APK SHA-256
+Cast1 settings regression job `J‑77cad3b00e9f` uses frozen APK SHA-256
 `48e89c05b364f2d200c569dcf84168b80e73c3a84756888e585f9960e09c7430`;
 the app installed and **seven existing-settings assertions passed**, including
 TV keypad/back behavior, opening settings with held A, and phone seed/water
@@ -815,12 +815,12 @@ pending that deployment. No successful final device run is claimed yet.
 ### Numeric keyboard Up crash: fixed
 
 Will reported pressing Up from the 1 key crashed the native numeric editor.
-Owned jobs `J-c40d759cc60b` and `J-8c28af8e8ec5` reproduced an
+Owned jobs `J‑c40d759cc60b` and `J‑8c28af8e8ec5` reproduced an
 `UnsatisfiedLinkError` calling `WorldFoundryActivity.textResult`. Both APK
 ABIs exported the JNI symbol. Will explicitly approved the Android-host fix:
 load `wf_game` through `System.loadLibrary` in the activity static initializer.
 Diagnostic and ordinary APK builds pass. Fixed diagnostic jobs
-`J-2b93477c9b6c` and `J-484dfebcef68` preserve the process through Up and
+`J‑2b93477c9b6c` and `J‑484dfebcef68` preserve the process through Up and
 show no JNI errors or fatal exceptions. The full settings validator still needs
 to reopen the editor after this Up probe before typing the seed.
 Evidence: [crash/fix receipt](../../docs/diagnostics/coordinator-extraction-20261006/up-crash/report.json).

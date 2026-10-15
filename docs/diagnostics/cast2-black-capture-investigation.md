@@ -12,7 +12,7 @@ Cast2 returned entirely transparent screenshots during YouTube playback. Cast1 r
 
 The installed coordinator ran PNG capture, raw-buffer capture, UI Automation and a three-second observational recording. Each job completed with verified cleanup. “Captured” in the method receipts means an artifact was obtained; it does not mean the image is complete. The methods run successively, so moving images and app state can differ between them.
 
-| Method | Cast1 playing video: `J-d129f5b7cba4` | Cast2 YouTube foreground: `J-ad44a9cdd524` |
+| Method | Cast1 playing video: `J‑d129f5b7cba4` | Cast2 YouTube foreground: `J‑ad44a9cdd524` |
 |---|---|---|
 | PNG | Partial video, large missing rectangular areas and horizontal artifacts | Entirely transparent; RGB and alpha zero |
 | Raw buffer | Partial video with similar missing regions; alpha is 255 everywhere | Original RGB bytes all zero; alpha zero everywhere |
@@ -23,7 +23,7 @@ The installed coordinator ran PNG capture, raw-buffer capture, UI Automation and
 
 ### Cast1: playing-video repeat
 
-Will confirmed that cast1 was playing a video. The first comparison (`J-3f2e938525c5`) caught an “Up next” countdown, so a second comparison was run. Its PNG, raw and UI Automation images contain different video frames with missing regions. The recording subsequently captured a recommendations UI. This state change limits the recording comparison: it cannot be presented as a successful or failed moving-video recording.
+Will confirmed that cast1 was playing a video. The first comparison (`J‑3f2e938525c5`) caught an “Up next” countdown, so a second comparison was run. Its PNG, raw and UI Automation images contain different video frames with missing regions. The recording subsequently captured a recommendations UI. This state change limits the recording comparison: it cannot be presented as a successful or failed moving-video recording.
 
 PNG:
 
@@ -45,7 +45,7 @@ Recording's first decoded frame — recommendations, not evidence of moving-vide
 
 ### Cast1: menu control comparison
 
-The earlier comparison `J-8fab5343f20e` was on YouTube's History screen. PNG, raw and UI Automation captured that menu clearly; the recording's first frame also shows it. A static recording contained only one encoded frame, so later extraction offsets yielded no images. This is a useful control showing the capture routes work for UI, but it does not establish full video capture.
+The earlier comparison `J‑8fab5343f20e` was on YouTube's History screen. PNG, raw and UI Automation captured that menu clearly; the recording's first frame also shows it. A static recording contained only one encoded frame, so later extraction offsets yielded no images. This is a useful control showing the capture routes work for UI, but it does not establish full video capture.
 
 ![Cast1 History menu: ordinary UI capture works](chromecast-capture-J-8fab5343f20e/screenshot.png)
 
@@ -79,7 +79,7 @@ Use a known long-running video so the three-second recording stays within playba
 
 ## Earlier cast1 capture: paused video
 
-Will paused the video before job `J-6ceb581d5470`. The captured play button, title, timeline and recommendations are visible and coherent; the main video area is dark. Pausing therefore improves UI capture but does not demonstrate a complete video-frame capture. The capture command itself sent no input.
+Will paused the video before job `J‑6ceb581d5470`. The captured play button, title, timeline and recommendations are visible and coherent; the main video area is dark. Pausing therefore improves UI capture but does not demonstrate a complete video-frame capture. The capture command itself sent no input.
 
 ![Cast1 paused: YouTube controls visible, main video area dark](chromecast-capture-J-6ceb581d5470/screenshot.png)
 
@@ -87,7 +87,7 @@ Will paused the video before job `J-6ceb581d5470`. The captured play button, tit
 
 ## Cast1: video playing — partial capture
 
-Job `J-72e95f41027a` captured visible parts of the video with large dark regions and horizontal artifacts. Some video pixels reached the capture, so this is positive evidence that video capture is possible at least in part. The missing regions make complete capture a plausible target for further testing; a reliable full frame has not yet been demonstrated.
+Job `J‑72e95f41027a` captured visible parts of the video with large dark regions and horizontal artifacts. Some video pixels reached the capture, so this is positive evidence that video capture is possible at least in part. The missing regions make complete capture a plausible target for further testing; a reliable full frame has not yet been demonstrated.
 
 ![Cast1 playing: partial video capture with missing regions and horizontal artifacts](chromecast-capture-J-72e95f41027a/screenshot.png)
 
@@ -95,11 +95,11 @@ Job `J-72e95f41027a` captured visible parts of the video with large dark regions
 
 ## Cast2: video playing — transparent captures
 
-The initial job `J-a8a71f0fab0a` returned a valid 1920×1080 RGBA PNG containing only `(0,0,0,0)` pixels. It is fully transparent; a black background in an image viewer makes it appear black.
+The initial job `J‑a8a71f0fab0a` returned a valid 1920×1080 RGBA PNG containing only `(0,0,0,0)` pixels. It is fully transparent; a black background in an image viewer makes it appear black.
 
 <img class="blank-capture" src="chromecast-capture-J-a8a71f0fab0a/screenshot.png" alt="Cast2 initial capture: entirely transparent PNG" width="160">
 
-The repeat job `J-e33d994fc93a` produced the same empty image and also collected read-only display diagnostics. Will confirmed that the physical TV was playing a video.
+The repeat job `J‑e33d994fc93a` produced the same empty image and also collected read-only display diagnostics. Will confirmed that the physical TV was playing a video.
 
 <img class="blank-capture" src="chromecast-capture-J-e33d994fc93a/screenshot.png" alt="Cast2 repeat capture: entirely transparent PNG while YouTube was playing" width="160">
 

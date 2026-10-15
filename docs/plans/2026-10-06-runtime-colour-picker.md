@@ -152,7 +152,7 @@ Full Custom interaction and overlay performance measurements on the Chromecasts 
 | Palette/Custom editing on Chromecast | Pending | Requires a reviewed coordinator validator to enter a level, hold A and drive the authored colour field, rather than relying on the existing selector shortcut |
 | Picker overlay performance | Pending | No FPS or latency claim from desktop timing or gameplay-only screenshots |
 
-The second fixture likewise did not open the colour field: current selector settings are specifically tied to the Planted Tank preview registry. Its jobs `J-be5cd48f3730` / `J-220eefda3ae0` completed, but their captures must not count as palette acceptance. This limitation requires no additional engine change to implement the picker; the device validator needs to navigate the in-level generic editor.
+The second fixture likewise did not open the colour field: current selector settings are specifically tied to the Planted Tank preview registry. Its jobs `J‑be5cd48f3730` / `J‑220eefda3ae0` completed, but their captures must not count as palette acceptance. This limitation requires no additional engine change to implement the picker; the device validator needs to navigate the in-level generic editor.
 
 The intermediate install-only restoration jobs failed launcher artwork verification with “HOME launcher left foreground during artwork verification”, after installing the normal APK. Final restoration uses ordinary coordinator launch/resume checks; preserve the receipts and report their final status separately.
 
@@ -161,12 +161,12 @@ The intermediate install-only restoration jobs failed launcher artwork verificat
 
 Final frozen release: `/tmp/wf-colour-picker-complete.apk`, SHA-256 `dd3f50a584a6ee582558bf4aa3b3a65184b6056d34fbfc2e9147463956b2a22d`. The standard build output is `android/app/build/outputs/apk/aquarium/release/worldfoundry-aquarium-release.apk`.
 
-Normal Aquarium restoration and launch/resume completed on both devices for the preceding build (`J-e8dbb35fdee5`, `J-9571d091dca8`). Final hue-strip styling was browser-tested (2 transport/browser tests passed) and packaged afterward. Final installed-build checks: batch `B-c86dce349442`, cast1 `J-d54a9c1e169a`, cast2 `J-42fbffc7fb41`; final receipts are saved under `evidence/final-app/`.
+Normal Aquarium restoration and launch/resume completed on both devices for the preceding build (`J‑e8dbb35fdee5`, `J‑9571d091dca8`). Final hue-strip styling was browser-tested (2 transport/browser tests passed) and packaged afterward. Final installed-build checks: batch `B-c86dce349442`, cast1 `J‑d54a9c1e169a`, cast2 `J‑42fbffc7fb41`; final receipts are saved under `evidence/final-app/`.
 
 Ordinary app test jobs close/restore their session afterward; these checks do not promise to leave Aquarium running. No dedicated-device reservation was created or released. No raw ADB was used.
 
 
-**Final installation/lifecycle result: both completed.** Batch `B-c86dce349442` finished successfully on cast1 (`J-d54a9c1e169a`) and cast2 (`J-42fbffc7fb41`), using the frozen SHA-256 above. Both devices have the normal Aquarium pack again. This confirms installation, launch, basic input and Home/resume; it does not close the separately listed palette-edit/profiling checks.
+**Final installation/lifecycle result: both completed.** Batch `B-c86dce349442` finished successfully on cast1 (`J‑d54a9c1e169a`) and cast2 (`J‑42fbffc7fb41`), using the frozen SHA-256 above. Both devices have the normal Aquarium pack again. This confirms installation, launch, basic input and Home/resume; it does not close the separately listed palette-edit/profiling checks.
 
 ![Readable native TV editor on cast1](2026-10-06-runtime-colour-picker/evidence/native-retry/chromecast-test-01/J-58b0227d4b12/native-numeric-keyboard-screenshot.png)
 
@@ -180,4 +180,4 @@ Custom now uses a hue/saturation square and a separate **Value (brightness)** sl
 
 Regression checks cover changing brightness without changing hue/saturation, reaching black and returning to colour, square gestures preserving brightness, and held-input release.
 
-Validation: **PASS** — TV picker/control regression and phone/browser transport regression (2 tests, 37.64 s). Saved output: [`evidence/custom-value-tests.log`](2026-10-06-runtime-colour-picker/evidence/custom-value-tests.log). Android release rebuild **PASS**. The updated APK is installed on both Chromecasts; coordinated launch/resume checks and cleanup **PASS** (batch `B-53a4f42194d7`, cast1 `J-803b9fb870c9`, cast2 `J-564db629decd`). APK SHA-256: `ae04e3f7514db529b69bb38a5a3bd29f632662fca0c801ec6b643e61ab91d0da`. Build log, frozen-release receipt and device evidence: [`evidence/custom-value/`](2026-10-06-runtime-colour-picker/evidence/custom-value/). These device checks verify installation and app lifecycle; full remote colour-editing acceptance and profiling remain pending.
+Validation: **PASS** — TV picker/control regression and phone/browser transport regression (2 tests, 37.64 s). Saved output: [`evidence/custom-value-tests.log`](2026-10-06-runtime-colour-picker/evidence/custom-value-tests.log). Android release rebuild **PASS**. The updated APK is installed on both Chromecasts; coordinated launch/resume checks and cleanup **PASS** (batch `B-53a4f42194d7`, cast1 `J‑803b9fb870c9`, cast2 `J‑564db629decd`). APK SHA-256: `ae04e3f7514db529b69bb38a5a3bd29f632662fca0c801ec6b643e61ab91d0da`. Build log, frozen-release receipt and device evidence: [`evidence/custom-value/`](2026-10-06-runtime-colour-picker/evidence/custom-value/). These device checks verify installation and app lifecycle; full remote colour-editing acceptance and profiling remain pending.
