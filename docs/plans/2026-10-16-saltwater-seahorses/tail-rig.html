@@ -1,0 +1,409 @@
+<!DOCTYPE html>
+<!--
+  Plan mockup — seahorse tail rig, 35 joints (one per tail ring).
+  Self-contained: inline CSS + JS only. 1440x900 logical canvas.
+  The joint-angle expansion in expand() mirrors the proposed engine function
+  (control block of 25 values -> 35 x 3 joint angles). All limits and
+  dimensions are OURS (game choices) until Phase 0 research checks them.
+-->
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<title>Mockup — seahorse tail rig</title>
+<style>
+  :root { --bg:#ffffff; --fg:#1f2328; --muted:#656d76; --line:#d1d9e0; --panel:#f6f8fa; --accent:#0969da; --chip:#eaeef2; }
+  @media (prefers-color-scheme: dark) {
+    :root { --bg:#0d1117; --fg:#e6edf3; --muted:#9198a1; --line:#30363d; --panel:#161b22; --accent:#4493f8; --chip:#21262d; }
+  }
+  * { box-sizing:border-box; }
+  body { margin:0; width:1440px; height:900px; overflow:hidden; background:var(--bg); color:var(--fg);
+         font:14px/1.45 ui-sans-serif,system-ui,-apple-system,"Segoe UI",sans-serif; }
+  header { display:flex; align-items:baseline; gap:14px; height:56px; padding:14px 24px; border-bottom:1px solid var(--line); background:var(--panel); }
+  header h1 { margin:0; font-size:16px; font-weight:600; white-space:nowrap; }
+  header .sub { color:var(--muted); font-size:13px; white-space:nowrap; overflow:hidden; text-overflow:ellipsis; }
+  header .tag { margin-left:auto; font:600 11px ui-monospace,SFMono-Regular,Menlo,monospace; letter-spacing:.04em; color:var(--muted);
+                border:1px solid var(--line); border-radius:10px; padding:2px 8px; white-space:nowrap; }
+  main { display:grid; grid-template-columns:900px 540px; height:844px; }
+  .left { display:flex; flex-direction:column; border-right:1px solid var(--line); }
+  canvas { display:block; }
+  #chart { background:var(--panel); border-top:1px solid var(--line); }
+  aside { padding:12px 18px; overflow:hidden; }
+  aside h2 { margin:8px 0 6px; font-size:12px; font-weight:700; letter-spacing:.05em; text-transform:uppercase; color:var(--muted); }
+  .presets { display:grid; grid-template-columns:repeat(4,1fr); gap:6px; }
+  .presets button { font:600 12.5px system-ui,sans-serif; padding:7px 4px; border-radius:6px; border:1px solid var(--line);
+                    background:var(--chip); color:var(--fg); cursor:pointer; }
+  .presets button.on { background:var(--accent); border-color:var(--accent); color:#fff; }
+  .sl { display:grid; grid-template-columns:150px 1fr 70px; align-items:center; gap:8px; height:25px; font-size:13px; }
+  .sl input { width:100%; accent-color:var(--accent); }
+  .sl output { font:12px ui-monospace,monospace; text-align:right; color:var(--muted); }
+  .sl.off { opacity:.4; }
+  table { width:100%; border-collapse:collapse; font:12px ui-monospace,monospace; }
+  th, td { padding:2px 6px; text-align:right; border-bottom:1px solid var(--line); }
+  th:first-child, td:first-child { text-align:left; }
+  th { color:var(--muted); font-weight:600; }
+  td.hot { color:#f85149; font-weight:700; }
+  .note { margin-top:8px; font-size:12.5px; color:var(--muted); line-height:1.45; }
+  .note b { color:var(--fg); }
+  .chips { display:flex; gap:6px; flex-wrap:wrap; margin-top:6px; }
+  .chip { font:600 11px ui-monospace,monospace; padding:1px 7px; border-radius:9px; border:1px solid var(--line); }
+  .chip.v { color:#3fb950; border-color:#3fb950; } .chip.o { color:#d29922; border-color:#d29922; }
+</style>
+</head>
+<body>
+<header>
+  <h1>Seahorse tail rig — 35 joints, one per tail ring</h1>
+  <span class="sub">ventral flex · lateral bend · twist at every joint · 25-value control block → 105 joint angles</span>
+  <span class="tag">MOCKUP — NOT SHIPPED</span>
+</header>
+<main>
+  <div class="left">
+    <canvas id="scene" width="900" height="556"></canvas>
+    <canvas id="chart" width="900" height="288"></canvas>
+  </div>
+  <aside>
+    <h2>Pose (a behaviour state picks one)</h2>
+    <div class="presets" id="presets"></div>
+    <h2>Controls (modifiers on the pose)</h2>
+    <div id="sliders"></div>
+    <h2>Control block — what the Director writes per seahorse</h2>
+    <table id="block"></table>
+    <div class="note">
+      <b>Expansion.</b> Seven knots (rings 0, 6, 12, 18, 24, 30, 34) are interpolated to all 35 joints, then the
+      <b>wrap</b> overrides the distal rings with the curvature of the holdfast (1&nbsp;/&nbsp;radius), growing from the tip as
+      <i>progress</i> rises; every angle is clamped to its joint's limit. Changing pose with a grip active releases first
+      (unwraps), then grasps from the tip — try <b>Behaviour loop</b>.
+      <div class="chips"><span class="chip v">verified: 33–37 tail rings (H.&nbsp;reidi)</span><span class="chip v">verified: whole tail grips, more motion toward tip, lateral bending</span><span class="chip o">ours: limits, lengths, knots</span></div>
+    </div>
+  </aside>
+</main>
+<script>
+"use strict";
+// ── Geometry (mm, real animal; the level multiplies by WORLD_SCALE = 10) — OURS ──
+const N = 35, KN = [0, 6, 12, 18, 24, 30, 34];
+const LEN = Array.from({length: N}, (_, i) => 3.75 * Math.pow(0.9764, i));          // 3.75 → 1.67 mm, Σ ≈ 90 mm
+const WID = Array.from({length: N + 1}, (_, i) => 9.0 + (1.4 - 9.0) * Math.pow(i / N, 0.85)); // 9.0 → 1.4 mm
+const LIM = Array.from({length: N}, (_, i) => { const t = i / (N - 1);
+  return { v: 12 + 28 * t, d: 4 + 6 * t, l: 8 + 20 * t, t: 3 + 5 * t }; });          // degrees per joint
+const D2R = Math.PI / 180;
+
+const PRESETS = {
+  rest:    { label: 'Rest coil',   f: [2, 3, 6, 11, 19, 28, 36],  pitch: 4,   wrap: { mode: 'off', start: 18, r: 4, p: 0 }, anim: 'sway' },
+  branch:  { label: 'Grip branch', f: [4, 5, 7, 8, 8, 8, 8],      pitch: 8,   wrap: { mode: 'h', start: 18, r: 4, p: 1 }, anim: 'sway' },
+  stem:    { label: 'Grip stem',   f: [3, 4, 4, 4, 4, 4, 4],      pitch: -4,  wrap: { mode: 'v', start: 16, r: 6, p: 1 }, anim: 'sway' },
+  swim:    { label: 'Swim',        f: [-2, 0, 2, 3, 5, 8, 12],    pitch: -6,  wrap: { mode: 'off', start: 18, r: 4, p: 0 }, anim: 'rudder' },
+  probe:   { label: 'Probe',       f: [9, 8, 6, 3, 1, 4, 12],     pitch: -14, wrap: { mode: 'off', start: 18, r: 4, p: 0 }, anim: 'probe' },
+  twine:   { label: 'Twine (pair)',f: [3, 4, 4, 4, 4, 4, 4],      pitch: -2,  wrap: { mode: 'v', start: 16, r: 5.5, p: 1 }, anim: 'sway', partner: true },
+  startle: { label: 'Startle',     f: [-3, -3, -2, -2, -1, 0, 2], pitch: 0,   wrap: { mode: 'off', start: 18, r: 4, p: 0 }, anim: 'none' },
+  loop:    { label: '▶ Behaviour loop' },
+};
+const LOOP = [['branch', 4.5], ['swim', 3.5], ['probe', 3.0], ['stem', 4.5], ['rest', 3.0], ['twine', 4.5], ['startle', 1.2]];
+
+// current (eased) state, target state, slider modifiers
+const zero7 = () => [0, 0, 0, 0, 0, 0, 0];
+let cur = { f: PRESETS.rest.f.slice(), l: zero7(), t: zero7(), pitch: 4, mode: 'off', start: 18, r: 4, p: 0, partner: 0 };
+let tgt = null, tgtKey = 'rest', loopOn = false, loopIdx = 0, loopT = 0;
+const mod = { gain: 1, lat: 0, tw: 0, pitch: 0, r: null, start: null, p: null };
+
+function setTarget(key) {
+  const P = PRESETS[key]; tgtKey = key;
+  tgt = { f: P.f.slice(), l: zero7(), t: zero7(), pitch: P.pitch, mode: P.wrap.mode, start: P.wrap.start, r: P.wrap.r, p: P.wrap.p,
+          anim: P.anim, partner: P.partner ? 1 : 0 };
+  mod.gain = 1; mod.lat = 0; mod.tw = 0; mod.pitch = 0; mod.r = null; mod.start = null; mod.p = null;
+  syncSliders();
+  document.querySelectorAll('.presets button').forEach(b => b.classList.toggle('on', b.dataset.k === key || (b.dataset.k === 'loop' && loopOn)));
+}
+
+// ── Non-uniform cubic Hermite (Catmull-Rom tangents) over knot ring indices ──
+function interp(vals, x) {
+  let k = 0; while (k < KN.length - 2 && x > KN[k + 1]) k++;
+  const x0 = KN[k], x1 = KN[k + 1], y0 = vals[k], y1 = vals[k + 1];
+  const m = j => j <= 0 ? (vals[1] - vals[0]) / (KN[1] - KN[0])
+               : j >= KN.length - 1 ? (vals[j] - vals[j - 1]) / (KN[j] - KN[j - 1])
+               : (vals[j + 1] - vals[j - 1]) / (KN[j + 1] - KN[j - 1]);
+  const h = x1 - x0, s = (x - x0) / h, s2 = s * s, s3 = s2 * s;
+  return (2 * s3 - 3 * s2 + 1) * y0 + (s3 - 2 * s2 + s) * h * m(k) + (-2 * s3 + 3 * s2) * y1 + (s3 - s2) * h * m(k + 1);
+}
+
+// ── The proposed engine function: control block → per-joint (flex, lateral, twist) degrees ──
+function expand(st, extra) {
+  const F = [], L = [], T = [], hit = [];
+  const mode = st.mode, r = st.r, Lw = (N - st.start) * st.p, s = N - Lw;
+  for (let i = 0; i < N; i++) {
+    const tt = i / (N - 1);
+    F[i] = interp(st.f, i) * mod.gain + (extra.f ? extra.f(i, tt) : 0);
+    L[i] = interp(st.l, i) + mod.lat * tt + (extra.l ? extra.l(i, tt) : 0);
+    T[i] = interp(st.t, i) + mod.tw;
+  }
+  if (mode === 'v' && st.p > 0) {                       // lead-in: turn the tail forward to horizontal before coiling
+    const i0 = Math.max(0, Math.floor(s) - 5);
+    let acc = -st.pitch; for (let i = 0; i < i0; i++) acc += F[i];
+    const per = (90 - acc) / 5, w = Math.min(1, st.p * 4);
+    for (let i = i0; i < Math.min(N, i0 + 5); i++) { F[i] = F[i] * (1 - w) + per * w; L[i] *= (1 - w); }
+  }
+  if (mode !== 'off' && st.p > 0) {
+    for (let i = 0; i < N; i++) {
+      const w = Math.max(0, Math.min(1, i + 1 - s)); if (!w) continue;
+      const kap = LEN[i] / (r + WID[i] / 2) / D2R;      // curvature of the holdfast, as a joint angle
+      if (mode === 'h') { F[i] = F[i] * (1 - w) + kap * w; L[i] *= (1 - w); }
+      else              { L[i] = L[i] * (1 - w) + kap * w; F[i] *= (1 - w); }
+      T[i] *= (1 - w);
+    }
+  }
+  for (let i = 0; i < N; i++) {                          // clamp to the joint's limits
+    const lm = LIM[i]; let h = 0;
+    if (F[i] > lm.v) { F[i] = lm.v; h = 1; } if (F[i] < -lm.d) { F[i] = -lm.d; h = 1; }
+    if (Math.abs(L[i]) > lm.l) { L[i] = Math.sign(L[i]) * lm.l; h = 1; }
+    if (Math.abs(T[i]) > lm.t) { T[i] = Math.sign(T[i]) * lm.t; h = 1; }
+    hit[i] = h;
+  }
+  return { F, L, T, hit };
+}
+
+// ── Forward kinematics: tail base frame from body pitch, then flex / lateral / twist per joint ──
+function fk(A, pitch) {
+  const b = pitch * D2R;
+  let d = [-Math.sin(b), 0, -Math.cos(b)], v = [Math.cos(b), 0, -Math.sin(b)], s = [0, 1, 0];
+  const P = [[0, 0, 0]], V = [v.slice()], S = [s.slice()];
+  const rot = (a, c, ang) => { const C = Math.cos(ang), Sn = Math.sin(ang);
+    return [[a[0] * C + c[0] * Sn, a[1] * C + c[1] * Sn, a[2] * C + c[2] * Sn], [c[0] * C - a[0] * Sn, c[1] * C - a[1] * Sn, c[2] * C - a[2] * Sn]]; };
+  let p = [0, 0, 0];
+  for (let i = 0; i < N; i++) {
+    [d, v] = rot(d, v, A.F[i] * D2R);      // ventral flex: d toward v
+    [d, s] = rot(d, s, A.L[i] * D2R);      // lateral bend: d toward s
+    [v, s] = rot(v, s, A.T[i] * D2R);      // twist about d
+    p = [p[0] + d[0] * LEN[i], p[1] + d[1] * LEN[i], p[2] + d[2] * LEN[i]];
+    P.push(p); V.push(v.slice()); S.push(s.slice());
+  }
+  return { P, V, S };
+}
+
+// ── Body silhouette (mm, body frame: +x ventral/front, +z up, origin = tail base) — stylised, OURS ──
+const BODY = [[-4.5,0],[-6.5,6],[-8,14],[-8.8,22],[-8.6,30],[-7.6,38],[-6,45],[-5,50],[-6.5,55],[-7,60],[-5.5,65],[-3,69],[-1,73],
+  [1.5,71],[3.5,67],[6,64.5],[10,63],[18,61.5],[26,60.5],[29,60.2],[29.6,58.6],[26,57.8],[18,57.6],[11,57.2],[7,55.5],[5.5,52.5],
+  [6.5,49],[9.5,44],[12,37],[12.5,28],[11,19],[8,10],[5,3],[4.5,0]];
+const POUCH = [[4.5,0],[9,1.5],[13,6],[13.5,11],[11.5,16]];
+
+// ── Drawing ──
+const sc = document.getElementById('scene'), g = sc.getContext('2d');
+const ch = document.getElementById('chart'), cg = ch.getContext('2d');
+const SIDE = { ox: 330, oy: 262, k: 2.9 };
+const TOP = { x: 636, y: 14, w: 250, h: 250, k: 2.1 };
+const css = n => getComputedStyle(document.documentElement).getPropertyValue(n).trim();
+
+function ribbon(ctx, pts, wids, colA, colB, stroke, hit, joint) {
+  const n = pts.length, nx = [], ny = [];
+  for (let i = 0; i < n; i++) {
+    const a = pts[Math.max(0, i - 1)], b = pts[Math.min(n - 1, i + 1)];
+    let dx = b[0] - a[0], dy = b[1] - a[1], L = Math.hypot(dx, dy);
+    if (L < 1e-6) { nx[i] = i ? nx[i - 1] : 1; ny[i] = i ? ny[i - 1] : 0; continue; }
+    nx[i] = -dy / L; ny[i] = dx / L;
+  }
+  for (let i = 0; i < n - 1; i++) {
+    const w0 = wids[i] / 2, w1 = wids[i + 1] / 2;
+    ctx.beginPath();
+    ctx.moveTo(pts[i][0] + nx[i] * w0, pts[i][1] + ny[i] * w0);
+    ctx.lineTo(pts[i + 1][0] + nx[i + 1] * w1, pts[i + 1][1] + ny[i + 1] * w1);
+    ctx.lineTo(pts[i + 1][0] - nx[i + 1] * w1, pts[i + 1][1] - ny[i + 1] * w1);
+    ctx.lineTo(pts[i][0] - nx[i] * w0, pts[i][1] - ny[i] * w0);
+    ctx.closePath(); ctx.fillStyle = i % 2 ? colA : colB; ctx.fill();
+    ctx.strokeStyle = stroke; ctx.lineWidth = 1; ctx.stroke();
+  }
+  if (joint) for (let i = 1; i < n - 1; i++) {
+    ctx.beginPath(); ctx.arc(pts[i][0], pts[i][1], 2.1, 0, 7);
+    ctx.fillStyle = hit[i - 1] ? '#f85149' : (i % 5 === 0 ? '#ffffff' : 'rgba(255,255,255,.55)'); ctx.fill();
+  }
+}
+
+function drawBody(pitch, ox, oy, k, mirror, male, t) {
+  const b = pitch * D2R, C = Math.cos(b), S = Math.sin(b), m = mirror ? -1 : 1;
+  const X = (x, z) => ox + m * (x * C + z * S) * k, Y = (x, z) => oy - (-x * S + z * C) * k;
+  // dorsal fin (behind the back): flutter drawn as a slow travelling wave — real beat is 30–42 Hz
+  g.beginPath();
+  for (let j = 0; j <= 12; j++) { const z = 13 + j * 1.4, x = -8.6 - 6.5 * Math.sin(Math.PI * j / 12) - 0.9 * Math.sin(t * 9 - j * 0.9);
+    j ? g.lineTo(X(x, z), Y(x, z)) : g.moveTo(X(x, z), Y(x, z)); }
+  g.lineTo(X(-8.6, 30), Y(-8.6, 30)); g.lineTo(X(-8.4, 13), Y(-8.4, 13)); g.closePath();
+  g.fillStyle = 'rgba(255,236,190,.38)'; g.fill(); g.strokeStyle = 'rgba(255,236,190,.7)'; g.lineWidth = 1; g.stroke();
+  // body
+  g.beginPath(); BODY.forEach(([x, z], i) => i ? g.lineTo(X(x, z), Y(x, z)) : g.moveTo(X(x, z), Y(x, z)));
+  if (male) POUCH.slice().reverse().forEach(([x, z]) => g.lineTo(X(x, z), Y(x, z)));
+  g.closePath(); g.fillStyle = male ? '#ec8b35' : '#f2c14e'; g.fill(); g.strokeStyle = male ? '#8d4612' : '#9a6a12'; g.lineWidth = 1.4; g.stroke();
+  if (male) { g.beginPath(); POUCH.forEach(([x, z], i) => i ? g.lineTo(X(x, z), Y(x, z)) : g.moveTo(X(x, z), Y(x, z)));
+    g.fillStyle = '#f3a65a'; g.fill(); }
+  // trunk rings (11)
+  g.strokeStyle = male ? 'rgba(110,50,10,.55)' : 'rgba(120,80,10,.5)'; g.lineWidth = 1;
+  for (let z = 4.5; z < 50; z += 4.5) { const bx = -8.6 + Math.abs(z - 27) * 0.1, fx = 12 - Math.abs(z - 30) * 0.17;
+    g.beginPath(); g.moveTo(X(bx, z), Y(bx, z)); g.quadraticCurveTo(X((bx + fx) / 2, z - 1.4), Y((bx + fx) / 2, z - 1.4), X(fx, z), Y(fx, z)); g.stroke(); }
+  // spots
+  g.fillStyle = 'rgba(60,30,5,.55)';
+  [[-3,8],[2,12],[-5,19],[4,22],[-2,27],[6,31],[-4,35],[1,40],[5,45],[-2,47]].forEach(([x, z]) => { g.beginPath(); g.arc(X(x, z), Y(x, z), 1.1, 0, 7); g.fill(); });
+  // pectoral fin
+  g.beginPath(); g.moveTo(X(-3, 54), Y(-3, 54)); g.lineTo(X(-8.5, 57 + Math.sin(t * 7)), Y(-8.5, 57 + Math.sin(t * 7))); g.lineTo(X(-7.5, 52), Y(-7.5, 52));
+  g.closePath(); g.fillStyle = 'rgba(255,236,190,.45)'; g.fill();
+  // eye (moves independently)
+  const ex = 2.2 + 0.5 * Math.sin(t * 0.8 + (mirror ? 2 : 0)), ez = 62.5;
+  g.beginPath(); g.arc(X(2.2, ez), Y(2.2, ez), 2.4 * k, 0, 7); g.fillStyle = '#fff6dc'; g.fill();
+  g.beginPath(); g.arc(X(ex + 0.4, ez), Y(ex + 0.4, ez), 1.2 * k, 0, 7); g.fillStyle = '#1b1208'; g.fill();
+}
+
+function drawHoldfast(mode, c, r, view) {
+  g.fillStyle = '#4f7f3c'; g.strokeStyle = '#2d4f22'; g.lineWidth = 1.2;
+  if (view === 'side') {
+    const x = SIDE.ox + c[0] * SIDE.k, y = SIDE.oy - c[2] * SIDE.k;
+    if (mode === 'h') { g.beginPath(); g.arc(x, y, r * SIDE.k, 0, 7); g.fill(); g.stroke(); }
+    else { g.fillRect(x - r * SIDE.k, 40, 2 * r * SIDE.k, 516); g.strokeRect(x - r * SIDE.k, 40, 2 * r * SIDE.k, 516); }
+  }
+}
+
+function project(P, view, cx, cy) {
+  return view === 'side' ? P.map(p => [SIDE.ox + p[0] * SIDE.k, SIDE.oy - p[2] * SIDE.k])
+                         : P.map(p => [TOP.x + TOP.w / 2 + (p[0] - cx) * TOP.k, TOP.y + TOP.h / 2 - (p[1] - cy) * TOP.k]);
+}
+
+function wrapCenter(K, st) {
+  const s = Math.min(N - 1, Math.max(0, Math.ceil(N - (N - st.start) * st.p)));
+  const p = K.P[s], ax = st.mode === 'h' ? K.V[s] : K.S[s], rr = st.r + WID[s] / 2;
+  return [p[0] + ax[0] * rr, p[1] + ax[1] * rr, p[2] + ax[2] * rr];
+}
+
+let A = null, K = null, partnerAlpha = 0;
+function frame(ts) {
+  const t = ts / 1000, dt = Math.min(0.05, (t - (frame.last || t)) || 0.016); frame.last = t;
+  if (loopOn) { loopT += dt; if (loopT > LOOP[loopIdx][1]) { loopT = 0; loopIdx = (loopIdx + 1) % LOOP.length; setTarget(LOOP[loopIdx][0]); } }
+  // ease toward target; a grip releases (p → 0) before the wrap mode changes, then grasps from the tip
+  const e = 1 - Math.exp(-3.2 * dt), ep = 1 - Math.exp(-1.8 * dt);
+  for (const key of ['f', 'l', 't']) for (let j = 0; j < 7; j++) cur[key][j] += (tgt[key][j] - cur[key][j]) * e;
+  cur.pitch += (tgt.pitch - cur.pitch) * e; cur.r += (tgt.r - cur.r) * e; cur.start += (tgt.start - cur.start) * e;
+  if (cur.mode !== tgt.mode) { cur.p += (0 - cur.p) * ep * 1.6; if (cur.p < 0.02) { cur.p = 0; cur.mode = tgt.mode; } }
+  else cur.p += (tgt.p - cur.p) * ep;
+  partnerAlpha += ((tgt.partner && cur.mode === 'v' ? 1 : 0) - partnerAlpha) * e;
+  const st = { f: cur.f, l: cur.l, t: cur.t, mode: cur.mode, start: mod.start ?? cur.start, r: mod.r ?? cur.r,
+               p: mod.p ?? cur.p, pitch: cur.pitch + mod.pitch };
+  const extra = {};
+  if (tgt.anim === 'sway') st.pitch += 2.5 * Math.sin(t * 0.9);
+  if (tgt.anim === 'rudder') extra.l = (i, u) => 4 * u * Math.sin(t * 1.6 - u * 2);
+  if (tgt.anim === 'probe') { extra.l = (i, u) => 12 * u * u * Math.sin(t * 1.1); extra.f = (i, u) => 8 * u * u * u * (0.5 + 0.5 * Math.sin(t * 0.7)); }
+  A = expand(st, extra); K = fk(A, st.pitch);
+  draw(st, t); drawChart(); updateBlock(st);
+  requestAnimationFrame(frame);
+}
+
+function draw(st, t) {
+  const W = sc.width, H = sc.height;
+  const grd = g.createLinearGradient(0, 0, 0, H); grd.addColorStop(0, '#12445a'); grd.addColorStop(1, '#071a24');
+  g.fillStyle = grd; g.fillRect(0, 0, W, H);
+  g.fillStyle = 'rgba(255,255,255,.06)'; for (let i = 0; i < 40; i++) { g.fillRect((i * 137.5 + t * 6) % W, (i * 71.3 + t * 3 * (i % 3)) % H, 2, 2); }
+  g.fillStyle = '#c9b48a'; g.fillRect(0, H - 22, W, 22);
+  const grip = st.mode !== 'off' && st.p > 0.5, c = st.mode !== 'off' && st.p > 0.02 ? wrapCenter(K, st) : null;
+  if (c && grip) drawHoldfast(st.mode, c, st.r, 'side');
+  // partner (twine): mirrored about the shared coil axis, a few mm lower
+  if (partnerAlpha > 0.02 && c) {
+    g.save(); g.globalAlpha = partnerAlpha;
+    const dz = -7, Pm = K.P.map(p => [2 * c[0] - p[0], p[1], p[2] + dz]);
+    ribbon(g, project(Pm, 'side'), WID.map(w => w * SIDE.k), '#e98a34', '#d47a28', '#7a3c0e', A.hit, false);
+    drawBody(st.pitch, SIDE.ox + 2 * c[0] * SIDE.k, SIDE.oy - dz * SIDE.k, SIDE.k, true, true, t + 1.3);
+    g.restore();
+  }
+  ribbon(g, project(K.P, 'side'), WID.map(w => w * SIDE.k), '#f2c14e', '#e2ad38', '#8a5d0e', A.hit, true);
+  drawBody(st.pitch, SIDE.ox, SIDE.oy, SIDE.k, false, false, t);
+  // labels
+  g.fillStyle = 'rgba(255,255,255,.85)'; g.font = '600 13px system-ui'; g.fillText('Side view (x = front, z = up)', 16, 24);
+  g.font = '12px system-ui'; g.fillStyle = 'rgba(255,255,255,.65)';
+  g.fillText('White dot every 5th joint · red = joint at its limit · dorsal fin flutter drawn slowed (real 30–42 Hz)', 16, 42);
+  g.fillText('10 mm', 26, H - 32); g.fillStyle = 'rgba(255,255,255,.8)'; g.fillRect(20, H - 28, 10 * SIDE.k, 3);
+  // top view inset
+  g.fillStyle = 'rgba(4,16,22,.82)'; g.fillRect(TOP.x, TOP.y, TOP.w, TOP.h); g.strokeStyle = 'rgba(255,255,255,.25)'; g.strokeRect(TOP.x, TOP.y, TOP.w, TOP.h);
+  g.save(); g.beginPath(); g.rect(TOP.x, TOP.y, TOP.w, TOP.h); g.clip();
+  const xs = K.P.map(p => p[0]), ys = K.P.map(p => p[1]);
+  const cx = (Math.min(...xs) + Math.max(...xs)) / 2, cy = (Math.min(...ys) + Math.max(...ys)) / 2;
+  if (c && grip) { const q = project([c], 'top', cx, cy)[0]; g.fillStyle = '#4f7f3c';
+    if (st.mode === 'v') { g.beginPath(); g.arc(q[0], q[1], st.r * TOP.k, 0, 7); g.fill(); }
+    else g.fillRect(q[0] - st.r * TOP.k, TOP.y, 2 * st.r * TOP.k, TOP.h); }
+  if (partnerAlpha > 0.02 && c) { g.globalAlpha = partnerAlpha;
+    ribbon(g, project(K.P.map(p => [2 * c[0] - p[0], p[1], p[2]]), 'top', cx, cy), WID.map(w => w * TOP.k), '#e98a34', '#d47a28', '#7a3c0e', A.hit, false);
+    g.globalAlpha = 1; }
+  const q0 = project([[0, 0, 0]], 'top', cx, cy)[0];
+  g.beginPath(); g.ellipse(q0[0] + 2 * TOP.k, q0[1], 11 * TOP.k, 7 * TOP.k, 0, 0, 7); g.fillStyle = 'rgba(242,193,78,.35)'; g.fill();
+  ribbon(g, project(K.P, 'top', cx, cy), WID.map(w => w * TOP.k), '#f2c14e', '#e2ad38', '#8a5d0e', A.hit, true);
+  g.restore();
+  g.fillStyle = 'rgba(255,255,255,.85)'; g.font = '600 12px system-ui'; g.fillText('Top view (x, y)', TOP.x + 8, TOP.y + 18);
+}
+
+function drawChart() {
+  const W = ch.width, H = ch.height;
+  cg.clearRect(0, 0, W, H);
+  const fg = css('--fg'), mu = css('--muted'), ln = css('--line');
+  const x0 = 120, x1 = W - 20, bw = (x1 - x0) / N;
+  const rows = [
+    { name: 'Ventral (+) / dorsal (−) flex', key: 'F', lo: -12, hi: 42, up: i => LIM[i].v, dn: i => -LIM[i].d, y: 10, h: 92 },
+    { name: 'Lateral bend', key: 'L', lo: -30, hi: 30, up: i => LIM[i].l, dn: i => -LIM[i].l, y: 112, h: 80 },
+    { name: 'Twist', key: 'T', lo: -10, hi: 10, up: i => LIM[i].t, dn: i => -LIM[i].t, y: 200, h: 50 },
+  ];
+  cg.font = '12px system-ui';
+  for (const r of rows) {
+    const Y = v => r.y + r.h - (v - r.lo) / (r.hi - r.lo) * r.h;
+    cg.fillStyle = fg; cg.fillText(r.name, 10, r.y + 14); cg.fillStyle = mu; cg.fillText('degrees / joint', 10, r.y + 30);
+    cg.strokeStyle = ln; cg.beginPath(); cg.moveTo(x0, Y(0)); cg.lineTo(x1, Y(0)); cg.stroke();
+    cg.setLineDash([4, 3]); cg.strokeStyle = mu; cg.beginPath();
+    for (let i = 0; i < N; i++) { const x = x0 + i * bw; i ? cg.lineTo(x, Y(r.up(i))) : cg.moveTo(x, Y(r.up(i))); cg.lineTo(x + bw, Y(r.up(i))); } cg.stroke();
+    cg.beginPath(); for (let i = 0; i < N; i++) { const x = x0 + i * bw; i ? cg.lineTo(x, Y(r.dn(i))) : cg.moveTo(x, Y(r.dn(i))); cg.lineTo(x + bw, Y(r.dn(i))); } cg.stroke();
+    cg.setLineDash([]);
+    for (let i = 0; i < N; i++) {
+      const v = A[r.key][i], lim = v >= 0 ? r.up(i) : -r.dn(i), use = Math.abs(v) / lim;
+      cg.fillStyle = use > 0.97 ? '#f85149' : use > 0.7 ? '#d29922' : '#3fb950';
+      const ya = Y(0), yb = Y(v); cg.fillRect(x0 + i * bw + 2, Math.min(ya, yb), bw - 4, Math.max(1, Math.abs(yb - ya)));
+    }
+  }
+  cg.fillStyle = mu;
+  for (let i = 0; i < N; i += 5) cg.fillText(String(i), x0 + i * bw + bw / 2 - 4, H - 18);
+  cg.fillText('joint: 0 = base … 34 = tip', 10, H - 18);
+  const sumF = A.F.reduce((a, b) => a + b, 0), hits = A.hit.reduce((a, b) => a + b, 0);
+  const msg = `Σ flex ${sumF.toFixed(0)}°  ·  joints at limit: ${hits}  ·  tail 90 mm, 35 rings (ours)`;
+  cg.fillStyle = fg; cg.fillText(msg, x1 - cg.measureText(msg).width, H - 3);
+}
+
+function updateBlock(st) {
+  const rows = KN.map((ring, j) => `<tr><td>knot ${j} · ring ${ring}</td><td>${(st.f[j] * mod.gain).toFixed(1)}</td><td>${(st.l[j] + mod.lat * ring / 34).toFixed(1)}</td><td>${(st.t[j] + mod.tw).toFixed(1)}</td></tr>`).join('');
+  const hits = A.hit.reduce((a, b) => a + b, 0);
+  document.getElementById('block').innerHTML =
+    `<tr><th>21 knot values (°/joint)</th><th>flex</th><th>lateral</th><th>twist</th></tr>${rows}` +
+    `<tr><th>4 wrap values</th><th>mode</th><th>start ring</th><th>radius · progress</th></tr>` +
+    `<tr><td>holdfast wrap</td><td>${st.mode}</td><td>${st.start.toFixed(1)}</td><td>${st.r.toFixed(1)} mm · ${st.p.toFixed(2)}</td></tr>` +
+    `<tr><td>expanded → 105 angles</td><td colspan="3" class="${hits ? 'hot' : ''}">${hits ? hits + ' joint(s) clamped at limit' : 'all within limits'}</td></tr>`;
+}
+
+// ── UI ──
+const SL = [
+  ['gain', 'Curl gain', 0, 1.6, 0.01, v => '×' + v.toFixed(2)],
+  ['lat', 'Lateral bend (tip)', -20, 20, 0.5, v => v.toFixed(1) + '°'],
+  ['tw', 'Twist per joint', -8, 8, 0.25, v => v.toFixed(2) + '°'],
+  ['pitch', 'Body pitch (added)', -30, 30, 0.5, v => v.toFixed(1) + '°'],
+  ['r', 'Holdfast radius', 2, 12, 0.1, v => v.toFixed(1) + ' mm'],
+  ['start', 'Wrap start ring', 8, 30, 0.5, v => v.toFixed(1)],
+  ['p', 'Wrap progress', 0, 1, 0.01, v => v.toFixed(2)],
+];
+const box = document.getElementById('sliders');
+for (const [k, label, lo, hi, step, fmt] of SL) {
+  const d = document.createElement('div'); d.className = 'sl'; d.id = 'sl-' + k;
+  d.innerHTML = `<label>${label}</label><input type="range" min="${lo}" max="${hi}" step="${step}"><output></output>`;
+  const inp = d.querySelector('input'), out = d.querySelector('output');
+  inp.addEventListener('input', () => { mod[k] = +inp.value; out.textContent = fmt(+inp.value); });
+  d._sync = () => { const val = mod[k] ?? (k === 'r' ? tgt.r : k === 'start' ? tgt.start : k === 'p' ? tgt.p : 0);
+    inp.value = val; out.textContent = fmt(+val); d.classList.toggle('off', ['r', 'start', 'p'].includes(k) && tgt.mode === 'off'); };
+  box.appendChild(d);
+}
+function syncSliders() { document.querySelectorAll('.sl').forEach(d => d._sync && d._sync()); }
+const pb = document.getElementById('presets');
+for (const [k, P] of Object.entries(PRESETS)) {
+  const b = document.createElement('button'); b.textContent = P.label; b.dataset.k = k;
+  b.onclick = () => { if (k === 'loop') { loopOn = !loopOn; loopIdx = 0; loopT = 0; setTarget(LOOP[0][0]); } else { loopOn = false; setTarget(k); } };
+  pb.appendChild(b);
+}
+const start = (location.hash || '').slice(1);
+if (start === 'loop' || !start) { loopOn = !start ? false : true; }
+setTarget(PRESETS[start] && start !== 'loop' ? start : 'branch');
+if (start === 'loop') { loopOn = true; setTarget(LOOP[0][0]); }
+cur = { ...cur, f: tgt.f.slice(), pitch: tgt.pitch, mode: tgt.mode, start: tgt.start, r: tgt.r, p: tgt.p };
+requestAnimationFrame(frame);
+</script>
+</body>
+</html>

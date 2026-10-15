@@ -1,0 +1,126 @@
+<!DOCTYPE html>
+<!--
+  Plan mockup — the "Seahorses" settings sheet (TV form + phone form).
+  Self-contained; 1440x900. TV styling copied from the Cast1 capture
+  plant-cast1-final/selector-properties-screenshot.png; phone colours from
+  wfsource/source/hal/phonepad/controller.html.
+-->
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<title>Mockup — Seahorses settings sheet</title>
+<style>
+  :root { --bg:#ffffff; --fg:#1f2328; --muted:#656d76; --line:#d1d9e0; --panel:#f6f8fa; --accent:#0969da; }
+  @media (prefers-color-scheme: dark) { :root { --bg:#0d1117; --fg:#e6edf3; --muted:#9198a1; --line:#30363d; --panel:#161b22; --accent:#4493f8; } }
+  * { box-sizing:border-box; }
+  body { margin:0; width:1440px; height:900px; overflow:hidden; background:var(--bg); color:var(--fg); font:14px/1.45 ui-sans-serif,system-ui,sans-serif; }
+  header { display:flex; align-items:baseline; gap:14px; height:56px; padding:14px 24px; border-bottom:1px solid var(--line); background:var(--panel); }
+  header h1 { margin:0; font-size:16px; font-weight:600; }
+  header .sub { color:var(--muted); font-size:13px; }
+  header .tag { margin-left:auto; font:600 11px ui-monospace,monospace; letter-spacing:.04em; color:var(--muted); border:1px solid var(--line); border-radius:10px; padding:2px 8px; }
+  .row1 { display:grid; grid-template-columns:1fr 1fr; gap:24px; padding:18px 24px 0; }
+  .card h2 { margin:0 0 3px; font-size:14px; }
+  .card p { margin:0 0 8px; color:var(--muted); font-size:12.5px; height:36px; }
+  /* TV form, matching the device capture */
+  .tv { width:684px; height:318px; background:#081009; padding:22px 30px; border-radius:6px; font:13px ui-monospace,"DejaVu Sans Mono",monospace; color:#e3ecd8; }
+  .tv .box { background:#173326; height:100%; padding:14px 16px; display:grid; grid-template-columns:150px 1fr; grid-template-rows:auto 1fr auto; gap:10px 14px; }
+  .tv .title { grid-column:1 / 3; font-size:14px; }
+  .tv .tabs div { background:#1f3d2e; padding:6px 8px; margin-bottom:6px; }
+  .tv .tabs div.sel { background:#2f5a40; outline:1px solid #6ea371; }
+  .tv .rows div.r { background:#21402f; padding:6px 9px; margin-bottom:7px; }
+  .tv .rows div.r.sel { background:#4f8452; }
+  .tv .seg { display:grid; grid-template-columns:repeat(3,1fr); margin-top:4px; font-size:11.5px; }
+  .tv .seg span { padding:2px 6px; color:#bcd0b4; }
+  .tv .seg span.on { background:#eef3df; color:#14261b; }
+  .tv .help { color:#d9c36a; font-size:11.5px; margin-top:3px; }
+  .tv .dim { opacity:.45; }
+  .tv .warn { color:#ffb454; font-size:12px; margin:2px 0 8px; }
+  .tv .foot { grid-column:1 / 3; display:flex; justify-content:space-between; font-size:11.5px; color:#d9c36a; }
+  .row2 { display:grid; grid-template-columns:330px 1fr; gap:24px; padding:14px 24px 0; }
+  /* phone form, colours from controller.html */
+  .phone { width:300px; height:368px; background:#0d1117; border:9px solid #3b3f46; border-radius:28px; padding:16px 14px; color:#e6edf3; font:13px system-ui,sans-serif; }
+  .phone .t { font-weight:700; font-size:14px; margin-bottom:2px; }
+  .phone .s { color:#8b98a9; font-size:12px; margin-bottom:10px; }
+  .phone .tabs { display:flex; gap:6px; margin-bottom:12px; }
+  .phone .tabs span { padding:5px 10px; border-radius:6px; background:#1d2a3f; font-size:12px; }
+  .phone .tabs span.on { background:#56d364; color:#0d1117; font-weight:700; }
+  .phone label { display:block; color:#8b98a9; font-size:12px; margin:8px 0 4px; }
+  .phone .seg { display:grid; grid-template-columns:repeat(3,1fr); border:1px solid #3a4a63; border-radius:8px; overflow:hidden; }
+  .phone .seg span { padding:8px 0; text-align:center; background:#111826; font-size:12.5px; }
+  .phone .seg span.on { background:#1d2a3f; color:#56d364; font-weight:700; }
+  .phone .chk { display:flex; align-items:center; gap:8px; padding:8px 10px; border:1px solid #3a4a63; border-radius:8px; background:#111826; }
+  .phone .chk i { width:16px; height:16px; border-radius:4px; background:#56d364; display:inline-block; }
+  .phone .hint { color:#8b98a9; font-size:11.5px; margin-top:8px; }
+  .phone .btns { display:grid; grid-template-columns:1fr 1fr; gap:8px; margin-top:12px; }
+  .phone .btns span { text-align:center; padding:10px 0; border-radius:8px; background:#1d2a3f; }
+  .phone .btns span.ok { background:#56d364; color:#0d1117; font-weight:700; }
+  .notes { display:grid; grid-template-columns:1fr 1fr; gap:14px; align-content:start; }
+  .notes div { border:1px solid var(--line); border-radius:8px; padding:10px 14px; background:var(--panel); font-size:12.5px; }
+  .notes b { color:var(--fg); }
+  pre { margin:6px 0 0; font:11px/1.45 ui-monospace,monospace; white-space:pre-wrap; color:var(--fg); }
+</style>
+</head>
+<body>
+<header><h1>“Seahorses” settings sheet — TV and phone</h1><span class="sub">a second sheet on the Planted Tank Director · fields 8 and 9 · no new UI code</span><span class="tag">MOCKUP — NOT SHIPPED</span></header>
+<div class="row1">
+  <div class="card">
+    <h2>1. TV — Saltwater (the state that matters)</h2>
+    <p>Hold A opens the form as today. A second sheet tab, <b>Seahorses</b>, sits under Plant growth. Left/right changes the pair count; Apply regenerates nothing — seahorses appear or leave on the next tick.</p>
+    <div class="tv"><div class="box">
+      <div class="title">Planted Tank / Director</div>
+      <div class="tabs"><div>Plant growth</div><div class="sel">Seahorses</div></div>
+      <div class="rows">
+        <div class="r sel">Seahorses: 2 pairs<div class="seg"><span>None</span><span>1 pair</span><span class="on">2 pairs</span></div>
+          <div class="help">H. reidi pairs; saltwater only</div></div>
+        <div class="r">Greeting: On<div class="help">Pairs meet on one post once per cycle</div></div>
+      </div>
+      <div class="foot"><span>Arrows: select&nbsp;&nbsp; A: edit</span><span>← Apply / close</span></div>
+    </div></div>
+  </div>
+  <div class="card">
+    <h2>2. TV — Water type is Freshwater</h2>
+    <p>The values are kept but have no effect: seahorses and posts follow the saltwater visibility mailbox. The rows dim and say why, instead of disappearing (the form has no conditional fields today).</p>
+    <div class="tv"><div class="box">
+      <div class="title">Planted Tank / Director</div>
+      <div class="tabs"><div>Plant growth</div><div class="sel">Seahorses</div></div>
+      <div class="rows">
+        <div class="warn">■ Saltwater only — hidden while Water type is Freshwater</div>
+        <div class="r sel dim">Seahorses: 2 pairs<div class="seg"><span>None</span><span>1 pair</span><span class="on">2 pairs</span></div></div>
+        <div class="r dim">Greeting: On</div>
+      </div>
+      <div class="foot"><span>Arrows: select&nbsp;&nbsp; A: edit</span><span>← Apply / close</span></div>
+    </div></div>
+  </div>
+</div>
+<div class="row2">
+  <div class="card">
+    <h2>3. Phone — narrow</h2>
+    <div class="phone">
+      <div class="t">Planted Tank / Director</div><div class="s">Bedroom TV · connected</div>
+      <div class="tabs"><span>Plant growth</span><span class="on">Seahorses</span></div>
+      <label>Seahorses</label>
+      <div class="seg"><span>None</span><span>1 pair</span><span class="on">2 pairs</span></div>
+      <label>Greeting</label>
+      <div class="chk"><i></i> On</div>
+      <div class="hint">H. reidi pairs; saltwater only</div>
+      <div class="btns"><span>Cancel</span><span class="ok">Apply</span></div>
+    </div>
+  </div>
+  <div class="notes">
+    <div><b>Fields (settings.oas, new sheet).</b>
+<pre>PROPERTY_SHEET_HEADER(Seahorses,1)
+  TYPEENTRYINT32(Seahorses,,0,2,2,"None|1 pair|2 pairs",
+    SHOW_AS_RADIOBUTTONS,"H. reidi pairs; saltwater only")
+  TYPEENTRYBOOLEAN(Greeting,,1,SHOW_AS_CHECKBOX,
+    "Pairs meet on one post once per cycle")
+PROPERTY_SHEET_FOOTER</pre></div>
+    <div><b>Bindings (settings-bindings.json).</b>
+<pre>"Seahorses": {"id": 8},
+"Greeting":  {"id": 9}</pre>
+      Forth reads them with <code>Director 8 property@</code> / <code>9 property@</code>. Field ids 1–7 are untouched.</div>
+    <div><b>Open question (Phase 3).</b> C++ commit handling in <code>plant_settings.h:65-77</code> only applies fields 1–7, and the catalog include is compiled into the engine. If a field the C++ side does not know still round-trips through Apply, no engine code changes; if not, this joins the Phase 1 engine request.</div>
+    <div><b>Not proposed.</b> No per-seahorse colour, species or tail-tuning fields: those are authored in the generator. The settings change only how many pairs appear and whether they greet. The RP02 catalog work (TODO, T4) does not block this.</div>
+  </div>
+</div>
+</body>
+</html>
