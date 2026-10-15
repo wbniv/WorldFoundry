@@ -260,6 +260,28 @@ once per GL context, not once per material or frame. The tested scene used only
 the specialized opaque mode, so it did not measure the extra program that a
 mixed-mode scene may create or the cost of switching between programs.
 
+### Experimental no-palette selector (not shipped)
+
+A later Cast1 prototype added a no-palette variant alongside that production
+opaque shader. It gained **+0.79 FPS** in a tour without palette art and
+**+0.70 FPS** with sparse synthetic palette art. An authored lionfish tank
+used only the palette-capable fast program and showed no meaningful change
+(**47.53→47.58 FPS**, 18 draws/frame in both variants). In a controlled
+lionfish asset, palette-enabled and ordinary opaque faces shared the same body
+texture. The selector split two batches, increasing draws **18→20/frame** and
+reducing median presented FPS **47.65→47.22** across three launches per variant.
+One first-use check also spent **84.57 ms** compiling an extra program that
+the all-palette tank never used; this is one cold observation, not a typical
+startup estimate. [Measurements and limits](https://github.com/wbniv/finding-your-way/blob/main/docs/investigations/2026-10-15-integrated-no-palette-selector.md).
+
+**For modelers:** keep `wf_texture_palette` consistent across opaque faces
+that use one texture and would otherwise form one draw. Alternating flagged
+and unflagged regions can add draw calls if the experimental selector is
+enabled. Continue to use palette recoloring when the art needs it; the
+production renderer still supports it, and this prototype is **not** enabled
+globally. The proposed next engine step uses the existing palette-capable
+shader for mixed batches and links the extra program only when first needed.
+
 ### Blender Viewport Display by Object Type
 
 **The rule: anything that does not render in the game engine should display as
