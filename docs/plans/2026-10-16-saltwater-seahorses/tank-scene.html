@@ -59,7 +59,7 @@
 const N = 35, KN = [0, 6, 12, 18, 24, 30, 34], D2R = Math.PI / 180;
 const LEN = Array.from({length: N}, (_, i) => 3.75 * Math.pow(0.9764, i));
 const WID = Array.from({length: N + 1}, (_, i) => 9.0 + (1.4 - 9.0) * Math.pow(i / N, 0.85));
-const LIM = Array.from({length: N}, (_, i) => { const t = i / (N - 1); return { v: 12 + 28 * t, d: 4 + 6 * t, l: 8 + 20 * t }; });
+const LIM = Array.from({length: N}, (_, i) => { const t = i / (N - 1); return { v: 12 + 28 * t, d: 4 + 8.5 * t, l: 8 + 20 * t }; });
 function interp(vals, x) {
   let k = 0; while (k < KN.length - 2 && x > KN[k + 1]) k++;
   const m = j => j <= 0 ? (vals[1] - vals[0]) / (KN[1] - KN[0]) : j >= KN.length - 1 ? (vals[j] - vals[j - 1]) / (KN[j] - KN[j - 1]) : (vals[j + 1] - vals[j - 1]) / (KN[j + 1] - KN[j - 1]);

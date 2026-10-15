@@ -12,7 +12,7 @@ Will asked how many seahorses the saltwater Planted Tank can hold, then asked fo
 
 What is true today:
 
-- **The tank** is the 48 × 13 × 21 in aquarium shell ([`generate.py:42`](../../wflevels/aquarium_tanks/generate.py)): 47 × 12 × 16.5 in of water above the sand, about **40 gal**. Ocean Rider's guideline of [about one pair per 10 gal](https://seahorse.com/topic/stocking-density/) for captive-bred seahorses allows at most 4 pairs. The same source advises staying below that limit unless the keeper is experienced. This plan caps the tank at **2 pairs** (4 seahorses).
+- **The tank** is the 48 × 13 × 21 in aquarium shell ([`generate.py:42`](../../wflevels/aquarium_tanks/generate.py)): 47 × 12 × 16.5 in of water above the sand, about **40 gal**. A breeder's guideline, posted in a 2006 Ocean Rider forum thread, of [about one pair per 10 gal](https://seahorse.com/topic/stocking-density/) for *H. erectus* allows at most 4 pairs ([research](../reference/seahorse-research.md)). This plan caps the tank at **2 pairs** (4 seahorses).
 - **Saltwater has one resident**, the sea urchin ([`config.py:3-4`](../../wflevels/aquarium_plants/config.py)). Freshwater has the rainbow goby.
 - **Performance is the binding constraint.** The last matched Chromecast 1 measurement is **13.5 FPS** (74.0 ms per frame), taken on 2026‑10‑05 with mature plants, seed 713 ([comparison](2026-10-05-sea-urchin-realism/comparison.md)). Plants dominate the render time. That baseline is **stale**: static mesh buffers landed on 2026‑10‑08, and a 2026‑10‑09 acceptance capture's HUD read 25.4 FPS in wide view. That reading is unmatched (plant age unknown, single reading). Phase 4 re-measures the baseline before trusting any seahorse number.
 - **No engine part can pose a joint chain at runtime.** The deformers are per-species C++ formulas (fish, swim, fin, jelly, lion) called from Forth. There is no skinning, no parenting and no hierarchy ([`rendacto.cc`](../../wfsource/source/renderassets/rendacto.cc), [clownfish plan](2026-09-30-clownfish-idle-animation.md)).
@@ -43,23 +43,28 @@ Research comes first and is saved before the poster, as for the goby and urchin:
 
 Eight panels, each claim carrying the chip it will print with. The printed copy may not contain any "unverified" claim: each is checked, or relabelled **ours**, before print. That is the [2026‑10‑06 poster audit rule](../reference/2026-10-06-aquarium-poster-reference-verification.md). Print on matte or uncoated A3, and copy the PDF to `~/Documents/TO PRINT/`. [Open the interactive mockup](2026-10-16-saltwater-seahorses/poster.html).
 
-Claims this plan already rests on, checked at abstract or press level; Phase 0 reads the full papers:
+Phase 0 checked these claims on 2026‑10‑16. The [research document](../reference/seahorse-research.md) holds every source, DOI, locator and access limit, and the [A3 poster](../reference/seahorse-biomechanics-poster/seahorse-biomechanics-a3.pdf) prints them.
 
-| Claim | Status now | Source |
+| Claim | Status | Source (see the research document) |
 |---|---|---|
-| 33–37 tail rings in *H. reidi* (45–48 in *H. abdominalis*); 11 trunk rings | verified (range, abstract); trunk count **unverified** | [SICB abstract, Maia, Couto & Adriaens](https://sicb.org/abstracts/how-seahorses-hang-on-to-their-life); Phase 0 confirms both against Lourie's identification guide |
-| Each tail ring is four L-shaped plates around a vertebra, joined by ball-and-socket, peg-and-socket and gliding joints; square plates resist crushing and keep alignment when bent and twisted | verified (printed models, not live tails) | [Porter et al. 2015, UC San Diego release](https://jacobsschool.ucsd.edu/news/release/1771); [paper PDF](https://library.ucsd.edu/dc/object/bb2636787q/_1.pdf) |
-| *H. reidi* grasps with the whole tail, with more range of motion toward the tip; tails also bend sideways while curling | verified (abstract) | [SICB abstract](https://sicb.org/abstracts/how-seahorses-hang-on-to-their-life) |
-| Dorsal fin beats at 30–42 Hz | verified | [Ashley-Ross 2002](https://users.wfu.edu/rossma/DorsalFin.pdf) |
-| Pivot feeding reaches prey in under 5 ms | verified | [Van Wassenbergh et al. 2009](https://medialibrary.uantwerpen.be/oldcontent/container20052/files/Van_Wassenbergh_et_al_2009_Biology_Letters.pdf) |
-| Adult *H. reidi* ≈ 15.6–16.6 cm (captive broodstock); colour yellow to orange, brown, black | verified | [Sri Lanka breeding study](https://tar.sljol.info/articles/8299); [Florent's reef guide](https://reefguide.org/carib/pixhtml/longsnoutseahorse1.html) |
-| Bonded pairs greet each morning, sometimes swirling their tails around a shared holdfast | **unverified** (popular accounts; the primary paper, Vincent & Sadler 1995, is not yet read) | [Ocean Futures](https://oceanfutures.org/news/blog/love-is-in-the-sea) |
-| Eyes move independently | **unverified** (not yet sourced) | Phase 0 |
-| Tail 90 mm, ring lengths, widths, joint limits, swim speed | **ours** | this plan |
+| 11 trunk rings; tail rings most often **35** (range 31–39) in *H. reidi* | verified | Lourie et al. 2004, p. 72 |
+| Other counts: 30–39 tail rings (104 specimens); 33–37 in one study | verified | Silveira et al. 2014; Maia et al. 2013 (abstract) |
+| Four L-shaped plates per ring around one vertebra; ball-and-socket, peg-and-socket and gliding joints; in printed models the square tail resists crushing and twists about 15° per segment | verified (printed models, not live tails) | Porter et al. 2015 |
+| The whole tail grips a 1 cm perch, with more motion toward the tip, and bends sideways while curling | verified (abstract) | Maia et al. 2013 |
+| Whole-tail bending of about 850° ventral, 290° dorsal, 570° lateral | other species (*H. kuda*) | Porter et al. 2015, Fig. 2A |
+| *H. reidi* fins beat at 20–60 Hz, most often about 50 Hz | verified (conference proceedings) | Zima-Kulisiewicz et al. 2009; Botello-Payro et al. 2010 |
+| Dorsal fin 30–42 Hz | other species (*H. erectus*) | Ashley-Ross 2002, p. 566 |
+| Adult strike: prey crosses the mouth 5.7 ± 0.8 ms after the hyoid starts to move | verified | Roos et al. 2009, Table 1 |
+| Captive pairs 15.6–16.6 cm tall; largest adult 17.5 cm; colour brown spots with tiny white dots, striped rings, or one even colour | verified | Hettiarachchi & Edirisinghe 2017; Lourie et al. 2004; Silveira et al. 2014 |
+| Found in pairs in the wild | verified | Lourie et al. 2004, p. 73 |
+| Eyes move independently | other species (a family-level statement) | Mosk et al. 2007 (abstract) |
+| Morning greeting with tails on a shared holdfast | **unverified**: the primary papers concern *H. whitei* and were paywalled, so the game's greeting is **ours** | — |
+| Yellow and orange colour forms | **unverified** (retail listings only), so the game's colourways are **ours** | — |
+| Tail 90 mm (56 % of height), ring lengths, widths, joint limits, swim speed, the order the wrap closes in | **ours** | this plan |
 
 ## The tail: 35 joints, one per ring
 
-**One joint per tail ring, 35 rings** (the middle of the published range). Each joint has three degrees of freedom: **ventral/dorsal flex**, **lateral bend** and **twist**. That is 105 angles per tail. The joint count follows the anatomy: each ring is a rigid box of plates, and the tail bends only between rings. A tail with fewer joints can't grip a thin post or coil at the tip, and those are the shapes that make a seahorse read as a seahorse.
+**One joint per tail ring, 35 rings** (the most common tail-ring count in *H. reidi*, Lourie et al. 2004, p. 72). Each joint has three degrees of freedom: **ventral/dorsal flex**, **lateral bend** and **twist**. That is 105 angles per tail. The joint count follows the anatomy: each ring is a rigid box of plates, and the tail bends only between rings. A tail with fewer joints can't grip a thin post or coil at the tip, and those are the shapes that make a seahorse read as a seahorse.
 
 [![Tail rig: 35 joints gripping a vertical post, per-joint angle charts, control block](2026-10-16-saltwater-seahorses/tail-rig.png)](2026-10-16-saltwater-seahorses/tail-rig.html)
 
@@ -68,7 +73,7 @@ The interactive mockup runs the proposed expansion in JavaScript. Pick a pose (r
 **Shape input, 25 values per seahorse.** Pre-animated clips set the base pose (see the next section). On top of that, the Director writes seven knots, at rings 0, 6, 12, 18, 24, 30 and 34, each with flex, lateral and twist (21 values). It adds a **wrap** of four values: mode (off, horizontal holdfast, vertical holdfast), start ring, holdfast radius and progress. The engine expands these to 105 angles. Clip, head and eye inputs and the engine's outputs complete a 40-cell block (Phase 1, E3):
 
 1. Interpolate the knots to every joint (cubic Hermite over ring index).
-2. Override the wrapped rings with the holdfast's curvature: joint angle = ring length ÷ (radius + half ring width). The wrapped region grows from the **tip** as progress rises, matching "grip starts at the tip".
+2. Override the wrapped rings with the holdfast's curvature: joint angle = ring length ÷ (radius + half ring width). The wrapped region grows from the **tip** as progress rises, The order the wrap closes in is **ours**: the source says only that motion increases toward the tip.
 3. For a **vertical** post, turn the five rings before the wrap forward to horizontal, then coil with **lateral** bend. A horizontal branch coils with ventral flex. This is why lateral bending matters, matching the published observation.
 4. Clamp every angle to its joint's limit.
 
@@ -79,9 +84,11 @@ Dimensions and limits are **ours** until Phase 0 checks them against video and m
 | Ring length | 3.75 mm | 1.67 mm | geometric taper; tail 90 mm |
 | Ring width (square) | 9.0 mm | 1.4 mm | |
 | Ventral flex limit | 12° | 40° | more motion toward the tip |
-| Dorsal flex limit | 4° | 10° | |
+| Dorsal flex limit | 4° | 12.5° | raised from 10° after Phase 0: the tail's total dorsal range (≈ 289°) now matches *H. kuda*'s 290° (other species) |
 | Lateral bend limit | 8° | 28° | |
 | Twist limit | 3° | 8° | square plates resist twist |
+
+Summed along the tail, these limits allow 910° ventral, 630° lateral and about 289° dorsal. The only whole-tail measurement, for *H. kuda* (other species), is 850°, 570° and 290° (Porter et al. 2015). Twist stays well below the printed square model's ≈ 15° per segment, because live plates also resist it. No source gives per-joint limits for *H. reidi*, so all of these remain **ours**.
 
 **Skin follows rings rigidly.** Each vertex belongs to exactly one ring, and each ring's plates reach about 15 % under the next ring, as real plates overlap. No vertex is shared across a joint, so bending never squashes a triangle. That matters because the engine aborts on tiny triangles (|(v2−v0)×(v1−v0)| > 6.1e‑5, [`vector3.hpi:243`](../../wfsource/source/math/vector3.hpi)). At the tip, a ring face is 14 × 16.7 mm in world units (×10), giving 2.3e‑4, a **3.8× margin**. So tip rings keep four sides, and only the wider proximal rings get bevels.
 
@@ -311,8 +318,8 @@ If D1 is refused, Phase 1 becomes the rigid ring chain instead. That means 35 ri
 
 - **Body mesh:** trunk, head, coronet, snout and eyes (11 trunk rings), plus the 35-ring tail with square plates.
 - **Armature and clips:** a Blender armature (35 tail bones, head, two eyes) with the joint limits. The authored clips are `rest_coil` (3 s, loop), `swim` (1.5 s, loop), `hold_idle` (3 s, loop; moves only the unwrapped rings), `probe` (2 s), `release` (1 s), `startle` (0.5 s) and `greet_f`/`greet_m` (6 s, loop). That is about 20 s in all. The exporter samples them into the `DFRM` frames table.
-- **Fins mesh:** dorsal and pectoral fins, with UV V running root to tip so the existing `fin-deform` drives them. The real dorsal fin beats at 30–42 Hz, above what a 60 Hz screen can show, so the game draws a **slowed, blurred wave** (ours).
-- **Male and female:** the male has a brood pouch; colours are yellow (female) and orange (male), within the published colour range.
+- **Fins mesh:** dorsal and pectoral fins, with UV V running root to tip so the existing `fin-deform` drives them. *H. reidi*'s fins beat at 20–60 Hz, most often about 50 Hz, far above the 30 Hz a 60 Hz screen can show, so the game draws a **slowed, blurred wave** (ours).
+- **Male and female:** the male has a brood pouch; the colourways are yellow (female) and orange (male). These are **ours**: published patterns are brown spots with tiny white dots, striped rings, or one even colour, and yellow and orange forms appear only in retail listings.
 - **Budget per seahorse:** ≤ 1,400 triangles, 2 actors (body + tail rig; fins). One shared 256² atlas holds both colourways. It fits because the aquarium app's permanent page grows from 512² to 1024² through `wf_args.txt` (D5), as the condo app already does.
 - **Origin at the tail base** (the curve's root). A held seahorse hangs from its tail, so the "base at local z = 0" rule for resting meshes doesn't apply. It is documented as an exception, like spheres.
 - **Two hitching posts:** a vertical sea whip and a branch with a horizontal arm. They are static meshes (baked), saltwater only, and their axes and radii are written into a Forth include, the same pattern as the goby's rock profiles.
@@ -336,7 +343,7 @@ stateDiagram-v2
 - **Hold:** the tail is coiled on a post and the body sways with the water. The Director keeps the engine-reported wrap centre on the post axis (one frame late, invisible at this speed). Eyes make independent saccades.
 - **Swim:** upright, slow (1.5 cm/s real, ours), steered by seek-and-arrive. The tail works as a small lateral rudder.
 - **Probe and grasp:** the tail tip reaches for the post, then the coil spreads from the tip toward the base. **Release** unwinds it.
-- **Greeting** (pairs, on by default): both seahorses take the same post on opposite sides, with their tails coiled at offset heights. This stays labelled as a popular-account behaviour until Phase 0 reads the primary paper.
+- **Greeting** (pairs, on by default): both seahorses take the same post on opposite sides, with their tails coiled at offset heights. This is **our choreography**. Phase 0 verified only that *H. reidi* is found in pairs; the greeting papers concern *H. whitei* and were paywalled.
 - **Settings:** a second sheet, **Seahorses** (field 8: None / 1 pair / 2 pairs, default 2 pairs; field 9: Greeting). Forth reads them with `Director 8 property@`. **Open:** C++ commit handling only applies fields 1–7 ([`plant_settings.h:65-77`](../../wfsource/source/game/plant_settings.h)). If an unknown field does not round-trip through Apply, that fix joins the Phase 1 engine request.
 - **Visibility:** pair *n* shows when saltwater and the count is ≥ *n* (mailboxes 1162, 1163, alongside the urchin's 1160). Freshwater hides seahorses and posts and skips their behaviour.
 
@@ -435,9 +442,42 @@ Ranks are suggestions; a Fable session ranks the TODO entry.
 ## Verification
 
 1. Research and poster files exist: `ls docs/reference/seahorse-research.md docs/reference/seahorse-biomechanics-poster/{poster.html,poster.png,seahorse-biomechanics-a3.pdf,layout-review.json}`
+
+    ```
+    $ ls docs/reference/seahorse-research.md docs/reference/seahorse-biomechanics-poster/{poster.html,poster.png,seahorse-biomechanics-a3.pdf,layout-review.json}
+    docs/reference/seahorse-biomechanics-poster/layout-review.json
+    docs/reference/seahorse-biomechanics-poster/poster.html
+    docs/reference/seahorse-biomechanics-poster/poster.png
+    docs/reference/seahorse-biomechanics-poster/seahorse-biomechanics-a3.pdf
+    docs/reference/seahorse-research.md
+    ```
+
+    **PASS** (2026‑10‑16): all five files exist.
 2. The PDF is one A3 page: `pdfinfo docs/reference/seahorse-biomechanics-poster/seahorse-biomechanics-a3.pdf | grep -E '^(Pages|Page size)'` prints `Pages: 1` and `841.89 x 1190.55 pts (A3)`.
+
+    ```
+    $ pdfinfo docs/reference/seahorse-biomechanics-poster/seahorse-biomechanics-a3.pdf | grep -E '^(Pages|Page size)'
+    Pages:           1
+    Page size:       841.92 x 1191.12 pts (A3)
+    ```
+
+    **PASS** (2026‑10‑16): one page, and poppler identifies it as A3. Chrome rounds 297 × 420 mm to 841.92 × 1191.12 pt, as it did for the clownfish poster, so the step's literal 841.89 × 1190.55 never matches a Chrome export.
 3. Every font is embedded: `pdffonts docs/reference/seahorse-biomechanics-poster/seahorse-biomechanics-a3.pdf | tail -n +3 | awk '{print $(NF-4)}' | sort | uniq -c` shows only `yes`.
+
+    ```
+    $ pdffonts docs/reference/seahorse-biomechanics-poster/seahorse-biomechanics-a3.pdf | tail -n +3 | awk '{print $(NF-4)}' | sort | uniq -c
+          5 yes
+    ```
+
+    **PASS** (2026‑10‑16): all 5 fonts embedded.
 4. No pending-verification wording in the print copy: `pdftotext docs/reference/seahorse-biomechanics-poster/seahorse-biomechanics-a3.pdf - | grep -c -i -E 'unverified|not opened|link missing'` prints `0`.
+
+    ```
+    $ pdftotext docs/reference/seahorse-biomechanics-poster/seahorse-biomechanics-a3.pdf - | grep -c -i -E 'unverified|not opened|link missing'
+    0
+    ```
+
+    **PASS** (2026‑10‑16): no pending wording. `tests/test_poster_seahorse_biomechanics.py`: 27 passed.
 5. Deformer tests pass: `task build && ctest --test-dir build -R "dfrm|deformer_golden" --output-on-failure`. The five existing kinds match their pre-refactor fixtures bit for bit, and on Chromecast 1 every tank in the eight-tank selector opens and animates.
 6. Content tests pass: `python3 -m pytest -q tests/test_seahorse_tail.py tests/test_seahorse_asset.py tests/test_dfrm_export.py tests/test_aquarium_plants.py`. These cover: the `DFRM` export round trip, with angles within 0.01° and influence count equal to vertex count; Python/C++ expansion parity, joint limits, arc length, no frame flips, triangle-area margin ≥ 2×, mesh and actor budgets, and no overlap in the mailbox map.
 7. The level builds and exports the seahorses: `bash wflevels/aquarium_plants/build.sh && grep -c seahorse wflevels/aquarium_plants/actor-map.json` prints at least `8` (4 seahorses × 2 actors).

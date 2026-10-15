@@ -1,9 +1,15 @@
 | Date | Change |
 |------|--------|
+| [2026-10-16](https://github.com/wbniv/WorldFoundry/commit/f394d62f) | Document stale face normals under deformation; DFRM updates them |
 | [2026-10-16](https://github.com/wbniv/WorldFoundry/commit/01d360f3) | Record seahorse plan decisions D2, D4, D6 and index the plan |
 | [2026-10-16](https://github.com/wbniv/WorldFoundry/commit/623a8ca3) | Plan saltwater seahorses with 35-joint tails and a generic deformer |
 
 <!--history-meta v1
+f394d62f	author	Will Norris
+f394d62f	added	4
+f394d62f	deleted	2
+f394d62f	files	1
+f394d62f	body	Face normals are computed once at load (rendobj3.cc:286) and drive the\nsoftware back-face cull and flat lighting, so a deformer that only moves\nvertices culls and lights with rest-pose normals. A coiled seahorse tail\nwould show holes. The plan's DFRM evaluator now rotates each deformed\nface's rest normal by its sample frame, with a test; the five existing\ndeformers keep stale normals as a deferred follow-up. The investigation\nexplains how culling works, why GPU skinning collides with the static\npath, and the ways out; it also corrects a citation to the real cull\nloop (static_mesh.cc:773-809).\n\nCo-Authored-By: Claude Opus 5.5 <noreply@anthropic.com>\nClaude-Session: https://claude.ai/code/session_01T3gB59hNsFhWnCTTKHc1yk
 01d360f3	author	Will Norris
 01d360f3	added	5
 01d360f3	deleted	5

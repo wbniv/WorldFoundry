@@ -83,7 +83,7 @@ const N = 35, KN = [0, 6, 12, 18, 24, 30, 34];
 const LEN = Array.from({length: N}, (_, i) => 3.75 * Math.pow(0.9764, i));          // 3.75 → 1.67 mm, Σ ≈ 90 mm
 const WID = Array.from({length: N + 1}, (_, i) => 9.0 + (1.4 - 9.0) * Math.pow(i / N, 0.85)); // 9.0 → 1.4 mm
 const LIM = Array.from({length: N}, (_, i) => { const t = i / (N - 1);
-  return { v: 12 + 28 * t, d: 4 + 6 * t, l: 8 + 20 * t, t: 3 + 5 * t }; });          // degrees per joint
+  return { v: 12 + 28 * t, d: 4 + 8.5 * t, l: 8 + 20 * t, t: 3 + 5 * t }; });          // degrees per joint
 const D2R = Math.PI / 180;
 
 const PRESETS = {
