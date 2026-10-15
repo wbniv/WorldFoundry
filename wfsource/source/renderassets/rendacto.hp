@@ -34,12 +34,10 @@
 
 //============================================================================
 
+#include <memory>
 #include <vector>
 #include <game/plant_growth.h>
-#include <renderassets/fish_deform.h>
-#include <renderassets/swim_deform.h>
-#include <renderassets/fin_deform.h>
-#include <renderassets/jelly_deform.h>
+#include <renderassets/mesh_deformer.h>
 #include <pigsys/pigsys.hp>
 #include <iff/iffread.hp>
 #include <memory/memory.hp>
@@ -77,11 +75,23 @@ public:
 	// (qbert stretch-and-squash, 2026-05-10.)
 	virtual void SetActorScale(const Vector3& /*scale*/) {}
 	virtual void SetPlantGeometry(const plantgrowth::Chunk&, float, float, unsigned, bool, bool, bool) {}
-	virtual void SetJellyDeformation(float /*contraction*/, float /*phase*/, float /*pitchLag*/, float /*rollLag*/) {}
-	virtual void SetFishDeformation(float /*phase*/, float /*amplitude*/) {}
-	virtual void SetSwimDeformation(float /*phase*/, float /*amplitude*/, float /*bend*/, float /*finPhase*/, float /*finAmplitude*/, float /*minX*/, float /*maxX*/) {}
-	virtual void SetFinDeformation(float /*phase*/, float /*amplitude*/, float /*sweep*/, float /*spread*/) {}
-    virtual void SetLionPose(float, float, float, float, unsigned, unsigned) {}
+	// One generic deformer slot (docs/plans/2026-10-16-saltwater-seahorses.md, E0).
+	// time is level seconds, used by DFRM clip playback. Actors without a mesh
+	// have nothing to deform.
+	virtual DeformStatus Deform(DeformKind /*kind*/, const float* /*channels*/, int /*n*/, double /*time*/ = 0) { return DeformStatus::NoMetadata; }
+	// Values the bound deformer publishes (DFRM: wrap centre, tail tip); returns the count.
+	virtual int DeformOutputs(float* /*out*/, int /*max*/) const { return 0; }
+	// The per-species entry points: adapters that pack their arguments as channels.
+	void SetJellyDeformation(float contraction, float phase, float pitchLag, float rollLag)
+		{ const float c[] = {contraction, phase, pitchLag, rollLag}; Deform(DeformKind::Jelly, c, 4); }
+	void SetFishDeformation(float phase, float amplitude)
+		{ const float c[] = {phase, amplitude}; Deform(DeformKind::Fish, c, 2); }
+	void SetSwimDeformation(float phase, float amplitude, float bend, float finPhase, float finAmplitude, float minX, float maxX)
+		{ const float c[] = {phase, amplitude, bend, finPhase, finAmplitude, minX, maxX}; Deform(DeformKind::Swim, c, 7); }
+	void SetFinDeformation(float phase, float amplitude, float sweep, float spread)
+		{ const float c[] = {phase, amplitude, sweep, spread}; Deform(DeformKind::Fin, c, 4); }
+	void SetLionPose(float phase, float drive, float turn, float gape, unsigned dark, unsigned light)
+		{ const float c[] = {phase, drive, turn, gape, float(dark), float(light)}; Deform(DeformKind::Lion, c, 6); }
 	void Validate() const;
 #if DO_VALIDATION
 	virtual void _Validate() const = 0;
@@ -123,11 +133,8 @@ public:
 	virtual void SetMaterialColor(int materialIdx, const Color& color) { _object.SetMaterialColor(materialIdx, color); }
 	virtual void SetActorScale(const Vector3& scale) { _scale = scale; }
 	virtual void SetPlantGeometry(const plantgrowth::Chunk& chunk, float age, float phase, unsigned generation, bool sway, bool publish, bool textured);
-	virtual void SetJellyDeformation(float contraction, float phase, float pitchLag, float rollLag);
-	virtual void SetFishDeformation(float phase, float amplitude);
-	virtual void SetSwimDeformation(float phase, float amplitude, float bend, float finPhase, float finAmplitude, float minX, float maxX);
-	virtual void SetFinDeformation(float phase, float amplitude, float sweep, float spread);
-    virtual void SetLionPose(float phase,float drive,float turn,float gape,unsigned dark,unsigned light);
+	virtual DeformStatus Deform(DeformKind kind, const float* channels, int n, double time = 0);
+	virtual int DeformOutputs(float* out, int max) const { return _deformer ? _deformer->Outputs(out, max) : 0; }
 #if DO_VALIDATION
 	virtual void _Validate() const;
 #endif
@@ -139,13 +146,7 @@ protected:
 	std::vector<TriFace> _plantFaces;
 	unsigned _plantGeneration=0;
 	int _plantBucket=-1;float _plantMaxBirth=0,_plantLastAge=-1,_plantLastPhase=-1;int _plantVisibleVertices=1;
-	std::vector<wf_render::FishWaveWeight> _fishWeights;
-	float _fishLength = 0;
-	std::vector<wf_render::SwimWaveWeight> _swimWeights;
-	float _swimMinX = 0, _swimMaxX = 0;
-	std::vector<wf_render::FinWaveWeight> _finWeights;
-    std::vector<wf_render::LionRest> _lionRest;
-	std::vector<wf_render::JellyWeight> _jellyWeights;
+	std::unique_ptr<MeshDeformer> _deformer;	// the one slot; empty until a kind binds
 private:
 };
 
