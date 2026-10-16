@@ -206,8 +206,10 @@ def build(preset):
     from fixtures import add_fixtures
     add_fixtures(preset, actor, Geometry, material, label)
     # Stable schema instances can be catalogued without native actor-class changes.
-    for name in ['SampleSettings','SampleSettings2']:
-        actor(name,'target','CONFIG',pos=(2,-4,1))
+    # Three owners exercise Pick in 3D: SampleSettings2 alone on the left, and
+    # SampleSettings3 on SampleSettings' spot for the "2 objects here" bracket.
+    for name,pos in [('SampleSettings',(2,-4,1)),('SampleSettings2',(-1.5,-3,1)),('SampleSettings3',(2,-4,1))]:
+        actor(name,'target','CONFIG',pos=pos)
     objects=[o for o in bpy.context.scene.objects if o.get('wf_schema_path')]
     ids={o.name:i+1 for i,o in enumerate(objects)}
     header='\\ Explicit generated baseline actor constants\n'+''.join(f': base-{n.lower()} {ids[n]} ;\n' for n in ['Player','Follow','FirstPerson'])

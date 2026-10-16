@@ -46,8 +46,10 @@ def build(preset,blend=None):
     name='settings-gallery' if preset=='settings-gallery' else 'settings'
     bindings=json.loads((HERE/(name+'-bindings.json')).read_text())
     ids=json.loads((HERE/'actor-map.json').read_text())['indices']
-    catalogs=[cooker.catalog(HERE/(name+'.oad'),dict(bindings,owner=owner),ids[owner]) for owner in ['SampleSettings','SampleSettings2']]
-    payload=b'RP01'+struct.pack('<I',2)+b''.join(c[8:] for c in catalogs)
+    owners=['SampleSettings','SampleSettings2','SampleSettings3']
+    # Distinct chooser labels: the type's title plus an ordinal after the first.
+    catalogs=[cooker.catalog(HERE/(name+'.oad'),dict(bindings,owner=owner,title=bindings.get('title','Settings')+('' if i==0 else ' '+str(i+1))),ids[owner]) for i,owner in enumerate(owners)]
+    payload=b'RP01'+struct.pack('<I',len(catalogs))+b''.join(c[8:] for c in catalogs)
     level=ROOT/'wflevels/baseline-standalone.iff'
     level.write_bytes(cooker.attach(level.read_bytes(),payload))
     (OUT/'settings.rprp').write_bytes(payload)

@@ -32,7 +32,8 @@ def structural():
     check('explicit player bounds',objs['Player']['bounds']==c['player_bounds'])
     check('no imported adventure/scaffold content',not re.search(r'snowgoons|parmenides|goddess|temple',json.dumps(inventory),re.I))
     check('default excludes diagnostics',preset!='default' or all(o['collection']!='DIAGNOSTICS' for o in inventory))
-    check('two independently addressed settings owners',objs['SampleSettings']['schema']=='target.oad' and objs['SampleSettings2']['schema']=='target.oad')
+    check('three independently addressed settings owners',all(objs[n]['schema']=='target.oad' for n in ['SampleSettings','SampleSettings2','SampleSettings3']))
+    check('Pick in 3D fixture: one owner apart, two sharing a spot',objs['SampleSettings']['position']==objs['SampleSettings3']['position']!=objs['SampleSettings2']['position'])
     check('default explicit runtime camera/room objects',all(n in objs for n in ['Level','Room','Camera','CameraOrigin','TargetFollow','TargetFirst','Follow','FirstPerson','Directional','Ambient','Background']))
     spec=json.loads((HERE/'settings-coverage.json').read_text())
     from settings_fixture import TYPES,SHOW
@@ -48,7 +49,7 @@ def structural():
         e=entries[f['key']]
         check('compiled descriptor '+f['key'],e[0]==f['button_type'] and e[591]==f['show_code'] and struct.unpack_from('<iii',e,65)==(f['min'],f['max'],f['default']))
     data=(OUT/'settings.rprp').read_bytes()
-    check('catalog contains two object instances',data[:4]==b'RP01' and struct.unpack_from('<I',data,4)[0]==2)
+    check('catalog contains three object instances',data[:4]==b'RP01' and struct.unpack_from('<I',data,4)[0]==3)
     check('standalone L4 and sector-aligned asset', (ROOT/'wflevels/baseline-standalone.iff').read_bytes()[:2]==b'L4' and (ROOT/'wflevels/baseline-standalone.iff').stat().st_size%2048==0)
 
 def bundle_checks(path):
