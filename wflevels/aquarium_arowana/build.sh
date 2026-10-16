@@ -2,6 +2,9 @@
 set -euo pipefail
 TANK_ROOT="$(cd "$(dirname "$0")/../.." && pwd)"
 cd "$TANK_ROOT"
+# Runs in the Blender container (scripts/level-build.sh); WF_LEVEL_BUILD_HOST=1 for the host.
+source scripts/level-build.sh
+wf_level_build "$0" "$@"
 # One-button remote plus desktop depth keys; touch can still be selected explicitly.
 export TANK_PROFILE="${TANK_PROFILE:-remote}"
 blender --background --python-exit-code 1 --python wflevels/aquarium_arowana/generate.py

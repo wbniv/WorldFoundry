@@ -223,6 +223,29 @@ For per-level builds (Q✱bert / mm_practice / etc.) use the four-stage Rust pip
 bash wftools/wf_blender/build_level_binary.sh <level-name>
 ```
 
+### Level builds run in the Blender container
+
+The aquarium tanks (`bash wflevels/aquarium_<tank>/build.sh`, or `task aquarium-<tank>-level`)
+do not use the host's `blender`. Each `build.sh` starts with `source scripts/level-build.sh;
+wf_level_build "$0" "$@"`, which re-runs the script in `wf-blender:local`
+([`docker/Dockerfile.blender`](../docker/Dockerfile.blender): Ubuntu 26.04 with Foundry Linux's
+`blender` package, so the host's Blender, Python, numpy and Pillow, pinned to one Ubuntu archive snapshot),
+through `scripts/in-linux-container.sh` with
+`WF_CONTAINER_IMAGE=blender`. Inside the container:
+
+- the `wf_blender` add-on comes from the mounted checkout (`/src/wftools/wf_blender`, on
+  `BLENDER_SYSTEM_SCRIPTS`), so an add-on edit needs no image rebuild;
+- `iffcomp-rs`, `levcomp-rs`, `textile-rs` and `wf_py` are built with `cargo --locked` for the
+  container's toolchain, and `wf_py`'s `libwf_core.so` is copied to `wftools/wf_blender/wf_core.so`.
+  Crates are cached in `build-docker/cargo-home`;
+- exported `TANK_*`, `AQUARIUM_*`, `LIONFISH_*`, `BETTA_*`, `PLANTED_*` and `SHRIMP_*` settings
+  are forwarded, so `TANK_PROFILE=touch bash wflevels/aquarium_betta/build.sh` still works.
+
+The first build creates the image (`task blender-image`, a ~375 MB download). `WF_LEVEL_BUILD_HOST=1`
+runs the old host route. `task level-build-compare` builds each tank both ways and compares
+every output by sha256. See [the plan](plans/2026-10-16-blender-in-container.md). New level
+build scripts should use the same two-line preamble.
+
 For runtime use Taskfile entries: `task run-level -- wflevels/<level>.iff` (no bridge),
 `task run-debug -- wflevels/<level>.iff` (debug bridge on `:7777`).
 
