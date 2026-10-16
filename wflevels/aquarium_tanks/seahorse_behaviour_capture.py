@@ -4,8 +4,8 @@ under the Release wf_game, stepped at a fixed 20 Hz through the debug bridge.
 
 1. Behaviour: a close view of the whip while seahorse 1 runs hold -> release -> swim ->
    probe -> grasp -> hold, then a wide view while it swims, then the greeting (forced
-   due by writing the shared greeting timer, 1603), close on the whip.
-2. Settings: one wide shot per Seahorses setting (None, 1 pair, 2 pairs) and freshwater,
+   due by writing the shared greeting timer, 1173), close on the whip.
+2. Settings: one wide shot per Seahorses setting (None through 6 pairs) and freshwater,
    each a fresh run of the level cooked with that setting (plant_settings_catalog).
 
 Every shot records each seahorse's state, spot, wrap progress, DFRM status and the
@@ -30,6 +30,7 @@ sys.path.insert(0, str(ROOT / 'tests'))
 sys.path.insert(0, str(ROOT / 'scripts'))
 from debug_bridge_client import BridgeClient  # noqa: E402
 from plant_settings_catalog import configure_level  # noqa: E402
+import seahorse as sh  # noqa: E402
 
 VRAM = ['--vram-width=2048', '--vram-height=1024', '--vram-slot-width=512', '--vram-slot-height=512',
         '--vram-perm-width=1024', '--vram-perm-height=1024']   # android/app/src/aquarium/assets/wf_args.txt
@@ -67,7 +68,7 @@ class Run:
         self.cli.send({'op': 'pause'})
         self.cli.inject_input('joystick1_raw', 0, duration_frames=-1)
         self.cli.watch(idx=self.player, mailbox=1906)
-        for m in (1162, 1163, 1600, 1601, 1602):
+        for m in (*sh.PAIR_VISIBILITY, sh.GREET_BASE, sh.GREET_BASE + 1, sh.GREET_BASE + 2):
             self.cli.watch(idx=self.director, mailbox=m)
         for a in self.sea['actors']:
             for k in CELLS.values():
@@ -79,7 +80,7 @@ class Run:
             return self.cli.mailbox_values.get((self.director if actor is None else actor, m), 0.0)
 
     def cell(self, s, name):
-        return self.value(1200 + 100 * s + CELLS[name])
+        return self.value(sh.block_base(s) + CELLS[name])
 
     def step(self, n):
         start = self.value(1906, self.player)
@@ -103,7 +104,7 @@ class Run:
 
     def seahorses(self):
         rows = []
-        for s in range(4):
+        for s in range(len(sh.SEXES_BY_SEAHORSE)):
             if self.cell(s, 'init') == 0:
                 rows.append({'seahorse': s, 'shown': False})
                 continue
@@ -126,8 +127,8 @@ class Run:
         msg = self.cli.wait_for(lambda m: m.get('op') in ('screenshot_done', 'error'), timeout=20)
         assert msg and msg.get('op') == 'screenshot_done', msg
         self.shots.append({'shot': name, 'note': note, 'time': round(self.value(1906, self.player), 2),
-                           'visible': [self.value(1162), self.value(1163)],
-                           'greeting': {'phase': self.value(1600), 'pair': self.value(1601), 'time': round(self.value(1602), 1)},
+                           'visible': [self.value(mb) for mb in sh.PAIR_VISIBILITY],
+                           'greeting': {'phase': self.value((sh.GREET_BASE + 0)), 'pair': self.value((sh.GREET_BASE + 1)), 'time': round(self.value((sh.GREET_BASE + 2)), 1)},
                            'seahorses': self.seahorses()})
 
     def view(self, x, y, z, side=1, dist=3.2):
@@ -175,15 +176,15 @@ def behaviour(args, out):
         r.step(10)
         r.shot('hold-after', 'seahorse 1 holds its new spot')
         # Wide: whoever swims next, followed from further back.
-        assert r.until(lambda: any(STATES[int(r.cell(s, 'state'))] == 'swim' for s in range(4)), 120)
+        assert r.until(lambda: any(STATES[int(r.cell(s, 'state'))] == 'swim' for s in range(len(sh.SEXES_BY_SEAHORSE))), 120)
         r.step(40)
-        s = next(s for s in range(4) if STATES[int(r.cell(s, 'state'))] == 'swim')
+        s = next(s for s in range(len(sh.SEXES_BY_SEAHORSE)) if STATES[int(r.cell(s, 'state'))] == 'swim')
         r.view(r.cell(s, 'x'), -.8, 3.2, dist=5.5)
         r.step(30)
         r.shot('swim-wide', 'a seahorse crossing between posts')
         # Greeting, forced due now.
-        r.cli.set_mailbox(1603, .01, idx=r.director)
-        assert r.until(lambda: r.value(1600) == 2, 240, chunk=8), 'greeting never reached the dance'
+        r.cli.set_mailbox((sh.GREET_BASE + 3), .01, idx=r.director)
+        assert r.until(lambda: r.value((sh.GREET_BASE + 0)) == 2, 240, chunk=8), 'greeting never reached the dance'
         r.view(-3.1, -.7, 3.25)
         r.step(80)
         r.shot('greet-0', 'a pair on the whip, opposite sides, offset heights')
@@ -197,7 +198,7 @@ def behaviour(args, out):
 def settings(args, out):
     results = []
     for tag, options in (('none', dict(water='saltwater', seahorses=0)), ('pair1', dict(water='saltwater', seahorses=1)),
-                         ('pair2', dict(water='saltwater', seahorses=2)), ('freshwater', dict(water='freshwater'))):
+                         ('pair2', dict(water='saltwater', seahorses=2)), ('pair6', dict(water='saltwater', seahorses=6)), ('freshwater', dict(water='freshwater'))):
         r = Run(args, out, options, tag)
         try:
             r.step(40)

@@ -27,7 +27,7 @@ DT = .05                                    # the desktop captures' -rate20
 HOLD, RELEASE, SWIM, PROBE, GRASP, STRIKE, GREET = range(7)
 NAMES = ('hold', 'release', 'swim', 'probe', 'grasp', 'strike', 'greet')
 DIRECTOR = 4
-ACTORS = {s: (20 + 2 * s, 21 + 2 * s) for s in range(4)}     # body, fins (test indices)
+ACTORS = {s: (20 + 2 * s, 21 + 2 * s) for s in range(len(sh.SEXES_BY_SEAHORSE))}     # body, fins (test indices)
 MM = .01                                    # 1 mm (real) in world units
 GREET_MM = 1.5                              # the error bound outside steady holds, at 20 Hz
 
@@ -43,8 +43,8 @@ class Tank:
         zf.BIN = binary
         self.h = zf.Host()
         self.rig = sh.rig()
-        indices = {f'seahorse-{s}-body': ACTORS[s][0] for s in range(4)}
-        indices.update({f'seahorse-{s}-fins': ACTORS[s][1] for s in range(4)})
+        indices = {f'seahorse-{s}-body': ACTORS[s][0] for s in ACTORS}
+        indices.update({f'seahorse-{s}-fins': ACTORS[s][1] for s in ACTORS})
         before, inside = sh.director_tick(indices)
         words = [
             ': INDEXOF_TIME 1906 ; : INDEXOF_DELTA_TIME 1907 ;',
@@ -70,7 +70,7 @@ class Tank:
         assert loaded == 'ok', (loaded, source.splitlines()[int(loaded.split()[-1]) - 1] if 'line' in loaded else '')
         self.now = 1.0
         self.settings(water=water, count=count, greeting=greeting)
-        self.log = {s: [] for s in range(4)}
+        self.log = {s: [] for s in ACTORS}
         self.contact = []                       # (s, state, error in world units) while held
 
     def settings(self, water=None, count=None, greeting=None):
@@ -79,17 +79,17 @@ class Tank:
                 self.h.write(7000 + field, v)
 
     def block(self, s, k, n=1):
-        return self.h.read(1200 + 100 * s + k, n)
+        return self.h.read(sh.cell_address(s, k)) if n == 1 else [self.h.read(sh.cell_address(s, k + i)) for i in range(n)]
 
     def set(self, s, k, v):
-        self.h.write(1200 + 100 * s + k, v)
+        self.h.write(sh.cell_address(s, k), v)
 
     def body(self, s):
         a = ACTORS[s][0]
         return [self.h.read(actor_cell(a, m)) for m in (3009, 3010, 3011, 3014)]
 
     def visible(self, s):
-        return self.h.read(1162 + s // 2) != 0
+        return self.h.read(sh.PAIR_VISIBILITY[s // 2]) != 0
 
     def step(self, n=1, dt=DT):
         for _ in range(n):
@@ -97,7 +97,7 @@ class Tank:
             self.h.write(1906, self.now)
             self.h.write(1907, dt)
             assert self.h.eval('tick') == 'ok'
-            for s in range(4):
+            for s in ACTORS:
                 if not self.visible(s) or self.block(s, 40) == 0:
                     continue
                 blk = self.block(s, 0, 40)
@@ -107,8 +107,8 @@ class Tank:
                 r = dfrm_ref.evaluate(self.rig, blk, self.now, world, chain_only=True)
                 out = r['outputs']
                 for k in range(6):
-                    self.h.write(1200 + 100 * s + 33 + k, out[k])
-                self.h.write(1200 + 100 * s + 39, r['status'])
+                    self.h.write(sh.block_base(s) + 33 + k, out[k])
+                self.h.write(sh.block_base(s) + 39, r['status'])
                 state = int(self.block(s, 41))
                 if not self.log[s] or self.log[s][-1][1] != state:
                     self.log[s].append((round(self.now, 2), state))
@@ -189,7 +189,12 @@ def test_hold_release_swim_probe_grasp_hold(tank):
     assert run_until(t, lambda: t.block(1, 41) == HOLD, 120), t.states(1)
     seq = t.states(1)
     i = seq.index('release')
-    assert seq[i:i + 5] == ['release', 'swim', 'probe', 'grasp', 'hold'], seq
+    # Longer trips can include a prey strike, then resume swimming.
+    cycle = []
+    for state in seq[i:]:
+        if state != 'strike' and (not cycle or state != cycle[-1]):
+            cycle.append(state)
+    assert cycle[:5] == ['release', 'swim', 'probe', 'grasp', 'hold'], seq
     assert t.block(1, 24) == 1 and t.block(1, 21) == 2
     assert t.block(1, 22) >= 16
     # Arrived at the spot it reserved: the coil is on that post.
@@ -243,6 +248,8 @@ def test_clips_crossfade_rather_than_snap(tank):
 def test_swim_is_slow_upright_and_ruddered(tank):
     t = tank
     assert run_until(t, lambda: t.block(1, 41) == SWIM, 15)
+    # Start a quarter-turn off the route to exercise steering independently of which free post is picked.
+    t.set(1, 48, t.block(1, 48) + .25)
     speeds, rudder = [], []
     for _ in range(200):
         t.step()
@@ -258,16 +265,16 @@ def test_swim_is_slow_upright_and_ruddered(tank):
 def test_greeting_brings_a_pair_to_one_post_for_two_minutes(tank):
     t = tank
     t.step(2)
-    t.h.write(1603, .01)                                         # greeting due now
-    assert run_until(t, lambda: t.h.read(1600) == 2, 240), (t.states(0), t.states(1), t.states(2), t.states(3))
-    pair = int(t.h.read(1601))
+    t.h.write(sh.GREET_BASE + 3, .01)                                         # greeting due now
+    assert run_until(t, lambda: t.h.read(sh.GREET_BASE + 0) == 2, 240), (t.states(0), t.states(1), t.states(2), t.states(3))
+    pair = int(t.h.read(sh.GREET_BASE + 1))
     f, m = 2 * pair, 2 * pair + 1
     assert t.block(f, 41) == GREET and t.block(m, 41) == GREET
     assert t.block(f, 43) == 0 and t.block(m, 43) == 1          # one post, opposite sides, offset heights
     assert t.block(f, 25) in (sh.CLIP_IDS['greet_f'],) or t.block(f, 27) == sh.CLIP_IDS['greet_f']
     assert t.block(m, 27) == sh.CLIP_IDS['greet_m']
     began = t.now
-    assert run_until(t, lambda: t.h.read(1600) == 0, sh.GREET_SECONDS + 5)
+    assert run_until(t, lambda: t.h.read(sh.GREET_BASE + 0) == 0, sh.GREET_SECONDS + 5)
     assert t.now - began == pytest.approx(sh.GREET_SECONDS, abs=1)
     assert t.block(f, 41) in (HOLD, STRIKE) and t.block(m, 41) in (HOLD, STRIKE) and t.block(f, 60) == 0
     held = [e for s, st, e, _ in t.contact if s in (f, m) and st == GREET]
@@ -278,20 +285,21 @@ def test_greeting_off_never_starts_one(binaries):
     t = Tank(binaries['float'], greeting=0)
     try:
         t.step(2)
-        t.h.write(1603, .01)
+        t.h.write(sh.GREET_BASE + 3, .01)
         t.step(200)
-        assert t.h.read(1600) == 0 and all(GREET not in [k for _t, k in t.log[s]] for s in range(4))
+        assert t.h.read(sh.GREET_BASE + 0) == 0 and all(GREET not in [k for _t, k in t.log[s]] for s in range(4))
     finally:
         t.close()
 
 
-@pytest.mark.parametrize('count,shown', [(0, (0, 0)), (1, (1, 0)), (2, (1, 1))])
-def test_settings_choose_the_pairs(binaries, count, shown):
+@pytest.mark.parametrize('count', range(sh.PAIR_COUNT + 1))
+def test_settings_choose_the_pairs(binaries, count):
+    shown = tuple(int(p < count) for p in range(sh.PAIR_COUNT))
     t = Tank(binaries['float'], count=count)
     try:
         t.step(3)
-        assert (t.h.read(1162), t.h.read(1163)) == shown
-        for s in range(4):
+        assert tuple(t.h.read(mb) for mb in sh.PAIR_VISIBILITY) == shown
+        for s in ACTORS:
             assert (t.block(s, 40) != 0) == bool(shown[s // 2])         # hidden pairs are skipped
     finally:
         t.close()
@@ -337,11 +345,51 @@ def test_no_two_seahorses_share_a_spot_over_ten_minutes(tank):
 
 def test_mailbox_map_matches_the_actor_map():
     m = json.loads((ROOT / 'wflevels/aquarium_plants/actor-map.json').read_text())['seahorses']
-    assert m['pair_visibility'] == [1162, 1163] and m['post_visibility'] == 1162
-    assert m['greeting_state'] == [1600, 1609]
-    blocks = [range(a['block'], a['block'] + 100) for a in m['actors']]
-    cells = [c for b in blocks for c in b] + list(range(1600, 1610)) + [1162, 1163]
+    assert m['pair_visibility'] == list(sh.PAIR_VISIBILITY) and m['post_visibility'] == 1162
+    assert m['greeting_state'] == [sh.GREET_BASE, sh.GREET_BASE + 9]
+    blocks = [[sh.cell_address(a['seahorse'], i) for i in range(98)] for a in m['actors']]
+    cells = [c for b in blocks for c in b] + list(range(sh.GREET_BASE, sh.GREET_BASE + 10)) + list(sh.PAIR_VISIBILITY)
     assert len(cells) == len(set(cells)) and max(cells) < 1900
     other = set(range(600, 640)) | {747, 748, 1160, 1161} | set(range(800, 968)) | set(range(1000, 1112)) \
-        | set(range(1140, 1160))
+        | set(range(1140, 1160)) | {70, 71, 72} | set(range(1800, 1900))
     assert not other & set(cells)
+
+
+def test_six_pairs_have_distinct_homes_and_run_independently(binaries):
+    t = Tank(binaries['float'], count=sh.PAIR_COUNT, greeting=0)
+    try:
+        t.step(2)
+        assert len(ACTORS) == 12
+        assert all(t.visible(s) and t.block(s, 40) == 1 for s in ACTORS)
+        assert [int(t.block(s, 43)) for s in ACTORS] == list(sh.HOME)
+        for _ in range(int(90 / DT)):
+            t.step()
+            spots = [int(t.block(s, 43)) for s in ACTORS]
+            assert len(set(spots)) == 12, (t.now, spots)
+        assert all('swim' in t.states(s) for s in ACTORS)
+        t.settings(water=0)
+        t.step(2)
+        assert all(not t.visible(s) and t.block(s, 40) == 0 for s in ACTORS)
+        t.settings(water=1, count=6)
+        t.step(2)
+        assert all(t.visible(s) and t.block(s, 40) == 1 for s in ACTORS)
+    finally:
+        t.close()
+
+
+@pytest.mark.parametrize('pair', [2, 5])
+def test_greeting_finds_both_partners_across_mailbox_ranges(binaries, pair):
+    t = Tank(binaries['float'], count=6)
+    try:
+        t.step(2)
+        # Clear the two reserved greeting spots without changing the actors' state.
+        for s in ACTORS:
+            t.set(s, 43, s + 2)
+        t.h.write(sh.GREET_BASE + 1, pair - 1)
+        assert t.h.eval('shg-start') == 'ok'
+        assert t.h.read(sh.GREET_BASE) == 1
+        assert int(t.h.read(sh.GREET_BASE + 1)) == pair
+        assert t.block(2 * pair, 60) == t.block(2 * pair + 1, 60) == 1
+        assert all(t.block(s, 60) == 0 for s in ACTORS if s // 2 != pair)
+    finally:
+        t.close()

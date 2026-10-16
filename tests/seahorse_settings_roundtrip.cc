@@ -19,13 +19,13 @@ int main(){
  auto* o=registry.schema("PlantedTankSettings");CHECK(o);
  CHECK(o->field(8)&&o->field(9));
  bool ok=false;
- CHECK(propertyAt(*o,8,ok)==2&&ok);                      // default 2 pairs
+ CHECK(propertyAt(*o,8,ok)==6&&ok);                      // default 6 pairs
  CHECK(propertyAt(*o,9,ok)==1&&ok);                      // greeting on
  auto& s=planted::state();s.active=true;planted::regenerate(713,true);
  planted::syncProperties();planted::registerSettings();wfprops::host().bind(&registry);
  const auto seed=*o->get(1);
  // Each count, through the host's Apply and through the TV form's Back-applies path.
- for(int count:{0,1,2}){
+ for(int count:{0,1,2,3,4,5,6}){
   for(int path=0;path<2;++path){
    CHECK(wfprops::host().openOwner(o->actor));
    CHECK(wfprops::host().form.edit.set(8,std::to_string(count)));
@@ -41,11 +41,11 @@ int main(){
  CHECK(wfprops::host().openOwner(o->actor));
  CHECK(wfprops::host().form.edit.set(3,"5"));
  CHECK(wfprops::host().apply());
- CHECK(s.speed==5&&propertyAt(*o,8,ok)==2&&propertyAt(*o,9,ok)==1);
+ CHECK(s.speed==5&&propertyAt(*o,8,ok)==6&&propertyAt(*o,9,ok)==1);
  // Out-of-range counts are refused, not committed.
  CHECK(wfprops::host().openOwner(o->actor));
- bool refused=!wfprops::host().form.edit.set(8,"3")||!wfprops::host().apply();
- CHECK(refused&&propertyAt(*o,8,ok)==2);
+ bool refused=!wfprops::host().form.edit.set(8,"7")||!wfprops::host().apply();
+ CHECK(refused&&propertyAt(*o,8,ok)==6);
  wfprops::host().close();
  std::printf("seahorse settings round-trip ok\n");
  return 0;

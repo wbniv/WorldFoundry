@@ -76,15 +76,15 @@ def test_triangle_and_vertex_budgets(sex):
     assert len(fins[0]) <= 200, len(fins[0])
 
 
-def test_two_actors_per_seahorse_and_four_seahorses(mapping):
+def test_two_actors_per_seahorse_and_six_pairs(mapping):
     sea = mapping['seahorses']
-    assert [a['sex'] for a in sea['actors']] == ['f', 'm', 'f', 'm']          # D3: two pairs
+    assert [a['sex'] for a in sea['actors']] == ['f', 'm'] * 6
     for a in sea['actors']:
         s = a['seahorse']
         names = sorted(n for n in mapping['indices'] if n.startswith(f'seahorse-{s}-'))
         assert names == [f'seahorse-{s}-body', f'seahorse-{s}-fins']
-        assert a['block'] == 1200 + 100 * s
-    assert sea['pair_visibility'] == [1162, 1163] and sea['post_visibility'] == 1162     # Phase 3
+        assert a['block'] == sh.block_base(s)
+    assert sea['pair_visibility'] == list(sh.PAIR_VISIBILITY) and sea['post_visibility'] == 1162     # Phase 3
 
 
 def test_35_tail_rings_and_11_trunk_rings():
@@ -221,8 +221,8 @@ def test_posts_match_the_forth_include(mapping):
     assert text == sh.posts_forth()
     assert f': sh-seg-count {len(sh.post_segments())} ;' in text
     segs = _forth_segments(text)
-    assert len(segs) == len(sh.post_segments()) == 3
-    assert [s[-1] for s in segs] == [2, 2, 1]                   # whip and trunk vertical, arm horizontal
+    assert len(segs) == len(sh.post_segments()) == 7
+    assert [s[-1] for s in segs] == [2, 2, 1, 2, 2, 2, 2]                   # whip and trunk vertical, arm horizontal
     by_post = {}
     for seg, g in zip(segs, mapping['seahorses']['grip_segments']):
         assert seg[:3] == pytest.approx(g['start'], abs=1e-4) and seg[3:6] == pytest.approx(g['end'], abs=1e-4)
@@ -277,7 +277,12 @@ def test_level_places_the_seahorses_in_saltwater_with_dfrm_blocks(mapping):
     assert ' sh-settings' in director and ' shg-tick' in director
     assert all(a['clip'] == 'hold_idle' for a in sea['actors'])        # each starts holding its home spot
     # The seahorse blocks stay clear of every other mailbox the tank uses.
-    used = set(range(600, 640)) | {747, 748, 1160, 1161, 1162, 1163} | set(range(800, 968)) | set(range(1000, 1112)) \
-        | set(range(1140, 1160)) | set(range(1600, 1610))
-    blocks = {m for a in sea['actors'] for m in range(a['block'], a['block'] + 100)}
+    used = set(range(600, 640)) | {747, 748, 1160, 1161} | set(sh.PAIR_VISIBILITY) | set(range(800, 968)) | set(range(1000, 1112)) \
+        | set(range(1140, 1160)) | {70, 71, 72} | set(range(1800, 1900)) | set(range(sh.GREET_BASE, sh.GREET_BASE + 10))
+    blocks = {m for a in sea['actors'] for m in [sh.cell_address(a['seahorse'], i) for i in range(98)]}
     assert not used & blocks and max(blocks) < 1900
+
+
+def test_twelve_residents_have_a_six_megabyte_permanent_pool():
+    wrapper = (HERE / 'aquarium_plants-standalone.iff.txt').read_text()
+    assert "'PERM' 6000000l" in wrapper

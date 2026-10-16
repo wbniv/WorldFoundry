@@ -5,11 +5,11 @@ everything else (native libraries, wf_args.txt, resources) is kept byte for byte
 APK is aligned and signed with the local debug key, as build-aquarium-variant.py does.
 
 Variants (docs/plans/2026-10-16-saltwater-seahorses.md, Phase 3 step 10 and Phase 4):
-  none, pair1, pair2   saltwater with Seahorses = None / 1 pair / 2 pairs
+  none, pair1, pair2, pair6   saltwater with Seahorses = None / 1 / 2 / 6 pairs
   freshwater           freshwater (the seahorses and posts hidden)
 Each is seed 713, plant age 150, growth paused, greeting on.
 
-    scripts/build-planted-seahorse-variants.py --base-apk APK --out DIR [--variants none pair1 pair2 freshwater]
+    scripts/build-planted-seahorse-variants.py --base-apk APK --out DIR [--variants none pair1 pair2 pair6 freshwater]
 """
 import argparse
 import hashlib
@@ -28,7 +28,8 @@ VARIANTS = {
     'none': dict(water='saltwater', seahorses=0),
     'pair1': dict(water='saltwater', seahorses=1),
     'pair2': dict(water='saltwater', seahorses=2),
-    'freshwater': dict(water='freshwater', seahorses=2),
+    'pair6': dict(water='saltwater', seahorses=6),
+    'freshwater': dict(water='freshwater', seahorses=6),
 }
 
 

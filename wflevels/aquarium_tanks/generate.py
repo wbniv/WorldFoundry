@@ -541,9 +541,9 @@ if C.KIND=='arowana':
                   'palette_seed':0,'palettes':[lionfish_model.palette_for(0,k) for k in range(COUNT)],
                   'shared_textures':['lionfish_body.tga','lionfish_fins.tga'],'fin_opacity':.55} if LION_RIG else None),
     seahorses=(dict(pair_visibility=list(seahorse.PAIR_VISIBILITY),post_visibility=seahorse.POST_VISIBILITY,
-                    block_base=seahorse.BLOCK_BASE,block_stride=seahorse.BLOCK_STRIDE,
-                    block_cells=40,forth_cells=[40,99],greeting_state=[seahorse.GREET_BASE,seahorse.GREET_BASE+9],
-                    settings=dict(count=dict(field=seahorse.SETTING_COUNT,values=['None','1 pair','2 pairs'],default=2),
+                    block_base=seahorse.BLOCK_BASE,block_stride=seahorse.BLOCK_STRIDE,block_bases=list(seahorse.BLOCK_BASES),
+                    block_cells=40,forth_cells=[40,97],cell_remap=dict(actor=11,offsets=[68,69,70],mailboxes=[1112,1113,1114]),greeting_state=[seahorse.GREET_BASE,seahorse.GREET_BASE+9],
+                    settings=dict(count=dict(field=seahorse.SETTING_COUNT,values=['None','1 pair']+[f'{n} pairs' for n in range(2,seahorse.PAIR_COUNT+1)],default=seahorse.PAIR_COUNT),
                                   greeting=dict(field=seahorse.SETTING_GREETING,default=1)),
                     states=['hold','release','swim','probe','grasp','strike','greet'],behaviour='seahorse_behaviour.fth',
                     spots=[dict(spot=n,**{k:(list(v) if isinstance(v,(list,tuple)) else v) for k,v in seahorse.spot(n).items()})
@@ -551,7 +551,7 @@ if C.KIND=='arowana':
                     home_spots=list(seahorse.HOME),greet_spots=list(seahorse.GREET_SPOTS),clips=seahorse.CLIP_IDS,
                     texture=seahorse.TEXTURE,
                     actors=[dict(seahorse=s,sex=sex,body=indices[f'seahorse-{s}-body'],fins=indices[f'seahorse-{s}-fins'],
-                                 block=seahorse.BLOCK_BASE+seahorse.BLOCK_STRIDE*s,position=list(pos),yaw=yaw,clip=clip,clip_start=start)
+                                 block=seahorse.block_base(s),position=list(pos),yaw=yaw,clip=clip,clip_start=start)
                             for s,(sex,pos,yaw,clip,start) in enumerate(sh_placements)],
                     posts=[dict(name=name,actor=indices[name],base=list(base),mesh=name.replace('-','_')+'.iff') for name,base,_segs in seahorse.POSTS],
                     grip_segments=[dict(mode=m,start=list(a),end=list(b),radius=[r0,r1]) for m,a,b,r0,r1 in seahorse.post_segments()],

@@ -1,6 +1,6 @@
-# Saltwater seahorses: two pairs with expressive tails, and an A3 poster
+# Saltwater seahorses: six pairs with expressive tails, and an A3 poster
 
-16 October 2026 · **Plan — Phases 0, 1 and 2 done** (Phase 1 merged as `e98621fe`, Phase 2 as `7b0662c4`, both on 2026‑10‑16; Phase 3 next). **All six decisions are made** (Will, 2026‑10‑16): D1 engine edits for Phase 1 (yes), D2 *H. reidi*, D3 4 seahorses, D4 authored hitching posts, D5 1024² texture page, D6 Deformer phase 2 after the seahorses ship. Engine edits beyond Phase 1 need their own permission ([`AGENTS.md:11-12`](../../AGENTS.md)).
+16 October 2026 · **Plan — Phases 0, 1 and 2 done** (Phase 1 merged as `e98621fe`, Phase 2 as `7b0662c4`, both on 2026‑10‑16; Phase 3 next). **All six decisions are made** (Will, 2026‑10‑16): D1 engine edits for Phase 1 (yes), D2 *H. reidi*, D3 12 seahorses (updated from 4 at Will’s request), D4 authored hitching posts, D5 1024² texture page, D6 Deformer phase 2 after the seahorses ship. Engine edits beyond Phase 1 need their own permission ([`AGENTS.md:11-12`](../../AGENTS.md)).
 
 **In TODO.md** since 2026‑10‑16: Seahorses Phases 2–4 (Open → Level / Gameplay; Phase 2 dispatched) and Deformer phase 2 plus the joint-rig spike (Parked → Deferred until level / phase). The Fable-only ranking rule was rescinded the same day.
 
@@ -10,7 +10,7 @@ Will asked how many seahorses the saltwater Planted Tank can hold, then asked fo
 
 What is true today:
 
-- **The tank** is the 48 × 13 × 21 in aquarium shell ([`generate.py:42`](../../wflevels/aquarium_tanks/generate.py)): 47 × 12 × 16.5 in of water above the sand, about **40 gal**. A breeder's guideline, posted in a 2006 Ocean Rider forum thread, of [about one pair per 10 gal](https://seahorse.com/topic/stocking-density/) for *H. erectus* allows at most 4 pairs ([research](../reference/seahorse-research.md)). This plan caps the tank at **2 pairs** (4 seahorses).
+- **The tank** is the 48 × 13 × 21 in aquarium shell ([`generate.py:42`](../../wflevels/aquarium_tanks/generate.py)): 47 × 12 × 16.5 in of water above the sand, about **40 gal**. A breeder's guideline, posted in a 2006 Ocean Rider forum thread, of [about one pair per 10 gal](https://seahorse.com/topic/stocking-density/) for *H. erectus* allows at most 4 pairs ([research](../reference/seahorse-research.md)). Will requested four additional pairs on 2026‑10‑16: the visual tank now defaults to **6 pairs** (12 seahorses). The earlier stocking guideline is research context, not a simulation limit.
 - **Saltwater has one resident**, the sea urchin ([`config.py:3-4`](../../wflevels/aquarium_plants/config.py)). Freshwater has the rainbow goby.
 - **Performance is the binding constraint.** The last matched Chromecast 1 measurement is **13.5 FPS** (74.0 ms per frame), taken on 2026‑10‑05 with mature plants, seed 713 ([comparison](2026-10-05-sea-urchin-realism/comparison.md)). Plants dominate the render time. That baseline is **stale**: static mesh buffers landed on 2026‑10‑08, and a 2026‑10‑09 acceptance capture's HUD read 25.4 FPS in wide view. That reading is unmatched (plant age unknown, single reading). Phase 4 re-measures the baseline before trusting any seahorse number.
 - **No engine part can pose a joint chain at runtime.** The deformers are per-species C++ formulas (fish, swim, fin, jelly, lion) called from Forth. There is no skinning, no parenting and no hierarchy ([`rendacto.cc`](../../wfsource/source/renderassets/rendacto.cc), [clownfish plan](2026-09-30-clownfish-idle-animation.md)).
@@ -28,7 +28,7 @@ What is true today:
 |---|---|---|---|
 | D1 | Engine change for the tail | **Decided (Will, 2026‑10‑16): yes.** **Allow Phase 1:** move the five existing deformers behind one generic slot, then implement `DFRM` v1 as its sixth kind (rooted curve + weighted transform, plus clip playback). These are the two operators the generic-deformation proposal says to build first. The specification is in Phase 1 | (a) Rigid ring chain, no engine edit: 35 ring actors per seahorse, joint maths in Forth. Est. 7–9 ms per seahorse on Chromecast 1, about 3× the deformer. (b) Vertex clips in the engine's animation system. These still need at least four engine edits, can't grip, and take about 13 MB per seahorse. See the comparison under Phase 1 |
 | D2 | Species | **Decided (Will, 2026‑10‑16).** ***Hippocampus reidi*** (longsnout): captive-bred, and its tail grasping is published (whole tail grips, more motion toward the tip) | *H. erectus*: similar size, but this research found no grasping data for it |
-| D3 | How many | **Decided (Will, 2026‑10‑16): 4 seahorses (2 pairs) by default.** The setting keeps None / 1 pair / 2 pairs, for the Phase 4 measurements and for players | Fixed count, no setting |
+| D3 | How many | **Updated (Will, 2026‑10‑16): 12 seahorses (6 pairs) by default.** The setting covers None through 6 pairs; four more holdfasts provide distinct homes for the added pairs | Fixed count, no setting |
 | D4 | What they grip | **Decided (Will, 2026‑10‑16).** **Authored hitching posts** (two branches, saltwater only, geometry known to Forth) | Live plants: Forth cannot read stem positions (`plant-register`/`plant-step` only), so this needs a C++ query, another engine edit |
 | D5 | Texture space | **Decided (Will, 2026‑10‑16): 1024².** **Grow the aquarium app's permanent page** past 512² via `wf_args.txt` (the condo app already runs 1024²); measure memory | Untextured vertex colours: no memory cost, much less convincing |
 | D6 | Deformer phase 2 | **Decided (Will, 2026‑10‑16).** **Schedule it after the seahorses ship**, as its own permission and TODO entry | Leave the five species formulas behind the E0 slot indefinitely: this works, but each new animal then needs new C++ |
@@ -359,21 +359,21 @@ stateDiagram-v2
 - **Swim:** upright, slow (1.5 cm/s real, ours), steered by seek-and-arrive. The tail works as a small lateral rudder.
 - **Probe and grasp:** the tail tip reaches for the post, then the coil spreads from the tip toward the base. **Release** unwinds it.
 - **Greeting** (pairs, on by default): both seahorses take the same post on opposite sides, with their tails coiled at offset heights. This is **our choreography**. Phase 0 verified only that *H. reidi* is found in pairs; the greeting papers concern *H. whitei* and were paywalled.
-- **Settings:** a second sheet, **Seahorses** (field 8: None / 1 pair / 2 pairs, default 2 pairs; field 9: Greeting). Forth reads them with `Director 8 property@`. **Open:** C++ commit handling only applies fields 1–7 ([`plant_settings.h:65-77`](../../wfsource/source/game/plant_settings.h)). If an unknown field does not round-trip through Apply, that fix joins the Phase 1 engine request.
-- **Visibility:** pair *n* shows when saltwater and the count is ≥ *n* (mailboxes 1162, 1163, alongside the urchin's 1160). Freshwater hides seahorses and posts and skips their behaviour.
+- **Settings:** a second sheet, **Seahorses** (field 8: None through 6 pairs, default 6 pairs; field 9: Greeting). Forth reads them with `Director 8 property@`. **Open:** C++ commit handling only applies fields 1–7 ([`plant_settings.h:65-77`](../../wfsource/source/game/plant_settings.h)). If an unknown field does not round-trip through Apply, that fix joins the Phase 1 engine request.
+- **Visibility:** pair *n* shows when saltwater and the count is ≥ *n* (mailboxes 1162–1167, alongside the urchin's 1160). Freshwater hides seahorses and posts and skips their behaviour.
 
 | Mailboxes | Use |
 |---|---|
-| 1162, 1163 | pair 1 / pair 2 visible |
-| 1200 + 100·*s* + 0..39 | seahorse *s*: the engine-facing block (inputs, outputs and status; layout in Phase 1, E3) |
-| … + 40..99 | seahorse *s*: behaviour state and scratch (Forth only) |
-| 1600–1609 | shared greeting state |
+| 1162–1167 | pair 1 through pair 6 visible |
+| `sh-block(s)` + 0..39 | seahorse *s*: the engine-facing block (inputs, outputs and status; layout in Phase 1, E3) |
+| … + 40..97 | seahorse *s*: behaviour state and scratch (Forth only) |
+| 1170–1179 | shared greeting state |
 
-All of these lie in the free range 1200–1900, below `GLOBAL_USER_MAX` 1900 ([`mailbox.inc:135-145`](../../wfsource/source/mailbox/mailbox.inc)). The level's `actor-map.json` records them, and a test fails on any overlap.
+The 12 block bases are 1200, 1300, 1400, 1500, 1600, 1700, 100, 200, 300, 400, 500 and 2. Each uses offsets 0–97. The final resident redirects offsets 68–70 from HUD slots 70–72 to 1112–1114. Addresses 1800–1899 stay clear because the engine reads Moon HUD switches there even in other levels. All addresses remain below `GLOBAL_USER_MAX` 1900 ([`mailbox.inc:135-145`](../../wfsource/source/mailbox/mailbox.inc)). The level's `actor-map.json` records them, and a test fails on any overlap.
 
 [![Tank states: 1 pair over a real capture, close grip, greeting, 2 pairs, today, freshwater](2026-10-16-saltwater-seahorses/tank-scene.png)](2026-10-16-saltwater-seahorses/tank-scene.html)
 
-Six states: **2 pairs** (default), **1 pair**, **close view** on a grip, **greeting**, **None** (today's tank, unchanged), and **freshwater** (hidden). Seahorses are drawn over real Chromecast 1 captures, using the same tail expansion. Decisions for each state are in the side panel. [Open the interactive mockup](2026-10-16-saltwater-seahorses/tank-scene.html).
+Original two-pair mockup (retained as design history; the current default is six pairs). Six states: **2 pairs** (original default), **1 pair**, **close view** on a grip, **greeting**, **None** (today's tank, unchanged), and **freshwater** (hidden). Seahorses are drawn over real Chromecast 1 captures, using the same tail expansion. Decisions for each state are in the side panel. [Open the interactive mockup](2026-10-16-saltwater-seahorses/tank-scene.html).
 
 [![Seahorses settings sheet: TV saltwater, TV freshwater, phone](2026-10-16-saltwater-seahorses/settings.png)](2026-10-16-saltwater-seahorses/settings.html)
 
@@ -396,7 +396,7 @@ The protocol matches the urchin study:
 3. Run on **Chromecast 1 and the Chromecast HD**, through the coordinator.
 4. Record the results in `2026-10-16-saltwater-seahorses/comparison.md`.
 
-The default is decided: 4 seahorses (D3). The table confirms what that costs, and a large surprise reopens D3.
+These original estimates cover four seahorses. Will later increased D3 to twelve; measure that density separately.
 
 ## Deformer phase 2 — the existing kinds as `DFRM` data
 
@@ -454,7 +454,7 @@ Ranks are suggestions; a Fable session ranks the TODO entry.
 - **`tests/test_species_movement.py` fails 6 cases with "Unknown lion-pose" (found during Phase 1, not caused by it).** The test's own Forth word list lacks `lion-pose` (syscall 177). The bootstrap text it extracts is byte-identical before and after Phase 1. Fix: add the word, or extract the list from `scripting_zforth.cc:1541`.
 - **Breeding, pouch pumping and fry.**
 - **Morph targets and the sea anemone.** The anemone stays set aside, but it can resume on the same evaluator after Deformer phase 2. The travelling-wave operator is part of Deformer phase 2, not this plan's Phase 1.
-- **More than 2 pairs.** The tank's biological ceiling is 4 pairs. The setting stops at 2.
+- **Six-pair density:** implemented at Will’s request on 2026‑10‑16, superseding the earlier two-pair limit. Chromecast performance at this density still needs measurement.
 
 ## Verification
 
@@ -526,7 +526,7 @@ Ranks are suggestions; a Fable session ranks the TODO entry.
     ```
 
     **PASS** (2026‑10‑16): ran in the container with `TMPDIR` on disk (the RAM-backed `/tmp` was full).
-7. The level builds and exports the seahorses: `bash wflevels/aquarium_plants/build.sh && grep -c seahorse wflevels/aquarium_plants/actor-map.json` prints at least `8` (4 seahorses × 2 actors).
+7. The level builds and exports the seahorses: `bash wflevels/aquarium_plants/build.sh && grep -c seahorse wflevels/aquarium_plants/actor-map.json` prints at least `24` (12 seahorses × 2 actors).
 
     ```
     $ grep -c seahorse wflevels/aquarium_plants/actor-map.json
@@ -557,7 +557,7 @@ Ranks are suggestions; a Fable session ranks the TODO entry.
 
     **PASS** (2026‑10‑16): all three limits hold. Ran in the container, with `--out …/evidence/phase3` so Phase 3's evidence stays together. The poses are the mockup's presets on the exported female rig; a vertical grip takes its wrap start from the post radius (Phase 3: no ring past 97 % of its lateral limit), so `twine` uses start 18. Limit use is the worst joint over the pose and its 1 s ease-in from rest. The centre error is the Director's solve as the game runs it: one frame late, extrapolated, for 6 s of `hold_idle` sway at 20 Hz.
 9. Matched device runs, with Chromecast 1 reserved through the coordinator (`task cast1:reserve`): `python3 scripts/profile-planted-tank-device.py --variants-dir <variant APKs> --restore-apk <eight-tank selector release> --out docs/plans/2026-10-16-saltwater-seahorses/profiles --variants baseline none pair1 pair2 --runs 3`, then `task cast1:release`. Repeat on the Chromecast HD. The comparison table is written to `2026-10-16-saltwater-seahorses/comparison.md`.
-10. Normal gameplay on Chromecast 1 with the selector release: Hold A → Seahorses sheet → None / 1 pair / 2 pairs each apply. Switching to freshwater hides seahorses and posts. Selector, Back, Home and resume all pass. Evidence goes under `docs/diagnostics/`.
+10. Normal gameplay on Chromecast 1 with the selector release: Hold A → Seahorses sheet → every count from None through 6 pairs applies. Switching to freshwater hides seahorses and posts. Selector, Back, Home and resume all pass. Evidence goes under `docs/diagnostics/`.
 
     ```
     $ task chromecast:submit DEVICE=chromecast-test-01 APP=aquarium WORKFLOW=check APK=~/tmp/seahorse-phase3/variants/pair2.apk ASYNC=true
@@ -581,3 +581,39 @@ Ranks are suggestions; a Fable session ranks the TODO entry.
     <img src="2026-10-16-saltwater-seahorses/evidence/phase3/behaviour-sequence.png" width="700">
 11. The eight-tank selector release is reinstalled on each Chromecast, and its installed hash matches the build.
 12. Mockups rebuild cleanly: `python3 docs/plans/2026-10-16-saltwater-seahorses/build_mockups.py` reports no errors, and every file is under the 512 KB budget.
+
+## Six-pair update — 2026‑10‑16
+
+Will requested four additional pairs after viewing the two-pair cast1 demo.
+The tank now authors twelve residents (six females and six males), with four
+additional vertical holdfasts and distinct starting spots. Existing body/fins
+meshes and the atlas remain shared. Field 8 offers None through 6 pairs and
+defaults to 6; freshwater still hides all residents and posts. Greeting rotates
+through visible pairs, checking every other resident's spot reservation.
+
+The state blocks use existing free level mailboxes, with no engine changes. The permanent pool is 6 MB: the 64-bit desktop build exhausted the previous 3 MB during resident loading.
+Pair 6 straddles the two ranges, so greeting looks up both partners through
+`sh-block` rather than assuming adjacent addresses. The actor map records every
+base explicitly. Tests cover all seven count settings, twelve independent
+state machines, unique spots over 90 simulated seconds, freshwater restoration,
+and the settings form’s accepted range. The earlier two-pair performance and
+render evidence describes its original build; it is not six-pair evidence.
+
+The selector bundle has now been rebuilt with the six-pair standalone level;
+this supersedes the earlier deferred menu rebuild. The cast1 demo APK keeps
+the verified merged engine libraries and configures saltwater, six pairs,
+seed 713, plant age 150 and growth paused. It is frozen at
+`engine/objs_game/.tmp/seahorse-six-pairs/pair6.apk` with SHA256
+`c119b3725112684a41d6e810052ec88750380e8c47f540244589458474cd306e`.
+Coordinator recording J‑a4b8d6aee65f completed successfully on cast1 after the earlier owned session released it. The 86 seahorse asset, settings, Forth behavior and tail tests passed (108.75 s).
+The first desktop attempts did not provide render coverage: no usable host
+X display, then a host/container glibc version mismatch. Device render evidence is recorded separately. A later host run with a shared container X display successfully loaded and stepped the level after the pool and mailbox fixes.
+
+[Six-pair cast1 evidence](../diagnostics/seahorse-six-pairs-20261016/README.md):
+the corrected 6 MB build passed J‑767e9ce236c4. Its screenshot shows the twelve residents; its current level-load log has zero recorded Forth compile/evaluation errors. Earlier errors in the cumulative app log were from older sessions. The scoped log and scan are recorded there. Final two-minute demo: J‑87f711215525. This
+render check does not establish a six-pair performance budget.
+
+Final validation after the memory and mailbox corrections: **88 tests passed**
+in 203.43 s, including the complete exported player/director scripts and HUD
+mailbox exclusions. Cast1’s scoped current-run log is clean. Changes are on
+`seahorse-six-pairs` in the isolated normal-convention integration worktree.

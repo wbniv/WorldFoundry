@@ -492,6 +492,7 @@ _Auto-added from plan "Out of scope"/"Deferred" sections at commit time. Triage 
 - [ ] **(triage)** **Trimming the shipped `.oad` padding.** It's an optimisation, deferred until size matters. — _from [2026-10-16-runtime-object-editing.md](docs/plans/2026-10-16-runtime-object-editing.md)_  <!-- fp:d5164b51c5dbfc8e -->
 - [verify] **2026-10-16-runtime-object-editing** — Verification section present but no PASS recorded — run + record the steps. _from [2026-10-16-runtime-object-editing.md](docs/plans/2026-10-16-runtime-object-editing.md)_  <!-- fp:4f8533ba6f666a19 -->
 - [verify] **2026-10-16-blender-normal-convention-engine-wide** — Verification section present but no PASS recorded — run + record the steps. _from [2026-10-16-blender-normal-convention-engine-wide.md](docs/plans/2026-10-16-blender-normal-convention-engine-wide.md)_  <!-- fp:0a916552b544d7dc -->
+- [ ] **(triage)** **Six-pair density:** implemented at Will’s request on 2026‑10‑16, superseding the earlier two-pair limit. Chromecast performance at this density still needs measurement. — _from [2026-10-16-saltwater-seahorses.md](docs/plans/2026-10-16-saltwater-seahorses.md)_  <!-- fp:e901262c17164c77 -->
 <!-- END auto-captured-deferrals -->
 
 

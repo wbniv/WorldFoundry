@@ -4,7 +4,7 @@
 // deforming actors' writable copies), so it grows from 1 MB to 3 MB.
 { 'L4'
  { 'ALGN' .align( 2048 ) }
- { 'RAM' 'OBJD' 1000000l 'PERM' 3000000l 'ROOM' 24000000l 'FLAG' 1l 1l 'SLOT' 1l }
+ { 'RAM' 'OBJD' 1000000l 'PERM' 6000000l 'ROOM' 24000000l 'FLAG' 1l 1l 'SLOT' 1l }
  { 'ALGN' .align( 2048 ) }
  [ "../aquarium_plants.iff" ]
 }

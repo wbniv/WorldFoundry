@@ -41,9 +41,13 @@
 		$3fff010l { 'STR' "seahorse_m_fins.iff" }  // IFF PERM fff:010
 		$3fff011l { 'STR' "seahorse_whip.iff" }  // IFF PERM fff:011
 		$3fff012l { 'STR' "seahorse_branch.iff" }  // IFF PERM fff:012
-		$3fff013l { 'STR' "goby_grazing_rock_0.iff" }  // IFF PERM fff:013
-		$3fff014l { 'STR' "goby_grazing_rock_1.iff" }  // IFF PERM fff:014
-		$3fff015l { 'STR' "goby_grazing_rock_2.iff" }  // IFF PERM fff:015
+		$3fff013l { 'STR' "seahorse_post_2.iff" }  // IFF PERM fff:013
+		$3fff014l { 'STR' "seahorse_post_3.iff" }  // IFF PERM fff:014
+		$3fff015l { 'STR' "seahorse_post_4.iff" }  // IFF PERM fff:015
+		$3fff016l { 'STR' "seahorse_post_5.iff" }  // IFF PERM fff:016
+		$3fff017l { 'STR' "goby_grazing_rock_0.iff" }  // IFF PERM fff:017
+		$3fff018l { 'STR' "goby_grazing_rock_1.iff" }  // IFF PERM fff:018
+		$3fff019l { 'STR' "goby_grazing_rock_2.iff" }  // IFF PERM fff:019
 		$3000001l { 'STR' "tank_base.iff" }  // IFF RM0 000:001
 		$3000002l { 'STR' "water_back.iff" }  // IFF RM0 000:002
 		$3000003l { 'STR' "back_air.iff" }  // IFF RM0 000:003
@@ -89,9 +93,13 @@
 		{ 'ASS' $3fff010l [ "seahorse_m_fins.iff" ] }  // IFF PERM fff:010
 		{ 'ASS' $3fff011l [ "seahorse_whip.iff" ] }  // IFF PERM fff:011
 		{ 'ASS' $3fff012l [ "seahorse_branch.iff" ] }  // IFF PERM fff:012
-		{ 'ASS' $3fff013l [ "goby_grazing_rock_0.iff" ] }  // IFF PERM fff:013
-		{ 'ASS' $3fff014l [ "goby_grazing_rock_1.iff" ] }  // IFF PERM fff:014
-		{ 'ASS' $3fff015l [ "goby_grazing_rock_2.iff" ] }  // IFF PERM fff:015
+		{ 'ASS' $3fff013l [ "seahorse_post_2.iff" ] }  // IFF PERM fff:013
+		{ 'ASS' $3fff014l [ "seahorse_post_3.iff" ] }  // IFF PERM fff:014
+		{ 'ASS' $3fff015l [ "seahorse_post_4.iff" ] }  // IFF PERM fff:015
+		{ 'ASS' $3fff016l [ "seahorse_post_5.iff" ] }  // IFF PERM fff:016
+		{ 'ASS' $3fff017l [ "goby_grazing_rock_0.iff" ] }  // IFF PERM fff:017
+		{ 'ASS' $3fff018l [ "goby_grazing_rock_1.iff" ] }  // IFF PERM fff:018
+		{ 'ASS' $3fff019l [ "goby_grazing_rock_2.iff" ] }  // IFF PERM fff:019
 	}
 	{ 'ALGN' .align(2048) }
 	{ 'RM0'

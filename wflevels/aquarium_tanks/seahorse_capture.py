@@ -1,6 +1,6 @@
 #!/usr/bin/env python3
 """Desktop evidence for the seahorse asset (Phase 2): the saltwater planted tank,
-wide and close, with the four seahorses animating their clips.
+wide and close, with the twelve seahorses animating their clips.
 
 Runs the Release wf_game with the aquarium app's VRAM flags on an isolated debug
 port, steps the simulation at a fixed 20 Hz, and takes bridge screenshots: a
@@ -48,7 +48,7 @@ def main():
     mapping = json.loads((here / 'actor-map.json').read_text())
     idx, mb, sea = mapping['indices'], mapping['mailboxes'], mapping['seahorses']
     player, director = idx['Player'], idx['Director']
-    # Saltwater (the seahorses' visibility mailbox 1160), mature plants, growth paused.
+    # Saltwater, six visible pairs, mature plants, growth paused.
     level = out / 'configured-level.iff'
     data, receipt = configure_level((ROOT / 'wflevels/aquarium_plants-standalone.iff').read_bytes(),
                                     dict(seed=args.seed, water='saltwater', age=args.age, speed=0))
@@ -116,7 +116,7 @@ def main():
             step(args.gap)
         # Close: the Director drives only the urchin's close camera, so keep the wide view and
         # move its camshot (cs_wide) and target (LookAt) to each pair instead.
-        for pair, s in ((0, 0), (1, 2)):
+        for pair, s in enumerate(range(0, len(sea['actors']), 2)):
             a, b = sea['actors'][s]['position'], sea['actors'][s + 1]['position']
             x, y, z = (a[0] + b[0]) / 2, (a[1] + b[1]) / 2, (a[2] + b[2]) / 2 - .45
             cam_x = x - .5 * (1 if x > 0 else -1)             # off-centre, away from the end glass

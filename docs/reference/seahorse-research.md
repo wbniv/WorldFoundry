@@ -133,7 +133,7 @@ All sources were opened on 2026‑10‑16. Page numbers are the printed page num
 | T2 | Dwarf seahorses: two pairs per gallon, "a very conservative figure"; "it is always better to understock your aquarium" | other species | Breeder/retailer source; same thread, reply #2821, 2006‑08‑30 | *H. zosterae* · full page |
 | T3 | The same source advises staying below the limit unless the keeper is experienced | unverified | Not found on the page. The nearest text is T2's general "better to understock" | — |
 
-**Consequence.** The plan cites Ocean Rider for "about one pair per 10 gal for captive-bred seahorses". The page is a 2006 forum thread, and the figure is given for *H. erectus*. Ocean Rider sells *H. reidi* as "Brazileros", but this thread gives no *H. reidi* figure. The 40 gal tank still allows at most 4 pairs by T1. The cap of 2 pairs is **ours**.
+**Consequence.** The plan cites Ocean Rider for "about one pair per 10 gal for captive-bred seahorses". The page is a 2006 forum thread, and the figure is given for *H. erectus*. Ocean Rider sells *H. reidi* as "Brazileros", but this thread gives no *H. reidi* figure. The 40 gal tank still allows at most 4 pairs by T1. The original cap of 2 pairs was **ours**. Will increased the simulated tank to six pairs on 2026‑10‑16; that visual population is an authored choice, not a change to this husbandry evidence.
 
 ## 10. Game numbers (all ours)
 

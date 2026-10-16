@@ -13,7 +13,7 @@ HERE = ROOT / 'wflevels/aquarium_plants'
 def test_sheet_and_bindings():
     oas = (HERE / 'settings.oas').read_text()
     assert 'PROPERTY_SHEET_HEADER(Seahorses,0)' in oas
-    assert re.search(r'TYPEENTRYINT32\(Seahorses,,0,2,2,"None\|1 pair\|2 pairs",SHOW_AS_RADIOBUTTONS', oas)
+    assert re.search(r'TYPEENTRYINT32\(Seahorses,,0,6,6,"None\|1 pair\|2 pairs\|3 pairs\|4 pairs\|5 pairs\|6 pairs",SHOW_AS_RADIOBUTTONS', oas)
     assert re.search(r'TYPEENTRYBOOLEAN\(Greeting,,1,SHOW_AS_CHECKBOX', oas)
     fields = json.loads((HERE / 'settings-bindings.json').read_text())['fields']
     assert fields['Seahorses'] == {'id': 8} and fields['Greeting'] == {'id': 9}

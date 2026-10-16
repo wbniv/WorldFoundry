@@ -18,9 +18,9 @@ FIELDS={'seed':'Seed','water':'Water type','age':'Initial age','speed':'Growth s
 
 def validate(options):
     if set(options)-set(FIELDS):raise ValueError('Unknown plant configuration key')
-    result=dict(seed=0,water='freshwater',age=0,speed=3,textures=True,sway=True,random_entry=True,seahorses=2,greeting=True)
+    result=dict(seed=0,water='freshwater',age=0,speed=3,textures=True,sway=True,random_entry=True,seahorses=6,greeting=True)
     result.update(options)
-    for key,maximum in [('seed',4294967295),('speed',6),('seahorses',2)]:
+    for key,maximum in [('seed',4294967295),('speed',6),('seahorses',6)]:
         if type(result[key]) is not int or not 0<=result[key]<=maximum:raise ValueError('Invalid '+key)
     if type(result['age']) not in (int,float) or not math.isfinite(result['age']) or not 0<=result['age']<=240:raise ValueError('Invalid age')
     if result['water'] not in ('freshwater','saltwater'):raise ValueError('Invalid water')

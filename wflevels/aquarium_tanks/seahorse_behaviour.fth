@@ -1,11 +1,12 @@
 \ Seahorse behaviour: docs/plans/2026-10-16-saltwater-seahorses.md, Phase 3.
-\ One state machine per seahorse over its DFRM block (1200 + 100 s). Cells 0..39 face the
-\ engine (Phase 1, E3); 40..99 are this file's. 1600..1609 are shared.
+\ One state machine per seahorse over its DFRM block (sh-block s). Cells 0..39 face the
+\ engine (Phase 1, E3); 40..97 are this file's. 1170..1179 are shared.
 \ States: 0 hold, 1 release, 2 swim, 3 probe, 4 grasp, 5 strike, 6 greet.
 \ Needs tk@ tk! tk-dt@ tk-frac tk-sin tk-cos tk-wrap tk-atan2 uf-hypot, the clip ids
 \ (sh-clip-*) and the generated sh-spot / sh-spot-off / sh-spot-post / sh-count / sh-greeting.
-: sh-b 1609 tk@ ;
-: sh@ sh-b + tk@ ; : sh! sh-b + tk! ;
+: sh-b sh-shared 9 + tk@ ;
+: sh-cell sh-b + dup 70 >= over 72 <= & sh-b 2 = & if 1042 + then ;
+: sh@ sh-cell tk@ ; : sh! sh-cell tk! ;
 : sh-init 40 ; : sh-state 41 ; : sh-age 42 ; : sh-spot# 43 ; : sh-rest 44 ;
 : sh-x 45 ; : sh-y 46 ; : sh-z 47 ; : sh-yaw 48 ; : sh-vx 49 ; : sh-vy 50 ; : sh-vz 51 ;
 : sh-strike 52 ; : sh-head 53 ; : sh-eyet 54 ; : sh-eyel 55 ; : sh-eyer 56 ; : sh-rudder 57 ;
@@ -13,9 +14,10 @@
 : sh-ax 65 ; : sh-ay 66 ; : sh-az 67 ; : sh-r 68 ; : sh-start 69 ; : sh-tyaw 70 ;
 : sh-tx 71 ; : sh-ty 72 ; : sh-tz 73 ; : sh-fin 74 ; : sh-c 76 ; : sh-s 77 ;
 : sh-wx 78 ; : sh-wy 79 ; : sh-wz 80 ; : sh-ex 81 ; : sh-ey 82 ; : sh-hx 83 ; : sh-hy 84 ;
+: sh-id 75 ;
 : sh-hz 85 ; : sh-dist 86 ; : sh-kf 87 ; : sh-kl 88 ; : sh-pk 89 ; : sh-off 90 ; : sh-next 91 ;
-: shg-phase 1600 ; : shg-pair 1601 ; : shg-time 1602 ; : shg-due 1603 ; : shg-on 1604 ;
-: shg-ready 1605 ;
+: shg-phase sh-shared 0 + ; : shg-pair sh-shared 1 + ; : shg-time sh-shared 2 + ; : shg-due sh-shared 3 + ; : shg-on sh-shared 4 + ;
+: shg-ready sh-shared 5 + ;
 : sh-now INDEXOF_TIME tk@ ;
 : sh-go ( state -- ) sh-state sh! 0 sh-age sh! ;
 : sh-rand ( -- r ) sh-seed sh@ .6180339 + tk-frac dup sh-seed sh! tk-sin 9.137 * abs tk-frac ;
@@ -32,7 +34,7 @@
 \ Spots: another visible seahorse holds or heads for spot n.
 : sh-other ( n blk -- flag ) dup sh-b = if 2drop 0 exit then
   dup 40 + tk@ 0 = if 2drop 0 exit then 43 + tk@ = ;
-: sh-taken ( n -- flag ) 0 4 0 do over i 100 * 1200 + sh-other | loop nip ;
+: sh-taken ( n -- flag ) 0 sh-population 0 do over i sh-block sh-other | loop nip ;
 : sh-ok ( n -- flag ) dup sh-spot# sh@ = over sh-taken |
   swap 2 < shg-phase tk@ 0 <> & | not ;
 : sh-floor ( x -- n ) 0 sh-spot-count 1 do over i >= if 1 + then loop nip ;
@@ -128,7 +130,7 @@
   sh-eyer sh@ 32 sh@ - tk-dt@ 25 * 1 min * 32 sh@ + 32 sh! ;
 \ Setup on entry (or when its pair reappears): holding its home spot (or a free one),
 \ placed for hold_idle at t = 0 (sh-spot-off), so the first frame is already on the post;
-\ the solve's history (cells 92..98) is seeded with the centre's velocity there (sh-spot-vel).
+\ the solve's history (cells 92..97 and 64) is seeded with the centre's velocity there (sh-spot-vel).
 : sh-setup ( s -- ) dup .1373 * sh-seed sh!
   sh-home dup sh-taken if drop 0 sh-greet sh! -1 sh-spot# sh! sh-pick then sh-load
   sh-tyaw sh@ sh-yaw sh! sh-trig
@@ -137,13 +139,13 @@
   0 sh-kf sh! 0 sh-kl sh! 0 sh-eyet sh!
   21 0 do 0 i sh! loop sh-wrap-on 1 24 sh!
   sh-clip-hold-idle 25 sh! sh-now 26 sh! 0 27 sh! 0 28 sh! 0 29 sh! 0 30 sh!
-  sh-hx sh@ 33 sh! sh-hy sh@ 34 sh! 1 sh-valid sh! 0 95 sh! 1 98 sh!
+  sh-hx sh@ 33 sh! sh-hy sh@ 34 sh! 1 sh-valid sh! 0 95 sh! 1 64 sh!
   sh-spot# sh@ sh-spot-vel tk-dt@ * sh-hy sh@ swap - 93 sh! tk-dt@ * sh-hx sh@ swap - 92 sh!
-  sh-b 1200 - 100 / sh-first-rest sh-rest sh! 6 sh-rand 15 * + sh-strike sh! 0 sh-go 1 sh-init sh! ;
+  sh-id sh@ sh-first-rest sh-rest sh! 6 sh-rand 15 * + sh-strike sh! 0 sh-go 1 sh-init sh! ;
 : sh-place ( actor -- ) >r sh-x sh@ INDEXOF_X_POS r@ write-actor-mailbox sh-y sh@ INDEXOF_Y_POS r@ write-actor-mailbox
   sh-z sh@ INDEXOF_Z_POS r@ write-actor-mailbox sh-yaw sh@ INDEXOF_ROTATION_C r> write-actor-mailbox ;
 : sh-tick ( body fins sex s -- )
-  dup 100 * 1200 + 1609 tk! >r sh-sex sh! sh-fins sh! sh-body sh!
+  dup sh-block sh-shared 9 + tk! dup sh-id sh! >r sh-sex sh! sh-fins sh! sh-body sh!
   sh-init sh@ 0 = if r@ sh-setup then r> drop
   sh-age sh@ tk-dt@ + sh-age sh! sh-trig
   sh-state sh@ dup 0 = if sh-hold else dup 1 = if sh-release else dup 2 = if sh-swim else
@@ -155,34 +157,39 @@
   sh-kf sh@ dup 12 sh! dup 15 sh! 18 sh!
   sh-kl sh@ sh-rudder sh@ + dup 13 sh! dup 16 sh! 19 sh!
   sh-body sh@ sh-place sh-fins sh@ sh-place
-  98 sh@ if 0 98 sh! else 33 sh@ 92 sh! 34 sh@ 93 sh! then sh-valid sh@ 95 sh! tk-dt@ 94 sh!
+  64 sh@ if 0 64 sh! else 33 sh@ 92 sh! 34 sh@ 93 sh! then sh-valid sh@ 95 sh! tk-dt@ 94 sh!
   sh-b sh-body sh@ dfrm-pose drop
   24 sh@ 0 > 39 sh@ 1 <> & 39 sh@ 2 <> & sh-valid sh!
   sh-fin sh@ tk-dt@ 2.2 * sh-vx sh@ sh-vy sh@ uf-hypot 8 * 1 + * + tk-frac sh-fin sh!
   sh-fin sh@ .022 0 1 sh-fins sh@ fin-deform ;
 \ Greeting (shared, once a frame before the seahorses): pair p's female and male take
 \ spots 0 and 1, on opposite sides of the whip, for sh-greet-time seconds. Ours.
-: shg-a shg-pair tk@ 200 * 1200 + ;
-: shg-flag ( v -- ) dup shg-a 60 + tk! shg-a 160 + tk! ;
+: shg-a shg-pair tk@ 2 * sh-block ;
+: shg-m shg-pair tk@ 2 * 1 + sh-block ;
+: shg-flag ( v -- ) dup shg-a 60 + tk! shg-m 60 + tk! ;
 : shg-free ( blk -- flag ) dup 40 + tk@ 0 <> swap 41 + tk@ dup 0 = swap 2 = | & ;
-: shg-clear ( blk -- ) 1609 tk! sh-state sh@ 6 = if sh-clip-hold-idle 2.5 sh-play sh-to-hold
+: shg-clear ( blk -- ) sh-shared 9 + tk! sh-state sh@ 6 = if sh-clip-hold-idle 2.5 sh-play sh-to-hold
   4 sh-rand 8 * + sh-rest sh! 8 sh-rand 10 * + sh-strike sh! then ;
-: shg-stop 0 shg-flag shg-a 40 + tk@ if shg-a shg-clear then shg-a 140 + tk@ if shg-a 100 + shg-clear then
+: shg-stop 0 shg-flag shg-a 40 + tk@ if shg-a shg-clear then shg-m 40 + tk@ if shg-m shg-clear then
   0 shg-phase tk! 0 shg-time tk! sh-now .0137 * tk-sin abs 120 * 240 + shg-due tk! ;
 : shg-clearof ( blk -- flag ) dup 40 + tk@ 0 = swap 43 + tk@ 2 >= | ;
-: shg-start 1 shg-pair tk@ - 1163 tk@ & shg-pair tk!
-  shg-a shg-free shg-a 100 + shg-free &
-  1 shg-pair tk@ - 200 * 1200 + dup shg-clearof swap 100 + shg-clearof & &
+: shg-other-clear 1 sh-population 0 do
+  i 2 / shg-pair tk@ <> if i sh-block shg-clearof & then loop ;
+: shg-start shg-pair tk@ 1 + dup sh-count >= if drop 0 then shg-pair tk!
+  shg-a shg-free shg-m shg-free & shg-other-clear &
   if 1 shg-flag 1 shg-phase tk! 0 shg-time tk! else 10 shg-due tk! then ;
-: shg-tick 1162 tk@ not if 0 shg-ready tk! exit then
+: shg-tick 0 sh-vis tk@ not if 0 shg-ready tk! exit then
   shg-ready tk@ 0 = if 45 shg-due tk! 0 shg-phase tk! 1 shg-pair tk! 0 shg-flag 1 shg-ready tk! then
-  shg-phase tk@ 0 <> shg-on tk@ 0 = 1162 shg-pair tk@ + tk@ 0 = | & if shg-stop exit then
+  shg-phase tk@ 0 <> shg-on tk@ 0 = shg-pair tk@ sh-vis tk@ 0 = | & if shg-stop exit then
   shg-phase tk@ 0 = if shg-on tk@ if shg-due tk@ tk-dt@ - dup shg-due tk! 0 <= if shg-start then then exit then
   shg-time tk@ tk-dt@ + shg-time tk!
   shg-phase tk@ 1 = if
-    shg-a 41 + tk@ 6 = shg-a 141 + tk@ 6 = & if 2 shg-phase tk! 0 shg-time tk! exit then
+    shg-a 41 + tk@ 6 = shg-m 41 + tk@ 6 = & if 2 shg-phase tk! 0 shg-time tk! exit then
     shg-time tk@ 180 > if shg-stop then exit then
   shg-time tk@ sh-greet-time >= if shg-stop then ;
 \ Settings and visibility, every frame: pair n shows when saltwater and the count >= n.
-: sh-settings pg-salt sh-count 1 >= & 1162 tk! pg-salt sh-count 2 >= & 1163 tk! sh-greeting shg-on tk!
-  1162 tk@ not if 0 1240 tk! 0 1340 tk! 0 shg-ready tk! then 1163 tk@ not if 0 1440 tk! 0 1540 tk! then ;
+: sh-settings sh-greeting shg-on tk!
+  sh-pair-count 0 do
+    pg-salt sh-count i > & dup i sh-vis tk!
+    not if 0 i 2 * sh-block 40 + tk! 0 i 2 * 1 + sh-block 40 + tk! then
+  loop 0 sh-vis tk@ not if 0 shg-ready tk! then ;

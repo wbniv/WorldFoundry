@@ -1,0 +1,16 @@
+zforth: INDEXOF_CAMSHOT = 1921 (expect 1921)
+audio: MusicPlayer — soundfont not found: florestan-subset.sf2
+audio: sfx[0] not found: wflevels/qbert_practice/sfx/qbert_hop.wav
+audio: sfx[1] not found: wflevels/qbert_practice/sfx/qbert_land.wav
+audio: sfx[2] not found: wflevels/qbert_practice/sfx/qbert_fall.wav
+audio: sfx[3] not found: wflevels/qbert_practice/sfx/qbert_swear.wav
+audio: sfx[4] not found: wflevels/qbert_practice/sfx/qbert_round_clear.wav
+audio: sfx[5] not found: wflevels/qbert_practice/sfx/qbert_kill.wav
+audio: sfx[6] not found: wflevels/qbert_practice/sfx/qbert_disc.wav
+PLANTS generation=1 seed=713 mode=saltwater shoots=384 vertices=78212 triangles=46540 graph_ms=1.912 mesh_ms=40.187
+PLANTS settings-source=RPRP seed=713 water=saltwater age=150 speed=0 textures=1 sway=1 random_entry=0 selector_override=0
+delta too large: 0.5665283203
+timeofday:1792163207:394117
+lasttimeofday: 1792163206:827583
+deltatime:0:566534
+delta: 0.5665283203
