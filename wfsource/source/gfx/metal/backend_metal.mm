@@ -499,6 +499,8 @@ public:
 
     bool BitmapTextSupported() const override { return true; }
     void CaptureTextView() override { std::memcpy(_textView,_mv,sizeof(_mv)); }
+    bool CameraMatrices(float* view,float* proj) const override
+    { std::memcpy(view,_textView,sizeof(_textView)); std::memcpy(proj,_proj,sizeof(_proj)); return true; }
     bool ProjectTextAnchor(float x,float y,float z,int width,int height,float& px,float& py,float& depth) const override
     {
         float view[4],clip[4];const float point[4]={x,y,z,1};

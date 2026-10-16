@@ -159,6 +159,10 @@ public:
     virtual unsigned TextureGeneration() const { return 0; }
     virtual void CaptureTextView() {}
     virtual bool ProjectTextAnchor(float, float, float, int, int, float&, float&, float&) const { return false; }
+    // The active camera's view (captured with CaptureTextView) and projection,
+    // column-major. Read only by the 3D object picker while it is open
+    // (engine/object_picker.hpp); false when the backend has no camera.
+    virtual bool CameraMatrices(float* /*view16*/, float* /*proj16*/) const { return false; }
     virtual void DrawGlyphs(const bitmaptext::Quad*, int, int, int, RBTextureHandle,
                             bool, float = 0, float = 0, float = 0) {}
 
