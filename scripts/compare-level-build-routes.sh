@@ -51,17 +51,23 @@ status=0
 printf '%-22s %-29s %-16s %-16s %s\n' tank file host container result
 for t in "${tanks[@]}"; do
     mapfile -t p < <(paths_of "$t")
+    failed=""
     for route in host container; do
         if [ "$route" = host ]; then
-            WF_LEVEL_BUILD_HOST=1 bash "wflevels/$t/build.sh" >"$out/$t.$route.log" 2>&1 \
-                || { echo "$t: $route build failed, see $out/$t.$route.log" >&2; status=1; }
+            WF_LEVEL_BUILD_HOST=1 bash "wflevels/$t/build.sh" >"$out/$t.$route.log" 2>&1 || failed+=" $route"
         else
-            bash "wflevels/$t/build.sh" >"$out/$t.$route.log" 2>&1 \
-                || { echo "$t: $route build failed, see $out/$t.$route.log" >&2; status=1; }
+            bash "wflevels/$t/build.sh" >"$out/$t.$route.log" 2>&1 || failed+=" $route"
         fi
         manifest "$t" "$route"
         git checkout -q -- "${p[@]}"
     done
+    # A failed build leaves the committed files behind, so comparing would only compare
+    # leftovers: report the failure and skip the tank.
+    if [ -n "$failed" ]; then
+        echo "$t: BUILD FAILED ($failed ), comparison skipped; see $out/$t.<route>.log"
+        status=1
+        continue
+    fi
     for f in "wflevels/$t/$t.lvl" "wflevels/$t.iff" "wflevels/$t-standalone.iff"; do
         h=$(grep -F "  $f" "$out/$t.host.sha256" | cut -c1-16 || true)
         c=$(grep -F "  $f" "$out/$t.container.sha256" | cut -c1-16 || true)

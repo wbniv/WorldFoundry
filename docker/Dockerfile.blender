@@ -31,6 +31,12 @@ RUN python3 -c "import shutil, urllib.request as u; r = u.urlopen(u.Request('htt
  && rm /tmp/blender.tar.xz \
  && ln -s /opt/blender/blender /usr/local/bin/blender
 
+# The generators import Pillow (textures); host Blender gets it from the system Python,
+# the official build's bundled Python has none. Pinned to the host's version (12.1.1).
+ARG PILLOW_VERSION=12.1.1
+RUN /opt/blender/${BLENDER_VERSION%.*}/python/bin/python3.11 -m ensurepip \
+ && /opt/blender/${BLENDER_VERSION%.*}/python/bin/python3.11 -m pip install --no-cache-dir --only-binary=:all: "Pillow==${PILLOW_VERSION}"
+
 # The wf_blender add-on is loaded from the mounted checkout, never baked in, so an
 # add-on edit needs no image rebuild: Blender's system scripts path gets an addons/
 # entry that points at /src/wftools/wf_blender (dangling until the repo is mounted).
