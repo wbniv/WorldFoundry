@@ -1,5 +1,7 @@
 | Date | Change |
 |------|--------|
+| [2026-10-16](https://github.com/wbniv/WorldFoundry/commit/177e51f6) | Seahorse device variants; record verification steps 8 and 10 |
+| [2026-10-16](https://github.com/wbniv/WorldFoundry/commit/dfc13252) | Record seahorse Phase 2: as-built notes, steps 6-7 PASS, TODO done |
 | [2026-10-16](https://github.com/wbniv/WorldFoundry/commit/0a128929) | Add seahorse phases, deformer follow-ons and Blender-in-container to TODO |
 | [2026-10-16](https://github.com/wbniv/WorldFoundry/commit/c8a226cc) | Record seahorse Phase 1 verification and the texture-overflow fix |
 | [2026-10-16](https://github.com/wbniv/WorldFoundry/commit/e941e460) | Record two pre-existing faults found during seahorse Phase 1 |
@@ -9,6 +11,16 @@
 | [2026-10-16](https://github.com/wbniv/WorldFoundry/commit/623a8ca3) | Plan saltwater seahorses with 35-joint tails and a generic deformer |
 
 <!--history-meta v1
+177e51f6	author	Will Norris
+177e51f6	added	42
+177e51f6	deleted	0
+177e51f6	files	1
+177e51f6	body	scripts/build-planted-seahorse-variants.py cooks the planted tank's settings\n(saltwater + None / 1 pair / 2 pairs, or freshwater; seed 713, age 150, growth\npaused) into a built aquarium APK's selector bundle and re-signs it, keeping\nthe native libraries and wf_args.txt. Step 10 and Phase 4 reuse it.\n\nPlan: step 8 PASS (max_limit_use 0.959, frame_flips 0, wrap centre error\n0.257 mm). Step 10 NOT RUN: Chromecast 1 dropped off the network as job\nJ-0369f7a26e23 connected; nothing was installed; the coordinator's automatic\nretry was cancelled. The desktop settings and behaviour montages are attached.\n\nCo-Authored-By: Claude Opus 5.5 <noreply@anthropic.com>\nClaude-Session: https://claude.ai/code/session_01T3gB59hNsFhWnCTTKHc1yk
+dfc13252	author	Will Norris
+dfc13252	added	34
+dfc13252	deleted	1
+dfc13252	files	1
+dfc13252	body	Phase 2 merged as 7b0662c4: 1,101 triangles per seahorse, 693 clip\nframes within 0.005 deg, slotted-action exporter fix, PERM pool 1->3 MB,\nmenu bundle left for a later rebuild. Content tests 75 passed in the\ncontainer; actor map names 21 seahorse entries.\n\nCo-Authored-By: Claude Opus 5.5 <noreply@anthropic.com>\nClaude-Session: https://claude.ai/code/session_01T3gB59hNsFhWnCTTKHc1yk
 0a128929	author	Will Norris
 0a128929	added	1
 0a128929	deleted	3
