@@ -16,6 +16,7 @@
 | M6 | **Labels:** automatic at export (the type's display name plus an ordinal, e.g. "Seahorse 2"). An optional **Editor Label** in `actor.inc` (`XDATA_COPY`) overrides it. Labels must be unique within a level, or the build fails. |
 | M7 | **Editability is automatic at export:** an object is editable exactly when its type declares at least one live field. No per-instance flag. Add an opt-out only if a picker ever gets crowded. |
 | M8 | **Live fields are declared in the OAS** with a `SHOW_AS_LIVE` modifier bit (0x40), following the `SHOW_AS_VECTOR` (0x80) pattern. A type with live fields implements one change hook, and every live field has a test proving an edit takes effect. Non-live fields show read-only. **The UI never prints "live":** editable fields carry no marker; read-only fields are dimmed and show a padlock icon (Will, 2026‑10‑16). |
+| M9 | **`--edit-all`, desktop/debug builds only** (Will, 2026‑10‑16): a switch that makes every object in the level editable, whether or not its type declares a live field. It is compiled out of release and Android builds, so shipped behaviour still follows the export's list (M3, M7). Under the switch the chooser lists every object; one the export didn't list is labelled with its type's display name and actor index. Non-live fields become editable too: an edit lands in the overlay, and takes effect only where the engine re-reads that field, so there is no per-field test requirement for them. Listing every object is a walk of the level's object array, not a search by type, so M3's rule against runtime type scans still holds. |
 
 **Open:**
 
@@ -155,7 +156,7 @@ It shows:
 |---|---|---|---|
 | 0 | **Trace before building:** the type registration points (factory, type ids, `.mas` lists); the `XDATA_COPY`/`XDATA_OBJECTLIST` path through levcomp-rs and the engine; how the exporter writes an object's OAD properties | no | T3 |
 | 1 | `settings.inc`, `plantedtanksettings.oas`, the `actor.inc`/`levelobj.oas` appends, `SHOW_AS_LIVE`; levcomp-rs list, labels and `OAD ` chunks, with tests | `oas/` only | T4 |
-| 2 | Runtime: `OAD ` loader, descriptor walker (parity test), writable overlay with copy-on-write, `property@`, host fed from the list | yes | T4 |
+| 2 | Runtime: `OAD ` loader, descriptor walker (parity test), writable overlay with copy-on-write, `property@`, host fed from the list; the desktop/debug `--edit-all` switch (M9) | yes | T4 |
 | 3 | Planted tank migration on desktop and both Chromecasts: dialog, phone, water-type switch, seed apply | yes (`plant_settings.h`) | T3 |
 | 4 | Baseline migration; delete `SampleSettings2` | no | T2 |
 | 5 | Retire `RP01`, the cooker scripts and `settings-bindings.json` once no level uses them | yes (reader removal) | T2 |
