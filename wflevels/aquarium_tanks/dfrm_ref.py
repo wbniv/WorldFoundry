@@ -86,8 +86,8 @@ def rodrigues(axis, ang, x):
 
 
 def face_normal(p0, p1, p2):
-    """gfx/face.hpi CalculateNormal: (v2 - v0) x (v1 - v0), normalised."""
-    return normalize(cross(sub(p2, p0), sub(p1, p0)))
+    """Blender/gfx/face.hpi: (v1 - v0) x (v2 - v0), normalised."""
+    return normalize(cross(sub(p1, p0), sub(p2, p0)))
 
 
 def hermite(knots, vals, x):

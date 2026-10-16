@@ -82,6 +82,7 @@ def _capture(level_path: Path, png_path: Path) -> None:
             "--frame-step-smoke=30",
             "--cycles=1",
             "-rate20",
+            "--no-fps",
             "-record_video",
             f"--capture-frame={CAPTURE_FRAME}={png_path}",
             f"-L{level_path}",

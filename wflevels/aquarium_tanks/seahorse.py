@@ -40,7 +40,7 @@ ROOT_SLEEVE = .35         # ring 0 starts this far (x its length) inside the tru
 LIMIT_USE = .97           # clips stay inside 97 % of every joint limit
 HEAD_LIMITS = (-20.0, 35.0)   # head pitch, degrees (+ = snout up)
 EYE_LIMITS = (-40.0, 40.0)    # eye yaw, degrees (+ = toward the seahorse's left, +Y)
-MIN_CROSS = 6.1e-5            # vector3.hpi:243: |(v2-v0)x(v1-v0)| must exceed this
+MIN_CROSS = 6.1e-5            # vector3.hpi:243: |(v1-v0)x(v2-v0)| must exceed this
 
 TEXTURE = 'seahorse_atlas.tga'
 ATLAS = 256

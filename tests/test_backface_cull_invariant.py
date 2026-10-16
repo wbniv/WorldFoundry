@@ -135,6 +135,7 @@ def _capture(level_path: Path, png_path: Path, cull: str | None,
             "--frame-step-smoke=30",
             "--cycles=1",
             "-rate20",
+            "--no-fps",
             "-record_video",
             *(extra or []),
             f"--capture-frame={CAPTURE_FRAME}={png_path}",
@@ -254,7 +255,7 @@ def test_cull_is_a_noop_on_shipped_levels(level, tmp_path):
     assert n <= budget, (
         f"{level} frame 20 differs in {n} px between WF_CULL=0 and WF_CULL=1, "
         f"over its accepted residual of {budget} px. Either a face is now being "
-        "culled that should not be (check its winding: the engine's normal is "
-        "(v2-v0)x(v1-v0), and the Blender exporter reverses each loop), or the "
+        "culled that should not be (check its Blender-order winding: the "
+        "engine's normal is (v1-v0)x(v2-v0)), or the "
         "cull test itself changed. Plan: docs/plans/"
         "2026-06-13-planetarium-dome-view-engine-wide-backface-culling.md")

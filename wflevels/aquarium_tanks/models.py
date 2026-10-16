@@ -16,6 +16,12 @@ JELLY_OPACITY = dict(jelly=.22, edge=.32, trail=.12, motif=.72)
 def membrane(name, outline, key, thickness=.028):
     m=Mesh(name)
     # Both faces and the perimeter are closed, so fins stay visible when turning.
+    # CCW in XZ makes the front face point -Y. Mirrored ventral outlines need
+    # the same outward shell order as dorsal outlines.
+    area2 = sum(a[0]*b[1]-b[0]*a[1]
+                for a,b in zip(outline, outline[1:]+outline[:1]))
+    if area2 < 0:
+        outline = list(reversed(outline))
     front=[(x,-thickness/2,z) for x,z in outline]
     back=[(x,thickness/2,z) for x,z in outline]
     m.face(front,key); m.face(list(reversed(back)),key)

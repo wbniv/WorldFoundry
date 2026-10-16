@@ -214,8 +214,8 @@ bool DfrmEvaluator::Bind(const DfrmData& data, const float* rest, int vertexCoun
             _faceMode[f] = FaceSample; _faceIndex[f] = in[0]->index;
             float p0[3], p1[3], p2[3];
             boundRest(*in[0], p0); boundRest(*in[1], p1); boundRest(*in[2], p2);
-            const float ea[3] = {p2[0] - p0[0], p2[1] - p0[1], p2[2] - p0[2]};
-            const float eb[3] = {p1[0] - p0[0], p1[1] - p0[1], p1[2] - p0[2]};
+            const float ea[3] = {p1[0] - p0[0], p1[1] - p0[1], p1[2] - p0[2]};
+            const float eb[3] = {p2[0] - p0[0], p2[1] - p0[1], p2[2] - p0[2]};
             Cross(ea, eb, bound);
             if (Normalize(bound)) n = bound;          // the loaded normal only for a degenerate triangle
             _faceCoeff[3*f] = Dot(n, curve.d); _faceCoeff[3*f+1] = Dot(n, curve.v); _faceCoeff[3*f+2] = Dot(n, curve.s);
@@ -422,8 +422,8 @@ int DfrmEvaluator::Evaluate(const float* block, int n, double now, const float* 
             const float* v0 = &pos[3*_faces[3*f]];
             const float* v1 = &pos[3*_faces[3*f + 1]];
             const float* v2 = &pos[3*_faces[3*f + 2]];
-            const float a[3] = {v2[0] - v0[0], v2[1] - v0[1], v2[2] - v0[2]};
-            const float b[3] = {v1[0] - v0[0], v1[1] - v0[1], v1[2] - v0[2]};
+            const float a[3] = {v1[0] - v0[0], v1[1] - v0[1], v1[2] - v0[2]};
+            const float b[3] = {v2[0] - v0[0], v2[1] - v0[1], v2[2] - v0[2]};
             float nrm[3]; Cross(a, b, nrm);
             if (Normalize(nrm)) std::memcpy(out, nrm, sizeof nrm);   // degenerate: keep the last normal
             break;

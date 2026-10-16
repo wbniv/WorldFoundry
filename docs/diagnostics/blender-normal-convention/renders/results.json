@@ -1,0 +1,90 @@
+[
+  {
+    "level": "dome",
+    "cull": "0",
+    "exit_code": 0,
+    "visible_pixels": 0,
+    "capture": "docs/diagnostics/blender-normal-convention/renders/dome-cull0.png"
+  },
+  {
+    "level": "dome",
+    "cull": "1",
+    "exit_code": 0,
+    "visible_pixels": 0,
+    "capture": "docs/diagnostics/blender-normal-convention/renders/dome-cull1.png"
+  },
+  {
+    "level": "qbert_practice",
+    "cull": "0",
+    "exit_code": 0,
+    "visible_pixels": 9825,
+    "capture": "docs/diagnostics/blender-normal-convention/renders/qbert_practice-cull0.png"
+  },
+  {
+    "level": "qbert_practice",
+    "cull": "1",
+    "exit_code": 0,
+    "visible_pixels": 9825,
+    "capture": "docs/diagnostics/blender-normal-convention/renders/qbert_practice-cull1.png"
+  },
+  {
+    "level": "aquarium_arowana",
+    "cull": "0",
+    "exit_code": 0,
+    "visible_pixels": 297584,
+    "capture": "docs/diagnostics/blender-normal-convention/renders/aquarium_arowana-cull0.png"
+  },
+  {
+    "level": "aquarium_arowana",
+    "cull": "1",
+    "exit_code": 0,
+    "visible_pixels": 297584,
+    "capture": "docs/diagnostics/blender-normal-convention/renders/aquarium_arowana-cull1.png"
+  },
+  {
+    "level": "aquarium_jellyfish",
+    "cull": "0",
+    "exit_code": 0,
+    "visible_pixels": 307200,
+    "capture": "docs/diagnostics/blender-normal-convention/renders/aquarium_jellyfish-cull0.png"
+  },
+  {
+    "level": "aquarium_jellyfish",
+    "cull": "1",
+    "exit_code": 0,
+    "visible_pixels": 307200,
+    "capture": "docs/diagnostics/blender-normal-convention/renders/aquarium_jellyfish-cull1.png"
+  },
+  {
+    "level": "aquarium_plants",
+    "cull": "0",
+    "exit_code": 0,
+    "visible_pixels": 290581,
+    "capture": "docs/diagnostics/blender-normal-convention/renders/aquarium_plants-cull0.png",
+    "vram_page": 512
+  },
+  {
+    "level": "aquarium_plants",
+    "cull": "1",
+    "exit_code": 0,
+    "visible_pixels": 290581,
+    "capture": "docs/diagnostics/blender-normal-convention/renders/aquarium_plants-cull1.png",
+    "vram_page": 512
+  },
+  {
+    "level": "condo_639_640",
+    "cull": "0",
+    "exit_code": 0,
+    "visible_pixels": 307200,
+    "capture": "docs/diagnostics/blender-normal-convention/renders/condo_639_640-cull0.png",
+    "vram_page": 1024
+  },
+  {
+    "level": "condo_639_640",
+    "cull": "1",
+    "exit_code": 0,
+    "visible_pixels": 307200,
+    "capture": "docs/diagnostics/blender-normal-convention/renders/condo_639_640-cull1.png",
+    "vram_page": 1024
+  }
+]

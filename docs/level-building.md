@@ -302,8 +302,28 @@ that use one texture and would otherwise form one draw. Alternating flagged
 and unflagged regions can add draw calls if the experimental selector is
 enabled. Continue to use palette recoloring when the art needs it; the
 production renderer still supports it, and this prototype is **not** enabled
-globally. The proposed next engine step uses the existing palette-capable
-shader for mixed batches and links the extra program only when first needed.
+globally. A later diagnostic selector keeps mixed batches on the existing
+palette-capable shader and links the extra program only for an ordinary opaque
+draw. In five mixed-scene Cast1 pairs it preserved **18 draws/frame** and
+changed median FPS **47.49→47.46**, within run variation. This fallback is
+still isolated from production. [Selector follow-up](https://github.com/wbniv/finding-your-way/blob/main/docs/investigations/2026-10-16-no-palette-selector-follow-up.md).
+
+**Future level opt-in guidance:** A cold first ordinary draw can pause a
+visible scene while the no-palette program is created. In three diagnostic
+Cast1 pairs, a scripted late reveal had a **116.8 ms** worst presented
+interval without prewarm and **50.1 ms** with level-load prewarm. The median
+interval crossing level loading rose **183.5→283.6 ms**; one opted-in run
+reached **417.1 ms**. Treat prewarm as a per-level tradeoff for a known visible
+ordinary opaque batch whose first appearance would otherwise interrupt play.
+Do not request it merely because an asset has ordinary materials: three
+hidden-asset runs showed an unused shader taking **89–99 ms** to create during
+load. In the diagnostic selector, palette recoloring and mixed-batch fallback
+remain available either way. These numbers measure presentation gaps, not a
+steady-FPS gain from prewarm.
+The trial used APK arguments and a menu index; there is **no authored level
+property or production opt-in yet**. A visible palette-only level and an
+intermittent 30 FPS cadence in a nearly empty fixture still need investigation
+before shipping. [Prewarm opt-in report](https://github.com/wbniv/finding-your-way/blob/main/docs/investigations/2026-10-16-no-palette-level-optin.md).
 
 ### Blender Viewport Display by Object Type
 
@@ -463,7 +483,7 @@ and the FSN `filesys` towers (2026-06-12, runtime template + scale). It is one
 rule, not a physics quirk. See also the scale-mailbox note in
 [level-design-troubleshooting.md](level-design-troubleshooting.md#b-runtime-xyz_scale-mailboxes-30403042--visual-only).
 
-### Mesh face winding — author for Blender; the exporter adapts (2026-09-19)
+### Mesh face winding — Blender order in the engine (2026-10-16)
 
 **The renderer has a software backface cull, ON by default** (`WF_CULL=0` opts out; the flip
 landed 2026‑09‑21). A face is kept only if its normal points toward
@@ -472,24 +492,24 @@ terrain), **inward** for interior geometry the player stands inside (rooms, a do
 wrong-way face **vanishes** under culling, and with culling off it is **lit from the wrong side**
 (one-sided lighting), which reads as a flat, unshaded mass.
 
-**The rule is Blender's rule.** The engine computes a face normal as `(v2−v0)×(v1−v0)`
-(`gfx/face.hpi:34`, "reversed for our handedness"), the opposite hand of Blender's
-`(v1−v0)×(v2−v0)`; since 2026-09-19 `export_level.py` reverses each face's loop order on export
-(and back on import) so the two agree. So: if `recalc_face_normals` / "Recalculate Outside" looks
-right in the Blender viewport, it is right in the engine; the standard hand-written box list
+**The rule is Blender's rule.** The engine computes `(v1−v0)×(v2−v0)` from the
+stored `FACE` order. The exporter and importer preserve Blender's loop order.
+If `recalc_face_normals` / "Recalculate Outside" looks right in the Blender
+viewport, it is right in the engine; the standard hand-written box list
 `[(0,3,2,1),(4,5,6,7),(0,1,5,4),(1,2,6,5),(2,3,7,6),(3,0,4,7)]` is an **exterior** box; a dome the
-player stands inside is the one thing that gets `bmesh.ops.reverse_faces`. **Never compensate for
-the engine's hand in a level script** — the pre-2026-09-19 advice to "reverse every tuple" or
-"recalc then reverse" is retired (a script that still does it is now inside-out). Recalc **per
+player stands inside gets `bmesh.ops.reverse_faces`. **Never compensate for
+an engine/exporter hand difference in a level script**; there is no difference
+now. Recalc **per
 closed shell before merging** shells that share vertices, or the recalc flips faces at random.
 A lone open quad has no "outside" for the recalc to find: wind it counter-clockwise as seen from
 its visible side. Verify by A/B-ing `WF_CULL=0` against the default, not by whether a box survives
 (a box keeps its inner faces either way). Genuinely two-sided surfaces (matte, billboards) set the
-material `DOUBLE_SIDED` flag. **Note:** a level authored before the 2026‑09‑19 exporter flip may
-still carry a hand-compensated winding — under the default-on cull it now *vanishes* rather than
-merely shading wrong. Full rules + the `WF_CULL` toggle: [level-design-troubleshooting.md → Mesh face normals & backface culling](level-design-troubleshooting.md#mesh-face-normals--backface-culling).
-Hand-written `.iff` text (no exporter) still needs the engine's hand. Plan:
-[2026-09-19-exporter-face-hand](plans/2026-09-19-exporter-face-hand.md).
+material `DOUBLE_SIDED` flag. Current checked-in models were individually
+reviewed and migrated for this convention; an external `.iff` created for the
+old reversed engine hand needs offline conversion before use. Full rules and
+the `WF_CULL` toggle: [level-design-troubleshooting.md → Mesh face normals & backface culling](level-design-troubleshooting.md#mesh-face-normals--backface-culling).
+Hand-written `.iff` generators use the same Blender winding. Migration:
+[2026-10-16 Blender normal convention](plans/2026-10-16-blender-normal-convention-engine-wide.md).
 
 ---
 

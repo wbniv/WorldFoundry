@@ -19,9 +19,8 @@ Architecture — REUSES Filelight's emitter VERBATIM (no engine code):
 Dome meshes are wound for INWARD normals **in Blender** (toward the player at the
 centre) so they're visible from inside under backface culling — run with WF_CULL=1
 (the dome is the first opt-in consumer; see docs/level-design-troubleshooting.md).
-The exporter reverses each face loop since 2026-09-19, so "inward in Blender" is
-"inward in WF": author for the Blender viewport, never for the engine's
-(v2-v0)x(v1-v0) formula. With culling off (default) they render regardless.
+The exporter preserves Blender's face loops, and the engine computes the same
+(v1-v0)x(v2-v0) normal. With WF_CULL=0 they render from either side.
 
 Run headlessly:
     blender --background --python blender_dome.py
@@ -256,11 +255,9 @@ def spherical_band_geo(R, phi0_deg, phi1_deg, sweep_deg, az_segs=4, el_segs=3):
     radius R. Centred on azimuth 0 so a spawned instance needs only a Z-rotation to
     land on its arc. Wound for INWARD normals **in Blender** (toward the player at
     the centre): the loop order (j+1,i)(j+1,i+1)(j,i+1)(j,i) gives a Blender normal
-    (v1-v0)x(v2-v0) pointing -radial. Since 2026-09-19 the exporter reverses every
-    face loop so Blender-outward is WF-outward
-    (docs/plans/2026-09-19-exporter-face-hand.md), hence Blender-inward here lands
-    as WF-inward and the patch survives WF_CULL from the centre. Author for
-    Blender, not for the engine's (v2-v0)x(v1-v0) formula."""
+    (v1-v0)x(v2-v0) pointing -radial. The exporter stores that loop order and
+    the engine uses the same normal, so the patch survives WF_CULL from the
+    centre."""
     phi0, phi1, sw = map(math.radians, (phi0_deg, phi1_deg, sweep_deg))
     n_th = az_segs + 1
     verts = []

@@ -1,0 +1,52 @@
+[
+  {
+    "level": "dome",
+    "differing_pixels": 0,
+    "bbox": null
+  },
+  {
+    "level": "qbert_practice",
+    "differing_pixels": 0,
+    "bbox": null
+  },
+  {
+    "level": "aquarium_arowana",
+    "differing_pixels": 8,
+    "bbox": [
+      241,
+      224,
+      388,
+      269
+    ]
+  },
+  {
+    "level": "aquarium_jellyfish",
+    "differing_pixels": 13978,
+    "bbox": [
+      0,
+      126,
+      640,
+      344
+    ]
+  },
+  {
+    "level": "aquarium_plants",
+    "differing_pixels": 197,
+    "bbox": [
+      53,
+      294,
+      379,
+      453
+    ]
+  },
+  {
+    "level": "condo_639_640",
+    "differing_pixels": 139,
+    "bbox": [
+      152,
+      65,
+      162,
+      89
+    ]
+  }
+]

@@ -1,0 +1,75 @@
+Start testing: Oct 16 16:31 +07
+----------------------------------------------------------
+3/27 Testing: dfrm_strand
+3/27 Test: dfrm_strand
+Command: "/usr/bin/python3" "/home/will/WorldFoundry-wbniv/.worktrees/blender-normal-convention/wflevels/aquarium_tanks/dfrm_ref.py" "--check" "/home/will/WorldFoundry-wbniv/.worktrees/blender-normal-convention/build-normal-convention/dfrm_strand_test"
+Directory: /home/will/WorldFoundry-wbniv/.worktrees/blender-normal-convention/build-normal-convention
+"dfrm_strand" start time: Oct 16 16:31 +07
+Output:
+----------------------------------------------------------
+material: texture=""  bTranslucent=0  bitdepth=16  flags_in=0x2
+material: texture=""  bTranslucent=0  bitdepth=16  flags_in=0x2
+DFRM: chunk dropped, mesh keeps its rest pose (influence count != vertex count)
+DFRM: chunk dropped, mesh keeps its rest pose (unknown version)
+DFRM: chunk dropped, mesh keeps its rest pose (influence index out of range)
+ok   arc length preserved within 0.1 % on five poses (worst relative error) (1.16e-07)
+ok   coil test turns two full coils unclamped (degrees) (720)
+ok   frames orthonormal within 1e-5 through two coils (worst) (3.58e-07)
+ok   no frame axis flips sign between samples (flips) (0)
+ok   wrapped joints within 0.5 mm (0.005 units) of the analytic circle (worst, units) (0.000269)
+ok   180-degree coil poses (status) (0)
+ok   coiled face normals equal their rotated rest normals within 1e-4 (worst) (1.24e-06)
+ok   no camera-facing face is reported back-facing (count) (0)
+ok   with rest normals some camera-facing faces would be culled (count) (20)
+ok   pitched +15 deg: wrapped joints at one world height (spread, units) (5.96e-08)
+ok   pitched +15 deg: wrap centre within 0.5 mm of the circle's centre (units) (4.61e-08)
+ok   pitched +15 deg: a model-frame lead-in would tilt the coil (spread, units) (0.0327)
+ok   pitched -15 deg: wrapped joints at one world height (spread, units) (8.94e-08)
+ok   pitched -15 deg: wrap centre within 0.5 mm of the circle's centre (units) (1.43e-08)
+ok   pitched -15 deg: a model-frame lead-in would tilt the coil (spread, units) (0.0327)
+ok   linear interpolation between frames (ramp at frame 1.5) (3)
+ok   a clip plays from its start time (ramp at frame 2 after start) (4)
+ok   one-shot holds its last frame (6)
+ok   looping clip wraps (wave at frame 3.5 = frame 0.5) (0)
+ok   looping clip interpolates last -> first (wave at frame 2.5) (2)
+ok   unknown clip id is no clip (0)
+ok   crossfade at w = 0 equals clip A exactly (0)
+ok   crossfade at w = 1 equals clip B exactly (0)
+ok   crossfade midway blends (6 -> 5 at w = .5 is 5.5) (5.5)
+ok   loader drops bad_count.iff: no metadata, rest pose kept (status) (1)
+ok   loader drops bad_version.iff: no metadata, rest pose kept (status) (1)
+ok   loader drops bad_index.iff: no metadata, rest pose kept (status) (1)
+ok   DFRM refused when fin weights exist (status) (2)
+ok   DFRM binds when lion found no rig (status) (0)
+ok   lion and fish refused once DFRM is bound (status) (2)
+ok   non-finite input keeps the previous pose (status) (4)
+ok   too few channels is bad input, pose kept (status) (5)
+info evaluator: 28.3 us per pose alone, 32.2 us through Deform; 925 vertices, 916 faces (this host, Release)
+dfrm_strand unit: PASS
+ok   parity rest[0] max |C++ - Python| = 3.17e-07
+ok   parity branch[0] max |C++ - Python| = 6.49e-07
+ok   parity stem[0] max |C++ - Python| = 3.52e-07
+ok   parity swim[0] max |C++ - Python| = 2.47e-07
+ok   parity probe[0] max |C++ - Python| = 7.97e-07
+ok   parity twine[0] max |C++ - Python| = 3.19e-07
+ok   parity startle[0] max |C++ - Python| = 6.97e-07
+ok   parity clips[0] max |C++ - Python| = 2.81e-07
+ok   parity clips[1] max |C++ - Python| = 1.59e-07
+ok   parity clips[2] max |C++ - Python| = 8.81e-07
+ok   parity clips[3] max |C++ - Python| = 1.23e-06
+ok   parity clips[4] max |C++ - Python| = 5.40e-07
+ok   parity clips[5] max |C++ - Python| = 1.46e-06
+ok   parity clips[6] max |C++ - Python| = 1.46e-06
+ok   parity stem-world+15+0[0] max |C++ - Python| = 3.59e-07
+ok   parity stem-world-15+0[0] max |C++ - Python| = 2.79e-07
+ok   parity twine-world+10+6[0] max |C++ - Python| = 2.92e-07
+dfrm_strand: PASS
+<end of output>
+Test time =   4.61 sec
+----------------------------------------------------------
+Test Passed.
+"dfrm_strand" end time: Oct 16 16:31 +07
+"dfrm_strand" time elapsed: 00:00:04
+----------------------------------------------------------
+
+End testing: Oct 16 16:31 +07
