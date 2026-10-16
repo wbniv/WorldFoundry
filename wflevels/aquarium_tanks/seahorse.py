@@ -58,10 +58,15 @@ CLIP_IDS = {name: i + 1 for i, name in enumerate(sorted(CLIPS))}   # the exporte
 FPS = dc.FPS
 HOLD_FREE = 11            # hold_idle moves rings 0..10 only: a stem wrap (start 16) and its lead-in cover 11..34
 
-# ── level integration (Phase 2: visible and animating; behaviour is Phase 3) ──
-VISIBILITY = 1160         # saltwater, like the urchin
+# ── level integration (Phase 3: behaviour, settings and visibility) ──
+# Pair n (seahorses 2n, 2n+1) shows on PAIR_VISIBILITY[n] when the water is saltwater and the
+# Seahorses setting (Director field 8) is >= n + 1. The posts show with pair 1: None and
+# freshwater hide them too. The urchin keeps 1160.
+PAIR_VISIBILITY = (1162, 1163)
+POST_VISIBILITY = PAIR_VISIBILITY[0]
 BLOCK_BASE, BLOCK_STRIDE = 1200, 100
-SH_INIT, SH_CLOCK = 1240, 1241          # seahorse 0's Forth-only cells (block + 40, + 41)
+GREET_BASE = 1600                       # 1600..1609: shared greeting state and the current-block pointer
+SETTING_COUNT, SETTING_GREETING = 8, 9  # Director fields (settings.oas, "Seahorses" sheet)
 FIN_RATE = 2.2                          # slowed, blurred wave (ours): the real beat is 20-60 Hz
 SAND = .635
 POSTS = [
@@ -71,14 +76,25 @@ POSTS = [
     ('seahorse-branch', (3.00, -.65, SAND - .05), [(2, (0, 0, 0), (0, 0, 3.40), .075, .055),
                                                    (1, (0, 0, 3.00), (1.00, 0, 3.00), .045, .038)]),
 ]
-# sex, position, yaw (radians; 0 faces +X), clip, clip start (level seconds). One pair at each post,
-# in front of the foliage: one of each pair rests (rest_coil), the other swims.
-PLACEMENTS = [
-    ('f', (-3.58, -.95, 3.85), 0.0, 'rest_coil', 0.0),
-    ('m', (-2.55, -1.00, 3.55), math.pi, 'swim', -0.4),
-    ('f', (4.25, -.95, 3.25), math.pi, 'rest_coil', -1.3),        # beyond the arm's end, clear of it
-    ('m', (2.42, -1.00, 3.80), 0.0, 'swim', -0.9),
-]
+# Grip spots (ours): (grip segment, coil-centre height in world z, yaw in turns; 0 faces +X).
+# Vertical segments only. A held seahorse hangs about 0.38 above its coil and stands
+# 0.6 tall, so on the arm (z 3.585) its head would reach the water surface (4.83) and
+# it would have to arrive from above it; the arm stays a pose (seahorse_poses.py).
+# Spots on one side of a post are >= 0.9 apart, so one seahorse's tail never reaches the
+# head below it; the highest head stays under the water surface and the arm.
+SEXES_BY_SEAHORSE = ('f', 'm', 'f', 'm')
+SPOTS = [(0, 2.55, 0.0),     # whip, low: the female's greeting spot
+         (0, 3.30, 0.5),     # whip, far side: the male's greeting spot (tails at offset heights)
+         (0, 3.50, 0.0),     # whip, high
+         (1, 2.50, 0.5),     # trunk, low, under the arm (head below z 3.54)
+         (1, 3.40, 0.0)]     # trunk, high, on the side away from the arm
+GREET_SPOTS = (0, 1)         # female, male
+HOME = (2, 1, 4, 3)          # each seahorse's spot on entry
+FIRST_REST = (20.0, 6.0, 48.0, 34.0)   # seconds each holds before its first swim (staggered)
+GREET_SECONDS = 120.0        # about two minutes on one post (ours)
+SWIM_SPEED = .15             # 1.5 cm/s real x WORLD_SCALE 10 (ours)
+CRUISE_Z = 3.5               # swims stay above the foliage until they near the post
+ENTRY_PROGRESS = .15         # the wrap progress the approach aims the tail tip for
 
 # ── atlas layout (pixels; v = y / 256, as goby.py) ──
 STRIP_X = {'f': 0, 'm': 96}             # body strip and head region columns, 96 px each
@@ -746,21 +762,153 @@ def clips_forth():
     return '\n'.join(out) + '\n'
 
 
+# ── behaviour (Phase 3) ──
+def rig_chunk():
+    """The DFRM chain as dfrm_ref reads it, built from this module's tables and clips
+    (no Blender, no exported file); a test checks it against the exported chunk."""
+    clips, frames = [], []
+    for name in sorted(CLIPS):
+        _dur, loop = CLIPS[name]
+        rows = clip_frames(name)
+        if loop:
+            rows = rows[:-1]                     # the closing key equals the first: the exporter drops it
+        clips.append(dict(first=len(frames), frames=len(rows), fps=float(FPS), loop=loop))
+        frames += rows
+    samples = [dict(length=TAIL_LEN[i], half_width=TAIL_WID[i] / 2, limits=list(TAIL_LIMITS[i])) for i in range(N_TAIL)]
+    transforms = [dict(lo=HEAD_LIMITS[0], hi=HEAD_LIMITS[1]), dict(lo=EYE_LIMITS[0], hi=EYE_LIMITS[1]),
+                  dict(lo=EYE_LIMITS[0], hi=EYE_LIMITS[1])]
+    return dict(curves=[dict(d=[0.0, 0.0, -1.0], v=[1.0, 0.0, 0.0], root=[0.0, 0.0, 0.0], knots=list(KNOTS))],
+                samples=samples, transforms=transforms, frames=frames, clips=clips, influences=[])
+
+
+_RIG = []
+
+
+def rig():
+    if not _RIG:
+        _RIG.append(ref.Rig(rig_chunk(), [], []))
+    return _RIG[0]
+
+
+def wrap_start(radius):
+    """The first wrap start (>= 16, which hold_idle assumes) at which no wrapped ring's
+    lateral holdfast curvature exceeds LIMIT_USE of its limit (a vertical post)."""
+    for start in range(16, N_TAIL - 4):
+        if all(math.degrees(TAIL_LEN[i] / (radius + TAIL_WID[i] / 2)) <= LIMIT_USE * TAIL_LIMITS[i][2]
+               for i in range(start, N_TAIL)):
+            return start
+    raise ValueError(f'post radius {radius} is too thin to grip')
+
+
+def wrap_block(clip, mode, start, radius, progress, clip_start=0.0):
+    block = [0.0] * 40
+    block[21:25] = [float(mode), float(start), radius, progress]
+    block[25], block[26] = float(CLIP_IDS[clip]), clip_start
+    return block
+
+
+def spot(n):
+    """Grip spot n: the axis point on its segment, holdfast radius, wrap start, yaw (turns),
+    and the body-local wrap centre at entry (ENTRY_PROGRESS, on the probe clip's final reach)
+    and when held (progress 1, hold_idle at t = 0), through the reference evaluator."""
+    k, z, yaw = SPOTS[n]
+    mode, a, b, r0, r1 = post_segments()[k]
+    assert mode == 2, 'grip spots are on vertical segments'
+    t = (z - a[2]) / (b[2] - a[2])
+    assert .05 <= t <= .95, (n, t)
+    radius = r0 + (r1 - r0) * t
+    start = wrap_start(radius)
+    entry = ref.evaluate(rig(), wrap_block('probe', 2, start, radius, ENTRY_PROGRESS), CLIPS['probe'][0],
+                         chain_only=True)
+    hold = ref.evaluate(rig(), wrap_block('hold_idle', 2, start, radius, 1.0), 0.0, chain_only=True)
+    return dict(segment=k, axis=(a[0], a[1], z), radius=radius, start=start, yaw=yaw,
+                entry=entry['outputs'][:3], hold=hold['outputs'][:3], hold_velocity=_hold_velocity(start, radius))
+
+
+def _hold_velocity(start, radius, h=.01):
+    """d/dt of the held wrap centre (x, y) at hold_idle t = 0, per second: the Director seeds
+    its extrapolation with it when a seahorse appears."""
+    a, b = (ref.evaluate(rig(), wrap_block('hold_idle', 2, start, radius, 1.0), t, chain_only=True)['outputs']
+            for t in (h, 3.0 - h))      # hold_idle loops at 3 s, so t = -h is t = 3 - h
+    return [(a[k] - b[k]) / (2 * h) for k in range(2)]
+
+
+def body_at(n):
+    """Where a seahorse holding spot n stands (world position of its tail base), and its yaw."""
+    s = spot(n)
+    c, si = math.cos(2 * math.pi * s['yaw']), math.sin(2 * math.pi * s['yaw'])
+    hx, hy, hz = s['hold']
+    ax, ay, az = s['axis']
+    return (ax - (c * hx - si * hy), ay - (si * hx + c * hy), az - hz), s['yaw']
+
+
+def placements():
+    """(sex, position, yaw in radians, clip, clip start) per seahorse: each starts holding its HOME spot."""
+    out = []
+    for s, sex in enumerate(SEXES_BY_SEAHORSE):
+        pos, yaw = body_at(HOME[s])
+        out.append((sex, tuple(round(v, 4) for v in pos), 2 * math.pi * yaw, 'hold_idle', -.7 * s))
+    return out
+
+
+def behaviour_forth(director):
+    """The generated half of the behaviour: spots and settings. The state machine is
+    seahorse_behaviour.fth."""
+    out = ['\\ Seahorse grip spots and settings, generated by seahorse.py (behaviour_forth).',
+           f': sh-director {director} ;',
+           f': sh-spot-count {len(SPOTS)} ;',
+           f': sh-swim-speed {_num(SWIM_SPEED)} ; : sh-cruise-z {_num(CRUISE_Z)} ; : sh-greet-time {_num(GREET_SECONDS)} ;',
+           f': sh-count sh-director {SETTING_COUNT} property@ if else drop 2 then ;',
+           f': sh-greeting sh-director {SETTING_GREETING} property@ if else drop 1 then ;']
+    out.append(': sh-first-rest ( s -- seconds ) ' + ' '.join(f'dup {s} = if drop {_num(v)} exit then' for s, v in enumerate(FIRST_REST[:-1]))
+               + f' drop {_num(FIRST_REST[-1])} ;')
+    out.append(': sh-home ( s -- spot ) ' + ' '.join(f'dup {s} = if drop {n} exit then' for s, n in enumerate(HOME[:-1]))
+               + f' drop {HOME[-1]} ;')
+    rows = [spot(n) for n in range(len(SPOTS))]
+    for name, fn in (('sh-spot ( n -- ax ay az r start yaw )', lambda s: (*s['axis'], s['radius'], s['start'], s['yaw'])),
+                     ('sh-spot-off ( n -- ex ey hx hy hz )', lambda s: (*s['entry'][:2], *s['hold'])),
+                     ('sh-spot-vel ( n -- vx vy )', lambda s: tuple(s['hold_velocity'])),
+                     ('sh-spot-post ( n -- segment )', lambda s: (s['segment'],))):
+        out.append(f': {name}')
+        for n, s in enumerate(rows):
+            vals = ' '.join(_num(v) for v in fn(s))
+            out.append(f'  dup {n} = if drop {vals} exit then' if n < len(rows) - 1 else f'  drop {vals} ;')
+    return '\n'.join(out) + '\n'
+
+
+TRIG_WORDS = ('tk-frac', 'tk-sin', 'tk-cos', 'tk-wrap', 'tk-atan-oct', 'tk-atan2')
+
+
+def forth_definitions(text, names):
+    """The named colon definitions from a Forth source, in the order given."""
+    import re
+    out = []
+    for name in names:
+        m = re.search(r'^: ' + re.escape(name) + r'\s.*?;$', text, re.S | re.M)
+        assert m, name
+        out.append(m.group(0))
+    return '\n'.join(out) + '\n'
+
+
+def behaviour_source(director, here=None):
+    """Everything the Director needs after the posts and clip ids: the shared trig words
+    (controller.fth's; the planted tank's own core lacks them), the generated spots and
+    settings, and the state machine (seahorse_behaviour.fth)."""
+    here = Path(here) if here else Path(__file__).resolve().parent
+    trig = forth_definitions((here / 'controller.fth').read_text(), TRIG_WORDS)
+    return trig + behaviour_forth(director) + (here / 'seahorse_behaviour.fth').read_text()
+
+
 def director_tick(indices):
-    """Phase 2 only: one clip per seahorse through dfrm-pose, and the fins' slowed wave.
-    Runs in the saltwater branch, so hidden seahorses cost nothing."""
-    tick = f' {SH_INIT} tk@ 0 = if'
-    for s, (_sex, _pos, _yaw, clip, start) in enumerate(PLACEMENTS):
-        base = BLOCK_BASE + BLOCK_STRIDE * s
-        tick += f' {CLIP_IDS[clip]} {base + 25} tk! {_num(start)} {base + 26} tk!'
-    tick += f' 1 {SH_INIT} tk! then\n'
-    tick += f' {SH_CLOCK} tk@ tk-dt@ + {SH_CLOCK} tk!\n'
-    for s in range(len(PLACEMENTS)):
-        base = BLOCK_BASE + BLOCK_STRIDE * s
-        body, fin = indices[f'seahorse-{s}-body'], indices[f'seahorse-{s}-fins']
-        tick += (f' {base} {body} dfrm-pose drop {SH_CLOCK} tk@ {_num(FIN_RATE)} * {_num(.31 * s)} +'
-                 f' .022 0 1 {fin} fin-deform\n')
-    return tick
+    """Director tick fragments: (every frame, inside the saltwater branch). Settings and
+    visibility run every frame; each visible pair runs its state machines
+    (body fins sex s sh-tick; sex 0 = female, 1 = male)."""
+    inside = ' shg-tick\n'
+    for pair, mb in enumerate(PAIR_VISIBILITY):
+        calls = ' '.join(f'{indices[f"seahorse-{s}-body"]} {indices[f"seahorse-{s}-fins"]} '
+                         f'{1 if SEXES_BY_SEAHORSE[s] == "m" else 0} {s} sh-tick' for s in (2 * pair, 2 * pair + 1))
+        inside += f' {mb} tk@ if {calls} then\n'
+    return ' sh-settings\n', inside
 
 
 # ── atlas ──

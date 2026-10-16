@@ -263,16 +263,19 @@ if C.KIND=='plants':
         obj['wf_Moves Between Rooms']=True
         obj['wf_Visibility Mailbox']=1160
         urchin_spines.append((obj,index,offset,rest_b,rest_c))
-    # Seahorses (Phase 2): a DFRM body rig and a fin-deform fins actor each, saltwater only.
+    # Seahorses (Phases 2-3): a DFRM body rig and a fin-deform fins actor each, placed holding
+    # their home spots. Pair n shows on PAIR_VISIBILITY[n] (saltwater and the Seahorses
+    # setting); the posts show with pair 1, so None and freshwater hide them too.
     sh_meshes={sex:(seahorse.body(sex),seahorse.fins(sex)) for sex in seahorse.SEXES}
     sh_data={sex:(blender_mesh(b),blender_mesh(f)) for sex,(b,f) in sh_meshes.items()}
     sh_actions=None
-    for s,(sex,pos,yaw,_clip,_start) in enumerate(seahorse.PLACEMENTS):
+    sh_placements=seahorse.placements()
+    for s,(sex,pos,yaw,_clip,_start) in enumerate(sh_placements):
         body=actor(f'seahorse-{s}-body',sh_data[sex][0],pos,mesh_name=f'seahorse_{sex}_body')
         fins=actor(f'seahorse-{s}-fins',sh_data[sex][1],pos,mesh_name=f'seahorse_{sex}_fins')
         for obj in (body,fins):
             obj.rotation_euler=(0,0,yaw)
-            obj['wf_Visibility Mailbox']=seahorse.VISIBILITY
+            obj['wf_Visibility Mailbox']=seahorse.PAIR_VISIBILITY[s//2]
             obj['wf_Moves Between Rooms']=True
         seahorse.add_vertex_groups(body,sh_meshes[sex][0])
         bpy.context.view_layer.update()
@@ -280,7 +283,7 @@ if C.KIND=='plants':
         seahorse_parts.append((body,fins))
     for k,(name,base,_segs) in enumerate(seahorse.POSTS):
         obj=actor(name,seahorse.post_mesh(k),base)
-        obj['wf_Visibility Mailbox']=seahorse.VISIBILITY
+        obj['wf_Visibility Mailbox']=seahorse.POST_VISIBILITY
         obj['wf_Moves Between Rooms']=True
 
 if FEEDING:
@@ -496,17 +499,18 @@ if C.KIND=='plants':
     # Player input does not need the Director's feet/spine pose definitions.
     plant_player_core = core
     pose=setup=''
-    tick=": tk-director-tick\n pg-salt dup 1160 tk! not 1161 tk! tk-camera-tick\n pg-salt if INDEXOF_X_POS tk-player read-actor-mailbox INDEXOF_Y_POS tk-player read-actor-mailbox INDEXOF_Z_POS tk-player read-actor-mailbox uf-begin\n"
+    sh_every,sh_salt=seahorse.director_tick(indices)
+    tick=": tk-director-tick\n pg-salt dup 1160 tk! not 1161 tk! tk-camera-tick\n"+sh_every+" pg-salt if INDEXOF_X_POS tk-player read-actor-mailbox INDEXOF_Y_POS tk-player read-actor-mailbox INDEXOF_Z_POS tk-player read-actor-mailbox uf-begin\n"
     for k,(obj,offset) in enumerate(urchin_feet):
         tick+=f' {num(offset[0])} {num(offset[1])} {num(.017+.0014*k)} {k} {indices[obj.name]} uf-foot\n'
     core+=(COMMON/'urchin_motion.fth').read_text()
     core+=(COMMON/'urchin_spines.fth').read_text()
     posts_forth=seahorse.posts_forth()
     (HERE/'seahorse_posts.fth').write_text(posts_forth)
-    core+=posts_forth+seahorse.clips_forth()
+    core+=posts_forth+seahorse.clips_forth()+seahorse.behaviour_source(indices['Director'],COMMON)
     for k,(obj,index,offset,rest_b,rest_c) in enumerate(urchin_spines):
         tick+=f' {num(offset[0])} {num(offset[1])} {num(offset[2])} {num(rest_b)} {num(rest_c)} {num(4.1+k*.41)} {1 if k%2==0 else -1} {k} {indices[obj.name]} us-spine\n'
-    tick+=seahorse.director_tick(indices)
+    tick+=sh_salt
     tick+=' else\n'
     for obj in goby_parts:
         index=indices[obj.name]
@@ -536,12 +540,19 @@ if C.KIND=='arowana':
     lionfish_rig=({'parts':1,'regions':lionfish_model.REGIONS,'triangles':sum(len(f)-2 for f in meshes[0].faces),
                   'palette_seed':0,'palettes':[lionfish_model.palette_for(0,k) for k in range(COUNT)],
                   'shared_textures':['lionfish_body.tga','lionfish_fins.tga'],'fin_opacity':.55} if LION_RIG else None),
-    seahorses=(dict(visibility=seahorse.VISIBILITY,block_base=seahorse.BLOCK_BASE,block_stride=seahorse.BLOCK_STRIDE,
-                    block_cells=40,forth_cells=[seahorse.SH_INIT,seahorse.SH_CLOCK],clips=seahorse.CLIP_IDS,
+    seahorses=(dict(pair_visibility=list(seahorse.PAIR_VISIBILITY),post_visibility=seahorse.POST_VISIBILITY,
+                    block_base=seahorse.BLOCK_BASE,block_stride=seahorse.BLOCK_STRIDE,
+                    block_cells=40,forth_cells=[40,99],greeting_state=[seahorse.GREET_BASE,seahorse.GREET_BASE+9],
+                    settings=dict(count=dict(field=seahorse.SETTING_COUNT,values=['None','1 pair','2 pairs'],default=2),
+                                  greeting=dict(field=seahorse.SETTING_GREETING,default=1)),
+                    states=['hold','release','swim','probe','grasp','strike','greet'],behaviour='seahorse_behaviour.fth',
+                    spots=[dict(spot=n,**{k:(list(v) if isinstance(v,(list,tuple)) else v) for k,v in seahorse.spot(n).items()})
+                           for n in range(len(seahorse.SPOTS))],
+                    home_spots=list(seahorse.HOME),greet_spots=list(seahorse.GREET_SPOTS),clips=seahorse.CLIP_IDS,
                     texture=seahorse.TEXTURE,
                     actors=[dict(seahorse=s,sex=sex,body=indices[f'seahorse-{s}-body'],fins=indices[f'seahorse-{s}-fins'],
                                  block=seahorse.BLOCK_BASE+seahorse.BLOCK_STRIDE*s,position=list(pos),yaw=yaw,clip=clip,clip_start=start)
-                            for s,(sex,pos,yaw,clip,start) in enumerate(seahorse.PLACEMENTS)],
+                            for s,(sex,pos,yaw,clip,start) in enumerate(sh_placements)],
                     posts=[dict(name=name,actor=indices[name],base=list(base),mesh=name.replace('-','_')+'.iff') for name,base,_segs in seahorse.POSTS],
                     grip_segments=[dict(mode=m,start=list(a),end=list(b),radius=[r0,r1]) for m,a,b,r0,r1 in seahorse.post_segments()],
                     forth_include='seahorse_posts.fth') if C.KIND=='plants' else None),

@@ -12,4 +12,8 @@ TYPEHEADER(PlantedTankSettings)
     TYPEENTRYBOOLEAN(Sway,,1,SHOW_AS_CHECKBOX,"Enable plant sway on Apply")
     TYPEENTRYBOOLEAN(Random seed on entry,,1,SHOW_AS_CHECKBOX,"Authored entry policy; disable to use the authored Seed deterministically")
     PROPERTY_SHEET_FOOTER
+    PROPERTY_SHEET_HEADER(Seahorses,0)
+    TYPEENTRYINT32(Seahorses,,0,2,2,"None|1 pair|2 pairs",SHOW_AS_RADIOBUTTONS,"Saltwater only: how many seahorse pairs live in the tank")
+    TYPEENTRYBOOLEAN(Greeting,,1,SHOW_AS_CHECKBOX,"Saltwater only: pairs meet on one post for about two minutes")
+    PROPERTY_SHEET_FOOTER
 TYPEFOOTER

@@ -84,7 +84,7 @@ def test_two_actors_per_seahorse_and_four_seahorses(mapping):
         names = sorted(n for n in mapping['indices'] if n.startswith(f'seahorse-{s}-'))
         assert names == [f'seahorse-{s}-body', f'seahorse-{s}-fins']
         assert a['block'] == 1200 + 100 * s
-    assert sea['visibility'] == 1160
+    assert sea['pair_visibility'] == [1162, 1163] and sea['post_visibility'] == 1162     # Phase 3
 
 
 def test_35_tail_rings_and_11_trunk_rings():
@@ -265,17 +265,19 @@ def test_level_places_the_seahorses_in_saltwater_with_dfrm_blocks(mapping):
     for a in sea['actors']:
         for part in ('body', 'fins'):
             obj = f"seahorse-{a['seahorse']}-{part}"
-            assert field(obj, 'Visibility Mailbox').startswith('1160'), obj
+            assert field(obj, 'Visibility Mailbox').startswith(str(1162 + a['seahorse'] // 2)), obj
             assert field(obj, 'Mesh Name') == f'"seahorse_{a["sex"]}_{part}.iff"'
     for post in sea['posts']:
-        assert field(post['name'], 'Visibility Mailbox').startswith('1160')
-    director = lev[lev.index('tk-director-tick'):]
+        assert field(post['name'], 'Visibility Mailbox').startswith('1162')
+    # Phase 3: the Director runs each visible pair's state machines (seahorse_behaviour.fth).
+    director = lev[lev.index(': tk-director-tick'):]
     for a in sea['actors']:
-        assert f"{a['block']} {a['body']} dfrm-pose drop" in director
-        assert f"{sh.CLIP_IDS[a['clip']]} {a['block'] + 25} tk!" in director
-        assert f" {a['fins']} fin-deform" in director
-    assert sorted(a['clip'] for a in sea['actors']) == ['rest_coil', 'rest_coil', 'swim', 'swim']
+        sex = 1 if a['sex'] == 'm' else 0
+        assert f"{a['body']} {a['fins']} {sex} {a['seahorse']} sh-tick" in director
+    assert ' sh-settings' in director and ' shg-tick' in director
+    assert all(a['clip'] == 'hold_idle' for a in sea['actors'])        # each starts holding its home spot
     # The seahorse blocks stay clear of every other mailbox the tank uses.
-    used = set(range(600, 640)) | {747, 748, 1160, 1161} | set(range(800, 968)) | set(range(1000, 1112))
+    used = set(range(600, 640)) | {747, 748, 1160, 1161, 1162, 1163} | set(range(800, 968)) | set(range(1000, 1112)) \
+        | set(range(1140, 1160)) | set(range(1600, 1610))
     blocks = {m for a in sea['actors'] for m in range(a['block'], a['block'] + 100)}
     assert not used & blocks and max(blocks) < 1900

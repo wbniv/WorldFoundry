@@ -13,17 +13,18 @@ ROOT=Path(__file__).resolve().parents[1]
 HERE=ROOT/'wflevels/aquarium_plants'
 MARKER=b'PLANTS settings-source=%s seed=%u water=%s age='
 FIELDS={'seed':'Seed','water':'Water type','age':'Initial age','speed':'Growth speed',
-        'textures':'Textures','sway':'Sway','random_entry':'Random seed on entry'}
+        'textures':'Textures','sway':'Sway','random_entry':'Random seed on entry',
+        'seahorses':'Seahorses','greeting':'Greeting'}
 
 def validate(options):
     if set(options)-set(FIELDS):raise ValueError('Unknown plant configuration key')
-    result=dict(seed=0,water='freshwater',age=0,speed=3,textures=True,sway=True,random_entry=True)
+    result=dict(seed=0,water='freshwater',age=0,speed=3,textures=True,sway=True,random_entry=True,seahorses=2,greeting=True)
     result.update(options)
-    for key,maximum in [('seed',4294967295),('speed',6)]:
+    for key,maximum in [('seed',4294967295),('speed',6),('seahorses',2)]:
         if type(result[key]) is not int or not 0<=result[key]<=maximum:raise ValueError('Invalid '+key)
     if type(result['age']) not in (int,float) or not math.isfinite(result['age']) or not 0<=result['age']<=240:raise ValueError('Invalid age')
     if result['water'] not in ('freshwater','saltwater'):raise ValueError('Invalid water')
-    for key in ['textures','sway','random_entry']:
+    for key in ['textures','sway','random_entry','greeting']:
         if type(result[key]) is not bool:raise ValueError('Invalid '+key)
     # Providing a seed is deterministic unless random entry is explicitly chosen.
     if 'seed' in options and 'random_entry' not in options:result['random_entry']=False
