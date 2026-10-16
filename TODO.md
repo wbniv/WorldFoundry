@@ -62,7 +62,6 @@
 - [T2] **`wflevels/cd_full.iff.txt` is stale — won't build against current level files.** References nonexistent `/tmp/L*_*.iff` paths and bare-includes `[ "snowgoons.iff" ]` at the `L4` slot **with no `{ 'L4' … }` wrapper** — but snowgoons roots at `LVAS`, so the binding has nothing to resolve. Regenerate to the wrapper form (cf. the correct `cd_snowgoons.iff.txt`) or delete it.
 - [T5] **Consider 8-byte alignment in the IFF file format itself.** Chunks are 4-byte aligned (`iff/iffread.cc:55`); on 64-bit hosts every chunk with a pointer/`int64`/`double` payload lands 4-aligned-but-not-8. Bumping to 8 lets consumers read native types without copy. Tradeoff: re-emit all `cd*.iff` + standalone `.iff`s (cheap via Rust tools), audit reader sites. Worth doing alongside a future asset-pipeline bump; low priority alone.
 - [T3] **BaseObject 2003 extraction.** [plan](docs/plans/2026-05-30-baseobject-2003-extraction.md)
-- [wip T3] **Run Blender asset generation in a container.** Every tank's `build.sh` runs host `blender --background …/generate.py`, the one build step still on the host; Will wants it containerised like engine builds (2026-10-16). Pin a Blender version in an image (or a layer of `docker/Dockerfile.linux-test`), install the `wf_blender` add-on, route the level build scripts through `scripts/in-linux-container.sh`, and prove the regenerated `.iff`/`.lvl` files are byte-identical to the host build for every level. Rank T3: multi-file infra with a clear goal; version pinning and the byte-identical check need care. Needs a plan first. <!-- agent:ac92094d13b63cb4c -->
 
 ### Naming & Hygiene
 
@@ -164,6 +163,7 @@
 
 ## Done
 
+- ✅ 2026-10-16 — [blender-container] Level builds run in wf-blender:local (Foundry Linux blender, snapshot-pinned); 7 tanks byte-identical. See [plan](docs/plans/2026-10-16-blender-in-container.md).
 - ✅ 2026-10-16 — [species-movement-test] Test VM reads engine words from source, stubs 173/177–182; urchin runs saltwater. See [plan](docs/plans/2026-10-16-saltwater-seahorses.md).
 - ✅ 2026-10-16 — [seahorses-phase2] H. reidi model, 35-ring DFRM tail, 8 clips, posts; 4 seahorses animate in the saltwater tank. See [plan](docs/plans/2026-10-16-saltwater-seahorses.md).
 - ✅ 2026-10-16 — [texture-slot-overflow] Release heap overflow loading 512-wide lionfish/plants textures: slot check now in every build + 4 ctests. See [BUGS.md](docs/BUGS.md). <!-- fp:fc5673e67a6dc68d -->

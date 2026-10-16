@@ -1,5 +1,6 @@
 | Date | Change |
 |------|--------|
+| [2026-10-16](https://github.com/wbniv/WorldFoundry/commit/01d360f3) | Record seahorse plan decisions D2, D4, D6 and index the plan |
 | [2026-10-09](https://github.com/wbniv/WorldFoundry/commit/cc151d2a) | Verify inactive-source actor teleports on both Chromecasts |
 | [2026-10-09](https://github.com/wbniv/WorldFoundry/commit/280a1fb2) | Repair cross-room teleports from inactive source rooms |
 | [2026-10-09](https://github.com/wbniv/WorldFoundry/commit/ffe4f94b) | Record cross-room teleport audit and Chromecast verification |
@@ -58,6 +59,11 @@
 | [2026-06-26](https://github.com/wbniv/WorldFoundry/commit/16d72fa6) | docs: add plan index (docs/plans/README.md) |
 
 <!--history-meta v1
+01d360f3	author	Will Norris
+01d360f3	added	1
+01d360f3	deleted	0
+01d360f3	files	1
+01d360f3	body	Will accepted the remaining recommendations on 2026-10-16: H. reidi,\nauthored hitching posts, and Deformer phase 2 after the seahorses ship.\nRetitle for the 2-pair default and add the plan's row to the index.\n\nCo-Authored-By: Claude Opus 5.5 <noreply@anthropic.com>\nClaude-Session: https://claude.ai/code/session_01T3gB59hNsFhWnCTTKHc1yk
 cc151d2a	author	Will Norris
 cc151d2a	added	1
 cc151d2a	deleted	1
