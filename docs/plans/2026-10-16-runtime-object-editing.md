@@ -16,7 +16,7 @@
 
 | M6 | **Labels:** automatic at export (the type's display name plus an ordinal, e.g. "Seahorse 2"). An optional **Editor Label** in `actor.inc` (`XDATA_COPY`) overrides it. Labels must be unique within a level, or the build fails. |
 | M7 | **Editability is automatic at export:** an object is editable exactly when its type declares at least one live field. No per-instance flag. Add an opt-out only if a picker ever gets crowded. |
-| M8 | **Live fields are declared in the OAS** with a `SHOW_AS_LIVE` modifier bit (0x40), following the `SHOW_AS_VECTOR` (0x80) pattern. A type with live fields implements one change hook, and every live field has a test proving an edit takes effect. Non-live fields show read-only. |
+| M8 | **Live fields are declared in the OAS** with a `SHOW_AS_LIVE` modifier bit (0x40), following the `SHOW_AS_VECTOR` (0x80) pattern. A type with live fields implements one change hook, and every live field has a test proving an edit takes effect. Non-live fields show read-only. **The UI never prints "live":** editable fields carry no marker; read-only fields are dimmed and show a padlock icon (Will, 2026‑10‑16). |
 
 **Open:**
 
@@ -82,11 +82,11 @@ flowchart LR
 6. **Live fields (M8):**
     - **Declared.** A field is live when its OAS entry adds `SHOW_AS_LIVE` to its show-as (e.g. `SHOW_AS_SLIDER|SHOW_AS_LIVE`). Liveness can't be inferred from the data: it means the engine re-reads the field after construction, which is a property of engine code.
     - **Honoured.** A type with live fields implements `OnPropertiesChanged(changedFields)` on its actor class. Apply writes the overlay, then calls the hook, which re-reads what the type uses. The planted tank already re-reads Water type and Growth speed every tick, so its hook is nearly empty; a changed Seed triggers a regenerate.
-    - **Enforced.** Every live field has a test that edits it, applies, and checks the effect, so a field marked live that does nothing fails the build. Fields without the bit show read-only, with "applies on level entry".
+    - **Enforced.** Every live field has a test that edits it, applies, and checks the effect, so a field marked live that does nothing fails the build. Fields without the bit are read-only: dimmed, with a padlock icon and no text tag. Editable fields carry no marker at all, and the word "live" never appears in the UI. The TV form draws the padlock from its rectangle primitives if its font has no lock character.
 7. **UI, kept:**
     - The 2026‑10‑06 host, TV form and phone form remain.
     - The picker lists the `LevelObj` Editable Objects by label. A level with one editable object opens its form directly, as today.
-    - The form is built from the object type's `.oad`: labels, help, ranges, choices, show-as. Fields without `SHOW_AS_LIVE` are read-only.
+    - The form is built from the object type's `.oad`: labels, help, ranges, choices, show-as. Fields without `SHOW_AS_LIVE` are read-only, dimmed, with a padlock icon.
 8. **Scripts:** `property@ ( actor field -- value valid )` keeps its signature. It now reads the overlay struct, with field = descriptor index.
 9. **Migration:**
     - **Planted tank:** a `PlantedTankSettings` actor joins the level. `planted::State` reads its struct and `syncProperties` goes. The `settings-catalog.inc` include leaves the engine, and `settings-bindings.json` and the level's `RPRP` are removed.
@@ -108,11 +108,11 @@ flowchart LR
 
 ## Mockups
 
-[![Picker with automatic and overridden labels, form with live and read-only fields, phone, export error](2026-10-16-runtime-object-editing/editor.png)](2026-10-16-runtime-object-editing/editor.html)
+[![Picker with automatic and overridden labels, form with editable and padlocked read-only fields, phone, export error](2026-10-16-runtime-object-editing/editor.png)](2026-10-16-runtime-object-editing/editor.html)
 
 It shows:
 - the TV picker listing editable objects by automatic label ("Seahorse 2") and an override ("Goldie");
-- the Planted Tank Settings form, built from its `.oad`, with Initial age read-only because it isn't live;
+- the Planted Tank Settings form, built from its `.oad`, with Initial age dimmed and padlocked (read-only) and no marker on the editable fields;
 - the same form on the phone;
 - the export failing on a duplicate label.
 
