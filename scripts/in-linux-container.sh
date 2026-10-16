@@ -32,8 +32,15 @@ fi
 mkdir -p "$root/build-docker"
 cpus=()
 [ -n "${WF_CONTAINER_CPUS:-}" ] && cpus=(--cpus "$WF_CONTAINER_CPUS")
+# Files must come out owned by the calling user. A rootful daemon maps container
+# uids 1:1, so run as $(id -u). A rootless daemon maps container uid 0 to the
+# calling user and every other uid to an unprivileged sub-uid that cannot write
+# the bind mounts, so there the calling user is --user 0:0.
+user=(--user "$(id -u):$(id -g)")
+security="$(docker info --format '{{.SecurityOptions}}' 2>/dev/null || true)"
+case "$security" in *rootless*) user=(--user 0:0) ;; esac
 exec docker run --rm \
-    --user "$(id -u):$(id -g)" \
+    "${user[@]}" \
     --ulimit core=0 --memory "${WF_CONTAINER_MEMORY:-12g}" "${cpus[@]}" \
     -v "$root":/src -v "$root/build-docker":/build -w /src \
     "$image" "$@"
