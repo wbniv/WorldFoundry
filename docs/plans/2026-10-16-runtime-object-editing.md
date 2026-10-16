@@ -183,6 +183,20 @@ It shows:
 **Phase P (3D object picker):** each step records its screenshots under `docs/plans/2026-10-16-runtime-object-editing/evidence/picker/` and embeds them here.
 
 9. Unit tests pass for the projection, the arrow-direction choice (synthetic layouts: a row, a column, a diagonal, behind-camera, off-screen), the 12 px same-spot grouping, and the mouse ray pick: `scripts/in-linux-container.sh ctest --test-dir /build/sh -R object_picker --output-on-failure`.
+
+    ```
+    $ scripts/in-linux-container.sh ctest --test-dir /build/sh -R object_picker --output-on-failure
+    Internal ctest changing into directory: /build/sh
+    Test project /build/sh
+        Start 7: object_picker
+    1/1 Test #7: object_picker ....................   Passed    0.00 sec
+
+    100% tests passed, 0 tests failed out of 1
+
+    Total Test time (real) =   0.01 sec
+    ```
+
+    **PASS** (2026‑10‑16, Release `/build/sh` on `object-picker-3d`). The test is `tests/object_picker_test.cc` against `engine/object_picker.hpp`; it also covers the ±60° cone edge (50° in, 70° out) and the 12 px threshold (11.5 px grouped, 13 px apart).
 10. **Desktop screenshots**, baseline level, Release build in the container under Xvfb:
     - (a) the chooser with **Pick in 3D** first;
     - (b) pick mode with the first highlight;
@@ -192,5 +206,80 @@ It shows:
     - (f) mouse hover, if the HAL exposes a cursor.
 
     All are captured by a scripted run, e.g. `wf_game --frame-step-smoke` with injected keys.
+
+    ```
+    $ scripts/in-linux-container.sh /build/desktop-capture.sh /src/docs/plans/2026-10-16-runtime-object-editing/evidence/picker
+    captured /src/docs/plans/2026-10-16-runtime-object-editing/evidence/picker/a-chooser.png
+    captured /src/docs/plans/2026-10-16-runtime-object-editing/evidence/picker/b-pick.png
+    captured /src/docs/plans/2026-10-16-runtime-object-editing/evidence/picker/c-after-right.png
+    captured /src/docs/plans/2026-10-16-runtime-object-editing/evidence/picker/d1-same-spot.png
+    captured /src/docs/plans/2026-10-16-runtime-object-editing/evidence/picker/d2-short-list.png
+    captured /src/docs/plans/2026-10-16-runtime-object-editing/evidence/picker/e-nothing-in-view.png
+    ```
+
+    The script is `tests/picker_screenshots.py`, run under Xvfb in the container. It drives Release `wf_game -Lwflevels/baseline-standalone.iff` with injected joystick input over the debug bridge: hold OK 1.4 s, OK, →, OK. A second session moves the player to (40, 40) first, so the follow camera faces away from the owners.
+
+    (a) The chooser, with Pick in 3D first and highlighted:
+    <img src="2026-10-16-runtime-object-editing/evidence/picker/a-chooser.png" width="700">
+
+    (b) Pick mode. The first highlight is Baseline settings 2, the gear nearest the centre:
+    <img src="2026-10-16-runtime-object-editing/evidence/picker/b-pick.png" width="700">
+
+    (c) After →, the highlight moves to the next object to the right:
+    <img src="2026-10-16-runtime-object-editing/evidence/picker/c-after-right.png" width="700">
+
+    (d) That object is the shared bracket "2 objects here" (`d1-same-spot.png`, the same frame as (c)). OK on it opens the short list of just those two:
+    <img src="2026-10-16-runtime-object-editing/evidence/picker/d2-short-list.png" width="700">
+
+    (e) The camera is turned away:
+    <img src="2026-10-16-runtime-object-editing/evidence/picker/e-nothing-in-view.png" width="700">
+
+    (f) **Not captured.** The desktop HAL exposes no cursor: `gfx/gl/mesa.cc` selects `ButtonPress` but not pointer motion, and only `printf`s the button. The ray pick (`wfpick::cursorRay`, `wfpick::rayPick`, `Host::pickHover`) is implemented and unit-tested in step 9, but no HAL input is wired to it.
+
+    **PASS** for (a) to (e). (f) is not applicable, because the HAL has no cursor.
 11. **Chromecast 1 screenshots** through the coordinator, on the baseline level: the chooser with the option, pick mode with a highlight, and the highlight after an arrow press from the phone's D-pad. The release is reinstalled afterwards and its hash verified.
+
+    **NOT RUN (escalated).** No coordinator workflow can reach pick mode under owned-job rules:
+    - `press` sends at most 20 key taps, and none of them can hold OK.
+    - Opening the chooser needs a one-second held OK, or the phone's `r:open`. Only reviewed validators do either (for example `baseline_checks.py` with `held_key` and `Phone`), and they live in the separate `chromecast-coordinator` repository.
+
+    A new reviewed validator is needed, for example `baseline-picker`:
+    1. hold OK and capture the chooser;
+    2. press OK and capture pick mode;
+    3. send `r:<session>:move:right` from the phone and capture the moved highlight.
+
+    No APK was built and no device job was submitted, so there was nothing to restore. The existing `baseline-settings` validator will now fail its `stable_two_owner_picker` assertion, because the plan's fixture has three owners. It also opens the first owner after DOWN, because row 0 is Pick in 3D. That validator needs the same update.
 12. The existing settings checks still pass: single-owner direct open (planted tank), apply/cancel, phone reconnect, Back/Home/resume.
+
+    ```
+    $ scripts/in-linux-container.sh python3 -m pytest -q -p no:cacheprovider tests/test_runtime_property_host.py tests/test_object_properties.py tests/test_plant_runtime.py tests/test_plant_phone.py tests/test_plant_catalog.py tests/test_runtime_options.py
+    FAILED tests/test_runtime_property_host.py::test_phone_picker_isolation_fractional_values_and_reconnect
+    FAILED tests/test_plant_phone.py::test_complete_phone_settings_and_reconnection
+    FAILED tests/test_plant_phone.py::test_generic_colour_and_text_transactions
+    3 failed, 28 passed in 124.61s (0:02:04)
+    ```
+
+    The three failures are `ModuleNotFoundError: No module named 'playwright'`, because the container image has no Playwright. Those three Playwright phone tests were run on the host:
+
+    ```
+    $ python3 -m pytest -q -p no:cacheprovider tests/test_runtime_property_host.py tests/test_plant_phone.py
+    ....                                                                     [100%]
+    4 passed in 44.40s
+    ```
+
+    The desktop baseline checks and engine smoke tests, in the container under Xvfb:
+
+    ```
+    $ python3 wflevels/baseline/verify.py --desktop
+    146 of 146 checks passed
+    $ ctest --test-dir /build/sh -R "object_picker|wf_game_smoke"
+    100% tests passed, 0 tests failed out of 9
+    ```
+
+    **PASS** on desktop. The 31 tests cover:
+    - single-owner direct open (the host test and the planted-tank harness);
+    - apply and cancel;
+    - phone reconnect, through the real phone transport in Playwright;
+    - the host's new Pick in 3D cases: first highlight, arrows, the same-spot group, Back from group to scene to list to closed, nothing in view, no camera, and the phone verbs.
+
+    Back/Home/resume is an Android lifecycle check and needs the device, so it is **not run**; see step 11.
