@@ -30,6 +30,8 @@
 // (head pitch, eye L yaw, eye R yaw) deg, added to the clips'. Outputs, written
 // by the caller: 33-35 wrap centre, 36-38 tail tip (model units), 39 status.
 // A clip id is its 1-based index in the clip table; 0 or unknown = no clip.
+// A vertical holdfast (wrap mode 2) is world-vertical: the lead-in turns the
+// tail horizontal in world space, using the actor's rotation from the caller.
 //============================================================================
 #ifndef WF_DFRM_DEFORM_H
 #define WF_DFRM_DEFORM_H
@@ -83,7 +85,8 @@ public:
     // One frame. block holds n >= DfrmInputCount cells. On DfrmOk or
     // DfrmClamped, Positions(), FaceNormals() and Outputs() hold the new pose;
     // on any other status they keep the previous one (no partial pose).
-    int Evaluate(const float* block, int n, double now);
+    // worldRotation: 9 floats, row i = model axis i in world (NULL = model frame).
+    int Evaluate(const float* block, int n, double now, const float* worldRotation = nullptr);
 
     const std::vector<float>& Positions() const { return _positions; }
     const std::vector<float>& FaceNormals() const { return _normals; }

@@ -135,7 +135,17 @@ class Rig:
         return [self.rest_joints[i][k] + a * self.d0[k] + b * self.v0[k] + c * self.s0[k] for k in range(3)]
 
 
-def evaluate(rig: Rig, block, now):
+def world_rotation(pitch=0.0, roll=0.0):
+    """An actor's world rotation as the engine passes it: 9 floats, row i = model
+    axis i in world. Pitch turns about the model's side axis (Y), roll about X."""
+    p, r = math.radians(pitch), math.radians(roll)
+    ry = [[math.cos(p), 0, math.sin(p)], [0, 1, 0], [-math.sin(p), 0, math.cos(p)]]
+    rx = [[1, 0, 0], [0, math.cos(r), -math.sin(r)], [0, math.sin(r), math.cos(r)]]
+    m = [[sum(rx[i][k] * ry[k][j] for k in range(3)) for j in range(3)] for i in range(3)]
+    return [m[j][i] for i in range(3) for j in range(3)]   # columns (axis images) as rows
+
+
+def evaluate(rig: Rig, block, now, world=None):
     c = rig.c
     S, T = c['samples'], c['transforms']
     n, nt = len(S), len(T)
@@ -190,8 +200,22 @@ def evaluate(rig: Rig, block, now):
     start = min(float(n), max(0.0, block[22]))
     s = n - (n - start) * progress
     if wrapping and mode == 2:
+        # World-vertical post: flex phi makes d horizontal with v up when
+        # d0.u cos phi + v0.u sin phi = 0 and v.u > 0 (u = world up in model axes).
+        pitch = rig.pitch
+        if world is not None:
+            u = normalize([world[2], world[5], world[8]])
+            if u:
+                a, cc = dot(rig.d0, u), dot(rig.v0, u)
+                if a * a + cc * cc > 1e-8:
+                    phi = math.degrees(math.atan2(cc, a)) - 90
+                    while phi > 180:
+                        phi -= 360
+                    while phi <= -180:
+                        phi += 360
+                    pitch = phi - 90
         i0 = max(0, int(math.floor(s)) - 5)
-        acc = -rig.pitch + sum(F[:i0])
+        acc = -pitch + sum(F[:i0])
         per, w = (90 - acc) / 5, min(1.0, progress * 4)
         for i in range(i0, min(n, i0 + 5)):
             F[i] = F[i] * (1 - w) + per * w
@@ -431,7 +455,8 @@ def write_files(out: Path):
 def run_eval(binary, mesh: Path, blocks):
     """BINARY --eval MESH BLOCKS -> one result per block line."""
     bpath = mesh.with_suffix('.blocks')
-    bpath.write_text(''.join(' '.join(repr(float(x)) for x in [now] + list(b)) + '\n' for now, b in blocks))
+    bpath.write_text(''.join(' '.join(repr(float(x)) for x in [e[0]] + list(e[1]) + (list(e[2]) if len(e) > 2 else []))
+                             + '\n' for e in blocks))
     out = subprocess.run([str(binary), '--eval', str(mesh), str(bpath)], check=True, capture_output=True, text=True).stdout
     results, cur = [], None
     for line in out.splitlines():
@@ -480,6 +505,11 @@ def check(binary: Path) -> int:
             b[30], b[31], b[32] = 5.0, -3.0, 50.0
             seq.append((now, b))
         cases.append(('clips', pos, faces, payload, seq))
+        # Vertical posts are world-vertical: the same poses on a pitched and rolled actor.
+        for name, pitch, roll in (('stem', 15.0, 0.0), ('stem', -15.0, 0.0), ('twine', 10.0, 6.0)):
+            pos, faces, payload = strand(pitch=PRESETS[name][1])
+            cases.append((f'{name}-world{pitch:+g}{roll:+g}', pos, faces, payload,
+                          [(0.0, preset_block(name), world_rotation(pitch, roll))]))
         for name, pos, faces, payload, blocks in cases:
             mesh = tmp / f'{name}.iff'
             mesh.write_bytes(modl(pos, faces, payload))
@@ -489,8 +519,9 @@ def check(binary: Path) -> int:
                 print(f'FAIL {name}: {len(got)} results for {len(blocks)} blocks')
                 failures += 1
                 continue
-            for step, ((now, block), result) in enumerate(zip(blocks, got)):
-                err, worst = compare(f'{name}[{step}]', result, evaluate(rig, block, now))
+            for step, (entry, result) in enumerate(zip(blocks, got)):
+                now, block, *world = entry
+                err, worst = compare(f'{name}[{step}]', result, evaluate(rig, block, now, world[0] if world else None))
                 print(('FAIL ' + err) if err else f'ok   parity {name}[{step}] max |C++ - Python| = {worst:.2e}')
                 failures += bool(err)
         write_files(tmp / 'unit')

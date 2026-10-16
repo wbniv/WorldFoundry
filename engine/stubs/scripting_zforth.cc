@@ -1397,8 +1397,14 @@ zf_input_state zf_host_sys(zf_ctx* ctx, zf_syscall_id id, const char* /*last_wor
                         if(object&&IsActor(object)) {
                             wf_profile::Scope animationProfile(wf_profile::Animation);
                             wf_profile::count(5);
-                            RenderActor& render=static_cast<Actor*>(object)->GetRenderActor();
-                            status=render.Deform(DeformKind(kind),channels,n,theLevel->LevelClock().Current().AsFloat());
+                            Actor* subject=static_cast<Actor*>(object);
+                            RenderActor& render=subject->GetRenderActor();
+                            // World rotation, rows = model axes in world (Matrix34 rows), so
+                            // DFRM's vertical-post lead-in is world-vertical.
+                            const Matrix34 world=subject->GetPhysicalAttributes().Matrix();
+                            float rotation[9];
+                            for(int r=0;r<3;++r) for(int c=0;c<3;++c) rotation[3*r+c]=world[r][c].AsFloat();
+                            status=render.Deform(DeformKind(kind),channels,n,theLevel->LevelClock().Current().AsFloat(),rotation);
                             if(custom==54&&kind==int(DeformKind::Dfrm)) {
                                 Mailboxes& mb=g_mgr->LookupMailboxes(g_curObj);
                                 float outputs[6];

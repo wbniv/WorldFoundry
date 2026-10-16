@@ -106,7 +106,10 @@ int Eval(const std::string& meshPath, const std::string& blocksPath)
         double now; ss >> now;
         float block[40] = {0};
         for (float& c : block) ss >> c;
-        const DeformStatus status = m->actor->Deform(DeformKind::Dfrm, block, 40, now);
+        float rotation[9];                       // optional: the actor's world rotation
+        int got = 0;
+        while (got < 9 && (ss >> rotation[got])) ++got;
+        const DeformStatus status = m->actor->Deform(DeformKind::Dfrm, block, 40, now, got == 9 ? rotation : nullptr);
         std::printf("S %d\n", int(status));
         for (int i = 0; i < m->VertexCount(); ++i) {
             const Vector3& p = m->Vertices()[i].position;
@@ -257,6 +260,55 @@ void Geometry(const std::string& dir)
     Check(visibleStaleCulled > 0, "with rest normals some camera-facing faces would be culled (count)", visibleStaleCulled);
 }
 
+// Vertical posts are world-vertical. With the actor pitched +-15 degrees, the
+// wrapped rings must still circle a world-vertical axis: every wrapped joint at
+// one world height, and the reported wrap centre on the circle's centre.
+void WorldVertical(const std::string& dir)
+{
+    std::unique_ptr<Strand> c = Evaluator(dir + "/coil.iff");
+    const float radius = .02f / (18.f * 0.01745329252f) - .003f;      // 18 degrees per ring: 20 rings = 360
+    float b[40]; Block(b); b[21] = 2; b[22] = 20; b[23] = radius; b[24] = 1;
+    auto toWorld = [](const float* R, const float* p, float* w) {
+        for (int k = 0; k < 3; ++k) w[k] = p[0]*R[k] + p[1]*R[3 + k] + p[2]*R[6 + k];
+    };
+    auto spreadAndCentre = [&](const float* R, double& zSpread, double& centreError, double& radial) {
+        const auto& J = c->eval.Joints();
+        float W[41][3];
+        double lo = 1e9, hi = -1e9;
+        for (int j = 20; j <= 40; ++j) { toWorld(R, &J[3*j], W[j]); lo = std::min(lo, double(W[j][2])); hi = std::max(hi, double(W[j][2])); }
+        zSpread = hi - lo;
+        // Circumcentre of three wrapped joints, against the reported wrap centre.
+        const float* p0 = W[20]; const float* p1 = W[27]; const float* p2 = W[34];
+        const double a[] = {p1[0]-p0[0], p1[1]-p0[1], p1[2]-p0[2]}, e[] = {p2[0]-p0[0], p2[1]-p0[1], p2[2]-p0[2]};
+        const double n[] = {a[1]*e[2]-a[2]*e[1], a[2]*e[0]-a[0]*e[2], a[0]*e[1]-a[1]*e[0]};
+        const double aa = a[0]*a[0]+a[1]*a[1]+a[2]*a[2], ee = e[0]*e[0]+e[1]*e[1]+e[2]*e[2], nn = n[0]*n[0]+n[1]*n[1]+n[2]*n[2];
+        const double t[] = {aa*e[0]-ee*a[0], aa*e[1]-ee*a[1], aa*e[2]-ee*a[2]};
+        const double circ[] = {p0[0] + (t[1]*n[2]-t[2]*n[1])/(2*nn), p0[1] + (t[2]*n[0]-t[0]*n[2])/(2*nn), p0[2] + (t[0]*n[1]-t[1]*n[0])/(2*nn)};
+        float C[3]; toWorld(R, c->eval.Outputs(), C);
+        centreError = std::sqrt(std::pow(C[0]-circ[0], 2) + std::pow(C[1]-circ[1], 2) + std::pow(C[2]-circ[2], 2));
+        radial = 0;
+        for (int j = 20; j <= 40; ++j)
+            radial = std::max(radial, std::fabs(std::sqrt(std::pow(W[j][0]-C[0], 2) + std::pow(W[j][1]-C[1], 2) + std::pow(W[j][2]-C[2], 2)) - (radius + .003)));
+    };
+    for (float pitch : {15.f, -15.f}) {
+        const float p = pitch * 0.01745329252f;
+        const float R[9] = {std::cos(p), 0, -std::sin(p), 0, 1, 0, std::sin(p), 0, std::cos(p)};   // rows: model axes in world
+        double zSpread, centreError, radial;
+        const int status = c->eval.Evaluate(b, 40, 0, R);
+        spreadAndCentre(R, zSpread, centreError, radial);
+        char what[160];
+        std::snprintf(what, sizeof what, "pitched %+.0f deg: wrapped joints at one world height (spread, units)", pitch);
+        Check(status == wf_render::DfrmOk && zSpread < .005, what, zSpread);
+        std::snprintf(what, sizeof what, "pitched %+.0f deg: wrap centre within 0.5 mm of the circle's centre (units)", pitch);
+        Check(centreError < .005 && radial < .005, what, centreError);
+        // The model-frame lead-in (before this change) would tilt the coil with the body.
+        c->eval.Evaluate(b, 40, 0, nullptr);
+        spreadAndCentre(R, zSpread, centreError, radial);
+        std::snprintf(what, sizeof what, "pitched %+.0f deg: a model-frame lead-in would tilt the coil (spread, units)", pitch);
+        Check(zSpread > .02, what, zSpread);
+    }
+}
+
 void Clips(const std::string& dir)
 {
     std::unique_ptr<Strand> s = Evaluator(dir + "/clips.iff");
@@ -367,7 +419,7 @@ int main(int argc, char** argv)
     if (argc == 4 && std::strcmp(argv[1], "--eval") == 0) return Eval(argv[2], argv[3]);
     if (argc == 3 && std::strcmp(argv[1], "--unit") == 0) {
         const std::string dir = argv[2];
-        Geometry(dir); Clips(dir); Loader(dir); Exclusivity(dir); Timing(dir);
+        Geometry(dir); WorldVertical(dir); Clips(dir); Loader(dir); Exclusivity(dir); Timing(dir);
         std::printf("dfrm_strand unit: %s\n", g_failures ? "FAIL" : "PASS");
         return g_failures ? 1 : 0;
     }

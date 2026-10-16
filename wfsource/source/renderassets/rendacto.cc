@@ -572,7 +572,7 @@ void RenderActor3D::SetPlantGeometry(const plantgrowth::Chunk& chunk,float age,f
 // input, run the kind's own input checks, take the writable vertex list (which
 // moves the actor to the streamed path), refuse a second kind, bind once, pose.
 
-DeformStatus RenderActor3D::Deform(DeformKind kind, const float* channels, int n, double time)
+DeformStatus RenderActor3D::Deform(DeformKind kind, const float* channels, int n, double time, const float* worldRotation)
 {
     if (n < 0 || (n > 0 && !channels)) return DeformStatus::BadInput;
     for (int i = 0; i < n; ++i) if (!std::isfinite(channels[i])) return DeformStatus::NotFinite;
@@ -587,7 +587,7 @@ DeformStatus RenderActor3D::Deform(DeformKind kind, const float* channels, int n
     if (n > deformer->MaxChannels()) return DeformStatus::BadInput;
     DeformStatus status = deformer->Check(channels, n);
     if (status != DeformStatus::Ok) return status;
-    const DeformTarget target{_object.GetWrittableVertexList(), _object.GetVertexCount(), _object, time};
+    const DeformTarget target{_object.GetWrittableVertexList(), _object.GetVertexCount(), _object, time, worldRotation};
     if (!target.vertices || target.count <= 0) return DeformStatus::BadInput;
     if (fresh) {
         status = fresh->Bind(target, channels, n);

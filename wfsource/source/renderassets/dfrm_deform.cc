@@ -238,7 +238,7 @@ bool DfrmEvaluator::Bind(const DfrmData& data, const float* rest, int vertexCoun
     return true;
 }
 
-int DfrmEvaluator::Evaluate(const float* block, int n, double now)
+int DfrmEvaluator::Evaluate(const float* block, int n, double now, const float* worldRotation)
 {
     if (!_data) return DfrmNoData;
     if (!block || n < DfrmInputCount) return DfrmBadInput;
@@ -304,8 +304,26 @@ int DfrmEvaluator::Evaluate(const float* block, int n, double now)
     const float start = std::min(float(N), std::max(0.f, block[22]));
     const float s = float(N) - (float(N) - start) * progress;
     if (wrapping && mode == 2) {               // vertical post: lead-in turns the tail horizontal
+        // The mockup measures the root's pitch from straight down. In world
+        // space: flexing the root by phi makes d horizontal with v up when
+        // d0.u cos phi + v0.u sin phi = 0 and v.u > 0, i.e. phi = atan2(v0.u,
+        // d0.u) - 90 deg, u being world up in model coordinates. The mockup's
+        // pitch is phi - 90; for the identity rotation it equals _rootPitch.
+        float pitch = _rootPitch;
+        if (worldRotation) {
+            float u[3] = {worldRotation[2], worldRotation[5], worldRotation[8]};
+            if (Normalize(u)) {
+                const float a = Dot(curve.d, u), c = Dot(curve.v, u);
+                if (a*a + c*c > 1e-8f) {       // else the flex plane is horizontal: keep the model pitch
+                    float phi = std::atan2(c, a) / kDegToRad - 90;
+                    while (phi > 180) phi -= 360;
+                    while (phi <= -180) phi += 360;
+                    pitch = phi - 90;
+                }
+            }
+        }
         const int i0 = std::max(0, int(std::floor(s)) - 5);
-        float acc = -_rootPitch;
+        float acc = -pitch;
         for (int i = 0; i < i0; ++i) acc += F[i];
         const float per = (90 - acc) / 5, w = std::min(1.f, progress * 4);
         for (int i = i0; i < std::min(N, i0 + 5); ++i) { F[i] = F[i]*(1 - w) + per*w; L[i] *= (1 - w); }

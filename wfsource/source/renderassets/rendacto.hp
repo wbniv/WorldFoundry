@@ -78,7 +78,7 @@ public:
 	// One generic deformer slot (docs/plans/2026-10-16-saltwater-seahorses.md, E0).
 	// time is level seconds, used by DFRM clip playback. Actors without a mesh
 	// have nothing to deform.
-	virtual DeformStatus Deform(DeformKind /*kind*/, const float* /*channels*/, int /*n*/, double /*time*/ = 0) { return DeformStatus::NoMetadata; }
+	virtual DeformStatus Deform(DeformKind /*kind*/, const float* /*channels*/, int /*n*/, double /*time*/ = 0, const float* /*worldRotation*/ = nullptr) { return DeformStatus::NoMetadata; }
 	// Values the bound deformer publishes (DFRM: wrap centre, tail tip); returns the count.
 	virtual int DeformOutputs(float* /*out*/, int /*max*/) const { return 0; }
 	// The per-species entry points: adapters that pack their arguments as channels.
@@ -133,7 +133,7 @@ public:
 	virtual void SetMaterialColor(int materialIdx, const Color& color) { _object.SetMaterialColor(materialIdx, color); }
 	virtual void SetActorScale(const Vector3& scale) { _scale = scale; }
 	virtual void SetPlantGeometry(const plantgrowth::Chunk& chunk, float age, float phase, unsigned generation, bool sway, bool publish, bool textured);
-	virtual DeformStatus Deform(DeformKind kind, const float* channels, int n, double time = 0);
+	virtual DeformStatus Deform(DeformKind kind, const float* channels, int n, double time = 0, const float* worldRotation = nullptr);
 	virtual int DeformOutputs(float* out, int max) const { return _deformer ? _deformer->Outputs(out, max) : 0; }
 #if DO_VALIDATION
 	virtual void _Validate() const;

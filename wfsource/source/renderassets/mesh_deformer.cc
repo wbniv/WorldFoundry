@@ -248,7 +248,7 @@ public:
     }
     DeformStatus Pose(const DeformTarget& t, const float* c, int n) override
     {
-        const int status = _evaluator.Evaluate(c, n, t.time);
+        const int status = _evaluator.Evaluate(c, n, t.time, t.worldRotation);
         if (status != wf_render::DfrmOk && status != wf_render::DfrmClamped) return DeformStatus(status);
         const std::vector<float>& p = _evaluator.Positions();
         for (int i = 0; i < t.count; ++i)

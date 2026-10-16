@@ -24,6 +24,10 @@ struct DeformTarget {                   // everything a deformer may touch
     Vertex3D* vertices; int count;      // writable list: the actor streams, as before
     RenderObject3D& object;             // metadata (LRIG, DFRM), faces and side effects (lion palette)
     double time;                        // level seconds (DFRM clip playback); 0 for the species kinds
+    // The actor's world rotation, row-major, row i = model axis i in world space
+    // (Matrix34 rows). DFRM's vertical-post lead-in turns the tail horizontal in
+    // world space with it. NULL: the model frame is taken as the world frame.
+    const float* worldRotation;
 };
 
 class MeshDeformer {
