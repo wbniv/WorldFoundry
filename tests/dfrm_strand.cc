@@ -335,13 +335,28 @@ void Exclusivity(const std::string& dir)
 
 void Timing(const std::string& dir)
 {
-    std::unique_ptr<Mesh> m = Load(dir + "/dense.iff");
+    // Best of 5 runs of 2000 poses each: the evaluator alone, then the whole
+    // Deform path (evaluator plus the Vertex3D / TriFace writes).
+    std::unique_ptr<Strand> s = Evaluator(dir + "/dense.iff");
+    std::unique_ptr<Mesh>& m = s->mesh;
     float b[40]; Block(b, 6); b[21] = 2; b[22] = 16; b[23] = .06f; b[24] = .7f; b[30] = 5;
     const int reps = 2000;
-    const auto t0 = std::chrono::steady_clock::now();
-    for (int i = 0; i < reps; ++i) { b[24] = .5f + .4f * float(i % 10) / 10; m->actor->Deform(DeformKind::Dfrm, b, 40, i / 60.0); }
-    const double us = std::chrono::duration<double, std::micro>(std::chrono::steady_clock::now() - t0).count() / reps;
-    std::printf("info evaluator: %.1f us per pose, %d vertices, %d faces (this host, Release)\n", us, m->VertexCount(), m->FaceCount());
+    auto best = [&](bool whole) {
+        double fastest = 1e30;
+        for (int run = 0; run < 5; ++run) {
+            const auto t0 = std::chrono::steady_clock::now();
+            for (int i = 0; i < reps; ++i) {
+                b[24] = .5f + .4f * float(i % 10) / 10;
+                if (whole) m->actor->Deform(DeformKind::Dfrm, b, 40, i / 60.0);
+                else s->eval.Evaluate(b, 40, i / 60.0);
+            }
+            fastest = std::min(fastest, std::chrono::duration<double, std::micro>(std::chrono::steady_clock::now() - t0).count() / reps);
+        }
+        return fastest;
+    };
+    const double evalUs = best(false), deformUs = best(true);
+    std::printf("info evaluator: %.1f us per pose alone, %.1f us through Deform; %d vertices, %d faces (this host, Release)\n",
+                evalUs, deformUs, m->VertexCount(), m->FaceCount());
 }
 
 } // namespace

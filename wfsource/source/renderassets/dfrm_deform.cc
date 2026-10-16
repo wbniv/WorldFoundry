@@ -231,6 +231,10 @@ bool DfrmEvaluator::Bind(const DfrmData& data, const float* rest, int vertexCoun
     _angles.assign(3 * N, 0.f);
     _xf.assign(data.transforms.size(), 0.f);
     std::fill(_outputs, _outputs + 6, 0.f);
+    _clipA.assign(data.frameStride, 0.f); _clipB.assign(data.frameStride, 0.f);
+    _flex.assign(N, 0.f); _lateral.assign(N, 0.f); _twist.assign(N, 0.f);
+    _xfNext = _xf; _jointsNext = _joints; _framesNext = _frames;
+    _positionsNext = _positions; _normalsNext = _normals;
     return true;
 }
 
@@ -243,8 +247,8 @@ int DfrmEvaluator::Evaluate(const float* block, int n, double now)
     const DfrmData& D = *_data;
     const DfrmCurve& curve = D.curves[0];
     const int N = curve.sampleCount, T = int(D.transforms.size()), stride = D.frameStride;
-    std::vector<float>& A = _scratch;          // stride angles: clip base pose, degrees
-    A.assign(stride, 0.f);
+    std::vector<float>& A = _clipA;            // stride angles: clip base pose, degrees
+    std::fill(A.begin(), A.end(), 0.f);
 
     // 1. Clips A and B at now - start, linear between frames; loops wrap, one-shots hold.
     auto clipOf = [&](float id) -> const DfrmClip* {
@@ -270,18 +274,20 @@ int DfrmEvaluator::Evaluate(const float* block, int n, double now)
     const DfrmClip* clipB = clipOf(block[27]);
     if (clipA) sample(*clipA, block[26], A.data());
     if (clipB) {
-        std::vector<float> B(stride);
+        std::vector<float>& B = _clipB;
         sample(*clipB, block[28], B.data());
         const double fade = block[29];
         double w = fade > 0 ? (now - block[28]) / fade : (now >= block[28] ? 1.0 : 0.0);
         w = std::min(1.0, std::max(0.0, w));
         const float wf = float(w);
-        if (wf >= 1.f) A = B;                                   // endpoints exact
+        if (wf >= 1.f) std::copy(B.begin(), B.end(), A.begin());   // endpoints exact
         else if (wf > 0.f) for (int k = 0; k < stride; ++k) A[k] = A[k] + (B[k] - A[k]) * wf;
     }
 
     // 2. Additive knot layer (Hermite over the knots' sample indices).
-    std::vector<float> F(N), L(N), Tw(N);
+    std::vector<float>& F = _flex;
+    std::vector<float>& L = _lateral;
+    std::vector<float>& Tw = _twist;
     float kf[DfrmMaxKnots], kl[DfrmMaxKnots], kt[DfrmMaxKnots];
     for (int k = 0; k < curve.knotCount; ++k) { kf[k] = block[3*k]; kl[k] = block[3*k + 1]; kt[k] = block[3*k + 2]; }
     for (int i = 0; i < N; ++i) {
@@ -326,7 +332,7 @@ int DfrmEvaluator::Evaluate(const float* block, int n, double now)
         if (std::fabs(Tw[i]) > sm.twist) { Tw[i] = std::copysign(sm.twist, Tw[i]); clamped = true; }
     }
     // Transform angles: clip value plus the block's, clamped to the transform's range.
-    std::vector<float> xf(T);
+    std::vector<float>& xf = _xfNext;
     for (int t = 0; t < T; ++t) {
         const float a = A[3*N + t] + block[30 + t];
         const DfrmTransform& tr = D.transforms[t];
@@ -335,7 +341,8 @@ int DfrmEvaluator::Evaluate(const float* block, int n, double now)
     }
 
     // 5. Forward kinematics: frames propagated down the chain, re-orthonormalised every 8 samples.
-    std::vector<float> joints(3 * (N + 1)), frames(9 * N);
+    std::vector<float>& joints = _jointsNext;
+    std::vector<float>& frames = _framesNext;
     float d[3], v[3], sv[3], p[3];
     std::memcpy(d, curve.d, sizeof d); std::memcpy(v, curve.v, sizeof v); std::memcpy(sv, curve.s, sizeof sv);
     std::memcpy(p, curve.root, sizeof p);
@@ -354,7 +361,7 @@ int DfrmEvaluator::Evaluate(const float* block, int n, double now)
 
     // 6. Vertices: rigid per sample; weighted transforms about their pivots.
     const int V = int(D.influences.size());
-    std::vector<float> pos(3 * size_t(V));
+    std::vector<float>& pos = _positionsNext;
     for (int i = 0; i < V; ++i) {
         const DfrmInfluence& in = D.influences[i];
         float* o = &pos[3*i];
@@ -375,7 +382,8 @@ int DfrmEvaluator::Evaluate(const float* block, int n, double now)
     // Face normals: a rigid face turns with its sample or transform; a face that
     // spans two is recomputed with the loader's CalculateNormal winding.
     const int Fc = int(_faceMode.size());
-    std::vector<float> normals(_normals);
+    std::vector<float>& normals = _normalsNext;
+    std::copy(_normals.begin(), _normals.end(), normals.begin());   // static faces and degenerate recomputes keep theirs
     for (int f = 0; f < Fc; ++f) {
         float* out = &normals[3*f];
         switch (_faceMode[f]) {
@@ -422,7 +430,7 @@ int DfrmEvaluator::Evaluate(const float* block, int n, double now)
         }
     }
 
-    _positions.swap(pos);
+    _positions.swap(pos);                       // swaps of equal-sized buffers: no allocation
     _normals.swap(normals);
     _joints.swap(joints);
     _frames.swap(frames);

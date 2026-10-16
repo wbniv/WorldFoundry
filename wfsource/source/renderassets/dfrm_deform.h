@@ -103,7 +103,11 @@ private:
     std::vector<uint8_t> _faceMode;
     std::vector<uint16_t> _faceIndex;      // sample or transform of a rigid face
     std::vector<float> _faceCoeff;         // FaceSample: rest normal in the rest (d, v, s)
-    std::vector<float> _joints, _frames, _angles, _scratch, _xf;
+    std::vector<float> _joints, _frames, _angles, _xf;
+    // Per-frame working buffers, sized once in Bind so Evaluate never allocates.
+    // The *Next buffers are swapped with the published ones on success only.
+    std::vector<float> _clipA, _clipB, _flex, _lateral, _twist;
+    std::vector<float> _xfNext, _jointsNext, _framesNext, _positionsNext, _normalsNext;
     float _outputs[6] = {0, 0, 0, 0, 0, 0};
     float _rootPitch = 0;
 };
