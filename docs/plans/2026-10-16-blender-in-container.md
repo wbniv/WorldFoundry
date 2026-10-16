@@ -165,13 +165,16 @@ The host route depends on several things that are not in the repository:
 
     **FAIL as written** (2026‑10‑16): the task exits 1, because plants is 82/84. Everything the engine loads is identical for all seven tanks: every `.lvl`, `.iff` and `-standalone.iff`, and every other file of six tanks. Plants' `aquarium_plants.lev` and `actor-map.json` differ only in the last digits of a few floats. The `actor-map.json` values are one double ULP apart, and the `EULR` angles are adjacent float32 values, 2.98e‑8 apart. levcomp quantises angles to 1.15.16 fixed point, a step of 1.5e‑5, so the `.lvl` is identical.
 
-    The cause is the two Blenders' maths stacks. Host Blender is Ubuntu's package `5.0.1+dfsg-1ubuntu1` on Python 3.14.4 with numpy 2.3.5. The official build is Python 3.11.13 with numpy 1.26.4. One-ULP differences in trigonometry and float formatting between them change the last digit of these generated values.
+    The two causes, each reproduced on its own (2026‑10‑16):
+    - **Seahorse grip spots** (`actor-map.json` `seahorses/spots[1,2,4]/entry[2]`, and the same values in the `.lev`): Python 3.12 made `sum()` of floats use compensated (Neumaier) summation. Host Blender runs Python 3.14, the official build's bundled Python is 3.11, and `dfrm_ref.py` multiplies its rotation matrices with `sum()` (line 144). On Python 3.14 with `sum()` replaced by plain left-to-right addition, `seahorse.spot(n)` gives exactly the container's values (`0.028207925161793903`, `0.026372356446021466`, `0.04842252563408855`). The builtin gives the host's. The host's are the more accurate ones.
+    - **Urchin spine pitch** (`EULR` b of `urchin-spine-*`): plain Python computes the same angle on every route. The exporter then writes `matrix_world.to_euler('XYZ')` (`export_level.py:1242`), a float32 round trip through Blender's compiled matrix code. With the same stored `rotation_euler` of `0.26302221417427063`, Ubuntu's build returns it unchanged, and the official build returns `0.26302218437194824`, the next float32 down. That is inside Blender's C build: a different compiler and flags, and a different glibc libm (2.43 on the host, 2.39 in the image). Which of those it is has not been isolated.
+    Python's version is Blender's choice, not ours: the official 5.0.1 tarball bundles Python 3.11.13 and numpy 1.26.4, while Ubuntu's `5.0.1+dfsg-1ubuntu1` is the same Blender rebuilt against Ubuntu 26.04's system Python 3.14.4 and numpy 2.3.5.
 
     Earlier failures, fixed before this run:
     - Five tanks could not build in the container at all: no Pillow in Blender's bundled Python, and the add-on's schema search not following the image's symlink (`ecd65ae0`).
     - The script had compared the leftover committed files and still printed `identical`. It now reports `BUILD FAILED` and skips the tank.
 
-    Decision for Will: accept the container's rounding, so this step's bar becomes "every shipped file identical; intermediates may differ only in float rounding" (recommended, because the official tarball is sha256-pinned while Ubuntu's package moves with apt), or pin Ubuntu's Blender in an `ubuntu:26.04` image to get bit-for-bit `.lev` text.
+    Decision for Will: keep the official build and accept the rounding, or build the image on `ubuntu:26.04` with Ubuntu's Blender (the host's exact versions, newer Python), pinned with `snapshot.ubuntu.com` so apt can't move it.
 
 5. Disk: `df -h /` after the image build still shows at least 5 GB free (9.7 GB before it).
 
