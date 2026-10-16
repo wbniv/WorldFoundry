@@ -104,6 +104,15 @@ body.off .ctl{opacity:.35}
 #plant-settings .actions button{padding:13px 8px;border:1px solid var(--line);border-radius:9px;background:var(--btn);color:var(--fg)}
 #plant-settings .actions #plant-regen{background:#3b7250}
 #plant-error{color:var(--bad);min-height:1.5em}#plant-detail{color:var(--dim)}
+#plant-settings .pick-objects button{display:flex;align-items:center;gap:10px;width:100%;margin:0 0 10px;padding:13px 14px;border:1px solid var(--line);border-radius:9px;background:var(--panel);color:var(--fg);text-align:left}
+#plant-settings .pick-objects button.pick-3d{background:#3b7250;border-color:#56a36c}
+#plant-settings .pick-objects svg{flex:none}
+#plant-settings .pick-status{color:var(--dim);margin:0 0 6px}#plant-settings .pick-highlight{font-weight:600;color:var(--ok);min-height:1.5em;margin:0 0 14px}
+#plant-settings .pick-pad{display:grid;grid-template-columns:repeat(3,72px);grid-template-rows:repeat(3,64px);gap:8px;justify-content:center;margin:0 0 16px}
+#plant-settings .pick-pad button{border:1px solid var(--line);border-radius:10px;background:var(--btn);color:var(--fg);font-size:22px}
+#plant-settings .pick-pad button.pick-ok{background:var(--ok);color:#09150d;border-color:var(--ok);font-weight:700;font-size:18px}
+#plant-settings .pick-pad span{border-radius:10px;background:var(--panel)}
+#plant-settings .pick-list{display:block;width:100%;padding:13px;border:1px solid var(--line);border-radius:9px;background:var(--btn);color:var(--fg)}
 .water-toggle{display:flex;gap:8px}.water-toggle button{flex:1;padding:12px;border:1px solid var(--line);border-radius:8px;background:var(--panel);color:var(--fg)}.water-toggle button[aria-pressed=true]{background:var(--ok);color:#09150d}
 </style>
 </head>
@@ -161,7 +170,7 @@ body.off .ctl{opacity:.35}
   }
 
   // Retain legacy DOM IDs for installed controllers; all state is generic.
-  let propertySession = -1, propertySync = false;
+  let propertySession = -1, propertySync = false, propertyPickKey = '';
   function propertySend(verb,tail){
     if(!send('r:'+propertySession+':'+verb+(tail===undefined?'':':'+tail)))$('plant-error').textContent='Connection lost; continue on the TV';
   }
@@ -201,6 +210,31 @@ body.off .ctl{opacity:.35}
       group.querySelectorAll('button[data-colour]').forEach(b=>{const selected=Number(b.dataset.colour)===ui.preview;b.setAttribute('aria-pressed',String(selected));b.textContent=selected?'✓':'';});}
     colourSync(group,f.value);return group;
   }
+  // Object chooser and Pick in 3D (docs/plans/2026-10-16-runtime-object-editing.md, Phase P).
+  function crosshairIcon(){const ns='http://www.w3.org/2000/svg',svg=document.createElementNS(ns,'svg');svg.setAttribute('width','22');svg.setAttribute('height','22');svg.setAttribute('viewBox','0 0 22 22');svg.setAttribute('aria-hidden','true');
+    [['circle',{cx:11,cy:11,r:6.5}],['path',{d:'M11 0v6M11 16v6M0 11h6M16 11h6'}]].forEach(([tag,attrs])=>{const e=document.createElementNS(ns,tag);Object.keys(attrs).forEach(k=>e.setAttribute(k,String(attrs[k])));e.setAttribute('fill','none');e.setAttribute('stroke','currentColor');e.setAttribute('stroke-width','2');svg.appendChild(e);});return svg;}
+  function pickerView(model,root){
+    const pick=model.pick||'off';const list=document.createElement('div');list.className='pick-objects';
+    const objectButton=(object)=>{const button=document.createElement('button');button.type='button';button.textContent=object.title+' ['+object.actor+']';button.dataset.owner=String(object.actor);button.addEventListener('click',()=>propertySend('select',String(object.actor)));return button;};
+    const listButton=()=>{const button=document.createElement('button');button.type='button';button.className='pick-list';button.textContent='\u2630 List';button.addEventListener('click',()=>propertySend('list'));return button;};
+    if(pick==='off'){
+      if((model.objects||[]).length>=2){const button=document.createElement('button');button.type='button';button.className='pick-3d';button.dataset.pick='3d';button.appendChild(crosshairIcon());button.appendChild(document.createTextNode('Pick in 3D'));button.addEventListener('click',()=>propertySend('pick'));list.appendChild(button);}
+      (model.objects||[]).forEach(object=>list.appendChild(objectButton(object)));root.appendChild(list);return;
+    }
+    if(pick==='group'){
+      $('property-title').textContent='Objects here';(model.group||[]).forEach(object=>list.appendChild(objectButton(object)));root.appendChild(list);root.appendChild(listButton());return;
+    }
+    $('property-title').textContent='Pick in 3D';
+    const status=document.createElement('p');status.className='pick-status';status.textContent='TV is in Pick in 3D';root.appendChild(status);
+    const lit=document.createElement('p');lit.id='pick-highlight';lit.className='pick-highlight';lit.textContent=model.highlight||(model.inView?'':'No editable objects in view');root.appendChild(lit);
+    const pad=document.createElement('div');pad.className='pick-pad';
+    [['','',''],['up','\u25B2','Up'],['','',''],['left','\u25C0','Left'],['ok','OK','OK'],['right','\u25B6','Right'],['','',''],['down','\u25BC','Down'],['','','']].forEach(([verb,text,name])=>{
+      if(!verb){pad.appendChild(document.createElement('span'));return;}
+      const button=document.createElement('button');button.type='button';button.textContent=text;button.setAttribute('aria-label',name);button.dataset.pickMove=verb;
+      if(verb==='ok')button.className='pick-ok';
+      button.addEventListener('click',()=>propertySend(verb==='ok'?'ok':'move:'+verb));pad.appendChild(button);});
+    root.appendChild(pad);root.appendChild(listButton());
+  }
   function propertiesMessage(t){
     let model;try{model=JSON.parse(t.slice(2));}catch(e){return;}
     if(!model||!Array.isArray(model.fields))return;
@@ -208,9 +242,10 @@ body.off .ctl{opacity:.35}
     $('plant-settings').hidden=!model.open;document.body.classList.toggle('plant-edit',model.open);
     $('plant-error').textContent=model.error||'';
     if(!model.open){if(activeColour)activeColour.cancel();propertySync=false;return;}
-    const fresh=!propertySync||propertySession!==model.session;propertySession=model.session;propertySync=true;
+    const pickKey=model.picker?(model.pick||'off')+':'+JSON.stringify(model.group||[])+':'+(model.groupSelected||0):'';
+    const fresh=!propertySync||propertySession!==model.session||pickKey!==propertyPickKey;propertySession=model.session;propertySync=true;propertyPickKey=pickKey;
     if(fresh){if(activeColour)activeColour.cancel();releaseAll();$('property-title').textContent=model.title;const root=$('property-fields');root.textContent='';
-      if(model.picker){(model.objects||[]).forEach(object=>{const button=document.createElement('button');button.type='button';button.textContent=object.title+' ['+object.actor+']';button.dataset.owner=String(object.actor);button.addEventListener('click',()=>propertySend('select',String(object.actor)));root.appendChild(button);});return;}
+      if(model.picker){pickerView(model,root);return;}
       model.fields.forEach(f=>{
         if(f.kind===7)return;
         if(f.kind===5||f.kind===6){const heading=document.createElement('h2');heading.textContent=f.label;root.appendChild(heading);return;}
@@ -231,7 +266,8 @@ body.off .ctl{opacity:.35}
         input.addEventListener('input',()=>{show();propertySend('set',f.id+':'+encodeURIComponent(input.type==='checkbox'?(input.checked?'1':'0'):input.value));});
         if(f.help){const help=document.createElement('small');help.textContent=f.help;wrap.appendChild(help);}
       });
-    }else model.fields.forEach(f=>{const input=$('property-'+f.id);if(input&&input.classList.contains('property-colour')){colourSync(input,f.value);}else if(input&&input.tagName==='FIELDSET'){input.querySelectorAll('button').forEach(button=>button.setAttribute('aria-pressed',String(button.value===f.value)));}else if(input&&input!==document.activeElement){input.value=f.value;input.checked=f.value==='1';}});
+    }else if(model.picker){const lit=$('pick-highlight');if(lit)lit.textContent=model.highlight||(model.inView?'':'No editable objects in view');}
+    else model.fields.forEach(f=>{const input=$('property-'+f.id);if(input&&input.classList.contains('property-colour')){colourSync(input,f.value);}else if(input&&input.tagName==='FIELDSET'){input.querySelectorAll('button').forEach(button=>button.setAttribute('aria-pressed',String(button.value===f.value)));}else if(input&&input!==document.activeElement){input.value=f.value;input.checked=f.value==='1';}});
   }
   document.addEventListener('keydown',e=>{if(e.key==='Escape'&&activeColour){e.preventDefault();activeColour.cancel();}});
   $('plant-open').textContent='Properties';
