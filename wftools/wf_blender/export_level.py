@@ -4,12 +4,10 @@ World Foundry level import / export operators.
   WF_OT_import_level  — read a .lev text IFF → populate Blender scene
   WF_OT_export_level  — write Blender scene → .lev text IFF
 
-Face hand: the engine computes a face normal as (v2−v0)×(v1−v0) (gfx/face.hpi, "reversed
-for our handedness"); Blender uses (v1−v0)×(v2−v0). This module is the adapter: the exporter
-writes each face's loop order REVERSED and the importer reverses it back, so a mesh that is
-outward in Blender is outward in WF (lit from the camera side, kept by WF_CULL=1) and
-import → export is byte-identical. Author for Blender; never compensate in a level script.
-See docs/plans/2026-09-19-exporter-face-hand.md.
+Face hand: the engine and Blender both use (v1−v0)×(v2−v0). The exporter writes
+Blender's triangle order directly, and the importer reads it directly. Models
+produced before this convention change require the reviewed offline migration
+in docs/plans/2026-10-16-blender-normal-convention-engine-wide.md.
 
 .lev format (text IFF):
 
@@ -377,7 +375,7 @@ def _load_mesh_iff(filepath: str):
     for i in range(n_faces):
         base = i * _FACE_SIZE
         v1, v2, v3, mat_idx = struct.unpack_from('<hhhh', face_data, base)
-        faces.append((v3, v2, v1))          # WF hand → Blender hand (see module docstring)
+        faces.append((v1, v2, v3))          # WF and Blender share one face hand
         face_mat_idxs.append(mat_idx)
 
     _MATL_SIZE = 264  # sizeof(_MaterialOnDisk) = 4+4+256
@@ -622,7 +620,7 @@ def _write_mesh_iff(blobj, filepath: str) -> bool:
                 split_rig.append((rig[orig_vi] if rig is not None else ()) +
                                  (dfrm_meta[orig_vi] if dfrm_meta is not None else ()))
             tri.append(split_map[key])
-        face_triples.append((tri[2], tri[1], tri[0], face.material_index))   # Blender hand → WF hand
+        face_triples.append((tri[0], tri[1], tri[2], face.material_index))
 
     # ── Canonicalize vertex + face order (deterministic export) ──────────────
     # split_verts/face_triples above are built in `bm.faces` encounter order,

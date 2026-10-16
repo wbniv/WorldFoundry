@@ -48,8 +48,9 @@ static Material scarecrowMaterialList[] =
 
 static TriFace scarecrowFaceList[] =
 {
-	TriFace( 0, 1, 2, 0, scarecrowVertexList ),
-	TriFace( 1, 3, 2, 0, scarecrowVertexList )
+	// The sheet faces -Y, toward the viewer in front of the scarecrow.
+	TriFace( 0, 2, 1, 0, scarecrowVertexList ),
+	TriFace( 1, 2, 3, 0, scarecrowVertexList )
 };
 
 Vertex3D*

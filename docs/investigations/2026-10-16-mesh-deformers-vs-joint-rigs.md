@@ -112,8 +112,16 @@ The two pipelines share the middle: both compute a frame per joint (per curve sa
 
 ## Back-face culling, and why moving vertices collides with it
 
+**16 October validation status.** The Blender normal migration passes local
+builds, exporter/converter tests, DFRM engine parity and the desktop GL guards.
+Its Android release APK contains the migrated assets. Chromecast rendering is
+pending because the shared network is unavailable; Metal rendering and the
+legacy dome script failure also remain open. The
+[GPU skinning experiment](../plans/2026-10-16-gpu-skinning-chromecast-experiment.md)
+has not run, so this supplies no measured GPU-skinning cost or speedup.
+
 **How culling works today.**
-- **Where:** World Foundry never enables `GL_CULL_FACE`. Winding is inconsistent across the engine: the `rendacto.cc` cube is clockwise seen from inside, Blender boxes are counter-clockwise from outside, and the matte is ad hoc. A hardware cull would erase surfaces that are hard to enumerate ([back-face culling plan](../plans/2026-06-13-planetarium-dome-view-engine-wide-backface-culling.md), "Why software"). So since 2026‑09‑21 every triangle passes a **software** test, written once ([`backface_cull.hp`](../../wfsource/source/gfx/backface_cull.hp)):
+- **Where:** World Foundry never enables `GL_CULL_FACE`. The engine now derives face normals from Blender's `(v1−v0)×(v2−v0)` order; checked-in meshes, the built-in cube and the matte have been migrated with their intended visible sides reviewed ([normal-convention migration](../plans/2026-10-16-blender-normal-convention-engine-wide.md)). The migration does not make hardware culling safe for all existing draws: two-sided and inside-viewed surfaces still need their material and draw behavior checked. Since 2026‑09‑21 every triangle passes a **software** test, written once ([`backface_cull.hp`](../../wfsource/source/gfx/backface_cull.hp)):
   - rotate the face's stored normal into eye space;
   - move the triangle's centroid into eye space;
   - the face is back-facing when their dot product is > 0.
@@ -137,7 +145,7 @@ A skinned mesh must be exempt from the first two and needs conservative bounds f
 
 **Ways out, simplest first:**
 1. **Don't cull skinned meshes.** Mark their groups cull-exempt and draw the whole static index buffer. That removes the per-draw index upload too. The cost is rasterising back faces, about 2× the fragments of a closed mesh. For a 16 cm seahorse on a TV that is likely small, but it should be measured on the Mali-G31.
-2. **Hardware culling only for skinned draws.** This is safe only for meshes whose winding our own exporter guarantees (counter-clockwise outward). The cull state has to join the backend's batch key, and Metal needs `setCullMode` too.
+2. **Hardware culling only for skinned draws.** Blender-order winding is now the engine-wide reference, but this still requires reviewed outward-facing skin meshes and two-sided exemptions. The cull state has to join the backend's batch key, and Metal needs `setCullMode` too.
 3. **Conservative CPU culling per joint.** Cull a joint's faces only when they face away in every pose the joint can reach. This is complex and fragile. Not recommended.
 
 **The CPU deformers have the same problem today.** The five existing deformers move vertices but never update face normals. Their cull and lighting therefore use rest normals against deformed centroids. For a fish's small sideways sway the error is small, but a coiled seahorse tail would show holes. Two consequences:

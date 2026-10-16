@@ -240,7 +240,7 @@ def bake_transform(obj):
     obj.data.update()
 
 
-# The engine computes each face normal at load as (v2−v0)×(v1−v0) and asserts its
+# The engine computes each face normal at load as (v1−v0)×(v2−v0) and asserts its
 # length > Scalar(0,4) ≈ 6.1e-5 in 1.15.16 fixed point (math/vector3.hpi:243,
 # "Probably have a polygon which is too small") — i.e. any triangle with area
 # < ~3e-5 m² aborts the level. Bevelled-curve corners produce exactly those.
@@ -525,7 +525,7 @@ import bmesh as _bmesh
 
 
 def box_mesh(name, x0, y0, z0, x1, y1, z1):
-    """Closed box, outward in Blender's hand — the exporter adapts to the engine's
+    """Closed box, outward in Blender's and the engine's face order
     (level-building.md § winding)."""
     bm = _bmesh.new()
     _bmesh.ops.create_cube(bm, size=1.0)
@@ -577,7 +577,7 @@ parapet = add_flat_actor('corridor-parapet',
 _gm = bpy.data.meshes.new('site-map')
 _g = GROUND_HALF
 # Winding pinned to +Z in Blender's hand (counter-clockwise seen from above); a recalc on a
-# lone open quad is a coin toss. The exporter adapts the hand to the engine's.
+# lone open quad is a coin toss. The exporter preserves this Blender order.
 _gm.from_pydata([(-_g, -_g, 0.0), (_g, -_g, 0.0), (_g, _g, 0.0), (-_g, _g, 0.0)], [], [(0, 1, 2, 3)])
 _uv = _gm.uv_layers.new(name='UVMap')
 for li, loop in enumerate(_gm.loops):
@@ -596,7 +596,7 @@ def build_skydome(radius, segs=48, rings=24):
     """Lat/long sphere with explicit UVs: column j at compass θ = 360·j/segs, level position
     (R cosθ cosφ, −R sinθ cosφ, R sinφ) since +X is north and +Y west; u = θ/360, v = (90−φ)/180
     (WF v = 0 is the top row = zenith, see the site-map note above). Faces are wound inward in
-    Blender's hand (the player is inside); the exporter adapts the hand.
+    Blender's hand (the player is inside); the engine uses the same hand.
     One extra seam column (segs+1 vertex columns) so no face straddles u = 1 → 0. Faces are
     wound inward (the player is inside)."""
     verts, uvs = [], []
@@ -681,7 +681,7 @@ def prism(bm, loop, z0, z1, mat_wall, mat_roof):
             faces.append(f)
         # Outward, per prism, while it is still a closed manifold of its own (a global recalc
         # after welding shared shophouse vertices turned rows into one non-manifold blob and
-        # flipped walls at random). Blender's hand; the exporter adapts to the engine's.
+        # flipped walls at random). Blender's hand is the engine's hand.
         _bmesh.ops.recalc_face_normals(bm, faces=faces)
         _bmesh.ops.delete(bm, geom=[fb], context='FACES_ONLY')
         return n + 1

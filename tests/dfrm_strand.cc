@@ -240,7 +240,7 @@ void Geometry(const std::string& dir)
     for (int f = 0; f < m->FaceCount(); ++f) {
         const TriFace& t = m->Faces()[f];
         const float* a = &P[3*t.v1Index]; const float* bb = &P[3*t.v2Index]; const float* cc = &P[3*t.v3Index];
-        const float e1[] = {cc[0]-a[0], cc[1]-a[1], cc[2]-a[2]}, e2[] = {bb[0]-a[0], bb[1]-a[1], bb[2]-a[2]};
+        const float e1[] = {bb[0]-a[0], bb[1]-a[1], bb[2]-a[2]}, e2[] = {cc[0]-a[0], cc[1]-a[1], cc[2]-a[2]};
         float g[] = {e1[1]*e2[2]-e1[2]*e2[1], e1[2]*e2[0]-e1[0]*e2[2], e1[0]*e2[1]-e1[1]*e2[0]};
         const float gl = std::sqrt(Dot(g, g)); for (float& x : g) x /= gl;
         const float n[] = {t.normal.X().AsFloat(), t.normal.Y().AsFloat(), t.normal.Z().AsFloat()};

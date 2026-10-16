@@ -763,7 +763,7 @@ for the modeler-facing tradeoff and current exporter controls.
 > ("Effort 2" for the sweep). Guard: `tests/test_backface_cull_invariant.py`.
 
 **How it works.** Each face normal is computed once at load from winding order —
-`CalculateNormal = (v2-v0) × (v1-v0)` (`gfx/face.hpi:35`). The cull (in
+`CalculateNormal = (v1-v0) × (v2-v0)` (`gfx/face.hpi`). The cull (in
 `gfx/glpipeline/backend_modern.cc::DrawTriangle`) transforms that normal + the face centre into
 eye space via the modelview and skips the triangle when `dot(Ne, Pe) > 0` (normal facing away
 from the camera at the origin). The same normal also drives one-sided lighting, so a wrong-way
@@ -776,15 +776,15 @@ to be **seen from**:
 - **Interior-viewed** geometry (room boxes seen from inside, a dome/skybox the player stands
   within) → normals point **inward, toward the viewer**.
 
-**Whose hand? Blender's.** The engine's `(v2−v0)×(v1−v0)` is the opposite hand of Blender's
-`(v1−v0)×(v2−v0)`; since 2026-09-19 `export_level.py` reverses every face's loop order on export
-and back on import, so what is outward in the viewport is outward in the engine and
-import → export is byte-identical. Consequences: the hand-written box list
+**Whose hand? Blender's.** The engine computes `(v1−v0)×(v2−v0)` directly from
+the stored face indices. `export_level.py` writes Blender's triangulated loop
+order and imports it unchanged, so what is outward in the viewport is outward
+in the engine and import → export preserves face order. The hand-written box list
 `[(0,3,2,1),(4,5,6,7),(0,1,5,4),(1,2,6,5),(2,3,7,6),(3,0,4,7)]` (`add_solid_box` / `make_box_mesh`)
 is an **exterior** box — do **not** reverse its tuples; `recalc_face_normals` is right for props;
-only an interior (dome) gets `reverse_faces`. A level script that compensated for the engine's
-hand before the flip is now inside-out and must drop the compensation. Only hand-written `.iff`
-text still needs the engine's hand. Guard: `tests/test_blender_addon_export.py::test_exported_faces_are_wf_outward`.
+only an interior (dome) gets `reverse_faces`. Hand-written `.iff` files use the
+same Blender order. Checked-in meshes were reviewed and migrated; external old-hand
+IFFs need offline conversion. Guard: `tests/test_blender_addon_export.py::test_exported_faces_are_wf_outward`.
 
 **Diagnosing.** A face that **disappears** from the intended view is wound
 backwards (toggle `WF_CULL` off and on — if the surface reappears with `WF_CULL=0`, it's a
@@ -1028,7 +1028,7 @@ AssertMsg:Probably have a polygon which is too small, length = 1.777941361e-05
 |length.Abs() > Scalar(0,4)                        math/vector3.hpi:243
 ```
 
-**Cause:** face normals are computed at load as `(v2−v0)×(v1−v0)` and normalised in 1.15.16
+**Cause:** face normals are computed at load as `(v1−v0)×(v2−v0)` and normalised in 1.15.16
 fixed point; `Vector3::Normalize` asserts the cross-product length is > `Scalar(0,4)` ≈ 6.1e-5.
 That is **twice the triangle's area**, so any triangle under ~3e-5 m² aborts. Bevelled Blender
 curves (pipes, service runs) produce exactly those at sharp polyline corners; boolean cut-outs

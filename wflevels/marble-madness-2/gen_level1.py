@@ -47,7 +47,8 @@ def write_mesh(verts, faces, path):
         vb += struct.pack('<iiIiii', fx(u), fx(v), GREY, fx(x), fx(y), fx(z))
     fb = bytearray()
     for i, j, k in faces:
-        fb += struct.pack('<hhhh', i, j, k, 0)
+        # A cyclic rotation preserves the normal and the saved mesh's index order.
+        fb += struct.pack('<hhhh', k, i, j, 0)
     inner = iff_chunk('VRTX', bytes(vb)) + iff_chunk('MATL', MATL) + iff_chunk('FACE', bytes(fb))
     data  = iff_chunk('MODL', inner)
     with open(path, 'wb') as f:
@@ -59,19 +60,13 @@ def reversed_faces(faces):
     return [(c, b, a) for a, b, c in faces]
 
 
-# Every mesh here used to be emitted by a `both_sides()` helper that appended a
-# reversed duplicate of every triangle, so each surface existed twice with
-# opposite normals. That is invisible with backface culling off — but only by
-# accident: the two coincident polygons z-fight, the first-listed one wins ties,
-# and under WF_CULL=1 the loser is the one that survives, so the course changed
-# appearance the moment culling was switched on (see
-# docs/plans/2026-06-13-planetarium-dome-view-engine-wide-backface-culling.md
-# "Effort 1d"/"Effort 1e"). Meshes are now single-sided and wound OUTWARD in
-# WF's hand — normal = (v2-v0)x(v1-v0), gfx/face.hpi:34 — which means:
+# Floors use Blender's (v1-v0)x(v2-v0) normal rule. The literal
+# (0,1,2),(0,2,3) winding gives an UP (+Z) normal. Walls have a face for each
+# side because they are viewed from both sides; the first side points outward.
+# See docs/plans/2026-06-13-planetarium-dome-view-engine-wide-backface-culling.md
+# for the earlier removal of coincident floor backfaces.
 #
-#   floors: the literal (0,1,2),(0,2,3) winding gives a DOWN (-Z) normal, so the
-#           floor is listed reversed — single-sided, nobody looks at a floor from
-#           underneath;
+#   floors: single-sided, nobody looks at a floor from underneath;
 #   walls:  zero-thickness and seen from BOTH sides (the near wall's outside, the
 #           far wall's inside, from the course camera), so each wall keeps an
 #           outward face (-X / +X) plus its inward twin. Under WF_CULL=1 exactly
@@ -97,10 +92,10 @@ def flat_with_walls(hx, hy, wh=WH, path=None):
         (1.0, 0.0,  hx, -hy,  wh),  # 6 near-right wall top
         (1.0, 1.0,  hx,  hy,  wh),  # 7 far-right  wall top
     ]
-    faces = reversed_faces([(0, 1, 2), (0, 2, 3)]) + two_sided([   # floor -> up (+Z)
+    faces = [(0, 1, 2), (0, 2, 3)] + two_sided(reversed_faces([  # floor -> up (+Z)
         (0, 5, 4), (0, 3, 5),   # left wall  (outward -X, plus inner twin)
         (1, 6, 7), (1, 7, 2),   # right wall (outward +X, plus inner twin)
-    ])
+    ]))
     write_mesh(verts, faces, path)
 
 def slope_with_walls(hx, hy, z_drop, wh=WH, path=None):
@@ -118,10 +113,10 @@ def slope_with_walls(hx, hy, z_drop, wh=WH, path=None):
         (1.0, 0.0,  hx, -hy,         wh ),  # 6
         (1.0, 1.0,  hx,  hy, -z_drop+wh),   # 7
     ]
-    faces = reversed_faces([(0, 1, 2), (0, 2, 3)]) + two_sided([   # slope face -> up
+    faces = [(0, 1, 2), (0, 2, 3)] + two_sided(reversed_faces([  # slope face -> up
         (0, 5, 4), (0, 3, 5),   # left wall  (outward -X, plus inner twin)
         (1, 6, 7), (1, 7, 2),   # right wall (outward +X, plus inner twin)
-    ])
+    ]))
     write_mesh(verts, faces, path)
 
 # ── Course geometry ───────────────────────────────────────────────────────────

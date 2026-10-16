@@ -1,5 +1,9 @@
 # Condo level: the surroundings — near buildings, the Bangkok skyline, the bridges
 
+> **Winding note (2026-10-16):** The face-hand observations below describe the
+> former engine. The [current convention](2026-10-16-blender-normal-convention-engine-wide.md)
+> uses Blender's face order directly.
+
 **2026-10-05 update:** Will replaced the enclosing rectangular podium with the combined 639/640 floorplan, retaining the full hallway and parapet footprint. The original box description below records the earlier implementation. [Current geometry check](2026-10-02-condo-translucency/condo/floorplan-podium/model.txt) verifies sampled coverage and a closed manifold; [current capture](2026-10-02-condo-translucency/condo/floorplan-podium/after-podium.png).
 
 

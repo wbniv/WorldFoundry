@@ -217,8 +217,9 @@ ScrollingMatte::Render(ViewPort&
             CalcVRAMuv(xTileOffsetRight,  yTileOffset,       uResult, vResult, _texture);
             CalcUV(uResult, vResult, *texturePixelMap, tr.u, tr.v);
 
-            // Unlit matte: normal unused, but set facing camera. cullExempt=true —
-            // the background quad must never be backface-culled.
+            // WF and Blender normals use (v1-v0) x (v2-v0). The tiled
+            // matte's +Z front faces point toward the camera.
+            // cullExempt=true remains necessary: backgrounds are two-sided.
             RendererBackendGet().SetOpacity(1.0f);
             RendererBackendGet().DrawTriangle(tl, bl, br, 0.0f, 0.0f, 1.0f, texturePixelMap, true);
             RendererBackendGet().DrawTriangle(tl, br, tr, 0.0f, 0.0f, 1.0f, texturePixelMap, true);

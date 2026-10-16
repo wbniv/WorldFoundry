@@ -88,7 +88,7 @@ Dimensions and limits are **ours** until Phase 0 checks them against video and m
 
 Summed along the tail, these limits allow 910° ventral, 630° lateral and about 289° dorsal. The only whole-tail measurement, for *H. kuda* (other species), is 850°, 570° and 290° (Porter et al. 2015). Twist stays well below the printed square model's ≈ 15° per segment, because live plates also resist it. No source gives per-joint limits for *H. reidi*, so all of these remain **ours**.
 
-**Skin follows rings rigidly.** Each vertex belongs to exactly one ring, and each ring's plates reach about 15 % under the next ring, as real plates overlap. No vertex is shared across a joint, so bending never squashes a triangle. That matters because the engine aborts on tiny triangles (|(v2−v0)×(v1−v0)| > 6.1e‑5, [`vector3.hpi:243`](../../wfsource/source/math/vector3.hpi)). At the tip, a ring face is 14 × 16.7 mm in world units (×10), giving 2.3e‑4, a **3.8× margin**. So tip rings keep four sides, and only the wider proximal rings get bevels.
+**Skin follows rings rigidly.** Each vertex belongs to exactly one ring, and each ring's plates reach about 15 % under the next ring, as real plates overlap. No vertex is shared across a joint, so bending never squashes a triangle. That matters because the engine aborts on tiny triangles (|(v1−v0)×(v2−v0)| > 6.1e‑5, [`vector3.hpi:243`](../../wfsource/source/math/vector3.hpi)). At the tip, a ring face is 14 × 16.7 mm in world units (×10), giving 2.3e‑4, a **3.8× margin**. So tip rings keep four sides, and only the wider proximal rings get bevels.
 
 ## Pre-animated clips with procedural contact
 

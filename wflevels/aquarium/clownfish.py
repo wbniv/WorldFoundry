@@ -184,7 +184,7 @@ PHYSICS = {
 }
 SCALED_PHYSICS = ('wf_Max Air Speed', 'wf_Max Ground Speed')
 MIN_COLLISION_SPAN_M = 0.25              # levcomp expand_thin_bbox: a thinner side is grown from its MIN face
-ENGINE_MIN_TRIANGLE_M2 = 3.05e-5         # math/vector3.hpi:243 asserts |(v2-v0)x(v1-v0)| > Scalar(0,4)
+ENGINE_MIN_TRIANGLE_M2 = 3.05e-5         # math/vector3.hpi:243 asserts |(v1-v0)x(v2-v0)| > Scalar(0,4)
 
 # Global user mailboxes the fish owns (2..1900 are shared by every actor).
 FISH_MB_BASE = 600

@@ -1,5 +1,10 @@
 # Exporter: flip the face hand so Blender‑outward is WF‑outward
 
+> **Historical implementation, superseded 2026-10-16.** The engine and exporter
+> now use Blender's `(v1−v0)×(v2−v0)` order directly. See the
+> [engine-wide migration](2026-10-16-blender-normal-convention-engine-wide.md)
+> and the [current authoring guide](../level-building.md#mesh-face-winding--blender-order-in-the-engine-2026-10-16).
+
 ## Context
 
 WF computes a face normal as `(v2−v0)×(v1−v0)` (`gfx/face.hpi:34`, "kts reversed 12/3/2001

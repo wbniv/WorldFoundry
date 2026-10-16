@@ -1,0 +1,2245 @@
+[
+  {
+    "scene": "wflevels/baseline/baseline.blend",
+    "exit_code": 0,
+    "meshes": [
+      {
+        "name": "camerawall.iff",
+        "comparison": "no_standalone_source"
+      },
+      {
+        "name": "collisionbox.iff",
+        "comparison": "same_embedded_face_direction",
+        "matching_model_hashes": [
+          "06b7d04272929b9f0baa9134595ac55a98127d899c8dff4c85397a8e6151da6a"
+        ]
+      },
+      {
+        "name": "coordinatelabels.iff",
+        "comparison": "same_embedded_face_direction",
+        "matching_model_hashes": [
+          "164ee8002b6973cc95a0e7244701967a93e3b7af949d8c1912e259765ac02434"
+        ]
+      },
+      {
+        "name": "floor.iff",
+        "comparison": "same_embedded_face_direction",
+        "matching_model_hashes": [
+          "500ee83b8e2c92b7aba4f1359008e53e1d497578b9ecd5b7a1d09eff253bc1fa"
+        ]
+      },
+      {
+        "name": "originaxes.iff",
+        "comparison": "same_embedded_face_direction",
+        "matching_model_hashes": [
+          "103a5d01f4a26336e8a254edcf983835d17f8576b50a17069fccfea4d3393d1d"
+        ]
+      },
+      {
+        "name": "player.iff",
+        "comparison": "same_embedded_face_direction",
+        "matching_model_hashes": [
+          "c8920cab4c168d6585ef3dd41238944ad7944821de764281341f27a3ad2bd3ea"
+        ]
+      },
+      {
+        "name": "spawnruler.iff",
+        "comparison": "same_embedded_face_direction",
+        "matching_model_hashes": [
+          "6585e99d36ffc817b545cea52003dfa0aef5a72ad18aa8ed144fc2ace6852446"
+        ]
+      },
+      {
+        "name": "step0.iff",
+        "comparison": "no_standalone_source"
+      },
+      {
+        "name": "step1.iff",
+        "comparison": "no_standalone_source"
+      },
+      {
+        "name": "step2.iff",
+        "comparison": "no_standalone_source"
+      },
+      {
+        "name": "thinwall.iff",
+        "comparison": "no_standalone_source"
+      },
+      {
+        "name": "unitcube.iff",
+        "comparison": "same_embedded_face_direction",
+        "matching_model_hashes": [
+          "06b7d04272929b9f0baa9134595ac55a98127d899c8dff4c85397a8e6151da6a"
+        ]
+      },
+      {
+        "name": "uvswatch.iff",
+        "comparison": "no_standalone_source"
+      },
+      {
+        "name": "wedge15.iff",
+        "comparison": "no_standalone_source"
+      },
+      {
+        "name": "wedge30.iff",
+        "comparison": "no_standalone_source"
+      },
+      {
+        "name": "wedge45.iff",
+        "comparison": "no_standalone_source"
+      }
+    ]
+  },
+  {
+    "scene": "wflevels/condo_639_640/condo_639_640.blend",
+    "exit_code": 0,
+    "meshes": [
+      {
+        "name": "639_balcony_north_jamb.iff",
+        "comparison": "same_face_direction",
+        "matching_model_hashes": [
+          "a0cd937ecbf144bfe665040d0b571e9c71fed1bc6506758dd20717f8b0d6170c"
+        ]
+      },
+      {
+        "name": "639_balcony_pony_wall.iff",
+        "comparison": "same_face_direction",
+        "matching_model_hashes": [
+          "a2d87f138731b8f0125af5f3cbd6e933893111b550d67f708520d9ac64355a67"
+        ]
+      },
+      {
+        "name": "639_balcony_shade_bar.iff",
+        "comparison": "same_face_direction",
+        "matching_model_hashes": [
+          "2fcf1b1e4357fb2c5b57d319a814b4c14caf28556fd22f5d86239e363d371145"
+        ]
+      },
+      {
+        "name": "639_balcony_shade_cassette.iff",
+        "comparison": "same_face_direction",
+        "matching_model_hashes": [
+          "77206f87a80d707e0adf42fc3231440fe65f70e4746dbc11284738217e06215b"
+        ]
+      },
+      {
+        "name": "639_balcony_shade_guide_n.iff",
+        "comparison": "same_face_direction",
+        "matching_model_hashes": [
+          "c4b575bc2578a7d0f9acca6edbcce4a90c40a9c01e85135049248993884cf802"
+        ]
+      },
+      {
+        "name": "639_balcony_shade_guide_s.iff",
+        "comparison": "same_face_direction",
+        "matching_model_hashes": [
+          "f27a405ab6cd29ef21600805af504b0be9ac4e20cf7658b1a0a72537d152b210"
+        ]
+      },
+      {
+        "name": "639_balcony_shade_slat_0.iff",
+        "comparison": "same_face_direction",
+        "matching_model_hashes": [
+          "d5d03d1e04169b345950833d9e0d482b24a6289636042bc9c0f0600dd7448335"
+        ]
+      },
+      {
+        "name": "639_balcony_shade_slat_1.iff",
+        "comparison": "same_face_direction",
+        "matching_model_hashes": [
+          "f8acebe7d57217fc9e057f53916a6e2b78b535ac16a66d72cc01b3d90df364e7"
+        ]
+      },
+      {
+        "name": "639_balcony_shade_slat_2.iff",
+        "comparison": "same_face_direction",
+        "matching_model_hashes": [
+          "c01db1127d9789bd4ba625c4b0b74acd19385afc1348fb22b2992ae69a7f8d5e"
+        ]
+      },
+      {
+        "name": "639_balcony_shade_slat_3.iff",
+        "comparison": "same_face_direction",
+        "matching_model_hashes": [
+          "d0ad3b8185d786dfc79ca5e51184eaee21020cb383ee5aa9a582e2cc15e3bca0"
+        ]
+      },
+      {
+        "name": "639_balcony_shade_slat_4.iff",
+        "comparison": "same_face_direction",
+        "matching_model_hashes": [
+          "c184f25862d5216b293af1bd79e3a03e00aceea3f9af6550b19faefb4958ba9a"
+        ]
+      },
+      {
+        "name": "639_balcony_shade_slat_5.iff",
+        "comparison": "same_face_direction",
+        "matching_model_hashes": [
+          "c6617487c64b89505dadf61f0a124a9a347e346cba0f47bce2c1616da74b426f"
+        ]
+      },
+      {
+        "name": "639_balcony_shade_slat_6.iff",
+        "comparison": "same_face_direction",
+        "matching_model_hashes": [
+          "bf448b9ab50e1b9c7353e21d579eb4c512e17fd6687782b816f6bbdf35bb19b3"
+        ]
+      },
+      {
+        "name": "639_balcony_shade_slat_7.iff",
+        "comparison": "same_face_direction",
+        "matching_model_hashes": [
+          "5462fb172a9842917ea996bf246118b06cae53c0d5f19d17ecbd8fed7a0bc313"
+        ]
+      },
+      {
+        "name": "639_balcony_shade_switch.iff",
+        "comparison": "same_face_direction",
+        "matching_model_hashes": [
+          "25b69a64441c79cbc661e0e80d4ed78ead4d6dd7a2f8ce2ecac121dd78aba252"
+        ]
+      },
+      {
+        "name": "639_bath_n_e_wall.iff",
+        "comparison": "same_face_direction",
+        "matching_model_hashes": [
+          "6ac4eee219eca758f26747101b1c2e5950a4a766fd339519228140b9cd53db5c"
+        ]
+      },
+      {
+        "name": "639_bath_s_e_wall_doo_9132.iff",
+        "comparison": "same_face_direction",
+        "matching_model_hashes": [
+          "ec78e7a16eae8653550c3cdf3919df00326fcc9f471b3a845815180c50c21eb8",
+          "3dce12e1988e78dd4ceb28dc1293d7c495fd2af46f6002819974a7b00f00d26b"
+        ]
+      },
+      {
+        "name": "639_bath_s_e_wall_jamb0.iff",
+        "comparison": "same_face_direction",
+        "matching_model_hashes": [
+          "05cddf73d553eb66fa82d272b91df4c0e81c268cbf0712194b1212e8fa1bbc73",
+          "7f2a895668cd18424d19da757cfccaa23a1bcc3a86a8c2e59eb891e6888a2d89"
+        ]
+      },
+      {
+        "name": "639_bath_s_e_wall_jamb1.iff",
+        "comparison": "same_face_direction",
+        "matching_model_hashes": [
+          "4bc882208cf4149a035a9019474b6f4494d5ca314d3ced1f32e65d1c8f67e835",
+          "c36bfab0976bb2e57782053a11d45868bf86844b9983fa933ed7d0fcbf76152d"
+        ]
+      },
+      {
+        "name": "639_bath_s_n_wall.iff",
+        "comparison": "same_face_direction",
+        "matching_model_hashes": [
+          "427660f66f30f5f3dc1d415b2665960ee9a16d9c477d80fd99f03f7611160ef0"
+        ]
+      },
+      {
+        "name": "639_consumer_unit.iff",
+        "comparison": "same_face_direction",
+        "matching_model_hashes": [
+          "92f8b4221cb24a05b292dbe555a6ae47fb70467ec594764fbaca5c9127b74dd8"
+        ]
+      },
+      {
+        "name": "639_daikin_18k_guest_b546.iff",
+        "comparison": "same_face_direction",
+        "matching_model_hashes": [
+          "9339b754cd39a1eb670b46420def6710d2bca359cc2505b6baf708b1af40ab43"
+        ]
+      },
+      {
+        "name": "639_daikin_18k_guest_d870.iff",
+        "comparison": "same_face_direction",
+        "matching_model_hashes": [
+          "882b75d90e25a6bf3de82e228b5ecb09a329c5e095a30b58cc579246577e7044"
+        ]
+      },
+      {
+        "name": "639_daikin_drain.iff",
+        "comparison": "same_face_direction",
+        "matching_model_hashes": [
+          "4942419cf989d1836ac4d8b47d6b9f3fe378520d927fd6d05224c19219fc403b"
+        ]
+      },
+      {
+        "name": "639_daikin_lineset.iff",
+        "comparison": "same_face_direction",
+        "matching_model_hashes": [
+          "c67c969fb3d7ec9f269ffa9c1ac0265ab5a07078770f97f71fe34ed6a0f188cb"
+        ]
+      },
+      {
+        "name": "639_daikin_power.iff",
+        "comparison": "same_face_direction",
+        "matching_model_hashes": [
+          "ca0f8d8dd3fab567037d887c08f07977dc9fc8386479b5a26e8636d44104a549"
+        ]
+      },
+      {
+        "name": "639_front_strip_s_wal_6196.iff",
+        "comparison": "same_face_direction",
+        "matching_model_hashes": [
+          "772e4e7bd2552bab5e5553242be27c6e3dd1f91ea40bb189bc70e9161ca9943d"
+        ]
+      },
+      {
+        "name": "639_front_strip_s_wal_97eb.iff",
+        "comparison": "same_face_direction",
+        "matching_model_hashes": [
+          "16bc772c49e06de0902c2466f5b7773710997d18816373a9cc450bb30ac32d7d"
+        ]
+      },
+      {
+        "name": "639_front_strip_s_wal_9daf.iff",
+        "comparison": "same_face_direction",
+        "matching_model_hashes": [
+          "772e4e7bd2552bab5e5553242be27c6e3dd1f91ea40bb189bc70e9161ca9943d"
+        ]
+      },
+      {
+        "name": "639_front_strip_s_wal_a77d.iff",
+        "comparison": "same_face_direction",
+        "matching_model_hashes": [
+          "3798d0337c150a9137c5a523419c9821fe33d06f5d5540b61696c7e37a36769c"
+        ]
+      },
+      {
+        "name": "639_front_strip_s_wal_f6c7.iff",
+        "comparison": "same_face_direction",
+        "matching_model_hashes": [
+          "0beab4c134b47b9f06bf56b1b2a45d229a2b88be885017950e016fdc505c16de"
+        ]
+      },
+      {
+        "name": "639_guest_project_wall.iff",
+        "comparison": "same_face_direction",
+        "matching_model_hashes": [
+          "e3409849618f37eeec477ba3d7a6c59f166e289fcc63ca77a9fd01a3cb587663"
+        ]
+      },
+      {
+        "name": "639_kitchen_n_wall_do_8213.iff",
+        "comparison": "same_face_direction",
+        "matching_model_hashes": [
+          "772e4e7bd2552bab5e5553242be27c6e3dd1f91ea40bb189bc70e9161ca9943d"
+        ]
+      },
+      {
+        "name": "639_kitchen_n_wall_do_c21b.iff",
+        "comparison": "same_face_direction",
+        "matching_model_hashes": [
+          "772e4e7bd2552bab5e5553242be27c6e3dd1f91ea40bb189bc70e9161ca9943d"
+        ]
+      },
+      {
+        "name": "639_kitchen_n_wall_jamb0.iff",
+        "comparison": "same_face_direction",
+        "matching_model_hashes": [
+          "03a49a5f9b617c999c33bea66aaee0fc8a111b375fc4a36e99bdfcd9990696eb"
+        ]
+      },
+      {
+        "name": "639_kitchen_n_wall_jamb1.iff",
+        "comparison": "same_face_direction",
+        "matching_model_hashes": [
+          "16bc772c49e06de0902c2466f5b7773710997d18816373a9cc450bb30ac32d7d"
+        ]
+      },
+      {
+        "name": "639_kitchen_n_wall_jamb2.iff",
+        "comparison": "same_face_direction",
+        "matching_model_hashes": [
+          "f0b608fbb52824f13e87b3d5ad715f1d8d1a8f784abb06edca9164153f4a4ec4"
+        ]
+      },
+      {
+        "name": "639_patio_grass.iff",
+        "comparison": "same_face_direction",
+        "matching_model_hashes": [
+          "aa3c390f9fc8e3383b606b240fc369404200fe6c20e564d40e5b3786f6c7c839"
+        ]
+      },
+      {
+        "name": "639_project_door_panel_0.iff",
+        "comparison": "same_face_direction",
+        "matching_model_hashes": [
+          "11754c1fade5741c79be584b8cbf6a26f6b78d3729500425399db0df0d335212"
+        ]
+      },
+      {
+        "name": "639_project_door_panel_1.iff",
+        "comparison": "same_face_direction",
+        "matching_model_hashes": [
+          "15c6cb28ac6ff9f0d07322d2e375991d800f2376eda89838a39d0aa153d8b06a"
+        ]
+      },
+      {
+        "name": "639_project_door_panel_2.iff",
+        "comparison": "same_face_direction",
+        "matching_model_hashes": [
+          "cf42b2db22f945229f9199bed78dd7cf1ac4a821aa933775a0ddd98409f34664"
+        ]
+      },
+      {
+        "name": "639_window_1.iff",
+        "comparison": "same_face_direction",
+        "matching_model_hashes": [
+          "4fd33cbfa59695df4a54708f0e81f763bb35babe79c4e28a7085132aef7300dc"
+        ]
+      },
+      {
+        "name": "640_bath_closet_divider.iff",
+        "comparison": "same_face_direction",
+        "matching_model_hashes": [
+          "6ac4eee219eca758f26747101b1c2e5950a4a766fd339519228140b9cd53db5c"
+        ]
+      },
+      {
+        "name": "640_bath_closet_s_wal_0083.iff",
+        "comparison": "same_face_direction",
+        "matching_model_hashes": [
+          "7f57e665e8fc31cf61d224efc5f7081aa4b252e62b9fb483a5177947cd031277"
+        ]
+      },
+      {
+        "name": "640_bath_closet_s_wal_200d.iff",
+        "comparison": "same_face_direction",
+        "matching_model_hashes": [
+          "772e4e7bd2552bab5e5553242be27c6e3dd1f91ea40bb189bc70e9161ca9943d"
+        ]
+      },
+      {
+        "name": "640_bath_closet_s_wal_5139.iff",
+        "comparison": "same_face_direction",
+        "matching_model_hashes": [
+          "e5c366e32ae21e6dd0c7965e72d1dc23fff44edbbab079f86918961f9de5dfac"
+        ]
+      },
+      {
+        "name": "640_bath_closet_s_wal_61af.iff",
+        "comparison": "same_face_direction",
+        "matching_model_hashes": [
+          "c40fe97db3a7a03719f1dcf5f7b36b030c13e1680b0a7e563393283ab60e91ad"
+        ]
+      },
+      {
+        "name": "640_bath_closet_s_wal_724f.iff",
+        "comparison": "same_face_direction",
+        "matching_model_hashes": [
+          "772e4e7bd2552bab5e5553242be27c6e3dd1f91ea40bb189bc70e9161ca9943d"
+        ]
+      },
+      {
+        "name": "640_bath_s_w_wall_doo_9831.iff",
+        "comparison": "same_face_direction",
+        "matching_model_hashes": [
+          "ec78e7a16eae8653550c3cdf3919df00326fcc9f471b3a845815180c50c21eb8",
+          "3dce12e1988e78dd4ceb28dc1293d7c495fd2af46f6002819974a7b00f00d26b"
+        ]
+      },
+      {
+        "name": "640_bath_s_w_wall_jamb0.iff",
+        "comparison": "same_face_direction",
+        "matching_model_hashes": [
+          "05cddf73d553eb66fa82d272b91df4c0e81c268cbf0712194b1212e8fa1bbc73",
+          "7f2a895668cd18424d19da757cfccaa23a1bcc3a86a8c2e59eb891e6888a2d89"
+        ]
+      },
+      {
+        "name": "640_bath_s_w_wall_jamb1.iff",
+        "comparison": "same_face_direction",
+        "matching_model_hashes": [
+          "4bc882208cf4149a035a9019474b6f4494d5ca314d3ced1f32e65d1c8f67e835",
+          "c36bfab0976bb2e57782053a11d45868bf86844b9983fa933ed7d0fcbf76152d"
+        ]
+      },
+      {
+        "name": "640_consumer_unit.iff",
+        "comparison": "same_face_direction",
+        "matching_model_hashes": [
+          "92f8b4221cb24a05b292dbe555a6ae47fb70467ec594764fbaca5c9127b74dd8"
+        ]
+      },
+      {
+        "name": "640_curve_window_1.iff",
+        "comparison": "same_face_direction",
+        "matching_model_hashes": [
+          "78c0f2c31c443ea8d924e6c4fe7e144bd550d2afadb1266d4817d3a36a6a3517"
+        ]
+      },
+      {
+        "name": "640_curve_window_2.iff",
+        "comparison": "same_face_direction",
+        "matching_model_hashes": [
+          "2368bc6c912e2231beb7397a7d8aa7cc4148fc5323d2b0d1614900bbf51576da"
+        ]
+      },
+      {
+        "name": "640_curve_window_3.iff",
+        "comparison": "same_face_direction",
+        "matching_model_hashes": [
+          "14e486d90e8bfc0d71ea9700765ea6f5674f695757a6424f9e8e79e1b0128908"
+        ]
+      },
+      {
+        "name": "640_curve_window_4.iff",
+        "comparison": "same_face_direction",
+        "matching_model_hashes": [
+          "3e6594ce011de1674005fe53984acfec413c622cf0ef3a87393f47b530f51b98"
+        ]
+      },
+      {
+        "name": "640_curve_window_5.iff",
+        "comparison": "same_face_direction",
+        "matching_model_hashes": [
+          "3b8766aea3d3cc875c81781cc0c59461f3a0899eff474e7fd7a69e41ea01097f"
+        ]
+      },
+      {
+        "name": "640_curve_window_6.iff",
+        "comparison": "same_face_direction",
+        "matching_model_hashes": [
+          "c4157266b7e1ec91834713f7522e58092ceb7e02dcdc0516504692cd22781b80"
+        ]
+      },
+      {
+        "name": "640_living_nw_column.iff",
+        "comparison": "same_face_direction",
+        "matching_model_hashes": [
+          "3de92b2f383573921883047cc1dd3324681e62ff802d8e45ece121cefce5f1be"
+        ]
+      },
+      {
+        "name": "640_master_bed_s_door_9839.iff",
+        "comparison": "same_face_direction",
+        "matching_model_hashes": [
+          "5806ec4febd8e6e101c86980fab721fc3262a6c8323a17b4eb7b4b67b0b7bd36"
+        ]
+      },
+      {
+        "name": "640_master_bed_s_wall_e.iff",
+        "comparison": "same_face_direction",
+        "matching_model_hashes": [
+          "b38500b9a7baac204e78f459cf41fcc62024b91f820d2f29668b55a65c72717a"
+        ]
+      },
+      {
+        "name": "640_master_bed_s_wall_w.iff",
+        "comparison": "same_face_direction",
+        "matching_model_hashes": [
+          "6946fb31bc4f61caa16fdab657da2ec4fabb3333bf053d6445d67143a2ff5565"
+        ]
+      },
+      {
+        "name": "640_master_bed_s_wall_w2.iff",
+        "comparison": "same_face_direction",
+        "matching_model_hashes": [
+          "bbdfd1db5c1e21a56898c359cda71a2b957367e74183302aad59f02830a5b35a"
+        ]
+      },
+      {
+        "name": "640_midea_24k_master_219b.iff",
+        "comparison": "same_face_direction",
+        "matching_model_hashes": [
+          "9339b754cd39a1eb670b46420def6710d2bca359cc2505b6baf708b1af40ab43"
+        ]
+      },
+      {
+        "name": "640_midea_24k_master_94f8.iff",
+        "comparison": "same_face_direction",
+        "matching_model_hashes": [
+          "3bfaa65dfc0f92feaab914b8e62fba06dca54afd918bac2f4b528784664b3202"
+        ]
+      },
+      {
+        "name": "640_midea_drain_a_clo_57b6.iff",
+        "comparison": "same_face_direction",
+        "matching_model_hashes": [
+          "c2902c329792bcc4ce61d4abf82cd16aa85680a57851329e89b68968aaf5df61"
+        ]
+      },
+      {
+        "name": "640_midea_lineset_a_c_09f9.iff",
+        "comparison": "same_face_direction",
+        "matching_model_hashes": [
+          "db0529268a692d721d2428e02c42e86eb87527495c0c8d1c4ef0178d680143d4"
+        ]
+      },
+      {
+        "name": "640_midea_power_a_clo_39bb.iff",
+        "comparison": "same_face_direction",
+        "matching_model_hashes": [
+          "42c38742d99c6c8c37c716fd94df27cd5a913a58ac168761214db158ca72b633"
+        ]
+      },
+      {
+        "name": "640_nong_ice_s_wall.iff",
+        "comparison": "same_face_direction",
+        "matching_model_hashes": [
+          "0e6fbc969c21f7290f52118f6f1030f592030aad3e650927073eb85562cd6f8f",
+          "af38cd57a6f105641aa0b74f70c42121c8d37df3e88e9323974e7409b1e4911a"
+        ]
+      },
+      {
+        "name": "640_nong_ice_w_wall_d_9703.iff",
+        "comparison": "same_face_direction",
+        "matching_model_hashes": [
+          "ec78e7a16eae8653550c3cdf3919df00326fcc9f471b3a845815180c50c21eb8",
+          "3dce12e1988e78dd4ceb28dc1293d7c495fd2af46f6002819974a7b00f00d26b"
+        ]
+      },
+      {
+        "name": "640_nong_ice_w_wall_jamb0.iff",
+        "comparison": "same_face_direction",
+        "matching_model_hashes": [
+          "05cddf73d553eb66fa82d272b91df4c0e81c268cbf0712194b1212e8fa1bbc73",
+          "7f2a895668cd18424d19da757cfccaa23a1bcc3a86a8c2e59eb891e6888a2d89"
+        ]
+      },
+      {
+        "name": "640_nong_ice_w_wall_jamb1.iff",
+        "comparison": "same_face_direction",
+        "matching_model_hashes": [
+          "52347f3800329c3eb36916497c58203f6ceee2b143ee040e497ee11cc9351d3d"
+        ]
+      },
+      {
+        "name": "640_room_s_of_master_b087.iff",
+        "comparison": "same_face_direction",
+        "matching_model_hashes": [
+          "9a38480daf5834d6675c4a404050d741623a4b1c93743b212877ad8d34ae87e6"
+        ]
+      },
+      {
+        "name": "640_room_s_of_master_f291.iff",
+        "comparison": "same_face_direction",
+        "matching_model_hashes": [
+          "0e6fbc969c21f7290f52118f6f1030f592030aad3e650927073eb85562cd6f8f",
+          "af38cd57a6f105641aa0b74f70c42121c8d37df3e88e9323974e7409b1e4911a"
+        ]
+      },
+      {
+        "name": "640_window_0.iff",
+        "comparison": "same_face_direction",
+        "matching_model_hashes": [
+          "889f8048056d1366ea9ed1aad24a7e158a1fcb1a513726cd4a72a5771835b5a7"
+        ]
+      },
+      {
+        "name": "640_xiaomi_18k_nongic_4c79.iff",
+        "comparison": "same_face_direction",
+        "matching_model_hashes": [
+          "d8ca734ca3a8f4f5e00ca7a0f58dd95442c010c6af5debaa76ced1a61904b565"
+        ]
+      },
+      {
+        "name": "640_xiaomi_18k_nongic_e8a4.iff",
+        "comparison": "same_face_direction",
+        "matching_model_hashes": [
+          "9339b754cd39a1eb670b46420def6710d2bca359cc2505b6baf708b1af40ab43"
+        ]
+      },
+      {
+        "name": "640_xiaomi_condensate_pump.iff",
+        "comparison": "same_face_direction",
+        "matching_model_hashes": [
+          "387a442e262b8e7a09f26d25effaee56c839a047e8dbd3860fc23e8227afa0f3"
+        ]
+      },
+      {
+        "name": "640_xiaomi_drain.iff",
+        "comparison": "same_face_direction",
+        "matching_model_hashes": [
+          "856ab6206df1655b31ea383f6c46e1628e9ecc4f44a7e2e0fc14c712c0dbdcd5"
+        ]
+      },
+      {
+        "name": "640_xiaomi_lineset.iff",
+        "comparison": "same_face_direction",
+        "matching_model_hashes": [
+          "93ed9f6d50123b318b7dc9933be46206e51e2cbf151db9f0b4455802e5b7b702"
+        ]
+      },
+      {
+        "name": "640_xiaomi_power.iff",
+        "comparison": "same_face_direction",
+        "matching_model_hashes": [
+          "35e4ee0e7c74ac8716b73232c4970f2651e84f55fefd8ff48680d140ee8ba20f"
+        ]
+      },
+      {
+        "name": "corridor.iff",
+        "comparison": "same_face_direction",
+        "matching_model_hashes": [
+          "81d9a6f91b17d91db5980e8188086be2c9031ca8b0574618b3b96f52c8c75ae2"
+        ]
+      },
+      {
+        "name": "corridor_parapet.iff",
+        "comparison": "same_face_direction",
+        "matching_model_hashes": [
+          "9468ab3edaa4666399d5c246a9e9d6a9f4d5cf4935aff50c86466d664669daf3"
+        ]
+      },
+      {
+        "name": "player.iff",
+        "comparison": "same_face_direction",
+        "matching_model_hashes": [
+          "eac3300dedd4ce388bffc1091f946380cebd4646cda63ff366a817af78413cc0"
+        ]
+      },
+      {
+        "name": "site_buildings.iff",
+        "comparison": "same_face_direction",
+        "matching_model_hashes": [
+          "a1855f8313663b165b7a9492eea37fd7a8bee54cf8ff339912512df0bf9d12f5"
+        ]
+      },
+      {
+        "name": "site_map.iff",
+        "comparison": "same_face_direction",
+        "matching_model_hashes": [
+          "2462c09318361c294f6e4b241b1c1218a5bf06425ae4c0f3847c068233e36814"
+        ]
+      },
+      {
+        "name": "site_podium.iff",
+        "comparison": "same_face_direction",
+        "matching_model_hashes": [
+          "a502c8c419a19f9abd275be24f38995263d62bca5b6085abe566fec9fa549854"
+        ]
+      },
+      {
+        "name": "skydome.iff",
+        "comparison": "same_face_direction",
+        "matching_model_hashes": [
+          "4d38dff0ad7fa42949c698d1ebfdc1213ddec6de00aa0f5cf4a48b02a05d6725"
+        ]
+      },
+      {
+        "name": "unit_639.iff",
+        "comparison": "same_face_direction",
+        "matching_model_hashes": [
+          "abf4a6d8a56caae1ebee6f71b36d0c33638d99945f1f5e4867d53968f45fa09d"
+        ]
+      },
+      {
+        "name": "unit_640.iff",
+        "comparison": "same_face_direction",
+        "matching_model_hashes": [
+          "88e411b1dc9aace13df977c86ed62eb8a88d5832784da8d12c1847dfb45d4822"
+        ]
+      },
+      {
+        "name": "west_facade_ledge.iff",
+        "comparison": "same_face_direction",
+        "matching_model_hashes": [
+          "5d9e4f40de8b4ee5f80fb4bbbbd87798d5e765ac08ed1c29703728a9143416fe"
+        ]
+      }
+    ]
+  },
+  {
+    "scene": "wflevels/condo_639_640_touch/condo_639_640_touch.blend",
+    "exit_code": 0,
+    "meshes": [
+      {
+        "name": "639_balcony_north_jamb.iff",
+        "comparison": "same_face_direction",
+        "matching_model_hashes": [
+          "a0cd937ecbf144bfe665040d0b571e9c71fed1bc6506758dd20717f8b0d6170c"
+        ]
+      },
+      {
+        "name": "639_balcony_pony_wall.iff",
+        "comparison": "same_face_direction",
+        "matching_model_hashes": [
+          "a2d87f138731b8f0125af5f3cbd6e933893111b550d67f708520d9ac64355a67"
+        ]
+      },
+      {
+        "name": "639_balcony_shade_bar.iff",
+        "comparison": "same_face_direction",
+        "matching_model_hashes": [
+          "2fcf1b1e4357fb2c5b57d319a814b4c14caf28556fd22f5d86239e363d371145"
+        ]
+      },
+      {
+        "name": "639_balcony_shade_cassette.iff",
+        "comparison": "same_face_direction",
+        "matching_model_hashes": [
+          "77206f87a80d707e0adf42fc3231440fe65f70e4746dbc11284738217e06215b"
+        ]
+      },
+      {
+        "name": "639_balcony_shade_guide_n.iff",
+        "comparison": "same_face_direction",
+        "matching_model_hashes": [
+          "c4b575bc2578a7d0f9acca6edbcce4a90c40a9c01e85135049248993884cf802"
+        ]
+      },
+      {
+        "name": "639_balcony_shade_guide_s.iff",
+        "comparison": "same_face_direction",
+        "matching_model_hashes": [
+          "f27a405ab6cd29ef21600805af504b0be9ac4e20cf7658b1a0a72537d152b210"
+        ]
+      },
+      {
+        "name": "639_balcony_shade_slat_0.iff",
+        "comparison": "same_face_direction",
+        "matching_model_hashes": [
+          "0520f9a008e66c69b7bc49d6c6a2e60a177035476064c8d3b62c2e65c544aef0"
+        ]
+      },
+      {
+        "name": "639_balcony_shade_slat_1.iff",
+        "comparison": "same_face_direction",
+        "matching_model_hashes": [
+          "affcb358418fbcf9d82fd2b64ac080ef3ed8a1842a9d28c18a830af7cd13be0e"
+        ]
+      },
+      {
+        "name": "639_balcony_shade_slat_2.iff",
+        "comparison": "same_face_direction",
+        "matching_model_hashes": [
+          "1fb170240bf16308d4c38b35aee11fafce296884a325a38f7fce343c7ed7867d"
+        ]
+      },
+      {
+        "name": "639_balcony_shade_slat_3.iff",
+        "comparison": "same_face_direction",
+        "matching_model_hashes": [
+          "8e830bcb2f83c1f3de05241ff09a35ef3f4a97452aa5d593c85e191e0fc7edd9"
+        ]
+      },
+      {
+        "name": "639_balcony_shade_slat_4.iff",
+        "comparison": "same_face_direction",
+        "matching_model_hashes": [
+          "1c26125bc0f2cc286340ef8302dc0515785e9994fe88c9e95ca14f7b60e6edd6"
+        ]
+      },
+      {
+        "name": "639_balcony_shade_slat_5.iff",
+        "comparison": "same_face_direction",
+        "matching_model_hashes": [
+          "95db40b1c142be07ac3d823fa2d9c416d66a34b5e129b0e14786674891eef38f"
+        ]
+      },
+      {
+        "name": "639_balcony_shade_slat_6.iff",
+        "comparison": "same_face_direction",
+        "matching_model_hashes": [
+          "5dce92ba570728f532e5c0542246d3249a955f16a7894fd5fe8b5e0568fd023e"
+        ]
+      },
+      {
+        "name": "639_balcony_shade_slat_7.iff",
+        "comparison": "same_face_direction",
+        "matching_model_hashes": [
+          "8e177341bb550a216b62638a966442095c7f81a708f82b77477d8d7a05bf64c2"
+        ]
+      },
+      {
+        "name": "639_balcony_shade_switch.iff",
+        "comparison": "same_face_direction",
+        "matching_model_hashes": [
+          "25b69a64441c79cbc661e0e80d4ed78ead4d6dd7a2f8ce2ecac121dd78aba252"
+        ]
+      },
+      {
+        "name": "639_bath_n_e_wall.iff",
+        "comparison": "same_face_direction",
+        "matching_model_hashes": [
+          "6ac4eee219eca758f26747101b1c2e5950a4a766fd339519228140b9cd53db5c"
+        ]
+      },
+      {
+        "name": "639_bath_s_e_wall_doo_9132.iff",
+        "comparison": "same_face_direction",
+        "matching_model_hashes": [
+          "ec78e7a16eae8653550c3cdf3919df00326fcc9f471b3a845815180c50c21eb8",
+          "3dce12e1988e78dd4ceb28dc1293d7c495fd2af46f6002819974a7b00f00d26b"
+        ]
+      },
+      {
+        "name": "639_bath_s_e_wall_jamb0.iff",
+        "comparison": "same_face_direction",
+        "matching_model_hashes": [
+          "05cddf73d553eb66fa82d272b91df4c0e81c268cbf0712194b1212e8fa1bbc73",
+          "7f2a895668cd18424d19da757cfccaa23a1bcc3a86a8c2e59eb891e6888a2d89"
+        ]
+      },
+      {
+        "name": "639_bath_s_e_wall_jamb1.iff",
+        "comparison": "same_face_direction",
+        "matching_model_hashes": [
+          "4bc882208cf4149a035a9019474b6f4494d5ca314d3ced1f32e65d1c8f67e835",
+          "c36bfab0976bb2e57782053a11d45868bf86844b9983fa933ed7d0fcbf76152d"
+        ]
+      },
+      {
+        "name": "639_bath_s_n_wall.iff",
+        "comparison": "same_face_direction",
+        "matching_model_hashes": [
+          "427660f66f30f5f3dc1d415b2665960ee9a16d9c477d80fd99f03f7611160ef0"
+        ]
+      },
+      {
+        "name": "639_consumer_unit.iff",
+        "comparison": "same_face_direction",
+        "matching_model_hashes": [
+          "92f8b4221cb24a05b292dbe555a6ae47fb70467ec594764fbaca5c9127b74dd8"
+        ]
+      },
+      {
+        "name": "639_daikin_18k_guest_b546.iff",
+        "comparison": "same_face_direction",
+        "matching_model_hashes": [
+          "9339b754cd39a1eb670b46420def6710d2bca359cc2505b6baf708b1af40ab43"
+        ]
+      },
+      {
+        "name": "639_daikin_18k_guest_d870.iff",
+        "comparison": "same_face_direction",
+        "matching_model_hashes": [
+          "882b75d90e25a6bf3de82e228b5ecb09a329c5e095a30b58cc579246577e7044"
+        ]
+      },
+      {
+        "name": "639_daikin_drain.iff",
+        "comparison": "same_face_direction",
+        "matching_model_hashes": [
+          "4942419cf989d1836ac4d8b47d6b9f3fe378520d927fd6d05224c19219fc403b"
+        ]
+      },
+      {
+        "name": "639_daikin_lineset.iff",
+        "comparison": "same_face_direction",
+        "matching_model_hashes": [
+          "c67c969fb3d7ec9f269ffa9c1ac0265ab5a07078770f97f71fe34ed6a0f188cb"
+        ]
+      },
+      {
+        "name": "639_daikin_power.iff",
+        "comparison": "same_face_direction",
+        "matching_model_hashes": [
+          "ca0f8d8dd3fab567037d887c08f07977dc9fc8386479b5a26e8636d44104a549"
+        ]
+      },
+      {
+        "name": "639_front_strip_s_wal_6196.iff",
+        "comparison": "same_face_direction",
+        "matching_model_hashes": [
+          "772e4e7bd2552bab5e5553242be27c6e3dd1f91ea40bb189bc70e9161ca9943d"
+        ]
+      },
+      {
+        "name": "639_front_strip_s_wal_97eb.iff",
+        "comparison": "same_face_direction",
+        "matching_model_hashes": [
+          "16bc772c49e06de0902c2466f5b7773710997d18816373a9cc450bb30ac32d7d"
+        ]
+      },
+      {
+        "name": "639_front_strip_s_wal_9daf.iff",
+        "comparison": "same_face_direction",
+        "matching_model_hashes": [
+          "772e4e7bd2552bab5e5553242be27c6e3dd1f91ea40bb189bc70e9161ca9943d"
+        ]
+      },
+      {
+        "name": "639_front_strip_s_wal_a77d.iff",
+        "comparison": "same_face_direction",
+        "matching_model_hashes": [
+          "3798d0337c150a9137c5a523419c9821fe33d06f5d5540b61696c7e37a36769c"
+        ]
+      },
+      {
+        "name": "639_front_strip_s_wal_f6c7.iff",
+        "comparison": "same_face_direction",
+        "matching_model_hashes": [
+          "0beab4c134b47b9f06bf56b1b2a45d229a2b88be885017950e016fdc505c16de"
+        ]
+      },
+      {
+        "name": "639_guest_project_wall.iff",
+        "comparison": "same_face_direction",
+        "matching_model_hashes": [
+          "e3409849618f37eeec477ba3d7a6c59f166e289fcc63ca77a9fd01a3cb587663"
+        ]
+      },
+      {
+        "name": "639_kitchen_n_wall_do_8213.iff",
+        "comparison": "same_face_direction",
+        "matching_model_hashes": [
+          "772e4e7bd2552bab5e5553242be27c6e3dd1f91ea40bb189bc70e9161ca9943d"
+        ]
+      },
+      {
+        "name": "639_kitchen_n_wall_do_c21b.iff",
+        "comparison": "same_face_direction",
+        "matching_model_hashes": [
+          "772e4e7bd2552bab5e5553242be27c6e3dd1f91ea40bb189bc70e9161ca9943d"
+        ]
+      },
+      {
+        "name": "639_kitchen_n_wall_jamb0.iff",
+        "comparison": "same_face_direction",
+        "matching_model_hashes": [
+          "03a49a5f9b617c999c33bea66aaee0fc8a111b375fc4a36e99bdfcd9990696eb"
+        ]
+      },
+      {
+        "name": "639_kitchen_n_wall_jamb1.iff",
+        "comparison": "same_face_direction",
+        "matching_model_hashes": [
+          "16bc772c49e06de0902c2466f5b7773710997d18816373a9cc450bb30ac32d7d"
+        ]
+      },
+      {
+        "name": "639_kitchen_n_wall_jamb2.iff",
+        "comparison": "same_face_direction",
+        "matching_model_hashes": [
+          "f0b608fbb52824f13e87b3d5ad715f1d8d1a8f784abb06edca9164153f4a4ec4"
+        ]
+      },
+      {
+        "name": "639_patio_grass.iff",
+        "comparison": "same_face_direction",
+        "matching_model_hashes": [
+          "aa3c390f9fc8e3383b606b240fc369404200fe6c20e564d40e5b3786f6c7c839"
+        ]
+      },
+      {
+        "name": "639_project_door_panel_0.iff",
+        "comparison": "same_face_direction",
+        "matching_model_hashes": [
+          "66286ff4fbb26b0106c2d4578659ccdab3a688b9d6e6e488d603536ed56999e3"
+        ]
+      },
+      {
+        "name": "639_project_door_panel_1.iff",
+        "comparison": "same_face_direction",
+        "matching_model_hashes": [
+          "5895b43007434b1473a6c5233b7d6a9d92397c094fc5e3e83b0b4c4ce543c6c0"
+        ]
+      },
+      {
+        "name": "639_project_door_panel_2.iff",
+        "comparison": "same_face_direction",
+        "matching_model_hashes": [
+          "7ab3852208cc82211f4344f3770efe68c9171a0a908f316798d39c66afcfc90a"
+        ]
+      },
+      {
+        "name": "639_window_1.iff",
+        "comparison": "same_face_direction",
+        "matching_model_hashes": [
+          "4fd33cbfa59695df4a54708f0e81f763bb35babe79c4e28a7085132aef7300dc"
+        ]
+      },
+      {
+        "name": "640_bath_closet_divider.iff",
+        "comparison": "same_face_direction",
+        "matching_model_hashes": [
+          "6ac4eee219eca758f26747101b1c2e5950a4a766fd339519228140b9cd53db5c"
+        ]
+      },
+      {
+        "name": "640_bath_closet_s_wal_0083.iff",
+        "comparison": "same_face_direction",
+        "matching_model_hashes": [
+          "7f57e665e8fc31cf61d224efc5f7081aa4b252e62b9fb483a5177947cd031277"
+        ]
+      },
+      {
+        "name": "640_bath_closet_s_wal_200d.iff",
+        "comparison": "same_face_direction",
+        "matching_model_hashes": [
+          "772e4e7bd2552bab5e5553242be27c6e3dd1f91ea40bb189bc70e9161ca9943d"
+        ]
+      },
+      {
+        "name": "640_bath_closet_s_wal_5139.iff",
+        "comparison": "same_face_direction",
+        "matching_model_hashes": [
+          "e5c366e32ae21e6dd0c7965e72d1dc23fff44edbbab079f86918961f9de5dfac"
+        ]
+      },
+      {
+        "name": "640_bath_closet_s_wal_61af.iff",
+        "comparison": "same_face_direction",
+        "matching_model_hashes": [
+          "c40fe97db3a7a03719f1dcf5f7b36b030c13e1680b0a7e563393283ab60e91ad"
+        ]
+      },
+      {
+        "name": "640_bath_closet_s_wal_724f.iff",
+        "comparison": "same_face_direction",
+        "matching_model_hashes": [
+          "772e4e7bd2552bab5e5553242be27c6e3dd1f91ea40bb189bc70e9161ca9943d"
+        ]
+      },
+      {
+        "name": "640_bath_s_w_wall_doo_9831.iff",
+        "comparison": "same_face_direction",
+        "matching_model_hashes": [
+          "ec78e7a16eae8653550c3cdf3919df00326fcc9f471b3a845815180c50c21eb8",
+          "3dce12e1988e78dd4ceb28dc1293d7c495fd2af46f6002819974a7b00f00d26b"
+        ]
+      },
+      {
+        "name": "640_bath_s_w_wall_jamb0.iff",
+        "comparison": "same_face_direction",
+        "matching_model_hashes": [
+          "05cddf73d553eb66fa82d272b91df4c0e81c268cbf0712194b1212e8fa1bbc73",
+          "7f2a895668cd18424d19da757cfccaa23a1bcc3a86a8c2e59eb891e6888a2d89"
+        ]
+      },
+      {
+        "name": "640_bath_s_w_wall_jamb1.iff",
+        "comparison": "same_face_direction",
+        "matching_model_hashes": [
+          "4bc882208cf4149a035a9019474b6f4494d5ca314d3ced1f32e65d1c8f67e835",
+          "c36bfab0976bb2e57782053a11d45868bf86844b9983fa933ed7d0fcbf76152d"
+        ]
+      },
+      {
+        "name": "640_consumer_unit.iff",
+        "comparison": "same_face_direction",
+        "matching_model_hashes": [
+          "92f8b4221cb24a05b292dbe555a6ae47fb70467ec594764fbaca5c9127b74dd8"
+        ]
+      },
+      {
+        "name": "640_curve_window_1.iff",
+        "comparison": "same_face_direction",
+        "matching_model_hashes": [
+          "78c0f2c31c443ea8d924e6c4fe7e144bd550d2afadb1266d4817d3a36a6a3517"
+        ]
+      },
+      {
+        "name": "640_curve_window_2.iff",
+        "comparison": "same_face_direction",
+        "matching_model_hashes": [
+          "2368bc6c912e2231beb7397a7d8aa7cc4148fc5323d2b0d1614900bbf51576da"
+        ]
+      },
+      {
+        "name": "640_curve_window_3.iff",
+        "comparison": "same_face_direction",
+        "matching_model_hashes": [
+          "14e486d90e8bfc0d71ea9700765ea6f5674f695757a6424f9e8e79e1b0128908"
+        ]
+      },
+      {
+        "name": "640_curve_window_4.iff",
+        "comparison": "same_face_direction",
+        "matching_model_hashes": [
+          "3e6594ce011de1674005fe53984acfec413c622cf0ef3a87393f47b530f51b98"
+        ]
+      },
+      {
+        "name": "640_curve_window_5.iff",
+        "comparison": "same_face_direction",
+        "matching_model_hashes": [
+          "3b8766aea3d3cc875c81781cc0c59461f3a0899eff474e7fd7a69e41ea01097f"
+        ]
+      },
+      {
+        "name": "640_curve_window_6.iff",
+        "comparison": "same_face_direction",
+        "matching_model_hashes": [
+          "c4157266b7e1ec91834713f7522e58092ceb7e02dcdc0516504692cd22781b80"
+        ]
+      },
+      {
+        "name": "640_living_nw_column.iff",
+        "comparison": "same_face_direction",
+        "matching_model_hashes": [
+          "3de92b2f383573921883047cc1dd3324681e62ff802d8e45ece121cefce5f1be"
+        ]
+      },
+      {
+        "name": "640_master_bed_s_door_9839.iff",
+        "comparison": "same_face_direction",
+        "matching_model_hashes": [
+          "5806ec4febd8e6e101c86980fab721fc3262a6c8323a17b4eb7b4b67b0b7bd36"
+        ]
+      },
+      {
+        "name": "640_master_bed_s_wall_e.iff",
+        "comparison": "same_face_direction",
+        "matching_model_hashes": [
+          "b38500b9a7baac204e78f459cf41fcc62024b91f820d2f29668b55a65c72717a"
+        ]
+      },
+      {
+        "name": "640_master_bed_s_wall_w.iff",
+        "comparison": "same_face_direction",
+        "matching_model_hashes": [
+          "6946fb31bc4f61caa16fdab657da2ec4fabb3333bf053d6445d67143a2ff5565"
+        ]
+      },
+      {
+        "name": "640_master_bed_s_wall_w2.iff",
+        "comparison": "same_face_direction",
+        "matching_model_hashes": [
+          "bbdfd1db5c1e21a56898c359cda71a2b957367e74183302aad59f02830a5b35a"
+        ]
+      },
+      {
+        "name": "640_midea_24k_master_219b.iff",
+        "comparison": "same_face_direction",
+        "matching_model_hashes": [
+          "9339b754cd39a1eb670b46420def6710d2bca359cc2505b6baf708b1af40ab43"
+        ]
+      },
+      {
+        "name": "640_midea_24k_master_94f8.iff",
+        "comparison": "same_face_direction",
+        "matching_model_hashes": [
+          "3bfaa65dfc0f92feaab914b8e62fba06dca54afd918bac2f4b528784664b3202"
+        ]
+      },
+      {
+        "name": "640_midea_drain_a_clo_57b6.iff",
+        "comparison": "same_face_direction",
+        "matching_model_hashes": [
+          "c2902c329792bcc4ce61d4abf82cd16aa85680a57851329e89b68968aaf5df61"
+        ]
+      },
+      {
+        "name": "640_midea_lineset_a_c_09f9.iff",
+        "comparison": "same_face_direction",
+        "matching_model_hashes": [
+          "db0529268a692d721d2428e02c42e86eb87527495c0c8d1c4ef0178d680143d4"
+        ]
+      },
+      {
+        "name": "640_midea_power_a_clo_39bb.iff",
+        "comparison": "same_face_direction",
+        "matching_model_hashes": [
+          "42c38742d99c6c8c37c716fd94df27cd5a913a58ac168761214db158ca72b633"
+        ]
+      },
+      {
+        "name": "640_nong_ice_s_wall.iff",
+        "comparison": "same_face_direction",
+        "matching_model_hashes": [
+          "0e6fbc969c21f7290f52118f6f1030f592030aad3e650927073eb85562cd6f8f",
+          "af38cd57a6f105641aa0b74f70c42121c8d37df3e88e9323974e7409b1e4911a"
+        ]
+      },
+      {
+        "name": "640_nong_ice_w_wall_d_9703.iff",
+        "comparison": "same_face_direction",
+        "matching_model_hashes": [
+          "ec78e7a16eae8653550c3cdf3919df00326fcc9f471b3a845815180c50c21eb8",
+          "3dce12e1988e78dd4ceb28dc1293d7c495fd2af46f6002819974a7b00f00d26b"
+        ]
+      },
+      {
+        "name": "640_nong_ice_w_wall_jamb0.iff",
+        "comparison": "same_face_direction",
+        "matching_model_hashes": [
+          "05cddf73d553eb66fa82d272b91df4c0e81c268cbf0712194b1212e8fa1bbc73",
+          "7f2a895668cd18424d19da757cfccaa23a1bcc3a86a8c2e59eb891e6888a2d89"
+        ]
+      },
+      {
+        "name": "640_nong_ice_w_wall_jamb1.iff",
+        "comparison": "same_face_direction",
+        "matching_model_hashes": [
+          "52347f3800329c3eb36916497c58203f6ceee2b143ee040e497ee11cc9351d3d"
+        ]
+      },
+      {
+        "name": "640_room_s_of_master_b087.iff",
+        "comparison": "same_face_direction",
+        "matching_model_hashes": [
+          "9a38480daf5834d6675c4a404050d741623a4b1c93743b212877ad8d34ae87e6"
+        ]
+      },
+      {
+        "name": "640_room_s_of_master_f291.iff",
+        "comparison": "same_face_direction",
+        "matching_model_hashes": [
+          "0e6fbc969c21f7290f52118f6f1030f592030aad3e650927073eb85562cd6f8f",
+          "af38cd57a6f105641aa0b74f70c42121c8d37df3e88e9323974e7409b1e4911a"
+        ]
+      },
+      {
+        "name": "640_window_0.iff",
+        "comparison": "same_face_direction",
+        "matching_model_hashes": [
+          "889f8048056d1366ea9ed1aad24a7e158a1fcb1a513726cd4a72a5771835b5a7"
+        ]
+      },
+      {
+        "name": "640_xiaomi_18k_nongic_4c79.iff",
+        "comparison": "same_face_direction",
+        "matching_model_hashes": [
+          "d8ca734ca3a8f4f5e00ca7a0f58dd95442c010c6af5debaa76ced1a61904b565"
+        ]
+      },
+      {
+        "name": "640_xiaomi_18k_nongic_e8a4.iff",
+        "comparison": "same_face_direction",
+        "matching_model_hashes": [
+          "9339b754cd39a1eb670b46420def6710d2bca359cc2505b6baf708b1af40ab43"
+        ]
+      },
+      {
+        "name": "640_xiaomi_condensate_pump.iff",
+        "comparison": "same_face_direction",
+        "matching_model_hashes": [
+          "387a442e262b8e7a09f26d25effaee56c839a047e8dbd3860fc23e8227afa0f3"
+        ]
+      },
+      {
+        "name": "640_xiaomi_drain.iff",
+        "comparison": "same_face_direction",
+        "matching_model_hashes": [
+          "856ab6206df1655b31ea383f6c46e1628e9ecc4f44a7e2e0fc14c712c0dbdcd5"
+        ]
+      },
+      {
+        "name": "640_xiaomi_lineset.iff",
+        "comparison": "same_face_direction",
+        "matching_model_hashes": [
+          "93ed9f6d50123b318b7dc9933be46206e51e2cbf151db9f0b4455802e5b7b702"
+        ]
+      },
+      {
+        "name": "640_xiaomi_power.iff",
+        "comparison": "same_face_direction",
+        "matching_model_hashes": [
+          "35e4ee0e7c74ac8716b73232c4970f2651e84f55fefd8ff48680d140ee8ba20f"
+        ]
+      },
+      {
+        "name": "camera_mode_0.iff",
+        "comparison": "same_face_direction",
+        "matching_model_hashes": [
+          "4d8c2a767eb9ea01225f5dd2778ebf897a7d939a017e7d20afa15b1f32617dbb"
+        ]
+      },
+      {
+        "name": "camera_mode_1.iff",
+        "comparison": "same_face_direction",
+        "matching_model_hashes": [
+          "bd7db7f52fda8138f20e0d88bba038c1183b4bb8986f3647dfd47ab424cc8288"
+        ]
+      },
+      {
+        "name": "camera_mode_2.iff",
+        "comparison": "same_face_direction",
+        "matching_model_hashes": [
+          "ba0a462bde304e1b1620bb5159140acefce3e5df59847b728e18155b0118a229"
+        ]
+      },
+      {
+        "name": "corridor.iff",
+        "comparison": "same_face_direction",
+        "matching_model_hashes": [
+          "81d9a6f91b17d91db5980e8188086be2c9031ca8b0574618b3b96f52c8c75ae2"
+        ]
+      },
+      {
+        "name": "corridor_parapet.iff",
+        "comparison": "same_face_direction",
+        "matching_model_hashes": [
+          "9468ab3edaa4666399d5c246a9e9d6a9f4d5cf4935aff50c86466d664669daf3"
+        ]
+      },
+      {
+        "name": "player.iff",
+        "comparison": "same_face_direction",
+        "matching_model_hashes": [
+          "eac3300dedd4ce388bffc1091f946380cebd4646cda63ff366a817af78413cc0"
+        ]
+      },
+      {
+        "name": "site_buildings.iff",
+        "comparison": "same_face_direction",
+        "matching_model_hashes": [
+          "a1855f8313663b165b7a9492eea37fd7a8bee54cf8ff339912512df0bf9d12f5"
+        ]
+      },
+      {
+        "name": "site_map.iff",
+        "comparison": "same_face_direction",
+        "matching_model_hashes": [
+          "2462c09318361c294f6e4b241b1c1218a5bf06425ae4c0f3847c068233e36814"
+        ]
+      },
+      {
+        "name": "site_podium.iff",
+        "comparison": "same_face_direction",
+        "matching_model_hashes": [
+          "545f7262652a344aa14d33885f44f299c093425cd9d96232e960c508e8f19c87"
+        ]
+      },
+      {
+        "name": "skydome.iff",
+        "comparison": "same_face_direction",
+        "matching_model_hashes": [
+          "4d38dff0ad7fa42949c698d1ebfdc1213ddec6de00aa0f5cf4a48b02a05d6725"
+        ]
+      },
+      {
+        "name": "unit_639.iff",
+        "comparison": "same_face_direction",
+        "matching_model_hashes": [
+          "abf4a6d8a56caae1ebee6f71b36d0c33638d99945f1f5e4867d53968f45fa09d"
+        ]
+      },
+      {
+        "name": "unit_640.iff",
+        "comparison": "same_face_direction",
+        "matching_model_hashes": [
+          "88e411b1dc9aace13df977c86ed62eb8a88d5832784da8d12c1847dfb45d4822"
+        ]
+      },
+      {
+        "name": "west_facade_ledge.iff",
+        "comparison": "same_face_direction",
+        "matching_model_hashes": [
+          "5d9e4f40de8b4ee5f80fb4bbbbd87798d5e765ac08ed1c29703728a9143416fe"
+        ]
+      }
+    ]
+  },
+  {
+    "scene": "wflevels/condo_639_640_tour/condo_639_640_tour.blend",
+    "exit_code": 0,
+    "meshes": [
+      {
+        "name": "639_balcony_north_jamb.iff",
+        "comparison": "same_face_direction",
+        "matching_model_hashes": [
+          "a0cd937ecbf144bfe665040d0b571e9c71fed1bc6506758dd20717f8b0d6170c"
+        ]
+      },
+      {
+        "name": "639_balcony_pony_wall.iff",
+        "comparison": "same_face_direction",
+        "matching_model_hashes": [
+          "a2d87f138731b8f0125af5f3cbd6e933893111b550d67f708520d9ac64355a67"
+        ]
+      },
+      {
+        "name": "639_balcony_shade_bar.iff",
+        "comparison": "same_face_direction",
+        "matching_model_hashes": [
+          "2fcf1b1e4357fb2c5b57d319a814b4c14caf28556fd22f5d86239e363d371145"
+        ]
+      },
+      {
+        "name": "639_balcony_shade_cassette.iff",
+        "comparison": "same_face_direction",
+        "matching_model_hashes": [
+          "77206f87a80d707e0adf42fc3231440fe65f70e4746dbc11284738217e06215b"
+        ]
+      },
+      {
+        "name": "639_balcony_shade_guide_n.iff",
+        "comparison": "same_face_direction",
+        "matching_model_hashes": [
+          "c4b575bc2578a7d0f9acca6edbcce4a90c40a9c01e85135049248993884cf802"
+        ]
+      },
+      {
+        "name": "639_balcony_shade_guide_s.iff",
+        "comparison": "same_face_direction",
+        "matching_model_hashes": [
+          "f27a405ab6cd29ef21600805af504b0be9ac4e20cf7658b1a0a72537d152b210"
+        ]
+      },
+      {
+        "name": "639_balcony_shade_slat_0.iff",
+        "comparison": "same_face_direction",
+        "matching_model_hashes": [
+          "0520f9a008e66c69b7bc49d6c6a2e60a177035476064c8d3b62c2e65c544aef0"
+        ]
+      },
+      {
+        "name": "639_balcony_shade_slat_1.iff",
+        "comparison": "same_face_direction",
+        "matching_model_hashes": [
+          "affcb358418fbcf9d82fd2b64ac080ef3ed8a1842a9d28c18a830af7cd13be0e"
+        ]
+      },
+      {
+        "name": "639_balcony_shade_slat_2.iff",
+        "comparison": "same_face_direction",
+        "matching_model_hashes": [
+          "1fb170240bf16308d4c38b35aee11fafce296884a325a38f7fce343c7ed7867d"
+        ]
+      },
+      {
+        "name": "639_balcony_shade_slat_3.iff",
+        "comparison": "same_face_direction",
+        "matching_model_hashes": [
+          "8e830bcb2f83c1f3de05241ff09a35ef3f4a97452aa5d593c85e191e0fc7edd9"
+        ]
+      },
+      {
+        "name": "639_balcony_shade_slat_4.iff",
+        "comparison": "same_face_direction",
+        "matching_model_hashes": [
+          "1c26125bc0f2cc286340ef8302dc0515785e9994fe88c9e95ca14f7b60e6edd6"
+        ]
+      },
+      {
+        "name": "639_balcony_shade_slat_5.iff",
+        "comparison": "same_face_direction",
+        "matching_model_hashes": [
+          "95db40b1c142be07ac3d823fa2d9c416d66a34b5e129b0e14786674891eef38f"
+        ]
+      },
+      {
+        "name": "639_balcony_shade_slat_6.iff",
+        "comparison": "same_face_direction",
+        "matching_model_hashes": [
+          "5dce92ba570728f532e5c0542246d3249a955f16a7894fd5fe8b5e0568fd023e"
+        ]
+      },
+      {
+        "name": "639_balcony_shade_slat_7.iff",
+        "comparison": "same_face_direction",
+        "matching_model_hashes": [
+          "8e177341bb550a216b62638a966442095c7f81a708f82b77477d8d7a05bf64c2"
+        ]
+      },
+      {
+        "name": "639_balcony_shade_switch.iff",
+        "comparison": "same_face_direction",
+        "matching_model_hashes": [
+          "25b69a64441c79cbc661e0e80d4ed78ead4d6dd7a2f8ce2ecac121dd78aba252"
+        ]
+      },
+      {
+        "name": "639_bath_n_e_wall.iff",
+        "comparison": "same_face_direction",
+        "matching_model_hashes": [
+          "6ac4eee219eca758f26747101b1c2e5950a4a766fd339519228140b9cd53db5c"
+        ]
+      },
+      {
+        "name": "639_bath_s_e_wall_doo_9132.iff",
+        "comparison": "same_face_direction",
+        "matching_model_hashes": [
+          "ec78e7a16eae8653550c3cdf3919df00326fcc9f471b3a845815180c50c21eb8",
+          "3dce12e1988e78dd4ceb28dc1293d7c495fd2af46f6002819974a7b00f00d26b"
+        ]
+      },
+      {
+        "name": "639_bath_s_e_wall_jamb0.iff",
+        "comparison": "same_face_direction",
+        "matching_model_hashes": [
+          "05cddf73d553eb66fa82d272b91df4c0e81c268cbf0712194b1212e8fa1bbc73",
+          "7f2a895668cd18424d19da757cfccaa23a1bcc3a86a8c2e59eb891e6888a2d89"
+        ]
+      },
+      {
+        "name": "639_bath_s_e_wall_jamb1.iff",
+        "comparison": "same_face_direction",
+        "matching_model_hashes": [
+          "4bc882208cf4149a035a9019474b6f4494d5ca314d3ced1f32e65d1c8f67e835",
+          "c36bfab0976bb2e57782053a11d45868bf86844b9983fa933ed7d0fcbf76152d"
+        ]
+      },
+      {
+        "name": "639_bath_s_n_wall.iff",
+        "comparison": "same_face_direction",
+        "matching_model_hashes": [
+          "427660f66f30f5f3dc1d415b2665960ee9a16d9c477d80fd99f03f7611160ef0"
+        ]
+      },
+      {
+        "name": "639_consumer_unit.iff",
+        "comparison": "same_face_direction",
+        "matching_model_hashes": [
+          "92f8b4221cb24a05b292dbe555a6ae47fb70467ec594764fbaca5c9127b74dd8"
+        ]
+      },
+      {
+        "name": "639_daikin_18k_guest_b546.iff",
+        "comparison": "same_face_direction",
+        "matching_model_hashes": [
+          "9339b754cd39a1eb670b46420def6710d2bca359cc2505b6baf708b1af40ab43"
+        ]
+      },
+      {
+        "name": "639_daikin_18k_guest_d870.iff",
+        "comparison": "same_face_direction",
+        "matching_model_hashes": [
+          "882b75d90e25a6bf3de82e228b5ecb09a329c5e095a30b58cc579246577e7044"
+        ]
+      },
+      {
+        "name": "639_daikin_drain.iff",
+        "comparison": "same_face_direction",
+        "matching_model_hashes": [
+          "4942419cf989d1836ac4d8b47d6b9f3fe378520d927fd6d05224c19219fc403b"
+        ]
+      },
+      {
+        "name": "639_daikin_lineset.iff",
+        "comparison": "same_face_direction",
+        "matching_model_hashes": [
+          "c67c969fb3d7ec9f269ffa9c1ac0265ab5a07078770f97f71fe34ed6a0f188cb"
+        ]
+      },
+      {
+        "name": "639_daikin_power.iff",
+        "comparison": "same_face_direction",
+        "matching_model_hashes": [
+          "ca0f8d8dd3fab567037d887c08f07977dc9fc8386479b5a26e8636d44104a549"
+        ]
+      },
+      {
+        "name": "639_front_strip_s_wal_6196.iff",
+        "comparison": "same_face_direction",
+        "matching_model_hashes": [
+          "772e4e7bd2552bab5e5553242be27c6e3dd1f91ea40bb189bc70e9161ca9943d"
+        ]
+      },
+      {
+        "name": "639_front_strip_s_wal_97eb.iff",
+        "comparison": "same_face_direction",
+        "matching_model_hashes": [
+          "16bc772c49e06de0902c2466f5b7773710997d18816373a9cc450bb30ac32d7d"
+        ]
+      },
+      {
+        "name": "639_front_strip_s_wal_9daf.iff",
+        "comparison": "same_face_direction",
+        "matching_model_hashes": [
+          "772e4e7bd2552bab5e5553242be27c6e3dd1f91ea40bb189bc70e9161ca9943d"
+        ]
+      },
+      {
+        "name": "639_front_strip_s_wal_a77d.iff",
+        "comparison": "same_face_direction",
+        "matching_model_hashes": [
+          "3798d0337c150a9137c5a523419c9821fe33d06f5d5540b61696c7e37a36769c"
+        ]
+      },
+      {
+        "name": "639_front_strip_s_wal_f6c7.iff",
+        "comparison": "same_face_direction",
+        "matching_model_hashes": [
+          "0beab4c134b47b9f06bf56b1b2a45d229a2b88be885017950e016fdc505c16de"
+        ]
+      },
+      {
+        "name": "639_guest_project_wall.iff",
+        "comparison": "same_face_direction",
+        "matching_model_hashes": [
+          "e3409849618f37eeec477ba3d7a6c59f166e289fcc63ca77a9fd01a3cb587663"
+        ]
+      },
+      {
+        "name": "639_kitchen_n_wall_do_8213.iff",
+        "comparison": "same_face_direction",
+        "matching_model_hashes": [
+          "772e4e7bd2552bab5e5553242be27c6e3dd1f91ea40bb189bc70e9161ca9943d"
+        ]
+      },
+      {
+        "name": "639_kitchen_n_wall_do_c21b.iff",
+        "comparison": "same_face_direction",
+        "matching_model_hashes": [
+          "772e4e7bd2552bab5e5553242be27c6e3dd1f91ea40bb189bc70e9161ca9943d"
+        ]
+      },
+      {
+        "name": "639_kitchen_n_wall_jamb0.iff",
+        "comparison": "same_face_direction",
+        "matching_model_hashes": [
+          "03a49a5f9b617c999c33bea66aaee0fc8a111b375fc4a36e99bdfcd9990696eb"
+        ]
+      },
+      {
+        "name": "639_kitchen_n_wall_jamb1.iff",
+        "comparison": "same_face_direction",
+        "matching_model_hashes": [
+          "16bc772c49e06de0902c2466f5b7773710997d18816373a9cc450bb30ac32d7d"
+        ]
+      },
+      {
+        "name": "639_kitchen_n_wall_jamb2.iff",
+        "comparison": "same_face_direction",
+        "matching_model_hashes": [
+          "f0b608fbb52824f13e87b3d5ad715f1d8d1a8f784abb06edca9164153f4a4ec4"
+        ]
+      },
+      {
+        "name": "639_patio_grass.iff",
+        "comparison": "same_face_direction",
+        "matching_model_hashes": [
+          "aa3c390f9fc8e3383b606b240fc369404200fe6c20e564d40e5b3786f6c7c839"
+        ]
+      },
+      {
+        "name": "639_project_door_panel_0.iff",
+        "comparison": "same_face_direction",
+        "matching_model_hashes": [
+          "66286ff4fbb26b0106c2d4578659ccdab3a688b9d6e6e488d603536ed56999e3"
+        ]
+      },
+      {
+        "name": "639_project_door_panel_1.iff",
+        "comparison": "same_face_direction",
+        "matching_model_hashes": [
+          "5895b43007434b1473a6c5233b7d6a9d92397c094fc5e3e83b0b4c4ce543c6c0"
+        ]
+      },
+      {
+        "name": "639_project_door_panel_2.iff",
+        "comparison": "same_face_direction",
+        "matching_model_hashes": [
+          "7ab3852208cc82211f4344f3770efe68c9171a0a908f316798d39c66afcfc90a"
+        ]
+      },
+      {
+        "name": "639_window_1.iff",
+        "comparison": "same_face_direction",
+        "matching_model_hashes": [
+          "4fd33cbfa59695df4a54708f0e81f763bb35babe79c4e28a7085132aef7300dc"
+        ]
+      },
+      {
+        "name": "640_bath_closet_divider.iff",
+        "comparison": "same_face_direction",
+        "matching_model_hashes": [
+          "6ac4eee219eca758f26747101b1c2e5950a4a766fd339519228140b9cd53db5c"
+        ]
+      },
+      {
+        "name": "640_bath_closet_s_wal_0083.iff",
+        "comparison": "same_face_direction",
+        "matching_model_hashes": [
+          "7f57e665e8fc31cf61d224efc5f7081aa4b252e62b9fb483a5177947cd031277"
+        ]
+      },
+      {
+        "name": "640_bath_closet_s_wal_200d.iff",
+        "comparison": "same_face_direction",
+        "matching_model_hashes": [
+          "772e4e7bd2552bab5e5553242be27c6e3dd1f91ea40bb189bc70e9161ca9943d"
+        ]
+      },
+      {
+        "name": "640_bath_closet_s_wal_5139.iff",
+        "comparison": "same_face_direction",
+        "matching_model_hashes": [
+          "e5c366e32ae21e6dd0c7965e72d1dc23fff44edbbab079f86918961f9de5dfac"
+        ]
+      },
+      {
+        "name": "640_bath_closet_s_wal_61af.iff",
+        "comparison": "same_face_direction",
+        "matching_model_hashes": [
+          "c40fe97db3a7a03719f1dcf5f7b36b030c13e1680b0a7e563393283ab60e91ad"
+        ]
+      },
+      {
+        "name": "640_bath_closet_s_wal_724f.iff",
+        "comparison": "same_face_direction",
+        "matching_model_hashes": [
+          "772e4e7bd2552bab5e5553242be27c6e3dd1f91ea40bb189bc70e9161ca9943d"
+        ]
+      },
+      {
+        "name": "640_bath_s_w_wall_doo_9831.iff",
+        "comparison": "same_face_direction",
+        "matching_model_hashes": [
+          "ec78e7a16eae8653550c3cdf3919df00326fcc9f471b3a845815180c50c21eb8",
+          "3dce12e1988e78dd4ceb28dc1293d7c495fd2af46f6002819974a7b00f00d26b"
+        ]
+      },
+      {
+        "name": "640_bath_s_w_wall_jamb0.iff",
+        "comparison": "same_face_direction",
+        "matching_model_hashes": [
+          "05cddf73d553eb66fa82d272b91df4c0e81c268cbf0712194b1212e8fa1bbc73",
+          "7f2a895668cd18424d19da757cfccaa23a1bcc3a86a8c2e59eb891e6888a2d89"
+        ]
+      },
+      {
+        "name": "640_bath_s_w_wall_jamb1.iff",
+        "comparison": "same_face_direction",
+        "matching_model_hashes": [
+          "4bc882208cf4149a035a9019474b6f4494d5ca314d3ced1f32e65d1c8f67e835",
+          "c36bfab0976bb2e57782053a11d45868bf86844b9983fa933ed7d0fcbf76152d"
+        ]
+      },
+      {
+        "name": "640_consumer_unit.iff",
+        "comparison": "same_face_direction",
+        "matching_model_hashes": [
+          "92f8b4221cb24a05b292dbe555a6ae47fb70467ec594764fbaca5c9127b74dd8"
+        ]
+      },
+      {
+        "name": "640_curve_window_1.iff",
+        "comparison": "same_face_direction",
+        "matching_model_hashes": [
+          "78c0f2c31c443ea8d924e6c4fe7e144bd550d2afadb1266d4817d3a36a6a3517"
+        ]
+      },
+      {
+        "name": "640_curve_window_2.iff",
+        "comparison": "same_face_direction",
+        "matching_model_hashes": [
+          "2368bc6c912e2231beb7397a7d8aa7cc4148fc5323d2b0d1614900bbf51576da"
+        ]
+      },
+      {
+        "name": "640_curve_window_3.iff",
+        "comparison": "same_face_direction",
+        "matching_model_hashes": [
+          "14e486d90e8bfc0d71ea9700765ea6f5674f695757a6424f9e8e79e1b0128908"
+        ]
+      },
+      {
+        "name": "640_curve_window_4.iff",
+        "comparison": "same_face_direction",
+        "matching_model_hashes": [
+          "3e6594ce011de1674005fe53984acfec413c622cf0ef3a87393f47b530f51b98"
+        ]
+      },
+      {
+        "name": "640_curve_window_5.iff",
+        "comparison": "same_face_direction",
+        "matching_model_hashes": [
+          "3b8766aea3d3cc875c81781cc0c59461f3a0899eff474e7fd7a69e41ea01097f"
+        ]
+      },
+      {
+        "name": "640_curve_window_6.iff",
+        "comparison": "same_face_direction",
+        "matching_model_hashes": [
+          "c4157266b7e1ec91834713f7522e58092ceb7e02dcdc0516504692cd22781b80"
+        ]
+      },
+      {
+        "name": "640_living_nw_column.iff",
+        "comparison": "same_face_direction",
+        "matching_model_hashes": [
+          "3de92b2f383573921883047cc1dd3324681e62ff802d8e45ece121cefce5f1be"
+        ]
+      },
+      {
+        "name": "640_master_bed_s_door_9839.iff",
+        "comparison": "same_face_direction",
+        "matching_model_hashes": [
+          "5806ec4febd8e6e101c86980fab721fc3262a6c8323a17b4eb7b4b67b0b7bd36"
+        ]
+      },
+      {
+        "name": "640_master_bed_s_wall_e.iff",
+        "comparison": "same_face_direction",
+        "matching_model_hashes": [
+          "b38500b9a7baac204e78f459cf41fcc62024b91f820d2f29668b55a65c72717a"
+        ]
+      },
+      {
+        "name": "640_master_bed_s_wall_w.iff",
+        "comparison": "same_face_direction",
+        "matching_model_hashes": [
+          "6946fb31bc4f61caa16fdab657da2ec4fabb3333bf053d6445d67143a2ff5565"
+        ]
+      },
+      {
+        "name": "640_master_bed_s_wall_w2.iff",
+        "comparison": "same_face_direction",
+        "matching_model_hashes": [
+          "bbdfd1db5c1e21a56898c359cda71a2b957367e74183302aad59f02830a5b35a"
+        ]
+      },
+      {
+        "name": "640_midea_24k_master_219b.iff",
+        "comparison": "same_face_direction",
+        "matching_model_hashes": [
+          "9339b754cd39a1eb670b46420def6710d2bca359cc2505b6baf708b1af40ab43"
+        ]
+      },
+      {
+        "name": "640_midea_24k_master_94f8.iff",
+        "comparison": "same_face_direction",
+        "matching_model_hashes": [
+          "3bfaa65dfc0f92feaab914b8e62fba06dca54afd918bac2f4b528784664b3202"
+        ]
+      },
+      {
+        "name": "640_midea_drain_a_clo_57b6.iff",
+        "comparison": "same_face_direction",
+        "matching_model_hashes": [
+          "c2902c329792bcc4ce61d4abf82cd16aa85680a57851329e89b68968aaf5df61"
+        ]
+      },
+      {
+        "name": "640_midea_lineset_a_c_09f9.iff",
+        "comparison": "same_face_direction",
+        "matching_model_hashes": [
+          "db0529268a692d721d2428e02c42e86eb87527495c0c8d1c4ef0178d680143d4"
+        ]
+      },
+      {
+        "name": "640_midea_power_a_clo_39bb.iff",
+        "comparison": "same_face_direction",
+        "matching_model_hashes": [
+          "42c38742d99c6c8c37c716fd94df27cd5a913a58ac168761214db158ca72b633"
+        ]
+      },
+      {
+        "name": "640_nong_ice_s_wall.iff",
+        "comparison": "same_face_direction",
+        "matching_model_hashes": [
+          "0e6fbc969c21f7290f52118f6f1030f592030aad3e650927073eb85562cd6f8f",
+          "af38cd57a6f105641aa0b74f70c42121c8d37df3e88e9323974e7409b1e4911a"
+        ]
+      },
+      {
+        "name": "640_nong_ice_w_wall_d_9703.iff",
+        "comparison": "same_face_direction",
+        "matching_model_hashes": [
+          "ec78e7a16eae8653550c3cdf3919df00326fcc9f471b3a845815180c50c21eb8",
+          "3dce12e1988e78dd4ceb28dc1293d7c495fd2af46f6002819974a7b00f00d26b"
+        ]
+      },
+      {
+        "name": "640_nong_ice_w_wall_jamb0.iff",
+        "comparison": "same_face_direction",
+        "matching_model_hashes": [
+          "05cddf73d553eb66fa82d272b91df4c0e81c268cbf0712194b1212e8fa1bbc73",
+          "7f2a895668cd18424d19da757cfccaa23a1bcc3a86a8c2e59eb891e6888a2d89"
+        ]
+      },
+      {
+        "name": "640_nong_ice_w_wall_jamb1.iff",
+        "comparison": "same_face_direction",
+        "matching_model_hashes": [
+          "52347f3800329c3eb36916497c58203f6ceee2b143ee040e497ee11cc9351d3d"
+        ]
+      },
+      {
+        "name": "640_room_s_of_master_b087.iff",
+        "comparison": "same_face_direction",
+        "matching_model_hashes": [
+          "9a38480daf5834d6675c4a404050d741623a4b1c93743b212877ad8d34ae87e6"
+        ]
+      },
+      {
+        "name": "640_room_s_of_master_f291.iff",
+        "comparison": "same_face_direction",
+        "matching_model_hashes": [
+          "0e6fbc969c21f7290f52118f6f1030f592030aad3e650927073eb85562cd6f8f",
+          "af38cd57a6f105641aa0b74f70c42121c8d37df3e88e9323974e7409b1e4911a"
+        ]
+      },
+      {
+        "name": "640_window_0.iff",
+        "comparison": "same_face_direction",
+        "matching_model_hashes": [
+          "889f8048056d1366ea9ed1aad24a7e158a1fcb1a513726cd4a72a5771835b5a7"
+        ]
+      },
+      {
+        "name": "640_xiaomi_18k_nongic_4c79.iff",
+        "comparison": "same_face_direction",
+        "matching_model_hashes": [
+          "d8ca734ca3a8f4f5e00ca7a0f58dd95442c010c6af5debaa76ced1a61904b565"
+        ]
+      },
+      {
+        "name": "640_xiaomi_18k_nongic_e8a4.iff",
+        "comparison": "same_face_direction",
+        "matching_model_hashes": [
+          "9339b754cd39a1eb670b46420def6710d2bca359cc2505b6baf708b1af40ab43"
+        ]
+      },
+      {
+        "name": "640_xiaomi_condensate_pump.iff",
+        "comparison": "same_face_direction",
+        "matching_model_hashes": [
+          "387a442e262b8e7a09f26d25effaee56c839a047e8dbd3860fc23e8227afa0f3"
+        ]
+      },
+      {
+        "name": "640_xiaomi_drain.iff",
+        "comparison": "same_face_direction",
+        "matching_model_hashes": [
+          "856ab6206df1655b31ea383f6c46e1628e9ecc4f44a7e2e0fc14c712c0dbdcd5"
+        ]
+      },
+      {
+        "name": "640_xiaomi_lineset.iff",
+        "comparison": "same_face_direction",
+        "matching_model_hashes": [
+          "93ed9f6d50123b318b7dc9933be46206e51e2cbf151db9f0b4455802e5b7b702"
+        ]
+      },
+      {
+        "name": "640_xiaomi_power.iff",
+        "comparison": "same_face_direction",
+        "matching_model_hashes": [
+          "35e4ee0e7c74ac8716b73232c4970f2651e84f55fefd8ff48680d140ee8ba20f"
+        ]
+      },
+      {
+        "name": "corridor.iff",
+        "comparison": "same_face_direction",
+        "matching_model_hashes": [
+          "81d9a6f91b17d91db5980e8188086be2c9031ca8b0574618b3b96f52c8c75ae2"
+        ]
+      },
+      {
+        "name": "corridor_parapet.iff",
+        "comparison": "same_face_direction",
+        "matching_model_hashes": [
+          "9468ab3edaa4666399d5c246a9e9d6a9f4d5cf4935aff50c86466d664669daf3"
+        ]
+      },
+      {
+        "name": "player.iff",
+        "comparison": "same_face_direction",
+        "matching_model_hashes": [
+          "eac3300dedd4ce388bffc1091f946380cebd4646cda63ff366a817af78413cc0"
+        ]
+      },
+      {
+        "name": "site_buildings.iff",
+        "comparison": "same_face_direction",
+        "matching_model_hashes": [
+          "a1855f8313663b165b7a9492eea37fd7a8bee54cf8ff339912512df0bf9d12f5"
+        ]
+      },
+      {
+        "name": "site_map.iff",
+        "comparison": "same_face_direction",
+        "matching_model_hashes": [
+          "2462c09318361c294f6e4b241b1c1218a5bf06425ae4c0f3847c068233e36814"
+        ]
+      },
+      {
+        "name": "site_podium.iff",
+        "comparison": "same_face_direction",
+        "matching_model_hashes": [
+          "545f7262652a344aa14d33885f44f299c093425cd9d96232e960c508e8f19c87"
+        ]
+      },
+      {
+        "name": "skydome.iff",
+        "comparison": "same_face_direction",
+        "matching_model_hashes": [
+          "4d38dff0ad7fa42949c698d1ebfdc1213ddec6de00aa0f5cf4a48b02a05d6725"
+        ]
+      },
+      {
+        "name": "unit_639.iff",
+        "comparison": "same_face_direction",
+        "matching_model_hashes": [
+          "abf4a6d8a56caae1ebee6f71b36d0c33638d99945f1f5e4867d53968f45fa09d"
+        ]
+      },
+      {
+        "name": "unit_640.iff",
+        "comparison": "same_face_direction",
+        "matching_model_hashes": [
+          "88e411b1dc9aace13df977c86ed62eb8a88d5832784da8d12c1847dfb45d4822"
+        ]
+      },
+      {
+        "name": "west_facade_ledge.iff",
+        "comparison": "same_face_direction",
+        "matching_model_hashes": [
+          "5d9e4f40de8b4ee5f80fb4bbbbd87798d5e765ac08ed1c29703728a9143416fe"
+        ]
+      }
+    ]
+  },
+  {
+    "scene": "wflevels/pilot_demo/pilot_demo.blend",
+    "exit_code": 0,
+    "meshes": [
+      {
+        "name": "floor.iff",
+        "comparison": "same_embedded_face_direction",
+        "matching_model_hashes": [
+          "c28653e0bc0d3ab41fee7448dd7c3e0d00aa3cffa102bb605f7bbcda3cfb9eb8"
+        ]
+      },
+      {
+        "name": "player.iff",
+        "comparison": "same_embedded_face_direction",
+        "matching_model_hashes": [
+          "9ae49785300a12af0ad039077a15b3daa397087e865e33761f69343dfce5843e",
+          "abaaf50c746dcdebdde96a89c07a3b6d9579881d7040b2322fdeb1edbc435414",
+          "a81a24c03894f855fb4495beb67b71a47e15f7f9b1be5ae5fcdd8772584f1a25"
+        ]
+      }
+    ]
+  },
+  {
+    "scene": "wflevels/qbert_practice/qbert_practice.blend",
+    "exit_code": 0,
+    "meshes": [
+      {
+        "name": "coily_egg_2_mesh.iff",
+        "comparison": "same_face_direction",
+        "matching_model_hashes": [
+          "88b676c5e6d54fbe02f24870aad4ae34a53818ed596bc4c63abf74213ae407ed"
+        ]
+      },
+      {
+        "name": "coily_egg_mesh.iff",
+        "comparison": "same_face_direction",
+        "matching_model_hashes": [
+          "88b676c5e6d54fbe02f24870aad4ae34a53818ed596bc4c63abf74213ae407ed"
+        ]
+      },
+      {
+        "name": "coily_snake_mesh.iff",
+        "comparison": "same_face_direction",
+        "matching_model_hashes": [
+          "00c6c999ff6e46808fe5916194a284d1752e4d5cae9d83847144f5b8a1f8ce84",
+          "df3bd9d256b4c23157b5a84bd260c930214b6be53f637ac3774bb17c43e50ab9",
+          "d2c2cef727455aa05985970e190bf1d2e11409aa4bd3ca08db06e69767357cf4"
+        ]
+      },
+      {
+        "name": "cube.iff",
+        "comparison": "different_geometry",
+        "note": "Saved-scene placeholder; gen_cube.py owns the shipped override and regenerates it byte-identically."
+      },
+      {
+        "name": "curse_bubble.iff",
+        "comparison": "same_face_direction",
+        "matching_model_hashes": [
+          "59f925648a4e222868f3b552911b315d471382033ec6414fc15fe60b4861c4dd",
+          "2ddd67ad861717180a0d987c3174378e3dbbe82d89cc694452bac46312c6cc9b"
+        ]
+      },
+      {
+        "name": "disc_flash_ring_mesh.iff",
+        "comparison": "same_face_direction",
+        "matching_model_hashes": [
+          "02f4a20ec037cd5f08853c3708ee49f5ce25b437e3e0dd04f4cdb6318dbb85b4",
+          "c3a73a121a92b8dfc808ca9e44ffa0a6864a36baf58b8bd35c004dc4f7357d96"
+        ]
+      },
+      {
+        "name": "disc_mesh.iff",
+        "comparison": "same_face_direction",
+        "matching_model_hashes": [
+          "ac8a46a15e32433c4ae92d5cdc8c47f94568b258c37fb8f62e41461814e8949a"
+        ]
+      },
+      {
+        "name": "greenball.iff",
+        "comparison": "same_face_direction",
+        "matching_model_hashes": [
+          "c475bc98b92480c09d4d5206db22b70a003ee7c558d120e3e244b2bfb4df9693",
+          "ad2a167430fc8e253f61312fcdb3db87a2b8d0e7f27033e9b15a817c94f8724b"
+        ]
+      },
+      {
+        "name": "player.iff",
+        "comparison": "same_face_direction",
+        "matching_model_hashes": [
+          "3a8d3a9476be255fdfb5d9b1313a6ce647f6a4cbfa833a26399ba88b87356fd6"
+        ]
+      },
+      {
+        "name": "popup_100.iff",
+        "comparison": "same_face_direction",
+        "matching_model_hashes": [
+          "47f1650b97d665d3978c722ba761b81cd00f07fd39b2c13d17c054f103ce3dba",
+          "511d6714a25c9e8765ee2909e583d7cba904154ee687381a85e45be132e7dee5"
+        ]
+      },
+      {
+        "name": "popup_25.iff",
+        "comparison": "same_face_direction",
+        "matching_model_hashes": [
+          "74a9a57d331d36ac4862fb02f74a56fa16b9fe8aeaa08bfb633c7508e5394b50",
+          "94fcd92b172bb4b91cd49c72d510da4294d1a8190361810b010cb8e425950005"
+        ]
+      },
+      {
+        "name": "popup_300.iff",
+        "comparison": "same_face_direction",
+        "matching_model_hashes": [
+          "0d3b5de84b3c07ebc289e93f40f181f4de6b4d2ceaaf030d69f154e128f723f5",
+          "57cc7e517802939f45a48ff08733b8fb898bd9f4deba670489acad38ac389fb4"
+        ]
+      },
+      {
+        "name": "popup_50.iff",
+        "comparison": "same_face_direction",
+        "matching_model_hashes": [
+          "01baea8b9c179e12c2c1e0f98f8ab069d51fe5ba3c895f9ac9fbcf5f92823426"
+        ]
+      },
+      {
+        "name": "popup_500.iff",
+        "comparison": "same_face_direction",
+        "matching_model_hashes": [
+          "7d6096d4452a14d9dc2b604b1f14357d4d1d98eabaa37a55879364bdf66061f1"
+        ]
+      },
+      {
+        "name": "redball.iff",
+        "comparison": "same_face_direction",
+        "matching_model_hashes": [
+          "c475bc98b92480c09d4d5206db22b70a003ee7c558d120e3e244b2bfb4df9693",
+          "ad2a167430fc8e253f61312fcdb3db87a2b8d0e7f27033e9b15a817c94f8724b"
+        ]
+      },
+      {
+        "name": "sam_mesh.iff",
+        "comparison": "same_face_direction",
+        "matching_model_hashes": [
+          "7552bbb826965d677fe61589cdbb9c1d82355e098294a3ab80c1161c50749e4f",
+          "fa23fb147eba907dad6d920a240c87e8b491afe5d32d017e21681938ae5ee86e"
+        ]
+      },
+      {
+        "name": "slick_mesh.iff",
+        "comparison": "same_face_direction",
+        "matching_model_hashes": [
+          "7552bbb826965d677fe61589cdbb9c1d82355e098294a3ab80c1161c50749e4f",
+          "fa23fb147eba907dad6d920a240c87e8b491afe5d32d017e21681938ae5ee86e"
+        ]
+      },
+      {
+        "name": "ugg_mesh.iff",
+        "comparison": "same_face_direction",
+        "matching_model_hashes": [
+          "52fef5544d3f871a28b93be39e6e1b6780cb03a3afeb5f7cfa47fa05c3fc6995",
+          "9c243ce131364db55874928d1ebb20ace734f6aad43665e0da76750aa966d59b"
+        ]
+      },
+      {
+        "name": "wrongway_mesh.iff",
+        "comparison": "same_face_direction",
+        "matching_model_hashes": [
+          "52fef5544d3f871a28b93be39e6e1b6780cb03a3afeb5f7cfa47fa05c3fc6995",
+          "9c243ce131364db55874928d1ebb20ace734f6aad43665e0da76750aa966d59b"
+        ]
+      }
+    ]
+  }
+]

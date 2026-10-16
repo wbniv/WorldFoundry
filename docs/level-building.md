@@ -440,7 +440,7 @@ and the FSN `filesys` towers (2026-06-12, runtime template + scale). It is one
 rule, not a physics quirk. See also the scale-mailbox note in
 [level-design-troubleshooting.md](level-design-troubleshooting.md#b-runtime-xyz_scale-mailboxes-30403042--visual-only).
 
-### Mesh face winding — author for Blender; the exporter adapts (2026-09-19)
+### Mesh face winding — Blender order in the engine (2026-10-16)
 
 **The renderer has a software backface cull, ON by default** (`WF_CULL=0` opts out; the flip
 landed 2026‑09‑21). A face is kept only if its normal points toward
@@ -449,24 +449,24 @@ terrain), **inward** for interior geometry the player stands inside (rooms, a do
 wrong-way face **vanishes** under culling, and with culling off it is **lit from the wrong side**
 (one-sided lighting), which reads as a flat, unshaded mass.
 
-**The rule is Blender's rule.** The engine computes a face normal as `(v2−v0)×(v1−v0)`
-(`gfx/face.hpi:34`, "reversed for our handedness"), the opposite hand of Blender's
-`(v1−v0)×(v2−v0)`; since 2026-09-19 `export_level.py` reverses each face's loop order on export
-(and back on import) so the two agree. So: if `recalc_face_normals` / "Recalculate Outside" looks
-right in the Blender viewport, it is right in the engine; the standard hand-written box list
+**The rule is Blender's rule.** The engine computes `(v1−v0)×(v2−v0)` from the
+stored `FACE` order. The exporter and importer preserve Blender's loop order.
+If `recalc_face_normals` / "Recalculate Outside" looks right in the Blender
+viewport, it is right in the engine; the standard hand-written box list
 `[(0,3,2,1),(4,5,6,7),(0,1,5,4),(1,2,6,5),(2,3,7,6),(3,0,4,7)]` is an **exterior** box; a dome the
-player stands inside is the one thing that gets `bmesh.ops.reverse_faces`. **Never compensate for
-the engine's hand in a level script** — the pre-2026-09-19 advice to "reverse every tuple" or
-"recalc then reverse" is retired (a script that still does it is now inside-out). Recalc **per
+player stands inside gets `bmesh.ops.reverse_faces`. **Never compensate for
+an engine/exporter hand difference in a level script**; there is no difference
+now. Recalc **per
 closed shell before merging** shells that share vertices, or the recalc flips faces at random.
 A lone open quad has no "outside" for the recalc to find: wind it counter-clockwise as seen from
 its visible side. Verify by A/B-ing `WF_CULL=0` against the default, not by whether a box survives
 (a box keeps its inner faces either way). Genuinely two-sided surfaces (matte, billboards) set the
-material `DOUBLE_SIDED` flag. **Note:** a level authored before the 2026‑09‑19 exporter flip may
-still carry a hand-compensated winding — under the default-on cull it now *vanishes* rather than
-merely shading wrong. Full rules + the `WF_CULL` toggle: [level-design-troubleshooting.md → Mesh face normals & backface culling](level-design-troubleshooting.md#mesh-face-normals--backface-culling).
-Hand-written `.iff` text (no exporter) still needs the engine's hand. Plan:
-[2026-09-19-exporter-face-hand](plans/2026-09-19-exporter-face-hand.md).
+material `DOUBLE_SIDED` flag. Current checked-in models were individually
+reviewed and migrated for this convention; an external `.iff` created for the
+old reversed engine hand needs offline conversion before use. Full rules and
+the `WF_CULL` toggle: [level-design-troubleshooting.md → Mesh face normals & backface culling](level-design-troubleshooting.md#mesh-face-normals--backface-culling).
+Hand-written `.iff` generators use the same Blender winding. Migration:
+[2026-10-16 Blender normal convention](plans/2026-10-16-blender-normal-convention-engine-wide.md).
 
 ---
 
