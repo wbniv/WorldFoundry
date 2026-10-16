@@ -283,3 +283,5 @@ It shows:
     - the host's new Pick in 3D cases: first highlight, arrows, the same-spot group, Back from group to scene to list to closed, nothing in view, no camera, and the phone verbs.
 
     Back/Home/resume is an Android lifecycle check and needs the device, so it is **not run**; see step 11.
+
+**macOS (Metal) build, outside the numbered steps** (2026‑10‑16): the picker touches `backend_metal.mm` (`CameraMatrices`), which Linux never compiles. The branch was rebased onto `2026-new-level` (`06787e0d`) and gained `c6fc62c8`, which mirrors GL's guard: false until the first `CaptureTextView`. Codemagic `macos-desktop-debug` on `ci/object-picker-3d-macos` [build 6ad1f95b](https://codemagic.io/app/6aafa6886ab3f21cf431a6cb/build/6ad1f95bf67be9ac6c3ab928) finished green: `backend_metal.mm` compiled, `AQUARIUM PARITY: MATCH`, and the windowed smoke and close-path/fullscreen steps passed. **PASS** (compile and smoke; Pick in 3D itself is not driven on the Mac).
