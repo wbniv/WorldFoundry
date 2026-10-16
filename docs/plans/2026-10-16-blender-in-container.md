@@ -115,8 +115,69 @@ The host route depends on several things that are not in the repository:
 
 4. Byte-identical for all seven tanks: `task level-build-compare` exits 0 and prints `N/N identical` for every tank.
 
-    **NOT RUN.** It needs step 3.
+    ```
+    $ task level-build-compare
+    task: [level-build-compare] scripts/compare-level-build-routes.sh 
+    tank                   file                          host             container        result
+    aquarium_jellyfish     aquarium_jellyfish/aquarium_jellyfish.lvl 5553a09acd00fd28 5553a09acd00fd28 same
+    aquarium_jellyfish     aquarium_jellyfish.iff        37096882148219a9 37096882148219a9 same
+    aquarium_jellyfish     aquarium_jellyfish-standalone.iff d456dd55955ba655 d456dd55955ba655 same
+    aquarium_jellyfish: all files: 39/39 identical
+    aquarium_blue_shrimp   aquarium_blue_shrimp/aquarium_blue_shrimp.lvl 591b5f50b74c28ca 591b5f50b74c28ca same
+    aquarium_blue_shrimp   aquarium_blue_shrimp.iff      2e58a1c941b523a2 2e58a1c941b523a2 same
+    aquarium_blue_shrimp   aquarium_blue_shrimp-standalone.iff b4e6325e8f3e0836 b4e6325e8f3e0836 same
+    aquarium_blue_shrimp: all files: 66/66 identical
+    aquarium_lionfish      aquarium_lionfish/aquarium_lionfish.lvl abd9b4b7a5f40f5c abd9b4b7a5f40f5c same
+    aquarium_lionfish      aquarium_lionfish.iff         7ea19e59de21ea31 7ea19e59de21ea31 same
+    aquarium_lionfish      aquarium_lionfish-standalone.iff 0bb4924254ccf974 0bb4924254ccf974 same
+    aquarium_lionfish: all files: 50/50 identical
+    aquarium_betta         aquarium_betta/aquarium_betta.lvl b8159bcc6887f06f b8159bcc6887f06f same
+    aquarium_betta         aquarium_betta.iff            07dbd029887c6ce9 07dbd029887c6ce9 same
+    aquarium_betta         aquarium_betta-standalone.iff 64ea80d81089f417 64ea80d81089f417 same
+    aquarium_betta: all files: 47/47 identical
+    aquarium_plants        aquarium_plants/aquarium_plants.lvl 4c9415fae53eeabd 4c9415fae53eeabd same
+    aquarium_plants        aquarium_plants.iff           49f58bba669410e5 49f58bba669410e5 same
+    aquarium_plants        aquarium_plants-standalone.iff 9c4db4e7a081dda1 9c4db4e7a081dda1 same
+    aquarium_plants: all files: 82/84 identical
+    aquarium_arowana       aquarium_arowana/aquarium_arowana.lvl 462f92dc2f61c6ec 462f92dc2f61c6ec same
+    aquarium_arowana       aquarium_arowana.iff          730b2f308d504ab8 730b2f308d504ab8 same
+    aquarium_arowana       aquarium_arowana-standalone.iff f116a9604b00c7c6 f116a9604b00c7c6 same
+    aquarium_arowana: all files: 46/46 identical
+    aquarium_tiger_barbs   aquarium_tiger_barbs/aquarium_tiger_barbs.lvl f7ce5228394b4005 f7ce5228394b4005 same
+    aquarium_tiger_barbs   aquarium_tiger_barbs.iff      29ea798d4e644291 29ea798d4e644291 same
+    aquarium_tiger_barbs   aquarium_tiger_barbs-standalone.iff e90796ca4819ae7f e90796ca4819ae7f same
+    aquarium_tiger_barbs: all files: 27/27 identical
+    task: Failed to run task "level-build-compare": exit status 1
+    ```
+
+    The two plants files that differ, with each route built once more and diffed:
+
+    ```
+    $ diff host/actor-map.json container/actor-map.json      # entry[2] of an actor
+    <           0.0282079251617939
+    >           0.028207925161793903
+    $ diff host/aquarium_plants.lev container/aquarium_plants.lev   # 3 more JSON-style floats, then EULR b angles
+    < { 'EULR' … 0.2630222141742706(1.15.16) …
+    > { 'EULR' … 0.2630221843719482(1.15.16) …
+    < { 'EULR' … -0.1202898845076561(1.15.16) …        (×4 actors)
+    > { 'EULR' … -0.1202898919582367(1.15.16) …
+    ```
+
+    **FAIL as written** (2026‑10‑16): the task exits 1, because plants is 82/84. Everything the engine loads is identical for all seven tanks: every `.lvl`, `.iff` and `-standalone.iff`, and every other file of six tanks. Plants' `aquarium_plants.lev` and `actor-map.json` differ only in the last digits of a few floats. The `actor-map.json` values are one double ULP apart, and the `EULR` angles are adjacent float32 values, 2.98e‑8 apart. levcomp quantises angles to 1.15.16 fixed point, a step of 1.5e‑5, so the `.lvl` is identical.
+
+    The cause is the two Blenders' maths stacks. Host Blender is Ubuntu's package `5.0.1+dfsg-1ubuntu1` on Python 3.14.4 with numpy 2.3.5. The official build is Python 3.11.13 with numpy 1.26.4. One-ULP differences in trigonometry and float formatting between them change the last digit of these generated values.
+
+    Earlier failures, fixed before this run:
+    - Five tanks could not build in the container at all: no Pillow in Blender's bundled Python, and the add-on's schema search not following the image's symlink (`ecd65ae0`).
+    - The script had compared the leftover committed files and still printed `identical`. It now reports `BUILD FAILED` and skips the tank.
+
+    Decision for Will: accept the container's rounding, so this step's bar becomes "every shipped file identical; intermediates may differ only in float rounding" (recommended, because the official tarball is sha256-pinned while Ubuntu's package moves with apt), or pin Ubuntu's Blender in an `ubuntu:26.04` image to get bit-for-bit `.lev` text.
 
 5. Disk: `df -h /` after the image build still shows at least 5 GB free (9.7 GB before it).
 
-    **NOT RUN.** It needs step 3.
+    ```
+    $ df -h /
+    /dev/nvme0n1p2  469G  438G  6.9G  99% /
+    ```
+
+    **PASS** (2026‑10‑16): 6.9 GB free after the image (1.03 GB) and two full seven-tank comparisons.
