@@ -1250,6 +1250,17 @@ if(NOT ANDROID AND NOT IOS AND NOT APPLE AND NOT EMSCRIPTEN)
     target_compile_options(deformer_golden_test PRIVATE -fno-rtti -fpermissive)
     add_test(NAME deformer_golden COMMAND deformer_golden_test
         ${CMAKE_SOURCE_DIR} ${CMAKE_SOURCE_DIR}/tests/fixtures/deformer_golden)
+    # DFRM v1 evaluator: parity with the Python reference (dfrm_ref.py) on the
+    # seven tail-rig mockup poses plus a clip/crossfade sequence, then the unit
+    # checks (arc length, coils, clips, loader, exclusivity, face normals).
+    add_executable(dfrm_strand_test tests/dfrm_strand.cc)
+    target_link_libraries(dfrm_strand_test PRIVATE wfengine)
+    target_compile_options(dfrm_strand_test PRIVATE -fno-rtti -fpermissive)
+    find_package(Python3 COMPONENTS Interpreter)
+    if(Python3_Interpreter_FOUND)
+        add_test(NAME dfrm_strand COMMAND ${Python3_EXECUTABLE}
+            ${CMAKE_SOURCE_DIR}/wflevels/aquarium_tanks/dfrm_ref.py --check $<TARGET_FILE:dfrm_strand_test>)
+    endif()
     if(WF_DEBUG_BRIDGE AND NOT WF_RUNTIME_DIAGNOSTICS)
         add_executable(debug_listener_reconnect_test tests/debug_listener_reconnect_test.cc)
         target_link_libraries(debug_listener_reconnect_test PRIVATE wfengine)

@@ -27,6 +27,12 @@ RUN python3 -c "import urllib.request as u; u.urlretrieve('https://static.rust-l
 ENV PATH=/opt/cargo/bin:$PATH \
     CARGO_HOME=/tmp/cargo
 
+# pytest for the Python tests (tests/test_*.py), and Node for the ones that run a
+# mockup's own JavaScript (tests/test_dfrm_export.py). Its own layer, like Rust.
+RUN apt-get update \
+ && apt-get install -y --no-install-recommends python3-pytest nodejs \
+ && rm -rf /var/lib/apt/lists/*
+
 # Software GL, so every run renders with the same rasteriser whatever the host GPU is.
 ENV LIBGL_ALWAYS_SOFTWARE=1 \
     HOME=/tmp
