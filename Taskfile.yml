@@ -1905,8 +1905,10 @@ tasks:
 
   blender-image:
     desc: "Build the Blender level-build image (docker/Dockerfile.blender: wf-linux-test plus Blender 5.0.1, sha256-pinned; ~375 MB download). wflevels/aquarium_*/build.sh run in it."
-    deps: [linux-test-image]
     cmds:
+      # Only when the test image is missing: rebuilding it here would swap a freshly
+      # apt-updated wf-linux-test:local in under every other build (task linux-test-image does that on purpose).
+      - docker image inspect wf-linux-test:local >/dev/null 2>&1 || task linux-test-image
       - docker build --network=host -f docker/Dockerfile.blender -t wf-blender:local docker
 
   level-build-compare:
