@@ -23,7 +23,9 @@ def vm(tmp_path_factory):
     constants.update({f'JOYSTICK_BUTTON_{k}':1<<i for i,k in enumerate('ABCDEFGHIJK')})
     constants.update({f'JOYSTICK_BUTTON_{k}':1<<i for i,k in enumerate(('UP','DOWN','RIGHT','LEFT'),11)})
     definitions+='\n'+''.join(f': {k} {v} ;\n' for k,v in constants.items())
-    definitions+=": read-mailbox 128 sys ; : write-mailbox 129 sys ; : write-actor-mailbox 130 sys ; : read-actor-mailbox 152 sys ; : fin-deform 172 sys ; : fish-deform 171 sys ; : jelly-deform 174 sys ; : plant-register 175 sys ; : plant-step 176 sys ; : profile-begin 169 sys ; : profile-end 170 sys ; : r@ ' lit , 0 , ' pickr , ; immediate\n"
+    definitions+=": read-mailbox 128 sys ; : write-mailbox 129 sys ; : write-actor-mailbox 130 sys ; : read-actor-mailbox 152 sys ; : r@ ' lit , 0 , ' pickr , ; immediate\n"
+    # The engine's own bridge words (profile-begin 169 .. dfrm-pose), read from the source so the list can't drift.
+    definitions+=re.search(r'zf_eval\(&g_ctx, "(: profile-begin [^"]*)"\)',src).group(1)+'\n'
     vendor=ROOT/'engine/vendor/zforth-41db72d1/src/zforth'
     binary=tmp/'vm'
     subprocess.run(['cc','-O1','-I'+str(ROOT/'engine/stubs'),'-I'+str(vendor),str(ROOT/'tests/species_vm.c'),str(vendor/'zforth.c'),'-lm','-o',str(binary)],check=True)
@@ -100,12 +102,14 @@ def test_shrimp_stops_walking_swims_and_escapes_backwards(vm):
     assert all(r['z']>=.9649 for r in rows)
 
 def test_urchin_depth_diagonal_cap_and_action_only_view(vm):
-    rows=vm('plants','reset 0 -.5 .865\nstep 1200 10240 .05\nstep 40 1 .05\n')
+    # Saltwater (Director field 2 = 1) is the urchin's tank; with no properties pg-salt reads freshwater and the goby plays.
+    rows=vm('plants','prop 4 2 1\nreset 0 -.5 .865\nstep 1200 10240 .05\nstep 40 1 .05\n')
     assert rows[1199]['x']>.50 and rows[1199]['y']>0
     assert all(math.sqrt(r['vx']**2+r['vy']**2)<=.012501 for r in rows)
     assert all(abs(r['z']-.865)<1e-6 for r in rows)
     assert rows[1200][625]==rows[1199][625]  # Native tap/hold controller owns this now.
-    assert rows[-1][740]!=0,'contact phase should reflect displacement'
+    # The gait phase in 740 went with urchin phase 2 (775f883c): world-space foot contacts in 840-967 replaced it.
+    # tests/test_urchin_motion.py covers them on the engine's Forth host (displacement-driven cycling, planted pads).
 
 def test_native_jelly_apex_margin_roots_and_repeatable_rest(tmp_path):
     source=tmp_path/'jelly.cc'

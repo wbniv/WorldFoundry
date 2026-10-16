@@ -7,6 +7,7 @@
 static zf_ctx pvm,dvm;
 static float globals[7000], actors[1024][7000];
 static int current_actor,player,director;
+static float props[1024][16]; static char propset[1024][16];   /* instance properties for property@ ("prop actor field value") */
 zf_input_state zf_host_sys(zf_ctx*c,zf_syscall_id id,const char*w) {
  int mb,a;
  if(id==128){mb=zf_pop(c);zf_push(c,mb<1900?globals[mb]:actors[current_actor][mb]);}
@@ -16,6 +17,13 @@ zf_input_state zf_host_sys(zf_ctx*c,zf_syscall_id id,const char*w) {
  else if(id==172||id==174){for(int i=0;i<5;i++)zf_pop(c);}
  else if(id==175||id==176){zf_pop(c);zf_pop(c);}
  else if(id==171){for(int i=0;i<3;i++)zf_pop(c);}
+ else if(id==173){for(int i=0;i<8;i++)zf_pop(c);}                             /* swim-deform */
+ else if(id==177){for(int i=0;i<7;i++)zf_pop(c);}
+ else if(id==178){int f=zf_pop(c);a=zf_pop(c);int ok=a>=0&&a<1024&&f>=0&&f<16&&propset[a][f];zf_push(c,ok?props[a][f]:0);zf_push(c,ok);}  /* property@ */
+ else if(id==179){zf_pop(c);zf_pop(c);for(int i=0;i<5;i++)zf_push(c,0);}
+ else if(id==180){for(int i=0;i<3;i++)zf_pop(c);zf_push(c,0);zf_push(c,0);}
+ else if(id==181){zf_pop(c);zf_pop(c);int n=zf_pop(c);for(int i=0;i<n;i++)zf_pop(c);zf_push(c,0);}  /* deform: status Ok */
+ else if(id==182){for(int i=0;i<4;i++)zf_pop(c);zf_push(c,0);}                /* deform-block: status Ok */
  else if(id==169||id==170||id==0||id==1){zf_pop(c);}
  else {fprintf(stderr,"Unexpected syscall %d\n",id);exit(1);}
  return ZF_INPUT_INTERPRET;
@@ -29,6 +37,7 @@ int main(int argc,char**argv){
  char line[200];int frame=0;
  while(fgets(line,sizeof(line),stdin)){
   if(strncmp(line,"reset",5)==0){float x,y,z;sscanf(line,"reset %f %f %f",&x,&y,&z);memset(globals,0,sizeof(globals));memset(actors,0,sizeof(actors));actors[player][3009]=x;actors[player][3010]=y;actors[player][3011]=z;frame=0;}
+  else if(strncmp(line,"prop",4)==0){int pa,pf;float v;sscanf(line,"prop %d %d %f",&pa,&pf,&v);if(pa>=0&&pa<1024&&pf>=0&&pf<16){props[pa][pf]=v;propset[pa][pf]=1;}}
   else if(strncmp(line,"set",3)==0){int mb;float v;sscanf(line,"set %d %f",&mb,&v);globals[mb]=v;}
   else {
    int frames,bits;float dt;sscanf(line,"step %d %d %f",&frames,&bits,&dt);

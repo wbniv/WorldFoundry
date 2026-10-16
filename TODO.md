@@ -164,6 +164,7 @@
 
 ## Done
 
+- ✅ 2026-10-16 — [species-movement-test] Test VM reads engine words from source, stubs 173/177–182; urchin runs saltwater. See [plan](docs/plans/2026-10-16-saltwater-seahorses.md).
 - ✅ 2026-10-16 — [seahorses-phase2] H. reidi model, 35-ring DFRM tail, 8 clips, posts; 4 seahorses animate in the saltwater tank. See [plan](docs/plans/2026-10-16-saltwater-seahorses.md).
 - ✅ 2026-10-16 — [texture-slot-overflow] Release heap overflow loading 512-wide lionfish/plants textures: slot check now in every build + 4 ctests. See [BUGS.md](docs/BUGS.md). <!-- fp:fc5673e67a6dc68d -->
 - ✅ 2026-10-02 — [cmake-glob] CMake GLOB uses CONFIGURE_DEPENDS, so a new .cc builds in an old build directory. See [test](tests/test_cmake_glob_configure_depends.py).
@@ -485,7 +486,6 @@ _Auto-added from plan "Out of scope"/"Deferred" sections at commit time. Triage 
 - [ ] **(triage)** **More than 2 pairs.** The tank's biological ceiling is 4 pairs. The setting stops at 2. — _from [2026-10-16-saltwater-seahorses.md](docs/plans/2026-10-16-saltwater-seahorses.md)_  <!-- fp:d8d42bdd0466565f -->
 - [verify] **2026-10-16-saltwater-seahorses** — Verification section present but no PASS recorded — run + record the steps. _from [2026-10-16-saltwater-seahorses.md](docs/plans/2026-10-16-saltwater-seahorses.md)_  <!-- fp:ed512b74971cb7be -->
 - [ ] **(triage)** **Stale face normals in the five existing deformers.** They move vertices but keep rest-pose face normals (`rendobj3.cc:286`), so culling and lighting lag the deformation. The fix changes their output, so it needs re-recorded golden fixtures and a visual check per tank. Do it with Deformer phase 2 or as its own fix. — _from [2026-10-16-saltwater-seahorses.md](docs/plans/2026-10-16-saltwater-seahorses.md)_  <!-- fp:1bfc3aa60009d221 -->
-- [ ] **(triage)** **`tests/test_species_movement.py` fails 6 cases with "Unknown lion-pose" (found during Phase 1, not caused by it).** The test's own Forth word list lacks `lion-pose` (syscall 177). The bootstrap text it extracts is byte-identical before and after Phase 1. Fix: add the word, or extract the list from `scripting_zforth.cc:1541`. — _from [2026-10-16-saltwater-seahorses.md](docs/plans/2026-10-16-saltwater-seahorses.md)_  <!-- fp:790abbd25213b275 -->
 - [ ] **(triage)** **Persisting runtime edits** back to the level or the repository. Edits stay session-only, as in the 2026‑10‑06 plan. — _from [2026-10-16-runtime-object-editing.md](docs/plans/2026-10-16-runtime-object-editing.md)_  <!-- fp:0b495486e5c73cc2 -->
 - [ ] **(triage)** **Editing the `.oad` schemas themselves at runtime.** — _from [2026-10-16-runtime-object-editing.md](docs/plans/2026-10-16-runtime-object-editing.md)_  <!-- fp:5f3108d6d6af75d8 -->
 - [ ] **(triage)** **Translatable labels** (a string table). Revisit if localisation is planned. — _from [2026-10-16-runtime-object-editing.md](docs/plans/2026-10-16-runtime-object-editing.md)_  <!-- fp:9840a673dc03c23e -->
