@@ -1,11 +1,17 @@
 | Date | Change |
 |------|--------|
+| [2026-10-16](https://github.com/wbniv/WorldFoundry/commit/e941e460) | Record two pre-existing faults found during seahorse Phase 1 |
 | [2026-10-16](https://github.com/wbniv/WorldFoundry/commit/02e18dbc) | Add seahorse research and A3 biomechanics poster (Phase 0) |
 | [2026-10-16](https://github.com/wbniv/WorldFoundry/commit/f394d62f) | Document stale face normals under deformation; DFRM updates them |
 | [2026-10-16](https://github.com/wbniv/WorldFoundry/commit/01d360f3) | Record seahorse plan decisions D2, D4, D6 and index the plan |
 | [2026-10-16](https://github.com/wbniv/WorldFoundry/commit/623a8ca3) | Plan saltwater seahorses with 35-joint tails and a generic deformer |
 
 <!--history-meta v1
+e941e460	author	Will Norris
+e941e460	added	3
+e941e460	deleted	1
+e941e460	files	1
+e941e460	body	Lionfish and Planted Tank abort at exit with free(): invalid pointer on\ndesktop (pre-E0 code too); test_species_movement.py lacks lion-pose in\nits Forth word list (6 failures). Listed as deferred items for triage.\n\nCo-Authored-By: Claude Opus 5.5 <noreply@anthropic.com>\nClaude-Session: https://claude.ai/code/session_01T3gB59hNsFhWnCTTKHc1yk
 02e18dbc	author	Will Norris
 02e18dbc	added	58
 02e18dbc	deleted	18

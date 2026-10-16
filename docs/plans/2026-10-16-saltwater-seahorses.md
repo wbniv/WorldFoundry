@@ -1,6 +1,6 @@
 # Saltwater seahorses: two pairs with expressive tails, and an A3 poster
 
-16 October 2026 · **Plan — Phase 0 in progress.** **All six decisions are made** (Will, 2026‑10‑16): D1 engine edits for Phase 1 (yes), D2 *H. reidi*, D3 4 seahorses, D4 authored hitching posts, D5 1024² texture page, D6 Deformer phase 2 after the seahorses ship. Engine edits beyond Phase 1 need their own permission ([`AGENTS.md:11-12`](../../AGENTS.md)).
+16 October 2026 · **Plan — Phases 0 and 1 done** (Phase 1 merged as `e98621fe` on 2026‑10‑16; Phase 2 next). **All six decisions are made** (Will, 2026‑10‑16): D1 engine edits for Phase 1 (yes), D2 *H. reidi*, D3 4 seahorses, D4 authored hitching posts, D5 1024² texture page, D6 Deformer phase 2 after the seahorses ship. Engine edits beyond Phase 1 need their own permission ([`AGENTS.md:11-12`](../../AGENTS.md)).
 
 **TODO entries, ready for a Fable session to add** (this session ran on Opus, and the `rank-requires-fable` hook allows only Fable to write tiers):
 `- [T4] **Saltwater seahorses: H. reidi pairs with 35-joint prehensile tails, plus A3 poster.** Rank T4: the tail needs a generic deformer slot and a new engine rig (permission + design), and a wrong rig format is expensive to undo. [plan](docs/plans/2026-10-16-saltwater-seahorses.md)`
@@ -48,7 +48,7 @@ Phase 0 checked these claims on 2026‑10‑16. The [research document](../refer
 | Claim | Status | Source (see the research document) |
 |---|---|---|
 | 11 trunk rings; tail rings most often **35** (range 31–39) in *H. reidi* | verified | Lourie et al. 2004, p. 72 |
-| Other counts: 30–39 tail rings (104 specimens); 33–37 in one study | verified | Silveira et al. 2014; Maia et al. 2013 (abstract) |
+| Other counts: 30–39 tail rings (104 specimens); 33–37 in one study | verified | Silveira et al. 2014; Maia et al. 2013 (abstract) |
 | Four L-shaped plates per ring around one vertebra; ball-and-socket, peg-and-socket and gliding joints; in printed models the square tail resists crushing and twists about 15° per segment | verified (printed models, not live tails) | Porter et al. 2015 |
 | The whole tail grips a 1 cm perch, with more motion toward the tip, and bends sideways while curling | verified (abstract) | Maia et al. 2013 |
 | Whole-tail bending of about 850° ventral, 290° dorsal, 570° lateral | other species (*H. kuda*) | Porter et al. 2015, Fig. 2A |
@@ -244,7 +244,7 @@ flowchart LR
 1. **Read the control block** (E3).
 2. **Base pose from clips.** Sample clip A at `now − startA`, interpolating linearly between frames; looping clips wrap, and one-shots hold their last frame. If clip B is set, sample it too and crossfade over the fade time. In steady state Forth writes nothing: the engine advances clip time itself.
 3. **Additive knot layer.** Hermite-interpolated knot values are added per joint. This is the procedural shape input: probe direction, rudder bias, posture.
-4. **Wrap override (contact).** Over the wrapped region, from the tip toward the start sample, each joint angle becomes ring length ÷ (holdfast radius + half-width), blended by the fractional front. A vertical post first turns the five lead-in rings to horizontal, then coils with lateral bend (see "The tail").
+4. **Wrap override (contact).** Over the wrapped region, from the tip toward the start sample, each joint angle becomes ring length ÷ (holdfast radius + half-width), blended by the fractional front. A vertical post first turns the five lead-in rings to horizontal, then coils with lateral bend (see "The tail"). As built, the lead-in turns the tail horizontal in **world** space, using the actor's rotation that the syscall passes in, so a pitched body still coils around a world-vertical post (tested at ±15°). Roll is not compensated: a rolled body tilts the coil by the roll.
 5. **Clamp** every angle to its sample's limits, and record whether any joint clamped.
 6. **Forward kinematics.** Each frame is the previous frame times flex · lateral · twist, using rotation matrices propagated down the chain. Angles are never re-derived from Euler angles, so the frame can't flip. Re-orthonormalise every 8 samples.
 7. **Vertices.** A curve-bound vertex is placed at its sample's position plus its stored offset rotated by the sample frame (rigid per ring, so nothing between rings can squash). Transform-bound vertices rotate about their pivot. Vertices with no influence keep their rest position. **Face normals:** each deformed face gets its rest normal rotated by its sample frame (exact under rigid binding). The renderer culls and lights with normals computed once at load ([`rendobj3.cc:286`](../../wfsource/source/gfx/rendobj3.cc)), so without this a coiled ring would be culled as if it still faced its rest direction. That would show as holes.
@@ -274,7 +274,7 @@ A typical frame needs **0–4 writes per seahorse**: wrap progress during a gras
 
 ### E4 — fit with existing systems
 
-- **One deformer per actor.** This is now structural (E0): the slot holds one kind, and any other kind gets `OtherKindBound` (status 2 in the block).
+- **One deformer per actor.** This is now structural (E0): the slot holds one kind, and any other kind gets `OtherKindBound` (status 2 in the block).
 - **Static meshes.** A `DFRM` actor uses the writable vertex list, so it streams (`STATIC_DEFORMED`), as the fish do. The posts and the tank stay baked.
 - **Hidden seahorses.** The Director skips `dfrm-pose` while a seahorse is invisible, so freshwater costs nothing.
 - **Number formats.** All current targets use float scalars ([`CMakeLists.txt:180-200`](../../CMakeLists.txt)). The evaluator computes in float and converts through `Scalar`, like the other deformers.
@@ -401,7 +401,7 @@ After the seahorses ship, convert the five per-species formulas into `DFRM` oper
 - **Order and acceptance:** fish → fin → swim → lion → jelly, one kind per commit. Each conversion must:
     - match its `deformer_golden` fixtures within 1e‑4 model units (exact bits can't survive the restructured maths);
     - pass a visual check of its tank;
-    - show no FPS loss on Chromecast 1 in matched runs.
+    - show no FPS loss on Chromecast 1 in matched runs.
 - **What it unlocks:** the sea anemone can resume on the same evaluator, and a new animal becomes asset data plus behaviour, with no new C++.
 
 ## Pipeline
@@ -435,7 +435,7 @@ Ranks are suggestions; a Fable session ranks the TODO entry.
 - **Gripping live plants.** It needs a C++ stem-position query and sway tracking; the posts come first (D4).
 - **Real prey particles and feeding.** Strikes target ambient drifting particles only.
 - **Stale face normals in the five existing deformers.** They move vertices but keep rest-pose face normals (`rendobj3.cc:286`), so culling and lighting lag the deformation. The fix changes their output, so it needs re-recorded golden fixtures and a visual check per tank. Do it with Deformer phase 2 or as its own fix.
-- **Exit-time heap abort in two tanks (found during Phase 1, not caused by it).** On a desktop run of the eight selector tanks, Lionfish and Planted Tank abort at exit with `free(): invalid pointer` / `invalid size`, after the REST server stops. The code before E0 aborts the same way. Root cause not investigated: run one under ASan (`task build-wf-edit` has an ASan configuration) to find the first bad free.
+- ~~**Exit-time heap abort in two tanks (found during Phase 1, not caused by it).** On a desktop run of the eight selector tanks, Lionfish and Planted Tank abort at exit with `free(): invalid pointer` / `invalid size`, after the REST server stops. The code before E0 aborts the same way. Root cause not investigated: run one under ASan (`task build-wf-edit` has an ASan configuration) to find the first bad free.~~ **Fixed in `02f726c9` (2026‑10‑16).** The root cause was a heap overflow at texture load, not exit. `LoadTexture` guarded the texture size with an assertion, and Release builds compile assertions out (since `191c4c90`). So a 512-wide lionfish or plants texture overran the default 256² slot. The check now runs in every build. The new ctests are `wf_game_smoke_aquarium_{lionfish,plants}[_default_vram]`, and the bug has an entry in `docs/BUGS.md`.
 - **`tests/test_species_movement.py` fails 6 cases with "Unknown lion-pose" (found during Phase 1, not caused by it).** The test's own Forth word list lacks `lion-pose` (syscall 177). The bootstrap text it extracts is byte-identical before and after Phase 1. Fix: add the word, or extract the list from `scripting_zforth.cc:1541`.
 - **Breeding, pouch pumping and fry.**
 - **Morph targets and the sea anemone.** The anemone stays set aside, but it can resume on the same evaluator after Deformer phase 2. The travelling-wave operator is part of Deformer phase 2, not this plan's Phase 1.
@@ -481,6 +481,26 @@ Ranks are suggestions; a Fable session ranks the TODO entry.
 
     **PASS** (2026‑10‑16): no pending wording. `tests/test_poster_seahorse_biomechanics.py`: 27 passed.
 5. Deformer tests pass: `task build && ctest --test-dir build -R "dfrm|deformer_golden" --output-on-failure`. The five existing kinds match their pre-refactor fixtures bit for bit, and on Chromecast 1 every tank in the eight-tank selector opens and animates.
+
+    ```
+    $ scripts/in-linux-container.sh bash -c 'cmake --build /build/sh --target wfengine wf_game deformer_golden_test dfrm_strand_test && ctest --test-dir /build/sh -R "deformer_golden|dfrm_strand|wf_game_smoke|memory_pool"'   # Release, on 02f726c9 (Phase 1 + the texture fix)
+     1/11 Test  #2: deformer_golden ................................   Passed    0.24 sec
+     2/11 Test  #3: dfrm_strand ....................................   Passed    3.60 sec
+     3/11 Test #13: memory_pool_arrays .............................   Passed    0.01 sec
+     4/11 Test #14: wf_game_smoke_cycle1 ...........................   Passed    0.69 sec
+     5/11 Test #15: wf_game_smoke_cycle2 ...........................   Passed    0.69 sec
+     6/11 Test #16: wf_game_smoke_snow_cycle1 ......................   Passed    0.40 sec
+     7/11 Test #17: wf_game_smoke_snow_cycle2 ......................   Passed    0.55 sec
+     8/11 Test #18: wf_game_smoke_aquarium_lionfish ................   Passed    3.09 sec
+     9/11 Test #19: wf_game_smoke_aquarium_lionfish_default_vram ...   Passed    0.08 sec
+    10/11 Test #20: wf_game_smoke_aquarium_plants ..................   Passed    1.35 sec
+    11/11 Test #21: wf_game_smoke_aquarium_plants_default_vram .....   Passed    0.09 sec
+    100% tests passed, 0 tests failed out of 11
+    ```
+
+    Chromecast 1 (`chromecast-test-01`, Chromecast HD, Android 14), coordinator job J‑2926cf7cc193, test APK built from the Phase 1 tree: all eight tanks PASS start, Home and resume, and Back to the selector. Each animates: pixels change between the first, middle and last frames. Logcat shows 0 fatal, assert, crash or Forth lines. The eight-tank release was reinstalled afterwards and its hash verified. Evidence: `docs/diagnostics/seahorse-phase1-cast1/summary.json`.
+
+    **PASS** (2026‑10‑16): ran through the container script against the Release build in `/build/sh` instead of `task build` (house rule: builds run in the container). The five existing kinds match their pre-refactor fixtures bit for bit. The macOS build ([Codemagic 6ad1859b](https://codemagic.io/app/6aafa6886ab3f21cf431a6cb/build/6ad1859ba9acf427ac70fae7)) is also green, with `AQUARIUM PARITY: MATCH`.
 6. Content tests pass: `python3 -m pytest -q tests/test_seahorse_tail.py tests/test_seahorse_asset.py tests/test_dfrm_export.py tests/test_aquarium_plants.py`. These cover: the `DFRM` export round trip, with angles within 0.01° and influence count equal to vertex count; Python/C++ expansion parity, joint limits, arc length, no frame flips, triangle-area margin ≥ 2×, mesh and actor budgets, and no overlap in the mailbox map.
 7. The level builds and exports the seahorses: `bash wflevels/aquarium_plants/build.sh && grep -c seahorse wflevels/aquarium_plants/actor-map.json` prints at least `8` (4 seahorses × 2 actors).
 8. Desktop pose trace: `python3 wflevels/aquarium_tanks/seahorse_poses.py --out docs/plans/2026-10-16-saltwater-seahorses/evidence` writes one PNG per pose (rest, grip branch, grip stem, swim, probe, twine, startle) and a JSON in which `max_limit_use <= 1.0`, `frame_flips == 0` and `wrap_centre_error_mm <= 0.5`.
