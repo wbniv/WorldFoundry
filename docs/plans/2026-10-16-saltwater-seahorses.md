@@ -589,7 +589,82 @@ Ranks are suggestions; a Fable session ranks the TODO entry.
     <img src="2026-10-16-saltwater-seahorses/evidence/phase3/settings-sequence.png" width="700">
 
     <img src="2026-10-16-saltwater-seahorses/evidence/phase3/behaviour-sequence.png" width="700">
+
+    **Rerun on Chromecast 1** (2026‑10‑16, 22:30–23:00 +07, PC back on the home Wi‑Fi). The APKs are the frozen `0401c619` fallbacks, not a fresh build of the merged branch: `/` had 4.1 GB free, under the 5 GB floor for a Gradle and `.cxx` build, so the normals migration on `4d318485` is not covered on the device. All five hashes match `variants.json`.
+
+    ```
+    $ sha256sum ~/tmp/seahorse-phase3/aquarium-seahorse-phase3-0401c619.apk ~/tmp/seahorse-phase3/variants/*.apk
+    b758d5933c3e17a5684fa75b7d0fdcb143f2302553a9c547d415abb0408c3216  aquarium-seahorse-phase3-0401c619.apk
+    af62434ef6985a682c066aea8bb4f87be966a3fe2b53d6b5e0f91470e06e2413  variants/freshwater.apk
+    c0de73cdd3c87cd9512c553d2df7d528845ad1e6231683ac80c6752bd543484f  variants/none.apk
+    ed069f09d449d694ebe83b3f60293217c33704577536ec7a8c043f72c9de3bdf  variants/pair1.apk
+    c88612a0c485fbe1980d1ab7ce2495cb0e05481e7e70d444d48b0a322fff8640  variants/pair2.apk
+    $ task chromecast:check DEVICE=chromecast-test-01 APP=aquarium VALIDATOR=menu-back APK=~/tmp/seahorse-phase3/variants/pair2.apk
+    J-c662cfe8b72c: completed {"error": null, "health": "ready"}
+    $ task chromecast:check DEVICE=chromecast-test-01 APP=aquarium VALIDATOR=menu-back APK=~/tmp/seahorse-phase3/variants/pair1.apk
+    J-2949cf86700c: completed {"error": null, "health": "ready"}
+    $ task chromecast:check DEVICE=chromecast-test-01 APP=aquarium VALIDATOR=menu-back APK=~/tmp/seahorse-phase3/variants/none.apk
+    J-0ec6295b9e58: completed {"error": null, "health": "ready"}
+    $ task chromecast:check DEVICE=chromecast-test-01 APP=aquarium VALIDATOR=menu-back APK=~/tmp/seahorse-phase3/variants/freshwater.apk
+    J-cc8fe71434ad: completed {"error": null, "health": "ready"}
+    $ # per variant: assertions.json scenes PASS, betta pixels, fatal|assert|crash|Forth-error logcat lines, installed hash
+    pair2 8 scenes PASS betta [2575] bad-log-lines 0 installed ['c88612a0c485']
+    pair1 8 scenes PASS betta [2632] bad-log-lines 0 installed ['ed069f09d449']
+    none 8 scenes PASS betta [2054] bad-log-lines 0 installed ['c0de73cdd3c8']
+    freshwater 8 scenes PASS betta [2498] bad-log-lines 0 installed ['af62434ef698']
+    $ task chromecast:check DEVICE=chromecast-test-01 APP=aquarium VALIDATOR=aquarium-seahorses APK=~/tmp/seahorse-phase3/aquarium-seahorse-phase3-0401c619.apk
+    J-534fd47d24cc: phase {"phase": "awaiting-supervision"}
+    J-534fd47d24cc: recovery-required {"error": "plugin-error", "health": "recovery-required"}
+    J-534fd47d24cc: recovery-required: plugin-error (automatic readd J-0bae7529a0df)
+    J-0bae7529a0df: completed {"error": null, "health": "ready"}
+    task: Failed to run task "chromecast:check": exit status 1
+    $ # seahorse-checks.json, everything except phone_models
+    {'assertions': {'seahorses_sheet_fields': 'FAIL'}}
+    $ # the phone model's fields 8-9, as the device sent them (keys trimmed)
+    {'id': 8, 'kind': 2, 'show': 5, 'key': 'Seahorses', 'choices': 'None|1 pair|2 pairs', 'value': '2', 'min': 0, 'max': 2}
+    {'id': 9, 'kind': 2, 'show': 8, 'key': 'Greeting', 'choices': 'False|True', 'value': '1'}
+    ```
+
+    Menu check (`menu-back`): in all four variants, all eight tanks pass start, Home and resume, and Back to the selector, all in one process. Betta animates, and logcat has no fatal, assert, crash or Forth-error lines. The planted-tank captures, taken 1.5 s after entering the tank:
+
+    | Variant | Job | Planted tank on the TV |
+    |---|---|---|
+    | 2 pairs | J‑c662cfe8b72c | Saltwater. Four seahorses (two yellow, two orange) as two pairs, one pair on each post (red whip left, grey T‑post right). Urchin on the sand. 18.9 FPS. |
+    | 1 pair | J‑2949cf86700c | Saltwater. One pair on the red whip. The grey T‑post is shown and empty, matching the desktop `wide-pair1.png`. 19.9 FPS. |
+    | None | J‑0ec6295b9e58 | Saltwater. No seahorses and no posts; urchin only. 21.2 FPS. |
+    | Freshwater | J‑cc8fe71434ad | Freshwater plants, rocks and the freshwater resident. No seahorses, no posts, no urchin. HUD reads `Freshwater`. 19.9 FPS. |
+
+    <img src="../diagnostics/seahorse-phase3-cast1/menu-check/pair2/planted-tank-screenshot.png" width="700">
+
+    <img src="../diagnostics/seahorse-phase3-cast1/menu-check/pair1/planted-tank-screenshot.png" width="700">
+
+    <img src="../diagnostics/seahorse-phase3-cast1/menu-check/none/planted-tank-screenshot.png" width="700">
+
+    <img src="../diagnostics/seahorse-phase3-cast1/menu-check/freshwater/planted-tank-screenshot.png" width="700">
+
+    `aquarium-seahorses` (deployed during this session) ran as J‑534fd47d24cc. It entered the planted tank and Hold A opened the Director form with both sheets, **Plant growth** and **Seahorses**. The phone model carried field 8 (`None|1 pair|2 pairs`, value 2 pairs) and field 9 (Greeting, on). It then stopped at its first assertion, `seahorses_sheet_fields`. The predicate (`seahorse_checks.py:22-28`) requires Greeting to be `kind == 4`. The app sends every checkbox (Textures, Sway and Greeting alike) as kind 2 with show 8 and choices `False|True`. The level declares Greeting `TYPEENTRYBOOLEAN(Greeting,,1,SHOW_AS_CHECKBOX)` (`tests/test_seahorse_settings.py:17`). So the failure lies in the validator, not the game, and none of the Apply steps ran (2 → 1 → 0 → 2, speed-only, freshwater and back). The automatic readd J‑0bae7529a0df returned the device to `ready`.
+
+    <img src="../diagnostics/seahorse-phase3-cast1/aquarium-seahorses/remote-hold-opens-settings-screenshot.png" width="700">
+
+    **PARTIAL, not a pass** (2026‑10‑16): selector, Back, Home and resume pass. Each authored setting (None, 1 pair, 2 pairs, freshwater) shows the expected seahorses and posts on Chromecast 1. Still open:
+    - The in-game Hold A → Apply sequence is unverified on the device. The `aquarium-seahorses` validator needs its Greeting predicate fixed: accept kind 2, show 8, `False|True`, as Textures and Sway already are. That is a `~/chromecast-coordinator` change plus Will's sudo deploy, and then a rerun.
+    - The device APK is `0401c619`, not the merged branch.
+
+    Evidence: `docs/diagnostics/seahorse-phase3-cast1/summary.json`.
 11. The eight-tank selector release is reinstalled on each Chromecast, and its installed hash matches the build.
+
+    ```
+    $ task chromecast:submit DEVICE=chromecast-test-01 APP=aquarium WORKFLOW=install APK=~/tmp/seahorse-phase1/aquarium-selector-release-e941e460.apk
+    Accepted J-fdb7dc91844e: queued; install
+    J-fdb7dc91844e: completed {"error": null, "health": "ready"}
+    $ # receipt journal: before_hash -> installed_sha256
+    install:1 before af62434ef6985a682c066aea8bb4f87be966a3fe2b53d6b5e0f91470e06e2413 after 3d796c773070795e16fe4505b80f43f711c8bf6555bcbef70101176264738d88
+    $ task chromecast:submit DEVICE=chromecast-test-01 APP=aquarium WORKFLOW=install APK=~/tmp/seahorse-phase1/aquarium-selector-release-e941e460.apk   # re-read: nothing to install
+    J-37aa68f6ecdc: completed {"error": null, "health": "ready"}
+    install:1 before 3d796c773070795e16fe4505b80f43f711c8bf6555bcbef70101176264738d88 after 3d796c773070795e16fe4505b80f43f711c8bf6555bcbef70101176264738d88
+    ```
+
+    **Chromecast 1 PASS** (2026‑10‑16): the selector release `e941e460` (`3d796c77…`) is installed, and a second job read the same hash back before doing anything. Chromecast 2 is not done: it is `needs-local-setup` and was not used.
 12. Mockups rebuild cleanly: `python3 docs/plans/2026-10-16-saltwater-seahorses/build_mockups.py` reports no errors, and every file is under the 512 KB budget.
 
 ## Six-pair update — 2026‑10‑16
