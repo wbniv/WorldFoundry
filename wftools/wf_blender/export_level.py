@@ -466,6 +466,19 @@ def _dfrm_limits(pbone, name):
     raise ValueError(f'DFRM bone {name} needs a Limit Rotation constraint or wf_limits')
 
 
+def _dfrm_assign_action(ad, action):
+    """Make ``action`` the active action and give it a slot.
+
+    Blender 4.4+ (slotted actions) picks a slot on assignment only when one
+    matches this armature. An action keyed on another armature, as when several
+    seahorses share one set of clips, gets none: the pose then never moves and
+    every frame would export as the rest pose. Fall back to the first slot.
+    """
+    ad.action = action
+    if getattr(ad, 'action_slot', False) is None and len(getattr(action, 'slots', ())) > 0:
+        ad.action_slot = action.slots[0]
+
+
 def _collect_dfrm_rig(blobj):
     """Gather the DFRM inputs for one mesh: chain, transforms, weights, clips.
 
@@ -522,11 +535,12 @@ def _collect_dfrm_rig(blobj):
     if actions:
         scene = bpy.context.scene
         fps = scene.render.fps / scene.render.fps_base
-        saved = (ad.action, ad.use_nla, scene.frame_current, scene.frame_subframe)
+        saved = (ad.action, ad.use_nla, scene.frame_current, scene.frame_subframe,
+                 getattr(ad, 'action_slot', None))
         ad.use_nla = False
         try:
             for action in sorted(actions, key=lambda a: a.name):
-                ad.action = action
+                _dfrm_assign_action(ad, action)
                 loop = bool(action.get('wf_loop', getattr(action, 'use_cyclic', False)))
                 start, end = action.frame_range
                 count = max(1, int(round((end - start) / fps * dfrm.FPS)) + (0 if loop else 1))
@@ -545,6 +559,8 @@ def _collect_dfrm_rig(blobj):
                 clips.append({'name': action.name, 'loop': loop, 'frames': frames})
         finally:
             ad.action, ad.use_nla = saved[0], saved[1]
+            if saved[0] is not None and saved[4] is not None:
+                ad.action_slot = saved[4]
             scene.frame_set(saved[2], subframe=saved[3])
     return {'chain': chain, 'transforms': transforms, 'bindings': bindings, 'clips': clips}
 
