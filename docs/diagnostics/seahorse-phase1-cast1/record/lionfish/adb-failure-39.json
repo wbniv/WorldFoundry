@@ -1,0 +1,9 @@
+{
+  "args": [
+    "shell",
+    "cat /proc/31583/cmdline"
+  ],
+  "returncode": 1,
+  "stdout": "",
+  "stderr": "cat: /proc/31583/cmdline: No such file or directory\n"
+}

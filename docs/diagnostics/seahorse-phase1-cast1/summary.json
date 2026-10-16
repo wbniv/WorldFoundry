@@ -1,0 +1,238 @@
+{
+  "device": "chromecast-test-01 (Chromecast HD, Android 14)",
+  "test_apk": {
+    "branch": "seahorse-phase1",
+    "commit": "34e0447c",
+    "sha256": "c152241f4732a3290228833d8fd6f106a93c3b5e792b8c199f5dafd48c839591"
+  },
+  "restored_apk": {
+    "branch": "2026-new-level",
+    "commit": "e941e460",
+    "sha256": "3d796c773070795e16fe4505b80f43f711c8bf6555bcbef70101176264738d88"
+  },
+  "installed_before_this_session_sha256": "28b6c93dfb52a76d5fb7afb9e6c127c8631bbf0e1707554db72c5c922a2e9244",
+  "menu_check": {
+    "job": "J-2926cf7cc193",
+    "assertions": [
+      {
+        "scene": "clownfish",
+        "start_back_home_resume": "PASS"
+      },
+      {
+        "scene": "blue-shrimp",
+        "start_back_home_resume": "PASS"
+      },
+      {
+        "betta_animated_pixels": 2895
+      },
+      {
+        "scene": "betta",
+        "start_back_home_resume": "PASS"
+      },
+      {
+        "scene": "jellyfish",
+        "start_back_home_resume": "PASS"
+      },
+      {
+        "scene": "lionfish",
+        "start_back_home_resume": "PASS"
+      },
+      {
+        "scene": "planted-tank",
+        "start_back_home_resume": "PASS"
+      },
+      {
+        "scene": "arowana",
+        "start_back_home_resume": "PASS"
+      },
+      {
+        "scene": "tiger-barbs",
+        "start_back_home_resume": "PASS"
+      }
+    ]
+  },
+  "record": {
+    "arowana": {
+      "job": "J-d8a4a9ec9813",
+      "installed_sha256": [
+        "c152241f4732a3290228833d8fd6f106a93c3b5e792b8c199f5dafd48c839591"
+      ],
+      "motion": {
+        "frames": 23,
+        "span_s": [
+          0.0,
+          1.145
+        ],
+        "changed_pixels_first_mid_last": [
+          9501,
+          13194
+        ],
+        "animates": true
+      }
+    },
+    "betta": {
+      "job": "J-4011ebb27675",
+      "installed_sha256": [
+        "c152241f4732a3290228833d8fd6f106a93c3b5e792b8c199f5dafd48c839591"
+      ],
+      "motion": {
+        "frames": 23,
+        "span_s": [
+          0.0,
+          1.105
+        ],
+        "changed_pixels_first_mid_last": [
+          2829,
+          4006
+        ],
+        "animates": true
+      }
+    },
+    "blue-shrimp": {
+      "job": "J-8d94a0fb4bd7",
+      "installed_sha256": [
+        "c152241f4732a3290228833d8fd6f106a93c3b5e792b8c199f5dafd48c839591"
+      ],
+      "motion": {
+        "frames": 21,
+        "span_s": [
+          0.0,
+          0.947
+        ],
+        "changed_pixels_first_mid_last": [
+          20758,
+          25625
+        ],
+        "animates": true
+      }
+    },
+    "clownfish": {
+      "job": "J-7c72bdda4ccd",
+      "installed_sha256": [
+        "c152241f4732a3290228833d8fd6f106a93c3b5e792b8c199f5dafd48c839591"
+      ],
+      "motion": {
+        "frames": 21,
+        "span_s": [
+          0.0,
+          1.019
+        ],
+        "changed_pixels_first_mid_last": [
+          6410,
+          9300
+        ],
+        "animates": true
+      }
+    },
+    "jellyfish": {
+      "job": "J-c773c4033a2f",
+      "installed_sha256": [
+        "c152241f4732a3290228833d8fd6f106a93c3b5e792b8c199f5dafd48c839591"
+      ],
+      "motion": {
+        "frames": 20,
+        "span_s": [
+          0.0,
+          0.727
+        ],
+        "changed_pixels_first_mid_last": [
+          65314,
+          78712
+        ],
+        "animates": true
+      }
+    },
+    "lionfish": {
+      "job": "J-f73800e55573",
+      "installed_sha256": [
+        "c152241f4732a3290228833d8fd6f106a93c3b5e792b8c199f5dafd48c839591"
+      ],
+      "motion": {
+        "frames": 19,
+        "span_s": [
+          0.0,
+          0.674
+        ],
+        "changed_pixels_first_mid_last": [
+          25503,
+          22062
+        ],
+        "animates": true
+      }
+    },
+    "planted-tank": {
+      "job": "J-b435c96365fd",
+      "installed_sha256": [
+        "c152241f4732a3290228833d8fd6f106a93c3b5e792b8c199f5dafd48c839591"
+      ],
+      "motion": {
+        "frames": 22,
+        "span_s": [
+          0.0,
+          1.071
+        ],
+        "changed_pixels_first_mid_last": [
+          1934,
+          925
+        ],
+        "animates": true
+      }
+    },
+    "tiger-barbs": {
+      "job": "J-31ced2eebd8d",
+      "installed_sha256": [
+        "c152241f4732a3290228833d8fd6f106a93c3b5e792b8c199f5dafd48c839591"
+      ],
+      "motion": {
+        "frames": 22,
+        "span_s": [
+          0.0,
+          1.082
+        ],
+        "changed_pixels_first_mid_last": [
+          20591,
+          20005
+        ],
+        "animates": true
+      }
+    }
+  },
+  "baseline_release": {
+    "clownfish": {
+      "job": "J-74582da3ee88",
+      "installed_sha256": [
+        "3d796c773070795e16fe4505b80f43f711c8bf6555bcbef70101176264738d88"
+      ],
+      "motion": {
+        "frames": 21,
+        "span_s": [
+          0.0,
+          0.948
+        ],
+        "changed_pixels_first_mid_last": [
+          5745,
+          8056
+        ],
+        "animates": true
+      }
+    },
+    "lionfish": {
+      "job": "J-e9c3a732f3c6",
+      "installed_sha256": [
+        "3d796c773070795e16fe4505b80f43f711c8bf6555bcbef70101176264738d88"
+      ],
+      "motion": {
+        "frames": 21,
+        "span_s": [
+          0.0,
+          0.859
+        ],
+        "changed_pixels_first_mid_last": [
+          22839,
+          19612
+        ],
+        "animates": true
+      }
+    }
+  }
+}
