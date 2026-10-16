@@ -279,8 +279,28 @@ that use one texture and would otherwise form one draw. Alternating flagged
 and unflagged regions can add draw calls if the experimental selector is
 enabled. Continue to use palette recoloring when the art needs it; the
 production renderer still supports it, and this prototype is **not** enabled
-globally. The proposed next engine step uses the existing palette-capable
-shader for mixed batches and links the extra program only when first needed.
+globally. A later diagnostic selector keeps mixed batches on the existing
+palette-capable shader and links the extra program only for an ordinary opaque
+draw. In five mixed-scene Cast1 pairs it preserved **18 draws/frame** and
+changed median FPS **47.49→47.46**, within run variation. This fallback is
+still isolated from production. [Selector follow-up](https://github.com/wbniv/finding-your-way/blob/main/docs/investigations/2026-10-16-no-palette-selector-follow-up.md).
+
+**Future level opt-in guidance:** A cold first ordinary draw can pause a
+visible scene while the no-palette program is created. In three diagnostic
+Cast1 pairs, a scripted late reveal had a **116.8 ms** worst presented
+interval without prewarm and **50.1 ms** with level-load prewarm. The median
+interval crossing level loading rose **183.5→283.6 ms**; one opted-in run
+reached **417.1 ms**. Treat prewarm as a per-level tradeoff for a known visible
+ordinary opaque batch whose first appearance would otherwise interrupt play.
+Do not request it merely because an asset has ordinary materials: three
+hidden-asset runs showed an unused shader taking **89–99 ms** to create during
+load. In the diagnostic selector, palette recoloring and mixed-batch fallback
+remain available either way. These numbers measure presentation gaps, not a
+steady-FPS gain from prewarm.
+The trial used APK arguments and a menu index; there is **no authored level
+property or production opt-in yet**. A visible palette-only level and an
+intermittent 30 FPS cadence in a nearly empty fixture still need investigation
+before shipping. [Prewarm opt-in report](https://github.com/wbniv/finding-your-way/blob/main/docs/investigations/2026-10-16-no-palette-level-optin.md).
 
 ### Blender Viewport Display by Object Type
 
