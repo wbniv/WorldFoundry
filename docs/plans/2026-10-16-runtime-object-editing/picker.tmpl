@@ -1,0 +1,126 @@
+<!DOCTYPE html>
+<!--
+  Plan mockup — 3D object picker, an option in the object chooser list.
+  GENERATED: edit picker.tmpl, then run build_picker.py (it inlines the
+  tank view from the seahorse plan's tank-scene.png and renders picker.png).
+  1440x900. Positions are measured on that image; the seahorses are
+  editable here as they will be under runtime object editing.
+-->
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<title>Mockup — 3D object picker</title>
+<style>
+  :root { --bg:#ffffff; --fg:#1f2328; --muted:#656d76; --line:#d1d9e0; --panel:#f6f8fa; }
+  @media (prefers-color-scheme: dark) { :root { --bg:#0d1117; --fg:#e6edf3; --muted:#9198a1; --line:#30363d; --panel:#161b22; } }
+  * { box-sizing:border-box; }
+  body { margin:0; width:1440px; height:900px; overflow:hidden; background:var(--bg); color:var(--fg); font:13.5px/1.4 ui-sans-serif,system-ui,sans-serif; }
+  header { display:flex; align-items:baseline; gap:14px; height:52px; padding:13px 22px; border-bottom:1px solid var(--line); background:var(--panel); }
+  header h1 { margin:0; font-size:16px; font-weight:600; } header .sub { color:var(--muted); font-size:13px; }
+  header .tag { margin-left:auto; font:600 11px ui-monospace,monospace; color:var(--muted); border:1px solid var(--line); border-radius:10px; padding:2px 8px; }
+  main { display:grid; grid-template-columns:900px 420px; gap:76px; padding:10px 22px; }
+  h2 { margin:0 0 4px; font-size:13.5px; } .cap { color:var(--muted); font-size:12px; margin:0 0 6px; }
+  .tv { position:relative; background:#05080a; border-radius:6px; overflow:hidden; }
+  .scene { position:absolute; inset:0; background:url({{SCENE_JPG}}) top center/100% auto no-repeat; }
+  .dim { position:absolute; inset:0; background:rgba(0,0,0,.28); }
+  svg.ov { position:absolute; inset:0; width:100%; height:100%; }
+  .hud { position:absolute; left:0; right:0; bottom:0; padding:7px 14px; background:rgba(8,16,9,.85); color:#d9c36a; font:13px ui-monospace,monospace; display:flex; justify-content:space-between; }
+  .ui { position:absolute; inset:0; background:#081009; padding:16px 22px; font:13px ui-monospace,monospace; color:#e3ecd8; }
+  .ui .box { background:#173326; height:100%; padding:12px 14px; }
+  .ui .title { font-size:14px; margin-bottom:10px; }
+  .row { background:#21402f; padding:6px 10px; margin-bottom:6px; display:flex; gap:8px; align-items:center; }
+  .row.sel { background:#4f8452; }
+  .msg { position:absolute; left:50%; top:42%; transform:translate(-50%,-50%); background:rgba(8,16,9,.92); color:#e3ecd8; padding:12px 18px; font:14px ui-monospace,monospace; border:1px solid #4f8452; }
+  .under { display:grid; grid-template-columns:250px 1fr; gap:18px; margin-top:8px; }
+  .phone { width:230px; height:226px; background:#0d1117; border:8px solid #3b3f46; border-radius:26px; padding:12px; color:#e6edf3; font:12.5px system-ui,sans-serif; }
+  .phone .t { font-weight:700; } .phone .s { color:#8b98a9; font-size:11.5px; margin-bottom:8px; }
+  .pad { display:grid; grid-template-columns:repeat(3,40px); grid-template-rows:repeat(3,32px); gap:4px; justify-content:center; margin:6px 0; }
+  .pad span { background:#1d2a3f; border-radius:8px; display:flex; align-items:center; justify-content:center; font-size:16px; }
+  .pad .ok { background:#56d364; color:#0d1117; font-weight:700; font-size:12px; }
+  .pbtn { text-align:center; padding:8px 0; border-radius:8px; background:#1d2a3f; margin-top:6px; }
+  .notes { font-size:12px; color:var(--muted); }
+  .notes b { color:var(--fg); }
+</style>
+</head>
+<body>
+<header><h1>3D object picker — an option in the object chooser</h1><span class="sub">pick in the scene with the remote's arrows · only the export's editable objects are candidates · no runtime scan</span><span class="tag">MOCKUP — NOT SHIPPED</span></header>
+<main>
+  <div>
+    <h2>2. Pick in 3D (TV): arrows move between objects on screen, OK opens the form</h2>
+    <p class="cap">Every on-screen editable object gets corner brackets; the highlighted one shows its label. A settings holder with no mesh shows a gear at its authored position.</p>
+    <div class="tv" style="width:880px;height:495px">
+      <div class="scene"></div><div class="dim"></div>
+      <svg class="ov" viewBox="0 0 1040 585">
+        <defs>
+          <g id="gear"><circle r="9" fill="none" stroke="#e3ecd8" stroke-width="4" stroke-dasharray="4 3.1"/><circle r="5" fill="none" stroke="#e3ecd8" stroke-width="2.5"/></g>
+        </defs>
+        <!-- candidates: [x0,y0,x1,y1] measured on the tank view -->
+        <g fill="none" stroke="#e3ecd8" stroke-width="2.2" opacity=".85">
+          <path d="M334 268v-12h12 M380 256h12v12 M392 312v12h-12 M346 324h-12v-12"/>
+          <path d="M526 244v-12h12 M554 232h12v12 M566 330v12h-12 M538 342h-12v-12"/>
+          <path d="M666 246v-12h12 M694 234h12v12 M706 312v12h-12 M678 324h-12v-12"/>
+          <path d="M282 404v-12h12 M306 392h12v12 M318 428v12h-12 M294 440h-12v-12"/>
+        </g>
+        <use href="#gear" x="300" y="416"/>
+        <!-- highlighted: Goldie (female on the sea whip) -->
+        <g fill="none" stroke="#9ee37d" stroke-width="4">
+          <path d="M386 274v-16h16 M418 258h16v16 M434 330v16h-16 M402 346h-16v-16"/>
+        </g>
+        <g transform="translate(410,236)"><rect x="-38" y="-20" width="76" height="24" rx="3" fill="#173326" stroke="#9ee37d" stroke-width="1.5"/><text x="0" y="-3" fill="#e3ecd8" font-family="monospace" font-size="15" text-anchor="middle">Goldie</text></g>
+      </svg>
+      <div class="hud"><span>Arrows: move&nbsp;&nbsp; OK: edit</span><span>← list</span></div>
+    </div>
+    <div class="under">
+      <div>
+        <h2>5. Phone</h2>
+        <div class="phone">
+          <div class="t">Planted Tank</div><div class="s">TV is in Pick in 3D</div>
+          <div class="pad"><span></span><span>▲</span><span></span><span>◀</span><span class="ok">OK</span><span>▶</span><span></span><span>▼</span><span></span></div>
+          <div class="pbtn">☰ List</div>
+        </div>
+      </div>
+      <div>
+        <h2>6. Desktop: the mouse picks directly</h2>
+        <p class="cap">Hover highlights the object under the cursor (a ray against the listed objects' bounds only); click opens it. Arrows still work.</p>
+        <div class="tv" style="width:380px;height:214px">
+          <div class="scene"></div><div class="dim"></div>
+          <svg class="ov" viewBox="0 0 1040 585">
+            <g fill="none" stroke="#9ee37d" stroke-width="5"><path d="M520 250v-16h16 M552 234h16v16 M568 336v16h-16 M536 352h-16v-16"/></g>
+            <g transform="translate(546,212)"><rect x="-60" y="-24" width="120" height="30" rx="3" fill="#173326" stroke="#9ee37d" stroke-width="2"/><text x="0" y="-3" fill="#e3ecd8" font-family="monospace" font-size="20" text-anchor="middle">Seahorse 2</text></g>
+            <path d="M560 300 l0 26 l7 -7 l6 13 l5 -2 l-6 -13 l10 0 z" fill="#fff" stroke="#000" stroke-width="1.5"/>
+          </svg>
+        </div>
+      </div>
+    </div>
+  </div>
+  <div>
+    <h2>1. The chooser list gains one option</h2>
+    <p class="cap">"Pick in 3D" is the first row whenever there are two or more editable objects. Back from the scene returns here.</p>
+    <div class="tv" style="width:400px;height:206px"><div class="ui"><div class="box">
+      <div class="title">Choose an object</div>
+      <div class="row sel"><svg width="16" height="16" viewBox="0 0 16 16"><circle cx="8" cy="8" r="5.5" fill="none" stroke="#e3ecd8" stroke-width="1.6"/><path d="M8 0v5M8 11v5M0 8h5M11 8h5" stroke="#e3ecd8" stroke-width="1.6"/></svg>Pick in 3D</div>
+      <div class="row">Planted Tank Settings</div>
+      <div class="row">Goldie</div>
+      <div class="row">Seahorse 2</div>
+    </div></div></div>
+    <h2 style="margin-top:8px">3. Objects on the same spot</h2>
+    <p class="cap">Candidates within a few pixels share one bracket marked "2"; OK opens a short list of just those.</p>
+    <div class="tv" style="width:400px;height:206px">
+      <div class="scene"></div><div class="dim"></div>
+      <svg class="ov" viewBox="0 0 1040 585">
+        <g fill="none" stroke="#9ee37d" stroke-width="5"><path d="M270 394v-16h16 M314 378h16v16 M330 438v16h-16 M286 454h-16v-16"/></g>
+        <use href="#gear" x="300" y="416"/>
+        <g transform="translate(300,350)"><rect x="-104" y="-26" width="208" height="32" rx="3" fill="#173326" stroke="#9ee37d" stroke-width="2"/><text x="0" y="-3" fill="#e3ecd8" font-family="monospace" font-size="20" text-anchor="middle">2 objects here</text></g>
+      </svg>
+    </div>
+    <h2 style="margin-top:8px">4. Nothing editable in view</h2>
+    <p class="cap">The camera shows no listed object: a message, and ← returns to the list (which always has every object).</p>
+    <div class="tv" style="width:400px;height:206px">
+      <div class="scene"></div><div class="dim" style="background:rgba(0,0,0,.5)"></div>
+      <div class="msg">No editable objects in view</div>
+      <div class="hud"><span></span><span>← list</span></div>
+    </div>
+  </div>
+</main>
+</body>
+</html>

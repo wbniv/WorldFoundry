@@ -1,9 +1,15 @@
 | Date | Change |
 |------|--------|
+| [2026-10-16](https://github.com/wbniv/WorldFoundry/commit/3801e13d) | Runtime object editing plan: fix flowchart and decisions table |
 | [2026-10-16](https://github.com/wbniv/WorldFoundry/commit/928ee745) | Runtime object editing: no 'live' in the UI; padlock on read-only fields |
 | [2026-10-16](https://github.com/wbniv/WorldFoundry/commit/7ef36fbb) | Plan runtime object editing on OAS/OAD to replace RP02 |
 
 <!--history-meta v1
+3801e13d	author	Will Norris
+3801e13d	added	1
+3801e13d	deleted	2
+3801e13d	files	1
+3801e13d	body	The flowchart fell back to a code block: Mermaid 11 parses '@' in an\nunquoted node label as node metadata (renderer warned 'Parse error ...\ngot LINK_ID'); quote that label. A blank line split the decisions table,\nturning M6 into a bold header row; join it back.\n\nCo-Authored-By: Claude Opus 5.5 <noreply@anthropic.com>\nClaude-Session: https://claude.ai/code/session_01T3gB59hNsFhWnCTTKHc1yk
 928ee745	author	Will Norris
 928ee745	added	5
 928ee745	deleted	5
