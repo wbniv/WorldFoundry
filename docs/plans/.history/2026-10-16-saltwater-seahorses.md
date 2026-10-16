@@ -1,5 +1,6 @@
 | Date | Change |
 |------|--------|
+| [2026-10-16](https://github.com/wbniv/WorldFoundry/commit/5f65772a) | Seahorses Phase 3 merged; step 10 waits on the home network |
 | [2026-10-16](https://github.com/wbniv/WorldFoundry/commit/177e51f6) | Seahorse device variants; record verification steps 8 and 10 |
 | [2026-10-16](https://github.com/wbniv/WorldFoundry/commit/dfc13252) | Record seahorse Phase 2: as-built notes, steps 6-7 PASS, TODO done |
 | [2026-10-16](https://github.com/wbniv/WorldFoundry/commit/0a128929) | Add seahorse phases, deformer follow-ons and Blender-in-container to TODO |
@@ -11,6 +12,11 @@
 | [2026-10-16](https://github.com/wbniv/WorldFoundry/commit/623a8ca3) | Plan saltwater seahorses with 35-joint tails and a generic deformer |
 
 <!--history-meta v1
+5f65772a	author	Will Norris
+5f65772a	added	1
+5f65772a	deleted	1
+5f65772a	files	1
+5f65772a	body	The Cast1 job failed because the laptop woke onto the phone hotspot at\n14:07 (+07), not because the Chromecast left the LAN. TODO moves Phase 3\nto verify.\n\nCo-Authored-By: Claude Opus 5.5 <noreply@anthropic.com>\nClaude-Session: https://claude.ai/code/session_01T3gB59hNsFhWnCTTKHc1yk
 177e51f6	author	Will Norris
 177e51f6	added	42
 177e51f6	deleted	0
