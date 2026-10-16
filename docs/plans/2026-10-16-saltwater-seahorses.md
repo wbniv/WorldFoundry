@@ -535,7 +535,49 @@ Ranks are suggestions; a Fable session ranks the TODO entry.
 
     **PASS** (2026‑10‑16): the Phase 2 agent ran `wflevels/aquarium_plants/build.sh` (host Blender, the existing pipeline) and committed the rebuilt level. 21 actor-map entries name seahorses, at least the 8 required.
 8. Desktop pose trace: `python3 wflevels/aquarium_tanks/seahorse_poses.py --out docs/plans/2026-10-16-saltwater-seahorses/evidence` writes one PNG per pose (rest, grip branch, grip stem, swim, probe, twine, startle) and a JSON in which `max_limit_use <= 1.0`, `frame_flips == 0` and `wrap_centre_error_mm <= 0.5`.
+
+    ```
+    $ scripts/in-linux-container.sh env TMPDIR=/build/tmp python3 wflevels/aquarium_tanks/seahorse_poses.py --out docs/plans/2026-10-16-saltwater-seahorses/evidence/phase3   # on d5190a85
+    {"max_limit_use": 0.9591, "frame_flips": 0, "wrap_centre_error_mm": 0.2574, "pass": true}
+    ```
+
+    Per pose (`evidence/phase3/poses.json`):
+
+    ```
+    rest         max_limit_use 0.9    frame_flips 0
+    grip-branch  max_limit_use 0.822  frame_flips 0  wrap horizontal, start 18, radius 4.0 mm  wrap_centre_error_mm 0.1403
+    grip-stem    max_limit_use 0.9423 frame_flips 0  wrap vertical,   start 17, radius 6.0 mm  wrap_centre_error_mm 0.2441
+    swim         max_limit_use 0.5    frame_flips 0
+    probe        max_limit_use 0.75   frame_flips 0
+    twine        max_limit_use 0.9591 frame_flips 0  wrap vertical,   start 18, radius 5.5 mm  wrap_centre_error_mm 0.2574
+    startle      max_limit_use 0.75   frame_flips 0
+    ```
+
+    <img src="2026-10-16-saltwater-seahorses/evidence/phase3/poses-sheet.png" width="700">
+
+    **PASS** (2026‑10‑16): all three limits hold. Ran in the container, with `--out …/evidence/phase3` so Phase 3's evidence stays together. The poses are the mockup's presets on the exported female rig; a vertical grip takes its wrap start from the post radius (Phase 3: no ring past 97 % of its lateral limit), so `twine` uses start 18. Limit use is the worst joint over the pose and its 1 s ease-in from rest. The centre error is the Director's solve as the game runs it: one frame late, extrapolated, for 6 s of `hold_idle` sway at 20 Hz.
 9. Matched device runs, with Chromecast 1 reserved through the coordinator (`task cast1:reserve`): `python3 scripts/profile-planted-tank-device.py --variants-dir <variant APKs> --restore-apk <eight-tank selector release> --out docs/plans/2026-10-16-saltwater-seahorses/profiles --variants baseline none pair1 pair2 --runs 3`, then `task cast1:release`. Repeat on the Chromecast HD. The comparison table is written to `2026-10-16-saltwater-seahorses/comparison.md`.
 10. Normal gameplay on Chromecast 1 with the selector release: Hold A → Seahorses sheet → None / 1 pair / 2 pairs each apply. Switching to freshwater hides seahorses and posts. Selector, Back, Home and resume all pass. Evidence goes under `docs/diagnostics/`.
+
+    ```
+    $ task chromecast:submit DEVICE=chromecast-test-01 APP=aquarium WORKFLOW=check APK=~/tmp/seahorse-phase3/variants/pair2.apk ASYNC=true
+    Accepted J-0369f7a26e23: queued; check
+    $ task chromecast:status JOB=J-0369f7a26e23
+      "state": "failed",
+      "phase": "failed",
+      "error": "device-not-found-on-network",
+    $ task chromecast:devices
+    chromecast-test-01: needs-local-setup; Chromecast HD; serial 2628105GN0GT7C; Android 14; ABI armeabi-v7a,armeabi; endpoint 192.168.4.43:41277; pools chromecast-test; last connect device-not-found-on-network (J-0369f7a26e23)
+    $ task chromecast:cancel JOB=J-4987853d86fd      # the coordinator's automatic retry, so it cannot run unattended later
+    J-4987853d86fd: cancelled
+    ```
+
+    **NOT RUN** (2026‑10‑16): Chromecast 1 was `ready` in the queue at 14:32 (+07), then dropped off the network when job J‑0369f7a26e23 connected. Nothing was installed (no connection attempt succeeded), so the device still holds whatever it held before. Bringing it back needs `task chromecast:readd DEVICE=chromecast-test-01`, with a pairing code at Will's prompt.
+
+    Ready for the rerun (test APK on `0401c619`, menu bundle rebuilt locally and not committed): `~/tmp/seahorse-phase3/aquarium-seahorse-phase3-0401c619.apk`, plus variants with the planted tank authored saltwater + None / 1 pair / 2 pairs, and freshwater, from `scripts/build-planted-seahorse-variants.py` (`variants.json` records their hashes). The reviewed coordinator validators have no seahorse step. The menu check covers selector, start, Back, Home and resume, and its planted-tank screenshot shows each variant's seahorses. Driving Hold A → Seahorses sheet → Apply on the device needs a new validator in the coordinator repo. On the desktop, fields 8–9 round-trip through Apply (`tests/test_seahorse_settings.py`), and each setting and freshwater give the expected pairs (below; `evidence/phase3/capture.json`).
+
+    <img src="2026-10-16-saltwater-seahorses/evidence/phase3/settings-sequence.png" width="700">
+
+    <img src="2026-10-16-saltwater-seahorses/evidence/phase3/behaviour-sequence.png" width="700">
 11. The eight-tank selector release is reinstalled on each Chromecast, and its installed hash matches the build.
 12. Mockups rebuild cleanly: `python3 docs/plans/2026-10-16-saltwater-seahorses/build_mockups.py` reports no errors, and every file is under the 512 KB budget.
