@@ -145,7 +145,9 @@ def world_rotation(pitch=0.0, roll=0.0):
     return [m[j][i] for i in range(3) for j in range(3)]   # columns (axis images) as rows
 
 
-def evaluate(rig: Rig, block, now, world=None):
+def evaluate(rig: Rig, block, now, world=None, chain_only=False):
+    """chain_only skips vertices and face normals (the joints, angles and write-backs
+    are unchanged): the behaviour tests and pose traces step it thousands of times."""
     c = rig.c
     S, T = c['samples'], c['transforms']
     n, nt = len(S), len(T)
@@ -265,7 +267,7 @@ def evaluate(rig: Rig, block, now, world=None):
         joints.append(p[:])
 
     pos = []
-    for vi, (kind, index, a, b, cc) in enumerate(c['influences']):
+    for vi, (kind, index, a, b, cc) in enumerate([] if chain_only else c['influences']):
         r = rig.rest[vi]
         if kind == dc.ON_SAMPLE:
             dd, vv, ss = fr[index]
@@ -280,7 +282,7 @@ def evaluate(rig: Rig, block, now, world=None):
 
     infl = c['influences']
     normals = []
-    for fi, (ia, ib, ic) in enumerate(rig.faces):
+    for fi, (ia, ib, ic) in enumerate([] if chain_only else rig.faces):
         ka, kb, kc = infl[ia], infl[ib], infl[ic]
         same = ka[0] == kb[0] == kc[0] and ka[1] == kb[1] == kc[1]
         rn = rig.rest_normals[fi]
