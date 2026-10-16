@@ -1220,11 +1220,11 @@ tasks:
 
   aquarium-blue-shrimp-level:
     desc: "Build the independent blue-shrimp Aquarium tank"
-    deps: [tools-build]
     cmds:
-      - bash wflevels/aquarium_blue_shrimp/build.sh
+      - bash wflevels/aquarium_blue_shrimp/build.sh   # in the Blender container; builds its own tools
     sources:
       - wflevels/aquarium_blue_shrimp/build.sh
+      - scripts/level-build.sh
       - wflevels/aquarium_blue_shrimp/*.py
       - wflevels/aquarium_blue_shrimp/*.fth
       - wflevels/aquarium_tanks/*.py
@@ -1234,11 +1234,11 @@ tasks:
 
   aquarium-tiger-barbs-level:
     desc: "Build the independent 50-fish Tiger Barbs tank"
-    deps: [tools-build]
     cmds:
-      - bash wflevels/aquarium_tiger_barbs/build.sh
+      - bash wflevels/aquarium_tiger_barbs/build.sh   # in the Blender container; builds its own tools
     sources:
       - wflevels/aquarium_tiger_barbs/build.sh
+      - scripts/level-build.sh
       - wflevels/aquarium/*.py
       - wflevels/aquarium/*.fth
       - wflevels/aquarium/art/tiger-barb-source.png
@@ -1247,11 +1247,11 @@ tasks:
 
   aquarium-betta-level:
     desc: "Build the independent betta Aquarium tank"
-    deps: [tools-build]
     cmds:
-      - bash wflevels/aquarium_betta/build.sh
+      - bash wflevels/aquarium_betta/build.sh   # in the Blender container; builds its own tools
     sources:
       - wflevels/aquarium_betta/build.sh
+      - scripts/level-build.sh
       - wflevels/aquarium_betta/*.py
       - wflevels/aquarium_betta/*.fth
       - wflevels/aquarium_tanks/*.py
@@ -1261,11 +1261,11 @@ tasks:
 
   aquarium-jellyfish-level:
     desc: "Build the independent jellyfish Aquarium tank"
-    deps: [tools-build]
     cmds:
-      - bash wflevels/aquarium_jellyfish/build.sh
+      - bash wflevels/aquarium_jellyfish/build.sh   # in the Blender container; builds its own tools
     sources:
       - wflevels/aquarium_jellyfish/build.sh
+      - scripts/level-build.sh
       - wflevels/aquarium_jellyfish/*.py
       - wflevels/aquarium_jellyfish/*.fth
       - wflevels/aquarium_tanks/*.py
@@ -1275,11 +1275,11 @@ tasks:
 
   aquarium-lionfish-level:
     desc: "Build the independent lionfish Aquarium tank"
-    deps: [tools-build]
     cmds:
-      - bash wflevels/aquarium_lionfish/build.sh
+      - bash wflevels/aquarium_lionfish/build.sh   # in the Blender container; builds its own tools
     sources:
       - wflevels/aquarium_lionfish/build.sh
+      - scripts/level-build.sh
       - wflevels/aquarium_lionfish/*.py
       - wflevels/aquarium_lionfish/*.fth
       - wflevels/aquarium_tanks/*.py
@@ -1289,11 +1289,11 @@ tasks:
 
   aquarium-plants-level:
     desc: "Build the animal-free planted Aquarium tank"
-    deps: [tools-build]
     cmds:
-      - bash wflevels/aquarium_plants/build.sh
+      - bash wflevels/aquarium_plants/build.sh   # in the Blender container; builds its own tools
     sources:
       - wflevels/aquarium_plants/build.sh
+      - scripts/level-build.sh
       - wflevels/aquarium_plants/*.py
       - wflevels/aquarium_tanks/*.py
       - wflevels/aquarium_tanks/*.fth
@@ -1302,11 +1302,11 @@ tasks:
 
   aquarium-arowana-level:
     desc: "Build Asian Arowana in a broad bare tank"
-    deps: [tools-build]
     cmds:
-      - bash wflevels/aquarium_arowana/build.sh
+      - bash wflevels/aquarium_arowana/build.sh   # in the Blender container; builds its own tools
     sources:
       - wflevels/aquarium_arowana/build.sh
+      - scripts/level-build.sh
       - wflevels/aquarium_arowana/*.py
       - wflevels/aquarium_tanks/*.py
       - wflevels/aquarium_tanks/arowana_motion.fth
@@ -1902,6 +1902,17 @@ tasks:
     desc: "Build the Linux build/test container image (toolchain, X11/GL headers, Xvfb, Mesa llvmpipe): docker/Dockerfile.linux-test. Builds and tests run in this container, not on the host."
     cmds:
       - docker build --network=host -f docker/Dockerfile.linux-test -t wf-linux-test:local docker
+
+  blender-image:
+    desc: "Build the Blender level-build image (docker/Dockerfile.blender: wf-linux-test plus Blender 5.0.1, sha256-pinned; ~375 MB download). wflevels/aquarium_*/build.sh run in it."
+    deps: [linux-test-image]
+    cmds:
+      - docker build --network=host -f docker/Dockerfile.blender -t wf-blender:local docker
+
+  level-build-compare:
+    desc: "Build each aquarium tank with host Blender and in the Blender container and compare every output by sha256: task level-build-compare [-- aquarium_betta ...]"
+    cmds:
+      - scripts/compare-level-build-routes.sh {{.CLI_ARGS}}
 
   linux-container:
     desc: "Run a command in the Linux test container (repo at /src, build-docker/ at /build): task linux-container -- ctest --test-dir /build/listener"
