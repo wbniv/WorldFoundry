@@ -1,0 +1,939 @@
+{
+  "level": "aquarium_plants",
+  "vram": [
+    "--vram-width=2048",
+    "--vram-height=1024",
+    "--vram-slot-width=512",
+    "--vram-slot-height=512",
+    "--vram-perm-width=1024",
+    "--vram-perm-height=1024"
+  ],
+  "runs": [
+    {
+      "tag": "behaviour",
+      "settings": {
+        "seed": 713,
+        "water": "saltwater",
+        "age": 150,
+        "speed": 0,
+        "textures": true,
+        "sway": true,
+        "random_entry": false,
+        "seahorses": 2,
+        "greeting": true
+      },
+      "shots": [
+        {
+          "shot": "hold",
+          "note": "pair 1 holding the whip",
+          "time": 4.05,
+          "visible": [
+            1.0,
+            1.0
+          ],
+          "greeting": {
+            "phase": 0.0,
+            "pair": 1.0,
+            "time": 0.0
+          },
+          "seahorses": [
+            {
+              "seahorse": 0,
+              "shown": true,
+              "state": "hold",
+              "spot": 2,
+              "progress": 1.0,
+              "status": 0,
+              "position": [
+                -3.4491,
+                -0.8931,
+                4.0683
+              ],
+              "contact_error_mm": 0.241
+            },
+            {
+              "seahorse": 1,
+              "shown": true,
+              "state": "hold",
+              "spot": 1,
+              "progress": 1.0,
+              "status": 0,
+              "position": [
+                -2.7584,
+                -0.52,
+                3.8472
+              ],
+              "contact_error_mm": 0.225
+            },
+            {
+              "seahorse": 2,
+              "shown": true,
+              "state": "hold",
+              "spot": 4,
+              "progress": 1.0,
+              "status": 0,
+              "position": [
+                2.7617,
+                -0.8442,
+                3.8075
+              ],
+              "contact_error_mm": 0.173
+            },
+            {
+              "seahorse": 3,
+              "shown": true,
+              "state": "hold",
+              "spot": 3,
+              "progress": 1.0,
+              "status": 0,
+              "position": [
+                3.2328,
+                -0.4693,
+                2.8816
+              ],
+              "contact_error_mm": 0.148
+            }
+          ]
+        },
+        {
+          "shot": "release",
+          "note": "seahorse 1: release",
+          "time": 6.05,
+          "visible": [
+            1.0,
+            1.0
+          ],
+          "greeting": {
+            "phase": 0.0,
+            "pair": 1.0,
+            "time": 0.0
+          },
+          "seahorses": [
+            {
+              "seahorse": 0,
+              "shown": true,
+              "state": "hold",
+              "spot": 2,
+              "progress": 1.0,
+              "status": 0,
+              "position": [
+                -3.3504,
+                -0.8731,
+                4.0683
+              ],
+              "contact_error_mm": 0.154
+            },
+            {
+              "seahorse": 1,
+              "shown": true,
+              "state": "release",
+              "spot": 0,
+              "progress": 0.958,
+              "status": 0,
+              "position": [
+                -2.879,
+                -0.5281,
+                3.8472
+              ],
+              "contact_error_mm": null
+            },
+            {
+              "seahorse": 2,
+              "shown": true,
+              "state": "hold",
+              "spot": 4,
+              "progress": 1.0,
+              "status": 0,
+              "position": [
+                2.817,
+                -0.8142,
+                3.8075
+              ],
+              "contact_error_mm": 0.113
+            },
+            {
+              "seahorse": 3,
+              "shown": true,
+              "state": "hold",
+              "spot": 3,
+              "progress": 1.0,
+              "status": 0,
+              "position": [
+                3.1842,
+                -0.499,
+                2.8816
+              ],
+              "contact_error_mm": 0.097
+            }
+          ]
+        },
+        {
+          "shot": "swim-close",
+          "note": "seahorse 1: swim",
+          "time": 8.75,
+          "visible": [
+            1.0,
+            1.0
+          ],
+          "greeting": {
+            "phase": 0.0,
+            "pair": 1.0,
+            "time": 0.0
+          },
+          "seahorses": [
+            {
+              "seahorse": 0,
+              "shown": true,
+              "state": "strike",
+              "spot": 2,
+              "progress": 1.0,
+              "status": 0,
+              "position": [
+                -3.2689,
+                -0.728,
+                4.0683
+              ],
+              "contact_error_mm": 0.056
+            },
+            {
+              "seahorse": 1,
+              "shown": true,
+              "state": "swim",
+              "spot": 0,
+              "progress": 0.0,
+              "status": 0,
+              "position": [
+                -3.0282,
+                -0.5914,
+                3.7897
+              ],
+              "contact_error_mm": null
+            },
+            {
+              "seahorse": 2,
+              "shown": true,
+              "state": "hold",
+              "spot": 4,
+              "progress": 1.0,
+              "status": 0,
+              "position": [
+                2.8509,
+                -0.6938,
+                3.8075
+              ],
+              "contact_error_mm": 0.043
+            },
+            {
+              "seahorse": 3,
+              "shown": true,
+              "state": "hold",
+              "spot": 3,
+              "progress": 1.0,
+              "status": 0,
+              "position": [
+                3.1411,
+                -0.5869,
+                2.8816
+              ],
+              "contact_error_mm": 0.022
+            }
+          ]
+        },
+        {
+          "shot": "probe",
+          "note": "seahorse 1: probe",
+          "time": 15.65,
+          "visible": [
+            1.0,
+            1.0
+          ],
+          "greeting": {
+            "phase": 0.0,
+            "pair": 1.0,
+            "time": 0.0
+          },
+          "seahorses": [
+            {
+              "seahorse": 0,
+              "shown": true,
+              "state": "hold",
+              "spot": 2,
+              "progress": 1.0,
+              "status": 0,
+              "position": [
+                -3.4245,
+                -1.0123,
+                4.0683
+              ],
+              "contact_error_mm": 0.245
+            },
+            {
+              "seahorse": 1,
+              "shown": true,
+              "state": "probe",
+              "spot": 0,
+              "progress": 0.0,
+              "status": 0,
+              "position": [
+                -3.5348,
+                -0.4262,
+                3.1469
+              ],
+              "contact_error_mm": null
+            },
+            {
+              "seahorse": 2,
+              "shown": true,
+              "state": "hold",
+              "spot": 4,
+              "progress": 1.0,
+              "status": 0,
+              "position": [
+                2.7589,
+                -0.8899,
+                3.8075
+              ],
+              "contact_error_mm": 0.139
+            },
+            {
+              "seahorse": 3,
+              "shown": true,
+              "state": "hold",
+              "spot": 3,
+              "progress": 1.0,
+              "status": 0,
+              "position": [
+                3.2102,
+                -0.4033,
+                2.8816
+              ],
+              "contact_error_mm": 0.144
+            }
+          ]
+        },
+        {
+          "shot": "grasp",
+          "note": "seahorse 1: grasp",
+          "time": 18.05,
+          "visible": [
+            1.0,
+            1.0
+          ],
+          "greeting": {
+            "phase": 0.0,
+            "pair": 1.0,
+            "time": 0.0
+          },
+          "seahorses": [
+            {
+              "seahorse": 0,
+              "shown": true,
+              "state": "hold",
+              "spot": 2,
+              "progress": 1.0,
+              "status": 0,
+              "position": [
+                -3.3347,
+                -0.8948,
+                4.0683
+              ],
+              "contact_error_mm": 0.174
+            },
+            {
+              "seahorse": 1,
+              "shown": true,
+              "state": "grasp",
+              "spot": 0,
+              "progress": 0.407,
+              "status": 0,
+              "position": [
+                -3.5127,
+                -1.039,
+                3.1095
+              ],
+              "contact_error_mm": null
+            },
+            {
+              "seahorse": 2,
+              "shown": true,
+              "state": "hold",
+              "spot": 4,
+              "progress": 1.0,
+              "status": 0,
+              "position": [
+                2.8138,
+                -0.8116,
+                3.8075
+              ],
+              "contact_error_mm": 0.11
+            },
+            {
+              "seahorse": 3,
+              "shown": true,
+              "state": "strike",
+              "spot": 3,
+              "progress": 1.0,
+              "status": 0,
+              "position": [
+                3.1702,
+                -0.4825,
+                2.8816
+              ],
+              "contact_error_mm": 0.11
+            }
+          ]
+        },
+        {
+          "shot": "hold-after",
+          "note": "seahorse 1 holds its new spot",
+          "time": 20.85,
+          "visible": [
+            1.0,
+            1.0
+          ],
+          "greeting": {
+            "phase": 0.0,
+            "pair": 1.0,
+            "time": 0.0
+          },
+          "seahorses": [
+            {
+              "seahorse": 0,
+              "shown": true,
+              "state": "hold",
+              "spot": 2,
+              "progress": 1.0,
+              "status": 0,
+              "position": [
+                -3.2994,
+                -0.7701,
+                4.0683
+              ],
+              "contact_error_mm": 0.021
+            },
+            {
+              "seahorse": 1,
+              "shown": true,
+              "state": "hold",
+              "spot": 0,
+              "progress": 1.0,
+              "status": 0,
+              "position": [
+                -3.3746,
+                -0.9909,
+                3.1094
+              ],
+              "contact_error_mm": 0.2
+            },
+            {
+              "seahorse": 2,
+              "shown": true,
+              "state": "hold",
+              "spot": 4,
+              "progress": 1.0,
+              "status": 0,
+              "position": [
+                2.8414,
+                -0.7453,
+                3.8075
+              ],
+              "contact_error_mm": 0.039
+            },
+            {
+              "seahorse": 3,
+              "shown": true,
+              "state": "hold",
+              "spot": 3,
+              "progress": 1.0,
+              "status": 0,
+              "position": [
+                3.1611,
+                -0.5644,
+                2.8816
+              ],
+              "contact_error_mm": 0.021
+            }
+          ]
+        },
+        {
+          "shot": "swim-wide",
+          "note": "a seahorse crossing between posts",
+          "time": 26.15,
+          "visible": [
+            1.0,
+            1.0
+          ],
+          "greeting": {
+            "phase": 0.0,
+            "pair": 1.0,
+            "time": 0.0
+          },
+          "seahorses": [
+            {
+              "seahorse": 0,
+              "shown": true,
+              "state": "swim",
+              "spot": 1,
+              "progress": 0.0,
+              "status": 0,
+              "position": [
+                -2.9284,
+                -0.8797,
+                3.9473
+              ],
+              "contact_error_mm": null
+            },
+            {
+              "seahorse": 1,
+              "shown": true,
+              "state": "hold",
+              "spot": 0,
+              "progress": 1.0,
+              "status": 0,
+              "position": [
+                -3.2858,
+                -0.7735,
+                3.1094
+              ],
+              "contact_error_mm": 0.019
+            },
+            {
+              "seahorse": 2,
+              "shown": true,
+              "state": "hold",
+              "spot": 4,
+              "progress": 1.0,
+              "status": 0,
+              "position": [
+                2.8872,
+                -0.5485,
+                3.8075
+              ],
+              "contact_error_mm": 0.209
+            },
+            {
+              "seahorse": 3,
+              "shown": true,
+              "state": "hold",
+              "spot": 3,
+              "progress": 1.0,
+              "status": 0,
+              "position": [
+                3.1146,
+                -0.7324,
+                2.8816
+              ],
+              "contact_error_mm": 0.193
+            }
+          ]
+        },
+        {
+          "shot": "greet-0",
+          "note": "a pair on the whip, opposite sides, offset heights",
+          "time": 43.75,
+          "visible": [
+            1.0,
+            1.0
+          ],
+          "greeting": {
+            "phase": 2.0,
+            "pair": 0.0,
+            "time": 4.3
+          },
+          "seahorses": [
+            {
+              "seahorse": 0,
+              "shown": true,
+              "state": "greet",
+              "spot": 0,
+              "progress": 1.0,
+              "status": 0,
+              "position": [
+                -3.4406,
+                -0.5493,
+                3.1092
+              ],
+              "contact_error_mm": 0.095
+            },
+            {
+              "seahorse": 1,
+              "shown": true,
+              "state": "greet",
+              "spot": 1,
+              "progress": 1.0,
+              "status": 0,
+              "position": [
+                -2.6747,
+                -0.6052,
+                3.7982
+              ],
+              "contact_error_mm": 0.514
+            },
+            {
+              "seahorse": 2,
+              "shown": true,
+              "state": "hold",
+              "spot": 4,
+              "progress": 1.0,
+              "status": 0,
+              "position": [
+                2.8355,
+                -0.5912,
+                3.8075
+              ],
+              "contact_error_mm": 0.153
+            },
+            {
+              "seahorse": 3,
+              "shown": true,
+              "state": "swim",
+              "spot": 2,
+              "progress": 0.0,
+              "status": 0,
+              "position": [
+                2.337,
+                -0.5641,
+                3.0316
+              ],
+              "contact_error_mm": null
+            }
+          ]
+        },
+        {
+          "shot": "greet-1",
+          "note": "still greeting",
+          "time": 46.75,
+          "visible": [
+            1.0,
+            1.0
+          ],
+          "greeting": {
+            "phase": 2.0,
+            "pair": 0.0,
+            "time": 7.3
+          },
+          "seahorses": [
+            {
+              "seahorse": 0,
+              "shown": true,
+              "state": "greet",
+              "spot": 0,
+              "progress": 1.0,
+              "status": 0,
+              "position": [
+                -3.3531,
+                -0.9425,
+                3.1092
+              ],
+              "contact_error_mm": 0.065
+            },
+            {
+              "seahorse": 1,
+              "shown": true,
+              "state": "greet",
+              "spot": 1,
+              "progress": 1.0,
+              "status": 0,
+              "position": [
+                -2.6591,
+                -0.7201,
+                3.7982
+              ],
+              "contact_error_mm": 0.544
+            },
+            {
+              "seahorse": 2,
+              "shown": true,
+              "state": "hold",
+              "spot": 4,
+              "progress": 1.0,
+              "status": 0,
+              "position": [
+                2.8415,
+                -0.5764,
+                3.8075
+              ],
+              "contact_error_mm": 0.175
+            },
+            {
+              "seahorse": 3,
+              "shown": true,
+              "state": "swim",
+              "spot": 2,
+              "progress": 0.0,
+              "status": 0,
+              "position": [
+                1.8942,
+                -0.5516,
+                3.1092
+              ],
+              "contact_error_mm": null
+            }
+          ]
+        }
+      ],
+      "forth_errors": 0,
+      "fatal": 0
+    },
+    {
+      "tag": "none",
+      "settings": {
+        "seed": 713,
+        "water": "saltwater",
+        "age": 150,
+        "speed": 0,
+        "textures": true,
+        "sway": true,
+        "random_entry": false,
+        "seahorses": 0,
+        "greeting": true
+      },
+      "shots": [
+        {
+          "shot": "wide-none",
+          "note": "none",
+          "time": 2.1,
+          "visible": [
+            0.0,
+            0.0
+          ],
+          "greeting": {
+            "phase": 0.0,
+            "pair": 0.0,
+            "time": 0.0
+          },
+          "seahorses": [
+            {
+              "seahorse": 0,
+              "shown": false
+            },
+            {
+              "seahorse": 1,
+              "shown": false
+            },
+            {
+              "seahorse": 2,
+              "shown": false
+            },
+            {
+              "seahorse": 3,
+              "shown": false
+            }
+          ]
+        }
+      ],
+      "forth_errors": 0,
+      "fatal": 0
+    },
+    {
+      "tag": "pair1",
+      "settings": {
+        "seed": 713,
+        "water": "saltwater",
+        "age": 150,
+        "speed": 0,
+        "textures": true,
+        "sway": true,
+        "random_entry": false,
+        "seahorses": 1,
+        "greeting": true
+      },
+      "shots": [
+        {
+          "shot": "wide-pair1",
+          "note": "pair1",
+          "time": 2.1,
+          "visible": [
+            1.0,
+            0.0
+          ],
+          "greeting": {
+            "phase": 0.0,
+            "pair": 1.0,
+            "time": 0.0
+          },
+          "seahorses": [
+            {
+              "seahorse": 0,
+              "shown": true,
+              "state": "hold",
+              "spot": 2,
+              "progress": 1.0,
+              "status": 0,
+              "position": [
+                -3.2202,
+                -0.4958,
+                4.0683
+              ],
+              "contact_error_mm": 0.319
+            },
+            {
+              "seahorse": 1,
+              "shown": true,
+              "state": "hold",
+              "spot": 1,
+              "progress": 1.0,
+              "status": 0,
+              "position": [
+                -2.9961,
+                -0.9005,
+                3.8472
+              ],
+              "contact_error_mm": 0.329
+            },
+            {
+              "seahorse": 2,
+              "shown": false
+            },
+            {
+              "seahorse": 3,
+              "shown": false
+            }
+          ]
+        }
+      ],
+      "forth_errors": 0,
+      "fatal": 0
+    },
+    {
+      "tag": "pair2",
+      "settings": {
+        "seed": 713,
+        "water": "saltwater",
+        "age": 150,
+        "speed": 0,
+        "textures": true,
+        "sway": true,
+        "random_entry": false,
+        "seahorses": 2,
+        "greeting": true
+      },
+      "shots": [
+        {
+          "shot": "wide-pair2",
+          "note": "pair2",
+          "time": 2.1,
+          "visible": [
+            1.0,
+            1.0
+          ],
+          "greeting": {
+            "phase": 0.0,
+            "pair": 1.0,
+            "time": 0.0
+          },
+          "seahorses": [
+            {
+              "seahorse": 0,
+              "shown": true,
+              "state": "hold",
+              "spot": 2,
+              "progress": 1.0,
+              "status": 0,
+              "position": [
+                -3.2202,
+                -0.4958,
+                4.0683
+              ],
+              "contact_error_mm": 0.319
+            },
+            {
+              "seahorse": 1,
+              "shown": true,
+              "state": "hold",
+              "spot": 1,
+              "progress": 1.0,
+              "status": 0,
+              "position": [
+                -2.9961,
+                -0.9005,
+                3.8472
+              ],
+              "contact_error_mm": 0.329
+            },
+            {
+              "seahorse": 2,
+              "shown": true,
+              "state": "hold",
+              "spot": 4,
+              "progress": 1.0,
+              "status": 0,
+              "position": [
+                2.888,
+                -0.5416,
+                3.8075
+              ],
+              "contact_error_mm": 0.24
+            },
+            {
+              "seahorse": 3,
+              "shown": true,
+              "state": "hold",
+              "spot": 3,
+              "progress": 1.0,
+              "status": 0,
+              "position": [
+                3.1194,
+                -0.732,
+                2.8816
+              ],
+              "contact_error_mm": 0.21
+            }
+          ]
+        }
+      ],
+      "forth_errors": 0,
+      "fatal": 0
+    },
+    {
+      "tag": "freshwater",
+      "settings": {
+        "seed": 713,
+        "water": "freshwater",
+        "age": 150,
+        "speed": 0,
+        "textures": true,
+        "sway": true,
+        "random_entry": false,
+        "seahorses": 2,
+        "greeting": true
+      },
+      "shots": [
+        {
+          "shot": "wide-freshwater",
+          "note": "freshwater",
+          "time": 2.1,
+          "visible": [
+            0.0,
+            0.0
+          ],
+          "greeting": {
+            "phase": 0.0,
+            "pair": 0.0,
+            "time": 0.0
+          },
+          "seahorses": [
+            {
+              "seahorse": 0,
+              "shown": false
+            },
+            {
+              "seahorse": 1,
+              "shown": false
+            },
+            {
+              "seahorse": 2,
+              "shown": false
+            },
+            {
+              "seahorse": 3,
+              "shown": false
+            }
+          ]
+        }
+      ],
+      "forth_errors": 0,
+      "fatal": 0
+    }
+  ]
+}
