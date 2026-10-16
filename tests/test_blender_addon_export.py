@@ -236,10 +236,8 @@ def test_blender_addon_export_qbert_practice(tmp_path: Path, wf_core_so: Path) -
 
 
 # ── Face hand ─────────────────────────────────────────────────────────────────
-# The engine computes a face normal as (v2−v0)×(v1−v0) (gfx/face.hpi), Blender as
-# (v1−v0)×(v2−v0). export_level.py reverses each face's loop order so a mesh that is outward
-# in Blender is outward in WF. This pins that: every face of an exported closed box must have
-# its WF normal pointing away from the box centroid. Comment the reversal out and it fails.
+# The engine and Blender both compute (v1−v0)×(v2−v0). Every face of an exported
+# closed box must therefore point away from the box centroid without a hand swap.
 _VRTX_SIZE, _FACE_SIZE = 24, 8
 
 
@@ -290,9 +288,9 @@ def test_exported_faces_are_wf_outward(tmp_path: Path, wf_core_so: Path) -> None
         cx = sum(v[0] for v in verts) / 8; cy = sum(v[1] for v in verts) / 8; cz = sum(v[2] for v in verts) / 8
         for a, b, c in faces:
             v0, v1, v2 = verts[a], verts[b], verts[c]
-            e1 = (v2[0] - v0[0], v2[1] - v0[1], v2[2] - v0[2])       # WF: (v2−v0) × (v1−v0)
-            e2 = (v1[0] - v0[0], v1[1] - v0[1], v1[2] - v0[2])
+            e1 = (v1[0] - v0[0], v1[1] - v0[1], v1[2] - v0[2])       # WF and Blender
+            e2 = (v2[0] - v0[0], v2[1] - v0[1], v2[2] - v0[2])
             n = (e1[1] * e2[2] - e1[2] * e2[1], e1[2] * e2[0] - e1[0] * e2[2], e1[0] * e2[1] - e1[1] * e2[0])
             fc = ((v0[0] + v1[0] + v2[0]) / 3 - cx, (v0[1] + v1[1] + v2[1]) / 3 - cy, (v0[2] + v1[2] + v2[2]) / 3 - cz)
             dot = n[0] * fc[0] + n[1] * fc[1] + n[2] * fc[2]
-            assert dot > 0, f"{name}: face ({a},{b},{c}) has its WF normal pointing INTO the box (dot {dot:.4g}) — the exporter's hand reversal is missing"
+            assert dot > 0, f"{name}: face ({a},{b},{c}) points INTO the box (dot {dot:.4g})"

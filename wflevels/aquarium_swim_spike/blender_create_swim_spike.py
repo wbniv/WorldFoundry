@@ -154,7 +154,7 @@ fme.materials.append(flat_material('fish-white', (0.95, 0.95, 0.95)))
 bm = bmesh.new()
 if FISH_BOX:
     # Coarse box body: every triangle stays above the engine's minimum face area at ×1
-    # (vector3.hpi:243 asserts |(v2−v0)×(v1−v0)| > 6.1e-5, i.e. area > ~3e-5 m²).
+    # (vector3.hpi:243 asserts |(v1−v0)×(v2−v0)| > 6.1e-5, i.e. area > ~3e-5 m²).
     add_box(bm, -m(FISH_BODY_L) / 2, -m(FISH_W) / 2, 0.0, m(FISH_BODY_L) / 2, m(FISH_W) / 2, m(FISH_H))
 else:
     bmesh.ops.create_uvsphere(bm, u_segments=12, v_segments=8, radius=1.0)

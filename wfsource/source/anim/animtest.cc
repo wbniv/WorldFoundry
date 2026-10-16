@@ -229,18 +229,18 @@ TestGFX()
 
 	TriFace cubeFaceList[12] =
 	{
-		TriFace(0,1,2,0,cubeVertexList),                       // front(top)
-		TriFace(1,3,2,0,cubeVertexList),
-		TriFace(4,0,2,1,cubeVertexList),                       // left side
-		TriFace(2,7,4,1,cubeVertexList),
-		TriFace(1,5,6,2,cubeVertexList),                       // right side
-		TriFace(3,1,6,2,cubeVertexList),
-		TriFace(4,5,1,3,cubeVertexList),                       // top(back)
-		TriFace(4,1,0,3,cubeVertexList),
-		TriFace(2,3,6,4,cubeVertexList),                       // bottom(front)
-		TriFace(6,7,2,4,cubeVertexList),
-		TriFace(5,4,7,5,cubeVertexList),                       // back(bottom)
-		TriFace(5,7,6,5,cubeVertexList)
+		TriFace(0,2,1,0,cubeVertexList),                       // front(top)
+		TriFace(1,2,3,0,cubeVertexList),
+		TriFace(4,2,0,1,cubeVertexList),                       // left side
+		TriFace(2,4,7,1,cubeVertexList),
+		TriFace(1,6,5,2,cubeVertexList),                       // right side
+		TriFace(3,6,1,2,cubeVertexList),
+		TriFace(4,1,5,3,cubeVertexList),                       // top(back)
+		TriFace(4,0,1,3,cubeVertexList),
+		TriFace(2,6,3,4,cubeVertexList),                       // bottom(front)
+		TriFace(6,2,7,4,cubeVertexList),
+		TriFace(5,7,4,5,cubeVertexList),                       // back(bottom)
+		TriFace(5,6,7,5,cubeVertexList)
 	};
 #endif
 

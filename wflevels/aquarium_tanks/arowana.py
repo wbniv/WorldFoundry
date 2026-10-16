@@ -8,16 +8,7 @@ import re
 from pathlib import Path
 import sys
 from mesh import Mesh
-def membrane(name, outline, key, thickness=.028):
-    m=Mesh(name)
-    # Both faces and the perimeter are closed, so fins stay visible when turning.
-    front=[(x,-thickness/2,z) for x,z in outline]
-    back=[(x,thickness/2,z) for x,z in outline]
-    m.face(front,key); m.face(list(reversed(back)),key)
-    for i in range(len(outline)):
-        j=(i+1)%len(outline)
-        m.face([front[i],back[i],back[j],front[j]],key)
-    return m
+from models import membrane
 
 TOTAL_LENGTH=6.5
 MODEL_SCALE=TOTAL_LENGTH/5.94

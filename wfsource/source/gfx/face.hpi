@@ -31,9 +31,9 @@ CalculateNormal( const Vector3& v0, const Vector3& v1, const Vector3& v2 )
 	Vector3 fn;
 	Vector3 a,b;
 
-   // kts reversed 12/3/2001 02:30:35 for our handedness
-	a = v2 - v0;
-	b = v1 - v0;
+	// Match Blender's face order: (v1-v0) x (v2-v0).
+	a = v1 - v0;
+	b = v2 - v0;
 	fn = a.CrossProduct(b);
 //	cout << "cross product = " << fn << std::endl;
 	fn.Normalize();

@@ -470,18 +470,18 @@ GFXTester::GFXTester()
     cubeVertexList[6] = Vertex3D(SCALAR_CONSTANT(1), SCALAR_CONSTANT(0), Color(  0,  0,128), Vector3_PS(PS_SCALAR_CONSTANT( SIZE), PS_SCALAR_CONSTANT( SIZE), PS_SCALAR_CONSTANT(-SIZE)));
     cubeVertexList[7] = Vertex3D(SCALAR_CONSTANT(0), SCALAR_CONSTANT(0), Color(128,128,  0), Vector3_PS(PS_SCALAR_CONSTANT(-SIZE), PS_SCALAR_CONSTANT( SIZE), PS_SCALAR_CONSTANT(-SIZE)));
 
-    cubeFaceList[ 0] = TriFace(0,1,2, 0, cubeVertexList);
-    cubeFaceList[ 1] = TriFace(1,3,2, 0, cubeVertexList);
-    cubeFaceList[ 2] = TriFace(4,0,2, 1, cubeVertexList);
-    cubeFaceList[ 3] = TriFace(2,7,4, 1, cubeVertexList);
-    cubeFaceList[ 4] = TriFace(1,5,6, 2, cubeVertexList);
-    cubeFaceList[ 5] = TriFace(3,1,6, 2, cubeVertexList);
-    cubeFaceList[ 6] = TriFace(4,5,1, 3, cubeVertexList);
-    cubeFaceList[ 7] = TriFace(4,1,0, 3, cubeVertexList);
-    cubeFaceList[ 8] = TriFace(2,3,6, 4, cubeVertexList);
-    cubeFaceList[ 9] = TriFace(6,7,2, 4, cubeVertexList);
-    cubeFaceList[10] = TriFace(5,4,7, 5, cubeVertexList);
-    cubeFaceList[11] = TriFace(5,7,6, 5, cubeVertexList);
+    cubeFaceList[ 0] = TriFace(0,2,1, 0, cubeVertexList);
+    cubeFaceList[ 1] = TriFace(1,2,3, 0, cubeVertexList);
+    cubeFaceList[ 2] = TriFace(4,2,0, 1, cubeVertexList);
+    cubeFaceList[ 3] = TriFace(2,4,7, 1, cubeVertexList);
+    cubeFaceList[ 4] = TriFace(1,6,5, 2, cubeVertexList);
+    cubeFaceList[ 5] = TriFace(3,6,1, 2, cubeVertexList);
+    cubeFaceList[ 6] = TriFace(4,1,5, 3, cubeVertexList);
+    cubeFaceList[ 7] = TriFace(4,0,1, 3, cubeVertexList);
+    cubeFaceList[ 8] = TriFace(2,6,3, 4, cubeVertexList);
+    cubeFaceList[ 9] = TriFace(6,2,7, 4, cubeVertexList);
+    cubeFaceList[10] = TriFace(5,7,4, 5, cubeVertexList);
+    cubeFaceList[11] = TriFace(5,6,7, 5, cubeVertexList);
     cubeFaceList[12] = TriFace(0,0,0,-1);
 
     std::cout << "vram& = " << (void*)&vram << std::endl;

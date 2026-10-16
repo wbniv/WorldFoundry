@@ -1,5 +1,10 @@
 # Plan: Planetarium dome view + engine-wide backface culling
 
+> **Winding note (2026-10-16):** Measurements and face-order examples below
+> record the former reversed-normal engine. The
+> [current convention](2026-10-16-blender-normal-convention-engine-wide.md)
+> uses Blender's face order directly; software culling remains enabled.
+
 ## Context
 
 Continuing the **filesystem-visualization family** in World Foundry (FSN node-link · Filelight

@@ -461,9 +461,9 @@ public:
                       bool prelit) override
     {
         wf_profile::count(wf_profile::FacesSubmitted);   // E3 phase 0: before the cull
-        // Software backface cull (winding-independent). The renderer never
-        // enables GL_CULL_FACE, and mesh winding is inconsistent across asset
-        // sources, so we cull from the already-correct per-face normal instead
+        // Software backface cull. The renderer never enables GL_CULL_FACE.
+        // WF's face normal and Blender's use the same triangle hand. We cull
+        // from the per-face normal
         // (the same normal one-sided lighting uses). Work in eye space, where
         // the camera sits at the origin looking down -Z: transform the
         // object-space normal by _mv's upper 3x3 (as SetDirLight does) and the

@@ -1,0 +1,66 @@
+{
+  "bundles": [
+    {
+      "path": "wflevels/aquarium-cd.iff",
+      "sha256": "f25458be6b1f46844ef75da7d87c9cbeda23213de3ac14a1d00dbf71eddc2db8",
+      "bytes": 188416,
+      "exact": true
+    },
+    {
+      "path": "wflevels/condo-cd.iff",
+      "sha256": "7fccd3ad3310a7de9dbe22d48c0372c1a7603c98e784cf10eb71d3f36106e01b",
+      "bytes": 2435072,
+      "exact": true
+    },
+    {
+      "path": "wflevels/smb-cd.iff",
+      "sha256": "374ed92236709aa3f84c832b4e66b4e131b152c358afc369e355f775cd1ccb6f",
+      "bytes": 577536,
+      "exact": true
+    },
+    {
+      "path": "wflevels/snowgoons-cd.iff",
+      "sha256": "fbaa68103bbf7f3d4cf93dfc22521dbca897e2b3d86fbacee2e1f3536e1f6091",
+      "bytes": 172032,
+      "exact": true
+    },
+    {
+      "path": "wflevels/qbert-cd.iff",
+      "sha256": "3d259d1df99ab5f0daf1c81892834214436e32d1ca57d283858e0dc087e2ecba",
+      "bytes": 370688,
+      "exact": true
+    },
+    {
+      "path": "wfsource/source/game/cd.iff",
+      "sha256": "15242256b3df7dfde3c637c052fc19e2e5d9b0f00f365afa2de578ec42b2cfd8",
+      "bytes": 1882112,
+      "exact": true
+    },
+    {
+      "path": "wflevels/aquarium-menu-cd.iff",
+      "sha256": "ad722d44cd3745f379c6148011dc230b6f7d036326f7b651eb7278c4e60299e8",
+      "bytes": 3164160,
+      "exact": true
+    },
+    {
+      "path": "wflevels/smb-menu-cd.iff",
+      "sha256": "2855a6ce6c226d915a4bc089beccec94e9d73096fd627527f2b0630c5ae14ec9",
+      "bytes": 579584,
+      "exact": true
+    }
+  ],
+  "desktop_baseline_variant": {
+    "embedded_sha256": "9de8a9e13478337a92c4b5b912a6153bfceb84fe0cf1217eeb434f7764c2e0ac",
+    "standalone_sha256": "ce318d0d74a0d30477794fe70ee9aa274161ae2d8dcccafac0ef127d4d6eb33d",
+    "note": "Existing distinct baseline variant preserved; inventoried and migrated independently."
+  },
+  "apk": {
+    "path": "android/app/build/outputs/apk/aquarium/release/worldfoundry-aquarium-release.apk",
+    "sha256": "81e60e2327b7f06381d728ce917a0c8d13681ca40d01e4cf7fcdc04702e6fa62",
+    "cd_sha256": "ad722d44cd3745f379c6148011dc230b6f7d036326f7b651eb7278c4e60299e8",
+    "abis": [
+      "arm64-v8a",
+      "armeabi-v7a"
+    ]
+  }
+}

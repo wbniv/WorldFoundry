@@ -1,0 +1,50 @@
+[
+  {
+    "path": "wflevels/aquarium_plants/seahorse_branch.iff",
+    "original_sha256": "22b23d006ad27b25338d299ebfbab5c895c14c65925ed7763a3de57e8f6456fe",
+    "current_export_sha256": "e6edae1afb68eb0bc8b4014b9a67606f9349bc6920fc947a00806229fb5424d9",
+    "opposite_face_direction": true,
+    "face_swapped_export_byte_identical": false,
+    "faces": 224
+  },
+  {
+    "path": "wflevels/aquarium_plants/seahorse_f_body.iff",
+    "original_sha256": "2e6d315627706c92dfca0cdb19c1b4391435217c3552b680e2ed8f982c9ca06d",
+    "current_export_sha256": "e71b531ec1b582c6f2600ef6f995698fffe4266927c189b714bd660c1d68e257",
+    "opposite_face_direction": true,
+    "face_swapped_export_byte_identical": false,
+    "faces": 1027
+  },
+  {
+    "path": "wflevels/aquarium_plants/seahorse_f_fins.iff",
+    "original_sha256": "0a74e0cb03b3d6fe2d1e30be11c0d49e8958f93b500422e9654ef57db40ad707",
+    "current_export_sha256": "5568cf2196cf88812af0235b07ba25afaf4dd27dc5450afd8ebe936dc05cea8d",
+    "opposite_face_direction": true,
+    "face_swapped_export_byte_identical": false,
+    "faces": 74
+  },
+  {
+    "path": "wflevels/aquarium_plants/seahorse_m_body.iff",
+    "original_sha256": "bd247a7d3bdaf6910c8f2fd28ceff5a43cc833ee8f1597cbb7f92ebd00a8af9f",
+    "current_export_sha256": "d477b4b9c6be49bf991e106d81800dbc21be0d1f65015748d14b1354bba49ddd",
+    "opposite_face_direction": true,
+    "face_swapped_export_byte_identical": false,
+    "faces": 1027
+  },
+  {
+    "path": "wflevels/aquarium_plants/seahorse_m_fins.iff",
+    "original_sha256": "f70a33556bcfc4abdcdaff8f55bb60861c40e23a3831dccabd1f7e468b1c3315",
+    "current_export_sha256": "ea4030c9098863ca38ca8bab2ec47e09a23ef6d5431888e7350e35cb0d35e151",
+    "opposite_face_direction": true,
+    "face_swapped_export_byte_identical": false,
+    "faces": 74
+  },
+  {
+    "path": "wflevels/aquarium_plants/seahorse_whip.iff",
+    "original_sha256": "ffd11534b87a494c8b0784277a9cc9a9c5b36c68315e5fbc0d108e9e743f225b",
+    "current_export_sha256": "5a5c8c393a8c7dde0257bbdb41acc43056f757c79ea73b9a72ed3529e7637723",
+    "opposite_face_direction": true,
+    "face_swapped_export_byte_identical": false,
+    "faces": 184
+  }
+]

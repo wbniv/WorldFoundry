@@ -1,5 +1,10 @@
 # Aquarium level — 55 gal acrylic tank, one clownfish, one anemone
 
+> **Winding note (2026-10-16):** The cross-product formula in historical
+> debugging notes below describes the former engine. The
+> [current convention](2026-10-16-blender-normal-convention-engine-wide.md)
+> uses Blender's `(v1−v0)×(v2−v0)` order.
+
 Status: **Phase 0 run 2026‑09‑30 — the engine as it is cannot draw a translucent pane, so the level
 goes ahead on Plan B** (no front face). **Will chose Plan B on 2026‑09‑30**; Plan A (translucent pane) is deferred to its own TODO item because it needs an engine shader change. See [§ Phase 0 verdict](#phase-0-verdict).
 **Phase 1 run 2026‑09‑30: a gravity-free `Physics` fish works at ×10; ×1 does not load or collide sanely, so
