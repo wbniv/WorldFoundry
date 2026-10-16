@@ -33,6 +33,12 @@ RUN apt-get update \
  && apt-get install -y --no-install-recommends python3-pytest nodejs \
  && rm -rf /var/lib/apt/lists/*
 
+# Debuggers, for backtraces and heap checks of a crash reproduced in this container
+# (no host installs). Its own layer, so adding it does not redo the layers above.
+RUN apt-get update \
+ && apt-get install -y --no-install-recommends gdb valgrind \
+ && rm -rf /var/lib/apt/lists/*
+
 # Software GL, so every run renders with the same rasteriser whatever the host GPU is.
 ENV LIBGL_ALWAYS_SOFTWARE=1 \
     HOME=/tmp
