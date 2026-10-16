@@ -1,8 +1,14 @@
 | Date | Change |
 |------|--------|
+| [2026-10-16](https://github.com/wbniv/WorldFoundry/commit/928ee745) | Runtime object editing: no 'live' in the UI; padlock on read-only fields |
 | [2026-10-16](https://github.com/wbniv/WorldFoundry/commit/7ef36fbb) | Plan runtime object editing on OAS/OAD to replace RP02 |
 
 <!--history-meta v1
+928ee745	author	Will Norris
+928ee745	added	5
+928ee745	deleted	5
+928ee745	files	1
+928ee745	body	Will, 2026-10-16: never print "live" on edit fields. Editable fields\ncarry no marker; read-only fields are dimmed with a padlock icon. The\nmockup drops the in-frame annotation tags and draws the padlock as an\ninline SVG so it reads at TV distance.\n\nCo-Authored-By: Claude Opus 5.5 <noreply@anthropic.com>\nClaude-Session: https://claude.ai/code/session_01T3gB59hNsFhWnCTTKHc1yk
 7ef36fbb	author	Will Norris
 7ef36fbb	added	148
 7ef36fbb	deleted	0

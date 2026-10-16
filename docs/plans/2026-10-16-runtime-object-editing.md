@@ -13,7 +13,6 @@
 | M3 | Finding objects by type happens **only at export**, never by scanning at runtime. The export writes the list and the runtime follows it. |
 | M4 | Seed stays an `INT32` capped at 0…2³¹−1. |
 | M5 | Labels are XDATA strings (`XDATA_COPY`), as the convention requires for strings. |
-
 | M6 | **Labels:** automatic at export (the type's display name plus an ordinal, e.g. "Seahorse 2"). An optional **Editor Label** in `actor.inc` (`XDATA_COPY`) overrides it. Labels must be unique within a level, or the build fails. |
 | M7 | **Editability is automatic at export:** an object is editable exactly when its type declares at least one live field. No per-instance flag. Add an opt-out only if a picker ever gets crowded. |
 | M8 | **Live fields are declared in the OAS** with a `SHOW_AS_LIVE` modifier bit (0x40), following the `SHOW_AS_VECTOR` (0x80) pattern. A type with live fields implements one change hook, and every live field has a test proving an edit takes effect. Non-live fields show read-only. **The UI never prints "live":** editable fields carry no marker; read-only fields are dimmed and show a padlock icon (Will, 2026‑10‑16). |
@@ -52,7 +51,7 @@ flowchart LR
       G --> S[planted::State]
     end
     subgraph Proposed
-      T[plantedtanksettings.oas<br/>@include actor.inc, settings.inc] --> OAD[.oad] & HT[.ht struct]
+      T["plantedtanksettings.oas<br/>@include actor.inc, settings.inc"] --> OAD[.oad] & HT[.ht struct]
       OAD --> LC[levcomp-rs: struct bytes,<br/>Editable Objects list,<br/>OAD chunk per editable type]
       LC --> RT[runtime: writable overlay of the struct;<br/>form from the .oad]
       HT --> RT
