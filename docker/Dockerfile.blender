@@ -23,7 +23,8 @@ RUN apt-get update \
 # download.blender.org publishes in blender-5.0.1.sha256. Bump both together.
 ARG BLENDER_VERSION=5.0.1
 ARG BLENDER_SHA256=8019580ee1b7262e505f4196a00237ccf743c88d205b38d34201510676e60b09
-RUN python3 -c "import urllib.request as u; u.urlretrieve('https://download.blender.org/release/Blender${BLENDER_VERSION%.*}/blender-${BLENDER_VERSION}-linux-x64.tar.xz', '/tmp/blender.tar.xz')" \
+# download.blender.org answers Python's default User-Agent with 403; any ordinary one gets the file.
+RUN python3 -c "import shutil, urllib.request as u; r = u.urlopen(u.Request('https://download.blender.org/release/Blender${BLENDER_VERSION%.*}/blender-${BLENDER_VERSION}-linux-x64.tar.xz', headers={'User-Agent': 'wf-blender-image'})); shutil.copyfileobj(r, open('/tmp/blender.tar.xz', 'wb'))" \
  && echo "${BLENDER_SHA256}  /tmp/blender.tar.xz" | sha256sum -c - \
  && mkdir -p /opt/blender \
  && tar -xJf /tmp/blender.tar.xz -C /opt/blender --strip-components=1 \

@@ -99,7 +99,19 @@ The host route depends on several things that are not in the repository:
 
 3. The image builds and Blender runs in it: `task blender-image && WF_CONTAINER_IMAGE=blender scripts/in-linux-container.sh blender --background --python-expr "import addon_utils, bpy; print(bpy.app.version_string, addon_utils.enable('wf_blender', default_set=False, persistent=False) is not None)"` prints `5.0.1 True`.
 
-    **NOT RUN.** The auto-mode permission check denied `docker build` (a 375 MB download on the metered hotspot). Will needs to run `task blender-image` himself, or allow it.
+    ```
+    $ task blender-image && WF_CONTAINER_IMAGE=blender scripts/in-linux-container.sh blender --background --python-expr "…"
+    #8 unpacking to docker.io/library/wf-blender:local 0.0s done
+    #8 DONE 0.2s
+    5.0.1 True
+    Blender 5.0.1 (hash a3db93c5b259 built 2025-12-16 01:30:59)
+    Blender quit
+    ```
+
+    **PASS** (2026‑10‑16, after Will's go-ahead for the download). Getting there took two fixes:
+    - `download.blender.org` answers Python's default `User-Agent` with HTTP 403, so the first build failed after 0.6 s (`urllib.error.HTTPError: HTTP Error 403: Forbidden`). A HEAD request with the default agent gets 403; with any ordinary agent it gets 200 and `Content-Length: 374154072`. The Dockerfile now sends one.
+    - `blender-image` had `deps: [linux-test-image]`, which runs `docker build` on the test image every time. Once disk hygiene had pruned the build cache, that rebuilt `wf-linux-test:local` from scratch, re-downloading every package and swapping an apt-updated image in under other sessions. That rebuild was stopped, and the task now builds the test image only when it is missing.
+    The image adds 1.03 GB (`docker image inspect wf-blender:local`: 1030559731 bytes).
 
 4. Byte-identical for all seven tanks: `task level-build-compare` exits 0 and prints `N/N identical` for every tank.
 
