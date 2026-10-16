@@ -31,8 +31,8 @@ The host route depends on several things that are not in the repository:
 
 | # | Decision | Choice | Why |
 |---|---|---|---|
-| B1 | Blender version | **The official Blender 5.0.1 Linux x64 tarball**, sha256 `8019580e…fb4afb6` (from `download.blender.org/release/Blender5.0/blender-5.0.1.sha256`), unpacked to `/opt/blender` | Pinned by version and hash, and the same everywhere. Ubuntu's package is tied to 26.04, and the archive drops old versions. The host build is the *distribution* build (see Context), so byte identity is a real question, and verification step 4 settles it |
-| B2 | Which image | **A new image, `docker/Dockerfile.blender` → `wf-blender:local`, `FROM wf-linux-test:local`** | Its layers share the test image's, so the disk cost is only Blender's (~1.3 GB unpacked), while ctest runs keep the smaller image. Still one entry point: `scripts/in-linux-container.sh` selects it with `WF_CONTAINER_IMAGE=blender` and builds both images on first use |
+| B1 | Blender version | **Foundry Linux's Blender: Ubuntu 26.04's `blender 5.0.1+dfsg-1ubuntu1`**, with `python3-numpy 1:2.3.5+ds-3ubuntu1` and `python3-pil 12.1.1-2ubuntu1.3`, all installed from one Ubuntu archive snapshot (`apt-get --snapshot 20261016T000000Z`). Changed 2026‑10‑16 at Will's question "why are they not the same blender version? the host runs off of ../foundrylinux.org/" | The host is Foundry Linux on resolute, and its Blender is this package (`worldfoundry-blender-addons` depends on it; see foundrylinux.org `foundry-devbox/Dockerfile`). So the container has the host's Python 3.14, numpy, Pillow and glibc 2.43. The first choice, the official tarball, bundled Python 3.11, and that gave last-bit float differences (step 4). The snapshot keeps the pins installable after resolute moves on. Bump the snapshot and the pins together. |
+| B2 | Which image | **A standalone image, `docker/Dockerfile.blender` → `wf-blender:local`, `FROM ubuntu:26.04`**, with the same pinned Rust toolchain (1.85.1) as the test image | It can't layer on `wf-linux-test` (Ubuntu 24.04, whose archive has only Blender 4.0.2). It is still one entry point, `in-linux-container.sh` with `WF_CONTAINER_IMAGE=blender`, and building it never rebuilds the test image. |
 | B3 | How the add-on reaches Blender | **From the mounted checkout.** The image links `/opt/wf-blender-scripts/addons/wf_blender → /src/wftools/wf_blender` and sets `BLENDER_SYSTEM_SCRIPTS=/opt/wf-blender-scripts`. Each container build compiles `wftools/wf_py` and copies `libwf_core.so` to `wftools/wf_blender/wf_core.so` if it changed | Editing the add-on needs no image rebuild, and the container builds with *this* checkout's exporter, never the main checkout's. `wf_core.so` is `abi3-py310` and needs glibc 2.34 or newer, so the copy also works for the host's Blender (3.14) |
 | B4 | Routing | **A shared preamble, `scripts/level-build.sh`.** Each `build.sh` runs `source scripts/level-build.sh; wf_level_build "$0" "$@"` after its `cd`. Outside the container this execs `in-linux-container.sh bash wflevels/<tank>/build.sh`. Inside, it builds the tools and returns, so the rest of the script runs unchanged | One copy of the logic instead of seven. `bash wflevels/<tank>/build.sh` still works, and so do the `task aquarium-*-level` entries. `-h`/`--help` is handled in one place |
 | B5 | Settings passed to the generators | Exported `TANK_*`, `AQUARIUM_*`, `LIONFISH_*`, `BETTA_*`, `PLANTED_*` and `SHRIMP_*` variables are forwarded by name (`WF_CONTAINER_ENV`) | `TANK_PROFILE=touch bash …/build.sh` keeps working |
@@ -101,17 +101,19 @@ The host route depends on several things that are not in the repository:
 
     ```
     $ task blender-image && WF_CONTAINER_IMAGE=blender scripts/in-linux-container.sh blender --background --python-expr "…"
-    #8 unpacking to docker.io/library/wf-blender:local 0.0s done
-    #8 DONE 0.2s
     5.0.1 True
-    Blender 5.0.1 (hash a3db93c5b259 built 2025-12-16 01:30:59)
+    Blender 5.0.1
     Blender quit
+    $ WF_CONTAINER_IMAGE=blender scripts/in-linux-container.sh blender --background --python-expr "import sys, numpy, PIL; print('VERS', sys.version.split()[0], numpy.__version__, PIL.__version__)"
+    VERS 3.14.4 2.3.5 12.1.1
+    $ docker run --rm wf-blender:local ldd --version | head -1
+    ldd (Ubuntu GLIBC 2.43-2ubuntu2.4) 2.43
     ```
 
-    **PASS** (2026‑10‑16, after Will's go-ahead for the download). Getting there took two fixes:
-    - `download.blender.org` answers Python's default `User-Agent` with HTTP 403, so the first build failed after 0.6 s (`urllib.error.HTTPError: HTTP Error 403: Forbidden`). A HEAD request with the default agent gets 403; with any ordinary agent it gets 200 and `Content-Length: 374154072`. The Dockerfile now sends one.
-    - `blender-image` had `deps: [linux-test-image]`, which runs `docker build` on the test image every time. Once disk hygiene had pruned the build cache, that rebuilt `wf-linux-test:local` from scratch, re-downloading every package and swapping an apt-updated image in under other sessions. That rebuild was stopped, and the task now builds the test image only when it is missing.
-    The image adds 1.03 GB (`docker image inspect wf-blender:local`: 1030559731 bytes).
+    **PASS** (2026‑10‑16) on the Foundry Linux image (B1, B2): Ubuntu's `blender 5.0.1+dfsg-1ubuntu1` on the host's Python 3.14.4, numpy 2.3.5, Pillow 12.1.1 and glibc 2.43. The image is 797 MB. It took three fixes:
+    - `ca-certificates` had to come before the snapshot, because `snapshot.ubuntu.com` is HTTPS-only and bare `ubuntu:26.04` has no CA bundle (`certificate verify failed`).
+    - The first image, built on the official tarball, also needed a `User-Agent` for `download.blender.org`, which answers Python's default with HTTP 403.
+    - `blender-image` had an unconditional `deps: [linux-test-image]`, which rebuilt the shared test image from scratch once disk hygiene had pruned the build cache.
 
 4. Byte-identical for all seven tanks: `task level-build-compare` exits 0 and prints `N/N identical` for every tank.
 
@@ -138,7 +140,7 @@ The host route depends on several things that are not in the repository:
     aquarium_plants        aquarium_plants/aquarium_plants.lvl 4c9415fae53eeabd 4c9415fae53eeabd same
     aquarium_plants        aquarium_plants.iff           49f58bba669410e5 49f58bba669410e5 same
     aquarium_plants        aquarium_plants-standalone.iff 9c4db4e7a081dda1 9c4db4e7a081dda1 same
-    aquarium_plants: all files: 82/84 identical
+    aquarium_plants: all files: 84/84 identical
     aquarium_arowana       aquarium_arowana/aquarium_arowana.lvl 462f92dc2f61c6ec 462f92dc2f61c6ec same
     aquarium_arowana       aquarium_arowana.iff          730b2f308d504ab8 730b2f308d504ab8 same
     aquarium_arowana       aquarium_arowana-standalone.iff f116a9604b00c7c6 f116a9604b00c7c6 same
@@ -147,8 +149,11 @@ The host route depends on several things that are not in the repository:
     aquarium_tiger_barbs   aquarium_tiger_barbs.iff      29ea798d4e644291 29ea798d4e644291 same
     aquarium_tiger_barbs   aquarium_tiger_barbs-standalone.iff e90796ca4819ae7f e90796ca4819ae7f same
     aquarium_tiger_barbs: all files: 27/27 identical
-    task: Failed to run task "level-build-compare": exit status 1
     ```
+
+    **PASS** (2026‑10‑16): exit 0, and 359/359 files identical across all seven tanks, every `.lvl`, `.iff`, `-standalone.iff`, `.lev` and `actor-map.json` included.
+
+    **History: the first image failed this step.** It was built on Blender's official 5.0.1 tarball, which bundles Python 3.11.13 and numpy 1.26.4. Every shipped file matched, but plants was 82/84:
 
     The two plants files that differ, with each route built once more and diffed:
 
@@ -163,7 +168,7 @@ The host route depends on several things that are not in the repository:
     > { 'EULR' … -0.1202898919582367(1.15.16) …
     ```
 
-    **FAIL as written** (2026‑10‑16): the task exits 1, because plants is 82/84. Everything the engine loads is identical for all seven tanks: every `.lvl`, `.iff` and `-standalone.iff`, and every other file of six tanks. Plants' `aquarium_plants.lev` and `actor-map.json` differ only in the last digits of a few floats. The `actor-map.json` values are one double ULP apart, and the `EULR` angles are adjacent float32 values, 2.98e‑8 apart. levcomp quantises angles to 1.15.16 fixed point, a step of 1.5e‑5, so the `.lvl` is identical.
+    That run: the task exits 1, because plants is 82/84. Everything the engine loads is identical for all seven tanks: every `.lvl`, `.iff` and `-standalone.iff`, and every other file of six tanks. Plants' `aquarium_plants.lev` and `actor-map.json` differ only in the last digits of a few floats. The `actor-map.json` values are one double ULP apart, and the `EULR` angles are adjacent float32 values, 2.98e‑8 apart. levcomp quantises angles to 1.15.16 fixed point, a step of 1.5e‑5, so the `.lvl` is identical.
 
     The two causes, each reproduced on its own (2026‑10‑16):
     - **Seahorse grip spots** (`actor-map.json` `seahorses/spots[1,2,4]/entry[2]`, and the same values in the `.lev`): Python 3.12 made `sum()` of floats use compensated (Neumaier) summation. Host Blender runs Python 3.14, the official build's bundled Python is 3.11, and `dfrm_ref.py` multiplies its rotation matrices with `sum()` (line 144). On Python 3.14 with `sum()` replaced by plain left-to-right addition, `seahorse.spot(n)` gives exactly the container's values (`0.028207925161793903`, `0.026372356446021466`, `0.04842252563408855`). The builtin gives the host's. The host's are the more accurate ones.
@@ -174,13 +179,13 @@ The host route depends on several things that are not in the repository:
     - Five tanks could not build in the container at all: no Pillow in Blender's bundled Python, and the add-on's schema search not following the image's symlink (`ecd65ae0`).
     - The script had compared the leftover committed files and still printed `identical`. It now reports `BUILD FAILED` and skips the tank.
 
-    Decision for Will: keep the official build and accept the rounding, or build the image on `ubuntu:26.04` with Ubuntu's Blender (the host's exact versions, newer Python), pinned with `snapshot.ubuntu.com` so apt can't move it.
+    Matching the host's Blender package removed both causes.
 
 5. Disk: `df -h /` after the image build still shows at least 5 GB free (9.7 GB before it).
 
     ```
     $ df -h /
-    /dev/nvme0n1p2  469G  438G  6.9G  99% /
+    /dev/nvme0n1p2  469G  441G  3.7G 100% /
     ```
 
-    **PASS** (2026‑10‑16): 6.9 GB free after the image (1.03 GB) and two full seven-tank comparisons.
+    **FAIL as written** (2026‑10‑16): 3.7 GB free. The image itself is 797 MB. Building three images in one day (the official tarball twice, then Ubuntu's) grew Docker's build cache by about 2.9 GB, and other sessions wrote to the disk at the same time. Will chose to leave Docker's cache alone. To reclaim it, `docker builder prune` removes the superseded layers, along with other sessions' cache.

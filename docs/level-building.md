@@ -228,8 +228,9 @@ bash wftools/wf_blender/build_level_binary.sh <level-name>
 The aquarium tanks (`bash wflevels/aquarium_<tank>/build.sh`, or `task aquarium-<tank>-level`)
 do not use the host's `blender`. Each `build.sh` starts with `source scripts/level-build.sh;
 wf_level_build "$0" "$@"`, which re-runs the script in `wf-blender:local`
-([`docker/Dockerfile.blender`](../docker/Dockerfile.blender): the Linux test image plus the
-official Blender 5.0.1 tarball, sha256-pinned), through `scripts/in-linux-container.sh` with
+([`docker/Dockerfile.blender`](../docker/Dockerfile.blender): Ubuntu 26.04 with Foundry Linux's
+`blender` package, so the host's Blender, Python, numpy and Pillow, pinned to one Ubuntu archive snapshot),
+through `scripts/in-linux-container.sh` with
 `WF_CONTAINER_IMAGE=blender`. Inside the container:
 
 - the `wf_blender` add-on comes from the mounted checkout (`/src/wftools/wf_blender`, on

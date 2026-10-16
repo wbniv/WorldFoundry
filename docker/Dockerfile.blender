@@ -1,41 +1,47 @@
-# Level-build image for World Foundry: the Linux test image (docker/Dockerfile.linux-test,
-# with its pinned Rust toolchain, Python and Xvfb) plus a pinned Blender, so the
-# `blender --background` asset generation in wflevels/*/build.sh runs in the same
-# reproducible place as the rest of the build instead of on a developer's host.
-# Plan: docs/plans/2026-10-16-blender-in-container.md.
+# Level-build image for World Foundry: Foundry Linux's Blender, as on the host, so the
+# `blender --background` asset generation in wflevels/*/build.sh runs in a reproducible
+# place instead of on a developer's machine. Plan: docs/plans/2026-10-16-blender-in-container.md.
 #
-# Built FROM the local test image, so its layers are shared and only Blender is added
-# (~1.3 GB unpacked). scripts/in-linux-container.sh builds both on first use
+# The host is Foundry Linux on Ubuntu 26.04 ("resolute"): its Blender is Ubuntu's
+# blender package, pulled in by worldfoundry-blender-addons (foundrylinux.org,
+# foundry-devbox/Dockerfile). This image installs the same packages at the same
+# versions, so Blender runs on the same Python 3.14, numpy, Pillow and glibc as the host.
+# (Ubuntu 24.04, the test image's base, only carries Blender 4.0.2; the official
+# Blender tarball bundles its own Python 3.11, whose float sums and compiled maths
+# differ in the last bit from the host's.)
+#
+# Every package comes from one Ubuntu archive snapshot (snapshot.ubuntu.com), so the
+# pinned versions cannot disappear when resolute moves on. Bump the snapshot and the
+# pins together, to what `apt-cache policy blender python3-numpy python3-pil` shows on
+# an up-to-date host. scripts/in-linux-container.sh builds it on first use
 # (WF_CONTAINER_IMAGE=blender), or run `task blender-image`.
-FROM wf-linux-test:local
+FROM ubuntu:26.04
 
-# Runtime libraries the official Blender Linux build loads even in --background:
-# X11 client libs, xkbcommon, EGL/Wayland stubs, SM/ICE. xz-utils unpacks the tarball.
+ENV DEBIAN_FRONTEND=noninteractive
+ARG UBUNTU_SNAPSHOT=20261016T000000Z
+ARG BLENDER_DEB=5.0.1+dfsg-1ubuntu1
+ARG NUMPY_DEB=1:2.3.5+ds-3ubuntu1
+ARG PIL_DEB=12.1.1-2ubuntu1.3
+# snapshot.ubuntu.com is HTTPS-only and the base image has no CA bundle, so
+# ca-certificates comes from the live archive first; nothing it holds affects the build.
 RUN apt-get update \
- && apt-get install -y --no-install-recommends \
-      xz-utils \
-      libxi6 libxxf86vm1 libxfixes3 libxrender1 libxkbcommon0 libxkbcommon-x11-0 \
-      libsm6 libice6 libegl1 libwayland-client0 libwayland-cursor0 libwayland-egl1 \
-      libdecor-0-0 \
+ && apt-get install -y --no-install-recommends ca-certificates \
+ && apt-get update --snapshot "${UBUNTU_SNAPSHOT}" \
+ && apt-get install -y --no-install-recommends --snapshot "${UBUNTU_SNAPSHOT}" \
+      "blender=${BLENDER_DEB}" "python3-numpy=${NUMPY_DEB}" "python3-pil=${PIL_DEB}" \
+      python3 build-essential pkg-config git \
  && rm -rf /var/lib/apt/lists/*
 
-# Blender 5.0.1, the official Linux x64 build, checked against the sha256 that
-# download.blender.org publishes in blender-5.0.1.sha256. Bump both together.
-ARG BLENDER_VERSION=5.0.1
-ARG BLENDER_SHA256=8019580ee1b7262e505f4196a00237ccf743c88d205b38d34201510676e60b09
-# download.blender.org answers Python's default User-Agent with 403; any ordinary one gets the file.
-RUN python3 -c "import shutil, urllib.request as u; r = u.urlopen(u.Request('https://download.blender.org/release/Blender${BLENDER_VERSION%.*}/blender-${BLENDER_VERSION}-linux-x64.tar.xz', headers={'User-Agent': 'wf-blender-image'})); shutil.copyfileobj(r, open('/tmp/blender.tar.xz', 'wb'))" \
- && echo "${BLENDER_SHA256}  /tmp/blender.tar.xz" | sha256sum -c - \
- && mkdir -p /opt/blender \
- && tar -xJf /tmp/blender.tar.xz -C /opt/blender --strip-components=1 \
- && rm /tmp/blender.tar.xz \
- && ln -s /opt/blender/blender /usr/local/bin/blender
-
-# The generators import Pillow (textures); host Blender gets it from the system Python,
-# the official build's bundled Python has none. Pinned to the host's version (12.1.1).
-ARG PILLOW_VERSION=12.1.1
-RUN /opt/blender/${BLENDER_VERSION%.*}/python/bin/python3.11 -m ensurepip \
- && /opt/blender/${BLENDER_VERSION%.*}/python/bin/python3.11 -m pip install --no-cache-dir --only-binary=:all: "Pillow==${PILLOW_VERSION}"
+# The Rust level tools (iffcomp, levcomp, textile, oas2oad, wf_core) build from the
+# repo with the same pinned toolchain as docker/Dockerfile.linux-test.
+ENV RUSTUP_HOME=/opt/rustup
+RUN python3 -c "import urllib.request as u; u.urlretrieve('https://static.rust-lang.org/rustup/dist/x86_64-unknown-linux-gnu/rustup-init', '/tmp/rustup-init')" \
+ && chmod +x /tmp/rustup-init \
+ && CARGO_HOME=/opt/cargo /tmp/rustup-init -y --profile minimal --default-toolchain 1.85.1 --no-modify-path \
+ && rm /tmp/rustup-init \
+ && chmod -R a+rX /opt/rustup /opt/cargo
+ENV PATH=/opt/cargo/bin:$PATH \
+    CARGO_HOME=/tmp/cargo
 
 # The wf_blender add-on is loaded from the mounted checkout, never baked in, so an
 # add-on edit needs no image rebuild: Blender's system scripts path gets an addons/
@@ -43,4 +49,6 @@ RUN /opt/blender/${BLENDER_VERSION%.*}/python/bin/python3.11 -m ensurepip \
 RUN mkdir -p /opt/wf-blender-scripts/addons \
  && ln -s /src/wftools/wf_blender /opt/wf-blender-scripts/addons/wf_blender
 ENV BLENDER_SYSTEM_SCRIPTS=/opt/wf-blender-scripts \
-    WF_IN_CONTAINER=blender
+    WF_IN_CONTAINER=blender \
+    HOME=/tmp
+WORKDIR /src

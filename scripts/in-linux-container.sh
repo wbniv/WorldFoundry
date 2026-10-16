@@ -1,6 +1,6 @@
 #!/usr/bin/env bash
 # in-linux-container.sh: run a command in the Linux test image (docker/Dockerfile.linux-test),
-# or in the Blender level-build image layered on it (docker/Dockerfile.blender).
+# or in the Blender level-build image (docker/Dockerfile.blender: Ubuntu 26.04 with the host's Blender).
 #
 #   scripts/in-linux-container.sh ctest --test-dir /build
 #   WF_CONTAINER_IMAGE=blender scripts/in-linux-container.sh blender --version
@@ -17,7 +17,7 @@ Usage: scripts/in-linux-container.sh [-h|--help] COMMAND [ARGS...]
 Runs COMMAND in a container with the repo at /src and build-docker/ at /build.
 Environment:
   WF_CONTAINER_IMAGE    linux-test (default: wf-linux-test:local) or blender
-                        (wf-blender:local, docker/Dockerfile.blender: + Blender 5.0.1)
+                        (wf-blender:local, docker/Dockerfile.blender: Foundry Linux's Blender 5.0.1)
   WF_CONTAINER_MEMORY   memory cap (default 12g)
   WF_CONTAINER_CPUS     CPU cap (default all)
   WF_CONTAINER_ENV      space-separated docker -e entries, NAME or NAME=VALUE (no
@@ -46,7 +46,6 @@ case "${WF_CONTAINER_IMAGE:-linux-test}" in
         ensure_image "$image" Dockerfile.linux-test ;;
     blender)
         image="wf-blender:local"
-        ensure_image wf-linux-test:local Dockerfile.linux-test   # its base image
         ensure_image "$image" Dockerfile.blender ;;
     *)
         echo "in-linux-container.sh: unknown WF_CONTAINER_IMAGE '${WF_CONTAINER_IMAGE}' (linux-test|blender)" >&2
