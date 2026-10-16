@@ -89,7 +89,6 @@
 
 - [T2] Investigate [Tripo3D studio](https://studio.tripo3d.ai/?from=landingpage_header&category=featured&model_type=all&recommended=recommended&use_case=all)
 - [T4] **Aquarium: ten more fish that school and swarm around the player's fish** — Couzin-model zones with the player as leader; Phase 0 measures the cost of ten fish in Forth on the Chromecast first. T4: the open work is tuning a fixed-point Forth behaviour that shares the rig with the player's fish (plan Phases 2 to 4); later polish and tests rank T3 in the plan. [plan](docs/plans/2026-10-01-aquarium-schooling.md)
-- [wip T3] **Seahorses Phase 2: the seahorse asset.** `wflevels/aquarium_tanks/seahorse.py` (sibling of `urchin.py`, `goby.py`): *H. reidi* body and 35-ring tail mesh with `DFRM` rig tables, a Blender armature (35 tail bones, head, eyes) and the clip set (`rest_coil`, `swim`, `hold_idle`, `probe`, `release`, `startle`, `greet_f`/`greet_m`, ≈ 20 s). It also needs a fins mesh for `fin-deform`, a 256² atlas in a 1024² permanent page, and the two hitching posts. This is the first real run of the Blender `DFRM` export path, which has only been tested without Blender. Rank T3: the design is settled in the plan; the work is multi-file asset and exporter work. [plan](docs/plans/2026-10-16-saltwater-seahorses.md) <!-- agent:a711c2666b86414df -->
 - [T3] **Seahorses Phase 3: behaviour, settings and the level.** Director Forth state machine (hold, release, swim, probe, grasp, strike, greet); contact solve on the posts via the engine's wrap-centre write-back; the **Seahorses** settings sheet (fields 8–9: None / 1 pair / 2 pairs, default 2, plus greeting); visibility mailboxes 1162/1163 and blocks 1200–1599; check that fields 8–9 round-trip through Apply (`plant_settings.h:65-77`). Rank T3: the plan fixes the design; the work spans Forth, generator, settings and level. [plan](docs/plans/2026-10-16-saltwater-seahorses.md)
 - [T3] **Seahorses Phase 4: measure on both Chromecasts, then confirm the default.** Re-measure the stale planted-tank baseline first (13.5 FPS from 2026-10-05, before static meshes). Then run None / 1 pair / 2 pairs as matched release runs and write `comparison.md`. Will confirms the 4-seahorse default from the table. Rank T3: the device protocol exists (urchin study); the decision itself is Will's. [plan](docs/plans/2026-10-16-saltwater-seahorses.md)
 
@@ -165,6 +164,7 @@
 
 ## Done
 
+- ✅ 2026-10-16 — [seahorses-phase2] H. reidi model, 35-ring DFRM tail, 8 clips, posts; 4 seahorses animate in the saltwater tank. See [plan](docs/plans/2026-10-16-saltwater-seahorses.md).
 - ✅ 2026-10-16 — [texture-slot-overflow] Release heap overflow loading 512-wide lionfish/plants textures: slot check now in every build + 4 ctests. See [BUGS.md](docs/BUGS.md). <!-- fp:fc5673e67a6dc68d -->
 - ✅ 2026-10-02 — [cmake-glob] CMake GLOB uses CONFIGURE_DEPENDS, so a new .cc builds in an old build directory. See [test](tests/test_cmake_glob_configure_depends.py).
 - ✅ 2026-10-01 — [level-menu] SMB world select at launch, in the engine; the smb app ships it (checked on the Chromecast HD). See [plan](docs/plans/2026-10-01-level-menu-selector.md).

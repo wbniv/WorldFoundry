@@ -1,6 +1,6 @@
 # Saltwater seahorses: two pairs with expressive tails, and an A3 poster
 
-16 October 2026 · **Plan — Phases 0 and 1 done** (Phase 1 merged as `e98621fe` on 2026‑10‑16; Phase 2 next). **All six decisions are made** (Will, 2026‑10‑16): D1 engine edits for Phase 1 (yes), D2 *H. reidi*, D3 4 seahorses, D4 authored hitching posts, D5 1024² texture page, D6 Deformer phase 2 after the seahorses ship. Engine edits beyond Phase 1 need their own permission ([`AGENTS.md:11-12`](../../AGENTS.md)).
+16 October 2026 · **Plan — Phases 0, 1 and 2 done** (Phase 1 merged as `e98621fe`, Phase 2 as `7b0662c4`, both on 2026‑10‑16; Phase 3 next). **All six decisions are made** (Will, 2026‑10‑16): D1 engine edits for Phase 1 (yes), D2 *H. reidi*, D3 4 seahorses, D4 authored hitching posts, D5 1024² texture page, D6 Deformer phase 2 after the seahorses ship. Engine edits beyond Phase 1 need their own permission ([`AGENTS.md:11-12`](../../AGENTS.md)).
 
 **In TODO.md** since 2026‑10‑16: Seahorses Phases 2–4 (Open → Level / Gameplay; Phase 2 dispatched) and Deformer phase 2 plus the joint-rig spike (Parked → Deferred until level / phase). The Fable-only ranking rule was rescinded the same day.
 
@@ -322,6 +322,23 @@ If D1 is refused, Phase 1 becomes the rigid ring chain instead. That means 35 ri
 - **Origin at the tail base** (the curve's root). A held seahorse hangs from its tail, so the "base at local z = 0" rule for resting meshes doesn't apply. It is documented as an exception, like spheres.
 - **Two hitching posts:** a vertical sea whip and a branch with a horizontal arm. They are static meshes (baked), saltwater only, and their axes and radii are written into a Forth include, the same pattern as the goby's rock profiles.
 
+**As built (2026‑10‑16, `7b0662c4`):**
+- **Budget:** 1,101 triangles per seahorse (body 1,027, fins 74), within the 1,400 budget, in 2 actors. The `DFRM` chunk is 164 KB.
+- **Clips:** 693 frames in all. The exported angles are within 0.005° of the authored ones.
+- **Tiny triangles:** at least 2× margin on every face, at rest and in every posed frame. The worst cases are the tail tip at 3.45× and the fins at 2.47×.
+- **Exporter fix.** Blender 5 uses slotted actions, so an action keyed on one armature has no slot on another, and every frame exported as the rest pose. The exporter now falls back to the action's first slot (`e63f43d8`).
+- **Memory:** the planted tank's PERM pool grew from 1 MB to 3 MB, after the first run ran out of memory. The 1024² permanent page packs as 1024×512. Phase 4 measures both on Chromecast 1.
+- **Placement:** the posts and seahorses sit near the front glass and above the foliage, because mature plants hid them at mid-tank depth.
+- **Head and eyes:** the head pitches about the axis through both eyes, which keeps the eyes in their sockets. Seahorse materials are lit, so `DFRM`'s updated face normals shade them.
+- **The Android menu bundle** (`wflevels/aquarium-menu-cd.iff`) is left unchanged: another session has an uncommitted rebuild of it. Rebuild it with the seahorses once that session's work lands.
+- **For Phase 3:**
+    - the exported bounds are the rest pose, while the probe clip and future wraps swing the tail outside them. Check actor culling near the screen edges;
+    - grip parameters come from `sh-seg` in `seahorse_posts.fth`; Phase 3 picks the wrap start (`hold_idle` assumes 16 or later).
+
+<img src="2026‑10‑16-saltwater-seahorses/evidence/phase2/close-pair0-sequence.png" width="700">
+
+<img src="2026‑10‑16-saltwater-seahorses/evidence/phase2/clip-poses.png" width="700">
+
 ## Phase 3 — behaviour, settings and the level
 
 ```mermaid
@@ -500,7 +517,23 @@ Ranks are suggestions; a Fable session ranks the TODO entry.
 
     **PASS** (2026‑10‑16): ran through the container script against the Release build in `/build/sh` instead of `task build` (house rule: builds run in the container). The five existing kinds match their pre-refactor fixtures bit for bit. The macOS build ([Codemagic 6ad1859b](https://codemagic.io/app/6aafa6886ab3f21cf431a6cb/build/6ad1859ba9acf427ac70fae7)) is also green, with `AQUARIUM PARITY: MATCH`.
 6. Content tests pass: `python3 -m pytest -q tests/test_seahorse_tail.py tests/test_seahorse_asset.py tests/test_dfrm_export.py tests/test_aquarium_plants.py`. These cover: the `DFRM` export round trip, with angles within 0.01° and influence count equal to vertex count; Python/C++ expansion parity, joint limits, arc length, no frame flips, triangle-area margin ≥ 2×, mesh and actor budgets, and no overlap in the mailbox map.
+
+    ```
+    $ scripts/in-linux-container.sh bash -c 'TMPDIR=/build/tmp python3 -m pytest -q tests/test_seahorse_tail.py tests/test_seahorse_asset.py tests/test_dfrm_export.py tests/test_aquarium_plants.py'   # on 7b0662c4
+    ........................................................................ [ 96%]
+    ...                                                                      [100%]
+    75 passed in 3.62s
+    ```
+
+    **PASS** (2026‑10‑16): ran in the container with `TMPDIR` on disk (the RAM-backed `/tmp` was full).
 7. The level builds and exports the seahorses: `bash wflevels/aquarium_plants/build.sh && grep -c seahorse wflevels/aquarium_plants/actor-map.json` prints at least `8` (4 seahorses × 2 actors).
+
+    ```
+    $ grep -c seahorse wflevels/aquarium_plants/actor-map.json
+    21
+    ```
+
+    **PASS** (2026‑10‑16): the Phase 2 agent ran `wflevels/aquarium_plants/build.sh` (host Blender, the existing pipeline) and committed the rebuilt level. 21 actor-map entries name seahorses, at least the 8 required.
 8. Desktop pose trace: `python3 wflevels/aquarium_tanks/seahorse_poses.py --out docs/plans/2026-10-16-saltwater-seahorses/evidence` writes one PNG per pose (rest, grip branch, grip stem, swim, probe, twine, startle) and a JSON in which `max_limit_use <= 1.0`, `frame_flips == 0` and `wrap_centre_error_mm <= 0.5`.
 9. Matched device runs, with Chromecast 1 reserved through the coordinator (`task cast1:reserve`): `python3 scripts/profile-planted-tank-device.py --variants-dir <variant APKs> --restore-apk <eight-tank selector release> --out docs/plans/2026-10-16-saltwater-seahorses/profiles --variants baseline none pair1 pair2 --runs 3`, then `task cast1:release`. Repeat on the Chromecast HD. The comparison table is written to `2026-10-16-saltwater-seahorses/comparison.md`.
 10. Normal gameplay on Chromecast 1 with the selector release: Hold A → Seahorses sheet → None / 1 pair / 2 pairs each apply. Switching to freshwater hides seahorses and posts. Selector, Back, Home and resume all pass. Evidence goes under `docs/diagnostics/`.

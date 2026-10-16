@@ -1,5 +1,6 @@
 | Date | Change |
 |------|--------|
+| [2026-10-16](https://github.com/wbniv/WorldFoundry/commit/0a128929) | Add seahorse phases, deformer follow-ons and Blender-in-container to TODO |
 | [2026-10-16](https://github.com/wbniv/WorldFoundry/commit/c8a226cc) | Record seahorse Phase 1 verification and the texture-overflow fix |
 | [2026-10-16](https://github.com/wbniv/WorldFoundry/commit/e941e460) | Record two pre-existing faults found during seahorse Phase 1 |
 | [2026-10-16](https://github.com/wbniv/WorldFoundry/commit/02e18dbc) | Add seahorse research and A3 biomechanics poster (Phase 0) |
@@ -8,6 +9,11 @@
 | [2026-10-16](https://github.com/wbniv/WorldFoundry/commit/623a8ca3) | Plan saltwater seahorses with 35-joint tails and a generic deformer |
 
 <!--history-meta v1
+0a128929	author	Will Norris
+0a128929	added	1
+0a128929	deleted	3
+0a128929	files	1
+0a128929	body	Seahorses Phase 2 (wip, dispatched), 3 and 4 under Level / Gameplay;\nDeformer phase 2 and the joint-rig spike parked until the seahorses ship;\n"Run Blender asset generation in a container" under Tools & Pipeline (Will,\n2026-10-16). Also the texture-slot-overflow Done line and the seahorse\nplan's captured deferrals. The plan header now points at the TODO entries.\n\nCo-Authored-By: Claude Opus 5.5 <noreply@anthropic.com>\nClaude-Session: https://claude.ai/code/session_01T3gB59hNsFhWnCTTKHc1yk
 c8a226cc	author	Will Norris
 c8a226cc	added	26
 c8a226cc	deleted	6
