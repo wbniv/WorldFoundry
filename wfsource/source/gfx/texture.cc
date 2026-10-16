@@ -70,9 +70,23 @@ LoadTexture(binistream& texturestream, PixelMap& map)
 	int width = header.Width;
 	int height = header.Height;
 
+	// The size comes from level data and PixelMap::Load writes width x height pixels
+	// into the slot's buffer, so this check must hold in every build. It used to be a
+	// RangeCheckExclusive, which a no-assertions (Release) build compiles away: a 512²
+	// texture in a default 256² slot then wrote past the buffer and corrupted the heap,
+	// surfacing only at exit as "free(): invalid pointer" in ~VideoMemory.
+	if(width < 0 || height < 0 || width > map.GetXSize() || height > map.GetYSize())
+	{
+		char error[256];
+		snprintf(error, sizeof(error),
+			"LoadTexture: %dx%d texture does not fit its %dx%d VRAM slot; "
+			"launch with larger --vram-slot-width/height or --vram-perm-width/height\n",
+			width, height, map.GetXSize(), map.GetYSize());
+		AssertMsg(0, error);
+		FatalError(error);
+	}
+
 	const void* buffer = texturestream.GetMemoryPtr(width * height * 2);
-	RangeCheckExclusive(0,width,map.GetXSize()+1);
-	RangeCheckExclusive(0,height,map.GetYSize()+1);
    assert(buffer);
 
 		// kts hack, image needs to be long word aligned on disk

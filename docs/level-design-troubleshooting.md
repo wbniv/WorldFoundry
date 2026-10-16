@@ -1342,12 +1342,14 @@ Same assert as the `width = 320` palette case above, but here the number is your
 composite) black-screens or aborts at load:
 
 ```
-AssertMsg:width = 1024, map.GetXSize()+1 = 257
-|(ptrdiff_t)(width) < (ptrdiff_t)(map.GetXSize()+1)
-|in file "wfsource/source/gfx/texture.cc" on line 74
+LoadTexture: 1024x1024 texture does not fit its 256x256 VRAM slot; launch with larger --vram-slot-width/height or --vram-perm-width/height
 ```
 
-**Cause:** `LoadTexture` (`texture.cc:74`) range-checks the TGA width against its
+(`AssertMsg:` in front with assertions on; `Fatal Error:` and exit 1 in Release. Before
+2026‑10‑16 a Release build had no check here: it wrote the texture past the slot buffer
+and aborted at exit with `free(): invalid pointer`. See [BUGS.md](BUGS.md).)
+
+**Cause:** `LoadTexture` (`texture.cc`) checks the TGA width against its
 destination PixelMap — the **transient texture slot** in VRAM
 (`VideoMemory::GetSlotTexturePixelMap`, `assslot.cc:89`). That slot defaults to
 **256×256** (`VideoMemory::VRAMTransientWidth/Height`, `vmem.cc:40-41`), and the

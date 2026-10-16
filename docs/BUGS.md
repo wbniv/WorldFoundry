@@ -13,6 +13,40 @@ Format per entry:
 
 ---
 
+## Texture-fits-slot check only in assertion builds: a Release build wrote a 512² texture past its 256² VRAM slot and died at exit in `~VideoMemory` — 2026‑10‑16
+
+**Status:** FIXED on branch `fix-exit-free-abort` (from `2026-new-level`; `gfx/texture.cc`), with ctests `wf_game_smoke_aquarium_{lionfish,plants}[_default_vram]`.
+
+**Symptom:** A Release, no‑ASan `wf_game --frame-step-smoke=240 --cycles=1 -L…/aquarium_lionfish-standalone.iff` (or `aquarium_plants`) ran all 240 frames, printed `rest_api: server stopped`, then aborted with exit 134: `free(): invalid pointer` (lionfish) or `free(): invalid size` (plants). The other aquarium tanks exited 0. `gdb`: `#8 free`, `#9 PixelMap::~PixelMap`, `#10 VideoMemory::~VideoMemory`, `#11 WFGame::~WFGame`, `#12 PIGSMain`. Valgrind found the write that corrupted the heap, long before exit: `Invalid write of size 1 at PixelMap::Load` ← `LoadTexture(IFFChunkIter&, PixelMap&)` ← `AssetSlot::AssetSlot` ← `AssetManager::LoadPermanents` ← `Level::Level`, `0 bytes after a block of size 262,144` (one 256 × 256 × 4 slot buffer) allocated in `PixelMap::PixelMap` ← `VideoMemory::AllocateTextureSlots`.
+
+**Root cause:** `LoadTexture` (`gfx/texture.cc`) read the TGA's width and height from level data and guarded them against the destination slot with `RangeCheckExclusive(0,width,map.GetXSize()+1)`, which is an assertion: a build with `DO_ASSERTIONS=0` compiles it to nothing. `PixelMap::Load` then wrote `width × height` RGBA pixels at a stride of the slot's own width, so a texture bigger than its slot wrote past the slot's `new[]` buffer (its own bounds checks are assertions too). The two failing tanks are the only aquarium tanks whose textures exceed the default 256² slot: lionfish `Perm.tga` 512 × 256 and `Room0.tga` 512 × 272, plants `Perm.tga` 512 × 512. They are meant to run with 512² slots (`android/app/src/aquarium/assets/wf_args.txt`, `aquarium_lionfish/run.sh`); the repro command passed none, so the slots were 256². The overrun landed in the glibc chunk headers after the slot buffers, which glibc only checks when those chunks are freed, at exit.
+
+**Why dormant:** the check and the write are in git's first commit `a2784f6e` (2010‑05‑01; the 2026‑04‑18 `078bd9fa` change was whitespace). Every build ran with assertions until `191c4c90` "Build Release without the debug-mode engine defines" (2026‑10‑07). Any build with assertions stops at the check with `AssertMsg:width = 512, map.GetXSize()+1 = 257` (exit 255) before writing anything. That includes the default host Debug build, where ASan is on, so ASan never saw the overrun. A run with the 512² slot flags never overruns, in any build. Both were reproduced in the container: Debug + ASan without the flags asserts, and Release with the flags exits 0. Exactly which launch Will's clean ASan runs used is not recorded; they cannot have been the bare command.
+
+**Fix:** make the check unconditional. A texture larger than its slot (or a negative size) now prints `LoadTexture: WxH texture does not fit its XxY VRAM slot; launch with larger --vram-slot-width/height or --vram-perm-width/height`, then `AssertMsg`s (assertion builds) or calls `FatalError` (exit 1, the same pattern as `LMalloc` running out of memory). Nothing is written out of bounds. `aquarium_plants/run.sh` now passes the aquarium app's 512² slot flags, as `aquarium_lionfish/run.sh` already did. Before the fix, Release: `wf_game_smoke_aquarium_{lionfish,plants}_default_vram` fail with `Subprocess aborted` (`free(): invalid pointer` / `free(): invalid size`). After it, all four pass in both Release and Debug + ASan.
+
+**Diff** (`wfsource/source/gfx/texture.cc`, `LoadTexture`):
+```diff
++	if(width < 0 || height < 0 || width > map.GetXSize() || height > map.GetYSize())
++	{
++		char error[256];
++		snprintf(error, sizeof(error),
++			"LoadTexture: %dx%d texture does not fit its %dx%d VRAM slot; "
++			"launch with larger --vram-slot-width/height or --vram-perm-width/height\n",
++			width, height, map.GetXSize(), map.GetYSize());
++		AssertMsg(0, error);
++		FatalError(error);
++	}
++
+ 	const void* buffer = texturestream.GetMemoryPtr(width * height * 2);
+-	RangeCheckExclusive(0,width,map.GetXSize()+1);
+-	RangeCheckExclusive(0,height,map.GetYSize()+1);
+```
+
+**Investigation:** reproduced on `2026-new-level`, so it predates the seahorse Phase 1 deformer work. The slot-size flags: [level-design-troubleshooting.md](level-design-troubleshooting.md), "texture bigger than the transient VRAM slot".
+
+---
+
 ## Room loading assumed no teleports: `ChangeActiveRoom` binds Moves Between Rooms objects into room memory — the Player's render data overwritten after a teleport (a design gap) — 2026‑10‑08
 
 **Status:** FIXED [`2b893d48`](https://github.com/wbniv/WorldFoundry/commit/2b893d48) (merged into `2026-new-level` 2026‑10‑08; `room/actrooms.cc`, `baseobject/baseobject.{hp,cc}`, `game/actor.hp`).

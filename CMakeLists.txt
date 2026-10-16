@@ -1374,6 +1374,32 @@ if(NOT ANDROID AND NOT IOS AND NOT APPLE AND NOT EMSCRIPTEN)
         COMMAND $<TARGET_FILE:wf_game> --frame-step-smoke=30 --cycles=2 -L${WF_TEST_SNOW_LEVEL}
         WORKING_DIRECTORY ${WF_TEST_RUN_DIR})
 
+    # Two aquarium tanks carry textures larger than the default 256² VRAM slot
+    # (lionfish Perm/Room0 512 wide, plants Perm 512²). With the slot sizes the
+    # aquarium app ships (android/app/src/aquarium/assets/wf_args.txt) they must
+    # run 240 frames and exit 0. Without them, LoadTexture must refuse the
+    # texture: a Release build used to write it past the 256² PixelMap buffer
+    # and die at exit in ~VideoMemory with "free(): invalid pointer" (lionfish)
+    # or "free(): invalid size" (plants). See docs/BUGS.md, 2026-10-16.
+    set(WF_AQUARIUM_VRAM_ARGS --vram-width=2048 --vram-height=1024
+        --vram-slot-width=512 --vram-slot-height=512
+        --vram-perm-width=512 --vram-perm-height=512)
+    foreach(_tank aquarium_lionfish aquarium_plants)
+        add_test(NAME wf_game_smoke_${_tank}
+            COMMAND $<TARGET_FILE:wf_game> ${WF_AQUARIUM_VRAM_ARGS}
+                --frame-step-smoke=240 --cycles=1
+                -L${CMAKE_SOURCE_DIR}/wflevels/${_tank}-standalone.iff
+            WORKING_DIRECTORY ${WF_TEST_RUN_DIR})
+        add_test(NAME wf_game_smoke_${_tank}_default_vram
+            COMMAND $<TARGET_FILE:wf_game>
+                --frame-step-smoke=240 --cycles=1
+                -L${CMAKE_SOURCE_DIR}/wflevels/${_tank}-standalone.iff
+            WORKING_DIRECTORY ${WF_TEST_RUN_DIR})
+        set_tests_properties(wf_game_smoke_${_tank}_default_vram PROPERTIES
+            PASS_REGULAR_EXPRESSION "does not fit its [0-9]+x[0-9]+ VRAM slot"
+            FAIL_REGULAR_EXPRESSION "free\\(\\)|corrupted|AddressSanitizer")
+    endforeach()
+
     add_executable(wf_opaque_material_gl_test tests/opaque_material_gl.cc)
     target_link_libraries(wf_opaque_material_gl_test PRIVATE wfengine)
     target_compile_options(wf_opaque_material_gl_test PRIVATE -fpermissive -w -fno-rtti)
