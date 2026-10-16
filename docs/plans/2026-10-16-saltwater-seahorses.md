@@ -435,6 +435,8 @@ Ranks are suggestions; a Fable session ranks the TODO entry.
 - **Gripping live plants.** It needs a C++ stem-position query and sway tracking; the posts come first (D4).
 - **Real prey particles and feeding.** Strikes target ambient drifting particles only.
 - **Stale face normals in the five existing deformers.** They move vertices but keep rest-pose face normals (`rendobj3.cc:286`), so culling and lighting lag the deformation. The fix changes their output, so it needs re-recorded golden fixtures and a visual check per tank. Do it with Deformer phase 2 or as its own fix.
+- **Exit-time heap abort in two tanks (found during Phase 1, not caused by it).** On a desktop run of the eight selector tanks, Lionfish and Planted Tank abort at exit with `free(): invalid pointer` / `invalid size`, after the REST server stops. The code before E0 aborts the same way. Root cause not investigated: run one under ASan (`task build-wf-edit` has an ASan configuration) to find the first bad free.
+- **`tests/test_species_movement.py` fails 6 cases with "Unknown lion-pose" (found during Phase 1, not caused by it).** The test's own Forth word list lacks `lion-pose` (syscall 177). The bootstrap text it extracts is byte-identical before and after Phase 1. Fix: add the word, or extract the list from `scripting_zforth.cc:1541`.
 - **Breeding, pouch pumping and fry.**
 - **Morph targets and the sea anemone.** The anemone stays set aside, but it can resume on the same evaluator after Deformer phase 2. The travelling-wave operator is part of Deformer phase 2, not this plan's Phase 1.
 - **More than 2 pairs.** The tank's biological ceiling is 4 pairs. The setting stops at 2.
@@ -461,7 +463,7 @@ Ranks are suggestions; a Fable session ranks the TODO entry.
     Page size:       841.92 x 1191.12 pts (A3)
     ```
 
-    **PASS** (2026‑10‑16): one page, and poppler identifies it as A3. Chrome rounds 297 × 420 mm to 841.92 × 1191.12 pt, as it did for the clownfish poster, so the step's literal 841.89 × 1190.55 never matches a Chrome export.
+    **PASS** (2026‑10‑16): one page, and poppler identifies it as A3. Chrome rounds 297 × 420 mm to 841.92 × 1191.12 pt, as it did for the clownfish poster, so the step's literal 841.89 × 1190.55 never matches a Chrome export.
 3. Every font is embedded: `pdffonts docs/reference/seahorse-biomechanics-poster/seahorse-biomechanics-a3.pdf | tail -n +3 | awk '{print $(NF-4)}' | sort | uniq -c` shows only `yes`.
 
     ```

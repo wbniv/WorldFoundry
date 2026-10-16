@@ -1,10 +1,16 @@
 | Date | Change |
 |------|--------|
+| [2026-10-16](https://github.com/wbniv/WorldFoundry/commit/02e18dbc) | Add seahorse research and A3 biomechanics poster (Phase 0) |
 | [2026-10-16](https://github.com/wbniv/WorldFoundry/commit/f394d62f) | Document stale face normals under deformation; DFRM updates them |
 | [2026-10-16](https://github.com/wbniv/WorldFoundry/commit/01d360f3) | Record seahorse plan decisions D2, D4, D6 and index the plan |
 | [2026-10-16](https://github.com/wbniv/WorldFoundry/commit/623a8ca3) | Plan saltwater seahorses with 35-joint tails and a generic deformer |
 
 <!--history-meta v1
+02e18dbc	author	Will Norris
+02e18dbc	added	58
+02e18dbc	deleted	18
+02e18dbc	files	1
+02e18dbc	body	Research document for H. reidi, written first: ring counts (most often\n35 tail rings, range 31-39), tail plate anatomy, grasping, fin\nfrequencies (20-60 Hz for H. reidi; the plan's 30-42 Hz is H. erectus),\nstrike timing (prey in the mouth at 5.7 ms; peak head rotation\n26.7 deg), size, colour, pairing, eyes and stocking, each with status,\nlink, DOI, locator, species and access limits.\n\nA3 portrait poster generated from it: eight panels, every claim\nchipped verified / other species / ours, nothing unverified printed.\n27 regression tests (one A3 page, fonts, type size, fit, edges, links,\nwording, build freshness, tail numbers match the plan).\n\nPlan: fold the findings in, raise the dorsal tip limit 10 -> 12.5 deg so\nthe tail's total dorsal range (~289 deg) matches H. kuda's 290 deg,\nmark the greeting and colourways as ours, correct the stocking source,\nand record verification steps 1-4 as PASS. Mockups follow the new limit.\n\nCo-Authored-By: Claude Opus 5.5 <noreply@anthropic.com>\nClaude-Session: https://claude.ai/code/session_01T3gB59hNsFhWnCTTKHc1yk
 f394d62f	author	Will Norris
 f394d62f	added	4
 f394d62f	deleted	2
