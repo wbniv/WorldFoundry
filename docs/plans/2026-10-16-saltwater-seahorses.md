@@ -2,9 +2,7 @@
 
 16 October 2026 · **Plan — Phases 0 and 1 done** (Phase 1 merged as `e98621fe` on 2026‑10‑16; Phase 2 next). **All six decisions are made** (Will, 2026‑10‑16): D1 engine edits for Phase 1 (yes), D2 *H. reidi*, D3 4 seahorses, D4 authored hitching posts, D5 1024² texture page, D6 Deformer phase 2 after the seahorses ship. Engine edits beyond Phase 1 need their own permission ([`AGENTS.md:11-12`](../../AGENTS.md)).
 
-**TODO entries, ready for a Fable session to add** (this session ran on Opus, and the `rank-requires-fable` hook allows only Fable to write tiers):
-`- [T4] **Saltwater seahorses: H. reidi pairs with 35-joint prehensile tails, plus A3 poster.** Rank T4: the tail needs a generic deformer slot and a new engine rig (permission + design), and a wrong rig format is expensive to undo. [plan](docs/plans/2026-10-16-saltwater-seahorses.md)`
-`- [T4] **Deformer phase 2: fish, fin, swim, lion (jelly if it fits) as DFRM data.** Rank T4: rewrites the deformers that seven tanks use; each conversion is golden-tested and device-checked. Blocked on the seahorse Phase 1. [plan](docs/plans/2026-10-16-saltwater-seahorses.md), section "Deformer phase 2"`
+**In TODO.md** since 2026‑10‑16: Seahorses Phases 2–4 (Open → Level / Gameplay; Phase 2 dispatched) and Deformer phase 2 plus the joint-rig spike (Parked → Deferred until level / phase). The Fable-only ranking rule was rescinded the same day.
 
 ## Context
 

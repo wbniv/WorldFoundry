@@ -1,5 +1,6 @@
 | Date | Change |
 |------|--------|
+| [2026-10-16](https://github.com/wbniv/WorldFoundry/commit/c8a226cc) | Record seahorse Phase 1 verification and the texture-overflow fix |
 | [2026-10-16](https://github.com/wbniv/WorldFoundry/commit/e941e460) | Record two pre-existing faults found during seahorse Phase 1 |
 | [2026-10-16](https://github.com/wbniv/WorldFoundry/commit/02e18dbc) | Add seahorse research and A3 biomechanics poster (Phase 0) |
 | [2026-10-16](https://github.com/wbniv/WorldFoundry/commit/f394d62f) | Document stale face normals under deformation; DFRM updates them |
@@ -7,6 +8,11 @@
 | [2026-10-16](https://github.com/wbniv/WorldFoundry/commit/623a8ca3) | Plan saltwater seahorses with 35-joint tails and a generic deformer |
 
 <!--history-meta v1
+c8a226cc	author	Will Norris
+c8a226cc	added	26
+c8a226cc	deleted	6
+c8a226cc	files	1
+c8a226cc	body	Step 5 PASS: deformer_golden (bit-identical), dfrm_strand, smoke and the\nnew aquarium ctests (11/11, Release, container) on 02f726c9; all eight\ntanks pass on Chromecast 1 (job J‑2926cf7cc193); macOS build green with\nAQUARIUM PARITY: MATCH. The lead-in is world-vertical (roll not\ncompensated). The exit-time abort deferral is struck through: it was a\nRelease heap overflow at texture load, fixed in 02f726c9.\n\nCo-Authored-By: Claude Opus 5.5 <noreply@anthropic.com>\nClaude-Session: https://claude.ai/code/session_01T3gB59hNsFhWnCTTKHc1yk
 e941e460	author	Will Norris
 e941e460	added	3
 e941e460	deleted	1
