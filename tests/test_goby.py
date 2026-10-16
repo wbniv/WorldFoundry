@@ -54,7 +54,7 @@ def test_cooked_plant_scripts_compile(host, tmp_path):
         assert h.eval(f': JOYSTICK_BUTTON_{name} {value} ;') == 'ok'
     # Published engine bridge names; these stubs are only compiled, never called.
     for name in ['read-actor-mailbox', 'write-actor-mailbox', 'property@',
-                 'swim-deform', 'plant-register', 'plant-step']:
+                 'swim-deform', 'fin-deform', 'dfrm-pose', 'plant-register', 'plant-step']:
         assert h.eval(f': {name} 0 ;') == 'ok'
     lev = (ROOT/'wflevels/aquarium_plants/aquarium_plants.lev').read_text()
     scripts = re.findall(r"\{ 'NAME' \"Script\" \} \{ 'STR' (\"(?:\\.|[^\"\\])*\")", lev)

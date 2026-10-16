@@ -35,9 +35,15 @@
 		$3fff00al { 'STR' "urchin_spine_5.iff" }  // IFF PERM fff:00a
 		$3fff00bl { 'STR' "urchin_spine_6.iff" }  // IFF PERM fff:00b
 		$3fff00cl { 'STR' "urchin_spine_7.iff" }  // IFF PERM fff:00c
-		$3fff00dl { 'STR' "goby_grazing_rock_0.iff" }  // IFF PERM fff:00d
-		$3fff00el { 'STR' "goby_grazing_rock_1.iff" }  // IFF PERM fff:00e
-		$3fff00fl { 'STR' "goby_grazing_rock_2.iff" }  // IFF PERM fff:00f
+		$3fff00dl { 'STR' "seahorse_f_body.iff" }  // IFF PERM fff:00d
+		$3fff00el { 'STR' "seahorse_f_fins.iff" }  // IFF PERM fff:00e
+		$3fff00fl { 'STR' "seahorse_m_body.iff" }  // IFF PERM fff:00f
+		$3fff010l { 'STR' "seahorse_m_fins.iff" }  // IFF PERM fff:010
+		$3fff011l { 'STR' "seahorse_whip.iff" }  // IFF PERM fff:011
+		$3fff012l { 'STR' "seahorse_branch.iff" }  // IFF PERM fff:012
+		$3fff013l { 'STR' "goby_grazing_rock_0.iff" }  // IFF PERM fff:013
+		$3fff014l { 'STR' "goby_grazing_rock_1.iff" }  // IFF PERM fff:014
+		$3fff015l { 'STR' "goby_grazing_rock_2.iff" }  // IFF PERM fff:015
 		$3000001l { 'STR' "tank_base.iff" }  // IFF RM0 000:001
 		$3000002l { 'STR' "water_back.iff" }  // IFF RM0 000:002
 		$3000003l { 'STR' "back_air.iff" }  // IFF RM0 000:003
@@ -77,9 +83,15 @@
 		{ 'ASS' $3fff00al [ "urchin_spine_5.iff" ] }  // IFF PERM fff:00a
 		{ 'ASS' $3fff00bl [ "urchin_spine_6.iff" ] }  // IFF PERM fff:00b
 		{ 'ASS' $3fff00cl [ "urchin_spine_7.iff" ] }  // IFF PERM fff:00c
-		{ 'ASS' $3fff00dl [ "goby_grazing_rock_0.iff" ] }  // IFF PERM fff:00d
-		{ 'ASS' $3fff00el [ "goby_grazing_rock_1.iff" ] }  // IFF PERM fff:00e
-		{ 'ASS' $3fff00fl [ "goby_grazing_rock_2.iff" ] }  // IFF PERM fff:00f
+		{ 'ASS' $3fff00dl [ "seahorse_f_body.iff" ] }  // IFF PERM fff:00d
+		{ 'ASS' $3fff00el [ "seahorse_f_fins.iff" ] }  // IFF PERM fff:00e
+		{ 'ASS' $3fff00fl [ "seahorse_m_body.iff" ] }  // IFF PERM fff:00f
+		{ 'ASS' $3fff010l [ "seahorse_m_fins.iff" ] }  // IFF PERM fff:010
+		{ 'ASS' $3fff011l [ "seahorse_whip.iff" ] }  // IFF PERM fff:011
+		{ 'ASS' $3fff012l [ "seahorse_branch.iff" ] }  // IFF PERM fff:012
+		{ 'ASS' $3fff013l [ "goby_grazing_rock_0.iff" ] }  // IFF PERM fff:013
+		{ 'ASS' $3fff014l [ "goby_grazing_rock_1.iff" ] }  // IFF PERM fff:014
+		{ 'ASS' $3fff015l [ "goby_grazing_rock_2.iff" ] }  // IFF PERM fff:015
 	}
 	{ 'ALGN' .align(2048) }
 	{ 'RM0'

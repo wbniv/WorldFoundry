@@ -32,30 +32,40 @@
     "urchin-spine-5": 25,
     "urchin-spine-6": 26,
     "urchin-spine-7": 27,
-    "tank-base": 28,
-    "water-back": 29,
-    "back-air": 30,
-    "tank-end--1": 31,
-    "tank-end-1": 32,
-    "front-collider": 33,
-    "rim": 34,
-    "floor": 35,
-    "goby-grazing-rock-0": 36,
-    "goby-grazing-rock-1": 37,
-    "goby-grazing-rock-2": 38,
-    "plant_chunk_00": 39,
-    "plant_chunk_01": 40,
-    "plant_chunk_02": 41,
-    "plant_chunk_03": 42,
-    "plant_chunk_04": 43,
-    "plant_chunk_05": 44,
-    "plant_chunk_06": 45,
-    "plant_chunk_07": 46,
-    "stand": 47,
-    "room-backdrop": 48,
-    "AmbientLight": 49,
-    "LookClose": 50,
-    "cs_close": 51
+    "seahorse-0-body": 28,
+    "seahorse-0-fins": 29,
+    "seahorse-1-body": 30,
+    "seahorse-1-fins": 31,
+    "seahorse-2-body": 32,
+    "seahorse-2-fins": 33,
+    "seahorse-3-body": 34,
+    "seahorse-3-fins": 35,
+    "seahorse-whip": 36,
+    "seahorse-branch": 37,
+    "tank-base": 38,
+    "water-back": 39,
+    "back-air": 40,
+    "tank-end--1": 41,
+    "tank-end-1": 42,
+    "front-collider": 43,
+    "rim": 44,
+    "floor": 45,
+    "goby-grazing-rock-0": 46,
+    "goby-grazing-rock-1": 47,
+    "goby-grazing-rock-2": 48,
+    "plant_chunk_00": 49,
+    "plant_chunk_01": 50,
+    "plant_chunk_02": 51,
+    "plant_chunk_03": 52,
+    "plant_chunk_04": 53,
+    "plant_chunk_05": 54,
+    "plant_chunk_06": 55,
+    "plant_chunk_07": 56,
+    "stand": 57,
+    "room-backdrop": 58,
+    "AmbientLight": 59,
+    "LookClose": 60,
+    "cs_close": 61
   },
   "mailboxes": {
     "init": 600,
@@ -327,6 +337,165 @@
   },
   "movement": null,
   "lionfish_rig": null,
+  "seahorses": {
+    "visibility": 1160,
+    "block_base": 1200,
+    "block_stride": 100,
+    "block_cells": 40,
+    "forth_cells": [
+      1240,
+      1241
+    ],
+    "clips": {
+      "greet_f": 1,
+      "greet_m": 2,
+      "hold_idle": 3,
+      "probe": 4,
+      "release": 5,
+      "rest_coil": 6,
+      "startle": 7,
+      "swim": 8
+    },
+    "texture": "seahorse_atlas.tga",
+    "actors": [
+      {
+        "seahorse": 0,
+        "sex": "f",
+        "body": 28,
+        "fins": 29,
+        "block": 1200,
+        "position": [
+          -3.58,
+          -0.95,
+          3.85
+        ],
+        "yaw": 0.0,
+        "clip": "rest_coil",
+        "clip_start": 0.0
+      },
+      {
+        "seahorse": 1,
+        "sex": "m",
+        "body": 30,
+        "fins": 31,
+        "block": 1300,
+        "position": [
+          -2.55,
+          -1.0,
+          3.55
+        ],
+        "yaw": 3.141592653589793,
+        "clip": "swim",
+        "clip_start": -0.4
+      },
+      {
+        "seahorse": 2,
+        "sex": "f",
+        "body": 32,
+        "fins": 33,
+        "block": 1400,
+        "position": [
+          4.25,
+          -0.95,
+          3.25
+        ],
+        "yaw": 3.141592653589793,
+        "clip": "rest_coil",
+        "clip_start": -1.3
+      },
+      {
+        "seahorse": 3,
+        "sex": "m",
+        "body": 34,
+        "fins": 35,
+        "block": 1500,
+        "position": [
+          2.42,
+          -1.0,
+          3.8
+        ],
+        "yaw": 0.0,
+        "clip": "swim",
+        "clip_start": -0.9
+      }
+    ],
+    "posts": [
+      {
+        "name": "seahorse-whip",
+        "actor": 36,
+        "base": [
+          -3.1,
+          -0.7,
+          0.585
+        ],
+        "mesh": "seahorse_whip.iff"
+      },
+      {
+        "name": "seahorse-branch",
+        "actor": 37,
+        "base": [
+          3.0,
+          -0.65,
+          0.585
+        ],
+        "mesh": "seahorse_branch.iff"
+      }
+    ],
+    "grip_segments": [
+      {
+        "mode": 2,
+        "start": [
+          -3.1,
+          -0.7,
+          0.585
+        ],
+        "end": [
+          -3.1,
+          -0.7,
+          4.335
+        ],
+        "radius": [
+          0.06,
+          0.034
+        ]
+      },
+      {
+        "mode": 2,
+        "start": [
+          3.0,
+          -0.65,
+          0.585
+        ],
+        "end": [
+          3.0,
+          -0.65,
+          3.985
+        ],
+        "radius": [
+          0.075,
+          0.055
+        ]
+      },
+      {
+        "mode": 1,
+        "start": [
+          3.0,
+          -0.65,
+          3.585
+        ],
+        "end": [
+          4.0,
+          -0.65,
+          3.585
+        ],
+        "radius": [
+          0.045,
+          0.038
+        ]
+      }
+    ],
+    "forth_include": "seahorse_posts.fth"
+  },
   "animal": "sea_urchin",
   "spawn": [
     0,

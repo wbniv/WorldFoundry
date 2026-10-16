@@ -18,6 +18,7 @@ import species
 from models import COLORS as ANIMAL_COLORS, JELLY_OPACITY, models
 from urchin import COLORS as URCHIN_COLORS, TEXTURE as URCHIN_TEXTURE, urchin, tube_foot, spine_specs, spine_mesh, PIVOT_SPINES, write_texture as write_urchin_texture
 import goby
+import seahorse
 from planting import COLORS as PLANT_COLORS, planting
 from temple import COLORS as TEMPLE_COLORS, pavilion
 LEVEL=sys.argv[sys.argv.index('--')+1]
@@ -28,6 +29,7 @@ C=importlib.util.module_from_spec(spec); spec.loader.exec_module(C)
 if C.KIND=='plants':
     write_urchin_texture(HERE)
     goby.write_textures(HERE)
+    seahorse.write_texture(HERE)
 PROFILE=os.environ.get('TANK_PROFILE','keyboard')
 assert PROFILE in ('keyboard','touch','remote')
 COUNT=int(os.environ.get('TANK_COUNT',str(C.COUNT)))
@@ -49,6 +51,7 @@ COLORS.update(TEMPLE_COLORS)
 COLORS.update(PLANT_COLORS)
 COLORS.update(URCHIN_COLORS)
 COLORS.update(goby.COLORS)
+COLORS.update(seahorse.COLORS)
 if BETTA_FINS:COLORS.update(BETTA_COLORS)
 if C.KIND=='arowana':
     import arowana
@@ -98,6 +101,12 @@ def material(key):
             tex.image=bpy.data.images.load(str(HERE/({'goby_body':goby.BODY_TEXTURE,'goby_fin':goby.FIN_TEXTURE,'goby_rock':goby.ROCK_TEXTURE}[key])),check_existing=True)
             mt.node_tree.links.new(tex.outputs['Color'],mt.node_tree.nodes.get('Principled BSDF').inputs['Base Color'])
             if key=='goby_fin':mt['wf_opacity']=goby.FIN_OPACITY;mt['wf_double_sided']=True
+        if C.KIND=='plants' and key in ('seahorse_body','seahorse_fin'):
+            # One atlas for both colourways, in PERM (the aquarium app's 1024-square page, D5).
+            tex=mt.node_tree.nodes.new('ShaderNodeTexImage')
+            tex.image=bpy.data.images.load(str(HERE/seahorse.TEXTURE),check_existing=True)
+            mt.node_tree.links.new(tex.outputs['Color'],mt.node_tree.nodes.get('Principled BSDF').inputs['Base Color'])
+            if key=='seahorse_fin':mt['wf_opacity']=seahorse.FIN_OPACITY;mt['wf_double_sided']=True
         MATERIALS[key] = mt
     return MATERIALS[key]
 
@@ -228,6 +237,7 @@ for k in range(0 if C.KIND=='plants' else COUNT):
 
 goby_parts=[]
 urchin_feet=[]
+seahorse_parts=[]
 urchin_spines=[]
 if C.KIND=='plants':
     for m in (goby.body(),goby.fins()):
@@ -253,6 +263,25 @@ if C.KIND=='plants':
         obj['wf_Moves Between Rooms']=True
         obj['wf_Visibility Mailbox']=1160
         urchin_spines.append((obj,index,offset,rest_b,rest_c))
+    # Seahorses (Phase 2): a DFRM body rig and a fin-deform fins actor each, saltwater only.
+    sh_meshes={sex:(seahorse.body(sex),seahorse.fins(sex)) for sex in seahorse.SEXES}
+    sh_data={sex:(blender_mesh(b),blender_mesh(f)) for sex,(b,f) in sh_meshes.items()}
+    sh_actions=None
+    for s,(sex,pos,yaw,_clip,_start) in enumerate(seahorse.PLACEMENTS):
+        body=actor(f'seahorse-{s}-body',sh_data[sex][0],pos,mesh_name=f'seahorse_{sex}_body')
+        fins=actor(f'seahorse-{s}-fins',sh_data[sex][1],pos,mesh_name=f'seahorse_{sex}_fins')
+        for obj in (body,fins):
+            obj.rotation_euler=(0,0,yaw)
+            obj['wf_Visibility Mailbox']=seahorse.VISIBILITY
+            obj['wf_Moves Between Rooms']=True
+        seahorse.add_vertex_groups(body,sh_meshes[sex][0])
+        bpy.context.view_layer.update()
+        _rig,sh_actions=seahorse.armature(bpy,f'seahorse-{s}-rig',body,sh_actions)
+        seahorse_parts.append((body,fins))
+    for k,(name,base,_segs) in enumerate(seahorse.POSTS):
+        obj=actor(name,seahorse.post_mesh(k),base)
+        obj['wf_Visibility Mailbox']=seahorse.VISIBILITY
+        obj['wf_Moves Between Rooms']=True
 
 if FEEDING:
     import goldfish
@@ -472,9 +501,12 @@ if C.KIND=='plants':
         tick+=f' {num(offset[0])} {num(offset[1])} {num(.017+.0014*k)} {k} {indices[obj.name]} uf-foot\n'
     core+=(COMMON/'urchin_motion.fth').read_text()
     core+=(COMMON/'urchin_spines.fth').read_text()
+    posts_forth=seahorse.posts_forth()
+    (HERE/'seahorse_posts.fth').write_text(posts_forth)
+    core+=posts_forth+seahorse.clips_forth()
     for k,(obj,index,offset,rest_b,rest_c) in enumerate(urchin_spines):
         tick+=f' {num(offset[0])} {num(offset[1])} {num(offset[2])} {num(rest_b)} {num(rest_c)} {num(4.1+k*.41)} {1 if k%2==0 else -1} {k} {indices[obj.name]} us-spine\n'
-
+    tick+=seahorse.director_tick(indices)
     tick+=' else\n'
     for obj in goby_parts:
         index=indices[obj.name]
@@ -504,6 +536,15 @@ if C.KIND=='arowana':
     lionfish_rig=({'parts':1,'regions':lionfish_model.REGIONS,'triangles':sum(len(f)-2 for f in meshes[0].faces),
                   'palette_seed':0,'palettes':[lionfish_model.palette_for(0,k) for k in range(COUNT)],
                   'shared_textures':['lionfish_body.tga','lionfish_fins.tga'],'fin_opacity':.55} if LION_RIG else None),
+    seahorses=(dict(visibility=seahorse.VISIBILITY,block_base=seahorse.BLOCK_BASE,block_stride=seahorse.BLOCK_STRIDE,
+                    block_cells=40,forth_cells=[seahorse.SH_INIT,seahorse.SH_CLOCK],clips=seahorse.CLIP_IDS,
+                    texture=seahorse.TEXTURE,
+                    actors=[dict(seahorse=s,sex=sex,body=indices[f'seahorse-{s}-body'],fins=indices[f'seahorse-{s}-fins'],
+                                 block=seahorse.BLOCK_BASE+seahorse.BLOCK_STRIDE*s,position=list(pos),yaw=yaw,clip=clip,clip_start=start)
+                            for s,(sex,pos,yaw,clip,start) in enumerate(seahorse.PLACEMENTS)],
+                    posts=[dict(name=name,actor=indices[name],base=list(base),mesh=name.replace('-','_')+'.iff') for name,base,_segs in seahorse.POSTS],
+                    grip_segments=[dict(mode=m,start=list(a),end=list(b),radius=[r0,r1]) for m,a,b,r0,r1 in seahorse.post_segments()],
+                    forth_include='seahorse_posts.fth') if C.KIND=='plants' else None),
     animal=('sea_urchin' if C.KIND=='plants' else C.KIND),spawn=C.SPAWN,bottom=C.BOTTOM,top=C.TOP,limits=[LIMIT_X,LIMIT_Y],rows=ROWS,
     betta_fins=({'groups':8,'actor_lookup':[650,657],'motion_mailboxes':[660,666],
                  'weights':'solid UV.x across fin; UV.y root-to-tip','physics_bodies_added':0,
