@@ -739,16 +739,23 @@ Ranks are suggestions; a Fable session ranks the TODO entry.
     |---|---|---|
     | 6 pairs (default) | J‑596b791f43c6 | Saltwater. Twelve seahorses, one pair on each of six posts (four new grey posts, the red whip, the grey T‑post). Urchin on the sand. 14.2 FPS. |
     | None | J‑b5ec31187d7e | Saltwater. No seahorses and no posts; urchin only. 21.0 FPS. |
-    | Freshwater | J‑5c14c0313165 | Queued behind other owners' profile jobs when this was recorded. |
+    | Freshwater | J‑5c14c0313165 | Freshwater plants, rocks and the freshwater resident. No seahorses, posts or urchin. HUD reads `Freshwater`. 20.3 FPS. |
+
+    ```
+    $ task chromecast:check DEVICE=chromecast-test-01 APP=aquarium VALIDATOR=menu-back APK=…/variants-b788d43f/freshwater.apk
+    J-5c14c0313165: completed
+    freshwater 8 scenes PASS betta [2360] bad-log-lines 0 installed ['bd3383807b9d']
+    ```
 
     <img src="../diagnostics/seahorse-phase3-cast1/six-pairs-b788d43f/menu-check/pair6/planted-tank-screenshot.png" width="700">
 
     <img src="../diagnostics/seahorse-phase3-cast1/six-pairs-b788d43f/menu-check/none/planted-tank-screenshot.png" width="700">
 
+    <img src="../diagnostics/seahorse-phase3-cast1/six-pairs-b788d43f/menu-check/freshwater/planted-tank-screenshot.png" width="700">
+
     The pair1 and pair2 jobs (J‑142b7d475821, J‑7d3135b3dc28) were cancelled to free the congested device. Those counts were shown on `bada66c5` above.
 
-    **PARTIAL, not a pass** (2026‑10‑17): on the six-pair build, selector, Back, Home and resume pass with 6 pairs and with None. Each shows the expected seahorses and posts, and logcat is clean. Still open:
-    - freshwater (J‑5c14c0313165, queued);
+    **PARTIAL, not a pass** (2026‑10‑17): on the six-pair build, selector, Back, Home and resume pass with 6 pairs, None and freshwater. Each shows the expected seahorses and posts, and logcat is clean. Still open:
     - `aquarium-seahorses` on the base APK, which steps through every count 0..6. It is **pending deploy**: the `range(int(top) + 1)` validator is not yet in `/opt`.
 11. The eight-tank selector release is reinstalled on each Chromecast, and its installed hash matches the build.
 
@@ -779,6 +786,18 @@ Ranks are suggestions; a Fable session ranks the TODO entry.
     ```
 
     **Chromecast 1 PASS** (2026‑10‑17): `3d796c77…` is installed and read back. The re-read job ended `recovery-required`, but not because of the APK. Its launcher-artwork check compared the Aquarium tile on the **Your apps** row, which the bottom of the screen cuts off (bounds 844,986–996,1072, mean error 65, `launcher-result-J-846790bfbf69.json`). The restore job's own launcher check, at 844,906–996,1058, verified. The automatic recovery completed, and the device is `ready`.
+
+    After the six-pair rerun (2026‑10‑17):
+
+    ```
+    $ task chromecast:submit DEVICE=chromecast-test-01 APP=aquarium WORKFLOW=install APK=~/tmp/seahorse-phase1/aquarium-selector-release-e941e460.apk ASYNC=true
+    Accepted J-4edcfe0ad091: queued; install
+    $ # receipt journal and launcher check
+    install:1 before bd3383807b9d9e6b07c33e8275806416c42b841f1ada9c3dc56d8e842b1d7c13 after {'installed_sha256': '3d796c773070795e16fe4505b80f43f711c8bf6555bcbef70101176264738d88'}
+    launcher verified
+    ```
+
+    **Chromecast 1 PASS** (2026‑10‑17): the selector release `e941e460` (`3d796c77…`) replaced the freshwater test variant, and the launcher artwork verified.
 12. Mockups rebuild cleanly: `python3 docs/plans/2026-10-16-saltwater-seahorses/build_mockups.py` reports no errors, and every file is under the 512 KB budget.
 
 ## Six-pair update — 2026‑10‑16
