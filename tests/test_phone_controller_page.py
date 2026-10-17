@@ -84,6 +84,12 @@ def test_page_is_one_self_contained_file():
     assert "navigator.vibrate" in html and "keepawake" in html
     assert "tilt" not in html.lower(), "tilt is Phase E6 (https), not this page"
     assert len(html.encode()) < 64 * 1024
+    # The UI font (docs/plans/2026-10-17-settings-editor-font.md, F4): both weights inline, first in the stack.
+    # scripts/subset-phone-font.py --check (in the container, with fontTools) proves the subset is current.
+    faces = re.findall(r"@font-face\{font-family:'Atkinson Hyperlegible Next';font-weight:(\d+);[^}]*"
+                       r"url\(data:font/woff2;base64,", html)
+    assert faces == ["400", "600"]
+    assert "font:15px/1.35 'Atkinson Hyperlegible Next'," in html
 
 
 def test_condo_buttons_follow_its_layout(browser, condo):

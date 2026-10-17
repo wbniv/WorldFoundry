@@ -39,6 +39,13 @@ RUN apt-get update \
  && apt-get install -y --no-install-recommends gdb valgrind \
  && rm -rf /var/lib/apt/lists/*
 
+# fontTools + Brotli: pyftsubset writes the phone page's WOFF2 subset of the UI font
+# (scripts/subset-phone-font.py, docs/plans/2026-10-17-settings-editor-font.md Phase 4).
+# Pinned so the subset is reproducible. Its own layer, like the ones above.
+RUN apt-get update \
+ && apt-get install -y --no-install-recommends python3-fonttools=4.46.0-1build2 python3-brotli=1.1.0-2build2 \
+ && rm -rf /var/lib/apt/lists/*
+
 # Software GL, so every run renders with the same rasteriser whatever the host GPU is.
 ENV LIBGL_ALWAYS_SOFTWARE=1 \
     HOME=/tmp
