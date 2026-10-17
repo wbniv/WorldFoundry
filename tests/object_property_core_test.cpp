@@ -24,7 +24,7 @@ int main(int argc,char** argv){
     auto ids=[&](size_t s){std::vector<uint32_t> out;for(size_t i:form.sections[s])out.push_back(a->fields[i].id);return out;};
     assert((ids(0)==std::vector<uint32_t>{1,2,3,4,5,6,7}));
     assert((ids(1)==std::vector<uint32_t>{8,9,100,101,102})); // Seahorses, Greeting, then the form actions
-    {const auto& pairs=a->fields[form.sections[1][0]];assert(pairs.key=="Seahorses"&&pairs.kind==2&&pairs.choices=="None|1 pair|2 pairs"&&pairs.minimum==0&&pairs.maximum==2);}
+    {const auto& pairs=a->fields[form.sections[1][0]];assert(pairs.key=="Seahorses"&&pairs.kind==2&&pairs.choices=="None|1 pair|2 pairs|3 pairs|4 pairs|5 pairs|6 pairs"&&pairs.minimum==0&&pairs.maximum==6);}
     {const auto& greeting=a->fields[form.sections[1][1]];assert(greeting.key=="Greeting"&&greeting.kind==2&&greeting.show==8&&greeting.choices=="False|True");}
     for(const auto& f:a->fields)if(f.kind==5||f.kind==6||f.kind==7)assert(f.id==0);
     form.input(1);form.input(1);assert(!form.drawer);assert(form.value()=="4294967295");
