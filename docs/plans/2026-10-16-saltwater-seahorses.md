@@ -755,8 +755,36 @@ Ranks are suggestions; a Fable session ranks the TODO entry.
 
     The pair1 and pair2 jobs (J‑142b7d475821, J‑7d3135b3dc28) were cancelled to free the congested device. Those counts were shown on `bada66c5` above.
 
-    **PARTIAL, not a pass** (2026‑10‑17): on the six-pair build, selector, Back, Home and resume pass with 6 pairs, None and freshwater. Each shows the expected seahorses and posts, and logcat is clean. Still open:
-    - `aquarium-seahorses` on the base APK, which steps through every count 0..6. It is **pending deploy**: the `range(int(top) + 1)` validator is not yet in `/opt`.
+    **Seahorses sheet on Chromecast 1** (2026‑10‑17), after Will deployed coordinator `dc13626` (`aquarium-seahorses` reads N from the form and applies every count 0..N):
+
+    ```
+    $ task chromecast:submit DEVICE=chromecast-test-01 APP=aquarium WORKFLOW=check VALIDATOR=aquarium-seahorses APK=~/tmp/seahorse-phase3/aquarium-seahorse6-b788d43f.apk ASYNC=true
+    Accepted J-49ab7c4d2a35: queued; check
+    $ task chromecast:evidence JOB=J-49ab7c4d2a35 OUT=docs/diagnostics/seahorse-phase3-cast1/six-pairs-b788d43f/aquarium-seahorses
+    J-49ab7c4d2a35: completed; verified 78 artifacts
+    $ python3 -c 'import json; [print(k, v) for k, v in json.load(open("…/aquarium-seahorses/seahorse-checks.json"))["assertions"].items()]'
+    seahorses_sheet_fields PASS
+    sheet_headers_have_no_field_ids PASS
+    saltwater_applied PASS
+    seahorses_apply_0 PASS
+    seahorses_apply_1 PASS
+    seahorses_apply_2 PASS
+    seahorses_apply_3 PASS
+    seahorses_apply_4 PASS
+    seahorses_apply_5 PASS
+    seahorses_apply_6 PASS
+    plant_only_apply_keeps_seahorse_fields PASS
+    freshwater_applied_keeps_count PASS
+    saltwater_restored PASS
+    ```
+
+    <img src="../diagnostics/seahorse-phase3-cast1/six-pairs-b788d43f/aquarium-seahorses/seahorses-0-screenshot.png" width="700">
+
+    <img src="../diagnostics/seahorse-phase3-cast1/six-pairs-b788d43f/aquarium-seahorses/seahorses-6-screenshot.png" width="700">
+
+    Hold A opened the form with both sheets. Every count from None through 6 pairs applied and read back. At None the tank has no seahorses and no posts, only the urchin; at 6 pairs, 12 seahorses hold one post each in pairs. The plants are seedlings in the first shots because the saltwater Apply restarts their growth, so the frame rates across the sequence are not comparable. A speed-only Apply kept fields 8–9; freshwater kept the count; saltwater again restored the seahorses. Logcat has no fatal, assertion, crash or Forth-error lines.
+
+    **PASS** (2026‑10‑17): on the six-pair build, selector, Back, Home and resume pass with 6 pairs, None and freshwater ([freshwater evidence](../diagnostics/seahorse-phase3-cast1/six-pairs-b788d43f/menu-check/freshwater/assertions.json)), and the Seahorses sheet applies every count from None through 6 pairs (13/13 assertions, J‑49ab7c4d2a35).
 11. The eight-tank selector release is reinstalled on each Chromecast, and its installed hash matches the build.
 
     ```
@@ -798,6 +826,17 @@ Ranks are suggestions; a Fable session ranks the TODO entry.
     ```
 
     **Chromecast 1 PASS** (2026‑10‑17): the selector release `e941e460` (`3d796c77…`) replaced the freshwater test variant, and the launcher artwork verified.
+
+    After the Seahorses-sheet check (2026‑10‑17):
+
+    ```
+    $ task chromecast:submit DEVICE=chromecast-test-01 APP=aquarium WORKFLOW=install APK=~/tmp/seahorse-phase1/aquarium-selector-release-e941e460.apk ASYNC=true
+    Accepted J-fbe637867b9b: queued; install
+    $ task chromecast:evidence JOB=J-fbe637867b9b OUT=docs/diagnostics/seahorse-phase3-cast1/six-pairs-b788d43f/restore-final
+    install:1 before fd1731080bfad5f8644c201e1d0fbfa695a7983f983435241978ccf2a98a61e6 installed_sha256 3d796c773070795e16fe4505b80f43f711c8bf6555bcbef70101176264738d88
+    ```
+
+    **Chromecast 1 PASS** (2026‑10‑17): the selector release `e941e460` (`3d796c77…`) is back on Cast1 after the six-pair runs.
 12. Mockups rebuild cleanly: `python3 docs/plans/2026-10-16-saltwater-seahorses/build_mockups.py` reports no errors, and every file is under the 512 KB budget.
 
 ## Six-pair update — 2026‑10‑16
