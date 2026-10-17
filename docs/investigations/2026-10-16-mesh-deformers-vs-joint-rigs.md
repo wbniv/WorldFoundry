@@ -135,7 +135,7 @@ and [raw evidence](../diagnostics/seahorse-close-cast1-20261017/README.md).
 The plotted 3–5-pair values interpolate frame time between two and six pairs;
 they remain estimates, separate from the four measured populations.
 
-Cast2 remains unavailable. This establishes a current
+Cast2 was unavailable during that baseline collection. This establishes a
 `DFRM` workload reference; the CPU-rig/GPU-rig comparison, crossover, Metal
 validation and GPU timing still require the separate experiment. The joint-rig
 and Deformer phase 2 recommendations above are unchanged by this baseline.
@@ -154,19 +154,74 @@ and Deformer phase 2 recommendations above are unchanged by this baseline.
 2. The Metal backend ([`backend_metal.mm`](../../wfsource/source/gfx/metal/backend_metal.mm)) needs the same shader change for macOS and iOS.
 3. Visibility culling needs conservative bounds, because the CPU never sees the skinned positions.
 
+## GPU skinning experiment: preliminary device evidence, 17 October
+
+The approved experiment is implemented in its own `gpu-skinning-proposal`
+worktree. It adapts the existing DFRM poses to a resident vertex buffer and
+joint palette, with matching GL/GLES and Metal shaders. It does not introduce
+a general skeletal authoring format or change the default CPU path.
+
+The first matched cast1 release round passed at all four counts:
+
+| Pairs | Idle CPU FPS | Idle GPU FPS | Crawl CPU FPS | Crawl GPU FPS |
+|---:|---:|---:|---:|---:|
+| None | 20.14 | 20.10 | 20.12 | 20.15 |
+| 1 | 18.69 | 19.34 | 18.56 | 19.34 |
+| 2 | 17.30 | 18.72 | 17.27 | 18.74 |
+| 6 | 13.74 | 16.78 | 13.64 | 16.69 |
+
+These are **single measured runs**, not final medians. The second GPU idle
+round measured 16.73 FPS at six pairs. None has essentially no first-round
+change; benefit grows with visible body count. Fresh CPU and GPU APKs share
+the same native code and authored fixture settings. The earlier population
+baseline above is context, not the matched CPU comparison.
+
+Cast2 is now available. Its controlled 1/4/16-body study has three release
+repeats per path. Median FPS is 59.92/59.94/56.79 on the ordinary CPU path and
+59.89/59.91/59.92 on GPU skinning with hardware culling. At sixteen bodies,
+p95 presented interval falls from 33.37 to 16.68 ms; median process PSS rises
+from 67.34 to 73.89 MiB. These body-only scenes exclude fins, plants and
+behaviour AI. The small cases reach the display limit; CPU cost and the
+crossover still require the separate profiles.
+
+The completed cast2 G1 profile verifies zero steady vertex/index upload,
+zero rebuilds and zero CPU fallbacks at all three populations. Sixteen bodies
+upload 30 KiB of palettes per frame and use 3.95 MiB of resident GPU skin
+buffers; median render-section CPU time is 1.24 ms across eleven contained
+five-second windows. These are instrumented measurements, separate from
+the release FPS above. The matched CPU profile is still pending.
+
+GL image comparisons pass on the actual six-pair and sixteen-body scenes.
+Metal's real offscreen draw fixture also passes, including four influences,
+normals, fog, culling, resource recreation and upload accounting; it is not an
+Apple aquarium performance result. Both casts passed release GPU Home/resume
+with surface destruction/recreation and a reused EGL context. Separate
+diagnostic builds verified fresh held/released movement in all four
+directions on both casts, before a later unrelated native-IME/keypad assertion
+failed. The complete UI validators did not pass.
+
+Startup reliability remains open: two cast1 GPU sessions failed during case
+startup, the latest immediately after the coordinator's launch-time
+Back input. No native crash record was captured; the cause is not established.
+Those attempts are excluded from timing and retained as failure evidence.
+Three-round release summaries, CPU profiles, measured uploads/resident memory
+and the full controlled population study are still pending. No GPU timer
+result or adoption decision is claimed. See the
+[experiment plan and evidence](../plans/2026-10-16-gpu-skinning-chromecast-experiment.md#first-crawl-round-and-lifecycle-checks).
+
 ## Back-face culling, and why moving vertices collides with it
 
 **17 October validation status.** The Blender normal migration passes local
 builds, exporter/converter tests, DFRM engine parity and the desktop GL guards.
 Its Android release APK contains the migrated assets. Cast1 aquarium captures
 and the population baseline now provide rendering evidence for that workload.
-Cast2 is unavailable on the shared network; Metal rendering and the legacy
-dome script failure remain open. The
+Cast2 and Metal experiment rendering evidence are now available as described
+above; the legacy dome script failure remains open. The
 [GPU skinning experiment](../plans/2026-10-16-gpu-skinning-chromecast-experiment.md)
-has not run, so this supplies no measured GPU-skinning cost or speedup.
+has preliminary measurements; the complete performance gate remains pending.
 
 **How culling works today.**
-- **Where:** World Foundry never enables `GL_CULL_FACE`. The engine now derives face normals from Blender's `(v1−v0)×(v2−v0)` order; checked-in meshes, the built-in cube and the matte have been migrated with their intended visible sides reviewed ([normal-convention migration](../plans/2026-10-16-blender-normal-convention-engine-wide.md)). The migration does not make hardware culling safe for all existing draws: two-sided and inside-viewed surfaces still need their material and draw behavior checked. Since 2026‑09‑21 every triangle passes a **software** test, written once ([`backface_cull.hp`](../../wfsource/source/gfx/backface_cull.hp)):
+- **Where:** The default CPU path does not enable `GL_CULL_FACE`; the GPU experiment enables it only for eligible skinned draws. The engine now derives face normals from Blender's `(v1−v0)×(v2−v0)` order; checked-in meshes, the built-in cube and the matte have been migrated with their intended visible sides reviewed ([normal-convention migration](../plans/2026-10-16-blender-normal-convention-engine-wide.md)). The migration does not make hardware culling safe for all existing draws: two-sided and inside-viewed surfaces still need their material and draw behavior checked. Since 2026‑09‑21 every ordinary CPU triangle passes a **software** test, written once ([`backface_cull.hp`](../../wfsource/source/gfx/backface_cull.hp)):
   - rotate the face's stored normal into eye space;
   - move the triangle's centroid into eye space;
   - the face is back-facing when their dot product is > 0.
@@ -213,12 +268,7 @@ The generic-deformation proposal says not to build "a full skeletal/morph system
 ## Recommendation
 
 1. **Phase 1: no change of direction.** Ask the in-flight agent to keep the evaluator's per-joint frames as an explicit array between "pose" and "place vertices". That costs nothing now and lets a skinning deformer reuse the pose stage later.
-2. **Before Deformer phase 2, run a time-boxed joint-rig spike** on a throwaway worktree, T4. It would:
-    - add a CPU skinning deformer kind using Jolt's skeleton on the clownfish body, from a Blender armature with a procedural sine generator;
-    - add a GL-only GPU skinning path for the same mesh;
-    - measure both on Chromecast 1 against today's `fish-deform`.
-
-   D6's representation, `DFRM` waves or joint chains, follows from that table.
+2. **Complete the approved GPU experiment before choosing the Deformer phase 2 renderer.** The current DFRM adapter tests resident buffers, palette upload, posed normals and culling across GL/GLES and Metal on both casts. It does not measure sampling a general Jolt skeleton or authoring a weighted Blender armature. If D6 needs those features, prepare a separate bounded skeletal spike against `fish-deform`; the current measurements alone do not choose between DFRM waves and joint chains.
 3. **Make joint rigs a first-class feature when the first consumer needs a tree, soft skin, sockets or glTF import.** The sea anemone's revival is the likeliest trigger. At that point the E0 slot, the clip format and the curve's contact maths all carry over.
 
 ## Sources in this repository

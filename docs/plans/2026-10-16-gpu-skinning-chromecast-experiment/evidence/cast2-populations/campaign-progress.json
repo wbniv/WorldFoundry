@@ -2,10 +2,21 @@
   "device": "chromecast-test-02",
   "completed": [
     "population/cpu/round-1",
-    "population/cpu-no-cull/round-1"
+    "population/cpu-no-cull/round-1",
+    "population/gpu-no-cull/round-1",
+    "population/gpu/round-1",
+    "population/cpu-no-cull/round-2",
+    "population/gpu-no-cull/round-2",
+    "population/gpu/round-2",
+    "population/cpu/round-2",
+    "population/gpu-no-cull/round-3",
+    "population/gpu/round-3",
+    "population/cpu/round-3",
+    "population/cpu-no-cull/round-3",
+    "population/gpu/profile"
   ],
   "total": 16,
   "state": "running",
-  "current": "population/gpu-no-cull/round-1",
-  "job": "J-25e202859de6"
+  "current": "population/gpu-no-cull/profile",
+  "job": "J-b93333c1d450"
 }

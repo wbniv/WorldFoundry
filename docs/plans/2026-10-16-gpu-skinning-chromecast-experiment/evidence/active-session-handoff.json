@@ -1,0 +1,74 @@
+{
+  "updated_utc": "2026-10-17T10:56:00.356810+00:00",
+  "branch": "gpu-skinning-proposal",
+  "pushed_checkpoint": "76a02b16",
+  "native_source": "e64e5459660889ec8cda8dcadd059d10688c039c",
+  "native_sha256": "9ddd539f29600c729c0e26430ca162d61311b242a4c7d6defe0a97e4ff484b80",
+  "aquarium_runner_session": 77912,
+  "cast2_population_runner_session": 64795,
+  "cast1_population_waiter_session": 34463,
+  "report_waiter_session": 80750,
+  "aquarium_campaign": "/tmp/wf-gpu-skinning-campaign-v3/campaign.json",
+  "aquarium_fixtures": "/tmp/wf-gpu-skinning-fixtures-v3",
+  "population_campaign": "/tmp/wf-gpu-population-campaign-v3/campaign.json",
+  "population_fixtures": "/tmp/wf-gpu-population-apks-v3",
+  "logs": [
+    "build-gpu/cast1-campaign.log",
+    "build-gpu/cast2-population-campaign.log",
+    "build-gpu/cast1-population-after-aquarium.log",
+    "build-gpu/final-report.log"
+  ],
+  "safety": [
+    "No raw Chromecast ADB; coordinator owns every device session.",
+    "Do not duplicate saved job IDs; runners stop on failed sessions.",
+    "One reviewed cast1 startup retry J-084b4f52095d passed; failures retained, cause unresolved.",
+    "Both GPU release surface/resume checks passed with context reuse.",
+    "Both diagnostic directional checks passed before the later unrelated IME/keypad assertion failed. Full UI validators did not pass.",
+    "Raw cumulative engine/system logs and connection transcripts remain private and untracked.",
+    "No production merge or default change is authorized."
+  ],
+  "next": [
+    "Inspect each completed profile: at least eight contained CPU windows, GPU vertex/index bytes/rebuilds/fallbacks zero, CPU rig uploads positive.",
+    "Cast1 population waiter starts only after the aquarium campaign completes.",
+    "Final report waiter validates all three matrices before writing comparison and investigation. Rerun latest scripts/report-gpu-skinning.py afterward for the latest CPU-section tables; the active waiter loaded an earlier version.",
+    "Review generated results, update verification-status.json and README, curate evidence, then commit and push this experiment branch.",
+    "Preserve active frozen APKs. Clean own worktree/builds only after a reviewed merge."
+  ],
+  "aquarium": {
+    "device": "chromecast-test-01",
+    "completed": [
+      "close-idle/cpu/round-1",
+      "close-idle/gpu/round-1",
+      "close-crawl/cpu/round-1",
+      "close-crawl/gpu/round-1",
+      "close-idle/gpu/round-2",
+      "close-idle/cpu/round-2",
+      "close-crawl/gpu/round-2"
+    ],
+    "total": 16,
+    "state": "running",
+    "current": "close-crawl/cpu/round-2",
+    "job": "J-27fbaa42fc50"
+  },
+  "cast2_populations": {
+    "device": "chromecast-test-02",
+    "completed": [
+      "population/cpu/round-1",
+      "population/cpu-no-cull/round-1",
+      "population/gpu-no-cull/round-1",
+      "population/gpu/round-1",
+      "population/cpu-no-cull/round-2",
+      "population/gpu-no-cull/round-2",
+      "population/gpu/round-2",
+      "population/cpu/round-2",
+      "population/gpu-no-cull/round-3",
+      "population/gpu/round-3",
+      "population/cpu/round-3",
+      "population/cpu-no-cull/round-3"
+    ],
+    "total": 16,
+    "state": "running",
+    "current": "population/gpu/profile",
+    "job": "J-8e014e0085ce"
+  }
+}

@@ -21,11 +21,14 @@ def main():
     parser.add_argument('--base-apk', type=Path, required=True)
     parser.add_argument('--out', type=Path, required=True)
     parser.add_argument('--populations', type=Path, help='Controlled population manifest instead of aquarium views')
+    parser.add_argument('--selector', action='store_true', help='Keep the base selector CD for input and lifecycle checks')
     parser.add_argument('--views', nargs='+', choices=['wide-idle', 'close-idle', 'close-crawl'],
                         default=['wide-idle', 'close-idle', 'close-crawl'])
     parser.add_argument('--modes', nargs='+', choices=['cpu', 'cpu-no-cull', 'gpu-no-cull', 'gpu'], default=['cpu', 'gpu'])
     parser.add_argument('--counts', nargs='+', choices=list(fixture.COUNTS), default=list(fixture.COUNTS))
     args = parser.parse_args()
+    if args.selector and args.populations:
+        parser.error('--selector and --populations are mutually exclusive')
     args.out.mkdir(parents=True, exist_ok=True)
     tools = Path.home() / 'android-sdk-local/build-tools/34.0.0'
     manifest = subprocess.check_output([str(tools / 'aapt'), 'dump', 'xmltree',
@@ -39,6 +42,7 @@ def main():
     with zipfile.ZipFile(args.base_apk) as base:
         native = {n: sha(base.read(n)) for n in base.namelist() if n.startswith('lib/') and n.endswith('.so')}
         original_args = base.read('assets/wf_args.txt') if 'assets/wf_args.txt' in base.namelist() else b''
+        original_cd = base.read('assets/cd.iff')
         if not native or not any(b'gpu-no-cull' in base.read(n) for n in native):
             raise ValueError('Base APK lacks the experimental native modes')
     if b'--frame-profile' in original_args or b'--gpu-skinning' in original_args:
@@ -48,7 +52,9 @@ def main():
                    base_apk_sha256=sha(args.base_apk.read_bytes()), native=native,
                    source_level_sha256=sha(source_level), variants={})
     cases = []
-    if args.populations:
+    if args.selector:
+        cases.append(('selector', None, dict(scope='Unmodified base selector assets; input and lifecycle checks only'), [], {}))
+    elif args.populations:
         populations = json.loads(args.populations.read_text())
         receipt['population_manifest_sha256'] = sha(args.populations.read_bytes())
         for count, item in populations['populations'].items():
@@ -68,9 +74,11 @@ def main():
     for stem, level, settings, slots, preservation in cases:
         standalone = args.out / (stem + '-standalone.iff')
         cd = args.out / (stem + '-cd.iff')
-        standalone.write_bytes(level)
-        subprocess.run([str(ROOT / 'wftools/cdpack-rs/target/release/cdpack'),
-            str(ROOT / 'wfsource/source/game/shell.fth'), str(standalone.resolve()), '-o', str(cd.resolve())], check=True)
+        if level is not None:
+            standalone.write_bytes(level)
+            subprocess.run([str(ROOT / 'wftools/cdpack-rs/target/release/cdpack'),
+                str(ROOT / 'wfsource/source/game/shell.fth'), str(standalone.resolve()), '-o', str(cd.resolve())], check=True)
+        cd_bytes = cd.read_bytes() if level is not None else original_cd
         for mode in args.modes:
             for profiling in (False, True):
                 name = f'{stem}-{mode}' + ('-profile' if profiling else '')
@@ -81,7 +89,7 @@ def main():
                         if entry.filename.startswith('META-INF/') or entry.filename in ('assets/cd.iff', 'assets/wf_args.txt'):
                             continue
                         out.writestr(copy.copy(entry), base.read(entry.filename))
-                    out.writestr('assets/cd.iff', cd.read_bytes(), compress_type=zipfile.ZIP_DEFLATED)
+                    out.writestr('assets/cd.iff', cd_bytes, compress_type=zipfile.ZIP_DEFLATED)
                     out.writestr('assets/wf_args.txt', runtime_args)
                 subprocess.run([str(tools / 'zipalign'), '-f', '-p', '4', str(unsigned), str(aligned)], check=True)
                 subprocess.run([str(tools / 'apksigner'), 'sign', '--ks', str(Path.home() / '.android/debug.keystore'),
@@ -96,11 +104,14 @@ def main():
                             raise ValueError('Unexpected APK mutation: ' + n)
                     if out.read('assets/wf_args.txt') != runtime_args:
                         raise ValueError('Runtime mode mismatch')
-                receipt['variants'][name] = dict(apk_sha256=sha(final.read_bytes()), cd_sha256=sha(cd.read_bytes()),
-                    level_sha256=sha(level), mode=mode, settings=settings, scripts=slots,
+                    if out.read('assets/cd.iff') != cd_bytes:
+                        raise ValueError('Packaged CD mismatch')
+                receipt['variants'][name] = dict(apk_sha256=sha(final.read_bytes()), cd_sha256=sha(cd_bytes),
+                    level_sha256=sha(level) if level is not None else None, mode=mode, settings=settings, scripts=slots,
                     preservation=preservation, frame_profile=profiling)
                 print(name, receipt['variants'][name]['apk_sha256'], flush=True)
-        cd.unlink()
+        if level is not None:
+            cd.unlink()
     (args.out / 'variants.json').write_text(json.dumps(receipt, indent=2) + '\n')
 
 

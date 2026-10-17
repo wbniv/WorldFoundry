@@ -2,10 +2,15 @@
   "device": "chromecast-test-01",
   "completed": [
     "close-idle/cpu/round-1",
-    "close-idle/gpu/round-1"
+    "close-idle/gpu/round-1",
+    "close-crawl/cpu/round-1",
+    "close-crawl/gpu/round-1",
+    "close-idle/gpu/round-2",
+    "close-idle/cpu/round-2",
+    "close-crawl/gpu/round-2"
   ],
   "total": 16,
   "state": "running",
-  "current": "close-crawl/cpu/round-1",
-  "job": "J-310f760c47c1"
+  "current": "close-crawl/cpu/round-2",
+  "job": "J-27fbaa42fc50"
 }

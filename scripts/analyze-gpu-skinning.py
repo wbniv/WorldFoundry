@@ -71,6 +71,9 @@ def analyze(root, population_study=False, device='chromecast-test-01'):
                 instrumented = presentation(folder, mode, pairs, population_study)
                 cpu = baseline.cpu_windows(folder, instrumented)
                 sections, counters = cpu['frame_weighted_cpu_ms'], cpu['frame_weighted_counters']
+                cpu['median_window_cpu_ms'] = {
+                    name: statistics.median(w['sections'][name]['mean'] for w in cpu['windows'])
+                    for name in sections}
                 if not {'skin-pose', 'skin-vertices', 'skin-normals', 'skin-cull', 'skin-submit'} <= sections.keys():
                     raise ValueError(f'Missing rig CPU sections: {folder}')
                 if mode.startswith('gpu'):
@@ -86,6 +89,7 @@ def analyze(root, population_study=False, device='chromecast-test-01'):
                     frame_ms_range=[min(r['mean_frame_ms'] for r in runs), max(r['mean_frame_ms'] for r in runs)])
             c, g = row['cpu'], row['gpu']
             row['render_cpu_change_percent'] = 100 * (g['cpu_profile']['frame_weighted_cpu_ms']['render'] / c['cpu_profile']['frame_weighted_cpu_ms']['render'] - 1)
+            row['median_render_cpu_change_percent'] = 100 * (g['cpu_profile']['median_window_cpu_ms']['render'] / c['cpu_profile']['median_window_cpu_ms']['render'] - 1)
             row['presented_frame_change_percent'] = 100 * (g['median']['mean_frame_ms'] / c['median']['mean_frame_ms'] - 1)
             if population_study:
                 row['comparisons'] = {}
@@ -95,6 +99,7 @@ def analyze(root, population_study=False, device='chromecast-test-01'):
                     a, b = row[base], row[candidate]
                     row['comparisons'][name] = dict(baseline=base, candidate=candidate,
                         render_cpu_change_percent=100 * (b['cpu_profile']['frame_weighted_cpu_ms']['render'] / a['cpu_profile']['frame_weighted_cpu_ms']['render'] - 1),
+                        median_render_cpu_change_percent=100 * (b['cpu_profile']['median_window_cpu_ms']['render'] / a['cpu_profile']['median_window_cpu_ms']['render'] - 1),
                         presented_frame_change_percent=100 * (b['median']['mean_frame_ms'] / a['median']['mean_frame_ms'] - 1))
             rows.append(row)
         result['views'][view] = rows
@@ -106,6 +111,7 @@ def analyze(root, population_study=False, device='chromecast-test-01'):
         'Skin draws/faces are GPU-path counters; overall draws/faces cover CPU and GPU.',
         'All aquarium counts allocate twelve residents; None also hides six posts. Memory is whole-process PSS plus separately reported skin resource gauges.',
         'Crawl holds right in authored Forth; this does not verify delivery/release of remote input.',
+        'CPU acceptance uses the median of fully contained five-second window means; frame-weighted means are reported alongside it. This is one separate instrumented session per case, not three independent CPU-profile repeats.',
     ]
     if population_study:
         result['notes'] = result['notes'][:5] + [
@@ -113,6 +119,7 @@ def analyze(root, population_study=False, device='chromecast-test-01'):
             'This measures the existing DFRM adapter, not general four-weight authoring performance.',
             'C/C0/G0/G1 separate skinning from culling; only G1 versus C is the adoption comparison.',
             'PSS is whole-process memory. Skin memory gauges are reported separately in the profile counters.',
+            result['notes'][-1],
         ]
     return result
 

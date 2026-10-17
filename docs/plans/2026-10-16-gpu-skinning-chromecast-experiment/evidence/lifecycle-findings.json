@@ -1,0 +1,113 @@
+{
+  "surface_resume": {
+    "cast1-gpu-resume": {
+      "job": "J-39b77ea8097b",
+      "source_sha256": "9f1032646621e26ec5219b181198cbc1e0d535f47d28b52dd4dcd9be78cafbc6",
+      "events": [
+        "10-17 16:55:02.470  6024  6045 I wf_game : android_main: waiting for APP_CMD_INIT_WINDOW",
+        "10-17 16:55:02.476  6024  6045 I wf_game : APP_CMD_RESUME",
+        "10-17 16:55:02.510  6024  6045 I wf_game : APP_CMD_INIT_WINDOW",
+        "10-17 16:55:02.560  6024  6045 I wf_game : EGL surface ready: 1920x1080 (context reused)",
+        "10-17 16:55:45.844  6024  6045 I wf_game : APP_CMD_PAUSE",
+        "10-17 16:55:46.414  6024  6045 I wf_game : APP_CMD_TERM_WINDOW",
+        "10-17 16:55:47.199  6024  6045 I wf_game : APP_CMD_RESUME",
+        "10-17 16:55:47.218  6024  6045 I wf_game : APP_CMD_INIT_WINDOW",
+        "10-17 16:55:47.219  6024  6045 I wf_game : EGL surface ready: 1920x1080 (context reused)"
+      ],
+      "same_process_validator": "passed",
+      "capture": "cast1-gpu-resume/resumed-screenshot.png",
+      "visual_review": "all twelve seahorses visible after resume"
+    },
+    "cast2-gpu-resume": {
+      "job": "J-81b37ed86d58",
+      "source_sha256": "81d07c7185d95dd5a10ef66f291b08544e1918f572f3d47c48ee704337099a54",
+      "events": [
+        "10-17 16:50:29.633 18110 18129 I wf_game : android_main: waiting for APP_CMD_INIT_WINDOW",
+        "10-17 16:50:29.637 18110 18129 I wf_game : APP_CMD_RESUME",
+        "10-17 16:50:29.682 18110 18129 I wf_game : APP_CMD_INIT_WINDOW",
+        "10-17 16:50:29.718 18110 18129 I wf_game : EGL surface ready: 1920x1080 (context reused)",
+        "10-17 16:51:12.004 18110 18129 I wf_game : APP_CMD_PAUSE",
+        "10-17 16:51:12.992 18110 18129 I wf_game : APP_CMD_TERM_WINDOW",
+        "10-17 16:51:13.548 18110 18129 I wf_game : APP_CMD_RESUME",
+        "10-17 16:51:13.566 18110 18129 I wf_game : APP_CMD_INIT_WINDOW",
+        "10-17 16:51:13.567 18110 18129 I wf_game : EGL surface ready: 1920x1080 (context reused)"
+      ],
+      "same_process_validator": "passed",
+      "capture": "cast2-gpu-resume/resumed-screenshot.png",
+      "visual_review": "all twelve seahorses visible after resume"
+    }
+  },
+  "input": {
+    "cast1": {
+      "job": "J-801ec1d61d72",
+      "held_released_movement_checks_passed": true,
+      "required_checks": [
+        "game_press_22",
+        "actor_consumer_22",
+        "received_release_22",
+        "released_mask_22",
+        "same_actor_22",
+        "movement_22",
+        "game_press_21",
+        "actor_consumer_21",
+        "received_release_21",
+        "released_mask_21",
+        "same_actor_21",
+        "movement_21",
+        "game_press_19",
+        "actor_consumer_19",
+        "received_release_19",
+        "released_mask_19",
+        "same_actor_19",
+        "movement_19",
+        "game_press_20",
+        "actor_consumer_20",
+        "received_release_20",
+        "released_mask_20",
+        "same_actor_20",
+        "movement_20"
+      ],
+      "full_validator": "failed at keypad_input_acknowledged; current native IME differs from old keypad expectation",
+      "release_app": "GPU Home/resume separately passed",
+      "cleanup_recovery": "J-36a58f7e45a3"
+    },
+    "cast2": {
+      "job": "J-56c41a027869",
+      "held_released_movement_checks_passed": true,
+      "required_checks": [
+        "game_press_22",
+        "actor_consumer_22",
+        "received_release_22",
+        "released_mask_22",
+        "same_actor_22",
+        "movement_22",
+        "game_press_21",
+        "actor_consumer_21",
+        "received_release_21",
+        "released_mask_21",
+        "same_actor_21",
+        "movement_21",
+        "game_press_19",
+        "actor_consumer_19",
+        "received_release_19",
+        "released_mask_19",
+        "same_actor_19",
+        "movement_19",
+        "game_press_20",
+        "actor_consumer_20",
+        "received_release_20",
+        "released_mask_20",
+        "same_actor_20",
+        "movement_20"
+      ],
+      "full_validator": "failed at keypad_input_acknowledged; native IME differs from old keypad expectation",
+      "cleanup_recovery": "J-36ae68ed9e5b"
+    }
+  },
+  "limitations": [
+    "Android Home/resume reused EGL context; full context loss is covered by the local GL fixture, not this device cycle.",
+    "Diagnostic input tests are separate from release timing.",
+    "The full diagnostic validator expects the old keypad; its UI failure does not erase preceding acknowledged input samples.",
+    "Directional checks use the freshwater player; GPU seahorse rendering is verified separately in saltwater surface/resume jobs."
+  ]
+}

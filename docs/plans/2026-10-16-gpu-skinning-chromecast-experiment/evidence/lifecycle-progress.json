@@ -1,0 +1,64 @@
+{
+  "cast2-gpu-resume": {
+    "job": "J-81b37ed86d58",
+    "state": "completed",
+    "verified_session": true
+  },
+  "cast2-gpu-input": {
+    "job": "J-884e689375a2",
+    "state": "recovery-required",
+    "verified_session": false,
+    "assertions": {
+      "android_system_ime_shown": "PASS",
+      "numeric_up_keeps_process": "PASS",
+      "numeric_probe_keeps_form": "PASS",
+      "native_numeric_text_applied_to_draft": "PASS",
+      "back_closes_native_editor_before_form": "PASS",
+      "back_applies_and_closes_form": "PASS",
+      "selector_seed_applied_to_level": "PASS",
+      "hold_A_opens_level_settings": "PASS",
+      "phone_receives_oas_fields": "PASS",
+      "phone_seed_and_water_applied": "PASS",
+      "speed_only_preserves_generation": "PASS",
+      "stale_phone_session_ignored": "PASS",
+      "saltwater_regenerates_and_selects_urchin": "PASS",
+      "invalid_seed_does_not_commit": "PASS",
+      "reconnect_keeps_invalid_draft": "PASS",
+      "cancel_restores_effective_values": "PASS",
+      "uint32_seed_and_goby_restored": "PASS",
+      "panel_dismissal_preserves_world": "PASS"
+    },
+    "input_note": "Legacy position-logging prerequisite failed before directional movement tests; no held/released input result."
+  },
+  "cast1-gpu-resume": {
+    "job": "J-39b77ea8097b",
+    "state": "completed",
+    "verified_session": true
+  },
+  "cast1-gpu-input": {
+    "job": "J-aecfe09e0486",
+    "state": "recovery-required",
+    "verified_session": false,
+    "assertions": {
+      "android_system_ime_shown": "PASS",
+      "numeric_up_keeps_process": "PASS",
+      "numeric_probe_keeps_form": "PASS",
+      "native_numeric_text_applied_to_draft": "PASS",
+      "back_closes_native_editor_before_form": "PASS",
+      "back_applies_and_closes_form": "PASS",
+      "selector_seed_applied_to_level": "PASS",
+      "hold_A_opens_level_settings": "PASS",
+      "phone_receives_oas_fields": "PASS",
+      "phone_seed_and_water_applied": "PASS",
+      "speed_only_preserves_generation": "PASS",
+      "stale_phone_session_ignored": "PASS",
+      "saltwater_regenerates_and_selects_urchin": "PASS",
+      "invalid_seed_does_not_commit": "PASS",
+      "reconnect_keeps_invalid_draft": "PASS",
+      "cancel_restores_effective_values": "PASS",
+      "uint32_seed_and_goby_restored": "PASS",
+      "panel_dismissal_preserves_world": "PASS"
+    },
+    "input_note": "Legacy position-logging prerequisite failed before directional movement tests; no held/released input result."
+  }
+}

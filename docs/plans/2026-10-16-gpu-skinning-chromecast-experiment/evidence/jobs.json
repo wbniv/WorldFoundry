@@ -1,5 +1,10 @@
 {
   "close-idle/cpu/round-1": "J-b772c10c99a3",
   "close-idle/gpu/round-1": "J-2676c1a59ed6",
-  "close-crawl/cpu/round-1": "J-310f760c47c1"
+  "close-crawl/cpu/round-1": "J-310f760c47c1",
+  "close-crawl/gpu/round-1": "J-8151451b4e91",
+  "close-idle/gpu/round-2": "J-084b4f52095d",
+  "close-idle/cpu/round-2": "J-80544ac040b2",
+  "close-crawl/gpu/round-2": "J-89795ac3f6d5",
+  "close-crawl/cpu/round-2": "J-27fbaa42fc50"
 }

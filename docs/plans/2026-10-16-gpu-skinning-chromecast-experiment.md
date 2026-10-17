@@ -353,6 +353,12 @@ API references for the proposed paths:
 
 ## Acceptance gate
 
+The CPU statistic is the median of the fully contained five-second window
+means in the separate instrumented session for each case. Report its
+frame-weighted mean alongside it. These windows are not independent profile
+repeats; the three independent release repeats establish presentation spread.
+This definition is fixed before collecting the device CPU profiles.
+
 Adopt GPU skinning for an eligible class of meshes only if `G1` has visual and lifecycle parity on both rendering backends, a reliable CPU fallback, the winding cleanup and validation above are complete for that asset class, and it produces a repeatable improvement on the workload that will use it. The proposed performance gate is at least **10% lower median main-thread render-section CPU time** for the skinned workload on both Chromecasts, with no reproducible p95 presented-interval or missed-refresh regression beyond the run-to-run spread, and no GPU-time or memory increase that erases the frame-time gain or exceeds the available memory budget. Treat these thresholds as a decision rule for the experiment, not an expected result. If a timer is unavailable, do not claim a GPU-time result; use the presentation and CPU evidence, and state that GPU saturation remains unmeasured.
 
 If `G0` helps but `G1` does not, investigate culling/index work once before widening scope. If only 16 actors benefit, keep CPU skinning for sparse scenes and record the measured crossover. If a correct culling path, Metal parity, or acceptable GPU cost cannot be achieved within this bounded experiment, stop the spike and retain the CPU path. No rig format, renderer default, or Deformer phase 2 choice follows automatically from a single-device speedup.
@@ -519,3 +525,56 @@ checks hashes/coverage/GPU proof/cleanup, and stops on a failed session. It
 does not reboot or retry failed sessions. The analyzer also supports
 `--population-study --device=...` for the C/C0/G0/G1 comparison. Final
 investigation results and any adoption proposal await the complete evidence.
+
+### First crawl round and lifecycle checks
+
+The first matched cast1 crawl round also passed (`J‑310f760c47c1` CPU,
+`J‑8151451b4e91` GPU):
+
+| Pairs | Close-crawl CPU FPS | Close-crawl GPU FPS |
+|---:|---:|---:|
+| None | 20.12 | 20.15 |
+| 1 | 18.56 | 19.34 |
+| 2 | 17.27 | 18.74 |
+| 6 | 13.64 | 16.69 |
+
+These remain single release runs. Cast2's first controlled population round
+measured the following, also before repeats and CPU profiling were complete:
+
+| Bodies | C FPS | C0 FPS | G0 FPS | G1 FPS |
+|---:|---:|---:|---:|---:|
+| 1 | 59.94 | 59.94 | 59.91 | 59.94 |
+| 4 | 59.94 | 59.92 | 59.92 | 59.91 |
+| 16 | 56.81 | 54.01 | 59.92 | 59.91 |
+
+The small cases reach the display limit; this does not establish equal CPU
+cost. Instrumented CPU results and upload counters are still required.
+
+Release GPU Home/resume checks `J‑39b77ea8097b` (cast1) and
+`J‑81b37ed86d58` (cast2) passed. Both logs show `TERM_WINDOW`, then
+`INIT_WINDOW`, and a reused EGL context in the same process. Captures after
+resume were visually checked with all twelve bodies present. This verifies
+surface recreation, not full EGL context loss on a device. The latter remains
+covered only by the local GL fixture.
+
+The existing `plant-settings` validator could not verify movement on these
+release APKs: it depends on position log lines absent from the current level
+scope. Its historical cumulative lines must not be treated as current input
+evidence. Separate diagnostic APK checks `J‑801ec1d61d72` (cast1) and
+`J‑56c41a027869` (cast2) verified all four hardware presses, actor consumers,
+movement, release acknowledgements and cleared held masks using fresh
+snapshots. Both full validators subsequently failed at
+`keypad_input_acknowledged`, because the current native IME differs from the
+validator's older keypad expectation. Record the verified input assertions
+separately from that failed UI assertion; neither full validator passed.
+These directional checks use the freshwater player, while GPU seahorse
+rendering is verified by the separate saltwater surface/resume checks.
+
+Cast1's initial second-round GPU job `J‑c4cccc5e4274` exited before warmup,
+immediately after the coordinator's launch-time Back input. ActivityManager
+still reported the native activity resumed, while `pidof` was empty. Read-only
+inspect `J‑710d8d86588a` captured an empty crash buffer; this does not prove
+that no crash occurred. Cleanup and ordinary recovery completed. The failure
+is retained and excluded from timing; one explicit retry `J‑084b4f52095d`
+was submitted after review. Startup reliability is unresolved and must be
+accounted for in the final recommendation.

@@ -23,9 +23,10 @@
   "metal_build": "6ad3302ac27ce204978ad1ed",
   "matched_cast1": "in-progress-first-close-idle-round-passed",
   "cast2": "gpu-scene-check-passed-population-campaign-in-progress",
-  "lifecycle_device": "pending",
-  "held_released_input": "pending",
+  "lifecycle_device": "both-casts-home-surface-recreation-passed-context-reused",
+  "held_released_input": "both-casts-diagnostic-four-directions-passed-full-ui-validators-failed",
   "population_device": "cast2-in-progress-cast1-pending",
   "gpu_time_ms": null,
-  "adoption_decision": "not-made"
+  "adoption_decision": "not-made",
+  "startup_reliability": "unresolved-cast1-exit-after-launch-back-before-warmup"
 }
