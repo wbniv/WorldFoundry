@@ -7,9 +7,19 @@ stale and the gate goes red on a Mac build that costs real Mac-minutes, although
 pixels, found only in CI). This test renders the same frames on Linux with the same flags as CI and compares
 them with the committed references, so a stale reference fails here for free.
 
-Needs a built engine (engine/wf_game, or WF_GAME=) and the X display; it skips without them. If it fails after an
-engine change: rebuild first (`task build`); if it still fails, regenerate the reference from the Linux capture
-with the command in `_capture` below, look at the PNG, commit it, and let the macOS build confirm it.
+It is also the guard for a change that breaks every platform at once. 25a57d73 (Blender face normals) left the
+snowgoons floor/hedge model `keep` while the engine's normal flipped, so GL and Metal both culled the floor
+(39,809 pixels here); the macOS gate was the first thing to notice, because this test skipped everywhere it ran.
+Do not regenerate a reference until the new frame has been looked at and explained.
+
+Needs a built engine (engine/wf_game, or WF_GAME=) and the X display; it skips without them. In the Linux test
+container (the supported place to run it):
+
+  scripts/in-linux-container.sh bash -c 'Xvfb :99 & export DISPLAY=:99; sleep 1; \
+      python3 -m pytest tests/test_renderer_references_fresh.py -v'
+
+If it fails after an engine change: rebuild first; if it still fails, look at the capture before regenerating the
+reference from the Linux capture with the command in `_capture` below, commit it, and let the macOS build confirm it.
 """
 import os
 import resource
@@ -33,10 +43,24 @@ CASES = [
 ]
 
 
+# Isolated pixels allowed beyond tolerance 3. The references come from host GL; the container renders with
+# Mesa llvmpipe, which differs on a few edge pixels of a correct frame: 3 (snowgoons, measured at the last
+# green macOS commit c6fc62c8) and 2 (aquarium). 8 still fails the smallest real staleness seen (35 pixels,
+# 2026-09-30). The macOS gate itself keeps the comparator's default of 0.
+ALLOW_PIXELS = 8
+
+
 def _display_ok():
-    if not shutil.which('xdpyinfo'):
+    if shutil.which('xdpyinfo'):
+        return subprocess.run(['xdpyinfo'], capture_output=True).returncode == 0
+    # The Linux test container (docker/Dockerfile.linux-test) has Xvfb and python3-xlib but no
+    # xdpyinfo; requiring xdpyinfo made this test skip there, where it is meant to run.
+    try:
+        from Xlib import display as xdisplay
+        xdisplay.Display().close()
+        return True
+    except Exception:
         return False
-    return subprocess.run(['xdpyinfo'], capture_output=True).returncode == 0
 
 
 def _no_core_dumps():
@@ -44,10 +68,10 @@ def _no_core_dumps():
 
 
 def _capture(level, out):
-    """The same command as the macOS workflow: frame 20 of a 30-step, 1-cycle, -rate20 run."""
+    """The same command as the macOS workflow: frame 20 of a 30-step, 1-cycle, -rate20 run, --no-fps."""
     env = dict(os.environ, LD_LIBRARY_PATH=f"{REPO / 'engine' / 'libs'}:{os.environ.get('LD_LIBRARY_PATH', '')}")
     return subprocess.run(
-        [str(ENGINE), '--frame-step-smoke=30', '--cycles=1', f'-L{REPO / level}', '-rate20',
+        [str(ENGINE), '--frame-step-smoke=30', '--cycles=1', f'-L{REPO / level}', '-rate20', '--no-fps',
          f'--capture-frame=20={out}'],
         cwd=GAME_DIR, env=env, capture_output=True, text=True, timeout=120, preexec_fn=_no_core_dumps)
 
@@ -66,7 +90,7 @@ def test_reference_matches_a_fresh_linux_capture(name, level, reference, tmp_pat
 
     cmp = subprocess.run(
         [sys.executable, str(REPO / 'tests' / 'compare_renderer_frames.py'), str(REPO / reference), str(out),
-         '--tolerance', '3'], capture_output=True, text=True)
+         '--tolerance', '3', '--allow-pixels', str(ALLOW_PIXELS)], capture_output=True, text=True)
     assert cmp.returncode == 0, (
         f'{name}: the committed Linux reference is stale (or the engine binary is older than the source):\n'
         f'{cmp.stdout}\nRebuild (task build), then if it still differs regenerate {reference}.')

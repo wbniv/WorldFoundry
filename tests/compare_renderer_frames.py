@@ -58,9 +58,15 @@ def main():
     parser.add_argument("reference")
     parser.add_argument("actual")
     parser.add_argument("--tolerance", type=int, default=0)
+    # Isolated pixels allowed over the tolerance. Default 0: the macOS gate must stay strict.
+    # Only for a different rasterizer than the reference's (llvmpipe in the Linux container
+    # against the host-GL reference: 3 snowgoons and 2 aquarium edge pixels on a correct build).
+    parser.add_argument("--allow-pixels", type=int, default=0)
     args = parser.parse_args()
     if not 0 <= args.tolerance <= 255:
         parser.error("tolerance must be in [0,255]")
+    if args.allow_pixels < 0:
+        parser.error("allow-pixels must be >= 0")
     w, h, a = read_png(args.reference)
     wb, hb, b = read_png(args.actual)
     if (w, h) != (wb, hb):
@@ -84,8 +90,9 @@ def main():
     if bad:
         xs, ys = zip(*bad)
         print(f"difference bbox (inclusive): {min(xs)},{min(ys)}–{max(xs)},{max(ys)}")
-    print("FAIL" if bad else "PASS")
-    return int(bool(bad))
+    failed = len(bad) > args.allow_pixels
+    print("FAIL" if failed else "PASS")
+    return int(failed)
 
 
 if __name__ == "__main__":

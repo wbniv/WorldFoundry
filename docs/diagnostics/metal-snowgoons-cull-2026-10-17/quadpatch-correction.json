@@ -1,0 +1,179 @@
+{
+  "mode": "apply",
+  "corrected_hashes": [
+    "2ce88ee46270b6c71aa154339fc212dceb46b2c7d068b41091d5ef633dbab88f",
+    "77b1e0144fa6422f8fe127cb4d94cbd2f24893c200268556aece96e7db275833"
+  ],
+  "changed_files": 13,
+  "files": [
+    {
+      "path": "wflevels/cd.iff",
+      "sha256_before": "076ff702e2db79d512a4b6f3df081e2ac99278c4aa5aded0d95dc48a1edef6a3",
+      "sha256_after": "1f3ce744399c3b363e21b29149b13cfd0e470eff8524a9416b5814fc0fb3a0b2",
+      "models": [
+        {
+          "offset": 149144,
+          "before": "2ce88ee46270b6c71aa154339fc212dceb46b2c7d068b41091d5ef633dbab88f",
+          "after": "28c0a44796f11497a44652c73859295ca2df8df801b275a1c931d9e6423f109c",
+          "faces_reversed": 445
+        }
+      ]
+    },
+    {
+      "path": "wflevels/cd_full.iff",
+      "sha256_before": "26b2807ee11fde601a79f8b44094a2aa4fb603eeda028a23e3732e055ecad4d6",
+      "sha256_after": "f6eed58d2245cc9f0bbcabddafe025a9cb96fafbce10147bc9c3d067d5f57554",
+      "models": [
+        {
+          "offset": 1215268,
+          "before": "77b1e0144fa6422f8fe127cb4d94cbd2f24893c200268556aece96e7db275833",
+          "after": "49be17fa8a86c783f80f7b78f23e6d4423a61ba379600598d448e554f9b4ee07",
+          "faces_reversed": 445
+        }
+      ]
+    },
+    {
+      "path": "wflevels/full_cd/L4.iff",
+      "sha256_before": "414b7e677d6a87d2f6316f50d8cc85697940187d36840772da320502a56b184e",
+      "sha256_after": "04422af7eeb18cff80ccc5816ff30ee5e338394c8fcb6b2f34d13c6485fc7cc0",
+      "models": [
+        {
+          "offset": 140068,
+          "before": "77b1e0144fa6422f8fe127cb4d94cbd2f24893c200268556aece96e7db275833",
+          "after": "49be17fa8a86c783f80f7b78f23e6d4423a61ba379600598d448e554f9b4ee07",
+          "faces_reversed": 445
+        }
+      ]
+    },
+    {
+      "path": "wflevels/mm_practice/quadpatch01.iff",
+      "sha256_before": "2ce88ee46270b6c71aa154339fc212dceb46b2c7d068b41091d5ef633dbab88f",
+      "sha256_after": "28c0a44796f11497a44652c73859295ca2df8df801b275a1c931d9e6423f109c",
+      "models": [
+        {
+          "offset": 0,
+          "before": "2ce88ee46270b6c71aa154339fc212dceb46b2c7d068b41091d5ef633dbab88f",
+          "after": "28c0a44796f11497a44652c73859295ca2df8df801b275a1c931d9e6423f109c",
+          "faces_reversed": 445
+        }
+      ]
+    },
+    {
+      "path": "wflevels/snowgoons-blender-standalone.iff",
+      "sha256_before": "1f6315a222f9eea3277b3833847dccdfc3a8bd10f408907152ca947d0b900761",
+      "sha256_after": "001470f4c5104de4da6893dc9ebc0d6ab64ecfbfa060cf5ef01f4d49e752b30d",
+      "models": [
+        {
+          "offset": 145048,
+          "before": "2ce88ee46270b6c71aa154339fc212dceb46b2c7d068b41091d5ef633dbab88f",
+          "after": "28c0a44796f11497a44652c73859295ca2df8df801b275a1c931d9e6423f109c",
+          "faces_reversed": 445
+        }
+      ]
+    },
+    {
+      "path": "wflevels/snowgoons-blender.iff",
+      "sha256_before": "077795bfaded3054c913c48bea10083b2ee75aa4d161b4de4d7d053a03711839",
+      "sha256_after": "065222d850508ddf88e821dc5de1840ac6a6978e6f56aace4aa322f13937ed5a",
+      "models": [
+        {
+          "offset": 140952,
+          "before": "2ce88ee46270b6c71aa154339fc212dceb46b2c7d068b41091d5ef633dbab88f",
+          "after": "28c0a44796f11497a44652c73859295ca2df8df801b275a1c931d9e6423f109c",
+          "faces_reversed": 445
+        }
+      ]
+    },
+    {
+      "path": "wflevels/snowgoons-blender/quadpatch01.iff",
+      "sha256_before": "2ce88ee46270b6c71aa154339fc212dceb46b2c7d068b41091d5ef633dbab88f",
+      "sha256_after": "28c0a44796f11497a44652c73859295ca2df8df801b275a1c931d9e6423f109c",
+      "models": [
+        {
+          "offset": 0,
+          "before": "2ce88ee46270b6c71aa154339fc212dceb46b2c7d068b41091d5ef633dbab88f",
+          "after": "28c0a44796f11497a44652c73859295ca2df8df801b275a1c931d9e6423f109c",
+          "faces_reversed": 445
+        }
+      ]
+    },
+    {
+      "path": "wflevels/snowgoons-blender/snowgoons-standalone.iff",
+      "sha256_before": "c1399d09c03c72c90a482e0fb76a8f371a57e1adb066d0c5947d684f09314387",
+      "sha256_after": "5a02a2816e700cfc6a88265c4d3e0cdabab28963bff3291c039e46bcdd205822",
+      "models": [
+        {
+          "offset": 145048,
+          "before": "2ce88ee46270b6c71aa154339fc212dceb46b2c7d068b41091d5ef633dbab88f",
+          "after": "28c0a44796f11497a44652c73859295ca2df8df801b275a1c931d9e6423f109c",
+          "faces_reversed": 445
+        }
+      ]
+    },
+    {
+      "path": "wflevels/snowgoons-cd.iff",
+      "sha256_before": "f152215ada5a854232a81360d818bfa125579bf1df459de19226ceae7f13b197",
+      "sha256_after": "851481f596ec3db6cf024cb5c45339e8f7a9b1aede6e1055fe5ff54ca68703f2",
+      "models": [
+        {
+          "offset": 149144,
+          "before": "2ce88ee46270b6c71aa154339fc212dceb46b2c7d068b41091d5ef633dbab88f",
+          "after": "28c0a44796f11497a44652c73859295ca2df8df801b275a1c931d9e6423f109c",
+          "faces_reversed": 445
+        }
+      ]
+    },
+    {
+      "path": "wflevels/snowgoons-standalone.iff",
+      "sha256_before": "48306989fe55d70609fb286f9d22b95b0c23f8ee705ea466d8043952301cfbd2",
+      "sha256_after": "441ecb6f7a28f2c71f556d5c6b1366fc479aec230c1847a4e92e8a579cbc9d6d",
+      "models": [
+        {
+          "offset": 145048,
+          "before": "2ce88ee46270b6c71aa154339fc212dceb46b2c7d068b41091d5ef633dbab88f",
+          "after": "28c0a44796f11497a44652c73859295ca2df8df801b275a1c931d9e6423f109c",
+          "faces_reversed": 445
+        }
+      ]
+    },
+    {
+      "path": "wflevels/snowgoons.iff",
+      "sha256_before": "d428c9348ee628149cdd1ccd6fd136ebf7c50f1f0a6ac004f64abf3daac2460d",
+      "sha256_after": "e4fbea91d68ceefedb757cec3c2430617dfab7f087ba7dd799421a9429575ab8",
+      "models": [
+        {
+          "offset": 140952,
+          "before": "2ce88ee46270b6c71aa154339fc212dceb46b2c7d068b41091d5ef633dbab88f",
+          "after": "28c0a44796f11497a44652c73859295ca2df8df801b275a1c931d9e6423f109c",
+          "faces_reversed": 445
+        }
+      ]
+    },
+    {
+      "path": "wfsource/source/game/cd.iff",
+      "sha256_before": "2c8207db018a8c0fa37f524940ab89c8604e26a07ebe318a5262838570504f1f",
+      "sha256_after": "62692ec81da8c9abb11b63d1602dc0581f0c54c3f8975677bcc69c1493f647e7",
+      "models": [
+        {
+          "offset": 722584,
+          "before": "2ce88ee46270b6c71aa154339fc212dceb46b2c7d068b41091d5ef633dbab88f",
+          "after": "28c0a44796f11497a44652c73859295ca2df8df801b275a1c931d9e6423f109c",
+          "faces_reversed": 445
+        }
+      ]
+    },
+    {
+      "path": "wfsource/source/game/snowgoons.iff",
+      "sha256_before": "495273f520fbba33c9b49c1c79720e09dcca05ad4e1f107890e03c192414c257",
+      "sha256_after": "db3d6e00e8330c11b66f88e0b58df2c09afd636c5a19282393446f7e551822c6",
+      "models": [
+        {
+          "offset": 145188,
+          "before": "77b1e0144fa6422f8fe127cb4d94cbd2f24893c200268556aece96e7db275833",
+          "after": "49be17fa8a86c783f80f7b78f23e6d4423a61ba379600598d448e554f9b4ee07",
+          "faces_reversed": 445
+        }
+      ]
+    }
+  ]
+}

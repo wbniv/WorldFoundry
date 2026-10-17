@@ -63,13 +63,82 @@ def converted_model(model: bytes, decision: dict) -> tuple[bytes, int]:
     return bytes(output), len(selected)
 
 
+def apply_corrections(root: Path, choices: dict, hashes: list[str], report_path: Path, apply: bool):
+    """Re-apply corrected decisions to models that still carry their original hash.
+
+    The full conversion ran once (25a57d73); re-running it would reverse every
+    converted model a second time. A `keep` model is byte-identical to its
+    original, so when a keep is corrected to a reversal its original hash still
+    identifies every copy: tracked models, bundles and CD images alike.
+    """
+    for model_hash in hashes:
+        choice = choices.get(model_hash)
+        if not choice or not choice.get("evidence"):
+            raise SystemExit(f"{model_hash}: no reviewed decision")
+    wanted = set(hashes)
+    names = subprocess.check_output(["git", "ls-files", "*.iff"], cwd=root, text=True).splitlines()
+    staged, report, seen = [], [], set()
+    for name in names:
+        path = root / name
+        if path.is_symlink():
+            continue
+        original = path.read_bytes()
+        try:
+            models = list(find_models(original))
+        except ValueError:
+            continue
+        output = bytearray(original)
+        occurrences = []
+        for at, model in models:
+            old_hash = digest(model)
+            if old_hash not in wanted:
+                continue
+            new_model, flips = converted_model(model, choices[old_hash])
+            output[at:at + len(model)] = new_model
+            seen.add(old_hash)
+            occurrences.append({"offset": at, "before": old_hash,
+                                "after": digest(new_model), "faces_reversed": flips})
+        if occurrences:
+            staged.append((path, bytes(output)))
+            report.append({"path": name, "sha256_before": digest(original),
+                           "sha256_after": digest(output), "models": occurrences})
+    if seen != wanted:
+        raise SystemExit(f"no tracked copy of {sorted(wanted - seen)}")
+    result = {"mode": "apply" if apply else "dry-run", "corrected_hashes": sorted(wanted),
+              "changed_files": len(staged), "files": report}
+    report_path.parent.mkdir(parents=True, exist_ok=True)
+    report_path.write_text(json.dumps(result, indent=2) + "\n")
+    if apply:
+        write_all(staged)
+    print(f"{len(staged)} changed files for {len(wanted)} corrected model hashes "
+          f"-> {report_path} ({result['mode']})")
+
+
+def write_all(staged):
+    for path, data in staged:
+        with tempfile.NamedTemporaryFile(dir=path.parent, prefix=f".{path.name}.",
+                                         delete=False) as temp:
+            temp.write(data)
+            temp_name = temp.name
+        os.chmod(temp_name, path.stat().st_mode)
+        os.replace(temp_name, path)
+
+
 def main():
     ap = argparse.ArgumentParser(description=__doc__)
     ap.add_argument("--inventory", type=Path, required=True)
     ap.add_argument("--decisions", type=Path, required=True)
     ap.add_argument("--report", type=Path, required=True)
     ap.add_argument("--apply", action="store_true")
+    ap.add_argument("--only-hash", action="append", default=[], metavar="SHA256",
+                    help="apply only this original model hash's (corrected) decision to the "
+                         "tracked copies that still carry it; repeatable")
     args = ap.parse_args()
+    if args.only_hash:
+        apply_corrections(Path(__file__).resolve().parents[1],
+                          json.loads(args.decisions.read_text()),
+                          args.only_hash, args.report, args.apply)
+        return
     root = Path(__file__).resolve().parents[1]
     inventory = json.loads(args.inventory.read_text())
     choices = json.loads(args.decisions.read_text())
@@ -132,14 +201,7 @@ def main():
     args.report.parent.mkdir(parents=True, exist_ok=True)
     args.report.write_text(json.dumps(result, indent=2) + "\n")
     if args.apply:
-        for path, data in staged:
-            with tempfile.NamedTemporaryFile(dir=path.parent,
-                                             prefix=f".{path.name}.",
-                                             delete=False) as temp:
-                temp.write(data)
-                temp_name = temp.name
-            os.chmod(temp_name, path.stat().st_mode)
-            os.replace(temp_name, path)
+        write_all(staged)
     print(f"{len(staged)} changed files, {len(seen)} reviewed model hashes "
           f"-> {args.report} ({result['mode']})")
 
