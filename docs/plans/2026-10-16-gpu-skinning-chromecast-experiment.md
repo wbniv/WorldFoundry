@@ -394,3 +394,47 @@ a deliberately collapsing test face is rejected. This preserves the CPU
 previous-normal rule without a per-frame CPU face walk. Across the 640 pose
 samples, minimum triangle double area is 0.000210811384 and maximum normalized
 face-normal component difference is 7.16000795e-6.
+
+Local GL gates pass: `skin_pose_math`, existing `dfrm_strand`, and real
+`skinned_mesh_gl` rendering (four influences, posed fog, reversed winding,
+two-sided exemption, cull-state restoration, zero steady vertex uploads and
+actual context recreation). The deterministic wide six-pair aquarium CPU/GPU
+captures at backend frame 30 match at 307,192/307,200 pixels; the remaining
+eight differ by one channel value. Coverage is identical. Logs confirm twelve
+actual GPU body draws, rather than an accidentally exercised CPU fallback.
+See `evidence/gl/`.
+
+Metal gate passed on Codemagic build `6ad327bb86f10e8d5f64390f`, source
+`c53cd522367a018891803c8f1a71bba415fdd325`. The Apple Paravirtual Metal device
+rendered rigid/four-weight, normals, winding/two-sided, fog and upload fixtures;
+CPU/GPU fixture PPM hashes are identical. Resize 64→80→64 and buffer recreation
+also pass. This is offscreen Metal correctness evidence, not Apple performance
+or full aquarium scene acceptance. Source, logs and PPMs are in
+`evidence/metal/`. The first CI attempt failed before compilation because
+Ninja was unavailable; the retry uses Unix Makefiles.
+
+The armeabi-v7a release APK is frozen with native library SHA-256
+`888e952e3073f151e36937362616a18030a7c559544392aaebff554b5fdfc9a7`.
+`build-gpu-skinning-variants.py` changes only the level bundle and runtime args;
+all native APK entries are byte-identical. `prepare-gpu-skinning-campaign.py`
+verifies every fixture and the restore APK, then writes the rotated 48 release
+and 16 profile-run recipes. Evidence records the complete hashes.
+
+Coordinator update: initial cast1 readd `J‑dff2815f88c6` connected but refused
+an unresolved install from historical job `J‑e393c2ad5f70` with
+`cleanup-requires-restart`. Will requested direct coordination with the
+coordinator agent, which owns recovery investigation. Its restart/readd
+`J‑8cc58b6f7fff` hit a boot-wait error and shared transport recovery remains.
+Cast2 check `J‑4ab64a6c067f` and first cast1 CPU batch `J‑ac137d0bb084` are
+queued; neither has supplied a measurement. Do not substitute local timings
+for the pending matched device results.
+
+Follow-up instrumentation review found that `skin-vertex-bytes` initially
+counted GPU buffer creation only. Both backends now tag DFRM vertices in their
+pending streamed batch and count their byte share at the actual buffer upload,
+even when that batch flushes after the object scope ends. GL's draw fixture
+verifies the 228-byte CPU triangle upload and zero steady GPU vertex upload;
+Metal has the same assertion. `skin-draws`/`skin-faces-submitted` remain
+GPU-path counters; overall draw/face counters cover both paths. The queued
+old CPU batch was cancelled before execution; freeze the corrected APK for
+all matched results, superseding the native hash above.

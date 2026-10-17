@@ -1,0 +1,46 @@
+{
+  "build": "6ad327bb86f10e8d5f64390f",
+  "status": "finished",
+  "commit": {
+    "authorAvatarUrl": "https://avatars.githubusercontent.com/u/38008?v=4",
+    "authorEmail": "will@biohack.net",
+    "authorName": "Will Norris",
+    "branch": "gpu-skinning-proposal",
+    "tag": null,
+    "commitMessage": "Use available Makefiles generator for Metal experiment CI",
+    "hash": "c53cd522367a018891803c8f1a71bba415fdd325",
+    "url": "https://github.com/wbniv/WorldFoundry/commit/c53cd522367a018891803c8f1a71bba415fdd325"
+  },
+  "artifacts": [
+    {
+      "name": "LastTest.log",
+      "sha256": "a75c808a7df59084571b5062235b935cf7647c993d9c786d7204473a65463d29",
+      "size": 2250
+    },
+    {
+      "name": "skin-metal-cpu.ppm",
+      "sha256": "dfc4c9194b6d37a6ce902a488b743b31b9cf25205e76c42f47570a7beeff90e0",
+      "size": 12301
+    },
+    {
+      "name": "skin-metal-gpu.ppm",
+      "sha256": "dfc4c9194b6d37a6ce902a488b743b31b9cf25205e76c42f47570a7beeff90e0",
+      "size": 12301
+    },
+    {
+      "name": "skin-metal-last.ppm",
+      "sha256": "43dfebf451937a92bc5a39bb27418d6ac173e2d30f6ce166e720a42efcf427e4",
+      "size": 12301
+    },
+    {
+      "name": "skin-metal-build.log",
+      "sha256": "ea1f8bd9a18342f66ac57955b24fda7be19a340d35e8dd94af07b6e2233fa961",
+      "size": 52828
+    },
+    {
+      "name": "skin-metal-test.log",
+      "sha256": "c290459afa997dbe8f9d1c8d22a34d0714d5babc2bdbc9c50a695d42e198a948",
+      "size": 330
+    }
+  ]
+}

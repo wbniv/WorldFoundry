@@ -493,6 +493,7 @@ public:
         _cpu.push_back(tri[0]);
         _cpu.push_back(tri[1]);
         _cpu.push_back(tri[2]);
+        if(wf_profile::enabled() && wf_profile::state().skinObject)_skinStreamVertices+=3;
         ++_trianglesThisFrame;
     }
 
@@ -767,6 +768,7 @@ private:
     // material. Part of the batch key alongside _curTexture.
     bool  _curPrelit = false;
     std::vector<Vert> _cpu;
+    size_t _skinStreamVertices = 0; // tagged vertices in the pending mixed batch
 
     void Pack(Vert& dst, const RBVertex& v,
                      float nx, float ny, float nz)
@@ -950,14 +952,14 @@ private:
             // No live encoder yet (Phase 2B3 — engine frame loop not wired).
             // Drop the batched triangles; Phase 2C hands the backend an
             // encoder each frame.
-            _cpu.clear();
+            _cpu.clear(); _skinStreamVertices=0;
             _curTexture = nullptr;
             _curPrelit  = false;
             return;
         }
         LazyInit();
         if (!_inited) {
-            _cpu.clear();
+            _cpu.clear(); _skinStreamVertices=0;
             _curTexture = nullptr;
             _curPrelit  = false;
             return;
@@ -987,7 +989,7 @@ private:
                                                  options:MTLResourceStorageModeShared];
         if (!vbuf) {
             NSLog(@"wf_game: MetalBackend vertex buffer alloc failed (%zu bytes)", bytes);
-            _cpu.clear();
+            _cpu.clear(); _skinStreamVertices=0;
             _curTexture = nullptr;
             _curPrelit  = false;
             return;
@@ -1011,6 +1013,7 @@ private:
                              length:sizeof(Uniforms)
                             atIndex:1];
         wf_profile::count(wf_profile::Uploads);wf_profile::count(wf_profile::UploadBytes,bytes);
+        wf_profile::count(wf_profile::SkinVertexBytes,_skinStreamVertices*sizeof(Vert));
         wf_profile::count(wf_profile::Draws);wf_profile::count(wf_profile::Triangles,_cpu.size()/3);
         [_encoder drawPrimitives:MTLPrimitiveTypeTriangle
                      vertexStart:0
@@ -1019,7 +1022,7 @@ private:
 #if !__has_feature(objc_arc)
         [vbuf release];   // the encoder holds it until the command buffer ends
 #endif
-        _cpu.clear();
+        _cpu.clear(); _skinStreamVertices=0;
         _curTexture = nullptr;
         _curPrelit  = false;
     }

@@ -561,6 +561,7 @@ public:
         _cpu.push_back(tri[0]);
         _cpu.push_back(tri[1]);
         _cpu.push_back(tri[2]);
+        if(wf_profile::enabled() && wf_profile::state().skinObject)_skinStreamVertices+=3;
     }
 
     void DrawOverlay(const PhonepadRect* rects, int count, int width, int height) override
@@ -833,7 +834,7 @@ public:
         _opaqueTexUniforms = ProgramUniforms{};
         _customProgram = false;
         _skinProgram=0;_skinTried=false;_skinGpuBytes=0;_skinUniforms=ProgramUniforms{};
-        _cpu.clear();
+        _cpu.clear(); _skinStreamVertices=0;
         _curTexture  = nullptr;
         // Static meshes: every GL name is dead. Bumping the generation makes
         // StaticMeshLive false for all existing handles, so their owners bake
@@ -1105,6 +1106,7 @@ private:
     // LIGHTING_PRELIT material. Part of the batch key alongside _curTexture.
     bool  _curPrelit = false;
     std::vector<Vert> _cpu;
+    size_t _skinStreamVertices = 0; // tagged vertices in the pending mixed batch
     // Static-mesh batch (E3): when _curMesh is set the pending triangles are
     // indices into its VBO (16-bit, or 32-bit for a mesh over 65536 vertices)
     // instead of packed vertices in _cpu. Only one of the two is non-empty.
@@ -1304,6 +1306,7 @@ private:
                      GL_STREAM_DRAW);
         wf_profile::count(wf_profile::Uploads);
         wf_profile::count(wf_profile::UploadBytes,_cpu.size() * sizeof(Vert));
+        wf_profile::count(wf_profile::SkinVertexBytes,_skinStreamVertices*sizeof(Vert));
         wf_profile::count(2);
         wf_profile::count(3,_cpu.size()/3);
         glDrawArrays(GL_TRIANGLES, 0, GLsizei(_cpu.size()));
@@ -1313,7 +1316,7 @@ private:
         glBindBuffer(GL_ARRAY_BUFFER, 0);
         glUseProgram(0);
 
-        _cpu.clear();
+        _cpu.clear(); _skinStreamVertices=0;
         _curTexture = nullptr;
         _curPrelit  = false;
         _curMesh    = nullptr;
