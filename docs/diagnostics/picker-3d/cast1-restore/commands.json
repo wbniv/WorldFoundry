@@ -1,0 +1,157 @@
+[
+  {
+    "args": [
+      "shell",
+      "dumpsys activity activities"
+    ],
+    "start": 1792204200.1398282,
+    "end": 1792204200.4435005,
+    "returncode": 0
+  },
+  {
+    "args": [
+      "shell",
+      "pm path org.worldfoundry.wf_game.baseline"
+    ],
+    "start": 1792204200.5297973,
+    "end": 1792204200.890937,
+    "returncode": 0
+  },
+  {
+    "args": [
+      "shell",
+      "pm path org.worldfoundry.wf_game.baseline"
+    ],
+    "start": 1792204200.892001,
+    "end": 1792204201.2944934,
+    "returncode": 0
+  },
+  {
+    "args": [
+      "shell",
+      "sha256sum '/data/app/~~UYFAtkcF2tFIb_nZuvhq8w==/org.worldfoundry.wf_game.baseline--oXH9RHV7_pYrZPCbNHP_w==/base.apk'"
+    ],
+    "start": 1792204201.2955108,
+    "end": 1792204201.4892826,
+    "returncode": 0
+  },
+  {
+    "args": [
+      "shell",
+      "cmd package resolve-activity --brief -a android.intent.action.MAIN -c android.intent.category.HOME"
+    ],
+    "start": 1792204201.689628,
+    "end": 1792204201.8695693,
+    "returncode": 0
+  },
+  {
+    "args": [
+      "shell",
+      "am start -W -n com.google.android.apps.tv.launcherx/.home.HomeActivity"
+    ],
+    "start": 1792204201.906257,
+    "end": 1792204202.1412141,
+    "returncode": 0
+  },
+  {
+    "args": [
+      "shell",
+      "dumpsys activity activities"
+    ],
+    "start": 1792204205.1425822,
+    "end": 1792204205.3413398,
+    "returncode": 0
+  },
+  {
+    "args": [
+      "shell",
+      "uiautomator dump --compressed /data/local/tmp/wf-J-4ff83e75e56f-launcher.xml"
+    ],
+    "start": 1792204205.3684826,
+    "end": 1792204209.7739496,
+    "returncode": 0
+  },
+  {
+    "args": [
+      "shell",
+      "cat /data/local/tmp/wf-J-4ff83e75e56f-launcher.xml"
+    ],
+    "start": 1792204209.7748368,
+    "end": 1792204209.9660652,
+    "returncode": 0
+  },
+  {
+    "args": [
+      "exec-out",
+      "screencap",
+      "-p"
+    ],
+    "start": 1792204209.9682019,
+    "end": 1792204212.9951837,
+    "returncode": 0
+  },
+  {
+    "args": [
+      "shell",
+      "input tap 960 982"
+    ],
+    "start": 1792204213.6836553,
+    "end": 1792204214.078343,
+    "returncode": 0
+  },
+  {
+    "args": [
+      "shell",
+      "dumpsys activity activities"
+    ],
+    "start": 1792204215.0798793,
+    "end": 1792204215.4383402,
+    "returncode": 0
+  },
+  {
+    "args": [
+      "shell",
+      "uiautomator dump --compressed /data/local/tmp/wf-J-4ff83e75e56f-launcher.xml"
+    ],
+    "start": 1792204215.4429255,
+    "end": 1792204218.6105947,
+    "returncode": 0
+  },
+  {
+    "args": [
+      "shell",
+      "cat /data/local/tmp/wf-J-4ff83e75e56f-launcher.xml"
+    ],
+    "start": 1792204218.6114283,
+    "end": 1792204218.8818886,
+    "returncode": 0
+  },
+  {
+    "args": [
+      "exec-out",
+      "screencap",
+      "-p"
+    ],
+    "start": 1792204218.8829885,
+    "end": 1792204224.318671,
+    "returncode": 0
+  },
+  {
+    "args": [
+      "shell",
+      "input tap 960 1025"
+    ],
+    "start": 1792204226.1517367,
+    "end": 1792204226.4954042,
+    "returncode": 0
+  },
+  {
+    "args": [
+      "shell",
+      "dumpsys activity activities"
+    ],
+    "start": 1792204227.497036,
+    "end": 1792204227.7148778,
+    "returncode": 0
+  }
+]

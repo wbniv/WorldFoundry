@@ -239,16 +239,50 @@ It shows:
     **PASS** for (a) to (e). (f) is not applicable, because the HAL has no cursor.
 11. **Chromecast 1 screenshots** through the coordinator, on the baseline level: the chooser with the option, pick mode with a highlight, and the highlight after an arrow press from the phone's D-pad. The release is reinstalled afterwards and its hash verified.
 
-    **NOT RUN (escalated).** No coordinator workflow can reach pick mode under owned-job rules:
-    - `press` sends at most 20 key taps, and none of them can hold OK.
-    - Opening the chooser needs a one-second held OK, or the phone's `r:open`. Only reviewed validators do either (for example `baseline_checks.py` with `held_key` and `Phone`), and they live in the separate `chromecast-coordinator` repository.
+    Re-run on 2026‑10‑17, after Will deployed the coordinator with the reviewed `baseline-picker` validator (chromecast-coordinator `7850c63`) and the updated `baseline-settings` (`0c3d648`). The branch was rebased onto `2026-new-level` `9f97f5dd` (the normals migration and six seahorse pairs), and the baseline level and main `cd.iff` were regenerated from the merged sources. The frozen APK is `baseline-7ef645811cec98b9.apk` (SHA-256 `7ef645811cec98b9f49df0a1c2a4eb674d9d2f65452b8fa8256299f0a2a31481`): the merged tree's diagnostic runtime, signed with the existing baseline development key.
 
-    A new reviewed validator is needed, for example `baseline-picker`:
-    1. hold OK and capture the chooser;
-    2. press OK and capture pick mode;
-    3. send `r:<session>:move:right` from the phone and capture the moved highlight.
+    ```
+    $ task chromecast:submit WORKFLOW=check DEVICE=chromecast-test-01 APP=baseline VALIDATOR=baseline-picker APK=…/baseline-7ef645811cec98b9.apk ASYNC=true
+    Accepted J-6922370e7eb5: queued; check — waiting: device busy with J-bfad80d308ce
+    $ task chromecast:watch JOB=J-6922370e7eb5
+    J-6922370e7eb5: phase {"phase": "checking-installed-apk"}
+    J-6922370e7eb5: phase {"phase": "installing"}
+    J-6922370e7eb5: phase {"phase": "awaiting-supervision"}
+    J-6922370e7eb5: completed {"error": null, "health": "ready"}
+    $ python3 -c "...picker-checks.json assertions"
+    {'baseline_catalog_attached': True, 'chooser_pauses_simulation': True, 'three_candidates': True, 'two_brackets_in_view': True, 'first_highlight_nearest_centre': True, 'phone_right_moves_highlight': True, 'same_spot_short_list': True, 'ok_opens_owner_form': True, 'tv_form_is_that_owner': True, 'back_chain_keeps_dialog': True, 'picker_holds_scene': True, 'closed_releases_input': True}
+    ```
 
-    No APK was built and no device job was submitted, so there was nothing to restore. The existing `baseline-settings` validator will now fail its `stable_two_owner_picker` assertion, because the plan's fixture has three owners. It also opens the first owner after DOWN, because row 0 is Pick in 3D. That validator needs the same update.
+    Job J‑6922370e7eb5 passed all 12 assertions on chromecast‑test‑01 (Chromecast HD). The evidence is in [`docs/diagnostics/picker-3d/cast1-baseline-picker/`](../diagnostics/picker-3d/cast1-baseline-picker/). Per-capture duplicate logs were dropped; `receipt.json` lists every original artifact.
+
+    The chooser, with Pick in 3D first:
+    <img src="../diagnostics/picker-3d/cast1-baseline-picker/picker-chooser-screenshot.png" width="700">
+
+    Pick mode. The first highlight is Baseline settings 2, nearest the centre:
+    <img src="../diagnostics/picker-3d/cast1-baseline-picker/picker-scene-screenshot.png" width="700">
+
+    After the phone's D-pad Right, the highlight is on the shared bracket, "2 objects here":
+    <img src="../diagnostics/picker-3d/cast1-baseline-picker/picker-after-right-screenshot.png" width="700">
+
+    The same job also captured the short list (`picker-group`), the owner's form (`picker-form`), and the remote's Back chain: `picker-remote-group`, then `picker-back-1` (scene), `picker-back-2` (list) and `picker-closed`.
+
+    **Restore.** The install record of J‑6922370e7eb5 shows Cast1 had baseline `151186bac852a28db1964f0e8ded4e355f724196f04a3179d51cdd2f01fe0090` before these jobs. No local APK has that hash (main checkout, worktrees and `~/tmp` were searched), so the fallback `baseline-72a39130a9f9e5a0.apk` was reinstalled:
+
+    ```
+    $ task chromecast:submit WORKFLOW=install DEVICE=chromecast-test-01 APP=baseline APK=/home/will/WorldFoundry-wbniv/wflevels/baseline/build/baseline-72a39130a9f9e5a0.apk
+    Accepted J-4ff83e75e56f: queued; install — waiting: device busy with J-3dee9982ae42
+    J-4ff83e75e56f: phase {"phase": "installing"}
+    J-4ff83e75e56f: continuation-pending {"source": "install", "workflow": "verify-launch", "device": "chromecast-test-01"}
+    J-4ff83e75e56f: phase {"phase": "verifying-launcher"}
+    J-4ff83e75e56f: recovery-required {"error": "plugin-error", "health": "recovery-required"}
+    J-c5a651eb76fa: completed {"error": null, "health": "ready"}
+    $ apk-installations.json
+    [('7ef645811cec98b9f49df0a1c2a4eb674d9d2f65452b8fa8256299f0a2a31481', '72a39130a9f9e5a09e3da28c6f31180595b5934e74e0fc764e11df0a8d88ca23', 'install', 'verified')]
+    ```
+
+    The install verified the installed hash `72a39130…88ca23`. The coordinator's follow-on launcher-artwork check (`verify-launch`) then ended `unverified` with no attempts (`launcher/result.json`). It raised `plugin-error`, and the automatic readd J‑c5a651eb76fa returned the device to `ready`. That is a launcher-tile verification problem in the coordinator, not an install failure.
+
+    **PASS:** chooser, pick mode and the phone arrow on Cast1, and the release hash was verified after reinstall. Open items: the restore used the fallback APK, because the pre-job baseline `151186ba…` isn't available locally, and the launcher-artwork check after install is unverified.
 12. The existing settings checks still pass: single-owner direct open (planted tank), apply/cancel, phone reconnect, Back/Home/resume.
 
     ```
@@ -282,6 +316,27 @@ It shows:
     - phone reconnect, through the real phone transport in Playwright;
     - the host's new Pick in 3D cases: first highlight, arrows, the same-spot group, Back from group to scene to list to closed, nothing in view, no camera, and the phone verbs.
 
-    Back/Home/resume is an Android lifecycle check and needs the device, so it is **not run**; see step 11.
+    **Device part (2026‑10‑17, Cast1).** The updated `baseline-settings` validator ran with the same APK. Job J‑28f5619ea275 passed all 21 assertions:
+
+    ```
+    $ task chromecast:submit WORKFLOW=check DEVICE=chromecast-test-01 APP=baseline VALIDATOR=baseline-settings APK=…/baseline-7ef645811cec98b9.apk ASYNC=true
+    Accepted J-28f5619ea275: queued; check — waiting: device busy with J-03b9b4035636
+    J-28f5619ea275: phase {"phase": "reusing-installed-apk"}
+    J-28f5619ea275: completed {"error": null, "health": "ready"}
+    21 True
+    {'baseline_catalog_attached': True, 'grounded_spawn': True, 'hardware_up_moves_positive_y': True, 'hardware_press_release_received': True, 'released_input_settles': True, 'released_direction_20': True, 'released_direction_22': True, 'released_direction_21': True, 'picker_pauses_simulation': True, 'tv_selects_second_owner': True, 'stable_three_owner_picker': True, 'chooser_offers_pick_in_3d': True, 'stale_picker_session_ignored': True, 'other_instance_unchanged': True, 'reconnect_preserves_invalid_draft': True, 'apply_readback': True, 'home_resume_same_process': True, 'home_resume_releases_input': True, 'home_cancels_uncommitted_draft': True, 'reset_chord_without_settings_or_jump': True, 'reset_chord_keeps_gameplay': True}
+    ```
+
+    The assertions cover apply/cancel (`apply_readback`, `other_instance_unchanged`), phone reconnect (`reconnect_preserves_invalid_draft`) and Back/Home/resume (`home_resume_same_process`, `home_resume_releases_input`, `home_cancels_uncommitted_draft`). The evidence is in [`docs/diagnostics/picker-3d/cast1-baseline-settings/`](../diagnostics/picker-3d/cast1-baseline-settings/).
+
+    **Desktop re-run on the merged tree (2026‑10‑17):**
+    - `object_picker` ctest: `100% tests passed, 0 tests failed out of 1`
+    - `verify.py --desktop`: `146 of 146 checks passed`
+    - smoke ctests: `100% tests passed, 0 tests failed out of 9`
+    - Playwright phone tests on the host: `4 passed in 49.26s`
+
+    In the container, `tests/test_object_properties.py::test_real_core_edit_isolation_and_readback` now fails with `object_property_core_test.cpp:20: Assertion 'form.sections.size()==1' failed`. That test builds the planted tank's catalog, which gained a second sheet ("Seahorses") in `d5190a85` on `2026-new-level`; it isn't caused by the picker. The other 27 tests pass.
+
+    **PASS** for the settings checks on desktop and Cast1. The planted-tank single-owner direct open is covered by the desktop harness; Cast1 ran the baseline only. The `test_object_properties` failure is an upstream seahorse-sheet regression and is left to that work.
 
 **macOS (Metal) build, outside the numbered steps** (2026‑10‑16): the picker touches `backend_metal.mm` (`CameraMatrices`), which Linux never compiles. The branch was rebased onto `2026-new-level` (`06787e0d`) and gained `c6fc62c8`, which mirrors GL's guard: false until the first `CaptureTextView`. Codemagic `macos-desktop-debug` on `ci/object-picker-3d-macos` [build 6ad1f95b](https://codemagic.io/app/6aafa6886ab3f21cf431a6cb/build/6ad1f95bf67be9ac6c3ab928) finished green: `backend_metal.mm` compiled, `AQUARIUM PARITY: MATCH`, and the windowed smoke and close-path/fullscreen steps passed. **PASS** (compile and smoke; Pick in 3D itself is not driven on the Mac).
