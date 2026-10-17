@@ -1,11 +1,11 @@
 {
   "close-idle/gpu/round-3": {
-    "job": "J-8c4c0f882e93",
+    "job": "J-d8577a92e5f5",
     "frozen_recipe_sha256": "5e606582e752c4a656434fcf5297505eecfa3172b1a046b47b01a1f198a0d3bc",
     "submitted_recipe_sha256": "aaecf5eaed5c294f426ea052ad51ca914b4540518565159799a3d443cc1d1286",
     "harness_policy": {
       "panel": "require-hidden"
     },
-    "outcome": "recovery-required; archived in failed-close-idle-gpu-round-3-J-8c4c0f882e93"
+    "outcome": "failed; archived in failed-close-idle-gpu-round-3-J-d8577a92e5f5"
   }
 }

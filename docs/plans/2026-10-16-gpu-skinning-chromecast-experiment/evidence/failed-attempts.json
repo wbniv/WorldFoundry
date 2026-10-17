@@ -22,5 +22,21 @@
     "health": "recovery-required",
     "archived_evidence": "failed-close-idle-gpu-round-3-J-8c4c0f882e93",
     "reason": "First require-hidden session (coordinator 47cab46). pair2 and pair6 measured with the panel verified hidden (one Back each, engine hide line, after-capture absent). The third case, close-idle-none-gpu, showed the panel (white 0.638, black 0.353, fill 1.0) 6.4 s after launch; the single Back produced the engine line for a Back with no visible panel (system-back), so the activity left and the session failed under require-hidden. No exit record exists for that process (pid 32381). Cause of the engine treating the panel as hidden is unproven: that process logcat was parsed by the coordinator but not saved. Excluded from timing; not retried."
+  },
+  {
+    "result_key": "close-idle/gpu/round-3",
+    "job": "J-d8577a92e5f5",
+    "status": "uncertain",
+    "health": "recovery-required",
+    "archived_evidence": "failed-close-idle-gpu-round-3-J-d8577a92e5f5",
+    "measured_cases": [],
+    "lost_cases": [
+      "pair2"
+    ],
+    "classification": "Not the known crash and not a measurement. The first install (pair2, 25525fcc) and the restore install (3d796c77) were refused with INSTALL_FAILED_VERSION_DOWNGRADE: cast1 already had aquarium versionCode 41 installed (sha 1008aed8...), and the frozen APKs are versionCode 7. Cleanup could not be verified; the coordinator's automatic readd J-ff796a60b072 ended recovery-required, and cast1 needs an administrator readd. The v41 package came from outside this campaign.",
+    "exit": {
+      "launch": null
+    },
+    "action": "archived; a new job reruns the same frozen recipe"
   }
 ]

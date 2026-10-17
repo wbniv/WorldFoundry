@@ -126,5 +126,18 @@
   "reproduction": {
     "attempt": "Container ASan/UBSan Debug build (asserts on) of the worktree; frozen close-idle-pair1-gpu cd.iff and wf_args.txt; 1 x 45 s and 3 x 120 s under Xvfb/llvmpipe",
     "result": "No crash, assert or sanitizer report. The build runs at about 2 fps, so every frame hits the engine 0.2 s delta clamp (device frames are about 0.05 s); about 32 game seconds per run. Not reproduced."
-  }
+  },
+  "reruns": [
+    {
+      "result_key": "close-idle/gpu/round-3",
+      "job": "J-d8577a92e5f5",
+      "lost_cases": [
+        "pair2"
+      ],
+      "classification": "Not the known crash and not a measurement. The first install (pair2, 25525fcc) and the restore install (3d796c77) were refused with INSTALL_FAILED_VERSION_DOWNGRADE: cast1 already had aquarium versionCode 41 installed (sha 1008aed8...), and the frozen APKs are versionCode 7. Cleanup could not be verified; the coordinator's automatic readd J-ff796a60b072 ended recovery-required, and cast1 needs an administrator readd. The v41 package came from outside this campaign.",
+      "exit": {
+        "launch": null
+      }
+    }
+  ]
 }
