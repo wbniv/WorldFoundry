@@ -13,5 +13,6 @@
   "population/cpu-no-cull/round-3": "J-e3573a7cf01f",
   "population/cpu/profile": "J-9f38d64525e4",
   "population/gpu/profile": "J-7c79a85acea4",
-  "population/cpu-no-cull/profile": "J-ca74aa106927"
+  "population/cpu-no-cull/profile": "J-ca74aa106927",
+  "population/gpu-no-cull/profile": "J-7e279c3194ab"
 }

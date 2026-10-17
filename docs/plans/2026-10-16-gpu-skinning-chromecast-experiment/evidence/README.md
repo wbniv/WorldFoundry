@@ -38,7 +38,8 @@ Cast1 has two completed release rounds for both views; its third GPU idle
 round exited during startup. Cast1 is held while the coordinator removes
 unsafe automatic Back behavior. The previous failures remain excluded.
 Cast2 has all 36 release runs, plus corrected CPU and GPU profiles for all
-three populations. No-cull profiles are still running. Corrected CPU/GPU
+three populations. The strict analyzer verified all 36 release and 12 corrected profile runs;
+full cast2 results are in `cast2-populations/results.json`. Corrected CPU/GPU
 checks are in `cast2-populations/corrected-cpu-gpu-profile-check.json`;
 these do not establish an adoption decision.
 
@@ -66,7 +67,7 @@ cohorts have different native hashes, so profile/release presentation deltas
 are diagnostic rather than an isolated overhead calibration.
 
 1. Use only the shared coordinator service and respect other owners.
-2. Cast2's corrected profile runner is active. Cast1 runners are stopped;
+2. Cast2's corrected profile campaign is complete. Cast1 runners are stopped;
    wait for the coordinator startup fix before any retry. Consult
    `active-session-handoff.json` and current progress before starting a
    process; do not duplicate submitted jobs.
