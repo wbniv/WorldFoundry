@@ -1260,6 +1260,14 @@ if(NOT ANDROID AND NOT IOS AND NOT APPLE AND NOT EMSCRIPTEN)
     target_compile_options(deformer_golden_test PRIVATE -fno-rtti -fpermissive)
     add_test(NAME deformer_golden COMMAND deformer_golden_test
         ${CMAKE_SOURCE_DIR} ${CMAKE_SOURCE_DIR}/tests/fixtures/deformer_golden)
+    # Shared model geometry (GREF/UVCL appearances over a GEOM asset): decode
+    # equality with the plain models, the refcounted cache's lifetime, and a
+    # loud failure for each malformed fixture (tests/shared_geometry_fixtures.py).
+    add_executable(shared_geometry_loader_test tests/shared_geometry_loader.cc)
+    target_link_libraries(shared_geometry_loader_test PRIVATE wfengine)
+    target_compile_options(shared_geometry_loader_test PRIVATE -fno-rtti -fpermissive)
+    add_test(NAME shared_geometry_loader COMMAND shared_geometry_loader_test
+        ${CMAKE_SOURCE_DIR}/tests/fixtures/shared_geometry)
     # DFRM v1 evaluator: parity with the Python reference (dfrm_ref.py) on the
     # seven tail-rig mockup poses plus a clip/crossfade sequence, then the unit
     # checks (arc length, coils, clips, loader, exclusivity, face normals).

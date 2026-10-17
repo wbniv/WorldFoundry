@@ -26,7 +26,8 @@
 #define _GFXCALLBACKS_HP
 
 #include <pigsys/pigsys.hp>
-                          
+#include <streams/binstrm.hp>
+
 //==============================================================================
 // kts kludge, game must implement this call to allow gfx system to find textures,
 // need to design a better way
@@ -52,6 +53,18 @@ public:
    virtual ~GfxCallbacks();
 
    virtual LookupTextureStruct LookupTexture(const char* name, int32 userData) const = 0;                 // in streaming, this should be an asset ID
+
+   // Shared model geometry (a MODL with GREF + UVCL, see gfx/rendobj3.cc).
+   // LookupGeometry resolves the geometry asset `name` in the room of the
+   // appearance's packed asset id `userData` (as LookupTexture resolves a
+   // texture) and returns its packed asset id, or 0 when that room has none.
+   // GetGeometryStream iterates an id LookupGeometry returned. The defaults
+   // know no shared geometry, so a GREF model fails to load, loudly, under a
+   // callbacks implementation that has not opted in.
+   virtual int32 LookupGeometry(const char* name, int32 userData) const;
+   virtual binistream GetGeometryStream(int32 geometryAssetID) const;
+   // Asset name of `userData`, for diagnostics only; "" when unknown.
+   virtual const char* LookupAssetName(int32 userData) const;
 
    void  Validate() const;
 protected:

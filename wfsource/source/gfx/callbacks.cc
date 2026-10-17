@@ -23,12 +23,39 @@
 //============================================================================
 
 #include "callbacks.hp"
+#include <cstdio>
+#include <cstdlib>
 
 //==============================================================================
 
 GfxCallbacks::~GfxCallbacks()
 {
 
+}
+
+//==============================================================================
+
+int32
+GfxCallbacks::LookupGeometry(const char* /*name*/, int32 /*userData*/) const
+{
+   return 0;		// no shared geometry: the loader reports the model and reference
+}
+
+binistream
+GfxCallbacks::GetGeometryStream(int32 geometryAssetID) const
+{
+   // Unreachable: LookupGeometry above never returns an id. Not an assert,
+   // which a release build compiles out.
+   std::fprintf(stderr, "GfxCallbacks::GetGeometryStream(%08x): no shared geometry support\n", unsigned(geometryAssetID));
+   std::fflush(stderr);
+   _sys_assert(0, "GfxCallbacks::GetGeometryStream without LookupGeometry", __FILE__, __LINE__);
+   std::abort();
+}
+
+const char*
+GfxCallbacks::LookupAssetName(int32 /*userData*/) const
+{
+   return "";
 }
 
 //==============================================================================

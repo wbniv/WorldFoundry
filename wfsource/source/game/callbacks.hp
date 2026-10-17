@@ -39,6 +39,10 @@ public:
    virtual ~GameGfxCallbacks();
 
    virtual LookupTextureStruct LookupTexture(const char* name, int32 userData) const;                 // in streaming, this should be an asset ID
+   // Shared model geometry: resolved by name in the room of userData's packed id.
+   virtual int32 LookupGeometry(const char* name, int32 userData) const;
+   virtual binistream GetGeometryStream(int32 geometryAssetID) const;
+   virtual const char* LookupAssetName(int32 userData) const;
 
    void Validate() const;
 protected:

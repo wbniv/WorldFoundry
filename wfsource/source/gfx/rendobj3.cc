@@ -36,6 +36,258 @@
 
 	#include <gfx/glpipeline/rendobj3.cc>
 
+#include <cstdlib>
+#include <cstring>
+#include <unordered_map>
+
+//============================================================================
+// Shared model geometry v1 (finding-your-way
+// docs/plans/2026-10-17-texture-variant-mesh-sharing.md, "Exporter finding and
+// the v1 format"). A GREF appearance's positions and faces live in a GEOM
+// asset that several appearances name; each appearance keeps its own UVCL
+// (u, v, colour per geometry vertex), MATL and optional OPAC/HNDL.
+//
+// What is shared, and why it cannot dangle:
+//  - The record below holds the positions and the material-sorted TriFace
+//    array, built once per geometry asset exactly as the MODL path builds
+//    them. Every appearance still builds its own Vertex3D[] (shared position +
+//    own UV/colour), materials and primitives from the Memory& it is given.
+//  - That Memory& is the asset slot's arena (Actor::BindAssets is handed the
+//    room slot's, or PERM's, GetSlotMemory()); AssetManager::FreeRoomSlot
+//    releases it wholesale, refcounts or not. So the record is NOT allocated
+//    there: it is a heap object owned by std::shared_ptr, one reference per
+//    RenderObject3D (copies included) and nothing else, and it copies its
+//    data out of the asset stream, so a room free/reload cannot leave it
+//    pointing at freed slot memory. ActiveRooms unbinds a room's actors
+//    (Actor::UnBindAssets runs ~RenderActor, hence ~RenderObject3D) before it
+//    calls FreeRoomSlot, so the last user's release frees the record.
+//  - The cache maps the geometry's packed asset id to a weak_ptr, so it never
+//    keeps a record alive. Packed ids repeat across levels, and a holder that
+//    is never destroyed (an emitter's template object leaks today) would keep
+//    an old level's record alive: a hit is therefore reused only if its
+//    counts, both CRCs and name equal this GREF's, i.e. it holds these bytes.
+//  - The shared TriFace array is never written: GetWritableFaceList refuses a
+//    shared model, and LRIG/DFRM (which write vertices or face normals in
+//    place) make a GREF model invalid.
+//
+// Invalid data fails loudly with the model and geometry names, in every
+// build: SharedGeometryFail is not compiled out with DO_ASSERTIONS=0.
+
+struct UVColorOnDisk				// one UVCL record, 12 bytes
+{
+	fixed32 u,v;
+	Color color;
+};
+
+static int sSharedGeometryLive = 0;
+
+struct SharedModelGeometry
+{
+	SharedModelGeometry() { ++sSharedGeometryLive; }
+	~SharedModelGeometry() { --sSharedGeometryLive; }
+	int32 assetID = 0;
+	GeometryReferenceOnDisk ref;
+	int maxMaterialIndex = 0;
+	std::vector<Vector3_PS> positions;
+	std::vector<TriFace> faces;		// material-sorted, plus the dummy face (materialIndex -1)
+};
+
+int
+RenderObject3D::SharedGeometryLiveCount()
+{
+	return sSharedGeometryLive;
+}
+
+[[noreturn]] static void
+SharedGeometryFail(const char* model, const char* geometry, const char* reason)
+{
+	std::fprintf(stderr, "shared geometry: model %s -> geometry %s: %s\n", model, geometry, reason);
+	std::fflush(stderr);
+	_sys_assert(0, reason, __FILE__, __LINE__);
+	std::abort();					// _sys_assert returns on the web
+}
+
+uint32
+SharedGeometryCrc32(const void* data, size_t size)
+{
+	const uint8* bytes = static_cast<const uint8*>(data);
+	uint32 crc = 0xFFFFFFFFu;
+	for(size_t index=0;index<size;++index)
+	{
+		crc ^= bytes[index];
+		for(int bit=0;bit<8;++bit)
+			crc = (crc & 1) ? (crc >> 1) ^ 0xEDB88320u : crc >> 1;
+	}
+	return ~crc;
+}
+
+const char*
+ParseGeometryReference(const void* payload, int size, GeometryReferenceOnDisk& out)
+{
+	static_assert(sizeof(GeometryReferenceOnDisk) == 52, "GREF is 52 bytes on disk");
+	if(size != int(sizeof(GeometryReferenceOnDisk)))
+		return "GREF is not 52 bytes";
+	std::memcpy(&out, payload, sizeof(out));
+	if(out.version != 1)
+		return "GREF version is not 1";
+	const void* end = std::memchr(out.name, 0, sizeof(out.name));
+	if(!end || end == out.name)
+		return "GREF name is empty or longer than 31 characters";
+	return NULL;
+}
+
+const char*
+ReadSharedGeometry(binistream& geometry, const GeometryReferenceOnDisk& ref,
+	std::vector<int32>& positions, std::vector<_TriFaceOnDisk>& faces)
+{
+	static_assert(sizeof(_TriFaceOnDisk) == 8, "FACE record is 8 bytes");
+	positions.clear();
+	faces.clear();
+	IFFChunkIter geomIter(geometry);
+	if(geomIter.GetChunkID().ID() != IFFTAG('G','E','O','M'))
+		return "asset is not a GEOM";
+	int posnChunks = 0, faceChunks = 0, otherChunks = 0;
+	std::vector<uint8> posn, face;
+	while(geomIter.BytesLeft() > 0)
+	{
+		IFFChunkIter* chunkIter = geomIter.GetChunkIter(HALScratchLmalloc);
+		const uint32 id = chunkIter->GetChunkID().ID();
+		std::vector<uint8>* target = NULL;
+		if(id == IFFTAG('P','O','S','N')) { ++posnChunks; target = &posn; }
+		else if(id == IFFTAG('F','A','C','E')) { ++faceChunks; target = &face; }
+		else ++otherChunks;
+		if(target)
+		{
+			target->resize(chunkIter->BytesLeft());
+			if(!target->empty())
+				chunkIter->ReadBytes(target->data(), int(target->size()));
+		}
+		MEMORY_DELETE(HALScratchLmalloc,chunkIter,IFFChunkIter);
+	}
+	if(posnChunks != 1 || faceChunks != 1 || otherChunks != 0)
+		return "GEOM must hold exactly one POSN and one FACE";
+	if(posn.size() % 12 || face.size() % sizeof(_TriFaceOnDisk))
+		return "POSN or FACE is not a whole number of records";
+	const size_t vertexCount = posn.size() / 12, faceCount = face.size() / sizeof(_TriFaceOnDisk);
+	if(vertexCount == 0 || faceCount == 0 || vertexCount > 32767 || faceCount > 32767)
+		return "vertex or face count is out of range";
+	if(vertexCount != ref.vertexCount || faceCount != ref.faceCount)
+		return "GREF counts do not match the geometry";
+	if(SharedGeometryCrc32(posn.data(), posn.size()) != ref.posCrc32 ||
+	   SharedGeometryCrc32(face.data(), face.size()) != ref.faceCrc32)
+		return "GREF CRC does not match the geometry";
+	positions.resize(vertexCount * 3);
+	std::memcpy(positions.data(), posn.data(), posn.size());
+	faces.resize(faceCount);
+	std::memcpy(faces.data(), face.data(), face.size());
+	for(const _TriFaceOnDisk& f : faces)
+	{
+		if(f.v1Index < 0 || f.v2Index < 0 || f.v3Index < 0 ||
+		   size_t(f.v1Index) >= vertexCount || size_t(f.v2Index) >= vertexCount || size_t(f.v3Index) >= vertexCount)
+			return "a face vertex index is out of range";
+		if(f.materialIndex < 0)
+			return "a face material index is negative";
+	}
+	return NULL;
+}
+
+static std::unordered_map<int32, std::weak_ptr<const SharedModelGeometry> >&
+SharedGeometryCache()
+{
+	static std::unordered_map<int32, std::weak_ptr<const SharedModelGeometry> > cache;
+	return cache;
+}
+
+static bool
+SameReference(const GeometryReferenceOnDisk& a, const GeometryReferenceOnDisk& b)
+{
+	return a.vertexCount == b.vertexCount && a.faceCount == b.faceCount &&
+		a.posCrc32 == b.posCrc32 && a.faceCrc32 == b.faceCrc32 &&
+		std::strncmp(a.name, b.name, sizeof(a.name)) == 0;
+}
+
+// First user reads, validates and builds; later users of the same asset reuse it.
+static std::shared_ptr<const SharedModelGeometry>
+AcquireSharedGeometry(int32 assetID, const GeometryReferenceOnDisk& ref, const GfxCallbacks& callbacks, const char* model)
+{
+	auto& cache = SharedGeometryCache();
+	for(auto it = cache.begin(); it != cache.end(); )
+		it = it->second.expired() ? cache.erase(it) : std::next(it);
+	auto found = cache.find(assetID);
+	if(found != cache.end())
+	{
+		std::shared_ptr<const SharedModelGeometry> record = found->second.lock();
+		if(record && SameReference(record->ref, ref))
+			return record;
+		// else: a live record of another level's asset with this id; leave it to its holders
+	}
+
+	binistream stream = callbacks.GetGeometryStream(assetID);
+	std::vector<int32> posn;
+	std::vector<_TriFaceOnDisk> diskFaces;
+	if(const char* why = ReadSharedGeometry(stream, ref, posn, diskFaces))
+		SharedGeometryFail(model, ref.name, why);
+
+	auto record = std::make_shared<SharedModelGeometry>();
+	record->assetID = assetID;
+	record->ref = ref;
+	const int vertexCount = int(ref.vertexCount), faceCount = int(ref.faceCount);
+	record->positions.reserve(vertexCount);
+	for(int index=0;index<vertexCount;++index)
+		record->positions.push_back(Vector3_PS(Scalar::FromFixed32(posn[index*3]),Scalar::FromFixed32(posn[index*3+1]),Scalar::FromFixed32(posn[index*3+2])));
+
+	// Normals and the material sort exactly as the MODL FACE case below.
+	std::vector<TriFace> tempFaceList(faceCount);
+	for(int index=0;index < faceCount; ++index)
+	{
+		std::memcpy(&tempFaceList[index], &diskFaces[index], sizeof(_TriFaceOnDisk));	// TriFaceOnDisk is a prefix of TriFace
+		Vector3 v0( PSToVector3(record->positions[tempFaceList[index].v1Index]));
+		Vector3 v1( PSToVector3(record->positions[tempFaceList[index].v2Index]));
+		Vector3 v2( PSToVector3(record->positions[tempFaceList[index].v3Index]));
+		tempFaceList[index].normal = Vector3ToPS12(CalculateNormal(v0,v1,v2));
+		if(tempFaceList[index].materialIndex > record->maxMaterialIndex)
+			record->maxMaterialIndex = tempFaceList[index].materialIndex;
+	}
+	record->faces.resize(faceCount+1);	// plus one dummy face
+	const int MATERIAL_CLEARED = -1;
+	int materialIndex = MATERIAL_CLEARED-1;
+	int nextFreeFace=0;
+	while(materialIndex != MATERIAL_CLEARED)
+	{
+		materialIndex = MATERIAL_CLEARED;
+		for(int faceIndex=0;faceIndex < faceCount&&materialIndex == MATERIAL_CLEARED;++faceIndex)
+			materialIndex = tempFaceList[faceIndex].materialIndex;
+		if(materialIndex != MATERIAL_CLEARED)
+		{
+			for(int index=0;index< faceCount;++index)
+			{
+				if(tempFaceList[index].materialIndex == materialIndex)
+				{
+					record->faces[nextFreeFace] = tempFaceList[index];
+					tempFaceList[index].materialIndex = MATERIAL_CLEARED;
+					++nextFreeFace;
+				}
+			}
+		}
+	}
+	if(nextFreeFace != faceCount)
+		SharedGeometryFail(model, ref.name, "material sort lost a face");
+	record->faces[faceCount].materialIndex = -1;  // as the MODL path's dummy face
+	cache[assetID] = record;
+	return record;
+}
+
+//============================================================================
+
+TriFace*
+RenderObject3D::GetWritableFaceList()
+{
+	if(_sharedGeometry)
+		SharedGeometryFail("?", _sharedGeometry->ref.name, "GetWritableFaceList on a shared-geometry model (its faces are shared)");
+	_staticState = STATIC_DEFORMED;
+	return _faceList;
+}
+
 //============================================================================
 // keeps pointers to facelist and vertexlist
 
@@ -86,6 +338,7 @@ RenderObject3D::RenderObject3D( Memory& memory, const RenderObject3D& obj3d )
     }
 	_faceCount = obj3d._faceCount;
 	_faceList = obj3d._faceList;
+	_sharedGeometry = obj3d._sharedGeometry;	// a shared _faceList outlives obj3d through this reference
 	if(_dfrm) {
 		// DFRM writes positions and face normals: each copy needs its own.
 		_vertexList=new(memory) Vertex3D[_vertexCount];
@@ -174,6 +427,13 @@ RenderObject3D::RenderObject3D(Memory& memory, binistream& input,int32 userData,
 	int faceCount = 0;
 	_handleCount = 0;
 	_handleList = NULL;
+	// Shared model geometry (GREF appearance). Chunk order is not significant:
+	// everything is collected here and resolved after the loop.
+	GeometryReferenceOnDisk gref;
+	int grefChunks = 0, uvclChunks = 0;
+	const char* grefError = NULL;
+	bool sawLionRig = false, sawDeform = false;
+	std::vector<UVColorOnDisk> uvcl;
 
 //#pragma message ("KTS: memory leak, these news are never freed")
 // now tracked with LMalloc
@@ -237,8 +497,30 @@ RenderObject3D::RenderObject3D(Memory& memory, binistream& input,int32 userData,
 				assert(chunkIter->BytesLeft() == 0);
 				break;
 			}
+			case IFFTAG('G','R','E','F'):
+			{
+				std::vector<uint8> bytes(chunkIter->BytesLeft());
+				if(!bytes.empty()) chunkIter->ReadBytes(bytes.data(),int(bytes.size()));
+				if(++grefChunks == 1)
+					grefError = ParseGeometryReference(bytes.data(),int(bytes.size()),gref);
+				break;
+			}
+			case IFFTAG('U','V','C','L'):
+			{
+				static_assert(sizeof(UVColorOnDisk) == 12, "UVCL record is 12 bytes");
+				++uvclChunks;
+				if(chunkIter->BytesLeft() % int(sizeof(UVColorOnDisk)) != 0)
+				{
+					uvcl.clear();		// size checked against the geometry below
+					break;
+				}
+				uvcl.resize(chunkIter->BytesLeft() / sizeof(UVColorOnDisk));
+				if(!uvcl.empty()) chunkIter->ReadBytes(uvcl.data(),int(uvcl.size()*sizeof(UVColorOnDisk)));
+				break;
+			}
             case IFFTAG('L','R','I','G'):
             {
+                sawLionRig = true;
                 // v1: version/count followed by region, weight and pivot XYZ (16.16).
                 // Invalid optional metadata is discarded, never partially applied.
                 uint32 version=0,count=0;
@@ -259,6 +541,7 @@ RenderObject3D::RenderObject3D(Memory& memory, binistream& input,int32 userData,
             {
                 // DFRM v1 (renderassets/dfrm_deform.h). Same rule as LRIG: invalid
                 // optional metadata is discarded, never partially applied.
+                sawDeform = true;
                 std::vector<uint8> bytes(chunkIter->BytesLeft());
                 if(!bytes.empty()) chunkIter->ReadBytes(bytes.data(),int(bytes.size()));
                 auto data=std::make_shared<wf_render::DfrmData>();
@@ -364,6 +647,42 @@ RenderObject3D::RenderObject3D(Memory& memory, binistream& input,int32 userData,
 //		ciffread << "meshIter bytes left = " << meshIter.BytesLeft() << std::endl;
 	}
 	assert( meshIter.BytesLeft() == 0 );
+	if(grefChunks)
+	{
+		char model[80];
+		const char* modelName = callbacks.LookupAssetName(userData);
+		std::snprintf(model,sizeof(model),"%s (asset %08x)",modelName && modelName[0] ? modelName : "?",unsigned(userData));
+		const char* geometryName = grefError ? "?" : gref.name;
+		if(grefError) SharedGeometryFail(model,geometryName,grefError);
+		if(grefChunks != 1) SharedGeometryFail(model,geometryName,"more than one GREF chunk");
+		if(vertexList || faceList) SharedGeometryFail(model,geometryName,"a GREF model must not carry VRTX or FACE");
+		if(sawLionRig || sawDeform) SharedGeometryFail(model,geometryName,"a GREF model must not carry LRIG or DFRM (they write vertices or normals in place)");
+		if(!materials || materialCount < 1) SharedGeometryFail(model,geometryName,"a GREF model needs a MATL chunk");
+		if(uvclChunks != 1) SharedGeometryFail(model,geometryName,"a GREF model needs exactly one UVCL chunk");
+		if(uvcl.size() != gref.vertexCount) SharedGeometryFail(model,geometryName,"UVCL does not hold one record per GREF vertex");
+
+		const int32 geometryID = callbacks.LookupGeometry(gref.name,userData);
+		if(geometryID == 0) SharedGeometryFail(model,geometryName,"no asset of that name in the model's room");
+		_sharedGeometry = AcquireSharedGeometry(geometryID,gref,callbacks,model);
+		if(_sharedGeometry->maxMaterialIndex >= materialCount) SharedGeometryFail(model,geometryName,"a face material index is out of range for this model's MATL");
+
+		// Own vertex array: shared position + this appearance's UV and colour,
+		// in the geometry's vertex order (as the VRTX case builds it).
+		vertexCount = int(gref.vertexCount);
+		vertexList = new (memory) Vertex3D[vertexCount];
+		assert(ValidPtr(vertexList));
+		for(int index=0;index<vertexCount;++index)
+		{
+			vertexList[index].u = Scalar::FromFixed32(uvcl[index].u);
+			vertexList[index].v = Scalar::FromFixed32(uvcl[index].v);
+			vertexList[index].color = uvcl[index].color;
+			vertexList[index].position = _sharedGeometry->positions[index];
+		}
+		faceCount = int(gref.faceCount);
+		// Shared and immutable: nothing writes through _faceList for this object
+		// (GetWritableFaceList refuses it, and LRIG/DFRM are rejected above).
+		faceList = const_cast<TriFace*>(_sharedGeometry->faces.data());
+	}
 	assert(vertexCount > 0);
 	assert(faceCount > 0);
 	_materialCount = materialCount;	// captured for SetMaterialColor() range checks

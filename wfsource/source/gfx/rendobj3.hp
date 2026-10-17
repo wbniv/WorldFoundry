@@ -59,6 +59,35 @@ struct StaticMeshBake;		// gfx/glpipeline/static_mesh.cc (E3 phase 1)
 struct RecordedFace;
 struct RBStaticTriangle;
 
+//============================================================================
+// Shared model geometry v1 (see the comment above the loader in rendobj3.cc).
+// An appearance MODL carries GREF + UVCL + MATL and no VRTX/FACE; GREF names a
+// GEOM { POSN, FACE } asset in the appearance's own room.
+
+struct GeometryReferenceOnDisk		// the GREF chunk, 52 bytes
+{
+	uint32 version;					// 1
+	uint32 vertexCount;
+	uint32 faceCount;
+	uint32 posCrc32;				// CRC-32/ISO-HDLC of the POSN payload
+	uint32 faceCrc32;				// ... and of the FACE payload
+	char name[32];					// lowercase geometry asset name, NUL-terminated
+};
+
+// Validate a GREF payload. Returns NULL, or why it is malformed.
+const char* ParseGeometryReference(const void* payload, int size, GeometryReferenceOnDisk& out);
+// Read the GEOM asset in `geometry` and check it against `ref`: exactly one
+// POSN and FACE, counts, both CRCs and every face's vertex indices. Fills the
+// records as stored (positions as fixed32 x,y,z triples). Returns NULL, or why
+// it does not match. Rendering and collision both read through this.
+const char* ReadSharedGeometry(binistream& geometry, const GeometryReferenceOnDisk& ref,
+	std::vector<int32>& positions, std::vector<_TriFaceOnDisk>& faces);
+uint32 SharedGeometryCrc32(const void* data, size_t size);
+
+// Immutable positions and material-sorted faces shared by every RenderObject3D
+// whose GREF names the same geometry asset. Defined in rendobj3.cc.
+struct SharedModelGeometry;
+
 class RenderObject3D
 {
 public:
@@ -90,8 +119,14 @@ public:
 	int GetVertexCount() const;	// should only be used by the animation system
 	// Writable faces, for a deformer that keeps face normals current (DFRM).
 	// Like the vertex list, it takes the object off the static-mesh path.
-	TriFace* GetWritableFaceList() { _staticState = STATIC_DEFORMED; return _faceList; }
+	// A shared-geometry model's faces are shared by other objects: refused.
+	TriFace* GetWritableFaceList();
 	int GetFaceCount() const;	// measurement only (E3 phase 0 mesh-stats report)
+	const TriFace* GetFaceList() const { return _faceList; }	// read-only, for tests
+	// Shared model geometry: true when this object's faces come from a GREF's
+	// shared record. Live records, for lifetime tests and diagnostics.
+	bool UsesSharedGeometry() const { return bool(_sharedGeometry); }
+	static int SharedGeometryLiveCount();
 	// Read-only material access for tests (deformer_golden records lion palettes).
 	int GetMaterialCount() const { return _materialCount; }
 	const Material& GetMaterial(int index) const { return _materialList[index]; }
@@ -107,6 +142,9 @@ private:
 	std::vector<Primitive> _runtimePrimitives;
     std::vector<wf_render::LionRig> _lionRig;
 	std::shared_ptr<const wf_render::DfrmData> _dfrm;
+	// Owner of _faceList for a GREF model (NULL otherwise). Each holder keeps
+	// the record alive; the last one destroyed frees it (rendobj3.cc).
+	std::shared_ptr<const SharedModelGeometry> _sharedGeometry;
 	Primitive*	_primList[ORDER_TABLES];				// array of primitives, same # as face list
 	Material*	_materialList;	// non-const so SetMaterialColor() can mutate; for runtime per-face color override (qbert cube consolidation, 2026-05-10).
 	int			_materialCount;	// kept so SetMaterialColor() can range-check; populated by the on-disk constructor.

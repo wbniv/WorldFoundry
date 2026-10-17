@@ -62,7 +62,7 @@ def uv_b(i):
     return 65536 - i * 1024, 4096 + i * 2048, 0x80FF80 + i
 
 
-MATL = material(6, 0xFFFFFF00, b'cube.tga') + material(1, 0x00FF0000)
+MATL = material(6, 0x00FFFFFF, b'cube.tga') + material(1, 0x0000FF00)   # Color::Validate: top byte 0
 
 
 def posn_payload(positions):
@@ -106,7 +106,8 @@ def write(out):
     bad = {
         'pos-crc': (gref(b'cube_geo.iff', n, m, crc32(posn) ^ 1, crc32(face)), uvcl['a'], geometry),
         'face-crc': (gref(b'cube_geo.iff', n, m, crc32(posn), crc32(face) ^ 1), uvcl['a'], geometry),
-        'vertex-count': (gref(b'cube_geo.iff', n + 1, m, crc32(posn), crc32(face)), uvcl['a'], geometry),
+        'vertex-count': (gref(b'cube_geo.iff', n + 1, m, crc32(posn), crc32(face)),
+                         uvcl['a'] + struct.pack('<iiI', 0, 0, 0), geometry),   # UVCL agrees with GREF
         'uvcl-count': (good, uvcl['a'][:-12], geometry),
         'face-index': (gref(b'cube_geo.iff', n, m, crc32(posn), crc32(bad_face)), uvcl['a'],
                        chunk(b'GEOM', chunk(b'POSN', posn) + chunk(b'FACE', bad_face))),
@@ -116,7 +117,7 @@ def write(out):
     for case, (g, u, geo) in bad.items():
         files[f'bad/{case}/cube_geo.iff'] = geo
         files[f'bad/{case}/cube_a.iff'] = appearance(g, u)
-    one_material = material(1, 0x00FF0000)
+    one_material = material(1, 0x0000FF00)
     files['bad/material-index/cube_geo.iff'] = geometry
     files['bad/material-index/cube_a.iff'] = appearance(good, uvcl['a'], matl=one_material)
     files['bad/lrig/cube_geo.iff'] = geometry

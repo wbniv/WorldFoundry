@@ -57,3 +57,28 @@ GameGfxCallbacks::LookupTexture(const char* name, int32 userData) const         
 
 //==============================================================================
 
+//==============================================================================
+// Shared model geometry: levcomp registers a GREF appearance's geometry in the
+// appearance's own room slot, so the room bits of userData (the appearance's
+// packed id) select it, and that slot is resident while the appearance loads.
+
+int32
+GameGfxCallbacks::LookupGeometry(const char* name, int32 userData) const
+{
+   return _assetManager.LookupAssetID(name,packedAssetID(userData).Room());
+}
+
+binistream
+GameGfxCallbacks::GetGeometryStream(int32 geometryAssetID) const
+{
+   return _assetManager.GetAssetStream(packedAssetID(geometryAssetID));
+}
+
+const char*
+GameGfxCallbacks::LookupAssetName(int32 userData) const
+{
+   const char* name = _assetManager.FindAssetName(userData);
+   return name ? name : "";
+}
+
+//==============================================================================

@@ -93,6 +93,11 @@ public:
    void ReadAssetMap(binistream& in);
    LookupTextureStruct LookupTexture(const char* name, int32 userData);			// in streaming, this should be an asset ID
 	inline const char* LookupAssetName( packedAssetID idAsset );   // kts this is only used by mattes, the level conversion process needs to be updated so that the names are not needed
+	// Shared model geometry: the asset named `name` (lowercase, as ASMP stores
+	// it) whose packed id is in `room` (ROOM_PERM_INDEX for permanents), or the
+	// invalid id 0 when there is none. FindAssetName: NULL when unknown.
+	int32 LookupAssetID( const char* name, int32 room ) const;
+	const char* FindAssetName( int32 idAsset ) const;
    const void* LookupAssetMemory(packedAssetID id);
 
 	enum

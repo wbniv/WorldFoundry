@@ -265,6 +265,32 @@ AssetManager::ReadAssetMap(binistream& mapStream)
 
 //==============================================================================
 
+int32
+AssetManager::LookupAssetID(const char* name, int32 room) const
+{
+	assert(ValidPtr(name));
+	for(int index=0;index<_assetStringMapEntries;++index)
+	{
+		const AssetStringMap& entry = _assetStringMap[index];
+		if(entry._id.Room() == room && strncmp(entry._name,name,sizeof(entry._name)) == 0)
+			return entry._id.ID();
+	}
+	return 0;
+}
+
+//==============================================================================
+
+const char*
+AssetManager::FindAssetName(int32 idAsset) const
+{
+	for(int index=0;index<_assetStringMapEntries;++index)
+		if(_assetStringMap[index]._id.ID() == idAsset)
+			return _assetStringMap[index]._name;
+	return NULL;
+}
+
+//==============================================================================
+
 binistream
 AssetManager::GetAssetStream(packedAssetID asset) const  // return a binistream which will iterate the given asset
 {
