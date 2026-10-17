@@ -590,6 +590,8 @@ Ranks are suggestions; a Fable session ranks the TODO entry.
 
     <img src="2026-10-16-saltwater-seahorses/evidence/phase3/behaviour-sequence.png" width="700">
 
+    History: this run and the second rerun below were made before six pairs (`32821533`), so they verify the 0..2 range only.
+
     **Rerun on Chromecast 1** (2026‑10‑16, 22:30–23:00 +07, PC back on the home Wi‑Fi). The APKs are the frozen `0401c619` fallbacks, not a fresh build of the merged branch: `/` had 4.1 GB free, under the 5 GB floor for a Gradle and `.cxx` build, so the normals migration on `4d318485` is not covered on the device. All five hashes match `variants.json`.
 
     ```
@@ -652,7 +654,7 @@ Ranks are suggestions; a Fable session ranks the TODO entry.
 
     Evidence: `docs/diagnostics/seahorse-phase3-cast1/summary.json`.
 
-    **Second rerun on Chromecast 1, merged code** (2026‑10‑17, 08:40–09:35 +07). The run above found a real Phase 3 bug in its phone model: two entries with id 8. The `Seahorses` sheet header (kind 5) took the `Seahorses` field's binding in `scripts/build-object-properties.py` `catalog()`, and the duplicate-id check skips structural entries. Fixed in `bada66c5`: headers and groups never take a binding, so their id is always 0. Regression tests are `test_sheet_header_sharing_a_field_name_keeps_id_zero` and `test_planted_tank_catalog_has_unique_field_ids`. Regenerating the planted tank changes one byte in each of `settings.rprp`, `settings-catalog.inc` and the catalog inside `aquarium_plants-standalone.iff` (8 → 0). The baseline `settings` and `settings-gallery` catalogs are byte-identical. The validator's Greeting predicate was the orchestrator's brief, fixed in `~/chromecast-coordinator` `f5fb87e`.
+    **Second rerun on Chromecast 1, merged code** (2026‑10‑17, 08:40–09:35 +07; two pairs, before `32821533`; `bada66c5` is `0d5e1aba` after the rebase onto six pairs). The run above found a real Phase 3 bug in its phone model: two entries with id 8. The `Seahorses` sheet header (kind 5) took the `Seahorses` field's binding in `scripts/build-object-properties.py` `catalog()`, and the duplicate-id check skips structural entries. Fixed in `bada66c5`: headers and groups never take a binding, so their id is always 0. Regression tests are `test_sheet_header_sharing_a_field_name_keeps_id_zero` and `test_planted_tank_catalog_has_unique_field_ids`. Regenerating the planted tank changes one byte in each of `settings.rprp`, `settings-catalog.inc` and the catalog inside `aquarium_plants-standalone.iff` (8 → 0). The baseline `settings` and `settings-gallery` catalogs are byte-identical. The validator's Greeting predicate was the orchestrator's brief, fixed in `~/chromecast-coordinator` `f5fb87e`.
 
     This run uses an APK built from `bada66c5`: the merged Phase 3, the face-normals migration, and the cooker fix. Its menu bundle was rebuilt locally and not committed.
 
@@ -700,6 +702,38 @@ Ranks are suggestions; a Fable session ranks the TODO entry.
     <img src="../diagnostics/seahorse-phase3-cast1/merged-bada66c5/menu-check/freshwater/planted-tank-screenshot.png" width="700">
 
     **PARTIAL, not a pass** (2026‑10‑17). On the merged code, selector, Back, Home and resume pass with every variant. Each authored setting shows the expected seahorses and posts. Logcat is clean. The in-game Hold A → Apply run (`aquarium-seahorses`) is **pending deploy**: the fixed validator was not in `/opt` when this run finished. Rerun it on `~/tmp/seahorse-phase3/aquarium-seahorse-phase3-bada66c5.apk` once it is deployed. Evidence: `docs/diagnostics/seahorse-phase3-cast1/merged-bada66c5/summary.json`.
+
+    **Six-pair rerun on Chromecast 1** (2026‑10‑17). The APK is built from `b788d43f`: `origin/2026-new-level` `d8d215ae` (six pairs and the 3D picker) plus the rebased sheet-header fix. The menu bundle was rebuilt locally and not committed. The variants come from origin's script.
+
+    ```
+    $ sha256sum ~/tmp/seahorse-phase3/aquarium-seahorse6-b788d43f.apk
+    fd1731080bfad5f8644c201e1d0fbfa695a7983f983435241978ccf2a98a61e6
+    $ python3 scripts/build-planted-seahorse-variants.py --base-apk …/aquarium-seahorse6-b788d43f.apk --out …/variants-b788d43f --variants none pair1 pair2 pair6 freshwater
+    {"none": "768c762839bb", "pair1": "86def8174253", "pair2": "ba7f8c3e67e5", "pair6": "40424bdaea6f", "freshwater": "bd3383807b9d"}
+    $ task chromecast:check DEVICE=chromecast-test-01 APP=aquarium VALIDATOR=menu-back APK=…/variants-b788d43f/{pair6,none}.apk
+    J-596b791f43c6: completed
+    J-b5ec31187d7e: completed
+    pair6 8 scenes PASS betta [2429] bad-log-lines 0 installed ['40424bdaea6f']
+    none 8 scenes PASS betta [1779] bad-log-lines 0 installed ['768c762839bb']
+    $ grep -c "range(int(top) + 1)" /opt/wf-device-coordinator/scripts/wf_device/plugins/android/validators/seahorse_checks.py
+    0
+    ```
+
+    | Variant | Job | Planted tank on the TV |
+    |---|---|---|
+    | 6 pairs (default) | J‑596b791f43c6 | Saltwater. Twelve seahorses, one pair on each of six posts (four new grey posts, the red whip, the grey T‑post). Urchin on the sand. 14.2 FPS. |
+    | None | J‑b5ec31187d7e | Saltwater. No seahorses and no posts; urchin only. 21.0 FPS. |
+    | Freshwater | J‑5c14c0313165 | Queued behind other owners' profile jobs when this was recorded. |
+
+    <img src="../diagnostics/seahorse-phase3-cast1/six-pairs-b788d43f/menu-check/pair6/planted-tank-screenshot.png" width="700">
+
+    <img src="../diagnostics/seahorse-phase3-cast1/six-pairs-b788d43f/menu-check/none/planted-tank-screenshot.png" width="700">
+
+    The pair1 and pair2 jobs (J‑142b7d475821, J‑7d3135b3dc28) were cancelled to free the congested device. Those counts were shown on `bada66c5` above.
+
+    **PARTIAL, not a pass** (2026‑10‑17): on the six-pair build, selector, Back, Home and resume pass with 6 pairs and with None. Each shows the expected seahorses and posts, and logcat is clean. Still open:
+    - freshwater (J‑5c14c0313165, queued);
+    - `aquarium-seahorses` on the base APK, which steps through every count 0..6. It is **pending deploy**: the `range(int(top) + 1)` validator is not yet in `/opt`.
 11. The eight-tank selector release is reinstalled on each Chromecast, and its installed hash matches the build.
 
     ```
