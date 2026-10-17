@@ -7,5 +7,6 @@
   "close-idle/cpu/round-2": "J-80544ac040b2",
   "close-crawl/gpu/round-2": "J-89795ac3f6d5",
   "close-crawl/cpu/round-2": "J-27fbaa42fc50",
-  "close-idle/cpu/round-3": "J-bf2f41ca05e6"
+  "close-idle/cpu/round-3": "J-bf2f41ca05e6",
+  "close-idle/gpu/round-3": "J-0d2afeba096d"
 }

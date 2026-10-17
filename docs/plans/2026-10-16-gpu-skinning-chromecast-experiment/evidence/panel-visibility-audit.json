@@ -1,0 +1,913 @@
+{
+  "purpose": "Phone-controller panel visibility in timing captures; an audit, not a measurement.",
+  "detector": "QR field inside the panel rectangle: >=25% white and >=15% black samples (x 140-700, y 240-800, 8 px grid).",
+  "sessions_with_panel": [
+    "close-idle/gpu/round-3"
+  ],
+  "sessions_without_panel": [
+    "cast2-populations/population/cpu-no-cull/profile",
+    "cast2-populations/population/cpu-no-cull/round-1",
+    "cast2-populations/population/cpu-no-cull/round-2",
+    "cast2-populations/population/cpu-no-cull/round-3",
+    "cast2-populations/population/cpu/profile",
+    "cast2-populations/population/cpu/round-1",
+    "cast2-populations/population/cpu/round-2",
+    "cast2-populations/population/cpu/round-3",
+    "cast2-populations/population/gpu-no-cull/profile",
+    "cast2-populations/population/gpu-no-cull/round-1",
+    "cast2-populations/population/gpu-no-cull/round-2",
+    "cast2-populations/population/gpu-no-cull/round-3",
+    "cast2-populations/population/gpu/profile",
+    "cast2-populations/population/gpu/round-1",
+    "cast2-populations/population/gpu/round-2",
+    "cast2-populations/population/gpu/round-3",
+    "close-crawl/cpu/round-1",
+    "close-crawl/cpu/round-2",
+    "close-crawl/gpu/round-1",
+    "close-crawl/gpu/round-2",
+    "close-idle/cpu/round-1",
+    "close-idle/cpu/round-2",
+    "close-idle/cpu/round-3",
+    "close-idle/gpu/round-1",
+    "close-idle/gpu/round-2",
+    "failed-close-idle-gpu-round-3-J-da19a5050cff"
+  ],
+  "sessions": {
+    "close-idle/cpu/round-1": {
+      "job": "J-b772c10c99a3",
+      "device": "chromecast-test-01",
+      "coordinator_back_sent": "not-recorded (pre-8c24437: Back sent)",
+      "coordinator_panel_visibility": "not-recorded",
+      "session_screenshot_shows_panel": false,
+      "cases": {
+        "none": {
+          "capture_shows_panel": false,
+          "panel_opened": true,
+          "back_hid_panel": true,
+          "phone_connected": false,
+          "back_seconds_after_open": 6.31
+        },
+        "pair1": {
+          "capture_shows_panel": false,
+          "panel_opened": true,
+          "back_hid_panel": true,
+          "phone_connected": false,
+          "back_seconds_after_open": 6.381
+        },
+        "pair2": {
+          "capture_shows_panel": false,
+          "panel_opened": true,
+          "back_hid_panel": true,
+          "phone_connected": false,
+          "back_seconds_after_open": 6.177
+        },
+        "pair6": {
+          "capture_shows_panel": false,
+          "panel_opened": true,
+          "back_hid_panel": true,
+          "phone_connected": false,
+          "back_seconds_after_open": 6.457
+        }
+      }
+    },
+    "close-idle/gpu/round-1": {
+      "job": "J-2676c1a59ed6",
+      "device": "chromecast-test-01",
+      "coordinator_back_sent": "not-recorded (pre-8c24437: Back sent)",
+      "coordinator_panel_visibility": "not-recorded",
+      "session_screenshot_shows_panel": false,
+      "cases": {
+        "none": {
+          "capture_shows_panel": false,
+          "panel_opened": true,
+          "back_hid_panel": true,
+          "phone_connected": false,
+          "back_seconds_after_open": 6.195
+        },
+        "pair1": {
+          "capture_shows_panel": false,
+          "panel_opened": true,
+          "back_hid_panel": true,
+          "phone_connected": false,
+          "back_seconds_after_open": 5.988
+        },
+        "pair2": {
+          "capture_shows_panel": false,
+          "panel_opened": true,
+          "back_hid_panel": true,
+          "phone_connected": false,
+          "back_seconds_after_open": 6.398
+        },
+        "pair6": {
+          "capture_shows_panel": false,
+          "panel_opened": true,
+          "back_hid_panel": true,
+          "phone_connected": false,
+          "back_seconds_after_open": 6.231
+        }
+      }
+    },
+    "close-crawl/cpu/round-1": {
+      "job": "J-310f760c47c1",
+      "device": "chromecast-test-01",
+      "coordinator_back_sent": "not-recorded (pre-8c24437: Back sent)",
+      "coordinator_panel_visibility": "not-recorded",
+      "session_screenshot_shows_panel": false,
+      "cases": {
+        "none": {
+          "capture_shows_panel": false,
+          "panel_opened": true,
+          "back_hid_panel": true,
+          "phone_connected": false,
+          "back_seconds_after_open": 6.183
+        },
+        "pair1": {
+          "capture_shows_panel": false,
+          "panel_opened": true,
+          "back_hid_panel": true,
+          "phone_connected": false,
+          "back_seconds_after_open": 6.374
+        },
+        "pair2": {
+          "capture_shows_panel": false,
+          "panel_opened": true,
+          "back_hid_panel": true,
+          "phone_connected": false,
+          "back_seconds_after_open": 5.683
+        },
+        "pair6": {
+          "capture_shows_panel": false,
+          "panel_opened": true,
+          "back_hid_panel": true,
+          "phone_connected": false,
+          "back_seconds_after_open": 6.028
+        }
+      }
+    },
+    "close-crawl/gpu/round-1": {
+      "job": "J-8151451b4e91",
+      "device": "chromecast-test-01",
+      "coordinator_back_sent": "not-recorded (pre-8c24437: Back sent)",
+      "coordinator_panel_visibility": "not-recorded",
+      "session_screenshot_shows_panel": false,
+      "cases": {
+        "none": {
+          "capture_shows_panel": false,
+          "panel_opened": true,
+          "back_hid_panel": true,
+          "phone_connected": false,
+          "back_seconds_after_open": 6.281
+        },
+        "pair1": {
+          "capture_shows_panel": false,
+          "panel_opened": true,
+          "back_hid_panel": true,
+          "phone_connected": false,
+          "back_seconds_after_open": 5.944
+        },
+        "pair2": {
+          "capture_shows_panel": false,
+          "panel_opened": true,
+          "back_hid_panel": true,
+          "phone_connected": false,
+          "back_seconds_after_open": 6.266
+        },
+        "pair6": {
+          "capture_shows_panel": false,
+          "panel_opened": true,
+          "back_hid_panel": true,
+          "phone_connected": false,
+          "back_seconds_after_open": 6.244
+        }
+      }
+    },
+    "close-idle/gpu/round-2": {
+      "job": "J-084b4f52095d",
+      "device": "chromecast-test-01",
+      "coordinator_back_sent": "not-recorded (pre-8c24437: Back sent)",
+      "coordinator_panel_visibility": "not-recorded",
+      "session_screenshot_shows_panel": false,
+      "cases": {
+        "none": {
+          "capture_shows_panel": false,
+          "panel_opened": true,
+          "back_hid_panel": true,
+          "phone_connected": false,
+          "back_seconds_after_open": 6.121
+        },
+        "pair1": {
+          "capture_shows_panel": false,
+          "panel_opened": true,
+          "back_hid_panel": true,
+          "phone_connected": false,
+          "back_seconds_after_open": 5.85
+        },
+        "pair2": {
+          "capture_shows_panel": false,
+          "panel_opened": true,
+          "back_hid_panel": true,
+          "phone_connected": false,
+          "back_seconds_after_open": 6.159
+        },
+        "pair6": {
+          "capture_shows_panel": false,
+          "panel_opened": true,
+          "back_hid_panel": true,
+          "phone_connected": false,
+          "back_seconds_after_open": 6.195
+        }
+      }
+    },
+    "close-idle/cpu/round-2": {
+      "job": "J-80544ac040b2",
+      "device": "chromecast-test-01",
+      "coordinator_back_sent": "not-recorded (pre-8c24437: Back sent)",
+      "coordinator_panel_visibility": "not-recorded",
+      "session_screenshot_shows_panel": false,
+      "cases": {
+        "none": {
+          "capture_shows_panel": false,
+          "panel_opened": true,
+          "back_hid_panel": true,
+          "phone_connected": false,
+          "back_seconds_after_open": 5.804
+        },
+        "pair1": {
+          "capture_shows_panel": false,
+          "panel_opened": true,
+          "back_hid_panel": true,
+          "phone_connected": false,
+          "back_seconds_after_open": 6.164
+        },
+        "pair2": {
+          "capture_shows_panel": false,
+          "panel_opened": true,
+          "back_hid_panel": true,
+          "phone_connected": false,
+          "back_seconds_after_open": 6.264
+        },
+        "pair6": {
+          "capture_shows_panel": false,
+          "panel_opened": true,
+          "back_hid_panel": true,
+          "phone_connected": false,
+          "back_seconds_after_open": 5.8
+        }
+      }
+    },
+    "close-crawl/gpu/round-2": {
+      "job": "J-89795ac3f6d5",
+      "device": "chromecast-test-01",
+      "coordinator_back_sent": "not-recorded (pre-8c24437: Back sent)",
+      "coordinator_panel_visibility": "not-recorded",
+      "session_screenshot_shows_panel": false,
+      "cases": {
+        "none": {
+          "capture_shows_panel": false,
+          "panel_opened": true,
+          "back_hid_panel": true,
+          "phone_connected": false,
+          "back_seconds_after_open": 5.755
+        },
+        "pair1": {
+          "capture_shows_panel": false,
+          "panel_opened": true,
+          "back_hid_panel": true,
+          "phone_connected": false,
+          "back_seconds_after_open": 6.848
+        },
+        "pair2": {
+          "capture_shows_panel": false,
+          "panel_opened": true,
+          "back_hid_panel": true,
+          "phone_connected": false,
+          "back_seconds_after_open": 5.843
+        },
+        "pair6": {
+          "capture_shows_panel": false,
+          "panel_opened": true,
+          "back_hid_panel": true,
+          "phone_connected": false,
+          "back_seconds_after_open": 5.791
+        }
+      }
+    },
+    "close-crawl/cpu/round-2": {
+      "job": "J-27fbaa42fc50",
+      "device": "chromecast-test-01",
+      "coordinator_back_sent": "not-recorded (pre-8c24437: Back sent)",
+      "coordinator_panel_visibility": "not-recorded",
+      "session_screenshot_shows_panel": false,
+      "cases": {
+        "none": {
+          "capture_shows_panel": false,
+          "panel_opened": true,
+          "back_hid_panel": true,
+          "phone_connected": false,
+          "back_seconds_after_open": 5.747
+        },
+        "pair1": {
+          "capture_shows_panel": false,
+          "panel_opened": true,
+          "back_hid_panel": true,
+          "phone_connected": false,
+          "back_seconds_after_open": 5.882
+        },
+        "pair2": {
+          "capture_shows_panel": false,
+          "panel_opened": true,
+          "back_hid_panel": true,
+          "phone_connected": false,
+          "back_seconds_after_open": 5.739
+        },
+        "pair6": {
+          "capture_shows_panel": false,
+          "panel_opened": true,
+          "back_hid_panel": true,
+          "phone_connected": false,
+          "back_seconds_after_open": 5.681
+        }
+      }
+    },
+    "close-idle/cpu/round-3": {
+      "job": "J-bf2f41ca05e6",
+      "device": "chromecast-test-01",
+      "coordinator_back_sent": "not-recorded (pre-8c24437: Back sent)",
+      "coordinator_panel_visibility": "not-recorded",
+      "session_screenshot_shows_panel": false,
+      "cases": {
+        "none": {
+          "capture_shows_panel": false,
+          "panel_opened": true,
+          "back_hid_panel": true,
+          "phone_connected": false,
+          "back_seconds_after_open": 5.916
+        },
+        "pair1": {
+          "capture_shows_panel": false,
+          "panel_opened": true,
+          "back_hid_panel": true,
+          "phone_connected": false,
+          "back_seconds_after_open": 5.953
+        },
+        "pair2": {
+          "capture_shows_panel": false,
+          "panel_opened": true,
+          "back_hid_panel": true,
+          "phone_connected": false,
+          "back_seconds_after_open": 5.787
+        },
+        "pair6": {
+          "capture_shows_panel": false,
+          "panel_opened": true,
+          "back_hid_panel": true,
+          "phone_connected": false,
+          "back_seconds_after_open": 6.032
+        }
+      }
+    },
+    "close-idle/gpu/round-3": {
+      "job": "J-0d2afeba096d",
+      "device": "chromecast-test-01",
+      "coordinator_back_sent": false,
+      "coordinator_panel_visibility": "unverified",
+      "session_screenshot_shows_panel": true,
+      "cases": {
+        "none": {
+          "capture_shows_panel": true,
+          "panel_opened": true,
+          "back_hid_panel": false,
+          "phone_connected": false
+        },
+        "pair1": {
+          "capture_shows_panel": true,
+          "panel_opened": true,
+          "back_hid_panel": false,
+          "phone_connected": false
+        },
+        "pair2": {
+          "capture_shows_panel": true,
+          "panel_opened": true,
+          "back_hid_panel": false,
+          "phone_connected": false
+        },
+        "pair6": {
+          "capture_shows_panel": true,
+          "panel_opened": true,
+          "back_hid_panel": false,
+          "phone_connected": false
+        }
+      }
+    },
+    "failed-close-idle-gpu-round-3-J-da19a5050cff": {
+      "job": "J-da19a5050cff",
+      "device": "chromecast-test-01",
+      "coordinator_back_sent": "not-recorded (pre-8c24437: Back sent)",
+      "coordinator_panel_visibility": "not-recorded",
+      "session_screenshot_shows_panel": false,
+      "cases": {
+        "none": {
+          "capture_shows_panel": false,
+          "panel_opened": true,
+          "back_hid_panel": true,
+          "phone_connected": false,
+          "back_seconds_after_open": 6.005
+        },
+        "pair2": {
+          "capture_shows_panel": false,
+          "panel_opened": true,
+          "back_hid_panel": true,
+          "phone_connected": false,
+          "back_seconds_after_open": 5.992
+        },
+        "pair6": {
+          "capture_shows_panel": false,
+          "panel_opened": true,
+          "back_hid_panel": true,
+          "phone_connected": false,
+          "back_seconds_after_open": 6.194
+        }
+      }
+    },
+    "cast2-populations/population/cpu-no-cull/profile": {
+      "job": "J-ca74aa106927",
+      "device": "chromecast-test-02",
+      "coordinator_back_sent": "not-recorded (pre-8c24437: Back sent)",
+      "coordinator_panel_visibility": "not-recorded",
+      "session_screenshot_shows_panel": false,
+      "cases": {
+        "1": {
+          "capture_shows_panel": false,
+          "panel_opened": true,
+          "back_hid_panel": true,
+          "phone_connected": false,
+          "back_seconds_after_open": 5.652
+        },
+        "16": {
+          "capture_shows_panel": false,
+          "panel_opened": true,
+          "back_hid_panel": true,
+          "phone_connected": false,
+          "back_seconds_after_open": 5.753
+        },
+        "4": {
+          "capture_shows_panel": false,
+          "panel_opened": true,
+          "back_hid_panel": true,
+          "phone_connected": false,
+          "back_seconds_after_open": 5.631
+        }
+      }
+    },
+    "cast2-populations/population/cpu-no-cull/round-1": {
+      "job": "J-3d882cfd89c5",
+      "device": "chromecast-test-02",
+      "coordinator_back_sent": "not-recorded (pre-8c24437: Back sent)",
+      "coordinator_panel_visibility": "not-recorded",
+      "session_screenshot_shows_panel": false,
+      "cases": {
+        "1": {
+          "capture_shows_panel": false,
+          "panel_opened": true,
+          "back_hid_panel": true,
+          "phone_connected": false,
+          "back_seconds_after_open": 5.688
+        },
+        "16": {
+          "capture_shows_panel": false,
+          "panel_opened": true,
+          "back_hid_panel": true,
+          "phone_connected": false,
+          "back_seconds_after_open": 5.618
+        },
+        "4": {
+          "capture_shows_panel": false,
+          "panel_opened": true,
+          "back_hid_panel": true,
+          "phone_connected": false,
+          "back_seconds_after_open": 5.689
+        }
+      }
+    },
+    "cast2-populations/population/cpu-no-cull/round-2": {
+      "job": "J-f6f316064593",
+      "device": "chromecast-test-02",
+      "coordinator_back_sent": "not-recorded (pre-8c24437: Back sent)",
+      "coordinator_panel_visibility": "not-recorded",
+      "session_screenshot_shows_panel": false,
+      "cases": {
+        "1": {
+          "capture_shows_panel": false,
+          "panel_opened": true,
+          "back_hid_panel": true,
+          "phone_connected": false,
+          "back_seconds_after_open": 5.897
+        },
+        "16": {
+          "capture_shows_panel": false,
+          "panel_opened": true,
+          "back_hid_panel": true,
+          "phone_connected": false,
+          "back_seconds_after_open": 5.703
+        },
+        "4": {
+          "capture_shows_panel": false,
+          "panel_opened": true,
+          "back_hid_panel": true,
+          "phone_connected": false,
+          "back_seconds_after_open": 5.712
+        }
+      }
+    },
+    "cast2-populations/population/cpu-no-cull/round-3": {
+      "job": "J-e3573a7cf01f",
+      "device": "chromecast-test-02",
+      "coordinator_back_sent": "not-recorded (pre-8c24437: Back sent)",
+      "coordinator_panel_visibility": "not-recorded",
+      "session_screenshot_shows_panel": false,
+      "cases": {
+        "1": {
+          "capture_shows_panel": false,
+          "panel_opened": true,
+          "back_hid_panel": true,
+          "phone_connected": false,
+          "back_seconds_after_open": 5.788
+        },
+        "16": {
+          "capture_shows_panel": false,
+          "panel_opened": true,
+          "back_hid_panel": true,
+          "phone_connected": false,
+          "back_seconds_after_open": 5.873
+        },
+        "4": {
+          "capture_shows_panel": false,
+          "panel_opened": true,
+          "back_hid_panel": true,
+          "phone_connected": false,
+          "back_seconds_after_open": 5.836
+        }
+      }
+    },
+    "cast2-populations/population/cpu/profile": {
+      "job": "J-9f38d64525e4",
+      "device": "chromecast-test-02",
+      "coordinator_back_sent": "not-recorded (pre-8c24437: Back sent)",
+      "coordinator_panel_visibility": "not-recorded",
+      "session_screenshot_shows_panel": false,
+      "cases": {
+        "1": {
+          "capture_shows_panel": false,
+          "panel_opened": true,
+          "back_hid_panel": true,
+          "phone_connected": false,
+          "back_seconds_after_open": 5.709
+        },
+        "16": {
+          "capture_shows_panel": false,
+          "panel_opened": true,
+          "back_hid_panel": true,
+          "phone_connected": false,
+          "back_seconds_after_open": 5.704
+        },
+        "4": {
+          "capture_shows_panel": false,
+          "panel_opened": true,
+          "back_hid_panel": true,
+          "phone_connected": false,
+          "back_seconds_after_open": 5.832
+        }
+      }
+    },
+    "cast2-populations/population/cpu/round-1": {
+      "job": "J-248e89210d61",
+      "device": "chromecast-test-02",
+      "coordinator_back_sent": "not-recorded (pre-8c24437: Back sent)",
+      "coordinator_panel_visibility": "not-recorded",
+      "session_screenshot_shows_panel": false,
+      "cases": {
+        "1": {
+          "capture_shows_panel": false,
+          "panel_opened": true,
+          "back_hid_panel": true,
+          "phone_connected": false,
+          "back_seconds_after_open": 5.87
+        },
+        "16": {
+          "capture_shows_panel": false,
+          "panel_opened": true,
+          "back_hid_panel": true,
+          "phone_connected": false,
+          "back_seconds_after_open": 5.792
+        },
+        "4": {
+          "capture_shows_panel": false,
+          "panel_opened": true,
+          "back_hid_panel": true,
+          "phone_connected": false,
+          "back_seconds_after_open": 5.841
+        }
+      }
+    },
+    "cast2-populations/population/cpu/round-2": {
+      "job": "J-300ce107be2f",
+      "device": "chromecast-test-02",
+      "coordinator_back_sent": "not-recorded (pre-8c24437: Back sent)",
+      "coordinator_panel_visibility": "not-recorded",
+      "session_screenshot_shows_panel": false,
+      "cases": {
+        "1": {
+          "capture_shows_panel": false,
+          "panel_opened": true,
+          "back_hid_panel": true,
+          "phone_connected": false,
+          "back_seconds_after_open": 5.743
+        },
+        "16": {
+          "capture_shows_panel": false,
+          "panel_opened": true,
+          "back_hid_panel": true,
+          "phone_connected": false,
+          "back_seconds_after_open": 5.782
+        },
+        "4": {
+          "capture_shows_panel": false,
+          "panel_opened": true,
+          "back_hid_panel": true,
+          "phone_connected": false,
+          "back_seconds_after_open": 5.792
+        }
+      }
+    },
+    "cast2-populations/population/cpu/round-3": {
+      "job": "J-ad6b36500631",
+      "device": "chromecast-test-02",
+      "coordinator_back_sent": "not-recorded (pre-8c24437: Back sent)",
+      "coordinator_panel_visibility": "not-recorded",
+      "session_screenshot_shows_panel": false,
+      "cases": {
+        "1": {
+          "capture_shows_panel": false,
+          "panel_opened": true,
+          "back_hid_panel": true,
+          "phone_connected": false,
+          "back_seconds_after_open": 5.609
+        },
+        "16": {
+          "capture_shows_panel": false,
+          "panel_opened": true,
+          "back_hid_panel": true,
+          "phone_connected": false,
+          "back_seconds_after_open": 5.753
+        },
+        "4": {
+          "capture_shows_panel": false,
+          "panel_opened": true,
+          "back_hid_panel": true,
+          "phone_connected": false,
+          "back_seconds_after_open": 5.796
+        }
+      }
+    },
+    "cast2-populations/population/gpu-no-cull/profile": {
+      "job": "J-7e279c3194ab",
+      "device": "chromecast-test-02",
+      "coordinator_back_sent": "not-recorded (pre-8c24437: Back sent)",
+      "coordinator_panel_visibility": "not-recorded",
+      "session_screenshot_shows_panel": false,
+      "cases": {
+        "1": {
+          "capture_shows_panel": false,
+          "panel_opened": true,
+          "back_hid_panel": true,
+          "phone_connected": false,
+          "back_seconds_after_open": 5.697
+        },
+        "16": {
+          "capture_shows_panel": false,
+          "panel_opened": true,
+          "back_hid_panel": true,
+          "phone_connected": false,
+          "back_seconds_after_open": 5.888
+        },
+        "4": {
+          "capture_shows_panel": false,
+          "panel_opened": true,
+          "back_hid_panel": true,
+          "phone_connected": false,
+          "back_seconds_after_open": 5.633
+        }
+      }
+    },
+    "cast2-populations/population/gpu-no-cull/round-1": {
+      "job": "J-25e202859de6",
+      "device": "chromecast-test-02",
+      "coordinator_back_sent": "not-recorded (pre-8c24437: Back sent)",
+      "coordinator_panel_visibility": "not-recorded",
+      "session_screenshot_shows_panel": false,
+      "cases": {
+        "1": {
+          "capture_shows_panel": false,
+          "panel_opened": true,
+          "back_hid_panel": true,
+          "phone_connected": false,
+          "back_seconds_after_open": 5.699
+        },
+        "16": {
+          "capture_shows_panel": false,
+          "panel_opened": true,
+          "back_hid_panel": true,
+          "phone_connected": false,
+          "back_seconds_after_open": 5.99
+        },
+        "4": {
+          "capture_shows_panel": false,
+          "panel_opened": true,
+          "back_hid_panel": true,
+          "phone_connected": false,
+          "back_seconds_after_open": 5.876
+        }
+      }
+    },
+    "cast2-populations/population/gpu-no-cull/round-2": {
+      "job": "J-36ea7304b79b",
+      "device": "chromecast-test-02",
+      "coordinator_back_sent": "not-recorded (pre-8c24437: Back sent)",
+      "coordinator_panel_visibility": "not-recorded",
+      "session_screenshot_shows_panel": false,
+      "cases": {
+        "1": {
+          "capture_shows_panel": false,
+          "panel_opened": true,
+          "back_hid_panel": true,
+          "phone_connected": false,
+          "back_seconds_after_open": 5.729
+        },
+        "16": {
+          "capture_shows_panel": false,
+          "panel_opened": true,
+          "back_hid_panel": true,
+          "phone_connected": false,
+          "back_seconds_after_open": 5.862
+        },
+        "4": {
+          "capture_shows_panel": false,
+          "panel_opened": true,
+          "back_hid_panel": true,
+          "phone_connected": false,
+          "back_seconds_after_open": 5.804
+        }
+      }
+    },
+    "cast2-populations/population/gpu-no-cull/round-3": {
+      "job": "J-bb3abdf0e9ab",
+      "device": "chromecast-test-02",
+      "coordinator_back_sent": "not-recorded (pre-8c24437: Back sent)",
+      "coordinator_panel_visibility": "not-recorded",
+      "session_screenshot_shows_panel": false,
+      "cases": {
+        "1": {
+          "capture_shows_panel": false,
+          "panel_opened": true,
+          "back_hid_panel": true,
+          "phone_connected": false,
+          "back_seconds_after_open": 5.772
+        },
+        "16": {
+          "capture_shows_panel": false,
+          "panel_opened": true,
+          "back_hid_panel": true,
+          "phone_connected": false,
+          "back_seconds_after_open": 5.793
+        },
+        "4": {
+          "capture_shows_panel": false,
+          "panel_opened": true,
+          "back_hid_panel": true,
+          "phone_connected": false,
+          "back_seconds_after_open": 5.759
+        }
+      }
+    },
+    "cast2-populations/population/gpu/profile": {
+      "job": "J-7c79a85acea4",
+      "device": "chromecast-test-02",
+      "coordinator_back_sent": "not-recorded (pre-8c24437: Back sent)",
+      "coordinator_panel_visibility": "not-recorded",
+      "session_screenshot_shows_panel": false,
+      "cases": {
+        "1": {
+          "capture_shows_panel": false,
+          "panel_opened": true,
+          "back_hid_panel": true,
+          "phone_connected": false,
+          "back_seconds_after_open": 5.651
+        },
+        "16": {
+          "capture_shows_panel": false,
+          "panel_opened": true,
+          "back_hid_panel": true,
+          "phone_connected": false,
+          "back_seconds_after_open": 5.654
+        },
+        "4": {
+          "capture_shows_panel": false,
+          "panel_opened": true,
+          "back_hid_panel": true,
+          "phone_connected": false,
+          "back_seconds_after_open": 5.688
+        }
+      }
+    },
+    "cast2-populations/population/gpu/round-1": {
+      "job": "J-df7ef4cc2a72",
+      "device": "chromecast-test-02",
+      "coordinator_back_sent": "not-recorded (pre-8c24437: Back sent)",
+      "coordinator_panel_visibility": "not-recorded",
+      "session_screenshot_shows_panel": false,
+      "cases": {
+        "1": {
+          "capture_shows_panel": false,
+          "panel_opened": true,
+          "back_hid_panel": true,
+          "phone_connected": false,
+          "back_seconds_after_open": 5.705
+        },
+        "16": {
+          "capture_shows_panel": false,
+          "panel_opened": true,
+          "back_hid_panel": true,
+          "phone_connected": false,
+          "back_seconds_after_open": 5.773
+        },
+        "4": {
+          "capture_shows_panel": false,
+          "panel_opened": true,
+          "back_hid_panel": true,
+          "phone_connected": false,
+          "back_seconds_after_open": 5.699
+        }
+      }
+    },
+    "cast2-populations/population/gpu/round-2": {
+      "job": "J-559c1098c7f5",
+      "device": "chromecast-test-02",
+      "coordinator_back_sent": "not-recorded (pre-8c24437: Back sent)",
+      "coordinator_panel_visibility": "not-recorded",
+      "session_screenshot_shows_panel": false,
+      "cases": {
+        "1": {
+          "capture_shows_panel": false,
+          "panel_opened": true,
+          "back_hid_panel": true,
+          "phone_connected": false,
+          "back_seconds_after_open": 5.652
+        },
+        "16": {
+          "capture_shows_panel": false,
+          "panel_opened": true,
+          "back_hid_panel": true,
+          "phone_connected": false,
+          "back_seconds_after_open": 5.569
+        },
+        "4": {
+          "capture_shows_panel": false,
+          "panel_opened": true,
+          "back_hid_panel": true,
+          "phone_connected": false,
+          "back_seconds_after_open": 5.705
+        }
+      }
+    },
+    "cast2-populations/population/gpu/round-3": {
+      "job": "J-1ef5fe06cc2c",
+      "device": "chromecast-test-02",
+      "coordinator_back_sent": "not-recorded (pre-8c24437: Back sent)",
+      "coordinator_panel_visibility": "not-recorded",
+      "session_screenshot_shows_panel": false,
+      "cases": {
+        "1": {
+          "capture_shows_panel": false,
+          "panel_opened": true,
+          "back_hid_panel": true,
+          "phone_connected": false,
+          "back_seconds_after_open": 6.022
+        },
+        "16": {
+          "capture_shows_panel": false,
+          "panel_opened": true,
+          "back_hid_panel": true,
+          "phone_connected": false,
+          "back_seconds_after_open": 5.844
+        },
+        "4": {
+          "capture_shows_panel": false,
+          "panel_opened": true,
+          "back_hid_panel": true,
+          "phone_connected": false,
+          "back_seconds_after_open": 5.766
+        }
+      }
+    }
+  }
+}

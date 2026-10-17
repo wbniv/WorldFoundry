@@ -43,6 +43,24 @@ full cast2 results are in `cast2-populations/results.json`. Corrected CPU/GPU
 checks are in `cast2-populations/corrected-cpu-gpu-profile-check.json`;
 these do not establish an adoption decision.
 
+## Phone-controller panel audit, 17 October
+
+`panel-visibility-audit.json` (from `scripts/audit-gpu-skinning-panel.py`)
+checks every timing capture for the phone-controller pairing panel. It is an
+audit, separate from the measurements. Every session before coordinator
+`8c24437` shows no panel: in each case the coordinator's Back hid it about
+6 s after launch, inside the 15 s or 30 s warmup. That covers all nine
+earlier cast1 aquarium rounds, the excluded J‑da19a5050cff and all 16 cast2
+population sessions.
+
+The first session under `8c24437`, close-idle GPU round 3 J‑0d2afeba096d,
+sent no Back. The panel stays over the scene through measurement in all four
+cases (pair2, pair6, None, pair1), and the logs show no phone connection.
+Its receipt, hashes and cleanup verify, but whether it can count beside the
+panel-free rounds is the user's decision. It is held, neither accepted nor
+dropped. Its captures show the LAN endpoint and pairing PIN, so they stay
+local. The curator refuses any capture that shows the panel.
+
 Earlier CPU profiles missed the final stream upload and used expensive
 per-face clocks. `cast2-populations/superseded-profiles-v1/` retains their
 provenance; they must not be used for CPU acceptance. Corrected profiles

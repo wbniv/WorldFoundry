@@ -15,8 +15,24 @@ baseline = importlib.util.module_from_spec(spec)
 spec.loader.exec_module(baseline)
 
 
+def require_visual_capture(folder):
+    """Each measured case keeps a readable, non-blank capture of the app layer."""
+    from PIL import Image  # Imported here so the timing analysis has no import-time image dependency.
+    path = folder / 'idle.png'
+    try:
+        with Image.open(path) as image:
+            image.load()
+            size = image.size
+            low, high = image.convert('L').getextrema()
+    except (OSError, ValueError) as error:
+        raise ValueError(f'Missing or unreadable visual capture: {path}: {error}') from error
+    if size[0] < 640 or size[1] < 360 or low == high:
+        raise ValueError(f'Blank or undersized visual capture: {path}')
+
+
 def presentation(folder, mode, pairs, population_study=False):
     row = baseline.presentation(folder, require_plant_fixture=not population_study)
+    require_visual_capture(folder)
     summary = baseline.read_json(folder / 'summary.json')
     for name in ['refresh_ms', 'p50_ms', 'p99_ms', 'missed_refresh_percent']:
         row[name] = summary[name]

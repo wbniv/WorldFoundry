@@ -467,6 +467,36 @@
       "scope": "Final level-load marker through end of captured engine log; cumulative earlier sessions excluded."
     },
     {
+      "path": "close-crawl/cpu/round-2/none/run-1/wf.log.gz",
+      "original_sha256": "4fe9b6562d33a42153cdd4d2a7a314670d9b5508803e7230c7f194787403615a",
+      "scoped_sha256": "7d16d40cb32e73f17842bfacf6eafcf2343a8750bd9f161556acbdc489931c0a",
+      "scope": "Final level-load marker through end of captured engine log; cumulative earlier sessions excluded."
+    },
+    {
+      "path": "close-crawl/cpu/round-2/pair1/run-1/wf.log.gz",
+      "original_sha256": "8fbd9dadd49239ea4ac5bcdba1cc5a0b9f26abc06ef27c58395c807727dc30f9",
+      "scoped_sha256": "68a2986ded6d59de536770de188b2d8cee9b992a916a4f2e0040ccc31660f76e",
+      "scope": "Final level-load marker through end of captured engine log; cumulative earlier sessions excluded."
+    },
+    {
+      "path": "close-crawl/cpu/round-2/pair2/run-1/wf.log.gz",
+      "original_sha256": "be2419f653554aeda6fa175d00da698412214770af5e145855daf5a6ed09b281",
+      "scoped_sha256": "e212a9d71e948d2049cd1feb0e2a40b125e66a3251ceb8cf9eafe835e7f25edc",
+      "scope": "Final level-load marker through end of captured engine log; cumulative earlier sessions excluded."
+    },
+    {
+      "path": "close-crawl/cpu/round-2/pair6/run-1/wf.log.gz",
+      "original_sha256": "bb9a248aac2dadcd5ac2a786d12595b5e0b84f5b2494377c7fecfb10210ff2d5",
+      "scoped_sha256": "8fa14da4d5e3fa4fe128cba642f09e3bb16d9036bf6f8389531211e60c35086f",
+      "scope": "Final level-load marker through end of captured engine log; cumulative earlier sessions excluded."
+    },
+    {
+      "path": "close-crawl/cpu/round-2/wf.log.gz",
+      "original_sha256": "4fe9b6562d33a42153cdd4d2a7a314670d9b5508803e7230c7f194787403615a",
+      "scoped_sha256": "7d16d40cb32e73f17842bfacf6eafcf2343a8750bd9f161556acbdc489931c0a",
+      "scope": "Final level-load marker through end of captured engine log; cumulative earlier sessions excluded."
+    },
+    {
       "path": "close-crawl/gpu/round-1/none/run-1/wf.log.gz",
       "original_sha256": "d2ee684889eb2fcca3e81a24e451d2d25b0d9036e686c3c3b834f9366595c8f2",
       "scoped_sha256": "8a9515b310cbac8047c9c64de9fb1787f8f2a896e7fc22c0a66d23bea89624a1",
@@ -584,6 +614,36 @@
       "path": "close-idle/cpu/round-2/wf.log.gz",
       "original_sha256": "29149c739f3a953579b378b0b5361b95510c473406a7f911253243ba137b70e1",
       "scoped_sha256": "227dc831f0345f9ebe9996ad2f06e65b6dfa949b42e8440fdd50ab091f81ed7a",
+      "scope": "Final level-load marker through end of captured engine log; cumulative earlier sessions excluded."
+    },
+    {
+      "path": "close-idle/cpu/round-3/none/run-1/wf.log.gz",
+      "original_sha256": "4adbf3dd90c6273fc4ff8da303e4a46036cb7f66d41beab2a580979ffd8cbd01",
+      "scoped_sha256": "66e0e1bc3e20a67af71ec1aea25b4a0eabe047e5c8bac62bb0df3771baa0999b",
+      "scope": "Final level-load marker through end of captured engine log; cumulative earlier sessions excluded."
+    },
+    {
+      "path": "close-idle/cpu/round-3/pair1/run-1/wf.log.gz",
+      "original_sha256": "11ed7dde96f8b09bf499162b0059000d55b9fc1b28246d6262f396d715ee0e6a",
+      "scoped_sha256": "732cbf08a4ce1011f10720a8771a8c63ee7ba113f18260ca69f17950f083bcae",
+      "scope": "Final level-load marker through end of captured engine log; cumulative earlier sessions excluded."
+    },
+    {
+      "path": "close-idle/cpu/round-3/pair2/run-1/wf.log.gz",
+      "original_sha256": "4f6844bb84035056488dbe4413cc66668d633865e87ad0e9bc476c06ac19fbc1",
+      "scoped_sha256": "cf4fdab3440f16fb4391905e4cdf37a7a9ca10d53a420565173da5863ce68c23",
+      "scope": "Final level-load marker through end of captured engine log; cumulative earlier sessions excluded."
+    },
+    {
+      "path": "close-idle/cpu/round-3/pair6/run-1/wf.log.gz",
+      "original_sha256": "80d84f8962460a4ec3d73dbcca4e28e1bd0446f327a94e7bb514319496885f73",
+      "scoped_sha256": "eba2fb2bd305ffa7799b01bfe11c75ab3d6e028fa1745b73a7068d11018f8a6d",
+      "scope": "Final level-load marker through end of captured engine log; cumulative earlier sessions excluded."
+    },
+    {
+      "path": "close-idle/cpu/round-3/wf.log.gz",
+      "original_sha256": "11ed7dde96f8b09bf499162b0059000d55b9fc1b28246d6262f396d715ee0e6a",
+      "scoped_sha256": "732cbf08a4ce1011f10720a8771a8c63ee7ba113f18260ca69f17950f083bcae",
       "scope": "Final level-load marker through end of captured engine log; cumulative earlier sessions excluded."
     },
     {

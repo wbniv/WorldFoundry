@@ -1,0 +1,115 @@
+"""Guards the GPU skinning evidence tooling.
+
+1. The strict analyzer rejects a measured case whose app-layer capture is
+   missing, blank or undersized. Before this check, `analyze-gpu-skinning.py`
+   validated timing, hashes and logs but never looked at a capture, so a
+   committed record without captures (the cast2 profile sessions) passed.
+2. The curator scopes engine logs to the final level-load marker, writes
+   deterministic gzip copies and never lists private session files.
+"""
+import gzip
+import hashlib
+import importlib.util
+import json
+from pathlib import Path
+import subprocess
+import sys
+
+import pytest
+from PIL import Image
+
+ROOT = Path(__file__).resolve().parents[1]
+
+
+def load(name):
+    spec = importlib.util.spec_from_file_location(name.replace('-', '_'), ROOT / 'scripts' / f'{name}.py')
+    module = importlib.util.module_from_spec(spec)
+    spec.loader.exec_module(module)
+    return module
+
+
+analyzer = load('analyze-gpu-skinning')
+
+
+def test_visual_capture_accepts_a_rendered_frame(tmp_path):
+    image = Image.new('RGB', (1920, 1080))
+    image.putpixel((900, 500), (200, 180, 40))
+    image.save(tmp_path / 'idle.png')
+    analyzer.require_visual_capture(tmp_path)
+
+
+@pytest.mark.parametrize('case', ['missing', 'blank', 'undersized', 'corrupt'])
+def test_visual_capture_rejects_unusable_evidence(tmp_path, case):
+    if case == 'blank':
+        Image.new('RGB', (1920, 1080)).save(tmp_path / 'idle.png')
+    elif case == 'undersized':
+        image = Image.new('RGB', (320, 180))
+        image.putpixel((1, 1), (255, 255, 255))
+        image.save(tmp_path / 'idle.png')
+    elif case == 'corrupt':
+        (tmp_path / 'idle.png').write_bytes(b'\x89PNG\r\n\x1a\nnot an image')
+    with pytest.raises(ValueError, match='visual capture'):
+        analyzer.require_visual_capture(tmp_path)
+
+
+def test_curator_scopes_logs_and_lists_only_allowed_files(tmp_path):
+    session = tmp_path / 'view' / 'gpu' / 'round-1'
+    run = session / 'pair1' / 'run-1'
+    run.mkdir(parents=True)
+    marker = b'zforth: INDEXOF_CAMSHOT = 1921 (expect 1921)'
+    log = b'older session\n' + marker + b'\nold\n' + marker + b'\ncurrent run\n'
+    (run / 'wf.log').write_bytes(log)
+    (run / 'meminfo.txt').write_text('TOTAL PSS: 1\n')
+    (run / 'summary.json').write_text('{}')
+    for private in ['logcat.txt', 'commands.json', 'connection-attempts.json', 'panel-dismissal.json']:
+        (session / private).write_text('{}')
+    (tmp_path / 'device-evidence-scope.json').write_text(json.dumps(dict(logs=[], excluded='local')))
+    command = [sys.executable, str(ROOT / 'scripts/curate-gpu-skinning-evidence.py'),
+               '--evidence', str(tmp_path), 'view/gpu/round-1']
+    listed = subprocess.run(command, check=True, capture_output=True, text=True).stdout.split()
+    assert sorted(listed) == ['device-evidence-scope.json', 'view/gpu/round-1/pair1/run-1/meminfo.txt.gz',
+                              'view/gpu/round-1/pair1/run-1/summary.json', 'view/gpu/round-1/pair1/run-1/wf.log.gz']
+    scoped = gzip.decompress((run / 'wf.log.gz').read_bytes())
+    assert scoped == marker + b'\ncurrent run\n'
+    assert (run / 'wf.log.gz').read_bytes()[4:8] == b'\0\0\0\0'  # deterministic mtime
+    entry, = json.loads((tmp_path / 'device-evidence-scope.json').read_text())['logs']
+    assert entry['original_sha256'] == hashlib.sha256(log).hexdigest()
+    assert entry['scoped_sha256'] == hashlib.sha256(scoped).hexdigest()
+
+
+def panel_capture(path):
+    """A 1920x1080 frame with the phone panel's QR field: white with black modules."""
+    image = Image.new('RGB', (1920, 1080), (40, 90, 60))
+    image.paste((255, 255, 255), (132, 232, 706, 806))
+    for y in range(240, 800, 48):
+        for x in range(140, 700, 48):
+            image.paste((0, 0, 0), (x, y, x + 24, y + 24))
+    image.save(path)
+
+
+def test_panel_detector_separates_panel_from_scene(tmp_path):
+    panel = load('audit-gpu-skinning-panel')
+    panel_capture(tmp_path / 'panel.png')
+    Image.new('RGB', (1920, 1080), (40, 90, 60)).save(tmp_path / 'scene.png')
+    assert panel.capture_shows_panel(tmp_path / 'panel.png')
+    assert not panel.capture_shows_panel(tmp_path / 'scene.png')
+
+
+def test_curator_refuses_panel_capture(tmp_path):
+    session = tmp_path / 'check'
+    session.mkdir()
+    panel_capture(session / 'screenshot.png')
+    (tmp_path / 'device-evidence-scope.json').write_text(json.dumps(dict(logs=[])))
+    result = subprocess.run([sys.executable, str(ROOT / 'scripts/curate-gpu-skinning-evidence.py'),
+                             '--evidence', str(tmp_path), 'check'], capture_output=True, text=True)
+    assert result.returncode != 0 and 'phone-controller panel' in result.stderr
+
+
+def test_curator_refuses_connection_details(tmp_path):
+    session = tmp_path / 'check'
+    session.mkdir()
+    (session / 'receipt.json').write_text(json.dumps(dict(endpoint='10.0.0.2:5555')))
+    (tmp_path / 'device-evidence-scope.json').write_text(json.dumps(dict(logs=[])))
+    result = subprocess.run([sys.executable, str(ROOT / 'scripts/curate-gpu-skinning-evidence.py'),
+                             '--evidence', str(tmp_path), 'check'], capture_output=True, text=True)
+    assert result.returncode != 0 and 'Connection detail' in result.stderr
