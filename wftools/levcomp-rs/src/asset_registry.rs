@@ -146,7 +146,7 @@ impl AssetRegistry {
 
 /// Extract the room field from a packed asset ID.
 /// Returns `ROOM_PERM` (-1) when room bits == 0xFFF.
-fn room_from_id(id: i32) -> i32 {
+pub(crate) fn room_from_id(id: i32) -> i32 {
     let room_bits = ((id as u32) >> 12) & 0xFFF;
     if room_bits == 0xFFF { ROOM_PERM } else { room_bits as i32 }
 }

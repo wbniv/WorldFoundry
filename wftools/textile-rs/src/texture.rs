@@ -33,7 +33,31 @@ pub fn parse_iff(
     match tag {
         b"MODL" => { parse_modl(payload, texture_names, texture_dirs, obj_dir, verbose); true }
         b"CROW" => { parse_crow(payload, texture_names, texture_dirs, obj_dir, verbose); true }
+        // Shared model geometry (POSN + FACE) has no materials; the GREF
+        // appearance that names it carries the MATL and is parsed as MODL.
+        b"GEOM" => true,
         _ => false,
+    }
+}
+
+#[cfg(test)]
+mod shared_geometry_tests {
+    use super::parse_iff;
+
+    fn parse(path: &str) -> (bool, Vec<String>) {
+        let root = concat!(env!("CARGO_MANIFEST_DIR"), "/../../tests/fixtures/shared_geometry/");
+        let data = std::fs::read(format!("{root}{path}")).unwrap();
+        let (mut names, mut dirs) = (Vec::new(), Vec::new());
+        let ok = parse_iff(&data, &mut names, &mut dirs, "", false);
+        (ok, names)
+    }
+
+    #[test]
+    fn appearance_keeps_its_textures_and_geometry_is_recognised() {
+        let plain = parse("pier-plain/temple_pier_1.iff");
+        assert_eq!(plain, (true, vec!["art_temple.tga".to_string()]));
+        assert_eq!(parse("pier-shared/temple_pier_1.iff"), plain);
+        assert_eq!(parse("pier-shared/temple_pier_0_geo.iff"), (true, vec![]));
     }
 }
 

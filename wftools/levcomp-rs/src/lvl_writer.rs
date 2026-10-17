@@ -109,7 +109,10 @@ pub fn write(plan: &mut LevelPlan) -> Result<Vec<u8>, String> {
     // (PERM, RM0, RM1, …) separately; we match that ordering here so
     // each MeshName packed-asset-ID comes out to the same value.
     // The OAD serialization loop below hits the cache in `add_iff_room`
-    // and gets the pre-assigned IDs verbatim.
+    // and gets the pre-assigned IDs verbatim. Shared-geometry assets named
+    // by GREF appearances are registered only after this whole function
+    // returns (`shared_geometry::register`, called from main), so they never
+    // shift an id assigned here or by the serialization loop.
     let room_count = room_list.len() as i32;
     for target_room in std::iter::once(ROOM_PERM).chain(0..room_count) {
         for (i, obj) in plan.objects.iter().enumerate() {

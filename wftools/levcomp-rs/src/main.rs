@@ -25,6 +25,7 @@ mod lvl_writer;
 mod mesh_bbox;
 mod oad_loader;
 mod rooms;
+mod shared_geometry;
 
 use std::path::Path;
 use std::process;
@@ -282,7 +283,10 @@ fn main() {
             .map(crate::lev_parser::field_str_value)?;
         if name.is_empty() { return None; }
         let path = mesh_bbox::find_case_insensitive(mdir, &name)?;
-        let bbox = mesh_bbox::load(&path)?;
+        let bbox = mesh_bbox::load(&path).unwrap_or_else(|e| {
+            eprintln!("error: {e}");
+            process::exit(1);
+        })?;
         eprintln!("  mesh bbox for {}: {:?}", name, bbox);
         Some(bbox)
     }).collect();
@@ -301,6 +305,19 @@ fn main() {
         eprintln!("error: writing level: {}", e);
         process::exit(1);
     });
+
+    // Shared model geometry: register the GEOM asset each GREF appearance
+    // names, in the appearance's room. This runs after write() — after the
+    // pre-registration loop AND the OAD serialization, which can register
+    // further meshes — so no packed id assigned above moves. Geometry ids
+    // never appear in the .lvl; only ASMP and the room's asset list carry
+    // them, and both are emitted below from the registry.
+    if let Some(mdir) = mesh_dir {
+        shared_geometry::register(&mut assets, mdir).unwrap_or_else(|e| {
+            eprintln!("error: {e}");
+            process::exit(1);
+        });
+    }
 
     std::fs::write(out_path, &bytes).unwrap_or_else(|e| {
         eprintln!("error: writing {}: {}", out_path.display(), e);

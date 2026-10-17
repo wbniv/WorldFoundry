@@ -25,9 +25,21 @@ const POS_OFFSET: usize = 12;  // byte offset of x within Vertex3DOnDisk
 /// Parse a mesh IFF at `path` and return its local-space bbox
 /// `[minX, minY, minZ, maxX, maxY, maxZ]` in fixed32 units.
 ///
-/// Returns `None` if the file cannot be read, contains no MODL or VRTX chunk,
-/// or has no complete vertices.
-pub fn load(path: &Path) -> Option<[i32; 6]> {
+/// A shared-geometry appearance (`GREF` instead of `VRTX`) is resolved to the
+/// geometry file in the same directory and its bbox comes from `POSN`, which
+/// equals the bbox of the plain model it replaced. A malformed or unresolvable
+/// `GREF` is an error naming the model and the reference.
+///
+/// Returns `Ok(None)` (as before sharing) if the file contains no MODL or
+/// VRTX chunk, or has no complete vertices.
+pub fn load(path: &Path) -> Result<Option<[i32; 6]>, String> {
+    if let Some(shared) = crate::shared_geometry::inspect(path)? {
+        return Ok(Some(shared.bbox()));
+    }
+    Ok(load_plain(path))
+}
+
+fn load_plain(path: &Path) -> Option<[i32; 6]> {
     let data = std::fs::read(path).ok()?;
     let top = read_chunks(&data).ok()?;
 
