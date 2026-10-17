@@ -151,6 +151,7 @@
 			int32 MusicVh;	/* This is a packedAssetID */
 			int32 MusicVb;	/* This is a packedAssetID */
 			int32 MusicSeq;	/* This is a packedAssetID */
+	int32 PrewarmNoPaletteProgram;        /* Default: 0 */
 };
 /*============================================================================*/
 #endif         /* levelobj_HT */
