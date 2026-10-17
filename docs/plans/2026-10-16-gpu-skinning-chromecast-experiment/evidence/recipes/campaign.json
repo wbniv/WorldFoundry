@@ -1,0 +1,232 @@
+{
+  "fixtures_manifest_sha256": "729e69892d954841bd4cd8049c703bee8461369e820699906aed815168d50ee2",
+  "restore_sha256": "3d796c773070795e16fe4505b80f43f711c8bf6555bcbef70101176264738d88",
+  "recipes": [
+    {
+      "name": "close-idle-cpu-round-1",
+      "path": "/tmp/wf-gpu-skinning-campaign-v2/close-idle-cpu-round-1.json",
+      "sha256": "853f1180814e6e5178fe51eeaa1933d187ae36e04151664b5621521caa8ae139",
+      "view": "close-idle",
+      "mode": "cpu",
+      "frame_profile": false,
+      "order": [
+        "none",
+        "pair1",
+        "pair2",
+        "pair6"
+      ]
+    },
+    {
+      "name": "close-idle-gpu-round-1",
+      "path": "/tmp/wf-gpu-skinning-campaign-v2/close-idle-gpu-round-1.json",
+      "sha256": "68fc33c3d8212bcc0dc425b1dbd6c4dd3fd0d742b5131e96fb1c0349c2733703",
+      "view": "close-idle",
+      "mode": "gpu",
+      "frame_profile": false,
+      "order": [
+        "none",
+        "pair1",
+        "pair2",
+        "pair6"
+      ]
+    },
+    {
+      "name": "close-crawl-cpu-round-1",
+      "path": "/tmp/wf-gpu-skinning-campaign-v2/close-crawl-cpu-round-1.json",
+      "sha256": "346dbaf8b1f7fb2bbd60ee1501eb3b99e13b6821bf5a56cb4db565fec15a6191",
+      "view": "close-crawl",
+      "mode": "cpu",
+      "frame_profile": false,
+      "order": [
+        "none",
+        "pair1",
+        "pair2",
+        "pair6"
+      ]
+    },
+    {
+      "name": "close-crawl-gpu-round-1",
+      "path": "/tmp/wf-gpu-skinning-campaign-v2/close-crawl-gpu-round-1.json",
+      "sha256": "2e4b912a1ef6f1287b6ca8c00849c2e514265c30ded1282b7163769444d7a416",
+      "view": "close-crawl",
+      "mode": "gpu",
+      "frame_profile": false,
+      "order": [
+        "none",
+        "pair1",
+        "pair2",
+        "pair6"
+      ]
+    },
+    {
+      "name": "close-idle-gpu-round-2",
+      "path": "/tmp/wf-gpu-skinning-campaign-v2/close-idle-gpu-round-2.json",
+      "sha256": "1ceb3e6a524ba9bb386cc66cca1d9aa403f958744222bd38b28d93c117553373",
+      "view": "close-idle",
+      "mode": "gpu",
+      "frame_profile": false,
+      "order": [
+        "pair1",
+        "pair2",
+        "pair6",
+        "none"
+      ]
+    },
+    {
+      "name": "close-idle-cpu-round-2",
+      "path": "/tmp/wf-gpu-skinning-campaign-v2/close-idle-cpu-round-2.json",
+      "sha256": "3b31b0b4ebbef129d5a5bad7360fd1498d15b4ffa99bce1faad27303376c93f7",
+      "view": "close-idle",
+      "mode": "cpu",
+      "frame_profile": false,
+      "order": [
+        "pair1",
+        "pair2",
+        "pair6",
+        "none"
+      ]
+    },
+    {
+      "name": "close-crawl-gpu-round-2",
+      "path": "/tmp/wf-gpu-skinning-campaign-v2/close-crawl-gpu-round-2.json",
+      "sha256": "40043ee5cbba5f91f3848aeb6788a58ce80d83edf56c174a91eb25d15a7b251c",
+      "view": "close-crawl",
+      "mode": "gpu",
+      "frame_profile": false,
+      "order": [
+        "pair1",
+        "pair2",
+        "pair6",
+        "none"
+      ]
+    },
+    {
+      "name": "close-crawl-cpu-round-2",
+      "path": "/tmp/wf-gpu-skinning-campaign-v2/close-crawl-cpu-round-2.json",
+      "sha256": "2a9a3fcac1afdad77a9d4f9ff2f7a4190b2af05afbafb56945769e43a7b2dd1e",
+      "view": "close-crawl",
+      "mode": "cpu",
+      "frame_profile": false,
+      "order": [
+        "pair1",
+        "pair2",
+        "pair6",
+        "none"
+      ]
+    },
+    {
+      "name": "close-idle-cpu-round-3",
+      "path": "/tmp/wf-gpu-skinning-campaign-v2/close-idle-cpu-round-3.json",
+      "sha256": "684b04e7b71052af3c59321a725679eeabd01bdd16159b754cd4fcb52f8eed7d",
+      "view": "close-idle",
+      "mode": "cpu",
+      "frame_profile": false,
+      "order": [
+        "pair2",
+        "pair6",
+        "none",
+        "pair1"
+      ]
+    },
+    {
+      "name": "close-idle-gpu-round-3",
+      "path": "/tmp/wf-gpu-skinning-campaign-v2/close-idle-gpu-round-3.json",
+      "sha256": "697ec00d487a0436e0329b62dfd9ecf43ed15198c4d982227787ff9eac4c44a3",
+      "view": "close-idle",
+      "mode": "gpu",
+      "frame_profile": false,
+      "order": [
+        "pair2",
+        "pair6",
+        "none",
+        "pair1"
+      ]
+    },
+    {
+      "name": "close-crawl-cpu-round-3",
+      "path": "/tmp/wf-gpu-skinning-campaign-v2/close-crawl-cpu-round-3.json",
+      "sha256": "e69d0faeed84abf70d80b27ab51cb1ce0b5fab379dad544ee7ebdb365a70414f",
+      "view": "close-crawl",
+      "mode": "cpu",
+      "frame_profile": false,
+      "order": [
+        "pair2",
+        "pair6",
+        "none",
+        "pair1"
+      ]
+    },
+    {
+      "name": "close-crawl-gpu-round-3",
+      "path": "/tmp/wf-gpu-skinning-campaign-v2/close-crawl-gpu-round-3.json",
+      "sha256": "f3e1bb48eb7067a289bc043e4a76f03a31ca33d294e02ad4adf0495c8b465cb4",
+      "view": "close-crawl",
+      "mode": "gpu",
+      "frame_profile": false,
+      "order": [
+        "pair2",
+        "pair6",
+        "none",
+        "pair1"
+      ]
+    },
+    {
+      "name": "close-idle-gpu-profile",
+      "path": "/tmp/wf-gpu-skinning-campaign-v2/close-idle-gpu-profile.json",
+      "sha256": "2f70ab5c57e1d2c8ef8e3570fc3348513e68725181f816826a0ccccc6bf60632",
+      "view": "close-idle",
+      "mode": "gpu",
+      "frame_profile": true,
+      "order": [
+        "pair6",
+        "pair2",
+        "pair1",
+        "none"
+      ]
+    },
+    {
+      "name": "close-idle-cpu-profile",
+      "path": "/tmp/wf-gpu-skinning-campaign-v2/close-idle-cpu-profile.json",
+      "sha256": "2f6826d42290289455ab45da30183330ea7221525dbe63dcdeb758175ee255cb",
+      "view": "close-idle",
+      "mode": "cpu",
+      "frame_profile": true,
+      "order": [
+        "pair6",
+        "pair2",
+        "pair1",
+        "none"
+      ]
+    },
+    {
+      "name": "close-crawl-gpu-profile",
+      "path": "/tmp/wf-gpu-skinning-campaign-v2/close-crawl-gpu-profile.json",
+      "sha256": "4417f070e0d3a3d846b1345e495da52c7e215cc5a9454752811a1893b940f1f8",
+      "view": "close-crawl",
+      "mode": "gpu",
+      "frame_profile": true,
+      "order": [
+        "pair6",
+        "pair2",
+        "pair1",
+        "none"
+      ]
+    },
+    {
+      "name": "close-crawl-cpu-profile",
+      "path": "/tmp/wf-gpu-skinning-campaign-v2/close-crawl-cpu-profile.json",
+      "sha256": "c00dc6674633d9a0a0025876fcebb1da90d91a35e735d2d34ff0b224e2c062b4",
+      "view": "close-crawl",
+      "mode": "cpu",
+      "frame_profile": true,
+      "order": [
+        "pair6",
+        "pair2",
+        "pair1",
+        "none"
+      ]
+    }
+  ],
+  "release_runs": 48,
+  "profile_runs": 16
+}

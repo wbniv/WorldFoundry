@@ -1,0 +1,46 @@
+{
+  "build": "6ad3302ac27ce204978ad1ed",
+  "status": "finished",
+  "commit": {
+    "authorAvatarUrl": "https://avatars.githubusercontent.com/u/38008?v=4",
+    "authorEmail": "will@biohack.net",
+    "authorName": "Will Norris",
+    "branch": "gpu-skinning-proposal",
+    "tag": null,
+    "commitMessage": "Record renderer parity and prepare matched skinning fixture campaigns",
+    "hash": "e64e5459660889ec8cda8dcadd059d10688c039c",
+    "url": "https://github.com/wbniv/WorldFoundry/commit/e64e5459660889ec8cda8dcadd059d10688c039c"
+  },
+  "artifacts": [
+    {
+      "name": "LastTest.log",
+      "sha256": "9eb5e53883b5f458aeb3beb55837a866b7854fd3399f470683d850ca3b026070",
+      "size": 2250
+    },
+    {
+      "name": "skin-metal-cpu.ppm",
+      "sha256": "dfc4c9194b6d37a6ce902a488b743b31b9cf25205e76c42f47570a7beeff90e0",
+      "size": 12301
+    },
+    {
+      "name": "skin-metal-gpu.ppm",
+      "sha256": "dfc4c9194b6d37a6ce902a488b743b31b9cf25205e76c42f47570a7beeff90e0",
+      "size": 12301
+    },
+    {
+      "name": "skin-metal-last.ppm",
+      "sha256": "43dfebf451937a92bc5a39bb27418d6ac173e2d30f6ce166e720a42efcf427e4",
+      "size": 12301
+    },
+    {
+      "name": "skin-metal-build.log",
+      "sha256": "0b359cac70463027eb34d0ae2cf4fc8eb7253872409dbc71dc1432b75c97ed56",
+      "size": 51963
+    },
+    {
+      "name": "skin-metal-test.log",
+      "sha256": "9e8f75723eac6aa66d72716be0503e29fcd1ff7db33d5228b9eb326a2a0edfb8",
+      "size": 330
+    }
+  ]
+}

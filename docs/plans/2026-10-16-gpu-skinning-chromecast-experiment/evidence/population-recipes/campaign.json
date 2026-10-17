@@ -1,0 +1,216 @@
+{
+  "fixtures_manifest_sha256": "4f213f704701856a4d1788f7fb9f0a95b28e7110651f2da441e1d08c02449539",
+  "restore_sha256": "3d796c773070795e16fe4505b80f43f711c8bf6555bcbef70101176264738d88",
+  "recipes": [
+    {
+      "name": "population-cpu-round-1",
+      "path": "/tmp/wf-gpu-population-campaign/population-cpu-round-1.json",
+      "sha256": "6da27956e6d37fc58323dc00bad00fc287981a544adf3edaf14de37cfacfd07c",
+      "view": "population",
+      "mode": "cpu",
+      "frame_profile": false,
+      "order": [
+        "1",
+        "4",
+        "16"
+      ]
+    },
+    {
+      "name": "population-cpu-no-cull-round-1",
+      "path": "/tmp/wf-gpu-population-campaign/population-cpu-no-cull-round-1.json",
+      "sha256": "42e2c9f7043de39651412241fae60efa2f7d27806e0d247a852852a05d2cce94",
+      "view": "population",
+      "mode": "cpu-no-cull",
+      "frame_profile": false,
+      "order": [
+        "1",
+        "4",
+        "16"
+      ]
+    },
+    {
+      "name": "population-gpu-no-cull-round-1",
+      "path": "/tmp/wf-gpu-population-campaign/population-gpu-no-cull-round-1.json",
+      "sha256": "f66f4c4b87e005a4f11a53b37a2c8fd32a7884782c7192897dbdac476b557e2f",
+      "view": "population",
+      "mode": "gpu-no-cull",
+      "frame_profile": false,
+      "order": [
+        "1",
+        "4",
+        "16"
+      ]
+    },
+    {
+      "name": "population-gpu-round-1",
+      "path": "/tmp/wf-gpu-population-campaign/population-gpu-round-1.json",
+      "sha256": "282c763a7110a5377b81d8361606829f0213e6b72699f4142a1678b5a7c21ba4",
+      "view": "population",
+      "mode": "gpu",
+      "frame_profile": false,
+      "order": [
+        "1",
+        "4",
+        "16"
+      ]
+    },
+    {
+      "name": "population-cpu-no-cull-round-2",
+      "path": "/tmp/wf-gpu-population-campaign/population-cpu-no-cull-round-2.json",
+      "sha256": "41c74c1379a4d3797ce921e1370897fced14b67b0432f7abed7e9a90f60e74c6",
+      "view": "population",
+      "mode": "cpu-no-cull",
+      "frame_profile": false,
+      "order": [
+        "4",
+        "16",
+        "1"
+      ]
+    },
+    {
+      "name": "population-gpu-no-cull-round-2",
+      "path": "/tmp/wf-gpu-population-campaign/population-gpu-no-cull-round-2.json",
+      "sha256": "d31e71d5216572ea09a4607c0a3a7c52380e2ab4a40c0c1cedf3fbec4010a174",
+      "view": "population",
+      "mode": "gpu-no-cull",
+      "frame_profile": false,
+      "order": [
+        "4",
+        "16",
+        "1"
+      ]
+    },
+    {
+      "name": "population-gpu-round-2",
+      "path": "/tmp/wf-gpu-population-campaign/population-gpu-round-2.json",
+      "sha256": "ca28d4cf2c4a0cdd91447f6a4bea28c90143b60763cccfb63138630a3470a51e",
+      "view": "population",
+      "mode": "gpu",
+      "frame_profile": false,
+      "order": [
+        "4",
+        "16",
+        "1"
+      ]
+    },
+    {
+      "name": "population-cpu-round-2",
+      "path": "/tmp/wf-gpu-population-campaign/population-cpu-round-2.json",
+      "sha256": "5fa78251a171084137eee36a8fdf860376b732ee5d0d30628d68eb258b9517cc",
+      "view": "population",
+      "mode": "cpu",
+      "frame_profile": false,
+      "order": [
+        "4",
+        "16",
+        "1"
+      ]
+    },
+    {
+      "name": "population-gpu-no-cull-round-3",
+      "path": "/tmp/wf-gpu-population-campaign/population-gpu-no-cull-round-3.json",
+      "sha256": "71adc98034b8fa64b2ff4bdb64ade61eccf998da983d320ce158f80c79f14366",
+      "view": "population",
+      "mode": "gpu-no-cull",
+      "frame_profile": false,
+      "order": [
+        "16",
+        "1",
+        "4"
+      ]
+    },
+    {
+      "name": "population-gpu-round-3",
+      "path": "/tmp/wf-gpu-population-campaign/population-gpu-round-3.json",
+      "sha256": "7c3d1649f3f75863f4bf44ee91cb5d94ef1ac4930652ff8c1d63f139c92f4428",
+      "view": "population",
+      "mode": "gpu",
+      "frame_profile": false,
+      "order": [
+        "16",
+        "1",
+        "4"
+      ]
+    },
+    {
+      "name": "population-cpu-round-3",
+      "path": "/tmp/wf-gpu-population-campaign/population-cpu-round-3.json",
+      "sha256": "1b382dafa420f5acac25dc7d9aef7058f6d9544ded46d15c261f23a06966ed3d",
+      "view": "population",
+      "mode": "cpu",
+      "frame_profile": false,
+      "order": [
+        "16",
+        "1",
+        "4"
+      ]
+    },
+    {
+      "name": "population-cpu-no-cull-round-3",
+      "path": "/tmp/wf-gpu-population-campaign/population-cpu-no-cull-round-3.json",
+      "sha256": "fa3eae479643517d1d272f7ce89d568949ced020d653e92d84ceb875e9d66442",
+      "view": "population",
+      "mode": "cpu-no-cull",
+      "frame_profile": false,
+      "order": [
+        "16",
+        "1",
+        "4"
+      ]
+    },
+    {
+      "name": "population-gpu-profile",
+      "path": "/tmp/wf-gpu-population-campaign/population-gpu-profile.json",
+      "sha256": "4e650e90c048d59a9e927fe58ebe9a90eed26601c6fd62f0524f8f1e2fc93974",
+      "view": "population",
+      "mode": "gpu",
+      "frame_profile": true,
+      "order": [
+        "16",
+        "4",
+        "1"
+      ]
+    },
+    {
+      "name": "population-gpu-no-cull-profile",
+      "path": "/tmp/wf-gpu-population-campaign/population-gpu-no-cull-profile.json",
+      "sha256": "d250fa0d2191cd7e6e7d41b5fd766b59c5b464e1ed6ec81187ee4834681febb4",
+      "view": "population",
+      "mode": "gpu-no-cull",
+      "frame_profile": true,
+      "order": [
+        "16",
+        "4",
+        "1"
+      ]
+    },
+    {
+      "name": "population-cpu-no-cull-profile",
+      "path": "/tmp/wf-gpu-population-campaign/population-cpu-no-cull-profile.json",
+      "sha256": "9887774b3581a647c31ef2b4ca44bb3def51858ad45d71b88fe899f732ffd90e",
+      "view": "population",
+      "mode": "cpu-no-cull",
+      "frame_profile": true,
+      "order": [
+        "16",
+        "4",
+        "1"
+      ]
+    },
+    {
+      "name": "population-cpu-profile",
+      "path": "/tmp/wf-gpu-population-campaign/population-cpu-profile.json",
+      "sha256": "56f683cbb16b154f11ee25919d8148d0b99b249b296adda66f02741fb861870f",
+      "view": "population",
+      "mode": "cpu",
+      "frame_profile": true,
+      "order": [
+        "16",
+        "4",
+        "1"
+      ]
+    }
+  ],
+  "release_runs": 36,
+  "profile_runs": 12
+}

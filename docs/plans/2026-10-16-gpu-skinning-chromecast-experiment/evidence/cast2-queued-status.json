@@ -1,0 +1,39 @@
+{
+  "id": "J-fd4329e8e0e0",
+  "owner": "fdccc7b6ad7d611cd4c4b130",
+  "accepted": 1792225691.1395047,
+  "state": "queued",
+  "phase": "queued",
+  "request": {
+    "device": "chromecast-test-02",
+    "app": "aquarium",
+    "apk": "677be66dfb988cd64d086cd86ea92b596c9b22eb6accf62cb39fd6c80d13903b.apk",
+    "workflow": "check"
+  },
+  "device": null,
+  "generation": null,
+  "cancel": 0,
+  "error": null,
+  "started": null,
+  "finished": null,
+  "worker_pid": null,
+  "installation": null,
+  "owner_label": "01a141d7-edb7-7621-90ed-ffe1dd174ece",
+  "hold": {
+    "code": "transport-recovery",
+    "job": null,
+    "text": "shared transport recovery"
+  },
+  "retry_of": null,
+  "retried_by": null,
+  "automatic_recovery": null,
+  "device_wait": null,
+  "plugin_recovery": {
+    "fences": [],
+    "attempts": [],
+    "fence_count": 0,
+    "attempt_count": 0
+  },
+  "unresolved_effects": [],
+  "recovery_resolution": null
+}

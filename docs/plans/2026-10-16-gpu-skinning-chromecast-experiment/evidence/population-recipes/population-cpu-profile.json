@@ -1,0 +1,24 @@
+{
+  "workflow": "variant-benchmark",
+  "app": "aquarium",
+  "apk": "/tmp/wf-gpu-population-campaign/restore.apk",
+  "restore_apk": "/tmp/wf-gpu-population-campaign/restore.apk",
+  "trace": "idle",
+  "duration": 60,
+  "warmup": 30,
+  "runs": 1,
+  "variants": [
+    {
+      "label": "16",
+      "apk": "/tmp/wf-gpu-population-apks/population-16-cpu-profile.apk"
+    },
+    {
+      "label": "4",
+      "apk": "/tmp/wf-gpu-population-apks/population-4-cpu-profile.apk"
+    },
+    {
+      "label": "1",
+      "apk": "/tmp/wf-gpu-population-apks/population-1-cpu-profile.apk"
+    }
+  ]
+}

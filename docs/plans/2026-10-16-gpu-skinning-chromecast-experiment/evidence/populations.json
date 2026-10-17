@@ -1,0 +1,63 @@
+{
+  "source_lev_sha256": "d0024e6f150f288e0e58677b9e50b29ffa3608cd7f15f6cd4fa332650d8935bb",
+  "body_sha256": "e71b531ec1b582c6f2600ef6f995698fffe4266927c189b714bd660c1d68e257",
+  "tools": {
+    "iffcomp": {
+      "path": "/home/will/WorldFoundry-wbniv/wftools/iffcomp-rs/target/release/iffcomp",
+      "sha256": "c822b0a76412378ccbb20b282a0d0eb25daa7351975e019832b03dc1218e8e61"
+    },
+    "levcomp": {
+      "path": "/home/will/WorldFoundry-wbniv/wftools/levcomp-rs/target/release/levcomp",
+      "sha256": "270c027f071064d8ede761da20f595015840e3a6b392ad7700dcc1882e364070"
+    },
+    "textile": {
+      "path": "/home/will/WorldFoundry-wbniv/wftools/textile-rs/target/release/textile",
+      "sha256": "8ea399fd40da55d0626858dacc7e228cc70db05dd1f512c72762c52147266c6c"
+    }
+  },
+  "scope": "868-vertex, 35-sample DFRM body only; no fins, plants or behavior AI",
+  "populations": {
+    "1": {
+      "actors": [
+        12
+      ],
+      "lev_sha256": "ea185f12f84ca47f7efb8d421e21bc75db25eef03ac1630cf863f9f94e5e79b3",
+      "standalone_sha256": "6cc991c8bf0f791fdf32df4ac8865c0b7347c30a4bdb5adb5fd19c6f4bdf53ba",
+      "standalone": "/tmp/wf-gpu-populations/skin_population_1/skin_population_1-standalone.iff"
+    },
+    "4": {
+      "actors": [
+        12,
+        13,
+        14,
+        15
+      ],
+      "lev_sha256": "57548324b560ab6766e16e80586b36525194cb3643a516d6ecdd659590480a2a",
+      "standalone_sha256": "5d7c5897fd5c60d8281ffcb5f3bd2ba57791b3a26a85ec0527fd443e6d9a5342",
+      "standalone": "/tmp/wf-gpu-populations/skin_population_4/skin_population_4-standalone.iff"
+    },
+    "16": {
+      "actors": [
+        12,
+        13,
+        14,
+        15,
+        16,
+        17,
+        18,
+        19,
+        20,
+        21,
+        22,
+        23,
+        24,
+        25,
+        26,
+        27
+      ],
+      "lev_sha256": "e009d67f2ee0780d663fb2975a961b910e05e3ff690624ad51ef1c3faeb2255f",
+      "standalone_sha256": "176d58c3da1d0a3b29899c89a48a9199bc9eda260d5f08868ed8db6f3ca32839",
+      "standalone": "/tmp/wf-gpu-populations/skin_population_16/skin_population_16-standalone.iff"
+    }
+  }
+}

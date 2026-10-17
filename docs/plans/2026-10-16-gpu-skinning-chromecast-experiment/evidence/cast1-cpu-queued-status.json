@@ -1,0 +1,67 @@
+{
+  "id": "J-3764d1d22e88",
+  "owner": "fdccc7b6ad7d611cd4c4b130",
+  "accepted": 1792225693.329938,
+  "state": "queued",
+  "phase": "queued",
+  "request": {
+    "device": "chromecast-test-01",
+    "workflow": "variant-benchmark",
+    "app": "aquarium",
+    "apk": "3d796c773070795e16fe4505b80f43f711c8bf6555bcbef70101176264738d88.apk",
+    "restore_apk": "3d796c773070795e16fe4505b80f43f711c8bf6555bcbef70101176264738d88.apk",
+    "trace": "idle",
+    "duration": 60,
+    "warmup": 15,
+    "runs": 1,
+    "variants": [
+      {
+        "label": "none",
+        "apk": "0559822649e8be07cda192119d95d059df31646afe9de7500734326e145009cb.apk"
+      },
+      {
+        "label": "pair1",
+        "apk": "0c9ca7588007c388e035ae1541ad4fbee34a0cc01ae50cb9f5eca676ad1bed3a.apk"
+      },
+      {
+        "label": "pair2",
+        "apk": "27875412e9617adc72906f1958ec0f99183e855bb2f0d1576bef4695f0b6e99e.apk"
+      },
+      {
+        "label": "pair6",
+        "apk": "f2b8b1b69c8f1e6132ba9625646c47e74a743a534ef427dbb72002ef0e384940.apk"
+      }
+    ]
+  },
+  "device": null,
+  "generation": null,
+  "cancel": 0,
+  "error": null,
+  "started": null,
+  "finished": null,
+  "worker_pid": null,
+  "installation": null,
+  "owner_label": "01a141d7-edb7-7621-90ed-ffe1dd174ece",
+  "hold": {
+    "code": "needs-administrator",
+    "job": "J-8cc58b6f7fff",
+    "outcome": "plugin-error",
+    "origins": [
+      "J-e393c2ad5f70"
+    ],
+    "fenced": true,
+    "text": "device recovery-required: automatic readd J-8cc58b6f7fff plugin-error; an administrator readd is needed"
+  },
+  "retry_of": null,
+  "retried_by": null,
+  "automatic_recovery": null,
+  "device_wait": null,
+  "plugin_recovery": {
+    "fences": [],
+    "attempts": [],
+    "fence_count": 0,
+    "attempt_count": 0
+  },
+  "unresolved_effects": [],
+  "recovery_resolution": null
+}

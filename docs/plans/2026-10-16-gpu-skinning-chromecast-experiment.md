@@ -438,3 +438,38 @@ Metal has the same assertion. `skin-draws`/`skin-faces-submitted` remain
 GPU-path counters; overall draw/face counters cover both paths. The queued
 old CPU batch was cancelled before execution; freeze the corrected APK for
 all matched results, superseding the native hash above.
+
+Final corrected native SHA-256:
+`9ddd539f29600c729c0e26430ca162d61311b242a4c7d6defe0a97e4ff484b80`,
+source `e64e5459660889ec8cda8dcadd059d10688c039c`. Metal counter verification
+also passed on build `6ad3302ac27ce204978ad1ed` (see
+`evidence/metal-counters/`). The controlled 16-body scene has nonoverlapping
+rows and sixteen confirmed GPU draws. Both C/G1 and C0/G0 images match at
+307,192/307,200 pixels, with only a one-value channel difference in eight
+pixels. No device speedup is inferred from these local render checks.
+
+Reproducible controlled population scenes and C/C0/G0/G1 APKs are prepared for
+1/4/16 actual DFRM body actors (868 vertices and 35 curve samples each), with
+no fins, plants or behaviour AI. One invisible floor asset supplies the
+existing cooker's room table; it contributes no draws. The toolchain and
+model hashes are recorded in `evidence/populations.json`. This measures the
+DFRM adapter, not a general four-weight skeletal authoring format; four-weight
+shader correctness is covered separately by the GL/Metal draw fixtures.
+`prepare-gpu-skinning-campaign.py --population-study` produces 36 release and
+12 separate profile runs per device, with 30-second warmup and rotated path
+and population order. These recipes are prepared, not submitted or measured.
+
+Corrected jobs now queued: cast1 C `J‑3764d1d22e88`, cast1 G1
+`J‑a3e5160f7cb9`, and cast2 GPU check `J‑fd4329e8e0e0`. Earlier candidate
+jobs `J‑4ab64a6c067f` and `J‑ac137d0bb084` were cancelled before execution.
+The ordinary cast2 readd `J‑5acce1454c16` is itself queued behind the shared
+transport hold. Coordinator recovery owns the unresolved device state; no
+raw ADB, journal edits or bypass has been used. Its thread currently reports
+`waitingOnApproval`; a request for the exact pending action has been sent.
+
+`analyze-gpu-skinning.py` will refuse partial campaigns, mismatched installed
+hashes, incomplete cleanup, CPU fallback masquerading as GPU, missing rig
+counters, nonzero steady GPU vertex/index uploads, or insufficient measured
+CPU windows. The investigation update and adoption decision remain pending
+matched device evidence. Current status and resumable recipes are saved in
+this plan's `evidence/` directory.

@@ -1,14 +1,14 @@
 {
-  "source_revision": "69517e7d89c9b66579277abeeed1b9a848516908",
-  "source_diff_sha256": "4167afa81901e3cbcf05146d81b6d376a58999e0528afbd3e734a8bef3a323a5",
-  "base_apk_sha256": "d90390fd56ce9a8bfbe441829fa5949cad59830497f702b4ac8d1b0b49f4e37e",
+  "source_revision": "e64e5459660889ec8cda8dcadd059d10688c039c",
+  "source_diff_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+  "base_apk_sha256": "34149d2c40ceb44fcc4f4954d856393bd1b12d6b02037eaf32be7082f007419b",
   "native": {
-    "lib/armeabi-v7a/libwf_game.so": "888e952e3073f151e36937362616a18030a7c559544392aaebff554b5fdfc9a7"
+    "lib/armeabi-v7a/libwf_game.so": "9ddd539f29600c729c0e26430ca162d61311b242a4c7d6defe0a97e4ff484b80"
   },
   "source_level_sha256": "a94598005ec3b7e1f07e758ff5471358ef1c2e84a5bb276d55f3a6f5460cf84b",
   "variants": {
     "wide-idle-none-cpu": {
-      "apk_sha256": "1c5c0f6581633ab662ee3eded227cc19c57ca43d7a18136d67770a679bc472dc",
+      "apk_sha256": "addb54a1cd83b2fd498b94db20c16204d87074ddd81eb8d73ebe02e1bd889d2c",
       "cd_sha256": "33c8e0d557125ab0697efc350a24e9c9071bd8f0c30f2e6369b45b5c2157e79a",
       "level_sha256": "43730846b62e76659e74fa33cb6c10fc2c323f03b4f356b549df0488cf87f8e6",
       "mode": "cpu",
@@ -55,7 +55,7 @@
       "frame_profile": false
     },
     "wide-idle-none-cpu-profile": {
-      "apk_sha256": "e6ac22c0de555ff6d7bbd725864d631e7e1bcd27b13c05586fc05d916a973fa9",
+      "apk_sha256": "45b29cbb4c48b2e62e848da3f7679d3925c3b89020b45fa0d3753380a88f4831",
       "cd_sha256": "33c8e0d557125ab0697efc350a24e9c9071bd8f0c30f2e6369b45b5c2157e79a",
       "level_sha256": "43730846b62e76659e74fa33cb6c10fc2c323f03b4f356b549df0488cf87f8e6",
       "mode": "cpu",
@@ -102,7 +102,7 @@
       "frame_profile": true
     },
     "wide-idle-none-gpu": {
-      "apk_sha256": "7f6ec35a12c3469a97900f2354252af3a2fe0ece6f1ec93a808ef4342f5965df",
+      "apk_sha256": "9f3a9df405d248b25a9deaf829c31085116a54a3153c910d6e0c39f99fcebb4a",
       "cd_sha256": "33c8e0d557125ab0697efc350a24e9c9071bd8f0c30f2e6369b45b5c2157e79a",
       "level_sha256": "43730846b62e76659e74fa33cb6c10fc2c323f03b4f356b549df0488cf87f8e6",
       "mode": "gpu",
@@ -149,7 +149,7 @@
       "frame_profile": false
     },
     "wide-idle-none-gpu-profile": {
-      "apk_sha256": "b870ecaff7bdd1902369468f05da7555ee246cd84ffc59587e305e0f1d7d3a20",
+      "apk_sha256": "e02ee545b4c1ae2488987050d1c135fd614e01be097fc0259dea54bf65c09888",
       "cd_sha256": "33c8e0d557125ab0697efc350a24e9c9071bd8f0c30f2e6369b45b5c2157e79a",
       "level_sha256": "43730846b62e76659e74fa33cb6c10fc2c323f03b4f356b549df0488cf87f8e6",
       "mode": "gpu",
@@ -196,7 +196,7 @@
       "frame_profile": true
     },
     "wide-idle-pair1-cpu": {
-      "apk_sha256": "7adbde775c5d714c506e79255b1b3c575c04d0e9efca978f71e4949d9a1dc9c6",
+      "apk_sha256": "c967e1f37a1854c75dbf78fcb93088d8203c73b57cdd27c38e89143db6ab3335",
       "cd_sha256": "e79049d4fd4f7a2d229c6cb2ddbf00e8223a118fbbc55f0e8251f4943dd98396",
       "level_sha256": "c2a551aeb63428afe4b7c4702b548999d4f3c9df21596768dda74d30ee72b18c",
       "mode": "cpu",
@@ -243,7 +243,7 @@
       "frame_profile": false
     },
     "wide-idle-pair1-cpu-profile": {
-      "apk_sha256": "39dbe421ad02c8b87fc8c72239eded19b716c6ad6042f0732535918a026b3947",
+      "apk_sha256": "ab1cda1a55b4fdb4285cccb05da165f5b793efe8602f8bc6cffdefa66d56eb5e",
       "cd_sha256": "e79049d4fd4f7a2d229c6cb2ddbf00e8223a118fbbc55f0e8251f4943dd98396",
       "level_sha256": "c2a551aeb63428afe4b7c4702b548999d4f3c9df21596768dda74d30ee72b18c",
       "mode": "cpu",
@@ -290,7 +290,7 @@
       "frame_profile": true
     },
     "wide-idle-pair1-gpu": {
-      "apk_sha256": "2d2bd8a5111ab08ea8bff765c6d132540e5839fe802839504f052d02e8bcc03b",
+      "apk_sha256": "e76ba2875c3ee4e4d9d8dd73e0f50ad497244f9562b95a6b5b902abc18b8115e",
       "cd_sha256": "e79049d4fd4f7a2d229c6cb2ddbf00e8223a118fbbc55f0e8251f4943dd98396",
       "level_sha256": "c2a551aeb63428afe4b7c4702b548999d4f3c9df21596768dda74d30ee72b18c",
       "mode": "gpu",
@@ -337,7 +337,7 @@
       "frame_profile": false
     },
     "wide-idle-pair1-gpu-profile": {
-      "apk_sha256": "7cb024743c6dbd06a1afd30660727c940d818c5baab20477ca6938ee18f5627d",
+      "apk_sha256": "ed250a92923ba57919a30e112b11f17ca579295ab8842ea40f6b3cb7a350602d",
       "cd_sha256": "e79049d4fd4f7a2d229c6cb2ddbf00e8223a118fbbc55f0e8251f4943dd98396",
       "level_sha256": "c2a551aeb63428afe4b7c4702b548999d4f3c9df21596768dda74d30ee72b18c",
       "mode": "gpu",
@@ -384,7 +384,7 @@
       "frame_profile": true
     },
     "wide-idle-pair2-cpu": {
-      "apk_sha256": "fd88f0d7adf293117cf195df8ca54ff25d4ed6ef449405c360341b1a7c7058d7",
+      "apk_sha256": "e557d9f4d592c00813ef9c823078c9e3fde7a94a22bc23eb8de0972c5fea329d",
       "cd_sha256": "a2ac51f190ed7d1b65ee7089a8201f4451afd519afc3fdba9763c6a1e96253d4",
       "level_sha256": "1e3d8d54cd2d851a04fce421283a41519d03ca3fb906b8184adf16c2ebe763c5",
       "mode": "cpu",
@@ -431,7 +431,7 @@
       "frame_profile": false
     },
     "wide-idle-pair2-cpu-profile": {
-      "apk_sha256": "032aea045b5580fa34cda6039ed5a3dc39517976438dcdb7a67f0b0e8b93ab31",
+      "apk_sha256": "93e3bc7d282c05e563b6065853e04310b5c54e6b61bfea826eea3098bd8bb173",
       "cd_sha256": "a2ac51f190ed7d1b65ee7089a8201f4451afd519afc3fdba9763c6a1e96253d4",
       "level_sha256": "1e3d8d54cd2d851a04fce421283a41519d03ca3fb906b8184adf16c2ebe763c5",
       "mode": "cpu",
@@ -478,7 +478,7 @@
       "frame_profile": true
     },
     "wide-idle-pair2-gpu": {
-      "apk_sha256": "ad91be7c9ee10fe0654eb08bde0fb14ea4eb7d12ec5ab75b015e68b3391b1de0",
+      "apk_sha256": "66c278ca71de1af371f032e24635ea5ae9e83fe15a28062789d78b01d5be2e18",
       "cd_sha256": "a2ac51f190ed7d1b65ee7089a8201f4451afd519afc3fdba9763c6a1e96253d4",
       "level_sha256": "1e3d8d54cd2d851a04fce421283a41519d03ca3fb906b8184adf16c2ebe763c5",
       "mode": "gpu",
@@ -525,7 +525,7 @@
       "frame_profile": false
     },
     "wide-idle-pair2-gpu-profile": {
-      "apk_sha256": "e733bd9378553adf3f3462bea108c4abb0075f557e973a990572aa3cd3ffb3b5",
+      "apk_sha256": "bf9a87b30620e2af73436ec9829c57674a19c9cc64fed8e85a1e197300d2e7e0",
       "cd_sha256": "a2ac51f190ed7d1b65ee7089a8201f4451afd519afc3fdba9763c6a1e96253d4",
       "level_sha256": "1e3d8d54cd2d851a04fce421283a41519d03ca3fb906b8184adf16c2ebe763c5",
       "mode": "gpu",
@@ -572,7 +572,7 @@
       "frame_profile": true
     },
     "wide-idle-pair6-cpu": {
-      "apk_sha256": "aaec89946794411b03ef923446ee24740460e99fa6fbd8bb5f0998c2e79a0e61",
+      "apk_sha256": "abfb828030d1872bf357727c10d6fa567840f9400501e6011eef557c9f29cac4",
       "cd_sha256": "2bf3db11fb93d9dd96802d9c4ff720450317612bae111f3feec2da5c13bd0c5c",
       "level_sha256": "eee81f11656c31004f6c6ce19104b146064b92ed21ee0066117967d42caf4560",
       "mode": "cpu",
@@ -619,7 +619,7 @@
       "frame_profile": false
     },
     "wide-idle-pair6-cpu-profile": {
-      "apk_sha256": "cd20384a07b726414821f9fca905b82134eac04da6b2b33f01158abc5cb4f3df",
+      "apk_sha256": "2a596524fd3aad6a40046a0e668e89d076b1a1cdc3a63b01c06de727fd535754",
       "cd_sha256": "2bf3db11fb93d9dd96802d9c4ff720450317612bae111f3feec2da5c13bd0c5c",
       "level_sha256": "eee81f11656c31004f6c6ce19104b146064b92ed21ee0066117967d42caf4560",
       "mode": "cpu",
@@ -666,7 +666,7 @@
       "frame_profile": true
     },
     "wide-idle-pair6-gpu": {
-      "apk_sha256": "7c2a08b4d2cfdf087d3d3fddc9f97b99d99c3728487856212e6e36f9221e0f15",
+      "apk_sha256": "677be66dfb988cd64d086cd86ea92b596c9b22eb6accf62cb39fd6c80d13903b",
       "cd_sha256": "2bf3db11fb93d9dd96802d9c4ff720450317612bae111f3feec2da5c13bd0c5c",
       "level_sha256": "eee81f11656c31004f6c6ce19104b146064b92ed21ee0066117967d42caf4560",
       "mode": "gpu",
@@ -713,7 +713,7 @@
       "frame_profile": false
     },
     "wide-idle-pair6-gpu-profile": {
-      "apk_sha256": "bd070cd069e2272aedc8b674988e8f21da01a011e4452c552112fe337a77a988",
+      "apk_sha256": "331b261d1c4298342da8e9385b1570f27f475e4668115f629810bca5d91a533e",
       "cd_sha256": "2bf3db11fb93d9dd96802d9c4ff720450317612bae111f3feec2da5c13bd0c5c",
       "level_sha256": "eee81f11656c31004f6c6ce19104b146064b92ed21ee0066117967d42caf4560",
       "mode": "gpu",
@@ -760,7 +760,7 @@
       "frame_profile": true
     },
     "close-idle-none-cpu": {
-      "apk_sha256": "6920206a3c78d42597c1954372949e836db02c6fb5bf4cf3cbf814cd37590a31",
+      "apk_sha256": "0559822649e8be07cda192119d95d059df31646afe9de7500734326e145009cb",
       "cd_sha256": "e6e7f11976751f0d6460df8afcb1dbb5925898b233791923fa34c1b553c3692b",
       "level_sha256": "9018caead4f1dfb4da1319403b70f13cad53e70bb05af8a7505af9bb535b7300",
       "mode": "cpu",
@@ -807,7 +807,7 @@
       "frame_profile": false
     },
     "close-idle-none-cpu-profile": {
-      "apk_sha256": "44ff2438e28dac0f2bed5e49697a87875c847711682536f28288f9c8b957aeae",
+      "apk_sha256": "0c2a9a9c41f8a2093fe923fb9809361c2cea1e671672f9dbf09b3dc58f3e3ed2",
       "cd_sha256": "e6e7f11976751f0d6460df8afcb1dbb5925898b233791923fa34c1b553c3692b",
       "level_sha256": "9018caead4f1dfb4da1319403b70f13cad53e70bb05af8a7505af9bb535b7300",
       "mode": "cpu",
@@ -854,7 +854,7 @@
       "frame_profile": true
     },
     "close-idle-none-gpu": {
-      "apk_sha256": "479b74734af107c844ed478c83d35e55d6a55f02ff0e461a202ce8ee7db72ff3",
+      "apk_sha256": "15e5f36c1217f254941ec92606f69fc1abd3c5717c21b25d51c172f87e697dc1",
       "cd_sha256": "e6e7f11976751f0d6460df8afcb1dbb5925898b233791923fa34c1b553c3692b",
       "level_sha256": "9018caead4f1dfb4da1319403b70f13cad53e70bb05af8a7505af9bb535b7300",
       "mode": "gpu",
@@ -901,7 +901,7 @@
       "frame_profile": false
     },
     "close-idle-none-gpu-profile": {
-      "apk_sha256": "1855eb311ea06aae862ccffa6c427ee5a202baa0ae1510f720eedac9893b14db",
+      "apk_sha256": "30b5f98367d8afef03b1ad6e56703e2d2a45452437a5aa08e0107a4ca468e7a7",
       "cd_sha256": "e6e7f11976751f0d6460df8afcb1dbb5925898b233791923fa34c1b553c3692b",
       "level_sha256": "9018caead4f1dfb4da1319403b70f13cad53e70bb05af8a7505af9bb535b7300",
       "mode": "gpu",
@@ -948,7 +948,7 @@
       "frame_profile": true
     },
     "close-idle-pair1-cpu": {
-      "apk_sha256": "3f0f59e3000cc6e20081e2436c5c17bb24d1a5494d5ae50f0a8ea95238599260",
+      "apk_sha256": "0c9ca7588007c388e035ae1541ad4fbee34a0cc01ae50cb9f5eca676ad1bed3a",
       "cd_sha256": "fd325e87dc3cba8257f5d51cd8526bde1390fb0b05de1e8660d64abd3e2359bf",
       "level_sha256": "1bdc20b73ea99ac8bcf13cb02b72ee692dadd786e60c32aa255dc87f6421ef0a",
       "mode": "cpu",
@@ -995,7 +995,7 @@
       "frame_profile": false
     },
     "close-idle-pair1-cpu-profile": {
-      "apk_sha256": "1d4164fb60a9fcad92205a4b2f24532f5cc0c4445a61490a5bc15130f0f71d28",
+      "apk_sha256": "6db1677cb30e07c206d5bf43904533a03be7ad54a50974ad7042d2073f254d06",
       "cd_sha256": "fd325e87dc3cba8257f5d51cd8526bde1390fb0b05de1e8660d64abd3e2359bf",
       "level_sha256": "1bdc20b73ea99ac8bcf13cb02b72ee692dadd786e60c32aa255dc87f6421ef0a",
       "mode": "cpu",
@@ -1042,7 +1042,7 @@
       "frame_profile": true
     },
     "close-idle-pair1-gpu": {
-      "apk_sha256": "3b66b553f080196df061705f153a2e47780a1ec2451c7d9349d793e9a24f5d59",
+      "apk_sha256": "bcfe881484b67cd3f1b0b81bc139cf6a3a807213e2d73ade2fe2f63322c4d556",
       "cd_sha256": "fd325e87dc3cba8257f5d51cd8526bde1390fb0b05de1e8660d64abd3e2359bf",
       "level_sha256": "1bdc20b73ea99ac8bcf13cb02b72ee692dadd786e60c32aa255dc87f6421ef0a",
       "mode": "gpu",
@@ -1089,7 +1089,7 @@
       "frame_profile": false
     },
     "close-idle-pair1-gpu-profile": {
-      "apk_sha256": "ab79a7901df6b67ffaaa3d707bab7035b0d17971a717450027c451a4a7a64c07",
+      "apk_sha256": "e33f72da618829a8a365a1c65b31b4dd45b860c3d9ea4615997be0e39b4242b8",
       "cd_sha256": "fd325e87dc3cba8257f5d51cd8526bde1390fb0b05de1e8660d64abd3e2359bf",
       "level_sha256": "1bdc20b73ea99ac8bcf13cb02b72ee692dadd786e60c32aa255dc87f6421ef0a",
       "mode": "gpu",
@@ -1136,7 +1136,7 @@
       "frame_profile": true
     },
     "close-idle-pair2-cpu": {
-      "apk_sha256": "3640306ce13b1b172824d6f3fdf59fe8b3118bc300691372f6fe37c1db071f90",
+      "apk_sha256": "27875412e9617adc72906f1958ec0f99183e855bb2f0d1576bef4695f0b6e99e",
       "cd_sha256": "94fc6a893ec1f771f4920e58fa9b44fad43b061a40cdc26bb77692ed56909d36",
       "level_sha256": "b29288e8b310aada3cba6bd0a3885b3b62d73121a4824156648daa0e73ec64b8",
       "mode": "cpu",
@@ -1183,7 +1183,7 @@
       "frame_profile": false
     },
     "close-idle-pair2-cpu-profile": {
-      "apk_sha256": "5bbf4b3a5e1eef444456e9af4e53c35593c736907c19a7c9dff87056e46556d7",
+      "apk_sha256": "fc07a2cdc0a0aa737e67f6f95c4ebb87c9dc13184a4d01daff39e47c4568ab50",
       "cd_sha256": "94fc6a893ec1f771f4920e58fa9b44fad43b061a40cdc26bb77692ed56909d36",
       "level_sha256": "b29288e8b310aada3cba6bd0a3885b3b62d73121a4824156648daa0e73ec64b8",
       "mode": "cpu",
@@ -1230,7 +1230,7 @@
       "frame_profile": true
     },
     "close-idle-pair2-gpu": {
-      "apk_sha256": "619e493ac6011552ba21582afcfe3f40e61bda657202f196543374e9d48604a8",
+      "apk_sha256": "2fed930f80e9e5649d897cd64fccca2824be7e8bac466c8290465611c479f0f6",
       "cd_sha256": "94fc6a893ec1f771f4920e58fa9b44fad43b061a40cdc26bb77692ed56909d36",
       "level_sha256": "b29288e8b310aada3cba6bd0a3885b3b62d73121a4824156648daa0e73ec64b8",
       "mode": "gpu",
@@ -1277,7 +1277,7 @@
       "frame_profile": false
     },
     "close-idle-pair2-gpu-profile": {
-      "apk_sha256": "9bf606c99492b8981bc26402b1b68b81e7c2c0b2e4c5d543c74163b585cced56",
+      "apk_sha256": "10f1c55aafb66c61872413487f60c152ab6b917122fa46debb7c0813c8c6c680",
       "cd_sha256": "94fc6a893ec1f771f4920e58fa9b44fad43b061a40cdc26bb77692ed56909d36",
       "level_sha256": "b29288e8b310aada3cba6bd0a3885b3b62d73121a4824156648daa0e73ec64b8",
       "mode": "gpu",
@@ -1324,7 +1324,7 @@
       "frame_profile": true
     },
     "close-idle-pair6-cpu": {
-      "apk_sha256": "74ead7fa27e853b61620ea055edf0c35fd92e9dd6be0edbc53d0634bfe98393d",
+      "apk_sha256": "f2b8b1b69c8f1e6132ba9625646c47e74a743a534ef427dbb72002ef0e384940",
       "cd_sha256": "0f98b278d5ae398d626b3c42489b16a506fa67ad2768d1bccdbbe1ce59d2b10a",
       "level_sha256": "6cb6cc3a3d238644fa67616f24624f91afa4f3c9ae9a17a4b8309fdb40d35465",
       "mode": "cpu",
@@ -1371,7 +1371,7 @@
       "frame_profile": false
     },
     "close-idle-pair6-cpu-profile": {
-      "apk_sha256": "6fd7ef788976967a99d05820909e6c8484ae50276ebd78136e1a701539a97870",
+      "apk_sha256": "20d11fb8e606bed4790f8c16d492615a70891933c22cf694a1f50f1f42db6464",
       "cd_sha256": "0f98b278d5ae398d626b3c42489b16a506fa67ad2768d1bccdbbe1ce59d2b10a",
       "level_sha256": "6cb6cc3a3d238644fa67616f24624f91afa4f3c9ae9a17a4b8309fdb40d35465",
       "mode": "cpu",
@@ -1418,7 +1418,7 @@
       "frame_profile": true
     },
     "close-idle-pair6-gpu": {
-      "apk_sha256": "811ceab066052e0530f7b9ad42d631155c338e9effc2066d5ce9a1ebecd51149",
+      "apk_sha256": "f2705d9c980d4136edd88e5ec9e1ba568be8dcaeea63c583d6ccd639539b0989",
       "cd_sha256": "0f98b278d5ae398d626b3c42489b16a506fa67ad2768d1bccdbbe1ce59d2b10a",
       "level_sha256": "6cb6cc3a3d238644fa67616f24624f91afa4f3c9ae9a17a4b8309fdb40d35465",
       "mode": "gpu",
@@ -1465,7 +1465,7 @@
       "frame_profile": false
     },
     "close-idle-pair6-gpu-profile": {
-      "apk_sha256": "3c9bc8e94d3e5d5db9e14fc395a635a6d094e59f298c90187c9a10828a053b5d",
+      "apk_sha256": "22a4e6e496491deec462798aecb7d864d177a3c691044088fa5a8e128276bf80",
       "cd_sha256": "0f98b278d5ae398d626b3c42489b16a506fa67ad2768d1bccdbbe1ce59d2b10a",
       "level_sha256": "6cb6cc3a3d238644fa67616f24624f91afa4f3c9ae9a17a4b8309fdb40d35465",
       "mode": "gpu",
@@ -1512,7 +1512,7 @@
       "frame_profile": true
     },
     "close-crawl-none-cpu": {
-      "apk_sha256": "8bcd60ed0a5d28d12a7fc23ef5b1760b5dff0b35f5b39e463c2cb8b539cb54bb",
+      "apk_sha256": "df49257c43d8adf06be76b61198d05bc755844c95fb8c16aee30a02c83c49246",
       "cd_sha256": "c122d1953600fce0fb85c529eb576be5cc945172ad31a2b66bddf14e894d082e",
       "level_sha256": "1b66d24db4307a8a1e1ff835280495e2751d973939d67a68a6cf4a78dfb34903",
       "mode": "cpu",
@@ -1559,7 +1559,7 @@
       "frame_profile": false
     },
     "close-crawl-none-cpu-profile": {
-      "apk_sha256": "96d8b19f63bc4ac35fa9090f145ad9f92473362d49f4ad4b68e96019b2e49a71",
+      "apk_sha256": "4b23ca4d3ed8b4022726bd1a4b74187eee7feb03a85e8442d616d81938d2d3b1",
       "cd_sha256": "c122d1953600fce0fb85c529eb576be5cc945172ad31a2b66bddf14e894d082e",
       "level_sha256": "1b66d24db4307a8a1e1ff835280495e2751d973939d67a68a6cf4a78dfb34903",
       "mode": "cpu",
@@ -1606,7 +1606,7 @@
       "frame_profile": true
     },
     "close-crawl-none-gpu": {
-      "apk_sha256": "74123da4ea7126e33ebe198caba1c19d2b7fd8cdaab784454bb9aeaf4a360c0d",
+      "apk_sha256": "da771aaed9ca1a7cd361d78ef4965e612c3b444ef4604ff652f15ccb557a9742",
       "cd_sha256": "c122d1953600fce0fb85c529eb576be5cc945172ad31a2b66bddf14e894d082e",
       "level_sha256": "1b66d24db4307a8a1e1ff835280495e2751d973939d67a68a6cf4a78dfb34903",
       "mode": "gpu",
@@ -1653,7 +1653,7 @@
       "frame_profile": false
     },
     "close-crawl-none-gpu-profile": {
-      "apk_sha256": "8387f11b99439767c49ca98e5fe398e87a6e61c30e7f59fb9a1b5a788b05862e",
+      "apk_sha256": "e61228274da45dcb0b759ad8cdd4a2a050646fc663068ae4ef8ccc6342a456c9",
       "cd_sha256": "c122d1953600fce0fb85c529eb576be5cc945172ad31a2b66bddf14e894d082e",
       "level_sha256": "1b66d24db4307a8a1e1ff835280495e2751d973939d67a68a6cf4a78dfb34903",
       "mode": "gpu",
@@ -1700,7 +1700,7 @@
       "frame_profile": true
     },
     "close-crawl-pair1-cpu": {
-      "apk_sha256": "98df2a20abebdb9fc2c9ae5eae00b7e37364dcb1b29da65be10bacfc45fd9e26",
+      "apk_sha256": "1245dbbca4a6d47c4dfda48f4ab0bf99cab5089ae4380e6a9bb7b36e680a733e",
       "cd_sha256": "aee9d07cc9fb26445828dc561c14ed66fc4ebc128f465ef558da4e951f0a7deb",
       "level_sha256": "a2482adef2513b4a3f136946b42783f3ebe6cb23519449c4b7c38b6015891022",
       "mode": "cpu",
@@ -1747,7 +1747,7 @@
       "frame_profile": false
     },
     "close-crawl-pair1-cpu-profile": {
-      "apk_sha256": "70a13f1ae10f1e7fcc7101363fa2edfd445a2443e59b1b5da382e180b30f64d2",
+      "apk_sha256": "d65160e297fb25c68cca2b5486b58cbf8b96b00d4e267fd8a5897d4b1f81ad0c",
       "cd_sha256": "aee9d07cc9fb26445828dc561c14ed66fc4ebc128f465ef558da4e951f0a7deb",
       "level_sha256": "a2482adef2513b4a3f136946b42783f3ebe6cb23519449c4b7c38b6015891022",
       "mode": "cpu",
@@ -1794,7 +1794,7 @@
       "frame_profile": true
     },
     "close-crawl-pair1-gpu": {
-      "apk_sha256": "d96f56978e9147feac3ae7a79cbf5bda3e1730cda1edc27151a839f4f7ab6275",
+      "apk_sha256": "00fe02e9af89e68aded919da94f02316de8ba04ca08ebe3002dacd3555d00a4c",
       "cd_sha256": "aee9d07cc9fb26445828dc561c14ed66fc4ebc128f465ef558da4e951f0a7deb",
       "level_sha256": "a2482adef2513b4a3f136946b42783f3ebe6cb23519449c4b7c38b6015891022",
       "mode": "gpu",
@@ -1841,7 +1841,7 @@
       "frame_profile": false
     },
     "close-crawl-pair1-gpu-profile": {
-      "apk_sha256": "2eb4f7adef41970c91b60382f8a1c5e26034aa0e931a860424336a739afa784d",
+      "apk_sha256": "5bc32d8568feaf3eecd114dd9f33be33dc85f989dcf785c62932202b7ec95e97",
       "cd_sha256": "aee9d07cc9fb26445828dc561c14ed66fc4ebc128f465ef558da4e951f0a7deb",
       "level_sha256": "a2482adef2513b4a3f136946b42783f3ebe6cb23519449c4b7c38b6015891022",
       "mode": "gpu",
@@ -1888,7 +1888,7 @@
       "frame_profile": true
     },
     "close-crawl-pair2-cpu": {
-      "apk_sha256": "bad725f5f7ba8331ad553529281f255ae60f6b526d4a7e667a47779c9ed13a98",
+      "apk_sha256": "8e63b297368ae0b8609241a99ac861e317363e38bed366bef46110ce3aafee7f",
       "cd_sha256": "6cbb089315aa8280a296f5a560f1d005cb08822014f7ffa57872bd7cbcec11c3",
       "level_sha256": "a8f0f857291af9c3667fe5c0a5770761c994120caeefb6e9ee9c630ddb15b0ff",
       "mode": "cpu",
@@ -1935,7 +1935,7 @@
       "frame_profile": false
     },
     "close-crawl-pair2-cpu-profile": {
-      "apk_sha256": "bb7d0c93f22246f4a855f7b13fc595464c88308d81d3bf2b8864347f2ada4a05",
+      "apk_sha256": "de8fa82773456e8f1b0f4f79c2d48f7a1739392570c491c3177e2c130af7d5d2",
       "cd_sha256": "6cbb089315aa8280a296f5a560f1d005cb08822014f7ffa57872bd7cbcec11c3",
       "level_sha256": "a8f0f857291af9c3667fe5c0a5770761c994120caeefb6e9ee9c630ddb15b0ff",
       "mode": "cpu",
@@ -1982,7 +1982,7 @@
       "frame_profile": true
     },
     "close-crawl-pair2-gpu": {
-      "apk_sha256": "1e574441c6724edcab03d42fcd19ebfaaf1a5fadb62101f5388e010d58569864",
+      "apk_sha256": "8ffcd3e94ad9c0b90b8d07b47823e929b21d4e5caf272832e34b1ad4c5a1af07",
       "cd_sha256": "6cbb089315aa8280a296f5a560f1d005cb08822014f7ffa57872bd7cbcec11c3",
       "level_sha256": "a8f0f857291af9c3667fe5c0a5770761c994120caeefb6e9ee9c630ddb15b0ff",
       "mode": "gpu",
@@ -2029,7 +2029,7 @@
       "frame_profile": false
     },
     "close-crawl-pair2-gpu-profile": {
-      "apk_sha256": "39ebe69e714386fed23feda99255db0ec23eabf7549e9c8c69d9d79eea0bf2ad",
+      "apk_sha256": "b51992f7de8fa4ce69cab5439aa4da02e5f000db9e48f8f8caf5793f41aa51be",
       "cd_sha256": "6cbb089315aa8280a296f5a560f1d005cb08822014f7ffa57872bd7cbcec11c3",
       "level_sha256": "a8f0f857291af9c3667fe5c0a5770761c994120caeefb6e9ee9c630ddb15b0ff",
       "mode": "gpu",
@@ -2076,7 +2076,7 @@
       "frame_profile": true
     },
     "close-crawl-pair6-cpu": {
-      "apk_sha256": "6e046deec25499947431bf99914e7f8a711c78683d3e118d52463ccbb4ccde4f",
+      "apk_sha256": "beb75b25831e8da4b0ec2ae2986f8f2199b7f4b6f29214fb9051b51911db141b",
       "cd_sha256": "d8dd534ea3f9d53b0d09315326094422a4caf159290460b22cf342910901dc3a",
       "level_sha256": "c99195469849c67e483883b390087780d07a205939278a2cd64f9a3dbf6a3f9e",
       "mode": "cpu",
@@ -2123,7 +2123,7 @@
       "frame_profile": false
     },
     "close-crawl-pair6-cpu-profile": {
-      "apk_sha256": "b3a1adbd5b886f78cae2ae652b9fa33dd147ae09cbdf82b5beb969d9890ac29c",
+      "apk_sha256": "a3d77413ed154707ec9a65cf1ceecb913a83dbbed2b66fa9dfadc6bcbb5db335",
       "cd_sha256": "d8dd534ea3f9d53b0d09315326094422a4caf159290460b22cf342910901dc3a",
       "level_sha256": "c99195469849c67e483883b390087780d07a205939278a2cd64f9a3dbf6a3f9e",
       "mode": "cpu",
@@ -2170,7 +2170,7 @@
       "frame_profile": true
     },
     "close-crawl-pair6-gpu": {
-      "apk_sha256": "aa589e16aae509d7c2e46bc026359899619b7eb39f75bcc819077da5afb8a6b6",
+      "apk_sha256": "f51efe6446e3ee61f6adfabf182607096053ec85fcbe08e99d7b7357d193dd60",
       "cd_sha256": "d8dd534ea3f9d53b0d09315326094422a4caf159290460b22cf342910901dc3a",
       "level_sha256": "c99195469849c67e483883b390087780d07a205939278a2cd64f9a3dbf6a3f9e",
       "mode": "gpu",
@@ -2217,7 +2217,7 @@
       "frame_profile": false
     },
     "close-crawl-pair6-gpu-profile": {
-      "apk_sha256": "0b61c6626fd7f1eaff2b931cf409ceced59bbad80153d1f8eb66889b7064e313",
+      "apk_sha256": "210f1a033a85207bd179625ee553b6d800a4f55f27ae4ee7feb95e63ba4fc16b",
       "cd_sha256": "d8dd534ea3f9d53b0d09315326094422a4caf159290460b22cf342910901dc3a",
       "level_sha256": "c99195469849c67e483883b390087780d07a205939278a2cd64f9a3dbf6a3f9e",
       "mode": "gpu",
@@ -2263,7 +2263,5 @@
       },
       "frame_profile": true
     }
-  },
-  "native_source_revision": "004d85ae",
-  "native_source_note": "Native engine sources were committed after APK build; no engine changes between build and this commit. CI-only followup c53cd522."
+  }
 }
