@@ -651,6 +651,55 @@ Ranks are suggestions; a Fable session ranks the TODO entry.
     - The device APK is `0401c619`, not the merged branch.
 
     Evidence: `docs/diagnostics/seahorse-phase3-cast1/summary.json`.
+
+    **Second rerun on Chromecast 1, merged code** (2026‑10‑17, 08:40–09:35 +07). The run above found a real Phase 3 bug in its phone model: two entries with id 8. The `Seahorses` sheet header (kind 5) took the `Seahorses` field's binding in `scripts/build-object-properties.py` `catalog()`, and the duplicate-id check skips structural entries. Fixed in `bada66c5`: headers and groups never take a binding, so their id is always 0. Regression tests are `test_sheet_header_sharing_a_field_name_keeps_id_zero` and `test_planted_tank_catalog_has_unique_field_ids`. Regenerating the planted tank changes one byte in each of `settings.rprp`, `settings-catalog.inc` and the catalog inside `aquarium_plants-standalone.iff` (8 → 0). The baseline `settings` and `settings-gallery` catalogs are byte-identical. The validator's Greeting predicate was the orchestrator's brief, fixed in `~/chromecast-coordinator` `f5fb87e`.
+
+    This run uses an APK built from `bada66c5`: the merged Phase 3, the face-normals migration, and the cooker fix. Its menu bundle was rebuilt locally and not committed.
+
+    ```
+    $ scripts/in-linux-container.sh python3 <old vs new cooker over every *-bindings.json>
+    wflevels/aquarium_plants/settings-bindings.json DIFFERENT 1750 1750
+        (8, 5, 'Seahorses') -> (0, 5, 'Seahorses')
+    wflevels/baseline/settings-bindings.json identical 17172 17172
+    wflevels/baseline/settings-gallery-bindings.json identical 28919 28919
+    $ scripts/in-linux-container.sh bash -c 'TMPDIR=/build/tmp python3 -m pytest -q tests/test_object_properties.py'
+    8 passed in 16.63s
+    $ (android) ./gradlew assembleAquariumRelease
+    BUILD SUCCESSFUL in 8m 3s
+    $ sha256sum ~/tmp/seahorse-phase3/aquarium-seahorse-phase3-bada66c5.apk
+    5ea742fee283f96d6f5514209145c622eb368452ed52e7a0e1b40c25cb37ede2
+    $ python3 scripts/build-planted-seahorse-variants.py --base-apk ~/tmp/seahorse-phase3/aquarium-seahorse-phase3-bada66c5.apk --out ~/tmp/seahorse-phase3/variants-bada66c5
+    {"freshwater": "ab12e3015ab3", "none": "7dc880b6b314", "pair1": "3c1a123dc182", "pair2": "bbb15cabd38e"}
+    $ task chromecast:check DEVICE=chromecast-test-01 APP=aquarium VALIDATOR=menu-back APK=…/variants-bada66c5/{pair2,pair1,none,freshwater}.apk
+    J-607d36b673a6: completed (pair2; the client timed out queued behind another owner's job, the job ran and completed)
+    J-a5b5418e2026: completed {"error": null, "health": "ready"}
+    J-bfad80d308ce: completed {"error": null, "health": "ready"}
+    J-03b9b4035636: completed {"error": null, "health": "ready"}
+    $ # per variant: assertions.json scenes PASS, betta pixels, fatal|assert|crash|Forth-error logcat lines, installed hash
+    pair2 8 scenes PASS betta [2753] bad-log-lines 0 installed ['bbb15cabd38e']
+    pair1 8 scenes PASS betta [2982] bad-log-lines 0 installed ['3c1a123dc182']
+    none 8 scenes PASS betta [2215] bad-log-lines 0 installed ['7dc880b6b314']
+    freshwater 8 scenes PASS betta [2402] bad-log-lines 0 installed ['ab12e3015ab3']
+    $ grep -c sheet_headers_have_no_field_ids /opt/wf-device-coordinator/scripts/wf_device/plugins/android/validators/seahorse_checks.py
+    0
+    ```
+
+    | Variant | Job | Planted tank on the TV |
+    |---|---|---|
+    | 2 pairs | J‑607d36b673a6 | Saltwater. Four seahorses as two pairs, one pair on each post. Urchin on the sand. 18.7 FPS. |
+    | 1 pair | J‑a5b5418e2026 | Saltwater. One pair on the red whip; the grey T‑post is shown and empty. 20.0 FPS. |
+    | None | J‑bfad80d308ce | Saltwater. No seahorses and no posts; urchin only. 21.1 FPS. |
+    | Freshwater | J‑03b9b4035636 | Freshwater plants, rocks and the freshwater resident. No seahorses, posts or urchin. 20.1 FPS. |
+
+    <img src="../diagnostics/seahorse-phase3-cast1/merged-bada66c5/menu-check/pair2/planted-tank-screenshot.png" width="700">
+
+    <img src="../diagnostics/seahorse-phase3-cast1/merged-bada66c5/menu-check/pair1/planted-tank-screenshot.png" width="700">
+
+    <img src="../diagnostics/seahorse-phase3-cast1/merged-bada66c5/menu-check/none/planted-tank-screenshot.png" width="700">
+
+    <img src="../diagnostics/seahorse-phase3-cast1/merged-bada66c5/menu-check/freshwater/planted-tank-screenshot.png" width="700">
+
+    **PARTIAL, not a pass** (2026‑10‑17). On the merged code, selector, Back, Home and resume pass with every variant. Each authored setting shows the expected seahorses and posts. Logcat is clean. The in-game Hold A → Apply run (`aquarium-seahorses`) is **pending deploy**: the fixed validator was not in `/opt` when this run finished. Rerun it on `~/tmp/seahorse-phase3/aquarium-seahorse-phase3-bada66c5.apk` once it is deployed. Evidence: `docs/diagnostics/seahorse-phase3-cast1/merged-bada66c5/summary.json`.
 11. The eight-tank selector release is reinstalled on each Chromecast, and its installed hash matches the build.
 
     ```
@@ -665,6 +714,21 @@ Ranks are suggestions; a Fable session ranks the TODO entry.
     ```
 
     **Chromecast 1 PASS** (2026‑10‑16): the selector release `e941e460` (`3d796c77…`) is installed, and a second job read the same hash back before doing anything. Chromecast 2 is not done: it is `needs-local-setup` and was not used.
+
+    After the second rerun (2026‑10‑17):
+
+    ```
+    $ task chromecast:submit DEVICE=chromecast-test-01 APP=aquarium WORKFLOW=install APK=~/tmp/seahorse-phase1/aquarium-selector-release-e941e460.apk
+    J-3dee9982ae42: completed
+    install:1 before ab12e3015ab3ecf9ae3e479918d74487c03b6e7718aa69cdf0fe28bb979083b2 after {'installed_sha256': '3d796c773070795e16fe4505b80f43f711c8bf6555bcbef70101176264738d88'}
+    $ task chromecast:submit DEVICE=chromecast-test-01 APP=aquarium WORKFLOW=install APK=~/tmp/seahorse-phase1/aquarium-selector-release-e941e460.apk   # re-read
+    J-846790bfbf69: recovery-required; verified 24 artifacts
+    install:1 before 3d796c773070795e16fe4505b80f43f711c8bf6555bcbef70101176264738d88 after {'installed_sha256': '3d796c773070795e16fe4505b80f43f711c8bf6555bcbef70101176264738d88'}
+    $ task chromecast:status JOB=J-45f863d011b0      # its automatic recovery
+      "state": "completed",
+    ```
+
+    **Chromecast 1 PASS** (2026‑10‑17): `3d796c77…` is installed and read back. The re-read job ended `recovery-required`, but not because of the APK. Its launcher-artwork check compared the Aquarium tile on the **Your apps** row, which the bottom of the screen cuts off (bounds 844,986–996,1072, mean error 65, `launcher-result-J-846790bfbf69.json`). The restore job's own launcher check, at 844,906–996,1058, verified. The automatic recovery completed, and the device is `ready`.
 12. Mockups rebuild cleanly: `python3 docs/plans/2026-10-16-saltwater-seahorses/build_mockups.py` reports no errors, and every file is under the 512 KB budget.
 
 ## Six-pair update — 2026‑10‑16

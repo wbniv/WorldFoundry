@@ -1,0 +1,42 @@
+{
+  "device": "chromecast-test-01 (Chromecast HD, Android 14)",
+  "date": "2026-10-17",
+  "test_apk": {
+    "branch": "seahorse-phase3-device",
+    "commit": "bada66c5",
+    "includes": ["origin/2026-new-level 4d318485 (Phase 3 merged, Blender face-normals migration, level-build container)", "the property-cooker header fix"],
+    "menu_bundle": "wflevels/aquarium-menu-cd.iff rebuilt locally with cdpack from the committed standalone levels (sha256 17d295a1a4a0dd13cbcedcd127aeefa680e7d08201db260b6938d83c8342c16d), not committed",
+    "base_sha256": "5ea742fee283f96d6f5514209145c622eb368452ed52e7a0e1b40c25cb37ede2",
+    "variants_sha256": {
+      "pair2": "bbb15cabd38e6da601828a3286ac79d0cef64ac1076de9382b4b9c7402e09db8",
+      "pair1": "3c1a123dc1823fe7990524e5440118fb0fc51b8faf3ed40561114377639cf0ca",
+      "none": "7dc880b6b3141a2466c7f0780bc240e194639500183d576ef05cf5070c2127aa",
+      "freshwater": "ab12e3015ab3ecf9ae3e479918d74487c03b6e7718aa69cdf0fe28bb979083b2"
+    }
+  },
+  "menu_check": {
+    "validator": "menu-back",
+    "pair2": {"job": "J-607d36b673a6", "scenes_pass": 8, "betta_animated_pixels": 2753, "fatal_assert_crash_forth_lines": 0,
+              "planted_tank": "saltwater, 4 seahorses as 2 pairs, one pair on each post, urchin; 18.7 FPS"},
+    "pair1": {"job": "J-a5b5418e2026", "scenes_pass": 8, "betta_animated_pixels": 2982, "fatal_assert_crash_forth_lines": 0,
+              "planted_tank": "saltwater, 1 pair on the red whip, grey T-post shown and empty; 20.0 FPS"},
+    "none": {"job": "J-bfad80d308ce", "scenes_pass": 8, "betta_animated_pixels": 2215, "fatal_assert_crash_forth_lines": 0,
+             "planted_tank": "saltwater, no seahorses, no posts, urchin only; 21.1 FPS"},
+    "freshwater": {"job": "J-03b9b4035636", "scenes_pass": 8, "betta_animated_pixels": 2402, "fatal_assert_crash_forth_lines": 0,
+                   "planted_tank": "freshwater plants, rocks and the freshwater resident; no seahorses, posts or urchin; 20.1 FPS"}
+  },
+  "aquarium_seahorses": {
+    "status": "pending deploy",
+    "detail": "the fixed validator (~/chromecast-coordinator f5fb87e, assertion sheet_headers_have_no_field_ids) was not yet in /opt when the menu checks and restore finished: grep -c sheet_headers_have_no_field_ids returned 0"
+  },
+  "restored_apk": {
+    "commit": "e941e460",
+    "sha256": "3d796c773070795e16fe4505b80f43f711c8bf6555bcbef70101176264738d88",
+    "install_job": "J-3dee9982ae42",
+    "install_before_hash": "ab12e3015ab3ecf9ae3e479918d74487c03b6e7718aa69cdf0fe28bb979083b2",
+    "installed_sha256": "3d796c773070795e16fe4505b80f43f711c8bf6555bcbef70101176264738d88",
+    "confirm_job": "J-846790bfbf69",
+    "confirm_before_hash": "3d796c773070795e16fe4505b80f43f711c8bf6555bcbef70101176264738d88",
+    "confirm_note": "the hash read back matched, but the job ended recovery-required (plugin-error): its launcher-artwork check compared the Aquarium tile at bounds 844,986-996,1072, on the 'Your apps' row cut off by the bottom of the screen (MAE 65, not verified). The restore job's own launcher check at 844,906-996,1058 was verified. Automatic recovery J-45f863d011b0 completed; the device is ready."
+  }
+}

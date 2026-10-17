@@ -1,0 +1,52 @@
+{
+  "status": "failed",
+  "home": "com.google.android.apps.tv.launcherx/.home.HomeActivity",
+  "apk": "3d796c773070795e16fe4505b80f43f711c8bf6555bcbef70101176264738d88.apk",
+  "attempts": [
+    {
+      "bounds": [
+        844,
+        986,
+        996,
+        1072
+      ],
+      "reference": "expected-banner-0.png",
+      "resource": "res/gU.png",
+      "kind": "banner",
+      "mean_absolute_error": 65.15616391184572,
+      "rms_error": 83.5867476909731,
+      "worst_region_error": 80.00892857142857,
+      "brightness_gain": 0.9551285455276473,
+      "verified": false,
+      "screenshot": "attempt-1-view-1.png",
+      "hierarchy": "attempt-1-view-1.xml",
+      "attempt": 1
+    },
+    {
+      "bounds": [
+        844,
+        986,
+        996,
+        1072
+      ],
+      "reference": "expected-banner-0.png",
+      "resource": "res/gU.png",
+      "kind": "banner",
+      "mean_absolute_error": 65.15616391184572,
+      "rms_error": 83.5867476909731,
+      "worst_region_error": 80.00892857142857,
+      "brightness_gain": 0.9551285455276473,
+      "verified": false,
+      "screenshot": "attempt-2-view-1.png",
+      "hierarchy": "attempt-2-view-1.xml",
+      "attempt": 2
+    }
+  ],
+  "refreshes": [
+    {
+      "operation": "launcher-force-stop-and-home",
+      "package": "com.google.android.apps.tv.launcherx"
+    }
+  ],
+  "error": "APK installed, but launcher artwork is stale or unverified after bounded recovery; inspect launcher evidence."
+}
