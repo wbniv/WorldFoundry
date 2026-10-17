@@ -57,15 +57,15 @@ def upload_table(rows, population=False):
 
 def cpu_sections_table(rows, population=False, modes=('cpu', 'gpu')):
     heading = 'Bodies' if population else 'Pairs'
-    lines = [f'| {heading} | Mode | Pose ms | Vertices ms | Normals ms | Cull ms | Submit ms | Total CPU ms |',
-             '|---:|---|---:|---:|---:|---:|---:|---:|']
+    lines = [f'| {heading} | Mode | Pose ms | Vertices ms | Normals ms | Cull ms | Object submit ms | Total CPU ms | Profile frame-time change % |',
+             '|---:|---|---:|---:|---:|---:|---:|---:|---:|']
     for row in rows:
         for mode in modes:
             sections = row[mode]['cpu_profile']['frame_weighted_cpu_ms']
-            values = ' | '.join(f'{sections[name]:.4f}' for name in
+            values = ' | '.join('unavailable' if name == 'skin-cull' else f'{sections[name]:.4f}' for name in
                                 ['skin-pose', 'skin-vertices', 'skin-normals', 'skin-cull', 'skin-submit', 'total'])
             count = row['actors' if population else 'pairs']
-            lines.append(f'| {count} | {mode} | {values} |')
+            lines.append(f"| {count} | {mode} | {values} | {row[mode]['profile_presented_frame_change_percent']:+.2f} |")
     return '\n'.join(lines)
 
 

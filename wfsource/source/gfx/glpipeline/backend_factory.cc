@@ -182,6 +182,7 @@ public:
         t.order=_count++; t.cullExempt=exempt; t.prelit=prelit;
     }
     void FlushTranslucency() override { Drain(); }
+    void FlushPending() override { Drain(); _backend.FlushPending(); }
     void DrawOverlay(const PhonepadRect* rects, int count, int w, int h) override
     { Drain(); _backend.DrawOverlay(rects, count, w, h); }
     bool BitmapTextSupported() const override { return _backend.BitmapTextSupported(); }

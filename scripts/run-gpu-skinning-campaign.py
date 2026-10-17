@@ -49,6 +49,7 @@ def main():
     parser.add_argument('--fixtures', type=Path, required=True)
     parser.add_argument('--evidence', type=Path, required=True)
     parser.add_argument('--device', choices=['chromecast-test-01', 'chromecast-test-02'], required=True)
+    parser.add_argument('--release-only', action='store_true', help='Finish release recipes and wait for corrected profiles')
     args = parser.parse_args()
     args.evidence.mkdir(parents=True, exist_ok=True)
     campaign = json.loads(args.campaign.read_text())
@@ -70,6 +71,8 @@ def main():
     save(progress_path, progress)
     try:
         for recipe in campaign['recipes']:
+            if args.release_only and recipe['frame_profile']:
+                continue
             match = re.search(r'-round-(\d+)$', recipe['name'])
             stage = 'profile' if recipe['frame_profile'] else 'round-' + match[1]
             key = f"{recipe['view']}/{recipe['mode']}/{stage}"
@@ -136,7 +139,7 @@ def main():
                 raise ValueError('Restore APK mismatch: ' + key)
             progress['completed'].append(key)
             save(progress_path, progress)
-        progress.update(state='complete')
+        progress.update(state='awaiting-profiles' if args.release_only else 'complete')
         save(progress_path, progress)
         print('campaign complete', args.evidence, flush=True)
     except Exception as error:

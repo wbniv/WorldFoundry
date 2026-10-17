@@ -22,6 +22,7 @@ def main():
     parser.add_argument('--out', type=Path, required=True)
     parser.add_argument('--populations', type=Path, help='Controlled population manifest instead of aquarium views')
     parser.add_argument('--selector', action='store_true', help='Keep the base selector CD for input and lifecycle checks')
+    parser.add_argument('--profile-only', action='store_true', help='Freeze corrected instrumented cases without replacing release timing APKs')
     parser.add_argument('--views', nargs='+', choices=['wide-idle', 'close-idle', 'close-crawl'],
                         default=['wide-idle', 'close-idle', 'close-crawl'])
     parser.add_argument('--modes', nargs='+', choices=['cpu', 'cpu-no-cull', 'gpu-no-cull', 'gpu'], default=['cpu', 'gpu'])
@@ -45,12 +46,14 @@ def main():
         original_cd = base.read('assets/cd.iff')
         if not native or not any(b'gpu-no-cull' in base.read(n) for n in native):
             raise ValueError('Base APK lacks the experimental native modes')
+        if not any(b'frame-profile-schema: v2 flushed-final-batch no-per-face-clocks' in base.read(n) for n in native):
+            raise ValueError('Base APK lacks corrected v2 profiling; rebuild before freezing profiles')
     if b'--frame-profile' in original_args or b'--gpu-skinning' in original_args:
         raise ValueError('Base arguments must not select profiling or skinning')
     receipt = dict(source_revision=subprocess.check_output(['git', 'rev-parse', 'HEAD'], cwd=ROOT, text=True).strip(),
                    source_diff_sha256=sha(subprocess.check_output(['git', 'diff', 'HEAD', '--'], cwd=ROOT)),
                    base_apk_sha256=sha(args.base_apk.read_bytes()), native=native,
-                   source_level_sha256=sha(source_level), variants={})
+                   source_level_sha256=sha(source_level), profile_scope_version=2, variants={})
     cases = []
     if args.selector:
         cases.append(('selector', None, dict(scope='Unmodified base selector assets; input and lifecycle checks only'), [], {}))
@@ -80,7 +83,7 @@ def main():
                 str(ROOT / 'wfsource/source/game/shell.fth'), str(standalone.resolve()), '-o', str(cd.resolve())], check=True)
         cd_bytes = cd.read_bytes() if level is not None else original_cd
         for mode in args.modes:
-            for profiling in (False, True):
+            for profiling in ((True,) if args.profile_only else (False, True)):
                 name = f'{stem}-{mode}' + ('-profile' if profiling else '')
                 unsigned, aligned, final = (args.out / (name + suffix) for suffix in ('-unsigned.apk', '-aligned.apk', '.apk'))
                 runtime_args = original_args + f'\n--gpu-skinning={mode}\n'.encode() + (b'--frame-profile\n' if profiling else b'')
@@ -109,6 +112,7 @@ def main():
                 receipt['variants'][name] = dict(apk_sha256=sha(final.read_bytes()), cd_sha256=sha(cd_bytes),
                     level_sha256=sha(level) if level is not None else None, mode=mode, settings=settings, scripts=slots,
                     preservation=preservation, frame_profile=profiling)
+                receipt['variants'][name].update(native=native, profile_scope_version=2 if profiling else None)
                 print(name, receipt['variants'][name]['apk_sha256'], flush=True)
         if level is not None:
             cd.unlink()

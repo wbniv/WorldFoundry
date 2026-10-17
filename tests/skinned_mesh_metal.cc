@@ -33,7 +33,11 @@ int main() {
     auto finish=[&](){backend->EndFrame();wf_metal::EndFrame();};
     auto draw=[&](bool two,bool cull){need(wf_metal::BeginFrame(64,64),"begin frame");need(backend->DrawSkinnedMesh(h,0,3,palette,4,nullptr,false,two,cull),"draw rejected");finish();};
     draw(false,true);center(255);
-    need(wf_metal::BeginFrame(64,64),"CPU begin");wf_profile::enableFresh();wf_profile::begin_frame();{wf_profile::SkinObjectScope tagged(true);backend->DrawTriangle(v[0].vertex,v[1].vertex,v[2].vertex,0,0,1,nullptr,true,false);}finish();auto cpu=frame();
+    need(wf_metal::BeginFrame(64,64),"CPU begin");wf_profile::enableFresh();wf_profile::begin_frame();{wf_profile::SkinObjectScope tagged(true);backend->DrawTriangle(v[0].vertex,v[1].vertex,v[2].vertex,0,0,1,nullptr,true,false);}
+    need(wf_profile::state().counters[wf_profile::SkinVertexBytes]==0,"CPU batch unexpectedly uploaded before flush");
+    backend->FlushPending();wf_profile::end_frame();
+    need(wf_profile::state().totals[wf_profile::SkinVertexBytes]==3*76,"final CPU rig upload missed the profiled frame");
+    finish();auto cpu=frame();
     need(wf_profile::state().counters[wf_profile::SkinVertexBytes]==3*76,"CPU rig stream byte count");
     draw(false,true);need(cpu==frame(),"rigid lighting differs");
     backend->DestroySkinnedMesh(h);std::swap(v[1],v[2]);h=backend->CreateSkinnedMesh(v,3);

@@ -157,6 +157,11 @@ public:
                               bool cullExempt = false,
                               bool prelit = false) = 0;
 
+    // Submit pending draws without finalizing the frame or resetting budgets.
+    // Profiling uses this before closing its render scope so the final batch
+    // is included in CPU costs and upload counters on every backend.
+    virtual void FlushPending() {}
+
     // Flush any pending batched draws. Called once per frame, right before
     // the swap-buffers. Legacy fixed-function backend is a no-op; modern
     // VBO backend uses this to drain its accumulated vertex buffer.

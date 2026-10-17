@@ -184,12 +184,22 @@ from 67.34 to 73.89 MiB. These body-only scenes exclude fins, plants and
 behaviour AI. The small cases reach the display limit; CPU cost and the
 crossover still require the separate profiles.
 
-The completed cast2 G1 profile verifies zero steady vertex/index upload,
+The first cast2 G1 profile verifies zero steady vertex/index upload,
 zero rebuilds and zero CPU fallbacks at all three populations. Sixteen bodies
 upload 30 KiB of palettes per frame and use 3.95 MiB of resident GPU skin
 buffers; median render-section CPU time is 1.24 ms across eleven contained
 five-second windows. These are instrumented measurements, separate from
-the release FPS above. The matched CPU profile is still pending.
+the release FPS above. They use the original profiling scope and are retained
+as historical measurements, not a matched CPU-cost conclusion.
+
+The initial CPU profiles are invalid for that comparison: their final queued
+body upload occurred after the profiler closed, and per-face thread clocks
+heavily perturbed ordinary CPU culling (about 56.8 release FPS became 19.5
+instrumented FPS at sixteen bodies). Corrected profiles are being repeated
+with an explicit final-batch flush and coarse CPU scopes. Isolated cull time
+is unavailable; C/C0 records its net effect. The paired release FPS above is
+unaffected by those profiling-only defects. Release and corrected profiling
+cohorts have separate native hashes and must remain separate.
 
 GL image comparisons pass on the actual six-pair and sixteen-body scenes.
 Metal's real offscreen draw fixture also passes, including four influences,

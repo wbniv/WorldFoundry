@@ -49,7 +49,7 @@ struct Recorded { float x,z,opacity,ambient,fog; bool prelit,modulate,palette; u
 struct Backend : RendererBackend {
  std::vector<Recorded> draws;
  float opacity=1, ambient=0, fog=0;
- int ambientCalls=0;
+ int ambientCalls=0,flushCalls=0;
  bool modulate=false,palette=false;unsigned dark=0,light=0xffffff;
  void SetProjection(float,float,float,float) override {}
  void SetModelView(const Matrix34&) override {}
@@ -67,10 +67,13 @@ struct Backend : RendererBackend {
    draws.push_back({a.x,a.z,opacity,ambient,fog,p,modulate,palette,dark,light});
  }
  void EndFrame() override {}
+ void FlushPending() override { ++flushCalls; }
  RBTextureHandle CreateTexture(int,int,RBTextureFormat,const void*) override { return nullptr; }
  void DestroyTexture(RBTextureHandle) override {}
 } backend;
 RendererBackend* ModernBackendInstance() { return &backend; }
+void ModernBackendSimulateSurfaceLoss() {}
+bool StaticMeshEndFrame() { return false; }
 int main() {
  RendererBackend& r=RendererBackendGet();
  RBVertex v={0,0,-2,1,1,1,0,0};
@@ -117,6 +120,13 @@ int main() {
  assert(backend.draws.size()==drawStart+40);
  assert(backend.ambientCalls-before<=1);
  for(int i=0;i<40;++i) assert(backend.draws[drawStart+i].dark==(i%2?0x550000u:0x330000u));
+ assert(testMemory.allocated==0);
+ // Profiling must drain the compositor and forward the final batch flush
+ // without finalizing the frame or leaving translucent work behind.
+ r.SetOpacity(.5); submit();
+ const size_t pendingStart=backend.draws.size();
+ r.FlushPending();
+ assert(backend.draws.size()==pendingStart+1 && backend.flushCalls==1);
  assert(testMemory.allocated==0);
 }
 '''

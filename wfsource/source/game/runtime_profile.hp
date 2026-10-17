@@ -9,6 +9,8 @@
 #include <ctime>
 #include <vector>
 namespace wf_profile {
+// SkinCullCpu is reserved/unavailable: per-face thread-clock syscalls heavily
+// perturb the CPU path. Compare C/C0 coarse scopes for the net culling effect.
 enum Section { Update, Actors, Director, Render, School, Pose, Animation, Total, SkinPoseCpu, SkinVerticesCpu, SkinNormalsCpu, SkinCullCpu, SkinSubmitCpu, Count };
 // Per-frame counters, indexed by wf_profile::count(k,n). The first six keep
 // their numeric values (existing callers pass literals; existing log parsers
@@ -52,7 +54,8 @@ inline double cpu_ms() {
 #endif
 }
 inline bool enabled() { return state().enabled; }
-inline void enable() { state().enabled=true; state().last=std::chrono::steady_clock::now(); }
+inline void enable() { state().enabled=true; state().last=std::chrono::steady_clock::now();
+    fprintf(stderr,"frame-profile-schema: v2 flushed-final-batch no-per-face-clocks\n"); }
 inline void enableFresh() { auto& s=state(); s.frame.fill(0); s.started.fill(0); s.frames.clear(); s.counters.fill(0); s.totals.fill(0); s.maxima.fill(0); enable(); }
 inline void begin_frame() { if(state().enabled) { state().frame.fill(0); state().counters.fill(0); } }
 inline void count(int k,unsigned long n=1) { if(state().enabled && k>=0 && k<CounterCount) state().counters[k]+=n; }

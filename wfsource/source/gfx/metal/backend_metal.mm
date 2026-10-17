@@ -463,7 +463,6 @@ public:
         }();
         if (cullEnabled && !cullExempt)
         {
-            wf_profile::Scope cullTime(wf_profile::SkinCullCpu,wf_profile::state().skinObject);
             const float nex = _mv[0]*nx + _mv[4]*ny + _mv[8]*nz;
             const float ney = _mv[1]*nx + _mv[5]*ny + _mv[9]*nz;
             const float nez = _mv[2]*nx + _mv[6]*ny + _mv[10]*nz;
@@ -570,6 +569,8 @@ public:
         Flush();_bitmapPass=false;_bitmapHandle=NULL;std::memcpy(_proj,projection,sizeof(_proj));std::memcpy(_mv,modelview,sizeof(_mv));
         _mvpDirty=true;_lightingEnabled=lighting;_fogEnabled=fog;_overlay=overlay;_paletteEnabled=palette;_opacity=opacity;
     }
+
+    void FlushPending() override { Flush(); }
 
     void EndFrame() override
     {

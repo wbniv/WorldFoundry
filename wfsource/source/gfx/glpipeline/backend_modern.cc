@@ -536,7 +536,6 @@ public:
         // with WF_CULL=0).
         bool backfacing=false;
         if (WfBackfaceCullEnabled() && !cullExempt) {
-            wf_profile::Scope cullTime(wf_profile::SkinCullCpu,wf_profile::state().skinObject);
             backfacing=WfFaceIsBackfacing(_mv,nx,ny,nz,v0.x,v0.y,v0.z,v1.x,v1.y,v1.z,v2.x,v2.y,v2.z);
         }
         if (backfacing) { wf_profile::count(wf_profile::FacesCulled);return; }
@@ -703,6 +702,8 @@ public:
         if(cull)glEnable(GL_CULL_FACE);else glDisable(GL_CULL_FACE);
         if(scissor)glEnable(GL_SCISSOR_TEST);else glDisable(GL_SCISSOR_TEST);
     }
+
+    void FlushPending() override { Flush(); }
 
     void EndFrame() override
     {

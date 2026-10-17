@@ -359,6 +359,25 @@ frame-weighted mean alongside it. These windows are not independent profile
 repeats; the three independent release repeats establish presentation spread.
 This definition is fixed before collecting the device CPU profiles.
 
+**Profiling correction, 17 October.** The initial instrumented runs exposed
+two measurement defects: the final queued CPU batch flushed after the profile
+closed, losing one body's upload counters, and per-face thread-clock calls
+heavily perturbed CPU culling (16 bodies fell from about 56.8 release FPS to
+19.5 instrumented FPS). Those profiles are superseded and cannot pass the CPU
+comparison gate. Profiling schema v2 explicitly flushes pending draws inside
+the render measurement, through GL, Metal and the compositor, without ending
+the backend frame. It removes per-face clocks. Isolated cull CPU time is
+unavailable; compare C/C0 for the net culling effect, including changed drawing
+work. The raw reserved `skin-cull` zero is not a measured cost.
+
+Retain the matched uninstrumented v3 release pairs: both paths in that cohort
+use the same native library. Repeat the instrumented CPU/GPU pairs with the
+corrected native library, keeping their hashes and scope version separate.
+Do not compare a v3 CPU profile with a corrected GPU profile, or combine
+instrumented FPS with the release medians. The analyzer rejects obsolete
+profile manifests. Record the presentation change under profiling as an
+overhead diagnostic; a display-limited case can conceal CPU overhead.
+
 Adopt GPU skinning for an eligible class of meshes only if `G1` has visual and lifecycle parity on both rendering backends, a reliable CPU fallback, the winding cleanup and validation above are complete for that asset class, and it produces a repeatable improvement on the workload that will use it. The proposed performance gate is at least **10% lower median main-thread render-section CPU time** for the skinned workload on both Chromecasts, with no reproducible p95 presented-interval or missed-refresh regression beyond the run-to-run spread, and no GPU-time or memory increase that erases the frame-time gain or exceeds the available memory budget. Treat these thresholds as a decision rule for the experiment, not an expected result. If a timer is unavailable, do not claim a GPU-time result; use the presentation and CPU evidence, and state that GPU saturation remains unmeasured.
 
 If `G0` helps but `G1` does not, investigate culling/index work once before widening scope. If only 16 actors benefit, keep CPU skinning for sparse scenes and record the measured crossover. If a correct culling path, Metal parity, or acceptable GPU cost cannot be achieved within this bounded experiment, stop the spike and retain the CPU path. No rig format, renderer default, or Deformer phase 2 choice follows automatically from a single-device speedup.

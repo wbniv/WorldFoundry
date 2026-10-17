@@ -31,7 +31,10 @@ def presentation(folder, mode, pairs, population_study=False):
 
 
 def analyze(root, population_study=False, device='chromecast-test-01'):
-    frozen = baseline.read_json(root / 'variants.json')['variants']
+    manifest = baseline.read_json(root / 'variants.json')
+    if manifest.get('profile_scope_version') != 2:
+        raise ValueError('Obsolete profiling scope: requires final-batch flush and no per-face clocks')
+    frozen = manifest['variants']
     campaign = baseline.read_json(root / 'campaign.json')
     jobs = baseline.read_json(root / 'jobs.json')
     views = ['population'] if population_study else ['close-idle', 'close-crawl']
@@ -55,11 +58,14 @@ def analyze(root, population_study=False, device='chromecast-test-01'):
                     fixture = f"{view}-{item['variant']}-{mode}" + ('-profile' if run == 'profile' else '')
                     if item['status'] != 'verified' or item['installed_sha256'] != frozen[fixture]['apk_sha256']:
                         raise ValueError(f'Fixture hash mismatch: {key}/{fixture}')
+                    if run == 'profile' and frozen[fixture].get('profile_scope_version') != 2:
+                        raise ValueError(f'Obsolete instrumented fixture: {fixture}')
                 restored = [j for j in receipt['journal'] if j['key'] == 'variant']
                 if len(restored) != 1 or restored[0]['verification']['installed_sha256'] != campaign['restore_sha256']:
                     raise ValueError(f'Restore hash mismatch: {key}')
                 verified.append(dict(source=str(folder / 'receipt.json'), job=jobs[key]))
     result = dict(device=device, population_study=population_study, verified_jobs=verified, views={}, gpu_time_ms=None,
+                  unavailable_cpu_sections=['skin-cull'],
                   gpu_time_note='No supported GPU timer evidence; presentation and thread CPU only.')
     for view in views:
         rows = []
@@ -85,6 +91,7 @@ def analyze(root, population_study=False, device='chromecast-test-01'):
                 if mode.startswith('cpu') and pairs and counters['skin-vertex-bytes'] <= 0:
                     raise ValueError(f'Missing CPU rig stream upload accounting: {folder}')
                 row[mode] = dict(release_runs=runs, cpu_profile=cpu, instrumented_presentation=instrumented,
+                    profile_presented_frame_change_percent=100 * (instrumented['mean_frame_ms'] / statistics.median(r['mean_frame_ms'] for r in runs) - 1),
                     median={k: statistics.median(r[k] for r in runs) for k in ['mean_frame_ms', 'fps', 'p50_ms', 'p95_ms', 'p99_ms', 'missed_refresh_percent', 'total_pss_kib']},
                     frame_ms_range=[min(r['mean_frame_ms'] for r in runs), max(r['mean_frame_ms'] for r in runs)])
             c, g = row['cpu'], row['gpu']
@@ -104,7 +111,7 @@ def analyze(root, population_study=False, device='chromecast-test-01'):
             rows.append(row)
         result['views'][view] = rows
     result['notes'] = [
-        'Fresh CPU/GPU paths use identical native code and cooked assets; installed hashes and cleanup are verified.',
+        'CPU/GPU pairs within each release or profiling cohort use identical native code and cooked assets; installed hashes and cleanup are verified. Cohorts retain separate native provenance.',
         'Release presentation and separate instrumented CPU results must not be combined into a single timing.',
         'Skin submit includes nested culling; total is update plus render, never a sum of nested sections.',
         'Skin vertex bytes include the actual CPU rig share of mixed streamed batches and GPU resource creation; steady GPU uses palette bytes.',
@@ -112,6 +119,7 @@ def analyze(root, population_study=False, device='chromecast-test-01'):
         'All aquarium counts allocate twelve residents; None also hides six posts. Memory is whole-process PSS plus separately reported skin resource gauges.',
         'Crawl holds right in authored Forth; this does not verify delivery/release of remote input.',
         'CPU acceptance uses the median of fully contained five-second window means; frame-weighted means are reported alongside it. This is one separate instrumented session per case, not three independent CPU-profile repeats.',
+        'Isolated skin-cull CPU time is unavailable: per-face thread clocks perturb the measurement. Its reserved raw zero field is not a measured cost; C/C0 compares the net culling effect.',
     ]
     if population_study:
         result['notes'] = result['notes'][:5] + [
@@ -119,7 +127,7 @@ def analyze(root, population_study=False, device='chromecast-test-01'):
             'This measures the existing DFRM adapter, not general four-weight authoring performance.',
             'C/C0/G0/G1 separate skinning from culling; only G1 versus C is the adoption comparison.',
             'PSS is whole-process memory. Skin memory gauges are reported separately in the profile counters.',
-            result['notes'][-1],
+            *result['notes'][-2:],
         ]
     return result
 

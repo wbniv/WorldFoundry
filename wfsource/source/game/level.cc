@@ -1484,6 +1484,7 @@ Level::RenderScene()
 		++roomIter;
 	}
 	_viewPort.Render();
+	if(wf_profile::enabled()) RendererBackendGet().FlushPending();
 	StaticMeshSampleGauges();		// E3 byte gauges, inside the profiled frame
 	wf_profile::end(wf_profile::Render);
 	wf_profile::end_frame();
