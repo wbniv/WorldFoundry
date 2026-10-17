@@ -749,6 +749,42 @@ for the modeler-facing tradeoff and current exporter controls.
 
 ---
 
+## Level entry got longer, or play pauses when an ordinary surface first appears
+
+**Symptom A — a one-time pause during play** (Cast1 or another GLES device):
+the scene hitches once, the first time an ordinary opaque textured surface
+(one without `wf_texture_palette`) becomes visible after the level started, for
+example on a scripted reveal or a late spawn. **Cause:** the renderer links its
+no-palette opaque program the first time it draws such a batch; a cold driver
+compile took about 90 ms on Cast1. **Fix, if the pause matters more than a
+longer level transition:** turn on **Prewarm No Palette Program** in the
+**Rendering** sheet of the level's `levelobj` object and re-export. The level
+then links the program while it loads.
+
+**Symptom B — a level's transition became longer after opting in.** That is
+the cost of the opt-in: in diagnostic Cast1 pairs the presented interval
+across level loading rose from a median of about 184 ms to about 284 ms. If
+the level never draws an ordinary opaque batch after entry, turn the setting
+off: it then links nothing at all.
+
+**Do not opt in because a level merely contains ordinary materials.** Faces on
+hidden or never-shown actors are never drawn, so without the opt-in they cost
+nothing; with it, the level pays about 90–100 ms of load time for an unused
+program. Levels whose opaque textured faces all use palette recoloring never
+create the program either way. Palette recoloring, `wf_alpha_cutout`,
+`wf_opacity` blending and modulation keep working with or without the opt-in;
+a batch that mixes palette and ordinary faces stays one draw on the
+palette-capable program.
+
+**Check:** run the level with `--frame-profile` and read
+`level-object: … prewarm-no-palette-program=0|1` at load and
+`no-palette-program: created reason=prewarm|lazy wall-ms=…` when the program is
+linked. Levels compiled before the setting existed report `payload-bytes=568`
+and read as off. See
+[No-palette opaque shader and level prewarm](level-building.md#no-palette-opaque-shader-and-level-prewarm).
+
+---
+
 ## Mesh face normals & backface culling
 
 > **UPDATED 2026‑09‑21 — software backface culling is ON BY DEFAULT (`WF_CULL=0` opts out).**

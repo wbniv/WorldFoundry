@@ -266,7 +266,7 @@ non-modulated textured draws. See the [experiment and scope](https://github.com/
 
 | Material choice | Renderer behavior and authoring consequence |
 | --- | --- |
-| Opaque painted texture with white vertex color; `wf_texture_palette`; normal lighting, fog or `wf_prelit` | Uses the specialized fast path. Palette recoloring is supported there. |
+| Opaque painted texture with white vertex color; `wf_texture_palette`; normal lighting, fog or `wf_prelit` | Uses the specialized fast path. Palette recoloring is supported there; a draw batch without any palette faces uses its no-palette variant ([below](#no-palette-opaque-shader-and-level-prewarm)). |
 | Texture multiplied by non-white vertex colors for tint or baked shadow (`TEXTURE_MODULATE`) | Uses texture mode 3 and the existing opaque program, so those pixels miss this particular gain. Without modulation, the legacy mode-1 rule uses the texture only on white vertices; non-white vertices produce flat color instead of textured shading. |
 | `wf_alpha_cutout` for texture holes; `wf_opacity < 1` for whole-material blending | Uses the existing general program. Texture alpha by itself does not cut holes in an opaque mode-1 surface; opacity below 1 does not give each texel a different blend amount. Large or overlapping cutout/translucent sheets can also increase pixel work. |
 
@@ -283,47 +283,73 @@ once per GL context, not once per material or frame. The tested scene used only
 the specialized opaque mode, so it did not measure the extra program that a
 mixed-mode scene may create or the cost of switching between programs.
 
-### Experimental no-palette selector (not shipped)
+### No-palette opaque shader and level prewarm
 
-A later Cast1 prototype added a no-palette variant alongside that production
-opaque shader. It gained **+0.79 FPS** in a tour without palette art and
-**+0.70 FPS** with sparse synthetic palette art. An authored lionfish tank
-used only the palette-capable fast program and showed no meaningful change
-(**47.53→47.58 FPS**, 18 draws/frame in both variants). In a controlled
-lionfish asset, palette-enabled and ordinary opaque faces shared the same body
-texture. The selector split two batches, increasing draws **18→20/frame** and
-reducing median presented FPS **47.65→47.22** across three launches per variant.
-One first-use check also spent **84.57 ms** compiling an extra program that
-the all-palette tank never used; this is one cold observation, not a typical
-startup estimate. [Measurements and limits](https://github.com/wbniv/finding-your-way/blob/main/docs/investigations/2026-10-15-integrated-no-palette-selector.md).
+Eligible opaque textured draws (opaque, textured, no `TEXTURE_MODULATE`, no
+`wf_alpha_cutout`, `wf_opacity` 1) have two programs. The renderer picks one
+per draw batch from the faces actually queued in it:
 
-**For modelers:** keep `wf_texture_palette` consistent across opaque faces
-that use one texture and would otherwise form one draw. Alternating flagged
-and unflagged regions can add draw calls if the experimental selector is
-enabled. Continue to use palette recoloring when the art needs it; the
-production renderer still supports it, and this prototype is **not** enabled
-globally. A later diagnostic selector keeps mixed batches on the existing
-palette-capable shader and links the extra program only for an ordinary opaque
-draw. In five mixed-scene Cast1 pairs it preserved **18 draws/frame** and
-changed median FPS **47.49→47.46**, within run variation. This fallback is
-still isolated from production. [Selector follow-up](https://github.com/wbniv/finding-your-way/blob/main/docs/investigations/2026-10-16-no-palette-selector-follow-up.md).
+| Faces in the batch | Program | Consequence |
+| --- | --- | --- |
+| All without `wf_texture_palette` | No-palette variant | The measured gain applies. |
+| All with `wf_texture_palette` | Palette-capable fast program | Unchanged; no extra program is created. |
+| Both kinds (same texture and state) | Palette-capable fast program | Still **one** draw; the ordinary faces in that batch forgo the gain. |
 
-**Future level opt-in guidance:** A cold first ordinary draw can pause a
-visible scene while the no-palette program is created. In three diagnostic
-Cast1 pairs, a scripted late reveal had a **116.8 ms** worst presented
-interval without prewarm and **50.1 ms** with level-load prewarm. The median
-interval crossing level loading rose **183.5→283.6 ms**; one opted-in run
-reached **417.1 ms**. Treat prewarm as a per-level tradeoff for a known visible
-ordinary opaque batch whose first appearance would otherwise interrupt play.
-Do not request it merely because an asset has ordinary materials: three
-hidden-asset runs showed an unused shader taking **89–99 ms** to create during
-load. In the diagnostic selector, palette recoloring and mixed-batch fallback
-remain available either way. These numbers measure presentation gaps, not a
-steady-FPS gain from prewarm.
-The trial used APK arguments and a menu index; there is **no authored level
-property or production opt-in yet**. A visible palette-only level and an
-intermittent 30 FPS cadence in a nearly empty fixture still need investigation
-before shipping. [Prewarm opt-in report](https://github.com/wbniv/finding-your-way/blob/main/docs/investigations/2026-10-16-no-palette-level-optin.md).
+Palette recoloring, cutouts, blending and modulation work as before; only the
+program choice for ordinary opaque batches changed, and their pixels are
+identical. Faces culled before drawing do not count. In the diagnostic Cast1
+campaign the nine-room tour without palette art rose **55.71→56.62 FPS**, and a
+lionfish tank whose body texture mixes palette and ordinary faces kept
+**18 draws/frame** (47.49→47.46 FPS, run variation). [Selector follow-up](https://github.com/wbniv/finding-your-way/blob/main/docs/investigations/2026-10-16-no-palette-selector-follow-up.md).
+These numbers come from the diagnostic engine; the production device runs are
+still to be repeated.
+
+**When the program is created.** The no-palette program is linked once per GL
+context, the first time a wholly ordinary opaque batch is drawn. A level whose
+eligible draws all use palette recoloring never creates it. A cold driver
+compile of it took about **90 ms** on Cast1. When that first ordinary batch
+appears in the middle of play, for example on a scripted reveal, the visible
+scene pauses: the late-reveal fixture's worst presented interval was
+**116.8 ms**, against **50.1 ms** for its normal cadence.
+
+**Level opt-in: Prewarm No Palette Program.** Select the level's `levelobj`
+object in Blender. The World Foundry attributes panel has a **Rendering**
+sheet (collapsed by default) with the checkbox **Prewarm No Palette Program**.
+It is off by default and exports as
+`{ 'I32' { 'NAME' "Prewarm No Palette Program" } { 'DATA' 0l } { 'STR' "False" } }`.
+When it is on, the engine links the program while that level loads, before
+its first gameplay frame. The setting is part of the level file, so it follows
+the level through standalone and menu packaging, including a reordered menu.
+Levels compiled before the field existed read it as off; rebuilding such a
+level without editing it keeps it off. The control appears when the Level
+Object schema comes from `wfsource/source/oas` (the directory levcomp reads);
+the older copy under `wftools/wf_oad/tests/fixtures` does not have it.
+
+| | Off (default) | On |
+| --- | --- | --- |
+| Level entry | Unchanged | Longer: the median presented interval across level loading rose **183.5→283.6 ms** in three Cast1 pairs; one opted-in run reached **417.1 ms** |
+| First ordinary opaque draw during play | May pause the visible scene once (about **90 ms** cold compile) | No pause; the program already exists |
+| Level that never draws an ordinary opaque batch | No extra program | Links an unused program: **89–99 ms** of load time and memory (a many-copy probe measured about **34 KiB** per linked-and-bound copy; not a direct one-program figure) |
+
+Turn it on only for a level that shows a known ordinary opaque textured
+surface **after** entry (a scripted reveal, a late spawn, a room that comes
+into view) where a longer level transition is preferable to a pause at that
+moment. Leave it off otherwise. In particular, ordinary materials on hidden or
+never-shown actors do not justify it: they never draw, so without the opt-in
+they never cost anything. A level whose ordinary surfaces are visible on its
+first frame gains little: the first-use link then happens while that first
+frame is prepared, inside the transition already (not measured separately). The opt-in does not change steady FPS.
+[Prewarm opt-in report](https://github.com/wbniv/finding-your-way/blob/main/docs/investigations/2026-10-16-no-palette-level-optin.md) ·
+[visible palette-only control](https://github.com/wbniv/finding-your-way/blob/main/docs/investigations/2026-10-16-visible-palette-only-control.md).
+
+**Checking a level.** Run it with `--frame-profile`. Level load prints
+`level-object: payload-bytes=572 prewarm-no-palette-program=1` (568 bytes for a
+level compiled before the field), the program's creation prints
+`no-palette-program: created reason=prewarm` or `reason=lazy` with its wall
+time and monotonic `start-ns`/`end-ns`, `level-load: … start-ns=… end-ns=…`
+brackets the level load on the same clock, and the five-second windows add the counters `no-palette-programs`,
+`no-palette-draws` and `mixed-palette-draws` beside `draws`. See also
+[the troubleshooting entry](level-design-troubleshooting.md#level-entry-got-longer-or-play-pauses-when-an-ordinary-surface-first-appears).
 
 ### Blender Viewport Display by Object Type
 
