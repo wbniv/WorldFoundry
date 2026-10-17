@@ -66,8 +66,22 @@ def main():
             shutil.copyfile(source, destination)
     jobs_path = args.evidence / 'jobs.json'
     jobs = json.loads(jobs_path.read_text()) if jobs_path.exists() else {}
-    progress = dict(device=args.device, completed=[], total=len(campaign['recipes']), state='running')
     progress_path = args.evidence / 'campaign-progress.json'
+    recipes = {}
+    for recipe in campaign['recipes']:
+        match = re.search(r'-round-(\d+)$', recipe['name'])
+        stage = 'profile' if recipe['frame_profile'] else 'round-' + match[1]
+        key = f"{recipe['view']}/{recipe['mode']}/{stage}"
+        if key in recipes:
+            raise ValueError('Duplicate campaign result key: ' + key)
+        recipes[key] = recipe
+    previous = json.loads(progress_path.read_text()) if progress_path.exists() else {}
+    completed = previous.get('completed', [])
+    if previous and (previous.get('device') != args.device or previous.get('total') != len(campaign['recipes'])):
+        raise ValueError('Existing campaign progress belongs to another device/campaign')
+    if len(completed) != len(set(completed)) or not set(completed) <= set(recipes):
+        raise ValueError('Existing campaign progress has unknown or duplicate completed keys')
+    progress = dict(device=args.device, completed=completed, total=len(campaign['recipes']), state='running')
     save(progress_path, progress)
     try:
         for recipe in campaign['recipes']:
@@ -76,6 +90,9 @@ def main():
             match = re.search(r'-round-(\d+)$', recipe['name'])
             stage = 'profile' if recipe['frame_profile'] else 'round-' + match[1]
             key = f"{recipe['view']}/{recipe['mode']}/{stage}"
+            if key in progress['completed']:
+                print('already verified; skipping', key, flush=True)
+                continue
             if key not in jobs:
                 output = task('chromecast:submit', 'DEVICE=' + args.device,
                               'RECIPE=' + recipe['path'], 'ASYNC=true')
