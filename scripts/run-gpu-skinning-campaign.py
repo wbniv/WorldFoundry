@@ -6,6 +6,7 @@ Seed jobs.json with already submitted jobs to resume without duplicate submissio
 """
 import argparse
 import hashlib
+import importlib.util
 import json
 from pathlib import Path
 import re
@@ -15,6 +16,33 @@ import time
 
 ROOT = Path(__file__).resolve().parents[1]
 TERMINAL = {'completed', 'failed', 'cancelled', 'recovery-required', 'superseded'}
+_spec = importlib.util.spec_from_file_location('panel', Path(__file__).with_name('audit-gpu-skinning-panel.py'))
+panel = importlib.util.module_from_spec(_spec)
+_spec.loader.exec_module(panel)
+
+
+def derive_recipe(recipe, policy, directory):
+    """Frozen recipe plus the harness panel policy, written beside it, never over it.
+
+    The frozen file and its campaign hash stay unchanged; the derived file must
+    equal the frozen JSON with exactly one added key.
+    """
+    frozen_bytes = Path(recipe['path']).read_bytes()
+    if hashlib.sha256(frozen_bytes).hexdigest() != recipe['sha256']:
+        raise ValueError('Frozen recipe changed: ' + recipe['path'])
+    frozen = json.loads(frozen_bytes)
+    if 'panel' in frozen:
+        raise ValueError('Frozen recipe already sets a panel policy: ' + recipe['path'])
+    derived = dict(frozen, panel=policy)
+    if {k: v for k, v in derived.items() if k != 'panel'} != frozen:
+        raise ValueError('Derived recipe differs beyond the panel policy: ' + recipe['path'])
+    directory.mkdir(parents=True, exist_ok=True)
+    path = directory / Path(recipe['path']).name
+    data = (json.dumps(derived, indent=2) + '\n').encode()
+    if path.exists() and path.read_bytes() != data:
+        raise ValueError('Conflicting derived recipe: ' + str(path))
+    path.write_bytes(data)
+    return path, hashlib.sha256(data).hexdigest()
 
 
 def save(path, value):
@@ -50,7 +78,13 @@ def main():
     parser.add_argument('--evidence', type=Path, required=True)
     parser.add_argument('--device', choices=['chromecast-test-01', 'chromecast-test-02'], required=True)
     parser.add_argument('--release-only', action='store_true', help='Finish release recipes and wait for corrected profiles')
+    parser.add_argument('--panel-policy', choices=['require-hidden'],
+                        help='Harness policy added to each NEW submission; recorded in submissions.json')
+    parser.add_argument('--submitted-recipes', type=Path,
+                        help='Directory for derived recipes (frozen recipe + panel policy); required with --panel-policy')
     args = parser.parse_args()
+    if args.panel_policy and not args.submitted_recipes:
+        parser.error('--panel-policy needs --submitted-recipes')
     args.evidence.mkdir(parents=True, exist_ok=True)
     campaign = json.loads(args.campaign.read_text())
     frozen_path = args.fixtures / 'variants.json'
@@ -66,6 +100,8 @@ def main():
             shutil.copyfile(source, destination)
     jobs_path = args.evidence / 'jobs.json'
     jobs = json.loads(jobs_path.read_text()) if jobs_path.exists() else {}
+    submissions_path = args.evidence / 'submissions.json'
+    submissions = json.loads(submissions_path.read_text()) if submissions_path.exists() else {}
     progress_path = args.evidence / 'campaign-progress.json'
     recipes = {}
     for recipe in campaign['recipes']:
@@ -94,13 +130,21 @@ def main():
                 print('already verified; skipping', key, flush=True)
                 continue
             if key not in jobs:
+                submitted, submitted_sha = Path(recipe['path']), recipe['sha256']
+                if args.panel_policy:
+                    submitted, submitted_sha = derive_recipe(recipe, args.panel_policy, args.submitted_recipes)
                 output = task('chromecast:submit', 'DEVICE=' + args.device,
-                              'RECIPE=' + recipe['path'], 'ASYNC=true')
+                              'RECIPE=' + str(submitted), 'ASYNC=true')
                 found = re.search(r'Accepted (J-[a-f0-9]{12}):', output)
                 if not found:
                     raise ValueError('No accepted job ID: ' + output)
                 jobs[key] = found[1]
                 save(jobs_path, jobs)
+                if args.panel_policy:
+                    submissions[key] = dict(job=found[1], frozen_recipe_sha256=recipe['sha256'],
+                                            submitted_recipe_sha256=submitted_sha,
+                                            harness_policy=dict(panel=args.panel_policy))
+                    save(submissions_path, submissions)
                 print('submitted', key, jobs[key], flush=True)
             job = jobs[key]
             progress.update(current=key, job=job)
@@ -154,6 +198,8 @@ def main():
             restored = [j for j in receipt['journal'] if j['key'] == 'variant']
             if len(restored) != 1 or restored[0]['verification']['installed_sha256'] != campaign['restore_sha256']:
                 raise ValueError('Restore APK mismatch: ' + key)
+            if key in submissions and submissions[key]['job'] == job:
+                print('panel', key, panel.verify_required_hidden(folder, recipe['order']), flush=True)
             progress['completed'].append(key)
             save(progress_path, progress)
         progress.update(state='awaiting-profiles' if args.release_only else 'complete')

@@ -6,5 +6,13 @@
     "health": "recovery-required",
     "archived_evidence": "failed-close-idle-gpu-round-3-J-da19a5050cff",
     "reason": "Target process was missing during startup after the unverified-panel Back path; job is excluded from measurements. Coordinator fix 8c24437 is deployed. A fresh job will measure the same frozen recipe."
+  },
+  {
+    "result_key": "close-idle/gpu/round-3",
+    "job": "J-0d2afeba096d",
+    "status": "held",
+    "health": "ready",
+    "archived_evidence": "held-close-idle-gpu-round-3-J-0d2afeba096d",
+    "reason": "Completed with verified hashes and cleanup, but the phone-controller panel covered the scene through measurement in all four cases (coordinator 8c24437 sent no Back). Neither accepted nor dropped; per the user (option b) the same frozen recipe is rerun under a coordinator with verified panel dismissal and the require-hidden harness policy. Its captures show the LAN endpoint and PIN and stay local."
   }
 ]

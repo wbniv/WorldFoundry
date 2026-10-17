@@ -25,7 +25,10 @@ MARKER = b'zforth: INDEXOF_CAMSHOT = 1921 (expect 1921)'
 SCOPE = 'Final level-load marker through end of captured engine log; cumulative earlier sessions excluded.'
 KEEP = {'receipt.json', 'apk-installations.json', 'cleanup-apk-installations.json', 'screenshot.png',
         'summary.json', 'idle.png', 'presents-ns.json', 'samples.json', 'segments.json',
-        'selected-layer.txt', 'settling-samples.json', 'README.md'}
+        'selected-layer.txt', 'settling-samples.json', 'README.md',
+        # Coordinator panel record (schema 2 holds no endpoint or PIN) and
+        # process-exit evidence, still scanned for connection details.
+        'panel-dismissal.json', 'process-exit-info.txt', 'process-exit-observation.json'}
 COMPRESS = {'meminfo.txt', 'thermal.txt'}
 _spec = importlib.util.spec_from_file_location('panel', Path(__file__).with_name('audit-gpu-skinning-panel.py'))
 panel = importlib.util.module_from_spec(_spec)

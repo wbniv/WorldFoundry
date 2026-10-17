@@ -13,6 +13,45 @@ import statistics
 spec = importlib.util.spec_from_file_location('population', Path(__file__).with_name('analyze-seahorse-population.py'))
 baseline = importlib.util.module_from_spec(spec)
 spec.loader.exec_module(baseline)
+panel_spec = importlib.util.spec_from_file_location('panel', Path(__file__).with_name('audit-gpu-skinning-panel.py'))
+panel = importlib.util.module_from_spec(panel_spec)
+panel_spec.loader.exec_module(panel)
+
+
+def panel_policy(root, campaign):
+    """Sessions submitted under require-hidden, and the audit for older sessions.
+
+    submissions.json records each later submission's frozen recipe hash (which
+    must match the campaign) and the harness-added panel policy; frozen recipes
+    and hashes are never rewritten. Earlier sessions are checked against
+    panel-visibility-audit.json, which lives at this root or its parent.
+    """
+    path = root / 'submissions.json'
+    submissions = baseline.read_json(path) if path.exists() else {}
+    frozen = {}
+    for recipe in campaign['recipes']:
+        stage = 'profile' if recipe['frame_profile'] else 'round-' + recipe['name'].rsplit('-round-', 1)[1]
+        frozen[f"{recipe['view']}/{recipe['mode']}/{stage}"] = recipe['sha256']
+    for key, item in submissions.items():
+        if item['frozen_recipe_sha256'] != frozen.get(key):
+            raise ValueError(f'Submitted recipe does not derive from the frozen campaign: {key}')
+    for base in (root, root.parent):
+        if (base / 'panel-visibility-audit.json').exists():
+            audit = baseline.read_json(base / 'panel-visibility-audit.json')
+            return submissions, audit, root.relative_to(base).as_posix()
+    return submissions, None, ''
+
+
+def verify_panel(root, key, job, cases, submissions, audit, prefix):
+    item = submissions.get(key)
+    if item and item['job'] == job:
+        if item['harness_policy'].get('panel') != 'require-hidden':
+            raise ValueError(f'New session without require-hidden panel policy: {key}')
+        return panel.verify_required_hidden(root / key, cases)
+    if audit is None:
+        raise ValueError(f'No panel audit for legacy session: {key}')
+    panel.verify_legacy(root / key, '/'.join(p for p in (prefix, key) if p), job, cases, audit)
+    return 'legacy-back-hidden'
 
 
 def require_visual_capture(folder):
@@ -58,6 +97,8 @@ def analyze(root, population_study=False, device='chromecast-test-01'):
     counts = {'1': 1, '4': 4, '16': 16} if population_study else baseline.COUNTS
     verified = []
     native_cohorts = {}
+    submissions, audit, prefix = panel_policy(root, campaign)
+    panel_checks = {}
     for view in views:
         for mode in modes:
             for run in ['round-1', 'round-2', 'round-3', 'profile']:
@@ -85,8 +126,10 @@ def analyze(root, population_study=False, device='chromecast-test-01'):
                 restored = [j for j in receipt['journal'] if j['key'] == 'variant']
                 if len(restored) != 1 or restored[0]['verification']['installed_sha256'] != campaign['restore_sha256']:
                     raise ValueError(f'Restore hash mismatch: {key}')
+                panel_checks[key] = verify_panel(root, key, jobs[key], list(counts), submissions, audit, prefix)
                 verified.append(dict(source=str(folder / 'receipt.json'), job=jobs[key]))
-    result = dict(device=device, population_study=population_study, verified_jobs=verified, native_cohorts=native_cohorts, views={}, gpu_time_ms=None,
+    result = dict(device=device, population_study=population_study, verified_jobs=verified, native_cohorts=native_cohorts,
+                  phone_panel=panel_checks, views={}, gpu_time_ms=None,
                   unavailable_cpu_sections=['skin-cull'],
                   gpu_time_note='No supported GPU timer evidence; presentation and thread CPU only.')
     for view in views:

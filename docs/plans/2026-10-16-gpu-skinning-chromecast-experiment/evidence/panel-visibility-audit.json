@@ -2,7 +2,7 @@
   "purpose": "Phone-controller panel visibility in timing captures; an audit, not a measurement.",
   "detector": "QR field inside the panel rectangle: >=25% white and >=15% black samples (x 140-700, y 240-800, 8 px grid).",
   "sessions_with_panel": [
-    "close-idle/gpu/round-3"
+    "held-close-idle-gpu-round-3-J-0d2afeba096d"
   ],
   "sessions_without_panel": [
     "cast2-populations/population/cpu-no-cull/profile",
@@ -366,7 +366,7 @@
         }
       }
     },
-    "close-idle/gpu/round-3": {
+    "held-close-idle-gpu-round-3-J-0d2afeba096d": {
       "job": "J-0d2afeba096d",
       "device": "chromecast-test-01",
       "coordinator_back_sent": false,

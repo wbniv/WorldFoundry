@@ -36,6 +36,55 @@ def capture_shows_panel(path):
     return white / samples >= 0.25 and black / samples >= 0.15
 
 
+ACCEPTED = {'verified-hidden', 'verified-absent'}
+
+
+def verify_required_hidden(folder, cases):
+    """A require-hidden session: coordinator-verified hidden/absent panel and clean captures.
+
+    Reads the coordinator's schema-2 panel-dismissal.json (no endpoint or PIN).
+    Every dismissal call must carry the require-hidden policy and end verified
+    hidden or absent; every case needs its own verified call when calls are
+    labelled, and every capture must show no panel.
+    """
+    path = folder / 'panel-dismissal.json'
+    if not path.exists():
+        raise ValueError(f'Missing panel-dismissal.json for a require-hidden session: {folder}')
+    record = json.loads(path.read_text())
+    history = record.get('history') or []
+    if record.get('schema') != 2 or not history:
+        raise ValueError(f'Panel record is not schema 2 with history: {path}')
+    for entry in history:
+        if entry.get('policy') != 'require-hidden' or entry.get('panel_visibility') not in ACCEPTED:
+            raise ValueError(f'Panel not verified hidden under require-hidden: {path}: '
+                             f"{entry.get('variant')} {entry.get('panel_visibility')} {entry.get('reason')}")
+    labelled = {entry.get('variant') for entry in history}
+    if None in labelled:
+        if len(history) < len(cases):
+            raise ValueError(f'Fewer panel verifications than cases: {path}')
+    elif not set(cases) <= labelled:
+        raise ValueError(f'Cases without a panel verification: {sorted(set(cases) - labelled)}: {path}')
+    for case in cases:
+        if capture_shows_panel(folder / case / 'run-1' / 'idle.png'):
+            raise ValueError(f'Capture shows the phone panel despite verification: {folder / case}')
+    if (folder / 'screenshot.png').exists() and capture_shows_panel(folder / 'screenshot.png'):
+        raise ValueError(f'Session screenshot shows the phone panel: {folder}')
+    return {entry.get('variant'): entry['panel_visibility'] for entry in history}
+
+
+def verify_legacy(folder, key, job, cases, audit):
+    """A session from before require-hidden: Back hid the panel and no capture shows it."""
+    entry = audit['sessions'].get(key)
+    if not entry or entry['job'] != job:
+        raise ValueError(f'No panel audit for legacy session {key} {job}')
+    for case in cases:
+        audited = entry['cases'].get(case)
+        if not audited or audited['capture_shows_panel'] or audited.get('back_hid_panel') is not True:
+            raise ValueError(f'Legacy session lacks a hidden panel: {key}/{case}')
+        if capture_shows_panel(folder / case / 'run-1' / 'idle.png'):
+            raise ValueError(f'Capture shows the phone panel: {folder / case}')
+
+
 def log_events(path):
     if not path.exists():
         return dict(logcat='missing-locally')
