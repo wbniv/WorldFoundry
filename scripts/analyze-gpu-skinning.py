@@ -41,6 +41,7 @@ def analyze(root, population_study=False, device='chromecast-test-01'):
     modes = ['cpu', 'cpu-no-cull', 'gpu-no-cull', 'gpu'] if population_study else ['cpu', 'gpu']
     counts = {'1': 1, '4': 4, '16': 16} if population_study else baseline.COUNTS
     verified = []
+    native_cohorts = {}
     for view in views:
         for mode in modes:
             for run in ['round-1', 'round-2', 'round-3', 'profile']:
@@ -60,11 +61,16 @@ def analyze(root, population_study=False, device='chromecast-test-01'):
                         raise ValueError(f'Fixture hash mismatch: {key}/{fixture}')
                     if run == 'profile' and frozen[fixture].get('profile_scope_version') != 2:
                         raise ValueError(f'Obsolete instrumented fixture: {fixture}')
+                    cohort = 'profile' if run == 'profile' else 'release'
+                    native = frozen[fixture].get('native')
+                    if not native or (cohort in native_cohorts and native_cohorts[cohort] != native):
+                        raise ValueError(f'Missing or mismatched native code within {cohort} cohort: {fixture}')
+                    native_cohorts[cohort] = native
                 restored = [j for j in receipt['journal'] if j['key'] == 'variant']
                 if len(restored) != 1 or restored[0]['verification']['installed_sha256'] != campaign['restore_sha256']:
                     raise ValueError(f'Restore hash mismatch: {key}')
                 verified.append(dict(source=str(folder / 'receipt.json'), job=jobs[key]))
-    result = dict(device=device, population_study=population_study, verified_jobs=verified, views={}, gpu_time_ms=None,
+    result = dict(device=device, population_study=population_study, verified_jobs=verified, native_cohorts=native_cohorts, views={}, gpu_time_ms=None,
                   unavailable_cpu_sections=['skin-cull'],
                   gpu_time_note='No supported GPU timer evidence; presentation and thread CPU only.')
     for view in views:
