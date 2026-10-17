@@ -20,12 +20,27 @@
    "title",
    "SemiBold",
    46
+  ],
+  [
+   "menu",
+   "Regular",
+   56
+  ],
+  [
+   "menu-bold",
+   "SemiBold",
+   56
+  ],
+  [
+   "display",
+   "SemiBold",
+   80
   ]
  ],
- "glyphs": 792,
+ "glyphs": 1386,
  "atlas": [
   1024,
-  1024
+  2048
  ],
- "bytes": 1048576
+ "bytes": 2097152
 }

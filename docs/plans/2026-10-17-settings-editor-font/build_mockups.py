@@ -31,7 +31,10 @@ BG, BOX, ROW, FOCUS = (6, 16, 20), (20, 45, 37), (35, 62, 49), (73, 123, 81)
 INK, CAT, HINT, DIM = (241, 242, 228), (203, 212, 186), (217, 195, 106), (150, 165, 150)
 LIGHT, DARK, TAG, GREEN, ERR = (228, 239, 217), (20, 38, 27), (13, 31, 23), (143, 224, 138), (255, 123, 114)
 # Proposed variants: (name, style file, pixel size) at the 1920x1080 logical canvas.
-VARIANTS = [('small', 'Regular', 28), ('body', 'Regular', 36), ('body-bold', 'SemiBold', 36), ('title', 'SemiBold', 46)]
+VARIANTS = [('small', 'Regular', 28), ('body', 'Regular', 36), ('body-bold', 'SemiBold', 36), ('title', 'SemiBold', 46),
+            ('menu', 'Regular', 56), ('menu-bold', 'SemiBold', 56), ('display', 'SemiBold', 80)]
+# The fishtank menu's colours, sampled from the Cast1 capture.
+M_BG, M_BAR, M_STRIPE, M_TITLE, M_SUB, M_ROW = (14, 23, 38), (35, 64, 107), (86, 211, 100), (255, 180, 84), (143, 163, 191), (201, 212, 227)
 
 
 def font(style, size):
@@ -43,7 +46,7 @@ class TV:
     """A 1920x1080 frame drawn with the proposed variants."""
     def __init__(self):
         from PIL import Image, ImageDraw
-        self.im = Image.new('RGB', (1920, 1080), BG)
+        self.im = Image.new('RGB', (1920, 1080), BG)  # noqa: the menu paints its own background
         self.d = ImageDraw.Draw(self.im)
         self.f = {n: font(s, px) for n, s, px in VARIANTS}
 
@@ -106,6 +109,39 @@ def form(error=False):
         t.text(598, 788, 'Random number seed from 0 to 4 294 967 295', 'small', DIM)
     t.text(222, 845, 'Arrows: select     A: edit', 'small', HINT, 'lm')
     t.left_arrow(1260, 845, INK); t.text(1302, 845, 'Apply / close', 'small', INK, 'lm')
+    return t
+
+
+def menu():
+    """The aquarium tank selector (level_menu.cc), geometry from returned-selector-screenshot.png."""
+    t = TV(); t.rect(0, 0, 1920, 1080, M_BG)
+    t.text(960, 104, 'WF Aquarium', 'display', M_TITLE, 'mm')
+    t.text(960, 198, 'Choose a tank', 'body', M_SUB, 'mm')
+    rows = ['Clownfish & Sea Anemone', 'Blue Shrimp', 'Calm Betta', 'Jellyfish', 'Lionfish', 'Planted Tank']
+    for i, label in enumerate(rows):
+        cy = 346 + 100 * i
+        if i == 5:
+            t.rect(360, cy - 46, 1200, 92, M_BAR); t.rect(360, cy - 46, 16, 92, M_STRIPE)
+            t.text(406, cy, label, 'menu-bold', (236, 241, 247), 'lm')
+        else:
+            t.text(406, cy, label, 'menu', M_ROW, 'lm')
+    t.d.polygon([(938, 906), (982, 906), (960, 930)], fill=M_SUB)
+    t.text(1552, 924, '6 / 8', 'body', M_SUB, 'rm')
+    segs = ['D-pad choose  ·  OK starts  ·  ', None, ' returns here;  ', None, ' here exits']
+    w = sum(t.d.textlength(x, font=t.f['body']) if x else 40 for x in segs); x = 960 - w / 2
+    for seg in segs:
+        if seg is None:
+            t.left_arrow(x + 4, 1016, M_SUB); x += 40
+        else:
+            t.text(x, 1016, seg, 'body', M_SUB, 'lm'); x += t.d.textlength(seg, font=t.f['body'])
+    return t
+
+
+def hud():
+    """The planted tank's HUD strip (plant_ui.cc), bottom-left of the 1080p frame."""
+    t = TV()
+    t.rect(40, 984, 890, 52, (13, 34, 26)); t.text(60, 1010, 'Seed: 2266015420  |  Saltwater  |  Hold A: settings', 'small', INK, 'lm')
+    t.text(1880, 1010, '19.1', 'small', INK, 'rm')
     return t
 
 
@@ -211,7 +247,7 @@ def main():
  <div><h2>4. After: the chooser</h2><p class="cap">Selected row SemiBold; crosshair, gear, arrow and padlock stay drawn shapes.</p><img src="{uri(c_after.png(S))}" width="640" height="360"></div>
 </main>'''
     out = {}
-    out['tv-form'] = page('tv-form', 'Settings editor font: before and after', 'Chromecast 1 captures vs the same layout in Atkinson Hyperlegible Next', body)
+    out['tv-form'] = page('tv-form', 'UI font: before and after', 'Chromecast 1 captures vs the same layout in Atkinson Hyperlegible Next', body)
 
     atlas, cps, n, (W, H) = bake_atlas()
     small = f_after.im.resize((1280, 720), Image.BILINEAR).crop((0, 40, 640, 400))
@@ -222,7 +258,30 @@ def main():
  <div><h2>7. Narrow: drawn at 1280×720, shown 1:1</h2><p class="cap">The 1080p atlas sampled at ⅔ scale (bilinear), as on a 720p surface; the smallest text is 19 px.</p><img src="{uri(png_of(small, (640, 360)))}" width="640" height="360"></div>
  <div><h2>8. The baked atlas (prototype)</h2><p class="cap">{cps} code points × {len(VARIANTS)} variants = {n} glyphs, shelf-packed: <b>{W}×{H}</b>, 8-bit coverage = {W*H//1024} KiB. Top {min(H,512)} rows shown at ½ scale.</p><img src="{uri(abuf.getvalue())}" width="512"></div>
 </main>'''
-    out['states'] = page('states', 'Settings editor font: states and the atlas', 'pick tags, error, 720p, the baked atlas', body2)
+    out['states'] = page('states', 'UI font: states and the atlas', 'pick tags, error, 720p, the baked atlas', body2)
+
+    before_menu = cast1('returned-selector-screenshot.png', '../baseline/generic-settings/plant-cast1-final')
+    six = ROOT / 'docs/diagnostics/seahorse-phase3-cast1/six-pairs-b788d43f/aquarium-seahorses/seahorses-6-screenshot.png'
+    hud_before = Image.open(six).convert('RGB').crop((0, 960, 1920, 1080)) if six.exists() else blank.crop((0, 0, 1920, 120))
+    hud_after = hud().im.crop((0, 960, 1920, 1080))
+    users = [('level_menu.cc', 'the fishtank menu (all apps)', 'display 80 · menu/menu-bold 56 · body 36'),
+             ('runtime_property_ui.cc', 'settings form', 'title 46 · body 36 · small 28'),
+             ('runtime_settings_ui.cc', 'chooser, pick tags', 'title 46 · body/body-bold 36 · small 28'),
+             ('plant_ui.cc', 'planted-tank HUD strip', 'small 28'),
+             ('phonepad_overlay.cc', 'phone pairing overlay (QR, URL)', 'title 46 · body 36'),
+             ('display.cc', 'in-game HUD text, banners, headers', 'display 80 · title 46 · body 36 · small 28'),
+             ('android_window.cc', 'on-screen touch button labels', 'body-bold 36'),
+             ('fps_overlay.cc', 'FPS counter', 'small 28'),
+             ('engine/vendor/stb_easy_font.h', '<b>deleted</b>', 'no fallback: ui-font.wfga is required')]
+    rows = ''.join(f'<tr><td><code>{a}</code></td><td>{b}</td><td>{c}</td></tr>' for a, b, c in users)
+    body3 = f'''<main style="grid-template-columns:640px 640px">
+ <div><h2>9. Before: the fishtank menu on Chromecast 1</h2><p class="cap"><code>level_menu.cc</code>, <code>stb_easy_font</code> at about ×9 and ×5 (<code>returned-selector-screenshot.png</code>).</p><img src="{uri(png_of(before_menu or blank, S))}" width="640" height="360"></div>
+ <div><h2>10. After: the same menu in Atkinson Hyperlegible Next</h2><p class="cap">Title SemiBold 80 px · rows Regular 56 px, selected SemiBold 56 px · subtitle, counter and hints Regular 36 px. Arrows and ▼ stay drawn.</p><img src="{uri(menu().png(S))}" width="640" height="360"></div>
+ <div><h2>11. The HUD strip, before and after</h2><p class="cap"><code>plant_ui.cc</code> and the FPS counter: Cast1 capture above, Atkinson Regular 28 px below.</p><img src="{uri(png_of(hud_before, (640, 40)))}" width="640" height="40"><img src="{uri(png_of(hud_after, (640, 40)))}" width="640" height="40" style="margin-top:6px"></div>
+ <div><h2>12. Every <code>stb_easy_font</code> user switches</h2><p class="cap">One shared atlas, seven variants; the vendored font is deleted.</p>
+ <table style="border-collapse:collapse;font-size:12px">{rows}</table></div>
+</main>'''
+    out['menu'] = page('menu', 'UI font: the fishtank menu and every other user', 'stb_easy_font is replaced everywhere and deleted', body3)
 
     for name, html in out.items():
         p = HERE / f'{name}.html'
