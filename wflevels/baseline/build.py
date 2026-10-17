@@ -10,11 +10,11 @@ import shutil
 import struct
 import subprocess
 import zipfile
-from PIL import Image, ImageDraw
 
 HERE=Path(__file__).resolve().parent
 ROOT=HERE.parents[1]
 OUT=HERE/'build'
+ICON_ART=ROOT/'android/app/art-src/baseline-icon-2026-10-11'  # scripts/gen-baseline-icon.py; the logo is stamped per docs/reference/android-brand-badge.md
 
 def digest(p):return hashlib.sha256(Path(p).read_bytes()).hexdigest()
 def run(*args, **kwargs):
@@ -83,17 +83,12 @@ def package(runtime,refresh=False):
         names=['assets/controller.html']+(['assets/runtime-diagnostics.json'] if diagnostic else [])
         for name in names:(assets/Path(name).name).write_bytes(z.read(name))
         if not diagnostic:(assets/'runtime-diagnostics.json').unlink(missing_ok=True)
-    (assets/'layout.json').write_text(json.dumps(dict(app='baseline',title='World Foundry baseline',threshold=.5,stick=dict(up=2048,down=4096,right=8192,left=16384),buttons=[dict(id=n,bit=bit,label=label,x=x,y=.65,size=.8) for n,bit,label,x in [('A',1,'jump',.88),('B',2,'reset',.70),('C',4,'camera',.52)]],hint='Move with the stick. A jumps, B resets, C switches camera.')))
-    for name,size in [('icon',(256,256)),('tv_banner',(640,360))]:
-        image=Image.new('RGB',size,'#172028');d=ImageDraw.Draw(image)
-        x,y=size[0]//2,size[1]//2
-        for dx,dy,col in [(80,0,'#ef5350'),(0,-80,'#42a5f5'),(-55,55,'#66bb6a')]:
-            d.line((x,y,x+dx,y+dy),fill=col,width=10);d.ellipse((x+dx-8,y+dy-8,x+dx+8,y+dy+8),fill=col)
-        d.text((16,size[1]-30),'World Foundry baseline',fill='white');image.save(res/(name+'.png'))
-    manifest='''<manifest xmlns:android="http://schemas.android.com/apk/res/android" package="org.worldfoundry.wf_game.baseline" android:versionCode="1" android:versionName="0.1">
+    (assets/'layout.json').write_text(json.dumps(dict(app='baseline',title='WF baseline',threshold=.5,stick=dict(up=2048,down=4096,right=8192,left=16384),buttons=[dict(id=n,bit=bit,label=label,x=x,y=.65,size=.8) for n,bit,label,x in [('A',1,'jump',.88),('B',2,'reset',.70),('C',4,'camera',.52)]],hint='Move with the stick. A jumps, B resets, C switches camera.')))
+    for name in ('icon','tv_banner'):shutil.copyfile(ICON_ART/(name+'.png'),res/(name+'.png'))
+    manifest='''<manifest xmlns:android="http://schemas.android.com/apk/res/android" package="org.worldfoundry.wf_game.baseline" android:versionCode="2" android:versionName="0.2">
 <uses-sdk android:minSdkVersion="21" android:targetSdkVersion="34"/><uses-permission android:name="android.permission.INTERNET"/>
 <uses-feature android:name="android.hardware.touchscreen" android:required="false"/><uses-feature android:name="android.software.leanback" android:required="false"/>
-<application android:label="World Foundry baseline" android:icon="@drawable/icon" android:banner="@drawable/tv_banner" android:isGame="true" android:hasCode="__HAS_CODE__" android:extractNativeLibs="true">
+<application android:label="WF baseline" android:icon="@drawable/icon" android:banner="@drawable/tv_banner" android:isGame="true" android:hasCode="__HAS_CODE__" android:extractNativeLibs="true">
 <activity android:name="__ACTIVITY__" android:exported="true" android:screenOrientation="landscape" android:configChanges="orientation|keyboardHidden|screenSize|uiMode" android:launchMode="singleTask"><meta-data android:name="android.app.lib_name" android:value="wf_game"/>
 __ALIAS__<intent-filter><action android:name="android.intent.action.MAIN"/><category android:name="android.intent.category.LAUNCHER"/><category android:name="android.intent.category.LEANBACK_LAUNCHER"/></intent-filter></activity></application></manifest>'''
     manifest=manifest.replace('__HAS_CODE__','true' if java else 'false').replace('__ACTIVITY__','org.worldfoundry.wf_game.WorldFoundryActivity' if java else 'android.app.NativeActivity')
