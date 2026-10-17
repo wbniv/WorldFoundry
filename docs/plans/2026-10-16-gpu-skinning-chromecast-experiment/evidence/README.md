@@ -32,11 +32,26 @@ The earlier coordinator recovery job J‑8cc58b6f7fff issued a reboot and then
 failed its boot wait. The reason wireless debugging disabled remains unknown.
 The first v2 APK jobs failed installation with `INSTALL_FAILED_TEST_ONLY`;
 v3 fixes packaging without changing native code. The earlier GPU batch
-J‑1e59129b22a2 lost foreground and is excluded; its cause is unknown.
+J‑1e59129b22a2 lost its pair1 process and is excluded.
 
-Cast1 has two completed release rounds for both views; its third GPU idle
-round exited during startup. Cast1 is held while the coordinator removes
-unsafe automatic Back behavior. The previous failures remain excluded.
+## Startup deaths: a pre-existing seahorse fault, not GPU skinning
+
+Three cast1 deaths share one crash: J‑1e59129b22a2, J‑c4cccc5e4274 and
+J‑da19a5050cff, all close-idle pair1. Each is a SIGSEGV from a NULL
+dereference in `WorldFoundryMailboxesManager::LookupMailboxes`
+(`level.cc:340`), reached from zForth `write-actor-mailbox` on actor 30. That
+actor is pair 0's male seahorse body, which `sh-place` writes every frame.
+
+The pre-experiment CPU seahorse baseline crashed the same way twice:
+J‑4399ea64b1f4 and J‑a85e8414f1d4, both wide-idle pair1, built without any
+skinning code. The deaths are therefore not a GPU skinning result. Why
+actor 30 leaves the object list is not yet proven.
+
+Will's policy (18 October) is to rerun and record. Every failed attempt
+stays in `failed-attempts.json`, `startup-exits.json` and its archived
+folder, and the cell is rerun as a new job, at most 10 attempts per cell.
+`scripts/archive-gpu-skinning-attempt.py` archives a failed session without
+deleting anything.
 Cast2 has all 36 release runs, plus corrected CPU and GPU profiles for all
 three populations. The strict analyzer verified all 36 release and 12 corrected profile runs;
 full cast2 results are in `cast2-populations/results.json`. Corrected CPU/GPU
