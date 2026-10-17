@@ -27,6 +27,15 @@ REVIEW_JS = '''() => {
   const foot = document.getElementById('panel-src'), last = foot.lastElementChild.getBoundingClientRect();
   const panels = [...document.querySelectorAll('.panel')].map(e => ({id: e.id,
       clientHeight: e.clientHeight, scrollHeight: e.scrollHeight, overflowing: e.scrollHeight > e.clientHeight + 1}));
+  const facts = document.querySelector('header .facts');
+  const orphanedHeaderRefs = [...facts.querySelectorAll('.ref')].filter(ref => {
+    const prev = ref.previousSibling, match = prev.textContent.match(/\\S+\\s*$/);
+    const range = document.createRange();
+    range.setStart(prev, match.index);
+    range.setEnd(prev, match.index + match[0].trimEnd().length);
+    const rects = range.getClientRects(), word = rects[rects.length - 1];
+    return ref.getBoundingClientRect().top > word.top + 1;
+  }).map(ref => ref.textContent);
   const sizes = [];
   for (const el of document.querySelectorAll('.page *')) {
     const own = [...el.childNodes].some(n => n.nodeType === 3 && n.textContent.trim());
@@ -40,6 +49,8 @@ REVIEW_JS = '''() => {
     footer_last_bottom_px: last.bottom - box.top,
     footer_overflowing: last.bottom > box.bottom - pad + 1,
     document_overflowing: sheet.scrollHeight > sheet.clientHeight + 1,
+    header_overflowing: facts.scrollHeight > facts.clientHeight + 1,
+    orphaned_header_refs: orphanedHeaderRefs,
     panels,
     min_font_px: Math.min(...sizes),
     min_font_pt: +(Math.min(...sizes) * 0.75).toFixed(2),
@@ -61,6 +72,7 @@ def export(out_dir: Path = HERE) -> dict:
         page.wait_for_function("document.body.getAttribute('data-fit') !== null")
         review = page.evaluate(REVIEW_JS)
         review['overflowing'] = bool(review['document_overflowing'] or review['footer_overflowing']
+                                     or review['header_overflowing'] or review['orphaned_header_refs']
                                      or any(x['overflowing'] for x in review['panels']))
         (out_dir / 'layout-review.json').write_text(json.dumps(review, indent=2) + '\n', encoding='utf-8')
         if review['overflowing'] or review['fit'] != 'ok':

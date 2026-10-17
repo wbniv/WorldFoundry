@@ -128,9 +128,9 @@ SOURCES = {
 # Each claim: (status, text, sources). `chip` overrides the printed chip label (same colours as the status).
 HEADER_CLAIMS = [
     dict(status='verified', src=['hett', 'lourie'],
-         text='Captive breeding pairs average 15.6–16.6 cm in height; the largest adult on record is 17.5 cm.'),
+         text='Captive broodstock averages 15.6–16.6 cm tall.<br>Largest recorded adult: 17.5 cm.'),
     dict(status='verified', src=['lourie', 'silveira'],
-         text='Colour varies: brown spots with tiny white dots, striped rings, or one even colour.'),
+         text='Colour: brown spots with tiny white dots, ring stripes, or uniform.'),
     dict(status='verified', src=['lourie'],
          text='Western Atlantic; on seagrass, mangrove roots, macroalgae and gorgonians.'),
 ]
@@ -669,7 +669,7 @@ def chip_html(c):
 def refs_html(c, num):
     if not c['src']:
         return ''
-    return ' <span class="ref">[' + ', '.join(str(num[s]) for s in c['src']) + ']</span>'
+    return '\u00a0<span class="ref">[' + ', '.join(str(num[s]) for s in c['src']) + ']</span>'
 
 
 def claim_html(c, num, area):

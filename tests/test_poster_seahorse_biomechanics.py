@@ -251,6 +251,8 @@ def test_page_fits(exported):
     _out, review = exported
     assert review['overflowing'] is False and review['fit'] == 'ok', review
     assert all(not p['overflowing'] for p in review['panels'])
+    assert not review['header_overflowing']
+    assert review['orphaned_header_refs'] == []
 
 
 @needs_pdf

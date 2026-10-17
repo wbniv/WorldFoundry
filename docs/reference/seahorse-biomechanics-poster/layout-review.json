@@ -11,6 +11,8 @@
   "footer_last_bottom_px": 1531.78125,
   "footer_overflowing": false,
   "document_overflowing": false,
+  "header_overflowing": false,
+  "orphaned_header_refs": [],
   "panels": [
     {
       "id": "panel-rings",
