@@ -794,8 +794,9 @@ def _default_oad_dirs() -> list[str]:
     ]
     candidates = [p for p in _HARDCODED_CANDIDATES if os.path.isdir(p)]
 
-    # Walk up from this file's location to find wf_oad/tests/fixtures/
-    here = os.path.dirname(os.path.abspath(__file__))
+    # Walk up from this file's real location to find wf_oad/tests/fixtures/ (realpath: the
+    # add-on is often a symlink, e.g. /opt/wf-blender-scripts/addons/wf_blender in the Blender image)
+    here = os.path.dirname(os.path.realpath(__file__))
     d = here
     for _ in range(6):
         fixtures = os.path.join(d, "wf_oad", "tests", "fixtures")

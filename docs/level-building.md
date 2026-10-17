@@ -223,6 +223,29 @@ For per-level builds (Q✱bert / mm_practice / etc.) use the four-stage Rust pip
 bash wftools/wf_blender/build_level_binary.sh <level-name>
 ```
 
+### Level builds run in the Blender container
+
+The aquarium tanks (`bash wflevels/aquarium_<tank>/build.sh`, or `task aquarium-<tank>-level`)
+do not use the host's `blender`. Each `build.sh` starts with `source scripts/level-build.sh;
+wf_level_build "$0" "$@"`, which re-runs the script in `wf-blender:local`
+([`docker/Dockerfile.blender`](../docker/Dockerfile.blender): Ubuntu 26.04 with Foundry Linux's
+`blender` package, so the host's Blender, Python, numpy and Pillow, pinned to one Ubuntu archive snapshot),
+through `scripts/in-linux-container.sh` with
+`WF_CONTAINER_IMAGE=blender`. Inside the container:
+
+- the `wf_blender` add-on comes from the mounted checkout (`/src/wftools/wf_blender`, on
+  `BLENDER_SYSTEM_SCRIPTS`), so an add-on edit needs no image rebuild;
+- `iffcomp-rs`, `levcomp-rs`, `textile-rs` and `wf_py` are built with `cargo --locked` for the
+  container's toolchain, and `wf_py`'s `libwf_core.so` is copied to `wftools/wf_blender/wf_core.so`.
+  Crates are cached in `build-docker/cargo-home`;
+- exported `TANK_*`, `AQUARIUM_*`, `LIONFISH_*`, `BETTA_*`, `PLANTED_*` and `SHRIMP_*` settings
+  are forwarded, so `TANK_PROFILE=touch bash wflevels/aquarium_betta/build.sh` still works.
+
+The first build creates the image (`task blender-image`, a ~375 MB download). `WF_LEVEL_BUILD_HOST=1`
+runs the old host route. `task level-build-compare` builds each tank both ways and compares
+every output by sha256. See [the plan](plans/2026-10-16-blender-in-container.md). New level
+build scripts should use the same two-line preamble.
+
 For runtime use Taskfile entries: `task run-level -- wflevels/<level>.iff` (no bridge),
 `task run-debug -- wflevels/<level>.iff` (debug bridge on `:7777`).
 
@@ -279,8 +302,28 @@ that use one texture and would otherwise form one draw. Alternating flagged
 and unflagged regions can add draw calls if the experimental selector is
 enabled. Continue to use palette recoloring when the art needs it; the
 production renderer still supports it, and this prototype is **not** enabled
-globally. The proposed next engine step uses the existing palette-capable
-shader for mixed batches and links the extra program only when first needed.
+globally. A later diagnostic selector keeps mixed batches on the existing
+palette-capable shader and links the extra program only for an ordinary opaque
+draw. In five mixed-scene Cast1 pairs it preserved **18 draws/frame** and
+changed median FPS **47.49→47.46**, within run variation. This fallback is
+still isolated from production. [Selector follow-up](https://github.com/wbniv/finding-your-way/blob/main/docs/investigations/2026-10-16-no-palette-selector-follow-up.md).
+
+**Future level opt-in guidance:** A cold first ordinary draw can pause a
+visible scene while the no-palette program is created. In three diagnostic
+Cast1 pairs, a scripted late reveal had a **116.8 ms** worst presented
+interval without prewarm and **50.1 ms** with level-load prewarm. The median
+interval crossing level loading rose **183.5→283.6 ms**; one opted-in run
+reached **417.1 ms**. Treat prewarm as a per-level tradeoff for a known visible
+ordinary opaque batch whose first appearance would otherwise interrupt play.
+Do not request it merely because an asset has ordinary materials: three
+hidden-asset runs showed an unused shader taking **89–99 ms** to create during
+load. In the diagnostic selector, palette recoloring and mixed-batch fallback
+remain available either way. These numbers measure presentation gaps, not a
+steady-FPS gain from prewarm.
+The trial used APK arguments and a menu index; there is **no authored level
+property or production opt-in yet**. A visible palette-only level and an
+intermittent 30 FPS cadence in a nearly empty fixture still need investigation
+before shipping. [Prewarm opt-in report](https://github.com/wbniv/finding-your-way/blob/main/docs/investigations/2026-10-16-no-palette-level-optin.md).
 
 ### Blender Viewport Display by Object Type
 

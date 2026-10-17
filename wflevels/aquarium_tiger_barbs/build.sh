@@ -2,6 +2,9 @@
 set -euo pipefail
 TANK_ROOT="$(cd "$(dirname "$0")/../.." && pwd)"
 cd "$TANK_ROOT"
+# Runs in the Blender container (scripts/level-build.sh); WF_LEVEL_BUILD_HOST=1 for the host.
+source scripts/level-build.sh
+wf_level_build "$0" "$@"
 export AQUARIUM_TANK=tiger_barbs
 export AQUARIUM_SCHOOL_N=49
 export AQUARIUM_FOLLOWER_ASSET=barb_refined
