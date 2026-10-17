@@ -505,6 +505,9 @@ _Auto-added from plan "Out of scope"/"Deferred" sections at commit time. Triage 
 - [ ] **(triage)** Runtime TTF rasterization. As in finding-your-way, the runtime only ever sees baked pixels and metrics. — _from [2026-10-17-settings-editor-font.md](docs/plans/2026-10-17-settings-editor-font.md)_  <!-- fp:bfd56d1a1b4ac45e -->
 - [ ] **(triage)** Scripts other than Latin. The atlas covers ASCII, Latin‑1 and common punctuation; widening it is a bake-list change. — _from [2026-10-17-settings-editor-font.md](docs/plans/2026-10-17-settings-editor-font.md)_  <!-- fp:d2a0c19e09b6f8f2 -->
 - [ ] **(triage)** Dialogue text. It keeps its own per-level `DLOG` bundles, which already use the same `WFGA` path. — _from [2026-10-17-settings-editor-font.md](docs/plans/2026-10-17-settings-editor-font.md)_  <!-- fp:ed065dcbb9a78a9e -->
+- [ ] **(triage)** Runtime TTF rasterization. As in finding-your-way, the runtime only ever sees baked pixels and metrics. — _from [2026-10-17-settings-editor-font.md](docs/plans/2026-10-17-settings-editor-font.md)_  <!-- fp:bfd56d1a1b4ac45e -->
+- [ ] **(triage)** Scripts other than Latin. The atlas covers ASCII, Latin‑1 and common punctuation; widening it is a bake-list change. — _from [2026-10-17-settings-editor-font.md](docs/plans/2026-10-17-settings-editor-font.md)_  <!-- fp:d2a0c19e09b6f8f2 -->
+- [ ] **(triage)** Dialogue text. It keeps its own per-level `DLOG` bundles, which already use the same `WFGA` path. — _from [2026-10-17-settings-editor-font.md](docs/plans/2026-10-17-settings-editor-font.md)_  <!-- fp:ed065dcbb9a78a9e -->
 <!-- END auto-captured-deferrals -->
 
 
