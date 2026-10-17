@@ -42,6 +42,7 @@
 #include <movement/movement.hp>
 #include <room/room.hp>
 #include <gfx/static_mesh.hp>
+#include <gfx/renderer_backend.hp>
 #include <physics/collision.hp>
 #ifdef PHYSICS_ENGINE_JOLT
 #include <physics/jolt/jolt_backend.hp>
@@ -592,6 +593,18 @@ Level::Level
     }
     wfprops::activeRegistry()=&_runtimeProperties;
     wfprops::host().bind(&_runtimeProperties);
+    // Pick in 3D: where the chooser's objects are, read only while it is open.
+    wfprops::host().world.camera=[](wfpick::Camera& camera){return RendererBackendGet().CameraMatrices(camera.view,camera.proj);};
+    wfprops::host().world.locate=[this](uint32_t actor,wfpick::Candidate& candidate){
+        if(actor==0||int(actor)>=GetMaxObjectIndex())return false;
+        BaseObject* object=GetObject(int(actor));if(!object||!IsActor(object))return false;
+        const Actor* a=static_cast<const Actor*>(object);const PhysicalAttributes& physical=a->GetPhysicalAttributes();
+        const Vector3& p=physical.Position();candidate.position={p.X().AsFloat(),p.Y().AsFloat(),p.Z().AsFloat()};
+        // Meshless objects (settings holders) show a gear at their position.
+        candidate.bounded=a->GetMeshName()!=0;
+        if(candidate.bounded){const Vector3 lo=physical.Min(),hi=physical.Max();
+            candidate.lo={lo.X().AsFloat(),lo.Y().AsFloat(),lo.Z().AsFloat()};candidate.hi={hi.X().AsFloat(),hi.Y().AsFloat(),hi.Z().AsFloat()};}
+        return true;};
     wfoptions::registerBaseline(_runtimeProperties);
 	assert( plmc->tagRam == IFFTAG('R','A','M','\0') );
 	assert( plmc->tagObjects == IFFTAG('O','B','J','D') );
@@ -835,7 +848,7 @@ Level::~Level()
     if(_bitmapPresenter){_bitmapPresenter->~Presenter();_memory->Free(_bitmapPresenter);_bitmapPresenter=NULL;}
     if(_bitmapBundle){_memory->Free(_bitmapBundle);_bitmapBundle=NULL;}
 
-    if(wfprops::host().registry()==&_runtimeProperties)wfprops::host().bind(nullptr);
+    if(wfprops::host().registry()==&_runtimeProperties){wfprops::host().bind(nullptr);wfprops::host().world={};}
     if(wfprops::activeRegistry()==&_runtimeProperties)wfprops::activeRegistry()=nullptr;
 	// HALLmalloc is a stack/bump allocator — Free must happen in strict
 	// reverse-allocation order or lmalloc.cc:308 asserts. The construction

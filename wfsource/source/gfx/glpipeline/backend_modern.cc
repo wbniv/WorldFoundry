@@ -592,7 +592,9 @@ public:
 
     bool BitmapTextSupported() const override { return true; }
     unsigned TextureGeneration() const override { return _contextGeneration; }
-    void CaptureTextView() override { std::memcpy(_textView,_mv,sizeof(_mv)); }
+    void CaptureTextView() override { std::memcpy(_textView,_mv,sizeof(_mv)); std::memcpy(_textProj,_proj,sizeof(_proj)); _textCaptured=true; }
+    bool CameraMatrices(float* view,float* proj) const override
+    { if(!_textCaptured)return false; std::memcpy(view,_textView,sizeof(_textView)); std::memcpy(proj,_textProj,sizeof(_textProj)); return true; }
     bool ProjectTextAnchor(float x,float y,float z,int width,int height,float& px,float& py,float& depth) const override
     {
         float view[4], clip[4]; const float point[4]={x,y,z,1};
@@ -1002,6 +1004,8 @@ private:
     unsigned _contextGeneration = 1;
     GLuint _glyphProgram=0, _glyphVao=0, _glyphBuffer=0;
     float _textView[16] = {};
+    float _textProj[16] = {};
+    bool _textCaptured = false;
     size_t _staticGpuBytes = 0;
     GLuint _sharedIbo = 0;
     size_t _sharedIboBytes = 0;  // largest upload, counted once across all VAOs

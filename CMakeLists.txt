@@ -1277,6 +1277,10 @@ if(NOT ANDROID AND NOT IOS AND NOT APPLE AND NOT EMSCRIPTEN)
     target_include_directories(fps_overlay_test PRIVATE ${SRC})
     target_compile_definitions(fps_overlay_test PRIVATE ${WF_DEFS})
     add_test(NAME fps_overlay_layout COMMAND fps_overlay_test)
+    # 3D object picker geometry (docs/plans/2026-10-16-runtime-object-editing.md, step 9).
+    add_executable(object_picker_test tests/object_picker_test.cc)
+    target_include_directories(object_picker_test PRIVATE ${CMAKE_SOURCE_DIR}/engine)
+    add_test(NAME object_picker COMMAND object_picker_test)
     if(NOT WF_FORTH_ENGINE STREQUAL "none" AND NOT WF_FORTH_ENGINE STREQUAL "zforth")
         add_executable(frame_rate_forth_probe tests/frame_rate_forth_probe.cc
             ${STUB_SRC}/scripting_${WF_FORTH_ENGINE}.cc)
