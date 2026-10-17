@@ -787,6 +787,15 @@ public:
         return true;
     }
 
+    // Level-load prewarm. Built-in programs only: after a custom reload the
+    // no-palette program is never used, so it is not created.
+    void PrepareNoPaletteProgram() override
+    {
+        if (_customProgram) return;
+        LazyInit();
+        InitNoPaletteProgram("prewarm");
+    }
+
     // Called from the Android lifecycle hook (WFAndroidEglTerm) when the
     // EGL surface is destroyed. Reset all GL-object handles; the next draw
     // call's LazyInit will recompile the program + recreate VAO/VBO in the
@@ -1140,10 +1149,20 @@ private:
         _noPaletteUniforms = FetchUniformLocations(_noPaletteProg);
         wf_profile::count(wf_profile::NoPalettePrograms);
         if (profiled)
-            std::fprintf(stderr, "no-palette-program: created reason=%s context=%u wall-ms=%.3f\n",
+        {
+            // Monotonic ns on the frame-window clock, so a device trace can
+            // place the creation relative to level loading and presentation.
+            // The span covers compile, link and uniform lookup; a driver may
+            // defer more work to the first bind or draw.
+            const auto ended = std::chrono::steady_clock::now();
+            const auto ns = [](std::chrono::steady_clock::time_point t) {
+                return (long long)std::chrono::duration_cast<std::chrono::nanoseconds>(t.time_since_epoch()).count();
+            };
+            std::fprintf(stderr, "no-palette-program: created reason=%s context=%u wall-ms=%.3f start-ns=%lld end-ns=%lld\n",
                          reason, _contextGeneration,
-                         std::chrono::duration<double, std::milli>(
-                             std::chrono::steady_clock::now() - started).count());
+                         std::chrono::duration<double, std::milli>(ended - started).count(),
+                         ns(started), ns(ended));
+        }
     }
 
     void UpdateMvp()

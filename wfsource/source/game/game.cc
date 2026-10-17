@@ -35,6 +35,8 @@
 #include <hal/lifecycle.h>
 #include <unistd.h>
 #include <algorithm>
+#include <chrono>
+#include "runtime_profile.hp"
 #if defined(__EMSCRIPTEN__)
 #  include <emscripten.h>
 #endif
@@ -351,6 +353,7 @@ WFGame::LoadLevel(_DiskFile* levelFile)
 	DebugServer_DiagnosticLevel(_desiredLevelNum);
 #endif
     _frameRate.Reset();
+    const auto loadStarted = std::chrono::steady_clock::now();
     DBSTREAM3( cprogress << "WFGame::LoadLevel (sizeof level = " << sizeof(Level) << std::endl; )
     assert(!_curLevel);
     assert(!_gameMailboxes);
@@ -360,6 +363,23 @@ WFGame::LoadLevel(_DiskFile* levelFile)
     _curLevel = new (HALLmalloc) Level( *this, levelFile, *_viewPort, *_videoMemory, _gameMailboxes );
 	DBSTREAM3( cprogress << "new level at address " << _curLevel << ", sizeof " << sizeof(Level) << std::endl; )
 	assert( ValidPtr(_curLevel));
+	// Level-owned opt-in, read from this level's own Level Object: link the
+	// no-palette opaque program now, as part of the level transition, rather
+	// than on the level's first ordinary opaque batch during play. Without
+	// it the program is created only if such a batch is drawn.
+	if ( _curLevel->PrewarmNoPaletteProgram() )
+		RendererBackendGet().PrepareNoPaletteProgram();
+	// --frame-profile: the level construction (+ prewarm) span on the
+	// frame-window clock, for placing program creation in a device trace.
+	if ( wf_profile::enabled() )
+	{
+		const auto ns = [](std::chrono::steady_clock::time_point t) {
+			return (long long)std::chrono::duration_cast<std::chrono::nanoseconds>(t.time_since_epoch()).count();
+		};
+		fprintf( stderr, "level-load: index=%d start-ns=%lld end-ns=%lld prewarm-no-palette-program=%d\n",
+		         int(_desiredLevelNum), ns(loadStarted), ns(std::chrono::steady_clock::now()),
+		         _curLevel->PrewarmNoPaletteProgram() ? 1 : 0 );
+	}
 	DBSTREAM3( cprogress << "WFGame::LoadLevel done" << std::endl; )
 
 	// Start per-level music: look for level<N>.mid alongside cd.iff.

@@ -222,6 +222,8 @@ int main(int argc, char** argv)
     Require(counter(wf_profile::NoPaletteDraws) == 0 && counter(wf_profile::NoPalettePrograms) == 0,
             "no-palette program used after a custom reload");
     Pixel(16,24,255,255,0);
+    backend->PrepareNoPaletteProgram();
+    Require(counter(wf_profile::NoPalettePrograms) == 0, "prewarm linked a program after a custom reload");
     wf_profile::state().enabled = false;
     Require(glGetError()==GL_NO_ERROR,"GL error before context reset");
 
@@ -246,11 +248,38 @@ int main(int argc, char** argv)
                 "no-palette program not relinked exactly once after context recreation");
         Require(frame() == ordinaryStreaming, "no-palette pixels changed after context recreation");
     }
+
+    // Level-load prewarm in a fresh context: links the program once without
+    // drawing; palette-only batches still use the palette-capable program,
+    // and the first ordinary batch reuses the prewarmed program.
+    ModernBackendSimulateSurfaceLoss();
+    glXMakeCurrent(dpy,None,nullptr); glXDestroyContext(dpy,context);
+    context=glXCreateContext(dpy,visual,nullptr,GL_TRUE);
+    Require(context && glXMakeCurrent(dpy,win,context),"second replacement context failed");
+    glViewport(0,0,64,64); glDisable(GL_DITHER); glEnable(GL_DEPTH_TEST);
+    PixelMap prewarmed(PixelMap::MEMORY_VIDEO, 1, 1);
+    prewarmed.Load(&redTexel, 1, 1);
+    wf_profile::enableFresh();
+    backend->PrepareNoPaletteProgram();
+    backend->PrepareNoPaletteProgram();
+    Require(counter(wf_profile::NoPalettePrograms) == 1 && counter(wf_profile::Draws) == 0,
+            "prewarm did not link the program exactly once without drawing");
+    eligible();
+    submit(false, 1, &prewarmed);
+    backend->EndFrame();
+    Require(counter(wf_profile::Draws) == 1 && counter(wf_profile::NoPaletteDraws) == 0,
+            "prewarm moved a palette-only batch off the palette-capable program");
+    eligible();
+    submit(false, 0, &prewarmed);
+    backend->EndFrame();
+    Require(counter(wf_profile::NoPaletteDraws) == 1 && counter(wf_profile::NoPalettePrograms) == 0,
+            "first ordinary batch relinked a prewarmed program");
+    Require(frame() == ordinaryStreaming, "prewarmed program changed ordinary pixels");
     wf_profile::state().enabled = false;
     Require(glGetError()==GL_NO_ERROR,"GL error after context reset");
     glXMakeCurrent(dpy,None,nullptr); glXDestroyContext(dpy,context);
     XDestroyWindow(dpy,win); XFree(visual); XCloseDisplay(dpy);
     std::puts("PASS opaque/cutout/blended transitions, depth, no-palette selector (palette-only, mixed, ordinary,"
-              " streaming/static, culled, texture change, ineligible effects), reload success/failure and"
-              " context recreation");
+              " streaming/static, culled, texture change, ineligible effects, prewarm), reload success/failure"
+              " and context recreation");
 }
