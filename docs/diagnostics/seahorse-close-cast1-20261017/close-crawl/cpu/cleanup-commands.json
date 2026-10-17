@@ -1,0 +1,102 @@
+[
+  {
+    "args": [
+      "shell",
+      "pm path org.worldfoundry.wf_game.aquarium"
+    ],
+    "start": 1792212159.46225,
+    "end": 1792212159.7894316,
+    "returncode": 0
+  },
+  {
+    "args": [
+      "shell",
+      "sha256sum '/data/app/~~dFar1OzlMuBVNISpTk6O1A==/org.worldfoundry.wf_game.aquarium-MdKzEb-RK_rtXLMYK3mSXA==/base.apk'"
+    ],
+    "start": 1792212159.7904046,
+    "end": 1792212159.9676442,
+    "returncode": 0
+  },
+  {
+    "args": [
+      "install",
+      "-r",
+      "/var/lib/wf-device-coordinator/inputs/1cc22299254efffd1def3712748073509cdce30234ba4d7ff57b0d4ea56d5187.apk"
+    ],
+    "start": 1792212160.0077705,
+    "end": 1792212165.2698686,
+    "returncode": 0
+  },
+  {
+    "args": [
+      "shell",
+      "pm path org.worldfoundry.wf_game.aquarium"
+    ],
+    "start": 1792212165.2718525,
+    "end": 1792212165.5905492,
+    "returncode": 0
+  },
+  {
+    "args": [
+      "shell",
+      "sha256sum '/data/app/~~hDGhaaHlbo_EVHFCP5NksQ==/org.worldfoundry.wf_game.aquarium-bWsf0-P4ZGvux92NwJsIrA==/base.apk'"
+    ],
+    "start": 1792212165.5914555,
+    "end": 1792212166.0541785,
+    "returncode": 0
+  },
+  {
+    "args": [
+      "shell",
+      "pm path org.worldfoundry.wf_game.aquarium"
+    ],
+    "start": 1792212166.0789917,
+    "end": 1792212166.2835534,
+    "returncode": 0
+  },
+  {
+    "args": [
+      "shell",
+      "sha256sum '/data/app/~~hDGhaaHlbo_EVHFCP5NksQ==/org.worldfoundry.wf_game.aquarium-bWsf0-P4ZGvux92NwJsIrA==/base.apk'"
+    ],
+    "start": 1792212166.284903,
+    "end": 1792212166.648548,
+    "returncode": 0
+  },
+  {
+    "args": [
+      "shell",
+      "am force-stop org.worldfoundry.wf_game.aquarium"
+    ],
+    "start": 1792212166.6925206,
+    "end": 1792212167.0596218,
+    "returncode": 0
+  },
+  {
+    "args": [
+      "shell",
+      "am start -W -n com.google.android.apps.tv.launcherx/.home.HomeActivity"
+    ],
+    "start": 1792212167.0612035,
+    "end": 1792212167.2954755,
+    "returncode": 0
+  },
+  {
+    "args": [
+      "shell",
+      "dumpsys activity activities"
+    ],
+    "start": 1792212167.2968483,
+    "end": 1792212167.5610433,
+    "returncode": 0
+  },
+  {
+    "args": [
+      "shell",
+      "dumpsys activity activities"
+    ],
+    "start": 1792212167.5633774,
+    "end": 1792212167.8482826,
+    "returncode": 0
+  }
+]

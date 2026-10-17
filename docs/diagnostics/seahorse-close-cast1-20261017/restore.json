@@ -1,0 +1,29 @@
+{
+  "base_apk": "/home/will/WorldFoundry-wbniv/.worktrees/seahorse-close-baselines/android/app/build/outputs/apk/aquarium/release/worldfoundry-aquarium-release.apk",
+  "base_apk_sha256": "b4a324a03b31caa86d28b26165ca9720e565b134c15c087bc3226061103aa4b6",
+  "revision": "d8d215ae0d67b2a23a8f1fce89a65e69eccb7f93",
+  "variants": {
+    "pair6": {
+      "settings": {
+        "seed": 713,
+        "water": "saltwater",
+        "age": 150,
+        "speed": 0,
+        "textures": true,
+        "sway": true,
+        "random_entry": false,
+        "seahorses": 6,
+        "greeting": true
+      },
+      "actor": 4,
+      "source": "RPRP",
+      "oas_sha256": "a5a459e1866fc423dafc6d803e0d937c48867c4cc73c2969c415c95c7091c4fe",
+      "oad_sha256": "6f71322da27adfe70118a79648871945c1adb1c33dcfdcee1ad9a4e61440de63",
+      "bindings_sha256": "5d6c9e18fac61c3dda1a0e03c5401cf631be99abe66e0a274a5632ae68c81af4",
+      "catalog_sha256": "122b7ce2b377c6ef6e6a09a90fab2000a037628586972328c4dfca7bc233f9e7",
+      "level_sha256": "beca8630c6cd9dfedcd80445d84169a46e5b654b14e99e757ef8ef968580b5b8",
+      "cd_sha256": "430695e25a52386758f51d11d46f3d1ffedcf5155a5982cc936aee3942b76f1a",
+      "apk_sha256": "1cc22299254efffd1def3712748073509cdce30234ba4d7ff57b0d4ea56d5187"
+    }
+  }
+}

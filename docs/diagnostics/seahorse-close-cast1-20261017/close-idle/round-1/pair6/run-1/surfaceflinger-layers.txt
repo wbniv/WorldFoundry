@@ -1,0 +1,63 @@
+Display 0 name="Built-in Screen"#3
+WindowedMagnification:0:31#4
+HideDisplayCutout:0:14#5
+OneHanded:0:14#6
+FullscreenMagnification:0:12#7
+Leaf:0:1#8
+WallpaperWindowToken{861b3be token=android.os.Binder@350fa79}#53
+2f00cb8 com.android.systemui.wallpapers.ImageWallpaper#56
+com.android.systemui.wallpapers.ImageWallpaper#57
+Wallpaper BBQ wrapper#58
+DefaultTaskDisplayArea#9
+Task=1#46
+Task=1700#2825
+b903a54 ActivityRecordInputSink com.google.android.apps.tv.launcherx/.home.HomeActivity#2831
+ActivityRecord{f269dfd u0 com.google.android.apps.tv.launcherx/.home.HomeActivity#2826
+c1f9a03 com.google.android.apps.tv.launcherx/com.google.android.apps.tv.launcherx.home.HomeActivity#2828
+Task=1594#96
+d50d30d ActivityRecordInputSink com.android.tv.settings/.MainSettings#102
+ActivityRecord{4c602c2 u0 com.android.tv.settings/.MainSettings#97
+67a3058 com.android.tv.settings/com.android.tv.settings.MainSettings#99
+Task=1738#3415
+8273fb5 ActivityRecordInputSink org.worldfoundry.wf_game.aquarium/org.worldfoundry.wf_game.WorldFoundryActivity#3420
+ActivityRecord{91d764a u0 org.worldfoundry.wf_game.aquarium/android.app.NativeActivity#3416
+e688025 org.worldfoundry.wf_game.aquarium/android.app.NativeActivity#3417
+org.worldfoundry.wf_game.aquarium/android.app.NativeActivity#3418
+Leaf:3:12#10
+WindowToken{5cea032 type=2038 android.os.BinderProxy@f0661d0}#47
+cb49ae8 ShellDropTarget#48
+ImePlaceholder:13:14#11
+ImeContainer#12
+OneHanded:15:15#13
+FullscreenMagnification:15:15#14
+Leaf:15:15#15
+HideDisplayCutout:16:16#16
+OneHanded:16:16#17
+FullscreenMagnification:16:16#18
+Leaf:16:16#19
+OneHanded:17:17#20
+FullscreenMagnification:17:17#21
+Leaf:17:17#22
+HideDisplayCutout:18:23#23
+OneHanded:18:23#24
+FullscreenMagnification:18:23#25
+Leaf:18:23#26
+Leaf:24:25#27
+HideDisplayCutout:26:31#28
+OneHanded:26:31#29
+FullscreenMagnification:26:27#30
+Leaf:26:27#31
+Leaf:28:28#32
+FullscreenMagnification:29:31#33
+Leaf:29:31#34
+HideDisplayCutout:32:35#35
+OneHanded:32:32#36
+Leaf:32:32#37
+FullscreenMagnification:33:33#38
+Leaf:33:33#39
+OneHanded:34:35#40
+FullscreenMagnification:34:35#41
+Leaf:34:35#42
+Leaf:36:36#43
+Accessibility Overlays#45
+Display Overlays#44

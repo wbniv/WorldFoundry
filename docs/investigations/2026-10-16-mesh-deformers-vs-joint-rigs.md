@@ -119,7 +119,23 @@ are measured GPU-skinning savings.
 
 All variants allocate the same twelve residents; None also hides the six posts.
 PSS varies between repeats and cannot establish per-resident allocation cost.
-Close/crawl views and cast2 remain outstanding. This establishes a current
+**Close views completed on cast1:** three release repeats and one separate CPU
+profile per population/view, source `d8d215ae`. Close idle measures 47.19 →
+68.52 ms from None to six pairs (21.19 → 14.59 FPS); close crawl measures
+47.33 → 68.57 ms (21.13 → 14.58 FPS). The corresponding main-thread CPU
+increases are 20.67 and 20.82 ms. Their nested animation increases are
+2.68 and 2.73 ms, already included in update/Director. Whole-frame vertex traffic
+is about 5.13 → 6.66 MiB/frame, including other deformers. These totals are not
+measured GPU-skinning savings. The existing close camera follows the urchin and
+clips some seahorses; an authored held-right fixture measures crawling work,
+without exercising remote input delivery. All 32 close runs passed, with thermal
+status 0 and verified selector restoration. See the
+[completed comparison and graph](../plans/2026-10-16-saltwater-seahorses/comparison.md#close-idle-and-close-crawl--completed-17-october)
+and [raw evidence](../diagnostics/seahorse-close-cast1-20261017/README.md).
+The plotted 3–5-pair values interpolate frame time between two and six pairs;
+they remain estimates, separate from the four measured populations.
+
+Cast2 remains unavailable. This establishes a current
 `DFRM` workload reference; the CPU-rig/GPU-rig comparison, crossover, Metal
 validation and GPU timing still require the separate experiment. The joint-rig
 and Deformer phase 2 recommendations above are unchanged by this baseline.

@@ -1,0 +1,28 @@
+{
+  "workflow": "variant-benchmark",
+  "app": "aquarium",
+  "apk": "/home/will/WorldFoundry-wbniv/.worktrees/seahorse-close-baselines/engine/objs_game/.tmp/seahorse-close/restore/pair6.apk",
+  "restore_apk": "/home/will/WorldFoundry-wbniv/.worktrees/seahorse-close-baselines/engine/objs_game/.tmp/seahorse-close/restore/pair6.apk",
+  "trace": "idle",
+  "duration": 60,
+  "warmup": 15,
+  "runs": 1,
+  "variants": [
+    {
+      "label": "none",
+      "apk": "/home/will/WorldFoundry-wbniv/.worktrees/seahorse-close-baselines/engine/objs_game/.tmp/seahorse-close/fixtures/close-crawl-none.apk"
+    },
+    {
+      "label": "pair1",
+      "apk": "/home/will/WorldFoundry-wbniv/.worktrees/seahorse-close-baselines/engine/objs_game/.tmp/seahorse-close/fixtures/close-crawl-pair1.apk"
+    },
+    {
+      "label": "pair2",
+      "apk": "/home/will/WorldFoundry-wbniv/.worktrees/seahorse-close-baselines/engine/objs_game/.tmp/seahorse-close/fixtures/close-crawl-pair2.apk"
+    },
+    {
+      "label": "pair6",
+      "apk": "/home/will/WorldFoundry-wbniv/.worktrees/seahorse-close-baselines/engine/objs_game/.tmp/seahorse-close/fixtures/close-crawl-pair6.apk"
+    }
+  ]
+}

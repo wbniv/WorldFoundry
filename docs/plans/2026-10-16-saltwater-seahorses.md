@@ -12,7 +12,7 @@ What is true today:
 
 - **The tank** is the 48 × 13 × 21 in aquarium shell ([`generate.py:42`](../../wflevels/aquarium_tanks/generate.py)): 47 × 12 × 16.5 in of water above the sand, about **40 gal**. A breeder's guideline, posted in a 2006 Ocean Rider forum thread, of [about one pair per 10 gal](https://seahorse.com/topic/stocking-density/) for *H. erectus* allows at most 4 pairs ([research](../reference/seahorse-research.md)). Will requested four additional pairs on 2026‑10‑16: the visual tank now defaults to **6 pairs** (12 seahorses). The earlier stocking guideline is research context, not a simulation limit.
 - **Saltwater has one resident**, the sea urchin ([`config.py:3-4`](../../wflevels/aquarium_plants/config.py)). Freshwater has the rainbow goby.
-- **Performance is the binding constraint.** The matched 17 October cast1 wide-idle baseline is **47.14 ms / 21.22 FPS** with None and **69.26 ms / 14.44 FPS** with six pairs, using mature plants, seed 713 and growth paused ([comparison](2026-10-16-saltwater-seahorses/comparison.md)). This supersedes the older 5 October 74.0 ms estimate and unmatched HUD readings. Close views, crawling and cast2 remain unmeasured in this baseline.
+- **Performance is the binding constraint.** The matched 17 October cast1 wide-idle baseline is **47.14 ms / 21.22 FPS** with None and **69.26 ms / 14.44 FPS** with six pairs, using mature plants, seed 713 and growth paused ([comparison](2026-10-16-saltwater-seahorses/comparison.md)). This supersedes the older 5 October 74.0 ms estimate and unmatched HUD readings. The completed close baselines are **68.52 ms / 14.59 FPS** at six pairs in close idle and **68.57 ms / 14.58 FPS** in close crawl. Cast2 remains unavailable.
 - **Phase 1 now poses the seahorse’s rooted curve at runtime.** Before that implementation, deformers were per-species C++ formulas (fish, swim, fin, jelly, lion) called from Forth. General weighted joint skinning, parenting and a skeleton hierarchy remain separate work ([`rendacto.cc`](../../wfsource/source/renderassets/rendacto.cc), [clownfish plan](2026-09-30-clownfish-idle-animation.md)).
 - **The legacy vertex-animation system plays canned clips and cannot compute a runtime tail grip.** It plays baked mesh-vertex cycles (`CYMP` + `CANM` chunks, `RenderActor3DAnimates`) in 31 fixed slots named for a platform-game character (`IDLE`, `WALK`, `CLIMB_PULL_UP`, `SWORD_STRIKE_FORWARD` …, [`anim.inc`](../../wfsource/source/anim/anim.inc)). Movement state picks the slot, or a `SET_ANIM_CYCLE` message overrides it ([`animmang.cc:172-257`, `:329-334`](../../wfsource/source/anim/animmang.cc)).
     - The compiled-in format stores **every vertex of every frame**, and playback is `frame = ⌊time × rate⌋ mod frameCount`: no interpolation and no blending between cycles ([`anim.cc:146-163`](../../wfsource/source/anim/anim.cc)).
@@ -402,11 +402,27 @@ saved by removing actors from the level. The original 2–3 ms per seahorse
 estimate is retained only as design history, not a result for every view.
 Will's chosen default remains six pairs.
 
-**Still outstanding from the full Phase 4 protocol:** three repeats of close
-idle and close crawl, and the second device. Cast1 is the Chromecast HD;
-cast2 (`sabrina`) is unavailable on the shared network. This wide-view baseline
-does not complete those checks. GPU skinning remains a separate engine
-experiment requiring explicit permission.
+**Close-idle/crawl completed on cast1, 17 October:** integration `d8d215ae`,
+three 60-second release repeats and one separate CPU profile per population and
+view, with the same authored settings. All 32 close runs passed; all sessions
+restored the six-pair selector and completed cleanup, with thermal status 0.
+
+| Pairs | Close-idle ms / FPS | Close-crawl ms / FPS |
+|---:|---:|---:|
+| 0 | 47.19 / 21.19 | 47.33 / 21.13 |
+| 1 | 51.56 / 19.39 | 51.65 / 19.36 |
+| 2 | 54.97 / 18.19 | 54.95 / 18.20 |
+| 6 | 68.52 / 14.59 | 68.57 / 14.58 |
+
+[Graph, interpolated 3–5-pair estimates, CPU split and run ranges](2026-10-16-saltwater-seahorses/comparison.md#close-idle-and-close-crawl--completed-17-october).
+These use the existing urchin-following close camera and an asset fixture that
+holds right through the existing controller; they measure crawling work without
+validating hardware input delivery. The deployed coordinator accepts idle/school
+traces, so the supported idle profile runs those direct-launch fixtures.
+
+**Still outstanding:** cast2 (`sabrina`), unavailable on the shared network, and
+any other uncompleted full Phase 4 gameplay checks. GPU skinning remains a
+separate engine experiment requiring explicit permission.
 
 ## Deformer phase 2 — the existing kinds as `DFRM` data
 
@@ -566,7 +582,7 @@ Ranks are suggestions; a Fable session ranks the TODO entry.
     <img src="2026-10-16-saltwater-seahorses/evidence/phase3/poses-sheet.png" width="700">
 
     **PASS** (2026‑10‑16): all three limits hold. Ran in the container, with `--out …/evidence/phase3` so Phase 3's evidence stays together. The poses are the mockup's presets on the exported female rig; a vertical grip takes its wrap start from the post radius (Phase 3: no ring past 97 % of its lateral limit), so `twine` uses start 18. Limit use is the worst joint over the pose and its 1 s ease-in from rest. The centre error is the Director's solve as the game runs it: one frame late, extrapolated, for 6 s of `hold_idle` sway at 20 Hz.
-9. Matched device runs, with Chromecast 1 reserved through the coordinator (`task cast1:reserve`): `python3 scripts/profile-planted-tank-device.py --variants-dir <variant APKs> --restore-apk <eight-tank selector release> --out docs/plans/2026-10-16-saltwater-seahorses/profiles --variants baseline none pair1 pair2 --runs 3`, then `task cast1:release`. Repeat on the Chromecast HD. The comparison table is written to `2026-10-16-saltwater-seahorses/comparison.md`.
+9. Matched device runs use frozen None / 1 / 2 / 6-pair APKs and coordinator `variant-benchmark` recipes, submitted with `task chromecast:submit DEVICE=chromecast-test-01 RECIPE=<recipe> ASYNC=1`. The coordinator owns the complete session and restores the selector release. Do not create a personal reservation for agent tests. See the [wide protocol](../diagnostics/seahorse-population-cast1-20261017/README.md) and [close-view protocol](../diagnostics/seahorse-close-cast1-20261017/README.md). Repeat on cast2 when it is available. Results go in `2026-10-16-saltwater-seahorses/comparison.md`.
 10. Normal gameplay on Chromecast 1 with the selector release: Hold A → Seahorses sheet → every count from None through 6 pairs applies. Switching to freshwater hides seahorses and posts. Selector, Back, Home and resume all pass. Evidence goes under `docs/diagnostics/`.
 
     ```

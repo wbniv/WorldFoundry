@@ -1,0 +1,1115 @@
+{
+  "base_apk_sha256": "b4a324a03b31caa86d28b26165ca9720e565b134c15c087bc3226061103aa4b6",
+  "native": {
+    "lib/arm64-v8a/libwf_game.so": "e908d0b0d4591f6ca8f1f26cdfdb92e40d88b191980aebe6a7fc30d4e1378907",
+    "lib/armeabi-v7a/libwf_game.so": "77a2227ae86741a9078678a9dcea5a007fc3d6fdbdad1577bf8ded94c1c76fd4"
+  },
+  "source_level_sha256": "7d22ed90492b6210702f29eb927818b49d1d1f2c4536a7beb4691e3233f99e76",
+  "variants": {
+    "wide-idle-none": {
+      "apk_sha256": "45e4e1f14f9405a9514579be5c832cae0cfbb82bf0212f3ed98f4022d19c2fb4",
+      "cd_sha256": "74828248319a6f5a4fde28dd009998689fca613da7fdfa3dfc2196b91c398f25",
+      "level_sha256": "db629037963355ac0502e7d8a2c8c0ddb2cf023b256e98316341db8ea71b28b6",
+      "settings": {
+        "settings": {
+          "seed": 713,
+          "water": "saltwater",
+          "age": 150,
+          "speed": 0,
+          "textures": true,
+          "sway": true,
+          "random_entry": false,
+          "seahorses": 0,
+          "greeting": true
+        },
+        "actor": 4,
+        "source": "RPRP",
+        "oas_sha256": "a5a459e1866fc423dafc6d803e0d937c48867c4cc73c2969c415c95c7091c4fe",
+        "oad_sha256": "6f71322da27adfe70118a79648871945c1adb1c33dcfdcee1ad9a4e61440de63",
+        "bindings_sha256": "3d73f330e0e189a9bcad3542b6e79074caef1e7ded5d801e45b4b7a1d0233fc2",
+        "catalog_sha256": "9f617b1e50d92abfed337d4f7fe57bf1eb9c76f75566d654db668a13194ef579",
+        "level_sha256": "db629037963355ac0502e7d8a2c8c0ddb2cf023b256e98316341db8ea71b28b6"
+      },
+      "scripts": [
+        {
+          "actor": "Director",
+          "offset": 17352,
+          "size": 34605,
+          "original_sha256": "b4fb7dcf19e93242fdffbb7a3c806fbb79640244130c8f1195b7583cb0a5f230",
+          "fixture_sha256": "973e4a3ce846d34d722b0aa0b96bf51595783507d4627fab316aafd86a11d0cc"
+        },
+        {
+          "actor": "Player",
+          "offset": 51960,
+          "size": 6847,
+          "original_sha256": "a48a8e2e3a5db1840cdd36f9fbe065d5cd534e277be9361e448ee7c306fc2d0d",
+          "fixture_sha256": "4f36dc6f74a129370c63bf50458c33f679e444cff33f9160af194bdfc3002008"
+        }
+      ],
+      "frame_profile": false,
+      "preservation": {
+        "asset_prefix_bytes": 1808384,
+        "asset_prefix_sha256": "b37d6eabf6e02714aeaa3a3d6b6cf93be8a54d0c28e2183f2ac19c3526c42db2"
+      }
+    },
+    "wide-idle-none-cpu": {
+      "apk_sha256": "db3e9b7692396199aa4300fc470a412fb002970c9b55afbd19b9ecfed40a9d8a",
+      "cd_sha256": "74828248319a6f5a4fde28dd009998689fca613da7fdfa3dfc2196b91c398f25",
+      "level_sha256": "db629037963355ac0502e7d8a2c8c0ddb2cf023b256e98316341db8ea71b28b6",
+      "settings": {
+        "settings": {
+          "seed": 713,
+          "water": "saltwater",
+          "age": 150,
+          "speed": 0,
+          "textures": true,
+          "sway": true,
+          "random_entry": false,
+          "seahorses": 0,
+          "greeting": true
+        },
+        "actor": 4,
+        "source": "RPRP",
+        "oas_sha256": "a5a459e1866fc423dafc6d803e0d937c48867c4cc73c2969c415c95c7091c4fe",
+        "oad_sha256": "6f71322da27adfe70118a79648871945c1adb1c33dcfdcee1ad9a4e61440de63",
+        "bindings_sha256": "3d73f330e0e189a9bcad3542b6e79074caef1e7ded5d801e45b4b7a1d0233fc2",
+        "catalog_sha256": "9f617b1e50d92abfed337d4f7fe57bf1eb9c76f75566d654db668a13194ef579",
+        "level_sha256": "db629037963355ac0502e7d8a2c8c0ddb2cf023b256e98316341db8ea71b28b6"
+      },
+      "scripts": [
+        {
+          "actor": "Director",
+          "offset": 17352,
+          "size": 34605,
+          "original_sha256": "b4fb7dcf19e93242fdffbb7a3c806fbb79640244130c8f1195b7583cb0a5f230",
+          "fixture_sha256": "973e4a3ce846d34d722b0aa0b96bf51595783507d4627fab316aafd86a11d0cc"
+        },
+        {
+          "actor": "Player",
+          "offset": 51960,
+          "size": 6847,
+          "original_sha256": "a48a8e2e3a5db1840cdd36f9fbe065d5cd534e277be9361e448ee7c306fc2d0d",
+          "fixture_sha256": "4f36dc6f74a129370c63bf50458c33f679e444cff33f9160af194bdfc3002008"
+        }
+      ],
+      "frame_profile": true,
+      "preservation": {
+        "asset_prefix_bytes": 1808384,
+        "asset_prefix_sha256": "b37d6eabf6e02714aeaa3a3d6b6cf93be8a54d0c28e2183f2ac19c3526c42db2"
+      }
+    },
+    "wide-idle-pair1": {
+      "apk_sha256": "8acc35b19b8d472625d8d2ce689a911ac27dc938948bf5594cada5c59a243df0",
+      "cd_sha256": "f43baf0e849e04c38b769cd6f865d2443596ab8721b4b507a67b9dc0534d267a",
+      "level_sha256": "9cc508565717e09a2b204daffb1a0572f86849c2cd10416fa66809aca108d8ed",
+      "settings": {
+        "settings": {
+          "seed": 713,
+          "water": "saltwater",
+          "age": 150,
+          "speed": 0,
+          "textures": true,
+          "sway": true,
+          "random_entry": false,
+          "seahorses": 1,
+          "greeting": true
+        },
+        "actor": 4,
+        "source": "RPRP",
+        "oas_sha256": "a5a459e1866fc423dafc6d803e0d937c48867c4cc73c2969c415c95c7091c4fe",
+        "oad_sha256": "6f71322da27adfe70118a79648871945c1adb1c33dcfdcee1ad9a4e61440de63",
+        "bindings_sha256": "624b665a25cf64d2bcf0081b0fabec466e46189293f9eb2fb9d8685137065364",
+        "catalog_sha256": "8d06a62f728eed110cc1a7b1e17648297a2420032009fc6f2aa1321a5c72d5af",
+        "level_sha256": "9cc508565717e09a2b204daffb1a0572f86849c2cd10416fa66809aca108d8ed"
+      },
+      "scripts": [
+        {
+          "actor": "Director",
+          "offset": 17352,
+          "size": 34605,
+          "original_sha256": "b4fb7dcf19e93242fdffbb7a3c806fbb79640244130c8f1195b7583cb0a5f230",
+          "fixture_sha256": "973e4a3ce846d34d722b0aa0b96bf51595783507d4627fab316aafd86a11d0cc"
+        },
+        {
+          "actor": "Player",
+          "offset": 51960,
+          "size": 6847,
+          "original_sha256": "a48a8e2e3a5db1840cdd36f9fbe065d5cd534e277be9361e448ee7c306fc2d0d",
+          "fixture_sha256": "4f36dc6f74a129370c63bf50458c33f679e444cff33f9160af194bdfc3002008"
+        }
+      ],
+      "frame_profile": false,
+      "preservation": {
+        "asset_prefix_bytes": 1808384,
+        "asset_prefix_sha256": "b37d6eabf6e02714aeaa3a3d6b6cf93be8a54d0c28e2183f2ac19c3526c42db2"
+      }
+    },
+    "wide-idle-pair1-cpu": {
+      "apk_sha256": "5811b39cac009f234c12c698859d5086aa1552778773ba9bc49bc0545fb83e3d",
+      "cd_sha256": "f43baf0e849e04c38b769cd6f865d2443596ab8721b4b507a67b9dc0534d267a",
+      "level_sha256": "9cc508565717e09a2b204daffb1a0572f86849c2cd10416fa66809aca108d8ed",
+      "settings": {
+        "settings": {
+          "seed": 713,
+          "water": "saltwater",
+          "age": 150,
+          "speed": 0,
+          "textures": true,
+          "sway": true,
+          "random_entry": false,
+          "seahorses": 1,
+          "greeting": true
+        },
+        "actor": 4,
+        "source": "RPRP",
+        "oas_sha256": "a5a459e1866fc423dafc6d803e0d937c48867c4cc73c2969c415c95c7091c4fe",
+        "oad_sha256": "6f71322da27adfe70118a79648871945c1adb1c33dcfdcee1ad9a4e61440de63",
+        "bindings_sha256": "624b665a25cf64d2bcf0081b0fabec466e46189293f9eb2fb9d8685137065364",
+        "catalog_sha256": "8d06a62f728eed110cc1a7b1e17648297a2420032009fc6f2aa1321a5c72d5af",
+        "level_sha256": "9cc508565717e09a2b204daffb1a0572f86849c2cd10416fa66809aca108d8ed"
+      },
+      "scripts": [
+        {
+          "actor": "Director",
+          "offset": 17352,
+          "size": 34605,
+          "original_sha256": "b4fb7dcf19e93242fdffbb7a3c806fbb79640244130c8f1195b7583cb0a5f230",
+          "fixture_sha256": "973e4a3ce846d34d722b0aa0b96bf51595783507d4627fab316aafd86a11d0cc"
+        },
+        {
+          "actor": "Player",
+          "offset": 51960,
+          "size": 6847,
+          "original_sha256": "a48a8e2e3a5db1840cdd36f9fbe065d5cd534e277be9361e448ee7c306fc2d0d",
+          "fixture_sha256": "4f36dc6f74a129370c63bf50458c33f679e444cff33f9160af194bdfc3002008"
+        }
+      ],
+      "frame_profile": true,
+      "preservation": {
+        "asset_prefix_bytes": 1808384,
+        "asset_prefix_sha256": "b37d6eabf6e02714aeaa3a3d6b6cf93be8a54d0c28e2183f2ac19c3526c42db2"
+      }
+    },
+    "wide-idle-pair2": {
+      "apk_sha256": "4eae8aec3e2596934bbc3aca00f4bb62dd1115663e8f2f7e06e749628f76e85a",
+      "cd_sha256": "01480079bd81e86a87205d26c94991a9515615f1cd156a871578c88251a9b841",
+      "level_sha256": "47a8f31dc5c64d55171f13cef90ed72ba70a58c84fc161053c4b385374211807",
+      "settings": {
+        "settings": {
+          "seed": 713,
+          "water": "saltwater",
+          "age": 150,
+          "speed": 0,
+          "textures": true,
+          "sway": true,
+          "random_entry": false,
+          "seahorses": 2,
+          "greeting": true
+        },
+        "actor": 4,
+        "source": "RPRP",
+        "oas_sha256": "a5a459e1866fc423dafc6d803e0d937c48867c4cc73c2969c415c95c7091c4fe",
+        "oad_sha256": "6f71322da27adfe70118a79648871945c1adb1c33dcfdcee1ad9a4e61440de63",
+        "bindings_sha256": "f354e71d686afeb20b76f52294a047264882c902d775c8123e5eee9d15c01016",
+        "catalog_sha256": "14451f9020812dda4118d17c9894a99bee6925d55dcd9931acdd8a01f0acc799",
+        "level_sha256": "47a8f31dc5c64d55171f13cef90ed72ba70a58c84fc161053c4b385374211807"
+      },
+      "scripts": [
+        {
+          "actor": "Director",
+          "offset": 17352,
+          "size": 34605,
+          "original_sha256": "b4fb7dcf19e93242fdffbb7a3c806fbb79640244130c8f1195b7583cb0a5f230",
+          "fixture_sha256": "973e4a3ce846d34d722b0aa0b96bf51595783507d4627fab316aafd86a11d0cc"
+        },
+        {
+          "actor": "Player",
+          "offset": 51960,
+          "size": 6847,
+          "original_sha256": "a48a8e2e3a5db1840cdd36f9fbe065d5cd534e277be9361e448ee7c306fc2d0d",
+          "fixture_sha256": "4f36dc6f74a129370c63bf50458c33f679e444cff33f9160af194bdfc3002008"
+        }
+      ],
+      "frame_profile": false,
+      "preservation": {
+        "asset_prefix_bytes": 1808384,
+        "asset_prefix_sha256": "b37d6eabf6e02714aeaa3a3d6b6cf93be8a54d0c28e2183f2ac19c3526c42db2"
+      }
+    },
+    "wide-idle-pair2-cpu": {
+      "apk_sha256": "4f3cf6fe7bb0411cc18ec50e849da8aed8410f12a548dc1921466a9647a60472",
+      "cd_sha256": "01480079bd81e86a87205d26c94991a9515615f1cd156a871578c88251a9b841",
+      "level_sha256": "47a8f31dc5c64d55171f13cef90ed72ba70a58c84fc161053c4b385374211807",
+      "settings": {
+        "settings": {
+          "seed": 713,
+          "water": "saltwater",
+          "age": 150,
+          "speed": 0,
+          "textures": true,
+          "sway": true,
+          "random_entry": false,
+          "seahorses": 2,
+          "greeting": true
+        },
+        "actor": 4,
+        "source": "RPRP",
+        "oas_sha256": "a5a459e1866fc423dafc6d803e0d937c48867c4cc73c2969c415c95c7091c4fe",
+        "oad_sha256": "6f71322da27adfe70118a79648871945c1adb1c33dcfdcee1ad9a4e61440de63",
+        "bindings_sha256": "f354e71d686afeb20b76f52294a047264882c902d775c8123e5eee9d15c01016",
+        "catalog_sha256": "14451f9020812dda4118d17c9894a99bee6925d55dcd9931acdd8a01f0acc799",
+        "level_sha256": "47a8f31dc5c64d55171f13cef90ed72ba70a58c84fc161053c4b385374211807"
+      },
+      "scripts": [
+        {
+          "actor": "Director",
+          "offset": 17352,
+          "size": 34605,
+          "original_sha256": "b4fb7dcf19e93242fdffbb7a3c806fbb79640244130c8f1195b7583cb0a5f230",
+          "fixture_sha256": "973e4a3ce846d34d722b0aa0b96bf51595783507d4627fab316aafd86a11d0cc"
+        },
+        {
+          "actor": "Player",
+          "offset": 51960,
+          "size": 6847,
+          "original_sha256": "a48a8e2e3a5db1840cdd36f9fbe065d5cd534e277be9361e448ee7c306fc2d0d",
+          "fixture_sha256": "4f36dc6f74a129370c63bf50458c33f679e444cff33f9160af194bdfc3002008"
+        }
+      ],
+      "frame_profile": true,
+      "preservation": {
+        "asset_prefix_bytes": 1808384,
+        "asset_prefix_sha256": "b37d6eabf6e02714aeaa3a3d6b6cf93be8a54d0c28e2183f2ac19c3526c42db2"
+      }
+    },
+    "wide-idle-pair6": {
+      "apk_sha256": "0ab95cf411874367525c5e0d1344635f6bd1161b3e485fb46064392bb104360c",
+      "cd_sha256": "b6d0858dae4ac1468a46e799ee7d90423bf293d209a8301117c2691846ed3206",
+      "level_sha256": "939af5b4f7f29d81850da2e741f808537d520142d94f73369edaeb477a0c002e",
+      "settings": {
+        "settings": {
+          "seed": 713,
+          "water": "saltwater",
+          "age": 150,
+          "speed": 0,
+          "textures": true,
+          "sway": true,
+          "random_entry": false,
+          "seahorses": 6,
+          "greeting": true
+        },
+        "actor": 4,
+        "source": "RPRP",
+        "oas_sha256": "a5a459e1866fc423dafc6d803e0d937c48867c4cc73c2969c415c95c7091c4fe",
+        "oad_sha256": "6f71322da27adfe70118a79648871945c1adb1c33dcfdcee1ad9a4e61440de63",
+        "bindings_sha256": "5d6c9e18fac61c3dda1a0e03c5401cf631be99abe66e0a274a5632ae68c81af4",
+        "catalog_sha256": "122b7ce2b377c6ef6e6a09a90fab2000a037628586972328c4dfca7bc233f9e7",
+        "level_sha256": "939af5b4f7f29d81850da2e741f808537d520142d94f73369edaeb477a0c002e"
+      },
+      "scripts": [
+        {
+          "actor": "Director",
+          "offset": 17352,
+          "size": 34605,
+          "original_sha256": "b4fb7dcf19e93242fdffbb7a3c806fbb79640244130c8f1195b7583cb0a5f230",
+          "fixture_sha256": "973e4a3ce846d34d722b0aa0b96bf51595783507d4627fab316aafd86a11d0cc"
+        },
+        {
+          "actor": "Player",
+          "offset": 51960,
+          "size": 6847,
+          "original_sha256": "a48a8e2e3a5db1840cdd36f9fbe065d5cd534e277be9361e448ee7c306fc2d0d",
+          "fixture_sha256": "4f36dc6f74a129370c63bf50458c33f679e444cff33f9160af194bdfc3002008"
+        }
+      ],
+      "frame_profile": false,
+      "preservation": {
+        "asset_prefix_bytes": 1808384,
+        "asset_prefix_sha256": "b37d6eabf6e02714aeaa3a3d6b6cf93be8a54d0c28e2183f2ac19c3526c42db2"
+      }
+    },
+    "wide-idle-pair6-cpu": {
+      "apk_sha256": "d37820a10e00286faf2fb0aa1249c8ed159c971c05d062e68961a3e6858e3427",
+      "cd_sha256": "b6d0858dae4ac1468a46e799ee7d90423bf293d209a8301117c2691846ed3206",
+      "level_sha256": "939af5b4f7f29d81850da2e741f808537d520142d94f73369edaeb477a0c002e",
+      "settings": {
+        "settings": {
+          "seed": 713,
+          "water": "saltwater",
+          "age": 150,
+          "speed": 0,
+          "textures": true,
+          "sway": true,
+          "random_entry": false,
+          "seahorses": 6,
+          "greeting": true
+        },
+        "actor": 4,
+        "source": "RPRP",
+        "oas_sha256": "a5a459e1866fc423dafc6d803e0d937c48867c4cc73c2969c415c95c7091c4fe",
+        "oad_sha256": "6f71322da27adfe70118a79648871945c1adb1c33dcfdcee1ad9a4e61440de63",
+        "bindings_sha256": "5d6c9e18fac61c3dda1a0e03c5401cf631be99abe66e0a274a5632ae68c81af4",
+        "catalog_sha256": "122b7ce2b377c6ef6e6a09a90fab2000a037628586972328c4dfca7bc233f9e7",
+        "level_sha256": "939af5b4f7f29d81850da2e741f808537d520142d94f73369edaeb477a0c002e"
+      },
+      "scripts": [
+        {
+          "actor": "Director",
+          "offset": 17352,
+          "size": 34605,
+          "original_sha256": "b4fb7dcf19e93242fdffbb7a3c806fbb79640244130c8f1195b7583cb0a5f230",
+          "fixture_sha256": "973e4a3ce846d34d722b0aa0b96bf51595783507d4627fab316aafd86a11d0cc"
+        },
+        {
+          "actor": "Player",
+          "offset": 51960,
+          "size": 6847,
+          "original_sha256": "a48a8e2e3a5db1840cdd36f9fbe065d5cd534e277be9361e448ee7c306fc2d0d",
+          "fixture_sha256": "4f36dc6f74a129370c63bf50458c33f679e444cff33f9160af194bdfc3002008"
+        }
+      ],
+      "frame_profile": true,
+      "preservation": {
+        "asset_prefix_bytes": 1808384,
+        "asset_prefix_sha256": "b37d6eabf6e02714aeaa3a3d6b6cf93be8a54d0c28e2183f2ac19c3526c42db2"
+      }
+    },
+    "close-idle-none": {
+      "apk_sha256": "728f45ece80252629801b1b29c28e444ace7d08e8f470858e7288e6feb5a8bb6",
+      "cd_sha256": "e13f007b2f0d9fe0ca3faefd60b5d1b28197e4427a1021b56c512427f8fd4d45",
+      "level_sha256": "e85ace3827977d21900c12edc33be2ddf6ba157d44aadcdeda8139209d16b68f",
+      "settings": {
+        "settings": {
+          "seed": 713,
+          "water": "saltwater",
+          "age": 150,
+          "speed": 0,
+          "textures": true,
+          "sway": true,
+          "random_entry": false,
+          "seahorses": 0,
+          "greeting": true
+        },
+        "actor": 4,
+        "source": "RPRP",
+        "oas_sha256": "a5a459e1866fc423dafc6d803e0d937c48867c4cc73c2969c415c95c7091c4fe",
+        "oad_sha256": "6f71322da27adfe70118a79648871945c1adb1c33dcfdcee1ad9a4e61440de63",
+        "bindings_sha256": "3d73f330e0e189a9bcad3542b6e79074caef1e7ded5d801e45b4b7a1d0233fc2",
+        "catalog_sha256": "9f617b1e50d92abfed337d4f7fe57bf1eb9c76f75566d654db668a13194ef579",
+        "level_sha256": "e85ace3827977d21900c12edc33be2ddf6ba157d44aadcdeda8139209d16b68f"
+      },
+      "scripts": [
+        {
+          "actor": "Director",
+          "offset": 17352,
+          "size": 34605,
+          "original_sha256": "b4fb7dcf19e93242fdffbb7a3c806fbb79640244130c8f1195b7583cb0a5f230",
+          "fixture_sha256": "1007fe9b05e0bc5a44db4f33801bbc821d22060e0dd8d065598ba9aaa9672317"
+        },
+        {
+          "actor": "Player",
+          "offset": 51960,
+          "size": 6847,
+          "original_sha256": "a48a8e2e3a5db1840cdd36f9fbe065d5cd534e277be9361e448ee7c306fc2d0d",
+          "fixture_sha256": "2a4a85ef45d723ab8455c2d378a355f9715b95ed3a012da6216663c65a1ba887"
+        }
+      ],
+      "frame_profile": false,
+      "preservation": {
+        "asset_prefix_bytes": 1808384,
+        "asset_prefix_sha256": "f5ca29e80dec02b0c2cb0578d7c73d6a30ea4293345fd94aa033dc1aa1686675"
+      }
+    },
+    "close-idle-none-cpu": {
+      "apk_sha256": "64463c97d1a3b9f1ab9a84b19e532322ed833b3ed11322d28cb172f942eb6bcb",
+      "cd_sha256": "e13f007b2f0d9fe0ca3faefd60b5d1b28197e4427a1021b56c512427f8fd4d45",
+      "level_sha256": "e85ace3827977d21900c12edc33be2ddf6ba157d44aadcdeda8139209d16b68f",
+      "settings": {
+        "settings": {
+          "seed": 713,
+          "water": "saltwater",
+          "age": 150,
+          "speed": 0,
+          "textures": true,
+          "sway": true,
+          "random_entry": false,
+          "seahorses": 0,
+          "greeting": true
+        },
+        "actor": 4,
+        "source": "RPRP",
+        "oas_sha256": "a5a459e1866fc423dafc6d803e0d937c48867c4cc73c2969c415c95c7091c4fe",
+        "oad_sha256": "6f71322da27adfe70118a79648871945c1adb1c33dcfdcee1ad9a4e61440de63",
+        "bindings_sha256": "3d73f330e0e189a9bcad3542b6e79074caef1e7ded5d801e45b4b7a1d0233fc2",
+        "catalog_sha256": "9f617b1e50d92abfed337d4f7fe57bf1eb9c76f75566d654db668a13194ef579",
+        "level_sha256": "e85ace3827977d21900c12edc33be2ddf6ba157d44aadcdeda8139209d16b68f"
+      },
+      "scripts": [
+        {
+          "actor": "Director",
+          "offset": 17352,
+          "size": 34605,
+          "original_sha256": "b4fb7dcf19e93242fdffbb7a3c806fbb79640244130c8f1195b7583cb0a5f230",
+          "fixture_sha256": "1007fe9b05e0bc5a44db4f33801bbc821d22060e0dd8d065598ba9aaa9672317"
+        },
+        {
+          "actor": "Player",
+          "offset": 51960,
+          "size": 6847,
+          "original_sha256": "a48a8e2e3a5db1840cdd36f9fbe065d5cd534e277be9361e448ee7c306fc2d0d",
+          "fixture_sha256": "2a4a85ef45d723ab8455c2d378a355f9715b95ed3a012da6216663c65a1ba887"
+        }
+      ],
+      "frame_profile": true,
+      "preservation": {
+        "asset_prefix_bytes": 1808384,
+        "asset_prefix_sha256": "f5ca29e80dec02b0c2cb0578d7c73d6a30ea4293345fd94aa033dc1aa1686675"
+      }
+    },
+    "close-idle-pair1": {
+      "apk_sha256": "74ad2f7c3675dc1b812753e3d0fdcf23b35bb678c03c112251e8c3051fc4c81d",
+      "cd_sha256": "86dc51b0b25c6efce5f79a6e72e60d5ed8b6984f2560070dc955d818c83bcbb3",
+      "level_sha256": "4470073be20eabd23a8101d0ce74f2525edacabfc484bb468c7ff23e59b5f225",
+      "settings": {
+        "settings": {
+          "seed": 713,
+          "water": "saltwater",
+          "age": 150,
+          "speed": 0,
+          "textures": true,
+          "sway": true,
+          "random_entry": false,
+          "seahorses": 1,
+          "greeting": true
+        },
+        "actor": 4,
+        "source": "RPRP",
+        "oas_sha256": "a5a459e1866fc423dafc6d803e0d937c48867c4cc73c2969c415c95c7091c4fe",
+        "oad_sha256": "6f71322da27adfe70118a79648871945c1adb1c33dcfdcee1ad9a4e61440de63",
+        "bindings_sha256": "624b665a25cf64d2bcf0081b0fabec466e46189293f9eb2fb9d8685137065364",
+        "catalog_sha256": "8d06a62f728eed110cc1a7b1e17648297a2420032009fc6f2aa1321a5c72d5af",
+        "level_sha256": "4470073be20eabd23a8101d0ce74f2525edacabfc484bb468c7ff23e59b5f225"
+      },
+      "scripts": [
+        {
+          "actor": "Director",
+          "offset": 17352,
+          "size": 34605,
+          "original_sha256": "b4fb7dcf19e93242fdffbb7a3c806fbb79640244130c8f1195b7583cb0a5f230",
+          "fixture_sha256": "1007fe9b05e0bc5a44db4f33801bbc821d22060e0dd8d065598ba9aaa9672317"
+        },
+        {
+          "actor": "Player",
+          "offset": 51960,
+          "size": 6847,
+          "original_sha256": "a48a8e2e3a5db1840cdd36f9fbe065d5cd534e277be9361e448ee7c306fc2d0d",
+          "fixture_sha256": "2a4a85ef45d723ab8455c2d378a355f9715b95ed3a012da6216663c65a1ba887"
+        }
+      ],
+      "frame_profile": false,
+      "preservation": {
+        "asset_prefix_bytes": 1808384,
+        "asset_prefix_sha256": "f5ca29e80dec02b0c2cb0578d7c73d6a30ea4293345fd94aa033dc1aa1686675"
+      }
+    },
+    "close-idle-pair1-cpu": {
+      "apk_sha256": "9ef22ad99a869afc8a91861491e1c61cf0b1a00043865a521cf16824370c5fa8",
+      "cd_sha256": "86dc51b0b25c6efce5f79a6e72e60d5ed8b6984f2560070dc955d818c83bcbb3",
+      "level_sha256": "4470073be20eabd23a8101d0ce74f2525edacabfc484bb468c7ff23e59b5f225",
+      "settings": {
+        "settings": {
+          "seed": 713,
+          "water": "saltwater",
+          "age": 150,
+          "speed": 0,
+          "textures": true,
+          "sway": true,
+          "random_entry": false,
+          "seahorses": 1,
+          "greeting": true
+        },
+        "actor": 4,
+        "source": "RPRP",
+        "oas_sha256": "a5a459e1866fc423dafc6d803e0d937c48867c4cc73c2969c415c95c7091c4fe",
+        "oad_sha256": "6f71322da27adfe70118a79648871945c1adb1c33dcfdcee1ad9a4e61440de63",
+        "bindings_sha256": "624b665a25cf64d2bcf0081b0fabec466e46189293f9eb2fb9d8685137065364",
+        "catalog_sha256": "8d06a62f728eed110cc1a7b1e17648297a2420032009fc6f2aa1321a5c72d5af",
+        "level_sha256": "4470073be20eabd23a8101d0ce74f2525edacabfc484bb468c7ff23e59b5f225"
+      },
+      "scripts": [
+        {
+          "actor": "Director",
+          "offset": 17352,
+          "size": 34605,
+          "original_sha256": "b4fb7dcf19e93242fdffbb7a3c806fbb79640244130c8f1195b7583cb0a5f230",
+          "fixture_sha256": "1007fe9b05e0bc5a44db4f33801bbc821d22060e0dd8d065598ba9aaa9672317"
+        },
+        {
+          "actor": "Player",
+          "offset": 51960,
+          "size": 6847,
+          "original_sha256": "a48a8e2e3a5db1840cdd36f9fbe065d5cd534e277be9361e448ee7c306fc2d0d",
+          "fixture_sha256": "2a4a85ef45d723ab8455c2d378a355f9715b95ed3a012da6216663c65a1ba887"
+        }
+      ],
+      "frame_profile": true,
+      "preservation": {
+        "asset_prefix_bytes": 1808384,
+        "asset_prefix_sha256": "f5ca29e80dec02b0c2cb0578d7c73d6a30ea4293345fd94aa033dc1aa1686675"
+      }
+    },
+    "close-idle-pair2": {
+      "apk_sha256": "f0d53decef9c56d9b417d962ca7ce7f01bb91dbe24f16642e7f9bfad0f5318ff",
+      "cd_sha256": "18b5d3bdd86629bb3d1070dba61535a6a9e13e85ee12d37e7242c65bcd51951f",
+      "level_sha256": "b4c36ef56e4593422a3b847d9dd88f84038751d1aa44ea5de08f86de34cfc939",
+      "settings": {
+        "settings": {
+          "seed": 713,
+          "water": "saltwater",
+          "age": 150,
+          "speed": 0,
+          "textures": true,
+          "sway": true,
+          "random_entry": false,
+          "seahorses": 2,
+          "greeting": true
+        },
+        "actor": 4,
+        "source": "RPRP",
+        "oas_sha256": "a5a459e1866fc423dafc6d803e0d937c48867c4cc73c2969c415c95c7091c4fe",
+        "oad_sha256": "6f71322da27adfe70118a79648871945c1adb1c33dcfdcee1ad9a4e61440de63",
+        "bindings_sha256": "f354e71d686afeb20b76f52294a047264882c902d775c8123e5eee9d15c01016",
+        "catalog_sha256": "14451f9020812dda4118d17c9894a99bee6925d55dcd9931acdd8a01f0acc799",
+        "level_sha256": "b4c36ef56e4593422a3b847d9dd88f84038751d1aa44ea5de08f86de34cfc939"
+      },
+      "scripts": [
+        {
+          "actor": "Director",
+          "offset": 17352,
+          "size": 34605,
+          "original_sha256": "b4fb7dcf19e93242fdffbb7a3c806fbb79640244130c8f1195b7583cb0a5f230",
+          "fixture_sha256": "1007fe9b05e0bc5a44db4f33801bbc821d22060e0dd8d065598ba9aaa9672317"
+        },
+        {
+          "actor": "Player",
+          "offset": 51960,
+          "size": 6847,
+          "original_sha256": "a48a8e2e3a5db1840cdd36f9fbe065d5cd534e277be9361e448ee7c306fc2d0d",
+          "fixture_sha256": "2a4a85ef45d723ab8455c2d378a355f9715b95ed3a012da6216663c65a1ba887"
+        }
+      ],
+      "frame_profile": false,
+      "preservation": {
+        "asset_prefix_bytes": 1808384,
+        "asset_prefix_sha256": "f5ca29e80dec02b0c2cb0578d7c73d6a30ea4293345fd94aa033dc1aa1686675"
+      }
+    },
+    "close-idle-pair2-cpu": {
+      "apk_sha256": "2025314670887edcec0e3c4fc94cd738410f3c58da3211d22f3b5c159dc59dbe",
+      "cd_sha256": "18b5d3bdd86629bb3d1070dba61535a6a9e13e85ee12d37e7242c65bcd51951f",
+      "level_sha256": "b4c36ef56e4593422a3b847d9dd88f84038751d1aa44ea5de08f86de34cfc939",
+      "settings": {
+        "settings": {
+          "seed": 713,
+          "water": "saltwater",
+          "age": 150,
+          "speed": 0,
+          "textures": true,
+          "sway": true,
+          "random_entry": false,
+          "seahorses": 2,
+          "greeting": true
+        },
+        "actor": 4,
+        "source": "RPRP",
+        "oas_sha256": "a5a459e1866fc423dafc6d803e0d937c48867c4cc73c2969c415c95c7091c4fe",
+        "oad_sha256": "6f71322da27adfe70118a79648871945c1adb1c33dcfdcee1ad9a4e61440de63",
+        "bindings_sha256": "f354e71d686afeb20b76f52294a047264882c902d775c8123e5eee9d15c01016",
+        "catalog_sha256": "14451f9020812dda4118d17c9894a99bee6925d55dcd9931acdd8a01f0acc799",
+        "level_sha256": "b4c36ef56e4593422a3b847d9dd88f84038751d1aa44ea5de08f86de34cfc939"
+      },
+      "scripts": [
+        {
+          "actor": "Director",
+          "offset": 17352,
+          "size": 34605,
+          "original_sha256": "b4fb7dcf19e93242fdffbb7a3c806fbb79640244130c8f1195b7583cb0a5f230",
+          "fixture_sha256": "1007fe9b05e0bc5a44db4f33801bbc821d22060e0dd8d065598ba9aaa9672317"
+        },
+        {
+          "actor": "Player",
+          "offset": 51960,
+          "size": 6847,
+          "original_sha256": "a48a8e2e3a5db1840cdd36f9fbe065d5cd534e277be9361e448ee7c306fc2d0d",
+          "fixture_sha256": "2a4a85ef45d723ab8455c2d378a355f9715b95ed3a012da6216663c65a1ba887"
+        }
+      ],
+      "frame_profile": true,
+      "preservation": {
+        "asset_prefix_bytes": 1808384,
+        "asset_prefix_sha256": "f5ca29e80dec02b0c2cb0578d7c73d6a30ea4293345fd94aa033dc1aa1686675"
+      }
+    },
+    "close-idle-pair6": {
+      "apk_sha256": "ab141a3dd8dd1b7ecf00d8cfbcc0ec8f13ddebb36c2bc506fe279e84418dd987",
+      "cd_sha256": "2efabb2f0685120eddfc939c3bd45374d97b4b91cc8b26cf086917205906c942",
+      "level_sha256": "1b0dfb1169901706bf6d512556aee26060d4fdd73061f316f9de4c320025b8bf",
+      "settings": {
+        "settings": {
+          "seed": 713,
+          "water": "saltwater",
+          "age": 150,
+          "speed": 0,
+          "textures": true,
+          "sway": true,
+          "random_entry": false,
+          "seahorses": 6,
+          "greeting": true
+        },
+        "actor": 4,
+        "source": "RPRP",
+        "oas_sha256": "a5a459e1866fc423dafc6d803e0d937c48867c4cc73c2969c415c95c7091c4fe",
+        "oad_sha256": "6f71322da27adfe70118a79648871945c1adb1c33dcfdcee1ad9a4e61440de63",
+        "bindings_sha256": "5d6c9e18fac61c3dda1a0e03c5401cf631be99abe66e0a274a5632ae68c81af4",
+        "catalog_sha256": "122b7ce2b377c6ef6e6a09a90fab2000a037628586972328c4dfca7bc233f9e7",
+        "level_sha256": "1b0dfb1169901706bf6d512556aee26060d4fdd73061f316f9de4c320025b8bf"
+      },
+      "scripts": [
+        {
+          "actor": "Director",
+          "offset": 17352,
+          "size": 34605,
+          "original_sha256": "b4fb7dcf19e93242fdffbb7a3c806fbb79640244130c8f1195b7583cb0a5f230",
+          "fixture_sha256": "1007fe9b05e0bc5a44db4f33801bbc821d22060e0dd8d065598ba9aaa9672317"
+        },
+        {
+          "actor": "Player",
+          "offset": 51960,
+          "size": 6847,
+          "original_sha256": "a48a8e2e3a5db1840cdd36f9fbe065d5cd534e277be9361e448ee7c306fc2d0d",
+          "fixture_sha256": "2a4a85ef45d723ab8455c2d378a355f9715b95ed3a012da6216663c65a1ba887"
+        }
+      ],
+      "frame_profile": false,
+      "preservation": {
+        "asset_prefix_bytes": 1808384,
+        "asset_prefix_sha256": "f5ca29e80dec02b0c2cb0578d7c73d6a30ea4293345fd94aa033dc1aa1686675"
+      }
+    },
+    "close-idle-pair6-cpu": {
+      "apk_sha256": "52f859194751f32a40a7b31f5df10c8a4d433c7da060bbc26d3219c46f774cba",
+      "cd_sha256": "2efabb2f0685120eddfc939c3bd45374d97b4b91cc8b26cf086917205906c942",
+      "level_sha256": "1b0dfb1169901706bf6d512556aee26060d4fdd73061f316f9de4c320025b8bf",
+      "settings": {
+        "settings": {
+          "seed": 713,
+          "water": "saltwater",
+          "age": 150,
+          "speed": 0,
+          "textures": true,
+          "sway": true,
+          "random_entry": false,
+          "seahorses": 6,
+          "greeting": true
+        },
+        "actor": 4,
+        "source": "RPRP",
+        "oas_sha256": "a5a459e1866fc423dafc6d803e0d937c48867c4cc73c2969c415c95c7091c4fe",
+        "oad_sha256": "6f71322da27adfe70118a79648871945c1adb1c33dcfdcee1ad9a4e61440de63",
+        "bindings_sha256": "5d6c9e18fac61c3dda1a0e03c5401cf631be99abe66e0a274a5632ae68c81af4",
+        "catalog_sha256": "122b7ce2b377c6ef6e6a09a90fab2000a037628586972328c4dfca7bc233f9e7",
+        "level_sha256": "1b0dfb1169901706bf6d512556aee26060d4fdd73061f316f9de4c320025b8bf"
+      },
+      "scripts": [
+        {
+          "actor": "Director",
+          "offset": 17352,
+          "size": 34605,
+          "original_sha256": "b4fb7dcf19e93242fdffbb7a3c806fbb79640244130c8f1195b7583cb0a5f230",
+          "fixture_sha256": "1007fe9b05e0bc5a44db4f33801bbc821d22060e0dd8d065598ba9aaa9672317"
+        },
+        {
+          "actor": "Player",
+          "offset": 51960,
+          "size": 6847,
+          "original_sha256": "a48a8e2e3a5db1840cdd36f9fbe065d5cd534e277be9361e448ee7c306fc2d0d",
+          "fixture_sha256": "2a4a85ef45d723ab8455c2d378a355f9715b95ed3a012da6216663c65a1ba887"
+        }
+      ],
+      "frame_profile": true,
+      "preservation": {
+        "asset_prefix_bytes": 1808384,
+        "asset_prefix_sha256": "f5ca29e80dec02b0c2cb0578d7c73d6a30ea4293345fd94aa033dc1aa1686675"
+      }
+    },
+    "close-crawl-none": {
+      "apk_sha256": "185c20974040b36a77ffc96cb80374694449a939791ace61564964cb3fe370c7",
+      "cd_sha256": "373fcf947c47dc5dad72f764148e48ede0a45756c1feb10a51895f43b2947dfd",
+      "level_sha256": "8ddda292745a92ba643cf5172e13e48fe6a337e0c3125bf03e08fbabd05c7ca6",
+      "settings": {
+        "settings": {
+          "seed": 713,
+          "water": "saltwater",
+          "age": 150,
+          "speed": 0,
+          "textures": true,
+          "sway": true,
+          "random_entry": false,
+          "seahorses": 0,
+          "greeting": true
+        },
+        "actor": 4,
+        "source": "RPRP",
+        "oas_sha256": "a5a459e1866fc423dafc6d803e0d937c48867c4cc73c2969c415c95c7091c4fe",
+        "oad_sha256": "6f71322da27adfe70118a79648871945c1adb1c33dcfdcee1ad9a4e61440de63",
+        "bindings_sha256": "3d73f330e0e189a9bcad3542b6e79074caef1e7ded5d801e45b4b7a1d0233fc2",
+        "catalog_sha256": "9f617b1e50d92abfed337d4f7fe57bf1eb9c76f75566d654db668a13194ef579",
+        "level_sha256": "8ddda292745a92ba643cf5172e13e48fe6a337e0c3125bf03e08fbabd05c7ca6"
+      },
+      "scripts": [
+        {
+          "actor": "Director",
+          "offset": 17352,
+          "size": 34605,
+          "original_sha256": "b4fb7dcf19e93242fdffbb7a3c806fbb79640244130c8f1195b7583cb0a5f230",
+          "fixture_sha256": "f273f60205b642bb19b0d40ef43b64c1092ce98ee6a1dcde98f7002978edce93"
+        },
+        {
+          "actor": "Player",
+          "offset": 51960,
+          "size": 6847,
+          "original_sha256": "a48a8e2e3a5db1840cdd36f9fbe065d5cd534e277be9361e448ee7c306fc2d0d",
+          "fixture_sha256": "a2d8a6c13016348e1957905dd64202ede3625a9d2f86c51616cd9bd5738b73e5"
+        }
+      ],
+      "frame_profile": false,
+      "preservation": {
+        "asset_prefix_bytes": 1808384,
+        "asset_prefix_sha256": "787d295be28818a9dac62aabd86274f2a75f9fcbde7bc3e5bf4d482138a985dc"
+      }
+    },
+    "close-crawl-none-cpu": {
+      "apk_sha256": "657be6754e452fa5b24a4724e74983f3eaf45ca67399d4f299848f3c32c0097d",
+      "cd_sha256": "373fcf947c47dc5dad72f764148e48ede0a45756c1feb10a51895f43b2947dfd",
+      "level_sha256": "8ddda292745a92ba643cf5172e13e48fe6a337e0c3125bf03e08fbabd05c7ca6",
+      "settings": {
+        "settings": {
+          "seed": 713,
+          "water": "saltwater",
+          "age": 150,
+          "speed": 0,
+          "textures": true,
+          "sway": true,
+          "random_entry": false,
+          "seahorses": 0,
+          "greeting": true
+        },
+        "actor": 4,
+        "source": "RPRP",
+        "oas_sha256": "a5a459e1866fc423dafc6d803e0d937c48867c4cc73c2969c415c95c7091c4fe",
+        "oad_sha256": "6f71322da27adfe70118a79648871945c1adb1c33dcfdcee1ad9a4e61440de63",
+        "bindings_sha256": "3d73f330e0e189a9bcad3542b6e79074caef1e7ded5d801e45b4b7a1d0233fc2",
+        "catalog_sha256": "9f617b1e50d92abfed337d4f7fe57bf1eb9c76f75566d654db668a13194ef579",
+        "level_sha256": "8ddda292745a92ba643cf5172e13e48fe6a337e0c3125bf03e08fbabd05c7ca6"
+      },
+      "scripts": [
+        {
+          "actor": "Director",
+          "offset": 17352,
+          "size": 34605,
+          "original_sha256": "b4fb7dcf19e93242fdffbb7a3c806fbb79640244130c8f1195b7583cb0a5f230",
+          "fixture_sha256": "f273f60205b642bb19b0d40ef43b64c1092ce98ee6a1dcde98f7002978edce93"
+        },
+        {
+          "actor": "Player",
+          "offset": 51960,
+          "size": 6847,
+          "original_sha256": "a48a8e2e3a5db1840cdd36f9fbe065d5cd534e277be9361e448ee7c306fc2d0d",
+          "fixture_sha256": "a2d8a6c13016348e1957905dd64202ede3625a9d2f86c51616cd9bd5738b73e5"
+        }
+      ],
+      "frame_profile": true,
+      "preservation": {
+        "asset_prefix_bytes": 1808384,
+        "asset_prefix_sha256": "787d295be28818a9dac62aabd86274f2a75f9fcbde7bc3e5bf4d482138a985dc"
+      }
+    },
+    "close-crawl-pair1": {
+      "apk_sha256": "ed6dca54155757b445ec23d5d7d25f74bb7faf3eb18504a9ef10547aa2c13f69",
+      "cd_sha256": "355a106c3c0bac3023fe2818addc94c1d9443415e9e6543c229b55a39c4954b2",
+      "level_sha256": "d230fd8cecd4197628daab6babff82c8cdd33a37ceb6ea17b107dcd397a53290",
+      "settings": {
+        "settings": {
+          "seed": 713,
+          "water": "saltwater",
+          "age": 150,
+          "speed": 0,
+          "textures": true,
+          "sway": true,
+          "random_entry": false,
+          "seahorses": 1,
+          "greeting": true
+        },
+        "actor": 4,
+        "source": "RPRP",
+        "oas_sha256": "a5a459e1866fc423dafc6d803e0d937c48867c4cc73c2969c415c95c7091c4fe",
+        "oad_sha256": "6f71322da27adfe70118a79648871945c1adb1c33dcfdcee1ad9a4e61440de63",
+        "bindings_sha256": "624b665a25cf64d2bcf0081b0fabec466e46189293f9eb2fb9d8685137065364",
+        "catalog_sha256": "8d06a62f728eed110cc1a7b1e17648297a2420032009fc6f2aa1321a5c72d5af",
+        "level_sha256": "d230fd8cecd4197628daab6babff82c8cdd33a37ceb6ea17b107dcd397a53290"
+      },
+      "scripts": [
+        {
+          "actor": "Director",
+          "offset": 17352,
+          "size": 34605,
+          "original_sha256": "b4fb7dcf19e93242fdffbb7a3c806fbb79640244130c8f1195b7583cb0a5f230",
+          "fixture_sha256": "f273f60205b642bb19b0d40ef43b64c1092ce98ee6a1dcde98f7002978edce93"
+        },
+        {
+          "actor": "Player",
+          "offset": 51960,
+          "size": 6847,
+          "original_sha256": "a48a8e2e3a5db1840cdd36f9fbe065d5cd534e277be9361e448ee7c306fc2d0d",
+          "fixture_sha256": "a2d8a6c13016348e1957905dd64202ede3625a9d2f86c51616cd9bd5738b73e5"
+        }
+      ],
+      "frame_profile": false,
+      "preservation": {
+        "asset_prefix_bytes": 1808384,
+        "asset_prefix_sha256": "787d295be28818a9dac62aabd86274f2a75f9fcbde7bc3e5bf4d482138a985dc"
+      }
+    },
+    "close-crawl-pair1-cpu": {
+      "apk_sha256": "76dbe8b5e596994839d835a29fbab47a9d3e77b3997a9017eff7cc56c3df476e",
+      "cd_sha256": "355a106c3c0bac3023fe2818addc94c1d9443415e9e6543c229b55a39c4954b2",
+      "level_sha256": "d230fd8cecd4197628daab6babff82c8cdd33a37ceb6ea17b107dcd397a53290",
+      "settings": {
+        "settings": {
+          "seed": 713,
+          "water": "saltwater",
+          "age": 150,
+          "speed": 0,
+          "textures": true,
+          "sway": true,
+          "random_entry": false,
+          "seahorses": 1,
+          "greeting": true
+        },
+        "actor": 4,
+        "source": "RPRP",
+        "oas_sha256": "a5a459e1866fc423dafc6d803e0d937c48867c4cc73c2969c415c95c7091c4fe",
+        "oad_sha256": "6f71322da27adfe70118a79648871945c1adb1c33dcfdcee1ad9a4e61440de63",
+        "bindings_sha256": "624b665a25cf64d2bcf0081b0fabec466e46189293f9eb2fb9d8685137065364",
+        "catalog_sha256": "8d06a62f728eed110cc1a7b1e17648297a2420032009fc6f2aa1321a5c72d5af",
+        "level_sha256": "d230fd8cecd4197628daab6babff82c8cdd33a37ceb6ea17b107dcd397a53290"
+      },
+      "scripts": [
+        {
+          "actor": "Director",
+          "offset": 17352,
+          "size": 34605,
+          "original_sha256": "b4fb7dcf19e93242fdffbb7a3c806fbb79640244130c8f1195b7583cb0a5f230",
+          "fixture_sha256": "f273f60205b642bb19b0d40ef43b64c1092ce98ee6a1dcde98f7002978edce93"
+        },
+        {
+          "actor": "Player",
+          "offset": 51960,
+          "size": 6847,
+          "original_sha256": "a48a8e2e3a5db1840cdd36f9fbe065d5cd534e277be9361e448ee7c306fc2d0d",
+          "fixture_sha256": "a2d8a6c13016348e1957905dd64202ede3625a9d2f86c51616cd9bd5738b73e5"
+        }
+      ],
+      "frame_profile": true,
+      "preservation": {
+        "asset_prefix_bytes": 1808384,
+        "asset_prefix_sha256": "787d295be28818a9dac62aabd86274f2a75f9fcbde7bc3e5bf4d482138a985dc"
+      }
+    },
+    "close-crawl-pair2": {
+      "apk_sha256": "bf777cc8692aa15eedba0a9915c31960edbfebd0668629845ec73090d6cd19aa",
+      "cd_sha256": "4fd9848a529b90fc3934a39b5ec2770f4d60d90c8ac88e0d8e8ce25cb4d3c320",
+      "level_sha256": "5cc99e27ee0a9905e6e83cfa3f6fd16d68407dc230d047c33e6f2b49b5aff980",
+      "settings": {
+        "settings": {
+          "seed": 713,
+          "water": "saltwater",
+          "age": 150,
+          "speed": 0,
+          "textures": true,
+          "sway": true,
+          "random_entry": false,
+          "seahorses": 2,
+          "greeting": true
+        },
+        "actor": 4,
+        "source": "RPRP",
+        "oas_sha256": "a5a459e1866fc423dafc6d803e0d937c48867c4cc73c2969c415c95c7091c4fe",
+        "oad_sha256": "6f71322da27adfe70118a79648871945c1adb1c33dcfdcee1ad9a4e61440de63",
+        "bindings_sha256": "f354e71d686afeb20b76f52294a047264882c902d775c8123e5eee9d15c01016",
+        "catalog_sha256": "14451f9020812dda4118d17c9894a99bee6925d55dcd9931acdd8a01f0acc799",
+        "level_sha256": "5cc99e27ee0a9905e6e83cfa3f6fd16d68407dc230d047c33e6f2b49b5aff980"
+      },
+      "scripts": [
+        {
+          "actor": "Director",
+          "offset": 17352,
+          "size": 34605,
+          "original_sha256": "b4fb7dcf19e93242fdffbb7a3c806fbb79640244130c8f1195b7583cb0a5f230",
+          "fixture_sha256": "f273f60205b642bb19b0d40ef43b64c1092ce98ee6a1dcde98f7002978edce93"
+        },
+        {
+          "actor": "Player",
+          "offset": 51960,
+          "size": 6847,
+          "original_sha256": "a48a8e2e3a5db1840cdd36f9fbe065d5cd534e277be9361e448ee7c306fc2d0d",
+          "fixture_sha256": "a2d8a6c13016348e1957905dd64202ede3625a9d2f86c51616cd9bd5738b73e5"
+        }
+      ],
+      "frame_profile": false,
+      "preservation": {
+        "asset_prefix_bytes": 1808384,
+        "asset_prefix_sha256": "787d295be28818a9dac62aabd86274f2a75f9fcbde7bc3e5bf4d482138a985dc"
+      }
+    },
+    "close-crawl-pair2-cpu": {
+      "apk_sha256": "313390ad482989c405083b5a0ce98467dd3a70225c376ca6c3162b18d510a88c",
+      "cd_sha256": "4fd9848a529b90fc3934a39b5ec2770f4d60d90c8ac88e0d8e8ce25cb4d3c320",
+      "level_sha256": "5cc99e27ee0a9905e6e83cfa3f6fd16d68407dc230d047c33e6f2b49b5aff980",
+      "settings": {
+        "settings": {
+          "seed": 713,
+          "water": "saltwater",
+          "age": 150,
+          "speed": 0,
+          "textures": true,
+          "sway": true,
+          "random_entry": false,
+          "seahorses": 2,
+          "greeting": true
+        },
+        "actor": 4,
+        "source": "RPRP",
+        "oas_sha256": "a5a459e1866fc423dafc6d803e0d937c48867c4cc73c2969c415c95c7091c4fe",
+        "oad_sha256": "6f71322da27adfe70118a79648871945c1adb1c33dcfdcee1ad9a4e61440de63",
+        "bindings_sha256": "f354e71d686afeb20b76f52294a047264882c902d775c8123e5eee9d15c01016",
+        "catalog_sha256": "14451f9020812dda4118d17c9894a99bee6925d55dcd9931acdd8a01f0acc799",
+        "level_sha256": "5cc99e27ee0a9905e6e83cfa3f6fd16d68407dc230d047c33e6f2b49b5aff980"
+      },
+      "scripts": [
+        {
+          "actor": "Director",
+          "offset": 17352,
+          "size": 34605,
+          "original_sha256": "b4fb7dcf19e93242fdffbb7a3c806fbb79640244130c8f1195b7583cb0a5f230",
+          "fixture_sha256": "f273f60205b642bb19b0d40ef43b64c1092ce98ee6a1dcde98f7002978edce93"
+        },
+        {
+          "actor": "Player",
+          "offset": 51960,
+          "size": 6847,
+          "original_sha256": "a48a8e2e3a5db1840cdd36f9fbe065d5cd534e277be9361e448ee7c306fc2d0d",
+          "fixture_sha256": "a2d8a6c13016348e1957905dd64202ede3625a9d2f86c51616cd9bd5738b73e5"
+        }
+      ],
+      "frame_profile": true,
+      "preservation": {
+        "asset_prefix_bytes": 1808384,
+        "asset_prefix_sha256": "787d295be28818a9dac62aabd86274f2a75f9fcbde7bc3e5bf4d482138a985dc"
+      }
+    },
+    "close-crawl-pair6": {
+      "apk_sha256": "d0bd84b94564c574835dae4d18974befe12e988f5bd5c3b45d1699b5a46f2364",
+      "cd_sha256": "cabdf2de20fa85d28bd6d7dbbfcb7d3ca15cedd6f228b9a69a760d239bfd7ea2",
+      "level_sha256": "b26df4c26def1bf866ff438ebe4d7628a5c3721201a11086dc2305b22795404e",
+      "settings": {
+        "settings": {
+          "seed": 713,
+          "water": "saltwater",
+          "age": 150,
+          "speed": 0,
+          "textures": true,
+          "sway": true,
+          "random_entry": false,
+          "seahorses": 6,
+          "greeting": true
+        },
+        "actor": 4,
+        "source": "RPRP",
+        "oas_sha256": "a5a459e1866fc423dafc6d803e0d937c48867c4cc73c2969c415c95c7091c4fe",
+        "oad_sha256": "6f71322da27adfe70118a79648871945c1adb1c33dcfdcee1ad9a4e61440de63",
+        "bindings_sha256": "5d6c9e18fac61c3dda1a0e03c5401cf631be99abe66e0a274a5632ae68c81af4",
+        "catalog_sha256": "122b7ce2b377c6ef6e6a09a90fab2000a037628586972328c4dfca7bc233f9e7",
+        "level_sha256": "b26df4c26def1bf866ff438ebe4d7628a5c3721201a11086dc2305b22795404e"
+      },
+      "scripts": [
+        {
+          "actor": "Director",
+          "offset": 17352,
+          "size": 34605,
+          "original_sha256": "b4fb7dcf19e93242fdffbb7a3c806fbb79640244130c8f1195b7583cb0a5f230",
+          "fixture_sha256": "f273f60205b642bb19b0d40ef43b64c1092ce98ee6a1dcde98f7002978edce93"
+        },
+        {
+          "actor": "Player",
+          "offset": 51960,
+          "size": 6847,
+          "original_sha256": "a48a8e2e3a5db1840cdd36f9fbe065d5cd534e277be9361e448ee7c306fc2d0d",
+          "fixture_sha256": "a2d8a6c13016348e1957905dd64202ede3625a9d2f86c51616cd9bd5738b73e5"
+        }
+      ],
+      "frame_profile": false,
+      "preservation": {
+        "asset_prefix_bytes": 1808384,
+        "asset_prefix_sha256": "787d295be28818a9dac62aabd86274f2a75f9fcbde7bc3e5bf4d482138a985dc"
+      }
+    },
+    "close-crawl-pair6-cpu": {
+      "apk_sha256": "6ecae15ba09b262bf33bd9dc927319375af2fc8941920c3253e96d75b1432400",
+      "cd_sha256": "cabdf2de20fa85d28bd6d7dbbfcb7d3ca15cedd6f228b9a69a760d239bfd7ea2",
+      "level_sha256": "b26df4c26def1bf866ff438ebe4d7628a5c3721201a11086dc2305b22795404e",
+      "settings": {
+        "settings": {
+          "seed": 713,
+          "water": "saltwater",
+          "age": 150,
+          "speed": 0,
+          "textures": true,
+          "sway": true,
+          "random_entry": false,
+          "seahorses": 6,
+          "greeting": true
+        },
+        "actor": 4,
+        "source": "RPRP",
+        "oas_sha256": "a5a459e1866fc423dafc6d803e0d937c48867c4cc73c2969c415c95c7091c4fe",
+        "oad_sha256": "6f71322da27adfe70118a79648871945c1adb1c33dcfdcee1ad9a4e61440de63",
+        "bindings_sha256": "5d6c9e18fac61c3dda1a0e03c5401cf631be99abe66e0a274a5632ae68c81af4",
+        "catalog_sha256": "122b7ce2b377c6ef6e6a09a90fab2000a037628586972328c4dfca7bc233f9e7",
+        "level_sha256": "b26df4c26def1bf866ff438ebe4d7628a5c3721201a11086dc2305b22795404e"
+      },
+      "scripts": [
+        {
+          "actor": "Director",
+          "offset": 17352,
+          "size": 34605,
+          "original_sha256": "b4fb7dcf19e93242fdffbb7a3c806fbb79640244130c8f1195b7583cb0a5f230",
+          "fixture_sha256": "f273f60205b642bb19b0d40ef43b64c1092ce98ee6a1dcde98f7002978edce93"
+        },
+        {
+          "actor": "Player",
+          "offset": 51960,
+          "size": 6847,
+          "original_sha256": "a48a8e2e3a5db1840cdd36f9fbe065d5cd534e277be9361e448ee7c306fc2d0d",
+          "fixture_sha256": "a2d8a6c13016348e1957905dd64202ede3625a9d2f86c51616cd9bd5738b73e5"
+        }
+      ],
+      "frame_profile": true,
+      "preservation": {
+        "asset_prefix_bytes": 1808384,
+        "asset_prefix_sha256": "787d295be28818a9dac62aabd86274f2a75f9fcbde7bc3e5bf4d482138a985dc"
+      }
+    }
+  },
+  "source_revision": "d8d215ae0d67b2a23a8f1fce89a65e69eccb7f93"
+}

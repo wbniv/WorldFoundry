@@ -11,7 +11,16 @@ per presented frame. Use its CPU sections, upload counters, PSS, frozen hashes
 and raw timestamps as the current workload reference. All variants author the
 same twelve residents (two actors each); None also hides six posts. This baseline supplies
 context for the spike, not the matched CPU-rig (`C`) versus GPU-rig (`G0`/`G1`)
-comparison below. Close views and cast2 are still outstanding. GPU skinning has
+comparison below. Cast1 close-idle/crawl are now complete on `d8d215ae`: None → six pairs
+measures 47.19 → 68.52 ms in close idle and 47.33 → 68.57 ms in close crawl,
+with three release repeats per count/view and separate CPU profiles. The CPU
+increases are 20.67 / 20.82 ms; nested animation contributes 2.68 / 2.73 ms,
+already included in update/Director. Whole-frame vertex traffic is about
+5.13 → 6.66 MiB/frame, including other deformers. The existing close camera
+follows the urchin; the authored crawl fixture measures controller work without
+validating remote input delivery. See the comparison's
+[close results and graph](2026-10-16-saltwater-seahorses/comparison.md#close-idle-and-close-crawl--completed-17-october).
+Three through five pairs are interpolated estimates. Cast2 remains unavailable. GPU skinning has
 not been implemented or measured by this baseline.
 
 ## Decision and scope
