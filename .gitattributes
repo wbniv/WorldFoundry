@@ -7,3 +7,5 @@
 *.tgz    binary
 *.zip    binary
 *.wasm   binary
+*.wfga   binary
+*.ttf    binary
