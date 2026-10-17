@@ -1,8 +1,8 @@
 {
   "workflow": "variant-benchmark",
   "app": "aquarium",
-  "apk": "/tmp/wf-gpu-skinning-campaign-v2/restore.apk",
-  "restore_apk": "/tmp/wf-gpu-skinning-campaign-v2/restore.apk",
+  "apk": "/tmp/wf-gpu-skinning-campaign-v3/restore.apk",
+  "restore_apk": "/tmp/wf-gpu-skinning-campaign-v3/restore.apk",
   "trace": "idle",
   "duration": 60,
   "warmup": 15,
@@ -10,19 +10,19 @@
   "variants": [
     {
       "label": "pair2",
-      "apk": "/tmp/wf-gpu-skinning-fixtures-v2/close-crawl-pair2-gpu.apk"
+      "apk": "/tmp/wf-gpu-skinning-fixtures-v3/close-crawl-pair2-gpu.apk"
     },
     {
       "label": "pair6",
-      "apk": "/tmp/wf-gpu-skinning-fixtures-v2/close-crawl-pair6-gpu.apk"
+      "apk": "/tmp/wf-gpu-skinning-fixtures-v3/close-crawl-pair6-gpu.apk"
     },
     {
       "label": "none",
-      "apk": "/tmp/wf-gpu-skinning-fixtures-v2/close-crawl-none-gpu.apk"
+      "apk": "/tmp/wf-gpu-skinning-fixtures-v3/close-crawl-none-gpu.apk"
     },
     {
       "label": "pair1",
-      "apk": "/tmp/wf-gpu-skinning-fixtures-v2/close-crawl-pair1-gpu.apk"
+      "apk": "/tmp/wf-gpu-skinning-fixtures-v3/close-crawl-pair1-gpu.apk"
     }
   ]
 }

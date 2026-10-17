@@ -4,6 +4,7 @@ import argparse
 import copy
 import importlib.util
 import json
+import re
 from pathlib import Path
 import subprocess
 import zipfile
@@ -27,6 +28,11 @@ def main():
     args = parser.parse_args()
     args.out.mkdir(parents=True, exist_ok=True)
     tools = Path.home() / 'android-sdk-local/build-tools/34.0.0'
+    manifest = subprocess.check_output([str(tools / 'aapt'), 'dump', 'xmltree',
+        str(args.base_apk), 'AndroidManifest.xml'], text=True)
+    test_only = re.search(r'android:testOnly[^\n]*=\(type 0x12\)(0x[0-9a-fA-F]+)', manifest)
+    if test_only and int(test_only[1], 16):
+        raise ValueError('Base APK is testOnly; rebuild with -Pandroid.injected.testOnly=false')
     sha = fixture.sha
     source_level = (ROOT / 'wflevels/aquarium_plants-standalone.iff').read_bytes()
     sources = fixture.scripts((ROOT / 'wflevels/aquarium_plants/aquarium_plants.lev').read_text())

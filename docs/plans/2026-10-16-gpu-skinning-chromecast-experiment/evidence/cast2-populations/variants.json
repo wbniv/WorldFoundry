@@ -1,0 +1,324 @@
+{
+  "source_revision": "b4f0ce06de35312da35e47a5d846faac3eb591d3",
+  "source_diff_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+  "base_apk_sha256": "d3b650942119df482bc5ae597b4ebf4e99d46424ad7f803e8e186f0736ff4470",
+  "native": {
+    "lib/armeabi-v7a/libwf_game.so": "9ddd539f29600c729c0e26430ca162d61311b242a4c7d6defe0a97e4ff484b80"
+  },
+  "source_level_sha256": "a94598005ec3b7e1f07e758ff5471358ef1c2e84a5bb276d55f3a6f5460cf84b",
+  "variants": {
+    "population-1-cpu": {
+      "apk_sha256": "e7956feb45bef2de66bcea8ee5e05739c3dedb8106d8a8cde0beee252f2335ce",
+      "cd_sha256": "67345f1b59693ab5a9bdd2579eed41e7bdff8681019ba6b5744ac068ce493305",
+      "level_sha256": "6cc991c8bf0f791fdf32df4ac8865c0b7347c30a4bdb5adb5fd19c6f4bdf53ba",
+      "mode": "cpu",
+      "settings": {
+        "actors": 1,
+        "scope": "868-vertex, 35-sample DFRM body only; no fins, plants or behavior AI"
+      },
+      "scripts": [],
+      "preservation": {},
+      "frame_profile": false
+    },
+    "population-1-cpu-profile": {
+      "apk_sha256": "b544efeff4da3ec143e5692b1f6790795cc21cfe5f3a2874f08cf9855c0ba718",
+      "cd_sha256": "67345f1b59693ab5a9bdd2579eed41e7bdff8681019ba6b5744ac068ce493305",
+      "level_sha256": "6cc991c8bf0f791fdf32df4ac8865c0b7347c30a4bdb5adb5fd19c6f4bdf53ba",
+      "mode": "cpu",
+      "settings": {
+        "actors": 1,
+        "scope": "868-vertex, 35-sample DFRM body only; no fins, plants or behavior AI"
+      },
+      "scripts": [],
+      "preservation": {},
+      "frame_profile": true
+    },
+    "population-1-cpu-no-cull": {
+      "apk_sha256": "36e28d0681a3082cb77d1eafa6030cc3e032c8acdaf6232c13af288091ac77bc",
+      "cd_sha256": "67345f1b59693ab5a9bdd2579eed41e7bdff8681019ba6b5744ac068ce493305",
+      "level_sha256": "6cc991c8bf0f791fdf32df4ac8865c0b7347c30a4bdb5adb5fd19c6f4bdf53ba",
+      "mode": "cpu-no-cull",
+      "settings": {
+        "actors": 1,
+        "scope": "868-vertex, 35-sample DFRM body only; no fins, plants or behavior AI"
+      },
+      "scripts": [],
+      "preservation": {},
+      "frame_profile": false
+    },
+    "population-1-cpu-no-cull-profile": {
+      "apk_sha256": "3b0ea42a093129b38afc567078ab3611a4625445841ff7cd8cd67e95f8291b62",
+      "cd_sha256": "67345f1b59693ab5a9bdd2579eed41e7bdff8681019ba6b5744ac068ce493305",
+      "level_sha256": "6cc991c8bf0f791fdf32df4ac8865c0b7347c30a4bdb5adb5fd19c6f4bdf53ba",
+      "mode": "cpu-no-cull",
+      "settings": {
+        "actors": 1,
+        "scope": "868-vertex, 35-sample DFRM body only; no fins, plants or behavior AI"
+      },
+      "scripts": [],
+      "preservation": {},
+      "frame_profile": true
+    },
+    "population-1-gpu-no-cull": {
+      "apk_sha256": "86e9de61a7bb03f56089d777da7909b07ce3bc074732733c65a3229873a7339e",
+      "cd_sha256": "67345f1b59693ab5a9bdd2579eed41e7bdff8681019ba6b5744ac068ce493305",
+      "level_sha256": "6cc991c8bf0f791fdf32df4ac8865c0b7347c30a4bdb5adb5fd19c6f4bdf53ba",
+      "mode": "gpu-no-cull",
+      "settings": {
+        "actors": 1,
+        "scope": "868-vertex, 35-sample DFRM body only; no fins, plants or behavior AI"
+      },
+      "scripts": [],
+      "preservation": {},
+      "frame_profile": false
+    },
+    "population-1-gpu-no-cull-profile": {
+      "apk_sha256": "f05e0106f520a49b8adba1b60e376d0a17e9993940fc6e4b17397758d7e4ac26",
+      "cd_sha256": "67345f1b59693ab5a9bdd2579eed41e7bdff8681019ba6b5744ac068ce493305",
+      "level_sha256": "6cc991c8bf0f791fdf32df4ac8865c0b7347c30a4bdb5adb5fd19c6f4bdf53ba",
+      "mode": "gpu-no-cull",
+      "settings": {
+        "actors": 1,
+        "scope": "868-vertex, 35-sample DFRM body only; no fins, plants or behavior AI"
+      },
+      "scripts": [],
+      "preservation": {},
+      "frame_profile": true
+    },
+    "population-1-gpu": {
+      "apk_sha256": "186459fbe003364a6228da7a8b1d9a053f4a0627ee720b332bf36f58717bf69d",
+      "cd_sha256": "67345f1b59693ab5a9bdd2579eed41e7bdff8681019ba6b5744ac068ce493305",
+      "level_sha256": "6cc991c8bf0f791fdf32df4ac8865c0b7347c30a4bdb5adb5fd19c6f4bdf53ba",
+      "mode": "gpu",
+      "settings": {
+        "actors": 1,
+        "scope": "868-vertex, 35-sample DFRM body only; no fins, plants or behavior AI"
+      },
+      "scripts": [],
+      "preservation": {},
+      "frame_profile": false
+    },
+    "population-1-gpu-profile": {
+      "apk_sha256": "1826ac9c411dc5b6ad8a67b7c44d3883b589d0e930366a69f4fb322fa9a1cc6c",
+      "cd_sha256": "67345f1b59693ab5a9bdd2579eed41e7bdff8681019ba6b5744ac068ce493305",
+      "level_sha256": "6cc991c8bf0f791fdf32df4ac8865c0b7347c30a4bdb5adb5fd19c6f4bdf53ba",
+      "mode": "gpu",
+      "settings": {
+        "actors": 1,
+        "scope": "868-vertex, 35-sample DFRM body only; no fins, plants or behavior AI"
+      },
+      "scripts": [],
+      "preservation": {},
+      "frame_profile": true
+    },
+    "population-4-cpu": {
+      "apk_sha256": "826a108d32be81605dbce234a77083221fb93a1c5c771902f31b054786c547c4",
+      "cd_sha256": "32e268dd724813dcf13412ae78ed5813580d79ce684dace33ffd536c007d9190",
+      "level_sha256": "5d7c5897fd5c60d8281ffcb5f3bd2ba57791b3a26a85ec0527fd443e6d9a5342",
+      "mode": "cpu",
+      "settings": {
+        "actors": 4,
+        "scope": "868-vertex, 35-sample DFRM body only; no fins, plants or behavior AI"
+      },
+      "scripts": [],
+      "preservation": {},
+      "frame_profile": false
+    },
+    "population-4-cpu-profile": {
+      "apk_sha256": "7883950663f95470cbba19572833096c2c2efd6c076c22b84384af93a2ab5dce",
+      "cd_sha256": "32e268dd724813dcf13412ae78ed5813580d79ce684dace33ffd536c007d9190",
+      "level_sha256": "5d7c5897fd5c60d8281ffcb5f3bd2ba57791b3a26a85ec0527fd443e6d9a5342",
+      "mode": "cpu",
+      "settings": {
+        "actors": 4,
+        "scope": "868-vertex, 35-sample DFRM body only; no fins, plants or behavior AI"
+      },
+      "scripts": [],
+      "preservation": {},
+      "frame_profile": true
+    },
+    "population-4-cpu-no-cull": {
+      "apk_sha256": "270ff30e9f05a4c3e5b1aeb3561da8ef806420d89862d2c037b270bae8cb4a72",
+      "cd_sha256": "32e268dd724813dcf13412ae78ed5813580d79ce684dace33ffd536c007d9190",
+      "level_sha256": "5d7c5897fd5c60d8281ffcb5f3bd2ba57791b3a26a85ec0527fd443e6d9a5342",
+      "mode": "cpu-no-cull",
+      "settings": {
+        "actors": 4,
+        "scope": "868-vertex, 35-sample DFRM body only; no fins, plants or behavior AI"
+      },
+      "scripts": [],
+      "preservation": {},
+      "frame_profile": false
+    },
+    "population-4-cpu-no-cull-profile": {
+      "apk_sha256": "3fde597f742c6099e0f90f269e736f4755316186537c6d90a5e445f8a4e11351",
+      "cd_sha256": "32e268dd724813dcf13412ae78ed5813580d79ce684dace33ffd536c007d9190",
+      "level_sha256": "5d7c5897fd5c60d8281ffcb5f3bd2ba57791b3a26a85ec0527fd443e6d9a5342",
+      "mode": "cpu-no-cull",
+      "settings": {
+        "actors": 4,
+        "scope": "868-vertex, 35-sample DFRM body only; no fins, plants or behavior AI"
+      },
+      "scripts": [],
+      "preservation": {},
+      "frame_profile": true
+    },
+    "population-4-gpu-no-cull": {
+      "apk_sha256": "14dedbe21967fc74a273875216275ca5740d3fc882dbea9d5c145b773265f580",
+      "cd_sha256": "32e268dd724813dcf13412ae78ed5813580d79ce684dace33ffd536c007d9190",
+      "level_sha256": "5d7c5897fd5c60d8281ffcb5f3bd2ba57791b3a26a85ec0527fd443e6d9a5342",
+      "mode": "gpu-no-cull",
+      "settings": {
+        "actors": 4,
+        "scope": "868-vertex, 35-sample DFRM body only; no fins, plants or behavior AI"
+      },
+      "scripts": [],
+      "preservation": {},
+      "frame_profile": false
+    },
+    "population-4-gpu-no-cull-profile": {
+      "apk_sha256": "52c9200b0fd64fe87e699d1688c1a37692d64f64a80e2b74e0d5ee954dffc3b2",
+      "cd_sha256": "32e268dd724813dcf13412ae78ed5813580d79ce684dace33ffd536c007d9190",
+      "level_sha256": "5d7c5897fd5c60d8281ffcb5f3bd2ba57791b3a26a85ec0527fd443e6d9a5342",
+      "mode": "gpu-no-cull",
+      "settings": {
+        "actors": 4,
+        "scope": "868-vertex, 35-sample DFRM body only; no fins, plants or behavior AI"
+      },
+      "scripts": [],
+      "preservation": {},
+      "frame_profile": true
+    },
+    "population-4-gpu": {
+      "apk_sha256": "b4e8ad58a717c7299f677d4741cfb6085db3f584b8272857c6a3b40e6d2da551",
+      "cd_sha256": "32e268dd724813dcf13412ae78ed5813580d79ce684dace33ffd536c007d9190",
+      "level_sha256": "5d7c5897fd5c60d8281ffcb5f3bd2ba57791b3a26a85ec0527fd443e6d9a5342",
+      "mode": "gpu",
+      "settings": {
+        "actors": 4,
+        "scope": "868-vertex, 35-sample DFRM body only; no fins, plants or behavior AI"
+      },
+      "scripts": [],
+      "preservation": {},
+      "frame_profile": false
+    },
+    "population-4-gpu-profile": {
+      "apk_sha256": "7b4176c6813aafec8b01c2643a5bb9ff6e44f0a5ee15d3775e011b153c5c94da",
+      "cd_sha256": "32e268dd724813dcf13412ae78ed5813580d79ce684dace33ffd536c007d9190",
+      "level_sha256": "5d7c5897fd5c60d8281ffcb5f3bd2ba57791b3a26a85ec0527fd443e6d9a5342",
+      "mode": "gpu",
+      "settings": {
+        "actors": 4,
+        "scope": "868-vertex, 35-sample DFRM body only; no fins, plants or behavior AI"
+      },
+      "scripts": [],
+      "preservation": {},
+      "frame_profile": true
+    },
+    "population-16-cpu": {
+      "apk_sha256": "43487090a6b9f17c5c0d09eba8a308ecd6a9693b7fd527c2126bf7c0ef5975f3",
+      "cd_sha256": "635baa21e637be0b6f4da29cc396e35abe707787ffad5d3eb7d257c11c25ab43",
+      "level_sha256": "176d58c3da1d0a3b29899c89a48a9199bc9eda260d5f08868ed8db6f3ca32839",
+      "mode": "cpu",
+      "settings": {
+        "actors": 16,
+        "scope": "868-vertex, 35-sample DFRM body only; no fins, plants or behavior AI"
+      },
+      "scripts": [],
+      "preservation": {},
+      "frame_profile": false
+    },
+    "population-16-cpu-profile": {
+      "apk_sha256": "c5f814ababb9b3c38d7f9854d74aacd97f4ee1fc3cece67d5468da76f9c6fdc0",
+      "cd_sha256": "635baa21e637be0b6f4da29cc396e35abe707787ffad5d3eb7d257c11c25ab43",
+      "level_sha256": "176d58c3da1d0a3b29899c89a48a9199bc9eda260d5f08868ed8db6f3ca32839",
+      "mode": "cpu",
+      "settings": {
+        "actors": 16,
+        "scope": "868-vertex, 35-sample DFRM body only; no fins, plants or behavior AI"
+      },
+      "scripts": [],
+      "preservation": {},
+      "frame_profile": true
+    },
+    "population-16-cpu-no-cull": {
+      "apk_sha256": "649fd0011f6d3e405b15d61098f4bf592c6bb46f511bc20348e4c9b8e6310dfd",
+      "cd_sha256": "635baa21e637be0b6f4da29cc396e35abe707787ffad5d3eb7d257c11c25ab43",
+      "level_sha256": "176d58c3da1d0a3b29899c89a48a9199bc9eda260d5f08868ed8db6f3ca32839",
+      "mode": "cpu-no-cull",
+      "settings": {
+        "actors": 16,
+        "scope": "868-vertex, 35-sample DFRM body only; no fins, plants or behavior AI"
+      },
+      "scripts": [],
+      "preservation": {},
+      "frame_profile": false
+    },
+    "population-16-cpu-no-cull-profile": {
+      "apk_sha256": "5c13a3d8bd9e9325fe91cdc9ae138f94d3f357e3a9d4ae8bb90941db3dcc97d2",
+      "cd_sha256": "635baa21e637be0b6f4da29cc396e35abe707787ffad5d3eb7d257c11c25ab43",
+      "level_sha256": "176d58c3da1d0a3b29899c89a48a9199bc9eda260d5f08868ed8db6f3ca32839",
+      "mode": "cpu-no-cull",
+      "settings": {
+        "actors": 16,
+        "scope": "868-vertex, 35-sample DFRM body only; no fins, plants or behavior AI"
+      },
+      "scripts": [],
+      "preservation": {},
+      "frame_profile": true
+    },
+    "population-16-gpu-no-cull": {
+      "apk_sha256": "ebde19e45d87afec27a94e40bd64318d089f57f663fc4eb980302271b0ea260c",
+      "cd_sha256": "635baa21e637be0b6f4da29cc396e35abe707787ffad5d3eb7d257c11c25ab43",
+      "level_sha256": "176d58c3da1d0a3b29899c89a48a9199bc9eda260d5f08868ed8db6f3ca32839",
+      "mode": "gpu-no-cull",
+      "settings": {
+        "actors": 16,
+        "scope": "868-vertex, 35-sample DFRM body only; no fins, plants or behavior AI"
+      },
+      "scripts": [],
+      "preservation": {},
+      "frame_profile": false
+    },
+    "population-16-gpu-no-cull-profile": {
+      "apk_sha256": "7091c008e97f8dcb7a05dc7d4afe7692f7cde5e50e61f66e22a5dec9531ac43c",
+      "cd_sha256": "635baa21e637be0b6f4da29cc396e35abe707787ffad5d3eb7d257c11c25ab43",
+      "level_sha256": "176d58c3da1d0a3b29899c89a48a9199bc9eda260d5f08868ed8db6f3ca32839",
+      "mode": "gpu-no-cull",
+      "settings": {
+        "actors": 16,
+        "scope": "868-vertex, 35-sample DFRM body only; no fins, plants or behavior AI"
+      },
+      "scripts": [],
+      "preservation": {},
+      "frame_profile": true
+    },
+    "population-16-gpu": {
+      "apk_sha256": "8e882cc1553ae8cbfc4cd3d40b7c839db1d3325a796be8b799413121d5132818",
+      "cd_sha256": "635baa21e637be0b6f4da29cc396e35abe707787ffad5d3eb7d257c11c25ab43",
+      "level_sha256": "176d58c3da1d0a3b29899c89a48a9199bc9eda260d5f08868ed8db6f3ca32839",
+      "mode": "gpu",
+      "settings": {
+        "actors": 16,
+        "scope": "868-vertex, 35-sample DFRM body only; no fins, plants or behavior AI"
+      },
+      "scripts": [],
+      "preservation": {},
+      "frame_profile": false
+    },
+    "population-16-gpu-profile": {
+      "apk_sha256": "b357199f3216fd21439a502d139b786e78ab7a1dc7fffdc9050fe000374c3aed",
+      "cd_sha256": "635baa21e637be0b6f4da29cc396e35abe707787ffad5d3eb7d257c11c25ab43",
+      "level_sha256": "176d58c3da1d0a3b29899c89a48a9199bc9eda260d5f08868ed8db6f3ca32839",
+      "mode": "gpu",
+      "settings": {
+        "actors": 16,
+        "scope": "868-vertex, 35-sample DFRM body only; no fins, plants or behavior AI"
+      },
+      "scripts": [],
+      "preservation": {},
+      "frame_profile": true
+    }
+  },
+  "population_manifest_sha256": "c5b397d29e843e9466f1e34f1ca4cce039d8ded78a87ad5f26331cf009f51d94"
+}

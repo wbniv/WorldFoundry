@@ -457,7 +457,8 @@ DFRM adapter, not a general four-weight skeletal authoring format; four-weight
 shader correctness is covered separately by the GL/Metal draw fixtures.
 `prepare-gpu-skinning-campaign.py --population-study` produces 36 release and
 12 separate profile runs per device, with 30-second warmup and rotated path
-and population order. These recipes are prepared, not submitted or measured.
+and population order. The initial freeze was prepared before device recovery;
+the current campaign status is recorded below.
 
 Corrected jobs now queued: cast1 C `J‑3764d1d22e88`, cast1 G1
 `J‑a3e5160f7cb9`, and cast2 GPU check `J‑fd4329e8e0e0`. Earlier candidate
@@ -473,3 +474,48 @@ counters, nonzero steady GPU vertex/index uploads, or insufficient measured
 CPU windows. The investigation update and adoption decision remain pending
 matched device evidence. Current status and resumable recipes are saved in
 this plan's `evidence/` directory.
+
+### Resumed device campaign, 17 October
+
+Cast1 readd `J‑64ad5b5d0707` completed after Will restored wireless debugging.
+The coordinator's earlier restart job `J‑8cc58b6f7fff` did issue a reboot;
+the before/after boot IDs differ. That reboot is established, while the exact
+reason wireless debugging became disabled remains unproven. Automatic incident
+diagnosis is proposed separately in the coordinator repository.
+
+The initial corrected APK jobs listed above failed installation because the
+Android ABI-injection option also set `testOnly`. The v3 APK freeze explicitly
+sets `android.injected.testOnly=false`, and the variant builder now rejects
+test-only base APKs. Native code and its SHA-256 remain unchanged. Current
+frozen recipes use `/tmp/wf-gpu-skinning-campaign-v3` and
+`/tmp/wf-gpu-population-campaign-v3`.
+
+Cast1 CPU round one `J‑b772c10c99a3` and GPU round one `J‑2676c1a59ed6`
+passed with verified installed hashes, presentation coverage and cleanup:
+
+| Pairs | Close-idle CPU FPS | Close-idle GPU FPS |
+|---:|---:|---:|
+| None | 20.14 | 20.10 |
+| 1 | 18.69 | 19.34 |
+| 2 | 17.30 | 18.72 |
+| 6 | 13.74 | 16.78 |
+
+These are **single release runs, not three-round medians or an acceptance
+result**. Separate CPU profiles are still pending. The prior GPU attempt
+`J‑1e59129b22a2` lost foreground during the one-pair case and is excluded;
+its cause is unknown. A short one-pair GPU check `J‑49a2f4008d65` and the
+replacement full batch passed. Failed evidence is retained separately.
+
+Cast2's six-pair GPU scene check `J‑807d69af58af` passed with twelve actual
+GPU body draws and a visually checked capture. Its controlled CPU population
+round one `J‑248e89210d61` completed; C0/G0/G1 and repeat/profile sessions
+continue through the coordinator. Cast1's remaining aquarium sessions are
+queued behind existing owners. Controlled cast1 populations, device lifecycle
+and held/released input checks remain pending.
+
+`run-gpu-skinning-campaign.py` resumes saved job IDs without duplicating
+submissions, submits one session at a time per device, downloads each receipt,
+checks hashes/coverage/GPU proof/cleanup, and stops on a failed session. It
+does not reboot or retry failed sessions. The analyzer also supports
+`--population-study --device=...` for the C/C0/G0/G1 comparison. Final
+investigation results and any adoption proposal await the complete evidence.

@@ -1,0 +1,101 @@
+{
+  "logs": [
+    {
+      "path": "close-idle/cpu/round-1/none/run-1/wf.log.gz",
+      "original_sha256": "ad2c1ca3ce8937be6cc7a0512869e84c7e3711713b9b8212e68f772d74070f40",
+      "scoped_sha256": "600ba2109474a1acf42b2ceaccf6717685fc0705c48a1bd1d9976b283d20e08a",
+      "scope": "Final level-load marker through end of captured engine log; cumulative earlier sessions excluded."
+    },
+    {
+      "path": "close-idle/cpu/round-1/pair1/run-1/wf.log.gz",
+      "original_sha256": "bf7fcbba416db1305e99696aaffad29ae9f40bf58814a263d63935ebaed64a2c",
+      "scoped_sha256": "1735fc0ab39923c4449a0a0745089d4b98b217e168679ad5d0d5e748cf1f564c",
+      "scope": "Final level-load marker through end of captured engine log; cumulative earlier sessions excluded."
+    },
+    {
+      "path": "close-idle/cpu/round-1/pair2/run-1/wf.log.gz",
+      "original_sha256": "46a8b51447117a5586e039f4fd092c7a0c8e36905a2ae11e070e1254f5a63c6c",
+      "scoped_sha256": "efab4a66b24f19cec9cb909a9aed25caf44c806969e25577d1e868963843e1cc",
+      "scope": "Final level-load marker through end of captured engine log; cumulative earlier sessions excluded."
+    },
+    {
+      "path": "close-idle/cpu/round-1/pair6/run-1/wf.log.gz",
+      "original_sha256": "e948f7563c70ba9853f019b1c9bb74334c033806a5d20316c27e1f815cd8010e",
+      "scoped_sha256": "336ca4105d251e78e7966b5bb858a608bd3a3a8c2075cb16ea395430c76ed693",
+      "scope": "Final level-load marker through end of captured engine log; cumulative earlier sessions excluded."
+    },
+    {
+      "path": "close-idle/cpu/round-1/wf.log.gz",
+      "original_sha256": "e948f7563c70ba9853f019b1c9bb74334c033806a5d20316c27e1f815cd8010e",
+      "scoped_sha256": "336ca4105d251e78e7966b5bb858a608bd3a3a8c2075cb16ea395430c76ed693",
+      "scope": "Final level-load marker through end of captured engine log; cumulative earlier sessions excluded."
+    },
+    {
+      "path": "close-idle/gpu/round-1/none/run-1/wf.log.gz",
+      "original_sha256": "8aac88e59701afb243b0f7d0b707482e7f15ccb192ceace9329faab7cda2a450",
+      "scoped_sha256": "0862fe8f1120864d3bc8fc45da4c7491f776f0ae568ec44ac06bde2aa01f509f",
+      "scope": "Final level-load marker through end of captured engine log; cumulative earlier sessions excluded."
+    },
+    {
+      "path": "close-idle/gpu/round-1/pair1/run-1/wf.log.gz",
+      "original_sha256": "298695eab8aef7074335b6c82143a8041c3a754d224817c02057559fd9d61ba0",
+      "scoped_sha256": "746480cd37d382c5b8603f3dca2b3971ac0926ca499cee60484874ec8b626a31",
+      "scope": "Final level-load marker through end of captured engine log; cumulative earlier sessions excluded."
+    },
+    {
+      "path": "close-idle/gpu/round-1/pair2/run-1/wf.log.gz",
+      "original_sha256": "aacb3d18781143317fff89fd9e55275e734ca97f62c9cb49b01f2ee9f0405a28",
+      "scoped_sha256": "cfbc8084b0ce8e8dd935dd5adae4e376a9f5e73c10c17da2d354618359c11d6f",
+      "scope": "Final level-load marker through end of captured engine log; cumulative earlier sessions excluded."
+    },
+    {
+      "path": "close-idle/gpu/round-1/pair6/run-1/wf.log.gz",
+      "original_sha256": "3031b3ea5f1ab84399ce5135e69f8f558fe7213df4ea07678f3efff01eaf77bb",
+      "scoped_sha256": "a7f0ca555dad7d86200b6fa6c61005cd3661332c56edefd68b8b7ba9a5c990a0",
+      "scope": "Final level-load marker through end of captured engine log; cumulative earlier sessions excluded."
+    },
+    {
+      "path": "close-idle/gpu/round-1/wf.log.gz",
+      "original_sha256": "3031b3ea5f1ab84399ce5135e69f8f558fe7213df4ea07678f3efff01eaf77bb",
+      "scoped_sha256": "a7f0ca555dad7d86200b6fa6c61005cd3661332c56edefd68b8b7ba9a5c990a0",
+      "scope": "Final level-load marker through end of captured engine log; cumulative earlier sessions excluded."
+    },
+    {
+      "path": "cast2-populations/population/cpu/round-1/1/run-1/wf.log.gz",
+      "original_sha256": "1d32ec5c9d69bfc5ee9149bc3d0f3008db64cca96edc04023b8b3a8020f75aad",
+      "scoped_sha256": "6ce3411415b1f56aed6808a2e5d483ef56c16b04e7107479ccf3e6aed97d18b4",
+      "scope": "Final level-load marker through end of captured engine log; cumulative earlier sessions excluded."
+    },
+    {
+      "path": "cast2-populations/population/cpu/round-1/16/run-1/wf.log.gz",
+      "original_sha256": "88399956ee4c3a5970a7896c9f71293dea90c4a4179c53b99110c39dac9ea91c",
+      "scoped_sha256": "a7607f6c5e066e6e4b48e2406576097e40dd8f10fad9f440aeedb238fed7155f",
+      "scope": "Final level-load marker through end of captured engine log; cumulative earlier sessions excluded."
+    },
+    {
+      "path": "cast2-populations/population/cpu/round-1/4/run-1/wf.log.gz",
+      "original_sha256": "0e6967cb4e1ecc2b1cfac124767b713c58ee06a5207150275ca8b336e3510436",
+      "scoped_sha256": "a7607f6c5e066e6e4b48e2406576097e40dd8f10fad9f440aeedb238fed7155f",
+      "scope": "Final level-load marker through end of captured engine log; cumulative earlier sessions excluded."
+    },
+    {
+      "path": "cast2-populations/population/cpu/round-1/wf.log.gz",
+      "original_sha256": "88399956ee4c3a5970a7896c9f71293dea90c4a4179c53b99110c39dac9ea91c",
+      "scoped_sha256": "a7607f6c5e066e6e4b48e2406576097e40dd8f10fad9f440aeedb238fed7155f",
+      "scope": "Final level-load marker through end of captured engine log; cumulative earlier sessions excluded."
+    },
+    {
+      "path": "cast1-gpu-pair1-check/wf.log.gz",
+      "original_sha256": "d30f56e5e97988c0fd78a22d793e26f4f639c22bc6f328a2103662631ad72eb4",
+      "scoped_sha256": "445c7fc44228eb27861bf486f0b655cdca69e1bb1682836b4bd392fc23051a59",
+      "scope": "Final level-load marker through end of captured engine log; cumulative earlier sessions excluded."
+    },
+    {
+      "path": "cast2-gpu-check/wf.log.gz",
+      "original_sha256": "9750395f118beaf8fd9c7192a2ee5e6116da11bedde8cf8a0d0dd9a6ae55ae94",
+      "scoped_sha256": "0f92d10903aee6858efffea381122f5c8a7af46fd5d01076c50ea367f7b36c03",
+      "scope": "Final level-load marker through end of captured engine log; cumulative earlier sessions excluded."
+    }
+  ],
+  "excluded": "Raw cumulative engine logs, system logcat, connection details, command transcripts, foreground-failure dumps and watcher logs remain local."
+}

@@ -1,0 +1,11 @@
+{
+  "device": "chromecast-test-02",
+  "completed": [
+    "population/cpu/round-1",
+    "population/cpu-no-cull/round-1"
+  ],
+  "total": 16,
+  "state": "running",
+  "current": "population/gpu-no-cull/round-1",
+  "job": "J-25e202859de6"
+}

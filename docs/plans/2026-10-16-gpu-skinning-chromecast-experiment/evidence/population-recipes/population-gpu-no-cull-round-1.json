@@ -1,8 +1,8 @@
 {
   "workflow": "variant-benchmark",
   "app": "aquarium",
-  "apk": "/tmp/wf-gpu-population-campaign/restore.apk",
-  "restore_apk": "/tmp/wf-gpu-population-campaign/restore.apk",
+  "apk": "/tmp/wf-gpu-population-campaign-v3/restore.apk",
+  "restore_apk": "/tmp/wf-gpu-population-campaign-v3/restore.apk",
   "trace": "idle",
   "duration": 60,
   "warmup": 30,
@@ -10,15 +10,15 @@
   "variants": [
     {
       "label": "1",
-      "apk": "/tmp/wf-gpu-population-apks/population-1-gpu-no-cull.apk"
+      "apk": "/tmp/wf-gpu-population-apks-v3/population-1-gpu-no-cull.apk"
     },
     {
       "label": "4",
-      "apk": "/tmp/wf-gpu-population-apks/population-4-gpu-no-cull.apk"
+      "apk": "/tmp/wf-gpu-population-apks-v3/population-4-gpu-no-cull.apk"
     },
     {
       "label": "16",
-      "apk": "/tmp/wf-gpu-population-apks/population-16-gpu-no-cull.apk"
+      "apk": "/tmp/wf-gpu-population-apks-v3/population-16-gpu-no-cull.apk"
     }
   ]
 }

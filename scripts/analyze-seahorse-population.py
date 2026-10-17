@@ -41,7 +41,7 @@ def pss_kib(path):
     return int(found[1])
 
 
-def presentation(folder):
+def presentation(folder, require_plant_fixture=True):
     summary = read_json(folder / 'summary.json')
     if summary.get('sampling_holes') or summary.get('latency_statistics_may_include_unobserved_bridges'):
         raise ValueError(f'incomplete presentation sampling: {folder}')
@@ -62,7 +62,7 @@ def presentation(folder):
     current = log[marker:]
     fixture = ('PLANTS settings-source=RPRP seed=713 water=saltwater age=150 speed=0 '
                'textures=1 sway=1 random_entry=0 selector_override=0')
-    if fixture not in current:
+    if require_plant_fixture and fixture not in current:
         raise ValueError(f'wrong or missing authored plant fixture: {folder}')
     for error in ('zforth compile error', 'zforth eval error', 'AssertMsg:', 'out of memory'):
         if error.lower() in current.lower():

@@ -1,0 +1,11 @@
+{
+  "device": "chromecast-test-01",
+  "completed": [
+    "close-idle/cpu/round-1",
+    "close-idle/gpu/round-1"
+  ],
+  "total": 16,
+  "state": "running",
+  "current": "close-crawl/cpu/round-1",
+  "job": "J-310f760c47c1"
+}
