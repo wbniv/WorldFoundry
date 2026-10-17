@@ -21,12 +21,19 @@ def main():
     ap = argparse.ArgumentParser(description=__doc__)
     ap.add_argument("--inventory", type=Path, required=True)
     ap.add_argument("--decisions", type=Path, required=True)
+    ap.add_argument("--path", action="append", default=[],
+                    help="verify only these tracked paths (repeatable); skips the coverage check")
     args = ap.parse_args()
     root = Path(__file__).resolve().parents[1]
     inv = json.loads(args.inventory.read_text())
     decisions = json.loads(args.decisions.read_text())
     names = subprocess.check_output(["git", "ls-files", "*.iff"],
                                     cwd=root, text=True).splitlines()
+    if args.path:
+        missing = sorted(set(args.path) - set(names))
+        if missing:
+            raise SystemExit(f"not tracked IFF paths: {missing}")
+        names = [name for name in names if name in set(args.path)]
     expected_hashes = {row["sha256"] for row in inv["models"] +
                        inv["unmatched_embedded_models"]}
     if set(decisions) != expected_hashes:
@@ -65,7 +72,7 @@ def main():
                              if a != b), min(len(actual), len(output)))
             raise SystemExit(f"{name}: unexpected byte at offset {mismatch}")
         changed_files += actual != original
-    if seen != expected_hashes:
+    if not args.path and seen != expected_hashes:
         raise SystemExit(f"{len(expected_hashes - seen)} reviewed models absent")
     print(f"verified {len(names)} tracked IFF paths, {len(seen)} old model hashes, "
           f"{changed_faces} selected faces, {changed_models} model occurrences, "

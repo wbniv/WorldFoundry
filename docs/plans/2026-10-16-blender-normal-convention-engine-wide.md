@@ -187,6 +187,13 @@ meshes have no current geometry match; Qbert's saved cube is a placeholder whose
 shipped override regenerates exactly from `gen_cube.py`. They are accounted for
 as separate sources rather than overwriting the current assets from stale scenes.
 
+**Correction (2026‑10‑17).** One `keep` was wrong. The snowgoons arena
+(`quadpatch01` and its classic twin) was kept on exterior-shell clues, which
+this plan rules out as authority for an open sheet. Its floor then pointed down,
+and GL and Metal both culled it. It is now `reverse_all`, and a render audit of
+the other kept models found no further inversion. See the
+[investigation](../diagnostics/metal-snowgoons-cull-2026-10-17/README.md).
+
 All authoring guides and current docs with winding guidance are updated,
 including the GPU experiment and rig investigation. Historical plans carry
 current-convention notices; transcripts retain their recorded statements.

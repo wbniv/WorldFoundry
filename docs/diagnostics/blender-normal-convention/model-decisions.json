@@ -1366,8 +1366,8 @@
     "evidence": "wflevels/mm_practice/house.iff: 294 triangles; Blender signed volume6=-237655464874420435; bbox-radial faces=71 outward/223 inward. Its stored Blender cross points opposite the old engine normal. The old normal is the reviewed visible side for this source; swapping indices preserves that side without a runtime branch."
   },
   "2ce88ee46270b6c71aa154339fc212dceb46b2c7d068b41091d5ef633dbab88f": {
-    "action": "keep",
-    "evidence": "wflevels/mm_practice/quadpatch01.iff: 445 triangles; Blender signed volume6=1610254340440242831; bbox-radial faces=341 outward/104 inward. This open exterior patch has positive signed volume and an outward radial majority in Blender order."
+    "action": "reverse_all",
+    "evidence": "Corrected 2026-10-17 from keep (docs/diagnostics/metal-snowgoons-cull-2026-10-17/README.md). wflevels/snowgoons-blender/quadpatch01.iff is the snowgoons arena: a ground sheet with hedge walls seen from inside, not an exterior shell, so signed volume and the outward radial majority were the wrong clues. Under the Blender cross 176 of 176 floor faces (material 5) point down; the old engine normal pointed up and the reviewed Linux reference shows the floor and the inner hedge faces. Keep made both GL and Metal cull the floor at frame 20 (39,809 px). Reversing all faces restores the reviewed visible side."
   },
   "147dab048003e2f44d588da85be1601726ff09bb188d6aa4f2833ebb007af620": {
     "action": "reverse_all",
@@ -1962,8 +1962,8 @@
     "evidence": "wflevels/cd_full.iff: 294 triangles; Blender signed volume6=-237655464874420435; bbox-radial faces=71 outward/223 inward. Its stored Blender cross points opposite the old engine normal. The old normal is the reviewed visible side for this source; swapping indices preserves that side without a runtime branch."
   },
   "77b1e0144fa6422f8fe127cb4d94cbd2f24893c200268556aece96e7db275833": {
-    "action": "keep",
-    "evidence": "wflevels/cd_full.iff: 445 triangles; Blender signed volume6=1610254340440242831; bbox-radial faces=341 outward/104 inward. The historical embedded model has positive Blender volume and an outward radial majority; retain its authored order."
+    "action": "reverse_all",
+    "evidence": "Corrected 2026-10-17 from keep (docs/diagnostics/metal-snowgoons-cull-2026-10-17/README.md). The classic snowgoons arena (wfsource/source/game/snowgoons.iff): the same 481-vertex, 445-face ground-and-hedge geometry as 2ce88ee4 with other materials. Keep turned its floor down; frame 20 at HEAD loses the floor and hedge (38,636 px versus the keep-reversed capture). Reversing all faces restores the old visible side."
   },
   "287424bbe4892ba7bc2776de905515c5ddaab706d163fe0684980209d155cc01": {
     "action": "reverse_all",

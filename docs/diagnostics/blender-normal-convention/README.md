@@ -88,6 +88,7 @@ correction. External old-hand IFF files need conversion before use.
   network is unavailable. Coordinator reconnect J‑a4be8ca239d8 failed with
   `device-not-found-on-network`; no direct-control fallback was used.
 - Metal rendering is pending on an Apple host.
+- **Correction, 2026‑10‑17.** The snowgoons arena, `quadpatch01` (`2ce88ee4…`), and its classic twin (`77b1e014…`) were wrongly kept, so GL and Metal both culled the floor. Both are now `reverse_all` in both manifests, and 13 IFFs were re-converted with `convert_face_hand.py --only-hash`. A render audit of every other `keep` found no other inverted model; `cyber` is unverified. See [metal-snowgoons-cull-2026-10-17](../metal-snowgoons-cull-2026-10-17/README.md).
 
 ## Integration with the newer seahorse work
 
