@@ -349,6 +349,30 @@ Phases 0, 1, 2 and 4 landed on branch `ui-font`; Phase 3 (Chromecast 1) ran on `
 
     **Not yet complete: PASS on Chromecast 1 for the aquarium and baseline apps; Chromecast 2 and the other apps still to run** (2026‑10‑17, 09:02–09:40 UTC, 16:02–16:40 Bangkok). `menu-back` for the aquarium app (all eight tanks, twice), `baseline-settings` (21/21), `baseline-picker` (12/12) and `aquarium-seahorses` (13/13, twice) pass with the UI-font APKs; no logcat in these jobs has a fatal, assertion, crash or `UI_FONT unavailable` line. Cast1 holds its previous apps again: aquarium `3d796c77…` and the fallback baseline `72a39130…` (its original `151186ba…` is not available locally). Chromecast 2 and the other apps' `menu-back` (condo, smb, snowgoons, qbert) were not run: the orchestrator's brief for this round narrowed the step to Cast1, aquarium and baseline, which was its mistake: the step as written needs both devices and every app. The two refused installs changed nothing (the coordinator verified the installed hash was unchanged).
 
+    **Second round (2026‑10‑17, 09:45–10:02 UTC, 16:45–17:02 Bangkok): stopped before any install.** Two read-only inspections first ([Cast1](../diagnostics/ui-font/cast1/inspect/packages.txt), [Cast2](../diagnostics/ui-font/cast2/inspect/packages.txt)):
+
+    ```
+    $ (installed client, WORKFLOW=inspect DEVICE=chromecast-test-02)   J-13de92a457f6: completed
+    package:org.worldfoundry.wf_game.aquarium versionCode:7
+    package:org.worldfoundry.wf_game.baseline versionCode:1
+    package:org.worldfoundry.wf_game.condo versionCode:5
+    (no smb, snowgoons or qbert)            Physical size: 3840x2160 / Override size: 1920x1080
+    $ (installed client, WORKFLOW=inspect DEVICE=chromecast-test-01)   J-0b8554173101: completed
+    package:org.worldfoundry.wf_game.aquarium versionCode:7     package:org.worldfoundry.wf_game.baseline versionCode:2
+    package:org.worldfoundry.wf_game.condo versionCode:5        package:org.worldfoundry.wf_game.smb versionCode:5
+    package:org.worldfoundry.wf_game versionCode:5  (snowgoons) package:org.worldfoundry.wf_game.qbert versionCode:5
+    Physical size: 1920x1080
+    $ grep -n "menu-back validator" /opt/wf-device-coordinator/scripts/wf_device/plugins/android/operations.py
+    1114:            raise ValueError('menu-back validator currently targets Aquarium')
+    ```
+
+    The rest cannot run without breaking the "restore exactly" rule, so nothing more was installed (a condo `menu-back` J‑44ea33e7886b and `poke-resume` J‑8c857fe6a543, and four probe installs J‑99761335edf5, J‑47cb623ebcc0, J‑1282c8f614ed, J‑40cfeb4a5a33, were cancelled while queued):
+    - `menu-back` refuses every app but aquarium; for condo, smb, snowgoons and qbert the nearest existing validator is `poke-resume` (keys, OK, Home and resume in one process, with captures that fail on fatal or assertion lines).
+    - Every UI-font APK is versionCode 7 (`android/app/build.gradle.kts`). Condo, smb, snowgoons and qbert are versionCode 5 on Cast1, and condo is 5 on Cast2: after a 7 is installed, Android refuses the 5 back as a downgrade, and the coordinator has no downgrade or uninstall path.
+    - Cast2 has no smb, snowgoons or qbert, and the coordinator cannot uninstall, so installing them cannot be undone.
+    - Cast2's baseline is versionCode 1 (Cast1's is 2), and neither device's installed hashes are known before an install: the coordinator records them only in an install's own journal. A deliberately refused install would reveal them without a change, but that was denied as interfering with the shared devices.
+    - The condo APK for this round is built: `condo-uifont-release-9447f73a.apk` (`9447f73a569b1c30…`, versionCode 7). Cast2's aquarium and baseline jobs could run with `f38fa046` and a versionCode 1 baseline (`baseline-6635071caaa60614.apk`), but only once the restore targets' hashes are known.
+
 9. Cost recorded: `cd.iff` and APK size before and after, and Cast1 frame time on the fishtank menu and the planted tank before and after (three runs each).
 
     ```
