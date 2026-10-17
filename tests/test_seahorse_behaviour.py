@@ -393,3 +393,28 @@ def test_greeting_finds_both_partners_across_mailbox_ranges(binaries, pair):
         assert all(t.block(s, 60) == 0 for s in ACTORS if s // 2 != pair)
     finally:
         t.close()
+
+
+@pytest.mark.parametrize('eps', [0, 3e-5, 1e-4, 2e-4, 1e-3])
+def test_the_end_of_a_release_never_throws_the_body(binaries, eps):
+    """Seahorse 1's first release (at 6 s) under frames of 50 ms x (1 - eps): a device that
+    presents every third 60 Hz vsync. The release's last pose then has a residual progress of
+    about eps; there DFRM's reported centre is the half-wrapped tip ring's, about
+    0.0041 / progress away, and one solve on it threw actor 30 out of the room (y > 10). The
+    engine then removed it, and the next sh-place wrote to a NULL actor: the pair-1 SIGSEGVs
+    J-1e59129b22a2, J-c4cccc5e4274, J-da19a5050cff, J-4399ea64b1f4 and J-a85e8414f1d4.
+    docs/diagnostics/seahorse-actor30-2026-10-18/README.md."""
+    assert sh.N_TAIL == 35                  # seahorse_behaviour.fth's sh-valid uses 35 rings
+    t = Tank(binaries['float'], count=1)
+    try:
+        t.step(1, dt=DT * (1 - eps))        # the first tick places the body
+        prev, worst = t.body(1)[:2], 0.0
+        while t.now < 9.0 and 'swim' not in t.states(1)[-1:]:
+            t.step(1, dt=DT * (1 - eps))
+            x, y = t.body(1)[:2]
+            worst = max(worst, math.hypot(x - prev[0], y - prev[1]))
+            prev = (x, y)
+        assert t.states(1)[-2:] == ['release', 'swim'], t.states(1)
+        assert worst < .1, worst            # a hold-to-release frame moves about 0.06
+    finally:
+        t.close()
