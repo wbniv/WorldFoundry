@@ -1,0 +1,73 @@
+{
+  "runs": [
+    {
+      "run": 1,
+      "frames": 732,
+      "interval_count": 732,
+      "fps": 59.614218294150966,
+      "refresh_ms": 16.683333,
+      "p50_ms": 16.683353,
+      "p90_ms": 16.683561,
+      "p95_ms": 16.683664,
+      "p99_ms": 16.683867,
+      "worst_ms": 33.367311,
+      "missed_refresh_percent": 0.546448087431694,
+      "duration_seconds": 12,
+      "layer": "org.worldfoundry.wf_game.aquarium/android.app.NativeActivity#424",
+      "measurement_anchor_ns": 6115868113686,
+      "measurement_start_wall_time": 1792228580.704802,
+      "settling_reads": 2,
+      "sampling_holes": [],
+      "empty_sample_indices": [],
+      "latency_statistics_may_include_unobserved_bridges": false,
+      "observed_span_seconds": 12.278949904
+    },
+    {
+      "run": 2,
+      "frames": 720,
+      "interval_count": 720,
+      "fps": 59.60881801103266,
+      "refresh_ms": 16.683333,
+      "p50_ms": 16.683355,
+      "p90_ms": 16.683577,
+      "p95_ms": 16.683705,
+      "p99_ms": 16.683896,
+      "worst_ms": 33.366907,
+      "missed_refresh_percent": 0.5555555555555556,
+      "duration_seconds": 12,
+      "layer": "org.worldfoundry.wf_game.aquarium/android.app.NativeActivity#439",
+      "measurement_anchor_ns": 6164399995844,
+      "measurement_start_wall_time": 1792228629.228609,
+      "settling_reads": 2,
+      "sampling_holes": [],
+      "empty_sample_indices": [],
+      "latency_statistics_may_include_unobserved_bridges": false,
+      "observed_span_seconds": 12.078749823
+    },
+    {
+      "run": 3,
+      "frames": 722,
+      "interval_count": 722,
+      "fps": 59.60972897007989,
+      "refresh_ms": 16.683333,
+      "p50_ms": 16.683354,
+      "p90_ms": 16.683564,
+      "p95_ms": 16.683674,
+      "p99_ms": 16.683866,
+      "worst_ms": 33.366847,
+      "missed_refresh_percent": 0.554016620498615,
+      "duration_seconds": 12,
+      "layer": "org.worldfoundry.wf_game.aquarium/android.app.NativeActivity#454",
+      "measurement_anchor_ns": 6211080025369,
+      "measurement_start_wall_time": 1792228675.9131482,
+      "settling_reads": 2,
+      "sampling_holes": [],
+      "empty_sample_indices": [],
+      "latency_statistics_may_include_unobserved_bridges": false,
+      "observed_span_seconds": 12.112116805
+    }
+  ],
+  "median": {
+    "fps": 59.60972897007989
+  }
+}
