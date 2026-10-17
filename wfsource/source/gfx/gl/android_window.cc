@@ -24,7 +24,7 @@
 #include <hal/android/wf_android_export.hp>
 #include <hal/phonepad/phonepad_overlay.h>
 #include <hal/android/touch_controls.h>
-#include "../../../../engine/vendor/stb_easy_font.h"
+#include <game/ui_font.hp>
 
 extern "C" void WFAndroidTouchLayout(int,int,androidtouch::Layout*,uint32_t*,float*,float*);
 
@@ -369,6 +369,7 @@ WFAndroidDrawHUD()
 
     // Rendering and input use the same density-aware control geometry.
     std::vector<HudVert> verts;
+    std::vector<bitmaptext::Quad> glyphs;
     androidtouch::Layout layout;uint32_t held=0;float stickX=0,stickY=0;
     WFAndroidTouchLayout(w,h,&layout,&held,&stickX,&stickY);
     if(!layout.valid)return;
@@ -386,17 +387,12 @@ WFAndroidDrawHUD()
         const float alpha=(held&control.bit)?0.85f:0.55f;
         PushHudRect(verts,r.x0,r.y0,r.x1,r.y1,fw,fh,
                     action?0.20f:0.38f,action?0.28f:0.38f,action?0.43f:0.38f,alpha);
-        float text[256];
-        const int count=stb_easy_font_print(0,0,(char*)control.label,nullptr,text,sizeof(text));
-        const float scale=(r.x1-r.x0)/16;
-        const float x=(r.x0+r.x1-stb_easy_font_width((char*)control.label)*scale)/2;
-        const float y=(r.y0+r.y1-8*scale)/2;
-        for(int q=0;q<count;++q) {
-            const float* v=text+q*16;
-            float x0=v[0],x1=v[0],y0=v[1],y1=v[1];
-            for(int k=1;k<4;++k){x0=std::min(x0,v[k*4]);x1=std::max(x1,v[k*4]);y0=std::min(y0,v[k*4+1]);y1=std::max(y1,v[k*4+1]);}
-            PushHudRect(verts,x+x0*scale,y+y0*scale,x+x1*scale,y+y1*scale,fw,fh,1,1,1,0.95f);
-        }
+        // The label in the UI font's SemiBold 36 (game/ui_font.hp), centred, its capitals as
+        // tall as the old stroke font's (7/16 of the button's width).
+        wfui::Transform t;
+        t.s=7.0f*(r.x1-r.x0)/16.0f/(0.7f*36.0f);
+        t.ox=(r.x0+r.x1)*0.5f;t.oy=(r.y0+r.y1)*0.5f;
+        wfui::TextBytes(glyphs,0,0,wfui::BodyBold,0xFFFFFFF2u,control.label,std::strlen(control.label),wfui::Middle,wfui::Centre,t);
     }
 
     // Save minimal GL state we'll touch.
@@ -425,10 +421,12 @@ WFAndroidDrawHUD()
     if (!prevBlend) glDisable(GL_BLEND);
     if ( prevDepth) glEnable(GL_DEPTH_TEST);
     if ( prevCull)  glEnable(GL_CULL_FACE);
+    wfui::Draw(glyphs, w, h);
 }
 
 // Defined in hal/android/native_app_entry.cc.
-extern "C" int WFAndroidPhoneOverlayRects(int w, int h, const PhonepadRect** rects, int* changed);
+extern "C" int WFAndroidPhoneOverlayRects(int w, int h, const PhonepadRect** rects, int* changed,
+                                          const bitmaptext::Quad** glyphs, int* glyphCount);
 
 // The phone-controller panel and toasts (Phase E of docs/plans/2026-09-30-aquarium-chromecast.md),
 // drawn over the game like the touch HUD but also on TV, where the HUD is off.
@@ -439,8 +437,9 @@ WFAndroidDrawPhoneOverlay()
     const int h = _halWindowHeight;
     if (w <= 0 || h <= 0) return;
     const PhonepadRect* rects = nullptr;
-    int changed = 0;
-    const int n = WFAndroidPhoneOverlayRects(w, h, &rects, &changed);
+    const bitmaptext::Quad* glyphs = nullptr;
+    int changed = 0, glyphCount = 0;
+    const int n = WFAndroidPhoneOverlayRects(w, h, &rects, &changed, &glyphs, &glyphCount);
     if (n <= 0) { gPhoneVerts = 0; return; }
 
     HudInit();
@@ -492,6 +491,7 @@ WFAndroidDrawPhoneOverlay()
     if (!prevBlend) glDisable(GL_BLEND);
     if ( prevDepth) glEnable(GL_DEPTH_TEST);
     if ( prevCull)  glEnable(GL_CULL_FACE);
+    wfui::Draw(glyphs, glyphCount, w, h);
 }
 
 // The level menu (game/level_menu.h; docs/plans/2026-10-01-level-menu-selector.md):

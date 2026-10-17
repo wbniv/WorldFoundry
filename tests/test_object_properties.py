@@ -39,7 +39,7 @@ def test_missing_oad_field_rejected():
 
 def test_colour_text_and_notes_ui(catalog,tmp_path):
     path=tmp_path/'properties';path.write_bytes(catalog);exe=tmp_path/'controls'
-    subprocess.run(['c++','-std=c++17','-I'+str(ROOT/'wfsource/source'),str(ROOT/'tests/runtime_property_controls_test.cpp'),str(ROOT/'wfsource/source/game/runtime_property_ui.cc'),str(ROOT/'wfsource/source/game/runtime_settings_ui.cc'),str(ROOT/'engine/runtime_properties.cpp'),str(ROOT/'engine/runtime_property_form.cpp'),str(ROOT/'engine/runtime_property_host.cpp'),str(ROOT/'wftools/wf_attr_edit/target/release/libwf_attr_edit.a'),'-ldl','-lpthread','-lm','-o',str(exe)],check=True)
+    subprocess.run(['c++','-std=c++17','-I'+str(ROOT/'wfsource/source'),str(ROOT/'tests/runtime_property_controls_test.cpp'),str(ROOT/'wfsource/source/game/runtime_property_ui.cc'),str(ROOT/'wfsource/source/game/runtime_settings_ui.cc'),str(ROOT/'wfsource/source/game/ui_font.cc'),str(ROOT/'wfsource/source/game/bitmap_text.cc'),str(ROOT/'engine/runtime_properties.cpp'),str(ROOT/'engine/runtime_property_form.cpp'),str(ROOT/'engine/runtime_property_host.cpp'),str(ROOT/'wftools/wf_attr_edit/target/release/libwf_attr_edit.a'),'-ldl','-lpthread','-lm','-o',str(exe)],check=True)
     subprocess.run([exe,path,tmp_path],check=True)
 
 def test_explicit_notes_binding_uses_multiline_string(tmp_path):

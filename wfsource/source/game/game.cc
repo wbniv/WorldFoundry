@@ -678,6 +678,7 @@ WFGame::StepFrame(bool do_swap, Scalar* out_dt)
 			_display->GetSurfaceSize(w, h);
 			const int count = _fpsOverlay.Build(_curLevel->GetMailboxes().ReadMailbox(EMAILBOX_FRAMERATE), w, h);
 			RendererBackendGet().DrawOverlay(_fpsOverlay.Rects(), count, w, h);
+			wfui::Draw(_fpsOverlay.Glyphs(), w, h);
 		}
 		_display->RenderEnd();
 	}
@@ -929,6 +930,7 @@ WFGame::RunLevelMenu()
 
 	IJoystick stick = JoystickNew(EJW_JOYSTICK1);
 	std::vector<PhonepadRect> rects;
+	std::vector<bitmaptext::Quad> glyphs;
 	_display->ResetTime();
 	int64_t nowMs = 0;
 	int lastCursor = menu.Cursor();
@@ -981,9 +983,13 @@ WFGame::RunLevelMenu()
 			break;
 		int w = 0, h = 0;
 		_display->GetSurfaceSize(w, h);
-        if(wfprops::host().modal)propertyui::buildHost(w,h,rects);else menu.Build(w, h, &rects);
+        // The settings screens rebuild every frame; the menu only when it changed, so it
+        // must rebuild once they close (they share the rectangle and glyph lists).
+        if(wfprops::host().modal){rects.clear();glyphs.clear();propertyui::buildHost(w,h,rects,&glyphs);menu.Invalidate();}
+        else menu.Build(w, h, &rects, &glyphs);
 		_display->RenderBegin();
 		Drawer()(rects.data(), int(rects.size()), w, h);
+		wfui::Draw(glyphs, w, h);		// the text, over the rectangles (game/ui_font.hp)
 		_display->RenderEnd();
 		nowMs += int64_t(_display->PageFlip().AsFloat() * 1000.0f);	// also pumps the window's input
 	}

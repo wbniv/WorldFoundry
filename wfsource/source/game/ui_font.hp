@@ -1,0 +1,102 @@
+//==============================================================================
+// game/ui_font.hp — the engine's one UI font (Atkinson Hyperlegible Next)
+// Copyright ( c ) 2026 World Foundry Group
+// This program is free software; you can redistribute it and/or modify it
+// under the terms of the GNU General Public License Version 2.
+// This program is distributed without ANY WARRANTY. See www.fsf.org.
+//==============================================================================
+// Description: every engine-drawn UI string (the level menu, the settings
+// editor, the planted-tank HUD, the phone pairing overlay, the desktop HUD,
+// the touch labels and the FPS counter) is laid out here over one shared
+// pre-rendered atlas, ui-font.wfga (WFGA v1, baked by scripts/bake-ui-font.py
+// and packed into every cd.iff by cdpack as the UIFT chunk). The runtime never
+// rasterizes a TTF. Plan: docs/plans/2026-10-17-settings-editor-font.md.
+//
+// Layout is portable (this header and ui_font.cc; the host test harnesses
+// compile them with no engine). Loading the bundle from cd.iff and drawing
+// the quads live in ui_font_engine.cc.
+//==============================================================================
+#ifndef _UI_FONT_HP
+#define _UI_FONT_HP
+
+#include "bitmap_text.hp"
+#include <stddef.h>
+#include <stdint.h>
+#include <string>
+#include <vector>
+
+namespace wfui
+{
+// The seven variants of the bake (F3), sized for the 1920x1080 logical canvas.
+// The numbers are the variant ids in ui-font.wfga.
+enum Variant { Small = 0, Body, BodyBold, Title, Menu, MenuBold, Display, VariantCount };
+
+// Horizontal: x is the left edge, the centre or the right edge of the advance box.
+enum Align { Left = 0, Centre, Right };
+// Vertical: y is the ascender line (Pillow's "a" anchor), the middle between
+// ascender and descender (Pillow's "m"; for this font that is also the middle
+// of the capitals) or the baseline.
+enum Anchor { Top = 0, Middle, Baseline };
+
+// Canvas units to surface pixels: surface = (ox, oy) + canvas * s.
+struct Transform { float s = 1, ox = 0, oy = 0; };
+
+// The tag of the cd.iff chunk that carries ui-font.wfga (cdpack writes it last).
+constexpr uint32_t kChunkTag = uint32_t('U') | uint32_t('I') << 8 | uint32_t('F') << 16 | uint32_t('T') << 24;
+constexpr const char* kFileName = "ui-font.wfga";
+
+// Validates a WFGA bundle as the UI font: Catalog::Load, seven variants with
+// the faces and sizes above, and '?' in every variant. The bytes must outlive
+// the process's use of the font (the engine keeps them for its lifetime).
+bool Load(const void* bytes, size_t size, const char*& error);
+bool Loaded();
+void Unload();   // tests only
+const bitmaptext::Catalog& Catalog();
+
+// Metrics of a variant in canvas pixels.
+float Ascent(Variant v);
+float Descent(Variant v);
+float LineHeight(Variant v);
+
+// The advance width of a UTF-8 string: the sum of the glyph advances plus the
+// kerning between neighbours, in canvas pixels. A code point the atlas lacks
+// measures (and draws) as '?'.
+float Width(Variant v, const char* utf8, size_t bytes);
+inline float Width(Variant v, const std::string& utf8) { return Width(v, utf8.data(), utf8.size()); }
+
+// Appends one textured quad per visible glyph to `out`, positioned in surface
+// pixels. Returns the advance width in canvas pixels. (TextBytes takes a pointer
+// and a length; it has its own name so an Anchor can never pass for a length.)
+float TextBytes(std::vector<bitmaptext::Quad>& out, float x, float y, Variant v, uint32_t rgba,
+                const char* utf8, size_t bytes, Anchor anchor = Top, Align align = Left,
+                const Transform& t = Transform());
+inline float Text(std::vector<bitmaptext::Quad>& out, float x, float y, Variant v, uint32_t rgba,
+                  const std::string& utf8, Anchor anchor = Top, Align align = Left,
+                  const Transform& t = Transform())
+{
+    return TextBytes(out, x, y, v, rgba, utf8.data(), utf8.size(), anchor, align, t);
+}
+
+// The longest prefix of `utf8` (cut at a code point) whose width plus
+// `suffix`'s fits in `maxWidth`, with `suffix` appended when anything was cut.
+std::string Fit(Variant v, const std::string& utf8, float maxWidth, const char* suffix = "...");
+
+// ---- engine side (ui_font_engine.cc) -----------------------------------------
+// Reads the UIFT chunk of cd.iff through HALGetAssetAccessor and validates it.
+// A -L run (levelOverride) plays no cd.iff, so it also accepts a bare
+// ui-font.wfga asset (the web build) and, on the Linux desktop, the source
+// tree's wfsource/source/game/ui-font.wfga. On any failure it prints exactly
+// one "UI_FONT unavailable: <reason>" line and exits non-zero (F6: there is
+// no fallback font). Idempotent.
+void LoadOrDie(bool levelOverride);
+// Draws quads made by Text over a width x height surface with
+// RendererBackend::DrawGlyphs. Creates the atlas texture on first use and
+// re-creates it whenever the backend's TextureGeneration() changes.
+void Draw(const bitmaptext::Quad* quads, int count, int width, int height);
+inline void Draw(const std::vector<bitmaptext::Quad>& quads, int width, int height)
+{
+    Draw(quads.data(), int(quads.size()), width, height);
+}
+}
+
+#endif

@@ -35,10 +35,15 @@ UP, DOWN, RIGHT, LEFT = 1 << 11, 1 << 12, 1 << 13, 1 << 14
 QRCODEGEN = REPO / "engine" / "vendor" / "qrcodegen-3c6d0b3c" / "qrcodegen.c"
 
 
+GAME = REPO / "wfsource" / "source" / "game"
+UI_FONT = GAME / "ui-font.wfga"
+
+
 def host_sources() -> list[Path]:
-    """Exactly what CMakeLists.txt adds to the Android library for the phone controller, plus the host's main."""
+    """Exactly what CMakeLists.txt adds to the Android library for the phone controller, plus the host's main and the
+    UI font the overlay's text is laid out in (game/ui_font.cc over bitmap_text.cc, reading the committed bake)."""
     return ([PHONEPAD / "phonepad.cc", PHONEPAD / "host" / "phonepad_host.cc"] + sorted(PHONEPAD.glob("phonepad_*.cc"))
-            + [QRCODEGEN])
+            + [QRCODEGEN, GAME / "ui_font.cc", GAME / "bitmap_text.cc"])
 
 
 def build_host(out_dir: Path, extra: list[Path] | None = None) -> Path:
@@ -53,7 +58,10 @@ def build_host(out_dir: Path, extra: list[Path] | None = None) -> Path:
             cc = shutil.which(os.environ.get("CC", "gcc")) or shutil.which("cc")
             cmd = [cc, "-std=c99", *flags, "-c", str(src), "-o", str(obj)]
         else:
-            cmd = [cxx, "-std=c++17", *flags, "-c", str(src), "-o", str(obj)]
+            # bitmap_text.cc is the engine's reader, unchanged: its one-line loops trip -Wmisleading-indentation.
+            extra_flags = (["-Wno-misleading-indentation"] if src.name == "bitmap_text.cc"
+                           else [f'-DWF_UI_FONT_SOURCE_PATH="{UI_FONT}"'] if src.name == "phonepad_host.cc" else [])
+            cmd = [cxx, "-std=c++17", *flags, *extra_flags, "-c", str(src), "-o", str(obj)]
         subprocess.run(cmd, check=True)
         objs.append(str(obj))
     subprocess.run([cxx, "-fsanitize=address,undefined", *objs, "-o", str(exe)], check=True)
@@ -229,7 +237,8 @@ def ws_accept(key: str) -> str:
 
 
 def overlay_rects(host: "Host", w: int, h: int, t: int):
-    """Ask the host's overlay for its rectangles: (changed, [(x0, y0, x1, y1, (r, g, b, a)), ...])."""
+    """Ask the host's overlay for its rectangles: (changed, [(x0, y0, x1, y1, (r, g, b, a)), ...]). The text's glyph
+    quads that follow go to host.glyphs: [(x0, y0, x1, y1, u0, v0, u1, v1, (r, g, b, a)), ...]."""
     host.command(f"ov-rects {w} {h} {t}")
     m = host.expect(r"^RECTS (\d+) changed=(\d)$")
     rects = []
@@ -237,7 +246,27 @@ def overlay_rects(host: "Host", w: int, h: int, t: int):
         r = host.expect(r"^R (\S+) (\S+) (\S+) (\S+) ([0-9a-f]{8})$")
         c = int(r.group(5), 16)
         rects.append((*map(float, r.groups()[:4]), (c >> 24, (c >> 16) & 255, (c >> 8) & 255, c & 255)))
+    host.glyphs = []
+    for _ in range(int(host.expect(r"^GLYPHS (\d+)$").group(1))):
+        g = host.expect(r"^G " + r"(\S+) " * 8 + r"([0-9a-f]{8})$")
+        c = int(g.group(9), 16)
+        host.glyphs.append((*map(float, g.groups()[:8]), (c >> 24, (c >> 16) & 255, (c >> 8) & 255, c & 255)))
     return m.group(2) == "1", rects
+
+
+def render_glyphs(image, glyphs):
+    """Draw glyph quads onto a PIL image the way the GL side does: the atlas's coverage scales the colour's alpha."""
+    from PIL import Image
+    import struct as _struct
+    data = UI_FONT.read_bytes()
+    width, height, variants, count, kerns = _struct.unpack_from("<5i", data, 8)
+    atlas = Image.frombytes("L", (width, height), data[64 + 24 * variants + 36 * count + 16 * kerns:])
+    for x0, y0, x1, y1, u0, v0, u1, v1, rgba in glyphs:
+        box = (round(u0 * width), round(v0 * height), round(u1 * width), round(v1 * height))
+        size = (max(1, round(x1 - x0)), max(1, round(y1 - y0)))
+        mask = atlas.crop(box).resize(size, Image.NEAREST).point(lambda a: a * rgba[3] // 255)
+        image.paste(Image.new("RGBA", size, rgba), (round(x0), round(y0)), mask)
+    return image
 
 
 def render_rects(rects, w: int, h: int, background: Path | None = None):

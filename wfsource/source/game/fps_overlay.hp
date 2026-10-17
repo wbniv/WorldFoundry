@@ -26,25 +26,29 @@
 
 #include <math/scalar.hp>
 #include <hal/phonepad/phonepad_overlay.h>
+#include <game/ui_font.hp>
+#include <vector>
 
 namespace fpscounter
 {
 extern bool enabled;
 
-// Cached text geometry in surface pixels, independent of the game HUD.
+// Cached geometry in surface pixels, independent of the game HUD: one backing
+// plate (Rects) and the number in the UI font's small variant (Glyphs, for
+// wfui::Draw). The UI font must be loaded.
 class Overlay
 {
 public:
 	int Build(Scalar fps, int width, int height);
 	const PhonepadRect* Rects() const { Validate(); return _rects; }
+	const std::vector<bitmaptext::Quad>& Glyphs() const { Validate(); return _glyphs; }
 	void Validate() const;
 	const char* Text() const { Validate(); return _text; }
 private:
 	char _text[32] = "";
 	int _width = 0, _height = 0;
-	enum { MAX_QUADS = 128 };
-	PhonepadRect _rects[MAX_QUADS + 1];
-	float _vertices[MAX_QUADS * 16];
+	PhonepadRect _rects[1];
+	std::vector<bitmaptext::Quad> _glyphs;
 	int _count = 0;
 };
 }

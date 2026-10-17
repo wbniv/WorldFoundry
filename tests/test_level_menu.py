@@ -28,7 +28,8 @@ from pathlib import Path
 import pytest
 
 from level_menu_harness import (GAME, LEVELS, PLAIN_BUNDLES, REPO, SHELL, SHELL_MENU, SMB_LEVELS, SMB_MANIFEST,
-                                SMB_MENU_BUNDLE, build_host, cdpack, read_menu, read_toc, rects, run_host, states)
+                                SMB_MENU_BUNDLE, build_host, cdpack, glyphs, read_menu, read_toc, rects, run_host,
+                                states)
 
 SHOTS = Path.home() / "tmp" / "level-menu"
 A, UP, DOWN = 0x1, 0x800, 0x1000
@@ -53,8 +54,11 @@ def test_menu_bundle_is_current_and_keeps_the_smb_indices(tmp_path):
 
     plain = (LEVELS / "smb-cd.iff").read_bytes()
     toc, plain_toc = read_toc(data), read_toc(plain)
-    assert [t[0] for t in toc] == [b"SHEL"] + [e[0] for e in plain_toc[1:]] + [b"MENU"]
+    assert [t[0] for t in toc] == [b"SHEL"] + [e[0] for e in plain_toc[1:-1]] + [b"MENU", b"UIFT"]
     assert toc[1:5] == plain_toc[1:5], "the four levels must sit at smb-cd.iff's TOC offsets (the flag/axe chain)"
+    ui = toc[-1]
+    assert data[ui[1]:ui[1] + ui[2]] == b"UIFT" + (ui[2] - 8).to_bytes(4, "little") + (GAME / "ui-font.wfga").read_bytes(), \
+        "the UI font (docs/plans/2026-10-17-settings-editor-font.md) is packed last"
     for (_, off, size), name in zip(toc[1:5], SMB_LEVELS):
         assert data[off:off + size] == (LEVELS / name).read_bytes()
     shel = data[2048:2048 + 8 + toc[0][2]]
@@ -182,8 +186,9 @@ def test_host_cuts_a_long_name(host):
     assert "ROW Level 4" in out
     _, rs = rects(out)
     bar = next(r for r in rs if r[4] == BAR)
-    text = [r for r in rs if r[4] == (255, 255, 255, 255) and bar[1] <= r[1] < bar[3]]
-    assert text and max(r[2] for r in text) <= bar[2] - 20, "the cut name stays inside the highlight bar"
+    text = [g for g in glyphs(out) if g[-1] == (255, 255, 255, 255) and bar[1] <= g[1] < bar[3]]
+    assert text and max(g[2] for g in text) <= bar[2] - 20, "the cut name stays inside the highlight bar"
+    assert all(bar[1] < g[1] and g[3] < bar[3] for g in text), "and inside it top to bottom"
 
 
 def test_host_geometry(host):
@@ -200,12 +205,19 @@ def test_host_geometry(host):
     assert bar == [(360.0, 500.0, 1560.0, 592.0, BAR)], "the highlight on row 3 (World 1-3)"
     assert [r for r in big if r[4] == EDGE] == [(360.0, 500.0, 374.0, 592.0, EDGE)]
     assert all(abs(s[2] - b[2] * 2 / 3) < 0.05 and abs(s[3] - b[3] * 2 / 3) < 0.05 for s, b in zip(small, big))
+    # The text: one quad per visible character, on whole pixels, scaling by 2/3 to within a pixel.
+    big_text, small_text = glyphs(out[:blocks[1]]), glyphs(out)
+    title = [g for g in big_text if g[-1] == (0xFF, 0xB4, 0x54, 255)]
+    assert len(title) == len("WFSMB"), "the title, 'WF SMB', in the title colour"
+    assert abs((min(g[0] for g in title) + max(g[2] for g in title)) / 2 - 960) < 12, "centred"
+    assert len(small_text) == len(big_text) and all(g[0] == int(g[0]) and g[1] == int(g[1]) for g in big_text)
+    assert all(abs(s[0] - b[0] * 2 / 3) <= 1 and abs(s[1] - b[1] * 2 / 3) <= 1 for s, b in zip(small_text, big_text))
 
 
 def test_host_renders_the_states(host):
     """Composited pictures of the real rectangles, for comparison with the plan's mockups."""
     pil = pytest.importorskip("PIL")
-    from phonepad_harness import render_rects
+    from phonepad_harness import render_glyphs, render_rects
     SHOTS.mkdir(parents=True, exist_ok=True)
     cases = {
         "default": [f"bundle {SMB_MENU_BUNDLE}", "menu 0"],
@@ -215,8 +227,8 @@ def test_host_renders_the_states(host):
         "tv-hint": [f"bundle {SMB_MENU_BUNDLE}", "menu 1 tv"],
     }
     for name, cmds in cases.items():
-        _, rs = rects(run_host(host, [*cmds, "rects 1280 720"]))
-        render_rects(rs, 1280, 720).save(SHOTS / f"{name}.png")
+        out = run_host(host, [*cmds, "rects 1280 720"])
+        render_glyphs(render_rects(rects(out)[1], 1280, 720), glyphs(out)).save(SHOTS / f"{name}.png")
     assert pil and len(list(SHOTS.glob("*.png"))) >= len(cases)
 
 

@@ -8,10 +8,13 @@
 //!   Sector 1 (2048 B): SHEL<script> + ALGN<pad>
 //!   Sector 2+        : each level IFF, sector-aligned
 //!   (--manifest only) : one more TOC entry and chunk, MENU, after the last level
+//!   last              : UIFT, the engine's UI font atlas (ui-font.wfga), the last TOC entry
 //!
-//! Without --manifest the output is exactly what it always was (tests/test_level_menu.py
-//! pins it against the tracked bundles). The manifest names the levels for the level menu
-//! (wfsource/source/game/level_menu.cc); see docs/plans/2026-10-01-level-menu-selector.md.
+//! The manifest names the levels for the level menu (wfsource/source/game/level_menu.cc); see
+//! docs/plans/2026-10-01-level-menu-selector.md. Every bundle carries the UI font: by default
+//! ui-font.wfga from the SHEL script's directory (wfsource/source/game/, where
+//! scripts/bake-ui-font.py writes it), or --ui-font <path>; the engine stops at start-up without
+//! it (docs/plans/2026-10-17-settings-editor-font.md). --no-ui-font leaves it out, for that test.
 
 use std::fs;
 use std::io::Write;
@@ -128,7 +131,10 @@ const USAGE: &str = "Usage: cdpack <shel.fth> <L0.iff> [<L1.iff> ...] -o <cd.iff
                      cdpack <shel.fth> --manifest <menu.manifest> -o <cd.iff>\n\n\
                      --manifest  levels and their menu names, one `level <path> | <name>` per line\n            \
                      (paths relative to the manifest), optional `title <text>` and `prompt <text>`;\n            \
-                     adds a MENU chunk after the levels (docs/plans/2026-10-01-level-menu-selector.md)";
+                     adds a MENU chunk after the levels (docs/plans/2026-10-01-level-menu-selector.md)\n\
+                     --ui-font   the UI font atlas packed last as the UIFT chunk (default: ui-font.wfga\n            \
+                     beside the SHEL script; docs/plans/2026-10-17-settings-editor-font.md)\n\
+                     --no-ui-font  leave the UI font out (a bundle the engine refuses, for its test)";
 
 fn usage() -> ! {
     eprintln!("{}", USAGE);
@@ -150,6 +156,8 @@ fn main() {
     let mut level_paths: Vec<String> = Vec::new();
     let mut out_path: Option<&str> = None;
     let mut manifest_path: Option<&str> = None;
+    let mut ui_font_path: Option<String> = None;
+    let mut no_ui_font = false;
 
     let mut i = 2;
     while i < args.len() {
@@ -167,6 +175,15 @@ fn main() {
                 process::exit(1);
             }
             manifest_path = Some(&args[i]);
+        } else if args[i] == "--ui-font" {
+            i += 1;
+            if i >= args.len() {
+                eprintln!("error: --ui-font requires a file argument");
+                process::exit(1);
+            }
+            ui_font_path = Some(args[i].clone());
+        } else if args[i] == "--no-ui-font" {
+            no_ui_font = true;
         } else {
             level_paths.push(args[i].clone());
         }
@@ -198,6 +215,26 @@ fn main() {
         process::exit(1);
     });
 
+    // The UI font atlas: a WFGA v1 bundle (scripts/bake-ui-font.py), packed as the UIFT chunk.
+    let ui_font_path = ui_font_path.unwrap_or_else(|| {
+        Path::new(shel_path).parent().unwrap_or_else(|| Path::new(".")).join("ui-font.wfga").to_string_lossy().into_owned()
+    });
+    let ui_font: Option<Vec<u8>> = if no_ui_font { None } else {
+        let bytes = fs::read(&ui_font_path).unwrap_or_else(|e| {
+            eprintln!("error: reading the UI font {}: {} (bake it with scripts/bake-ui-font.py, or pass --ui-font)", ui_font_path, e);
+            process::exit(1);
+        });
+        if bytes.len() < 64 || &bytes[0..4] != b"WFGA" {
+            eprintln!("error: {} is not a WFGA atlas", ui_font_path);
+            process::exit(1);
+        }
+        let mut chunk = Vec::with_capacity(8 + bytes.len());
+        write_tag(&mut chunk, b"UIFT");
+        write_u32_le(&mut chunk, bytes.len() as u32);
+        chunk.extend_from_slice(&bytes);
+        Some(chunk)
+    };
+
     let level_data: Vec<Vec<u8>> = level_paths.iter().map(|p| {
         fs::read(p).unwrap_or_else(|e| {
             eprintln!("error: reading {}: {}", p, e);
@@ -222,9 +259,15 @@ fn main() {
     if let Some(m) = &menu {
         cur += (m.len() + SECTOR - 1) / SECTOR * SECTOR;
     }
+    // The UI font goes last of all, so the levels and MENU keep their places.
+    let ui_font_offset = cur;
+    if let Some(f) = &ui_font {
+        cur += (f.len() + SECTOR - 1) / SECTOR * SECTOR;
+    }
     let total_file_size = cur;
 
-    let n_entries = 1 + level_data.len() + menu.is_some() as usize;   // SHEL + N levels (+ MENU)
+    // SHEL + N levels (+ MENU) (+ UIFT)
+    let n_entries = 1 + level_data.len() + menu.is_some() as usize + ui_font.is_some() as usize;
     let toc_data_len = n_entries * 12;           // 12 bytes per entry
 
     // ── Sector 0: GAME header + TOC chunk + ALGN padding ────────────────────
@@ -261,6 +304,11 @@ fn main() {
         write_tag(&mut sector0, b"MENU");
         write_u32_le(&mut sector0, menu_offset as u32);
         write_u32_le(&mut sector0, m.len() as u32);
+    }
+    if let Some(f) = &ui_font {
+        write_tag(&mut sector0, b"UIFT");
+        write_u32_le(&mut sector0, ui_font_offset as u32);
+        write_u32_le(&mut sector0, f.len() as u32);
     }
 
     // ALGN chunk to fill the rest of sector 0
@@ -307,6 +355,11 @@ fn main() {
         let pad = (m.len() + SECTOR - 1) / SECTOR * SECTOR - m.len();
         out.write_all(&vec![0u8; pad]).unwrap();
     }
+    if let Some(f) = &ui_font {
+        out.write_all(f).unwrap();
+        let pad = (f.len() + SECTOR - 1) / SECTOR * SECTOR - f.len();
+        out.write_all(&vec![0u8; pad]).unwrap();
+    }
 
     let meta = fs::metadata(out_path).unwrap();
     eprintln!("cdpack: wrote {} bytes to {}", meta.len(), out_path);
@@ -320,5 +373,9 @@ fn main() {
     }
     if let (Some(m), Some(man)) = (&menu, &manifest) {
         eprintln!("  MENU: {} bytes at sector {} (\"{}\", {} entries)", m.len(), menu_offset / SECTOR, man.title, man.levels.len());
+    }
+    match &ui_font {
+        Some(f) => eprintln!("  UIFT: {} bytes at sector {} ({})", f.len(), ui_font_offset / SECTOR, ui_font_path),
+        None => eprintln!("  UIFT: none (--no-ui-font): the engine refuses this bundle"),
     }
 }

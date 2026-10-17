@@ -20,17 +20,6 @@
 #include <cstdlib>
 #include <cstring>
 
-#if defined(__GNUC__)
-#pragma GCC diagnostic push
-#pragma GCC diagnostic ignored "-Wunused-function"
-#pragma GCC diagnostic ignored "-Wsign-compare"
-#pragma GCC diagnostic ignored "-Wcast-align"
-#endif
-#include "../../../engine/vendor/stb_easy_font.h"
-#if defined(__GNUC__)
-#pragma GCC diagnostic pop
-#endif
-
 namespace levelmenu
 {
 
@@ -46,10 +35,14 @@ constexpr uint32_t kSelBar  = 0x23406BFFu;
 constexpr uint32_t kSelEdge = 0x56D364FFu;
 constexpr uint32_t kSelText = 0xFFFFFFFFu;
 
-// The 1920x1080 canvas.
+// The 1920x1080 canvas (docs/plans/2026-10-17-settings-editor-font/menu.html, mockup 10).
 constexpr float kListX0 = 360, kListX1 = 1560, kListY = 300, kRowH = 92, kRowGap = 8;
-constexpr float kRowTextX = kListX0 + 48, kRowTextScale = 6.0f;
+constexpr float kRowTextX = kListX0 + 46;
 constexpr float kRowTextMaxW = kListX1 - 24 - kRowTextX;
+// The UI font's variants: SemiBold 80 title, Regular 56 rows (SemiBold 56 selected),
+// Regular 36 subtitle, counter and hint (Regular 28 if the hint is too wide).
+constexpr wfui::Variant kTitleFont = wfui::Display, kRowFont = wfui::Menu, kSelFont = wfui::MenuBold;
+constexpr wfui::Variant kSubFont = wfui::Body;
 
 uint32_t U32(const uint8_t* p) { return uint32_t(p[0]) | uint32_t(p[1]) << 8 | uint32_t(p[2]) << 16 | uint32_t(p[3]) << 24; }
 uint16_t U16(const uint8_t* p) { return uint16_t(p[0] | p[1] << 8); }
@@ -62,60 +55,47 @@ bool Drawable(const std::string& s)
     return true;
 }
 
-// stb_easy_font writes floats through a char*, so the buffer must be float aligned
-// (an unaligned VFP store faults on 32-bit ARM). ~270 bytes per character.
-float gTextBuf[16384];
-
-float TextWidth(const std::string& text, float scale)
+// The text's width in canvas units; the remote's Back symbol (remoteui::kBackArrow) is
+// a drawn arrow, as the font has none.
+float TextWidth(const std::string& text, wfui::Variant v)
 {
     const auto arrow = text.find(remoteui::kBackArrow);
     if (arrow != std::string::npos)
-        return TextWidth(text.substr(0, arrow), scale) + remoteui::kBackArrowAdvance * scale
-             + TextWidth(text.substr(arrow + 3), scale);
-    stb_easy_font_spacing(-0.5f);   // as the phone panel: the 1-pixel gap looks loose scaled up
-    return float(stb_easy_font_width(const_cast<char*>(text.c_str()))) * scale;
+        return TextWidth(text.substr(0, arrow), v) + remoteui::BackArrowAdvance(v)
+             + TextWidth(text.substr(arrow + 3), v);
+    return wfui::Width(v, text);
 }
 
 // Canvas units -> surface pixels, with the canvas centred when the aspect differs.
 struct Painter
 {
     std::vector<PhonepadRect>* out;
+    std::vector<bitmaptext::Quad>* glyphs;
     float s, ox, oy;
 
     void Rect(float x0, float y0, float x1, float y1, uint32_t rgba)
     {
         out->push_back({ox + x0 * s, oy + y0 * s, ox + x1 * s, oy + y1 * s, rgba});
     }
-    // ASCII text with its top-left at (x, y), `scale` canvas units per font pixel.
-    void Text(float x, float y, float scale, uint32_t rgba, const std::string& text)
+    // Text whose left edge is x and whose middle (the capitals' middle) is cy.
+    void Text(float x, float cy, wfui::Variant v, uint32_t rgba, const std::string& text)
     {
         const auto arrow = text.find(remoteui::kBackArrow);
         if (arrow != std::string::npos) {
             const auto prefix = text.substr(0, arrow);
-            Text(x, y, scale, rgba, prefix);
-            x += TextWidth(prefix, scale);
-            remoteui::BackArrow(*this, x, y, scale, rgba);
-            Text(x + remoteui::kBackArrowAdvance * scale, y, scale, rgba, text.substr(arrow + 3));
+            Text(x, cy, v, rgba, prefix);
+            x += TextWidth(prefix, v);
+            remoteui::BackArrowMiddle(*this, x, cy, v, rgba);
+            Text(x + remoteui::BackArrowAdvance(v), cy, v, rgba, text.substr(arrow + 3));
             return;
         }
-        stb_easy_font_spacing(-0.5f);
-        const int quads = stb_easy_font_print(0.0f, 0.0f, const_cast<char*>(text.c_str()), nullptr, gTextBuf, int(sizeof(gTextBuf)));
-        for (int q = 0; q < quads; ++q)
-        {
-            const float* v = gTextBuf + q * 16;    // 4 vertices x (x, y, z, rgba)
-            float minx = v[0], maxx = v[0], miny = v[1], maxy = v[1];
-            for (int k = 1; k < 4; ++k)
-            {
-                const float vx = v[k * 4], vy = v[k * 4 + 1];
-                minx = vx < minx ? vx : minx;  maxx = vx > maxx ? vx : maxx;
-                miny = vy < miny ? vy : miny;  maxy = vy > maxy ? vy : maxy;
-            }
-            Rect(x + minx * scale, y + miny * scale, x + maxx * scale, y + maxy * scale, rgba);
-        }
+        wfui::Transform t;
+        t.s = s; t.ox = ox; t.oy = oy;
+        wfui::Text(*glyphs, x, cy, v, rgba, text, wfui::Middle, wfui::Left, t);
     }
-    void Centred(float y, float scale, uint32_t rgba, const std::string& text)
+    void Centred(float cy, wfui::Variant v, uint32_t rgba, const std::string& text)
     {
-        Text(960.0f - TextWidth(text, scale) / 2.0f, y, scale, rgba, text);
+        Text(960.0f - TextWidth(text, v) / 2.0f, cy, v, rgba, text);
     }
     // A triangle pointing up (dir -1) or down (+1), apex at (cx, y), made of strips.
     void Arrow(float cx, float y, int dir, uint32_t rgba)
@@ -157,11 +137,15 @@ bool ParseToc(const uint8_t* p, size_t n, std::vector<TocEntry>* out)
 
 bool FindMenu(const std::vector<TocEntry>& toc, TocEntry* menu, int* levelCount)
 {
-    // SHEL first, the levels, then MENU last (cdpack --manifest), so level n stays entry 1 + n.
-    if (toc.size() < 3 || toc.front().tag != Tag("SHEL") || toc.back().tag != Tag("MENU"))
+    // SHEL first, the levels, then MENU (cdpack --manifest), so level n stays entry 1 + n;
+    // cdpack packs the UI font (UIFT) after everything else.
+    size_t n = toc.size();
+    if (n > 0 && toc[n - 1].tag == Tag("UIFT"))
+        --n;
+    if (n < 3 || toc.front().tag != Tag("SHEL") || toc[n - 1].tag != Tag("MENU"))
         return false;
-    *menu = toc.back();
-    *levelCount = int(toc.size()) - 2;
+    *menu = toc[n - 1];
+    *levelCount = int(n) - 2;
     return true;
 }
 
@@ -299,31 +283,27 @@ void Menu::Update(uint32_t buttons, int64_t nowMs)
 
 std::string Menu::RowText(int i) const
 {
-    std::string name = bundle_.entries[size_t(i)].name;
-    if (TextWidth(name, kRowTextScale) <= kRowTextMaxW)
-        return name;
-    while (!name.empty() && TextWidth(name + "...", kRowTextScale) > kRowTextMaxW)
-        name.pop_back();
-    while (!name.empty() && name.back() == ' ')
-        name.pop_back();
-    return name + "...";
+    // Cut to the selected (SemiBold, wider) row's width, so a name reads the same
+    // whether or not the cursor is on it.
+    return wfui::Fit(kSelFont, bundle_.entries[size_t(i)].name, kRowTextMaxW);
 }
 
-bool Menu::Build(int w, int h, std::vector<PhonepadRect>* out)
+bool Menu::Build(int w, int h, std::vector<PhonepadRect>* out, std::vector<bitmaptext::Quad>* glyphs)
 {
     char key[96];
     std::snprintf(key, sizeof(key), "%dx%d c%d f%d", w, h, cursor_, first_);
     if (lastKey_ == key) return false;
     lastKey_ = key;
     out->clear();
+    glyphs->clear();
     if (w <= 0 || h <= 0) return true;
 
     const float sx = float(w) / 1920.0f, sy = float(h) / 1080.0f, s = sx < sy ? sx : sy;
-    Painter p{out, s, (float(w) - 1920.0f * s) / 2.0f, (float(h) - 1080.0f * s) / 2.0f};
+    Painter p{out, glyphs, s, (float(w) - 1920.0f * s) / 2.0f, (float(h) - 1080.0f * s) / 2.0f};
 
     out->push_back({0.0f, 0.0f, float(w), float(h), kBg});   // nothing is loaded behind the menu
-    p.Centred(70, 9.0f, kTitle, bundle_.title);
-    p.Centred(180, 5.0f, kSub, bundle_.prompt);
+    p.Centred(104, kTitleFont, kTitle, bundle_.title);
+    p.Centred(198, kSubFont, kSub, bundle_.prompt);
 
     const int n = int(bundle_.entries.size());
     for (int row = 0; row < kVisibleRows && first_ + row < n; ++row)
@@ -335,7 +315,7 @@ bool Menu::Build(int w, int h, std::vector<PhonepadRect>* out)
             p.Rect(kListX0, y, kListX1, y + kRowH, kSelBar);
             p.Rect(kListX0, y, kListX0 + 14, y + kRowH, kSelEdge);
         }
-        p.Text(kRowTextX, y + 25, kRowTextScale, i == cursor_ ? kSelText : kText, RowText(i));
+        p.Text(kRowTextX, y + kRowH / 2, i == cursor_ ? kSelFont : kRowFont, i == cursor_ ? kSelText : kText, RowText(i));
     }
     const float below = kListY + kVisibleRows * (kRowH + kRowGap);
     if (first_ > 0)
@@ -345,12 +325,9 @@ bool Menu::Build(int w, int h, std::vector<PhonepadRect>* out)
     if (n > 0)
     {
         const std::string count = std::to_string(cursor_ + 1) + " / " + std::to_string(n);
-        p.Text(kListX1 - TextWidth(count, 4.5f), below + 8, 4.5f, kSub, count);
+        p.Text(kListX1 - 8 - TextWidth(count, kSubFont), below + 24, kSubFont, kSub, count);
     }
-    float hs = 4.5f;
-    while (hs > 2.0f && TextWidth(hint_, hs) > 1800.0f)
-        hs -= 0.25f;
-    p.Centred(1000, hs, kSub, hint_);
+    p.Centred(1016, TextWidth(hint_, kSubFont) > 1800.0f ? wfui::Small : kSubFont, kSub, hint_);
     return true;
 }
 

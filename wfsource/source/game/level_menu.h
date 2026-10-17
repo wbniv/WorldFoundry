@@ -11,9 +11,11 @@
 // A (the remote's OK) starts. The chosen index goes to LEVEL_TO_RUN.
 //
 // Everything here is pure logic plus geometry, like hal/phonepad/phonepad_overlay:
-// the menu is a list of solid rectangles (text from stb_easy_font) that each
-// platform draws (desktop: gfx/gl/display.cc). The tests compile this file with
-// level_menu_host.cc on Linux and drive it with a fake clock (tests/test_level_menu.py).
+// the menu is a list of solid rectangles that each platform draws (desktop:
+// gfx/gl/display.cc) plus the text as glyph quads over the shared UI atlas
+// (game/ui_font.hp), drawn after the rectangles with wfui::Draw. The tests compile
+// this file with ui_font.cc, bitmap_text.cc and level_menu_host.cc on Linux and drive
+// it with a fake clock (tests/test_level_menu.py).
 // Plan: docs/plans/2026-10-01-level-menu-selector.md
 //=============================================================================
 
@@ -27,6 +29,7 @@
 #include <vector>
 
 #include "../hal/phonepad/phonepad_overlay.h"   // PhonepadRect: the rectangle type Android already draws
+#include "ui_font.hp"                           // bitmaptext::Quad: the menu's text
 
 namespace levelmenu
 {
@@ -70,7 +73,8 @@ uint32_t Tag(const char (&s)[5]);
 
 // Sector 0 of a cd.iff: GAME header, TOC chunk. False if it is not one.
 bool ParseToc(const uint8_t* sector0, size_t n, std::vector<TocEntry>* out);
-// The MENU entry, which must be the last TOC entry; *levelCount = entries - SHEL - MENU.
+// The MENU entry, which must be the last TOC entry but for cdpack's UIFT (the UI font)
+// after it; *levelCount = entries - SHEL - MENU (- UIFT).
 bool FindMenu(const std::vector<TocEntry>& toc, TocEntry* menu, int* levelCount);
 // The MENU chunk (starting at its 'MENU' tag, `n` = TOC size). False with *err on any
 // malformation, an index >= levelCount, or text the font cannot draw.
@@ -95,9 +99,12 @@ public:
     int  ChosenLevel() const { return bundle_.entries[size_t(cursor_)].level; }
     const Bundle& GetBundle() const { return bundle_; }
 
-    // The rectangles for a w x h surface (pixels, origin top-left). Returns true when
-    // the list differs from the previous call's (a GPU-side caller re-uploads only then).
-    bool Build(int w, int h, std::vector<PhonepadRect>* out);
+    // The rectangles and the text's glyph quads for a w x h surface (pixels, origin
+    // top-left; the UI font must be loaded). Returns true when they differ from the
+    // previous call's (a GPU-side caller re-uploads only then).
+    bool Build(int w, int h, std::vector<PhonepadRect>* out, std::vector<bitmaptext::Quad>* glyphs);
+    // The next Build rebuilds even if nothing changed (another screen used the lists).
+    void Invalidate() { lastKey_.clear(); }
 
     // The text actually drawn for entry i at the row width (cut with "..." if too wide).
     std::string RowText(int i) const;

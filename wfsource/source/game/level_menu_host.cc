@@ -4,8 +4,9 @@
 // Part of the World Foundry 3D video game engine/production environment
 // for more information about World Foundry, see www.worldfoundry.org
 //=============================================================================
-// tests/level_menu_harness.py compiles this file with level_menu.cc (and
-// -DWF_LEVEL_MENU_HOST, ASan, UBSan) and feeds it one command per stdin line;
+// tests/level_menu_harness.py compiles this file with level_menu.cc, ui_font.cc and
+// bitmap_text.cc (and -DWF_LEVEL_MENU_HOST, -DWF_UI_FONT_SOURCE_PATH, ASan, UBSan) and
+// feeds it one command per stdin line;
 // the engine build globs this directory too, so without the define this file
 // is empty. Commands and their answers:
 //
@@ -15,7 +16,8 @@
 //   autopick               AUTO <level or -1>
 //   menu <cursor> [tv]     a Menu over the bundle (tv: the remote's hint)
 //   input <hex> <ms>       one frame of buttons; answers with a STATE line
-//   rects <w> <h>          RECTS <count> changed=<0|1>, then R x0 y0 x1 y1 rrggbbaa
+//   rects <w> <h>          RECTS <count> changed=<0|1>, then R x0 y0 x1 y1 rrggbbaa;
+//                          GLYPHS <count>, then G x0 y0 x1 y1 u0 v0 u1 v1 rrggbbaa (the text)
 //   row <i>                ROW <text drawn for entry i>
 //   script <text>          SCRIPT ok <frames> | SCRIPT error <why>
 //   next                   FRAME <hex> back=<0|1> quit=<0|1> | FRAME end
@@ -26,11 +28,26 @@
 #include "level_menu.h"
 
 #include <cstdio>
+#include <cstdlib>
 #include <fstream>
 #include <iostream>
 #include <iterator>
 #include <memory>
 #include <sstream>
+
+// The UI font: the source tree's bake (the engine reads the same bytes from cd.iff).
+static std::vector<char> LoadUiFont()
+{
+    std::ifstream f(WF_UI_FONT_SOURCE_PATH, std::ios::binary);
+    std::vector<char> bytes((std::istreambuf_iterator<char>(f)), std::istreambuf_iterator<char>());
+    const char* error = nullptr;
+    if (!wfui::Load(bytes.data(), bytes.size(), error))
+    {
+        std::fprintf(stderr, "UI_FONT unavailable: %s: %s\n", WF_UI_FONT_SOURCE_PATH, error);
+        std::exit(1);
+    }
+    return bytes;
+}
 
 using namespace levelmenu;
 
@@ -43,10 +60,12 @@ static void State(const Menu& m)
 int main()
 {
     std::setvbuf(stdout, nullptr, _IOLBF, 0);
+    static const std::vector<char> font = LoadUiFont();
     Bundle bundle;
     std::unique_ptr<Menu> menu;
     InputScript script;
     std::vector<PhonepadRect> rects;
+    std::vector<bitmaptext::Quad> glyphs;
     std::string line;
     while (std::getline(std::cin, line))
     {
@@ -115,10 +134,14 @@ int main()
         {
             int w = 0, h = 0;
             in >> w >> h;
-            const bool changed = menu->Build(w, h, &rects);
+            const bool changed = menu->Build(w, h, &rects, &glyphs);
             std::printf("RECTS %zu changed=%d\n", rects.size(), changed ? 1 : 0);
             for (const PhonepadRect& r : rects)
                 std::printf("R %.2f %.2f %.2f %.2f %08x\n", r.x0, r.y0, r.x1, r.y1, unsigned(r.rgba));
+            std::printf("GLYPHS %zu\n", glyphs.size());
+            for (const bitmaptext::Quad& g : glyphs)
+                std::printf("G %.2f %.2f %.2f %.2f %.6f %.6f %.6f %.6f %08x\n", g.x0, g.y0, g.x1, g.y1, g.u0, g.v0, g.u1, g.v1,
+                            g.rgba);
         }
         else if (cmd == "row" && menu)
         {

@@ -4,13 +4,22 @@
 #include <cstdlib>
 #include <cmath>
 #include <hal/remote_back_arrow.h>
-#include "../../../engine/vendor/stb_easy_font.h"
 namespace propertyui {
 namespace { const bool registeredInput=[](){inputHandler()=&input;return true;}(); }
-void build(wfprops::Form& editor,bool phone,int w,int h,std::vector<PhonepadRect>& out){
+// Title SemiBold 46 for the old x4 headings, Regular 36 for rows (x3, x3.4) and
+// Regular 28 for hints, help, slider and section labels (x2 to x2.7).
+wfui::Variant variantFor(float scale){return scale>=3.5f?wfui::Title:scale>=2.9f?wfui::Body:wfui::Small;}
+float textWidth(float scale,const std::string& text){return wfui::Width(variantFor(scale),text);}
+void drawText(std::vector<bitmaptext::Quad>* glyphs,float sx,float sy,float x,float y,float scale,const std::string& text,uint32_t color,wfui::Variant variant){
+ if(!glyphs)return;
+ // Positions follow the canvas's own (possibly non-uniform) scale; glyphs keep their shape at the smaller one.
+ wfui::Transform t;t.s=std::min(sx,sy);t.ox=x*sx;t.oy=(y+3.5f*scale)*sy;
+ wfui::Text(*glyphs,0,0,variant==wfui::VariantCount?variantFor(scale):variant,color,text,wfui::Middle,wfui::Left,t);
+}
+void build(wfprops::Form& editor,bool phone,int w,int h,std::vector<PhonepadRect>& out,std::vector<bitmaptext::Quad>* glyphs){
  float sx=w/1920.f,sy=h/1080.f;
  auto rect=[&](float x,float y,float width,float height,uint32_t color){out.push_back({x*sx,y*sy,(x+width)*sx,(y+height)*sy,color});};
- auto text=[&](float x,float y,float scale,const std::string& str,uint32_t color=0xf1f2e4ffu){auto& buf=editor.textVertices;int n=stb_easy_font_print(0,0,const_cast<char*>(str.c_str()),nullptr,buf,sizeof(buf));float* f=buf;for(int i=0;i<n;i++){float* v=f+i*16;float x0=v[0],y0=v[1],x1=x0,y1=y0;for(int k=1;k<4;k++){x0=std::min(x0,v[k*4]);x1=std::max(x1,v[k*4]);y0=std::min(y0,v[k*4+1]);y1=std::max(y1,v[k*4+1]);}rect(x+x0*scale,y+y0*scale,(x1-x0)*scale,(y1-y0)*scale,color);}};
+ auto text=[&](float x,float y,float scale,const std::string& str,uint32_t color=0xf1f2e4ffu){drawText(glyphs,sx,sy,x,y,scale,str,color);};
  rect(0,0,1920,1080,0x061014ffu);rect(180,110,1560,820,0x142d25ffu);
  syncText(editor,phone);auto& f=editor;auto* object=f.edit.object();if(!object)return;text(225,150,4,object->title);
  struct ArrowPainter {decltype(rect)& draw;void Rect(float x0,float y0,float x1,float y1,uint32_t c){draw(x0,y0,x1-x0,y1-y0,c);}} painter{rect};
@@ -84,6 +93,6 @@ void build(wfprops::Form& editor,bool phone,int w,int h,std::vector<PhonepadRect
  }
  bool direct=!f.rail&&focused&&!focused->readonly&&(focused->kind==2||focused->kind==4||focused->show==2);
  text(225,840,2.7f,f.edit.error.empty()?(f.drawer?(colour(focused)?(controls(f).planeAdjust?"Arrows: hue / saturation   A: finish":controls(f).page==1?"Up / down: select   Left / right: value":"Arrows: select   A: choose"):"Use the system text editor"):direct?"Up / down: select   Left / right: change":focused&&focused->readonly?"Read only: arrows select   Left: sections":"Arrows: select   A: edit"):f.edit.error,0xffdd99ffu);
- remoteui::BackArrow(painter,1260,840,4,0xf1f2e4ffu);text(1310,840,2.7f,f.drawer?(colour(focused)?(controls(f).planeAdjust?"Finish adjustment":"Cancel colour"):"Close editor"):"Apply / close");
+ remoteui::BackArrowMiddle(painter,1260,840+3.5f*2.7f,variantFor(2.7f),0xf1f2e4ffu);text(1310,840,2.7f,f.drawer?(colour(focused)?(controls(f).planeAdjust?"Finish adjustment":"Cancel colour"):"Close editor"):"Apply / close");
 }
 }

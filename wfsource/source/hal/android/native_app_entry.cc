@@ -222,6 +222,7 @@ bool                gPhoneResumed   = false;   // between APP_CMD_RESUME and APP
 std::string         gPhonePage, gPhoneLayout, gPhonePin;
 int64_t             gPhoneRetryMs   = 0;       // next attempt to find a LAN address
 std::vector<PhonepadRect> gPhoneRects;
+std::vector<bitmaptext::Quad> gPhoneGlyphs;   // the overlay's text (game/ui_font.hp)
 
 int64_t NowMs()
 {
@@ -623,15 +624,24 @@ WFAndroidPumpEvents()
 }
 
 // The phone overlay's rectangles for a w x h surface, drawn by gfx/gl/android_window.cc after
-// the touch HUD. Returns the count; *changed is 1 when the list differs from the last call's.
+// the touch HUD, and its text's glyph quads (*glyphs, *glyphCount; wfui::Draw after the
+// rectangles). Returns the rectangle count; *changed is 1 when they differ from the last call's.
 extern "C" WF_ANDROID_EXPORT int
-WFAndroidPhoneOverlayRects(int w, int h, const PhonepadRect** rects, int* changed)
+WFAndroidPhoneOverlayRects(int w, int h, const PhonepadRect** rects, int* changed,
+                           const bitmaptext::Quad** glyphs, int* glyphCount)
 {
     // The panel says "Use your phone as the controller": meaningless on the phone itself, so it is
     // drawn only on a TV with the controller running, whatever else set an endpoint.
-    if (!gIsTvMode || !gPhoneEnabled) { gPhoneRects.clear(); *changed = 0; *rects = gPhoneRects.data(); return 0; }
-    *changed = gPhoneOverlay.Build(w, h, NowMs(), &gPhoneRects) ? 1 : 0;
-    *rects   = gPhoneRects.data();
+    if (!gIsTvMode || !gPhoneEnabled)
+    {
+        gPhoneRects.clear(); gPhoneGlyphs.clear();
+        *changed = 0; *rects = gPhoneRects.data(); *glyphs = gPhoneGlyphs.data(); *glyphCount = 0;
+        return 0;
+    }
+    *changed    = gPhoneOverlay.Build(w, h, NowMs(), &gPhoneRects, &gPhoneGlyphs) ? 1 : 0;
+    *rects      = gPhoneRects.data();
+    *glyphs     = gPhoneGlyphs.data();
+    *glyphCount = int(gPhoneGlyphs.size());
     return int(gPhoneRects.size());
 }
 

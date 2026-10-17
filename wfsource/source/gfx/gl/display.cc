@@ -46,8 +46,7 @@
 #include <gfx/renderer_backend.hp>
 
 #if DESIGNER_CHEATS && defined(__LINUX__)
-#define STB_EASY_FONT_IMPLEMENTATION
-#include "../../../../engine/vendor/stb_easy_font.h"
+#include <game/ui_font.hp>
 
 extern int wf_hud_score;
 extern int wf_hud_timer;
@@ -111,14 +110,39 @@ static bool WfCaptureActive()
     return bRecordVideo || (gCaptureFrame > 0 && gCapturePath);
 }
 
-static void DrawHudText(float x, float y, const char* text)
+// HUD text in the UI font (game/ui_font.hp; docs/plans/2026-10-17-settings-editor-font.md).
+// DrawHud's layout is in ortho units (surface / hud_scale) and was drawn for
+// the old stroke font: a text's y is the top of its capitals and `scale` is ortho units per
+// font pixel (capitals 7 font pixels tall). Each text keeps that box: its middle goes
+// where the old capitals' middle was, in the variant whose capitals are nearest the old
+// height on the 1080p canvas (small, body, title or display). The glyphs collect here
+// and are drawn after the HUD's shapes, in its colour at the time of the call.
+static std::vector<bitmaptext::Quad> gHudGlyphs;
+static float gHudOrtho = 1.0f;     // ortho units -> surface pixels (hud_scale)
+static float gHudCanvas = 1.0f;    // 1080p canvas pixels -> surface pixels
+static uint32_t gHudColour = 0xFFFF00FFu;
+
+static void HudColor3f(float r, float g, float b)
 {
-    static char vbuf[65536];
-    int num_quads = stb_easy_font_print(x, y, (char*)text, nullptr, vbuf, sizeof(vbuf));
-    glEnableClientState(GL_VERTEX_ARRAY);
-    glVertexPointer(2, GL_FLOAT, 16, vbuf);
-    glDrawArrays(GL_QUADS, 0, num_quads * 4);
-    glDisableClientState(GL_VERTEX_ARRAY);
+    glColor3f(r, g, b);
+    auto byte = [](float c) { return uint32_t(c <= 0 ? 0 : c >= 1 ? 255 : int(c * 255.0f + 0.5f)); };
+    gHudColour = byte(r) << 24 | byte(g) << 16 | byte(b) << 8 | 0xFFu;
+}
+
+static wfui::Variant HudVariant(float scale)
+{
+    // The old capitals on the 1080p canvas, against Atkinson's (0.7 of the pixel size).
+    const float caps = 7.0f * scale * gHudOrtho / gHudCanvas;
+    return caps < 22.4f ? wfui::Small : caps < 28.7f ? wfui::Body : caps < 44.0f ? wfui::Title : wfui::Display;
+}
+
+static void HudText(float x, float y, float scale, const char* text, wfui::Align align = wfui::Left)
+{
+    wfui::Transform t;
+    t.s = gHudCanvas;
+    t.ox = x * gHudOrtho;
+    t.oy = (y + 3.5f * scale) * gHudOrtho;
+    wfui::TextBytes(gHudGlyphs, 0, 0, HudVariant(scale), gHudColour, text, std::strlen(text), wfui::Middle, align, t);
 }
 
 // Moon Site 01 minimap. Samples the resident ground atlas live (terrain_texture.tga
@@ -149,6 +173,10 @@ static void DrawHud(int xSize, int ySize)
     // together. See docs/plans/2026-05-31-hud-scale-with-window.md.
     const float hud_scale = std::max(1.0f,
         std::min((float)xSize, (float)ySize) / 600.0f);
+    const int surfaceW = xSize, surfaceH = ySize;
+    gHudGlyphs.clear();
+    gHudOrtho = hud_scale;
+    gHudCanvas = std::min((float)xSize / 1920.0f, (float)ySize / 1080.0f);
     const float ortho_w = (float)xSize / hud_scale;
     const float ortho_h = (float)ySize / hud_scale;
     // After this point, treat xSize / ySize aliases as the *ortho* size so
@@ -167,14 +195,13 @@ static void DrawHud(int xSize, int ySize)
     glDisable(GL_DEPTH_TEST);
     glDisable(GL_TEXTURE_2D);
     glDisable(GL_LIGHTING);
-    glColor3f(1.0f, 1.0f, 0.0f);
+    HudColor3f(1.0f, 1.0f, 0.0f);
 
     char buf[64];
     const float kScale = 2.0f;
 
     snprintf(buf, sizeof(buf), "SCORE %d", wf_hud_score);
-    glPushMatrix(); glTranslatef(8, 8, 0); glScalef(kScale, kScale, 1);
-    DrawHudText(0, 0, buf); glPopMatrix();
+    HudText(8, 8, kScale, buf);
 
     int t = wf_hud_timer > 0 ? wf_hud_timer : 0;
     if (wf_moon_launch_phase >= 3) {
@@ -182,34 +209,20 @@ static void DrawHud(int xSize, int ySize)
     } else {
         snprintf(buf, sizeof(buf), "TIME %d", t);
     }
-    {
-        float tw = (float)stb_easy_font_width((char*)buf) * kScale;
-        glPushMatrix(); glTranslatef((float)xSize * 0.5f - tw * 0.5f, 8, 0); glScalef(kScale, kScale, 1);
-        DrawHudText(0, 0, buf); glPopMatrix();
-    }
+    HudText((float)xSize * 0.5f, 8, kScale, buf, wfui::Centre);
 
     if (wf_hud_marble_state)
         snprintf(buf, sizeof(buf), "FALLS %d", wf_hud_marble_falls);
     else
         snprintf(buf, sizeof(buf), "LIVES %d", wf_hud_lives);
-    {
-        float lw = (float)stb_easy_font_width((char*)buf) * kScale;
-        glPushMatrix(); glTranslatef((float)xSize - lw - 8, 8, 0); glScalef(kScale, kScale, 1);
-        DrawHudText(0, 0, buf); glPopMatrix();
-    }
+    HudText((float)xSize - 8, 8, kScale, buf, wfui::Right);
 
     if (wf_hud_marble_state) {
         const char* title = wf_hud_marble_state == 2 ? "FINISHED!" :
                             wf_hud_marble_state == 3 ? "TIME UP" : "PRACTICE RACE";
-        float width = (float)stb_easy_font_width((char*)title) * kScale;
-        glPushMatrix();
-        glTranslatef(xSize * 0.5f - width * 0.5f, ySize - 52, 0);
-        glScalef(kScale, kScale, 1);
-        DrawHudText(0, 0, title);
-        glPopMatrix();
+        HudText(xSize * 0.5f, ySize - 52, kScale, title, wfui::Centre);
         const char* help = "ARROWS: ROLL    SPACE: RESTART";
-        width = (float)stb_easy_font_width((char*)help);
-        DrawHudText(xSize * 0.5f - width * 0.5f, ySize - 22, help);
+        HudText(xSize * 0.5f, ySize - 22, 1.0f, help, wfui::Centre);
     }
 
     // ── Moon Site 01 position-display HUD overlay ──────────────────────────
@@ -236,13 +249,10 @@ static void DrawHud(int xSize, int ySize)
         double lon  = LON0 + (double)wf_moon_player_x_m * D_LON_PER_M;
         double elev = ELEV_BASE_M + (double)wf_moon_player_z_m;
 
-        glColor3f(1.0f, 1.0f, 0.0f);
+        HudColor3f(1.0f, 1.0f, 0.0f);
         const float kTxt = 1.5f;
         char  l[80];
-        auto draw_line = [&](float y, const char* s) {
-            glPushMatrix(); glTranslatef(8.0f, y, 0.0f); glScalef(kTxt, kTxt, 1.0f);
-            DrawHudText(0.0f, 0.0f, (char*)s); glPopMatrix();
-        };
+        auto draw_line = [&](float y, const char* s) { HudText(8.0f, y, kTxt, s); };
         draw_line(36.0f, "SITE 01 -- CONNECTING RIDGE");
         snprintf(l, sizeof(l), "LAT %.4f S  LON %.4f E", -lat, lon);
         draw_line(50.0f, l);
@@ -268,7 +278,7 @@ static void DrawHud(int xSize, int ySize)
         {
             glEnable(GL_TEXTURE_2D);
             atlas->SetGLTexture();
-            glColor3f(1.0f, 1.0f, 1.0f);
+            HudColor3f(1.0f, 1.0f, 1.0f);
             glBegin(GL_QUADS);
                 glTexCoord2f(0.0f, 0.0f); glVertex2f(mm_x,      mm_y);
                 glTexCoord2f(1.0f, 0.0f); glVertex2f(mm_x + MM, mm_y);
@@ -279,7 +289,7 @@ static void DrawHud(int xSize, int ySize)
         }
 
         // 1-px white border.
-        glColor3f(1.0f, 1.0f, 1.0f);
+        HudColor3f(1.0f, 1.0f, 1.0f);
         glBegin(GL_LINE_LOOP);
             glVertex2f(mm_x,      mm_y);
             glVertex2f(mm_x + MM, mm_y);
@@ -326,7 +336,7 @@ static void DrawHud(int xSize, int ySize)
         const double lat_major = pick_major(lat_unit);
         const double lon_major = pick_major(lon_unit);
 
-        glColor3f(0.6f, 0.6f, 0.6f);
+        HudColor3f(0.6f, 0.6f, 0.6f);
         glBegin(GL_LINES);
         // Lat → vertical edges (left + right).
         for (double lat = ceil(lat_min/lat_unit)*lat_unit; lat <= lat_max + 1e-9; lat += lat_unit) {
@@ -353,7 +363,7 @@ static void DrawHud(int xSize, int ySize)
         float sx, sy;
 
         // Spawn square — hollow yellow 4-px outline at world (0, 0).
-        glColor3f(1.0f, 1.0f, 0.0f);
+        HudColor3f(1.0f, 1.0f, 0.0f);
         world_to_screen(0.0f, 0.0f, sx, sy);
         glBegin(GL_LINE_LOOP);
             glVertex2f(sx - 2.0f, sy - 2.0f);
@@ -392,7 +402,7 @@ static void DrawHud(int xSize, int ySize)
         rot_pt(6.0f,  0.0f, tx,  ty);
         rot_pt(-1.5f, +2.5f, bxL, byL);
         rot_pt(-1.5f, -2.5f, bxR, byR);
-        glColor3f(0.0f, 1.0f, 1.0f);   // cyan
+        HudColor3f(0.0f, 1.0f, 1.0f);   // cyan
         glBegin(GL_TRIANGLES);
             glVertex2f(tx,  ty);
             glVertex2f(bxL, byL);
@@ -425,16 +435,13 @@ static void DrawHud(int xSize, int ySize)
             const float ccx = mm_x + MM*0.5f;
             const float ccy = mm_y + MM*0.5f;
             const float crad = MM*0.5f - 10.0f;     // 54 px from centre
-            glColor3f(1.0f, 0.6f, 0.0f);            // orange
+            HudColor3f(1.0f, 0.6f, 0.0f);            // orange
             for (const CardinalDir& d : dirs) {
                 // Game (dx, dy) → screen offset: world Y → screen -Y.
                 const float lx = ccx + (float)d.dx * crad;
                 const float ly = ccy + (float)(-d.dy) * crad;
-                // Centre the 6×8 stb_easy_font glyph at scale 1.0.
-                glPushMatrix();
-                glTranslatef(lx - 3.0f, ly - 4.0f, 0.0f);
-                DrawHudText(0.0f, 0.0f, (char*)d.letter);
-                glPopMatrix();
+                // Centre the letter on the radius point.
+                HudText(lx, ly - 3.5f, 1.0f, d.letter, wfui::Centre);
             }
         }
 
@@ -453,16 +460,11 @@ static void DrawHud(int xSize, int ySize)
             } else {
                 snprintf(banner, sizeof(banner), "IGNITION");
             }
-            float bw = (float)stb_easy_font_width(banner) * bscale;
             // Centred horizontally, ~y=110 (below the 4-line text block, above
             // the lander silhouette).
-            glColor3f(1.0f, 0.6f, 0.1f);   // Raptor-flame orange
-            glPushMatrix();
-            glTranslatef((float)xSize * 0.5f - bw * 0.5f, 110.0f, 0.0f);
-            glScalef(bscale, bscale, 1.0f);
-            DrawHudText(0.0f, 0.0f, banner);
-            glPopMatrix();
-            glColor3f(1.0f, 1.0f, 0.0f);   // restore yellow for any HUD below
+            HudColor3f(1.0f, 0.6f, 0.1f);   // Raptor-flame orange
+            HudText((float)xSize * 0.5f, 110.0f, bscale, banner, wfui::Centre);
+            HudColor3f(1.0f, 1.0f, 0.0f);   // restore yellow for any HUD below
         }
     }
 
@@ -471,29 +473,19 @@ static void DrawHud(int xSize, int ySize)
     // arcade GAME OVER colour (see docs/plans/screenshots/qbert-arcade-game-over-reference.png).
     if (wf_hud_game_over != 0)
     {
-        glColor3f(1.0f, 0.0f, 0.0f);
+        HudColor3f(1.0f, 0.0f, 0.0f);
         const float cx = (float)xSize * 0.5f;
         const float cy = (float)ySize * 0.5f;
 
         // Line 1: "GAME OVER" — large prominence (3x scale).
         char line1[] = "GAME OVER";
         const float scale1 = 3.0f;
-        const float w1 = (float)stb_easy_font_width(line1) * scale1;
-        glPushMatrix();
-        glTranslatef(cx - w1 * 0.5f, cy - 24.0f * scale1, 0.0f);
-        glScalef(scale1, scale1, 1.0f);
-        DrawHudText(0.0f, 0.0f, line1);
-        glPopMatrix();
+        HudText(cx, cy - 24.0f * scale1, scale1, line1, wfui::Centre);
 
         // Line 2: restart prompt — smaller (1.5x), below.
         char line2[] = "PRESS ANY BUTTON TO RESTART";
         const float scale2 = 1.5f;
-        const float w2 = (float)stb_easy_font_width(line2) * scale2;
-        glPushMatrix();
-        glTranslatef(cx - w2 * 0.5f, cy + 12.0f, 0.0f);
-        glScalef(scale2, scale2, 1.0f);
-        DrawHudText(0.0f, 0.0f, line2);
-        glPopMatrix();
+        HudText(cx, cy + 12.0f, scale2, line2, wfui::Centre);
 
         // HIGH SCORES table — matches arcade layout:
         //   Entry #1 centered at top; entries 2-23 in two-column pairs.
@@ -502,28 +494,18 @@ static void DrawHud(int xSize, int ySize)
         const float trow = 9.0f * tscale;
 
         // Header: "HIGH SCORES" in red, centered just below GAME OVER block.
-        glColor3f(1.0f, 0.1f, 0.1f);
+        HudColor3f(1.0f, 0.1f, 0.1f);
         {
             char hdr[] = "HIGH SCORES";
-            float hw = (float)stb_easy_font_width(hdr) * tscale;
-            glPushMatrix();
-            glTranslatef(cx - hw * 0.5f, cy + 28.0f, 0.0f);
-            glScalef(tscale, tscale, 1.0f);
-            DrawHudText(0.0f, 0.0f, hdr);
-            glPopMatrix();
+            HudText(cx, cy + 28.0f, tscale, hdr, wfui::Centre);
         }
 
         // Entry #1 — centered, yellow.
-        glColor3f(1.0f, 1.0f, 0.0f);
+        HudColor3f(1.0f, 1.0f, 0.0f);
         float ty = cy + 38.0f;
         {
             snprintf(buf, sizeof(buf), "1) %s %d", g_hiscores[0].name, g_hiscores[0].score);
-            float w = (float)stb_easy_font_width(buf) * tscale;
-            glPushMatrix();
-            glTranslatef(cx - w * 0.5f, ty, 0.0f);
-            glScalef(tscale, tscale, 1.0f);
-            DrawHudText(0.0f, 0.0f, buf);
-            glPopMatrix();
+            HudText(cx, ty, tscale, buf, wfui::Centre);
         }
         ty += trow;
 
@@ -537,14 +519,14 @@ static void DrawHud(int xSize, int ySize)
             // Left entry
             snprintf(buf, sizeof(buf), "%2d) %s %d", i + 1,
                      g_hiscores[i].name, g_hiscores[i].score);
-            DrawHudText(colL, ty, buf);
+            HudText(colL, ty, tscale, buf);
             ++i;
             // Right entry (may be absent if count is odd)
             if (i < HS_COUNT)
             {
                 snprintf(buf, sizeof(buf), "%2d) %s %d", i + 1,
                          g_hiscores[i].name, g_hiscores[i].score);
-                DrawHudText(colR, ty, buf);
+                HudText(colR, ty, tscale, buf);
                 ++i;
             }
             ty += trow;
@@ -553,7 +535,7 @@ static void DrawHud(int xSize, int ySize)
         // AAA initials picker — white, centered below the table.
         if (wf_hud_entering_initials)
         {
-            glColor3f(1.0f, 1.0f, 1.0f);
+            HudColor3f(1.0f, 1.0f, 1.0f);
             char picker[32];
             // Show current position bracketed: e.g.  [A] B C
             snprintf(picker, sizeof(picker), "%c%c%c  %c%c%c  %c%c%c",
@@ -561,34 +543,25 @@ static void DrawHud(int xSize, int ySize)
                      wf_hud_initials_pos == 1 ? '[' : ' ', wf_hud_initials[1], wf_hud_initials_pos == 1 ? ']' : ' ',
                      wf_hud_initials_pos == 2 ? '[' : ' ', wf_hud_initials[2], wf_hud_initials_pos == 2 ? ']' : ' ');
             const float scale2 = 2.0f;
-            const float pw = (float)stb_easy_font_width(picker) * scale2;
-            glPushMatrix();
-            glTranslatef(cx - pw * 0.5f, ty + 4.0f, 0.0f);
-            glScalef(scale2, scale2, 1.0f);
-            DrawHudText(0.0f, 0.0f, picker);
-            glPopMatrix();
+            HudText(cx, ty + 4.0f, scale2, picker, wfui::Centre);
         }
 
-        glColor3f(1.0f, 1.0f, 0.0f);  // restore HUD yellow for any later draws
+        HudColor3f(1.0f, 1.0f, 0.0f);  // restore HUD yellow for any later draws
     }
 
     // PILOT T:/TH: text — cyan, stacked from the bottom of the HUD.
     // Ring of 4 lines; start slot = wf_hud_pilot_count % 4 (oldest visible).
     if (wf_hud_pilot_count > 0) {
-        glColor3f(0.0f, 1.0f, 1.0f);
+        HudColor3f(0.0f, 1.0f, 1.0f);
         int nlines = wf_hud_pilot_count < 4 ? wf_hud_pilot_count : 4;
         int start  = wf_hud_pilot_count % 4;   // oldest slot in the ring
         float lh   = 11.0f * kScale;           // line height at kScale
         float y0   = (float)ySize - 8.0f - (float)nlines * lh;
         for (int i = 0; i < nlines; ++i) {
             int slot = (start + i) % 4;
-            glPushMatrix();
-            glTranslatef(8.0f, y0 + (float)i * lh, 0.0f);
-            glScalef(kScale, kScale, 1.0f);
-            DrawHudText(0.0f, 0.0f, wf_hud_pilot[slot]);
-            glPopMatrix();
+            HudText(8.0f, y0 + (float)i * lh, kScale, wf_hud_pilot[slot]);
         }
-        glColor3f(1.0f, 1.0f, 0.0f);   // restore HUD yellow
+        HudColor3f(1.0f, 1.0f, 0.0f);   // restore HUD yellow
     }
 
     glEnable(GL_DEPTH_TEST);
@@ -598,6 +571,8 @@ static void DrawHud(int xSize, int ySize)
     glPopMatrix();
 
     glViewport(saved_vp[0], saved_vp[1], saved_vp[2], saved_vp[3]);
+    // The text, over the HUD's shapes.
+    wfui::Draw(gHudGlyphs, surfaceW, surfaceH);
 }
 #endif // DESIGNER_CHEATS && __LINUX__
 
@@ -1299,7 +1274,7 @@ Display::PageFlip()
 
 
     RendererBackendGet().EndFrame();
-    if((planted::state().active||wfprops::host().modal) && levelmenu::Drawer()){int w=0,h=0;GetSurfaceSize(w,h);std::vector<PhonepadRect> rects;planted::buildUI(w,h,rects);levelmenu::Drawer()(rects.data(),int(rects.size()),w,h);}
+    if((planted::state().active||wfprops::host().modal) && levelmenu::Drawer()){int w=0,h=0;GetSurfaceSize(w,h);std::vector<PhonepadRect> rects;std::vector<bitmaptext::Quad> glyphs;planted::buildUI(w,h,rects,&glyphs);levelmenu::Drawer()(rects.data(),int(rects.size()),w,h);wfui::Draw(glyphs,w,h);}
 
 
 #if DESIGNER_CHEATS && defined(__LINUX__)

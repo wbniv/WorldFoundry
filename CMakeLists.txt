@@ -962,6 +962,13 @@ set_target_properties(wf_property_core PROPERTIES IMPORTED_LOCATION "${WF_PROPER
 add_dependencies(wf_property_core wf_property_core_build)
 list(APPEND WF_SOURCES "${CMAKE_SOURCE_DIR}/engine/runtime_properties.cpp" "${CMAKE_SOURCE_DIR}/engine/runtime_property_form.cpp" "${CMAKE_SOURCE_DIR}/engine/runtime_property_host.cpp" "${CMAKE_SOURCE_DIR}/wfsource/source/game/runtime_options.cc")
 add_library(wfengine STATIC ${WF_SOURCES})
+# The UI font (game/ui_font.hp) comes from cd.iff's UIFT chunk. Linux desktop
+# -L runs often have no cd.iff in their working directory, so they read the
+# source tree's committed bake instead (docs/plans/2026-10-17-settings-editor-font.md).
+if(NOT ANDROID AND NOT EMSCRIPTEN AND NOT APPLE)
+    set_source_files_properties(${SRC}/game/ui_font_engine.cc PROPERTIES COMPILE_DEFINITIONS
+        "WF_UI_FONT_SOURCE_PATH=\"${CMAKE_SOURCE_DIR}/wfsource/source/game/ui-font.wfga\"")
+endif()
 if(WF_TELEPORT_UBSAN)
     if(NOT CMAKE_CXX_COMPILER_ID MATCHES "GNU|Clang")
         message(FATAL_ERROR "WF_TELEPORT_UBSAN requires GCC or Clang")
@@ -1183,6 +1190,9 @@ elseif(EMSCRIPTEN)
         target_link_options(wf_game PRIVATE
             "SHELL:--preload-file ${CMAKE_SOURCE_DIR}/wflevels/${_lvl}.iff@/${_lvl}.iff")
     endforeach()
+    # The UI font: the web build loads -L levels and no cd.iff, so it preloads the bare atlas.
+    target_link_options(wf_game PRIVATE
+        "SHELL:--preload-file ${CMAKE_SOURCE_DIR}/wfsource/source/game/ui-font.wfga@/ui-font.wfga")
     set_target_properties(wf_game PROPERTIES SUFFIX ".html")
 else()
     list(APPEND WF_LINK_LIBS GL GLU X11 m pthread dl)
@@ -1273,10 +1283,18 @@ if(NOT ANDROID AND NOT IOS AND NOT APPLE AND NOT EMSCRIPTEN)
     target_include_directories(frame_rate_test PRIVATE ${SRC})
     target_compile_definitions(frame_rate_test PRIVATE ${WF_DEFS})
     add_test(NAME frame_rate_sampler COMMAND frame_rate_test)
-    add_executable(fps_overlay_test tests/fps_overlay_test.cc ${SRC}/game/fps_overlay.cc)
+    set(WF_UI_FONT_FILE ${CMAKE_SOURCE_DIR}/wfsource/source/game/ui-font.wfga)
+    add_executable(fps_overlay_test tests/fps_overlay_test.cc ${SRC}/game/fps_overlay.cc
+        ${SRC}/game/ui_font.cc ${SRC}/game/bitmap_text.cc)
     target_include_directories(fps_overlay_test PRIVATE ${SRC})
-    target_compile_definitions(fps_overlay_test PRIVATE ${WF_DEFS})
+    target_compile_definitions(fps_overlay_test PRIVATE ${WF_DEFS} WF_UI_FONT_SOURCE_PATH="${WF_UI_FONT_FILE}")
     add_test(NAME fps_overlay_layout COMMAND fps_overlay_test)
+    # The UI font (docs/plans/2026-10-17-settings-editor-font.md, steps 3 and 4): the
+    # committed ui-font.wfga passes Catalog::Load, covers the bake's list in all seven
+    # variants, lays U+2190 out as '?', and measures as its advances plus kerning.
+    add_executable(ui_font_test tests/ui_font_test.cc ${SRC}/game/ui_font.cc ${SRC}/game/bitmap_text.cc)
+    target_include_directories(ui_font_test PRIVATE ${SRC})
+    add_test(NAME ui_font COMMAND ui_font_test ${WF_UI_FONT_FILE})
     # 3D object picker geometry (docs/plans/2026-10-16-runtime-object-editing.md, step 9).
     add_executable(object_picker_test tests/object_picker_test.cc)
     target_include_directories(object_picker_test PRIVATE ${CMAKE_SOURCE_DIR}/engine)
@@ -1926,6 +1944,7 @@ if(WF_ENABLE_WEB_EDITOR AND EMSCRIPTEN)
         # Both are the snowgoons demo (Doc + viewport are the same level).
         "SHELL:--preload-file ${CMAKE_SOURCE_DIR}/wflevels/snowgoons-blender@/level"
         "SHELL:--preload-file ${CMAKE_SOURCE_DIR}/wflevels/snowgoons-standalone.iff@/snowgoons-standalone.iff"
+        "SHELL:--preload-file ${CMAKE_SOURCE_DIR}/wfsource/source/game/ui-font.wfga@/ui-font.wfga"
         # Pre-parsed .lev → JSON (built above) for web Doc-population (no popen on wasm).
         "SHELL:--preload-file ${_WF_WEB_JSON}@/level/snowgoons-blender.lev.json"
     )

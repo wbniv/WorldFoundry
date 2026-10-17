@@ -64,8 +64,9 @@ def read_game_toc(data: bytes):
 def test_aquarium_cd_iff_is_shell_plus_the_current_level():
     data = AQ_CD.read_bytes()
     toc = read_game_toc(data)
-    assert [t[0] for t in toc] == [b"SHEL", AQ_LEVEL.read_bytes()[:4]], toc
-    (_, shel_off, shel_len), (_, lvl_off, lvl_len) = toc
+    # cdpack packs the UI font last (docs/plans/2026-10-17-settings-editor-font.md).
+    assert [t[0] for t in toc] == [b"SHEL", AQ_LEVEL.read_bytes()[:4], b"UIFT"], toc
+    (_, shel_off, shel_len), (_, lvl_off, lvl_len), (_, ui_off, ui_len) = toc
     shell = SHELL.read_bytes()
     assert (shel_off, shel_len) == (SECTOR, len(shell))
     assert data[shel_off:shel_off + 4] == b"SHEL"
@@ -74,7 +75,10 @@ def test_aquarium_cd_iff_is_shell_plus_the_current_level():
     assert (lvl_off, lvl_len) == (2 * SECTOR, len(level))
     assert data[lvl_off:lvl_off + lvl_len] == level, (
         "wflevels/aquarium-cd.iff is stale against wflevels/aquarium-standalone.iff: task build-cd-iff-aquarium")
-    assert len(data) == lvl_off + -(-lvl_len // SECTOR) * SECTOR
+    assert ui_off == lvl_off + -(-lvl_len // SECTOR) * SECTOR
+    font = (REPO / "wfsource/source/game/ui-font.wfga").read_bytes()
+    assert data[ui_off:ui_off + ui_len] == b"UIFT" + len(font).to_bytes(4, "little") + font
+    assert len(data) == ui_off + -(-ui_len // SECTOR) * SECTOR
 
 
 def test_shell_boots_toc_level_zero():

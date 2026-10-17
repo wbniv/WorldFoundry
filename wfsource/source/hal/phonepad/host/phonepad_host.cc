@@ -44,9 +44,12 @@
 #include <cstdlib>
 #include <cstring>
 #include <fstream>
+#include <iterator>
 #include <sstream>
 #include <string>
 #include <vector>
+
+#include "../../../game/ui_font.hp"
 
 namespace
 {
@@ -118,6 +121,16 @@ int main(int argc, char** argv)
     std::string line;
     phonepad::Overlay overlay;
     std::vector<PhonepadRect> rects;
+    std::vector<bitmaptext::Quad> glyphs;
+    // The overlay's text needs the UI font: the source tree's bake (the engine reads it from cd.iff).
+    std::ifstream fontFile(WF_UI_FONT_SOURCE_PATH, std::ios::binary);
+    static const std::vector<char> font((std::istreambuf_iterator<char>(fontFile)), std::istreambuf_iterator<char>());
+    const char* fontError = nullptr;
+    if (!wfui::Load(font.data(), font.size(), fontError))
+    {
+        std::printf("UI_FONT unavailable: %s: %s\n", WF_UI_FONT_SOURCE_PATH, fontError);
+        return 1;
+    }
     for (;;)
     {
         pollfd p = { STDIN_FILENO, POLLIN, 0 };
@@ -178,10 +191,14 @@ int main(int argc, char** argv)
                 long long t = 0;
                 if (std::sscanf(cmd.c_str() + 9, "%d %d %lld", &w, &h, &t) == 3)
                 {
-                    const bool changed = overlay.Build(w, h, t, &rects);
+                    const bool changed = overlay.Build(w, h, t, &rects, &glyphs);
                     std::printf("RECTS %u changed=%d\n", unsigned(rects.size()), changed ? 1 : 0);
                     for (const PhonepadRect& r : rects)
                         std::printf("R %.2f %.2f %.2f %.2f %08x\n", r.x0, r.y0, r.x1, r.y1, unsigned(r.rgba));
+                    std::printf("GLYPHS %u\n", unsigned(glyphs.size()));
+                    for (const bitmaptext::Quad& g : glyphs)
+                        std::printf("G %.2f %.2f %.2f %.2f %.6f %.6f %.6f %.6f %08x\n", g.x0, g.y0, g.x1, g.y1,
+                                    g.u0, g.v0, g.u1, g.v1, g.rgba);
                 }
             }
             else if (cmd.compare(0, 8, "ov-logo ") == 0)

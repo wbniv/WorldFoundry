@@ -26,7 +26,7 @@
 #include <algorithm>
 #include <cstdio>
 #include <cstring>
-#include "../../../engine/vendor/stb_easy_font.h"
+#include <cmath>
 
 namespace fpscounter
 {
@@ -46,41 +46,39 @@ int Overlay::Build(Scalar fps, int width, int height)
 	_width = width;
 	_height = height;
 	_count = 0;
+	_glyphs.clear();
 	if (width <= 0 || height <= 0) { Validate(); return _count; }
 
+	// About the old size: Regular 28 on the 1080p canvas, with the same padding.
 	const float scale = std::max(1.0f, std::min(float(width), float(height)) / 360.0f);
 	const float pad = 1.5f * scale;
 	const float right = float(width) * 0.97f;
 	const float bottom = float(height) * 0.97f;
-
-	// stb writes float positions: retain float alignment on 32-bit ARM.
-	auto& vertices = _vertices;
-	const int count = stb_easy_font_print(0, 0, text, NULL, vertices, sizeof(vertices));
-	assert(count > 0);
-	float left = vertices[0], top = vertices[1];
-	float glyphRight = vertices[8], glyphBottom = vertices[9];
-	for (int i = 1; i < count; ++i)
+	wfui::Transform t;
+	t.s = std::min(float(width) / 1920.0f, float(height) / 1080.0f);
+	t.ox = right - pad;
+	t.oy = bottom - pad;
+	_glyphs.clear();
+	wfui::TextBytes(_glyphs, 0, 0, wfui::Small, 0xFFFFFFFFu, text, std::strlen(text), wfui::Baseline, wfui::Right, t);
+	assert(!_glyphs.empty());
+	// The plate fits the glyphs actually drawn, padded equally on every side.
+	float left = _glyphs[0].x0, top = _glyphs[0].y0, glyphRight = _glyphs[0].x1, glyphBottom = _glyphs[0].y1;
+	for (const auto& g : _glyphs)
 	{
-		const float* v = vertices + i * 16;
-		left = std::min(left, v[0]); top = std::min(top, v[1]);
-		glyphRight = std::max(glyphRight, v[8]); glyphBottom = std::max(glyphBottom, v[9]);
+		left = std::min(left, g.x0); top = std::min(top, g.y0);
+		glyphRight = std::max(glyphRight, g.x1); glyphBottom = std::max(glyphBottom, g.y1);
 	}
-	const float x = right - pad - glyphRight * scale;
-	const float y = bottom - pad - glyphBottom * scale;
-	_rects[_count++] = {x + left * scale - pad, y + top * scale - pad, right, bottom, 0x101820B0u};
-	for (int i = 0; i < count; ++i)
-	{
-		const float* v = vertices + i * 16;
-		_rects[_count++] = {x + v[0] * scale, y + v[1] * scale,
-							x + v[8] * scale, y + v[9] * scale, 0xFFFFFFFFu};
-	}
+	// Shift the text by whole pixels so its ink, not its advance box, sits pad inside the corner.
+	const float dx = std::floor(right - pad - glyphRight + 0.5f), dy = std::floor(bottom - pad - glyphBottom + 0.5f);
+	for (auto& g : _glyphs) { g.x0 += dx; g.x1 += dx; g.y0 += dy; g.y1 += dy; }
+	_rects[_count++] = {left + dx - pad, top + dy - pad, glyphRight + dx + pad, glyphBottom + dy + pad, 0x101820B0u};
 	Validate();
 	return _count;
 }
 
 void Overlay::Validate() const
 {
-	assert(_count >= 0 && _count <= MAX_QUADS + 1);
+	assert(_count >= 0 && _count <= 1);
 	assert(_text[sizeof(_text) - 1] == 0);
 }
 }

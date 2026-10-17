@@ -19,7 +19,8 @@ def test_menu_matches_current_standalones_and_manifest(tmp_path):
     assert read_menu(data) == dict(version=1, levels=8, title='WF Aquarium',
                                    prompt='Choose a tank', entries=list(enumerate(TITLES)))
     toc = read_toc(data)
-    assert len(toc) == 10 and toc[0][0] == b'SHEL' and toc[-1][0] == b'MENU'
+    # SHEL, eight tanks, MENU, then cdpack's UI font (docs/plans/2026-10-17-settings-editor-font.md).
+    assert len(toc) == 11 and toc[0][0] == b'SHEL' and toc[-2][0] == b'MENU' and toc[-1][0] == b'UIFT'
     shell_offset, shell_size = toc[0][1:]
     assert data[shell_offset+8:shell_offset+8+shell_size] == SHELL_MENU.read_bytes()
     for (_, offset, size), level in zip(toc[1:9], LEVELS):
@@ -30,7 +31,7 @@ def test_android_uses_selector_and_apple_keeps_direct_bundle():
     asset = ROOT/'android/app/src/aquarium/assets/cd.iff'
     assert asset.is_symlink()
     assert asset.resolve() == (ROOT/'wflevels/aquarium-menu-cd.iff').resolve()
-    assert read_toc((ROOT/'wflevels/aquarium-cd.iff').read_bytes())[-1][0] != b'MENU'
+    assert all(t[0] != b'MENU' for t in read_toc((ROOT/'wflevels/aquarium-cd.iff').read_bytes()))
 
 
 def test_both_apk_builds_use_the_single_eight_tank_menu_task():

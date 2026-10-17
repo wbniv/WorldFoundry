@@ -49,6 +49,7 @@
 
 #include "gamestrm.hp"
 #include "level_menu.h"
+#include "ui_font.hp"
 
 //==============================================================================
 
@@ -571,6 +572,12 @@ PIGSMain( int argc, char* * argv )
 #	endif
 #endif
 
+	// The UI font (game/ui_font.hp) before anything can draw a menu or a HUD:
+	// a missing or invalid atlas stops here with one "UI_FONT unavailable" line
+	// (docs/plans/2026-10-17-settings-editor-font.md, F6). Every platform and
+	// host (wf-edit's --editor mode too) comes through PIGSMain.
+	extern const char* gLevelOverridePath;
+	wfui::LoadOrDie(gLevelOverridePath != nullptr);
 	DBSTREAM1( cprogress << "main::constructing the game" << std::endl; )
    WFGame* game = new (HALLmalloc) WFGame( nStartingLevel );
 	assert( ValidPtr( game ) );

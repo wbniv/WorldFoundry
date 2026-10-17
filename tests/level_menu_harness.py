@@ -1,8 +1,9 @@
 """Shared harness for the level-menu tests (docs/plans/2026-10-01-level-menu-selector.md).
 
-Builds wfsource/source/game/level_menu.cc with its host main (level_menu_host.cc, -DWF_LEVEL_MENU_HOST) using the host
-C++ compiler, AddressSanitizer and UBSan, and runs it on a list of stdin commands. Also: the bundle recipes, cdpack, and
-a small reader for the GAME/TOC/MENU layout. No device, no display, no third-party Python packages (PIL only to render).
+Builds wfsource/source/game/level_menu.cc with its host main (level_menu_host.cc, -DWF_LEVEL_MENU_HOST) and the UI font
+(ui_font.cc, bitmap_text.cc, reading the committed ui-font.wfga) using the host C++ compiler, AddressSanitizer and UBSan,
+and runs it on a list of stdin commands. Also: the bundle recipes, cdpack, and a small reader for the GAME/TOC/MENU
+layout. No device, no display, no third-party Python packages (PIL only to render).
 """
 
 from __future__ import annotations
@@ -23,11 +24,12 @@ SHELL_MENU = GAME / "shell-menu.fth"
 SMB_MANIFEST = LEVELS / "smb-menu.manifest"
 SMB_MENU_BUNDLE = LEVELS / "smb-menu-cd.iff"
 SMB_LEVELS = [f"smb_w1_{n}-standalone.iff" for n in (1, 2, 3, 4)]
+UI_FONT = GAME / "ui-font.wfga"
 
 # Every tracked bundle built without a manifest, with its recipe (Taskfile.yml build-cd-iff*): shell.fth + these levels.
 PLAIN_BUNDLES = {
     "wfsource/source/game/cd.iff": SMB_LEVELS + ["snowgoons-standalone.iff", "qbert_practice-standalone.iff",
-                                                  "marble-madness-3d-astra-standalone.iff"],
+                                                  "marble-madness-3d-astra-standalone.iff", "baseline-standalone.iff"],
     "wflevels/smb-cd.iff": SMB_LEVELS,
     "wflevels/snowgoons-cd.iff": ["snowgoons-standalone.iff"],
     "wflevels/qbert-cd.iff": ["qbert_practice-standalone.iff"],
@@ -53,9 +55,10 @@ def read_toc(data: bytes) -> list[tuple[bytes, int, int]]:
 
 
 def read_menu(data: bytes) -> dict:
-    """The MENU chunk of a bundle (cdpack --manifest), decoded."""
-    tag, off, size = read_toc(data)[-1]
-    assert tag == b"MENU", f"last TOC entry is {tag!r}, not MENU"
+    """The MENU chunk of a bundle (cdpack --manifest), decoded: the last TOC entry but for the UI font's UIFT."""
+    toc = read_toc(data)
+    tag, off, size = toc[-2] if toc[-1][0] == b"UIFT" else toc[-1]
+    assert tag == b"MENU", f"last TOC entry before UIFT is {tag!r}, not MENU"
     chunk = data[off:off + size]
     assert chunk[:4] == b"MENU" and struct.unpack_from("<I", chunk, 4)[0] + 8 == size
     version, levels, count = struct.unpack_from("<III", chunk, 8)
@@ -80,7 +83,10 @@ def build_host(out_dir: Path) -> Path:
     assert cxx, "no host C++ compiler"
     flags = ["-std=c++17", "-O1", "-g", "-Wall", "-Wextra", "-Werror", "-fsanitize=address,undefined", "-fno-sanitize-recover=all"]
     objs = []
-    for src, extra in ((GAME / "level_menu.cc", []), (GAME / "level_menu_host.cc", ["-DWF_LEVEL_MENU_HOST"])):
+    # bitmap_text.cc is the engine's reader, unchanged: its one-line loops trip -Wmisleading-indentation.
+    for src, extra in ((GAME / "level_menu.cc", []), (GAME / "ui_font.cc", []),
+                       (GAME / "bitmap_text.cc", ["-Wno-misleading-indentation"]),
+                       (GAME / "level_menu_host.cc", ["-DWF_LEVEL_MENU_HOST", f'-DWF_UI_FONT_SOURCE_PATH="{UI_FONT}"'])):
         obj = out_dir / (src.name + ".o")
         subprocess.run([cxx, *flags, *extra, "-c", str(src), "-o", str(obj)], check=True)
         objs.append(str(obj))
@@ -115,3 +121,14 @@ def rects(lines: list[str]) -> tuple[bool, list]:
         c = int(c, 16)
         out.append((float(x0), float(y0), float(x1), float(y1), (c >> 24, (c >> 16) & 255, (c >> 8) & 255, c & 255)))
     return changed, out
+
+
+def glyphs(lines: list[str]) -> list:
+    """The last GLYPHS block (the text, in the UI font): [(x0, y0, x1, y1, u0, v0, u1, v1, (r, g, b, a)), ...]."""
+    i = max(n for n, line in enumerate(lines) if line.startswith("GLYPHS "))
+    out = []
+    for line in lines[i + 1:i + 1 + int(lines[i].split()[1])]:
+        *v, c = line.split()[1:]
+        c = int(c, 16)
+        out.append((*map(float, v), (c >> 24, (c >> 16) & 255, (c >> 8) & 255, c & 255)))
+    return out

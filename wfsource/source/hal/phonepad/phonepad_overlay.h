@@ -16,10 +16,11 @@
 //                      released by the server)
 //   Back on the panel  hides it for this session (the remote still works)
 //
-// Text comes from engine/vendor/stb_easy_font.h (public domain, already used
-// by gfx/gl/display.cc), the QR code from engine/vendor/qrcodegen (MIT). Both
-// produce quads, so no texture or font file is needed. Pure logic plus
-// geometry: the tests drive it with a fake clock on Linux.
+// Text is laid out over the engine's shared UI atlas (game/ui_font.hp, Atkinson
+// Hyperlegible Next) as glyph quads that the platform draws after the
+// rectangles; the QR code comes from engine/vendor/qrcodegen (MIT) as
+// rectangles. Pure logic plus geometry: the tests drive it with a fake clock
+// on Linux.
 //=============================================================================
 
 #ifndef HAL_PHONEPAD_PHONEPAD_OVERLAY_H
@@ -28,6 +29,8 @@
 #include <cstdint>
 #include <string>
 #include <vector>
+
+#include "../../game/bitmap_text.hp"   // bitmaptext::Quad: the text's glyphs
 
 // Plain C layout so the GL side can take it across an extern "C" boundary.
 // Pixels, origin top-left, +Y down; colour 0xRRGGBBAA.
@@ -69,9 +72,10 @@ public:
     // "" when no toast is showing.
     const char* Toast(int64_t nowMs) const;
 
-    // Fill `out` for a w x h surface. Returns true when the list differs
-    // from the previous call's (the caller re-uploads only then).
-    bool Build(int w, int h, int64_t nowMs, std::vector<PhonepadRect>* out);
+    // Fill `out` (rectangles) and `glyphs` (text, wfui::Draw) for a w x h
+    // surface; the UI font must be loaded. Returns true when they differ from
+    // the previous call's (the caller re-uploads only then).
+    bool Build(int w, int h, int64_t nowMs, std::vector<PhonepadRect>* out, std::vector<bitmaptext::Quad>* glyphs);
 
     // The QR module grid Build draws (size x size, row-major, 1 = dark);
     // false if the URL could not be encoded. For the tests.
