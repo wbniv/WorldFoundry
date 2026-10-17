@@ -1041,7 +1041,7 @@ workflows:
         script: |
           set -euo pipefail
           exec > >(tee -a "$CM_BUILD_DIR/skin-metal-build.log") 2>&1
-          cmake -S . -B build-skin-metal -G Ninja -DCMAKE_BUILD_TYPE=Release -DCMAKE_OSX_ARCHITECTURES=arm64 -DWF_ASAN=OFF -DWF_ENABLE_EDITOR=OFF
+          cmake -S . -B build-skin-metal -G "Unix Makefiles" -DCMAKE_BUILD_TYPE=Release -DCMAKE_OSX_ARCHITECTURES=arm64 -DWF_ASAN=OFF -DWF_ENABLE_EDITOR=OFF
           cmake --build build-skin-metal --target wf_skinned_mesh_metal_test wf_skin_pose_math --parallel 4
       - name: Render and compare CPU and GPU fixtures
         script: |
