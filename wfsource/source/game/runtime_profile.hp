@@ -9,7 +9,7 @@
 #include <ctime>
 #include <vector>
 namespace wf_profile {
-enum Section { Update, Actors, Director, Render, School, Pose, Animation, Total, Count };
+enum Section { Update, Actors, Director, Render, School, Pose, Animation, Total, SkinPoseCpu, SkinVerticesCpu, SkinNormalsCpu, SkinCullCpu, SkinSubmitCpu, Count };
 // Per-frame counters, indexed by wf_profile::count(k,n). The first six keep
 // their numeric values (existing callers pass literals; existing log parsers
 // read the names in this order), so new counters are only ever appended.
@@ -29,9 +29,11 @@ enum Section { Update, Actors, Director, Render, School, Pose, Animation, Total,
 enum Counter { LevelObjects, RenderActors, Draws, Triangles, ActorMailboxWrites, FishDeformations,
     Uploads, UploadBytes, FacesSubmitted, FacesCulled,
     StaticObjects, StaticDraws, StaticFacesCulled, StaticIndexBytes, StaticBakes, StaticBakeUs,
-    StaticGpuBytes, StaticCpuBytes, StaticExcludedObjects, StaticDeferredObjects, CounterCount };
+    StaticGpuBytes, StaticCpuBytes, StaticExcludedObjects, StaticDeferredObjects, SkinVertexBytes, SkinPaletteBytes, SkinDraws, SkinFaces, SkinFallbacks, SkinGpuBytes, SkinCpuBytes, SkinRebuilds, SkinIndexBytes, CounterCount };
 struct State {
     bool enabled = false;
+    bool skinObject = false;
+    bool skinCullExempt = false;
     std::array<double,Count> frame{};
     std::array<double,Count> started{};
     std::vector<std::array<double,Count>> frames;
@@ -56,7 +58,8 @@ inline void begin_frame() { if(state().enabled) { state().frame.fill(0); state()
 inline void count(int k,unsigned long n=1) { if(state().enabled && k>=0 && k<CounterCount) state().counters[k]+=n; }
 inline void begin(int k) { if(state().enabled && k>=0 && k<Count) state().started[k]=cpu_ms(); }
 inline void end(int k) { if(state().enabled && k>=0 && k<Count) state().frame[k]+=cpu_ms()-state().started[k]; }
-struct Scope { int k; explicit Scope(int section):k(section){begin(k);} ~Scope(){end(k);} };
+struct SkinObjectScope { bool old,oldCull; explicit SkinObjectScope(bool value,bool noCull=false):old(state().skinObject),oldCull(state().skinCullExempt){state().skinObject=value;state().skinCullExempt=value && noCull;} ~SkinObjectScope(){state().skinObject=old;state().skinCullExempt=oldCull;} };
+struct Scope { int k; bool active=true; explicit Scope(int section,bool enabled=true):k(section),active(enabled){if(active)begin(k);} void stop(){if(active){end(k);active=false;}} ~Scope(){stop();} };
 inline void end_frame() {
     State& s=state(); if(!s.enabled) return;
     s.frame[Total]=s.frame[Update]+s.frame[Render];
@@ -67,7 +70,7 @@ inline void end_frame() {
     fprintf(stderr,"frame-window: start-ns=%lld end-ns=%lld\n",
         (long long)std::chrono::duration_cast<std::chrono::nanoseconds>(s.last.time_since_epoch()).count(),
         (long long)std::chrono::duration_cast<std::chrono::nanoseconds>(now.time_since_epoch()).count());
-    const char* names[]={"update","actors","director","render","school","pose","animation","total"};
+    const char* names[]={"update","actors","director","render","school","pose","animation","total","skin-pose","skin-vertices","skin-normals","skin-cull","skin-submit"};
     for(int k=0;k<Count;k++) {
         std::vector<double> values; double sum=0;
         for(const auto& f:s.frames){ values.push_back(f[k]); sum+=f[k]; }
@@ -77,7 +80,8 @@ inline void end_frame() {
     const char* counterNames[CounterCount]={"level-objects","render-actors","draws","triangles","actor-mailbox-writes","fish-deformations",
         "uploads","upload-bytes","faces-submitted","faces-culled",
         "static-objects","static-draws","static-faces-culled","static-index-bytes","static-bakes","static-bake-us",
-        "static-gpu-bytes","static-cpu-bytes","static-excluded-objects","static-deferred-objects"};
+        "static-gpu-bytes","static-cpu-bytes","static-excluded-objects","static-deferred-objects",
+        "skin-vertex-bytes","skin-palette-bytes","skin-draws","skin-faces-submitted","skin-fallbacks","skin-gpu-bytes","skin-cpu-bytes","skin-rebuilds","skin-index-bytes"};
     // max= is the largest single-frame value in the window (appended after
     // mean=, so existing `frames=N mean=X` parsers are unaffected).
     for(int k=0;k<CounterCount;k++) fprintf(stderr,"frame-count: %s frames=%zu mean=%.3f max=%lu\n",counterNames[k],s.frames.size(),double(s.totals[k])/s.frames.size(),s.maxima[k]);

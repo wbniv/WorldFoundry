@@ -1,0 +1,21 @@
+#ifndef WF_SKINNED_MESH_HP
+#define WF_SKINNED_MESH_HP
+#include <renderassets/skin_pose.h>
+#include <gfx/renderer_backend.hp>
+class RenderObject3D;
+
+enum class SkinningMode { Cpu, CpuNoCull, GpuNoCull, Gpu };
+SkinningMode SkinningGetMode();
+bool SkinningSetMode(const char*);
+
+class SkinPoseSource {
+public:
+    virtual ~SkinPoseSource() = default;
+    virtual const wf_render::DfrmSkin& Skin() const = 0;
+    virtual bool MaterializeCpu(RenderObject3D&) = 0;
+};
+struct SkinMeshState;
+void SkinMeshSampleGauges();
+void SkinPoseResidentBytes(size_t bytes,bool add);
+void SkinMeshDestroy(SkinMeshState*);
+#endif

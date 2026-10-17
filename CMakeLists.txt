@@ -1200,6 +1200,21 @@ endif()
 target_link_libraries(wfengine PUBLIC ${WF_LINK_LIBS})
 target_link_libraries(wf_game  PRIVATE wfengine)
 
+# Experimental skinning requires an actual Apple draw, not only MSL compilation.
+if(APPLE AND NOT IOS)
+    add_executable(wf_skinned_mesh_metal_test tests/skinned_mesh_metal.cc)
+    target_link_libraries(wf_skinned_mesh_metal_test PRIVATE wfengine)
+    target_compile_options(wf_skinned_mesh_metal_test PRIVATE -fpermissive -w -fno-rtti)
+    enable_testing()
+    add_test(NAME skinned_mesh_metal COMMAND wf_skinned_mesh_metal_test)
+    add_executable(wf_skin_pose_math tests/skin_pose_math.cc
+        ${SRC}/renderassets/dfrm_deform.cc ${SRC}/renderassets/skin_pose.cc)
+    target_include_directories(wf_skin_pose_math PRIVATE ${SRC})
+    add_test(NAME skin_pose_math COMMAND wf_skin_pose_math
+        ${CMAKE_SOURCE_DIR}/wflevels/aquarium_plants/seahorse_f_body.iff
+        ${CMAKE_SOURCE_DIR}/wflevels/aquarium_plants/seahorse_m_body.iff)
+endif()
+
 # ─── Host-GL e2e test ────────────────────────────────────────────────────────
 # Drives a real WFGame through Load/Step×N/Unload against a host-supplied
 # X11/GLX context — proves the Phase 0a libwfengine.a split lets external
@@ -1253,6 +1268,13 @@ if(NOT ANDROID AND NOT IOS AND NOT APPLE AND NOT EMSCRIPTEN)
     # DFRM v1 evaluator: parity with the Python reference (dfrm_ref.py) on the
     # seven tail-rig mockup poses plus a clip/crossfade sequence, then the unit
     # checks (arc length, coils, clips, loader, exclusivity, face normals).
+    add_executable(wf_skin_pose_math tests/skin_pose_math.cc
+        ${SRC}/renderassets/dfrm_deform.cc ${SRC}/renderassets/skin_pose.cc)
+    target_include_directories(wf_skin_pose_math PRIVATE ${SRC})
+    target_compile_features(wf_skin_pose_math PRIVATE cxx_std_17)
+    add_test(NAME skin_pose_math COMMAND wf_skin_pose_math
+        ${CMAKE_SOURCE_DIR}/wflevels/aquarium_plants/seahorse_f_body.iff
+        ${CMAKE_SOURCE_DIR}/wflevels/aquarium_plants/seahorse_m_body.iff)
     add_executable(dfrm_strand_test tests/dfrm_strand.cc)
     target_link_libraries(dfrm_strand_test PRIVATE wfengine)
     target_compile_options(dfrm_strand_test PRIVATE -fno-rtti -fpermissive)
@@ -1411,6 +1433,10 @@ if(NOT ANDROID AND NOT IOS AND NOT APPLE AND NOT EMSCRIPTEN)
     set_tests_properties(opaque_material_programs PROPERTIES LABELS "gl")
 
     # E3 index ownership: mixed index widths and deletion across context loss.
+    add_executable(wf_skinned_mesh_gl_test tests/skinned_mesh_gl.cc)
+    target_link_libraries(wf_skinned_mesh_gl_test PRIVATE wfengine)
+    target_compile_options(wf_skinned_mesh_gl_test PRIVATE -fpermissive -w -fno-rtti)
+    add_test(NAME skinned_mesh_gl COMMAND wf_skinned_mesh_gl_test)
     add_executable(wf_static_mesh_index_gl_test tests/static_mesh_index_gl.cc)
     target_link_libraries(wf_static_mesh_index_gl_test PRIVATE wfengine)
     target_compile_options(wf_static_mesh_index_gl_test PRIVATE -fpermissive -w -fno-rtti)

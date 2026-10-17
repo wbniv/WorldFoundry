@@ -1,0 +1,95 @@
+{
+  "revision": "69517e7d89c9b66579277abeeed1b9a848516908",
+  "scope": "Rest geometry and palette preflight only; not posed winding or GPU parity.",
+  "source_review": "docs/diagnostics/blender-normal-convention/integration-seahorse-source-review.json",
+  "models": [
+    {
+      "path": "wflevels/aquarium_plants/seahorse_f_body.iff",
+      "sha256": "e71b531ec1b582c6f2600ef6f995698fffe4266927c189b714bd660c1d68e257",
+      "matches_reviewed_export": true,
+      "vertices": 868,
+      "triangles": 1027,
+      "material_flags": [
+        2
+      ],
+      "material_face_counts": {
+        "0": 1027
+      },
+      "material_opacities": [
+        1.0
+      ],
+      "double_sided_faces": 0,
+      "alpha_cutout_faces": 0,
+      "native_handle_bytes": 0,
+      "degenerate_rest_faces": 0,
+      "minimum_rest_double_area_model_units_squared": 0.0002102542772446962,
+      "samples": 35,
+      "transforms": 3,
+      "clip_frames": 693,
+      "transform_angle_weight_groups": [
+        {
+          "transform": 0,
+          "weight": 0.5
+        },
+        {
+          "transform": 0,
+          "weight": 1.0
+        },
+        {
+          "transform": 1,
+          "weight": 1.0
+        },
+        {
+          "transform": 2,
+          "weight": 1.0
+        }
+      ],
+      "proposed_palette_entries": 40,
+      "faces_spanning_bindings": 32
+    },
+    {
+      "path": "wflevels/aquarium_plants/seahorse_m_body.iff",
+      "sha256": "d477b4b9c6be49bf991e106d81800dbc21be0d1f65015748d14b1354bba49ddd",
+      "matches_reviewed_export": true,
+      "vertices": 868,
+      "triangles": 1027,
+      "material_flags": [
+        2
+      ],
+      "material_face_counts": {
+        "0": 1027
+      },
+      "material_opacities": [
+        1.0
+      ],
+      "double_sided_faces": 0,
+      "alpha_cutout_faces": 0,
+      "native_handle_bytes": 0,
+      "degenerate_rest_faces": 0,
+      "minimum_rest_double_area_model_units_squared": 0.0002102542772446962,
+      "samples": 35,
+      "transforms": 3,
+      "clip_frames": 693,
+      "transform_angle_weight_groups": [
+        {
+          "transform": 0,
+          "weight": 0.5
+        },
+        {
+          "transform": 0,
+          "weight": 1.0
+        },
+        {
+          "transform": 1,
+          "weight": 1.0
+        },
+        {
+          "transform": 2,
+          "weight": 1.0
+        }
+      ],
+      "proposed_palette_entries": 40,
+      "faces_spanning_bindings": 32
+    }
+  ]
+}

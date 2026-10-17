@@ -33,6 +33,8 @@
 #include <gfx/math.hp>
 #include <gfx/display.hp>
 #include <gfx/renderer_backend.hp>
+#include <game/runtime_profile.hp>
+#include <gfx/skinned_mesh.hp>
 
 //============================================================================
 // kts maybe I should write an SVECTOR class
@@ -50,6 +52,7 @@ RendererVariables globalRendererVariables;
 void
 RenderObject3D::Render(ViewPort& vp,const Matrix34& position)
 {
+    wf_profile::SkinObjectScope skinObject(_dfrm.get()!=NULL,SkinningGetMode()==SkinningMode::CpuNoCull);
 	globalRendererVariables.viewPort = &vp;
 //	cout << "RenderObject3D::Render: " << std::endl;
 
@@ -67,6 +70,7 @@ RenderObject3D::Render(ViewPort& vp,const Matrix34& position)
 	// E3 phase 1: draw from the static bake when the switch is on, the backend
 	// supports it and this object can be baked (gfx/glpipeline/static_mesh.cc);
 	// otherwise the per-face streaming loop below, exactly as before.
+    if (RenderSkinned(position)) return;
 	if(RenderStatic(position))
 		return;
 	StreamFaces(0,_faceCount);
@@ -78,6 +82,7 @@ RenderObject3D::Render(ViewPort& vp,const Matrix34& position)
 void
 RenderObject3D::StreamFaces(int firstFace, int endFace)
 {
+    wf_profile::Scope skinSubmit(wf_profile::SkinSubmitCpu,_dfrm.get()!=NULL);
 	Primitive* primitive  = _primList[0] + firstFace;
 	pRenderObj3DFunc renderer;
 

@@ -216,9 +216,8 @@ static void PackVert(Vert& dst, const RBVertex& v, float nx, float ny, float nz,
 
 // Vertex attribute layout for the currently bound VAO + GL_ARRAY_BUFFER.
 // Shared by the streaming VAO and every static-mesh VAO.
-static void SetupVertexAttribs()
+static void SetupVertexAttribs(GLsizei stride = sizeof(Vert))
 {
-    const GLsizei stride = sizeof(Vert);
     glEnableVertexAttribArray(0);
     glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, stride,
                           (void*)offsetof(Vert, x));
@@ -260,6 +259,47 @@ struct StaticMeshGL
     size_t vboBytes = 0;
     size_t iboBytes = 0;        // largest index upload so far
 };
+
+struct SkinnedMeshGL {
+    GLuint vao=0,vbo=0; unsigned generation=0; int count=0; size_t bytes=0;
+};
+static_assert(sizeof(Vert)==offsetof(RBSkinnedVertex,joints),"skin vertex prefix differs");
+
+static void ReplaceShader(std::string& text,const std::string& before,const std::string& after) {
+    size_t at=0;
+    while ((at=text.find(before,at))!=std::string::npos) { text.replace(at,before.size(),after);at+=after.size(); }
+}
+static std::string SkinVS() {
+    std::string text=kVS;
+    const auto lighting=text.find("    if (u_lighting != 0)");
+    const auto fog=text.find("    if (u_fog != 0)",lighting);
+    text.replace(lighting,fog-lighting,"    v_lit=vec3(1.0);\n");
+    ReplaceShader(text,"vec4(a_pos, 1.0)","vec4(posed, 1.0)");
+    ReplaceShader(text,"    gl_Position =",R"GLSL(    vec4 p=vec4(a_pos,1.0); vec3 posed=vec3(0.0);
+    for(int i=0;i<4;++i) {
+        int j=int(a_joints[i])*3;
+        posed+=a_weights[i]*vec3(dot(u_skin[j],p),dot(u_skin[j+1],p),dot(u_skin[j+2],p));
+    }
+    v_eye=(u_mv*vec4(posed,1.0)).xyz;
+    gl_Position =)GLSL");
+    return "layout(location=7) in uvec4 a_joints;\nlayout(location=8) in vec4 a_weights;\nuniform vec4 u_skin[144];\nout vec3 v_eye;\n"+text;
+}
+static std::string SkinFS() {
+    std::string text=kFS;
+    ReplaceShader(text,"    vec4 c =",R"GLSL(    vec3 face_n=cross(dFdx(v_eye),dFdy(v_eye));
+    float n2=dot(face_n,face_n);
+    vec3 N=n2>1e-24 ? face_n*inversesqrt(n2) : vec3(0.0);
+    N*=gl_FrontFacing ? 1.0 : -1.0;
+    vec3 shade=vec3(1.0);
+    if(u_lighting!=0) {
+        shade=u_ambient;
+        for(int i=0;i<3;++i) shade+=u_light_color[i]*max(0.0,dot(N,u_light_dir[i]));
+    }
+    vec4 c =)GLSL");
+    ReplaceShader(text,"v_color * v_lit","v_color * shade");
+    ReplaceShader(text,"albedo * v_lit","albedo * shade");
+    return "in vec3 v_eye;\nuniform int u_lighting;\nuniform vec3 u_ambient,u_light_dir[3],u_light_color[3];\n"+text;
+}
 
 // ---- shader compile helpers -------------------------------------------------
 
@@ -460,6 +500,7 @@ public:
                       bool cullExempt,
                       bool prelit) override
     {
+        if(wf_profile::state().skinCullExempt)cullExempt=true;
         wf_profile::count(wf_profile::FacesSubmitted);   // E3 phase 0: before the cull
         // Software backface cull. The renderer never enables GL_CULL_FACE.
         // WF's face normal and Blender's use the same triangle hand. We cull
@@ -493,13 +534,12 @@ public:
         // with the static-mesh path so both make bit-identical decisions; the
         // WF_CULL switch is WfBackfaceCullEnabled there (default ON; opt out
         // with WF_CULL=0).
-        if (WfBackfaceCullEnabled() && !cullExempt
-            && WfFaceIsBackfacing(_mv, nx, ny, nz,
-                                  v0.x, v0.y, v0.z, v1.x, v1.y, v1.z, v2.x, v2.y, v2.z))
-        {
-            wf_profile::count(wf_profile::FacesCulled);
-            return;   // back-facing — skip
+        bool backfacing=false;
+        if (WfBackfaceCullEnabled() && !cullExempt) {
+            wf_profile::Scope cullTime(wf_profile::SkinCullCpu,wf_profile::state().skinObject);
+            backfacing=WfFaceIsBackfacing(_mv,nx,ny,nz,v0.x,v0.y,v0.z,v1.x,v1.y,v1.z,v2.x,v2.y,v2.z);
         }
+        if (backfacing) { wf_profile::count(wf_profile::FacesCulled);return; }
 
         // Batch key = (texture, prelit, static mesh). A LIGHTING_PRELIT run
         // must be drawn with the lighting uniform off, which is per-draw state,
@@ -792,6 +832,7 @@ public:
         _opaqueUniforms = ProgramUniforms{};
         _opaqueTexUniforms = ProgramUniforms{};
         _customProgram = false;
+        _skinProgram=0;_skinTried=false;_skinGpuBytes=0;_skinUniforms=ProgramUniforms{};
         _cpu.clear();
         _curTexture  = nullptr;
         // Static meshes: every GL name is dead. Bumping the generation makes
@@ -807,6 +848,74 @@ public:
         _sharedIbo = 0;
         _sharedIboBytes = 0;
         _sharedMeshCount = 0;
+    }
+
+    bool SkinnedMeshSupported() override {
+        LazyInit();
+        if (_customProgram) return false;
+        if (_skinTried) return _skinProgram!=0;
+        _skinTried=true;
+        GLint attribs=0,uniforms=0;glGetIntegerv(GL_MAX_VERTEX_ATTRIBS,&attribs);
+#if defined(__ANDROID__) || defined(__EMSCRIPTEN__)
+        glGetIntegerv(GL_MAX_VERTEX_UNIFORM_VECTORS,&uniforms);
+#else
+        glGetIntegerv(GL_MAX_VERTEX_UNIFORM_COMPONENTS,&uniforms);uniforms/=4;
+#endif
+        if(attribs<9 || uniforms<160 || _customProgram) return false;
+        const auto vsText=SkinVS(),fsText=SkinFS();std::string log;
+        GLuint vs=TryCompileShader(GL_VERTEX_SHADER,vsText.c_str(),log);
+        GLuint fs=TryCompileShader(GL_FRAGMENT_SHADER,fsText.c_str(),log);
+        if(vs && fs) _skinProgram=TryLinkProgram(vs,fs,log);
+        if(vs)glDeleteShader(vs);if(fs)glDeleteShader(fs);
+        if(!_skinProgram) { std::fprintf(stderr,"skinning: GL fallback: %s\n",log.c_str());return false; }
+        _skinUniforms=FetchUniformLocations(_skinProgram);
+        _skinPalette=glGetUniformLocation(_skinProgram,"u_skin[0]");
+        std::fprintf(stderr,"skinning: GL ready attribs=%d vertex-uniform-vectors=%d\n",attribs,uniforms);
+        return true;
+    }
+    RBSkinnedMeshHandle CreateSkinnedMesh(const RBSkinnedVertex* vertices,int count) override {
+        if(!vertices || count<=0 || count%3 || !SkinnedMeshSupported()) return NULL;
+        Flush();auto* mesh=new SkinnedMeshGL;mesh->generation=_contextGeneration;
+        mesh->count=count;mesh->bytes=size_t(count)*sizeof(RBSkinnedVertex);
+        glGenVertexArrays(1,&mesh->vao);glGenBuffers(1,&mesh->vbo);
+        glBindVertexArray(mesh->vao);glBindBuffer(GL_ARRAY_BUFFER,mesh->vbo);
+        glBufferData(GL_ARRAY_BUFFER,mesh->bytes,vertices,GL_STATIC_DRAW);
+        SetupVertexAttribs(sizeof(RBSkinnedVertex));
+        glEnableVertexAttribArray(7);glVertexAttribIPointer(7,4,GL_UNSIGNED_BYTE,sizeof(RBSkinnedVertex),(void*)offsetof(RBSkinnedVertex,joints));
+        glEnableVertexAttribArray(8);glVertexAttribPointer(8,4,GL_UNSIGNED_BYTE,GL_TRUE,sizeof(RBSkinnedVertex),(void*)offsetof(RBSkinnedVertex,weights));
+        const GLenum error=glGetError();glBindVertexArray(0);glBindBuffer(GL_ARRAY_BUFFER,0);
+        if(error!=GL_NO_ERROR) {glDeleteBuffers(1,&mesh->vbo);glDeleteVertexArrays(1,&mesh->vao);delete mesh;return NULL;}
+        _skinGpuBytes+=mesh->bytes;wf_profile::count(wf_profile::SkinVertexBytes,mesh->bytes);return mesh;
+    }
+    bool SkinnedMeshLive(RBSkinnedMeshHandle h) const override {
+        auto* m=static_cast<SkinnedMeshGL*>(h);return m && m->generation==_contextGeneration;
+    }
+    void DestroySkinnedMesh(RBSkinnedMeshHandle h) override {
+        auto* m=static_cast<SkinnedMeshGL*>(h);if(!m)return;
+        if(SkinnedMeshLive(h)){glDeleteBuffers(1,&m->vbo);glDeleteVertexArrays(1,&m->vao);_skinGpuBytes-=m->bytes;}
+        delete m;
+    }
+    void SkinnedMeshBytes(size_t& gpu,size_t& cpu) const override {gpu=_skinGpuBytes;cpu=0;}
+    bool DrawSkinnedMesh(RBSkinnedMeshHandle h,int first,int count,const float* palette,int joints,
+                         const PixelMap* texture,bool prelit,bool twoSided,bool cull) override {
+        if(!SkinnedMeshLive(h) || !SkinnedMeshSupported() || joints<1 || joints>48 || !palette)return false;
+        auto& mesh=*static_cast<SkinnedMeshGL*>(h);
+        if(first<0 || count<0 || first+count>mesh.count)return false;
+        Flush();UpdateMvp();glUseProgram(_skinProgram);
+        _curTexture=texture;_curPrelit=prelit;BindSceneUniforms(_skinUniforms);
+        glUniform4fv(_skinPalette,joints*3,palette);
+        GLint front=0,face=0;glGetIntegerv(GL_FRONT_FACE,&front);glGetIntegerv(GL_CULL_FACE_MODE,&face);
+        const bool oldCull=glIsEnabled(GL_CULL_FACE);
+        glFrontFace(GL_CCW);glCullFace(GL_BACK);
+        if(cull && !twoSided)glEnable(GL_CULL_FACE);else glDisable(GL_CULL_FACE);
+        glDisable(GL_BLEND);glDepthMask(GL_TRUE);glBindVertexArray(mesh.vao);
+        glDrawArrays(GL_TRIANGLES,first,count);
+        if(oldCull)glEnable(GL_CULL_FACE);else glDisable(GL_CULL_FACE);
+        glFrontFace(front);glCullFace(face);glBindVertexArray(0);glUseProgram(0);
+        _curTexture=nullptr;_curPrelit=false;
+        wf_profile::count(wf_profile::SkinPaletteBytes,joints*48);wf_profile::count(wf_profile::SkinDraws);
+        wf_profile::count(wf_profile::SkinFaces,count/3);wf_profile::count(wf_profile::FacesSubmitted,count/3);wf_profile::count(wf_profile::Draws);wf_profile::count(wf_profile::Triangles,count/3);
+        return true;
     }
 
     // ---- static meshes (E3 phase 1) ----------------------------------------
@@ -966,7 +1075,8 @@ private:
         GLint lighting=-1, ambient=-1, lightDir=-1, lightColor=-1;
         GLint fog=-1, fogColor=-1, fogStart=-1, fogEnd=-1;
     };
-    ProgramUniforms _uniforms, _opaqueUniforms, _opaqueTexUniforms;
+    ProgramUniforms _uniforms, _opaqueUniforms, _opaqueTexUniforms, _skinUniforms;
+    GLuint _skinProgram=0;GLint _skinPalette=-1;bool _skinTried=false;size_t _skinGpuBytes=0;
     GLuint _opaqueProg = 0;
     GLuint _opaqueTexProg = 0;
     bool _customProgram = false;
@@ -1098,6 +1208,33 @@ private:
         _mvpDirty = false;
     }
 
+    void BindSceneUniforms(const ProgramUniforms& uniforms) {
+        glUniformMatrix4fv(uniforms.mvp, 1, GL_FALSE, _mvp);
+        glUniformMatrix4fv(uniforms.mv,  1, GL_FALSE, _mv);
+        // A prelit batch is unlit by definition: its vertex colors are final.
+        glUniform1i(uniforms.lighting, (_lightingEnabled && !_curPrelit) ? 1 : 0);
+        glUniform3fv(uniforms.ambient, 1, _ambient);
+        glUniform3fv(uniforms.lightDir,   RB_MAX_LIGHTS, &_lightDir[0][0]);
+        glUniform3fv(uniforms.lightColor, RB_MAX_LIGHTS, &_lightColor[0][0]);
+        glUniform1i(uniforms.fog, _fogEnabled ? 1 : 0);
+        glUniform3fv(uniforms.fogColor, 1, _fogColor);
+        glUniform1f(uniforms.fogStart, _fogStart);
+        glUniform1f(uniforms.fogEnd,   _fogEnd);
+
+        if (_curTexture)
+        {
+            glActiveTexture(GL_TEXTURE0);
+            _curTexture->SetGLTexture();
+            glUniform1i(uniforms.tex, 0);
+            glUniform1i(uniforms.useTex, _modulateTexture ? 3 : 1);
+            glUniform1i(uniforms.alphaCutout, _alphaCutout ? 1 : 0);
+        }
+        else
+        {
+            glUniform1i(uniforms.useTex, 0);
+        }
+    }
+
     void Flush()
     {
         if (BatchEmpty())
@@ -1124,30 +1261,7 @@ private:
             glDisable(GL_BLEND);
             glDepthMask(GL_TRUE);
         }
-        glUniformMatrix4fv(uniforms.mvp, 1, GL_FALSE, _mvp);
-        glUniformMatrix4fv(uniforms.mv,  1, GL_FALSE, _mv);
-        // A prelit batch is unlit by definition: its vertex colors are final.
-        glUniform1i(uniforms.lighting, (_lightingEnabled && !_curPrelit) ? 1 : 0);
-        glUniform3fv(uniforms.ambient, 1, _ambient);
-        glUniform3fv(uniforms.lightDir,   RB_MAX_LIGHTS, &_lightDir[0][0]);
-        glUniform3fv(uniforms.lightColor, RB_MAX_LIGHTS, &_lightColor[0][0]);
-        glUniform1i(uniforms.fog, _fogEnabled ? 1 : 0);
-        glUniform3fv(uniforms.fogColor, 1, _fogColor);
-        glUniform1f(uniforms.fogStart, _fogStart);
-        glUniform1f(uniforms.fogEnd,   _fogEnd);
-
-        if (_curTexture)
-        {
-            glActiveTexture(GL_TEXTURE0);
-            _curTexture->SetGLTexture();
-            glUniform1i(uniforms.tex, 0);
-            glUniform1i(uniforms.useTex, _modulateTexture ? 3 : 1);
-            glUniform1i(uniforms.alphaCutout, _alphaCutout ? 1 : 0);
-        }
-        else
-        {
-            glUniform1i(uniforms.useTex, 0);
-        }
+        BindSceneUniforms(uniforms);
 
         if (_curMesh)
         {

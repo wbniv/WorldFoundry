@@ -56,6 +56,18 @@ struct RBStaticTriangle
 // needs to draw subsets of it). NULL means "none".
 typedef void* RBStaticMeshHandle;
 
+// Experimental skinning: immutable, face-expanded vertices. The prefix
+// matches the existing backend Vert layout; joints are integer bytes and
+// weights are UNORM bytes. Palette matrices are three float4 rows.
+struct RBSkinnedVertex {
+    RBVertex vertex;
+    float normal[3];
+    float opacity;
+    float paletteDark[4], paletteLight[3];
+    unsigned char joints[4], weights[4];
+};
+typedef void* RBSkinnedMeshHandle;
+
 // Pixel layout of the data handed to CreateTexture. Matches what PixelMap
 // actually stores, which is chosen by the SIXTEEN_BIT_VRAM build switch.
 enum RBTextureFormat
@@ -213,6 +225,15 @@ public:
     // StaticMeshSupported (the default), and the caller keeps using
     // DrawTriangle, so Metal and the headless stub need no change.
     virtual bool StaticMeshSupported() const { return false; }
+    virtual bool SkinnedMeshSupported() { return false; }
+    virtual RBSkinnedMeshHandle CreateSkinnedMesh(const RBSkinnedVertex*, int) { return NULL; }
+    virtual void SkinnedMeshBytes(size_t& gpu, size_t& cpu) const { gpu = cpu = 0; }
+    virtual bool SkinnedMeshLive(RBSkinnedMeshHandle) const { return false; }
+    virtual void DestroySkinnedMesh(RBSkinnedMeshHandle) {}
+    // Immediate range draw; false means no draw was submitted. Caller must
+    // materialize its current pose before streaming the rejected range.
+    virtual bool DrawSkinnedMesh(RBSkinnedMeshHandle, int, int, const float*, int,
+                                 const PixelMap*, bool, bool, bool) { return false; }
 
     // Packs and uploads `count` triangles. Returns NULL on failure or when
     // unsupported; the caller then streams the mesh as before.

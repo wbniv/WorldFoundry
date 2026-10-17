@@ -43,6 +43,8 @@
 #import <QuartzCore/CAMetalLayer.h>
 
 #include <gfx/renderer_backend.hp>
+#include <game/runtime_profile.hp>
+#include <string>
 #include <game/bitmap_text.hp>
 #include <hal/phonepad/phonepad_overlay.h>
 #include <gfx/pixelmap.hp>
@@ -199,6 +201,41 @@ fragment float4 wf_fs(VertexOut v                  [[stage_in]],
     return c;
 }
 )MSL";
+
+static void SkinReplace(std::string& text,const std::string& before,const std::string& after) {
+    size_t at=0;while((at=text.find(before,at))!=std::string::npos){text.replace(at,before.size(),after);at+=after.size();}
+}
+static std::string SkinMSL() {
+    std::string s=kMSL;
+    SkinReplace(s,"    float opacity [[attribute(4)]];", "    uint4 joints [[attribute(7)]];\n    float4 weights [[attribute(8)]];\n    float opacity [[attribute(4)]];");
+    SkinReplace(s,"    float3 lit;","    float3 lit;\n    float3 eye;");
+    SkinReplace(s,"wf_vs(","wf_skin_vs(");SkinReplace(s,"wf_fs(","wf_skin_fs(");
+    SkinReplace(s,"constant Uniforms& u        [[buffer(1)]])", "constant Uniforms& u        [[buffer(1)]], constant float4* skin [[buffer(2)]])");
+    const auto first=s.find("    if (u.lighting != 0)"),last=s.find("    if (u.fog != 0)",first);
+    s.replace(first,last-first,"    o.lit=float3(1.0);\n");
+    SkinReplace(s,"    o.position = u.mvp * float4(v.pos, 1.0);",R"MSL(    float4 p=float4(v.pos,1.0); float3 posed=float3(0.0);
+    for(int i=0;i<4;++i) {
+        uint j=v.joints[i]*3;
+        posed+=v.weights[i]*float3(dot(skin[j],p),dot(skin[j+1],p),dot(skin[j+2],p));
+    }
+    o.eye=(u.mv*float4(posed,1.0)).xyz;
+    o.position=u.mvp*float4(posed,1.0);)MSL");
+    SkinReplace(s,"(u.mv * float4(v.pos, 1.0))","(u.mv * float4(posed, 1.0))");
+    SkinReplace(s,"[[sampler(0)]])", "[[sampler(0)]], bool front [[front_facing]])");
+    SkinReplace(s,"    float4 c =",R"MSL(    // Metal render-target Y grows downward; calibrate on an Apple draw.
+    float3 n=cross(dfdy(v.eye),dfdx(v.eye));float n2=dot(n,n);
+    float3 N=n2>1e-24 ? n*rsqrt(n2) : float3(0.0);
+    N*=front ? 1.0 : -1.0;
+    float3 shade=float3(1.0);
+    if(u.lighting!=0) {
+        shade=u.ambient;
+        for(int i=0;i<3;++i)shade+=u.light_color[i].xyz*max(0.0,dot(N,u.light_dir[i].xyz));
+    }
+    float4 c =)MSL");
+    SkinReplace(s,"v.color * v.lit","v.color * shade");SkinReplace(s,"albedo*v.lit","albedo*shade");
+    return s;
+}
+struct SkinMeshMetal { id<MTLBuffer> buffer=nil; id<MTLDevice> device=nil; size_t bytes=0; int count=0; };
 
 struct Vert
 {
@@ -410,6 +447,8 @@ public:
                       bool cullExempt,
                       bool prelit) override
     {
+        if(wf_profile::state().skinCullExempt)cullExempt=true;
+        wf_profile::count(wf_profile::FacesSubmitted);
         // Software backface cull — mirrors backend_modern.cc. Cull from the
         // object-space face normal + model->eye _mv (winding-independent): a face
         // points away when dot(Ne, Pe) > 0 in eye space. DOUBLE_SIDED/matte pass
@@ -424,6 +463,7 @@ public:
         }();
         if (cullEnabled && !cullExempt)
         {
+            wf_profile::Scope cullTime(wf_profile::SkinCullCpu,wf_profile::state().skinObject);
             const float nex = _mv[0]*nx + _mv[4]*ny + _mv[8]*nz;
             const float ney = _mv[1]*nx + _mv[5]*ny + _mv[9]*nz;
             const float nez = _mv[2]*nx + _mv[6]*ny + _mv[10]*nz;
@@ -433,8 +473,9 @@ public:
             const float pex = _mv[0]*cx + _mv[4]*cy + _mv[8]*cz  + _mv[12];
             const float pey = _mv[1]*cx + _mv[5]*cy + _mv[9]*cz  + _mv[13];
             const float pez = _mv[2]*cx + _mv[6]*cy + _mv[10]*cz + _mv[14];
-            if (nex*pex + ney*pey + nez*pez > 0.0f)
-                return;
+            if (nex*pex + ney*pey + nez*pez > 0.0f) {
+                wf_profile::count(wf_profile::FacesCulled);return;
+            }
         }
 
         // Batch key = (texture, prelit) — mirrors backend_modern.cc. A
@@ -598,6 +639,67 @@ public:
         ReleaseTexHandle(handle);
     }
 
+    bool SkinnedMeshSupported() override {
+        LazyInit();if(!_inited)return false;if(_skinTried)return _skinPipeline!=nil;_skinTried=true;
+        NSError* error=nil;auto text=SkinMSL();
+        id<MTLLibrary> library=[_device newLibraryWithSource:[NSString stringWithUTF8String:text.c_str()] options:nil error:&error];
+        if(!library){NSLog(@"skinning: MSL compile failed %@",error);return false;}
+        id<MTLFunction> vs=[library newFunctionWithName:@"wf_skin_vs"],fs=[library newFunctionWithName:@"wf_skin_fs"];
+        MTLVertexDescriptor* vd=[[MTLVertexDescriptor alloc] init];
+        const MTLVertexFormat formats[9]={MTLVertexFormatFloat3,MTLVertexFormatFloat3,MTLVertexFormatFloat2,MTLVertexFormatFloat3,
+            MTLVertexFormatFloat,MTLVertexFormatFloat4,MTLVertexFormatFloat3,MTLVertexFormatUChar4,MTLVertexFormatUChar4Normalized};
+        const NSUInteger offsets[9]={offsetof(RBSkinnedVertex,vertex)+offsetof(RBVertex,x),offsetof(RBSkinnedVertex,vertex)+offsetof(RBVertex,r),
+            offsetof(RBSkinnedVertex,vertex)+offsetof(RBVertex,u),offsetof(RBSkinnedVertex,normal),offsetof(RBSkinnedVertex,opacity),
+            offsetof(RBSkinnedVertex,paletteDark),offsetof(RBSkinnedVertex,paletteLight),offsetof(RBSkinnedVertex,joints),offsetof(RBSkinnedVertex,weights)};
+        for(int i=0;i<9;++i){vd.attributes[i].format=formats[i];vd.attributes[i].offset=offsets[i];vd.attributes[i].bufferIndex=0;}
+        vd.layouts[0].stride=sizeof(RBSkinnedVertex);vd.layouts[0].stepFunction=MTLVertexStepFunctionPerVertex;
+        MTLRenderPipelineDescriptor* pd=[[MTLRenderPipelineDescriptor alloc] init];pd.vertexFunction=vs;pd.fragmentFunction=fs;
+        pd.vertexDescriptor=vd;pd.colorAttachments[0].pixelFormat=MTLPixelFormatBGRA8Unorm;pd.depthAttachmentPixelFormat=kDepthFormat;
+        _skinPipeline=[_device newRenderPipelineStateWithDescriptor:pd error:&error];
+#if !__has_feature(objc_arc)
+        [library release];[vs release];[fs release];[vd release];[pd release];
+#endif
+        if(!_skinPipeline)NSLog(@"skinning: Metal pipeline failed %@",error);
+        return _skinPipeline!=nil;
+    }
+    RBSkinnedMeshHandle CreateSkinnedMesh(const RBSkinnedVertex* v,int count) override {
+        if(!v || count<=0 || count%3 || !SkinnedMeshSupported())return NULL;
+        auto* mesh=new SkinMeshMetal;mesh->device=_device;mesh->count=count;mesh->bytes=size_t(count)*sizeof(RBSkinnedVertex);
+        mesh->buffer=[_device newBufferWithBytes:v length:mesh->bytes options:MTLResourceStorageModeShared];
+        if(!mesh->buffer){delete mesh;return NULL;}
+        _skinGpuBytes+=mesh->bytes;wf_profile::count(wf_profile::SkinVertexBytes,mesh->bytes);return mesh;
+    }
+    bool SkinnedMeshLive(RBSkinnedMeshHandle h) const override {auto* m=static_cast<SkinMeshMetal*>(h);return m && m->buffer && m->device==_device;}
+    void DestroySkinnedMesh(RBSkinnedMeshHandle h) override {
+        auto* m=static_cast<SkinMeshMetal*>(h);if(!m)return;
+        _skinGpuBytes-=m->bytes;
+#if !__has_feature(objc_arc)
+        [m->buffer release];
+#endif
+        delete m;
+    }
+    void SkinnedMeshBytes(size_t& gpu,size_t& cpu) const override {gpu=_skinGpuBytes;cpu=0;}
+    bool DrawSkinnedMesh(RBSkinnedMeshHandle h,int first,int count,const float* p,int joints,
+                         const PixelMap* texture,bool prelit,bool twoSided,bool cull) override {
+        if(!_encoder || !SkinnedMeshLive(h) || !SkinnedMeshSupported() || !p || joints<1 || joints>48)return false;
+        auto* m=static_cast<SkinMeshMetal*>(h);if(first<0 || count<0 || first+count>m->count)return false;
+        Flush();UpdateMvp();_curTexture=texture;_curPrelit=prelit;Uniforms u;BuildUniforms(u);
+        [_encoder setRenderPipelineState:_skinPipeline];[_encoder setDepthStencilState:_depthState];
+        [_encoder setFrontFacingWinding:MTLWindingCounterClockwise];
+        [_encoder setCullMode:(cull && !twoSided ? MTLCullModeBack : MTLCullModeNone)];
+        [_encoder setVertexBuffer:m->buffer offset:0 atIndex:0];
+        [_encoder setVertexBytes:&u length:sizeof(u) atIndex:1];[_encoder setFragmentBytes:&u length:sizeof(u) atIndex:1];
+        [_encoder setVertexBytes:p length:joints*48 atIndex:2];
+        [_encoder setFragmentTexture:(u.use_tex ? HandleToTex(_boundTexture) : _whiteTexture) atIndex:0];
+        [_encoder setFragmentSamplerState:_sampler atIndex:0];
+        [_encoder drawPrimitives:MTLPrimitiveTypeTriangle vertexStart:first vertexCount:count];
+        [_encoder setCullMode:MTLCullModeNone];[_encoder setFrontFacingWinding:MTLWindingCounterClockwise];
+        _curTexture=nullptr;_curPrelit=false;_trianglesThisFrame+=count/3;
+        wf_profile::count(wf_profile::SkinPaletteBytes,joints*48);wf_profile::count(wf_profile::SkinDraws);
+        wf_profile::count(wf_profile::SkinFaces,count/3);wf_profile::count(wf_profile::FacesSubmitted,count/3);wf_profile::count(wf_profile::Draws);wf_profile::count(wf_profile::Triangles,count/3);
+        return true;
+    }
+
     // ---- offscreen support (Phase 2) ---------------------------------------
     // The wf_metal:: free functions below are the public face of this; these
     // are the accessors they need. LazyInitPublic exists so the offscreen path
@@ -636,6 +738,7 @@ private:
     id<MTLTexture>             _whiteTexture    = nil;
     RBTextureHandle            _boundTexture    = NULL;
     bool                       _inited          = false;
+    id<MTLRenderPipelineState> _skinPipeline=nil;bool _skinTried=false;size_t _skinGpuBytes=0;
 
     // Phase 1 measured 1563 triangles/frame against the headless backend; these
     // keep that number comparable now that Metal has replaced it.
@@ -907,6 +1010,8 @@ private:
         [_encoder setFragmentBytes:&u
                              length:sizeof(Uniforms)
                             atIndex:1];
+        wf_profile::count(wf_profile::Uploads);wf_profile::count(wf_profile::UploadBytes,bytes);
+        wf_profile::count(wf_profile::Draws);wf_profile::count(wf_profile::Triangles,_cpu.size()/3);
         [_encoder drawPrimitives:MTLPrimitiveTypeTriangle
                      vertexStart:0
                      vertexCount:_cpu.size()];

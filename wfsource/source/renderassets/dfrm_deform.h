@@ -86,8 +86,13 @@ public:
     // DfrmClamped, Positions(), FaceNormals() and Outputs() hold the new pose;
     // on any other status they keep the previous one (no partial pose).
     // worldRotation: 9 floats, row i = model axis i in world (NULL = model frame).
-    int Evaluate(const float* block, int n, double now, const float* worldRotation = nullptr);
+    int Evaluate(const float* block, int n, double now, const float* worldRotation = nullptr, bool materialize = true);
+    // Materialize the published pose without sampling clips or advancing state.
+    bool Materialize();
+    const std::vector<float>& TransformAngles() const { return _xf; }
 
+    const std::vector<int>& FaceIndices() const { return _faces; }
+    const std::vector<float>& RestPositions() const { return _rest; }
     const std::vector<float>& Positions() const { return _positions; }
     const std::vector<float>& FaceNormals() const { return _normals; }
     bool FaceNormalDriven(int face) const { return _faceMode[face] != FaceStatic; }
@@ -99,6 +104,8 @@ public:
     float RootPitch() const { return _rootPitch; }
 
 private:
+    bool PlaceVertices(const std::vector<float>& joints, const std::vector<float>& frames,
+                       const std::vector<float>& xf, std::vector<float>& positions, std::vector<float>& normals);
     enum FaceMode : uint8_t { FaceStatic, FaceSample, FaceTransform, FaceRecompute };
     const DfrmData* _data = nullptr;
     std::vector<float> _rest, _positions, _restNormals, _normals;

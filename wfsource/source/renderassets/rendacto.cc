@@ -588,6 +588,10 @@ DeformStatus RenderActor3D::Deform(DeformKind kind, const float* channels, int n
     if (n > deformer->MaxChannels()) return DeformStatus::BadInput;
     DeformStatus status = deformer->Check(channels, n);
     if (status != DeformStatus::Ok) return status;
+    if (deformer->PoseGpu(_object,channels,n,time,worldRotation,status)) {
+        if (fresh && (status==DeformStatus::Ok || status==DeformStatus::Clamped)) _deformer=std::move(fresh);
+        return status;
+    }
     const DeformTarget target{_object.GetWrittableVertexList(), _object.GetVertexCount(), _object, time, worldRotation};
     if (!target.vertices || target.count <= 0) return DeformStatus::BadInput;
     if (fresh) {

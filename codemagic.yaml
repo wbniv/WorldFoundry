@@ -1006,3 +1006,49 @@ workflows:
       cancel_previous_builds: true
     scripts: *macos_desktop_scripts
     artifacts: *macos_desktop_artifacts
+
+  gpu-skinning-metal:
+    name: GPU skinning Metal verification (experimental)
+    instance_type: mac_mini_m2
+    max_build_duration: 25
+    environment:
+      xcode: latest
+    cache:
+      cache_paths:
+        - ~/.rustup
+        - ~/.cargo
+        - engine/vendor/jolt-physics-5.5.0
+        - build-skin-metal
+    triggering:
+      events: []
+      cancel_previous_builds: false
+    scripts:
+      - name: Prepare compiler and dependencies
+        script: |
+          set -euo pipefail
+          exec > >(tee -a "$CM_BUILD_DIR/skin-metal-build.log") 2>&1
+          if ! command -v cargo >/dev/null 2>&1 && [ ! -x "$HOME/.cargo/bin/cargo" ]; then
+            curl --proto '=https' --tlsv1.2 -sSf https://sh.rustup.rs | sh -s -- -y --profile minimal --no-modify-path
+          fi
+          export PATH="$HOME/.cargo/bin:$PATH"
+          echo "PATH=$PATH" >> "$CM_ENV"
+          cargo fetch --locked --manifest-path wftools/wf_attr_edit/Cargo.toml
+          if [ ! -d engine/vendor/jolt-physics-5.5.0 ]; then
+            mkdir -p engine/vendor/jolt-physics-5.5.0
+            tar -xzf engine/vendor/jolt-physics-5.5.0.tar.gz --strip-components=1 -C engine/vendor/jolt-physics-5.5.0
+          fi
+      - name: Build the Metal rendering gate
+        script: |
+          set -euo pipefail
+          exec > >(tee -a "$CM_BUILD_DIR/skin-metal-build.log") 2>&1
+          cmake -S . -B build-skin-metal -G Ninja -DCMAKE_BUILD_TYPE=Release -DCMAKE_OSX_ARCHITECTURES=arm64 -DWF_ASAN=OFF -DWF_ENABLE_EDITOR=OFF
+          cmake --build build-skin-metal --target wf_skinned_mesh_metal_test wf_skin_pose_math --parallel 4
+      - name: Render and compare CPU and GPU fixtures
+        script: |
+          set -euo pipefail
+          ctest --test-dir build-skin-metal -R '^(skin_pose_math|skinned_mesh_metal)$' --output-on-failure 2>&1 | tee skin-metal-test.log
+    artifacts:
+      - skin-metal-build.log
+      - skin-metal-test.log
+      - build-skin-metal/Testing/Temporary/LastTest.log
+      - build-skin-metal/skin-metal-*.ppm

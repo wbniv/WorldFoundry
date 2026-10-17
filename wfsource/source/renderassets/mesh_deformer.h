@@ -42,6 +42,7 @@ public:
     // depend on its span (min-x, max-x), which is model metadata.
     virtual DeformStatus Bind(const DeformTarget&, const float* channels, int n) = 0;
     virtual DeformStatus Pose(const DeformTarget&, const float* channels, int n) = 0;
+    virtual bool PoseGpu(RenderObject3D&, const float*, int, double, const float*, DeformStatus&) { return false; }
     // Values for the caller to publish (DFRM: wrap centre, tail tip). Returns the count.
     virtual int Outputs(float* /*out*/, int /*max*/) const { return 0; }
 };

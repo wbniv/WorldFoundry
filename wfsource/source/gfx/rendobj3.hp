@@ -58,6 +58,8 @@
 struct StaticMeshBake;		// gfx/glpipeline/static_mesh.cc (E3 phase 1)
 struct RecordedFace;
 struct RBStaticTriangle;
+class SkinPoseSource;
+struct SkinMeshState;
 
 class RenderObject3D
 {
@@ -80,6 +82,10 @@ public:
     const std::vector<wf_render::LionRig>& GetLionRig() const { return _lionRig; }
 	// Optional DFRM v1 rig (renderassets/dfrm_deform.h); NULL when absent or invalid.
 	const wf_render::DfrmData* GetDfrm() const { return _dfrm.get(); }
+    const Vertex3D* ReadVertices() const { return _vertexList; }
+    const TriFace* ReadFaces() const { return _faceList; }
+    bool SkinEligible() const;
+    void SetSkinPose(SkinPoseSource* source) { _skinPose = source; }
 	bool SetRuntimeGeometry(int vertices, Vertex3D* vertexList, int faces, TriFace* faceList, bool textured=true);
 
 	// Should only be used by the animation system. Handing out writable
@@ -133,6 +139,10 @@ private:
 	// and drawn each frame from the bake with only the cull done per face.
 	// Returns false when this object must be streamed instead.
 	bool RenderStatic(const Matrix34& position);
+    bool RenderSkinned(const Matrix34& position);
+    SkinPoseSource* _skinPose = NULL;  // owned by the actor's MeshDeformer
+    unsigned _skinFallbackReasons = 0;
+    SkinMeshState* _skinMesh = NULL;
 	bool BakeStatic();
 	StaticMeshBake* BakeFromRecording(RBStaticTriangle* triangles, RecordedFace* faces);
 	int StaticBakeStale() const;		// 0 = valid; see static_mesh.cc

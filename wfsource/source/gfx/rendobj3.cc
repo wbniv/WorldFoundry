@@ -24,6 +24,7 @@
 // Original Author: Kevin T. Seghetti
 //============================================================================
 
+#include <gfx/skinned_mesh.hp>
 #include <hal/hal.h>
 #include <cstdio>
 #include <gfx/rendobj3.hp>
@@ -132,6 +133,8 @@ RenderObject3D::Construct( Memory& memory, int vertexCount,Vertex3D* vertexList,
 
 RenderObject3D::~RenderObject3D()
 {
+    SkinMeshDestroy(_skinMesh);
+
 	StaticMeshDiscard();	// frees the GPU buffers and bookkeeping of a bake
 }
 

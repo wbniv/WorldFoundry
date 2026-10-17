@@ -33,6 +33,7 @@
 #include <gfx/display.hp>
 #include <gfx/vmem.hp>
 #include <gfx/static_mesh.hp>
+#include <gfx/skinned_mesh.hp>
 
 #if defined(__LINUX__) || defined(__ANDROID__)
 	char szOadDir[ _MAX_PATH ];
@@ -155,6 +156,7 @@ usage( int argc, char* argv[] )
 	std::cout << "Usage : " << __GAME__ << " {switches} <level #>" << std::endl;
 	std::cout << "Switches:" << std::endl;
 	std::cout << "\t--no-fps\tHide the default bottom-right frame-rate counter" << std::endl;
+	std::cout << "\t--gpu-skinning=cpu|cpu-no-cull|gpu-no-cull|gpu\tExperimental skinning (default cpu)" << std::endl;
 	std::cout << "\t--static-mesh=0|1\tDraw meshes from static GPU buffers (default 1; env WF_STATIC_MESH)" << std::endl;
 	std::cout << "\t--static-mesh-cull=exact|fast\tStatic-mesh back-face test (default exact)" << std::endl;
 	std::cout << "\t--static-mesh-shared-index=0|1\tShare one static-mesh index buffer (default 1)" << std::endl;
@@ -280,6 +282,9 @@ ParseCommandLine(int argc, char** argv)
 		{
 			wf_profile::enable();
 		}
+        else if (strncmp(argv[index], "--gpu-skinning=", 15) == 0) {
+            if (!SkinningSetMode(argv[index] + 15)) { fprintf(stderr,"invalid GPU skinning mode\n"); exit(2); }
+        }
 		// E3 static mesh buffers (gfx/static_mesh.hp): on by default; =0 streams
 		// every mesh through DrawTriangle as before. Wins over WF_STATIC_MESH.
 		else if ( strcmp( argv[index], "--static-mesh=0" ) == 0 || strcmp( argv[index], "--static-mesh=1" ) == 0 )

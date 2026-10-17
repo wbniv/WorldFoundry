@@ -45,6 +45,7 @@ bool StaticMeshSharedIndex();
 // freed). Baked UVs come from that placement (CalcUV), so every bake made
 // before the call is rebuilt on its next draw.
 void StaticMeshAtlasChanged();
+unsigned StaticMeshAtlasGeneration();
 
 // Main-RAM bytes the static path holds (bake bookkeeping and scratch; not the
 // transient bake buffers, which are freed right after upload).

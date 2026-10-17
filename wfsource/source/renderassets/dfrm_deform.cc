@@ -4,6 +4,7 @@
 // the reference the dfrm_strand test compares against.
 //============================================================================
 #include <renderassets/dfrm_deform.h>
+#include <game/runtime_profile.hp>
 
 #include <algorithm>
 #include <cmath>
@@ -238,12 +239,13 @@ bool DfrmEvaluator::Bind(const DfrmData& data, const float* rest, int vertexCoun
     return true;
 }
 
-int DfrmEvaluator::Evaluate(const float* block, int n, double now, const float* worldRotation)
+int DfrmEvaluator::Evaluate(const float* block, int n, double now, const float* worldRotation, bool materialize)
 {
     if (!_data) return DfrmNoData;
     if (!block || n < DfrmInputCount) return DfrmBadInput;
     for (int i = 0; i < DfrmInputCount; ++i) if (!std::isfinite(block[i])) return DfrmNotFinite;
     if (!std::isfinite(now)) return DfrmNotFinite;
+    wf_profile::Scope poseTime(wf_profile::SkinPoseCpu);
     const DfrmData& D = *_data;
     const DfrmCurve& curve = D.curves[0];
     const int N = curve.sampleCount, T = int(D.transforms.size()), stride = D.frameStride;
@@ -377,9 +379,50 @@ int DfrmEvaluator::Evaluate(const float* block, int n, double now, const float* 
         std::memcpy(&joints[3*(i + 1)], p, sizeof p);
     }
 
+    // CPU materialization is optional; GPU draws consume only the published pose.
+    for (float f : joints) if (!std::isfinite(f)) return DfrmNotFinite;
+    for (float f : frames) if (!std::isfinite(f)) return DfrmNotFinite;
+    poseTime.stop();
+    if (materialize && !PlaceVertices(joints, frames, xf, _positionsNext, _normalsNext))
+        return DfrmNotFinite;
+
+    wf_profile::Scope outputsTime(wf_profile::SkinPoseCpu);
+    // 7. Write-backs: wrap centre (centre of the first fully wrapped ring's
+    // circle) and the tail tip, both body-local.
+    float centre[3] = {0, 0, 0};
+    if (wrapping) {
+        const int j = std::min(N - 1, std::max(0, int(std::ceil(s))));
+        const float* fr = &frames[9*j];
+        const float* nrm = mode == 1 ? fr + 3 : fr + 6;
+        const float theta = (mode == 1 ? F[j] : L[j]) * kDegToRad;
+        const DfrmSample& sm = D.samples[curve.firstSample + j];
+        if (std::fabs(theta) > 1e-4f) {
+            const float h = sm.length * .5f / std::tan(theta * .5f);
+            for (int k = 0; k < 3; ++k) centre[k] = .5f*(joints[3*j + k] + joints[3*(j + 1) + k]) + nrm[k]*h;
+        } else {
+            for (int k = 0; k < 3; ++k) centre[k] = joints[3*j + k] + nrm[k]*(radius + sm.halfWidth);
+        }
+    }
+
+    if (materialize) { _positions.swap(_positionsNext); _normals.swap(_normalsNext); }
+    _joints.swap(joints);
+    _frames.swap(frames);
+    for (int i = 0; i < N; ++i) { _angles[3*i] = F[i]; _angles[3*i + 1] = L[i]; _angles[3*i + 2] = Tw[i]; }
+    _xf.swap(xf);
+    std::memcpy(_outputs, centre, sizeof centre);
+    std::memcpy(_outputs + 3, &_joints[3*N], 3 * sizeof(float));
+    return clamped ? DfrmClamped : DfrmOk;
+}
+
+bool DfrmEvaluator::PlaceVertices(const std::vector<float>& joints, const std::vector<float>& frames,
+                                  const std::vector<float>& xf, std::vector<float>& pos,
+                                  std::vector<float>& normals)
+{
+    const DfrmData& D = *_data;
+    const DfrmCurve& curve = D.curves[0];
+    wf_profile::Scope vertexTime(wf_profile::SkinVerticesCpu);
     // 6. Vertices: rigid per sample; weighted transforms about their pivots.
     const int V = int(D.influences.size());
-    std::vector<float>& pos = _positionsNext;
     for (int i = 0; i < V; ++i) {
         const DfrmInfluence& in = D.influences[i];
         float* o = &pos[3*i];
@@ -395,12 +438,13 @@ int DfrmEvaluator::Evaluate(const float* block, int n, double now, const float* 
             for (int k = 0; k < 3; ++k) o[k] += tr.pivot[k];
         } else std::memcpy(o, r, 3 * sizeof(float));
     }
-    for (float f : pos) if (!std::isfinite(f)) return DfrmNotFinite;
+    for (float f : pos) if (!std::isfinite(f)) return false;
 
+    vertexTime.stop();
+    wf_profile::Scope normalTime(wf_profile::SkinNormalsCpu);
     // Face normals: a rigid face turns with its sample or transform; a face that
     // spans two is recomputed with the loader's CalculateNormal winding.
     const int Fc = int(_faceMode.size());
-    std::vector<float>& normals = _normalsNext;
     std::copy(_normals.begin(), _normals.end(), normals.begin());   // static faces and degenerate recomputes keep theirs
     for (int f = 0; f < Fc; ++f) {
         float* out = &normals[3*f];
@@ -431,32 +475,14 @@ int DfrmEvaluator::Evaluate(const float* block, int n, double now, const float* 
         }
     }
 
-    // 7. Write-backs: wrap centre (centre of the first fully wrapped ring's
-    // circle) and the tail tip, both body-local.
-    float centre[3] = {0, 0, 0};
-    if (wrapping) {
-        const int j = std::min(N - 1, std::max(0, int(std::ceil(s))));
-        const float* fr = &frames[9*j];
-        const float* nrm = mode == 1 ? fr + 3 : fr + 6;
-        const float theta = (mode == 1 ? F[j] : L[j]) * kDegToRad;
-        const DfrmSample& sm = D.samples[curve.firstSample + j];
-        if (std::fabs(theta) > 1e-4f) {
-            const float h = sm.length * .5f / std::tan(theta * .5f);
-            for (int k = 0; k < 3; ++k) centre[k] = .5f*(joints[3*j + k] + joints[3*(j + 1) + k]) + nrm[k]*h;
-        } else {
-            for (int k = 0; k < 3; ++k) centre[k] = joints[3*j + k] + nrm[k]*(radius + sm.halfWidth);
-        }
-    }
+    return true;
+}
 
-    _positions.swap(pos);                       // swaps of equal-sized buffers: no allocation
-    _normals.swap(normals);
-    _joints.swap(joints);
-    _frames.swap(frames);
-    for (int i = 0; i < N; ++i) { _angles[3*i] = F[i]; _angles[3*i + 1] = L[i]; _angles[3*i + 2] = Tw[i]; }
-    _xf.swap(xf);
-    std::memcpy(_outputs, centre, sizeof centre);
-    std::memcpy(_outputs + 3, &_joints[3*N], 3 * sizeof(float));
-    return clamped ? DfrmClamped : DfrmOk;
+bool DfrmEvaluator::Materialize()
+{
+    if (!_data || !PlaceVertices(_joints, _frames, _xf, _positionsNext, _normalsNext)) return false;
+    _positions.swap(_positionsNext); _normals.swap(_normalsNext);
+    return true;
 }
 
 } // namespace wf_render

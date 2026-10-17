@@ -14,6 +14,9 @@
 #include <renderassets/jelly_deform.h>
 #include <renderassets/lionfish_deform.h>
 #include <renderassets/dfrm_deform.h>
+#include <gfx/skinned_mesh.hp>
+#include <cstdio>
+#include <game/runtime_profile.hp>
 
 #include <algorithm>
 #include <cmath>
@@ -217,8 +220,9 @@ private:
 // (renderassets/dfrm_deform.h). Channels are the control block's input cells
 // 0..32; the caller publishes Outputs() and the status to cells 33..39.
 // Positions and face normals are written only for a complete pose (E5).
-class DfrmDeformer : public MeshDeformer {
+class DfrmDeformer : public MeshDeformer, public SkinPoseSource {
 public:
+    ~DfrmDeformer() override { if(_skinBound)SkinPoseResidentBytes(_skin.CpuBytes(),false); }
     DeformKind Kind() const override { return DeformKind::Dfrm; }
     int MaxChannels() const override { return wf_render::DfrmBlockSize; }
     DeformStatus Check(const float*, int n) const override
@@ -227,9 +231,10 @@ public:
     }
     DeformStatus Bind(const DeformTarget& t, const float*, int) override
     {
+        if (_bound) return DeformStatus::Ok;
         const wf_render::DfrmData* data = t.object.GetDfrm();
         if (!data) return DeformStatus::NoMetadata;
-        TriFace* faces = t.object.GetWritableFaceList();
+        const TriFace* faces = t.object.ReadFaces();
         const int faceCount = t.object.GetFaceCount();
         std::vector<float> rest(3 * size_t(t.count)), normals(3 * size_t(faceCount));
         std::vector<int> indices(3 * size_t(faceCount));
@@ -244,22 +249,51 @@ public:
         }
         if (!_evaluator.Bind(*data, rest.data(), t.count, indices.data(), normals.data(), faceCount))
             return DeformStatus::NoMetadata;
+        _bound = true;
         return DeformStatus::Ok;
     }
     DeformStatus Pose(const DeformTarget& t, const float* c, int n) override
     {
         const int status = _evaluator.Evaluate(c, n, t.time, t.worldRotation);
         if (status != wf_render::DfrmOk && status != wf_render::DfrmClamped) return DeformStatus(status);
-        const std::vector<float>& p = _evaluator.Positions();
-        for (int i = 0; i < t.count; ++i)
-            t.vertices[i].position = Vector3(Scalar(p[3*i]), Scalar(p[3*i+1]), Scalar(p[3*i+2]));
-        TriFace* faces = t.object.GetWritableFaceList();
-        const std::vector<float>& nrm = _evaluator.FaceNormals();
-        const int faceCount = t.object.GetFaceCount();
-        for (int f = 0; f < faceCount; ++f)
-            if (_evaluator.FaceNormalDriven(f))
-                faces[f].normal = Vector3ToPS12(Vector3(Scalar(nrm[3*f]), Scalar(nrm[3*f+1]), Scalar(nrm[3*f+2])));
+        Publish(t.vertices,t.object);
         return DeformStatus(status);
+    }
+    bool PoseGpu(RenderObject3D& object,const float* c,int n,double now,const float* rotation,DeformStatus& status) override
+    {
+        if(SkinningGetMode()==SkinningMode::Cpu || SkinningGetMode()==SkinningMode::CpuNoCull)return false;
+        auto reject=[&](const char* reason){
+            wf_profile::count(wf_profile::SkinFallbacks);
+            if(!_gpuRefused){std::fprintf(stderr,"skinning: effective=cpu reason=%s\n",reason);_gpuRefused=true;}
+            return false;
+        };
+        if(!object.SkinEligible())return reject("material-or-handle");
+        if(!RendererBackendGet().SkinnedMeshSupported())return reject("backend");
+        if (!_bound) {
+            const DeformTarget target{const_cast<Vertex3D*>(object.ReadVertices()),object.GetVertexCount(),object,now,rotation};
+            status=Bind(target,c,n);
+            if (status!=DeformStatus::Ok) return true;
+        }
+        if (!_skinBound) {
+            if(_skinRejected)return reject("uncertified-skin-geometry");
+            if (!_skin.Bind(*object.GetDfrm(),_evaluator.RestPositions().data(),object.GetVertexCount(),_evaluator.FaceIndices().data(),object.GetFaceCount())) {
+                _skinRejected=true;return reject("palette-capacity-or-unsafe-geometry");
+            }
+            _skinBound=true;SkinPoseResidentBytes(_skin.CpuBytes(),true);
+        }
+        status=DeformStatus(_evaluator.Evaluate(c,n,now,rotation,false));
+        if (status==DeformStatus::Ok || status==DeformStatus::Clamped) {
+            wf_profile::Scope paletteTime(wf_profile::SkinPoseCpu);
+            if (!_skin.Pose(*object.GetDfrm(),_evaluator)) { status=DeformStatus::NotFinite; return true; }
+            object.SetSkinPose(this);
+        }
+        return true;
+    }
+    const wf_render::DfrmSkin& Skin() const override { return _skin; }
+    bool MaterializeCpu(RenderObject3D& object) override {
+        if (!_evaluator.Materialize()) return false;
+        Publish(object.GetWrittableVertexList(),object);
+        return true;
     }
     int Outputs(float* out, int max) const override
     {
@@ -268,6 +302,22 @@ public:
         return count;
     }
 private:
+    void Publish(Vertex3D* vertices,RenderObject3D& object) {
+        wf_profile::Scope vertexCopy(wf_profile::SkinVerticesCpu);
+        const std::vector<float>& p = _evaluator.Positions();
+        for (int i = 0; i < object.GetVertexCount(); ++i)
+            vertices[i].position = Vector3(Scalar(p[3*i]), Scalar(p[3*i+1]), Scalar(p[3*i+2]));
+        vertexCopy.stop();
+        wf_profile::Scope normalCopy(wf_profile::SkinNormalsCpu);
+        TriFace* faces = object.GetWritableFaceList();
+        const std::vector<float>& nrm = _evaluator.FaceNormals();
+        const int faceCount = object.GetFaceCount();
+        for (int f = 0; f < faceCount; ++f)
+            if (_evaluator.FaceNormalDriven(f))
+                faces[f].normal = Vector3ToPS12(Vector3(Scalar(nrm[3*f]), Scalar(nrm[3*f+1]), Scalar(nrm[3*f+2])));
+    }
+    bool _bound=false, _skinBound=false, _gpuRefused=false, _skinRejected=false;
+    wf_render::DfrmSkin _skin;
     wf_render::DfrmEvaluator _evaluator;
 };
 

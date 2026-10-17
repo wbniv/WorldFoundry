@@ -48,6 +48,7 @@
 // vertices is kept (except in the self-check mode).
 //============================================================================
 
+#include <gfx/skinned_mesh.hp>
 #include <gfx/static_mesh.hp>
 #include <gfx/rendobj3.hp>
 #include <gfx/material.hp>
@@ -237,6 +238,8 @@ StaticMeshSharedIndex()
 	return shared;
 }
 
+unsigned StaticMeshAtlasGeneration() { return sAtlasGeneration; }
+
 void
 StaticMeshAtlasChanged()
 {
@@ -259,6 +262,7 @@ StaticMeshSetBakeBudget(int faces)
 void
 StaticMeshSampleGauges()
 {
+    SkinMeshSampleGauges();
 	size_t gpu = 0, staging = 0;
 	RendererBackendGet().StaticMeshBytes(gpu, staging);
 	wf_profile::count(wf_profile::StaticGpuBytes, gpu);

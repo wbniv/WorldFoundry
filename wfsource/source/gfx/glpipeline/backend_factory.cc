@@ -209,6 +209,17 @@ public:
     // caller streams translucent ones, which this layer still queues and
     // sorts), so DrawStaticTriangles does what DrawTriangle does for an
     // opaque triangle: reset the backend's opacity, then hand it on.
+    bool SkinnedMeshSupported() override { return _backend.SkinnedMeshSupported(); }
+    RBSkinnedMeshHandle CreateSkinnedMesh(const RBSkinnedVertex* v,int n) override { return _backend.CreateSkinnedMesh(v,n); }
+    bool SkinnedMeshLive(RBSkinnedMeshHandle h) const override { return _backend.SkinnedMeshLive(h); }
+    void DestroySkinnedMesh(RBSkinnedMeshHandle h) override { _backend.DestroySkinnedMesh(h); }
+    void SkinnedMeshBytes(size_t& gpu,size_t& cpu) const override { _backend.SkinnedMeshBytes(gpu,cpu); }
+    bool DrawSkinnedMesh(RBSkinnedMeshHandle h,int first,int n,const float* p,int joints,
+                         const PixelMap* tex,bool prelit,bool twoSided,bool cull) override {
+        if (_opacity < 1) return false;
+        _backend.SetOpacity(1);
+        return _backend.DrawSkinnedMesh(h,first,n,p,joints,tex,prelit,twoSided,cull);
+    }
     bool StaticMeshSupported() const override { return _backend.StaticMeshSupported(); }
     RBStaticMeshHandle CreateStaticMesh(const RBStaticTriangle* t, int n) override
     { return _backend.CreateStaticMesh(t, n); }
