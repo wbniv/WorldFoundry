@@ -33,6 +33,8 @@ COMPRESS = {'meminfo.txt', 'thermal.txt'}
 _spec = importlib.util.spec_from_file_location('panel', Path(__file__).with_name('audit-gpu-skinning-panel.py'))
 panel = importlib.util.module_from_spec(_spec)
 _spec.loader.exec_module(panel)
+# Coordinator 2a75f9d's scrubbed Back/crash diagnostics; listed only if the scan below finds no endpoint, URL or PIN.
+SCRUBBED = re.compile(r'panel-diagnostics-\d+-(engine|buffers)\.txt')
 PRIVATE = re.compile(rb'\b\d{1,3}\.\d{1,3}\.\d{1,3}\.\d{1,3}(:\d+)?\b|https?://|\bpin\b', re.I)
 
 
@@ -49,7 +51,7 @@ def curate(root, session, scope_entries, write):
         if not path.is_file() or '.history' in path.parts:
             continue
         relative = path.relative_to(root).as_posix()
-        if path.name in KEEP:
+        if path.name in KEEP or SCRUBBED.fullmatch(path.name):
             if path.suffix in {'.json', '.txt', '.md'} and PRIVATE.search(path.read_bytes()):
                 raise ValueError(f'Connection detail, URL or PIN in allowlisted file: {relative}')
             if path.suffix == '.png' and panel.capture_shows_panel(path):

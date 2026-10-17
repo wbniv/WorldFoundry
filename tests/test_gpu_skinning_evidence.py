@@ -175,3 +175,15 @@ def test_derived_recipe_adds_only_the_panel_policy(tmp_path):
     frozen.write_text('{"workflow": "changed"}')
     with pytest.raises(ValueError, match='Frozen recipe changed'):
         runner.derive_recipe(recipe, 'require-hidden', tmp_path / 'submitted')
+
+
+def test_curator_lists_scrubbed_diagnostics_only_when_clean(tmp_path):
+    session = tmp_path / 'check'
+    session.mkdir()
+    (session / 'panel-diagnostics-1-engine.txt').write_text('key code=4 action=1 (Back: hides the phone panel)\n')
+    (tmp_path / 'device-evidence-scope.json').write_text(json.dumps(dict(logs=[])))
+    command = [sys.executable, str(ROOT / 'scripts/curate-gpu-skinning-evidence.py'), '--evidence', str(tmp_path), 'check']
+    assert 'check/panel-diagnostics-1-engine.txt' in subprocess.run(command, check=True, capture_output=True, text=True).stdout
+    (session / 'panel-diagnostics-2-buffers.txt').write_text('phone controller: open http://10.0.0.2:8765/ (PIN 123456)\n')
+    result = subprocess.run(command, capture_output=True, text=True)
+    assert result.returncode != 0 and 'Connection detail' in result.stderr
