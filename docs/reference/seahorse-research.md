@@ -140,10 +140,81 @@ All sources were opened on 2026‑10‑16. Page numbers are the printed page num
 These are authored choices from the plan, and the poster chips each of them **ours**:
 
 - Tail: 35 rings, one joint per ring, 90 mm long. Ring length 3.75 mm × 0.9764ⁱ, so 3.75 mm at the base and 1.67 mm at the tip. Ring width 9.0 mm → 1.4 mm.
-- Joint limits, linear from ring 0 to ring 34: ventral flex 12°→40°, dorsal 4°→10°, lateral 8°→28°, twist 3°→8°.
+- Joint limits, linear from ring 0 to ring 34: ventral flex 12°→40°, dorsal 4°→12.5°, lateral 8°→28°, twist 3°→8°.
 - Control: 7 knots × 3 angles plus a 4-value wrap = 25 values. The engine expands them to 105 angles. The mailbox block is 40 cells.
-- Cost: 2–3 ms per seahorse on Chromecast 1. This is an **estimate**, scaled from the urchin's measured costs, and has not been measured. One pair, 78.0–80.0 ms per frame; two pairs, 82.0–86.0 ms. The baseline 74.0 ms is our own stale measurement from 2026‑10‑05.
-- Swim speed, greeting choreography, eye rotations, colour scheme and the 2-pair cap.
+- Cost: the 17 October measured population baselines below supersede the old 74.0 ms tank and 2–3 ms-per-seahorse estimates. Those earlier figures remain design history.
+- Swim speed, greeting choreography, eye rotations and colour scheme are authored. The current simulated default is six pairs; the original two-pair cap is historical.
+
+### Implemented behavior and asset — 17 October 2026 (ours)
+
+These are implementation findings, not additional biological claims. The
+[as-built asset and behavior record](../plans/2026-10-16-saltwater-seahorses.md#phase-2--the-seahorse-asset)
+and its six-pair update establish the following:
+
+- Each seahorse has **1,101 triangles**, split into body/tail (1,027) and fins
+  (74), in **two actors**. Its authored clips contain **693 frames** in total.
+  Both colorways share the atlas; resident instances share their body/fins
+  meshes. The male has a brood pouch; yellow female/orange male are authored
+  colors, not a claim about sex-specific coloration in the species.
+- The script supplies **25 shape values** (seven three-angle knots plus four
+  wrap parameters). The deformer expands these to **105 joint angles** across
+  35 rings, blends clips, and applies joint limits. The deformer mailbox block
+  has 40 cells; the behavior also uses separate state cells.
+- The behavior loop is **hold → release → swim → probe → grasp → hold**.
+  Grasping closes the wrap from the tip toward the base; release unwinds it
+  before swimming. The post radius and axis determine the runtime coil, and
+  the Director aligns its reported wrap center with the post during body sway.
+  This closing order and contact algorithm are ours (see R5–R7 above).
+- Twelve independent residents form six pairs around six holdfasts. Greeting
+  rotates through the visible pairs and checks every other resident's spot
+  reservation. Partners meet on opposite sides of one post with coils at
+  different heights. This is **our choreography**; the reviewed *H. reidi*
+  evidence supports occurrence in pairs, not this greeting sequence. Independent
+  eye targets and authored eye motion remain game choices.
+- The [seven-pose reference check](../plans/2026-10-16-saltwater-seahorses/evidence/phase3/poses.json)
+  evaluates the actual exported female rig, including one-second transitions
+  from rest. It reports zero frame flips, maximum joint-limit use 0.9591, and
+  maximum wrap-center error 0.2574 mm. The latter covers the Director's
+  one-frame-late, extrapolated solve over six seconds of hold sway at 20 Hz.
+  These are Python reference-evaluator checks, not device measurements or
+  observations of real animals. They cover the seven recorded poses, not all
+  possible runtime states.
+
+### Measured game cost — 17 October 2026 (ours)
+
+[Full comparison and graph](../plans/2026-10-16-saltwater-seahorses/comparison.md#close-idle-and-close-crawl--completed-17-october),
+[raw evidence and protocol](../diagnostics/seahorse-close-cast1-20261017/README.md).
+Cast1 is the Chromecast HD, Android 14, with the 32-bit app from `d8d215ae`.
+Saltwater, seed 713, plant age 150, growth paused; textures, sway and greeting on.
+Three independent 60-second release runs per count/view follow 15 seconds warmup;
+values are medians of run means. Every accepted run has thermal status 0.
+
+| Pairs | Close-idle frame ms / FPS | Close-crawl frame ms / FPS |
+|---:|---:|---:|
+| None | 47.19 / 21.19 | 47.33 / 21.13 |
+| 1 | 51.56 / 19.39 | 51.65 / 19.36 |
+| 2 | 54.97 / 18.19 | 54.95 / 18.20 |
+| 6 | 68.52 / 14.59 | 68.57 / 14.58 |
+
+The existing close camera follows the urchin and clips some seahorses at the
+upper edge. An authored held-right fixture measures crawling through the normal
+controller; these runs do not validate hardware input delivery. Every population
+allocates all twelve residents. None additionally hides the six posts. This is
+visible/executing population cost, not per-resident allocation cost or husbandry
+capacity. Six pairs is the game's authored default.
+
+Separate CPU profiles select only complete five-second windows inside the
+measured interval. None → six pairs adds 20.67 ms main-thread CPU in close idle:
+9.21 ms update + 11.47 ms render (rounded). Native animation adds 2.68 ms, nested
+inside update/Director. Close crawl adds 20.82 ms CPU. These are CPU `DFRM`
+workloads; GPU skinning and joint-rig comparisons have not been measured.
+
+**Interpolated estimates (ours), not device measurements:** interpolate frame
+time between measured two and six pairs, then convert using FPS = 1000/frame ms.
+For 3 / 4 / 5 pairs, close idle estimates 17.14 / 16.20 / 15.35 FPS; close crawl
+estimates 17.14 / 16.19 / 15.34 FPS. This assumes approximately linear frame-time
+cost across that interval. The poster draws measured points filled and the three
+estimates hollow/dashed. Its generator reads the committed comparison data.
 
 ## Findings that change the plan's claims table
 

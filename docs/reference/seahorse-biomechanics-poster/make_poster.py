@@ -12,6 +12,7 @@ from __future__ import annotations
 
 import argparse
 import html
+import json
 import math
 import re
 import sys
@@ -42,7 +43,7 @@ STATUS_TEXT = {'verified': 'verified', 'other-species': 'other species', 'ours':
 LEGEND_TEXT = {
     'verified': 'source read; it says this of <i>H. reidi</i>',
     'other-species': 'source read; it is about the species named',
-    'ours': 'a game choice; unmeasured costs say <b>estimate (ours)</b>',
+    'ours': 'game choices or measurements; estimates say <b>estimate (ours)</b>',
 }
 PRINTABLE = ('verified', 'other-species', 'ours')
 FONT_SANS = '"Noto Sans","DejaVu Sans",sans-serif'
@@ -62,8 +63,17 @@ LIMITS = {'ventral': (12, 40), 'lateral': (8, 28), 'dorsal': (4, 12.5), 'twist':
 KNOTS = (0, 6, 12, 18, 24, 30, 34)
 WRAP_VALUES = ('mode', 'start ring', 'holdfast radius', 'progress')
 BLOCK_CELLS = 40
-FRAME_MS = {'today': 74.0, 'pair1': (78.0, 80.0), 'pair2': (82.0, 86.0)}       # Chromecast 1
-PER_SEAHORSE_MS = (2, 3)
+MEASURED_DATE = '2026-10-17'
+MEASUREMENTS = json.loads((HERE.parents[1] / 'diagnostics/seahorse-close-cast1-20261017/comparison.json').read_text())
+FRAME_MS = {view: {r['pairs']: r['median_frame_ms'] for r in rows}
+            for view, rows in MEASUREMENTS['views'].items()}
+FRAME_FPS = {view: {n: 1000 / ms for n, ms in rows.items()} for view, rows in FRAME_MS.items()}
+INTERPOLATED_FPS = {view: {n: 1000 / (rows[2] + (n-2) * (rows[6]-rows[2])/4)
+                         for n in (3, 4, 5)} for view, rows in FRAME_MS.items()}
+_CPU_ROWS = MEASUREMENTS['views']['close-idle']
+CPU_DELTA = {key: _CPU_ROWS[-1]['cpu']['frame_weighted_cpu_ms'][key]
+                 - _CPU_ROWS[0]['cpu']['frame_weighted_cpu_ms'][key]
+             for key in ('total', 'update', 'render', 'animation')}
 TANK_GAL = 40
 H_KUDA_TOTALS = {'ventral': 850, 'dorsal': 290, 'lateral': 570}                # Porter et al. 2015, Fig. 2A
 
@@ -144,15 +154,13 @@ PANELS = [
         dict(status='ours', src=[], game=True,
              text='Our twist limit rises from 3° at the base to 8° at the tip.'),
     ]),
-    dict(key='grip', title='More motion toward the tip', claims=[
+    dict(key='grip', title='Grip, hold, release', claims=[
         dict(status='verified', src=['maia'],
-             text='<i>H. reidi</i> grips a 1 cm perch with the whole tail, with more range of motion toward the tip. The tail also bends sideways as it curls.'),
-        dict(status='other-species', src=['porter'],
-             text='<i>H. kuda</i>: the whole tail bends about 850° ventrally, 290° dorsally and 570° sideways.'),
+             text='<i>H. reidi</i>: whole-tail grip on a 1 cm perch; more motion toward the tip, with sideways bend as it curls.'),
         dict(status='other-species', src=['maia'],
              text='<i>H. abdominalis</i> chose vertical, round, smooth holdfasts.'),
         dict(status='ours', src=[], game=True,
-             text='Our limits rise linearly toward the tip; our wrap closes from the tip.'),
+             text='Our wrap closes from the tip, tracks the post during sway, and unwinds before swimming.'),
     ]),
     dict(key='fin', title='A fin too fast to draw', claims=[
         dict(status='verified', src=['zima', 'botello'],
@@ -172,31 +180,32 @@ PANELS = [
         dict(status='ours', src=[], game=True,
              text='The strike ends inside one 16.7 ms frame at 60 Hz, so the game cuts from aim to strike.'),
     ]),
-    dict(key='pairs', title='Pairs, and eyes that work alone', claims=[
+    dict(key='pairs', title='Six pairs share six holdfasts', claims=[
         dict(status='verified', src=['lourie'],
              text='<i>H. reidi</i> is found in pairs in the wild.'),
         dict(status='other-species', src=['mosk'],
              text='Seahorses and pipefishes move each eye on its own to find, track and strike single prey.'),
         dict(status='ours', src=[], game=True,
-             text='Our morning greeting, two tails on one post, and a separate target for each eye are game choreography.'),
+             text='12 residents, 6 posts. Greetings rotate through visible pairs and check other residents’ spot reservations. Partners share a post at different coil heights; this and independent eye targets are ours.'),
     ]),
-    dict(key='joints', title='From rings to joints', claims=[
+    dict(key='joints', title='The model we built', claims=[
         dict(status='ours', src=[], game=True,
-             text='One joint per ring, each with flex, sideways bend and twist: 35 × 3 = 105 angles.'),
+             text='Per seahorse: body/tail 1,027 triangles + fins 74. Residents share meshes and atlas; males have a brood pouch. Yellow/orange sex colours are authored.'),
         dict(status='ours', src=[], game=True,
-             text='The script writes 25 values: 7 knots × 3 angles, plus a 4-value wrap. The engine fills in every joint and clamps each to its limit.'),
+             text='7 three-angle knots + 4 wrap values drive 35 joints; clips blend and joint limits apply. The deformer block has 40 cells; behavior uses more.'),
         dict(status='ours', src=[], game=True,
-             text='Clip, head, eye and output cells bring the mailbox block to 40 cells.'),
+             chip='reference check (ours)',
+             text='7 exported-rig poses: no frame flips, ≤ 95.91% joint-limit use, ≤ 0.258 mm wrap-centre error. Python reference, not a device measurement.'),
     ]),
-    dict(key='cost', title='What a pair costs', claims=[
-        dict(status='ours', src=[], game=True,
-             text='Planted tank today: 74.0 ms per frame (13.5 FPS) on Chromecast 1, measured 2026-10-05; stale, so Phase 4 measures it again.'),
+    dict(key='cost', title='Six pairs: measured on cast1', claims=[
+        dict(status='ours', chip='measured (ours)', src=[], game=True,
+             text=f"Close idle: None → 6 pairs, {FRAME_FPS['close-idle'][0]:.2f} → {FRAME_FPS['close-idle'][6]:.2f} FPS. Crawl: {FRAME_FPS['close-crawl'][0]:.2f} → {FRAME_FPS['close-crawl'][6]:.2f} FPS. 3 × 60 s/count/view, {MEASURED_DATE}."),
         dict(status='ours', chip='estimate (ours)', src=[], game=True,
-             text='2–3 ms per seahorse, scaled from the urchin: one pair 78.0–80.0 ms, two pairs 82.0–86.0 ms.'),
+             text='3–5 pairs: frame-time interpolation between measured 2 and 6.'),
         dict(status='other-species', src=['oceanrider'],
-             text='Breeder guidance for <i>H. erectus</i>: one pair of adults per 10 gal.'),
+             text='<i>H. erectus</i> breeder guideline: one adult pair per 10 gal.'),
         dict(status='ours', src=[], game=True,
-             text='Our 40 gal tank: None, 1 pair or 2 pairs.'),
+             text='Our 40 gal game defaults to 6 pairs. None retains 12 residents and hides 6 posts.'),
     ]),
 ]
 
@@ -437,7 +446,7 @@ def panel_square():
 
 
 def panel_grip():
-    out = [svg_open(title='Per-joint limits (ours) and whole-tail totals against H. kuda')]
+    out = [svg_open(title='Authored joint limits and runtime grasp, hold and release; schematic top views')]
     x0, y0, w, h = 40, 126, 205, 98
     X = lambda i: x0 + i / (N_RINGS - 1) * w                     # noqa: E731
     Y = lambda d: y0 - d / 42 * h                                 # noqa: E731
@@ -453,22 +462,28 @@ def panel_grip():
         out.append(T(X(N_RINGS - 1) + 4, Y(b) + dy, kind, 11, fill=cols[kind], weight=700))
     out.append(T(x0, y0 + 16, 'ring 0', 11, fill=MUTED))
     out.append(T(x0 + w, y0 + 16, 'ring 34 (tip)', 11, 'end', MUTED))
-    # totals
-    bx, by = 340, 34
-    out.append(T(bx - 14, 16, 'Whole tail (°)', 12, weight=700))
-    sc = 0.11
-    for k, kind in enumerate(('ventral', 'lateral', 'dorsal')):
-        y = by + k * 34
-        ours, kuda = limit_total(kind), H_KUDA_TOTALS[kind]
-        out.append(T(bx - 14, y + 8, kind, 11, fill=MUTED))
-        out.append(f'<rect x="{bx + 40}" y="{y - 4}" width="{ours * sc:.1f}" height="9" fill="{CHIP["ours"][2]}" opacity=".75"/>')
-        out.append(f'<rect x="{bx + 40}" y="{y + 7}" width="{kuda * sc:.1f}" height="9" fill="{CHIP["other-species"][2]}" opacity=".75"/>')
-        out.append(T(bx + 44 + max(ours, kuda) * sc, y + 5, f'{ours:.0f}', 11, fill=CHIP['ours'][0]))
-        out.append(T(bx + 44 + max(ours, kuda) * sc, y + 17, f'{kuda}', 11, fill=CHIP['other-species'][0]))
-    out.append(f'<rect x="{bx - 14}" y="137" width="10" height="9" fill="{CHIP["ours"][2]}" opacity=".75"/>')
-    out.append(T(bx, 146, 'ours', 11, fill=CHIP['ours'][0]))
-    out.append(f'<rect x="{bx + 38}" y="137" width="10" height="9" fill="{CHIP["other-species"][2]}" opacity=".75"/>')
-    out.append(T(bx + 52, 146, 'H. kuda', 11, fill=CHIP['other-species'][0], italic=True))
+    out.append(T(315, 16, 'Runtime grip (ours)', 12, weight=700))
+    out.append(T(315, 31, 'Top views · dot = vertical post', 11, fill=MUTED))
+    for cx, label, sweep in ((337, 'Grasp', 1.0), (410, 'Hold', 1.6), (483, 'Release', .55)):
+        out.append(f'<circle cx="{cx}" cy="59" r="5" fill="#8b6a4a"/>')
+        pts = []
+        for i in range(46):
+            t = i / 45
+            angle = -math.pi / 2 + t * sweep * math.pi
+            radius = 22 - 10 * t
+            pts.append((cx + radius * math.cos(angle), 59 + radius * math.sin(angle)))
+        out.append('<polyline points="' + ' '.join(f'{x:.1f},{y:.1f}' for x, y in pts)
+                   + f'" fill="none" stroke="{BODY_EDGE}" stroke-width="5" stroke-linecap="round"/>')
+        out.append('<polyline points="' + ' '.join(f'{x:.1f},{y:.1f}' for x, y in pts)
+                   + f'" fill="none" stroke="{BODY}" stroke-width="3" stroke-linecap="round"/>')
+        # The arrow follows closing for grasp and reverses for release.
+        a, b = (pts[22], pts[32]) if label != 'Release' else (pts[32], pts[22])
+        out.append(arrow(*a, *b, CORAL))
+        out.append(T(cx, 96, label, 11, 'middle', INK, 700))
+    out.append(arrow(363, 59, 382, 59, MUTED))
+    out.append(arrow(437, 59, 455, 59, MUTED))
+    out.append(T(315, 118, 'Tip closes first; release unwinds.', 11, fill=MUTED))
+    out.append(T(315, 140, 'Release → swim → probe → grasp', 11, fill=ACC))
     out.append('</svg>')
     return ''.join(out)
 
@@ -492,7 +507,7 @@ def panel_fin():
     for t in range(0, 101, 20):
         out.append(line(X(t), yc + amp + 8, X(t), yc + amp + 12, MUTED, 1))
         out.append(T(X(t), yc + amp + 25, f'{t} ms', 11, 'middle', MUTED))
-    out.append(T(10, 147, 'At 13.5 FPS, Chromecast 1 draws a frame only every 74 ms.', 11, fill=MUTED))
+    out.append(T(10, 147, f"Six pairs, close idle: {FRAME_FPS['close-idle'][6]:.1f} FPS, one frame every {FRAME_MS['close-idle'][6]:.1f} ms.", 11, fill=MUTED))
     out.append('</svg>')
     return ''.join(out)
 
@@ -536,92 +551,106 @@ def panel_strike():
 
 
 def panel_pairs():
-    out = [svg_open(title='Two seahorses with tails coiled on one post; each eye has its own target')]
-    px = 258
-    out.append(f'<rect x="{px - 7}" y="4" width="14" height="146" rx="5" fill="#8b6a4a" stroke="#5c432c" stroke-width="1"/>')
+    out = [svg_open(title='Authored greeting: opposite sides and offset coils; six pairs and six holdfasts, schematic not tank layout')]
+    px = 152
+    out.append(T(10, 16, 'Greeting (ours)', 12, weight=700))
+    out.append(f'<rect x="{px - 5}" y="29" width="10" height="111" rx="4" fill="#8b6a4a" stroke="#5c432c" stroke-width="1"/>')
     colours = (BODY, '#d58f3a')
-    targets = (((-1, -1.0), (232, 8)), ((1, 0.9), (300, 66)))
-    for k, (ox, facing, eye) in enumerate(((180, 1, (1.0, -0.7)), (336, -1, (0.7, 0.8)))):
-        art, tip, ep = seahorse(ox, 33, 1.25, flex_u=0.12, facing=facing, tail_rings=11, spots=False, eye_dir=eye, uid=f'p{k}')
+    for k, (ox, facing, eye) in enumerate(((90, 1, (1.0, -0.7)), (214, -1, (0.7, 0.8)))):
+        art, tip, ep = seahorse(ox, 49, 1.0, flex_u=0.12, facing=facing, tail_rings=11, spots=False, eye_dir=eye, uid=f'p{k}')
         col = colours[k]
         if k == 1:
             art = art.replace(f'fill="{BODY}"', f'fill="{col}"')
         out.append(art)
-        y_on = 108 + k * 4
+        y_on = 104 + k * 13
         out.append(f'<path d="M{tip[0]:.1f} {tip[1]:.1f} Q{tip[0] + facing * 2:.1f} {y_on + 2:.1f} {px - facing * 10:.1f} {y_on:.1f}" '
                    f'fill="none" stroke="{col}" stroke-width="5" stroke-linecap="round"/>')
-        for j in range(5):
-            yb = y_on + j * 8
+        for j in range(3):
+            yb = y_on + j * 5
             out.append(f'<path d="M{px - 11} {yb:.1f} Q{px} {yb - 5:.1f} {px + 11} {yb + 2:.1f}" fill="none" '
                        f'stroke="{col}" stroke-width="{7 - j * 1.1:.1f}" stroke-linecap="round"/>')
         ex, ey = ep
         tx_, ty_ = (ex + facing * 22, ey - 14) if k == 0 else (ex + facing * 30, ey + 22)
         out.append(arrow(ex + facing * 3, ey, tx_, ty_, ACC))
-    out.append(T(10, 16, 'Each eye can track', 11, fill=ACC))
-    out.append(T(10, 30, 'its own target', 11, fill=ACC))
-    out.append(T(507, 146, 'one shared post', 11, 'end', MUTED))
+    out.append(T(10, 146, 'Opposite sides; coils at different heights', 11, fill=MUTED))
+    out.append(line(270, 8, 270, 145, GRID))
+    out.append(T(283, 16, '12 residents · 6 holdfasts (ours)', 12, weight=700))
+    for i in range(6):
+        cx, cy = 313 + i % 3 * 77, 48 + i // 3 * 43
+        out.append(f'<circle cx="{cx}" cy="{cy}" r="7" fill="#8b6a4a"/>')
+        for dx, col in ((-17, BODY), (17, '#d58f3a')):
+            out.append(f'<circle cx="{cx + dx}" cy="{cy}" r="5" fill="{col}" stroke="{BODY_EDGE}"/>')
+        out.append(T(cx, cy + 22, str(i + 1), 11, 'middle', MUTED))
+    out.append(T(283, 130, 'Greeting rotates through visible pairs.', 11, fill=ACC))
+    out.append(T(283, 146, 'Check occupied spots before moving.', 11, fill=MUTED))
     out.append('</svg>')
     return ''.join(out)
 
 
 def panel_joints():
-    out = [svg_open(title='Control block: 7 knots and a wrap expand to 105 joint angles')]
-    x0, y = 24, 34
-    step = 13.4
-    out.append(T(10, 16, '35 rings, one joint each; the large dots are the 7 knots', 12, weight=700))
+    out = [svg_open(title='As-built asset: 1101 triangles, 2 actors, 693 clip frames; 25 controls drive 105 joint angles')]
+    for cx, number, label in ((88, '1,101', 'triangles / seahorse'),
+                              (258, '2', 'actors: body + fins'),
+                              (430, '693', 'authored clip frames')):
+        out.append(T(cx, 31, number, 27, 'middle', ACC, 700))
+        out.append(T(cx, 49, label, 11, 'middle', MUTED))
+    out.append(line(10, 59, 507, 59, GRID))
+    out.append(T(10, 76, '35 rings · flex + sideways bend + twist · 7 control knots', 11, weight=700))
+    x0, y, step = 20, 81, 13.8
     for i in range(N_RINGS):
         cx = x0 + 6 + i * step
         knot = i in KNOTS
         out.append(f'<circle cx="{cx:.1f}" cy="{y + 10}" r="{6 if knot else 3.2}" fill="{CORAL if knot else BODY}" stroke="{BODY_EDGE}" stroke-width="1"/>')
         if knot:
-            out.append(T(cx, y + 34, str(i), 11, 'middle', MUTED))
-    boxes = [(14, 'knots', f'{len(KNOTS)} × 3 = {len(KNOTS) * 3}'), (134, 'wrap', f'{len(WRAP_VALUES)} values'),
-             (254, 'from the script', f'{len(KNOTS) * 3 + len(WRAP_VALUES)} values'), (380, 'engine output', f'{N_RINGS} × 3 = {N_RINGS * 3} angles')]
-    for k, (bx, top, bot) in enumerate(boxes):
-        fill = '#fbefe9' if k < 2 else ('#e4ecff' if k == 2 else '#eef3f6')
-        bw = 126 if k == 3 else 104
-        out.append(f'<rect x="{bx}" y="86" width="{bw}" height="44" rx="6" fill="{fill}" stroke="{GRID}"/>')
-        out.append(T(bx + bw / 2, 104, top, 11, 'middle', MUTED, bg=fill))
-        out.append(T(bx + bw / 2, 121, bot, 12, 'middle', INK, 700, bg=fill))
-    out.append(T(126, 113, '+', 14, 'middle', INK, 700))
-    out.append(arrow(240, 108, 252, 108, INK))
-    out.append(arrow(360, 108, 378, 108, INK))
-    out.append(T(500, 146, f'mailbox block: {BLOCK_CELLS} cells', 11, 'end', MUTED))
+            out.append(T(cx, y + 28, str(i), 11, 'middle', MUTED))
+    out.append(T(10, 139, '21 knot angles + 4 wrap values', 12, fill=CHIP['ours'][0], weight=700))
+    out.append(arrow(226, 135, 260, 135, ACC))
+    out.append(T(277, 139, '105 joint angles + clip blending', 12, fill=ACC, weight=700))
     out.append('</svg>')
     return ''.join(out)
 
 
 def panel_cost():
-    out = [svg_open(title='Chromecast 1 frame time: measured baseline and estimated cost of seahorses')]
-    x0, x1, lo, hi = 64, 270, 60.0, 90.0
-    X = lambda ms: x0 + (ms - lo) / (hi - lo) * (x1 - x0)          # noqa: E731
-    out.append(T(10, 16, 'Chromecast 1 frame time (ms)', 12, weight=700))
-    out.append(T(10, 32, 'The axis starts at 60 ms.', 11, fill=MUTED))
-    rows = [('today', FRAME_MS['today'], FRAME_MS['today']), ('1 pair', *FRAME_MS['pair1']), ('2 pairs', *FRAME_MS['pair2'])]
-    for k, (lab, a, b) in enumerate(rows):
-        y = 44 + k * 26
-        out.append(T(x0 - 6, y + 10, lab, 11, 'end', INK))
-        col = NAVY if k == 0 else CHIP['ours'][2]
-        out.append(f'<rect x="{x0}" y="{y}" width="{X(a) - x0:.1f}" height="13" fill="{col}" opacity="{1 if k == 0 else .6}"/>')
-        if b > a:
-            out.append(f'<rect x="{X(a):.1f}" y="{y}" width="{X(b) - X(a):.1f}" height="13" fill="{col}" opacity=".3" stroke="{col}" stroke-dasharray="3 2"/>')
-        txt = f'{a:.1f} ms measured' if a == b else f'{a:.1f}–{b:.1f} ms estimate'
-        out.append(T(X(b) + 5, y + 11, txt, 11, fill=INK))
-    out.append(line(x0, 126, x1, 126, MUTED, 1))
-    for v in (60, 70, 80, 90):
-        out.append(line(X(v), 126, X(v), 130, MUTED, 1))
-        out.append(T(X(v), 143, str(v), 11, 'middle', MUTED))
-    # tank: 40 gal, 1 pair per 10 gal → 4 slots, 2 used
-    tx, ty = 386, 30
-    out.append(T(tx, 16, f'Our {TANK_GAL} gal tank', 12, weight=700))
-    out.append(f'<rect x="{tx}" y="{ty}" width="120" height="70" rx="4" fill="#e9f3f6" stroke="{ACC}" stroke-width="1.4"/>')
-    for k in range(TANK_GAL // 10):
-        cx = tx + 18 + k * 28
-        used = k < 2
-        out.append(f'<rect x="{cx - 10}" y="{ty + 18}" width="22" height="34" rx="3" fill="{CHIP["ours"][2] if used else "#ffffff"}" '
-                   f'opacity="{.7 if used else 1}" stroke="{ACC}" stroke-dasharray="{"0" if used else "3 2"}"/>')
-    out.append(T(tx, ty + 88, 'guideline allows 4 pairs;', 11, fill=MUTED))
-    out.append(T(tx, ty + 102, 'we stop at 2', 11, fill=CHIP['ours'][0], weight=700))
+    out = [svg_open(title='Cast1 close-idle FPS: measured populations and interpolated estimates; CPU increment')]
+    x0, x1, top, bottom = 36, 298, 30, 105
+    X = lambda n: x0 + n / 6 * (x1 - x0)
+    Y = lambda fps: bottom - fps / 25 * (bottom-top)
+    out.append(T(10, 16, 'Close idle · FPS', 12, weight=700))
+    for fps in (0, 10, 20):
+        out.append(line(x0, Y(fps), x1, Y(fps), GRID, 1))
+        out.append(T(x0-5, Y(fps)+4, str(fps), 11, 'end', MUTED))
+    for n in range(7):
+        out.append(T(X(n), 122, 'None' if n == 0 else str(n), 11, 'middle', MUTED))
+    measured = FRAME_FPS['close-idle']
+    estimated = INTERPOLATED_FPS['close-idle']
+    for a, b in ((0, 1), (1, 2)):
+        out.append(line(X(a), Y(measured[a]), X(b), Y(measured[b]), CHIP['ours'][0], 1.6))
+    rows = FRAME_MS['close-idle']
+    curve = [(2+i/25, 1000/(rows[2]+i/100*(rows[6]-rows[2]))) for i in range(101)]
+    points = ' '.join(f'{X(n):.2f},{Y(fps):.2f}' for n, fps in curve)
+    out.append(f'<polyline points="{points}" fill="none" stroke="{WARN}" stroke-width="1.5" stroke-dasharray="4 3"/>')
+    for n in range(7):
+        known = n in measured
+        fps = measured[n] if known else estimated[n]
+        col = CHIP['ours'][0] if known else WARN
+        out.append(f'<circle cx="{X(n):.2f}" cy="{Y(fps):.2f}" r="3.2" fill="{col if known else WHITE}" stroke="{col}" stroke-width="1.4"/>')
+        out.append(T(X(n), Y(fps)-8, f'{fps:.1f}', 11, 'middle', col))
+    for x, known, label in ((14, True, 'measured'), (123, False, 'estimated')):
+        col = CHIP['ours'][0] if known else WARN
+        out.append(f'<circle cx="{x}" cy="140" r="3.2" fill="{col if known else WHITE}" stroke="{col}" stroke-width="1.4"/>')
+        out.append(T(x+8, 144, label, 11, fill=col))
+    out.append(T(293, 144, 'pairs', 11, 'end', MUTED))
+    bx, bw = 331, 173
+    out.append(T(bx, 16, 'Main-thread CPU', 12, weight=700))
+    out.append(T(bx, 35, '6 pairs − None · close idle', 11, fill=MUTED))
+    out.append(T(bx, 56, f"+{CPU_DELTA['total']:.2f} ms", 17, weight=700))
+    update_width = bw * CPU_DELTA['update']/CPU_DELTA['total']
+    out.append(f'<rect x="{bx}" y="65" width="{update_width:.2f}" height="13" fill="{CHIP["ours"][0]}"/>')
+    out.append(f'<rect x="{bx+update_width:.2f}" y="65" width="{bw-update_width:.2f}" height="13" fill="{ACC}"/>')
+    out.append(T(bx, 96, f"+{CPU_DELTA['update']:.2f} update", 11, fill=CHIP['ours'][0]))
+    out.append(T(bx, 112, f"+{CPU_DELTA['render']:.2f} render", 11, fill=ACC))
+    out.append(T(bx, 129, f"animation +{CPU_DELTA['animation']:.2f}", 11, fill=MUTED))
+    out.append(T(bx, 144, 'already inside update', 11, fill=MUTED))
     out.append('</svg>')
     return ''.join(out)
 
@@ -676,7 +705,7 @@ def footer_html(num):
     cols = [lis[i * per:(i + 1) * per] for i in range(3)]
     cols_html = ''.join(f'<ol>{"".join(c)}</ol>' for c in cols)
     return (f'<footer id="panel-src">{legend_html()}<div class="srcs">{cols_html}</div>'
-            f'<div class="note">Sources checked {CHECKED}. Locators, DOIs and access limits: docs/reference/seahorse-research.md. '
+            f'<div class="note">Sources checked {CHECKED}; game measured {MEASURED_DATE}. Saltwater, seed 713, age 150, growth paused. Locators, DOIs and access limits: docs/reference/seahorse-research.md. '
             'The drawings are original and use the game’s own ring table. Claims the research could not confirm stay in the research document. '
             'A3 portrait, 297 × 420 mm; print on matte or uncoated stock.</div></footer>')
 

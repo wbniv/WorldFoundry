@@ -7,7 +7,7 @@ Generator: docs/reference/seahorse-biomechanics-poster/make_poster.py, export_po
 What it pins:
   * every printed claim is verified, other species or ours; nothing unverified prints; every
     verified / other-species claim names a source; every game number is chipped ours;
-    the frame-cost estimate is labelled "estimate (ours)" and never called measured;
+    measured populations and interpolated estimates remain distinct;
   * the legend shows exactly the chips that are used;
   * every source URL is one the research document already holds (no invented links);
   * the committed poster.html and SVG panels are what the generator makes now;
@@ -101,17 +101,28 @@ def test_the_claim_check_has_teeth(monkeypatch):
     assert any('must be chipped ours' in p for p in M.check_claims())
 
 
-def test_game_numbers_are_ours_and_the_cost_is_an_estimate(html_text):
+def test_game_costs_match_evidence_and_interpolation_is_labelled(html_text):
     games = [c for _a, c in M.all_claims() if c.get('game')]
     assert len(games) >= 8 and all(c['status'] == 'ours' for c in games)
+    data = json.loads((REPO / 'docs/diagnostics/seahorse-close-cast1-20261017/comparison.json').read_text())
+    for view, rows in data['views'].items():
+        assert set(M.FRAME_MS[view]) == {0, 1, 2, 6}
+        for row in rows:
+            assert M.FRAME_MS[view][row['pairs']] == row['median_frame_ms']
+        assert set(M.INTERPOLATED_FPS[view]) == {3, 4, 5}
+        values = [M.FRAME_FPS[view][2], *M.INTERPOLATED_FPS[view].values(), M.FRAME_FPS[view][6]]
+        assert all(a > b for a, b in zip(values, values[1:]))
     cost = next(p for p in M.PANELS if p['key'] == 'cost')
-    est = [c for c in cost['claims'] if '78.0–80.0' in c['text']]
-    assert len(est) == 1 and est[0]['chip'] == 'estimate (ours)'
-    assert 'measured' not in est[0]['text']
-    assert '>estimate (ours)</span>' in html_text
-    assert '78.0–80.0' + NBSP + 'ms estimate' in html_text         # the drawing says estimate too
-    assert M.FRAME_MS == {'today': 74.0, 'pair1': (78.0, 80.0), 'pair2': (82.0, 86.0)}
-    assert M.PER_SEAHORSE_MS == (2, 3)
+    assert any(c.get('chip') == 'measured (ours)' for c in cost['claims'])
+    estimates = [c for c in cost['claims'] if c.get('chip') == 'estimate (ours)']
+    assert len(estimates) == 1 and 'interpolation' in estimates[0]['text']
+    assert '>measured (ours)</span>' in html_text and '>estimate (ours)</span>' in html_text
+    visible = ' '.join(_text_nodes(html_text))
+    assert not re.search(r'\b74(?:\.0)?\s*ms', visible) and '78.0–80.0' not in visible
+    assert M.CPU_DELTA['total'] == pytest.approx(20.6727423142)
+    assert M.CPU_DELTA['update'] + M.CPU_DELTA['render'] == pytest.approx(M.CPU_DELTA['total'], abs=.0001)
+    assert 'already inside update' in html_text
+    assert 'None retains 12 residents and hides 6 posts' in html_text
 
 
 def test_the_tail_table_is_the_plans():
@@ -121,6 +132,26 @@ def test_the_tail_table_is_the_plans():
     assert M.RING_WID[0] == pytest.approx(9.0) and M.RING_WID[-1] == pytest.approx(1.4)
     assert len(M.KNOTS) * 3 + len(M.WRAP_VALUES) == 25 and M.BLOCK_CELLS == 40
     assert M.limit_total('ventral') == pytest.approx(910) and M.limit_total('dorsal') == pytest.approx(288.75)
+
+
+def test_implemented_behavior_and_reference_results_are_distinguished(html_text):
+    panels = {p['key']: p for p in M.PANELS}
+    grip = ' '.join(c['text'] for c in panels['grip']['claims'] if c['status'] == 'ours')
+    assert 'closes from the tip' in grip and 'unwinds before swimming' in grip
+    pairs = ' '.join(c['text'] for c in panels['pairs']['claims'] if c['status'] == 'ours')
+    assert '12 residents, 6 posts' in pairs
+    assert 'rotate through visible pairs' in pairs and 'spot reservations' in pairs
+    assert 'different coil heights' in pairs
+    assert '1,101' in html_text and '693' in html_text
+    reference_claims = [c for c in panels['joints']['claims'] if c.get('chip') == 'reference check (ours)']
+    assert len(reference_claims) == 1
+    claim = reference_claims[0]
+    assert claim['status'] == 'ours' and 'not a device measurement' in claim['text']
+    evidence = json.loads((REPO / 'docs/plans/2026-10-16-saltwater-seahorses/evidence/phase3/poses.json').read_text())
+    assert len(evidence['poses']) == 7 and evidence['frame_flips'] == 0
+    assert evidence['max_limit_use'] * 100 == pytest.approx(95.91)
+    assert evidence['wrap_centre_error_mm'] <= .258
+    assert '95.91%' in claim['text'] and '0.258 mm' in claim['text']
 
 
 def test_legend_shows_only_the_chips_used(html_text):
@@ -203,7 +234,7 @@ def test_numbers_keep_their_unit(html_text):
 def test_iso_dates_use_non_breaking_hyphens(html_text):
     text = ' '.join(_text_nodes(html_text))
     assert not re.search(r'\d{4}-\d{2}-\d{2}', text)
-    assert '2026‑10‑05' in text and '2026‑10‑16' in text
+    assert '2026‑10‑17' in text and '2026‑10‑16' in text
 
 
 def test_no_12_hour_clock(html_text):

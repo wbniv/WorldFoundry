@@ -37,11 +37,20 @@ What is true today:
 
 Research comes first and is saved before the poster, as for the goby and urchin: `docs/reference/seahorse-research.md`, listing sources, study species and access limits. The poster follows the existing pipeline in `docs/reference/seahorse-biomechanics-poster/`: `make_poster.py`, `export_poster.py` (Playwright Chromium), `poster.html`, a 300 DPI `poster.png`, `seahorse-biomechanics-a3.pdf` (one 297 × 420 mm page), `layout-review.json` and editable SVG panels.
 
-[![A3 poster layout: eight panels, claim chips, sources](2026-10-16-saltwater-seahorses/poster.png)](2026-10-16-saltwater-seahorses/poster.html)
+[![A3 poster: implemented grip, six-pair behavior, model and measured costs](../reference/seahorse-biomechanics-poster/poster.png)](../reference/seahorse-biomechanics-poster/seahorse-biomechanics-a3.pdf)
 
 Eight panels, each claim carrying the chip it will print with. The printed copy may not contain any "unverified" claim: each is checked, or relabelled **ours**, before print. That is the [2026‑10‑06 poster audit rule](../reference/2026-10-06-aquarium-poster-reference-verification.md). Print on matte or uncoated A3, and copy the PDF to `~/Documents/TO PRINT/`. [Open the interactive mockup](2026-10-16-saltwater-seahorses/poster.html).
 
 Phase 0 checked these claims on 2026‑10‑16. The [research document](../reference/seahorse-research.md) holds every source, DOI, locator and access limit, and the [A3 poster](../reference/seahorse-biomechanics-poster/seahorse-biomechanics-a3.pdf) prints them.
+
+**Poster revised 2026‑10‑17:** the finished A3 now explains the implemented
+grip/release loop, rotating greetings and spot reservations for six pairs and
+six holdfasts, and the built asset (1,101 triangles, two actors, 693 clip
+frames). Seven-pose Python reference results are labelled separately from
+cast1 measurements. The cost panel uses the completed None / 1 / 2 / 6-pair
+close-idle/crawl campaign; 3 / 4 / 5 remain frame-time interpolation estimates.
+The linked preview and PDF above are the current poster; the interactive
+mockup remains design history.
 
 | Claim | Status | Source (see the research document) |
 |---|---|---|
