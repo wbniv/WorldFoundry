@@ -1,0 +1,124 @@
+{
+  "schema": 2,
+  "source": "frozen-apk+current-process-log",
+  "controller_advertised": true,
+  "process": "32381",
+  "controller_state": "open",
+  "policy": "require-hidden",
+  "variant": "none",
+  "panel_visibility": "back-exited",
+  "reason": "system-back",
+  "back_sent": true,
+  "back_keys_sent": 1,
+  "back_outcome": "system-back",
+  "before": {
+    "qr_white": 0.638,
+    "qr_black": 0.353,
+    "panel_fill": 1.0,
+    "size": [
+      1920,
+      1080
+    ],
+    "state": "present"
+  },
+  "after": null,
+  "elapsed_seconds": 6.379,
+  "history": [
+    {
+      "schema": 2,
+      "source": "frozen-apk+current-process-log",
+      "controller_advertised": true,
+      "process": "30315",
+      "controller_state": "open",
+      "policy": "require-hidden",
+      "variant": "pair2",
+      "panel_visibility": "verified-hidden",
+      "reason": "hide-acknowledged-and-panel-not-detected",
+      "back_sent": true,
+      "back_keys_sent": 1,
+      "back_outcome": "hidden",
+      "before": {
+        "qr_white": 0.642,
+        "qr_black": 0.35,
+        "panel_fill": 1.0,
+        "size": [
+          1920,
+          1080
+        ],
+        "state": "present"
+      },
+      "after": {
+        "qr_white": 0.0,
+        "qr_black": 0.0,
+        "panel_fill": 0.0,
+        "size": [
+          1920,
+          1080
+        ],
+        "state": "absent"
+      },
+      "elapsed_seconds": 10.14
+    },
+    {
+      "schema": 2,
+      "source": "frozen-apk+current-process-log",
+      "controller_advertised": true,
+      "process": "31352",
+      "controller_state": "open",
+      "policy": "require-hidden",
+      "variant": "pair6",
+      "panel_visibility": "verified-hidden",
+      "reason": "hide-acknowledged-and-panel-not-detected",
+      "back_sent": true,
+      "back_keys_sent": 1,
+      "back_outcome": "hidden",
+      "before": {
+        "qr_white": 0.644,
+        "qr_black": 0.348,
+        "panel_fill": 1.0,
+        "size": [
+          1920,
+          1080
+        ],
+        "state": "present"
+      },
+      "after": {
+        "qr_white": 0.0,
+        "qr_black": 0.0,
+        "panel_fill": 0.0,
+        "size": [
+          1920,
+          1080
+        ],
+        "state": "absent"
+      },
+      "elapsed_seconds": 11.808
+    },
+    {
+      "schema": 2,
+      "source": "frozen-apk+current-process-log",
+      "controller_advertised": true,
+      "process": "32381",
+      "controller_state": "open",
+      "policy": "require-hidden",
+      "variant": "none",
+      "panel_visibility": "back-exited",
+      "reason": "system-back",
+      "back_sent": true,
+      "back_keys_sent": 1,
+      "back_outcome": "system-back",
+      "before": {
+        "qr_white": 0.638,
+        "qr_black": 0.353,
+        "panel_fill": 1.0,
+        "size": [
+          1920,
+          1080
+        ],
+        "state": "present"
+      },
+      "after": null,
+      "elapsed_seconds": 6.379
+    }
+  ]
+}

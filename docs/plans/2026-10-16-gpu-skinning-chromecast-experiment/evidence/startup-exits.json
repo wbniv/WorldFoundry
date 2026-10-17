@@ -1,0 +1,87 @@
+{
+  "updated": "2026-10-17T15:54:12Z",
+  "scope": "Cast1 aquarium benchmark launches through J-8c4c0f882e93. A launch is a verified install of a case; a loss is a case that produced no measurement. Derived from receipts, apk-installations.json, commands.json and the coordinator's process-exit-info.txt; raw logcat stays local.",
+  "launches_by_variant": {
+    "close-idle-pair1-gpu": {
+      "launches": 7,
+      "lost": 3,
+      "lost_jobs": [
+        "J-1e59129b22a2",
+        "J-c4cccc5e4274",
+        "J-da19a5050cff"
+      ],
+      "note": "Also launched without loss by J-49a2f4008d65 (check), J-084b4f52095d and held J-0d2afeba096d."
+    },
+    "close-idle-none-gpu": {
+      "launches": 6,
+      "lost": 1,
+      "lost_jobs": [
+        "J-8c4c0f882e93"
+      ],
+      "note": "Lost to Back reaching the system, not a process death; see incidents."
+    },
+    "close-idle-pair2-gpu": {
+      "launches": 5,
+      "lost": 0
+    },
+    "close-idle-pair6-gpu": {
+      "launches": 5,
+      "lost": 0
+    },
+    "close-crawl-none-gpu": {
+      "launches": 2,
+      "lost": 0
+    },
+    "close-crawl-pair1-gpu": {
+      "launches": 2,
+      "lost": 0
+    },
+    "close-crawl-pair2-gpu": {
+      "launches": 2,
+      "lost": 0
+    },
+    "close-crawl-pair6-gpu": {
+      "launches": 2,
+      "lost": 0
+    },
+    "all CPU variants (idle x3, crawl x2 each)": {
+      "launches": 20,
+      "lost": 0
+    }
+  },
+  "incidents": [
+    {
+      "job": "J-da19a5050cff",
+      "variant": "close-idle-pair1-gpu",
+      "launch_local": "18:37:35.2",
+      "back_local": "18:37:41.6-18:37:42.3",
+      "exit": "ApplicationExitInfo pid=30834 at 18:37:43.828: reason=2 (SIGNALED) status=11 (SIGSEGV), pss=0",
+      "finding": "A native SIGSEGV about 1.6 s after the panel Back and about 8 s after launch. Recorded by Android exit-info, captured later by J-8c4c0f882e93; the earlier empty crash buffer did not rule a crash out."
+    },
+    {
+      "job": "J-c4cccc5e4274",
+      "variant": "close-idle-pair1-gpu",
+      "launch_local": "16:59:32.8",
+      "back_local": "16:59:39.4-16:59:40.0",
+      "exit": "pidof empty at 16:59:41.9; no exit-info captured by this job and none retained in the later list",
+      "finding": "Process gone within 2 s of the panel Back; exit reason not recorded."
+    },
+    {
+      "job": "J-1e59129b22a2",
+      "variant": "close-idle-pair1-gpu",
+      "launch_local": "16:01:17.9",
+      "back_local": "16:01:24.5-16:01:24.8",
+      "exit": "Process still present at 16:01:26.5 and 16:01:42.3; foreground later lost to the launcher during the case",
+      "finding": "Not a death at Back. Cause of the foreground loss unknown. The preceding none-case process logged two DPAD_CENTER presses at 16:01:00.7 and 16:01:06.5 that no benchmark command sent."
+    },
+    {
+      "job": "J-8c4c0f882e93",
+      "variant": "close-idle-none-gpu",
+      "launch_local": "22:50:50.8",
+      "back_local": "22:51:01.7-22:51:02.3",
+      "exit": "No exit record for pid 32381; observation panel-back-system-back",
+      "finding": "Capture showed the panel (white 0.638, black 0.353, fill 1.0) yet the engine handled the single Back as a system Back (key code=4 action=1 mask=...), so it did not consider the panel visible. A KEYCODE_WAKEUP from the coordinator's session-wake ran concurrently (22:51:01.730). Why PanelVisible() was false is unproven: the process logcat was parsed by the coordinator and not saved."
+    }
+  ],
+  "summary": "Three of seven close-idle-pair1-gpu launches failed. Across the other 44 cast1 launches (24 GPU, 20 CPU) no process died at startup; the only other loss is the J-8c4c0f882e93 Back mis-delivery on close-idle-none-gpu. One pair1 failure (J-da19a5050cff) is a recorded SIGSEGV about 1.6 s after the panel Back. The CPU path has no failures."
+}

@@ -14,5 +14,13 @@
     "health": "ready",
     "archived_evidence": "held-close-idle-gpu-round-3-J-0d2afeba096d",
     "reason": "Completed with verified hashes and cleanup, but the phone-controller panel covered the scene through measurement in all four cases (coordinator 8c24437 sent no Back). Neither accepted nor dropped; per the user (option b) the same frozen recipe is rerun under a coordinator with verified panel dismissal and the require-hidden harness policy. Its captures show the LAN endpoint and PIN and stay local."
+  },
+  {
+    "result_key": "close-idle/gpu/round-3",
+    "job": "J-8c4c0f882e93",
+    "status": "uncertain",
+    "health": "recovery-required",
+    "archived_evidence": "failed-close-idle-gpu-round-3-J-8c4c0f882e93",
+    "reason": "First require-hidden session (coordinator 47cab46). pair2 and pair6 measured with the panel verified hidden (one Back each, engine hide line, after-capture absent). The third case, close-idle-none-gpu, showed the panel (white 0.638, black 0.353, fill 1.0) 6.4 s after launch; the single Back produced the engine line for a Back with no visible panel (system-back), so the activity left and the session failed under require-hidden. No exit record exists for that process (pid 32381). Cause of the engine treating the panel as hidden is unproven: that process logcat was parsed by the coordinator but not saved. Excluded from timing; not retried."
   }
 ]

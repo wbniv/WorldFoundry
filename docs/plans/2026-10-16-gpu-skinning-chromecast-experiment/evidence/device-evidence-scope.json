@@ -705,6 +705,24 @@
       "original_sha256": "4822d9e01f705d3c5c254b3b8737a4ca03fcf3ea3e027cafeccfc15708922434",
       "scoped_sha256": "9d07430e96baca3fd13a895328978fb81189106740e133971c8e554b3d8cc9d8",
       "scope": "Final level-load marker through end of captured engine log; cumulative earlier sessions excluded."
+    },
+    {
+      "path": "failed-close-idle-gpu-round-3-J-8c4c0f882e93/pair2/run-1/wf.log.gz",
+      "original_sha256": "339979c7398aa761ac2b5ec1140514c4b8cdb95cbb061e455656fe11ec85d878",
+      "scoped_sha256": "9ced70103f5e46b3739f37bbf61ca07982d7ea9e3e361e4678338d604b486a4b",
+      "scope": "Final level-load marker through end of captured engine log; cumulative earlier sessions excluded."
+    },
+    {
+      "path": "failed-close-idle-gpu-round-3-J-8c4c0f882e93/pair6/run-1/wf.log.gz",
+      "original_sha256": "3c559a0e9be2d711511ca3bb25cfe1b1a70d7f47fb94cf0a81250c037851da68",
+      "scoped_sha256": "74e0f5ff00d283f8f049f075264c1e4d8dd657d8cea731799a3855a332cad1b8",
+      "scope": "Final level-load marker through end of captured engine log; cumulative earlier sessions excluded."
+    },
+    {
+      "path": "failed-close-idle-gpu-round-3-J-8c4c0f882e93/wf.log.gz",
+      "original_sha256": "3c559a0e9be2d711511ca3bb25cfe1b1a70d7f47fb94cf0a81250c037851da68",
+      "scoped_sha256": "74e0f5ff00d283f8f049f075264c1e4d8dd657d8cea731799a3855a332cad1b8",
+      "scope": "Final level-load marker through end of captured engine log; cumulative earlier sessions excluded."
     }
   ],
   "excluded": "Raw cumulative engine logs, system logcat, connection details, command transcripts, foreground-failure dumps and watcher logs remain local."

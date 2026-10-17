@@ -1,0 +1,68 @@
+ACTIVITY MANAGER PROCESS EXIT INFO (dumpsys activity exit-info)
+Last Timestamp of Persistence Into Persistent Storage: 2026-10-17 22:19:27.920
+  package: org.worldfoundry.wf_game.aquarium
+    Historical Process Exit for uid=10147
+        ApplicationExitInfo #0:
+          timestamp=2026-10-17 22:50:47.067 pid=31352 realUid=10147 packageUid=10147 definingUid=10147 user=0
+          process=org.worldfoundry.wf_game.aquarium reason=16 (PACKAGE UPDATED) subreason=0 (UNKNOWN) status=0
+          importance=100 pss=100MB rss=162MB description=stop org.worldfoundry.wf_game.aquarium due to installPackageLI state=empty trace=null
+        ApplicationExitInfo #1:
+          timestamp=2026-10-17 22:48:52.304 pid=30315 realUid=10147 packageUid=10147 definingUid=10147 user=0
+          process=org.worldfoundry.wf_game.aquarium reason=16 (PACKAGE UPDATED) subreason=0 (UNKNOWN) status=0
+          importance=100 pss=94MB rss=155MB description=stop org.worldfoundry.wf_game.aquarium due to installPackageLI state=empty trace=null
+        ApplicationExitInfo #2:
+          timestamp=2026-10-17 19:50:06.870 pid=15291 realUid=10147 packageUid=10147 definingUid=10147 user=0
+          process=org.worldfoundry.wf_game.aquarium reason=16 (PACKAGE UPDATED) subreason=0 (UNKNOWN) status=0
+          importance=100 pss=90MB rss=157MB description=stop org.worldfoundry.wf_game.aquarium due to installPackageLI state=empty trace=null
+        ApplicationExitInfo #3:
+          timestamp=2026-10-17 19:48:26.754 pid=14314 realUid=10147 packageUid=10147 definingUid=10147 user=0
+          process=org.worldfoundry.wf_game.aquarium reason=16 (PACKAGE UPDATED) subreason=0 (UNKNOWN) status=0
+          importance=100 pss=89MB rss=156MB description=stop org.worldfoundry.wf_game.aquarium due to installPackageLI state=empty trace=null
+        ApplicationExitInfo #4:
+          timestamp=2026-10-17 19:46:49.536 pid=13325 realUid=10147 packageUid=10147 definingUid=10147 user=0
+          process=org.worldfoundry.wf_game.aquarium reason=16 (PACKAGE UPDATED) subreason=0 (UNKNOWN) status=0
+          importance=100 pss=97MB rss=164MB description=stop org.worldfoundry.wf_game.aquarium due to installPackageLI state=empty trace=null
+        ApplicationExitInfo #5:
+          timestamp=2026-10-17 19:45:12.256 pid=12322 realUid=10147 packageUid=10147 definingUid=10147 user=0
+          process=org.worldfoundry.wf_game.aquarium reason=16 (PACKAGE UPDATED) subreason=0 (UNKNOWN) status=0
+          importance=100 pss=89MB rss=158MB description=stop org.worldfoundry.wf_game.aquarium due to installPackageLI state=empty trace=null
+        ApplicationExitInfo #6:
+          timestamp=2026-10-17 18:37:43.828 pid=30834 realUid=10147 packageUid=10147 definingUid=10147 user=0
+          process=org.worldfoundry.wf_game.aquarium reason=2 (SIGNALED) subreason=0 (UNKNOWN) status=11
+          importance=100 pss=0.00 rss=0.00 description=null state=empty trace=null
+        ApplicationExitInfo #7:
+          timestamp=2026-10-17 18:37:31.775 pid=29845 realUid=10147 packageUid=10147 definingUid=10147 user=0
+          process=org.worldfoundry.wf_game.aquarium reason=16 (PACKAGE UPDATED) subreason=0 (UNKNOWN) status=0
+          importance=100 pss=94MB rss=159MB description=stop org.worldfoundry.wf_game.aquarium due to installPackageLI state=empty trace=null
+        ApplicationExitInfo #8:
+          timestamp=2026-10-17 18:35:48.413 pid=28886 realUid=10147 packageUid=10147 definingUid=10147 user=0
+          process=org.worldfoundry.wf_game.aquarium reason=16 (PACKAGE UPDATED) subreason=0 (UNKNOWN) status=0
+          importance=100 pss=97MB rss=162MB description=stop org.worldfoundry.wf_game.aquarium due to installPackageLI state=empty trace=null
+        ApplicationExitInfo #9:
+          timestamp=2026-10-17 18:34:03.101 pid=27911 realUid=10147 packageUid=10147 definingUid=10147 user=0
+          process=org.worldfoundry.wf_game.aquarium reason=16 (PACKAGE UPDATED) subreason=0 (UNKNOWN) status=0
+          importance=100 pss=94MB rss=159MB description=stop org.worldfoundry.wf_game.aquarium due to installPackageLI state=empty trace=null
+        ApplicationExitInfo #10:
+          timestamp=2026-10-17 18:32:19.987 pid=27662 realUid=10147 packageUid=10147 definingUid=10147 user=0
+          process=org.worldfoundry.wf_game.aquarium reason=16 (PACKAGE UPDATED) subreason=0 (UNKNOWN) status=0
+          importance=400 pss=0.00 rss=0.00 description=stop org.worldfoundry.wf_game.aquarium due to installPackageLI state=empty trace=null
+        ApplicationExitInfo #11:
+          timestamp=2026-10-17 18:31:04.512 pid=26160 realUid=10147 packageUid=10147 definingUid=10147 user=0
+          process=org.worldfoundry.wf_game.aquarium reason=16 (PACKAGE UPDATED) subreason=0 (UNKNOWN) status=0
+          importance=100 pss=100MB rss=158MB description=stop org.worldfoundry.wf_game.aquarium due to installPackageLI state=empty trace=null
+        ApplicationExitInfo #12:
+          timestamp=2026-10-17 18:29:19.731 pid=25174 realUid=10147 packageUid=10147 definingUid=10147 user=0
+          process=org.worldfoundry.wf_game.aquarium reason=16 (PACKAGE UPDATED) subreason=0 (UNKNOWN) status=0
+          importance=100 pss=99MB rss=157MB description=stop org.worldfoundry.wf_game.aquarium due to installPackageLI state=empty trace=null
+        ApplicationExitInfo #13:
+          timestamp=2026-10-17 18:27:34.897 pid=24179 realUid=10147 packageUid=10147 definingUid=10147 user=0
+          process=org.worldfoundry.wf_game.aquarium reason=16 (PACKAGE UPDATED) subreason=0 (UNKNOWN) status=0
+          importance=100 pss=104MB rss=162MB description=stop org.worldfoundry.wf_game.aquarium due to installPackageLI state=empty trace=null
+        ApplicationExitInfo #14:
+          timestamp=2026-10-17 18:25:50.968 pid=23173 realUid=10147 packageUid=10147 definingUid=10147 user=0
+          process=org.worldfoundry.wf_game.aquarium reason=16 (PACKAGE UPDATED) subreason=0 (UNKNOWN) status=0
+          importance=100 pss=97MB rss=155MB description=stop org.worldfoundry.wf_game.aquarium due to installPackageLI state=empty trace=null
+        ApplicationExitInfo #15:
+          timestamp=2026-10-17 18:04:24.407 pid=14136 realUid=10147 packageUid=10147 definingUid=10147 user=0
+          process=org.worldfoundry.wf_game.aquarium reason=16 (PACKAGE UPDATED) subreason=0 (UNKNOWN) status=0
+          importance=100 pss=98MB rss=156MB description=stop org.worldfoundry.wf_game.aquarium due to installPackageLI state=empty trace=null
