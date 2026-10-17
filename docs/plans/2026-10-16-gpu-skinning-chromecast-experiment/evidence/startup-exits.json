@@ -83,5 +83,48 @@
       "finding": "Capture showed the panel (white 0.638, black 0.353, fill 1.0) yet the engine handled the single Back as a system Back (key code=4 action=1 mask=...), so it did not consider the panel visible. A KEYCODE_WAKEUP from the coordinator's session-wake ran concurrently (22:51:01.730). Why PanelVisible() was false is unproven: the process logcat was parsed by the coordinator and not saved."
     }
   ],
-  "summary": "Three of seven close-idle-pair1-gpu launches failed. Across the other 44 cast1 launches (24 GPU, 20 CPU) no process died at startup; the only other loss is the J-8c4c0f882e93 Back mis-delivery on close-idle-none-gpu. One pair1 failure (J-da19a5050cff) is a recorded SIGSEGV about 1.6 s after the panel Back. The CPU path has no failures."
+  "summary": "Five pair1 launches have died with the identical NULL mailbox-lookup SIGSEGV on actor 30: three close-idle GPU (3/7) and two wide-idle CPU from the pre-experiment baseline. GPU skinning is not the cause. The other 44 launches in this campaign had no startup death. J-8c4c0f882e93 is a separate Back mis-delivery, not a crash.",
+  "crash_signature": {
+    "source": "The engine's own crash handler lines in the cumulative device wf.log, recovered from later sessions' 4 MB tails (held-close-idle-gpu-round-3-J-0d2afeba096d/wf.log, local only).",
+    "signal": "SIGSEGV si_code=1 si_addr=0x0",
+    "release_cohort_pc": "libwf_game.so+0x155e36, lr +0x1b033b (native 9ddd539f, build id 0a8d613b)",
+    "symbolized_by": "Byte-pattern match into the unstripped worktree builds (build ids 00130532 and 890d8bdf), then addr2line",
+    "fault": "WorldFoundryMailboxesManager::LookupMailboxes(int), wfsource/source/game/level.cc:340: _objects[objectIndex] is NULL in a release build (assert compiled out)",
+    "caller": "zForth write-actor-mailbox (custom 2), engine/stubs/scripting_zforth.cc:1005",
+    "actor_index": "30 (r1=0x1e; r8=0x41f00000 is 30.0f, the Forth cell): the pair-0 male seahorse body, ticked as \"30 31 1 1 sh-tick\" and written by sh-place",
+    "occurrences": [
+      {
+        "job": "J-1e59129b22a2",
+        "variant": "close-idle-pair1-gpu",
+        "build": "release cohort"
+      },
+      {
+        "job": "J-c4cccc5e4274",
+        "variant": "close-idle-pair1-gpu",
+        "build": "release cohort"
+      },
+      {
+        "job": "J-da19a5050cff",
+        "variant": "close-idle-pair1-gpu",
+        "build": "release cohort"
+      },
+      {
+        "job": "J-4399ea64b1f4",
+        "variant": "wide-idle pair1 (seahorse CPU baseline, no skinning code)",
+        "build": "pre-experiment, pc +0x150bd6, same registers",
+        "time_local": "2026-10-17 08:05"
+      },
+      {
+        "job": "J-a85e8414f1d4",
+        "variant": "wide-idle pair1 CPU profile (baseline, no skinning code)",
+        "build": "pre-experiment, pc +0x150bd6, same registers; crashed after a full 95-frame profile window with level-objects 81",
+        "time_local": "2026-10-17 08:08"
+      }
+    ],
+    "conclusion": "Not a GPU-skinning defect. A pre-existing pair1 seahorse fault: the male body actor 30 leaves the level object list while its script keeps writing its mailboxes. The deaths come 6-8 s after launch, close to its scripted first rest of 6 s (sh-first-rest 1) and release. Why actor 30 is removed (the engine removes actors that leave every room, die, or set ALIVE 0) is not proven."
+  },
+  "reproduction": {
+    "attempt": "Container ASan/UBSan Debug build (asserts on) of the worktree; frozen close-idle-pair1-gpu cd.iff and wf_args.txt; 1 x 45 s and 3 x 120 s under Xvfb/llvmpipe",
+    "result": "No crash, assert or sanitizer report. The build runs at about 2 fps, so every frame hits the engine 0.2 s delta clamp (device frames are about 0.05 s); about 32 game seconds per run. Not reproduced."
+  }
 }
