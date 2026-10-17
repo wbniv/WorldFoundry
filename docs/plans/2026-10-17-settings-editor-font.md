@@ -1,6 +1,6 @@
 # UI font: Atkinson Hyperlegible Next everywhere, replacing `stb_easy_font`
 
-**Date:** 2026‑10‑17 · **Status:** proposal; needs Will's go-ahead on the open decisions · **TODO:** [T3] ui-font
+**Date:** 2026‑10‑17 · **Status:** approved (Will said yes to F2–F6, 2026‑10‑17); implementation dispatched · **TODO:** [T3] ui-font
 
 ## TL;DR
 
@@ -12,21 +12,16 @@ The engine already has a glyph-atlas text path that only per-level dialogue uses
 
 ## Decisions
 
-**Made (Will, 2026‑10‑17):**
+**Made (Will, 2026‑10‑17; F2–F6 answered "yes to all"):**
 
 | # | Decision |
 |---|---|
 | F1 | The font is **Atkinson Hyperlegible Next**, as finding-your-way uses it ("use same as ../finding-your-way/"). Both weights, unmodified, from the same pinned Google Fonts commit [7925f50](https://github.com/googlefonts/atkinson-hyperlegible-next/tree/7925f50f649b3813257faf2f4c0b381011f434f1/fonts/ttf). |
 | F5 | **It replaces `stb_easy_font` everywhere, and `stb_easy_font` is deleted:** the fishtank menu, the settings editor, and every other place the old font draws. |
-
-**Open (recommendation first):**
-
-| # | Question | Recommendation |
-|---|---|---|
-| F2 | Engine permission | This changes engine code in the eight files under **Engine changes**, adds a small UI-font module, deletes the vendored header and changes `cd.iff` packing. Confirm the scope. |
-| F3 | Sizes at the 1920×1080 logical canvas | Seven variants (mockups 2, 4–7, 10, 11): `small` Regular 28 · `body` Regular 36 · `body-bold` SemiBold 36 · `title` SemiBold 46 · `menu` Regular 56 · `menu-bold` SemiBold 56 · `display` SemiBold 80. Each call site keeps roughly today's apparent size. |
-| F4 | The phone page too? | **Yes, in Phase 4.** `controller.html` uses `system-ui`. Embed a subset WOFF2 of the same two weights (about 25 KB each, inline), so the TV and the phone match. |
-| F6 | What happens if the atlas is missing | **The engine stops at start-up with a clear error** (`UI_FONT unavailable: <reason>`), like a bad dialogue bundle (`BITMAP_TEXT …`) does today. With `stb_easy_font` deleted there is no font to fall back to, and every bundle is rebuilt in this change, so a missing atlas is a packaging bug. |
+| F2 | **Engine scope approved:** the eight files under **Engine changes**, the new `ui_font` module, deleting `engine/vendor/stb_easy_font.h`, and `cd.iff` packing. |
+| F3 | **Sizes:** seven variants at the 1920×1080 logical canvas: `small` Regular 28 · `body` Regular 36 · `body-bold` SemiBold 36 · `title` SemiBold 46 · `menu` Regular 56 · `menu-bold` SemiBold 56 · `display` SemiBold 80. |
+| F4 | **The phone page switches too** (Phase 4): an inline subset WOFF2 of both weights in `controller.html`. |
+| F6 | **A missing or invalid atlas stops start-up** with `UI_FONT unavailable: <reason>`. There is no fallback font. |
 
 ## Context: what exists today, from the code
 
