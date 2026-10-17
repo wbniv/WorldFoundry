@@ -526,6 +526,14 @@ does not reboot or retry failed sessions. The analyzer also supports
 `--population-study --device=...` for the C/C0/G0/G1 comparison. Final
 investigation results and any adoption proposal await the complete evidence.
 
+`report-gpu-skinning.py --evidence <evidence-dir> --wait` monitors the local
+aquarium and both population progress files. It validates all three complete
+matrices with the analyzer before writing `evidence/results.json`,
+`evidence/comparison.md` and the measured-results section in the investigation.
+It stops if a campaign stops, preserves surrounding investigation prose and
+does not commit, merge or change renderer defaults. Re-running it without
+`--wait` refreshes the report from complete evidence.
+
 ### First crawl round and lifecycle checks
 
 The first matched cast1 crawl round also passed (`J‑310f760c47c1` CPU,

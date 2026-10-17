@@ -30,6 +30,19 @@ def task(*args):
     return result.stdout
 
 
+def read_status(job):
+    # A service refresh does not cancel its durable jobs. Retry only the
+    # read; never repeat submission or retry a failed measurement session.
+    for attempt in range(7):
+        try:
+            return json.loads(task('chromecast:status', 'JOB=' + job))
+        except RuntimeError as error:
+            if attempt == 6 or 'Coordinator connection failed' not in str(error):
+                raise
+            print('Coordinator unavailable; retrying status read', job, attempt + 1, flush=True)
+            time.sleep(5)
+
+
 def main():
     parser = argparse.ArgumentParser(description=__doc__)
     parser.add_argument('--campaign', type=Path, required=True)
@@ -80,7 +93,7 @@ def main():
                 try:
                     previous = None
                     while True:
-                        status = json.loads(task('chromecast:status', 'JOB=' + job))
+                        status = read_status(job)
                         state = (status['state'], status['phase'], (status.get('hold') or {}).get('code'))
                         if state != previous:
                             print(key, job, *state, flush=True)

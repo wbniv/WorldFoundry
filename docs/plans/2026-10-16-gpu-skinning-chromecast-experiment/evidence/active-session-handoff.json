@@ -1,11 +1,11 @@
 {
-  "updated_utc": "2026-10-17T10:56:00.356810+00:00",
+  "updated_utc": "2026-10-17T11:14:44.753124+00:00",
   "branch": "gpu-skinning-proposal",
-  "pushed_checkpoint": "76a02b16",
+  "pushed_checkpoint": "e3b97ab5",
   "native_source": "e64e5459660889ec8cda8dcadd059d10688c039c",
   "native_sha256": "9ddd539f29600c729c0e26430ca162d61311b242a4c7d6defe0a97e4ff484b80",
-  "aquarium_runner_session": 77912,
-  "cast2_population_runner_session": 64795,
+  "aquarium_runner_session": 22562,
+  "cast2_population_runner_session": 42065,
   "cast1_population_waiter_session": 34463,
   "report_waiter_session": 80750,
   "aquarium_campaign": "/tmp/wf-gpu-skinning-campaign-v3/campaign.json",
@@ -43,12 +43,13 @@
       "close-crawl/gpu/round-1",
       "close-idle/gpu/round-2",
       "close-idle/cpu/round-2",
-      "close-crawl/gpu/round-2"
+      "close-crawl/gpu/round-2",
+      "close-crawl/cpu/round-2"
     ],
     "total": 16,
     "state": "running",
-    "current": "close-crawl/cpu/round-2",
-    "job": "J-27fbaa42fc50"
+    "current": "close-idle/cpu/round-3",
+    "job": "J-bf2f41ca05e6"
   },
   "cast2_populations": {
     "device": "chromecast-test-02",
@@ -64,11 +65,14 @@
       "population/gpu-no-cull/round-3",
       "population/gpu/round-3",
       "population/cpu/round-3",
-      "population/cpu-no-cull/round-3"
+      "population/cpu-no-cull/round-3",
+      "population/gpu/profile",
+      "population/gpu-no-cull/profile"
     ],
     "total": 16,
     "state": "running",
-    "current": "population/gpu/profile",
-    "job": "J-8e014e0085ce"
-  }
+    "current": "population/cpu-no-cull/profile",
+    "job": "J-542eefaff3da"
+  },
+  "coordinator_snapshot": "18:13 Bangkok: both devices ready; grants paused for reviewed coordinator deployment"
 }
