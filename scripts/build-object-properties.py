@@ -25,9 +25,11 @@ def catalog(oad,bindings,actor):
     fields=[];used=set();seen=set()
     for f in schema['fields']:
         if f['kind']=='Skip' or f['show']==6:continue
-        setting=bindings.get('fields',{}).get(f['key'])
         kind=KINDS.get(f['kind'],8)
         structural=kind in (5,6,7)
+        # Headers and groups never take a field binding, even when one shares their name
+        # (sheet "Seahorses" vs field "Seahorses"): their id stays 0.
+        setting=None if structural else bindings.get('fields',{}).get(f['key'])
         if not structural and setting is None:continue
         setting=setting or {}
         field_id=int(setting.get('id',0))

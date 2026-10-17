@@ -1,0 +1,117 @@
+{
+  "base_apk": "/home/will/tmp/seahorse-phase3/aquarium-seahorse6-b788d43f.apk",
+  "base_apk_sha256": "fd1731080bfad5f8644c201e1d0fbfa695a7983f983435241978ccf2a98a61e6",
+  "revision": "b788d43fb0ed7a6082ff866baa71dbe5ba069ba9",
+  "variants": {
+    "none": {
+      "settings": {
+        "seed": 713,
+        "water": "saltwater",
+        "age": 150,
+        "speed": 0,
+        "textures": true,
+        "sway": true,
+        "random_entry": false,
+        "seahorses": 0,
+        "greeting": true
+      },
+      "actor": 4,
+      "source": "RPRP",
+      "oas_sha256": "a5a459e1866fc423dafc6d803e0d937c48867c4cc73c2969c415c95c7091c4fe",
+      "oad_sha256": "6f71322da27adfe70118a79648871945c1adb1c33dcfdcee1ad9a4e61440de63",
+      "bindings_sha256": "3d73f330e0e189a9bcad3542b6e79074caef1e7ded5d801e45b4b7a1d0233fc2",
+      "catalog_sha256": "a71ba7fd8e0c148a5552926354642988b8b5ec784836ce1b2b8225eceda2047b",
+      "level_sha256": "c2676b5af5d294ff0e76227d55d4311077004a078a0e8604da27ce8ce467dfb7",
+      "cd_sha256": "195f542995b434b5fbc900b4904f076d130f367ffb61b043fdf4cba32c8ec581",
+      "apk_sha256": "768c762839bb1e0082dad35a85ac75c88ef9f89535baf2507154b28b7d84cb3b"
+    },
+    "pair1": {
+      "settings": {
+        "seed": 713,
+        "water": "saltwater",
+        "age": 150,
+        "speed": 0,
+        "textures": true,
+        "sway": true,
+        "random_entry": false,
+        "seahorses": 1,
+        "greeting": true
+      },
+      "actor": 4,
+      "source": "RPRP",
+      "oas_sha256": "a5a459e1866fc423dafc6d803e0d937c48867c4cc73c2969c415c95c7091c4fe",
+      "oad_sha256": "6f71322da27adfe70118a79648871945c1adb1c33dcfdcee1ad9a4e61440de63",
+      "bindings_sha256": "624b665a25cf64d2bcf0081b0fabec466e46189293f9eb2fb9d8685137065364",
+      "catalog_sha256": "d234e2a01d6e52a21afa84286ddc348f253e1f404e5269cdce057d6cb984f827",
+      "level_sha256": "e85d249482b0c71fba48837ca69088090446ecc6b116e494cbc56f6fe7bfbf9e",
+      "cd_sha256": "d04117a26f5aa59812669632aadc27e14e53674eebec94ad2074175e1a170ec1",
+      "apk_sha256": "86def81742532cc71659f0f6a51aa0055c638ccbe5851d94a4cf8fb2d3e35350"
+    },
+    "pair2": {
+      "settings": {
+        "seed": 713,
+        "water": "saltwater",
+        "age": 150,
+        "speed": 0,
+        "textures": true,
+        "sway": true,
+        "random_entry": false,
+        "seahorses": 2,
+        "greeting": true
+      },
+      "actor": 4,
+      "source": "RPRP",
+      "oas_sha256": "a5a459e1866fc423dafc6d803e0d937c48867c4cc73c2969c415c95c7091c4fe",
+      "oad_sha256": "6f71322da27adfe70118a79648871945c1adb1c33dcfdcee1ad9a4e61440de63",
+      "bindings_sha256": "f354e71d686afeb20b76f52294a047264882c902d775c8123e5eee9d15c01016",
+      "catalog_sha256": "b2555b4ec0e758279aa87ae0f0b82468d7f6485bf30700c6888446120d7b57da",
+      "level_sha256": "d88eca1ea78e182b9e6eac939e6fd603246202c9828b69d57f7e1c636feab5f8",
+      "cd_sha256": "fed291a37645dc19602d576db3625ce647eacf3a520f95ce594ef13074d13292",
+      "apk_sha256": "ba7f8c3e67e5a5dd6d81d5f8a51059147c9dec235f4b03c32602e316b161b923"
+    },
+    "pair6": {
+      "settings": {
+        "seed": 713,
+        "water": "saltwater",
+        "age": 150,
+        "speed": 0,
+        "textures": true,
+        "sway": true,
+        "random_entry": false,
+        "seahorses": 6,
+        "greeting": true
+      },
+      "actor": 4,
+      "source": "RPRP",
+      "oas_sha256": "a5a459e1866fc423dafc6d803e0d937c48867c4cc73c2969c415c95c7091c4fe",
+      "oad_sha256": "6f71322da27adfe70118a79648871945c1adb1c33dcfdcee1ad9a4e61440de63",
+      "bindings_sha256": "5d6c9e18fac61c3dda1a0e03c5401cf631be99abe66e0a274a5632ae68c81af4",
+      "catalog_sha256": "b48f26876d86852988ab9c5742cc5ce1db8a84942dc59076d78657ad64315dc0",
+      "level_sha256": "e004dc96b056c5df9f788903cf128713acc5de1dd1d0dd79b7391770f663e747",
+      "cd_sha256": "225ee653a3c6ce863e9eef691fc2466a853d14776ae19754c9fa02f36b62cc6d",
+      "apk_sha256": "40424bdaea6f6d37ff3eff95fcbfd05d7f454a461c412c1c4f75dc94dad63b87"
+    },
+    "freshwater": {
+      "settings": {
+        "seed": 713,
+        "water": "freshwater",
+        "age": 150,
+        "speed": 0,
+        "textures": true,
+        "sway": true,
+        "random_entry": false,
+        "seahorses": 6,
+        "greeting": true
+      },
+      "actor": 4,
+      "source": "RPRP",
+      "oas_sha256": "a5a459e1866fc423dafc6d803e0d937c48867c4cc73c2969c415c95c7091c4fe",
+      "oad_sha256": "6f71322da27adfe70118a79648871945c1adb1c33dcfdcee1ad9a4e61440de63",
+      "bindings_sha256": "c55d0be5a1743db1c5b6cced3dfbacec64f99c300de3935f6a204f701cf392da",
+      "catalog_sha256": "288b5da345c867376da0b27bcd968e89508bf01022fe48eb8e6ea91d5feea023",
+      "level_sha256": "1aac95f38b14f042c10a2b050d4b3fd9215d99658271e0745cbc84ba5e4e13ab",
+      "cd_sha256": "d207b2961f3696778e4e8f6b673482b349f28acb3160d7dd28a8c8ba1b2aaf9d",
+      "apk_sha256": "bd3383807b9d9e6b07c33e8275806416c42b841f1ada9c3dc56d8e842b1d7c13"
+    }
+  }
+}

@@ -1,0 +1,20 @@
+Accepted J-534fd47d24cc: queued; check
+Follow: task chromecast:watch JOB=J-534fd47d24cc
+J-534fd47d24cc: accepted {"device": "chromecast-test-01", "app": "aquarium", "apk": "b758d5933c3e17a5684fa75b7d0fdcb143f2302553a9c547d415abb0408c3216.apk", "validator": "aquarium-seahorses", "workflow": "check"}
+J-534fd47d24cc: granted {"device": "chromecast-test-01", "generation": 941}
+J-534fd47d24cc: phase {"phase": "android-transport-prepare"}
+J-534fd47d24cc: phase {"phase": "connecting"}
+J-534fd47d24cc: phase {"phase": "checking-installed-apk"}
+J-534fd47d24cc: phase {"phase": "installing"}
+J-534fd47d24cc: phase {"phase": "awaiting-supervision"}
+J-534fd47d24cc: recovery-required {"error": "plugin-error", "health": "recovery-required"}
+J-534fd47d24cc: recovery-required: plugin-error (automatic readd J-0bae7529a0df)
+J-534fd47d24cc: following J-0bae7529a0df (automatic recovery); detaching never cancels it
+J-0bae7529a0df: automatic readd queued for J-534fd47d24cc
+J-0bae7529a0df: granted {"device": "chromecast-test-01", "generation": 942}
+J-0bae7529a0df: phase {"phase": "android-transport-prepare"}
+J-0bae7529a0df: phase {"phase": "connecting"}
+J-0bae7529a0df: phase {"phase": "awaiting-supervision"}
+J-0bae7529a0df: completed {"error": null, "health": "ready"}
+J-0bae7529a0df: completed
+task: Failed to run task "chromecast:check": exit status 1

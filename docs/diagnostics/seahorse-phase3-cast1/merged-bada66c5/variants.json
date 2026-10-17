@@ -1,0 +1,95 @@
+{
+  "base_apk": "/home/will/tmp/seahorse-phase3/aquarium-seahorse-phase3-bada66c5.apk",
+  "base_apk_sha256": "5ea742fee283f96d6f5514209145c622eb368452ed52e7a0e1b40c25cb37ede2",
+  "revision": "bada66c59a78ed4afeb7dabd0989b56261051a29",
+  "variants": {
+    "freshwater": {
+      "settings": {
+        "seed": 713,
+        "water": "freshwater",
+        "age": 150,
+        "speed": 0,
+        "textures": true,
+        "sway": true,
+        "random_entry": false,
+        "seahorses": 2,
+        "greeting": true
+      },
+      "actor": 4,
+      "source": "RPRP",
+      "oas_sha256": "dfc3a31b28e9143c169697013040afde57bfdbf11a0419b90e8cd4fb30f4b07a",
+      "oad_sha256": "db0987a2fcbb7d6c43cf6b0058e8e341df1595130c2af3f32dcac9da043e9217",
+      "bindings_sha256": "4e38f00d48867ae3c691456f849f6c92bce31498a8eb026c672f85f4edd5d75c",
+      "catalog_sha256": "bb1d6efc4ee28c8f5653b852c9a4ba5f05d7f2b197a1a2474ee56fe6ca123ffc",
+      "level_sha256": "d185d49274f9762dfde676f16ae9e86fac9f41e9fe1dbd619d9ed385d91df310",
+      "cd_sha256": "6446f48586c8539eb8661d92238267e322d048c46035b3b85adf1d71eb6688c5",
+      "apk_sha256": "ab12e3015ab3ecf9ae3e479918d74487c03b6e7718aa69cdf0fe28bb979083b2"
+    },
+    "none": {
+      "settings": {
+        "seed": 713,
+        "water": "saltwater",
+        "age": 150,
+        "speed": 0,
+        "textures": true,
+        "sway": true,
+        "random_entry": false,
+        "seahorses": 0,
+        "greeting": true
+      },
+      "actor": 4,
+      "source": "RPRP",
+      "oas_sha256": "dfc3a31b28e9143c169697013040afde57bfdbf11a0419b90e8cd4fb30f4b07a",
+      "oad_sha256": "db0987a2fcbb7d6c43cf6b0058e8e341df1595130c2af3f32dcac9da043e9217",
+      "bindings_sha256": "3d73f330e0e189a9bcad3542b6e79074caef1e7ded5d801e45b4b7a1d0233fc2",
+      "catalog_sha256": "d23f3dc0ae8773d1af23a7399fca541733b27f726124b7b35c5ce3d6843a4138",
+      "level_sha256": "67d07ff520f38062f65c5d76a4710b1dd26a0a795f7f66927ab9388aa3e1eeca",
+      "cd_sha256": "f7de04d3536c455069e8645d336ab0f075742cf3fea1b470a644757e039d00ed",
+      "apk_sha256": "7dc880b6b3141a2466c7f0780bc240e194639500183d576ef05cf5070c2127aa"
+    },
+    "pair1": {
+      "settings": {
+        "seed": 713,
+        "water": "saltwater",
+        "age": 150,
+        "speed": 0,
+        "textures": true,
+        "sway": true,
+        "random_entry": false,
+        "seahorses": 1,
+        "greeting": true
+      },
+      "actor": 4,
+      "source": "RPRP",
+      "oas_sha256": "dfc3a31b28e9143c169697013040afde57bfdbf11a0419b90e8cd4fb30f4b07a",
+      "oad_sha256": "db0987a2fcbb7d6c43cf6b0058e8e341df1595130c2af3f32dcac9da043e9217",
+      "bindings_sha256": "624b665a25cf64d2bcf0081b0fabec466e46189293f9eb2fb9d8685137065364",
+      "catalog_sha256": "e33dd5a46298dfabf1feb2c946f88406b1921e9c6eb1c5e9e596a4ec61efc4d1",
+      "level_sha256": "aff7a5e8a1ab6cd97a7154272d75e40b4b5c5e2bc914334533f0e708d33ac682",
+      "cd_sha256": "877f83f9b7cb5b25474b9f0a671ca8bc854dbafe21eadb69d6fb29d8c2158132",
+      "apk_sha256": "3c1a123dc1823fe7990524e5440118fb0fc51b8faf3ed40561114377639cf0ca"
+    },
+    "pair2": {
+      "settings": {
+        "seed": 713,
+        "water": "saltwater",
+        "age": 150,
+        "speed": 0,
+        "textures": true,
+        "sway": true,
+        "random_entry": false,
+        "seahorses": 2,
+        "greeting": true
+      },
+      "actor": 4,
+      "source": "RPRP",
+      "oas_sha256": "dfc3a31b28e9143c169697013040afde57bfdbf11a0419b90e8cd4fb30f4b07a",
+      "oad_sha256": "db0987a2fcbb7d6c43cf6b0058e8e341df1595130c2af3f32dcac9da043e9217",
+      "bindings_sha256": "f354e71d686afeb20b76f52294a047264882c902d775c8123e5eee9d15c01016",
+      "catalog_sha256": "1c72796dcb7cf29da93d310a6472b6432211938b9f44ee1eccf7641e108c153a",
+      "level_sha256": "14f97e8ffe6632b444f18b95e7587ac690afaf217252cc1999592d8d307f8c70",
+      "cd_sha256": "0197459c0c5195fe6ad6d11ff9b6655acba4dab6a8a126a27d9932897391b1a0",
+      "apk_sha256": "bbb15cabd38e6da601828a3286ac79d0cef64ac1076de9382b4b9c7402e09db8"
+    }
+  }
+}
