@@ -12,9 +12,9 @@ What is true today:
 
 - **The tank** is the 48 × 13 × 21 in aquarium shell ([`generate.py:42`](../../wflevels/aquarium_tanks/generate.py)): 47 × 12 × 16.5 in of water above the sand, about **40 gal**. A breeder's guideline, posted in a 2006 Ocean Rider forum thread, of [about one pair per 10 gal](https://seahorse.com/topic/stocking-density/) for *H. erectus* allows at most 4 pairs ([research](../reference/seahorse-research.md)). Will requested four additional pairs on 2026‑10‑16: the visual tank now defaults to **6 pairs** (12 seahorses). The earlier stocking guideline is research context, not a simulation limit.
 - **Saltwater has one resident**, the sea urchin ([`config.py:3-4`](../../wflevels/aquarium_plants/config.py)). Freshwater has the rainbow goby.
-- **Performance is the binding constraint.** The last matched Chromecast 1 measurement is **13.5 FPS** (74.0 ms per frame), taken on 2026‑10‑05 with mature plants, seed 713 ([comparison](2026-10-05-sea-urchin-realism/comparison.md)). Plants dominate the render time. That baseline is **stale**: static mesh buffers landed on 2026‑10‑08, and a 2026‑10‑09 acceptance capture's HUD read 25.4 FPS in wide view. That reading is unmatched (plant age unknown, single reading). Phase 4 re-measures the baseline before trusting any seahorse number.
-- **No engine part can pose a joint chain at runtime.** The deformers are per-species C++ formulas (fish, swim, fin, jelly, lion) called from Forth. There is no skinning, no parenting and no hierarchy ([`rendacto.cc`](../../wfsource/source/renderassets/rendacto.cc), [clownfish plan](2026-09-30-clownfish-idle-animation.md)).
-- **The engine's own animation system plays canned clips, so it cannot pose a tail either.** It plays baked mesh-vertex cycles (`CYMP` + `CANM` chunks, `RenderActor3DAnimates`) in 31 fixed slots named for a platform-game character (`IDLE`, `WALK`, `CLIMB_PULL_UP`, `SWORD_STRIKE_FORWARD` …, [`anim.inc`](../../wfsource/source/anim/anim.inc)). Movement state picks the slot, or a `SET_ANIM_CYCLE` message overrides it ([`animmang.cc:172-257`, `:329-334`](../../wfsource/source/anim/animmang.cc)).
+- **Performance is the binding constraint.** The matched 17 October cast1 wide-idle baseline is **47.14 ms / 21.22 FPS** with None and **69.26 ms / 14.44 FPS** with six pairs, using mature plants, seed 713 and growth paused ([comparison](2026-10-16-saltwater-seahorses/comparison.md)). This supersedes the older 5 October 74.0 ms estimate and unmatched HUD readings. Close views, crawling and cast2 remain unmeasured in this baseline.
+- **Phase 1 now poses the seahorse’s rooted curve at runtime.** Before that implementation, deformers were per-species C++ formulas (fish, swim, fin, jelly, lion) called from Forth. General weighted joint skinning, parenting and a skeleton hierarchy remain separate work ([`rendacto.cc`](../../wfsource/source/renderassets/rendacto.cc), [clownfish plan](2026-09-30-clownfish-idle-animation.md)).
+- **The legacy vertex-animation system plays canned clips and cannot compute a runtime tail grip.** It plays baked mesh-vertex cycles (`CYMP` + `CANM` chunks, `RenderActor3DAnimates`) in 31 fixed slots named for a platform-game character (`IDLE`, `WALK`, `CLIMB_PULL_UP`, `SWORD_STRIKE_FORWARD` …, [`anim.inc`](../../wfsource/source/anim/anim.inc)). Movement state picks the slot, or a `SET_ANIM_CYCLE` message overrides it ([`animmang.cc:172-257`, `:329-334`](../../wfsource/source/anim/animmang.cc)).
     - The compiled-in format stores **every vertex of every frame**, and playback is `frame = ⌊time × rate⌋ mod frameCount`: no interpolation and no blending between cycles ([`anim.cc:146-163`](../../wfsource/source/anim/anim.cc)).
     - Nothing in `wftools/` writes `CANM`; the 3ds Max exporter that did is gone. The `KEYFRAME` mailbox is dead (`assert(0)`). The clownfish plan found the system orphaned (its row M5).
     - The other animation code, `anim/path.cc`, keyframes a whole actor's position and rotation along a path. It doesn't move vertices.
@@ -379,24 +379,34 @@ Original two-pair mockup (retained as design history; the current default is six
 
 In freshwater the sheet dims and says why, because the form has no conditional fields. The phone form uses the same two fields. [Open the interactive mockup](2026-10-16-saltwater-seahorses/settings.html).
 
-## Phase 4 — measure, then choose the default
+## Phase 4 — measure the six-pair default
 
-These are estimates until measured. Each seahorse is estimated at **2–3 ms per frame on Chromecast 1**, scaled from the urchin's measured costs. That covers 2 actors, a few mailbox writes, about 1,400 triangles drawn through the deformed (non-static) path, and the evaluator itself.
+**17 October cast1 wide-idle baseline:** three matched release repeats each of
+None, 1, 2 and 6 pairs, seed 713, saltwater, plant age 150, growth paused, plus
+one separate instrumented repeat per count for the CPU split. The six-pair
+source was merged and pushed in `9f97f5dd`. The
+[comparison and raw evidence](2026-10-16-saltwater-seahorses/comparison.md)
+replace the original estimates derived from the older 74.0 ms tank.
 
-| Seahorses | Est. frame time | Est. FPS | Drop vs today |
-|---:|---:|---:|---:|
-| 0 | 74.0 ms (measured) | 13.5 | — |
-| 2 (1 pair) | 78.0–80.0 ms | 12.5–12.8 | −5.1 to −7.5 % |
-| 4 (2 pairs) | 82.0–86.0 ms | 11.6–12.2 | −9.8 to −14.0 % |
+| Pairs | Measured mean frame ms | FPS |
+|---:|---:|---:|
+| None | 47.14 | 21.22 |
+| 1 | 51.58 | 19.39 |
+| 2 | 55.10 | 18.15 |
+| 6 | 69.26 | 14.44 |
 
-The protocol matches the urchin study:
+These are medians of three 60-second wide-idle release runs, after 15 seconds
+of warm-up. All variants still allocate twelve residents; None also hides the
+six posts. The setting measures visible/executing population, not the memory
+saved by removing actors from the level. The original 2–3 ms per seahorse
+estimate is retained only as design history, not a result for every view.
+Will's chosen default remains six pairs.
 
-1. **Re-measure the baseline first** (it is stale; see Context).
-2. Measure None / 1 pair / 2 pairs: three release repeats each, seed 713, plant age 150, growth paused. Each repeat is 60 s each of wide idle, close idle and close crawl, plus one instrumented repeat for the CPU split.
-3. Run on **Chromecast 1 and the Chromecast HD**, through the coordinator.
-4. Record the results in `2026-10-16-saltwater-seahorses/comparison.md`.
-
-These original estimates cover four seahorses. Will later increased D3 to twelve; measure that density separately.
+**Still outstanding from the full Phase 4 protocol:** three repeats of close
+idle and close crawl, and the second device. Cast1 is the Chromecast HD;
+cast2 (`sabrina`) is unavailable on the shared network. This wide-view baseline
+does not complete those checks. GPU skinning remains a separate engine
+experiment requiring explicit permission.
 
 ## Deformer phase 2 — the existing kinds as `DFRM` data
 
@@ -602,8 +612,7 @@ render evidence describes its original build; it is not six-pair evidence.
 The selector bundle has now been rebuilt with the six-pair standalone level;
 this supersedes the earlier deferred menu rebuild. The cast1 demo APK keeps
 the verified merged engine libraries and configures saltwater, six pairs,
-seed 713, plant age 150 and growth paused. It is frozen at
-`engine/objs_game/.tmp/seahorse-six-pairs/pair6.apk` with SHA256
+seed 713, plant age 150 and growth paused. The temporary demo APK had SHA256
 `c119b3725112684a41d6e810052ec88750380e8c47f540244589458474cd306e`.
 Coordinator recording J‑a4b8d6aee65f completed successfully on cast1 after the earlier owned session released it. The 86 seahorse asset, settings, Forth behavior and tail tests passed (108.75 s).
 The first desktop attempts did not provide render coverage: no usable host
@@ -615,5 +624,8 @@ render check does not establish a six-pair performance budget.
 
 Final validation after the memory and mailbox corrections: **88 tests passed**
 in 203.43 s, including the complete exported player/director scripts and HUD
-mailbox exclusions. Cast1’s scoped current-run log is clean. Changes are on
-`seahorse-six-pairs` in the isolated normal-convention integration worktree.
+mailbox exclusions. Cast1’s scoped current-run log is clean. The six-pair changes were merged and pushed to `2026-new-level` in
+`9f97f5dd` on 17 October. The completed normal-convention worktree was removed
+after confirming its source changes were merged. Temporary demo/build files
+are disposable; the committed coordinator evidence and recorded hashes are
+the lasting references.

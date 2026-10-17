@@ -2,6 +2,18 @@
 
 16 October 2026 · **Plan for review.** Will separately authorized the winding cleanup discussed here on 16 October 2026; GPU skinning engine work still needs its own explicit permission. GPU skinning could keep an animated mesh in a resident vertex buffer and send only joint matrices each frame. This experiment will compare that path with CPU skinning of the *same rig and poses*, then decide whether its frame-time benefit pays for new GL and Metal rendering paths and changed face culling. The [mesh deformer versus joint rig investigation](../investigations/2026-10-16-mesh-deformers-vs-joint-rigs.md) motivates the question; its cost figures are estimates, not a GPU-skinning result.
 
+## Existing CPU baseline — 17 October
+
+The [six-pair seahorse comparison](2026-10-16-saltwater-seahorses/comparison.md)
+records matched cast1 wide-idle measurements for None, 1, 2 and 6 pairs with the
+implemented CPU `DFRM` path. Release medians are 47.14, 51.58, 55.10 and 69.26 ms
+per presented frame. Use its CPU sections, upload counters, PSS, frozen hashes
+and raw timestamps as the current workload reference. All variants author the
+same twelve residents (two actors each); None also hides six posts. This baseline supplies
+context for the spike, not the matched CPU-rig (`C`) versus GPU-rig (`G0`/`G1`)
+comparison below. Close views and cast2 are still outstanding. GPU skinning has
+not been implemented or measured by this baseline.
+
 ## Decision and scope
 
 The decision is whether to build a production GPU path for opaque skinned meshes on the Chromecast, retain CPU skinning, or defer skinning entirely. A fish `DFRM` wave and a joint chain can be compared separately for Deformer phase 2; they are different animations, so they cannot isolate the cost of moving skinning to the GPU. The seahorse's approved Phase 1 remains on its planned CPU `DFRM` path. GPU skinning changes, including diagnostic counters, require Will's separate explicit permission under [AGENTS.md](../../AGENTS.md).

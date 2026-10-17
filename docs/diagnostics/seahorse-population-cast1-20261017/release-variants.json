@@ -1,0 +1,95 @@
+{
+  "base_apk": "/home/will/WorldFoundry-wbniv/.worktrees/blender-normal-merge/engine/objs_game/.tmp/seahorse-six-pairs/pair6.apk",
+  "base_apk_sha256": "c119b3725112684a41d6e810052ec88750380e8c47f540244589458474cd306e",
+  "revision": "9f97f5dd5b2e1c437344743128ebfd77b5221ea2",
+  "variants": {
+    "none": {
+      "settings": {
+        "seed": 713,
+        "water": "saltwater",
+        "age": 150,
+        "speed": 0,
+        "textures": true,
+        "sway": true,
+        "random_entry": false,
+        "seahorses": 0,
+        "greeting": true
+      },
+      "actor": 4,
+      "source": "RPRP",
+      "oas_sha256": "a5a459e1866fc423dafc6d803e0d937c48867c4cc73c2969c415c95c7091c4fe",
+      "oad_sha256": "6f71322da27adfe70118a79648871945c1adb1c33dcfdcee1ad9a4e61440de63",
+      "bindings_sha256": "3d73f330e0e189a9bcad3542b6e79074caef1e7ded5d801e45b4b7a1d0233fc2",
+      "catalog_sha256": "9f617b1e50d92abfed337d4f7fe57bf1eb9c76f75566d654db668a13194ef579",
+      "level_sha256": "fec7fe8b7c667bf2f6844e2b420702fb556efa54148d380b6abf60e05015ef55",
+      "cd_sha256": "5f13cd901faf607d1abb3a6ec6980b88c3a026dc33e620d8f7bd4391c9a8c18c",
+      "apk_sha256": "523642b9daf0a696cdc8e6923f08a6771514784855d1edeb6948bb18b61e0200"
+    },
+    "pair1": {
+      "settings": {
+        "seed": 713,
+        "water": "saltwater",
+        "age": 150,
+        "speed": 0,
+        "textures": true,
+        "sway": true,
+        "random_entry": false,
+        "seahorses": 1,
+        "greeting": true
+      },
+      "actor": 4,
+      "source": "RPRP",
+      "oas_sha256": "a5a459e1866fc423dafc6d803e0d937c48867c4cc73c2969c415c95c7091c4fe",
+      "oad_sha256": "6f71322da27adfe70118a79648871945c1adb1c33dcfdcee1ad9a4e61440de63",
+      "bindings_sha256": "624b665a25cf64d2bcf0081b0fabec466e46189293f9eb2fb9d8685137065364",
+      "catalog_sha256": "8d06a62f728eed110cc1a7b1e17648297a2420032009fc6f2aa1321a5c72d5af",
+      "level_sha256": "dcd3c61d91ac21bf58281630cce1a91d73f0d66aedf2bd3ff7cc058e9099ff55",
+      "cd_sha256": "d5f62ee6fa715913eba8122b3f2283bcc385922e8f27a197a4a65fde1e6f0a14",
+      "apk_sha256": "417b449ac6b700fff1889f091da8e8efc5fecaf770a7e5ed2723351c87cc3fdf"
+    },
+    "pair2": {
+      "settings": {
+        "seed": 713,
+        "water": "saltwater",
+        "age": 150,
+        "speed": 0,
+        "textures": true,
+        "sway": true,
+        "random_entry": false,
+        "seahorses": 2,
+        "greeting": true
+      },
+      "actor": 4,
+      "source": "RPRP",
+      "oas_sha256": "a5a459e1866fc423dafc6d803e0d937c48867c4cc73c2969c415c95c7091c4fe",
+      "oad_sha256": "6f71322da27adfe70118a79648871945c1adb1c33dcfdcee1ad9a4e61440de63",
+      "bindings_sha256": "f354e71d686afeb20b76f52294a047264882c902d775c8123e5eee9d15c01016",
+      "catalog_sha256": "14451f9020812dda4118d17c9894a99bee6925d55dcd9931acdd8a01f0acc799",
+      "level_sha256": "4a0e285159105fb5f9f99b0f36f0bace6a307214323013d8a7229bb2a9ee88b7",
+      "cd_sha256": "bcfa73458ae70a132cc0474a92588be94cd5f804ade53a497e7a53bf1d868013",
+      "apk_sha256": "0847562d6645ba05fc37b9606c244e0127fad890baf3ef03b6f07a6213ed5708"
+    },
+    "pair6": {
+      "settings": {
+        "seed": 713,
+        "water": "saltwater",
+        "age": 150,
+        "speed": 0,
+        "textures": true,
+        "sway": true,
+        "random_entry": false,
+        "seahorses": 6,
+        "greeting": true
+      },
+      "actor": 4,
+      "source": "RPRP",
+      "oas_sha256": "a5a459e1866fc423dafc6d803e0d937c48867c4cc73c2969c415c95c7091c4fe",
+      "oad_sha256": "6f71322da27adfe70118a79648871945c1adb1c33dcfdcee1ad9a4e61440de63",
+      "bindings_sha256": "5d6c9e18fac61c3dda1a0e03c5401cf631be99abe66e0a274a5632ae68c81af4",
+      "catalog_sha256": "122b7ce2b377c6ef6e6a09a90fab2000a037628586972328c4dfca7bc233f9e7",
+      "level_sha256": "beca8630c6cd9dfedcd80445d84169a46e5b654b14e99e757ef8ef968580b5b8",
+      "cd_sha256": "430695e25a52386758f51d11d46f3d1ffedcf5155a5982cc936aee3942b76f1a",
+      "apk_sha256": "9e41849e15842689dd8aab7ce1f1fba639661befdca304b5807347933e404d8b"
+    }
+  }
+}

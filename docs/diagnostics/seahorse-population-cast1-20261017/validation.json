@@ -1,0 +1,23 @@
+{
+  "accepted_release_runs": 12,
+  "accepted_cpu_runs": 4,
+  "reviewed_accepted_screenshots": 16,
+  "minimum_observed_seconds": 59.893247408,
+  "post_run_thermal_statuses": [
+    0
+  ],
+  "cpu_window_counts": {
+    "0": 11,
+    "1": 11,
+    "2": 11,
+    "6": 11
+  },
+  "cpu_covered_seconds": {
+    "0": 55.290400443,
+    "1": 55.262169193,
+    "2": 55.353229235,
+    "6": 55.309210318
+  },
+  "frozen_variant_installation_receipts_verified": 19,
+  "analysis_rerun_after_lossless_compression": true
+}

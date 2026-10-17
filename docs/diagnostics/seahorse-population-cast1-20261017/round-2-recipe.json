@@ -1,0 +1,28 @@
+{
+  "workflow": "variant-benchmark",
+  "app": "aquarium",
+  "scene": "planted-tank",
+  "duration": 60,
+  "warmup": 15,
+  "runs": 1,
+  "trace": "idle",
+  "restore_apk": "/home/will/WorldFoundry-wbniv/.worktrees/blender-normal-merge/engine/objs_game/.tmp/seahorse-benchmark/release/pair6.apk",
+  "variants": [
+    {
+      "label": "pair6",
+      "apk": "/home/will/WorldFoundry-wbniv/.worktrees/blender-normal-merge/engine/objs_game/.tmp/seahorse-benchmark/release/pair6.apk"
+    },
+    {
+      "label": "pair2",
+      "apk": "/home/will/WorldFoundry-wbniv/.worktrees/blender-normal-merge/engine/objs_game/.tmp/seahorse-benchmark/release/pair2.apk"
+    },
+    {
+      "label": "pair1",
+      "apk": "/home/will/WorldFoundry-wbniv/.worktrees/blender-normal-merge/engine/objs_game/.tmp/seahorse-benchmark/release/pair1.apk"
+    },
+    {
+      "label": "none",
+      "apk": "/home/will/WorldFoundry-wbniv/.worktrees/blender-normal-merge/engine/objs_game/.tmp/seahorse-benchmark/release/none.apk"
+    }
+  ]
+}

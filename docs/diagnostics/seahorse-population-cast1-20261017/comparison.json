@@ -1,0 +1,5727 @@
+{
+  "rows": [
+    {
+      "pairs": 0,
+      "residents": 0,
+      "release_runs": [
+        {
+          "source": "docs/diagnostics/seahorse-population-cast1-20261017/round-1/none/run-1",
+          "interval_count": 1271,
+          "mean_frame_ms": 47.13605890086546,
+          "fps": 21.215180550057383,
+          "p95_ms": 50.050329,
+          "observed_seconds": 59.909930863,
+          "total_pss_kib": 101375,
+          "thermal_status": 0,
+          "first_present_ns": 62382040040322,
+          "last_present_ns": 62441949971185
+        },
+        {
+          "source": "docs/diagnostics/seahorse-population-cast1-20261017/none-replacement/none/run-1",
+          "interval_count": 1274,
+          "mean_frame_ms": 47.12982525902669,
+          "fps": 21.217986582890457,
+          "p95_ms": 50.050326,
+          "observed_seconds": 60.04339738,
+          "total_pss_kib": 100602,
+          "thermal_status": 0,
+          "first_present_ns": 66746823007001,
+          "last_present_ns": 66806866404381
+        },
+        {
+          "source": "docs/diagnostics/seahorse-population-cast1-20261017/round-3/none/run-1",
+          "interval_count": 1275,
+          "mean_frame_ms": 47.23679554823529,
+          "fps": 21.169937299808193,
+          "p95_ms": 50.050393,
+          "observed_seconds": 60.226914324,
+          "total_pss_kib": 104024,
+          "thermal_status": 0,
+          "first_present_ns": 66508134235270,
+          "last_present_ns": 66568361149594
+        }
+      ],
+      "median_frame_ms": 47.13605890086546,
+      "median_fps": 21.215180550057383,
+      "frame_ms_range": [
+        47.12982525902669,
+        47.23679554823529
+      ],
+      "median_p95_ms": 50.050329,
+      "median_total_pss_mib": 98.9990234375,
+      "total_pss_mib_range": [
+        98.244140625,
+        101.5859375
+      ],
+      "cpu_presentation": {
+        "source": "docs/diagnostics/seahorse-population-cast1-20261017/cpu-failed/none/run-1",
+        "interval_count": 1253,
+        "mean_frame_ms": 48.06617273104549,
+        "fps": 20.80465206987677,
+        "p95_ms": 50.050419,
+        "observed_seconds": 60.226914432,
+        "total_pss_kib": 103484,
+        "thermal_status": 0,
+        "first_present_ns": 63314806464338,
+        "last_present_ns": 63375033378770
+      },
+      "cpu": {
+        "source": "docs/diagnostics/seahorse-population-cast1-20261017/cpu-failed/none/run-1/wf.log",
+        "windows": [
+          {
+            "start_ns": 63318643094189,
+            "end_ns": 63323662245775,
+            "sections": {
+              "update": {
+                "frames": 104,
+                "mean": 7.7625
+              },
+              "actors": {
+                "frames": 104,
+                "mean": 0.7467
+              },
+              "director": {
+                "frames": 104,
+                "mean": 6.901
+              },
+              "render": {
+                "frames": 104,
+                "mean": 35.1096
+              },
+              "school": {
+                "frames": 104,
+                "mean": 0.0
+              },
+              "pose": {
+                "frames": 104,
+                "mean": 0.0
+              },
+              "animation": {
+                "frames": 104,
+                "mean": 6.1326
+              },
+              "total": {
+                "frames": 104,
+                "mean": 42.8721
+              }
+            },
+            "counters": {
+              "level-objects": {
+                "frames": 104,
+                "mean": 81.0
+              },
+              "render-actors": {
+                "frames": 104,
+                "mean": 34.0
+              },
+              "draws": {
+                "frames": 104,
+                "mean": 27.0
+              },
+              "triangles": {
+                "frames": 104,
+                "mean": 25125.894
+              },
+              "actor-mailbox-writes": {
+                "frames": 104,
+                "mean": 93.0
+              },
+              "fish-deformations": {
+                "frames": 104,
+                "mean": 0.0
+              },
+              "uploads": {
+                "frames": 104,
+                "mean": 9.0
+              },
+              "upload-bytes": {
+                "frames": 104,
+                "mean": 5368260.0
+              },
+              "faces-submitted": {
+                "frames": 104,
+                "mean": 50332.0
+              },
+              "faces-culled": {
+                "frames": 104,
+                "mean": 25206.106
+              },
+              "static-objects": {
+                "frames": 104,
+                "mean": 18.0
+              },
+              "static-draws": {
+                "frames": 104,
+                "mean": 18.0
+              },
+              "static-faces-culled": {
+                "frames": 104,
+                "mean": 1667.106
+              },
+              "static-index-bytes": {
+                "frames": 104,
+                "mean": 9485.365
+              },
+              "static-bakes": {
+                "frames": 104,
+                "mean": 0.0
+              },
+              "static-bake-us": {
+                "frames": 104,
+                "mean": 0.0
+              },
+              "static-gpu-bytes": {
+                "frames": 104,
+                "mean": 748626.0
+              },
+              "static-cpu-bytes": {
+                "frames": 104,
+                "mean": 21056.0
+              },
+              "static-excluded-objects": {
+                "frames": 104,
+                "mean": 16.0
+              },
+              "static-deferred-objects": {
+                "frames": 104,
+                "mean": 0.0
+              }
+            }
+          },
+          {
+            "start_ns": 63323662245775,
+            "end_ns": 63328695007194,
+            "sections": {
+              "update": {
+                "frames": 106,
+                "mean": 7.7567
+              },
+              "actors": {
+                "frames": 106,
+                "mean": 0.7567
+              },
+              "director": {
+                "frames": 106,
+                "mean": 6.8862
+              },
+              "render": {
+                "frames": 106,
+                "mean": 34.741
+              },
+              "school": {
+                "frames": 106,
+                "mean": 0.0
+              },
+              "pose": {
+                "frames": 106,
+                "mean": 0.0
+              },
+              "animation": {
+                "frames": 106,
+                "mean": 6.1306
+              },
+              "total": {
+                "frames": 106,
+                "mean": 42.4977
+              }
+            },
+            "counters": {
+              "level-objects": {
+                "frames": 106,
+                "mean": 81.0
+              },
+              "render-actors": {
+                "frames": 106,
+                "mean": 34.0
+              },
+              "draws": {
+                "frames": 106,
+                "mean": 27.0
+              },
+              "triangles": {
+                "frames": 106,
+                "mean": 25126.189
+              },
+              "actor-mailbox-writes": {
+                "frames": 106,
+                "mean": 93.0
+              },
+              "fish-deformations": {
+                "frames": 106,
+                "mean": 0.0
+              },
+              "uploads": {
+                "frames": 106,
+                "mean": 9.0
+              },
+              "upload-bytes": {
+                "frames": 106,
+                "mean": 5368260.0
+              },
+              "faces-submitted": {
+                "frames": 106,
+                "mean": 50332.0
+              },
+              "faces-culled": {
+                "frames": 106,
+                "mean": 25205.811
+              },
+              "static-objects": {
+                "frames": 106,
+                "mean": 18.0
+              },
+              "static-draws": {
+                "frames": 106,
+                "mean": 18.0
+              },
+              "static-faces-culled": {
+                "frames": 106,
+                "mean": 1666.811
+              },
+              "static-index-bytes": {
+                "frames": 106,
+                "mean": 9487.132
+              },
+              "static-bakes": {
+                "frames": 106,
+                "mean": 0.0
+              },
+              "static-bake-us": {
+                "frames": 106,
+                "mean": 0.0
+              },
+              "static-gpu-bytes": {
+                "frames": 106,
+                "mean": 748626.0
+              },
+              "static-cpu-bytes": {
+                "frames": 106,
+                "mean": 21056.0
+              },
+              "static-excluded-objects": {
+                "frames": 106,
+                "mean": 16.0
+              },
+              "static-deferred-objects": {
+                "frames": 106,
+                "mean": 0.0
+              }
+            }
+          },
+          {
+            "start_ns": 63328695007194,
+            "end_ns": 63333710305196,
+            "sections": {
+              "update": {
+                "frames": 105,
+                "mean": 7.7463
+              },
+              "actors": {
+                "frames": 105,
+                "mean": 0.7557
+              },
+              "director": {
+                "frames": 105,
+                "mean": 6.8779
+              },
+              "render": {
+                "frames": 105,
+                "mean": 34.854
+              },
+              "school": {
+                "frames": 105,
+                "mean": 0.0
+              },
+              "pose": {
+                "frames": 105,
+                "mean": 0.0
+              },
+              "animation": {
+                "frames": 105,
+                "mean": 6.1185
+              },
+              "total": {
+                "frames": 105,
+                "mean": 42.6003
+              }
+            },
+            "counters": {
+              "level-objects": {
+                "frames": 105,
+                "mean": 81.0
+              },
+              "render-actors": {
+                "frames": 105,
+                "mean": 34.0
+              },
+              "draws": {
+                "frames": 105,
+                "mean": 27.0
+              },
+              "triangles": {
+                "frames": 105,
+                "mean": 25127.59
+              },
+              "actor-mailbox-writes": {
+                "frames": 105,
+                "mean": 93.0
+              },
+              "fish-deformations": {
+                "frames": 105,
+                "mean": 0.0
+              },
+              "uploads": {
+                "frames": 105,
+                "mean": 9.0
+              },
+              "upload-bytes": {
+                "frames": 105,
+                "mean": 5368260.0
+              },
+              "faces-submitted": {
+                "frames": 105,
+                "mean": 50332.0
+              },
+              "faces-culled": {
+                "frames": 105,
+                "mean": 25204.41
+              },
+              "static-objects": {
+                "frames": 105,
+                "mean": 18.0
+              },
+              "static-draws": {
+                "frames": 105,
+                "mean": 18.0
+              },
+              "static-faces-culled": {
+                "frames": 105,
+                "mean": 1665.41
+              },
+              "static-index-bytes": {
+                "frames": 105,
+                "mean": 9495.543
+              },
+              "static-bakes": {
+                "frames": 105,
+                "mean": 0.0
+              },
+              "static-bake-us": {
+                "frames": 105,
+                "mean": 0.0
+              },
+              "static-gpu-bytes": {
+                "frames": 105,
+                "mean": 748626.0
+              },
+              "static-cpu-bytes": {
+                "frames": 105,
+                "mean": 21056.0
+              },
+              "static-excluded-objects": {
+                "frames": 105,
+                "mean": 16.0
+              },
+              "static-deferred-objects": {
+                "frames": 105,
+                "mean": 0.0
+              }
+            }
+          },
+          {
+            "start_ns": 63333710305196,
+            "end_ns": 63338727954324,
+            "sections": {
+              "update": {
+                "frames": 104,
+                "mean": 7.8856
+              },
+              "actors": {
+                "frames": 104,
+                "mean": 0.7572
+              },
+              "director": {
+                "frames": 104,
+                "mean": 7.0131
+              },
+              "render": {
+                "frames": 104,
+                "mean": 34.9574
+              },
+              "school": {
+                "frames": 104,
+                "mean": 0.0
+              },
+              "pose": {
+                "frames": 104,
+                "mean": 0.0
+              },
+              "animation": {
+                "frames": 104,
+                "mean": 6.2378
+              },
+              "total": {
+                "frames": 104,
+                "mean": 42.843
+              }
+            },
+            "counters": {
+              "level-objects": {
+                "frames": 104,
+                "mean": 81.0
+              },
+              "render-actors": {
+                "frames": 104,
+                "mean": 34.0
+              },
+              "draws": {
+                "frames": 104,
+                "mean": 27.0
+              },
+              "triangles": {
+                "frames": 104,
+                "mean": 25127.481
+              },
+              "actor-mailbox-writes": {
+                "frames": 104,
+                "mean": 93.0
+              },
+              "fish-deformations": {
+                "frames": 104,
+                "mean": 0.0
+              },
+              "uploads": {
+                "frames": 104,
+                "mean": 9.0
+              },
+              "upload-bytes": {
+                "frames": 104,
+                "mean": 5368312.615
+              },
+              "faces-submitted": {
+                "frames": 104,
+                "mean": 50332.0
+              },
+              "faces-culled": {
+                "frames": 104,
+                "mean": 25204.519
+              },
+              "static-objects": {
+                "frames": 104,
+                "mean": 18.0
+              },
+              "static-draws": {
+                "frames": 104,
+                "mean": 18.0
+              },
+              "static-faces-culled": {
+                "frames": 104,
+                "mean": 1665.75
+              },
+              "static-index-bytes": {
+                "frames": 104,
+                "mean": 9493.5
+              },
+              "static-bakes": {
+                "frames": 104,
+                "mean": 0.0
+              },
+              "static-bake-us": {
+                "frames": 104,
+                "mean": 0.0
+              },
+              "static-gpu-bytes": {
+                "frames": 104,
+                "mean": 748626.0
+              },
+              "static-cpu-bytes": {
+                "frames": 104,
+                "mean": 21056.0
+              },
+              "static-excluded-objects": {
+                "frames": 104,
+                "mean": 16.0
+              },
+              "static-deferred-objects": {
+                "frames": 104,
+                "mean": 0.0
+              }
+            }
+          },
+          {
+            "start_ns": 63338727954324,
+            "end_ns": 63343753501826,
+            "sections": {
+              "update": {
+                "frames": 104,
+                "mean": 7.8316
+              },
+              "actors": {
+                "frames": 104,
+                "mean": 0.7623
+              },
+              "director": {
+                "frames": 104,
+                "mean": 6.9519
+              },
+              "render": {
+                "frames": 104,
+                "mean": 35.0307
+              },
+              "school": {
+                "frames": 104,
+                "mean": 0.0
+              },
+              "pose": {
+                "frames": 104,
+                "mean": 0.0
+              },
+              "animation": {
+                "frames": 104,
+                "mean": 6.1787
+              },
+              "total": {
+                "frames": 104,
+                "mean": 42.8622
+              }
+            },
+            "counters": {
+              "level-objects": {
+                "frames": 104,
+                "mean": 81.0
+              },
+              "render-actors": {
+                "frames": 104,
+                "mean": 34.0
+              },
+              "draws": {
+                "frames": 104,
+                "mean": 27.0
+              },
+              "triangles": {
+                "frames": 104,
+                "mean": 25125.231
+              },
+              "actor-mailbox-writes": {
+                "frames": 104,
+                "mean": 93.0
+              },
+              "fish-deformations": {
+                "frames": 104,
+                "mean": 0.0
+              },
+              "uploads": {
+                "frames": 104,
+                "mean": 9.0
+              },
+              "upload-bytes": {
+                "frames": 104,
+                "mean": 5368299.462
+              },
+              "faces-submitted": {
+                "frames": 104,
+                "mean": 50332.0
+              },
+              "faces-culled": {
+                "frames": 104,
+                "mean": 25206.769
+              },
+              "static-objects": {
+                "frames": 104,
+                "mean": 18.0
+              },
+              "static-draws": {
+                "frames": 104,
+                "mean": 18.0
+              },
+              "static-faces-culled": {
+                "frames": 104,
+                "mean": 1667.942
+              },
+              "static-index-bytes": {
+                "frames": 104,
+                "mean": 9480.346
+              },
+              "static-bakes": {
+                "frames": 104,
+                "mean": 0.0
+              },
+              "static-bake-us": {
+                "frames": 104,
+                "mean": 0.0
+              },
+              "static-gpu-bytes": {
+                "frames": 104,
+                "mean": 748626.0
+              },
+              "static-cpu-bytes": {
+                "frames": 104,
+                "mean": 21056.0
+              },
+              "static-excluded-objects": {
+                "frames": 104,
+                "mean": 16.0
+              },
+              "static-deferred-objects": {
+                "frames": 104,
+                "mean": 0.0
+              }
+            }
+          },
+          {
+            "start_ns": 63343753501826,
+            "end_ns": 63348799491287,
+            "sections": {
+              "update": {
+                "frames": 104,
+                "mean": 7.7855
+              },
+              "actors": {
+                "frames": 104,
+                "mean": 0.7559
+              },
+              "director": {
+                "frames": 104,
+                "mean": 6.9131
+              },
+              "render": {
+                "frames": 104,
+                "mean": 35.2744
+              },
+              "school": {
+                "frames": 104,
+                "mean": 0.0
+              },
+              "pose": {
+                "frames": 104,
+                "mean": 0.0
+              },
+              "animation": {
+                "frames": 104,
+                "mean": 6.1573
+              },
+              "total": {
+                "frames": 104,
+                "mean": 43.0599
+              }
+            },
+            "counters": {
+              "level-objects": {
+                "frames": 104,
+                "mean": 81.0
+              },
+              "render-actors": {
+                "frames": 104,
+                "mean": 34.0
+              },
+              "draws": {
+                "frames": 104,
+                "mean": 27.0
+              },
+              "triangles": {
+                "frames": 104,
+                "mean": 25127.375
+              },
+              "actor-mailbox-writes": {
+                "frames": 104,
+                "mean": 93.0
+              },
+              "fish-deformations": {
+                "frames": 104,
+                "mean": 0.0
+              },
+              "uploads": {
+                "frames": 104,
+                "mean": 9.0
+              },
+              "upload-bytes": {
+                "frames": 104,
+                "mean": 5368292.885
+              },
+              "faces-submitted": {
+                "frames": 104,
+                "mean": 50332.0
+              },
+              "faces-culled": {
+                "frames": 104,
+                "mean": 25204.625
+              },
+              "static-objects": {
+                "frames": 104,
+                "mean": 18.0
+              },
+              "static-draws": {
+                "frames": 104,
+                "mean": 18.0
+              },
+              "static-faces-culled": {
+                "frames": 104,
+                "mean": 1665.769
+              },
+              "static-index-bytes": {
+                "frames": 104,
+                "mean": 9493.385
+              },
+              "static-bakes": {
+                "frames": 104,
+                "mean": 0.0
+              },
+              "static-bake-us": {
+                "frames": 104,
+                "mean": 0.0
+              },
+              "static-gpu-bytes": {
+                "frames": 104,
+                "mean": 748626.0
+              },
+              "static-cpu-bytes": {
+                "frames": 104,
+                "mean": 21056.0
+              },
+              "static-excluded-objects": {
+                "frames": 104,
+                "mean": 16.0
+              },
+              "static-deferred-objects": {
+                "frames": 104,
+                "mean": 0.0
+              }
+            }
+          },
+          {
+            "start_ns": 63348799491287,
+            "end_ns": 63353841904331,
+            "sections": {
+              "update": {
+                "frames": 105,
+                "mean": 7.7777
+              },
+              "actors": {
+                "frames": 105,
+                "mean": 0.7542
+              },
+              "director": {
+                "frames": 105,
+                "mean": 6.9066
+              },
+              "render": {
+                "frames": 105,
+                "mean": 34.9103
+              },
+              "school": {
+                "frames": 105,
+                "mean": 0.0
+              },
+              "pose": {
+                "frames": 105,
+                "mean": 0.0
+              },
+              "animation": {
+                "frames": 105,
+                "mean": 6.1467
+              },
+              "total": {
+                "frames": 105,
+                "mean": 42.688
+              }
+            },
+            "counters": {
+              "level-objects": {
+                "frames": 105,
+                "mean": 81.0
+              },
+              "render-actors": {
+                "frames": 105,
+                "mean": 34.0
+              },
+              "draws": {
+                "frames": 105,
+                "mean": 27.0
+              },
+              "triangles": {
+                "frames": 105,
+                "mean": 25127.905
+              },
+              "actor-mailbox-writes": {
+                "frames": 105,
+                "mean": 93.0
+              },
+              "fish-deformations": {
+                "frames": 105,
+                "mean": 0.0
+              },
+              "uploads": {
+                "frames": 105,
+                "mean": 9.0
+              },
+              "upload-bytes": {
+                "frames": 105,
+                "mean": 5368296.914
+              },
+              "faces-submitted": {
+                "frames": 105,
+                "mean": 50332.0
+              },
+              "faces-culled": {
+                "frames": 105,
+                "mean": 25204.095
+              },
+              "static-objects": {
+                "frames": 105,
+                "mean": 18.0
+              },
+              "static-draws": {
+                "frames": 105,
+                "mean": 18.0
+              },
+              "static-faces-culled": {
+                "frames": 105,
+                "mean": 1665.257
+              },
+              "static-index-bytes": {
+                "frames": 105,
+                "mean": 9496.457
+              },
+              "static-bakes": {
+                "frames": 105,
+                "mean": 0.0
+              },
+              "static-bake-us": {
+                "frames": 105,
+                "mean": 0.0
+              },
+              "static-gpu-bytes": {
+                "frames": 105,
+                "mean": 748626.0
+              },
+              "static-cpu-bytes": {
+                "frames": 105,
+                "mean": 21056.0
+              },
+              "static-excluded-objects": {
+                "frames": 105,
+                "mean": 16.0
+              },
+              "static-deferred-objects": {
+                "frames": 105,
+                "mean": 0.0
+              }
+            }
+          },
+          {
+            "start_ns": 63353841904331,
+            "end_ns": 63358861269500,
+            "sections": {
+              "update": {
+                "frames": 105,
+                "mean": 7.7478
+              },
+              "actors": {
+                "frames": 105,
+                "mean": 0.7452
+              },
+              "director": {
+                "frames": 105,
+                "mean": 6.8831
+              },
+              "render": {
+                "frames": 105,
+                "mean": 34.8717
+              },
+              "school": {
+                "frames": 105,
+                "mean": 0.0
+              },
+              "pose": {
+                "frames": 105,
+                "mean": 0.0
+              },
+              "animation": {
+                "frames": 105,
+                "mean": 6.1259
+              },
+              "total": {
+                "frames": 105,
+                "mean": 42.6194
+              }
+            },
+            "counters": {
+              "level-objects": {
+                "frames": 105,
+                "mean": 81.0
+              },
+              "render-actors": {
+                "frames": 105,
+                "mean": 34.0
+              },
+              "draws": {
+                "frames": 105,
+                "mean": 27.0
+              },
+              "triangles": {
+                "frames": 105,
+                "mean": 25126.0
+              },
+              "actor-mailbox-writes": {
+                "frames": 105,
+                "mean": 93.0
+              },
+              "fish-deformations": {
+                "frames": 105,
+                "mean": 0.0
+              },
+              "uploads": {
+                "frames": 105,
+                "mean": 9.0
+              },
+              "upload-bytes": {
+                "frames": 105,
+                "mean": 5368260.0
+              },
+              "faces-submitted": {
+                "frames": 105,
+                "mean": 50332.0
+              },
+              "faces-culled": {
+                "frames": 105,
+                "mean": 25206.0
+              },
+              "static-objects": {
+                "frames": 105,
+                "mean": 18.0
+              },
+              "static-draws": {
+                "frames": 105,
+                "mean": 18.0
+              },
+              "static-faces-culled": {
+                "frames": 105,
+                "mean": 1667.0
+              },
+              "static-index-bytes": {
+                "frames": 105,
+                "mean": 9486.0
+              },
+              "static-bakes": {
+                "frames": 105,
+                "mean": 0.0
+              },
+              "static-bake-us": {
+                "frames": 105,
+                "mean": 0.0
+              },
+              "static-gpu-bytes": {
+                "frames": 105,
+                "mean": 748626.0
+              },
+              "static-cpu-bytes": {
+                "frames": 105,
+                "mean": 21056.0
+              },
+              "static-excluded-objects": {
+                "frames": 105,
+                "mean": 16.0
+              },
+              "static-deferred-objects": {
+                "frames": 105,
+                "mean": 0.0
+              }
+            }
+          },
+          {
+            "start_ns": 63358861269500,
+            "end_ns": 63363898585878,
+            "sections": {
+              "update": {
+                "frames": 105,
+                "mean": 7.745
+              },
+              "actors": {
+                "frames": 105,
+                "mean": 0.7396
+              },
+              "director": {
+                "frames": 105,
+                "mean": 6.8902
+              },
+              "render": {
+                "frames": 105,
+                "mean": 35.1099
+              },
+              "school": {
+                "frames": 105,
+                "mean": 0.0
+              },
+              "pose": {
+                "frames": 105,
+                "mean": 0.0
+              },
+              "animation": {
+                "frames": 105,
+                "mean": 6.1354
+              },
+              "total": {
+                "frames": 105,
+                "mean": 42.8549
+              }
+            },
+            "counters": {
+              "level-objects": {
+                "frames": 105,
+                "mean": 81.0
+              },
+              "render-actors": {
+                "frames": 105,
+                "mean": 34.0
+              },
+              "draws": {
+                "frames": 105,
+                "mean": 27.0
+              },
+              "triangles": {
+                "frames": 105,
+                "mean": 25125.81
+              },
+              "actor-mailbox-writes": {
+                "frames": 105,
+                "mean": 93.0
+              },
+              "fish-deformations": {
+                "frames": 105,
+                "mean": 0.0
+              },
+              "uploads": {
+                "frames": 105,
+                "mean": 9.0
+              },
+              "upload-bytes": {
+                "frames": 105,
+                "mean": 5368260.0
+              },
+              "faces-submitted": {
+                "frames": 105,
+                "mean": 50332.0
+              },
+              "faces-culled": {
+                "frames": 105,
+                "mean": 25206.19
+              },
+              "static-objects": {
+                "frames": 105,
+                "mean": 18.0
+              },
+              "static-draws": {
+                "frames": 105,
+                "mean": 18.0
+              },
+              "static-faces-culled": {
+                "frames": 105,
+                "mean": 1667.19
+              },
+              "static-index-bytes": {
+                "frames": 105,
+                "mean": 9484.857
+              },
+              "static-bakes": {
+                "frames": 105,
+                "mean": 0.0
+              },
+              "static-bake-us": {
+                "frames": 105,
+                "mean": 0.0
+              },
+              "static-gpu-bytes": {
+                "frames": 105,
+                "mean": 748626.0
+              },
+              "static-cpu-bytes": {
+                "frames": 105,
+                "mean": 21056.0
+              },
+              "static-excluded-objects": {
+                "frames": 105,
+                "mean": 16.0
+              },
+              "static-deferred-objects": {
+                "frames": 105,
+                "mean": 0.0
+              }
+            }
+          },
+          {
+            "start_ns": 63363898585878,
+            "end_ns": 63368911290213,
+            "sections": {
+              "update": {
+                "frames": 104,
+                "mean": 7.9033
+              },
+              "actors": {
+                "frames": 104,
+                "mean": 0.7566
+              },
+              "director": {
+                "frames": 104,
+                "mean": 7.0281
+              },
+              "render": {
+                "frames": 104,
+                "mean": 34.8893
+              },
+              "school": {
+                "frames": 104,
+                "mean": 0.0
+              },
+              "pose": {
+                "frames": 104,
+                "mean": 0.0
+              },
+              "animation": {
+                "frames": 104,
+                "mean": 6.251
+              },
+              "total": {
+                "frames": 104,
+                "mean": 42.7926
+              }
+            },
+            "counters": {
+              "level-objects": {
+                "frames": 104,
+                "mean": 81.0
+              },
+              "render-actors": {
+                "frames": 104,
+                "mean": 34.0
+              },
+              "draws": {
+                "frames": 104,
+                "mean": 27.0
+              },
+              "triangles": {
+                "frames": 104,
+                "mean": 25128.269
+              },
+              "actor-mailbox-writes": {
+                "frames": 104,
+                "mean": 93.0
+              },
+              "fish-deformations": {
+                "frames": 104,
+                "mean": 0.0
+              },
+              "uploads": {
+                "frames": 104,
+                "mean": 9.0
+              },
+              "upload-bytes": {
+                "frames": 104,
+                "mean": 5368260.0
+              },
+              "faces-submitted": {
+                "frames": 104,
+                "mean": 50332.0
+              },
+              "faces-culled": {
+                "frames": 104,
+                "mean": 25203.731
+              },
+              "static-objects": {
+                "frames": 104,
+                "mean": 18.0
+              },
+              "static-draws": {
+                "frames": 104,
+                "mean": 18.0
+              },
+              "static-faces-culled": {
+                "frames": 104,
+                "mean": 1664.731
+              },
+              "static-index-bytes": {
+                "frames": 104,
+                "mean": 9499.615
+              },
+              "static-bakes": {
+                "frames": 104,
+                "mean": 0.0
+              },
+              "static-bake-us": {
+                "frames": 104,
+                "mean": 0.0
+              },
+              "static-gpu-bytes": {
+                "frames": 104,
+                "mean": 748626.0
+              },
+              "static-cpu-bytes": {
+                "frames": 104,
+                "mean": 21056.0
+              },
+              "static-excluded-objects": {
+                "frames": 104,
+                "mean": 16.0
+              },
+              "static-deferred-objects": {
+                "frames": 104,
+                "mean": 0.0
+              }
+            }
+          },
+          {
+            "start_ns": 63368911290213,
+            "end_ns": 63373933494632,
+            "sections": {
+              "update": {
+                "frames": 106,
+                "mean": 7.7919
+              },
+              "actors": {
+                "frames": 106,
+                "mean": 0.7528
+              },
+              "director": {
+                "frames": 106,
+                "mean": 6.9246
+              },
+              "render": {
+                "frames": 106,
+                "mean": 34.8493
+              },
+              "school": {
+                "frames": 106,
+                "mean": 0.0
+              },
+              "pose": {
+                "frames": 106,
+                "mean": 0.0
+              },
+              "animation": {
+                "frames": 106,
+                "mean": 6.1674
+              },
+              "total": {
+                "frames": 106,
+                "mean": 42.6413
+              }
+            },
+            "counters": {
+              "level-objects": {
+                "frames": 106,
+                "mean": 81.0
+              },
+              "render-actors": {
+                "frames": 106,
+                "mean": 34.0
+              },
+              "draws": {
+                "frames": 106,
+                "mean": 27.0
+              },
+              "triangles": {
+                "frames": 106,
+                "mean": 25126.292
+              },
+              "actor-mailbox-writes": {
+                "frames": 106,
+                "mean": 93.0
+              },
+              "fish-deformations": {
+                "frames": 106,
+                "mean": 0.0
+              },
+              "uploads": {
+                "frames": 106,
+                "mean": 9.0
+              },
+              "upload-bytes": {
+                "frames": 106,
+                "mean": 5368326.679
+              },
+              "faces-submitted": {
+                "frames": 106,
+                "mean": 50332.0
+              },
+              "faces-culled": {
+                "frames": 106,
+                "mean": 25205.708
+              },
+              "static-objects": {
+                "frames": 106,
+                "mean": 18.0
+              },
+              "static-draws": {
+                "frames": 106,
+                "mean": 18.0
+              },
+              "static-faces-culled": {
+                "frames": 106,
+                "mean": 1667.0
+              },
+              "static-index-bytes": {
+                "frames": 106,
+                "mean": 9486.0
+              },
+              "static-bakes": {
+                "frames": 106,
+                "mean": 0.0
+              },
+              "static-bake-us": {
+                "frames": 106,
+                "mean": 0.0
+              },
+              "static-gpu-bytes": {
+                "frames": 106,
+                "mean": 748626.0
+              },
+              "static-cpu-bytes": {
+                "frames": 106,
+                "mean": 21056.0
+              },
+              "static-excluded-objects": {
+                "frames": 106,
+                "mean": 16.0
+              },
+              "static-deferred-objects": {
+                "frames": 106,
+                "mean": 0.0
+              }
+            }
+          }
+        ],
+        "covered_seconds": 55.290400443,
+        "measured_frames": 1152,
+        "frame_weighted_cpu_ms": {
+          "actors": 0.75298203125,
+          "animation": 6.161840364583333,
+          "director": 6.9248807291666665,
+          "pose": 0.0,
+          "render": 34.96274036458333,
+          "school": 0.0,
+          "total": 42.75651579861111,
+          "update": 7.7937843749999995
+        },
+        "frame_weighted_counters": {
+          "actor-mailbox-writes": 93.0,
+          "draws": 27.0,
+          "faces-culled": 25205.270823784722,
+          "faces-submitted": 50332.0,
+          "fish-deformations": 0.0,
+          "level-objects": 81.0,
+          "render-actors": 34.0,
+          "static-bake-us": 0.0,
+          "static-bakes": 0.0,
+          "static-cpu-bytes": 21056.0,
+          "static-deferred-objects": 0.0,
+          "static-draws": 18.0,
+          "static-excluded-objects": 16.0,
+          "static-faces-culled": 1666.3619296875,
+          "static-gpu-bytes": 748626.0,
+          "static-index-bytes": 9489.828056423612,
+          "static-objects": 18.0,
+          "triangles": 25126.729176215278,
+          "upload-bytes": 5368280.781243055,
+          "uploads": 9.0
+        }
+      },
+      "instrumented_frame_ms_change_percent": 1.9732532839374928,
+      "frame_ms_delta_vs_none": 0.0,
+      "fps_change_percent_vs_none": 0.0,
+      "main_thread_cpu_ms_delta_vs_none": 0.0
+    },
+    {
+      "pairs": 1,
+      "residents": 2,
+      "release_runs": [
+        {
+          "source": "docs/diagnostics/seahorse-population-cast1-20261017/round-1/pair1/run-1",
+          "interval_count": 1167,
+          "mean_frame_ms": 51.57973239931448,
+          "fps": 19.387460025156905,
+          "p95_ms": 66.733436,
+          "observed_seconds": 60.19354771,
+          "total_pss_kib": 99293,
+          "thermal_status": 0,
+          "first_present_ns": 62490281652996,
+          "last_present_ns": 62550475200706
+        },
+        {
+          "source": "docs/diagnostics/seahorse-population-cast1-20261017/round-2/pair1/run-1",
+          "interval_count": 1156,
+          "mean_frame_ms": 51.89735941522491,
+          "fps": 19.268803100348766,
+          "p95_ms": 66.733438,
+          "observed_seconds": 59.993347484,
+          "total_pss_kib": 103147,
+          "thermal_status": 0,
+          "first_present_ns": 63036594822618,
+          "last_present_ns": 63096588170102
+        },
+        {
+          "source": "docs/diagnostics/seahorse-population-cast1-20261017/round-3/pair1/run-1",
+          "interval_count": 1164,
+          "mean_frame_ms": 51.54067647680412,
+          "fps": 19.402151239711607,
+          "p95_ms": 66.733427,
+          "observed_seconds": 59.993347419,
+          "total_pss_kib": 101653,
+          "thermal_status": 0,
+          "first_present_ns": 66292401761093,
+          "last_present_ns": 66352395108512
+        }
+      ],
+      "median_frame_ms": 51.57973239931448,
+      "median_fps": 19.387460025156905,
+      "frame_ms_range": [
+        51.54067647680412,
+        51.89735941522491
+      ],
+      "median_p95_ms": 66.733436,
+      "median_total_pss_mib": 99.2705078125,
+      "total_pss_mib_range": [
+        96.9658203125,
+        100.7294921875
+      ],
+      "cpu_presentation": {
+        "source": "docs/diagnostics/seahorse-population-cast1-20261017/cpu/pair1/run-1",
+        "interval_count": 1152,
+        "mean_frame_ms": 52.2947898828125,
+        "fps": 19.122363857678785,
+        "p95_ms": 66.733457,
+        "observed_seconds": 60.243597945,
+        "total_pss_kib": 98693,
+        "thermal_status": 0,
+        "first_present_ns": 66863890114578,
+        "last_present_ns": 66924133712523
+      },
+      "cpu": {
+        "source": "docs/diagnostics/seahorse-population-cast1-20261017/cpu/pair1/run-1/wf.log",
+        "windows": [
+          {
+            "start_ns": 66868678927674,
+            "end_ns": 66873711842051,
+            "sections": {
+              "update": {
+                "frames": 96,
+                "mean": 9.4821
+              },
+              "actors": {
+                "frames": 96,
+                "mean": 0.7315
+              },
+              "director": {
+                "frames": 96,
+                "mean": 8.6356
+              },
+              "render": {
+                "frames": 96,
+                "mean": 37.5787
+              },
+              "school": {
+                "frames": 96,
+                "mean": 0.0
+              },
+              "pose": {
+                "frames": 96,
+                "mean": 0.0
+              },
+              "animation": {
+                "frames": 96,
+                "mean": 6.5733
+              },
+              "total": {
+                "frames": 96,
+                "mean": 47.0608
+              }
+            },
+            "counters": {
+              "level-objects": {
+                "frames": 96,
+                "mean": 81.0
+              },
+              "render-actors": {
+                "frames": 96,
+                "mean": 44.0
+              },
+              "draws": {
+                "frames": 96,
+                "mean": 38.26
+              },
+              "triangles": {
+                "frames": 96,
+                "mean": 26813.125
+              },
+              "actor-mailbox-writes": {
+                "frames": 96,
+                "mean": 109.0
+              },
+              "fish-deformations": {
+                "frames": 96,
+                "mean": 4.0
+              },
+              "uploads": {
+                "frames": 96,
+                "mean": 14.26
+              },
+              "upload-bytes": {
+                "frames": 96,
+                "mean": 5628921.0
+              },
+              "faces-submitted": {
+                "frames": 96,
+                "mean": 53678.0
+              },
+              "faces-culled": {
+                "frames": 96,
+                "mean": 26864.875
+              },
+              "static-objects": {
+                "frames": 96,
+                "mean": 24.0
+              },
+              "static-draws": {
+                "frames": 96,
+                "mean": 24.0
+              },
+              "static-faces-culled": {
+                "frames": 96,
+                "mean": 2267.125
+              },
+              "static-index-bytes": {
+                "frames": 96,
+                "mean": 12749.25
+              },
+              "static-bakes": {
+                "frames": 96,
+                "mean": 0.0
+              },
+              "static-bake-us": {
+                "frames": 96,
+                "mean": 0.0
+              },
+              "static-gpu-bytes": {
+                "frames": 96,
+                "mean": 1009458.0
+              },
+              "static-cpu-bytes": {
+                "frames": 96,
+                "mean": 21656.0
+              },
+              "static-excluded-objects": {
+                "frames": 96,
+                "mean": 20.0
+              },
+              "static-deferred-objects": {
+                "frames": 96,
+                "mean": 0.0
+              }
+            }
+          },
+          {
+            "start_ns": 66873711842051,
+            "end_ns": 66878727372220,
+            "sections": {
+              "update": {
+                "frames": 95,
+                "mean": 9.3669
+              },
+              "actors": {
+                "frames": 95,
+                "mean": 0.739
+              },
+              "director": {
+                "frames": 95,
+                "mean": 8.5164
+              },
+              "render": {
+                "frames": 95,
+                "mean": 37.7912
+              },
+              "school": {
+                "frames": 95,
+                "mean": 0.0
+              },
+              "pose": {
+                "frames": 95,
+                "mean": 0.0
+              },
+              "animation": {
+                "frames": 95,
+                "mean": 6.5837
+              },
+              "total": {
+                "frames": 95,
+                "mean": 47.1582
+              }
+            },
+            "counters": {
+              "level-objects": {
+                "frames": 95,
+                "mean": 81.0
+              },
+              "render-actors": {
+                "frames": 95,
+                "mean": 44.0
+              },
+              "draws": {
+                "frames": 95,
+                "mean": 42.032
+              },
+              "triangles": {
+                "frames": 95,
+                "mean": 26815.326
+              },
+              "actor-mailbox-writes": {
+                "frames": 95,
+                "mean": 109.0
+              },
+              "fish-deformations": {
+                "frames": 95,
+                "mean": 4.0
+              },
+              "uploads": {
+                "frames": 95,
+                "mean": 18.032
+              },
+              "upload-bytes": {
+                "frames": 95,
+                "mean": 5629351.2
+              },
+              "faces-submitted": {
+                "frames": 95,
+                "mean": 53678.0
+              },
+              "faces-culled": {
+                "frames": 95,
+                "mean": 26862.674
+              },
+              "static-objects": {
+                "frames": 95,
+                "mean": 24.0
+              },
+              "static-draws": {
+                "frames": 95,
+                "mean": 24.0
+              },
+              "static-faces-culled": {
+                "frames": 95,
+                "mean": 2266.811
+              },
+              "static-index-bytes": {
+                "frames": 95,
+                "mean": 12751.137
+              },
+              "static-bakes": {
+                "frames": 95,
+                "mean": 0.0
+              },
+              "static-bake-us": {
+                "frames": 95,
+                "mean": 0.0
+              },
+              "static-gpu-bytes": {
+                "frames": 95,
+                "mean": 1009458.0
+              },
+              "static-cpu-bytes": {
+                "frames": 95,
+                "mean": 21656.0
+              },
+              "static-excluded-objects": {
+                "frames": 95,
+                "mean": 20.0
+              },
+              "static-deferred-objects": {
+                "frames": 95,
+                "mean": 0.0
+              }
+            }
+          },
+          {
+            "start_ns": 66878727372220,
+            "end_ns": 66883765102681,
+            "sections": {
+              "update": {
+                "frames": 94,
+                "mean": 9.417
+              },
+              "actors": {
+                "frames": 94,
+                "mean": 0.7534
+              },
+              "director": {
+                "frames": 94,
+                "mean": 8.5497
+              },
+              "render": {
+                "frames": 94,
+                "mean": 38.0558
+              },
+              "school": {
+                "frames": 94,
+                "mean": 0.0
+              },
+              "pose": {
+                "frames": 94,
+                "mean": 0.0
+              },
+              "animation": {
+                "frames": 94,
+                "mean": 6.6265
+              },
+              "total": {
+                "frames": 94,
+                "mean": 47.4727
+              }
+            },
+            "counters": {
+              "level-objects": {
+                "frames": 94,
+                "mean": 81.0
+              },
+              "render-actors": {
+                "frames": 94,
+                "mean": 44.0
+              },
+              "draws": {
+                "frames": 94,
+                "mean": 42.053
+              },
+              "triangles": {
+                "frames": 94,
+                "mean": 26813.468
+              },
+              "actor-mailbox-writes": {
+                "frames": 94,
+                "mean": 109.0
+              },
+              "fish-deformations": {
+                "frames": 94,
+                "mean": 4.0
+              },
+              "uploads": {
+                "frames": 94,
+                "mean": 18.053
+              },
+              "upload-bytes": {
+                "frames": 94,
+                "mean": 5628604.468
+              },
+              "faces-submitted": {
+                "frames": 94,
+                "mean": 53678.0
+              },
+              "faces-culled": {
+                "frames": 94,
+                "mean": 26864.532
+              },
+              "static-objects": {
+                "frames": 94,
+                "mean": 24.0
+              },
+              "static-draws": {
+                "frames": 94,
+                "mean": 24.0
+              },
+              "static-faces-culled": {
+                "frames": 94,
+                "mean": 2265.394
+              },
+              "static-index-bytes": {
+                "frames": 94,
+                "mean": 12759.638
+              },
+              "static-bakes": {
+                "frames": 94,
+                "mean": 0.0
+              },
+              "static-bake-us": {
+                "frames": 94,
+                "mean": 0.0
+              },
+              "static-gpu-bytes": {
+                "frames": 94,
+                "mean": 1009458.0
+              },
+              "static-cpu-bytes": {
+                "frames": 94,
+                "mean": 21656.0
+              },
+              "static-excluded-objects": {
+                "frames": 94,
+                "mean": 20.0
+              },
+              "static-deferred-objects": {
+                "frames": 94,
+                "mean": 0.0
+              }
+            }
+          },
+          {
+            "start_ns": 66883765102681,
+            "end_ns": 66888785559058,
+            "sections": {
+              "update": {
+                "frames": 96,
+                "mean": 9.4024
+              },
+              "actors": {
+                "frames": 96,
+                "mean": 0.743
+              },
+              "director": {
+                "frames": 96,
+                "mean": 8.5441
+              },
+              "render": {
+                "frames": 96,
+                "mean": 37.5864
+              },
+              "school": {
+                "frames": 96,
+                "mean": 0.0
+              },
+              "pose": {
+                "frames": 96,
+                "mean": 0.0
+              },
+              "animation": {
+                "frames": 96,
+                "mean": 6.578
+              },
+              "total": {
+                "frames": 96,
+                "mean": 46.9887
+              }
+            },
+            "counters": {
+              "level-objects": {
+                "frames": 96,
+                "mean": 81.0
+              },
+              "render-actors": {
+                "frames": 96,
+                "mean": 44.0
+              },
+              "draws": {
+                "frames": 96,
+                "mean": 42.365
+              },
+              "triangles": {
+                "frames": 96,
+                "mean": 26819.25
+              },
+              "actor-mailbox-writes": {
+                "frames": 96,
+                "mean": 109.0
+              },
+              "fish-deformations": {
+                "frames": 96,
+                "mean": 4.0
+              },
+              "uploads": {
+                "frames": 96,
+                "mean": 18.365
+              },
+              "upload-bytes": {
+                "frames": 96,
+                "mean": 5630013.5
+              },
+              "faces-submitted": {
+                "frames": 96,
+                "mean": 53678.0
+              },
+              "faces-culled": {
+                "frames": 96,
+                "mean": 26858.75
+              },
+              "static-objects": {
+                "frames": 96,
+                "mean": 24.0
+              },
+              "static-draws": {
+                "frames": 96,
+                "mean": 24.0
+              },
+              "static-faces-culled": {
+                "frames": 96,
+                "mean": 2265.792
+              },
+              "static-index-bytes": {
+                "frames": 96,
+                "mean": 12757.25
+              },
+              "static-bakes": {
+                "frames": 96,
+                "mean": 0.0
+              },
+              "static-bake-us": {
+                "frames": 96,
+                "mean": 0.0
+              },
+              "static-gpu-bytes": {
+                "frames": 96,
+                "mean": 1009458.0
+              },
+              "static-cpu-bytes": {
+                "frames": 96,
+                "mean": 21656.0
+              },
+              "static-excluded-objects": {
+                "frames": 96,
+                "mean": 20.0
+              },
+              "static-deferred-objects": {
+                "frames": 96,
+                "mean": 0.0
+              }
+            }
+          },
+          {
+            "start_ns": 66888785559058,
+            "end_ns": 66893815947311,
+            "sections": {
+              "update": {
+                "frames": 96,
+                "mean": 9.4538
+              },
+              "actors": {
+                "frames": 96,
+                "mean": 0.7433
+              },
+              "director": {
+                "frames": 96,
+                "mean": 8.596
+              },
+              "render": {
+                "frames": 96,
+                "mean": 37.554
+              },
+              "school": {
+                "frames": 96,
+                "mean": 0.0
+              },
+              "pose": {
+                "frames": 96,
+                "mean": 0.0
+              },
+              "animation": {
+                "frames": 96,
+                "mean": 6.5679
+              },
+              "total": {
+                "frames": 96,
+                "mean": 47.0077
+              }
+            },
+            "counters": {
+              "level-objects": {
+                "frames": 96,
+                "mean": 81.0
+              },
+              "render-actors": {
+                "frames": 96,
+                "mean": 44.0
+              },
+              "draws": {
+                "frames": 96,
+                "mean": 41.573
+              },
+              "triangles": {
+                "frames": 96,
+                "mean": 26815.75
+              },
+              "actor-mailbox-writes": {
+                "frames": 96,
+                "mean": 109.0
+              },
+              "fish-deformations": {
+                "frames": 96,
+                "mean": 4.0
+              },
+              "uploads": {
+                "frames": 96,
+                "mean": 17.573
+              },
+              "upload-bytes": {
+                "frames": 96,
+                "mean": 5629709.5
+              },
+              "faces-submitted": {
+                "frames": 96,
+                "mean": 53678.0
+              },
+              "faces-culled": {
+                "frames": 96,
+                "mean": 26862.25
+              },
+              "static-objects": {
+                "frames": 96,
+                "mean": 24.0
+              },
+              "static-draws": {
+                "frames": 96,
+                "mean": 24.0
+              },
+              "static-faces-culled": {
+                "frames": 96,
+                "mean": 2267.958
+              },
+              "static-index-bytes": {
+                "frames": 96,
+                "mean": 12744.25
+              },
+              "static-bakes": {
+                "frames": 96,
+                "mean": 0.0
+              },
+              "static-bake-us": {
+                "frames": 96,
+                "mean": 0.0
+              },
+              "static-gpu-bytes": {
+                "frames": 96,
+                "mean": 1009458.0
+              },
+              "static-cpu-bytes": {
+                "frames": 96,
+                "mean": 21656.0
+              },
+              "static-excluded-objects": {
+                "frames": 96,
+                "mean": 20.0
+              },
+              "static-deferred-objects": {
+                "frames": 96,
+                "mean": 0.0
+              }
+            }
+          },
+          {
+            "start_ns": 66893815947311,
+            "end_ns": 66898837328688,
+            "sections": {
+              "update": {
+                "frames": 97,
+                "mean": 9.4098
+              },
+              "actors": {
+                "frames": 97,
+                "mean": 0.725
+              },
+              "director": {
+                "frames": 97,
+                "mean": 8.5761
+              },
+              "render": {
+                "frames": 97,
+                "mean": 37.3669
+              },
+              "school": {
+                "frames": 97,
+                "mean": 0.0
+              },
+              "pose": {
+                "frames": 97,
+                "mean": 0.0
+              },
+              "animation": {
+                "frames": 97,
+                "mean": 6.5265
+              },
+              "total": {
+                "frames": 97,
+                "mean": 46.7766
+              }
+            },
+            "counters": {
+              "level-objects": {
+                "frames": 97,
+                "mean": 81.0
+              },
+              "render-actors": {
+                "frames": 97,
+                "mean": 44.0
+              },
+              "draws": {
+                "frames": 97,
+                "mean": 42.474
+              },
+              "triangles": {
+                "frames": 97,
+                "mean": 26825.784
+              },
+              "actor-mailbox-writes": {
+                "frames": 97,
+                "mean": 109.0
+              },
+              "fish-deformations": {
+                "frames": 97,
+                "mean": 4.0
+              },
+              "uploads": {
+                "frames": 97,
+                "mean": 18.474
+              },
+              "upload-bytes": {
+                "frames": 97,
+                "mean": 5631491.876
+              },
+              "faces-submitted": {
+                "frames": 97,
+                "mean": 53678.0
+              },
+              "faces-culled": {
+                "frames": 97,
+                "mean": 26852.216
+              },
+              "static-objects": {
+                "frames": 97,
+                "mean": 24.0
+              },
+              "static-draws": {
+                "frames": 97,
+                "mean": 24.0
+              },
+              "static-faces-culled": {
+                "frames": 97,
+                "mean": 2265.742
+              },
+              "static-index-bytes": {
+                "frames": 97,
+                "mean": 12757.546
+              },
+              "static-bakes": {
+                "frames": 97,
+                "mean": 0.0
+              },
+              "static-bake-us": {
+                "frames": 97,
+                "mean": 0.0
+              },
+              "static-gpu-bytes": {
+                "frames": 97,
+                "mean": 1009458.0
+              },
+              "static-cpu-bytes": {
+                "frames": 97,
+                "mean": 21656.0
+              },
+              "static-excluded-objects": {
+                "frames": 97,
+                "mean": 20.0
+              },
+              "static-deferred-objects": {
+                "frames": 97,
+                "mean": 0.0
+              }
+            }
+          },
+          {
+            "start_ns": 66898837328688,
+            "end_ns": 66903861407191,
+            "sections": {
+              "update": {
+                "frames": 97,
+                "mean": 9.3677
+              },
+              "actors": {
+                "frames": 97,
+                "mean": 0.7148
+              },
+              "director": {
+                "frames": 97,
+                "mean": 8.5408
+              },
+              "render": {
+                "frames": 97,
+                "mean": 37.5032
+              },
+              "school": {
+                "frames": 97,
+                "mean": 0.0
+              },
+              "pose": {
+                "frames": 97,
+                "mean": 0.0
+              },
+              "animation": {
+                "frames": 97,
+                "mean": 6.5137
+              },
+              "total": {
+                "frames": 97,
+                "mean": 46.8709
+              }
+            },
+            "counters": {
+              "level-objects": {
+                "frames": 97,
+                "mean": 81.0
+              },
+              "render-actors": {
+                "frames": 97,
+                "mean": 44.0
+              },
+              "draws": {
+                "frames": 97,
+                "mean": 45.876
+              },
+              "triangles": {
+                "frames": 97,
+                "mean": 26813.33
+              },
+              "actor-mailbox-writes": {
+                "frames": 97,
+                "mean": 109.0
+              },
+              "fish-deformations": {
+                "frames": 97,
+                "mean": 4.0
+              },
+              "uploads": {
+                "frames": 97,
+                "mean": 21.876
+              },
+              "upload-bytes": {
+                "frames": 97,
+                "mean": 5628544.33
+              },
+              "faces-submitted": {
+                "frames": 97,
+                "mean": 53678.0
+              },
+              "faces-culled": {
+                "frames": 97,
+                "mean": 26864.67
+              },
+              "static-objects": {
+                "frames": 97,
+                "mean": 24.0
+              },
+              "static-draws": {
+                "frames": 97,
+                "mean": 24.0
+              },
+              "static-faces-culled": {
+                "frames": 97,
+                "mean": 2265.268
+              },
+              "static-index-bytes": {
+                "frames": 97,
+                "mean": 12760.392
+              },
+              "static-bakes": {
+                "frames": 97,
+                "mean": 0.0
+              },
+              "static-bake-us": {
+                "frames": 97,
+                "mean": 0.0
+              },
+              "static-gpu-bytes": {
+                "frames": 97,
+                "mean": 1009458.0
+              },
+              "static-cpu-bytes": {
+                "frames": 97,
+                "mean": 21656.0
+              },
+              "static-excluded-objects": {
+                "frames": 97,
+                "mean": 20.0
+              },
+              "static-deferred-objects": {
+                "frames": 97,
+                "mean": 0.0
+              }
+            }
+          },
+          {
+            "start_ns": 66903861407191,
+            "end_ns": 66908869749026,
+            "sections": {
+              "update": {
+                "frames": 95,
+                "mean": 9.4931
+              },
+              "actors": {
+                "frames": 95,
+                "mean": 0.7213
+              },
+              "director": {
+                "frames": 95,
+                "mean": 8.6619
+              },
+              "render": {
+                "frames": 95,
+                "mean": 37.6422
+              },
+              "school": {
+                "frames": 95,
+                "mean": 0.0
+              },
+              "pose": {
+                "frames": 95,
+                "mean": 0.0
+              },
+              "animation": {
+                "frames": 95,
+                "mean": 6.6117
+              },
+              "total": {
+                "frames": 95,
+                "mean": 47.1353
+              }
+            },
+            "counters": {
+              "level-objects": {
+                "frames": 95,
+                "mean": 81.0
+              },
+              "render-actors": {
+                "frames": 95,
+                "mean": 44.0
+              },
+              "draws": {
+                "frames": 95,
+                "mean": 47.621
+              },
+              "triangles": {
+                "frames": 95,
+                "mean": 26823.168
+              },
+              "actor-mailbox-writes": {
+                "frames": 95,
+                "mean": 109.0
+              },
+              "fish-deformations": {
+                "frames": 95,
+                "mean": 4.0
+              },
+              "uploads": {
+                "frames": 95,
+                "mean": 23.621
+              },
+              "upload-bytes": {
+                "frames": 95,
+                "mean": 5631182.4
+              },
+              "faces-submitted": {
+                "frames": 95,
+                "mean": 53678.0
+              },
+              "faces-culled": {
+                "frames": 95,
+                "mean": 26854.832
+              },
+              "static-objects": {
+                "frames": 95,
+                "mean": 24.0
+              },
+              "static-draws": {
+                "frames": 95,
+                "mean": 24.0
+              },
+              "static-faces-culled": {
+                "frames": 95,
+                "mean": 2267.0
+              },
+              "static-index-bytes": {
+                "frames": 95,
+                "mean": 12750.0
+              },
+              "static-bakes": {
+                "frames": 95,
+                "mean": 0.0
+              },
+              "static-bake-us": {
+                "frames": 95,
+                "mean": 0.0
+              },
+              "static-gpu-bytes": {
+                "frames": 95,
+                "mean": 1009458.0
+              },
+              "static-cpu-bytes": {
+                "frames": 95,
+                "mean": 21656.0
+              },
+              "static-excluded-objects": {
+                "frames": 95,
+                "mean": 20.0
+              },
+              "static-deferred-objects": {
+                "frames": 95,
+                "mean": 0.0
+              }
+            }
+          },
+          {
+            "start_ns": 66908869749026,
+            "end_ns": 66913885346654,
+            "sections": {
+              "update": {
+                "frames": 95,
+                "mean": 9.4799
+              },
+              "actors": {
+                "frames": 95,
+                "mean": 0.7363
+              },
+              "director": {
+                "frames": 95,
+                "mean": 8.6316
+              },
+              "render": {
+                "frames": 95,
+                "mean": 37.8277
+              },
+              "school": {
+                "frames": 95,
+                "mean": 0.0
+              },
+              "pose": {
+                "frames": 95,
+                "mean": 0.0
+              },
+              "animation": {
+                "frames": 95,
+                "mean": 6.5301
+              },
+              "total": {
+                "frames": 95,
+                "mean": 47.3075
+              }
+            },
+            "counters": {
+              "level-objects": {
+                "frames": 95,
+                "mean": 81.0
+              },
+              "render-actors": {
+                "frames": 95,
+                "mean": 44.0
+              },
+              "draws": {
+                "frames": 95,
+                "mean": 47.747
+              },
+              "triangles": {
+                "frames": 95,
+                "mean": 26837.684
+              },
+              "actor-mailbox-writes": {
+                "frames": 95,
+                "mean": 109.0
+              },
+              "fish-deformations": {
+                "frames": 95,
+                "mean": 4.0
+              },
+              "uploads": {
+                "frames": 95,
+                "mean": 23.747
+              },
+              "upload-bytes": {
+                "frames": 95,
+                "mean": 5634566.4
+              },
+              "faces-submitted": {
+                "frames": 95,
+                "mean": 53678.0
+              },
+              "faces-culled": {
+                "frames": 95,
+                "mean": 26840.316
+              },
+              "static-objects": {
+                "frames": 95,
+                "mean": 24.0
+              },
+              "static-draws": {
+                "frames": 95,
+                "mean": 24.0
+              },
+              "static-faces-culled": {
+                "frames": 95,
+                "mean": 2267.326
+              },
+              "static-index-bytes": {
+                "frames": 95,
+                "mean": 12748.042
+              },
+              "static-bakes": {
+                "frames": 95,
+                "mean": 0.0
+              },
+              "static-bake-us": {
+                "frames": 95,
+                "mean": 0.0
+              },
+              "static-gpu-bytes": {
+                "frames": 95,
+                "mean": 1009458.0
+              },
+              "static-cpu-bytes": {
+                "frames": 95,
+                "mean": 21656.0
+              },
+              "static-excluded-objects": {
+                "frames": 95,
+                "mean": 20.0
+              },
+              "static-deferred-objects": {
+                "frames": 95,
+                "mean": 0.0
+              }
+            }
+          },
+          {
+            "start_ns": 66913885346654,
+            "end_ns": 66918934151864,
+            "sections": {
+              "update": {
+                "frames": 98,
+                "mean": 9.2295
+              },
+              "actors": {
+                "frames": 98,
+                "mean": 0.7158
+              },
+              "director": {
+                "frames": 98,
+                "mean": 8.4039
+              },
+              "render": {
+                "frames": 98,
+                "mean": 37.3779
+              },
+              "school": {
+                "frames": 98,
+                "mean": 0.0
+              },
+              "pose": {
+                "frames": 98,
+                "mean": 0.0
+              },
+              "animation": {
+                "frames": 98,
+                "mean": 6.5569
+              },
+              "total": {
+                "frames": 98,
+                "mean": 46.6073
+              }
+            },
+            "counters": {
+              "level-objects": {
+                "frames": 98,
+                "mean": 81.0
+              },
+              "render-actors": {
+                "frames": 98,
+                "mean": 44.0
+              },
+              "draws": {
+                "frames": 98,
+                "mean": 48.316
+              },
+              "triangles": {
+                "frames": 98,
+                "mean": 26839.48
+              },
+              "actor-mailbox-writes": {
+                "frames": 98,
+                "mean": 109.0
+              },
+              "fish-deformations": {
+                "frames": 98,
+                "mean": 4.0
+              },
+              "uploads": {
+                "frames": 98,
+                "mean": 24.316
+              },
+              "upload-bytes": {
+                "frames": 98,
+                "mean": 5634363.918
+              },
+              "faces-submitted": {
+                "frames": 98,
+                "mean": 53678.0
+              },
+              "faces-culled": {
+                "frames": 98,
+                "mean": 26838.52
+              },
+              "static-objects": {
+                "frames": 98,
+                "mean": 24.0
+              },
+              "static-draws": {
+                "frames": 98,
+                "mean": 24.0
+              },
+              "static-faces-culled": {
+                "frames": 98,
+                "mean": 2264.643
+              },
+              "static-index-bytes": {
+                "frames": 98,
+                "mean": 12764.143
+              },
+              "static-bakes": {
+                "frames": 98,
+                "mean": 0.0
+              },
+              "static-bake-us": {
+                "frames": 98,
+                "mean": 0.0
+              },
+              "static-gpu-bytes": {
+                "frames": 98,
+                "mean": 1009458.0
+              },
+              "static-cpu-bytes": {
+                "frames": 98,
+                "mean": 21656.0
+              },
+              "static-excluded-objects": {
+                "frames": 98,
+                "mean": 20.0
+              },
+              "static-deferred-objects": {
+                "frames": 98,
+                "mean": 0.0
+              }
+            }
+          },
+          {
+            "start_ns": 66918934151864,
+            "end_ns": 66923941096867,
+            "sections": {
+              "update": {
+                "frames": 96,
+                "mean": 9.2802
+              },
+              "actors": {
+                "frames": 96,
+                "mean": 0.7158
+              },
+              "director": {
+                "frames": 96,
+                "mean": 8.456
+              },
+              "render": {
+                "frames": 96,
+                "mean": 37.7032
+              },
+              "school": {
+                "frames": 96,
+                "mean": 0.0
+              },
+              "pose": {
+                "frames": 96,
+                "mean": 0.0
+              },
+              "animation": {
+                "frames": 96,
+                "mean": 6.642
+              },
+              "total": {
+                "frames": 96,
+                "mean": 46.9834
+              }
+            },
+            "counters": {
+              "level-objects": {
+                "frames": 96,
+                "mean": 81.0
+              },
+              "render-actors": {
+                "frames": 96,
+                "mean": 44.0
+              },
+              "draws": {
+                "frames": 96,
+                "mean": 45.729
+              },
+              "triangles": {
+                "frames": 96,
+                "mean": 26817.552
+              },
+              "actor-mailbox-writes": {
+                "frames": 96,
+                "mean": 109.0
+              },
+              "fish-deformations": {
+                "frames": 96,
+                "mean": 4.0
+              },
+              "uploads": {
+                "frames": 96,
+                "mean": 21.729
+              },
+              "upload-bytes": {
+                "frames": 96,
+                "mean": 5629901.875
+              },
+              "faces-submitted": {
+                "frames": 96,
+                "mean": 53678.0
+              },
+              "faces-culled": {
+                "frames": 96,
+                "mean": 26860.448
+              },
+              "static-objects": {
+                "frames": 96,
+                "mean": 24.0
+              },
+              "static-draws": {
+                "frames": 96,
+                "mean": 24.0
+              },
+              "static-faces-culled": {
+                "frames": 96,
+                "mean": 2267.0
+              },
+              "static-index-bytes": {
+                "frames": 96,
+                "mean": 12750.0
+              },
+              "static-bakes": {
+                "frames": 96,
+                "mean": 0.0
+              },
+              "static-bake-us": {
+                "frames": 96,
+                "mean": 0.0
+              },
+              "static-gpu-bytes": {
+                "frames": 96,
+                "mean": 1009458.0
+              },
+              "static-cpu-bytes": {
+                "frames": 96,
+                "mean": 21656.0
+              },
+              "static-excluded-objects": {
+                "frames": 96,
+                "mean": 20.0
+              },
+              "static-deferred-objects": {
+                "frames": 96,
+                "mean": 0.0
+              }
+            }
+          }
+        ],
+        "covered_seconds": 55.262169193,
+        "measured_frames": 1055,
+        "frame_weighted_cpu_ms": {
+          "actors": 0.7307404739336493,
+          "animation": 6.573425876777251,
+          "director": 8.555238862559241,
+          "pose": 0.0,
+          "render": 37.63319848341232,
+          "school": 0.0,
+          "total": 47.03104199052133,
+          "update": 9.397889099526065
+        },
+        "frame_weighted_counters": {
+          "actor-mailbox-writes": 109.0,
+          "draws": 44.011272037914694,
+          "faces-culled": 26856.70048151659,
+          "faces-submitted": 53678.0,
+          "fish-deformations": 4.0,
+          "level-objects": 81.0,
+          "render-actors": 44.0,
+          "static-bake-us": 0.0,
+          "static-bakes": 0.0,
+          "static-cpu-bytes": 21656.0,
+          "static-deferred-objects": 0.0,
+          "static-draws": 24.0,
+          "static-excluded-objects": 20.0,
+          "static-faces-culled": 2266.3640142180097,
+          "static-gpu-bytes": 1009458.0,
+          "static-index-bytes": 12753.816091943128,
+          "static-objects": 24.0,
+          "triangles": 26821.29951848341,
+          "upload-bytes": 5630611.279562085,
+          "uploads": 20.01127203791469
+        }
+      },
+      "instrumented_frame_ms_change_percent": 1.3863148377007084,
+      "frame_ms_delta_vs_none": 4.443673498449023,
+      "fps_change_percent_vs_none": -8.615154231602961,
+      "main_thread_cpu_ms_delta_vs_none": 4.274526191910219
+    },
+    {
+      "pairs": 2,
+      "residents": 4,
+      "release_runs": [
+        {
+          "source": "docs/diagnostics/seahorse-population-cast1-20261017/round-1/pair2/run-1",
+          "interval_count": 1082,
+          "mean_frame_ms": 55.66258275785582,
+          "fps": 17.965389862526045,
+          "p95_ms": 66.733544,
+          "observed_seconds": 60.226914544,
+          "total_pss_kib": 100564,
+          "thermal_status": 0,
+          "first_present_ns": 62597689097742,
+          "last_present_ns": 62657916012286
+        },
+        {
+          "source": "docs/diagnostics/seahorse-population-cast1-20261017/round-2/pair2/run-1",
+          "interval_count": 1095,
+          "mean_frame_ms": 55.001748321461186,
+          "fps": 18.181240242681685,
+          "p95_ms": 66.733505,
+          "observed_seconds": 60.226914412,
+          "total_pss_kib": 100111,
+          "thermal_status": 0,
+          "first_present_ns": 62927101958524,
+          "last_present_ns": 62987328872936
+        },
+        {
+          "source": "docs/diagnostics/seahorse-population-cast1-20261017/round-3/pair2/run-1",
+          "interval_count": 1087,
+          "mean_frame_ms": 55.09958363201472,
+          "fps": 18.14895747086855,
+          "p95_ms": 66.733519,
+          "observed_seconds": 59.893247408,
+          "total_pss_kib": 107321,
+          "thermal_status": 0,
+          "first_present_ns": 66620346486331,
+          "last_present_ns": 66680239733739
+        }
+      ],
+      "median_frame_ms": 55.09958363201472,
+      "median_fps": 18.14895747086855,
+      "frame_ms_range": [
+        55.001748321461186,
+        55.66258275785582
+      ],
+      "median_p95_ms": 66.733519,
+      "median_total_pss_mib": 98.20703125,
+      "total_pss_mib_range": [
+        97.7646484375,
+        104.8056640625
+      ],
+      "cpu_presentation": {
+        "source": "docs/diagnostics/seahorse-population-cast1-20261017/cpu/pair2/run-1",
+        "interval_count": 1072,
+        "mean_frame_ms": 55.9795064636194,
+        "fps": 17.863680178207563,
+        "p95_ms": 66.733548,
+        "observed_seconds": 60.010030929,
+        "total_pss_kib": 101033,
+        "thermal_status": 0,
+        "first_present_ns": 66970580175011,
+        "last_present_ns": 67030590205940
+      },
+      "cpu": {
+        "source": "docs/diagnostics/seahorse-population-cast1-20261017/cpu/pair2/run-1/wf.log",
+        "windows": [
+          {
+            "start_ns": 66974851444391,
+            "end_ns": 66979877030310,
+            "sections": {
+              "update": {
+                "frames": 91,
+                "mean": 10.9788
+              },
+              "actors": {
+                "frames": 91,
+                "mean": 0.7196
+              },
+              "director": {
+                "frames": 91,
+                "mean": 10.1506
+              },
+              "render": {
+                "frames": 91,
+                "mean": 39.3381
+              },
+              "school": {
+                "frames": 91,
+                "mean": 0.0
+              },
+              "pose": {
+                "frames": 91,
+                "mean": 0.0
+              },
+              "animation": {
+                "frames": 91,
+                "mean": 7.0656
+              },
+              "total": {
+                "frames": 91,
+                "mean": 50.317
+              }
+            },
+            "counters": {
+              "level-objects": {
+                "frames": 91,
+                "mean": 81.0
+              },
+              "render-actors": {
+                "frames": 91,
+                "mean": 48.0
+              },
+              "draws": {
+                "frames": 91,
+                "mean": 53.253
+              },
+              "triangles": {
+                "frames": 91,
+                "mean": 28008.396
+              },
+              "actor-mailbox-writes": {
+                "frames": 91,
+                "mean": 125.0
+              },
+              "fish-deformations": {
+                "frames": 91,
+                "mean": 8.0
+              },
+              "uploads": {
+                "frames": 91,
+                "mean": 29.253
+              },
+              "upload-bytes": {
+                "frames": 91,
+                "mean": 5901439.253
+              },
+              "faces-submitted": {
+                "frames": 91,
+                "mean": 55880.0
+              },
+              "faces-culled": {
+                "frames": 91,
+                "mean": 27871.604
+              },
+              "static-objects": {
+                "frames": 91,
+                "mean": 24.0
+              },
+              "static-draws": {
+                "frames": 91,
+                "mean": 24.0
+              },
+              "static-faces-culled": {
+                "frames": 91,
+                "mean": 2267.11
+              },
+              "static-index-bytes": {
+                "frames": 91,
+                "mean": 12749.341
+              },
+              "static-bakes": {
+                "frames": 91,
+                "mean": 0.0
+              },
+              "static-bake-us": {
+                "frames": 91,
+                "mean": 0.0
+              },
+              "static-gpu-bytes": {
+                "frames": 91,
+                "mean": 1009458.0
+              },
+              "static-cpu-bytes": {
+                "frames": 91,
+                "mean": 21656.0
+              },
+              "static-excluded-objects": {
+                "frames": 91,
+                "mean": 24.0
+              },
+              "static-deferred-objects": {
+                "frames": 91,
+                "mean": 0.0
+              }
+            }
+          },
+          {
+            "start_ns": 66979877030310,
+            "end_ns": 66984919372896,
+            "sections": {
+              "update": {
+                "frames": 91,
+                "mean": 10.7797
+              },
+              "actors": {
+                "frames": 91,
+                "mean": 0.7138
+              },
+              "director": {
+                "frames": 91,
+                "mean": 9.9571
+              },
+              "render": {
+                "frames": 91,
+                "mean": 39.6098
+              },
+              "school": {
+                "frames": 91,
+                "mean": 0.0
+              },
+              "pose": {
+                "frames": 91,
+                "mean": 0.0
+              },
+              "animation": {
+                "frames": 91,
+                "mean": 7.0135
+              },
+              "total": {
+                "frames": 91,
+                "mean": 50.3895
+              }
+            },
+            "counters": {
+              "level-objects": {
+                "frames": 91,
+                "mean": 81.0
+              },
+              "render-actors": {
+                "frames": 91,
+                "mean": 48.0
+              },
+              "draws": {
+                "frames": 91,
+                "mean": 55.956
+              },
+              "triangles": {
+                "frames": 91,
+                "mean": 28006.088
+              },
+              "actor-mailbox-writes": {
+                "frames": 91,
+                "mean": 125.0
+              },
+              "fish-deformations": {
+                "frames": 91,
+                "mean": 8.0
+              },
+              "uploads": {
+                "frames": 91,
+                "mean": 31.956
+              },
+              "upload-bytes": {
+                "frames": 91,
+                "mean": 5900842.945
+              },
+              "faces-submitted": {
+                "frames": 91,
+                "mean": 55880.0
+              },
+              "faces-culled": {
+                "frames": 91,
+                "mean": 27873.912
+              },
+              "static-objects": {
+                "frames": 91,
+                "mean": 24.0
+              },
+              "static-draws": {
+                "frames": 91,
+                "mean": 24.0
+              },
+              "static-faces-culled": {
+                "frames": 91,
+                "mean": 2266.802
+              },
+              "static-index-bytes": {
+                "frames": 91,
+                "mean": 12751.187
+              },
+              "static-bakes": {
+                "frames": 91,
+                "mean": 0.0
+              },
+              "static-bake-us": {
+                "frames": 91,
+                "mean": 0.0
+              },
+              "static-gpu-bytes": {
+                "frames": 91,
+                "mean": 1009458.0
+              },
+              "static-cpu-bytes": {
+                "frames": 91,
+                "mean": 21656.0
+              },
+              "static-excluded-objects": {
+                "frames": 91,
+                "mean": 24.0
+              },
+              "static-deferred-objects": {
+                "frames": 91,
+                "mean": 0.0
+              }
+            }
+          },
+          {
+            "start_ns": 66984919372896,
+            "end_ns": 66989956822690,
+            "sections": {
+              "update": {
+                "frames": 89,
+                "mean": 10.9139
+              },
+              "actors": {
+                "frames": 89,
+                "mean": 0.7219
+              },
+              "director": {
+                "frames": 89,
+                "mean": 10.0858
+              },
+              "render": {
+                "frames": 89,
+                "mean": 39.9814
+              },
+              "school": {
+                "frames": 89,
+                "mean": 0.0
+              },
+              "pose": {
+                "frames": 89,
+                "mean": 0.0
+              },
+              "animation": {
+                "frames": 89,
+                "mean": 7.1553
+              },
+              "total": {
+                "frames": 89,
+                "mean": 50.8953
+              }
+            },
+            "counters": {
+              "level-objects": {
+                "frames": 89,
+                "mean": 81.0
+              },
+              "render-actors": {
+                "frames": 89,
+                "mean": 48.0
+              },
+              "draws": {
+                "frames": 89,
+                "mean": 56.438
+              },
+              "triangles": {
+                "frames": 89,
+                "mean": 28017.191
+              },
+              "actor-mailbox-writes": {
+                "frames": 89,
+                "mean": 125.0
+              },
+              "fish-deformations": {
+                "frames": 89,
+                "mean": 8.0
+              },
+              "uploads": {
+                "frames": 89,
+                "mean": 32.438
+              },
+              "upload-bytes": {
+                "frames": 89,
+                "mean": 5903068.584
+              },
+              "faces-submitted": {
+                "frames": 89,
+                "mean": 55880.0
+              },
+              "faces-culled": {
+                "frames": 89,
+                "mean": 27862.809
+              },
+              "static-objects": {
+                "frames": 89,
+                "mean": 24.0
+              },
+              "static-draws": {
+                "frames": 89,
+                "mean": 24.0
+              },
+              "static-faces-culled": {
+                "frames": 89,
+                "mean": 2265.461
+              },
+              "static-index-bytes": {
+                "frames": 89,
+                "mean": 12759.236
+              },
+              "static-bakes": {
+                "frames": 89,
+                "mean": 0.0
+              },
+              "static-bake-us": {
+                "frames": 89,
+                "mean": 0.0
+              },
+              "static-gpu-bytes": {
+                "frames": 89,
+                "mean": 1009458.0
+              },
+              "static-cpu-bytes": {
+                "frames": 89,
+                "mean": 21656.0
+              },
+              "static-excluded-objects": {
+                "frames": 89,
+                "mean": 24.0
+              },
+              "static-deferred-objects": {
+                "frames": 89,
+                "mean": 0.0
+              }
+            }
+          },
+          {
+            "start_ns": 66989956822690,
+            "end_ns": 66994976571276,
+            "sections": {
+              "update": {
+                "frames": 89,
+                "mean": 10.6452
+              },
+              "actors": {
+                "frames": 89,
+                "mean": 0.7217
+              },
+              "director": {
+                "frames": 89,
+                "mean": 9.8153
+              },
+              "render": {
+                "frames": 89,
+                "mean": 40.1791
+              },
+              "school": {
+                "frames": 89,
+                "mean": 0.0
+              },
+              "pose": {
+                "frames": 89,
+                "mean": 0.0
+              },
+              "animation": {
+                "frames": 89,
+                "mean": 6.9687
+              },
+              "total": {
+                "frames": 89,
+                "mean": 50.8243
+              }
+            },
+            "counters": {
+              "level-objects": {
+                "frames": 89,
+                "mean": 81.0
+              },
+              "render-actors": {
+                "frames": 89,
+                "mean": 48.0
+              },
+              "draws": {
+                "frames": 89,
+                "mean": 56.382
+              },
+              "triangles": {
+                "frames": 89,
+                "mean": 28034.674
+              },
+              "actor-mailbox-writes": {
+                "frames": 89,
+                "mean": 125.0
+              },
+              "fish-deformations": {
+                "frames": 89,
+                "mean": 8.0
+              },
+              "uploads": {
+                "frames": 89,
+                "mean": 32.382
+              },
+              "upload-bytes": {
+                "frames": 89,
+                "mean": 5907113.663
+              },
+              "faces-submitted": {
+                "frames": 89,
+                "mean": 55880.0
+              },
+              "faces-culled": {
+                "frames": 89,
+                "mean": 27845.326
+              },
+              "static-objects": {
+                "frames": 89,
+                "mean": 24.0
+              },
+              "static-draws": {
+                "frames": 89,
+                "mean": 24.0
+              },
+              "static-faces-culled": {
+                "frames": 89,
+                "mean": 2265.719
+              },
+              "static-index-bytes": {
+                "frames": 89,
+                "mean": 12757.685
+              },
+              "static-bakes": {
+                "frames": 89,
+                "mean": 0.0
+              },
+              "static-bake-us": {
+                "frames": 89,
+                "mean": 0.0
+              },
+              "static-gpu-bytes": {
+                "frames": 89,
+                "mean": 1009458.0
+              },
+              "static-cpu-bytes": {
+                "frames": 89,
+                "mean": 21656.0
+              },
+              "static-excluded-objects": {
+                "frames": 89,
+                "mean": 24.0
+              },
+              "static-deferred-objects": {
+                "frames": 89,
+                "mean": 0.0
+              }
+            }
+          },
+          {
+            "start_ns": 66994976571276,
+            "end_ns": 67000005365486,
+            "sections": {
+              "update": {
+                "frames": 89,
+                "mean": 10.8048
+              },
+              "actors": {
+                "frames": 89,
+                "mean": 0.716
+              },
+              "director": {
+                "frames": 89,
+                "mean": 9.9794
+              },
+              "render": {
+                "frames": 89,
+                "mean": 40.1246
+              },
+              "school": {
+                "frames": 89,
+                "mean": 0.0
+              },
+              "pose": {
+                "frames": 89,
+                "mean": 0.0
+              },
+              "animation": {
+                "frames": 89,
+                "mean": 7.0443
+              },
+              "total": {
+                "frames": 89,
+                "mean": 50.9294
+              }
+            },
+            "counters": {
+              "level-objects": {
+                "frames": 89,
+                "mean": 81.0
+              },
+              "render-actors": {
+                "frames": 89,
+                "mean": 48.0
+              },
+              "draws": {
+                "frames": 89,
+                "mean": 53.213
+              },
+              "triangles": {
+                "frames": 89,
+                "mean": 28032.0
+              },
+              "actor-mailbox-writes": {
+                "frames": 89,
+                "mean": 125.0
+              },
+              "fish-deformations": {
+                "frames": 89,
+                "mean": 8.0
+              },
+              "uploads": {
+                "frames": 89,
+                "mean": 29.213
+              },
+              "upload-bytes": {
+                "frames": 89,
+                "mean": 5907013.753
+              },
+              "faces-submitted": {
+                "frames": 89,
+                "mean": 55880.0
+              },
+              "faces-culled": {
+                "frames": 89,
+                "mean": 27848.0
+              },
+              "static-objects": {
+                "frames": 89,
+                "mean": 24.0
+              },
+              "static-draws": {
+                "frames": 89,
+                "mean": 24.0
+              },
+              "static-faces-culled": {
+                "frames": 89,
+                "mean": 2267.955
+              },
+              "static-index-bytes": {
+                "frames": 89,
+                "mean": 12744.27
+              },
+              "static-bakes": {
+                "frames": 89,
+                "mean": 0.0
+              },
+              "static-bake-us": {
+                "frames": 89,
+                "mean": 0.0
+              },
+              "static-gpu-bytes": {
+                "frames": 89,
+                "mean": 1009458.0
+              },
+              "static-cpu-bytes": {
+                "frames": 89,
+                "mean": 21656.0
+              },
+              "static-excluded-objects": {
+                "frames": 89,
+                "mean": 24.0
+              },
+              "static-deferred-objects": {
+                "frames": 89,
+                "mean": 0.0
+              }
+            }
+          },
+          {
+            "start_ns": 67000005365486,
+            "end_ns": 67005057986072,
+            "sections": {
+              "update": {
+                "frames": 90,
+                "mean": 10.974
+              },
+              "actors": {
+                "frames": 90,
+                "mean": 0.7517
+              },
+              "director": {
+                "frames": 90,
+                "mean": 10.1159
+              },
+              "render": {
+                "frames": 90,
+                "mean": 39.7805
+              },
+              "school": {
+                "frames": 90,
+                "mean": 0.0
+              },
+              "pose": {
+                "frames": 90,
+                "mean": 0.0
+              },
+              "animation": {
+                "frames": 90,
+                "mean": 6.9558
+              },
+              "total": {
+                "frames": 90,
+                "mean": 50.7545
+              }
+            },
+            "counters": {
+              "level-objects": {
+                "frames": 90,
+                "mean": 81.0
+              },
+              "render-actors": {
+                "frames": 90,
+                "mean": 48.0
+              },
+              "draws": {
+                "frames": 90,
+                "mean": 61.0
+              },
+              "triangles": {
+                "frames": 90,
+                "mean": 28018.144
+              },
+              "actor-mailbox-writes": {
+                "frames": 90,
+                "mean": 125.0
+              },
+              "fish-deformations": {
+                "frames": 90,
+                "mean": 8.0
+              },
+              "uploads": {
+                "frames": 90,
+                "mean": 37.0
+              },
+              "upload-bytes": {
+                "frames": 90,
+                "mean": 5903350.667
+              },
+              "faces-submitted": {
+                "frames": 90,
+                "mean": 55880.0
+              },
+              "faces-culled": {
+                "frames": 90,
+                "mean": 27861.856
+              },
+              "static-objects": {
+                "frames": 90,
+                "mean": 24.0
+              },
+              "static-draws": {
+                "frames": 90,
+                "mean": 24.0
+              },
+              "static-faces-culled": {
+                "frames": 90,
+                "mean": 2265.744
+              },
+              "static-index-bytes": {
+                "frames": 90,
+                "mean": 12757.533
+              },
+              "static-bakes": {
+                "frames": 90,
+                "mean": 0.0
+              },
+              "static-bake-us": {
+                "frames": 90,
+                "mean": 0.0
+              },
+              "static-gpu-bytes": {
+                "frames": 90,
+                "mean": 1009458.0
+              },
+              "static-cpu-bytes": {
+                "frames": 90,
+                "mean": 21656.0
+              },
+              "static-excluded-objects": {
+                "frames": 90,
+                "mean": 24.0
+              },
+              "static-deferred-objects": {
+                "frames": 90,
+                "mean": 0.0
+              }
+            }
+          },
+          {
+            "start_ns": 67005057986072,
+            "end_ns": 67010081478324,
+            "sections": {
+              "update": {
+                "frames": 91,
+                "mean": 11.0209
+              },
+              "actors": {
+                "frames": 91,
+                "mean": 0.7209
+              },
+              "director": {
+                "frames": 91,
+                "mean": 10.1929
+              },
+              "render": {
+                "frames": 91,
+                "mean": 39.1895
+              },
+              "school": {
+                "frames": 91,
+                "mean": 0.0
+              },
+              "pose": {
+                "frames": 91,
+                "mean": 0.0
+              },
+              "animation": {
+                "frames": 91,
+                "mean": 7.0018
+              },
+              "total": {
+                "frames": 91,
+                "mean": 50.2104
+              }
+            },
+            "counters": {
+              "level-objects": {
+                "frames": 91,
+                "mean": 81.0
+              },
+              "render-actors": {
+                "frames": 91,
+                "mean": 48.0
+              },
+              "draws": {
+                "frames": 91,
+                "mean": 51.648
+              },
+              "triangles": {
+                "frames": 91,
+                "mean": 27974.747
+              },
+              "actor-mailbox-writes": {
+                "frames": 91,
+                "mean": 125.0
+              },
+              "fish-deformations": {
+                "frames": 91,
+                "mean": 8.0
+              },
+              "uploads": {
+                "frames": 91,
+                "mean": 27.648
+              },
+              "upload-bytes": {
+                "frames": 91,
+                "mean": 5893346.505
+              },
+              "faces-submitted": {
+                "frames": 91,
+                "mean": 55880.0
+              },
+              "faces-culled": {
+                "frames": 91,
+                "mean": 27905.253
+              },
+              "static-objects": {
+                "frames": 91,
+                "mean": 24.0
+              },
+              "static-draws": {
+                "frames": 91,
+                "mean": 24.0
+              },
+              "static-faces-culled": {
+                "frames": 91,
+                "mean": 2265.264
+              },
+              "static-index-bytes": {
+                "frames": 91,
+                "mean": 12760.418
+              },
+              "static-bakes": {
+                "frames": 91,
+                "mean": 0.0
+              },
+              "static-bake-us": {
+                "frames": 91,
+                "mean": 0.0
+              },
+              "static-gpu-bytes": {
+                "frames": 91,
+                "mean": 1009458.0
+              },
+              "static-cpu-bytes": {
+                "frames": 91,
+                "mean": 21656.0
+              },
+              "static-excluded-objects": {
+                "frames": 91,
+                "mean": 24.0
+              },
+              "static-deferred-objects": {
+                "frames": 91,
+                "mean": 0.0
+              }
+            }
+          },
+          {
+            "start_ns": 67010081478324,
+            "end_ns": 67015130346077,
+            "sections": {
+              "update": {
+                "frames": 89,
+                "mean": 11.1582
+              },
+              "actors": {
+                "frames": 89,
+                "mean": 0.7215
+              },
+              "director": {
+                "frames": 89,
+                "mean": 10.3287
+              },
+              "render": {
+                "frames": 89,
+                "mean": 40.1505
+              },
+              "school": {
+                "frames": 89,
+                "mean": 0.0
+              },
+              "pose": {
+                "frames": 89,
+                "mean": 0.0
+              },
+              "animation": {
+                "frames": 89,
+                "mean": 6.9828
+              },
+              "total": {
+                "frames": 89,
+                "mean": 51.3087
+              }
+            },
+            "counters": {
+              "level-objects": {
+                "frames": 89,
+                "mean": 81.0
+              },
+              "render-actors": {
+                "frames": 89,
+                "mean": 48.0
+              },
+              "draws": {
+                "frames": 89,
+                "mean": 53.798
+              },
+              "triangles": {
+                "frames": 89,
+                "mean": 27960.202
+              },
+              "actor-mailbox-writes": {
+                "frames": 89,
+                "mean": 125.0
+              },
+              "fish-deformations": {
+                "frames": 89,
+                "mean": 8.0
+              },
+              "uploads": {
+                "frames": 89,
+                "mean": 29.798
+              },
+              "upload-bytes": {
+                "frames": 89,
+                "mean": 5890426.112
+              },
+              "faces-submitted": {
+                "frames": 89,
+                "mean": 55880.0
+              },
+              "faces-culled": {
+                "frames": 89,
+                "mean": 27919.798
+              },
+              "static-objects": {
+                "frames": 89,
+                "mean": 24.0
+              },
+              "static-draws": {
+                "frames": 89,
+                "mean": 24.0
+              },
+              "static-faces-culled": {
+                "frames": 89,
+                "mean": 2267.0
+              },
+              "static-index-bytes": {
+                "frames": 89,
+                "mean": 12750.0
+              },
+              "static-bakes": {
+                "frames": 89,
+                "mean": 0.0
+              },
+              "static-bake-us": {
+                "frames": 89,
+                "mean": 0.0
+              },
+              "static-gpu-bytes": {
+                "frames": 89,
+                "mean": 1009458.0
+              },
+              "static-cpu-bytes": {
+                "frames": 89,
+                "mean": 21656.0
+              },
+              "static-excluded-objects": {
+                "frames": 89,
+                "mean": 24.0
+              },
+              "static-deferred-objects": {
+                "frames": 89,
+                "mean": 0.0
+              }
+            }
+          },
+          {
+            "start_ns": 67015130346077,
+            "end_ns": 67020177432663,
+            "sections": {
+              "update": {
+                "frames": 91,
+                "mean": 10.7937
+              },
+              "actors": {
+                "frames": 91,
+                "mean": 0.7188
+              },
+              "director": {
+                "frames": 91,
+                "mean": 9.9648
+              },
+              "render": {
+                "frames": 91,
+                "mean": 39.4951
+              },
+              "school": {
+                "frames": 91,
+                "mean": 0.0
+              },
+              "pose": {
+                "frames": 91,
+                "mean": 0.0
+              },
+              "animation": {
+                "frames": 91,
+                "mean": 6.9442
+              },
+              "total": {
+                "frames": 91,
+                "mean": 50.2888
+              }
+            },
+            "counters": {
+              "level-objects": {
+                "frames": 91,
+                "mean": 81.0
+              },
+              "render-actors": {
+                "frames": 91,
+                "mean": 48.0
+              },
+              "draws": {
+                "frames": 91,
+                "mean": 55.462
+              },
+              "triangles": {
+                "frames": 91,
+                "mean": 27986.22
+              },
+              "actor-mailbox-writes": {
+                "frames": 91,
+                "mean": 125.0
+              },
+              "fish-deformations": {
+                "frames": 91,
+                "mean": 8.0
+              },
+              "uploads": {
+                "frames": 91,
+                "mean": 31.462
+              },
+              "upload-bytes": {
+                "frames": 91,
+                "mean": 5896420.747
+              },
+              "faces-submitted": {
+                "frames": 91,
+                "mean": 55880.0
+              },
+              "faces-culled": {
+                "frames": 91,
+                "mean": 27893.78
+              },
+              "static-objects": {
+                "frames": 91,
+                "mean": 24.0
+              },
+              "static-draws": {
+                "frames": 91,
+                "mean": 24.0
+              },
+              "static-faces-culled": {
+                "frames": 91,
+                "mean": 2267.275
+              },
+              "static-index-bytes": {
+                "frames": 91,
+                "mean": 12748.352
+              },
+              "static-bakes": {
+                "frames": 91,
+                "mean": 0.0
+              },
+              "static-bake-us": {
+                "frames": 91,
+                "mean": 0.0
+              },
+              "static-gpu-bytes": {
+                "frames": 91,
+                "mean": 1009458.0
+              },
+              "static-cpu-bytes": {
+                "frames": 91,
+                "mean": 21656.0
+              },
+              "static-excluded-objects": {
+                "frames": 91,
+                "mean": 24.0
+              },
+              "static-deferred-objects": {
+                "frames": 91,
+                "mean": 0.0
+              }
+            }
+          },
+          {
+            "start_ns": 67020177432663,
+            "end_ns": 67025186616707,
+            "sections": {
+              "update": {
+                "frames": 90,
+                "mean": 10.7359
+              },
+              "actors": {
+                "frames": 90,
+                "mean": 0.7175
+              },
+              "director": {
+                "frames": 90,
+                "mean": 9.9105
+              },
+              "render": {
+                "frames": 90,
+                "mean": 39.7241
+              },
+              "school": {
+                "frames": 90,
+                "mean": 0.0
+              },
+              "pose": {
+                "frames": 90,
+                "mean": 0.0
+              },
+              "animation": {
+                "frames": 90,
+                "mean": 6.9508
+              },
+              "total": {
+                "frames": 90,
+                "mean": 50.46
+              }
+            },
+            "counters": {
+              "level-objects": {
+                "frames": 90,
+                "mean": 81.0
+              },
+              "render-actors": {
+                "frames": 90,
+                "mean": 48.0
+              },
+              "draws": {
+                "frames": 90,
+                "mean": 64.256
+              },
+              "triangles": {
+                "frames": 90,
+                "mean": 28002.444
+              },
+              "actor-mailbox-writes": {
+                "frames": 90,
+                "mean": 125.0
+              },
+              "fish-deformations": {
+                "frames": 90,
+                "mean": 8.0
+              },
+              "uploads": {
+                "frames": 90,
+                "mean": 40.256
+              },
+              "upload-bytes": {
+                "frames": 90,
+                "mean": 5899520.267
+              },
+              "faces-submitted": {
+                "frames": 90,
+                "mean": 55880.0
+              },
+              "faces-culled": {
+                "frames": 90,
+                "mean": 27877.556
+              },
+              "static-objects": {
+                "frames": 90,
+                "mean": 24.0
+              },
+              "static-draws": {
+                "frames": 90,
+                "mean": 24.0
+              },
+              "static-faces-culled": {
+                "frames": 90,
+                "mean": 2264.644
+              },
+              "static-index-bytes": {
+                "frames": 90,
+                "mean": 12764.133
+              },
+              "static-bakes": {
+                "frames": 90,
+                "mean": 0.0
+              },
+              "static-bake-us": {
+                "frames": 90,
+                "mean": 0.0
+              },
+              "static-gpu-bytes": {
+                "frames": 90,
+                "mean": 1009458.0
+              },
+              "static-cpu-bytes": {
+                "frames": 90,
+                "mean": 21656.0
+              },
+              "static-excluded-objects": {
+                "frames": 90,
+                "mean": 24.0
+              },
+              "static-deferred-objects": {
+                "frames": 90,
+                "mean": 0.0
+              }
+            }
+          },
+          {
+            "start_ns": 67025186616707,
+            "end_ns": 67030204673626,
+            "sections": {
+              "update": {
+                "frames": 90,
+                "mean": 10.5912
+              },
+              "actors": {
+                "frames": 90,
+                "mean": 0.7174
+              },
+              "director": {
+                "frames": 90,
+                "mean": 9.7636
+              },
+              "render": {
+                "frames": 90,
+                "mean": 39.9112
+              },
+              "school": {
+                "frames": 90,
+                "mean": 0.0
+              },
+              "pose": {
+                "frames": 90,
+                "mean": 0.0
+              },
+              "animation": {
+                "frames": 90,
+                "mean": 6.9758
+              },
+              "total": {
+                "frames": 90,
+                "mean": 50.5025
+              }
+            },
+            "counters": {
+              "level-objects": {
+                "frames": 90,
+                "mean": 81.0
+              },
+              "render-actors": {
+                "frames": 90,
+                "mean": 48.0
+              },
+              "draws": {
+                "frames": 90,
+                "mean": 57.678
+              },
+              "triangles": {
+                "frames": 90,
+                "mean": 27997.644
+              },
+              "actor-mailbox-writes": {
+                "frames": 90,
+                "mean": 125.0
+              },
+              "fish-deformations": {
+                "frames": 90,
+                "mean": 8.0
+              },
+              "uploads": {
+                "frames": 90,
+                "mean": 33.678
+              },
+              "upload-bytes": {
+                "frames": 90,
+                "mean": 5898962.933
+              },
+              "faces-submitted": {
+                "frames": 90,
+                "mean": 55880.0
+              },
+              "faces-culled": {
+                "frames": 90,
+                "mean": 27882.356
+              },
+              "static-objects": {
+                "frames": 90,
+                "mean": 24.0
+              },
+              "static-draws": {
+                "frames": 90,
+                "mean": 24.0
+              },
+              "static-faces-culled": {
+                "frames": 90,
+                "mean": 2267.0
+              },
+              "static-index-bytes": {
+                "frames": 90,
+                "mean": 12750.0
+              },
+              "static-bakes": {
+                "frames": 90,
+                "mean": 0.0
+              },
+              "static-bake-us": {
+                "frames": 90,
+                "mean": 0.0
+              },
+              "static-gpu-bytes": {
+                "frames": 90,
+                "mean": 1009458.0
+              },
+              "static-cpu-bytes": {
+                "frames": 90,
+                "mean": 21656.0
+              },
+              "static-excluded-objects": {
+                "frames": 90,
+                "mean": 24.0
+              },
+              "static-deferred-objects": {
+                "frames": 90,
+                "mean": 0.0
+              }
+            }
+          }
+        ],
+        "covered_seconds": 55.353229235,
+        "measured_frames": 990,
+        "frame_weighted_cpu_ms": {
+          "actors": 0.7218828282828282,
+          "animation": 7.0052,
+          "director": 10.024111313131314,
+          "pose": 0.0,
+          "render": 39.76843222222222,
+          "school": 0.0,
+          "total": 50.62271111111111,
+          "update": 10.854260606060606
+        },
+        "frame_weighted_counters": {
+          "actor-mailbox-writes": 125.0,
+          "draws": 56.27681616161616,
+          "faces-culled": 27876.637490909092,
+          "faces-submitted": 55880.0,
+          "fish-deformations": 8.0,
+          "level-objects": 81.0,
+          "render-actors": 48.0,
+          "static-bake-us": 0.0,
+          "static-bakes": 0.0,
+          "static-cpu-bytes": 21656.0,
+          "static-deferred-objects": 0.0,
+          "static-draws": 24.0,
+          "static-excluded-objects": 24.0,
+          "static-faces-culled": 2266.3615919191916,
+          "static-gpu-bytes": 1009458.0,
+          "static-index-bytes": 12753.83036060606,
+          "static-objects": 24.0,
+          "triangles": 28003.362509090908,
+          "upload-bytes": 5900121.127220202,
+          "uploads": 32.27681616161616
+        }
+      },
+      "instrumented_frame_ms_change_percent": 1.5969682048439626,
+      "frame_ms_delta_vs_none": 7.963524731149263,
+      "fps_change_percent_vs_none": -14.45296716638379,
+      "main_thread_cpu_ms_delta_vs_none": 7.866195312499997
+    },
+    {
+      "pairs": 6,
+      "residents": 12,
+      "release_runs": [
+        {
+          "source": "docs/diagnostics/seahorse-population-cast1-20261017/round-1/pair6/run-1",
+          "interval_count": 871,
+          "mean_frame_ms": 69.26178488633754,
+          "fps": 14.43797617461138,
+          "p95_ms": 83.416806,
+          "observed_seconds": 60.327014636,
+          "total_pss_kib": 103202,
+          "thermal_status": 0,
+          "first_present_ns": 62706648094527,
+          "last_present_ns": 62766975109163
+        },
+        {
+          "source": "docs/diagnostics/seahorse-population-cast1-20261017/round-2/pair6/run-1",
+          "interval_count": 869,
+          "mean_frame_ms": 69.09481915189873,
+          "fps": 14.472865147842564,
+          "p95_ms": 83.416802,
+          "observed_seconds": 60.043397843,
+          "total_pss_kib": 106087,
+          "thermal_status": 0,
+          "first_present_ns": 62818843662419,
+          "last_present_ns": 62878887060262
+        },
+        {
+          "source": "docs/diagnostics/seahorse-population-cast1-20261017/round-3/pair6/run-1",
+          "interval_count": 865,
+          "mean_frame_ms": 69.27932265780346,
+          "fps": 14.434321261184593,
+          "p95_ms": 83.416811,
+          "observed_seconds": 59.926614099,
+          "total_pss_kib": 108798,
+          "thermal_status": 0,
+          "first_present_ns": 66399475538630,
+          "last_present_ns": 66459402152729
+        }
+      ],
+      "median_frame_ms": 69.26178488633754,
+      "median_fps": 14.43797617461138,
+      "frame_ms_range": [
+        69.09481915189873,
+        69.27932265780346
+      ],
+      "median_p95_ms": 83.416806,
+      "median_total_pss_mib": 103.6005859375,
+      "total_pss_mib_range": [
+        100.783203125,
+        106.248046875
+      ],
+      "cpu_presentation": {
+        "source": "docs/diagnostics/seahorse-population-cast1-20261017/cpu/pair6/run-1",
+        "interval_count": 860,
+        "mean_frame_ms": 70.03129562790697,
+        "fps": 14.279330277041272,
+        "p95_ms": 83.416823,
+        "observed_seconds": 60.22691424,
+        "total_pss_kib": 99046,
+        "thermal_status": 0,
+        "first_present_ns": 67080323289917,
+        "last_present_ns": 67140550204157
+      },
+      "cpu": {
+        "source": "docs/diagnostics/seahorse-population-cast1-20261017/cpu/pair6/run-1/wf.log",
+        "windows": [
+          {
+            "start_ns": 67084213523860,
+            "end_ns": 67089237027779,
+            "sections": {
+              "update": {
+                "frames": 72,
+                "mean": 16.8689
+              },
+              "actors": {
+                "frames": 72,
+                "mean": 0.7282
+              },
+              "director": {
+                "frames": 72,
+                "mean": 16.032
+              },
+              "render": {
+                "frames": 72,
+                "mean": 47.1772
+              },
+              "school": {
+                "frames": 72,
+                "mean": 0.0
+              },
+              "pose": {
+                "frames": 72,
+                "mean": 0.0
+              },
+              "animation": {
+                "frames": 72,
+                "mean": 8.8362
+              },
+              "total": {
+                "frames": 72,
+                "mean": 64.0461
+              }
+            },
+            "counters": {
+              "level-objects": {
+                "frames": 72,
+                "mean": 81.0
+              },
+              "render-actors": {
+                "frames": 72,
+                "mean": 64.0
+              },
+              "draws": {
+                "frames": 72,
+                "mean": 75.5
+              },
+              "triangles": {
+                "frames": 72,
+                "mean": 32743.139
+              },
+              "actor-mailbox-writes": {
+                "frames": 72,
+                "mean": 189.0
+              },
+              "fish-deformations": {
+                "frames": 72,
+                "mean": 24.0
+              },
+              "uploads": {
+                "frames": 72,
+                "mean": 51.5
+              },
+              "upload-bytes": {
+                "frames": 72,
+                "mean": 6980964.167
+              },
+              "faces-submitted": {
+                "frames": 72,
+                "mean": 64688.0
+              },
+              "faces-culled": {
+                "frames": 72,
+                "mean": 31944.861
+              },
+              "static-objects": {
+                "frames": 72,
+                "mean": 24.0
+              },
+              "static-draws": {
+                "frames": 72,
+                "mean": 24.0
+              },
+              "static-faces-culled": {
+                "frames": 72,
+                "mean": 2267.125
+              },
+              "static-index-bytes": {
+                "frames": 72,
+                "mean": 12749.25
+              },
+              "static-bakes": {
+                "frames": 72,
+                "mean": 0.0
+              },
+              "static-bake-us": {
+                "frames": 72,
+                "mean": 0.0
+              },
+              "static-gpu-bytes": {
+                "frames": 72,
+                "mean": 1009458.0
+              },
+              "static-cpu-bytes": {
+                "frames": 72,
+                "mean": 21656.0
+              },
+              "static-excluded-objects": {
+                "frames": 72,
+                "mean": 40.0
+              },
+              "static-deferred-objects": {
+                "frames": 72,
+                "mean": 0.0
+              }
+            }
+          },
+          {
+            "start_ns": 67089237027779,
+            "end_ns": 67094285704365,
+            "sections": {
+              "update": {
+                "frames": 72,
+                "mean": 16.7984
+              },
+              "actors": {
+                "frames": 72,
+                "mean": 0.7185
+              },
+              "director": {
+                "frames": 72,
+                "mean": 15.9708
+              },
+              "render": {
+                "frames": 72,
+                "mean": 47.2531
+              },
+              "school": {
+                "frames": 72,
+                "mean": 0.0
+              },
+              "pose": {
+                "frames": 72,
+                "mean": 0.0
+              },
+              "animation": {
+                "frames": 72,
+                "mean": 8.8043
+              },
+              "total": {
+                "frames": 72,
+                "mean": 64.0515
+              }
+            },
+            "counters": {
+              "level-objects": {
+                "frames": 72,
+                "mean": 81.0
+              },
+              "render-actors": {
+                "frames": 72,
+                "mean": 64.0
+              },
+              "draws": {
+                "frames": 72,
+                "mean": 80.25
+              },
+              "triangles": {
+                "frames": 72,
+                "mean": 32727.986
+              },
+              "actor-mailbox-writes": {
+                "frames": 72,
+                "mean": 189.0
+              },
+              "fish-deformations": {
+                "frames": 72,
+                "mean": 24.0
+              },
+              "uploads": {
+                "frames": 72,
+                "mean": 56.25
+              },
+              "upload-bytes": {
+                "frames": 72,
+                "mean": 6977439.667
+              },
+              "faces-submitted": {
+                "frames": 72,
+                "mean": 64688.0
+              },
+              "faces-culled": {
+                "frames": 72,
+                "mean": 31960.014
+              },
+              "static-objects": {
+                "frames": 72,
+                "mean": 24.0
+              },
+              "static-draws": {
+                "frames": 72,
+                "mean": 24.0
+              },
+              "static-faces-culled": {
+                "frames": 72,
+                "mean": 2266.819
+              },
+              "static-index-bytes": {
+                "frames": 72,
+                "mean": 12751.083
+              },
+              "static-bakes": {
+                "frames": 72,
+                "mean": 0.0
+              },
+              "static-bake-us": {
+                "frames": 72,
+                "mean": 0.0
+              },
+              "static-gpu-bytes": {
+                "frames": 72,
+                "mean": 1009458.0
+              },
+              "static-cpu-bytes": {
+                "frames": 72,
+                "mean": 21656.0
+              },
+              "static-excluded-objects": {
+                "frames": 72,
+                "mean": 40.0
+              },
+              "static-deferred-objects": {
+                "frames": 72,
+                "mean": 0.0
+              }
+            }
+          },
+          {
+            "start_ns": 67094285704365,
+            "end_ns": 67099293423492,
+            "sections": {
+              "update": {
+                "frames": 71,
+                "mean": 16.9894
+              },
+              "actors": {
+                "frames": 71,
+                "mean": 0.7207
+              },
+              "director": {
+                "frames": 71,
+                "mean": 16.164
+              },
+              "render": {
+                "frames": 71,
+                "mean": 47.3653
+              },
+              "school": {
+                "frames": 71,
+                "mean": 0.0
+              },
+              "pose": {
+                "frames": 71,
+                "mean": 0.0
+              },
+              "animation": {
+                "frames": 71,
+                "mean": 8.8396
+              },
+              "total": {
+                "frames": 71,
+                "mean": 64.3547
+              }
+            },
+            "counters": {
+              "level-objects": {
+                "frames": 71,
+                "mean": 81.0
+              },
+              "render-actors": {
+                "frames": 71,
+                "mean": 64.0
+              },
+              "draws": {
+                "frames": 71,
+                "mean": 82.676
+              },
+              "triangles": {
+                "frames": 71,
+                "mean": 32748.718
+              },
+              "actor-mailbox-writes": {
+                "frames": 71,
+                "mean": 189.0
+              },
+              "fish-deformations": {
+                "frames": 71,
+                "mean": 24.0
+              },
+              "uploads": {
+                "frames": 71,
+                "mean": 58.676
+              },
+              "upload-bytes": {
+                "frames": 71,
+                "mean": 6981841.69
+              },
+              "faces-submitted": {
+                "frames": 71,
+                "mean": 64688.0
+              },
+              "faces-culled": {
+                "frames": 71,
+                "mean": 31939.282
+              },
+              "static-objects": {
+                "frames": 71,
+                "mean": 24.0
+              },
+              "static-draws": {
+                "frames": 71,
+                "mean": 24.0
+              },
+              "static-faces-culled": {
+                "frames": 71,
+                "mean": 2265.394
+              },
+              "static-index-bytes": {
+                "frames": 71,
+                "mean": 12759.634
+              },
+              "static-bakes": {
+                "frames": 71,
+                "mean": 0.0
+              },
+              "static-bake-us": {
+                "frames": 71,
+                "mean": 0.0
+              },
+              "static-gpu-bytes": {
+                "frames": 71,
+                "mean": 1009458.0
+              },
+              "static-cpu-bytes": {
+                "frames": 71,
+                "mean": 21656.0
+              },
+              "static-excluded-objects": {
+                "frames": 71,
+                "mean": 40.0
+              },
+              "static-deferred-objects": {
+                "frames": 71,
+                "mean": 0.0
+              }
+            }
+          },
+          {
+            "start_ns": 67099293423492,
+            "end_ns": 67104338689369,
+            "sections": {
+              "update": {
+                "frames": 72,
+                "mean": 16.825
+              },
+              "actors": {
+                "frames": 72,
+                "mean": 0.7221
+              },
+              "director": {
+                "frames": 72,
+                "mean": 15.996
+              },
+              "render": {
+                "frames": 72,
+                "mean": 47.445
+              },
+              "school": {
+                "frames": 72,
+                "mean": 0.0
+              },
+              "pose": {
+                "frames": 72,
+                "mean": 0.0
+              },
+              "animation": {
+                "frames": 72,
+                "mean": 8.8148
+              },
+              "total": {
+                "frames": 72,
+                "mean": 64.27
+              }
+            },
+            "counters": {
+              "level-objects": {
+                "frames": 72,
+                "mean": 81.0
+              },
+              "render-actors": {
+                "frames": 72,
+                "mean": 64.0
+              },
+              "draws": {
+                "frames": 72,
+                "mean": 78.722
+              },
+              "triangles": {
+                "frames": 72,
+                "mean": 32739.708
+              },
+              "actor-mailbox-writes": {
+                "frames": 72,
+                "mean": 189.0
+              },
+              "fish-deformations": {
+                "frames": 72,
+                "mean": 24.0
+              },
+              "uploads": {
+                "frames": 72,
+                "mean": 54.722
+              },
+              "upload-bytes": {
+                "frames": 72,
+                "mean": 6979874.833
+              },
+              "faces-submitted": {
+                "frames": 72,
+                "mean": 64688.0
+              },
+              "faces-culled": {
+                "frames": 72,
+                "mean": 31948.292
+              },
+              "static-objects": {
+                "frames": 72,
+                "mean": 24.0
+              },
+              "static-draws": {
+                "frames": 72,
+                "mean": 24.0
+              },
+              "static-faces-culled": {
+                "frames": 72,
+                "mean": 2265.778
+              },
+              "static-index-bytes": {
+                "frames": 72,
+                "mean": 12757.333
+              },
+              "static-bakes": {
+                "frames": 72,
+                "mean": 0.0
+              },
+              "static-bake-us": {
+                "frames": 72,
+                "mean": 0.0
+              },
+              "static-gpu-bytes": {
+                "frames": 72,
+                "mean": 1009458.0
+              },
+              "static-cpu-bytes": {
+                "frames": 72,
+                "mean": 21656.0
+              },
+              "static-excluded-objects": {
+                "frames": 72,
+                "mean": 40.0
+              },
+              "static-deferred-objects": {
+                "frames": 72,
+                "mean": 0.0
+              }
+            }
+          },
+          {
+            "start_ns": 67104338689369,
+            "end_ns": 67109395476705,
+            "sections": {
+              "update": {
+                "frames": 71,
+                "mean": 17.272
+              },
+              "actors": {
+                "frames": 71,
+                "mean": 0.7321
+              },
+              "director": {
+                "frames": 71,
+                "mean": 16.433
+              },
+              "render": {
+                "frames": 71,
+                "mean": 47.6568
+              },
+              "school": {
+                "frames": 71,
+                "mean": 0.0
+              },
+              "pose": {
+                "frames": 71,
+                "mean": 0.0
+              },
+              "animation": {
+                "frames": 71,
+                "mean": 8.8893
+              },
+              "total": {
+                "frames": 71,
+                "mean": 64.9288
+              }
+            },
+            "counters": {
+              "level-objects": {
+                "frames": 71,
+                "mean": 81.0
+              },
+              "render-actors": {
+                "frames": 71,
+                "mean": 64.0
+              },
+              "draws": {
+                "frames": 71,
+                "mean": 79.155
+              },
+              "triangles": {
+                "frames": 71,
+                "mean": 32703.479
+              },
+              "actor-mailbox-writes": {
+                "frames": 71,
+                "mean": 189.0
+              },
+              "fish-deformations": {
+                "frames": 71,
+                "mean": 24.0
+              },
+              "uploads": {
+                "frames": 71,
+                "mean": 55.155
+              },
+              "upload-bytes": {
+                "frames": 71,
+                "mean": 6972108.338
+              },
+              "faces-submitted": {
+                "frames": 71,
+                "mean": 64688.0
+              },
+              "faces-culled": {
+                "frames": 71,
+                "mean": 31984.521
+              },
+              "static-objects": {
+                "frames": 71,
+                "mean": 24.0
+              },
+              "static-draws": {
+                "frames": 71,
+                "mean": 24.0
+              },
+              "static-faces-culled": {
+                "frames": 71,
+                "mean": 2267.944
+              },
+              "static-index-bytes": {
+                "frames": 71,
+                "mean": 12744.338
+              },
+              "static-bakes": {
+                "frames": 71,
+                "mean": 0.0
+              },
+              "static-bake-us": {
+                "frames": 71,
+                "mean": 0.0
+              },
+              "static-gpu-bytes": {
+                "frames": 71,
+                "mean": 1009458.0
+              },
+              "static-cpu-bytes": {
+                "frames": 71,
+                "mean": 21656.0
+              },
+              "static-excluded-objects": {
+                "frames": 71,
+                "mean": 40.0
+              },
+              "static-deferred-objects": {
+                "frames": 71,
+                "mean": 0.0
+              }
+            }
+          },
+          {
+            "start_ns": 67109395476705,
+            "end_ns": 67114442222791,
+            "sections": {
+              "update": {
+                "frames": 72,
+                "mean": 17.2122
+              },
+              "actors": {
+                "frames": 72,
+                "mean": 0.7409
+              },
+              "director": {
+                "frames": 72,
+                "mean": 16.3674
+              },
+              "render": {
+                "frames": 72,
+                "mean": 47.2033
+              },
+              "school": {
+                "frames": 72,
+                "mean": 0.0
+              },
+              "pose": {
+                "frames": 72,
+                "mean": 0.0
+              },
+              "animation": {
+                "frames": 72,
+                "mean": 8.987
+              },
+              "total": {
+                "frames": 72,
+                "mean": 64.4155
+              }
+            },
+            "counters": {
+              "level-objects": {
+                "frames": 72,
+                "mean": 81.0
+              },
+              "render-actors": {
+                "frames": 72,
+                "mean": 64.0
+              },
+              "draws": {
+                "frames": 72,
+                "mean": 75.806
+              },
+              "triangles": {
+                "frames": 72,
+                "mean": 32707.819
+              },
+              "actor-mailbox-writes": {
+                "frames": 72,
+                "mean": 189.0
+              },
+              "fish-deformations": {
+                "frames": 72,
+                "mean": 24.0
+              },
+              "uploads": {
+                "frames": 72,
+                "mean": 51.806
+              },
+              "upload-bytes": {
+                "frames": 72,
+                "mean": 6972616.833
+              },
+              "faces-submitted": {
+                "frames": 72,
+                "mean": 64688.0
+              },
+              "faces-culled": {
+                "frames": 72,
+                "mean": 31980.181
+              },
+              "static-objects": {
+                "frames": 72,
+                "mean": 24.0
+              },
+              "static-draws": {
+                "frames": 72,
+                "mean": 24.0
+              },
+              "static-faces-culled": {
+                "frames": 72,
+                "mean": 2265.833
+              },
+              "static-index-bytes": {
+                "frames": 72,
+                "mean": 12757.0
+              },
+              "static-bakes": {
+                "frames": 72,
+                "mean": 0.0
+              },
+              "static-bake-us": {
+                "frames": 72,
+                "mean": 0.0
+              },
+              "static-gpu-bytes": {
+                "frames": 72,
+                "mean": 1009458.0
+              },
+              "static-cpu-bytes": {
+                "frames": 72,
+                "mean": 21656.0
+              },
+              "static-excluded-objects": {
+                "frames": 72,
+                "mean": 40.0
+              },
+              "static-deferred-objects": {
+                "frames": 72,
+                "mean": 0.0
+              }
+            }
+          },
+          {
+            "start_ns": 67114442222791,
+            "end_ns": 67119472844168,
+            "sections": {
+              "update": {
+                "frames": 72,
+                "mean": 17.1666
+              },
+              "actors": {
+                "frames": 72,
+                "mean": 0.765
+              },
+              "director": {
+                "frames": 72,
+                "mean": 16.292
+              },
+              "render": {
+                "frames": 72,
+                "mean": 47.0853
+              },
+              "school": {
+                "frames": 72,
+                "mean": 0.0
+              },
+              "pose": {
+                "frames": 72,
+                "mean": 0.0
+              },
+              "animation": {
+                "frames": 72,
+                "mean": 8.8213
+              },
+              "total": {
+                "frames": 72,
+                "mean": 64.2519
+              }
+            },
+            "counters": {
+              "level-objects": {
+                "frames": 72,
+                "mean": 81.0
+              },
+              "render-actors": {
+                "frames": 72,
+                "mean": 64.0
+              },
+              "draws": {
+                "frames": 72,
+                "mean": 74.75
+              },
+              "triangles": {
+                "frames": 72,
+                "mean": 32716.194
+              },
+              "actor-mailbox-writes": {
+                "frames": 72,
+                "mean": 189.0
+              },
+              "fish-deformations": {
+                "frames": 72,
+                "mean": 24.0
+              },
+              "uploads": {
+                "frames": 72,
+                "mean": 50.75
+              },
+              "upload-bytes": {
+                "frames": 72,
+                "mean": 6974383.833
+              },
+              "faces-submitted": {
+                "frames": 72,
+                "mean": 64688.0
+              },
+              "faces-culled": {
+                "frames": 72,
+                "mean": 31971.806
+              },
+              "static-objects": {
+                "frames": 72,
+                "mean": 24.0
+              },
+              "static-draws": {
+                "frames": 72,
+                "mean": 24.0
+              },
+              "static-faces-culled": {
+                "frames": 72,
+                "mean": 2265.208
+              },
+              "static-index-bytes": {
+                "frames": 72,
+                "mean": 12760.75
+              },
+              "static-bakes": {
+                "frames": 72,
+                "mean": 0.0
+              },
+              "static-bake-us": {
+                "frames": 72,
+                "mean": 0.0
+              },
+              "static-gpu-bytes": {
+                "frames": 72,
+                "mean": 1009458.0
+              },
+              "static-cpu-bytes": {
+                "frames": 72,
+                "mean": 21656.0
+              },
+              "static-excluded-objects": {
+                "frames": 72,
+                "mean": 40.0
+              },
+              "static-deferred-objects": {
+                "frames": 72,
+                "mean": 0.0
+              }
+            }
+          },
+          {
+            "start_ns": 67119472844168,
+            "end_ns": 67124497280754,
+            "sections": {
+              "update": {
+                "frames": 72,
+                "mean": 16.9151
+              },
+              "actors": {
+                "frames": 72,
+                "mean": 0.7331
+              },
+              "director": {
+                "frames": 72,
+                "mean": 16.0781
+              },
+              "render": {
+                "frames": 72,
+                "mean": 47.336
+              },
+              "school": {
+                "frames": 72,
+                "mean": 0.0
+              },
+              "pose": {
+                "frames": 72,
+                "mean": 0.0
+              },
+              "animation": {
+                "frames": 72,
+                "mean": 8.7986
+              },
+              "total": {
+                "frames": 72,
+                "mean": 64.2511
+              }
+            },
+            "counters": {
+              "level-objects": {
+                "frames": 72,
+                "mean": 81.0
+              },
+              "render-actors": {
+                "frames": 72,
+                "mean": 64.0
+              },
+              "draws": {
+                "frames": 72,
+                "mean": 86.528
+              },
+              "triangles": {
+                "frames": 72,
+                "mean": 32676.222
+              },
+              "actor-mailbox-writes": {
+                "frames": 72,
+                "mean": 189.0
+              },
+              "fish-deformations": {
+                "frames": 72,
+                "mean": 24.0
+              },
+              "uploads": {
+                "frames": 72,
+                "mean": 62.528
+              },
+              "upload-bytes": {
+                "frames": 72,
+                "mean": 6965678.667
+              },
+              "faces-submitted": {
+                "frames": 72,
+                "mean": 64688.0
+              },
+              "faces-culled": {
+                "frames": 72,
+                "mean": 32011.778
+              },
+              "static-objects": {
+                "frames": 72,
+                "mean": 24.0
+              },
+              "static-draws": {
+                "frames": 72,
+                "mean": 24.0
+              },
+              "static-faces-culled": {
+                "frames": 72,
+                "mean": 2267.0
+              },
+              "static-index-bytes": {
+                "frames": 72,
+                "mean": 12750.0
+              },
+              "static-bakes": {
+                "frames": 72,
+                "mean": 0.0
+              },
+              "static-bake-us": {
+                "frames": 72,
+                "mean": 0.0
+              },
+              "static-gpu-bytes": {
+                "frames": 72,
+                "mean": 1009458.0
+              },
+              "static-cpu-bytes": {
+                "frames": 72,
+                "mean": 21656.0
+              },
+              "static-excluded-objects": {
+                "frames": 72,
+                "mean": 40.0
+              },
+              "static-deferred-objects": {
+                "frames": 72,
+                "mean": 0.0
+              }
+            }
+          },
+          {
+            "start_ns": 67124497280754,
+            "end_ns": 67129508772006,
+            "sections": {
+              "update": {
+                "frames": 72,
+                "mean": 17.0018
+              },
+              "actors": {
+                "frames": 72,
+                "mean": 0.7288
+              },
+              "director": {
+                "frames": 72,
+                "mean": 16.1671
+              },
+              "render": {
+                "frames": 72,
+                "mean": 47.0314
+              },
+              "school": {
+                "frames": 72,
+                "mean": 0.0
+              },
+              "pose": {
+                "frames": 72,
+                "mean": 0.0
+              },
+              "animation": {
+                "frames": 72,
+                "mean": 8.822
+              },
+              "total": {
+                "frames": 72,
+                "mean": 64.0333
+              }
+            },
+            "counters": {
+              "level-objects": {
+                "frames": 72,
+                "mean": 81.0
+              },
+              "render-actors": {
+                "frames": 72,
+                "mean": 64.0
+              },
+              "draws": {
+                "frames": 72,
+                "mean": 77.944
+              },
+              "triangles": {
+                "frames": 72,
+                "mean": 32662.069
+              },
+              "actor-mailbox-writes": {
+                "frames": 72,
+                "mean": 189.0
+              },
+              "fish-deformations": {
+                "frames": 72,
+                "mean": 24.0
+              },
+              "uploads": {
+                "frames": 72,
+                "mean": 53.944
+              },
+              "upload-bytes": {
+                "frames": 72,
+                "mean": 6962543.667
+              },
+              "faces-submitted": {
+                "frames": 72,
+                "mean": 64688.0
+              },
+              "faces-culled": {
+                "frames": 72,
+                "mean": 32025.931
+              },
+              "static-objects": {
+                "frames": 72,
+                "mean": 24.0
+              },
+              "static-draws": {
+                "frames": 72,
+                "mean": 24.0
+              },
+              "static-faces-culled": {
+                "frames": 72,
+                "mean": 2267.403
+              },
+              "static-index-bytes": {
+                "frames": 72,
+                "mean": 12747.583
+              },
+              "static-bakes": {
+                "frames": 72,
+                "mean": 0.0
+              },
+              "static-bake-us": {
+                "frames": 72,
+                "mean": 0.0
+              },
+              "static-gpu-bytes": {
+                "frames": 72,
+                "mean": 1009458.0
+              },
+              "static-cpu-bytes": {
+                "frames": 72,
+                "mean": 21656.0
+              },
+              "static-excluded-objects": {
+                "frames": 72,
+                "mean": 40.0
+              },
+              "static-deferred-objects": {
+                "frames": 72,
+                "mean": 0.0
+              }
+            }
+          },
+          {
+            "start_ns": 67129508772006,
+            "end_ns": 67134518905009,
+            "sections": {
+              "update": {
+                "frames": 72,
+                "mean": 17.1979
+              },
+              "actors": {
+                "frames": 72,
+                "mean": 0.7445
+              },
+              "director": {
+                "frames": 72,
+                "mean": 16.3462
+              },
+              "render": {
+                "frames": 72,
+                "mean": 47.0115
+              },
+              "school": {
+                "frames": 72,
+                "mean": 0.0
+              },
+              "pose": {
+                "frames": 72,
+                "mean": 0.0
+              },
+              "animation": {
+                "frames": 72,
+                "mean": 8.8061
+              },
+              "total": {
+                "frames": 72,
+                "mean": 64.2094
+              }
+            },
+            "counters": {
+              "level-objects": {
+                "frames": 72,
+                "mean": 81.0
+              },
+              "render-actors": {
+                "frames": 72,
+                "mean": 64.0
+              },
+              "draws": {
+                "frames": 72,
+                "mean": 79.056
+              },
+              "triangles": {
+                "frames": 72,
+                "mean": 32656.833
+              },
+              "actor-mailbox-writes": {
+                "frames": 72,
+                "mean": 189.0
+              },
+              "fish-deformations": {
+                "frames": 72,
+                "mean": 24.0
+              },
+              "uploads": {
+                "frames": 72,
+                "mean": 55.056
+              },
+              "upload-bytes": {
+                "frames": 72,
+                "mean": 6960703.833
+              },
+              "faces-submitted": {
+                "frames": 72,
+                "mean": 64688.0
+              },
+              "faces-culled": {
+                "frames": 72,
+                "mean": 32031.167
+              },
+              "static-objects": {
+                "frames": 72,
+                "mean": 24.0
+              },
+              "static-draws": {
+                "frames": 72,
+                "mean": 24.0
+              },
+              "static-faces-culled": {
+                "frames": 72,
+                "mean": 2264.569
+              },
+              "static-index-bytes": {
+                "frames": 72,
+                "mean": 12764.583
+              },
+              "static-bakes": {
+                "frames": 72,
+                "mean": 0.0
+              },
+              "static-bake-us": {
+                "frames": 72,
+                "mean": 0.0
+              },
+              "static-gpu-bytes": {
+                "frames": 72,
+                "mean": 1009458.0
+              },
+              "static-cpu-bytes": {
+                "frames": 72,
+                "mean": 21656.0
+              },
+              "static-excluded-objects": {
+                "frames": 72,
+                "mean": 40.0
+              },
+              "static-deferred-objects": {
+                "frames": 72,
+                "mean": 0.0
+              }
+            }
+          },
+          {
+            "start_ns": 67134518905009,
+            "end_ns": 67139522734178,
+            "sections": {
+              "update": {
+                "frames": 71,
+                "mean": 17.1095
+              },
+              "actors": {
+                "frames": 71,
+                "mean": 0.7754
+              },
+              "director": {
+                "frames": 71,
+                "mean": 16.226
+              },
+              "render": {
+                "frames": 71,
+                "mean": 47.3503
+              },
+              "school": {
+                "frames": 71,
+                "mean": 0.0
+              },
+              "pose": {
+                "frames": 71,
+                "mean": 0.0
+              },
+              "animation": {
+                "frames": 71,
+                "mean": 8.8235
+              },
+              "total": {
+                "frames": 71,
+                "mean": 64.4598
+              }
+            },
+            "counters": {
+              "level-objects": {
+                "frames": 71,
+                "mean": 81.0
+              },
+              "render-actors": {
+                "frames": 71,
+                "mean": 64.0
+              },
+              "draws": {
+                "frames": 71,
+                "mean": 78.873
+              },
+              "triangles": {
+                "frames": 71,
+                "mean": 32646.634
+              },
+              "actor-mailbox-writes": {
+                "frames": 71,
+                "mean": 189.0
+              },
+              "fish-deformations": {
+                "frames": 71,
+                "mean": 24.0
+              },
+              "uploads": {
+                "frames": 71,
+                "mean": 54.873
+              },
+              "upload-bytes": {
+                "frames": 71,
+                "mean": 6958932.507
+              },
+              "faces-submitted": {
+                "frames": 71,
+                "mean": 64688.0
+              },
+              "faces-culled": {
+                "frames": 71,
+                "mean": 32041.366
+              },
+              "static-objects": {
+                "frames": 71,
+                "mean": 24.0
+              },
+              "static-draws": {
+                "frames": 71,
+                "mean": 24.0
+              },
+              "static-faces-culled": {
+                "frames": 71,
+                "mean": 2267.0
+              },
+              "static-index-bytes": {
+                "frames": 71,
+                "mean": 12750.0
+              },
+              "static-bakes": {
+                "frames": 71,
+                "mean": 0.0
+              },
+              "static-bake-us": {
+                "frames": 71,
+                "mean": 0.0
+              },
+              "static-gpu-bytes": {
+                "frames": 71,
+                "mean": 1009458.0
+              },
+              "static-cpu-bytes": {
+                "frames": 71,
+                "mean": 21656.0
+              },
+              "static-excluded-objects": {
+                "frames": 71,
+                "mean": 40.0
+              },
+              "static-deferred-objects": {
+                "frames": 71,
+                "mean": 0.0
+              }
+            }
+          }
+        ],
+        "covered_seconds": 55.309210318,
+        "measured_frames": 789,
+        "frame_weighted_cpu_ms": {
+          "actors": 0.7371880861850443,
+          "animation": 8.840205323193917,
+          "director": 16.188091508238276,
+          "pose": 0.0,
+          "render": 47.26428643852978,
+          "school": 0.0,
+          "total": 64.29638517110266,
+          "update": 17.032089607097593
+        },
+        "frame_weighted_counters": {
+          "actor-mailbox-writes": 189.0,
+          "draws": 79.01903168567807,
+          "faces-culled": 31985.370290240815,
+          "faces-submitted": 64688.0,
+          "fish-deformations": 24.0,
+          "level-objects": 81.0,
+          "render-actors": 64.0,
+          "static-bake-us": 0.0,
+          "static-bakes": 0.0,
+          "static-cpu-bytes": 21656.0,
+          "static-deferred-objects": 0.0,
+          "static-draws": 24.0,
+          "static-excluded-objects": 40.0,
+          "static-faces-culled": 2266.3687173637513,
+          "static-gpu-bytes": 1009458.0,
+          "static-index-bytes": 12753.786965779467,
+          "static-objects": 24.0,
+          "triangles": 32702.629709759185,
+          "upload-bytes": 6971555.711007604,
+          "uploads": 55.019031685678065
+        }
+      },
+      "instrumented_frame_ms_change_percent": 1.111017775288703,
+      "frame_ms_delta_vs_none": 22.12572598547208,
+      "fps_change_percent_vs_none": -31.945070462422585,
+      "main_thread_cpu_ms_delta_vs_none": 21.539869372491545
+    }
+  ],
+  "notes": [
+    "Release values are medians of three independent 60-second wide-idle runs.",
+    "CPU values are frame-weighted means of fully contained five-second profiling windows from separate instrumented runs.",
+    "CPU total is update + render main-thread CPU time; it excludes presentation waits and is not whole-process CPU time.",
+    "All populations allocate the same twelve residents. None also hides the six posts; memory is process PSS, not per-resident allocation cost.",
+    "This experiment does not measure close views, crawling or GPU skinning."
+  ]
+}

@@ -1,10 +1,10 @@
 # Mesh deformers or joint rigs?
 
-16 October 2026 · **Investigation, for a decision by Will.** This compares the generic mesh deformer now being built (the [seahorse plan](../plans/2026-10-16-saltwater-seahorses.md), Phase 1) with **joint rigs**: a skeleton of joints, per-vertex skin weights and joint animation clips. No code changes. Numbers marked *est.* are estimates; the rest cite the source or a measurement.
+16 October 2026 · **Investigation, for a decision by Will.** This compares the implemented generic mesh deformer (the [seahorse plan](../plans/2026-10-16-saltwater-seahorses.md), Phase 1) with **joint rigs**: a skeleton of joints, per-vertex skin weights and joint animation clips. No code changes. Numbers marked *est.* are estimates; the rest cite the source or a measurement.
 
 ## The question
 
-Until now World Foundry has animated meshes in two ways: five per-species C++ deformers (fish, fin, swim, jelly, lion), and rigid actors posed one by one from Forth. It has no skeleton, no skinning and no parenting ([clownfish plan, M5–M7](../plans/2026-09-30-clownfish-idle-animation.md)). Phase 1 of the seahorse plan is now adding:
+Until now World Foundry has animated meshes in two ways: five per-species C++ deformers (fish, fin, swim, jelly, lion), and rigid actors posed one by one from Forth. It has no skeleton, no skinning and no parenting ([clownfish plan, M5–M7](../plans/2026-09-30-clownfish-idle-animation.md)). Phase 1 of the seahorse plan added:
 
 - **one generic deformer slot** per actor (`MeshDeformer`), with the five existing kinds moved behind it and golden-tested;
 - **`DFRM` v1**, a data-driven deformer with two operators. The *rooted curve* drives the 35-joint tail; *weighted transforms* drive head and eyes. Both play pre-animated clips, and the curve adds runtime contact (gripping a post).
@@ -21,7 +21,7 @@ Which should World Foundry's animated meshes use, now and later?
 ## Short answer
 
 1. **They are not opposites.** `DFRM`'s rooted curve *is* a joint chain in which every vertex follows exactly one joint. A weighted transform is a one-joint skin group. A joint rig is the general case: branching trees, blended influences at bends, and sockets.
-2. **Keep Phase 1 as planned.** The seahorse needs a chain, clips and contact, and `DFRM` gives all three with the smallest engine change. One cheap design choice keeps the door open: make the evaluator's per-joint **frames** an explicit intermediate result, separate from vertex placement. A later skinning deformer can then reuse the pose stage instead of rebuilding it.
+2. **Keep the implemented Phase 1 design.** The seahorse needs a chain, clips and contact, and `DFRM` gives all three with the smallest engine change. One cheap design choice keeps the door open: make the evaluator's per-joint **frames** an explicit intermediate result, separate from vertex placement. A later skinning deformer can then reuse the pose stage instead of rebuilding it.
 3. **Joint rigs earn their cost with the first consumer that needs any of:**
     - a branching skeleton (limbs, legs, fingers, the anemone's crown);
     - soft skin that blends two or more joints at a bend;
@@ -62,7 +62,7 @@ The two pipelines share the middle: both compute a frame per joint (per curve sa
 
 ## Side by side
 
-| | Mesh deformer (`DFRM`, being built) | Joint rig |
+| | Mesh deformer (`DFRM`, implemented) | Joint rig |
 |---|---|---|
 | Structure | Curves (chains) and transform groups, each hanging off the mesh root | A tree: any joint can have children |
 | Influences per vertex | 1 (rigid per sample) or a transform weight | Up to 4, blended (linear blend skinning) |
@@ -96,13 +96,41 @@ The two pipelines share the middle: both compute a frame per joint (per curve sa
 
 ## What it costs on the Chromecast
 
-**Measured:**
+**Measured current CPU baseline, 17 October:** the implemented six-pair tank,
+cast1 wide idle, three 60-second release repeats per count and one separate
+instrumented repeat per count, saltwater, seed 713, plant age 150, growth paused.
+
+| Pairs | Presented frame ms | FPS | Main-thread CPU ms | Process PSS MiB |
+|---:|---:|---:|---:|---:|
+| 0 | 47.14 | 21.22 | 42.76 | 99.0 |
+| 1 | 51.58 | 19.39 | 47.03 | 99.3 |
+| 2 | 55.10 | 18.15 | 50.62 | 98.2 |
+| 6 | 69.26 | 14.44 | 64.30 | 103.6 |
+
+See the [comparison](../plans/2026-10-16-saltwater-seahorses/comparison.md) and
+[raw evidence](../diagnostics/seahorse-population-cast1-20261017/README.md) for
+run ranges, p95, CPU windows, counters, frozen hashes and excluded samples.
+Six pairs add 22.13 ms per presented frame and 21.54 ms main-thread CPU over
+None: +9.24 ms update and +12.30 ms render. Native animation contributes +2.68 ms
+inside the update/Director totals; these overlapping sections are not additive.
+Whole-frame vertex traffic rises from 5.12 to 6.65 MiB/frame, including plants,
+fins and other geometry. Neither those bytes nor the complete render delta
+are measured GPU-skinning savings.
+
+All variants allocate the same twelve residents; None also hides the six posts.
+PSS varies between repeats and cannot establish per-resident allocation cost.
+Close/crawl views and cast2 remain outstanding. This establishes a current
+`DFRM` workload reference; the CPU-rig/GPU-rig comparison, crossover, Metal
+validation and GPU timing still require the separate experiment. The joint-rig
+and Deformer phase 2 recommendations above are unchanged by this baseline.
+
+**Other measured context:**
 - Adding the urchin's 2,680 streamed triangles cost **+3.8 ms render CPU** on Chromecast 1, and its 8 extra actors cost +0.59 ms of Director time ([urchin comparison](../plans/2026-10-05-sea-urchin-realism/comparison.md)).
 - Plant drawing dominates the frame ([dense planted tank plan](../plans/2026-10-03-aquarium-dense-planted-tank.md)).
 - Meshes that don't change are drawn from static buffers since 2026‑10‑08. Any CPU deformer takes its actor off that path, because it hands out writable vertices.
 
 **Estimated, for one 900-vertex seahorse:**
-- Rigid curve placement is ≈ 16,000 flops; four-joint skinning is ≈ 45,000. Both are small next to re-uploading the vertices every frame. **On the CPU, a rig and `DFRM` cost about the same**: the streaming dominates both.
+- Rigid curve placement is ≈ 16,000 flops; four-joint skinning is ≈ 45,000. This arithmetic estimate alone cannot establish whether a CPU rig and `DFRM` cost the same. Both currently require streamed geometry; a matched rig experiment must measure pose evaluation, vertex placement, upload and drawing before choosing one on cost.
 - **GPU skinning would remove the upload.** Both Chromecasts report a **Mali-G31 with OpenGL ES 3.2** (device logs in `docs/diagnostics/`). The modern vertex shader uses 7 attributes ([`backend_modern.cc:68-74`](../../wfsource/source/gfx/glpipeline/backend_modern.cc)), and GLES 3 guarantees at least 16, so joint indices and weights fit. Thirty-five joints as 3 × vec4 each is 105 uniform vectors, under the guaranteed 256.
 
 **GPU skinning also has three real obstacles:**
@@ -112,11 +140,12 @@ The two pipelines share the middle: both compute a frame per joint (per curve sa
 
 ## Back-face culling, and why moving vertices collides with it
 
-**16 October validation status.** The Blender normal migration passes local
+**17 October validation status.** The Blender normal migration passes local
 builds, exporter/converter tests, DFRM engine parity and the desktop GL guards.
-Its Android release APK contains the migrated assets. Chromecast rendering is
-pending because the shared network is unavailable; Metal rendering and the
-legacy dome script failure also remain open. The
+Its Android release APK contains the migrated assets. Cast1 aquarium captures
+and the population baseline now provide rendering evidence for that workload.
+Cast2 is unavailable on the shared network; Metal rendering and the legacy
+dome script failure remain open. The
 [GPU skinning experiment](../plans/2026-10-16-gpu-skinning-chromecast-experiment.md)
 has not run, so this supplies no measured GPU-skinning cost or speedup.
 
