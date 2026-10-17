@@ -554,10 +554,18 @@ Actor::BindAssets(Memory& memory)
 			{
 				std::vector<JoltMeshVertex> jverts;
 				std::vector<JoltMeshFace>   jfaces;
+				std::vector<uint8>          grefBytes;
+				bool                        sawGREF = false;
 				while (meshIter.BytesLeft() > 0)
 				{
 					IFFChunkIter* chunk = meshIter.GetChunkIter(HALScratchLmalloc);
-					if (chunk->GetChunkID().ID() == IFFTAG('V','R','T','X'))
+					if (chunk->GetChunkID().ID() == IFFTAG('G','R','E','F'))
+					{
+						sawGREF = true;
+						grefBytes.resize(chunk->BytesLeft());
+						if (!grefBytes.empty()) chunk->ReadBytes(grefBytes.data(), (int)grefBytes.size());
+					}
+					else if (chunk->GetChunkID().ID() == IFFTAG('V','R','T','X'))
 					{
 						int count = chunk->Size() / (int)sizeof(Vertex3DOnDisk);
 						for (int i = 0; i < count; ++i)
@@ -582,6 +590,48 @@ Actor::BindAssets(Memory& memory)
 						}
 					}
 					MEMORY_DELETE(HALScratchLmalloc, chunk, IFFChunkIter);
+				}
+				if (sawGREF)
+				{
+					// Shared model geometry: the GEOM asset RenderObject3D uses,
+					// resolved the same way (by name in the mesh's room) and read
+					// through the same validating reader. POSN and FACE in stored
+					// order are exactly the VRTX positions and FACE records the
+					// plain MODL would have fed JoltMakeStaticMesh.
+					GeometryReferenceOnDisk gref;
+					const char* why = ParseGeometryReference(grefBytes.data(), (int)grefBytes.size(), gref);
+					int32 geometryID = 0;
+					if (!why)
+					{
+						geometryID = theLevel->GetAssetManager().LookupAssetID(gref.name, meshID.Room());
+						if (!geometryID) why = "no asset of that name in the model's room";
+					}
+					std::vector<int32> posn;
+					std::vector<_TriFaceOnDisk> faces;
+					if (!why)
+					{
+						binistream geometry = theLevel->GetAssetManager().GetAssetStream(packedAssetID(geometryID));
+						why = ReadSharedGeometry(geometry, gref, posn, faces);
+					}
+					if (why)
+					{
+						const char* model = theLevel->GetAssetManager().FindAssetName(meshID.ID());
+						std::fprintf(stderr, "shared geometry collision: model %s (asset %08x): %s\n",
+						             model ? model : "?", unsigned(meshID.ID()), why);
+						std::fflush(stderr);
+						_sys_assert(0, why, __FILE__, __LINE__);
+						std::abort();
+					}
+					jverts.clear();
+					jfaces.clear();
+					for (size_t i = 0; i + 2 < posn.size(); i += 3)
+						jverts.push_back({(float)posn[i] / 65536.0f,
+						                  (float)posn[i + 1] / 65536.0f,
+						                  (float)posn[i + 2] / 65536.0f});
+					for (const _TriFaceOnDisk& f : faces)
+						jfaces.push_back({(uint32_t)f.v1Index,
+						                  (uint32_t)f.v2Index,
+						                  (uint32_t)f.v3Index});
 				}
 				if (!jverts.empty() && !jfaces.empty()) {
 					_physicalAttributes.JoltMakeStaticMesh(
