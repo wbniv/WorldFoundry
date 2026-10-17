@@ -17,7 +17,7 @@ int main(int argc,char** argv){
     assert(edit.begin(r,2));r.remove(2);assert(!edit.commit());
     auto bad=data;bad.resize(15);assert(!r.load(bad.data(),bad.size(),error));assert(r.object(1));
     assert(wfprops::decode("A%3AB%25",error)&&error=="A:B%");assert(!wfprops::decode("%xy",error));
-    wfprops::Form form;assert(form.begin(r,1,1));assert(form.sections.size()==1);
+    wfprops::Form form;assert(form.begin(r,1,1));assert(form.sections.size()==2); // Plant growth + Seahorses
     form.input(1);form.input(1);assert(!form.drawer);assert(form.value()=="4294967295");
     form.input(0);assert(!form.drawer);
     form.input(1);assert(form.drawer);form.input(0);form.input(1);

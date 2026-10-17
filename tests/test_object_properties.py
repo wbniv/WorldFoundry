@@ -69,3 +69,45 @@ def test_catalog_replacement_on_flag_only_baseline_ram(catalog):
     assert M.attach(result,catalog)==result
     asset_end=4096+8+struct.unpack_from('<I',original,4100)[0]
     assert result[4096:asset_end]==original[4096:asset_end]
+
+
+def parse_fields(payload):
+    """(id, kind_id, key) for every catalog entry, in order."""
+    cursor=12
+    def text():
+        nonlocal cursor
+        size=struct.unpack_from('<I',payload,cursor)[0];cursor+=4
+        value=payload[cursor:cursor+size].decode('utf8');cursor+=size
+        return value
+    text();text();count=struct.unpack_from('<I',payload,cursor)[0];cursor+=4
+    out=[]
+    for _ in range(count):
+        values=struct.unpack_from('<IBBBBiiIII',payload,cursor);cursor+=28
+        strings=[text() for _ in range(6)]
+        out.append((values[0],values[1],strings[0]))
+    return out
+
+
+def test_sheet_header_sharing_a_field_name_keeps_id_zero(monkeypatch):
+    # Regression: PROPERTY_SHEET_HEADER(Seahorses,0) took the "Seahorses" field's binding,
+    # so the phone saw two entries with id 8 (Chromecast 1 aquarium-seahorses run, 2026-10-16).
+    def entry(kind,key,show=0,**extra):
+        base=dict(kind=kind,key=key,label=key,show=show,default=0,scale=1,min=0,max=2,width=0,help='',group='',choices='')
+        base.update(extra);return base
+    schema={'name':'Director','fields':[
+        entry('Section','Seahorses'),
+        entry('Enum','Seahorses',show=5,choices='None|1 pair|2 pairs'),
+        entry('Group','Greeting'),
+        entry('Bool','Greeting',show=8,max=1),
+        entry('GroupEnd','Greeting')]}
+    monkeypatch.setattr(M.subprocess,'check_output',lambda *a,**k:json.dumps(schema))
+    payload=M.catalog(Path('unused.oad'),{'fields':{'Seahorses':{'id':8},'Greeting':{'id':9}}},1)
+    assert parse_fields(payload)==[(0,5,'Seahorses'),(8,2,'Seahorses'),(0,6,'Greeting'),(9,4,'Greeting'),(0,7,'Greeting')]
+
+
+def test_planted_tank_catalog_has_unique_field_ids(catalog):
+    entries=parse_fields(catalog)
+    ids=[i for i,kind,_ in entries if kind not in (5,6,7)]
+    assert len(ids)==len(set(ids))
+    assert all(i==0 for i,kind,_ in entries if kind in (5,6,7))
+    assert (0,5,'Seahorses') in entries and (8,2,'Seahorses') in entries
