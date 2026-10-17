@@ -1,6 +1,6 @@
 # UI font: Atkinson Hyperlegible Next everywhere, replacing `stb_easy_font`
 
-**Date:** 2026‑10‑17 · **Status:** approved (Will said yes to F2–F6, 2026‑10‑17); phases 0, 1, 2 and 4 implemented on branch `ui-font`; phase 3 (Chromecast) blocked · **TODO:** [T3] ui-font
+**Date:** 2026‑10‑17 · **Status:** approved (Will said yes to F2–F6, 2026‑10‑17); phases 0 to 4 implemented and verified (phase 3 on Chromecast 1, branch `ui-font-phase3`) · **TODO:** [T3] ui-font
 
 ## TL;DR
 
@@ -149,7 +149,7 @@ The left panels are real Chromecast 1 captures: `tv-form-screenshot.png` (J‑28
 
 ## Implementation notes (2026‑10‑17)
 
-Phases 0, 1, 2 and 4 are on branch `ui-font`. Phase 3 (Chromecast) is not done: see verification 8 and 9. Where the code had to settle something the plan left open, or differs from it:
+Phases 0, 1, 2 and 4 landed on branch `ui-font`; Phase 3 (Chromecast 1) ran on `ui-font-phase3` (verification 8 and 9). Where the code had to settle something the plan left open, or differs from it:
 
 - **Where the atlas lives.** `cdpack` packs `ui-font.wfga` into every bundle it writes as a `UIFT` chunk, the **last** TOC entry, so level *n* stays entry 1 + *n* and `MENU` keeps its place. By default it reads `ui-font.wfga` beside the SHEL script (`wfsource/source/game/`, where the bake writes it and where it is committed); `--ui-font` overrides and `--no-ui-font` leaves it out (for verification 6). Every call site of `cdpack` therefore picks the font up without an edit. `FindMenu` skips the trailing `UIFT`.
 - **Loading.** `wfui::LoadOrDie` runs in `PIGSMain` just before `WFGame` is constructed, which every platform and host (desktop, Android, iOS, macOS, web, `wf-edit --editor`) comes through, so one call covers them all. It reads `cd.iff`'s `UIFT` through `HALGetAssetAccessor`. A `-L` run plays no `cd.iff`, so it also accepts a bare `ui-font.wfga` asset (the web build preloads one) and, on the Linux desktop only, the source tree's committed bake (an absolute path compiled into `ui_font_engine.cc`); a `cd.iff` without the font that merely sits in a `-L` run's directory (`wflevels/cd.iff`, which the teleport tests run beside) is skipped there. In a normal run a `cd.iff` without `UIFT` is final: one `UI_FONT unavailable` line and exit 1.
@@ -159,6 +159,9 @@ Phases 0, 1, 2 and 4 are on branch `ui-font`. Phase 3 (Chromecast) is not done: 
 - **Variants per call site.** The settings screens keep their old geometry: each text's middle goes where the old capitals' middle was, in the variant `propertyui::variantFor` gives its old scale (×4 → title, ×3 and ×3.4 → body, ×2 to ×2.7 → small), with one-line rows centred and the Pick in 3D hint bar in small, as the mockups show. `display.cc` picks the variant whose capitals are nearest the old ones on the 1080p canvas; its banners land on title, not display, and text below small (the high-score table) is small scaled down so the rows keep their spacing. Touch labels are body-bold scaled to the old capital height.
 - **`display.cc`'s HUD is compiled only with `-DDESIGNER_CHEATS=1`**, which no CMake build defines (only the legacy `engine/build_game.sh`). The HUD captures below come from a CMake build with that flag added.
 - **Phone page.** The WOFF2 subsets carry no kerning: with GPOS the page is 68,466 bytes, past `tests/test_phone_controller_page.py`'s 64 KiB cap; without it, 62,855.
+- **Sampling on the device.** Chromecast 1's surface is 1920×1080 (`EGL surface ready: 1920x1080`, `gpu-surface: viewport=1920x1080` in every job's logcat and `wf.log`), so the menu, the settings screens, the pick tags, the HUD strip and the phone overlay all draw the atlas 1:1 there; no capture shows nearest-sampling artifacts, and none has scaled UI text. On this device nearest and linear sampling would give the same pixels. Scaled text appears only on surfaces that are not 1920×1080 (desktop windows of other sizes, `display.cc`'s HUD) and in the touch labels, which a TV does not draw.
+- **One layout fix from the device.** The settings form's row counter (`1 / 7`, shown when a section has more than six rows) sat at y 775 and overlapped the help line in Regular 28 on Cast1 ([before](../diagnostics/ui-font/cast1/director-counter-overlap.png)). It now sits right-aligned above the rows ([after](../diagnostics/ui-font/cast1/aquarium-seahorses-fix/remote-hold-opens-settings-screenshot.png)).
+- **macOS (Metal).** Codemagic `macos-desktop-debug` build [6ad335fa](https://codemagic.io/app/6aafa6886ab3f21cf431a6cb/build/6ad335fa8bb9384ce9b5b395) at `d5f8ec16`: `ui_font.cc` and `ui_font_engine.cc` compile with Apple Clang, `wf_game` links, and the headless smoke, box-colour check, raw FPS check and FPS-overlay capture pass; the capture shows "33.7" drawn in Atkinson by Metal. The build is red only for the snowgoons comparison with the Linux reference, which fails byte-identically at `20c9e080` (build 6ad3384a) and is not caused by the UI font.
 - **Bundles.** All eight tracked `cdpack` bundles were rebuilt by their recipes; before that, each recipe with `--no-ui-font` reproduced the committed bundle byte for byte except `wflevels/aquarium-menu-cd.iff`, which predated `aquarium_plants-standalone.iff` from `0d5e1aba` (one byte of its RPRP catalog). The rebuild picks that up. `wflevels/cd.iff` and `wflevels/cd_full.iff` are older `iffcomp` bundles that no app ships, and are unchanged.
 
 ## Verification
@@ -290,20 +293,61 @@ Phases 0, 1, 2 and 4 are on branch `ui-font`. Phase 3 (Chromecast) is not done: 
     The phone pairing overlay, composited by `tests/test_phone_overlay.py` from the overlay's own rectangles and glyph quads over the atlas:
     <img src="../diagnostics/ui-font/desktop/phone-overlay-host-composite.png" width="700">
 
-    **PASS with two gaps.** (a) The out-of-range message is not captured: on the desktop a value can only be typed through a connected browser or phone, which `wf_game` on Linux does not serve, so the capture shows the same footer error line with the message the desktop can reach. (b) The phone pairing overlay is drawn only by the Android TV app; the picture above is the host-test composite, not a GL capture. Both are covered on the device in step 8.
+    **PASS with two gaps, both closed on the device in step 8.** (a) The out-of-range message is not captured on the desktop: a value can only be typed through a connected browser or phone, which `wf_game` on Linux does not serve, so the capture shows the same footer error line with the message the desktop can reach. On Cast1, `baseline-settings` captured `Signed_INT32_NUMBER_40: Value is outside the field range`. (b) The phone overlay is drawn only by the Android TV app; the picture above is the host-test composite. On Cast1 the `Phone connected` and `Phone lost` toasts are GL captures.
 
 8. Chromecast 1 and Chromecast 2, through the coordinator: `menu-back` for every app, `baseline-settings`, `baseline-picker` and `aquarium-seahorses` pass with the new APKs, with screenshots under `docs/diagnostics/`.
 
+    The APKs are built on the host for armeabi-v7a only (`-Pandroid.injected.build.abi=armeabi-v7a -Pandroid.injected.testOnly=false`, Gradle `--no-daemon` under a free-space watchdog), signed with the same development keys as the installed builds. The aquarium release is `aquarium-uifont-release-f38fa046.apk` (SHA-256 `f38fa04632aaba0bdda676de82df4643d240ba95d36e64c25b8704c6d4900723`; the first build, `14180f52`, lacked the row-counter fix). The baseline APK `baseline-866e8eaf711edaa0.apk` (SHA-256 `866e8eaf711edaa089371ce465ee1e17971d3ff9aca2d4109d553f73d0252b57`, versionCode 2 like the installed one) is the aquarium diagnostic runtime of the same tree (`33c8556c`) packaged by `wflevels/baseline/build.py`'s `package()` around a `cd.iff` that cdpack packed from `shell.fth` + `wflevels/baseline-standalone.iff`, which is byte-identical to the level of the last validated baseline APK (`7ef64581`) and now carries `UIFT`. Both runtimes log `UI_FONT 1024x2048 atlas, 2770432 bytes`.
+
     ```
-    $ task chromecast:devices
-    chromecast-test-01: recovery-required; Chromecast HD; serial 2628105GN0GT7C; Android 14; …
-    chromecast-test-02: ready; Chromecast; serial 26031HFDD67QH7; Android 12; …
-    $ ./gradlew --no-daemon -q :app:assembleAquariumRelease
-      fatal error: error in backend: IO failure on output stream: No space left on device
-    BUILD FAILED in 10m 8s
+    $ task chromecast:devices      (2026-10-17 08:48 UTC)
+    chromecast-test-01: ready; Chromecast HD; serial 2628105GN0GT7C; Android 14; ABI armeabi-v7a,armeabi; …
+    chromecast-test-02: ready; Chromecast; serial 26031HFDD67QH7; Android 12; ABI armeabi-v7a,armeabi; …
+    $ task chromecast:submit WORKFLOW=check DEVICE=chromecast-test-01 APP=aquarium VALIDATOR=menu-back APK=…/aquarium-uifont-release-505cc178.apk ASYNC=true
+    Accepted J-bc57f0171973      → failed: install-refused (INSTALL_FAILED_TEST_ONLY; the injected-ABI build is testOnly)
+    $ … APP=baseline VALIDATOR=baseline-settings APK=…/baseline-6635071caaa60614.apk
+    Accepted J-2aaefd709fac      → failed: install-refused (INSTALL_FAILED_VERSION_DOWNGRADE; installed 72a39130 is versionCode 2)
+    $ task chromecast:submit WORKFLOW=check DEVICE=chromecast-test-01 APP=aquarium VALIDATOR=menu-back APK=…/aquarium-uifont-release-14180f52.apk ASYNC=true
+    J-6cba0d4eacae: completed
+    [{'scene': 'clownfish', 'start_back_home_resume': 'PASS'}, {'scene': 'blue-shrimp', 'start_back_home_resume': 'PASS'}, {'betta_animated_pixels': 3175}, {'scene': 'betta', 'start_back_home_resume': 'PASS'}, {'scene': 'jellyfish', 'start_back_home_resume': 'PASS'}, {'scene': 'lionfish', 'start_back_home_resume': 'PASS'}, {'scene': 'planted-tank', 'start_back_home_resume': 'PASS'}, {'scene': 'arowana', 'start_back_home_resume': 'PASS'}, {'scene': 'tiger-barbs', 'start_back_home_resume': 'PASS'}]
+    $ … VALIDATOR=aquarium-seahorses APK=…/aquarium-uifont-release-14180f52.apk
+    J-9105ea4395bc: completed     (13/13 PASS; its Director capture showed the row-counter overlap)
+    $ task chromecast:submit WORKFLOW=check DEVICE=chromecast-test-01 APP=baseline VALIDATOR=baseline-settings APK=…/baseline-866e8eaf711edaa0.apk ASYNC=true
+    J-76aece9516a9: completed
+    {'baseline_catalog_attached': True, 'grounded_spawn': True, 'hardware_up_moves_positive_y': True, 'hardware_press_release_received': True, 'released_input_settles': True, 'released_direction_20': True, 'released_direction_22': True, 'released_direction_21': True, 'picker_pauses_simulation': True, 'tv_selects_second_owner': True, 'stable_three_owner_picker': True, 'chooser_offers_pick_in_3d': True, 'stale_picker_session_ignored': True, 'other_instance_unchanged': True, 'reconnect_preserves_invalid_draft': True, 'apply_readback': True, 'home_resume_same_process': True, 'home_resume_releases_input': True, 'home_cancels_uncommitted_draft': True, 'reset_chord_without_settings_or_jump': True, 'reset_chord_keeps_gameplay': True}
+    $ … APP=baseline VALIDATOR=baseline-picker APK=…/baseline-866e8eaf711edaa0.apk
+    J-8fcafa5d7d0f: completed
+    {'baseline_catalog_attached': True, 'chooser_pauses_simulation': True, 'three_candidates': True, 'two_brackets_in_view': True, 'first_highlight_nearest_centre': True, 'phone_right_moves_highlight': True, 'same_spot_short_list': True, 'ok_opens_owner_form': True, 'tv_form_is_that_owner': True, 'back_chain_keeps_dialog': True, 'picker_holds_scene': True, 'closed_releases_input': True}
+    $ … APP=aquarium VALIDATOR=aquarium-seahorses APK=…/aquarium-uifont-release-f38fa046.apk
+    J-729964b28281: completed
+    {'seahorses_sheet_fields': 'PASS', 'sheet_headers_have_no_field_ids': 'PASS', 'saltwater_applied': 'PASS', 'seahorses_apply_0': 'PASS', 'seahorses_apply_1': 'PASS', 'seahorses_apply_2': 'PASS', 'seahorses_apply_3': 'PASS', 'seahorses_apply_4': 'PASS', 'seahorses_apply_5': 'PASS', 'seahorses_apply_6': 'PASS', 'plant_only_apply_keeps_seahorse_fields': 'PASS', 'freshwater_applied_keeps_count': 'PASS', 'saltwater_restored': 'PASS'}
+    $ … APP=aquarium VALIDATOR=menu-back APK=…/aquarium-uifont-release-f38fa046.apk
+    J-407a52613960: completed     (all eight tanks start_back_home_resume PASS; betta_animated_pixels 2133)
+
+    Restores (apk-installations.json of each job):
+    J-9b138684d823  aquarium  14180f521b281048… → 3d796c773070795e16fe4505b80f43f711c8bf6555bcbef70101176264738d88  install verified
+    J-e1ae33b8c79f  baseline  866e8eaf711edaa0… → 72a39130a9f9e5a09e3da28c6f31180595b5934e74e0fc764e11df0a8d88ca23  install verified; verify-launch plugin-error, automatic readd → ready
+    J-2ad8e3f8f142  aquarium  f38fa04632aaba0b… → 3d796c773070795e16fe4505b80f43f711c8bf6555bcbef70101176264738d88  install verified
+    $ task chromecast:devices      (2026-10-17 09:31 UTC)
+    chromecast-test-01: ready; Chromecast HD; …
     ```
 
-    **FAIL: not run.** The root file system ran out of space during the APK build (0 bytes free at one point; 1.5 GB at the end of this session), so no APK was built and no job was submitted. Cast1 was `recovery-required` (an automatic re-add failed with a plugin error and needs an administrator re-add); Cast2 was `ready` with another owner's jobs queued.
+    The fishtank menu on Cast1 (J‑6cba0d4eacae), drawn 1:1 on its 1920×1080 surface:
+    <img src="../diagnostics/ui-font/cast1/menu-back/screenshot.png" width="700">
+
+    The planted tank's HUD strip and FPS counter, and the Director form after the row-counter fix (J‑729964b28281):
+    <img src="../diagnostics/ui-font/cast1/aquarium-seahorses/planted-tank-screenshot.png" width="700">
+    <img src="../diagnostics/ui-font/cast1/aquarium-seahorses-fix/remote-hold-opens-settings-screenshot.png" width="700">
+
+    The baseline settings form, and an out-of-range value with the `Phone lost` toast (J‑76aece9516a9):
+    <img src="../diagnostics/ui-font/cast1/baseline-settings/tv-form-screenshot.png" width="700">
+    <img src="../diagnostics/ui-font/cast1/baseline-settings/disconnected-draft-screenshot.png" width="700">
+
+    The chooser and the pick tag "2 objects here" with the `Phone connected` toast (J‑8fcafa5d7d0f):
+    <img src="../diagnostics/ui-font/cast1/baseline-picker/picker-chooser-screenshot.png" width="700">
+    <img src="../diagnostics/ui-font/cast1/baseline-picker/picker-after-right-screenshot.png" width="700">
+
+    **Not yet complete: PASS on Chromecast 1 for the aquarium and baseline apps; Chromecast 2 and the other apps still to run** (2026‑10‑17, 09:02–09:40 UTC, 16:02–16:40 Bangkok). `menu-back` for the aquarium app (all eight tanks, twice), `baseline-settings` (21/21), `baseline-picker` (12/12) and `aquarium-seahorses` (13/13, twice) pass with the UI-font APKs; no logcat in these jobs has a fatal, assertion, crash or `UI_FONT unavailable` line. Cast1 holds its previous apps again: aquarium `3d796c77…` and the fallback baseline `72a39130…` (its original `151186ba…` is not available locally). Chromecast 2 and the other apps' `menu-back` (condo, smb, snowgoons, qbert) were not run: the orchestrator's brief for this round narrowed the step to Cast1, aquarium and baseline, which was its mistake: the step as written needs both devices and every app. The two refused installs changed nothing (the coordinator verified the installed hash was unchanged).
 
 9. Cost recorded: `cd.iff` and APK size before and after, and Cast1 frame time on the fishtank menu and the planted tank before and after (three runs each).
 
@@ -317,9 +361,26 @@ Phases 0, 1, 2 and 4 are on branch `ui-font`. Phase 3 (Chromecast) is not done: 
     wflevels/snowgoons-cd.iff       172032    2942976  +2770944
     wflevels/qbert-cd.iff           370688    3141632  +2770944
     wflevels/smb-menu-cd.iff        579584    3350528  +2770944
+
+    APK                                              bytes      ABIs                 assets/cd.iff (deflated)  lib/armeabi-v7a/libwf_game.so
+    aquarium before  aquarium-selector-release-e941e460  4993162    arm64 + armeabi-v7a  782653 (older 3164160 menu bundle)  2780328 (1552847 deflated)
+    aquarium after   aquarium-uifont-release-f38fa046     4207320    armeabi-v7a          1501462 (6901760)                     2823908 (1581100 deflated)
+    baseline before  baseline-72a39130a9f9e5a0            6894648    arm64 + armeabi-v7a  28064 (501760)                        2999496 (stored)
+    baseline after   baseline-866e8eaf711edaa0            3396591    armeabi-v7a          413906 (3321856)                      2919952 (stored)
+
+    the font's own cost in an APK (deflate level 6, as AAPT):
+    aquarium-menu-cd.iff at 2258fce5^   4130816 → 1105823 deflated
+    aquarium-menu-cd.iff now            6901760 → 1501462 deflated   (+395639)
+    ui-font.wfga alone                  2770432 →  395855 deflated
+
+    Cast1 frame time, task chromecast:submit WORKFLOW=profile … WARMUP=15 RUNS=3 (SurfaceFlinger presents, 12 s per run):
+    fishtank menu, before  J-6cfa094bde02 (e941e460)  59.70 / 59.53 / 59.69 fps  p50 16.68 ms  p95 16.68 ms  missed 0.41 / 0.70 / 0.42 %
+    fishtank menu, after   J-fe41b518f452 (14180f52)  59.61 / 59.61 / 59.61 fps  p50 16.68 ms  p95 16.68 ms  missed 0.55 / 0.56 / 0.55 %
+    planted tank, before   J-017620ba4aa0 (e941e460)  36.64 / 35.49 / 34.81 fps  p50 33.37 ms  p95 33.37 ms  missed 59.7 / 64.3 / 68.2 %
+    planted tank, after    J-fbef68e79591 (14180f52)  35.15 / 34.02 / 31.14 fps  p50 33.37 ms  p95 33.37 ms  missed 67.9 / 73.1 / 87.4 %
     ```
 
-    **FAIL: `cd.iff` sizes only.** The APK sizes and the Cast1 frame times need step 8's APKs.
+    **PASS.** The font costs 2,770,944 bytes in each `cd.iff` and about 396 KB in a compressed APK (inside the plan's 300–450 KB estimate). The whole-APK sizes are not like for like: the new APKs carry one ABI, the old ones two, and the old aquarium bundle predates three tanks. The fishtank menu holds 60 fps either side (p50 16.68 ms). The planted tank holds its 30 fps cadence (p50 33.37 ms) either side; its median fell from 35.49 to 34.02 fps, but the "before" APK `e941e460` is the Phase 1 seahorse build, from before the six-pair default added geometry to this tank, so that difference is not the font's. The HUD strip is one quad per character now, where the old font drew about 10 to 40 per character.
 
 10. Mockups rebuild cleanly: `python3 docs/plans/2026-10-17-settings-editor-font/build_mockups.py` reports no errors, and every file is under 512 KB.
 

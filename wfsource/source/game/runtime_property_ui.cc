@@ -59,7 +59,9 @@ void build(wfprops::Form& editor,bool phone,int w,int h,std::vector<PhonepadRect
     }
     y+=rowHeight;
    }
-   if(rows.size()>6)text(605,775,2.5f,std::to_string(f.row+1)+" / "+std::to_string(rows.size()));
+   // The row counter sits right-aligned above the rows: at 775 it overlapped the help line's
+   // Regular 28 on Cast1 (docs/diagnostics/ui-font/cast1/director-counter-overlap.png).
+   if(rows.size()>6){const std::string count=std::to_string(f.row+1)+" / "+std::to_string(rows.size());text(1680-textWidth(2.5f,count),215-3.5f*2.5f,2.5f,count,0xcbd4baffu);}
   }
   if(f.drawer){const auto* field=f.field();auto& ui=controls(f);
    if(colour(field)){rect(600,205,1080,625,0x102621ffu);text(630,235,3,field->label);
