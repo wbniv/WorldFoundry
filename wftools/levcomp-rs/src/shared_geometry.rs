@@ -22,8 +22,12 @@ use wf_iff::{id_to_str, read_chunks, IffChunk};
 
 pub const GREF_VERSION: u32 = 1;
 pub const GREF_SIZE: usize = 52;
-/// The runtime's asset-name field (`AssetStringMap::_name`) is 32 bytes with NUL.
+/// The GREF name field is 32 bytes with NUL (format limit).
 pub const NAME_LIMIT: usize = 31;
+/// The geometry is looked up by its ASMP name, and `AssetManager::ReadAssetMap`
+/// asserts each ASMP `'STR'` payload (name + NUL) is under 32 bytes, so a name
+/// that reaches the runtime has at most 30 characters.
+pub const ASMP_NAME_LIMIT: usize = 30;
 const POSITION_SIZE: usize = 12;
 const APPEARANCE_SIZE: usize = 12;
 const FACE_SIZE: usize = 8;
@@ -106,6 +110,15 @@ pub fn parse_gref(payload: &[u8]) -> Result<GeometryRef, String> {
     })
 }
 
+pub fn check_asmp_name(name: &str) -> Result<(), String> {
+    if name.len() > ASMP_NAME_LIMIT {
+        return Err(format!(
+            "name is {} characters; the runtime asset map (AssetManager::ReadAssetMap) holds at most {ASMP_NAME_LIMIT}",
+            name.len()));
+    }
+    Ok(())
+}
+
 fn top_level(data: &[u8], what: &str) -> Result<IffChunk, String> {
     let mut top = read_chunks(data).map_err(|e| format!("{what}: {e}"))?;
     if top.len() != 1 {
@@ -137,6 +150,7 @@ pub fn inspect(path: &Path) -> Result<Option<SharedModel>, String> {
     }
     let gref = parse_gref(&grefs[0].payload).map_err(|e| fail("?", e))?;
     let reference = gref.name.clone();
+    check_asmp_name(&reference).map_err(|e| fail(&reference, e))?;
     for tag in ["VRTX", "FACE", "LRIG", "DFRM"] {
         if !find(tag).is_empty() {
             return Err(fail(&reference, format!("a GREF model must not carry {tag}")));
@@ -284,6 +298,9 @@ mod tests {
         payload[20] = b'A';
         assert!(parse_gref(&payload).unwrap_err().contains("lowercase"));
         assert!(parse_gref(&payload[..51]).unwrap_err().contains("51 bytes"));
+        // A 31-character name fits GREF but not the runtime's ASMP entry.
+        assert!(check_asmp_name(&"a".repeat(31)).unwrap_err().contains("at most 30"));
+        assert!(check_asmp_name(&"a".repeat(30)).is_ok());
     }
 
     /// Registering geometry must not move any packed id assigned before it.
