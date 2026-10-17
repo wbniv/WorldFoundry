@@ -20,6 +20,8 @@ void inputHost(uint32_t buttons){
 #endif
 }
 namespace {
+// The hint bar's text: Regular 28, its middle on the bar's (mockup 5).
+constexpr float kBarMiddle=1046,kHintScale=3;
 // 3D object picker colours (docs/plans/2026-10-16-runtime-object-editing/picker.html).
 constexpr uint32_t kInk=0xf1f2e4ffu,kGreen=0x8fe08affu,kDim=0x00000047u,kBar=0x09140fe6u,kTag=0x0d1f17f0u;
 struct Painter {
@@ -67,14 +69,15 @@ void buildPick(wfprops::Host& host,Painter& p){
   p.rect(x,y,w,h,0x142d25f4u);p.frame(x,y,w,h,3,kGreen);p.text(x+36,y+30,3.4f,"Objects here");
   for(size_t i=0;i<host.group.size();++i){
    std::string title;for(const auto& o:host.owners)if(o.actor==host.group[i])title=o.title;
-   const float ry=y+86+i*rowH;p.rect(x+30,ry,w-60,rowH-12,i==host.groupSelected?0x497b51ffu:0x233e31ffu);p.text(x+50,ry+16,3,title.substr(0,40));
+   const float ry=y+86+i*rowH;p.rect(x+30,ry,w-60,rowH-12,i==host.groupSelected?0x497b51ffu:0x233e31ffu);p.text(x+50,ry+(rowH-12)*.5f-3.5f*3,3,title.substr(0,40));
   }
  }
  p.rect(0,1012,1920,68,kBar);
- if(host.pick==PickMode::Group)p.text(40,1032,3,"Up / down: select   OK: edit",kGreen);
- else if(!targets.empty())p.text(40,1032,3,"Arrows: move   OK: edit",kGreen);
+ const float hintTop=kBarMiddle-3.5f*kHintScale;
+ if(host.pick==PickMode::Group)p.text(40,hintTop,kHintScale,"Up / down: select   OK: edit",kGreen,wfui::Small);
+ else if(!targets.empty())p.text(40,hintTop,kHintScale,"Arrows: move   OK: edit",kGreen,wfui::Small);
  const std::string back=host.pick==PickMode::Group?"back":"list";
- const float bw=p.width(back,3);p.text(1880-bw,1032,3,back,kGreen);p.leftArrow(1880-bw-44,1045,kGreen);
+ const float bw=p.width(back,kHintScale,wfui::Small);p.text(1880-bw,hintTop,kHintScale,back,kGreen,wfui::Small);p.leftArrow(1880-bw-44,kBarMiddle,kGreen);
 }
 }
 void buildHost(int w,int h,std::vector<PhonepadRect>& out,std::vector<bitmaptext::Quad>* glyphs){
@@ -90,8 +93,8 @@ void buildHost(int w,int h,std::vector<PhonepadRect>& out,std::vector<bitmaptext
  size_t first=host.selected>5?host.selected-5:0;
  for(size_t i=first;i<rows&&i<first+6;++i){
   float y=240+(i-first)*85;p.rect(225,y,1455,68,i==host.selected?0x497b51ffu:0x233e31ffu);
-  if(i==0){p.crosshair(268,y+34,kInk);p.text(305,y+18,3,"Pick in 3D",kInk,i==host.selected?wfui::BodyBold:wfui::Body);continue;}
-  const auto& owner=host.owners[i-1];p.text(245,y+18,3,owner.title.substr(0,66)+" ["+std::to_string(owner.actor)+"]",kInk,i==host.selected?wfui::BodyBold:wfui::Body);
+  if(i==0){p.crosshair(268,y+34,kInk);p.text(305,y+34-3.5f*3,3,"Pick in 3D",kInk,i==host.selected?wfui::BodyBold:wfui::Body);continue;}
+  const auto& owner=host.owners[i-1];p.text(245,y+34-3.5f*3,3,owner.title.substr(0,66)+" ["+std::to_string(owner.actor)+"]",kInk,i==host.selected?wfui::BodyBold:wfui::Body);
  }
  p.text(225,840,2.7f,"Up / down: select   OK: open   Back: cancel");
 }

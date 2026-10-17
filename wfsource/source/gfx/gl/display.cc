@@ -138,8 +138,11 @@ static wfui::Variant HudVariant(float scale)
 
 static void HudText(float x, float y, float scale, const char* text, wfui::Align align = wfui::Left)
 {
+    // Text smaller than the smallest variant (the high-score table, at scale 1) is the
+    // small variant scaled down, so its rows keep their old spacing.
+    const float caps = 7.0f * scale * gHudOrtho / gHudCanvas, smallCaps = 0.7f * 28.0f;
     wfui::Transform t;
-    t.s = gHudCanvas;
+    t.s = gHudCanvas * (caps < smallCaps ? caps / smallCaps : 1.0f);
     t.ox = x * gHudOrtho;
     t.oy = (y + 3.5f * scale) * gHudOrtho;
     wfui::TextBytes(gHudGlyphs, 0, 0, HudVariant(scale), gHudColour, text, std::strlen(text), wfui::Middle, align, t);
