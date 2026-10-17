@@ -7,10 +7,13 @@
     "close-crawl/gpu/round-1",
     "close-idle/gpu/round-2",
     "close-idle/cpu/round-2",
-    "close-crawl/gpu/round-2"
+    "close-crawl/gpu/round-2",
+    "close-crawl/cpu/round-2",
+    "close-idle/cpu/round-3"
   ],
   "total": 16,
-  "state": "running",
-  "current": "close-crawl/cpu/round-2",
-  "job": "J-27fbaa42fc50"
+  "state": "stopped",
+  "current": "close-idle/gpu/round-3",
+  "job": "J-da19a5050cff",
+  "error": "Incomplete session/cleanup: close-idle/gpu/round-3 J-da19a5050cff"
 }

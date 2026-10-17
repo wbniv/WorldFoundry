@@ -377,6 +377,8 @@ Do not compare a v3 CPU profile with a corrected GPU profile, or combine
 instrumented FPS with the release medians. The analyzer rejects obsolete
 profile manifests. Record the presentation change under profiling as an
 overhead diagnostic; a display-limited case can conceal CPU overhead.
+Because the corrected profiling cohort has a separate native revision, this
+presentation delta is not an isolated calibration of profiling overhead.
 
 Adopt GPU skinning for an eligible class of meshes only if `G1` has visual and lifecycle parity on both rendering backends, a reliable CPU fallback, the winding cleanup and validation above are complete for that asset class, and it produces a repeatable improvement on the workload that will use it. The proposed performance gate is at least **10% lower median main-thread render-section CPU time** for the skinned workload on both Chromecasts, with no reproducible p95 presented-interval or missed-refresh regression beyond the run-to-run spread, and no GPU-time or memory increase that erases the frame-time gain or exceeds the available memory budget. Treat these thresholds as a decision rule for the experiment, not an expected result. If a timer is unavailable, do not claim a GPU-time result; use the presentation and CPU evidence, and state that GPU saturation remains unmeasured.
 

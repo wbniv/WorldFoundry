@@ -1,0 +1,43 @@
+Start testing: Oct 17 11:49 UTC
+----------------------------------------------------------
+1/2 Testing: skinned_mesh_metal
+1/2 Test: skinned_mesh_metal
+Command: "/Users/builder/clone/build-skin-metal/wf_skinned_mesh_metal_test"
+Directory: /Users/builder/clone/build-skin-metal
+"skinned_mesh_metal" start time: Oct 17 11:49 UTC
+Output:
+----------------------------------------------------------
+2026-10-17 11:49:48.795 wf_skinned_mesh_metal_test[3207:18882] wf_game: MetalBackend ready (device=Apple Paravirtual device)
+2026-10-17 11:49:48.876 wf_skinned_mesh_metal_test[3207:18882] wf_game: offscreen Metal target 64x64 ready
+frame-profile-schema: v2 flushed-final-batch no-per-face-clocks
+frame-profile-schema: v2 flushed-final-batch no-per-face-clocks
+2026-10-17 11:49:48.952 wf_skinned_mesh_metal_test[3207:18882] wf_game: offscreen Metal target 80x80 ready
+2026-10-17 11:49:48.952 wf_skinned_mesh_metal_test[3207:18882] wf_game: offscreen Metal target 64x64 ready
+skinned_mesh_metal: rigid/four-weight draws, flat normals, culling, state, upload, resize and recreation pass
+<end of output>
+Test time =   0.46 sec
+----------------------------------------------------------
+Test Passed.
+"skinned_mesh_metal" end time: Oct 17 11:49 UTC
+"skinned_mesh_metal" time elapsed: 00:00:00
+----------------------------------------------------------
+
+2/2 Testing: skin_pose_math
+2/2 Test: skin_pose_math
+Command: "/Users/builder/clone/build-skin-metal/wf_skin_pose_math" "/Users/builder/clone/wflevels/aquarium_plants/seahorse_f_body.iff" "/Users/builder/clone/wflevels/aquarium_plants/seahorse_m_body.iff"
+Directory: /Users/builder/clone/build-skin-metal
+"skin_pose_math" start time: Oct 17 11:49 UTC
+Output:
+----------------------------------------------------------
+/Users/builder/clone/wflevels/aquarium_plants/seahorse_f_body.iff: 320 CPU/palette/fallback poses pass
+/Users/builder/clone/wflevels/aquarium_plants/seahorse_m_body.iff: 320 CPU/palette/fallback poses pass
+maximum palette error 5.96046448e-08 model units; minimum posed double area 0.000210811384; maximum normal error 6.83218241e-06
+<end of output>
+Test time =   0.03 sec
+----------------------------------------------------------
+Test Passed.
+"skin_pose_math" end time: Oct 17 11:49 UTC
+"skin_pose_math" time elapsed: 00:00:00
+----------------------------------------------------------
+
+End testing: Oct 17 11:49 UTC

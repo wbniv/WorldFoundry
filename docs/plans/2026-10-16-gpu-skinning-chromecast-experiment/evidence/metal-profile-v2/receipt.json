@@ -1,0 +1,47 @@
+{
+  "status": "finished",
+  "workflowId": null,
+  "branch": "gpu-skinning-proposal",
+  "commit": {
+    "authorAvatarUrl": "https://avatars.githubusercontent.com/u/38008?v=4",
+    "authorEmail": "will@biohack.net",
+    "authorName": "Will Norris",
+    "branch": "gpu-skinning-proposal",
+    "tag": null,
+    "commitMessage": "Include final renderer uploads and avoid per-face profiler overhead",
+    "hash": "8f90bba8c65e47b32aca6511a7de9b461b433089",
+    "url": "https://github.com/wbniv/WorldFoundry/commit/8f90bba8c65e47b32aca6511a7de9b461b433089"
+  },
+  "startedAt": "2026-10-17T11:46:59.738000+00:00",
+  "finishedAt": "2026-10-17T11:49:54.025000+00:00",
+  "build": "6ad3602a12c0b2aac28778db",
+  "artifacts": [
+    {
+      "name": "LastTest.log",
+      "sha256": "76279e24581f7ddbbc69cb44864bb0cbe625621ccce6c0c352aa16b7846de7a7"
+    },
+    {
+      "name": "skin-metal-cpu.ppm",
+      "sha256": "dfc4c9194b6d37a6ce902a488b743b31b9cf25205e76c42f47570a7beeff90e0"
+    },
+    {
+      "name": "skin-metal-gpu.ppm",
+      "sha256": "dfc4c9194b6d37a6ce902a488b743b31b9cf25205e76c42f47570a7beeff90e0"
+    },
+    {
+      "name": "skin-metal-last.ppm",
+      "sha256": "43dfebf451937a92bc5a39bb27418d6ac173e2d30f6ce166e720a42efcf427e4"
+    },
+    {
+      "name": "skin-metal-build.log",
+      "sha256": "315dca0389b8e8bdfdbb68df06f426fbb5679c8d36f1b12fc041020e715477f7",
+      "stored_name": "skin-metal-build.log.gz",
+      "stored_sha256": "6d754a8db2bffed7573d30d84c6c6f75a1cda9c9672ee73c80cca5fa52258a14",
+      "storage": "gzip; original uncompressed artifact SHA-256 retained"
+    },
+    {
+      "name": "skin-metal-test.log",
+      "sha256": "2c212f41a0794a3b1b5801a516b4fd19add0556610299e7b0ae0db132c283c90"
+    }
+  ]
+}

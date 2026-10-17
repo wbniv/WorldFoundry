@@ -1,13 +1,13 @@
 {
-  "updated_utc": "2026-10-17T11:14:44.753124+00:00",
+  "updated_utc": "2026-10-17T12:16:34.559269+00:00",
   "branch": "gpu-skinning-proposal",
-  "pushed_checkpoint": "e3b97ab5",
+  "pushed_checkpoint": "fc2d1d60",
   "native_source": "e64e5459660889ec8cda8dcadd059d10688c039c",
   "native_sha256": "9ddd539f29600c729c0e26430ca162d61311b242a4c7d6defe0a97e4ff484b80",
-  "aquarium_runner_session": 22562,
-  "cast2_population_runner_session": 42065,
-  "cast1_population_waiter_session": 34463,
-  "report_waiter_session": 80750,
+  "aquarium_runner_session": null,
+  "cast2_population_runner_session": 57712,
+  "cast1_population_waiter_session": null,
+  "report_waiter_session": null,
   "aquarium_campaign": "/tmp/wf-gpu-skinning-campaign-v3/campaign.json",
   "aquarium_fixtures": "/tmp/wf-gpu-skinning-fixtures-v3",
   "population_campaign": "/tmp/wf-gpu-population-campaign-v3/campaign.json",
@@ -28,11 +28,13 @@
     "No production merge or default change is authorized."
   ],
   "next": [
-    "Inspect each completed profile: at least eight contained CPU windows, GPU vertex/index bytes/rebuilds/fallbacks zero, CPU rig uploads positive.",
-    "Cast1 population waiter starts only after the aquarium campaign completes.",
-    "Final report waiter validates all three matrices before writing comparison and investigation. Rerun latest scripts/report-gpu-skinning.py afterward for the latest CPU-section tables; the active waiter loaded an earlier version.",
-    "Review generated results, update verification-status.json and README, curate evidence, then commit and push this experiment branch.",
-    "Preserve active frozen APKs. Clean own worktree/builds only after a reviewed merge."
+    "Watch build-gpu/cast2-population-campaign-v4.log; runner session 57712 reuses release IDs and repeats four corrected profile batches (CPU first).",
+    "On completed corrected CPU/GPU profiles verify positive CPU rig bytes, zero GPU vertex/index/rebuild/fallback counts, 8+ complete CPU windows and profile presentation overhead.",
+    "Archive cast1 failed round3 before any reviewed retry; coordinate startup guard via existing owner, no raw ADB and no reboot.",
+    "Upgrade aquarium canonical provenance to /tmp/wf-gpu-skinning-matched-v4 before corrected profiles; archive v3 manifests/recipes first. Keep release job IDs/hashes; corrected profile IDs are new.",
+    "Cast1 controlled population study has not started; use full new /tmp/wf-gpu-populations-v4 and its cast1 campaign once startup testing can proceed.",
+    "Curate commits: only allowed evidence and scoped .gz logs. Superseded archive currently includes private raw logs; never git-add it wholesale. Relocate device-evidence-scope.json paths for old GPU profiles when staging archived copies.",
+    "After all matrices validate, run latest report-gpu-skinning.py, review results, update verification status/README, commit/push. No production merge/default change."
   ],
   "aquarium": {
     "device": "chromecast-test-01",
@@ -44,12 +46,14 @@
       "close-idle/gpu/round-2",
       "close-idle/cpu/round-2",
       "close-crawl/gpu/round-2",
-      "close-crawl/cpu/round-2"
+      "close-crawl/cpu/round-2",
+      "close-idle/cpu/round-3"
     ],
     "total": 16,
-    "state": "running",
-    "current": "close-idle/cpu/round-3",
-    "job": "J-bf2f41ca05e6"
+    "state": "stopped",
+    "current": "close-idle/gpu/round-3",
+    "job": "J-da19a5050cff",
+    "error": "Incomplete session/cleanup: close-idle/gpu/round-3 J-da19a5050cff"
   },
   "cast2_populations": {
     "device": "chromecast-test-02",
@@ -66,13 +70,37 @@
       "population/gpu/round-3",
       "population/cpu/round-3",
       "population/cpu-no-cull/round-3",
-      "population/gpu/profile",
-      "population/gpu-no-cull/profile"
+      "population/cpu/profile",
+      "population/gpu/profile"
     ],
     "total": 16,
     "state": "running",
     "current": "population/cpu-no-cull/profile",
-    "job": "J-542eefaff3da"
+    "job": "J-ca74aa106927"
   },
-  "coordinator_snapshot": "18:13 Bangkok: both devices ready; grants paused for reviewed coordinator deployment"
+  "coordinator_snapshot": "Startup guard remains uncommitted/undeployed. User authorized fix, commit and push; existing coordinator owner implementing safe replacement. No cast1 retry until reviewed deployment.",
+  "release_native_sha256": "9ddd539f29600c729c0e26430ca162d61311b242a4c7d6defe0a97e4ff484b80",
+  "profile_native_sha256": "13f604947c1aff3c39dc729c51e650561e55c5fa45f06785cf7f29f15580663c",
+  "profile_scope_version": 2,
+  "profile_source_revision": "8f90bba8c65e47b32aca6511a7de9b461b433089",
+  "cast2_population_campaign": "/tmp/wf-gpu-cast2-population-campaign-v4/campaign.json",
+  "cast2_population_fixtures": "/tmp/wf-gpu-populations-matched-v4",
+  "cast1_population_campaign": "/tmp/wf-gpu-cast1-population-campaign-v4/campaign.json",
+  "cast1_population_fixtures": "/tmp/wf-gpu-populations-v4",
+  "corrected_aquarium_campaign": "/tmp/wf-gpu-skinning-campaign-v4/campaign.json",
+  "corrected_aquarium_fixtures": "/tmp/wf-gpu-skinning-matched-v4",
+  "cast2_profile_smoke_job": "J-be114610d338",
+  "metal_profile_v2_build": "6ad3602a12c0b2aac28778db",
+  "current_work": [
+    "Initial profiles invalid: final CPU batch flushed after end_frame; per-face clocks heavily perturb CPU C (56.8 release FPS ->19.5 instrumented).",
+    "Corrected FlushPending seam in GL/Metal/compositor, used only when profiling before Level render scope closes. Per-face clocks removed; isolated skin-cull is unavailable, not measured zero.",
+    "GL/pose/DFRM tests and compositor test passed. Metal CI finished successfully; evidence in metal-profile-v2.",
+    "Corrected cast2 CPU1 smoke passed: 11 windows, ~107988 rig vertex bytes/frame (previously zero), 59.8567 FPS, render median 1.2323 ms.",
+    "All v3 release CPU/GPU pairs retained. Corrected profile pairs use a separate shared native hash, with identical cooked asset hashes enforced by scripts/merge-gpu-skinning-cohorts.py.",
+    "Cast2 v1 profiles archived at cast2-populations/superseded-profiles-v1; do not use them for acceptance. Canonical cast2 manifest/campaign now v4 hybrid, with 12 release jobs reused and profile jobs cleared.",
+    "Cast1 release-only runner stopped again at close-idle/gpu/round-3 J-da19a5050cff after pair2/pair6/None, likely final pair1 startup. Do not retry unchanged. No own cast1 jobs currently advancing.",
+    "Active coordinator owner thread 01a148d1-5de0-7ef0-a3dd-b24d5fdea362 is reviewing startup guard and PID/exit-info capture in its operations.py; focused tests 10 passed, no new device jobs/reboot. Endpoint-open does not prove visible panel. Await its findings/deployment status.",
+    "Final report observer stopped because obsolete profile campaign failed; restart latest report tool only after all canonical manifests are scope v2 and startup issue handled.",
+    "Corrected cast2 C/G1 profiles both passed: 11 contained windows per population, CPU render 1.2222/3.9858/10.6993 ms versus GPU 0.2497/0.4738/1.2525 ms for 1/4/16 bodies. GPU steady vertex/index/rebuild/fallback counters zero."
+  ]
 }

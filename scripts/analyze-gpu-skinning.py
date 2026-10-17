@@ -126,6 +126,7 @@ def analyze(root, population_study=False, device='chromecast-test-01'):
         'Crawl holds right in authored Forth; this does not verify delivery/release of remote input.',
         'CPU acceptance uses the median of fully contained five-second window means; frame-weighted means are reported alongside it. This is one separate instrumented session per case, not three independent CPU-profile repeats.',
         'Isolated skin-cull CPU time is unavailable: per-face thread clocks perturb the measurement. Its reserved raw zero field is not a measured cost; C/C0 compares the net culling effect.',
+        'Profile presentation change is relative to the separate frozen release cohort; it includes instrumentation-revision differences and is not an isolated overhead calibration.',
     ]
     if population_study:
         result['notes'] = result['notes'][:5] + [
@@ -133,7 +134,7 @@ def analyze(root, population_study=False, device='chromecast-test-01'):
             'This measures the existing DFRM adapter, not general four-weight authoring performance.',
             'C/C0/G0/G1 separate skinning from culling; only G1 versus C is the adoption comparison.',
             'PSS is whole-process memory. Skin memory gauges are reported separately in the profile counters.',
-            *result['notes'][-2:],
+            *result['notes'][-3:],
         ]
     return result
 

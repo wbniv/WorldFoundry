@@ -1,0 +1,6 @@
+{
+  "docs/plans/2026-10-16-gpu-skinning-chromecast-experiment/evidence/cast2-populations/population/cpu/profile": "docs/plans/2026-10-16-gpu-skinning-chromecast-experiment/evidence/cast2-populations/superseded-profiles-v1/cpu",
+  "docs/plans/2026-10-16-gpu-skinning-chromecast-experiment/evidence/cast2-populations/population/cpu-no-cull/profile": "docs/plans/2026-10-16-gpu-skinning-chromecast-experiment/evidence/cast2-populations/superseded-profiles-v1/cpu-no-cull",
+  "docs/plans/2026-10-16-gpu-skinning-chromecast-experiment/evidence/cast2-populations/population/gpu-no-cull/profile": "docs/plans/2026-10-16-gpu-skinning-chromecast-experiment/evidence/cast2-populations/superseded-profiles-v1/gpu-no-cull",
+  "docs/plans/2026-10-16-gpu-skinning-chromecast-experiment/evidence/cast2-populations/population/gpu/profile": "docs/plans/2026-10-16-gpu-skinning-chromecast-experiment/evidence/cast2-populations/superseded-profiles-v1/gpu"
+}

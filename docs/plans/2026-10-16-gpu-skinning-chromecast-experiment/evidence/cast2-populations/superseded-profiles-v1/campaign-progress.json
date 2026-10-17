@@ -1,0 +1,25 @@
+{
+  "device": "chromecast-test-02",
+  "completed": [
+    "population/cpu/round-1",
+    "population/cpu-no-cull/round-1",
+    "population/gpu-no-cull/round-1",
+    "population/gpu/round-1",
+    "population/cpu-no-cull/round-2",
+    "population/gpu-no-cull/round-2",
+    "population/gpu/round-2",
+    "population/cpu/round-2",
+    "population/gpu-no-cull/round-3",
+    "population/gpu/round-3",
+    "population/cpu/round-3",
+    "population/cpu-no-cull/round-3",
+    "population/gpu/profile",
+    "population/gpu-no-cull/profile",
+    "population/cpu-no-cull/profile"
+  ],
+  "total": 16,
+  "state": "stopped",
+  "current": "population/cpu/profile",
+  "job": "J-2342740f4303",
+  "error": "Incomplete presentation coverage: docs/plans/2026-10-16-gpu-skinning-chromecast-experiment/evidence/cast2-populations/population/cpu/profile/4/run-1"
+}

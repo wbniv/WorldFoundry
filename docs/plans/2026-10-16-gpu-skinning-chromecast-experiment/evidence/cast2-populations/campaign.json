@@ -1,11 +1,11 @@
 {
-  "fixtures_manifest_sha256": "9a085aee2dec9bd5ea17e1d00dddcc0356fb0a27972cbe6eb2629d43af3298f8",
+  "fixtures_manifest_sha256": "33c056771fc0d0e9c1c4ef5859f79f89c3fc8ae931bc34196b8d88241c15dcbd",
   "restore_sha256": "3d796c773070795e16fe4505b80f43f711c8bf6555bcbef70101176264738d88",
   "recipes": [
     {
       "name": "population-cpu-round-1",
-      "path": "/tmp/wf-gpu-population-campaign-v3/population-cpu-round-1.json",
-      "sha256": "b01eccd8c241938ba869704bfbef6b7339da056c1c0b39a15a8ecd4e608e3d30",
+      "path": "/tmp/wf-gpu-cast2-population-campaign-v4/population-cpu-round-1.json",
+      "sha256": "a40401b413e6c07ad36019f13c049081eebc01cd46451e4c8b809b295a5a6821",
       "view": "population",
       "mode": "cpu",
       "frame_profile": false,
@@ -17,8 +17,8 @@
     },
     {
       "name": "population-cpu-no-cull-round-1",
-      "path": "/tmp/wf-gpu-population-campaign-v3/population-cpu-no-cull-round-1.json",
-      "sha256": "df83037f47e163e3ff5b2582288eab43f1c2f21ea4e90dc222d8b302c7671964",
+      "path": "/tmp/wf-gpu-cast2-population-campaign-v4/population-cpu-no-cull-round-1.json",
+      "sha256": "bcd4f09f726137f2f96e1122fe43a95d933e4c68c71f8c23412bd0394a314968",
       "view": "population",
       "mode": "cpu-no-cull",
       "frame_profile": false,
@@ -30,8 +30,8 @@
     },
     {
       "name": "population-gpu-no-cull-round-1",
-      "path": "/tmp/wf-gpu-population-campaign-v3/population-gpu-no-cull-round-1.json",
-      "sha256": "39e44798a7005c134095564e3bedfce0ba308432f1c1c8cd776609b633386b57",
+      "path": "/tmp/wf-gpu-cast2-population-campaign-v4/population-gpu-no-cull-round-1.json",
+      "sha256": "f6ee3d934a915a6d1a612c61334f6261fb00a431998b9e128d6378c0b9d192f8",
       "view": "population",
       "mode": "gpu-no-cull",
       "frame_profile": false,
@@ -43,8 +43,8 @@
     },
     {
       "name": "population-gpu-round-1",
-      "path": "/tmp/wf-gpu-population-campaign-v3/population-gpu-round-1.json",
-      "sha256": "064e23c1026df677df9a3cd54150133dafad42bc5f22145e38a4c6060b52fe58",
+      "path": "/tmp/wf-gpu-cast2-population-campaign-v4/population-gpu-round-1.json",
+      "sha256": "6e9904cdc51116b6da681db889b3a94ba388f0127599d40f5b4e96d5dbf7581f",
       "view": "population",
       "mode": "gpu",
       "frame_profile": false,
@@ -56,8 +56,8 @@
     },
     {
       "name": "population-cpu-no-cull-round-2",
-      "path": "/tmp/wf-gpu-population-campaign-v3/population-cpu-no-cull-round-2.json",
-      "sha256": "954df874500101cddbbbc9d339ee7c46a64a06992449f005c14f6e6791589c44",
+      "path": "/tmp/wf-gpu-cast2-population-campaign-v4/population-cpu-no-cull-round-2.json",
+      "sha256": "1fff405f49f5f3e96002ab8956b3ce87da8a957652b6dce6e7d220445c153ee7",
       "view": "population",
       "mode": "cpu-no-cull",
       "frame_profile": false,
@@ -69,8 +69,8 @@
     },
     {
       "name": "population-gpu-no-cull-round-2",
-      "path": "/tmp/wf-gpu-population-campaign-v3/population-gpu-no-cull-round-2.json",
-      "sha256": "9f8551188b90554e27ca3be12795b773a338e3f4661e9714b084e203d85e0d3f",
+      "path": "/tmp/wf-gpu-cast2-population-campaign-v4/population-gpu-no-cull-round-2.json",
+      "sha256": "6c44e80401763ffd76f05b70b5c1871a9535b6aecb5157c44c388c06af4b2f7c",
       "view": "population",
       "mode": "gpu-no-cull",
       "frame_profile": false,
@@ -82,8 +82,8 @@
     },
     {
       "name": "population-gpu-round-2",
-      "path": "/tmp/wf-gpu-population-campaign-v3/population-gpu-round-2.json",
-      "sha256": "496518fa28962716684254bc15f8de3ef01c8a9257aebeb1620cbe6b34d33b41",
+      "path": "/tmp/wf-gpu-cast2-population-campaign-v4/population-gpu-round-2.json",
+      "sha256": "4d27fdf860ac2810e24101720ea9b6575943f82f496ae946feca85a8fac7b0f4",
       "view": "population",
       "mode": "gpu",
       "frame_profile": false,
@@ -95,8 +95,8 @@
     },
     {
       "name": "population-cpu-round-2",
-      "path": "/tmp/wf-gpu-population-campaign-v3/population-cpu-round-2.json",
-      "sha256": "7f627901094dcd21279ef3975d5751acae29b5231c5ffb3f19a6d845423434a3",
+      "path": "/tmp/wf-gpu-cast2-population-campaign-v4/population-cpu-round-2.json",
+      "sha256": "edbb8b3afc66cfeba0ca2f31cdc8fe11abed64a41668d7ea0563ec746dbeac5c",
       "view": "population",
       "mode": "cpu",
       "frame_profile": false,
@@ -108,8 +108,8 @@
     },
     {
       "name": "population-gpu-no-cull-round-3",
-      "path": "/tmp/wf-gpu-population-campaign-v3/population-gpu-no-cull-round-3.json",
-      "sha256": "458b4bcb340f19080d65917d6a98a1524766984f15c8a3d317da2a2f8797fc28",
+      "path": "/tmp/wf-gpu-cast2-population-campaign-v4/population-gpu-no-cull-round-3.json",
+      "sha256": "61e653b0e0b93dbb1d7db6e73683be52c7a3fadc4570fc3d30ef522bc3f30e94",
       "view": "population",
       "mode": "gpu-no-cull",
       "frame_profile": false,
@@ -121,8 +121,8 @@
     },
     {
       "name": "population-gpu-round-3",
-      "path": "/tmp/wf-gpu-population-campaign-v3/population-gpu-round-3.json",
-      "sha256": "f088b6eed2aa238e54b466b4ba3b36adbffa498cebf40c8a0bbd7565c8c90976",
+      "path": "/tmp/wf-gpu-cast2-population-campaign-v4/population-gpu-round-3.json",
+      "sha256": "88ef02b06f9bad71a7625d1f7b360dabc9a6308e7f27767239375c573d023d6d",
       "view": "population",
       "mode": "gpu",
       "frame_profile": false,
@@ -134,8 +134,8 @@
     },
     {
       "name": "population-cpu-round-3",
-      "path": "/tmp/wf-gpu-population-campaign-v3/population-cpu-round-3.json",
-      "sha256": "e4358c3f319caa5747d34150608034374985c54adf0842dd3b5cfeb615241ecd",
+      "path": "/tmp/wf-gpu-cast2-population-campaign-v4/population-cpu-round-3.json",
+      "sha256": "9ea5f107c06e241cac5cb104d2acc902e16edd85420a4b9f4788ad27e218a55a",
       "view": "population",
       "mode": "cpu",
       "frame_profile": false,
@@ -147,8 +147,8 @@
     },
     {
       "name": "population-cpu-no-cull-round-3",
-      "path": "/tmp/wf-gpu-population-campaign-v3/population-cpu-no-cull-round-3.json",
-      "sha256": "4de044fef018318bf32cfc6e582292a851bb61ca9af3eda03e5f7c7972f9a2a7",
+      "path": "/tmp/wf-gpu-cast2-population-campaign-v4/population-cpu-no-cull-round-3.json",
+      "sha256": "975001f6cab957f5b89b1488ce5af2f5a88ee96f14f88754c8202f46077da33d",
       "view": "population",
       "mode": "cpu-no-cull",
       "frame_profile": false,
@@ -159,9 +159,22 @@
       ]
     },
     {
+      "name": "population-cpu-profile",
+      "path": "/tmp/wf-gpu-cast2-population-campaign-v4/population-cpu-profile.json",
+      "sha256": "5e71415d518a6967173035c59a826a7860b6941e2a3725c4d164938635446703",
+      "view": "population",
+      "mode": "cpu",
+      "frame_profile": true,
+      "order": [
+        "16",
+        "4",
+        "1"
+      ]
+    },
+    {
       "name": "population-gpu-profile",
-      "path": "/tmp/wf-gpu-population-campaign-v3/population-gpu-profile.json",
-      "sha256": "fa06b4aeb7a6ca5fac939301a4133ac017edfac88311cad4e6308f093b966bac",
+      "path": "/tmp/wf-gpu-cast2-population-campaign-v4/population-gpu-profile.json",
+      "sha256": "9d5eff7b3a60577381d51acb470d85dd494231d83e1a9453ac70729ab7846a42",
       "view": "population",
       "mode": "gpu",
       "frame_profile": true,
@@ -172,22 +185,9 @@
       ]
     },
     {
-      "name": "population-gpu-no-cull-profile",
-      "path": "/tmp/wf-gpu-population-campaign-v3/population-gpu-no-cull-profile.json",
-      "sha256": "53e3c968881aab48a8a35a73e50578ff21f6f7f8e3fc1eaa1d5adba9f3f9c8b0",
-      "view": "population",
-      "mode": "gpu-no-cull",
-      "frame_profile": true,
-      "order": [
-        "16",
-        "4",
-        "1"
-      ]
-    },
-    {
       "name": "population-cpu-no-cull-profile",
-      "path": "/tmp/wf-gpu-population-campaign-v3/population-cpu-no-cull-profile.json",
-      "sha256": "2ac3047131200e7fd00d71ae8b0c3c76534f8091b2ce728625f65654dc28f4e7",
+      "path": "/tmp/wf-gpu-cast2-population-campaign-v4/population-cpu-no-cull-profile.json",
+      "sha256": "9ce2410f71912b331122de346fa9b5247f8b99ce754639dfe98f46807cf14df1",
       "view": "population",
       "mode": "cpu-no-cull",
       "frame_profile": true,
@@ -198,11 +198,11 @@
       ]
     },
     {
-      "name": "population-cpu-profile",
-      "path": "/tmp/wf-gpu-population-campaign-v3/population-cpu-profile.json",
-      "sha256": "dfbb6fe0b72f3cd0e8f863fcbcce0262576e96414fae5551aca0ccf77076d6e1",
+      "name": "population-gpu-no-cull-profile",
+      "path": "/tmp/wf-gpu-cast2-population-campaign-v4/population-gpu-no-cull-profile.json",
+      "sha256": "c6ed6a82d682128f726ac00df1c6b820cd99d4883ec376cbb8bc74edf3857c1b",
       "view": "population",
-      "mode": "cpu",
+      "mode": "gpu-no-cull",
       "frame_profile": true,
       "order": [
         "16",
@@ -212,5 +212,6 @@
     }
   ],
   "release_runs": 36,
-  "profile_runs": 12
+  "profile_runs": 12,
+  "profile_order_note": "CPU first to verify final-batch accounting and absence of per-face clock perturbation; all profile pairs use scope-v2 native code."
 }

@@ -13,10 +13,11 @@
     "population/gpu/round-3",
     "population/cpu/round-3",
     "population/cpu-no-cull/round-3",
+    "population/cpu/profile",
     "population/gpu/profile"
   ],
   "total": 16,
   "state": "running",
-  "current": "population/gpu-no-cull/profile",
-  "job": "J-b93333c1d450"
+  "current": "population/cpu-no-cull/profile",
+  "job": "J-ca74aa106927"
 }

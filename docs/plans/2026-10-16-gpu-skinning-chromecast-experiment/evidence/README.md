@@ -14,6 +14,7 @@ CPU remains the default. Nothing is merged or adopted.
 - `metal-counters/`: final gate at e64e5459, including CPU rig stream byte
   accounting and zero steady GPU vertex uploads. This Apple Paravirtual device
   evidence establishes offscreen correctness, not Apple performance.
+- `metal-profile-v2/`: corrected final-batch flush gate at 8f90bba8 passes.
 - Corrected Android armeabi-v7a native hash and status: `verification-status.json`.
 
 ## Device campaign in progress
@@ -33,8 +34,20 @@ The first v2 APK jobs failed installation with `INSTALL_FAILED_TEST_ONLY`;
 v3 fixes packaging without changing native code. The earlier GPU batch
 J‑1e59129b22a2 lost foreground and is excluded; its cause is unknown.
 
-The plan records the first close-idle CPU/GPU results. These are single runs,
-not medians or an adoption result. CPU profiling and the full repeats remain.
+Cast1 has two completed release rounds for both views; its third GPU idle
+round exited during startup. Cast1 is held while the coordinator removes
+unsafe automatic Back behavior. The previous failures remain excluded.
+Cast2 has all 36 release runs, plus corrected CPU and GPU profiles for all
+three populations. No-cull profiles are still running. Corrected CPU/GPU
+checks are in `cast2-populations/corrected-cpu-gpu-profile-check.json`;
+these do not establish an adoption decision.
+
+Earlier CPU profiles missed the final stream upload and used expensive
+per-face clocks. `cast2-populations/superseded-profiles-v1/` retains their
+provenance; they must not be used for CPU acceptance. Corrected profiles
+use scope version 2, with the final batch flushed before profiling closes
+and no per-face clocks. Isolated culling time is unavailable.
+
 Committed evidence includes raw presentation timestamps, summaries, receipts,
 installed hashes, memory/thermal snapshots and captures. Compressed engine
 logs retain only the final level-load scope; `device-evidence-scope.json`
@@ -43,22 +56,28 @@ connection details and command/watch transcripts remain local.
 
 ## Resume
 
-Frozen APKs are in `/tmp/wf-gpu-skinning-fixtures-v3` and
-`/tmp/wf-gpu-population-apks-v3`. The native code is identical across both sets.
-Keep them until accepted sessions finish; the source and hash receipts allow
-rebuilding if needed. Recipes reference their absolute frozen paths.
+Release APKs remain frozen in `/tmp/wf-gpu-skinning-fixtures-v3` and
+`/tmp/wf-gpu-population-apks-v3`. Corrected profiles are in
+`/tmp/wf-gpu-aquarium-profiles-v4` and `/tmp/wf-gpu-populations-v4`.
+The `*-matched-v4` directories reference unchanged release APKs and corrected
+profile APKs; the merger verifies identical cooked assets. Native hashes
+must match across modes within each release or profile cohort. The two
+cohorts have different native hashes, so profile/release presentation deltas
+are diagnostic rather than an isolated overhead calibration.
 
 1. Use only the shared coordinator service and respect other owners.
-2. The aquarium and cast2 population runners are active. Check their progress
-   before starting another process; do not duplicate submitted jobs.
+2. Cast2's corrected profile runner is active. Cast1 runners are stopped;
+   wait for the coordinator startup fix before any retry. Consult
+   `active-session-handoff.json` and current progress before starting a
+   process; do not duplicate submitted jobs.
 3. Resume with `scripts/run-gpu-skinning-campaign.py`, supplying the frozen
    `--campaign`, `--fixtures`, `--evidence` and `--device` paths. It reuses
    saved jobs, submits one session at a time and stops on failure without
    rebooting or automatically retrying. Completed sessions are revalidated.
-4. Complete actual held/released directional input and surface/resume checks.
-   The authored crawl fixture is not an input-delivery test. The existing
-   coordinator `plant-settings` validator exercises input and Home/resume but
-   requires a selector APK; do not run it against a direct-level fixture.
+4. Both casts passed release GPU Home/surface recreation with context
+   reuse. Diagnostic held/released checks passed for four directions;
+   the later unrelated IME/keypad assertion failed, so the full UI
+   validators did not pass. See `lifecycle-findings.json`.
 5. Complete the controlled population recipes under `population-recipes/` on
    both casts. They use 30 s warmup; aquarium recipes reproduce the earlier
    15 s warmup. Cast1 populations have not started. Keep conclusions separate.
@@ -77,4 +96,7 @@ rebuilding if needed. Recipes reference their absolute frozen paths.
 
 `variants-pre-counter.json` and `variants-v2-test-only.json` are historical
 and must not be used for the matched campaign. Current receipts are
-`variants.json` and `population-variants.json` (v3).
+`variants.json` and `population-variants.json` still describe the retained
+aquarium release cohort; its canonical provenance must be upgraded before
+corrected profiles. Cast2's canonical `cast2-populations/variants.json` is
+the merged scope-2 manifest. Never mix obsolete and corrected profiles.
