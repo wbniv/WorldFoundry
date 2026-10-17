@@ -1,5 +1,6 @@
 #include "../../../engine/runtime_options.hpp"
 #include "../../../engine/runtime_property_host.hpp"
+#include "../../../engine/room_render_settings.hpp"
 #include "../../../engine/runtime_diagnostics.hpp"
 #include "runtime_profile.hp"
 #include "bitmap_presenter.hp"
@@ -592,6 +593,13 @@ Level::Level
         }
     }
     wfprops::activeRegistry()=&_runtimeProperties;
+    std::string renderSettingError;
+    _renderCurrentRoomOnly = wfprops::currentRoomOnly(_runtimeProperties, renderSettingError);
+    if (!renderSettingError.empty())
+        std::fprintf(stderr, "ROOM-RENDER setting invalid: %s; using all-active\n", renderSettingError.c_str());
+    std::fprintf(stderr, "ROOM-RENDER scope=%s source=%s\n",
+                 _renderCurrentRoomOnly ? "current-only" : "all-active",
+                 _runtimeProperties.schema("LevelRenderSettings") ? "RPRP" : "default");
     wfprops::host().bind(&_runtimeProperties);
     // Pick in 3D: where the chooser's objects are, read only while it is open.
     wfprops::host().world.camera=[](wfpick::Camera& camera){return RendererBackendGet().CameraMatrices(camera.view,camera.proj);};
@@ -1386,8 +1394,13 @@ Level::RenderScene()
 
 	_theActiveRooms->Validate();
 	ActiveRoomsIterConst roomIter(_theActiveRooms->GetIter());
+	const Room* currentRenderRoom = _theActiveRooms->GetActiveRoom(0);
 	while(!roomIter.Empty())
 	{
+		if (_renderCurrentRoomOnly && &(*roomIter) != currentRenderRoom) {
+			++roomIter;
+			continue;
+		}
 		DBSTREAM3( cdebug << "----- room " << *roomIter << " -----" << std::endl; )
 				// in case there are none in this room
 		_camera->GetRenderCamera().SetAmbientColor( Color::black );

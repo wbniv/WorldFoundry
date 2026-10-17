@@ -297,6 +297,7 @@ private:
 	};
    LevelRoomCallbacks* _roomCallbacks;
    wfprops::Registry _runtimeProperties;
+   bool _renderCurrentRoomOnly = false;
    AssetCallbackRoom* _assetCallbackRoom;
 #if SW_DBSTREAM
 	friend std::ostream& operator <<( std::ostream& s, const Level& level );
