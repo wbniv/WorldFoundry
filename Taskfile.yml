@@ -737,6 +737,13 @@ tasks:
     cmds:
       - PYTHONPATH=/opt/wf-device-coordinator/vendor python3 scripts/chromecast.py task configure
 
+  chromecast:screensaver-trigger:
+    desc: "Trigger the selected TV screensaver through the shared coordinator"
+    silent: true
+    env: *chromecast_env
+    cmds:
+      - python3 scripts/chromecast.py task screensaver-trigger
+
   chromecast:submit:
     desc: "Submit jobs: DEVICE=id,id or all; WORKFLOW=install verifies launcher artwork"
     silent: true

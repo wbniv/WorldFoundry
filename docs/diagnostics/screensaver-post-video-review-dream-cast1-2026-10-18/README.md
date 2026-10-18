@@ -1,0 +1,9 @@
+# Cast1 aquarium Dream check, 18 October 2026
+
+The coordinator's `dream-check` job J‑5c0eeff72bff observed the Aquarium DreamService running, but its [immediate capture](dream.png) is fully black. The later `screensaver-trigger` job J‑a39b666f4c40 also reported the selected Aquarium DreamService running and captured a [black frame](../screensaver-post-video-review-trigger-cast1-2026-10-18/screensaver.png).
+
+Will reported that cast1's TV **showed the aquarium while it was in screensaver mode**. The black PNGs therefore do not establish a black display. Their cause remains undetermined; capture timing and SurfaceView capture behavior are possibilities, not verified explanations. Those immediate captures did not establish which tank Random selected or held/released directional input during the Dream.
+
+The trigger job lost the coordinator's wireless debugging connection during cleanup. Cast1 was on and in screensaver mode. After Will pressed Home, coordinator readd J‑209e2afb3eee completed, cleared the cleanup fences, and returned the device to ready. A subsequent coordinator [capture](../screensaver-post-video-review-after-readd-cast1-2026-10-18/screenshot.png) J‑e095130dac49 showed the Google TV Home screen. Cast2 was untouched.
+
+Later, with cast1 back in screensaver mode, coordinator captures [J‑9db556e4a4f3](../screensaver-late-dream-capture-cast1-2026-10-18/screenshot.png) and [J‑75ab2dac88af](../screensaver-late-dream-capture-cast1-followup-2026-10-18/screenshot.png) showed the Jellyfish tank at different camera positions with the jellyfish in different positions. The same tank remained visible across both captures. These later frames establish that the Dream rendered after the immediate black captures and support an early-capture explanation. They do not prove the exact cause of those black frames or test held/released directional input.

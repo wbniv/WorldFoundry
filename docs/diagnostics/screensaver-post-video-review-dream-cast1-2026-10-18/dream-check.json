@@ -1,0 +1,10 @@
+{
+  "schema": 1,
+  "device": "chromecast-test-01",
+  "collected_at": "2026-10-18T06:50:15.305237+00:00",
+  "selected": "org.worldfoundry.screensaver/.AquariumDreamService",
+  "observed": "DreamRecord{token=android.os.Binder@93e81b7, name=ComponentInfo{org.worldfoundry.screensaver/org.worldfoundry.screensaver.AquariumDreamService}, userId=0, isPreview=false, canDoze=false, isDozing=false, isWaking=false, dozeScreenState=0, dozeScreenBrightness=-1}",
+  "screenshot": "dream.png",
+  "condition": "aquarium-dream",
+  "restoration": "journaled settings and foreground"
+}
