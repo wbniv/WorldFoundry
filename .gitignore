@@ -97,3 +97,9 @@ wfsource/source/game/output.mp4
 
 # Separate local Git checkouts; their changes belong to their own branches.
 /.worktrees/
+
+# Generated live Aquarium screensaver levels and packed asset bundle.
+wflevels/*_screensaver/
+wflevels/*_screensaver.iff
+wflevels/*_screensaver-standalone.iff
+wflevels/aquarium-screensaver-cd.iff

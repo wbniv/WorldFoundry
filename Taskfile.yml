@@ -661,6 +661,7 @@ tasks:
       WF_CC_ASYNC: '{{.ASYNC | default ""}}'
       WF_CC_RECIPE: '{{.RECIPE | default ""}}'
       WF_CC_TRACE: '{{.TRACE | default ""}}'
+      WF_CC_CHANGE: '{{.CHANGE | default ""}}'
       WF_CC_PAIRING_ENDPOINT: '{{.PAIRING_ENDPOINT | default ""}}'
       WF_CC_ADDRESS: '{{.ADDRESS | default ""}}'
       WF_CC_METHOD: '{{.METHOD | default ""}}'
@@ -728,6 +729,13 @@ tasks:
     env: *chromecast_env
     cmds:
       - python3 scripts/chromecast.py task status
+
+  chromecast:configure:
+    desc: "Apply a reviewed persistent TV setting through the shared coordinator"
+    silent: true
+    env: *chromecast_env
+    cmds:
+      - PYTHONPATH=/opt/wf-device-coordinator/vendor python3 scripts/chromecast.py task configure
 
   chromecast:submit:
     desc: "Submit jobs: DEVICE=id,id or all; WORKFLOW=install verifies launcher artwork"

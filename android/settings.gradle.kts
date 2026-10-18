@@ -16,3 +16,4 @@ dependencyResolutionManagement {
 
 rootProject.name = "wf_game"
 include(":app")
+include(":screensaver")

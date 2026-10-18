@@ -1,5 +1,9 @@
 # The aquarium as its own app on a Chromecast with Google TV
 
+The separate aquarium **screensaver** app is tracked in the
+[2026-10-18 live screensaver plan](2026-10-18-aquarium-screensaver-player-and-tray-settings.md).
+Its live-level version is installed and selected on both test Chromecasts.
+
 Status: **done on a real Chromecast HD** (2026‑10‑01); **Phase D (audio) is open; Phase E (the phone as a gamepad) has E1 to E3 built and checked on the Chromecast, with the steps that need the user's phone, tilt and game-driven haptics open** ([Phase E progress](#phase-e-progress)). Written 2026‑10‑01 09:55 (+07) = 02:55 UTC, **after the fact**. The agent that was to write this
 plan alongside the Android work was stopped on 2026‑09‑30 (out of tokens) before it wrote the file, so four documents linked to a plan that did not exist
 ([the aquarium-on-every-platform plan](2026-09-30-aquarium-platforms.md), [the Chromecast plan](2026-04-23-chromecast-googletv-port.md),

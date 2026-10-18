@@ -1,5 +1,6 @@
 | Date | Change |
 |------|--------|
+| [2026-10-01](https://github.com/wbniv/WorldFoundry/commit/55a66fb8) | Phone controller QR: the World Foundry logo in the middle (planet by default, or the whole logo), at ECC H |
 | [2026-10-01](https://github.com/wbniv/WorldFoundry/commit/3a2d595d) | Phone controller: the page sends its mask every 50 ms while connected (the TV's Wi-Fi dozes at 250 ms) |
 | [2026-10-01](https://github.com/wbniv/WorldFoundry/commit/ec342020) | Phone controller: log every accepted connection and any closed before a request; record the first phone session |
 | [2026-10-01](https://github.com/wbniv/WorldFoundry/commit/9cfb58b5) | Aquarium-Chromecast plan and phone mockups: the condo's A is doors and shade, no B button; status of Phase E |
@@ -14,6 +15,11 @@
 | [2026-10-01](https://github.com/wbniv/WorldFoundry/commit/c48d5a8b) | Write the missing aquarium-on-Chromecast plan (four docs linked to it): rebuilt from the commits and device-run evidence |
 
 <!--history-meta v1
+55a66fb8	author	Will Norris
+55a66fb8	added	24
+55a66fb8	deleted	1
+55a66fb8	files	1
+55a66fb8	body	The code is now ECC H (version 4 for a typical URL) and a centred plate of whole modules carries the logo,\ndrawn as coloured rectangles like the rest of the overlay. Two grids from scripts/gen-qr-logo.py (task\ngen-qr-logo), generated into phonepad_logo.h from ../worldfoundry.org/src/assets/wflogo.png with its SHA-256:\n"full", the whole logo on a 9 x 11 plate (9.1 % of a 33-module code), and "planet", the picture with the\nWORLD and FOUNDRY strips cropped off (found from the pixels: the black bands), on 7 x 7 (4.5 %). wf_args.txt\n"qr_logo=planet|full|none" picks one (default planet), read by native_app_entry.cc and kept from the engine.\nThe plate is held to 10 % of the modules, never touches finder, timing, format or alignment modules, and is\nleft out on version 1 and on versions 7 and up. favicon.svg was not used: it has no text strips and no planet.\n\ntests/qr_decode.py gains Reed-Solomon correction and a per-block damage map. Tests: both logos, sampled from\nthe composited overlay, read back to the exact URL for four URLs, with only plate modules changed, every\nfunction module untouched and at most 3/4 of any block's budget used; a plate over 25 % of the code fails;\nplate geometry for versions 2 to 6; the header regenerates byte for byte (skips without the logo source).\nOn the Chromecast HD both decoded from real screenshots (planet: at most 4 of 8 codewords repaired per block;\nfull: 5 of 8); the planet build is left installed. Plan design item 4 and verification 22; mockup 3 redrawn.\n\nCo-Authored-By: Claude Opus 5.5 <noreply@anthropic.com>\nClaude-Session: https://claude.ai/code/session_01DxMP4jUNjCjDz8E9DWzXcM
 3a2d595d	author	Will Norris
 3a2d595d	added	12
 3a2d595d	deleted	3
