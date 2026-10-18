@@ -142,6 +142,10 @@
   sh-hx sh@ 33 sh! sh-hy sh@ 34 sh! 1 sh-valid sh! 0 95 sh! 1 64 sh!
   sh-spot# sh@ sh-spot-vel tk-dt@ * sh-hy sh@ swap - 93 sh! tk-dt@ * sh-hx sh@ swap - 92 sh!
   sh-id sh@ sh-first-rest sh-rest sh! 6 sh-rand 15 * + sh-strike sh! 0 sh-go 1 sh-init sh! ;
+\ The next solve trusts the reported wrap centre (sh-valid) only while progress x (35 - start)
+\ >= 1, 35 being the tail's ring count: then the centre is a fully wrapped ring's. Below that
+\ DFRM measures the half-wrapped tip ring, whose centre runs off as 1/progress near the end of a
+\ release, and one solve on it threw the body out of the room (docs/diagnostics/seahorse-actor30-2026-10-18).
 : sh-place ( actor -- ) >r sh-x sh@ INDEXOF_X_POS r@ write-actor-mailbox sh-y sh@ INDEXOF_Y_POS r@ write-actor-mailbox
   sh-z sh@ INDEXOF_Z_POS r@ write-actor-mailbox sh-yaw sh@ INDEXOF_ROTATION_C r> write-actor-mailbox ;
 : sh-tick ( body fins sex s -- )
@@ -159,7 +163,7 @@
   sh-body sh@ sh-place sh-fins sh@ sh-place
   64 sh@ if 0 64 sh! else 33 sh@ 92 sh! 34 sh@ 93 sh! then sh-valid sh@ 95 sh! tk-dt@ 94 sh!
   sh-b sh-body sh@ dfrm-pose drop
-  24 sh@ 0 > 39 sh@ 1 <> & 39 sh@ 2 <> & sh-valid sh!
+  24 sh@ 35 22 sh@ - * 1 >= 39 sh@ 1 <> & 39 sh@ 2 <> & sh-valid sh!
   sh-fin sh@ tk-dt@ 2.2 * sh-vx sh@ sh-vy sh@ uf-hypot 8 * 1 + * + tk-frac sh-fin sh!
   sh-fin sh@ .022 0 1 sh-fins sh@ fin-deform ;
 \ Greeting (shared, once a frame before the seahorses): pair p's female and male take
