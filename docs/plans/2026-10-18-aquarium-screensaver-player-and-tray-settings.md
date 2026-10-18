@@ -1,6 +1,6 @@
 # Aquarium screensaver: live tank players and tray settings
 
-Date: 2026-10-18. Status: implemented; live startup, all eight level renders, and sustained motion on cast1 verified.
+Date: 2026-10-18. Status: implemented; live startup, all eight level renders, and nine one-minute cast1 videos archived.
 
 ## Outcome
 
@@ -16,6 +16,7 @@ The old video Dream has been replaced by the live host and ordered tank bundle. 
 - The app's shell-only `TankSettingsProvider` publishes a versioned `getCapabilities` response and accepts `setSetting`.
 - Cast2 Dream activation and screenshots succeeded for Jellyfish (J‑3e70e8bc5cb0), Lionfish (J‑28a1a4a0f5bb), and Planted Urchin (J‑2b7f3b696245). Clownfish, Blue Shrimp, and Betta passed cast2 launcher renderer checks; Arowana and Tiger Barbs passed on cast1. Arowana natural activation on cast2 timed out twice without a new Dream start, while its renderer passed on cast1.
 - Cast1 recorded a fixed Clownfish run in J‑db4eacea69b0: the 41.7-second captured clip shows the fish beside the anemone at 1 second, crossing the open tank at 20 seconds, and turning near the left wall at 39 seconds. The job requested a 45-second recording; Android's resulting media duration is 41.7 seconds. The recording workflow launches the fullscreen activity; the Dream activation checks above are separate. Cast1's saved tank choice was restored to **Random** and verified by J‑05aea5825263. A separate Random run, J‑7b4df2e93c9e, selected Arowana and recorded its live render for 42.4 seconds.
+- [The video archive](../diagnostics/aquarium-screensaver-video-archive-2026-10-18/index.html) contains nine H.264 clips longer than 60 seconds: one for each tank and separate freshwater and saltwater Planted Tank captures. Each clip has a poster, source job ID, APK checksum, duration, and media checksum in its manifest. Four coordinator record jobs reported `recovery-required` after saving complete media; this is recorded in the archive. The footage uses the fullscreen launcher; it does not add a long-duration natural Dream check. Cast1's production APK and **Random** choice were restored and verified afterward.
 
 ## Tank bundle and player
 

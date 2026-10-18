@@ -54,7 +54,9 @@ As of 2026‑10‑18, the live screensaver APK with SHA-256
 `99fdfce1cde44b45f6037aa4048dfb348b18929847feb4bf567acf9490317a94`
 is installed and its Dream selected on both test Chromecasts. The
 [implementation plan](plans/2026-10-18-aquarium-screensaver-player-and-tray-settings.md)
-records the tank, tray and motion checks. The earlier
+records the tank, tray and motion checks. The
+[one-minute video archive](diagnostics/aquarium-screensaver-video-archive-2026-10-18/index.html)
+covers all eight tanks, including both Planted Tank water types. The earlier
 [investigation](investigations/2026-10-17-chromecast-screensaver-from-a-level.md)
 records the video predecessor's deployment.
 
