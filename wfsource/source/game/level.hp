@@ -148,6 +148,9 @@ class Level
 	inline int GetMaxObjectIndex() const;
 	inline Camera * camera() const;
 	inline const _LevelObj& GetLevelOAD() const;
+	// Level-owned renderer setting from this level's Level Object; false for
+	// levels compiled before the field existed (game/levelobj_fields.hp).
+	bool PrewarmNoPaletteProgram() const;
 	inline ViewPort& GetViewPort();
 	inline int GetActiveRoomIndex(int roomIndex) const;  // converts level room index into active room index (handles perm index as well)
 	inline AssetManager& GetAssetManager();
@@ -228,6 +231,7 @@ private:
 	_LevelOnDisk *					_levelData;
    const CommonBlock*      _commonBlock;
 	_LevelObj*					_levelOad;
+	int32						_levelOadSize = 0;	// bytes of *_levelOad on disk (its OADSize)
 	LevelRooms*				    	_theLevelRooms;
 	ActiveRooms*					_theActiveRooms;  // needs to be after _numRooms
    BaseObjectList             _actors;

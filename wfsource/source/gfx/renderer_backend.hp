@@ -204,6 +204,14 @@ public:
         return false;
     }
 
+    // Level-load prewarm (a level's Level Object "Prewarm No Palette
+    // Program"): create now the program the GL backend otherwise links on the
+    // first wholly ordinary opaque textured batch, so its cold compile lands
+    // in the level transition instead of in play. Once per GL context; a
+    // context created later relinks it lazily. Backends without that program
+    // do nothing.
+    virtual void PrepareNoPaletteProgram() {}
+
     // ---- static meshes (E3 phase 1, gfx/glpipeline/static_mesh.cc) --------
     //
     // A RenderObject3D whose geometry does not change is recorded once (the

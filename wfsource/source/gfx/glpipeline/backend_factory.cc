@@ -204,6 +204,8 @@ public:
     void DestroyTexture(RBTextureHandle h) override { Drain(); _backend.DestroyTexture(h); }
     bool ReloadProgram(const char* v,const char* f,std::string& log) override
     { Drain(); return _backend.ReloadProgram(v,f,log); }
+    void PrepareNoPaletteProgram() override
+    { Drain(); _backend.PrepareNoPaletteProgram(); }
 
     // Static meshes (E3 phase 1). Only opaque runs are drawn this way (the
     // caller streams translucent ones, which this layer still queues and

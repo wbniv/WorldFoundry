@@ -1,0 +1,49 @@
+//=============================================================================
+// game/levelobj_fields.hp: bounded reads of Level Object fields appended after
+// its original on-disk layout
+// Copyright ( c ) 2026 World Foundry Group
+// Part of the World Foundry 3D video game engine/production environment
+// for more information about World Foundry, see www.worldfoundry.org
+//==============================================================================
+// Use this software at your own risk.  It is distributed in the hope that it
+// will be useful, but WITHOUT ANY WARRANTY; without even the implied warranty
+// of MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU
+// General Public License for more details.
+//==============================================================================
+//
+// Every object's OAD payload on disk follows its _ObjectOnDisk header, which
+// records the payload's length (OADSize). A level compiled before a field was
+// appended to levelobj.oas has a shorter Level Object payload; at the new
+// field's offset it holds the start of the next object. These helpers read an
+// appended field only when the level's own payload contains it, so an older
+// level keeps the schema default instead of reading past its Level Object.
+//
+// The fields before PrewarmNoPaletteProgram are the original layout and are
+// read directly through Level::GetLevelOAD(), as before.
+//==============================================================================
+
+#ifndef _LevelObjFields_HP
+#define _LevelObjFields_HP
+
+#include <oas/levelobj.ht>
+#include <cstddef>
+
+// True when a payload of payloadBytes holds [offset, offset + size).
+inline bool
+LevelObjPayloadHolds(int payloadBytes, size_t offset, size_t size)
+{
+	return payloadBytes >= 0 && size_t(payloadBytes) >= offset + size;
+}
+
+// PrewarmNoPaletteProgram (Rendering sheet, default off). Levels compiled
+// before the field existed read as off.
+inline bool
+LevelObjPrewarmNoPaletteProgram(const _LevelObj* oad, int payloadBytes)
+{
+	return oad
+	    && LevelObjPayloadHolds(payloadBytes, offsetof(_LevelObj, PrewarmNoPaletteProgram),
+	                            sizeof(oad->PrewarmNoPaletteProgram))
+	    && oad->PrewarmNoPaletteProgram != 0;
+}
+
+#endif // !_LevelObjFields_HP

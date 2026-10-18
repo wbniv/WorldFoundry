@@ -64,6 +64,7 @@
 #include <cpplib/algo.hp>
 #include <math/vector3.hp>
 #include <oas/levelobj.ht>
+#include "levelobj_fields.hp"
 #include <oas/matte.ht>
 #include <audio/device.hp>
 
@@ -155,6 +156,7 @@ Level::initLevelOad()
 {
 	// Find "LevelObj" object
 	_levelOad = NULL;
+	_levelOadSize = 0;
 	assert( ValidPtr( _levelData ) );
 	assert( _levelData->objectCount);
 	for ( int index = 0; index < _levelData->objectCount; ++index )
@@ -166,11 +168,29 @@ Level::initLevelOad()
 			if ( _levelOad )
 				DBSTREAM1( cwarn << "Warning: Multiple LevelObj objects in level, using first" << std::endl; )
 			else
+			{
 				_levelOad = ( _LevelObj * )( objdata + 1 );
+				// Payload length bounds reads of fields appended to the
+				// Level Object later (game/levelobj_fields.hp).
+				_levelOadSize = objdata->OADSize;
+			}
 		}
 	}
 	if ( !_levelOad )
 		DBSTREAM1( cwarn << "Warning: No LevelObject object in level (using defaults)" << std::endl; )
+	// One-time load report under --frame-profile: which Level Object layout
+	// this level carries and the level-owned renderer setting it selects.
+	if ( wf_profile::enabled() )
+		fprintf( stderr, "level-object: payload-bytes=%d prewarm-no-palette-program=%d\n",
+		         int(_levelOadSize), PrewarmNoPaletteProgram() ? 1 : 0 );
+}
+
+//==============================================================================
+
+bool
+Level::PrewarmNoPaletteProgram() const
+{
+	return LevelObjPrewarmNoPaletteProgram( _levelOad, _levelOadSize );
 }
 
 //==============================================================================

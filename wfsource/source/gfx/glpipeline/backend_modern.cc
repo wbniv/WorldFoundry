@@ -40,6 +40,7 @@
 
 #include <cmath>
 #include <algorithm>
+#include <chrono>
 #include <cstdio>
 #include <cstdlib>
 #include <cstring>
@@ -141,7 +142,14 @@ static const char* kFS =
     "#ifndef WF_OPAQUE\n"
     "        if (u_alpha_cutout != 0 && (is_white > 0.5 || (WF_TEX_MODE & 2) != 0) && texel.a < 0.5) discard;\n"
     "#endif\n"
+    // WF_NO_PALETTE drops the palette branch for batches whose every vertex
+    // has the palette disabled (v_palette_dark.a == 0): the same expression
+    // the palette-capable program evaluates for those vertices.
+    "#ifdef WF_NO_PALETTE\n"
+    "        vec3 albedo = ((WF_TEX_MODE & 2) != 0 ? texel.rgb * v_color : mix(v_color, texel.rgb, is_white));\n"
+    "#else\n"
     "        vec3 albedo = v_palette_dark.a > 0.5 ? mix(v_palette_dark.rgb, v_palette_light, clamp((texel.r - 0.08) / 0.85, 0.0, 1.0)) : ((WF_TEX_MODE & 2) != 0 ? texel.rgb * v_color : mix(v_color, texel.rgb, is_white));\n"
+    "#endif\n"
     "        c = vec4(albedo * v_lit, 1.0);\n"
     "    }\n"
     "    if (u_fog != 0) c.rgb = mix(u_fog_color, c.rgb, v_fog_factor);\n"
@@ -521,6 +529,7 @@ public:
         _cpu.push_back(tri[0]);
         _cpu.push_back(tri[1]);
         _cpu.push_back(tri[2]);
+        NoteBatchPalette();
     }
 
     void DrawOverlay(const PhonepadRect* rects, int count, int width, int height) override
@@ -770,9 +779,21 @@ public:
         if (_opaqueTexProg) glDeleteProgram(_opaqueTexProg);
         _opaqueTexProg = 0;
         _opaqueTexUniforms = ProgramUniforms{};
+        if (_noPaletteProg) glDeleteProgram(_noPaletteProg);
+        _noPaletteProg = 0;
+        _noPaletteUniforms = ProgramUniforms{};
         _customProgram = true;
         _uniforms = FetchUniformLocations(_prog);
         return true;
+    }
+
+    // Level-load prewarm. Built-in programs only: after a custom reload the
+    // no-palette program is never used, so it is not created.
+    void PrepareNoPaletteProgram() override
+    {
+        if (_customProgram) return;
+        LazyInit();
+        InitNoPaletteProgram("prewarm");
     }
 
     // Called from the Android lifecycle hook (WFAndroidEglTerm) when the
@@ -788,11 +809,14 @@ public:
         _prog        = 0;
         _opaqueProg = 0;
         _opaqueTexProg = 0;
+        _noPaletteProg = 0;
         _uniforms = ProgramUniforms{};
         _opaqueUniforms = ProgramUniforms{};
         _opaqueTexUniforms = ProgramUniforms{};
+        _noPaletteUniforms = ProgramUniforms{};
         _customProgram = false;
         _cpu.clear();
+        _batchPaletteKinds = 0;
         _curTexture  = nullptr;
         // Static meshes: every GL name is dead. Bumping the generation makes
         // StaticMeshLive false for all existing handles, so their owners bake
@@ -933,6 +957,10 @@ public:
         _curTexture = texture;
         _curPrelit  = prelit;
         _curMesh    = mesh;
+        // A static run is one material's faces with one palette flag, baked
+        // from the same SetTexturePalette state RenderStatic sets before it
+        // (material palette flags are fixed after load).
+        NoteBatchPalette();
         if (mesh->index32)
         {
             for (int i = 0; i < count; ++i)
@@ -966,9 +994,19 @@ private:
         GLint lighting=-1, ambient=-1, lightDir=-1, lightColor=-1;
         GLint fog=-1, fogColor=-1, fogStart=-1, fogEnd=-1;
     };
-    ProgramUniforms _uniforms, _opaqueUniforms, _opaqueTexUniforms;
+    ProgramUniforms _uniforms, _opaqueUniforms, _opaqueTexUniforms, _noPaletteUniforms;
     GLuint _opaqueProg = 0;
     GLuint _opaqueTexProg = 0;
+    // Linked on the first wholly ordinary opaque textured batch (or by
+    // PrepareNoPaletteProgram when the level opts in); levels whose eligible
+    // batches all carry palette geometry never create it.
+    GLuint _noPaletteProg = 0;
+    // Palette kinds of the geometry actually queued in the pending batch: set
+    // by surviving streaming triangles and non-empty static submissions only,
+    // cleared by Flush. Palette changes do not flush; a mixed batch stays one
+    // draw on the palette-capable program.
+    enum { kBatchPalette = 1, kBatchOrdinary = 2 };
+    unsigned char _batchPaletteKinds = 0;
     bool _customProgram = false;
     bool _paletteEnabled=false; unsigned _paletteDark=0,_paletteLight=0xffffff;
     float _opacity = 1.0f;
@@ -1012,6 +1050,7 @@ private:
     unsigned _sharedMeshCount = 0;
 
     bool BatchEmpty() const { return _cpu.empty() && _idx16.empty() && _idx32.empty(); }
+    void NoteBatchPalette() { _batchPaletteKinds |= _paletteEnabled ? kBatchPalette : kBatchOrdinary; }
 
     void Pack(Vert& dst, const RBVertex& v,
                      float nx, float ny, float nz)
@@ -1091,6 +1130,41 @@ private:
         _opaqueTexUniforms = FetchUniformLocations(_opaqueTexProg);
     }
 
+    // The mode-1 opaque program without the palette branch. Creation is a
+    // one-time cost per GL context (a cold driver compile measured ~90 ms on
+    // Cast1), so --frame-profile logs when and why it happens.
+    void InitNoPaletteProgram(const char* reason)
+    {
+        if (_noPaletteProg) return;
+        const bool profiled = wf_profile::enabled();
+        const auto started = profiled ? std::chrono::steady_clock::now()
+                                      : std::chrono::steady_clock::time_point();
+        const std::string source = std::string(
+            "#define WF_OPAQUE 1\n#define WF_TEX_MODE 1\n#define WF_NO_PALETTE 1\n") + kFS;
+        GLuint vs = CompileShader(GL_VERTEX_SHADER, kVS);
+        GLuint fs = CompileShader(GL_FRAGMENT_SHADER, source.c_str());
+        _noPaletteProg = LinkProgram(vs, fs);
+        glDeleteShader(vs);
+        glDeleteShader(fs);
+        _noPaletteUniforms = FetchUniformLocations(_noPaletteProg);
+        wf_profile::count(wf_profile::NoPalettePrograms);
+        if (profiled)
+        {
+            // Monotonic ns on the frame-window clock, so a device trace can
+            // place the creation relative to level loading and presentation.
+            // The span covers compile, link and uniform lookup; a driver may
+            // defer more work to the first bind or draw.
+            const auto ended = std::chrono::steady_clock::now();
+            const auto ns = [](std::chrono::steady_clock::time_point t) {
+                return (long long)std::chrono::duration_cast<std::chrono::nanoseconds>(t.time_since_epoch()).count();
+            };
+            std::fprintf(stderr, "no-palette-program: created reason=%s context=%u wall-ms=%.3f start-ns=%lld end-ns=%lld\n",
+                         reason, _contextGeneration,
+                         std::chrono::duration<double, std::milli>(ended - started).count(),
+                         ns(started), ns(ended));
+        }
+    }
+
     void UpdateMvp()
     {
         if (!_mvpDirty) return;
@@ -1105,6 +1179,7 @@ private:
             _curTexture = nullptr;
             _curPrelit  = false;
             _curMesh    = nullptr;
+            _batchPaletteKinds = 0;
             return;
         }
         LazyInit();
@@ -1112,10 +1187,27 @@ private:
 
         const bool opaque = !_customProgram && _opacity >= 1.0f && !_alphaCutout;
         const bool opaqueTex = opaque && _curTexture && !_modulateTexture;
-        if (opaqueTex) InitOpaqueTexProgram();
+        // Wholly ordinary eligible batches take the no-palette program;
+        // palette-only and mixed ones keep the palette-capable program, so a
+        // palette change never costs a draw. Modulation, cutout, blending and
+        // custom reloads stay on the programs they used before.
+        const bool noPalette = opaqueTex && _batchPaletteKinds == kBatchOrdinary;
+        if (noPalette)
+        {
+            InitNoPaletteProgram("lazy");
+            wf_profile::count(wf_profile::NoPaletteDraws);
+        }
+        else if (opaqueTex)
+        {
+            InitOpaqueTexProgram();
+            if (_batchPaletteKinds == (kBatchPalette | kBatchOrdinary))
+                wf_profile::count(wf_profile::MixedPaletteDraws);
+        }
         else if (opaque) InitOpaqueProgram();
-        glUseProgram(opaqueTex ? _opaqueTexProg : opaque ? _opaqueProg : _prog);
-        const ProgramUniforms& uniforms = opaqueTex ? _opaqueTexUniforms : opaque ? _opaqueUniforms : _uniforms;
+        glUseProgram(noPalette ? _noPaletteProg : opaqueTex ? _opaqueTexProg : opaque ? _opaqueProg : _prog);
+        const ProgramUniforms& uniforms = noPalette ? _noPaletteUniforms
+                                        : opaqueTex ? _opaqueTexUniforms
+                                        : opaque ? _opaqueUniforms : _uniforms;
         if (_opacity < 1.0f) {
             glEnable(GL_BLEND);
             glBlendFuncSeparate(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA, GL_ONE, GL_ONE_MINUS_SRC_ALPHA);
@@ -1200,6 +1292,7 @@ private:
         glUseProgram(0);
 
         _cpu.clear();
+        _batchPaletteKinds = 0;
         _curTexture = nullptr;
         _curPrelit  = false;
         _curMesh    = nullptr;

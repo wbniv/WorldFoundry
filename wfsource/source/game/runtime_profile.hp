@@ -26,10 +26,17 @@ enum Section { Update, Actors, Director, Render, School, Pose, Animation, Total,
 // from baking, and static-deferred-objects: objects streamed this frame because
 // the per-frame bake budget was spent (they bake on a later frame).
 // `uploads`/`upload-bytes` stay vertex uploads only.
+// The no-palette selector counters (ModernRendererBackend::Flush) follow:
+// no-palette-programs counts creations of that GL program (at most one per
+// context), no-palette-draws the wholly ordinary opaque textured batches drawn
+// with it, and mixed-palette-draws the opaque textured batches that mixed
+// palette and ordinary geometry and therefore stayed on the palette-capable
+// program. All three are also in `draws`.
 enum Counter { LevelObjects, RenderActors, Draws, Triangles, ActorMailboxWrites, FishDeformations,
     Uploads, UploadBytes, FacesSubmitted, FacesCulled,
     StaticObjects, StaticDraws, StaticFacesCulled, StaticIndexBytes, StaticBakes, StaticBakeUs,
-    StaticGpuBytes, StaticCpuBytes, StaticExcludedObjects, StaticDeferredObjects, CounterCount };
+    StaticGpuBytes, StaticCpuBytes, StaticExcludedObjects, StaticDeferredObjects,
+    NoPalettePrograms, NoPaletteDraws, MixedPaletteDraws, CounterCount };
 struct State {
     bool enabled = false;
     std::array<double,Count> frame{};
@@ -77,7 +84,8 @@ inline void end_frame() {
     const char* counterNames[CounterCount]={"level-objects","render-actors","draws","triangles","actor-mailbox-writes","fish-deformations",
         "uploads","upload-bytes","faces-submitted","faces-culled",
         "static-objects","static-draws","static-faces-culled","static-index-bytes","static-bakes","static-bake-us",
-        "static-gpu-bytes","static-cpu-bytes","static-excluded-objects","static-deferred-objects"};
+        "static-gpu-bytes","static-cpu-bytes","static-excluded-objects","static-deferred-objects",
+        "no-palette-programs","no-palette-draws","mixed-palette-draws"};
     // max= is the largest single-frame value in the window (appended after
     // mean=, so existing `frames=N mean=X` parsers are unaffected).
     for(int k=0;k<CounterCount;k++) fprintf(stderr,"frame-count: %s frames=%zu mean=%.3f max=%lu\n",counterNames[k],s.frames.size(),double(s.totals[k])/s.frames.size(),s.maxima[k]);
