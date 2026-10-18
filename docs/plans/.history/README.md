@@ -1,5 +1,6 @@
 | Date | Change |
 |------|--------|
+| [2026-10-17](https://github.com/wbniv/WorldFoundry/commit/be86bbb9) | Index nine plans that had no row in docs/plans/README.md |
 | [2026-10-16](https://github.com/wbniv/WorldFoundry/commit/32821533) | Expand the saltwater tank to six seahorse pairs |
 | [2026-10-16](https://github.com/wbniv/WorldFoundry/commit/6a6cbf0d) | TODO and plan index: Blender level builds in a container done |
 | [2026-10-16](https://github.com/wbniv/WorldFoundry/commit/25a57d73) | Use Blender face normals throughout engine and assets |
@@ -62,6 +63,11 @@
 | [2026-06-26](https://github.com/wbniv/WorldFoundry/commit/16d72fa6) | docs: add plan index (docs/plans/README.md) |
 
 <!--history-meta v1
+be86bbb9	author	Will Norris
+be86bbb9	added	10
+be86bbb9	deleted	0
+be86bbb9	files	1
+be86bbb9	body	Rows are placed by creation commit, with hand-written summaries and\ncategories, and the footer records the addition. The tenth plan the drift\nhook reported, 2026-10-16-gpu-skinning-agent-handoff.md, exists only on\ngpu-skinning-proposal; its row is added when that branch merges so the\ntwo sides do not both append to the same README tail.\n\nCo-Authored-By: Claude Sonnet 5.5 <noreply@anthropic.com>\nClaude-Session: https://claude.ai/code/session_0182QMxtWjJQuTfujLPrPsVw
 32821533	author	Will Norris
 32821533	added	1
 32821533	deleted	1
